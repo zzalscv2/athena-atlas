@@ -11,7 +11,7 @@ def TileMuonReceiverDecisionCfg(flags, **kwargs):
     """Return component accumulator with configured Tile muon receiver decision algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Name -- name of TileMuonReceiverDecision algorithm. Defaults to TileMuonReceiverDecision.
     """
@@ -49,7 +49,7 @@ def TileMuonReceiverDecisionOutputCfg(flags, **kwargs):
     """Return component accumulator with configured Tile muon receiver decision algorithm and Output stream
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     acc = TileMuonReceiverDecisionCfg(flags, **kwargs)
@@ -72,7 +72,7 @@ def TileMuonReceiverDecisionOutputCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -80,29 +80,30 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.Output.RDOFileName = 'myRDO->TileMuonReceiverDecision.pool.root'
-    ConfigFlags.IOVDb.GlobalTag = 'OFLCOND-MC16-SDR-16'
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.Tile.RunType = 'PHY'
+    flags.Output.RDOFileName = 'myRDO->TileMuonReceiverDecision.pool.root'
+    flags.IOVDb.GlobalTag = 'OFLCOND-MC16-SDR-16'
 
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.fillFromArgs()
+    flags.lock()
+    flags.dump()
 
     # Construct our accumulator to run
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
+    acc = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    acc.merge(PoolReadCfg(ConfigFlags))
+    acc.merge(PoolReadCfg(flags))
 
-    if 'EventInfo' not in ConfigFlags.Input.Collections:
+    if 'EventInfo' not in flags.Input.Collections:
         from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-        acc.merge(EventInfoCnvAlgCfg(ConfigFlags,
+        acc.merge(EventInfoCnvAlgCfg(flags,
                                      inputKey='McEventInfo',
                                      outputKey='EventInfo'))
 
-    acc.merge( TileMuonReceiverDecisionOutputCfg(ConfigFlags, TileMuonReceiverContainer = 'TileMuRcvCntNew') )
+    acc.merge( TileMuonReceiverDecisionOutputCfg(flags, TileMuonReceiverContainer = 'TileMuRcvCntNew') )
 
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.store( open('TileMuonReceiverDecision.pkl','wb') )

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile Cell maker algorithm"""
 
@@ -12,7 +12,7 @@ def CaloCellContainerCheckerToolCfg(flags):
     """Return component accumulator with configured private Calo cell container checker tool
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     acc = ComponentAccumulator()
@@ -33,7 +33,7 @@ def TileCellMakerCfg(flags, **kwargs):
     """Return component accumulator with configured Tile Cell maker algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
         Name -- name of Tile cell maker algorithm. Defautls to TileCellMaker
                 or TileCellMakerHG/TileCellMakerLG depending on only used gain.
         SkipGain - skip given gain. Defaults to -1 [use all gains]. Possible values: 0 [LG], 1 [HG].
@@ -108,7 +108,7 @@ def TileCellMakerCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -116,32 +116,33 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.Tile.doOptATLAS = True
-    ConfigFlags.Tile.correctTimeJumps = True
-    ConfigFlags.Tile.NoiseFilter = 1
-    ConfigFlags.Output.ESDFileName = "myESD.pool.root"
-    ConfigFlags.Exec.MaxEvents=3
-    ConfigFlags.fillFromArgs()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Tile.RunType = 'PHY'
+    flags.Tile.doOptATLAS = True
+    flags.Tile.correctTimeJumps = True
+    flags.Tile.NoiseFilter = 1
+    flags.Output.ESDFileName = "myESD.pool.root"
+    flags.Exec.MaxEvents=3
+    flags.fillFromArgs()
 
-    ConfigFlags.lock()
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
+    acc = MainServicesCfg(flags)
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    acc.merge( ByteStreamReadCfg(ConfigFlags, ['TileRawChannelContainer/TileRawChannelCnt', 'TileDigitsContainer/TileDigitsCnt']) )
+    acc.merge( ByteStreamReadCfg(flags, ['TileRawChannelContainer/TileRawChannelCnt', 'TileDigitsContainer/TileDigitsCnt']) )
 
-    acc.merge( TileCellMakerCfg(ConfigFlags) )
+    acc.merge( TileCellMakerCfg(flags) )
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    acc.merge(OutputStreamCfg(ConfigFlags, "ESD",
+    acc.merge(OutputStreamCfg(flags, "ESD",
                               ItemList = [ 'CaloCellContainer#*', 'TileCellContainer#*']))
 
     acc.getEventAlgo("OutputStreamESD").ExtraInputs = [('CaloCellContainer', 'StoreGateSvc+AllCalo')]
 
-    ConfigFlags.dump()
+    flags.dump()
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.store( open('TileCellMaker.pkl','wb') )
 

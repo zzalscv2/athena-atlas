@@ -10,7 +10,7 @@ def TileCellBuilderCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile Cell builder tool
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
         SkipGain - skip given gain. Defaults to -1 [use all gains]. Possible values: 0 [LG], 1 [HG].
     """
 
@@ -71,7 +71,7 @@ def TileCellBuilderCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -79,17 +79,16 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Tile.RunType = 'PHY'
-
-    ConfigFlags.fillFromArgs()
-
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Tile.RunType = 'PHY'
+    flags.fillFromArgs()
+    flags.lock()
 
     acc = ComponentAccumulator()
 
-    print( acc.popToolsAndMerge( TileCellBuilderCfg(ConfigFlags) ) )
+    print( acc.popToolsAndMerge( TileCellBuilderCfg(flags) ) )
 
-    ConfigFlags.dump()
+    flags.dump()
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.store( open('TileCellBuilder.pkl','wb') )

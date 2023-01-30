@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile Wiener raw channel builder tool"""
 
@@ -9,7 +9,7 @@ def TileRawChannelBuilderWienerCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile Wiener raw channel builder tool
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     name = kwargs.pop('name', 'TileRawChannelBuilderWiener')
@@ -47,7 +47,7 @@ def TileRawChannelBuilderWienerCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -55,17 +55,18 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.Tile.NoiseFilter = 1
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Tile.RunType = 'PHY'
+    flags.Tile.NoiseFilter = 1
+    flags.lock()
 
-    ConfigFlags.dump()
+    flags.dump()
 
     acc = ComponentAccumulator()
 
     #printing Configurables isn't reliable with GaudiConfig2
-    acc.popToolsAndMerge( TileRawChannelBuilderWienerCfg(ConfigFlags) )
+    acc.popToolsAndMerge( TileRawChannelBuilderWienerCfg(flags) )
 
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.store( open('TileRawChannelBuilderWiener.pkl','wb') )

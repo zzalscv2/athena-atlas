@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 
@@ -87,8 +87,9 @@ def TileAANtupleCfg(flags, outputFile='', saveTMDB=True, **kwargs):
 if __name__=='__main__':
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    parser = ConfigFlags.getArgumentParser()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    parser = flags.getArgumentParser()
     parser.add_argument('--postExec', help='Code to execute after setup')
     parser.add_argument('--no-tmdb', dest='tmdb', action='store_false', help='Do not save TMDB information into ntuple')
     args, _ = parser.parse_known_args()
@@ -99,24 +100,24 @@ if __name__=='__main__':
     log.setLevel(INFO)
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Exec.MaxEvents = 3
-    ConfigFlags.fillFromArgs(parser=parser)
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Exec.MaxEvents = 3
+    flags.fillFromArgs(parser=parser)
 
     log.info('FINAL CONFIG FLAGS SETTINGS FOLLOW')
-    ConfigFlags.dump()
+    flags.dump()
 
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     rawChannelContainer = 'TileRawChannelCnt'
 
-    if ConfigFlags.Input.Format is Format.BS:
+    if flags.Input.Format is Format.BS:
 
-        cfg.addPublicTool(CompFactory.TileROD_Decoder(fullTileMode=ConfigFlags.Input.RunNumber[0]))
+        cfg.addPublicTool(CompFactory.TileROD_Decoder(fullTileMode=flags.Input.RunNumber[0]))
 
         from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
         tileTypeNames = ['TileDigitsContainer/TileDigitsCnt',
@@ -126,22 +127,22 @@ if __name__=='__main__':
                               'TileDigitsContainer/MuRcvDigitsCnt',
                               'TileMuonReceiverContainer/TileMuRcvCnt',]
 
-        if ConfigFlags.Tile.RunType == 'LAS':
+        if flags.Tile.RunType == 'LAS':
             tileTypeNames += ['TileLaserObject/TileLaserObj']
-        if ConfigFlags.Tile.RunType != 'PHY':
+        if flags.Tile.RunType != 'PHY':
             tileTypeNames += ['TileBeamElemContainer/TileBeamElemCnt']
 
-        cfg.merge( ByteStreamReadCfg(ConfigFlags, type_names = tileTypeNames) )
+        cfg.merge( ByteStreamReadCfg(flags, type_names = tileTypeNames) )
         cfg.getEventAlgo('SGInputLoader').FailIfNoProxy=False
     else:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-        cfg.merge(PoolReadCfg(ConfigFlags))
+        cfg.merge(PoolReadCfg(flags))
 
-        inputCollections = ConfigFlags.Input.Collections
+        inputCollections = flags.Input.Collections
         if rawChannelContainer not in inputCollections:
             rawChannelContainer = 'TileRawChannelFlt' if 'TileRawChannelFlt' in inputCollections else ""
 
-    cfg.merge( TileAANtupleCfg(ConfigFlags, TileRawChannelContainer=rawChannelContainer, saveTMDB = args.tmdb) )
+    cfg.merge( TileAANtupleCfg(flags, TileRawChannelContainer=rawChannelContainer, saveTMDB = args.tmdb) )
 
     # Any last things to do?
     if args.postExec:

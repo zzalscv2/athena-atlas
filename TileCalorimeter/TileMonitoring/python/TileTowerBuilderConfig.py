@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 '''
 @file TileTowerBuilderConfig.py
@@ -46,26 +46,27 @@ if __name__=='__main__':
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.ESD
-    ConfigFlags.Output.HISTFileName = 'TileTowerMonitorOutput.root'
-    ConfigFlags.DQ.useTrigger = False
-    ConfigFlags.DQ.enableLumiAccess = False
-    ConfigFlags.Exec.MaxEvents = 3
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.ESD
+    flags.Output.HISTFileName = 'TileTowerMonitorOutput.root'
+    flags.DQ.useTrigger = False
+    flags.DQ.enableLumiAccess = False
+    flags.Exec.MaxEvents = 3
+    flags.fillFromArgs()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    cfg.merge( TileTowerBuilderAlgCfg(ConfigFlags) )
+    cfg.merge( TileTowerBuilderAlgCfg(flags) )
 
     cfg.printConfig(withDetails = True, summariseProps = True)
-    ConfigFlags.dump()
+    flags.dump()
 
     cfg.store( open('TileTowerBuilder.pkl','wb') )
 

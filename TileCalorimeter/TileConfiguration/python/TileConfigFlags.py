@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, Format
@@ -184,16 +184,16 @@ def _getTimingType(prevFlags):
 
 if __name__=="__main__":
      import sys
-     from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
+     from AthenaConfiguration.AllConfigFlags import initConfigFlags
      from AthenaConfiguration.TestDefaults import defaultTestFiles
-     ConfigFlags.Input.Files = defaultTestFiles.RAW
+     flags = initConfigFlags()
+     flags.Input.Files = defaultTestFiles.RAW
 
      if len(sys.argv) > 1:
-          ConfigFlags.fillFromArgs()
+          flags.fillFromArgs()
 
-     ConfigFlags.lock()
+     flags.lock()
 
-     ConfigFlags.needFlagsCategory('Tile')
-     ConfigFlags.initAll()
-     ConfigFlags.dump()
+     flags.needFlagsCategory('Tile')
+     flags.initAll()
+     flags.dump()

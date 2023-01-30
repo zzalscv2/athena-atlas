@@ -252,30 +252,30 @@ if __name__=='__main__':
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Output.HISTFileName = 'TileDQFragMonitorOutput.root'
-    ConfigFlags.DQ.useTrigger = False
-    ConfigFlags.DQ.enableLumiAccess = False
-    ConfigFlags.Tile.doOptATLAS = True
-    ConfigFlags.Exec.MaxEvents = 3
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Output.HISTFileName = 'TileDQFragMonitorOutput.root'
+    flags.DQ.useTrigger = False
+    flags.DQ.enableLumiAccess = False
+    flags.Tile.doOptATLAS = True
+    flags.Exec.MaxEvents = 3
+    flags.fillFromArgs()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     tileTypeNames = ['TileRawChannelContainer/TileRawChannelCnt', 'TileDigitsContainer/TileDigitsCnt']
-    cfg.merge( ByteStreamReadCfg(ConfigFlags, type_names = tileTypeNames) )
+    cfg.merge( ByteStreamReadCfg(flags, type_names = tileTypeNames) )
 
     from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
-    cfg.merge( TileRawChannelMakerCfg(ConfigFlags) )
+    cfg.merge( TileRawChannelMakerCfg(flags) )
 
-    cfg.merge( TileDQFragMonitoringConfig(ConfigFlags) )
+    cfg.merge( TileDQFragMonitoringConfig(flags) )
 
     cfg.printConfig(withDetails = True, summariseProps = True)
 

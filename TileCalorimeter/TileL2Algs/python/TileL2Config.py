@@ -11,7 +11,7 @@ def TileL2BuilderCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile L2 builder tool
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     kwargs.setdefault('name', 'TileL2Builder')
@@ -44,7 +44,7 @@ def TileRawChannelToL2Cfg(flags, **kwargs):
     """Return component accumulator with configured Tile raw channels to L2 algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     kwargs.setdefault('name', 'TileRawChannelToL2')
@@ -71,7 +71,7 @@ def TileRawChannelToL2OutputCfg(flags, streamName = 'RDO', **kwargs):
     """Return component accumulator with configured Tile raw channels to L2 algorithm with Output stream
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
         streamName -- name of output stream. Defaults to RDO.
     """
 
@@ -92,7 +92,7 @@ def TileRawChannelToL2OutputCfg(flags, streamName = 'RDO', **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -100,22 +100,23 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.Output.ESDFileName = "myESD.pool.root"
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.fillFromArgs()
+    flags.Output.ESDFileName = "myESD.pool.root"
+    flags.lock()
 
     # Construct our accumulator to run
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
+    acc = MainServicesCfg(flags)
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    acc.merge( ByteStreamReadCfg(ConfigFlags, ["TileRawChannelContainer/TileRawChannelCnt"]) )
+    acc.merge( ByteStreamReadCfg(flags, ["TileRawChannelContainer/TileRawChannelCnt"]) )
 
-    acc.merge( TileRawChannelToL2OutputCfg(ConfigFlags, streamName = 'ESD') )
+    acc.merge( TileRawChannelToL2OutputCfg(flags, streamName = 'ESD') )
     acc.getService('StoreGateSvc').Dump = True
 
-    ConfigFlags.dump()
+    flags.dump()
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.store( open('TileL2.pkl','wb') )
 

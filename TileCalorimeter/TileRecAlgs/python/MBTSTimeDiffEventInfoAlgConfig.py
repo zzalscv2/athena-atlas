@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured MBTS time difference algorithm"""
 
@@ -9,7 +9,7 @@ def MBTSTimeDiffEventInfoAlgCfg(flags, **kwargs):
     """Return component accumulator with configured MBTS time difference algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     acc = ComponentAccumulator()
@@ -32,7 +32,7 @@ def MBTSTimeDiffEventInfoAlgCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -40,19 +40,20 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.AOD
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.AOD
+    flags.Tile.RunType = 'PHY'
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
+    acc = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    acc.merge(PoolReadCfg(ConfigFlags))
+    acc.merge(PoolReadCfg(flags))
 
-    acc.merge( MBTSTimeDiffEventInfoAlgCfg(ConfigFlags) )
+    acc.merge( MBTSTimeDiffEventInfoAlgCfg(flags) )
 
-    ConfigFlags.dump()
+    flags.dump()
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.store( open('MBTSTimeDiffEventInfoAlg.pkl','wb') )
 

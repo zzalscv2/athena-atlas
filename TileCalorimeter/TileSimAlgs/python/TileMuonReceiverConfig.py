@@ -10,7 +10,7 @@ def TilePulseForTileMuonReceiverCfg(flags, **kwargs):
     """Return component accumulator with configured Tile muon receiver algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     kwargs.setdefault('name', 'TilePulseForTileMuonReceiver')
@@ -99,7 +99,7 @@ def TilePulseForTileMuonReceiverOutputCfg(flags, **kwargs):
     """Return component accumulator with configured Tile muon receiver algorithm and Output stream
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     acc = TilePulseForTileMuonReceiverCfg(flags, **kwargs)
@@ -130,7 +130,7 @@ def TilePulseForTileMuonReceiverOutputCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -138,32 +138,33 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.HITS_RUN2
-    ConfigFlags.Output.RDOFileName = 'myRDO-TileMuonReceiver.pool.root'
-    ConfigFlags.IOVDb.GlobalTag = 'OFLCOND-MC16-SDR-16'
-    ConfigFlags.Digitization.PileUp = False
-    ConfigFlags.Exec.MaxEvents = 3
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.HITS_RUN2
+    flags.Output.RDOFileName = 'myRDO-TileMuonReceiver.pool.root'
+    flags.IOVDb.GlobalTag = 'OFLCOND-MC16-SDR-16'
+    flags.Digitization.PileUp = False
+    flags.Exec.MaxEvents = 3
 
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    flags.fillFromArgs()
+    flags.lock()
 
     # Construct our accumulator to run
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
+    acc = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    acc.merge(PoolReadCfg(ConfigFlags))
+    acc.merge(PoolReadCfg(flags))
 
-    if 'EventInfo' not in ConfigFlags.Input.Collections:
+    if 'EventInfo' not in flags.Input.Collections:
         from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-        acc.merge(EventInfoCnvAlgCfg(ConfigFlags,
+        acc.merge(EventInfoCnvAlgCfg(flags,
                                      inputKey='McEventInfo',
                                      outputKey='EventInfo'))
 
-    acc.merge( TilePulseForTileMuonReceiverOutputCfg(ConfigFlags) )
+    acc.merge( TilePulseForTileMuonReceiverOutputCfg(flags) )
 
     acc.printConfig(withDetails = True, summariseProps = True)
-    ConfigFlags.dump()
+    flags.dump()
     acc.store( open('TileMuonReceiver.pkl','wb') )
 
     sc = acc.run()

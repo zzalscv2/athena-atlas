@@ -10,7 +10,7 @@ def TileCellNoiseFilterCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile cell noise filter tool
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
         UseCaloNoise -- use Calo noise conditions object. Defaults to False.
     """
 
@@ -47,7 +47,7 @@ def TileCellNoiseFilterCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -55,18 +55,17 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.Tile.NoiseFilter = 111
-
-    ConfigFlags.fillFromArgs()
-
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Tile.RunType = 'PHY'
+    flags.Tile.NoiseFilter = 111
+    flags.fillFromArgs()
+    flags.lock()
 
     acc = ComponentAccumulator()
 
-    print( acc.popToolsAndMerge( TileCellNoiseFilterCfg(ConfigFlags) ) )
+    print( acc.popToolsAndMerge( TileCellNoiseFilterCfg(flags) ) )
 
-    ConfigFlags.dump()
+    flags.dump()
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.store( open('TileCellNoiseFilter.pkl','wb') )
