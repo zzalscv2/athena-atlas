@@ -67,6 +67,7 @@ StatusCode eSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<eTowe
     return StatusCode::FAILURE;
   }
 
+
   for(auto eachTower : *triggerTowerCollection) {
     if(fabs(eachTower->eta())<1.5 && eachTower->sampling()==1) {
       int i_phi = int(eachTower->phi()/pi_over_32);
@@ -114,11 +115,16 @@ void eSuperCellTowerMapper::reset(){
     return StatusCode::FAILURE;
   }
 
-
   //const CaloCell_Base_ID* idHelper = caloIdManager->getCaloCell_SuperCell_ID(); // getting the id helper class
   const CaloCell_Base_ID* idHelper = nullptr;
   ATH_CHECK( detStore()->retrieve (idHelper, "CaloCell_SuperCell_ID") );
   for (const auto& cell : * scellsCollection){
+
+    // Discard masked cells from monitoring
+    int SCprov = (cell)->provenance()&0xFFF;
+    bool isMasked = (SCprov&0x80)==0x80;
+
+    if (isMasked) continue;
 
     const CaloSampling::CaloSample sample = (cell)->caloDDE()->getSampling();
     const Identifier ID = (cell)->ID(); // super cell unique ID

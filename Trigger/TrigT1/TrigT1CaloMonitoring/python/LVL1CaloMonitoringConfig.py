@@ -64,6 +64,11 @@ def LVL1CaloMonitoringConfig(flags):
             from TrigT1CaloByteStream.LVL1CaloRun2ByteStreamConfig import LVL1CaloRun2ReadBSCfg
             result.merge(LVL1CaloRun2ReadBSCfg(flags))
 
+        # Phase 1 monitoring
+        if flags.Trigger.enableL1CaloPhase1:
+            from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringConfig
+            result.merge(EfexMonitoringConfig(flags))
+
     # algorithms for validation checks
     if validation:
         from TrigT1CaloMonitoring.L1CaloLegacyEDMMonitorAlgorithm import L1CaloLegacyEDMMonitoringConfig

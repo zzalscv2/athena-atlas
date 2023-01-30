@@ -41,7 +41,6 @@ StatusCode eFexTowerBuilder::initialize() {
     CHECK( m_outKey.initialize(true) );
 
 
-    CHECK (m_BCKey.initialize(true));
 
     return StatusCode::SUCCESS;
 }
@@ -63,8 +62,6 @@ StatusCode eFexTowerBuilder::execute(const EventContext& ctx) const {
         ATH_MSG_FATAL("Could not retrieve collection " << m_scellKey.key() );
         return StatusCode::FAILURE;
     }
-
-    SG::ReadCondHandle<LArBadChannelCont> bcCont{m_BCKey,ctx};
 
     SG::WriteHandle<xAOD::eFexTowerContainer> eTowers = SG::WriteHandle<xAOD::eFexTowerContainer>(m_outKey,ctx);
     ATH_CHECK( eTowers.record(std::make_unique<xAOD::eFexTowerContainer>(),std::make_unique<xAOD::eFexTowerAuxContainer>()) );
@@ -102,7 +99,10 @@ StatusCode eFexTowerBuilder::execute(const EventContext& ctx) const {
             int sampling = elem->getSampling();
             if(sampling==6 && ddm->getCaloCell_ID()->region(id)==0 && eta<0) eta-=0.01; // nudge this L2 endcap supercell into correct tower (right on boundary)
             auto val =  round(digi->energy()/(12.5*std::cosh(digi->eta())));
-            if( !bcCont->offlineStatus(id).good() ) {
+
+            bool isMasked = ((digi)->provenance()&0x80);
+
+            if( isMasked ) {
                 // deliberately leaving following lines commented in case we want to restore for tests
                 //badChans.SetPoint(badChans.GetN(),eta,elem->phi_raw());
                 //offId =  id.get_identifier32().get_compact();

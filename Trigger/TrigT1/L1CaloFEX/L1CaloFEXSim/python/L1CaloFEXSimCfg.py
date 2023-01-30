@@ -18,7 +18,7 @@ def ReadSCellFromPoolFileCfg(flags, key='SCell'):
     return acc
 
 
-def ReadSCellFromByteStreamCfg(flags, key='SCell', keyIn='SC_ET',SCmask=True):
+def ReadSCellFromByteStreamCfg(flags, key='SCell', keyIn='SC_ET_ID',SCmask=True):
     acc=ComponentAccumulator()
 
     # Geometry, conditions and cabling setup

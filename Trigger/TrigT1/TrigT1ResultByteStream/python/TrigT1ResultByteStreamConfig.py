@@ -354,6 +354,7 @@ def MuCTPIPhase1ByteStreamAlgoCfg(flags):
 
 if __name__ == '__main__':
   from AthenaConfiguration.AllConfigFlags import initConfigFlags
+  flags = initConfigFlags()
   import glob
   import sys
 
@@ -367,7 +368,7 @@ if __name__ == '__main__':
   parser.add_argument('--userAlgs',nargs='+',help="names of user algorithms to add, can specify as Type/Name or just Type",default=[])
   parser.add_argument('--outputLevel',default="WARNING",choices={ 'INFO','WARNING','DEBUG','VERBOSE'})
   parser.add_argument('--outputHISTFile',default="",help="if specified, will activate monitoring")
-  parser.add_argument('--outputs',nargs='+',choices={"eTOBs","exTOBs","eDataTowers","jTOBs","jxTOBS","jTowers","gTOBs","gCaloTowers","Topo","legacy","tTowers","sCells","eTriggerTowers"},required=True,
+  parser.add_argument('--outputs',nargs='+',choices={"eTOBs","exTOBs","seTOBs","eDataTowers","jTOBs","jxTOBS","jTowers","gTOBs","gCaloTowers","Topo","legacy","tTowers","sCells","eEmulatedTowers"},required=True,
                       help="What data to decode and output.")
   args = parser.parse_args()
 
@@ -376,13 +377,11 @@ if __name__ == '__main__':
   from AthenaCommon import Constants
   algLogLevel = getattr(Constants,args.outputLevel)
 
-  flags = initConfigFlags()
-
   if any(["data22" in f for f in args.filesInput]):
     flags.Trigger.triggerConfig='DB'
     from AthenaConfiguration.Enums import LHCPeriod
     flags.GeoModel.Run = LHCPeriod.Run3 # needed for LArGMConfig
-    flags.IOVDb.GlobalTag = "CONDBR2-HLTP-2022-02"
+    flags.IOVDb.GlobalTag = "CONDBR2-ES1PA-2022-07"
 
   flags.Exec.OutputLevel = algLogLevel
   flags.Exec.MaxEvents = args.evtMax
@@ -397,6 +396,9 @@ if __name__ == '__main__':
     flags.Output.AODFileName = "AOD."+(s.split("/")[-1]).split('_SFO')[0]+"pool.root"
   else:
     flags.Output.AODFileName = 'AOD.pool.root'
+
+  flags.DQ.useTrigger = False # don't do TrigDecisionTool in MonitorCfg helper methods
+  flags.DQ.enableLumiAccess = False
 
   flags.Trigger.enableL1CaloLegacy = 'legacy' in args.outputs
   flags.lock()
@@ -425,7 +427,7 @@ if __name__ == '__main__':
     return [f'{edmType}#{edmName}',
             f'{auxType}#{edmName}Aux.']
 
-  if "eTriggerTowers" in args.outputs:
+  if "eEmulatedTowers" in args.outputs:
     # building eTowers from supercells and trigger towers
     args.outputs += ["sCells","tTowers"] # need both of these
 
@@ -442,7 +444,6 @@ if __name__ == '__main__':
   if "sCells" in args.outputs:
     from L1CaloFEXSim.L1CaloFEXSimCfg import ReadSCellFromByteStreamCfg
     acc.merge( ReadSCellFromByteStreamCfg(flags,"SCell") )
-    acc.getEventAlgo("LArRAWtoSuperCell").SCellContainerIn="SC_ET_ID" # collection after timing cuts (SC_ET would be before timing cuts, SC would be the ADC samples)
     outputEDM += ["CaloCellContainer#SCell"]
 
   if "tTowers" in args.outputs:
@@ -558,6 +559,17 @@ if __name__ == '__main__':
     # allow for missing Topo ROBs:
     maybeMissingRobs += l1topoBSTool.ROBIDs
 
+  if 'seTOBs' in args.outputs:
+    # efex simulation
+    acc.addEventAlgo(CompFactory.LVL1.eTowerMakerFromSuperCells('eTowerMakerFromSuperCells'),sequenceName='AthAlgSeq') # builds eTowers from sCells
+    acc.addEventAlgo(CompFactory.LVL1.eFEXDriver('eFEXDriver',
+      eFEXSysSimTool = CompFactory.LVL1.eFEXSysSim('eFEXSysSimTool') # have to do this so that property settings below take effect
+                                                 ),sequenceName='AthAlgSeq') # creates L1_eEMRoI etc
+    acc.getEventAlgo('eFEXDriver').eFEXSysSimTool.Key_eFexEMOutputContainer = "L1_eEMRoISim" # changes key of output
+    acc.getEventAlgo('eFEXDriver').eFEXSysSimTool.Key_eFexEMxTOBOutputContainer = "L1_eEMxRoISim"
+    acc.getEventAlgo('eFEXDriver').eFEXSysSimTool.Key_eFexTauOutputContainer = "L1_eTauRoISim"
+    acc.getEventAlgo('eFEXDriver').eFEXSysSimTool.Key_eFexTauxTOBOutputContainer = "L1_eTauxRoISim"
+
   decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder",
                                                          DecoderTools=decoderTools, OutputLevel=algLogLevel, MaybeMissingROBs=list(set(maybeMissingRobs)))
 
@@ -572,7 +584,10 @@ if __name__ == '__main__':
   # note it's odd that the AthenaCommon.globalflags input format property doesn't get updated appropriately by flags??
   acc.getEventAlgo("EventInfoTagBuilder").PropagateInput = (flags.Input.Format != Format.BS)
 
-  if flags.Exec.OutputLevel==Constants.DEBUG: acc.getService("StoreGateSvc").Dump=True # when debugging also dump the storegatesvc content
+
+  if flags.Exec.MaxEvents==1: # if doing 1 event, will dump storegate too
+    acc.getService("StoreGateSvc").Dump=True
+    acc.getService("StoreGateSvc").OutputLevel=Constants.INFO
 
   # schedule user algs, if any
   for alg in args.userAlgs: acc.addEventAlgo(CompFactory.getComp(alg.split('/')[0])(name=alg.split('/')[-1]),sequenceName='AthEndSeq')
@@ -582,6 +597,10 @@ if __name__ == '__main__':
   if args.outputHISTFile != "":
     from AthenaMonitoring.AthMonitorCfgHelper import getDQTHistSvc
     acc.merge(getDQTHistSvc(flags))
+    if "seTOBs" in args.outputs and "eTOBs" in args.outputs and "exTOBs" in args.outputs:
+      from TrigT1CaloMonitoring.EfexSimMonitorAlgorithm import EfexSimMonitoringConfig
+      acc.merge(EfexSimMonitoringConfig(flags))
+
 
   acc.printConfig()
   flags.dump()

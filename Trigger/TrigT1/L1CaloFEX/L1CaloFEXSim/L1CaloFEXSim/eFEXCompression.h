@@ -79,11 +79,11 @@ private:
   /** Error return value */
   static const int s_error = -999;
   /** Noise Cuts per layer **/
-  static const unsigned int m_noisecutPS = 36; // corresponds to 100 MeV
-  static const unsigned int m_noisecutL1 = 36;
-  static const unsigned int m_noisecutL2 = 36;
-  static const unsigned int m_noisecutL3 = 36;
-  static const unsigned int m_noisecutHad = 36;
+  static const unsigned int m_noisecutPS = 64; // corresponds to 800 MeV
+  static const unsigned int m_noisecutL1 = 48; // 400 MeV
+  static const unsigned int m_noisecutL2 = 48;
+  static const unsigned int m_noisecutL3 = 48;
+  static const unsigned int m_noisecutHad = 48; // should only be applied for HEC
 };
 
 
