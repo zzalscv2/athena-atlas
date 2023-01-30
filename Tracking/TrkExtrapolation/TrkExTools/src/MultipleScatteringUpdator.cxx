@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,7 +12,10 @@
 // CLHEP
 
 #include "TrkExUtils/MaterialInteraction.h"
+#include "AthenaKernel/RNGWrapper.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include "CLHEP/Random/RandFlat.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace{
 // static doubles
@@ -45,8 +48,8 @@ Trk::MultipleScatteringUpdator::MultipleScatteringUpdator(const std::string &t, 
   m_log_include(true),
   m_gaussianMixture(false),
   m_optGaussianMixtureG4(true),
-  m_rndGenSvc("AtRndmGenSvc", n),
-  m_randomEngine(nullptr),
+  m_rndGenSvc("AthRNGSvc", n),
+  m_rngWrapper(nullptr),
   m_randomEngineName("TrkExRnd") {
   declareInterface<IMultipleScatteringUpdator>(this);
   // multiple scattering parameters
@@ -77,8 +80,8 @@ Trk::MultipleScatteringUpdator::initialize() {
     }
 
     // Get own engine with own seeds:
-    m_randomEngine = m_gaussianMixture ? m_rndGenSvc->GetEngine(m_randomEngineName) : nullptr;
-    if (!m_randomEngine) {
+    m_rngWrapper = m_gaussianMixture ? m_rndGenSvc->getEngine(this, m_randomEngineName) : nullptr;
+    if (!m_rngWrapper) {
       ATH_MSG_WARNING(
         "Could not get random engine '" << m_randomEngineName << "' -> switching Gaussian mixture model off.");
       m_gaussianMixture = false;
@@ -151,6 +154,15 @@ Trk::MultipleScatteringUpdator::sigmaSquare(const MaterialProperties &mat,
 
   // use the Gaussian mixture model
   if (m_gaussianMixture) {
+    // Reseed the RNG if needed.
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    if (m_rngWrapper->evtSeeded(ctx) != ctx.evt()) {
+      // Ok, the wrappers are unique to this algorithm and a given slot,
+      // so cannot be accessed concurrently.
+      ATHRNG::RNGWrapper* wrapper_nc ATLAS_THREAD_SAFE = m_rngWrapper;
+      wrapper_nc->setSeed (this->name(), ctx);
+    }
+    CLHEP::HepRandomEngine* engine = m_rngWrapper->getEngine (ctx);
     // d_0'
     double dprime = t / (beta * beta);
     double log_dprime = log(dprime);
@@ -170,7 +182,7 @@ Trk::MultipleScatteringUpdator::sigmaSquare(const MaterialProperties &mat,
       sigma2 = 225. * dprime / (p * p);
     }
     // throw the random number core/tail
-    if (CLHEP::RandFlat::shoot(m_randomEngine) < epsilon) {
+    if (CLHEP::RandFlat::shoot(engine) < epsilon) {
       sigma2 *= (1. - (1. - epsilon) * sigma1square) / epsilon;
     }
   }
