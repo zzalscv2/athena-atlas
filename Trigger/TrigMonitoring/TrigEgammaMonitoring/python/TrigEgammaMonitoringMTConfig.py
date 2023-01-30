@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 '''@file TrigEgammaMonitoringConfigRun3.py
 @author D. Maximov (histograms), Joao victor Pinto (core)
@@ -83,7 +83,7 @@ class TrigEgammaMonAlgBuilder:
     self.activate_onlineMonHypos = True
 
     if not self.get_monitoring_mode():
-      self.__logger.warning("HLTMonTriggerList: Error getting monitoring mode, default monitoring lists will be used.")
+      self.__logger.warning("Error getting monitoring mode, default monitoring lists will be used.")
     else:
       self.__logger.info("Configuring for %s", self.data_type)
 

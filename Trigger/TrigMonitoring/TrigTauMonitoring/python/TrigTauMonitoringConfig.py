@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -31,7 +31,7 @@ class TrigTauMonAlgBuilder:
     self.__logger.info("TrigTauMonToolBuilder.configureMode()")
     self._get_monitoring_mode_success = self.get_monitoring_mode()
     if self._get_monitoring_mode_success is False:
-      self.__logger.warning("HLTMonTriggerList: Error getting monitoring mode, default monitoring lists will be used.")
+      self.__logger.warning("Error getting monitoring mode, default monitoring lists will be used.")
     else:
       self.__logger.info("Configuring for %s", self.data_type)
 
