@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscSegmentUtilTool.h"
@@ -2183,7 +2183,7 @@ double CscSegmentUtilTool::matchLikelihood(const MuonSegment& rsg, const MuonSeg
     ICscSegmentFinder::RioList etarios;
     for (unsigned int irot = 0; irot < rsg.numberOfContainedROTs(); irot++) etarios.push_back(rsg.rioOnTrack(irot));
     ICscSegmentFinder::RioList phirios;
-    for (unsigned int irot = 0; irot < psg.numberOfContainedROTs(); irot++) etarios.push_back(psg.rioOnTrack(irot));
+    for (unsigned int irot = 0; irot < psg.numberOfContainedROTs(); irot++) phirios.push_back(psg.rioOnTrack(irot)); // CHECK THIS
     int maxeta = etarios.size();
     int maxphi = phirios.size();
 
