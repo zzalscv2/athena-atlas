@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTest/LArReadHadDMCoeffFile.h"
@@ -109,8 +109,8 @@ StatusCode LArReadHadDMCoeffFile::initDataFromFile(std::string hadDMCoeffFileNam
       dmArea.m_nPars = nPars;
       
       for(int i_frac=0; i_frac<nFrac; i_frac++){
-         int iparset, ifrac, iener, ieta;
-         float frac, ener, eta;
+         int iparset = 0, ifrac = 0, iener = 0, ieta = 0;
+         float frac = 0, ener = 0, eta = 0;
          for(int i_ener=0; i_ener<nEner; i_ener++){
             for(int i_eta=0; i_eta<nEta; i_eta++){
                fgets(line,1024,fin);
