@@ -1,5 +1,5 @@
 """
-Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 2020 Matthias Schott - Uni Mainz
 """
 
@@ -1976,17 +1976,18 @@ if __name__=="__main__":
     from AthenaCommon.Constants import INFO
     log.setLevel(INFO)
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     TestFiles = ['/eos/atlas/atlascerngroupdisk/det-rpc/data/DESDM_MCP/data18_13TeV.00358615.physics_Main.merge.DESDM_MCP.f961_m2024/data18_13TeV.00358615.physics_Main.merge.DESDM_MCP.f961_m2024._0084.1']
-    ConfigFlags.Input.Files = TestFiles
-    ConfigFlags.Output.HISTFileName = 'TestOutput.root'
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = TestFiles
+    flags.Output.HISTFileName = 'TestOutput.root'
+    flags.lock()
     # Initialize configuration object, add accumulator, merge and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
-    acc = MuonTrackConfig(ConfigFlags)
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
+    acc = MuonTrackConfig(flags)
     cfg.merge(acc)
     cfg.printConfig(withDetails=False)
     cfg.run(20)

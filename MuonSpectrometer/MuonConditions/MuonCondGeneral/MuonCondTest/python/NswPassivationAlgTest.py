@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 def NSWPassivAlgTest(flags,alg_name="NSWPassivAlgTest", **kwargs):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -12,25 +12,26 @@ def NSWPassivAlgTest(flags,alg_name="NSWPassivAlgTest", **kwargs):
     
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from .MdtCablingTester import SetupArgParser, setupServicesCfg
     
     args = SetupArgParser().parse_args()
-    ConfigFlags.Concurrency.NumThreads = args.threads
-    ConfigFlags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
-    ConfigFlags.Output.ESDFileName = args.output
-    ConfigFlags.Input.Files = args.inputFile
-    ConfigFlags.lock()
 
+    flags = initConfigFlags()
+    flags.Concurrency.NumThreads = args.threads
+    flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
+    flags.Output.ESDFileName = args.output
+    flags.Input.Files = args.inputFile
+    flags.lock()
    
-    cfg = setupServicesCfg(ConfigFlags)
+    cfg = setupServicesCfg(flags)
     msgService = cfg.getService('MessageSvc')
     msgService.Format = "S:%s E:%e % F%128W%S%7W%R%T  %0W%M"
 
-    cfg.merge(NSWPassivAlgTest(ConfigFlags))
+    cfg.merge(NSWPassivAlgTest(flags))
     cfg.printConfig(withDetails=True, summariseProps=True)
 
-    ConfigFlags.dump()
+    flags.dump()
 
     with open("NSWPassivAlgTest.pkl", "wb") as f:
          cfg.store(f)
