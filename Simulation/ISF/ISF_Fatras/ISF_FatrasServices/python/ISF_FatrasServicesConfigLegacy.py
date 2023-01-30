@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
 Service and Tool configurations for ISF for ISF_FatrasServicesConfig
@@ -343,9 +343,7 @@ def getFatrasEnergyLossSamplerBetheHeitler(name="ISF_FatrasEnergyLossSamplerBeth
 # (iii) Multiple scattering
 def getFatrasMultipleScatteringUpdator(name="ISF_FatrasMultipleScatteringUpdator", **kwargs):
     from G4AtlasApps.SimFlags import simFlags
-    if not simFlags.RandomSeedList.checkForExistingSeed( "TrkExRnd" ):
-      simFlags.RandomSeedList.addSeed( "TrkExRnd" , 12412330, 37849324 )
-    kwargs.setdefault("RandomNumberService"   , simFlags.RandomSvc() )
+    kwargs.setdefault("RandomNumberService"   , simFlags.RandomSvcMT() )
     kwargs.setdefault("RandomStreamName"      , 'TrkExRnd' ) # TODO: read stream name "TrkExRnd" from Fatras jobProperties
     kwargs.setdefault("GaussianMixtureModel"  , FatrasTuningFlags.GaussianMixtureModel())
 
