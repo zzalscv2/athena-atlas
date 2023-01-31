@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 """ Helpers for creating input reco sequences
@@ -94,7 +94,7 @@ class AlgInputConfig(ABC):
         pass
 
     @abstractmethod
-    def create_sequence(self, inputs, RoIs, recoDict):
+    def create_sequence(self, flags, inputs, RoIs, recoDict):
         """ Create the sequence and return it along with a dictionary of the objects that it produces """
         pass
 
@@ -119,7 +119,7 @@ class InputConfigRegistry:
         for x in config.produces:
             self._configs[x] = config
 
-    def build_steps(self, requested, RoIs, recoDict, return_ca=False, flags=None):
+    def build_steps(self, flags, requested, RoIs, recoDict, return_ca=False):
         """Build the necessary input sequence, separated by steps
 
         =========
@@ -139,10 +139,7 @@ class InputConfigRegistry:
         where steps is a list of input sequences or CAs, one for each step and
         inputs is a dictionary mapping input nickname to storegate key
         """
-        if return_ca and flags is None:
-            raise ValueError(
-                "Must provide flags if a component accumulator is requested"
-            )
+
         # The input sequences, keyed by step
         steps = defaultdict(ComponentAccumulator) if return_ca else defaultdict(list)
         # The mapping of input nickname to storegate key
@@ -272,7 +269,7 @@ class InputConfigRegistry:
         else:
             builder = config.create_sequence
 
-        reco, produced_inputs = builder(inputs, RoIs[this_step], recoDict)
+        reco, produced_inputs = builder(flags, inputs, RoIs[this_step], recoDict)
         if return_ca:
             steps[this_step].merge(reco)
         else:

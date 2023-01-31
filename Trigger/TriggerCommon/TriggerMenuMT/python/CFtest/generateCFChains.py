@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 
@@ -217,12 +217,12 @@ def generateCFChains(opt):
         from TriggerMenuMT.HLT.MET.ConfigHelpers import AlgConfig
 
         cellRecoDict = extractMETRecoDict({'EFrecoAlg': "cell"})
-        metCellConf = AlgConfig.fromRecoDict(**cellRecoDict)
-        metCellSeqs = metCellConf.menuSequences()
+        metCellConf = AlgConfig.fromRecoDict(ConfigFlags, **cellRecoDict)
+        metCellSeqs = metCellConf.menuSequences(ConfigFlags)
 
         pufitRecoDict = extractMETRecoDict({'EFrecoAlg': "tcpufit"})
-        metClusterPufitConf = AlgConfig.fromRecoDict(**pufitRecoDict)
-        metClusterPufitSeqs = metClusterPufitConf.menuSequences()
+        metClusterPufitConf = AlgConfig.fromRecoDict(ConfigFlags, **pufitRecoDict)
+        metClusterPufitSeqs = metClusterPufitConf.menuSequences(ConfigFlags)
         
         metCellStep = makeChainStep("Step1_met_cell", metCellSeqs)
         metClusterPufitStep          = makeChainStep("Step1_met_clusterpufit", metClusterPufitSeqs)

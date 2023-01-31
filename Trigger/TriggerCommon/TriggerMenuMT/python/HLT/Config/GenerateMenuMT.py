@@ -446,7 +446,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
             try:
                 if 'PhysicsTLA' in eventBuildType:
                     log.debug("Adding TLA Step for chain %s", mainChainDict['chainName'])
-                    TLABuildingSequences.addTLAStep(theChainConfig, mainChainDict)
+                    TLABuildingSequences.addTLAStep(flags, theChainConfig, mainChainDict)
             
                 log.debug('Configuring event building sequence %s for chain %s', eventBuildType, mainChainDict['chainName'])
                 EventBuildingSequences.addEventBuildingSequence(flags, theChainConfig, eventBuildType, mainChainDict)

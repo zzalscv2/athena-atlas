@@ -220,7 +220,7 @@ def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
                 acceptedEventSeq += conf2toConfigurable(recoSeq)
             elif any(purpose.startswith("met") for purpose in purposes):
                 from TriggerMenuMT.HLT.MET.EndOfEvent import getMETRecoSequences
-                algorithms, rois, streams = getMETRecoSequences(purposes)
+                algorithms, rois, streams = getMETRecoSequences(flags, purposes)
                 endOfEventFilterAlg.StreamFilter = streams
                 endOfEventRoIMaker.RoIs = [x for x in rois if x not in endOfEventRoIMaker.RoIs]
                 acceptedEventSeq += algorithms

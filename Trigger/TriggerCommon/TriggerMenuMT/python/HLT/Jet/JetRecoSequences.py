@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaCommon.CFElements import parOR, findAllAlgorithms
@@ -214,7 +214,7 @@ def standardJetRecoSequence( configFlags, dataSource, clustersKey, **jetRecoDict
         # the case of regional PFlow
         rhoKey = str(eventShapeAlg.EventDensityTool.OutputContainer)
 
-    jetDef.modifiers = JetRecoCommon.getCalibMods(jetRecoDict,dataSource,rhoKey)
+    jetDef.modifiers = JetRecoCommon.getCalibMods(configFlags,jetRecoDict,dataSource,rhoKey)
     # If we need JVT, just rerun the JVT modifier
     decorList = JetRecoCommon.getDecorList(jetRecoDict)
 
@@ -341,7 +341,7 @@ def JetFSTrackingSequence(dummyFlags,trkopt,RoIs):
         vtxAlgs += makeInDetTrigVertices( "amvf", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex, IDTrigConfig, IDTrigConfig.adaptiveVertex )
 
     jetTrkSeq = parOR(f"JetFSTracking_{trkopt}_RecoSequence", viewAlgs+vtxAlgs)
-    trackcollmap = jetTTVA( "jet", jetTrkSeq, trkopt, IDTrigConfig, verticesname=IDTrigConfig.vertex_jet,  adaptiveVertex=IDTrigConfig.adaptiveVertex_jet )
+    trackcollmap = jetTTVA( dummyFlags, "jet", jetTrkSeq, trkopt, IDTrigConfig, verticesname=IDTrigConfig.vertex_jet,  adaptiveVertex=IDTrigConfig.adaptiveVertex_jet )
 
     return jetTrkSeq, trackcollmap
 
@@ -433,7 +433,7 @@ def groomedJetRecoSequence( configFlags, dataSource, clustersKey, **jetRecoDict 
 
     groomDef = JetRecoCommon.defineGroomedJets(jetRecoDict,ungroomedDef)
     groomedJetsFullName = groomDef.fullname()
-    groomDef.modifiers = JetRecoCommon.getCalibMods(jetRecoDict,dataSource)
+    groomDef.modifiers = JetRecoCommon.getCalibMods(configFlags,jetRecoDict,dataSource)
     groomDef.modifiers += ["Sort","Filter:"+str(JetRecoCommon.getFilterCut(jetRecoDict["recoAlg"]))]
     # Can add substructure mods here
 

@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 """Input configurations for algorithms depending on other HLT FEXs
@@ -18,14 +18,10 @@ log = logging.getLogger(__name__)
 class HLTInputConfigRegistry:
     """Configure HLT outputs as inputs"""
 
-    def build_steps(self, requested, RoIs=None, recoDict=None, return_ca=False, flags = None):
+    def build_steps(self, flags, requested, RoIs=None, recoDict=None, return_ca=False):
         """Build the necessary input sequence, separated by steps"""
         from .ConfigHelpers import AlgConfig, stringToMETRecoDict
 
-        if return_ca and flags is None:
-            raise ValueError(
-                "Must provide flags if a component accumulator is requested"
-            )
         # The input sequences, keyed by step
         steps = defaultdict(ComponentAccumulator) if return_ca else defaultdict(list)
         # The mapping of input nickname to storegate key
@@ -34,11 +30,11 @@ class HLTInputConfigRegistry:
         for name in requested:
             # TODO, maybe pass the inputs and input_steps dictionaries to the algorithms?
             dct = stringToMETRecoDict(name)
-            cfg = AlgConfig.fromRecoDict(**dct)
+            cfg = AlgConfig.fromRecoDict(flags, **dct)
             if return_ca:
                 this_steps = cfg.make_reco_ca(flags)
             else:
-                this_steps = cfg.recoAlgorithms()
+                this_steps = cfg.recoAlgorithms(flags)
             for step, reco in enumerate(this_steps):
                 if return_ca:
                     steps[step].merge(reco)

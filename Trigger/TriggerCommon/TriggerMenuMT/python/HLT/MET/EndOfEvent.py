@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """Code to setup MET reconstruction during the end-of-event sequence"""
 
 from typing import List
@@ -23,7 +23,7 @@ _algs_by_purpose = {
 }
 
 
-def getMETRecoSequences(purposes: List[str]):
+def getMETRecoSequences(flags, purposes: List[str]):
     """Create the full reconstruction sequences to run at the end of the event
 
     Parameters
@@ -43,7 +43,7 @@ def getMETRecoSequences(purposes: List[str]):
             alg for alg in _algs_by_purpose.get(purpose, []) if alg not in ef_reco_algs
         ]
     registry = HLTInputConfigRegistry()
-    steps, _ = registry.build_steps(ef_reco_algs)
+    steps, _ = registry.build_steps(flags, ef_reco_algs)
     rois = [caloFSRoI]
     if len(steps) > 2:
         # If we have more than two steps then we also need the FS tracking RoI

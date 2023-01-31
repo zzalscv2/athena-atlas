@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaCommon.CFElements import parOR, seqAND
@@ -81,11 +81,10 @@ def _algoTauTrackRoiUpdater(inputRoIs, tracks):
     algo.Key_trigTauJetInputContainer  = ""
     return algo
 
-def _algoTauTrackBDTRoiUpdater(inputRoIs, tracks):
+def _algoTauTrackBDTRoiUpdater(flags, inputRoIs, tracks):
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
     config = getInDetTrigConfig("tauIso")
     from TrigTauHypo.TrigTauHypoConf import TrigTauTrackRoiUpdater
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
     algo                               = TrigTauTrackRoiUpdater("TrackRoiUpdaterBDT")
     algo.etaHalfWidth                  = config.etaHalfWidth
     algo.phiHalfWidth                  = config.phiHalfWidth
@@ -93,8 +92,8 @@ def _algoTauTrackBDTRoiUpdater(inputRoIs, tracks):
     algo.RoIInputKey                   = inputRoIs
     algo.RoIOutputKey                  = "UpdatedTrackBDTRoI"
     algo.fastTracksKey                 = tracks
-    algo.BDTweights                    = "{}/{}".format(ConfigFlags.Trigger.Offline.Tau.tauRecToolsCVMFSPath,
-                                                        ConfigFlags.Trigger.Offline.Tau.FTFTauCoreBDTConfig)
+    algo.BDTweights                    = "{}/{}".format(flags.Trigger.Offline.Tau.tauRecToolsCVMFSPath,
+                                                        flags.Trigger.Offline.Tau.FTFTauCoreBDTConfig)
     algo.Key_trigTauJetInputContainer  = "HLT_TrigTauRecMerged_CaloMVAOnly"
     return algo
 
@@ -258,7 +257,7 @@ def precTrackSequence( RoIs , name):
 
     return trackSequence, sequenceOut
 
-def tauFTFSequence( RoIs, name ):
+def tauFTFSequence( flags, RoIs, name ):
 
     tauFTFSequence = parOR(name)
 
@@ -279,7 +278,7 @@ def tauFTFSequence( RoIs, name ):
       viewAlgs.append(tauLRTRoiUpdaterAlg)
     elif 'Core' in signatureName:
       tauTrackRoiUpdaterAlg = _algoTauTrackRoiUpdater(inputRoIs = RoIs, tracks = TrackCollection)
-      tauTrackRoiUpdaterAlgBDT = _algoTauTrackBDTRoiUpdater(inputRoIs = RoIs, tracks = TrackCollection)
+      tauTrackRoiUpdaterAlgBDT = _algoTauTrackBDTRoiUpdater(flags, inputRoIs = RoIs, tracks = TrackCollection)
       viewAlgs.append(tauTrackRoiUpdaterAlgBDT)
       viewAlgs.append(tauTrackRoiUpdaterAlg)
 
@@ -332,7 +331,7 @@ def tauFTFCoreSequence(flags):
     if extraPrefetching:
       robPrefetchAlg.RoILinkName = str(prefetchRoITool.PrefetchRoIsLinkName)
 
-    (tauFTFCoreInViewSequence, sequenceOut) = tauFTFSequence( ftfCoreViewsMaker.InViewRoIs, RecoSequenceName)
+    (tauFTFCoreInViewSequence, sequenceOut) = tauFTFSequence( flags, ftfCoreViewsMaker.InViewRoIs, RecoSequenceName)
 
     tauFastTrackCoreSequence = seqAND("tauFastTrackCoreSequence", [ftfCoreViewsMaker, robPrefetchAlg, tauFTFCoreInViewSequence])
     return (tauFastTrackCoreSequence, ftfCoreViewsMaker, sequenceOut)
@@ -341,7 +340,7 @@ def tauFTFCoreSequence(flags):
 #   Reco sequence for FTFTauLRT + TrackRoIUpdater Alg
 # ===============================================================================================
 
-def tauFTFLRTSequence(ConfigFlags):
+def tauFTFLRTSequence(flags):
 
     RecoSequenceName                    = "tauFTFLRTInViewSequence"
 
@@ -364,9 +363,9 @@ def tauFTFLRTSequence(ConfigFlags):
     ftfLRTViewsMaker.RequireParentView = True
     ftfLRTViewsMaker.ViewNodeName      = RecoSequenceName
 
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, ConfigFlags, nameSuffix=ftfLRTViewsMaker.name())[0]
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=ftfLRTViewsMaker.name())[0]
 
-    (tauFTFLRTInViewSequence, sequenceOut) = tauFTFSequence( ftfLRTViewsMaker.InViewRoIs, RecoSequenceName)
+    (tauFTFLRTInViewSequence, sequenceOut) = tauFTFSequence( flags, ftfLRTViewsMaker.InViewRoIs, RecoSequenceName)
 
     tauFastTrackLRTSequence = seqAND("tauFastTrackLRTSequence", [ftfLRTViewsMaker, robPrefetchAlg, tauFTFLRTInViewSequence])
     return (tauFastTrackLRTSequence, ftfLRTViewsMaker, sequenceOut)
@@ -394,7 +393,7 @@ def tauFTFIsoSequence(flags):
 
     robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=ftfIsoViewsMaker.name())[0]
 
-    (tauFTFIsoInViewSequence, sequenceOut) = tauFTFSequence( ftfIsoViewsMaker.InViewRoIs, RecoSequenceName)
+    (tauFTFIsoInViewSequence, sequenceOut) = tauFTFSequence( flags, ftfIsoViewsMaker.InViewRoIs, RecoSequenceName)
 
     tauFastTrackIsoSequence = seqAND("tauFastTrackIsoSequence", [ftfIsoViewsMaker, robPrefetchAlg, tauFTFIsoInViewSequence])
     return (tauFastTrackIsoSequence, ftfIsoViewsMaker, sequenceOut)
@@ -422,7 +421,7 @@ def tauFTFIsoBDTSequence(flags):
 
     robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=ftfIsoViewsMaker.name())[0]
 
-    (tauFTFIsoBDTInViewSequence, sequenceOut) = tauFTFSequence( ftfIsoViewsMaker.InViewRoIs, RecoSequenceName)
+    (tauFTFIsoBDTInViewSequence, sequenceOut) = tauFTFSequence( flags, ftfIsoViewsMaker.InViewRoIs, RecoSequenceName)
 
     tauFastTrackIsoBDTSequence = seqAND("tauFastTrackIsoBDTSequence", [ftfIsoViewsMaker, robPrefetchAlg, tauFTFIsoBDTInViewSequence])
     return (tauFastTrackIsoBDTSequence, ftfIsoViewsMaker, sequenceOut)
@@ -453,7 +452,7 @@ def tauPrecIsoTrackSequence(flags):
 #   Reco sequence for Precision tracking (from FTF LRT algorithm)
 # ===============================================================================================
 
-def tauPrecLRTTrackSequence(ConfigFlags):
+def tauPrecLRTTrackSequence(flags):
 
     RecoSequenceName                       = "precFTFLRTInViewSequence"
 
@@ -519,7 +518,7 @@ def tauLLPSequence(flags):
 #    Reco sequence for Tau Precision LRT Alg
 # ===============================================================================================
 
-def tauLRTSequence(ConfigFlags):
+def tauLRTSequence(flags):
 
     RecoSequenceName = "tauLRTInViewSequence"
 

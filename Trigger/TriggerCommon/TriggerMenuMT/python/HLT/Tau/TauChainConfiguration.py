@@ -21,34 +21,34 @@ else:
 # fragments generating config will be functions in new JO
 #--------------------------------------------------------
 def getTauCaloMVACfg(flags, is_probe_leg=False):
-    return tauCaloMVAMenuSeq("Tau", is_probe_leg=is_probe_leg)
+    return tauCaloMVAMenuSeq(flags, "Tau", is_probe_leg=is_probe_leg)
 
 def getFTFCoreCfg(flags, is_probe_leg=False):
-    return tauFTFTauCoreSeq(is_probe_leg=is_probe_leg)
+    return tauFTFTauCoreSeq(flags, is_probe_leg=is_probe_leg)
 
 def getFTFLRTCfg(flags, is_probe_leg=False):
-    return tauFTFTauLRTSeq(is_probe_leg=is_probe_leg)
+    return tauFTFTauLRTSeq(flags, is_probe_leg=is_probe_leg)
 
 def getFTFIsoCfg(flags, is_probe_leg=False):
-    return tauFTFTauIsoSeq(is_probe_leg=is_probe_leg)
+    return tauFTFTauIsoSeq(flags, is_probe_leg=is_probe_leg)
 
 def getFTFIsoBDTCfg(flags, is_probe_leg=False):
-    return tauFTFTauIsoBDTSeq(is_probe_leg=is_probe_leg)
+    return tauFTFTauIsoBDTSeq(flags, is_probe_leg=is_probe_leg)
 
 def getTrackTwoMVACfg(flags, is_probe_leg=False):
-    return tauTrackTwoMVASeq(is_probe_leg=is_probe_leg)
+    return tauTrackTwoMVASeq(flags, is_probe_leg=is_probe_leg)
 
 def getTrackTwoLLPCfg(flags, is_probe_leg=False):
-    return tauTrackTwoLLPSeq(is_probe_leg=is_probe_leg)
+    return tauTrackTwoLLPSeq(flags, is_probe_leg=is_probe_leg)
 
 def getTrackLRTCfg(flags, is_probe_leg=False):
-    return tauTrackLRTSeq(is_probe_leg=is_probe_leg)
+    return tauTrackLRTSeq(flags, is_probe_leg=is_probe_leg)
 
 def getPrecTrackIsoCfg(flags, is_probe_leg=False):
-    return tauPrecTrackIsoSeq(is_probe_leg=is_probe_leg)
+    return tauPrecTrackIsoSeq(flags, is_probe_leg=is_probe_leg)
 
 def getPrecTrackLRTCfg(flags, is_probe_leg=False):
-    return tauPrecTrackLRTSeq(is_probe_leg=is_probe_leg)
+    return tauPrecTrackLRTSeq(flags, is_probe_leg=is_probe_leg)
 
 ############################################# 
 ###  Class/function to configure muon chains 

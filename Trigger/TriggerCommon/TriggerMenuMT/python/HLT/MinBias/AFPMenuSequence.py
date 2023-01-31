@@ -1,7 +1,6 @@
 # 
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
-from AthenaConfiguration.AllConfigFlags import ConfigFlags 
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence,algorithmCAToGlobalWrapper
 from AthenaCommon.CFElements import parOR, seqAND
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
@@ -10,7 +9,7 @@ from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorI
 from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool
 
 
-def AFPTrkRecoBaseSequence(ConfigFlags):
+def AFPTrkRecoBaseSequence(flags):
     # Create inputs using input maker
     AFPInputMaker = InputMakerForRoI("IM_AFPTrackingFS")
     AFPInputMaker.RoITool = ViewCreatorInitialROITool()
@@ -28,11 +27,11 @@ def AFPTrkRecoBaseSequence(ConfigFlags):
     #cluster reconstruction
 
     from AFP_SiClusterTools.AFP_SiClusterTools import AFP_SiClusterTools_HLT
-    AFP_SiCl= algorithmCAToGlobalWrapper(AFP_SiClusterTools_HLT,ConfigFlags)
+    AFP_SiCl= algorithmCAToGlobalWrapper(AFP_SiClusterTools_HLT,flags)
     
     # tracks reconstruction
     from AFP_LocReco.AFP_LocReco import AFP_LocReco_SiD_HLT
-    AFP_SID = algorithmCAToGlobalWrapper(AFP_LocReco_SiD_HLT,ConfigFlags)
+    AFP_SID = algorithmCAToGlobalWrapper(AFP_LocReco_SiD_HLT,flags)
     
     if globalflags.InputFormat.is_bytestream():
         AFPRecoSeq = parOR("AFPTrkRecoSeq", [AFP_Raw, AFP_R2D, AFP_SiCl, AFP_SID])
@@ -97,9 +96,9 @@ def TestTrigAFPDijetHypoToolGen(chainDict):
 
     return hypo
 
-def AFPTrkRecoHypoSequence():
+def AFPTrkRecoHypoSequence(flags):
 
-    (AFPRecoSeqHypo, AFPInputMakerHypo) = RecoFragmentsPool.retrieve(AFPTrkRecoBaseSequence,ConfigFlags)
+    (AFPRecoSeqHypo, AFPInputMakerHypo) = RecoFragmentsPool.retrieve(AFPTrkRecoBaseSequence,flags)
     AFPSequenceHypo = seqAND("AFPSequenceHypo", [AFPInputMakerHypo, AFPRecoSeqHypo])
     
     # Hypo

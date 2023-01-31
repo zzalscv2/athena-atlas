@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentAccumulator import CompFactory
@@ -85,7 +85,7 @@ def triggerRunCfgEmu( flags, menu=None ):
     return acc
 
 
-def generateEmuMenu(ConfigFlags):
+def generateEmuMenu(flags):
     """
     generate emulated chain manually, replacing loadChains in real HLT
     """
@@ -98,20 +98,20 @@ def generateEmuMenu(ConfigFlags):
     import TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig_newJO
     # set DEBUG flag on the control-flow builder (before building)
     TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig_newJO.log.setLevel(DEBUG)
-    menuAcc = generateDecisionTree(ConfigFlags, HLTMenuConfig)
+    menuAcc = generateDecisionTree(flags, HLTMenuConfig)
     
     menuAcc.wasMerged()   
     menuAcc.printConfig()
     log.info('CF is built')
     # # generate JOSON representation of the config
     from TriggerMenuMT.HLT.Config.JSON.HLTMenuJSON import generateJSON_newJO
-    generateJSON_newJO(ConfigFlags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList(), menuAcc.getSequence("HLTAllSteps"))
+    generateJSON_newJO(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList(), menuAcc.getSequence("HLTAllSteps"))
 
     from TriggerMenuMT.HLT.Config.JSON.HLTPrescaleJSON import generateJSON_newJO as generatePrescaleJSON_newJO
-    generatePrescaleJSON_newJO(ConfigFlags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList())
+    generatePrescaleJSON_newJO(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList())
    
     from TriggerMenuMT.HLT.Config.JSON.HLTMonitoringJSON import generateDefaultMonitoringJSON
-    generateDefaultMonitoringJSON(ConfigFlags)
+    generateDefaultMonitoringJSON(flags)
 
     return menuAcc
 

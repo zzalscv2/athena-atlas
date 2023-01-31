@@ -3,7 +3,6 @@
 #
 
 from JetRecTools import JetRecToolsConfig
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, conf2toConfigurable
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
@@ -107,7 +106,7 @@ def JetFSTrackingCfg(flags, trkopt, RoIs):
     return acc, outmap
 
 
-def jetTTVA( signature, jetseq, trkopt, config, verticesname=None, adaptiveVertex=None, selector=None ):
+def jetTTVA( flags, signature, jetseq, trkopt, config, verticesname=None, adaptiveVertex=None, selector=None ):
 
     tracksname = config.tracks_FTF()
 
@@ -146,7 +145,7 @@ def jetTTVA( signature, jetseq, trkopt, config, verticesname=None, adaptiveVerte
     jetseq += conf2toConfigurable( jettrkprepalg )
     jetseq += conf2toConfigurable( pjgalg )
 
-    if ConfigFlags.Trigger.Jet.doVRJets:
+    if flags.Trigger.Jet.doVRJets:
         pv0_jettvassoc, pv0_ttvatool = JetRecToolsConfig.getPV0TrackVertexAssoAlg(trkopt, jetseq)
         pv0trackselalg = JetRecToolsConfig.getPV0TrackSelAlg(pv0_ttvatool, trkopt)
         jetseq += conf2toConfigurable( pv0_jettvassoc )
