@@ -65,10 +65,12 @@ namespace CP {
     private:
       /// This allows to configure the OR strategy in the future, if more than one is supported by MCP. 
       Gaudi::Property<int>  m_strategy{this, "overlapStrategy", CP::IMuonLRTOverlapRemovalTool::defaultStrategy, "Overlap removal strategy to use (0 = default, 1 = write all muons and decorate with overlap type)"}; 
+      /// This allows to configure the geometry used for the muon selection tool (run 2 or run 3). 
+      Gaudi::Property<bool>  m_useRun3WP{this, "UseRun3WP", false, "Switch to toggle the run 2 & run 3 geometry for the muon ID working points used in the prompt-LRT overlap resolution. Set to true for run 3 and false for run 2."}; 
       /// This is the muon selection tool. No particular configuration required, the loosest WP is used as a tie breaker in overlaps 
       ToolHandle<CP::IMuonSelectionTool> m_muonSelectionTool{this, "MuonSelectionTool", "", "tool to determine the working point of the muons"};
 
-    }; // end namespace CP
+  };
 
-}
+} // end namespace CP
 #endif // LRTMUONANALYSISTOOLS_MuonLRTOverlapRemovalTool_H
