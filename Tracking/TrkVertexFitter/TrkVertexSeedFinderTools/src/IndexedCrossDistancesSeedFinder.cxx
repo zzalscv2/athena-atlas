@@ -121,7 +121,7 @@ namespace Trk
 
     std::vector< std::pair <int, int> > trkidx ;
     int idx_i = 0 ;
-    for (std::vector<const Trk::TrackParameters*>::const_iterator i=begin;i!=end-1;i++) 
+    for (std::vector<const Trk::TrackParameters*>::const_iterator i=begin;i!=end-1;++i) 
     {
       idx_i ++ ;
       const Trk::Perigee* MyI=dynamic_cast<const Trk::Perigee*>(*i);
@@ -131,7 +131,7 @@ namespace Trk
       }	
       
       int idx_j = idx_i ;   //  1 has been added to idx_i
-      for (std::vector<const Trk::TrackParameters*>::const_iterator j=i+1;j!=end;j++) {
+      for (std::vector<const Trk::TrackParameters*>::const_iterator j=i+1;j!=end;++j++) {
 
         idx_j ++ ;
         const Trk::Perigee* MyJ=dynamic_cast<const Trk::Perigee*>(*j);

@@ -104,7 +104,7 @@ StatusCode Trk::SingleTrackDiffAlg::execute() {
     if (refPerigee) {
         //double minDeltaqOverP = 1.e20;
         double minChi2 = 1.e30;
-        for (; compTrackIterator != comparedTracks->end(); compTrackIterator++) {
+        for (; compTrackIterator != comparedTracks->end(); ++compTrackIterator) {
             if (!(*compTrackIterator)) {
                 msg(MSG::WARNING) <<"track collection for comparison containes a NULL pointer" <<endmsg;
                 continue;

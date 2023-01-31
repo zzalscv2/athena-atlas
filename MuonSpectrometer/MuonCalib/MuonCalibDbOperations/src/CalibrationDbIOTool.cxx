@@ -121,7 +121,7 @@ namespace MuonCalib {
             t0s.clear();
 
             // loop on all the ids in the selected calibration region
-            for (std::vector<MuonCalib::NtupleStationId>::iterator it = m_region_ids.begin(); it != m_region_ids.end(); it++) {
+            for (std::vector<MuonCalib::NtupleStationId>::iterator it = m_region_ids.begin(); it != m_region_ids.end(); ++it) {
                 ATH_MSG_INFO("Reading t0s for region " << it->regionId());
                 MdtStationT0Container *t0;
                 t0 = t0_op.LoadT0Calibration(*it, m_headid, m_sitename);
@@ -171,7 +171,7 @@ namespace MuonCalib {
             // loop on all the ids in the selected calibration region
             RtFromPoints rt_from_points;
             RtResolutionFromPoints res_from_points;
-            for (std::vector<MuonCalib::NtupleStationId>::iterator it = m_region_ids.begin(); it != m_region_ids.end(); it++) {
+            for (std::vector<MuonCalib::NtupleStationId>::iterator it = m_region_ids.begin(); it != m_region_ids.end(); ++it) {
                 std::vector<SamplePoint> in_points;
                 RtFullInfo full_info;
                 if (!rt_op.LoadRt(*it, m_headid, m_use_validated_rt, m_sitename, in_points, &full_info)) continue;

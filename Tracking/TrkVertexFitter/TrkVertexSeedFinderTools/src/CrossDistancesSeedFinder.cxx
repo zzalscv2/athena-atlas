@@ -118,7 +118,7 @@ namespace Trk
     const std::vector<const Trk::TrackParameters*>::const_iterator begin=perigeeList.begin();
     const std::vector<const Trk::TrackParameters*>::const_iterator end=perigeeList.end();
 
-    for (std::vector<const Trk::TrackParameters*>::const_iterator i=begin;i!=end-1;i++) {
+    for (std::vector<const Trk::TrackParameters*>::const_iterator i=begin;i!=end-1;++i) {
       
       const Trk::Perigee* MyI=dynamic_cast<const Trk::Perigee*>(*i);
       if (MyI==nullptr) {
@@ -126,7 +126,7 @@ namespace Trk
 	continue;
       }	
       
-      for (std::vector<const Trk::TrackParameters*>::const_iterator j=i+1;j!=end;j++) {
+      for (std::vector<const Trk::TrackParameters*>::const_iterator j=i+1;j!=end;++j) {
 
       const Trk::Perigee* MyJ=dynamic_cast<const Trk::Perigee*>(*j);
       if (MyJ==nullptr) {

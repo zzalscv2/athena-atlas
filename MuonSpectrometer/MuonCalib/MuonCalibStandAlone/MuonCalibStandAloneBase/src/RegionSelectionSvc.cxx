@@ -79,8 +79,8 @@ int RegionSelectionSvc ::AddRegionNtuples(const std::string &infile, TChain *cha
         while ((key = (TKey *)nextkey())) { dirnames.push_back(key->GetName()); }
     }
     // loop over found ntuples and selected region
-    for (std::set<MuonCalib::NtupleStationId>::const_iterator it = m_unique_chambers.begin(); it != m_unique_chambers.end(); it++)
-        for (std::list<std::string>::iterator nt_it = dirnames.begin(); nt_it != dirnames.end(); nt_it++) {
+    for (std::set<MuonCalib::NtupleStationId>::const_iterator it = m_unique_chambers.begin(); it != m_unique_chambers.end(); ++it)
+        for (std::list<std::string>::iterator nt_it = dirnames.begin(); nt_it != dirnames.end(); ++nt_it) {
             // truncate region name
             std::string regname(it->regionId(), 0, nt_it->size());
             if (regname == (*nt_it)) {
@@ -127,14 +127,14 @@ void RegionSelectionSvc ::search_chambers_in_region() {
             full_station.SetMultilayer(0);
             m_stations_in_region.push_back(full_station);
         } else {
-            for (std::vector<MuonCalib::NtupleStationId>::iterator it2 = the_ids.begin(); it2 != the_ids.end(); it2++) {
+            for (std::vector<MuonCalib::NtupleStationId>::iterator it2 = the_ids.begin(); it2 != the_ids.end(); ++it2) {
                 m_stations_in_region.push_back(*it2);
             }
         }
     }
     // create a set of chambers (not multilayers)
     std::vector<int> tower(3);
-    for (std::vector<MuonCalib::NtupleStationId>::iterator it2 = m_stations_in_region.begin(); it2 != m_stations_in_region.end(); it2++) {
+    for (std::vector<MuonCalib::NtupleStationId>::iterator it2 = m_stations_in_region.begin(); it2 != m_stations_in_region.end(); ++it2) {
         MuonCalib::NtupleStationId station(*it2);
         station.SetMultilayer(0);
         m_unique_chambers.insert(station);
@@ -150,7 +150,7 @@ void RegionSelectionSvc ::print_list_of_selected_chambers() const {
     ATH_MSG_INFO("Selected regions: " << m_stations_in_region.size());
     msg(MSG::INFO) << "Selected regions: ";
     for (std::vector<MuonCalib::NtupleStationId>::const_iterator it = m_stations_in_region.begin(); it != m_stations_in_region.end();
-         it++) {
+         ++it) {
         msg(MSG::INFO) << " " << it->regionId();
     }
     msg(MSG::INFO) << endmsg;

@@ -86,7 +86,7 @@ int CaloMuonTag::caloMuonTag(const std::vector<DepositInCalo>& deposits, double 
     std::vector<DepositInCalo>::const_iterator it = deposits.begin();
     int numVetoesTriggered = 0;
     int tag = 4;
-    for (; it != deposits.end(); it++) {
+    for (; it != deposits.end(); ++it) {
         CaloCell_ID::CaloSample sample = it->subCaloId();
         double dep = it->energyDeposited();
         double eLoss = it->muonEnergyLoss();
