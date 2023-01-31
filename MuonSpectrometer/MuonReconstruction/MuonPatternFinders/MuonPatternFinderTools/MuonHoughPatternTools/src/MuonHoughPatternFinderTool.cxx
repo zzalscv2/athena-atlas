@@ -356,7 +356,7 @@ namespace Muon {
                 }
 
                 ATH_MSG_DEBUG(m_printer->print(*prd) << " weight " << weight);
-                MuonHoughHit* hit = new MuonHoughHit(globalpos, channel_type, MuonHough::CSC, 1., weight, prd);
+                std::shared_ptr<MuonHoughHit> hit = std::make_shared<MuonHoughHit>(globalpos, channel_type, MuonHough::CSC, 1., weight, prd);
 
                 hitcontainer->addHit(hit);
                 if (m_use_histos) {
@@ -533,7 +533,7 @@ namespace Muon {
                     }
                 }
             }
-            MuonHoughHit* hit = new MuonHoughHit(globalpos, channel_type, MuonHough::RPC, prob, weight, prd);
+            std::shared_ptr<MuonHoughHit> hit = std::make_shared<MuonHoughHit>(globalpos, channel_type, MuonHough::RPC, prob, weight, prd);
             hitcontainer.addHit(hit);
             ATH_MSG_DEBUG(m_printer->print(*prd) << " NEW weight " << weight);
 
@@ -655,7 +655,7 @@ namespace Muon {
                         }
                     }
                 }
-                MuonHoughHit* hit = new MuonHoughHit(globalpos, channel_type, MuonHough::TGC, prob, weight,
+                std::shared_ptr<MuonHoughHit> hit = std::make_shared<MuonHoughHit>(globalpos, channel_type, MuonHough::TGC, prob, weight,
                                                      prd);  // getPrd
                 hitcontainer.addHit(hit);
                 ATH_MSG_DEBUG(m_printer->print(*prd) << " NEW weight " << weight);
@@ -690,7 +690,7 @@ namespace Muon {
         if (!size) return;
 
         auto new_mdt_hit = [](const Muon::MdtPrepData* mdt_hit, double prob, double weight) {
-            return new MuonHoughHit(mdt_hit->globalPosition(), false /*measures_phi*/, MuonHough::MDT, prob, weight, mdt_hit);  // getPrd
+            return std::make_shared<MuonHoughHit>(mdt_hit->globalPosition(), false /*measures_phi*/, MuonHough::MDT, prob, weight, mdt_hit);  // getPrd
         };
         if (m_showerskip) {
             const Muon::MdtPrepData* mdt = (*mdt_coll->begin());
@@ -880,7 +880,7 @@ namespace Muon {
             for (unsigned int i = 0; i < stationhits.size(); i++) {
                 // rpc hit loop
                 for (int j = stationhits[i].first; j < stationhits[i].second; j++) {
-                    const MuonHoughHit* rpchit = hitcontainer.getHit(j);
+                    const std::shared_ptr<MuonHoughHit> rpchit = hitcontainer.getHit(j);
                     if (rpchit->getWeight() < 0.01) continue;
                     const Amg::Vector3D& rpcPos = rpchit->getPosition();
                     const double rpc_radius = rpcPos.perp();
@@ -919,7 +919,7 @@ namespace Muon {
             for (unsigned int i = 0; i < stationhits.size(); i++) {
                 // tgc hit loop
                 for (int j = stationhits[i].first; j < stationhits[i].second; j++) {
-                    const MuonHoughHit* tgchit = hitcontainer.getHit(j);
+                    const std::shared_ptr<MuonHoughHit> tgchit = hitcontainer.getHit(j);
                     if (!tgchit || tgchit->getWeight() < 0.01) continue;
                     const Amg::Vector3D& tgcPos = tgchit->getPosition();
                     const double tgc_rz_ratio = tgcPos.perp() / tgcPos.z();
@@ -1082,7 +1082,7 @@ namespace Muon {
                 ATH_MSG_DEBUG("CSC weight: " << weight);
             }
 
-            MuonHoughHit* hit = new MuonHoughHit(globalpos, channel_type, MuonHough::CSC, 1., weight,
+            std::shared_ptr<MuonHoughHit> hit = std::make_shared<MuonHoughHit>(globalpos, channel_type, MuonHough::CSC, 1., weight,
                                                  prd);  // getPrd
             hitcontainer.addHit(hit);
             ATH_MSG_DEBUG(m_printer->print(*prd) << " weight " << weight);

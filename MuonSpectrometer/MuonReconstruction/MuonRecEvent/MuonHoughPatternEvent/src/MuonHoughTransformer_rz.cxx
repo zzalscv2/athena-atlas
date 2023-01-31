@@ -16,7 +16,7 @@ MuonHoughTransformer_rz::MuonHoughTransformer_rz(int nbins, int nbins_angle, dou
     m_add_weight_angle = false;
 }
 
-void MuonHoughTransformer_rz::fillHit(MuonHoughHit* hit, double weight) {
+void MuonHoughTransformer_rz::fillHit(const std::shared_ptr<MuonHoughHit>& hit, double weight) {
     const double hitz = hit->getHitz();
 
     if (m_ip_setting)  // niels and peter alg, butterfly to be added, and to be looked into the method
@@ -30,7 +30,7 @@ void MuonHoughTransformer_rz::fillHit(MuonHoughHit* hit, double weight) {
         for (double rz0 = histo->getXmin() + m_stepsize / 2.; rz0 < histo->getXmax(); rz0 += m_stepsize) {
             if (std::abs(rz0) > radius) continue;
 
-            double heigth = sqrt(radius * radius - rz0 * rz0);
+            double heigth = std::sqrt(radius * radius - rz0 * rz0);
             double theta = std::atan2(perp, hitz) + std::atan2(rz0, heigth);
             double theta_in_grad = (theta / M_PI) * 180.;
 
@@ -112,12 +112,12 @@ double MuonHoughTransformer_rz::calculateAngle(double hitx, double hity, double 
     return theta;
 }
 
-MuonHoughPattern* MuonHoughTransformer_rz::hookAssociateHitsToMaximum(const MuonHoughHitContainer* event,
+std::unique_ptr<MuonHoughPattern> MuonHoughTransformer_rz::hookAssociateHitsToMaximum(const MuonHoughHitContainer* event,
                                                                       std::pair<double, double> coordsmaximum, double maximum_residu_mm,
                                                                       double maximum_residu_angle, int maxsector, bool /*which_segment*/,
                                                                       int printlevel) const {
     MsgStream log(Athena::getMessageSvc(), "MuonHoughTransformer_rz::hookAssociateHitsToMaximum");
-    MuonHoughPattern* houghpattern = new MuonHoughPattern(MuonHough::hough_rz);
+    std::unique_ptr<MuonHoughPattern> houghpattern = std::make_unique<MuonHoughPattern>(MuonHough::hough_rz);
 
     double theta = 0., residu_distance = 0., maximum_residu = 0.;
     double eradius = 0., etheta = 0., sin_theta = 0., cos_theta = 0., sin_phi = 0., cos_phi = 0., phi = 0., ephi = 0.;
@@ -144,7 +144,7 @@ MuonHoughPattern* MuonHoughTransformer_rz::hookAssociateHitsToMaximum(const Muon
         // select which hits could be in maximum:
         if (sectorhit == maxsector || sectorhit == maxsecmin || sectorhit == maxsecmax) {
             double hitz = event->getHitz(i);
-            double radius = std::sqrt(hitx * hitx + hity * hity);
+            double radius = std::hypot(hitx, hity);
 
             dotprod = radius * std::sin(coordsmaximumsecondinrad) + hitz * std::cos(coordsmaximumsecondinrad);
 
@@ -153,12 +153,12 @@ MuonHoughPattern* MuonHoughTransformer_rz::hookAssociateHitsToMaximum(const Muon
 
                 // Use this code for rz scan and theta
                 //
-                double radius3 = sqrt(hitx * hitx + hity * hity + hitz * hitz);
+                double radius3 = std::hypot(hitx, hity, hitz);
                 double heigth = 0.;
                 if (std::abs(rz0) < radius3) {
-                    heigth = sqrt(radius3 * radius3 - rz0 * rz0);
+                    heigth = std::sqrt(radius3 * radius3 - rz0 * rz0);
                 } else {
-                    heigth = sqrt(rz0 * rz0 - radius3 * radius3);
+                    heigth = std::sqrt(rz0 * rz0 - radius3 * radius3);
                 }
 
                 theta = std::atan2(radius, hitz) + std::atan2(rz0, heigth);
@@ -208,7 +208,7 @@ MuonHoughPattern* MuonHoughTransformer_rz::hookAssociateHitsToMaximum(const Muon
                     if (printlevel >= 4 || log.level() <= MSG::VERBOSE) {
                         log << MSG::VERBOSE << "MuonHoughTransformer_rz::calculateAngle: " << theta << " calculateradius: " << rz0hit
                             << endmsg;
-                        double radiush = sqrt(event->getHitx(i) * event->getHitx(i) + event->getHity(i) * event->getHity(i));
+                        double radiush = std::sqrt(event->getHitx(i) * event->getHitx(i) + event->getHity(i) * event->getHity(i));
                         log << MSG::VERBOSE << " R Z hit added to hough pattern theta hit " << atan2(radiush, event->getHitz(i))
                             << " theta all " << coordsmaximumsecondinrad << endmsg;
                     }

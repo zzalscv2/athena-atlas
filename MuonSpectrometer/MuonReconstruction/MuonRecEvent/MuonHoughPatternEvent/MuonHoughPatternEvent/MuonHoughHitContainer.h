@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONHOUGHPATTERNEVENT_MUONHOUGHHITCONTAINER_H
 #define MUONHOUGHPATTERNEVENT_MUONHOUGHHITCONTAINER_H
 
 #include "MuonHoughPatternEvent/MuonHoughHit.h"
+#include <memory>
 
 namespace Trk {
     class PrepRawData;
@@ -17,51 +18,51 @@ class MuonHoughHitContainer {
 
 public:
     /** constructor, flag for deleting hits at destructor */
-    MuonHoughHitContainer(bool ownhits = true);
+    MuonHoughHitContainer() = default;
 
     /** destructor */
-    ~MuonHoughHitContainer();
+    ~MuonHoughHitContainer() = default;
 
     /** returns Hit at position hitno */
-    MuonHoughHit* getHit(int hitno) const;
+    std::shared_ptr<MuonHoughHit> getHit(int hitno) const;
     /** returns hit vector */
-    std::vector<MuonHoughHit*> getHits() const;
+    const std::vector<std::shared_ptr<MuonHoughHit>>& getHits() const;
 
     /** add hit to container */
-    void addHit(MuonHoughHit* hit);
+    void addHit(std::shared_ptr<MuonHoughHit> hit);
 
     /** remove hit from container */
-    void removeHit(int hitno);
+    void removeHit(unsigned int hitno);
 
     /** returns hitid of hit hitno */
-    int getHitId(int hitno) const;
+    int getHitId(unsigned int hitno) const;
     /** returns x position of hit hitno*/
-    double getHitx(int hitno) const;
+    double getHitx(unsigned int hitno) const;
     /** returns y position of hit hitno*/
-    double getHity(int hitno) const;
+    double getHity(unsigned int hitno) const;
     /** returns z position of hit hitno*/
-    double getHitz(int hitno) const;
+    double getHitz(unsigned int hitno) const;
 
     /** returns radius of hit hitno*/
-    double getRadius(int hitno) const;
+    double getRadius(unsigned int hitno) const;
     /** returns theta of hit hitno*/
-    double getTheta(int hitno) const;
+    double getTheta(unsigned int hitno) const;
     /** returns phi of hit hitno*/
-    double getPhi(int hitno) const;
+    double getPhi(unsigned int hitno) const;
     /** returns weight of hit hitno*/
-    double getWeight(int hitno) const;
+    double getWeight(unsigned int hitno) const;
     /** returns the orignal weight of hit hitno*/
-    double getOrigWeight(int hitno) const;
+    double getOrigWeight(unsigned int hitno) const;
 
     /** returns if hit hitno measures phi*/
-    bool getMeasuresPhi(int hitno) const;
+    bool getMeasuresPhi(unsigned int hitno) const;
     /** returns preprawdata pointer of hit hitno*/
-    const Trk::PrepRawData* getPrd(int hitno) const;
+    const Trk::PrepRawData* getPrd(unsigned int hitno) const;
 
     /** returns detectortechnology in string of hit hitno*/
-    std::string getWhichDetector(int hitno) const;
+    std::string getWhichDetector(unsigned int hitno) const;
     /** returns detectortechnology of hit hitno*/
-    MuonHough::DetectorTechnology getDetectorId(int hitno) const;
+    MuonHough::DetectorTechnology getDetectorId(unsigned int hitno) const;
     /** returns size of hitcontainer */
     unsigned int size() const;
     /** returns if hitcontainer is empty */
@@ -82,31 +83,30 @@ public:
 
 protected:
     /** vector of hits in container */
-    std::vector<MuonHoughHit*> m_hit;
+    std::vector<std::shared_ptr<MuonHoughHit>> m_hit;
 
-    /** delete hits in destructor and create hits when added */
-    const bool m_ownhits;
+  
 };
 
-inline MuonHoughHit* MuonHoughHitContainer::getHit(int hitno) const { return m_hit[hitno]; }
-inline std::vector<MuonHoughHit*> MuonHoughHitContainer::getHits() const { return m_hit; }
-inline int MuonHoughHitContainer::getHitId(int hitno) const { return m_hit[hitno]->getId(); }
-inline double MuonHoughHitContainer::getHitx(int hitno) const { return m_hit[hitno]->getHitx(); }
-inline double MuonHoughHitContainer::getHity(int hitno) const { return m_hit[hitno]->getHity(); }
-inline double MuonHoughHitContainer::getHitz(int hitno) const { return m_hit[hitno]->getHitz(); }
-inline double MuonHoughHitContainer::getRadius(int hitno) const { return m_hit[hitno]->getRadius(); }
+inline std::shared_ptr<MuonHoughHit> MuonHoughHitContainer::getHit(int hitno) const { return m_hit.at(hitno); }
+inline const std::vector<std::shared_ptr<MuonHoughHit>>& MuonHoughHitContainer::getHits() const { return m_hit; }
+inline int MuonHoughHitContainer::getHitId(unsigned int hitno) const { return m_hit[hitno]->getId(); }
+inline double MuonHoughHitContainer::getHitx(unsigned int hitno) const { return m_hit[hitno]->getHitx(); }
+inline double MuonHoughHitContainer::getHity(unsigned int hitno) const { return m_hit[hitno]->getHity(); }
+inline double MuonHoughHitContainer::getHitz(unsigned int hitno) const { return m_hit[hitno]->getHitz(); }
+inline double MuonHoughHitContainer::getRadius(unsigned int hitno) const { return m_hit[hitno]->getRadius(); }
 
-inline double MuonHoughHitContainer::getTheta(int hitno) const { return m_hit[hitno]->getTheta(); }
-inline double MuonHoughHitContainer::getPhi(int hitno) const { return m_hit[hitno]->getPhi(); }
-inline double MuonHoughHitContainer::getWeight(int hitno) const { return m_hit[hitno]->getWeight(); }
-inline double MuonHoughHitContainer::getOrigWeight(int hitno) const { return m_hit[hitno]->getOrigWeight(); }
+inline double MuonHoughHitContainer::getTheta(unsigned int hitno) const { return m_hit[hitno]->getTheta(); }
+inline double MuonHoughHitContainer::getPhi(unsigned int hitno) const { return m_hit[hitno]->getPhi(); }
+inline double MuonHoughHitContainer::getWeight(unsigned int hitno) const { return m_hit[hitno]->getWeight(); }
+inline double MuonHoughHitContainer::getOrigWeight(unsigned int hitno) const { return m_hit[hitno]->getOrigWeight(); }
 
 inline unsigned int MuonHoughHitContainer::size() const { return m_hit.size(); }
 inline bool MuonHoughHitContainer::empty() const { return m_hit.empty(); }
 inline void MuonHoughHitContainer::reserve(int size) { m_hit.reserve(size); }
-inline MuonHough::DetectorTechnology MuonHoughHitContainer::getDetectorId(int hitno) const { return m_hit[hitno]->getDetectorId(); }
-inline std::string MuonHoughHitContainer::getWhichDetector(int hitno) const { return m_hit[hitno]->getWhichDetector(); }
-inline bool MuonHoughHitContainer::getMeasuresPhi(int hitno) const { return m_hit[hitno]->getMeasuresPhi(); }
-inline const Trk::PrepRawData* MuonHoughHitContainer::getPrd(int hitno) const { return m_hit[hitno]->getPrd(); }
+inline MuonHough::DetectorTechnology MuonHoughHitContainer::getDetectorId(unsigned int hitno) const { return m_hit[hitno]->getDetectorId(); }
+inline std::string MuonHoughHitContainer::getWhichDetector(unsigned int hitno) const { return m_hit[hitno]->getWhichDetector(); }
+inline bool MuonHoughHitContainer::getMeasuresPhi(unsigned int hitno) const { return m_hit[hitno]->getMeasuresPhi(); }
+inline const Trk::PrepRawData* MuonHoughHitContainer::getPrd(unsigned int hitno) const { return m_hit[hitno]->getPrd(); }
 
 #endif  // MUONHOUGHPATTERNEVENT_MUONHOUGHHITCONTAINER_H

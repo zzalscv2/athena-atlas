@@ -32,18 +32,16 @@ MuonHoughTransformer::MuonHoughTransformer(int nbins, int nbins_angle, double de
     m_add_weight_radius = 1.;
     m_histos.reserve(m_number_of_sectors);
     for (int i = 0; i < m_number_of_sectors; i++) {
-        MuonHoughHisto2D* histo = new MuonHoughHisto2D(nbins, -detectorsize, detectorsize, nbins_angle, 0., detectorsize_angle);
+        std::unique_ptr<MuonHoughHisto2D> histo = std::make_unique<MuonHoughHisto2D>(nbins, -detectorsize, detectorsize, nbins_angle, 0., detectorsize_angle);
         histo->setThreshold(m_threshold_histo);
-        m_histos.push_back(histo);
+        m_histos.push_back(std::move(histo));
     }
 
     m_binwidthx = m_histos.getHisto(0)->getBinWidthX();
     m_binwidthy = m_histos.getHisto(0)->getBinWidthY();
 }
 
-MuonHoughTransformer::~MuonHoughTransformer() {
-    for (int i = 0; i < m_number_of_sectors; i++) { delete m_histos.getHisto(i); }
-}
+MuonHoughTransformer::~MuonHoughTransformer() = default;
 
 void MuonHoughTransformer::fill(const MuonHoughHitContainer* event, bool subtract) {
     m_eventsize = event->size();
@@ -53,7 +51,7 @@ void MuonHoughTransformer::fill(const MuonHoughHitContainer* event, bool subtrac
         for (int i = 0; i < m_histos.size(); ++i) m_histos.getHisto(i)->setMaximumIsValid(false);
 
         for (unsigned int hitid = 0; hitid < m_eventsize; hitid++) {
-            MuonHoughHit* hit = event->getHit(hitid);
+            std::shared_ptr<MuonHoughHit> hit = event->getHit(hitid);
             if (hit->getAssociated()) fillHit(hit, -1. * hit->getWeight());
         }
     } else {
@@ -61,11 +59,11 @@ void MuonHoughTransformer::fill(const MuonHoughHitContainer* event, bool subtrac
     }
 }
 
-MuonHoughPattern* MuonHoughTransformer::associateHitsToMaximum(const MuonHoughHitContainer* event, double maximum_residu_mm,
+std::unique_ptr<MuonHoughPattern> MuonHoughTransformer::associateHitsToMaximum(const MuonHoughHitContainer* event, double maximum_residu_mm,
                                                                double maximum_residu_grad, int maximum_number, bool which_segment,
                                                                int printlevel) const {
     MsgStream log(Athena::getMessageSvc(), "MuonHoughTransformer::associateHitsToMaximum");
-    MuonHoughPattern* houghpattern;
+    std::unique_ptr<MuonHoughPattern> houghpattern{};
     std::pair<double, double> coordsmaximum;
     std::pair<int, int> maximumbin;
     maximumbin = m_histos.getMaximumBinnumber(maximum_number, which_segment, printlevel);
@@ -102,15 +100,13 @@ MuonHoughPattern* MuonHoughTransformer::associateHitsToMaximum(const MuonHoughHi
     return houghpattern;
 }
 
-MuonHoughPattern* MuonHoughTransformer::associateHitsToCoords(const MuonHoughHitContainer* event, std::pair<double, double> coordsmaximum,
+std::unique_ptr<MuonHoughPattern> MuonHoughTransformer::associateHitsToCoords(const MuonHoughHitContainer* event, std::pair<double, double> coordsmaximum,
                                                               double maximum_residu_mm, double maximum_residu_angle, int sector,
                                                               bool which_segment, int printlevel) const {
-    MuonHoughPattern* houghpattern =
-        hookAssociateHitsToMaximum(event, coordsmaximum, maximum_residu_mm, maximum_residu_angle, sector, which_segment, printlevel);
-    return houghpattern;
+    return hookAssociateHitsToMaximum(event, coordsmaximum, maximum_residu_mm, maximum_residu_angle, sector, which_segment, printlevel);   
 }
 
-MuonHoughPattern* MuonHoughTransformer::associateHitsToBinnumber(const MuonHoughHitContainer* event, int binnumber,
+std::unique_ptr<MuonHoughPattern> MuonHoughTransformer::associateHitsToBinnumber(const MuonHoughHitContainer* event, int binnumber,
                                                                  double maximum_residu_mm, double maximum_residu_angle, int sector,
                                                                  bool which_segment, int printlevel) const {
     MsgStream log(Athena::getMessageSvc(), "MuonHoughTransformer::associateHitsToBinnumber");
@@ -120,8 +116,8 @@ MuonHoughPattern* MuonHoughTransformer::associateHitsToBinnumber(const MuonHough
     }
 
     std::pair<double, double> coordsmaximum = m_histos.getHisto(sector)->binnumberToCoords(binnumber);
-    MuonHoughPattern* houghpattern =
-        hookAssociateHitsToMaximum(event, coordsmaximum, maximum_residu_mm, maximum_residu_angle, sector, which_segment, printlevel);
+    std::unique_ptr<MuonHoughPattern> houghpattern = hookAssociateHitsToMaximum(event, coordsmaximum, 
+                                                     maximum_residu_mm, maximum_residu_angle, sector, which_segment, printlevel);
     houghpattern->setMaximumHistogram(m_histos.getHisto(sector)->getBinContent(binnumber));
     return houghpattern;
 }

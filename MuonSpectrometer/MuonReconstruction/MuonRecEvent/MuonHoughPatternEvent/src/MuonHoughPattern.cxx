@@ -8,18 +8,13 @@
 #include "CxxUtils/sincos.h"
 #include "GaudiKernel/MsgStream.h"
 
-MuonHoughPattern::MuonHoughPattern(int id_number, bool ownhits) : MuonHoughHitContainer(ownhits), m_id_number(id_number) {}
+MuonHoughPattern::MuonHoughPattern(int id_number) : MuonHoughHitContainer(), m_id_number(id_number) {}
 
-void MuonHoughPattern::resetTracksegment() {
-    for (unsigned int i = 0; i < m_hit.size(); i++) {
-        delete m_hit[i];
-        m_hit[i] = nullptr;
-    }
-
+void MuonHoughPattern::resetTracksegment() {   
     m_hit.clear();
 }
 
-bool MuonHoughPattern::hitInHoughPattern(MuonHoughHit* hit) const  // adviced not to use, slow function
+bool MuonHoughPattern::hitInHoughPattern(const std::shared_ptr<MuonHoughHit>& hit) const  // adviced not to use, slow function
 {
     for (unsigned int i = 0; i < size(); i++) {
         if (m_hit[i]->getId() == hit->getId()) { return true; }

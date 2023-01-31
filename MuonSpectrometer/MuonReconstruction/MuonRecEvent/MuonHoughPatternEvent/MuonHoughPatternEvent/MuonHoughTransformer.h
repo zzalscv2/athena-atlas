@@ -28,21 +28,21 @@ public:
     /** fill histograms with hitcontainer */
     virtual void fill(const MuonHoughHitContainer* event, bool subtract = false);
     /** fill histograms with hit */
-    virtual void fillHit(MuonHoughHit* hit, double weight = 1.) = 0;
+    virtual void fillHit(const std::shared_ptr<MuonHoughHit>& hit, double weight = 1.) = 0;
     /** fill histogram with certain coordinate */
     virtual int fillHisto(double coord1, double coord2, double weight = 1., int sector = 0) = 0;
 
     /** associate hits to certain maximum number of histograms */
-    MuonHoughPattern* associateHitsToMaximum(const MuonHoughHitContainer* event, double residu_mm, double residu_grad, int maximum_number,
+    std::unique_ptr<MuonHoughPattern> associateHitsToMaximum(const MuonHoughHitContainer* event, double residu_mm, double residu_grad, int maximum_number,
                                              bool which_segment = 0, int printlevel = 0) const;
 
     /** associate hits to certain coordinates and sector */
-    MuonHoughPattern* associateHitsToCoords(const MuonHoughHitContainer* event, std::pair<double, double> coords, double residu_mm,
+    std::unique_ptr<MuonHoughPattern> associateHitsToCoords(const MuonHoughHitContainer* event, std::pair<double, double> coords, double residu_mm,
                                             double residu_angle, int sector = 0, bool which_segment = 0,
                                             int printlevel = 0) const;  // residu_mm for id=0,1,2 ; residu_angle for id=3,4
 
     /** associate hits to certain binnumber and sector */
-    MuonHoughPattern* associateHitsToBinnumber(const MuonHoughHitContainer* event, int binnumber, double maximum_residu_mm,
+    std::unique_ptr<MuonHoughPattern> associateHitsToBinnumber(const MuonHoughHitContainer* event, int binnumber, double maximum_residu_mm,
                                                double maximum_residu_angle, int sector = 0, bool which_segment = 0,
                                                int printlevel = 0) const;
 
@@ -66,7 +66,7 @@ protected:
                          int number_of_sectors = 1);
 
     /** pure virtual method for derived class implementation of associateHitsToMaximum method */
-    virtual MuonHoughPattern* hookAssociateHitsToMaximum(const MuonHoughHitContainer* event, std::pair<double, double> coordsmaximum,
+    virtual std::unique_ptr<MuonHoughPattern> hookAssociateHitsToMaximum(const MuonHoughHitContainer* event, std::pair<double, double> coordsmaximum,
                                                          double residu_mm, double residu_angle, int sector = 0, bool which_segment = 0,
                                                          int printlevel = 0) const = 0;
 
@@ -74,7 +74,7 @@ protected:
     std::pair<double, double> getEndPointsFillLoop(double radius, double stepsize, int sector = 0) const;
 
     /** returns sector for coords */
-    virtual int sector(MuonHoughHit* hit) const = 0;
+    virtual int sector(const std::shared_ptr<MuonHoughHit>& hit) const = 0;
 
     /** returns sinus from lookup table */
     double sinus(double angle) const;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCombinePatternTools/MuonCombinePatternTool.h"
@@ -1746,8 +1746,8 @@ Muon::MuonPrdPattern* MuonCombinePatternTool::cleanPhiPattern(const Muon::MuonPr
     }
 
     // need internal class to be able to remove hits fast
-    std::unique_ptr<MuonHoughPattern> newpattern = std::make_unique< MuonHoughPattern>(MuonHough::hough_xy, true);  // patterns owns hits
-    for (unsigned int phihitnr = 0; phihitnr < size; phihitnr++) { newpattern->addHit(new MuonHoughHit(phipattern->prd(phihitnr))); }
+    std::unique_ptr<MuonHoughPattern> newpattern = std::make_unique< MuonHoughPattern>(MuonHough::hough_xy);
+    for (unsigned int phihitnr = 0; phihitnr < size; phihitnr++) { newpattern->addHit(std::make_shared<MuonHoughHit>(phipattern->prd(phihitnr))); }
     newpattern->updateParametersRPhi(m_use_cosmics);
     double phi = newpattern->getEPhi();
     double r0 = newpattern->getERPhi();
