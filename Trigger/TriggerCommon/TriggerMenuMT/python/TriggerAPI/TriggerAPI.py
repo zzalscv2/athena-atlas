@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __author__  = 'Javier Montejo'
 __version__="$Revision: 2.0 $"
@@ -14,6 +14,7 @@ class TriggerAPI:
     log = logging.getLogger(__name__)
     dbQueries = {}
     customGRL = None
+    flags     = None
     release   = None
     cacheread = False
 
@@ -25,6 +26,11 @@ class TriggerAPI:
         todel = [(p,grl) for p,grl in cls.dbQueries if p  & TriggerPeriod.future]
         for key in todel:
             del cls.dbQueries[key]
+
+    @classmethod
+    def setConfigFlags(cls, flags):
+        """Set ConfigFlags (only required for "future" periods)"""
+        cls.flags = flags
 
     @classmethod
     def setRelease(cls, release):
@@ -140,7 +146,7 @@ class TriggerAPI:
         if not period & TriggerPeriod.future: cls.init()
         if (period,cls.customGRL) not in cls.dbQueries:
             if TriggerPeriod.isRunNumber(period) or (isinstance(period,TriggerPeriod) and period.isBasePeriod()):
-                cls.dbQueries[(period,cls.customGRL)] = TriggerInfo(period,cls.customGRL,cls.release)
+                cls.dbQueries[(period,cls.customGRL)] = TriggerInfo(period,cls.customGRL,cls.release,cls.flags)
             else:
                 basePeriods = [tp for tp in TriggerPeriod.basePeriods() if tp & period]
                 for bp in basePeriods:

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __author__  = 'Javier Montejo'
 __version__="$Revision: 2.0 $"
@@ -291,16 +291,15 @@ def getHLTmap_fromDB(period, customGRL):
 
     return hltMap, lbCount
 
-def getHLTmap_fromTM(period, release):
+def getHLTmap_fromTM(flags, period, release):
     ''' Return a map of HLT chain: (L1 seed, active LBs, is-rerun) for a given period
         Only "Future" periods make sense here
         The format is the same as for TriggerDBAccess for compatibility but rerun is always false
     '''
 
     from TriggerMenuMT.HLT.Config.GenerateMenuMT import GenerateMenuMT
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
     menu = GenerateMenuMT()
-    menu.getChainsFromMenu(ConfigFlags)
+    menu.getChainsFromMenu(flags)
 
     if not period & TriggerPeriod.future: return {}, 0
     hltMap = {}
@@ -322,7 +321,7 @@ def getMenuPathFromRelease(release):
     return "/cvmfs/atlas.cern.ch/repo/sw/software/21.1/AthenaP1/21.1.50/InstallArea/x86_64-slc6-gcc62-opt/python/TriggerMenu/menu"
 
 
-def getHLTlist(period, customGRL, release):
+def getHLTlist(period, customGRL, release, flags=None):
     ''' For a given period it returns: [HLT chain, L1 seed, average livefraction, active LB, is-rerun], total LB
         The average livefraction is an approximation weighting the PS by number of lumiblocks.
         *** Don't use this number in analysis!!! ***
@@ -331,7 +330,9 @@ def getHLTlist(period, customGRL, release):
     if not period & TriggerPeriod.future or TriggerPeriod.isRunNumber(period): 
         hltmap, totalLB = getHLTmap_fromDB(period, customGRL)
     else:
-        hltmap, totalLB = getHLTmap_fromTM(period, release)
+        if flags is None:
+            raise RuntimeError('ConfigFlags need to be provided via TriggerAPI.setConfigFlags for "future" periods.')
+        hltmap, totalLB = getHLTmap_fromTM(flags, period, release)
     
     hltlist = cleanHLTmap(hltmap, totalLB)
     return (hltlist, totalLB)
