@@ -332,7 +332,7 @@ Trk::MultiComponentStateCombiner::combineCovWithWeight(
 [[gnu::flatten]]
 #endif
 Trk::MultiComponentState
-Trk::MultiComponentStateCombiner::combine(
+Trk::MultiComponentStateCombiner::combineWithSmoother(
   const Trk::MultiComponentState& forwardsMultiState,
   const Trk::MultiComponentState& smootherMultiState,
   unsigned int maximumNumberOfComponents)

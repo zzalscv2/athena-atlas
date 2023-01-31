@@ -1007,7 +1007,7 @@ Trk::GaussianSumFitter::smootherFit(
       const Trk::MultiComponentState& forwardsMultiState =
         (*trackStateOnSurface)->components();
       Trk::MultiComponentState combinedfitterState =
-        Trk::MultiComponentStateCombiner::combine(
+        Trk::MultiComponentStateCombiner::combineWithSmoother(
           forwardsMultiState, updatedState, m_maximumNumberOfComponents);
       if (combinedfitterState.empty()) {
         ATH_MSG_WARNING("Could not combine state from forward fit with "
