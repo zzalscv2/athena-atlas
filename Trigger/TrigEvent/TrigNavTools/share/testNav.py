@@ -1,12 +1,11 @@
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-from AthenaConfiguration import AllConfigFlags, TestDefaults, MainServicesConfig, ComponentFactory
-from AthenaCommon import Configurable, Constants, Logging
-from OutputStreamAthenaPool import OutputStreamConfig
+from AthenaConfiguration import AllConfigFlags, MainServicesConfig, ComponentFactory
 
-flags = AllConfigFlags.ConfigFlags
+flags = AllConfigFlags.initConfigFlags()
 flags.Trigger.EDMVersion = 3 # when reading DOAD force new format
 
 flags.fillFromArgs()
+flags.lock()
 
 cfg= MainServicesConfig.MainServicesCfg(flags)
 

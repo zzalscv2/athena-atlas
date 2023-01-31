@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # Output file can be checked (and navigation graphs converted using):
 #  
@@ -12,32 +12,29 @@ if __name__=='__main__':
     import sys
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
-    ###test input file format: --filesInput='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q221/21.0/myAOD.pool.root'
+    flags.Input.Files=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data18_13TeV.00357772.physics_Main.recon.AOD.r13286/AOD.27654050._000557.pool.root.1"]
 
-    # Set the Athena configuration flags
-    #ConfigFlags.Input.Files=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q221/21.0/myAOD.pool.root"]
-    ConfigFlags.Input.Files=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data18_13TeV.00357772.physics_Main.recon.AOD.r13286/AOD.27654050._000557.pool.root.1"]
-
-    ConfigFlags.Output.AODFileName = "outAOD.pool.root"
-    ConfigFlags.Detector.GeometryLAr=True
-    ConfigFlags.Detector.GeometryTile=True
-    ConfigFlags.Exec.MaxEvents = 1000
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    flags.Output.AODFileName = "outAOD.pool.root"
+    flags.Detector.GeometryLAr=True
+    flags.Detector.GeometryTile=True
+    flags.Exec.MaxEvents = 1000
+    flags.fillFromArgs()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaConfiguration.ComponentFactory import CompFactory
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
 
     from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
-    cfg.merge(MetaDataSvcCfg(ConfigFlags))
+    cfg.merge(MetaDataSvcCfg(flags))
 
     confSvc = CompFactory.TrigConf.xAODConfigSvc("xAODConfigSvc")
     cfg.addService(confSvc)
@@ -62,7 +59,7 @@ if __name__=='__main__':
     outputType="AOD"
     toRecord = ["xAOD::TrigCompositeContainer#HLTNav_All", "xAOD::TrigCompositeAuxContainer#HLTNav_AllAux.",
                 "xAOD::TrigCompositeContainer#HLTNav_Summary", "xAOD::TrigCompositeAuxContainer#HLTNav_SummaryAux."]
-    outputCfg = OutputStreamCfg(ConfigFlags, outputType, ItemList=toRecord, disableEventTag=True)
+    outputCfg = OutputStreamCfg(flags, outputType, ItemList=toRecord, disableEventTag=True)
     streamAlg = outputCfg.getEventAlgo("OutputStream"+outputType)
     # need to expand possible options for the OutputStreamCfg to be able to pass also the metadata containers
     streamAlg.MetadataItemList += ["xAOD::TriggerMenuContainer#TriggerMenu", "xAOD::TriggerMenuAuxContainer#TriggerMenuAux."]
@@ -75,8 +72,8 @@ if __name__=='__main__':
     # input EDM needs calo det descrition for conversion (uff)
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     from TileGeoModel.TileGMConfig import TileGMCfg
-    cfg.merge(LArGMCfg(ConfigFlags))
-    cfg.merge(TileGMCfg(ConfigFlags))
+    cfg.merge(LArGMCfg(flags))
+    cfg.merge(TileGMCfg(flags))
 
     cfg.printConfig(withDetails=True, summariseProps=False) # set True for exhaustive info
     sc = cfg.run()
