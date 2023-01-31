@@ -4,13 +4,11 @@
 def EfexMonitoringConfig(inputFlags):
     '''Function to configure LVL1 Efex algorithm in the monitoring system.'''
 
-    import math
-
     # get the component factory - used for merging the algorithm results
     from AthenaConfiguration.ComponentFactory import CompFactory
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
-    
+
     # uncomment if you want to see all the flags
     #inputFlags.dump() # print all the configs
 
@@ -18,7 +16,7 @@ def EfexMonitoringConfig(inputFlags):
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags,'EfexMonitoringCfg')
 
-    # get any algorithms
+    # add algorithm to the helper
     EfexMonAlg = helper.addAlgorithm(CompFactory.EfexMonitorAlgorithm,'EfexMonAlg')
 
     # add any steering
@@ -28,6 +26,30 @@ def EfexMonitoringConfig(inputFlags):
     EfexMonAlg.HiPtCut = 15000.0
     EfexMonAlg.eFexEMTobKeyList = ['L1_eEMRoI', 'L1_eEMRoI_OfflineCopy', 'L1_eEMxRoI']
     EfexMonAlg.eFexTauTobKeyList = ['L1_eTauRoI', 'L1_eTauRoI_OfflineCopy', 'L1_eTauxRoI']
+
+    acc = helper.result()
+    result.merge(acc)
+    return result
+
+
+def EfexMonitoringHistConfig(inputFlags, eFexAlg):
+    """
+    The histogram binning depends on the algorithm settings, configure separately
+    """
+    import math
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    result = ComponentAccumulator()
+    
+    # uncomment if you want to see all the flags
+    #inputFlags.dump() # print all the configs
+
+    # make the athena monitoring helper again so we can add groups
+    from AthenaMonitoring import AthMonitorCfgHelper
+    helper = AthMonitorCfgHelper(inputFlags,'EfexMonitoringCfg')
+
+    # we don't add the algorithm again, use the supplied one
+    EfexMonAlg = eFexAlg 
+    baseGroupName = EfexMonAlg.PackageName
 
     # Some helpful variables for declaring the histograms
     mainDir = 'L1Calo'
@@ -164,6 +186,7 @@ def EfexMonitoringConfig(inputFlags):
 
             myGroup.defineHistogram('tauTOBthree_threshold;h_tauTOBthree_threshold', title='eFex '+tobStr+' Tau 3 taus threshold'+cut_title_addition,
                                     type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name+'/', xbins=4,xmin=0,xmax=4.0, xlabels=threshold_labels)
+
 
     acc = helper.result()
     result.merge(acc)

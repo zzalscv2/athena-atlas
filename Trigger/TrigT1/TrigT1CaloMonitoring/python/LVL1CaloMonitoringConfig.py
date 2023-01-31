@@ -67,7 +67,15 @@ def LVL1CaloMonitoringConfig(flags):
         # Phase 1 monitoring
         if flags.Trigger.enableL1CaloPhase1:
             from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringConfig
-            result.merge(EfexMonitoringConfig(flags))
+            EfexMonitorCfg = EfexMonitoringConfig(flags)
+            result.merge(EfexMonitorCfg)
+
+            #  Need to pass the algorithm to the histogram booking
+            EfexMonAlg = result.getEventAlgo('EfexMonAlg')  
+            from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringHistConfig
+            EfexMonitorHistCfg = EfexMonitoringHistConfig(flags,EfexMonAlg)
+            result.merge(EfexMonitorHistCfg)
+
 
     # algorithms for validation checks
     if validation:
@@ -75,7 +83,16 @@ def LVL1CaloMonitoringConfig(flags):
         result.merge(L1CaloLegacyEDMMonitoringConfig(flags))
         # Phase 1 systems
         from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringConfig
-        result.merge(EfexMonitoringConfig(flags))
+        EfexMonitorCfg = EfexMonitoringConfig(flags)
+        result.merge(EfexMonitorCfg)
+        # algorithm required for dynamic histogram booking
+        EfexMonAlg = result.getEventAlgo('EfexMonAlg')
+        EfexMonAlg.eFexEMTobKeyList = ['L1_eEMRoI', 'L1_eEMxRoI']
+        EfexMonAlg.eFexTauTobKeyList = ['L1_eTauRoI', 'L1_eTauxRoI'] 
+        from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringHistConfig
+        EfexMonitorHistCfg = EfexMonitoringHistConfig(flags,EfexMonAlg)
+        result.merge(EfexMonitorHistCfg)
+        #
         from TrigT1CaloMonitoring.GfexMonitorAlgorithm import GfexMonitoringConfig
         result.merge(GfexMonitoringConfig(flags))
         from TrigT1CaloMonitoring.JfexMonitorAlgorithm import JfexMonitoringConfig
