@@ -68,17 +68,23 @@ namespace CP
 
         // Loop over lrt electrons to remove those that do not pass ID.
         // Needed in case there are no prompt electrons passing ID
-        if (m_strategy == 0){
+        if (m_strategy == CP::IElectronLRTOverlapRemovalTool::defaultStrategy){
+            ATH_MSG_DEBUG("Implementing overlap removal strategy 0");
+            for (const xAOD::Electron *LRTElectron : LRTElectronCol)
+            {
+                if (!electronPassesID(LRTElectron,"DFCommonElectronsLHVeryLooseNoPix"))  ElectronsToRemove.insert(LRTElectron);
+            }
+        }
+        else if (m_strategy == CP::IElectronLRTOverlapRemovalTool::agnosticStrategy){ 
+            ATH_MSG_DEBUG("Implementing overlap removal strategy 1");
             for (const xAOD::Electron *LRTElectron : LRTElectronCol)
             {
                 if (!electronPassesID(LRTElectron,m_IDWorkingPoint))  ElectronsToRemove.insert(LRTElectron);
             }
         }
-        else if (m_strategy == 1){ 
-            for (const xAOD::Electron *LRTElectron : LRTElectronCol)
-            {
-                if (!electronPassesID(LRTElectron,"DFCommonElectronsLHVeryLooseNoPix"))  ElectronsToRemove.insert(LRTElectron);
-            }
+        else if (m_strategy == CP::IElectronLRTOverlapRemovalTool::passThrough){
+            ATH_MSG_DEBUG("Implementing overlap removal strategy 2");
+            ATH_MSG_DEBUG("Electrons with overlapping clusters will be kept");
         }
 
 
@@ -120,16 +126,16 @@ namespace CP
 
                 if (prompt_elEta0 == lrt_elEta0 && prompt_elPhi0 == lrt_elPhi0) 
                 {
-                     if (m_strategy == 0){
+                    if (m_strategy == CP::IElectronLRTOverlapRemovalTool::defaultStrategy){
                         ATH_MSG_DEBUG("Found a Calo cluster shared by LRT electron and prompt electron !");
-
+                        ATH_MSG_DEBUG("Removing LRT Electron");
                         // Save pointer to LRT electrons failing overlap
                         // This removes the LRT electron in favor of prompt
                         ElectronsToRemove.insert(LRTElectron);
                     }
-                    else if (m_strategy == 1){ //use tighter electron, if both equally tight use std collection
+                    else if (m_strategy == CP::IElectronLRTOverlapRemovalTool::agnosticStrategy){ //use tighter electron, if both equally tight use std collection
                     
-                        ATH_MSG_INFO("Implementing overlap removal strategy 1");
+                        ATH_MSG_DEBUG("Removing Electron with looser WP");
                         if (electronPassesID(promptElectron,"DFCommonElectronsLHTightNoPix")){
                             ElectronsToRemove.insert(LRTElectron);
                         }

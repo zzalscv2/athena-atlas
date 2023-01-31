@@ -36,11 +36,20 @@ namespace CP
 
     public:
         /// Allow to specify a number of supported overlap removal strategies.
-        /// So far, there is only a single one available.
+        // default strategy: for Electrons passing VeryLooseNoPix ID WP, discard
+        //                   those from the LRT collection that share a cluster
+        //                   with the standard collection 
+        // agnostic strategy: for Electrons passing VeryLooseNoPix ID WP, discard
+        //                   the electron with the looser ID in the case of a shared cluster.
+        //                   in the case of a 'tie', choose the standard electron
+        // removeFailing strategy: Remove electrons failing ID, but don't do overlap removal
+        //                   on electrons that share clusters. NOT FOR ANALYSIS, for validation
+        //                   purposes only                   
         typedef enum
         {
-            defaultStrategy = 0
-            agnosticStrategy = 1
+            defaultStrategy = 0,
+            agnosticStrategy = 1,
+            passThrough = 2
         } overlapStrategy;
 
         /// Check the overlap between the prompt and LRT electron collections.
