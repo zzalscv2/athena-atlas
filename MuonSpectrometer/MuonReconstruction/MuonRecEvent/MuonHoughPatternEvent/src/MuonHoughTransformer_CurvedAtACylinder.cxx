@@ -18,8 +18,8 @@ MuonHoughTransformer_CurvedAtACylinder::MuonHoughTransformer_CurvedAtACylinder(i
 
     // fill array with scanned curvatures
 
-    m_invcurvature = new double[m_nbins / 2];
-    m_weightcurvature = new double[m_nbins / 2];
+    m_invcurvature.reset(new double[m_nbins / 2]);
+    m_weightcurvature.reset(new double[m_nbins / 2]);
 
     for (int i = 0; i < m_nbins / 2; i++) {
         double x0 = -i + 24;                      // 24 ... -55
@@ -37,12 +37,8 @@ MuonHoughTransformer_CurvedAtACylinder::MuonHoughTransformer_CurvedAtACylinder(i
     }
 }
 
-MuonHoughTransformer_CurvedAtACylinder::~MuonHoughTransformer_CurvedAtACylinder() {
-    delete[] m_invcurvature;
-    delete[] m_weightcurvature;
-}
 
-void MuonHoughTransformer_CurvedAtACylinder::fillHit(MuonHoughHit* hit, double weight) {
+void MuonHoughTransformer_CurvedAtACylinder::fillHit(const std::shared_ptr<MuonHoughHit>& hit, double weight) {
     // MuonHough transform studies
 
     // cylinder for extrapolation planes in muon system endcap/barrel transition
@@ -58,7 +54,7 @@ void MuonHoughTransformer_CurvedAtACylinder::fillHit(MuonHoughHit* hit, double w
 
         // positive curvature (for positive i):
         double thetas[2];
-        MuonHoughMathUtils::thetasForCurvedHit(ratio, hit, thetas[0], thetas[1]);
+        MuonHoughMathUtils::thetasForCurvedHit(ratio, hit.get(), thetas[0], thetas[1]);
 
         const double weight_curvature =
             weight * 1. /
@@ -134,13 +130,13 @@ int MuonHoughTransformer_CurvedAtACylinder::fillHisto(double xbin, double theta_
     return filled_binnumber;
 }
 
-MuonHoughPattern* MuonHoughTransformer_CurvedAtACylinder::hookAssociateHitsToMaximum(const MuonHoughHitContainer* event,
+std::unique_ptr<MuonHoughPattern> MuonHoughTransformer_CurvedAtACylinder::hookAssociateHitsToMaximum(const MuonHoughHitContainer* event,
                                                                                      std::pair<double, double> coordsmaximum,
                                                                                      double max_residu_mm, double /*max_residu_grad */,
                                                                                      int maxsector, bool /*which_segment */,
                                                                                      int printlevel) const {
     MsgStream log(Athena::getMessageSvc(), "MuonHoughTransformer_CurvedAtACylinder::hookAssociateHitsToMaximum");
-    MuonHoughPattern* houghpattern = new MuonHoughPattern(MuonHough::hough_curved_at_a_cylinder);
+    std::unique_ptr<MuonHoughPattern> houghpattern = std::make_unique<MuonHoughPattern>(MuonHough::hough_curved_at_a_cylinder);
 
     // double ecurvature=0. // todo: recalculate estimated curvature for hits associated to maximum
     double etheta = 0., sin_phi = 0., cos_phi = 0., sin_theta = 0., cos_theta = 0., ephi = 0.;
@@ -182,7 +178,7 @@ MuonHoughPattern* MuonHoughTransformer_CurvedAtACylinder::hookAssociateHitsToMax
     }
 
     for (unsigned int i = 0; i < event->size(); i++) {
-        MuonHoughHit* hit = event->getHit(i);
+        std::shared_ptr<MuonHoughHit> hit = event->getHit(i);
         int sectorhit = sector(hit);
         if (sectorhit == sector_1 || sectorhit == sector_2 || sectorhit == sector_3) {
             double z0 = 0.;  // offset from IP on z-axis
@@ -210,7 +206,7 @@ MuonHoughPattern* MuonHoughTransformer_CurvedAtACylinder::hookAssociateHitsToMax
                 sin_phi += scphi.sn;
                 cos_phi += scphi.cs;
 
-                const double theta = MuonHoughMathUtils::thetaForCurvedHit(invcurvature, event->getHit(i));
+                const double theta = MuonHoughMathUtils::thetaForCurvedHit(invcurvature, event->getHit(i).get());
                 if (theta > 0 && theta < M_PI) {
                     if (printlevel >= 4 || log.level() <= MSG::VERBOSE) {
                         log << MSG::VERBOSE

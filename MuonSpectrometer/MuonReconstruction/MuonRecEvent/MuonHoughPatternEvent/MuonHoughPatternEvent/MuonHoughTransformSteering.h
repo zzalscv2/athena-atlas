@@ -32,13 +32,13 @@ public:
     MuonHoughPatternCollection constructHoughPatterns(const MuonHoughHitContainer* event, double residu_mm, double residu_grad,
                                                       int max_patterns = 1, bool which_segment = 0, int printlevel = 0) const;
     /** construct hough pattern on a certain maxima number of histogram */
-    MuonHoughPattern* constructHoughPattern(const MuonHoughHitContainer* event, double residu_mm, double residu_grad,
+    std::unique_ptr<MuonHoughPattern> constructHoughPattern(const MuonHoughHitContainer* event, double residu_mm, double residu_grad,
                                             int maximum_number = 0, bool which_segment = 0, int printlevel = 0) const;
     /** construct hough pattern at a certain coordinate (maximum) in certain sector*/
-    MuonHoughPattern* constructHoughPattern(const MuonHoughHitContainer* event, std::pair<double, double> coordsmaximum, double residu_mm,
+    std::unique_ptr<MuonHoughPattern> constructHoughPattern(const MuonHoughHitContainer* event, std::pair<double, double> coordsmaximum, double residu_mm,
                                             double residu_grad, int sector = 0, bool which_segment = 0, int printlevel = 0) const;
     /** construct hough pattern at a certain binnumber (maximum) in certain sector*/
-    MuonHoughPattern* constructHoughPattern(const MuonHoughHitContainer* event, int binnumber, double residu_mm, double residu_grad,
+    std::unique_ptr<MuonHoughPattern> constructHoughPattern(const MuonHoughHitContainer* event, int binnumber, double residu_mm, double residu_grad,
                                             int sector = 0, bool which_segment = 0, int printlevel = 0) const;
 
     /** fill histograms */
@@ -54,7 +54,7 @@ public:
 
 private:
     /** the actual houghtransform */
-    std::unique_ptr<MuonHoughTransformer> m_houghtransformer;
+    std::unique_ptr<MuonHoughTransformer> m_houghtransformer{};
 
 };
 

@@ -19,7 +19,7 @@ class MuonHoughPattern : public MuonHoughHitContainer {
 
 public:
     /** constructor */
-    MuonHoughPattern(int id_number, bool ownhits = false);
+    MuonHoughPattern(int id_number);
 
     /** destructor */
     virtual ~MuonHoughPattern() = default;
@@ -28,7 +28,7 @@ public:
     void resetTracksegment();
 
     /** returns if hit is in pattern */
-    bool hitInHoughPattern(MuonHoughHit* hit) const;
+    bool hitInHoughPattern(const std::shared_ptr<MuonHoughHit>& hit) const;
 
     /** calculate estimated z-position of pattern */
     double calculateEZ() const;

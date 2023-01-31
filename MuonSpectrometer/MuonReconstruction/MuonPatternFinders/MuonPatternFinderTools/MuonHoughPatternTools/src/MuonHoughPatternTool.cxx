@@ -62,7 +62,7 @@ void MuonHoughPatternTool::makePatterns(const MuonHoughHitContainer& hitcontaine
         ATH_MSG_VERBOSE("Size: " << hitcontainer.size());
 
         for (unsigned int i = 0; i < hitcontainer.size(); ++i) {
-            const MuonHoughHit* hit = hitcontainer.getHit(i);
+            const std::shared_ptr<MuonHoughHit> hit = hitcontainer.getHit(i);
             ATH_MSG_VERBOSE(hit->getHitx() << " " << hit->getHity() << " " << hit->getHitz() << " " << hit->getMeasuresPhi() << " "
                                            << hit->getWhichDetector() << " " << hit->getProbability() << " " << hit->getWeight() << " "
                                            << hit->getAssociated());
@@ -93,7 +93,7 @@ void MuonHoughPatternTool::makePatterns(int id_number, double weightmdt, const M
     if (msgLevel(MSG::VERBOSE)) {
         ATH_MSG_VERBOSE("Size event fill: " << event_for_hough->size());
         for (unsigned int i = 0; i < event_for_hough->size(); ++i) {
-            const MuonHoughHit* hit = event_for_hough->getHit(i);
+            const std::shared_ptr<MuonHoughHit> hit = event_for_hough->getHit(i);
             ATH_MSG_VERBOSE(hit->getHitx() << " " << hit->getHity() << " " << hit->getHitz() << " " << hit->getMeasuresPhi() << " "
                                            << hit->getWhichDetector() << " " << hit->getProbability() << " " << hit->getWeight() << " "
                                            << hit->getAssociated());
@@ -101,7 +101,7 @@ void MuonHoughPatternTool::makePatterns(int id_number, double weightmdt, const M
 
         ATH_MSG_VERBOSE("Size event association: " << event_for_association->size());
         for (unsigned int i = 0; i < event_for_association->size(); ++i) {
-            const MuonHoughHit* hit = event_for_association->getHit(i);
+            const std::shared_ptr<MuonHoughHit> hit = event_for_association->getHit(i);
             ATH_MSG_VERBOSE(hit->getHitx() << " " << hit->getHity() << " " << hit->getHitz() << " " << hit->getMeasuresPhi() << " "
                                            << hit->getWhichDetector() << " " << hit->getProbability() << " " << hit->getWeight() << " "
                                            << hit->getAssociated());
@@ -182,7 +182,7 @@ StatusCode MuonHoughPatternTool::initialize() {
 
 void MuonHoughPatternTool::resetAssociation(const MuonHoughHitContainer& event) {
     for (unsigned int i = 0; i < event.size(); ++i) {
-        MuonHoughHit* hit = event.getHit(i);
+        std::shared_ptr<MuonHoughHit> hit = event.getHit(i);
         hit->setAssociated(false);
         hit->setId(-1);  // ugly, to be changed?
     }
@@ -327,7 +327,7 @@ int MuonHoughPatternTool::numberOfHits(const MuonHoughHitContainer& event) const
     return number_of_hits_left;
 }
 
-bool MuonHoughPatternTool::hitInHoughPattern(MuonHoughHit* hit, const MuonHoughPatternContainer& houghpattern) const {
+bool MuonHoughPatternTool::hitInHoughPattern(const std::shared_ptr<MuonHoughHit>& hit, const MuonHoughPatternContainer& houghpattern) const {
     // checks if hit is already assigned to a houghpattern
 
     for (unsigned int i = 0; i < houghpattern.size(); ++i) {
@@ -390,7 +390,7 @@ void MuonHoughPatternTool::weightRescaling(const MuonHoughHitContainer& event, i
     }
 
     for (unsigned int i = 0; i < event.size(); ++i) {
-        MuonHoughHit* hit = event.getHit(i);
+        std::shared_ptr<MuonHoughHit> hit = event.getHit(i);
         MuonHough::DetectorTechnology technology = hit->getDetectorId();
         switch (technology) {
             case MuonHough::CSC:
@@ -406,7 +406,7 @@ void MuonHoughPatternTool::calculateWeights(const MuonHoughHitContainer& event, 
     if (weightmdt < 0.5) return;
     // else do nothing (e.g. cosmics case)
     for (unsigned int i = 0; i < event.size(); ++i) {
-        MuonHoughHit* hit = event.getHit(i);
+        std::shared_ptr<MuonHoughHit> hit = event.getHit(i);
         MuonHough::DetectorTechnology technology = hit->getDetectorId();
         if (technology == MuonHough::MDT) {
             // recalculate weight, especially important for cavern background MDT events
@@ -445,13 +445,13 @@ int MuonHoughPatternTool::overlapHoughPatterns(const MuonHoughPattern& houghpatt
 
 std::unique_ptr<MuonHoughHitContainer> MuonHoughPatternTool::whichEventAssociation(int id_number,
                                                                                    const MuonHoughHitContainer& event) const {
-    std::unique_ptr<MuonHoughHitContainer> event_to_analyse = std::make_unique<MuonHoughHitContainer>(false);
+    std::unique_ptr<MuonHoughHitContainer> event_to_analyse = std::make_unique<MuonHoughHitContainer>();
 
     switch (id_number) {
         case MuonHough::hough_xy:
 
             for (unsigned int hitid = 0; hitid < event.size(); ++hitid) {
-                MuonHoughHit* hit = event.getHit(hitid);
+                std::shared_ptr<MuonHoughHit> hit = event.getHit(hitid);
                 if (hit->getMeasuresPhi()) {
                     if (m_use_csc_in_pattern || (!m_use_csc_in_pattern && hit->getDetectorId() != MuonHough::CSC)) {
                         event_to_analyse->addHit(hit);
@@ -461,7 +461,7 @@ std::unique_ptr<MuonHoughHitContainer> MuonHoughPatternTool::whichEventAssociati
             break;
         case MuonHough::hough_yz:
             for (unsigned int hitid = 0; hitid < event.size(); ++hitid) {
-                MuonHoughHit* hit = event.getHit(hitid);
+                std::shared_ptr<MuonHoughHit> hit = event.getHit(hitid);
                 event_to_analyse->addHit(hit);
             }
             break;
@@ -469,7 +469,7 @@ std::unique_ptr<MuonHoughHitContainer> MuonHoughPatternTool::whichEventAssociati
         case MuonHough::hough_rzcosmics:
         case MuonHough::hough_curved_at_a_cylinder:
             for (unsigned int hitid = 0; hitid < event.size(); ++hitid) {
-                MuonHoughHit* hit = event.getHit(hitid);
+                std::shared_ptr<MuonHoughHit> hit = event.getHit(hitid);
                 if (!hit->getMeasuresPhi()) {
                     if (m_use_csc_in_pattern || (!m_use_csc_in_pattern && hit->getDetectorId() != MuonHough::CSC)) {
                         event_to_analyse->addHit(hit);
@@ -480,21 +480,21 @@ std::unique_ptr<MuonHoughHitContainer> MuonHoughPatternTool::whichEventAssociati
         case MuonHough::hough_rz_rpc:
             if (m_use_rpc_measures_eta == 1) {
                 for (unsigned int hitid = 0; hitid < event.size(); ++hitid) {
-                    MuonHoughHit* hit = event.getHit(hitid);
+                    std::shared_ptr<MuonHoughHit> hit = event.getHit(hitid);
                     if (hit->getDetectorId() == MuonHough::RPC) {
                         if (!hit->getMeasuresPhi()) { event_to_analyse->addHit(hit); }
                     }
                 }
             } else {
                 for (unsigned int hitid = 0; hitid < event.size(); ++hitid) {
-                    MuonHoughHit* hit = event.getHit(hitid);
+                    std::shared_ptr<MuonHoughHit> hit = event.getHit(hitid);
                     if (hit->getDetectorId() == MuonHough::RPC) { event_to_analyse->addHit(hit); }
                 }
             }
             break;
         case MuonHough::hough_rz_mdt:
             for (unsigned int hitid = 0; hitid < event.size(); ++hitid) {
-                MuonHoughHit* hit = event.getHit(hitid);
+                std::shared_ptr<MuonHoughHit> hit = event.getHit(hitid);
                 if (hit->getDetectorId() == MuonHough::MDT) { event_to_analyse->addHit(hit); }
             }
             break;
@@ -509,13 +509,13 @@ std::unique_ptr<MuonHoughHitContainer> MuonHoughPatternTool::whichEventHough(int
     ATH_MSG_DEBUG("whichEventHough::size of event: " << event.size());
     std::unique_ptr<MuonHoughHitContainer> hits_not_in_patterns{hitsNotInPattern(event, id_number)};
     ATH_MSG_DEBUG("whichEventHough::hitsNotInPattern: " << hits_not_in_patterns->size());
-    std::unique_ptr<MuonHoughHitContainer> event_to_analyse = std::make_unique<MuonHoughHitContainer>(false);
+    std::unique_ptr<MuonHoughHitContainer> event_to_analyse = std::make_unique<MuonHoughHitContainer>();
 
     switch (id_number) {
         case MuonHough::hough_xy:
 
             for (unsigned int hitid = 0; hitid < hits_not_in_patterns->size(); ++hitid) {
-                MuonHoughHit* hit = hits_not_in_patterns->getHit(hitid);
+                std::shared_ptr<MuonHoughHit> hit = hits_not_in_patterns->getHit(hitid);
                 if (hit->getMeasuresPhi() == 1) {
                     if (hitThroughCut(hit, weightmdt)) {
                         if (m_use_csc_in_hough || (!m_use_csc_in_hough && hit->getDetectorId() == MuonHough::CSC)) {
@@ -527,7 +527,7 @@ std::unique_ptr<MuonHoughHitContainer> MuonHoughPatternTool::whichEventHough(int
             break;
         case MuonHough::hough_yz:
             for (unsigned int hitid = 0; hitid < hits_not_in_patterns->size(); ++hitid) {
-                MuonHoughHit* hit = hits_not_in_patterns->getHit(hitid);
+                std::shared_ptr<MuonHoughHit> hit = hits_not_in_patterns->getHit(hitid);
                 if (hitThroughCut(hit, weightmdt)) { event_to_analyse->addHit(hit); }
             }
             break;
@@ -535,7 +535,7 @@ std::unique_ptr<MuonHoughHitContainer> MuonHoughPatternTool::whichEventHough(int
         case MuonHough::hough_rzcosmics:
         case MuonHough::hough_curved_at_a_cylinder:
             for (unsigned int hitid = 0; hitid < hits_not_in_patterns->size(); ++hitid) {
-                MuonHoughHit* hit = hits_not_in_patterns->getHit(hitid);
+                std::shared_ptr<MuonHoughHit> hit = hits_not_in_patterns->getHit(hitid);
                 if (hitThroughCut(hit, weightmdt)) {
                     if (hit->getMeasuresPhi() == 0) {
                         if (m_use_csc_in_hough || (!m_use_csc_in_hough && hit->getDetectorId() == MuonHough::CSC)) {
@@ -549,14 +549,14 @@ std::unique_ptr<MuonHoughHitContainer> MuonHoughPatternTool::whichEventHough(int
             if (m_use_rpc_measures_eta == 1) {
                 for (unsigned int hitid = 0; hitid < hits_not_in_patterns->size(); ++hitid) {
                     if (hits_not_in_patterns->getDetectorId(hitid) == MuonHough::RPC) {
-                        MuonHoughHit* hit = hits_not_in_patterns->getHit(hitid);
+                        std::shared_ptr<MuonHoughHit> hit = hits_not_in_patterns->getHit(hitid);
                         if (hit->getMeasuresPhi() == 0) { event_to_analyse->addHit(hit); }
                     }
                 }
             } else {
                 for (unsigned int hitid = 0; hitid < hits_not_in_patterns->size(); ++hitid) {
                     if (hits_not_in_patterns->getDetectorId(hitid) == MuonHough::RPC) {
-                        MuonHoughHit* hit = hits_not_in_patterns->getHit(hitid);
+                        std::shared_ptr<MuonHoughHit> hit = hits_not_in_patterns->getHit(hitid);
                         event_to_analyse->addHit(hit);
                     }
                 }
@@ -565,7 +565,7 @@ std::unique_ptr<MuonHoughHitContainer> MuonHoughPatternTool::whichEventHough(int
         case MuonHough::hough_rz_mdt:
             for (unsigned int hitid = 0; hitid < hits_not_in_patterns->size(); ++hitid) {
                 if (hits_not_in_patterns->getDetectorId(hitid) == MuonHough::MDT) {
-                    MuonHoughHit* hit = hits_not_in_patterns->getHit(hitid);
+                    std::shared_ptr<MuonHoughHit> hit = hits_not_in_patterns->getHit(hitid);
                     if (hitThroughCut(hit, weightmdt)) { event_to_analyse->addHit(hit); }
                 }
             }
@@ -1325,7 +1325,7 @@ std::unique_ptr<Muon::MuonPrdPattern> MuonHoughPatternTool::houghPatternToCleanP
 
     if (msgLevel(MSG::VERBOSE)) {
         for (unsigned int i = 0; i < houghpattern.size(); ++i) {
-            const MuonHoughHit* hit = houghpattern.getHit(i);
+            const std::shared_ptr<MuonHoughHit> hit = houghpattern.getHit(i);
             ATH_MSG_VERBOSE(hit->getHitx() << " " << hit->getHity() << " " << hit->getHitz() << " " << hit->getPhi() << " "
                                            << hit->getMeasuresPhi() << " " << hit->getWhichDetector() << " " << hit->getWeight() << " "
                                            << hit->getAssociated());
@@ -1417,7 +1417,7 @@ std::unique_ptr<Muon::MuonPrdPattern> MuonHoughPatternTool::houghPatternToCleanP
 }
 
 std::unique_ptr<MuonHoughHitContainer> MuonHoughPatternTool::hitsNotInPattern(const MuonHoughHitContainer& event, int /*id_number*/) {
-    std::unique_ptr<MuonHoughHitContainer> hits_not_in_patterns = std::make_unique<MuonHoughHitContainer>(false);
+    std::unique_ptr<MuonHoughHitContainer> hits_not_in_patterns = std::make_unique<MuonHoughHitContainer>();
 
     for (unsigned int hitid = 0; hitid < event.size(); ++hitid) {
         if (!event.getHit(hitid)->getAssociated()) { hits_not_in_patterns->addHit(event.getHit(hitid)); }
@@ -1463,7 +1463,7 @@ void MuonHoughPatternTool::setWeightMdtCutValue(const MuonHoughHitContainer& eve
     weightmdt = mdthits > 0. ? 1. - 5. / std::sqrt(mdthits) : 0.;
 }
 
-bool MuonHoughPatternTool::hitThroughCut(MuonHoughHit* hit, double weightmdt) const {
+bool MuonHoughPatternTool::hitThroughCut(const std::shared_ptr<MuonHoughHit>& hit, double weightmdt) const {
     return (!m_weightcutmdt || hit->getDetectorId() != MuonHough::MDT || hit->getProbability() >= weightmdt) &&
            (!m_weightcut || hit->getProbability() >= m_weight);
 }

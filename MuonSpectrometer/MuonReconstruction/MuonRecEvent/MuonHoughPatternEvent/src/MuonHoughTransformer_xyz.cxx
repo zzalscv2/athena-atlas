@@ -15,7 +15,7 @@ MuonHoughTransformer_xyz::MuonHoughTransformer_xyz(int nbins, int nbins_angle, d
     m_weight_constant_radius = 3000;
 }
 
-void MuonHoughTransformer_xyz::fillHit(MuonHoughHit* hit, double weight) {
+void MuonHoughTransformer_xyz::fillHit(const std::shared_ptr<MuonHoughHit>& hit, double weight) {
     double radius = hit->getRadius();
     double hitx = hit->getHitx();
     double hity = hit->getHity();
@@ -122,12 +122,12 @@ double MuonHoughTransformer_xyz::calculateAngle(double hitx, double hity, double
     return phi;
 }
 
-MuonHoughPattern* MuonHoughTransformer_xyz::hookAssociateHitsToMaximum(const MuonHoughHitContainer* event,
+std::unique_ptr<MuonHoughPattern> MuonHoughTransformer_xyz::hookAssociateHitsToMaximum(const MuonHoughHitContainer* event,
                                                                        std::pair<double, double> coordsmaximum, double max_residu_mm,
                                                                        double /*max_residu_angle*/, int max_sector, bool /*which_segment*/,
                                                                        int printlevel) const {
     MsgStream log(Athena::getMessageSvc(), "MuonHoughTransformer_xyz::hookAssociateHitsToMaximum");
-    MuonHoughPattern* houghpattern = initialiseHoughPattern();
+    std::unique_ptr<MuonHoughPattern> houghpattern{initialiseHoughPattern()};
     if (printlevel >= 3 || log.level() <= MSG::DEBUG) {
         log << MSG::DEBUG << "MuonHoughTransformer_xyz::hookAssociateHitsToMaximum  (start)" << endmsg;
     }
@@ -135,7 +135,7 @@ MuonHoughPattern* MuonHoughTransformer_xyz::hookAssociateHitsToMaximum(const Muo
     double ephi = 0., eradius = 0., sin_phi = 0., cos_phi = 0.;
     double dotprod = 0.;
     double etheta = 0.;
-    //  MuonHoughPattern houghpattern;
+    
 
     double residu_distance = 0.;
 
@@ -272,7 +272,7 @@ float MuonHoughTransformer_xyz::weightHoughTransform(double r0) const {
     }  // weight function, to give more importance to patterns close to origin
 }
 
-int MuonHoughTransformer_xyz::sector(MuonHoughHit* hit) const {
+int MuonHoughTransformer_xyz::sector(const std::shared_ptr<MuonHoughHit>& hit) const {
     double radius = hit->getRadius();
     double hitz = hit->getHitz();
 

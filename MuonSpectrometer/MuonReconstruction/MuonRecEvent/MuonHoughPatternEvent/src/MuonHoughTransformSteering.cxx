@@ -27,9 +27,9 @@ MuonHoughPatternCollection MuonHoughTransformSteering::constructHoughPatterns(co
 
         if (binnumber != -1) {
             int sector = maxima[maximum_number].first;
-            MuonHoughPattern* houghpattern =
+            std::unique_ptr<MuonHoughPattern> houghpattern =
                 constructHoughPattern(event, binnumber, residu_mm, residu_grad, sector, which_segment, printlevel);
-            houghpatterns.emplace_back(houghpattern);
+            houghpatterns.emplace_back(std::move(houghpattern));
         } else {
             if (printlevel >= 4 || log.level() <= MSG::VERBOSE) {
                 log << MSG::VERBOSE << "binnumber == -1 (no max found), max patterns = " << maximum_number << endmsg;
@@ -44,7 +44,7 @@ MuonHoughPatternCollection MuonHoughTransformSteering::constructHoughPatterns(co
     return houghpatterns;
 }
 
-MuonHoughPattern* MuonHoughTransformSteering::constructHoughPattern(const MuonHoughHitContainer* event, double residu_mm,
+std::unique_ptr<MuonHoughPattern> MuonHoughTransformSteering::constructHoughPattern(const MuonHoughHitContainer* event, double residu_mm,
                                                                     double residu_grad, int maximum_number, bool which_segment,
                                                                     int printlevel) const {
     MsgStream log(Athena::getMessageSvc(), "MuonHoughTransformSteering::constructHoughPattern");
@@ -52,7 +52,7 @@ MuonHoughPattern* MuonHoughTransformSteering::constructHoughPattern(const MuonHo
         log << MSG::DEBUG << "MuonHoughTransformSteering::constructHoughPattern (start) " << endmsg;
     }
 
-    MuonHoughPattern* houghpattern =
+    std::unique_ptr<MuonHoughPattern> houghpattern =
         m_houghtransformer->associateHitsToMaximum(event, residu_mm, residu_grad, maximum_number, which_segment, printlevel);
 
     if (printlevel >= 3 || log.level() <= MSG::DEBUG) {
@@ -62,21 +62,17 @@ MuonHoughPattern* MuonHoughTransformSteering::constructHoughPattern(const MuonHo
     return houghpattern;
 }
 
-MuonHoughPattern* MuonHoughTransformSteering::constructHoughPattern(const MuonHoughHitContainer* event, std::pair<double, double> coords,
+std::unique_ptr<MuonHoughPattern> MuonHoughTransformSteering::constructHoughPattern(const MuonHoughHitContainer* event, std::pair<double, double> coords,
                                                                     double residu_mm, double residu_grad, int sector, bool which_segment,
                                                                     int printlevel) const {
-    MuonHoughPattern* houghpattern =
-        m_houghtransformer->associateHitsToCoords(event, coords, residu_mm, residu_grad, sector, which_segment, printlevel);
-    return houghpattern;
+    return m_houghtransformer->associateHitsToCoords(event, coords, residu_mm, residu_grad, sector, which_segment, printlevel);   
 }
 
-MuonHoughPattern* MuonHoughTransformSteering::constructHoughPattern(const MuonHoughHitContainer* event, int binnumber, double residu_mm,
+std::unique_ptr<MuonHoughPattern> MuonHoughTransformSteering::constructHoughPattern(const MuonHoughHitContainer* event, int binnumber, double residu_mm,
                                                                     double residu_grad, int sector, bool which_segment,
                                                                     int printlevel) const {
-    MuonHoughPattern* houghpattern =
-        m_houghtransformer->associateHitsToBinnumber(event, binnumber, residu_mm, residu_grad, sector, which_segment, printlevel);
-    return houghpattern;
-}
+    return m_houghtransformer->associateHitsToBinnumber(event, binnumber, residu_mm, residu_grad, sector, which_segment, printlevel);
+}   
 
 void MuonHoughTransformSteering::fill(const MuonHoughHitContainer* event, bool /**subtract*/) { m_houghtransformer->fill(event); }
 

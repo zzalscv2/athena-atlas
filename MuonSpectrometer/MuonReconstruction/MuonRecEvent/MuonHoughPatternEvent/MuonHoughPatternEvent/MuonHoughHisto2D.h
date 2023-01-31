@@ -5,6 +5,7 @@
 #ifndef MUONHOUGHPATTERNEVENT_MUONHOUGHHISTO2D_H
 #define MUONHOUGHPATTERNEVENT_MUONHOUGHHISTO2D_H
 
+#include <AthenaBaseComps/AthMessaging.h>
 #include <memory.h>
 
 #include <algorithm>
@@ -18,10 +19,10 @@ class TH2F;
 /** Histogram class, similar to Root's TH2D.
     Binnumbering is similar to Root's numbering. Starting in left corner to right upper corner
     Remind the over/under flow bins */
-class MuonHoughHisto2D {
+class MuonHoughHisto2D: public AthMessaging {
 public:
     /** destructor */
-    ~MuonHoughHisto2D();
+    ~MuonHoughHisto2D() = default;
     /** constructor */
     MuonHoughHisto2D(int nbinsx, double xmin, double xmax, int nbinsy, double ymin, double ymax, int number_of_maxima = 1);
 
@@ -109,7 +110,7 @@ public:
     double getThreshold() const;
 
     /** intialises a root histogram of MuonHoughHisto2D and fill it, used for debugging purposes */
-    TH2F* bookAndFillRootHistogram(const std::string& hname) const;
+    std::unique_ptr<TH2F> bookAndFillRootHistogram(const std::string& hname) const;
 
     void setMaximumIsValid(bool flag) { m_maximumIsValid = flag; }
 
@@ -121,61 +122,62 @@ private:
     void resetHisto();
 
     /** actual storage of bin values */
-    unsigned int* m_histBuffer{};
+    std::unique_ptr<unsigned int []> m_histBuffer{};
     /** size of array */
-    unsigned int m_size;
+    unsigned int m_size{0};
 
     /** number of x bins */
-    unsigned int m_nbinsx;
+    unsigned int m_nbinsx{0};
     /** number of x bins + 2 , used for cpu speedup*/
-    unsigned int m_nbinsx_plus2;
+    unsigned int m_nbinsx_plus2{0};
     /** minimum x coordinate */
-    double m_xmin;
+    double m_xmin{0};
     /** maximum x coordinate */
-    double m_xmax;
+    double m_xmax{0};
     /** number of y bins */
-    unsigned int m_nbinsy;
+    unsigned int m_nbinsy{0};
     /** number of y bins + 2 , used for cpu speedup*/
-    unsigned int m_nbinsy_plus2;
+    unsigned int m_nbinsy_plus2{0};
     /** minimum y coordinate */
-    double m_ymin;
+    double m_ymin{0.};
     /** maximum y coordinate */
-    double m_ymax;
+    double m_ymax{0.};
 
     /** binwidth x axis */
-    double m_binwidthx;
+    double m_binwidthx{0.};
     /** binwidth y axis */
-    double m_binwidthy;
+    double m_binwidthy{0.};
 
     /** inv binwidth x axis used for cpu speedup */
-    double m_invbinwidthx;
+    double m_invbinwidthx{0.};
     /** inv binwidth y axis used for cpu speedup */
-    double m_invbinwidthy;
+    double m_invbinwidthy{0.};
 
     /** set of bins that are above threshold
      * used for speeding up searching for maxima */
-    std::set<int> m_bins_above_threshold;
+    std::set<int> m_bins_above_threshold{};
 
     /** binnumbers found as maxima */
-    std::vector<int> m_maximumbins;
+    std::vector<int> m_maximumbins{};
+
 
     /** number of maxima to be searched for */
-    const int m_number_of_maxima;
+    const int m_number_of_maxima{0};
 
     /** threshold for minimum content for a maximum */
-    unsigned int m_scale;  // conversion from double -> unsigned int
-    unsigned int m_threshold;
+    unsigned int m_scale{0};  // conversion from double -> unsigned int
+    unsigned int m_threshold{0};
 
     /** minimum distance for a maximum to be away from another maximum */
-    const int m_distance_to_next_maximum;
+    const int m_distance_to_next_maximum{0};
 
     /** check if search for maxima already performed */
-    bool m_maxima_found;
+    bool m_maxima_found{false};
 
     /** maximum */
-    int m_maximumBin;
-    unsigned int m_maximum;
-    bool m_maximumIsValid;  // flag whether the maximum can be trusted
+    int m_maximumBin{-1};
+    unsigned int m_maximum{0};
+    bool m_maximumIsValid{true};  // flag whether the maximum can be trusted
     /** set bin content of binnumber */
     void setBinContent(int binnumber, double value);
     /** set bin content of binnumber corresponding to coordinates */
@@ -229,6 +231,6 @@ inline double MuonHoughHisto2D::binnumberToXCoord(int binnumber) const {
 inline double MuonHoughHisto2D::binnumberToYCoord(int binnumber) const {
     return m_ymin + m_binwidthy * (-0.5 + (binnumber) / m_nbinsx_plus2);
 }
-inline void MuonHoughHisto2D::resetHisto() { memset(m_histBuffer, 0, sizeof(unsigned int) * m_size); }
+inline void MuonHoughHisto2D::resetHisto() { memset(m_histBuffer.get(), 0, sizeof(unsigned int) * m_size); }
 
 #endif  // MUONHOUGHPATTERNEVENT_MUONHOUGHHISTO2D_H

@@ -17,9 +17,6 @@ std::pair<double, double> MuonHoughTransformer_yz::getHitPos(const MuonHoughHitC
     return hitpos;
 }
 
-MuonHoughPattern* MuonHoughTransformer_yz::initialiseHoughPattern() const {
-    MuonHoughPattern* houghpattern = new MuonHoughPattern(MuonHough::hough_yz);
-    return houghpattern;
+std::unique_ptr<MuonHoughPattern> MuonHoughTransformer_yz::initialiseHoughPattern() const {
+    return std::make_unique<MuonHoughPattern>(MuonHough::hough_yz);    
 }
-
-float MuonHoughTransformer_yz::weightHoughTransform(double r0) const { return MuonHoughTransformer_xyz::weightHoughTransform(r0); }

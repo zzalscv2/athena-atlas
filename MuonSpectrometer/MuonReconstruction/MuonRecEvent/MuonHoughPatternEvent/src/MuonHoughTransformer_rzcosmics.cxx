@@ -15,9 +15,9 @@ MuonHoughTransformer_rzcosmics::MuonHoughTransformer_rzcosmics(int nbins, int nb
     m_weight_constant_radius = 0.3;  // 1./(1 + m_weight_constant_radius*std::abs(r0)/m_detectorsize) = 1/(1+10^-5*r)
     m_add_weight_angle = true;
 
-    m_phisec = new double[m_number_of_sectors];
-    m_sinphisec = new double[m_number_of_sectors];
-    m_cosphisec = new double[m_number_of_sectors];
+    m_phisec.reset(new double[m_number_of_sectors]);
+    m_sinphisec.reset(new double[m_number_of_sectors]);
+    m_cosphisec.reset(new double[m_number_of_sectors]);
 
     for (int phisector = 0; phisector < m_number_of_sectors; phisector++) {
         m_phisec[phisector] = (phisector + 0.5) * M_PI / (m_number_of_sectors + 0.) - M_PI;  // phi [-Pi,0]
@@ -26,9 +26,9 @@ MuonHoughTransformer_rzcosmics::MuonHoughTransformer_rzcosmics(int nbins, int nb
         m_cosphisec[phisector] = sc.cs;
     }
 
-    m_theta_in_grad = new double[m_nbins_angle];
-    m_sintheta = new double[m_nbins_angle];
-    m_costheta = new double[m_nbins_angle];
+    m_theta_in_grad.reset(new double[m_nbins_angle]);
+    m_sintheta.reset(new double[m_nbins_angle]);
+    m_costheta.reset(new double[m_nbins_angle]);
 
     for (int i = 0; i < m_nbins_angle; i++) {
         m_theta_in_grad[i] = (i + 0.5) * m_stepsize_per_angle;
@@ -39,16 +39,7 @@ MuonHoughTransformer_rzcosmics::MuonHoughTransformer_rzcosmics(int nbins, int nb
     }
 }
 
-MuonHoughTransformer_rzcosmics::~MuonHoughTransformer_rzcosmics() {
-    delete[] m_phisec;
-    delete[] m_sinphisec;
-    delete[] m_cosphisec;
-    delete[] m_theta_in_grad;
-    delete[] m_sintheta;
-    delete[] m_costheta;
-}
-
-void MuonHoughTransformer_rzcosmics::fillHit(MuonHoughHit* hit, double weight) {
+void MuonHoughTransformer_rzcosmics::fillHit(const std::shared_ptr<MuonHoughHit>& hit, double weight) {
     const double invradius = 1. / hit->getRadius();
     const double hitx = hit->getHitx();
     const double hity = hit->getHity();
@@ -95,12 +86,12 @@ int MuonHoughTransformer_rzcosmics::fillHisto(double rz0, double theta_in_grad, 
     return filled_binnumber;
 }
 
-MuonHoughPattern* MuonHoughTransformer_rzcosmics::hookAssociateHitsToMaximum(const MuonHoughHitContainer* event,
+std::unique_ptr<MuonHoughPattern> MuonHoughTransformer_rzcosmics::hookAssociateHitsToMaximum(const MuonHoughHitContainer* event,
                                                                              std::pair<double, double> coordsmaximum,
                                                                              double maximum_residu_mm, double /*maximum_residu_angle*/,
                                                                              int maxsector, bool /*which_segment*/, int printlevel) const {
     MsgStream log(Athena::getMessageSvc(), "MuonHoughTransformer_rzcosmics::hookAssociateHitsToMaximum");
-    MuonHoughPattern* houghpattern = new MuonHoughPattern(MuonHough::hough_rzcosmics);
+    std::unique_ptr<MuonHoughPattern> houghpattern = std::make_unique<MuonHoughPattern>(MuonHough::hough_rzcosmics);
 
     double eradius = 0., er0 = 0.;
     const double theta = m_muonhoughmathutils.angleFromGradToRadial(coordsmaximum.second);
@@ -175,7 +166,7 @@ MuonHoughPattern* MuonHoughTransformer_rzcosmics::hookAssociateHitsToMaximum(con
         houghpattern->setERTheta(rz0);
     }
 
-    updateParameters(houghpattern);  // not possible when phi direction not known!
+    updateParameters(houghpattern.get());  // not possible when phi direction not known!
 
     if (printlevel >= 4 || log.level() <= MSG::VERBOSE) {
         log << MSG::VERBOSE << "MuonHoughTransformer_rzcosmics::updateParameterstheta new phi: " << houghpattern->getEPhi()
@@ -214,7 +205,7 @@ float MuonHoughTransformer_rzcosmics::weightHoughTransform(double r0, double sin
     }
 }
 
-int MuonHoughTransformer_rzcosmics::sector(MuonHoughHit* /*hit*/) const {
+int MuonHoughTransformer_rzcosmics::sector(const std::shared_ptr<MuonHoughHit>&  /*hit*/) const {
     // function not implemented for this transform
     return 0;
 }

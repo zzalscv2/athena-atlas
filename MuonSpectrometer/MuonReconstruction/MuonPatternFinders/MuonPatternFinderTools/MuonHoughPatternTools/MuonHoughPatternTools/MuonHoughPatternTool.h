@@ -79,7 +79,7 @@ private:
     int numberOfHits(const MuonHoughHitContainer& event) const;
 
     /** checks if hit is already in one of the found houghpatterns (unused) */
-    bool hitInHoughPattern(MuonHoughHit* hit, const MuonHoughPatternContainer& houghpattern) const;
+    bool hitInHoughPattern(const std::shared_ptr<MuonHoughHit>& hit, const MuonHoughPatternContainer& houghpattern) const;
 
     /** returns a hitcontainer with hits not yet used in pattern */
     static std::unique_ptr<MuonHoughHitContainer> hitsNotInPattern(const MuonHoughHitContainer& event, int id_number);
@@ -134,7 +134,7 @@ private:
     void setWeightMdtCutValue(const MuonHoughHitContainer& event, double& weightmdt) const;
 
     /** hit through weight cut? */
-    bool hitThroughCut(MuonHoughHit* hit, double weightmdt) const;
+    bool hitThroughCut(const std::shared_ptr<MuonHoughHit>& hit, double weightmdt) const;
 
     /** pointer to the file name for the hough histograms */
     std::unique_ptr<TFile> m_file;
