@@ -11,11 +11,11 @@ def L2MuonSAIOMonConfig(helper):
 
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
     monAlg = helper.addAlgorithm(CompFactory.L2MuonSAIOMon,'L2MuonSAIOMon',
-                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.inputFlags, MuQuality=1)))
+                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)))
 
     ### monitorig groups
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
-    moniAccess = getHLTMonitoringAccess(helper.inputFlags)
+    moniAccess = getHLTMonitoringAccess(helper.flags)
     Chains = moniAccess.monitoredChains(signatures="muonMon",monLevels=["shifter","t0","val"])
     monAlg.MonitoredChains = [c for c in Chains if ('l2io' in c)] 
 

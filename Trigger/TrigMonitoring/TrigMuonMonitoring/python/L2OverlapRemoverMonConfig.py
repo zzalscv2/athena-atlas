@@ -10,11 +10,11 @@ def L2OverlapRemoverMonConfig(helper):
 
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
     monAlg = helper.addAlgorithm(CompFactory.L2OverlapRemoverMon,'L2OverlapRemoverMon',
-                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.inputFlags, MuQuality=1)))
+                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)))
 
     ### monitorig groups
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
-    moniAccess = getHLTMonitoringAccess(helper.inputFlags)
+    moniAccess = getHLTMonitoringAccess(helper.flags)
     Chains = moniAccess.monitoredChains(signatures="muonMon",monLevels=["shifter","t0","val"])
     monAlg.MonitoredChains = [c for c in Chains if '2mu14' in c]
   

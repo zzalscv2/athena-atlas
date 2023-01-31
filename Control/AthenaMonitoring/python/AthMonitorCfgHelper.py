@@ -28,7 +28,6 @@ class AthMonitorCfgHelper(object):
         from AthenaConfiguration.ComponentFactory import CompFactory
         AthSequencer=CompFactory.AthSequencer
         self.flags = flags
-        self.inputFlags = flags  # backwards compatibility
         self.monName = monName
         self.monSeq = AthSequencer('AthMonSeq_' + monName)
         self.monSeq.StopOverride=True

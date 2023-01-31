@@ -10,11 +10,11 @@ def MuonTriggerCountConfig(helper):
 
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
     monAlg = helper.addAlgorithm(CompFactory.MuonTriggerCount,'MuonTriggerCount',
-                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.inputFlags, MuQuality=1)))
+                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)))
 
     ### monitorig groups
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
-    moniAccess = getHLTMonitoringAccess(helper.inputFlags)
+    moniAccess = getHLTMonitoringAccess(helper.flags)
     monAlg.MonitoredChains = moniAccess.monitoredChains(signatures="muonMon",monLevels=["shifter","t0","val"])
 
     # if mon groups not found fall back to hard-coded trigger monitoring list
