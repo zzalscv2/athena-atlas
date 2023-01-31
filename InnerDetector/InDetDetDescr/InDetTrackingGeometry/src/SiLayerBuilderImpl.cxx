@@ -71,12 +71,6 @@ StatusCode InDet::SiLayerBuilderImpl::finalize()
     return StatusCode::SUCCESS;
 }
 
-
-void InDet::SiLayerBuilderImpl::registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface * const >&, Trk::Layer&) const {
-   throw std::runtime_error("Base class registerSurfacesToLayer should not be called!");
-}
-
-
 std::unique_ptr<std::vector< Trk::DiscLayer*> >
 InDet::SiLayerBuilderImpl::createRingLayersImpl(const InDetDD::SiDetectorElementCollection& siDetElementCollection) const
 {
@@ -1301,3 +1295,30 @@ InDet::SiLayerBuilderImpl::endcapLayerMaterial(double rMin, double rMax) const
   return Trk::BinnedLayerMaterial(layerBinUtilityR);
 }
 
+void InDet::SiLayerBuilderImpl::registerSurfacesToLayer(
+    Trk::BinnedArraySpan<Trk::Surface* const>& layerSurfaces,
+    Trk::Layer& lay) const {
+  if (!m_setLayerAssociation){
+      return;
+  }
+
+  const auto* laySurfIter = layerSurfaces.begin();
+  const auto *laySurfIterEnd = layerSurfaces.end();
+  // register the surfaces to the layer
+  for (; laySurfIter != laySurfIterEnd; ++laySurfIter){
+    if (*laySurfIter) {
+      // register the current surface
+      (**laySurfIter).associateLayer(lay);
+      const InDetDD::SiDetectorElement* detElement
+        = dynamic_cast<const InDetDD::SiDetectorElement*>((*laySurfIter)->associatedDetectorElement());
+      // register the backsise if necessary
+      const InDetDD::SiDetectorElement* otherSideElement = detElement ?  detElement->otherSide() : nullptr;
+      const Trk::Surface* otherSideSurface = otherSideElement ? &(otherSideElement->surface()) : nullptr;
+      if (otherSideSurface) {
+        // Needs care for Athena MT
+        // we bind again to the detElement owned surface
+        (const_cast<Trk::Surface&>(*otherSideSurface)).associateLayer(lay);
+      }
+    }
+  }
+}

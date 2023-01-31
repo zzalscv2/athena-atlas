@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKINGGEOMETRY_SILAYERBUILDERIMPL_H
@@ -72,7 +72,7 @@ namespace InDet {
     /** AlgTool style constructor */
     SiLayerBuilderImpl(const std::string&,const std::string&,const IInterface*);
 
-    virtual void registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface * const >& layerSurfaces, Trk::Layer& lay) const;
+    void registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface * const >& layerSurfaces, Trk::Layer& lay) const;
 
     std::unique_ptr<const std::vector<Trk::CylinderLayer*> >
       cylindricalLayersImpl(const InDetDD::SiDetectorElementCollection& siDetElementCollection) const;

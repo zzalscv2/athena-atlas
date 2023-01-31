@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackingGeometry/SiLayerBuilder.h"
@@ -81,32 +81,4 @@ InDet::SiLayerBuilder::createRingLayers() const {
   const InDetDD::SiDetectorElementCollection* siDetElementCollectionPtr = m_siMgr->getDetectorElementCollection();
   return createRingLayersImpl(*siDetElementCollectionPtr);
 }
-
-
-void InDet::SiLayerBuilder::registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface * const >& layerSurfaces, Trk::Layer& lay) const
-{
-  if (!m_setLayerAssociation) return;
-
-  Trk::BinnedArraySpan<Trk::Surface * const >::const_iterator laySurfIter    = layerSurfaces.begin();
-  Trk::BinnedArraySpan<Trk::Surface * const >::const_iterator laySurfIterEnd = layerSurfaces.end();
-  // register the surfaces to the layer
-  for (; laySurfIter != laySurfIterEnd; ++laySurfIter){
-    if (*laySurfIter) {
-      // register the current surface --------------------------------------------------------
-      // Needs care in Athena MT
-      Trk::ILayerBuilder::associateLayer(lay, (**laySurfIter));
-      const InDetDD::SiDetectorElement* detElement
-        = dynamic_cast<const InDetDD::SiDetectorElement*>((*laySurfIter)->associatedDetectorElement());
-      // register the backise if necessary ---------------------------------------------------
-      const InDetDD::SiDetectorElement* otherSideElement = detElement ?  detElement->otherSide() : nullptr;
-      const Trk::Surface* otherSideSurface = otherSideElement ? &(otherSideElement->surface()) : nullptr;
-      if (otherSideSurface) {
-        //Needs care in Athena MT
-        //Note that we again couple directly to the det element surface not a
-        Trk::ILayerBuilder::associateLayer(lay, const_cast<Trk::Surface&>(*otherSideSurface));
-      }
-    }
-  }
-}
-
 
