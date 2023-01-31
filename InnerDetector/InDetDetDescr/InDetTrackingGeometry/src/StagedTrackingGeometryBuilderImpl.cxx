@@ -389,7 +389,117 @@ std::vector<Trk::Layer*> InDet::StagedTrackingGeometryBuilderImpl::checkZoverlap
 
 }
 
-Trk::Layer* InDet::StagedTrackingGeometryBuilderImpl::mergeDiscLayers (std::vector<Trk::Layer*>&) const {
-  // Dummy implementation to be overridden
-  return nullptr;
+Trk::Layer* InDet::StagedTrackingGeometryBuilderImpl::mergeDiscLayers (std::vector<Trk::Layer*>& inputDiscs) const {
+  // if a single layer is input, no need for merging.
+  // Returning the layer
+  if (inputDiscs.size()==1)
+    return inputDiscs.at(0);
+
+  // on the input, disc layers overlapping in thickness : merge to a new DiscLayer
+  std::pair<float,float> zb(1.e5,-1.e5);
+  // order discs in radius
+  std::vector< std::pair<float,float> > rbounds;
+  std::vector<size_t> discOrder;
+  size_t id=0;
+  for ( const auto *  lay : inputDiscs ) {
+    zb.first = fmin( zb.first, lay->surfaceRepresentation().center().z()-0.5*lay->thickness());
+    zb.second = fmax( zb.second, lay->surfaceRepresentation().center().z()+0.5*lay->thickness());
+    const Trk::DiscBounds* db = dynamic_cast<const Trk::DiscBounds*>(&(lay->surfaceRepresentation().bounds()));
+    if (!db) {
+      ATH_MSG_WARNING("attempt to merge non-disc layers, bailing out");
+      return nullptr;
+    }
+    float r = db->rMin();
+    if (rbounds.empty() ||  r>rbounds.back().first) {
+      rbounds.emplace_back(r,db->rMax());
+      discOrder.push_back(id);
+    } else {
+      int ir=rbounds.size()-1;
+      while (ir>=0) {
+        if ( r>rbounds[ir].first ) break;
+        ir--;
+      }
+      auto rboundsInsertionPt(rbounds.begin());
+      std::advance(rboundsInsertionPt, ir+1);
+      rbounds.insert(rboundsInsertionPt,std::pair<float,float> (r,db->rMax()));
+      auto discOrderInsertionPt(discOrder.begin());
+      std::advance(discOrderInsertionPt, ir+1);
+      discOrder.insert(discOrderInsertionPt,id);
+    }
+    id++;
+  }
+
+  std::vector<float> rsteps;
+  std::vector<Trk::Surface*> surfs;
+  std::vector<Trk::BinUtility*>* binUtils=new std::vector<Trk::BinUtility*>();
+  rsteps.push_back(rbounds[0].first);
+  for (unsigned int id=0; id<discOrder.size(); id++) {
+    unsigned int index=discOrder[id];
+    Trk::SurfaceArray* surfArray = inputDiscs[index]->surfaceArray();
+    if (surfArray) {
+      if (surfArray->binUtility()->binningValue()!=Trk::binPhi) {
+        ATH_MSG_WARNING("attempt to merge 2D disc arrays, bailing out");
+        return nullptr;
+      }
+      binUtils->push_back(surfArray->binUtility()->clone());
+      if (id+1<discOrder.size()) rsteps.push_back( 0.5*(rbounds[id].second+rbounds[id+1].first));
+      Trk::BinnedArraySpan<Trk::Surface * const> ringSurf =surfArray->arrayObjects();
+      surfs.insert(surfs.end(),ringSurf.begin(),ringSurf.end());
+
+    }
+  }
+  rsteps.push_back(rbounds.back().second);
+
+  std::vector< std::pair< Trk::SharedObject<Trk::Surface>, Amg::Vector3D >  > surfaces;
+  for ( auto *  sf : surfs ) {
+    Trk::SharedObject<Trk::Surface> sharedSurface(sf,Trk::do_not_delete<Trk::Surface>);
+    std::pair< Trk::SharedObject<Trk::Surface>, Amg::Vector3D >  surfaceOrder(sharedSurface, sf->center());
+    surfaces.push_back(surfaceOrder);
+  }
+
+  // create merged binned array
+  // a two-dimensional BinnedArray is needed ; takes possession of binUtils and
+  // will delete it on destruction.
+  auto mergeBA = std::make_unique<Trk::BinnedArray1D1D<Trk::Surface>>(
+      surfaces, new Trk::BinUtility(rsteps, Trk::open, Trk::binR), binUtils);
+
+  // DiscOverlapDescriptor takes possession of clonedBinUtils, will delete it on
+  // destruction.
+  //  but *does not* manage mergeBA.
+  std::vector<Trk::BinUtility*>* clonedBinUtils = new std::vector<Trk::BinUtility*>();
+  for (auto *bu : *binUtils) clonedBinUtils->push_back(bu->clone());
+  auto olDescriptor = std::make_unique<InDet::DiscOverlapDescriptor>(mergeBA.get(),clonedBinUtils,true);
+
+  // position & bounds of the disc layer
+  double disc_thickness = std::fabs(zb.second-zb.first);
+  double disc_pos = (zb.first+zb.second)*0.5;
+
+  Amg::Transform3D transf;
+  transf = Amg::Translation3D(0.,0.,disc_pos);
+  Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces     = mergeBA->arrayObjects();
+  // create disc layer
+  // layer creation; deletes mergeBA in baseclass 'Layer' upon destruction
+  Trk::DiscLayer* layer =
+    new Trk::DiscLayer(transf,
+                       new Trk::DiscBounds(rsteps.front(), rsteps.back()),
+                       std::move(mergeBA),
+                       // get the layer material from the first merged layer
+                       *(inputDiscs[0]->layerMaterialProperties()),
+                       disc_thickness,
+                       std::move(olDescriptor));
+
+  // register the layer to the surfaces
+  for (const auto *sf : layerSurfaces) {
+    const InDetDD::SiDetectorElement* detElement = dynamic_cast<const InDetDD::SiDetectorElement*>(sf->associatedDetectorElement());
+    const std::vector<const Trk::Surface*>& allSurfacesVector = detElement->surfaces();
+    for (const auto *subsf : allSurfacesVector){
+      const_cast<Trk::Surface&>(*subsf).associateLayer(*layer);
+    }
+  }
+
+  for (const auto *disc : inputDiscs)   {
+    delete disc;      // cleanup
+  }
+
+  return layer;
 }

@@ -85,18 +85,18 @@ namespace InDet {
             - in case a ring layout is given, it creates the corresponding
          sub-volumes and updates the radius
             */
-      Trk::TrackingVolume* createTrackingVolume
-      ATLAS_NOT_THREAD_SAFE(const std::vector<Trk::Layer*>& layers,
-                            double innerRadius,
-                            double& outerRadius,
-                            double zMin,
-                            double zMax,
-                            const std::string& volumeName,
-                            Trk::BinningType btype,
-                            bool doAdjustOuterRadius = true) const;
+      Trk::TrackingVolume* createTrackingVolume(
+        const std::vector<Trk::Layer*>& layers,
+        double innerRadius,
+        double& outerRadius,
+        double zMin,
+        double zMax,
+        const std::string& volumeName,
+        Trk::BinningType btype,
+        bool doAdjustOuterRadius = true) const;
 
       /** Private helper method, creates and packs a triple containing of NegEndcap-Barrel-PosEndcap volumes */
-      Trk::TrackingVolume* packVolumeTriple ATLAS_NOT_THREAD_SAFE(
+      Trk::TrackingVolume* packVolumeTriple(
         const std::vector<Trk::TrackingVolume*>& negVolumes,
         const std::vector<Trk::TrackingVolume*>& centralVolumes,
         const std::vector<Trk::TrackingVolume*>& posVolumes,
@@ -111,40 +111,74 @@ namespace InDet {
 
       /** Private helper method for merging of rings with z-overlap */
       std::vector<Trk::Layer*> checkZoverlap(std::vector<Trk::Layer*>& lays) const;
-      virtual Trk::Layer* mergeDiscLayers(std::vector<Trk::Layer*>& dlays) const;
+      Trk::Layer* mergeDiscLayers(std::vector<Trk::Layer*>& dlays) const;
 
       // material configuration
       CxxUtils::CachedUniquePtrT<Trk::Material> m_materialProperties;       //!< overal material properties of the ID
 
       // Configurable Properties
-      PublicToolHandle<Trk::ITrackingVolumeCreator> m_trackingVolumeCreator{this, "TrackingVolumeCreator", "Trk::CylinderVolumeCreator/CylinderVolumeCreator"};   //!< Helper Tool to create TrackingVolumes
-      PublicToolHandle<Trk::ILayerArrayCreator> m_layerArrayCreator{this, "LayerArrayCreator", "Trk::LayerArrayCreator/LayerArrayCreator"};       //!< Helper Tool to create BinnedArrays
-
+      //!< Helper Tool to create TrackingVolumes
+      PublicToolHandle<Trk::ITrackingVolumeCreator> m_trackingVolumeCreator{
+          this, "TrackingVolumeCreator",
+          "Trk::CylinderVolumeCreator/CylinderVolumeCreator"};
+      PublicToolHandle<Trk::ILayerArrayCreator> m_layerArrayCreator{
+          this, "LayerArrayCreator",
+          "Trk::LayerArrayCreator/LayerArrayCreator"};  //!< Helper Tool to
+                                                        //!< create BinnedArrays
       // configurations for the layer builders
-      IntegerArrayProperty m_layerBinningTypeCenter{this, "LayerBinningTypeCenter", {} };  //!< binning type for the provided layers
-      IntegerArrayProperty m_layerBinningTypeEndcap{this, "LayerBinningTypeEndcap", {} };  //!< binning type for the provided layers
-      IntegerArrayProperty m_colorCodesConfig{this, "ColorCodes", {} };        //!< Color codes
+      IntegerArrayProperty m_layerBinningTypeCenter{
+          this,
+          "LayerBinningTypeCenter",
+          {}};  //!< binning type for the provided layers
+      IntegerArrayProperty m_layerBinningTypeEndcap{
+          this,
+          "LayerBinningTypeEndcap",
+          {}};  //!< binning type for the provided layers
+      IntegerArrayProperty m_colorCodesConfig{
+          this, "ColorCodes", {}};  //!< Color codes
 
       // enclosing endcap/cylinder layer
-      ServiceHandle<IEnvelopeDefSvc> m_enclosingEnvelopeSvc{this, "EnvelopeDefinitionSvc", "AtlasEnvelopeDefSvc"};     //!< the service to provide the ID envelope size
-      DoubleArrayProperty m_enclosingCylinderRadius{this, "VolumeEnclosureCylinderRadii", {} };  //!< the cylinder layer inside the enclosing volume
-      DoubleArrayProperty m_enclosingDiscPositionZ{this, "VolumeEnclosureDiscPositions",  {} };   //!< the disc position inside the enclosing volume
+      ServiceHandle<IEnvelopeDefSvc> m_enclosingEnvelopeSvc{
+          this, "EnvelopeDefinitionSvc",
+          "AtlasEnvelopeDefSvc"};  //!< the service to provide the ID envelope  size
+      DoubleArrayProperty m_enclosingCylinderRadius{
+          this,
+          "VolumeEnclosureCylinderRadii",
+          {}};  //!< the cylinder layer inside the enclosing volume
+      DoubleArrayProperty m_enclosingDiscPositionZ{
+          this,
+          "VolumeEnclosureDiscPositions",
+          {}};  //!< the disc position inside the enclosing volume
 
-      DoubleProperty m_layerEnvelopeCover{this, "EnvelopeCover", 2*Gaudi::Units::mm};       //!< innermost - outermost
-      BooleanProperty m_buildBoundaryLayers{this, "BuildBoundaryLayers", true};      //!< create boundary layers
-      BooleanProperty m_replaceJointBoundaries{this, "ReplaceAllJointBoundaries", true};   //!< run with replacement of all joint boundaries
+      DoubleProperty m_layerEnvelopeCover{
+          this, "EnvelopeCover",
+          2 * Gaudi::Units::mm};  //!< innermost - outermost
+      BooleanProperty m_buildBoundaryLayers{this, "BuildBoundaryLayers",
+                                            true};  //!< create boundary layers
+      BooleanProperty m_replaceJointBoundaries{
+          this, "ReplaceAllJointBoundaries",
+          true};  //!< run with replacement of all joint boundaries
 
       // robust layer indexing
-      BooleanProperty m_indexStaticLayers{this, "IndexStaticLayers", true};        //!< forces robust indexing for layers
+      BooleanProperty m_indexStaticLayers{
+          this, "IndexStaticLayers",
+          true};  //!< forces robust indexing for layers
 
       // check for endcap ring layout
-      BooleanProperty m_checkForRingLayout{this, "CheckForRingLayout", false};        //!< this is to check for the endcap ring layout
-      DoubleProperty m_ringTolerance{this, "MinimalRadialGapForVolumeSplit", 10*Gaudi::Units::mm};            //!< the ring tolerance
+      BooleanProperty m_checkForRingLayout{
+          this, "CheckForRingLayout",
+          false};  //!< this is to check for the endcap ring layout
+      DoubleProperty m_ringTolerance{
+          this, "MinimalRadialGapForVolumeSplit",
+          10 * Gaudi::Units::mm};  //!< the ring tolerance
 
       // naming schema
-      StringProperty m_namespace{this, "VolumeNamespace", "InDet::"};                //!< identificaton namespace
+      StringProperty m_namespace{this, "VolumeNamespace",
+                                 "InDet::"};  //!< identificaton namespace
       // ID container
-      StringProperty m_exitVolume{this, "ExitVolumeName", "InDet::Containers::InnerDetector"};                //!< the final ID container
+      StringProperty m_exitVolume{
+          this, "ExitVolumeName",
+          "InDet::Containers::InnerDetector"};  //!< the final ID container
 
       // Make room for HGTD (3420 mm < |z| < 3545 mm) within the ID tracking geometry volume
       // This will be filled by the dedicated HGTD Tracking Geometry Builder
