@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_LLP1.py
@@ -236,7 +236,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
                                                                                InDetTrackParticlesKey  = "InDetTrackParticles"))
 
     # LRT Tracks associated with jets
-    if ConfigFlags.InDet.Tracking.doR3LargeD0:
+    if ConfigFlags.Tracking.doLargeD0:
         LLP1LRTJetTPThinningTool = acc.getPrimaryAndMerge(JetLargeD0TrackParticleThinningCfg(ConfigFlags,
                                                                                              name                    = "LLP1LRTJetTPThinningTool",
                                                                                              StreamName              = kwargs['StreamName'],
@@ -258,7 +258,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
                      LLP1LRTVSITPThinningTool,
                      LLP1JetTPThinningTool]
 
-    if ConfigFlags.InDet.Tracking.doR3LargeD0:
+    if ConfigFlags.Tracking.doLargeD0:
         thinningTools.append(LLP1LRTJetTPThinningTool)
 
     # Skimming

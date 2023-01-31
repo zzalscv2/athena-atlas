@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of SiSpacePointFormation and SiSpacePointTool packages
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -10,18 +10,21 @@ def InDetSiElementPropertiesTableCondAlgCfg(flags, name="InDetSiElementPropertie
     from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
     acc = SCT_ReadoutGeometryCfg(flags)
 
-    acc.addCondAlgo(CompFactory.InDet.SiElementPropertiesTableCondAlg(name, **kwargs))
+    acc.addCondAlgo(
+        CompFactory.InDet.SiElementPropertiesTableCondAlg(name, **kwargs))
     return acc
 
 def ITkSiElementPropertiesTableCondAlgCfg(flags, name="ITkSiElementPropertiesTableCondAlg", **kwargs):
     # For strip DetectorElementCollection used
-    from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
+    from StripGeoModelXml.ITkStripGeoModelConfig import (
+        ITkStripReadoutGeometryCfg)
     acc = ITkStripReadoutGeometryCfg(flags)
     
     kwargs.setdefault("ReadKey", "ITkStripDetectorElementCollection")
     kwargs.setdefault("WriteKey", "ITkStripElementPropertiesTable")
 
-    acc.addCondAlgo(CompFactory.InDet.SiElementPropertiesTableCondAlg(name, **kwargs))
+    acc.addCondAlgo(
+        CompFactory.InDet.SiElementPropertiesTableCondAlg(name, **kwargs))
     return acc
 
 def SiSpacePointMakerToolCfg(flags, name="InDetSiSpacePointMakerTool", **kwargs):
@@ -46,9 +49,8 @@ def InDetSiTrackerSpacePointFinderCfg(flags, name = "InDetSiTrackerSpacePointFin
     acc.merge(BeamSpotCondAlgCfg(flags))
     acc.merge(InDetSiElementPropertiesTableCondAlgCfg(flags))
 
-    InDetSiSpacePointMakerTool = acc.popToolsAndMerge(SiSpacePointMakerToolCfg(flags))
-
-    kwargs.setdefault("SiSpacePointMakerTool", InDetSiSpacePointMakerTool)
+    kwargs.setdefault("SiSpacePointMakerTool", acc.popToolsAndMerge(
+        SiSpacePointMakerToolCfg(flags)))
     kwargs.setdefault("PixelsClustersName", 'PixelClusters')
     kwargs.setdefault("SCT_ClustersName", 'SCT_Clusters')
     kwargs.setdefault("SpacePointsPixelName", 'PixelSpacePoints')
@@ -66,7 +68,8 @@ def InDetSiTrackerSpacePointFinderCfg(flags, name = "InDetSiTrackerSpacePointFin
         kwargs.setdefault("VertexY", 99999999)
         kwargs.setdefault("OverlapLimitOpposite", 5)
 
-    acc.addEventAlgo(CompFactory.InDet.SiTrackerSpacePointFinder(name, **kwargs))
+    acc.addEventAlgo(
+        CompFactory.InDet.SiTrackerSpacePointFinder(name, **kwargs))
     return acc
 
 def TrigSiTrackerSpacePointFinderCfg(flags, name = "InDetTrigSiTrackerSpacePointFinder", **kwargs):
@@ -78,9 +81,8 @@ def TrigSiTrackerSpacePointFinderCfg(flags, name = "InDetTrigSiTrackerSpacePoint
     acc.merge(BeamSpotCondAlgCfg(flags))
     acc.merge(InDetSiElementPropertiesTableCondAlgCfg(flags))
 
-    InDetSiSpacePointMakerTool = acc.popToolsAndMerge(SiSpacePointMakerToolCfg(flags))
-
-    kwargs.setdefault("SiSpacePointMakerTool", InDetSiSpacePointMakerTool)
+    kwargs.setdefault("SiSpacePointMakerTool", acc.popToolsAndMerge(
+        SiSpacePointMakerToolCfg(flags)))
     kwargs.setdefault("PixelsClustersName", 'PixelTrigClusters')
     kwargs.setdefault("SCT_ClustersName", 'SCT_TrigClusters')
     kwargs.setdefault("SpacePointsPixelName", 'PixelTrigSpacePoints')
@@ -92,21 +94,22 @@ def TrigSiTrackerSpacePointFinderCfg(flags, name = "InDetTrigSiTrackerSpacePoint
     kwargs.setdefault("SpacePointCacheSCT", "SctSpacePointCache")
     kwargs.setdefault("SpacePointCachePix", "PixelSpacePointCache")
 
-    acc.addEventAlgo(CompFactory.InDet.SiTrackerSpacePointFinder(name, **kwargs))
+    acc.addEventAlgo(
+        CompFactory.InDet.SiTrackerSpacePointFinder(name, **kwargs))
     return acc
 
 def ITkSiTrackerSpacePointFinderCfg(flags, name = "ITkSiTrackerSpacePointFinder", **kwargs):
     # For strip DetectorElementCollection used
-    from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
+    from StripGeoModelXml.ITkStripGeoModelConfig import (
+        ITkStripReadoutGeometryCfg)
     acc = ITkStripReadoutGeometryCfg(flags)
 
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     acc.merge(BeamSpotCondAlgCfg(flags))
     acc.merge(ITkSiElementPropertiesTableCondAlgCfg(flags))
 
-    ITkSiSpacePointMakerTool = acc.popToolsAndMerge(ITkSiSpacePointMakerToolCfg(flags))
-
-    kwargs.setdefault("SiSpacePointMakerTool", ITkSiSpacePointMakerTool)
+    kwargs.setdefault("SiSpacePointMakerTool", acc.popToolsAndMerge(
+        ITkSiSpacePointMakerToolCfg(flags)))
     kwargs.setdefault("PixelsClustersName", 'ITkPixelClusters')
     kwargs.setdefault("SCT_ClustersName", 'ITkStripClusters')
     kwargs.setdefault("SCTPropertiesKey", "ITkStripElementPropertiesTable")
@@ -115,8 +118,13 @@ def ITkSiTrackerSpacePointFinderCfg(flags, name = "ITkSiTrackerSpacePointFinder"
     kwargs.setdefault("SpacePointsSCTName", 'ITkStripSpacePoints')
     kwargs.setdefault("SpacePointsOverlapName", 'ITkOverlapSpacePoints')
     kwargs.setdefault("ProcessPixels", flags.Detector.EnableITkPixel)
-    kwargs.setdefault("ProcessSCTs", flags.Detector.EnableITkStrip and (not flags.ITk.Tracking.doFastTracking or flags.ITk.Tracking.doLargeD0))
-    kwargs.setdefault("ProcessOverlaps", flags.Detector.EnableITkStrip and (not flags.ITk.Tracking.doFastTracking or flags.ITk.Tracking.doLargeD0))
+    # Strip hits are not used for default fast tracking but are used
+    # for LRT fast tracking
+    useStrip = flags.Detector.EnableITkStrip and \
+               (not flags.ITk.Tracking.doFastTracking or \
+                flags.Tracking.doLargeD0)
+    kwargs.setdefault("ProcessSCTs", useStrip)
+    kwargs.setdefault("ProcessOverlaps", useStrip)
 
     if flags.Beam.Type is BeamType.Cosmics:
         kwargs.setdefault("ProcessOverlaps", False)
@@ -126,7 +134,8 @@ def ITkSiTrackerSpacePointFinderCfg(flags, name = "ITkSiTrackerSpacePointFinder"
         kwargs.setdefault("VertexY", 99999999)
         kwargs.setdefault("OverlapLimitOpposite", 5)
 
-    acc.addEventAlgo(CompFactory.InDet.SiTrackerSpacePointFinder(name, **kwargs))
+    acc.addEventAlgo(
+        CompFactory.InDet.SiTrackerSpacePointFinder(name, **kwargs))
     return acc
 
 def ITkTrigSiTrackerSpacePointFinderCfg(flags, name = "ITkTrigSiTrackerSpacePointFinder", signature = "", **kwargs):
@@ -134,4 +143,4 @@ def ITkTrigSiTrackerSpacePointFinderCfg(flags, name = "ITkTrigSiTrackerSpacePoin
     kwargs.setdefault("SCT_ClustersName", "ITkTrigStripClusters")
     kwargs.setdefault("SpacePointsPixelName", "ITkPixelTrigSpacePoints")
     kwargs.setdefault("SpacePointsSCTName", "ITkStripTrigSpacePoints")
-    return ITkSiTrackerSpacePointFinderCfg(flags, name=name+signature, **kwargs)
+    return ITkSiTrackerSpacePointFinderCfg(flags, name+signature, **kwargs)

@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
  StandardJetConstits: A module containing standard definitions for jet inputs : external container and 
@@ -308,7 +308,7 @@ _stdSeqList = [
 
     # LRT. Only used as ghosts
     JetInputConstit("TrackLRT", xAODType.TrackParticle, "InDetLargeD0TrackParticles", 
-                    filterfn = lambda flags : (flags.InDet.Tracking.doR3LargeD0 and "InDetLargeD0TrackParticles" in flags.Input.Collections, "Large radius tracking did not run")),
+                    filterfn = lambda flags : (flags.Tracking.doLargeD0 and "InDetLargeD0TrackParticles" in flags.Input.Collections, "Large radius tracking did not run")),
 
     # *****************************
     # Muon segments. Only used as ghosts
