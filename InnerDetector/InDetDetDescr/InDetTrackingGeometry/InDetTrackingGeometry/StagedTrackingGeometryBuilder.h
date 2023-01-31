@@ -173,9 +173,6 @@ namespace InDet {
       double zMin,
       double zPosCentral) const;
 
-      /** Private helper method for merging of rings with z-overlap */
-      virtual Trk::Layer* mergeDiscLayers(std::vector<Trk::Layer*>& dlays) const override final;
-
       // helper tools for the geometry building
       ToolHandleArray<Trk::ILayerProvider>           m_layerProviders;          //!< Helper Tools for the Layer creation, includes beam pipe builder
   };

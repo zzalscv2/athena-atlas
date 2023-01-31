@@ -161,24 +161,22 @@ struct LayerSetupCond
       /** Private helper method to flush the cache into the id volumes - return
        * volume is the one to be provided */
       Trk::TrackingVolume* createFlushVolume
-      ATLAS_NOT_THREAD_SAFE(std::vector<InDet::LayerSetupCond>& layerSetupCache,
-                            double innerRadius,
-                            double& outerRadius,
-                            double extendZ) const;
+      (std::vector<InDet::LayerSetupCond>& layerSetupCache,
+       double innerRadius,
+       double& outerRadius,
+       double extendZ) const;
 
       using StagedTrackingGeometryBuilderImpl::packVolumeTriple;
       /** Private helper method, creates and packs a triple containing of NegEndcap-Barrel-PosEndcap layers
           - in case of a ring layout the subvolumes are created and the rMax is adapted
          */
       Trk::TrackingVolume* packVolumeTriple
-      ATLAS_NOT_THREAD_SAFE(LayerSetupCond& layerSetup,
-                            double rMin,
-                            double& rMax,
-                            double zMin,
-                            double zPosCentral) const;
+      (LayerSetupCond& layerSetup,
+       double rMin,
+       double& rMax,
+       double zMin,
+       double zPosCentral) const;
 
-      /** Private helper method for merging of rings with z-overlap */
-      virtual Trk::Layer* mergeDiscLayers(std::vector<Trk::Layer*>& dlays) const override final;
 
       // Configurable Properties
       // helper tools for the geometry building
