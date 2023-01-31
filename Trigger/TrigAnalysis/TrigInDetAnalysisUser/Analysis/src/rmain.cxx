@@ -56,7 +56,7 @@
 #include "PurityAnalysis.h"
 
 #include "ConfVtxAnalysis.h"
-
+#include "TIDAReference.h"
 
 #include "lumiList.h"
 #include "lumiParser.h"
@@ -90,6 +90,8 @@ extern BinConfig bjetBinConfig;
 extern BinConfig cosmicBinConfig;
 
 void copyReleaseInfo( TTree* tree, TFile* foutdir );
+
+bool debugPrintout = false;
 
 
 /// signal handler
@@ -306,7 +308,6 @@ struct event_list {
     
     while ( file>>evnt ) { 
       mevents.insert(evnt);
-      //      std::cout << "evnt " << evnt << std::endl; 
     }
     
     std::cout << "event_list::event_list() ";
@@ -375,6 +376,12 @@ double ETmin = 0;
 bool SelectObjectET(const TrackTrigObject& t) { return std::fabs(t.pt())>ETmin; }
 
 
+/// this is a swiss knife function - by default if ET/PT > 0
+/// such that fabs(ET/PT) > 0 is always true and we can always 
+/// call this function - PT can never be 0 for a particle in 
+/// the detector so can use this for both ET/PT selection and 
+/// raw ET selection 
+ 
 double ETovPTmin = 0;
 
 bool SelectObjectETovPT(const TrackTrigObject& tobj, TIDA::Track* t=0) {
@@ -383,6 +390,130 @@ bool SelectObjectETovPT(const TrackTrigObject& tobj, TIDA::Track* t=0) {
   if ( t ) ETovPTselection = std::fabs(tobj.pt()/t->pT())>=ETovPTmin;
   return ETselection&ETovPTselection;
 }
+
+
+
+
+
+/// This is awful code, passing in lots of filter pointers just 
+/// so that they can be assigned neatly ? This section of the code 
+/// needs a bit of a rethink
+/// getFilter( refname, &filter_off, &filter_muon, &filter_truth );
+/// Fixme: maybe use a switch statement or something in the future
+TrackFilter* getFilter( const std::string& refname, int pdgId, 
+			TrackFilter* foff,
+			TrackFilter* fmu,
+			TrackFilter* ftruth ) { 			
+ 
+  std::cout << "getFilter(): refname " << refname << std::endl; 
+
+  if      ( refname=="Offline" )                    return foff;
+  else if ( refname=="InDetLargeD0TrackParticles" ) return foff;
+  else if ( contains( refname, "Electrons") )       return foff;
+  else if ( contains( refname, "LRTElectrons") )    return foff;
+  else if ( contains( refname, "Muons"  ) )         return fmu;
+  else if ( contains( refname, "MuonsLRT"  ) )      return fmu;
+  else if ( contains( refname, "Taus"   ) )         return foff;  // tau ref chains
+  else if ( contains( refname, "1Prong" ) )         return foff;  // tau ref chains
+  else if ( contains( refname, "3Prong" ) )         return foff;  // tau ref chains
+  else if ( refname=="Truth" && pdgId!=0 )          return ftruth;
+  else if ( refname=="Truth" && pdgId==0 )          return foff;
+  else {
+    std::cerr << "unknown reference chain defined" << std::endl;
+    return 0;
+  }
+}
+
+
+bool GetRefTracks( const std::string& rc, const std::string& exclude, 
+		   const std::vector<TIDA::Chain>& chains, 
+		   NtupleTrackSelector& refTracks,
+		   TrackAssociator* ex_matcher, 
+		   TrigObjectMatcher& tom ) { 
+  
+   bool foundReference = false;
+
+   for ( size_t ic=chains.size() ; ic-- ;  ) { 
+
+     if ( chains[ic].name()==rc ) { 
+
+          foundReference = true;
+
+          //Get tracks from within reference roi
+
+	  /// get any objects to exclude matched from the reference selection
+
+	  if ( exclude.empty() ) { 
+	    refTracks.selectTracks( chains[ic].rois()[0].tracks() );
+	  }
+	  else { 
+
+	    std::vector<TIDA::Track> tmptracks = chains[ic][0].tracks();
+
+	    for ( size_t ix=chains.size() ; ix-- ; ) {
+	      
+	      if ( chains[ix].name()==exclude ) {
+		
+		std::vector<TIDA::Track> extracks = chains[ix][0].tracks();
+
+		std::vector<TIDA::Track*> refp;
+		std::vector<TIDA::Track*> refx;
+		
+		for ( size_t it=tmptracks.size() ; it-- ; )  refp.push_back( &tmptracks[it] );
+		for ( size_t it=extracks.size()  ; it-- ; )  refx.push_back( &extracks[it] );
+
+		/// match between the reference tracks and the objects to be excluded, 
+		/// and rebuild the reference tracks without the matches  
+		
+		ex_matcher->match( refp, refx );
+
+		std::vector<TIDA::Track*> refp_ex;
+
+		for ( size_t it=refp.size() ; it-- ; ) { 
+		  /// if no match then add back to the standard reefrence 
+		  if ( ex_matcher->matched(refp[it])==0 ) refp_ex.push_back(refp[it]);
+		}
+		
+		refTracks.clear();
+		refTracks.selectTracks( refp_ex );
+
+		if ( debugPrintout ) { 
+		  
+		  std::cout << "\nexclude: " << refp.size() << "\t" << refp_ex.size() << std::endl;
+		  std::cout << "exclude:\n"  << extracks << std::endl;
+		  std::cout << "reference tracks: " << std::endl;
+
+		  size_t it0 = refp_ex.size();
+		  
+		  for ( size_t it=0 ; it<refp.size() && it0>0 ; it++ ) { 
+		    if ( refp[it]==refp_ex[it0-1] ) std::cout << it << "\t" << *refp[it] << "\t" << *refp_ex[--it0] << std::endl;
+		    else 		            std::cout << "\n" << it << "\t" << *refp[it] << "\t----\n" << std::endl;
+		  }
+
+		}
+
+		break;
+	      }
+
+	    }
+	  }
+
+	  /// get objects if requested
+	  
+	  if ( chains[ic].rois()[0].objects().size()>0 ) { 
+	    tom = TrigObjectMatcher( &refTracks, chains[ic].rois()[0].objects(), SelectObjectETovPT );
+	  }
+	  
+	  break; 
+     }
+   }
+
+   return foundReference;
+
+}
+
+
+
 
 
 
@@ -419,7 +550,13 @@ int main(int argc, char** argv)
 
   std::string datafile = "";
 
-  std::vector<std::string> refChains = {};
+  std::vector<std::string> refChains(0);
+
+ std::vector<TrackFilter*> refFilters(0);
+
+  TrackFilter*   refFilter = 0;
+  TrackFilter* truthFilter = 0;
+                               
   std::string refChain = "";
 
   int pdgId = 0;
@@ -459,10 +596,12 @@ int main(int argc, char** argv)
         std::string token;
         while (std::getline(iss, token, '+')){ // tokenize string based on '+' delimeter
           refChains.push_back(token);
+          refFilters.push_back(0);
         }
       }
       else {         
         refChains.push_back(argv[i]); // standard single reference 
+	refFilters.push_back(0);
       }
     }
     else if ( std::string(argv[i])=="--rms" )   useoldrms = false;
@@ -602,16 +741,18 @@ int main(int argc, char** argv)
   // CK: Option to specify which ref tracks to use from ref track vector, ordered by pT
   //     User parameter is a vector of ref track vector indices
   //     e.g. specifyPtOrderedRefTracks = {0, 1, 5} will use the first leading, second leading, and sixth leading track
-  std::vector<int> refPtOrd_indices;
+  std::vector<size_t> refPtOrd_indices;
   bool use_pt_ordered_ref = false;
   
-  if ( inputdata.isTagDefined("specifyPtOrderedRefTracks") ) {
+  if ( inputdata.isTagDefined("UsePtOrderedRefTracks") ) {
     std::vector<double> refPtOrd_indices_tmp;
 
     use_pt_ordered_ref = true;
-    refPtOrd_indices_tmp = ( inputdata.GetVector("specifyPtOrderedRefTracks") );
+    refPtOrd_indices_tmp = ( inputdata.GetVector("UsePtOrderedRefTracks") );
     
-    for (unsigned int i = 0; i < refPtOrd_indices_tmp.size(); ++i) {
+    std::cout << "using PT ordered reference tracks: " << refPtOrd_indices_tmp << std::endl; 
+
+    for ( size_t i=refPtOrd_indices_tmp.size(); i-- ; ) {
       refPtOrd_indices.push_back( refPtOrd_indices_tmp.at(i) );
     }
   }
@@ -672,6 +813,7 @@ int main(int argc, char** argv)
     if ( inputdata.isTagDefined("refChain") )  {
       refChain = inputdata.GetString("refChain"); 
       refChains.push_back(refChain);
+      refFilters.push_back(0);
     }
     else { 
       std::cerr << "Error: no reference chain defined\n" << std::endl;
@@ -953,7 +1095,6 @@ int main(int argc, char** argv)
   bool doPurity = false;
   if ( inputdata.isTagDefined("doPurity") )  doPurity = ( inputdata.GetValue("doPurity")==0 ? false : true );
 
-  bool debugPrintout = false;
   if ( inputdata.isTagDefined("DebugPrintout") )  debugPrintout = ( inputdata.GetValue("DebugPrintout")==0 ? false : true );
 
 
@@ -1052,9 +1193,6 @@ int main(int argc, char** argv)
   /// track selectors so we can select multiple times with different 
   /// filters if we want (simpler then looping over vectors each time 
 
-  TrackFilter* refFilter;
-  TrackFilter* truthFilter;
-
 
   if ( inputdata.isTagDefined("Filter" ) ) { 
     ChainString filter = inputdata.GetString("Filter");
@@ -1071,22 +1209,40 @@ int main(int argc, char** argv)
     }
   }
   else { 
-    if      ( refChains[0]=="Offline" )                    refFilter = &filter_off;
-    else if ( refChains[0]=="InDetLargeD0TrackParticles" ) refFilter = &filter_off;
-    else if ( contains( refChains[0], "Electrons") )       refFilter = &filter_off;
-    else if ( contains( refChains[0], "LRTElectrons") )    refFilter = &filter_off;
-    else if ( contains( refChains[0], "Muons"  ) )         refFilter = &filter_muon;
-    else if ( contains( refChains[0], "MuonsLRT"  ) )      refFilter = &filter_muon;
-    else if ( contains( refChains[0], "Taus"   ) )         refFilter = &filter_off;  // tau ref chains
-    else if ( contains( refChains[0], "1Prong" ) )         refFilter = &filter_off;  // tau ref chains
-    else if ( contains( refChains[0], "3Prong" ) )         refFilter = &filter_off;  // tau ref chains
-    else if ( refChains[0]=="Truth" && pdgId!=0 )          refFilter = &filter_truth;
-    else if ( refChains[0]=="Truth" && pdgId==0 )          refFilter = &filter_off;
-    else { 
+    if ( !(refFilter = getFilter( refChains[0], pdgId, &filter_off, &filter_muon, &filter_truth ) ) ) { 
       std::cerr << "unknown reference chain defined" << std::endl;
       return (-1);
     }
   }
+
+  refFilters.push_back(refFilter);
+
+
+  std::map<std::string,TIDA::Reference> ref;
+
+  std::vector<NtupleTrackSelector*>  refSelectors;
+  
+#if 0
+  /// add thr default reference chain to the new ref map - do we want to do this ?
+  /// not sure at the moment, leave this code in place but not executed for the 
+  /// time being ... 
+
+  for ( size_t ic=0 ; ic<refChains.size() ; ic++ ) { 
+    
+    if ( refFilter==0 ) { 
+      if ( !(refFilters[ic] = getFilter( refChains[ic], pdgId, &filter_off, &filter_muon, &filter_truth ) ) ) { 
+	std::cerr << "unknown reference chain defined" << std::endl;
+	return (-1);
+      }
+      refFilter = refFilters[ic];
+    }
+    else refFilters[ic] = refFilter;
+
+    ref.insert( TIDA::ReferenceMap::value_type( refChains[ic], TIDA::Reference( refChains[ic], new NtupleTrackSelector(refFilter), refFilter, new TrigObjectMatcher ) ) ); 
+		
+  }
+
+# endif
 
   if (pdgId==0) truthFilter = &filter_off;
   else truthFilter = &filter_truth;
@@ -1122,7 +1278,6 @@ int main(int argc, char** argv)
   std::vector<TrackAnalysis*> analyses;
   analyses.reserve(test_chains.size());
 
-
   std::cout << "booking " << test_chains.size() << " analyses" << std::endl;
   
   for ( unsigned  i=0 ; i<test_chains.size() ; i++ ) {
@@ -1133,48 +1288,105 @@ int main(int argc, char** argv)
 
     chainnames.push_back(chainname);
 
-    //    std::cout << "chain name " << chainname << "\t:" << chainnames.back() << " : " << chainnames.size() << std::endl;
 
     // tag and probe object creation and configuration
 
     TagNProbe* TnP_tool = 0;
     ChainString probe = chainConfig[i];
-                
-    if ( probe.extra().find("_tag")!=std::string::npos ) continue;
-       
+     
+    std::string probe_extra = probe.extra();
+           
+    if ( probe_extra.empty() ) probe_extra = probe.postvalue("extra"); 
+
+    if ( probe_extra.find("_tag")!=std::string::npos || probe.extra().find("_tag")!=std::string::npos ) { 
+      std::cout << "rejecting tag chain " << probe << std::endl;
+      continue;
+    }
+
     // probe can be the .head() so convert m_chainNames to a ChainString and search the .extra() specifically                                           
-    size_t p = probe.extra().find("_probe");
- 
+    size_t p = probe_extra.find("_probe");
+
     if ( p!=std::string::npos ) {
- 
-      std::string probe_key = probe.extra().erase( p, 6) ;
+
+      std::string probe_ref = refChains[0];
+
+      if ( !probe.postvalue("ref").empty() )  { 
+
+	probe_ref = probe.postvalue("ref");
+
+	if ( refChains[0] != probe_ref ) { 
+	  std::cerr << "default and probe chain references do not match: probe ref: " << probe_ref << " ref: " << refChains[0] << std::endl;
+	  return -1;
+	}
+
+      }	
+
+
+      std::string probe_key = probe_extra.erase(p, 6);
  
       for ( unsigned j=0 ; j<test_chains.size(); ++j) {
  
 	if ( i==j ) continue;
  
-	ChainString tag = test_chains[j];
- 
+	ChainString tag = chainConfig[j];
+	
 	if ( tag.head() != probe.head() ) continue;
-	if ( tag.tail() != probe.tail() ) continue;
-	if ( tag.element() == probe.element() ) continue;
-	if ( tag.extra().find("_tag")==std::string::npos ) continue;
- 
+	
+	//	if ( tag.tail() != probe.tail() ) continue; // should not enforce this for mu + tau tnp chains
+
+	std::string tag_extra = tag.extra();
+
+	if ( tag_extra.empty() ) tag_extra = tag.postvalue("extra");
+	if ( tag_extra.find("_tag")==std::string::npos ) continue;
+	
 	// need to compare just the 'el1' part of of .extra() so create variables without '_probe/_tag' part                                                
-	std::string tag_key = tag.extra().erase( tag.extra().find("_tag"), 4) ;
+	std::string tag_key = tag_extra.erase( tag_extra.find("_tag"), 4) ;
  
 	// tag chain must be the same as probe chain but with te=0 and extra=*_tag                                                                          
 	if ( tag_key != probe_key ) continue;
- 
-	// if matching tag found then initialise tag and probe object and store tag and probe chains in there                                                        
+
+	if ( tag.element() == probe.element() ) continue;
+
+	std::string tag_ref = refChains[0];
+
+	/// now we know that there is a corresponding tag, we can add the probe ...
+
+	TrackFilter* filter = getFilter( probe_ref, pdgId, &filter_off, &filter_muon, &filter_truth );
+
+	ref.insert( TIDA::ReferenceMap::value_type( probe_ref, TIDA::Reference( probe_ref, new NtupleTrackSelector(filter), filter, new TrigObjectMatcher ) ) );  
+	       	 
+	if ( !tag.postvalue("ref").empty() )  { 
+
+	  tag_ref = tag.postvalue("ref");
+	  //	  refChains.push_back( tag_ref);
+
+	  std::cout << "tag ref:   " << tag_ref << std::endl;
+	  
+	  if ( ref.find(tag_ref)==ref.end() ) { 
+	    TrackFilter* filter = getFilter( tag_ref, pdgId, &filter_off, &filter_muon, &filter_truth );
+	    // ref.insert( std::map<std::string,TIDA::Reference>::value_type( tag_ref, TIDA::Reference( tag_ref, new NtupleTrackSelector(filter) ) ) );  
+	    ref.insert( TIDA::ReferenceMap::value_type( tag_ref, TIDA::Reference( tag_ref, new NtupleTrackSelector(filter), filter, new TrigObjectMatcher ) ) );  
+	  }	
+	}
+
+	/// if matching tag found then initialise tag and probe object and store tag and probe chains in there
 	/// this will be passed into the ConfAnalysis, which will delete it when necessary                                                                
-	/// could perhaps be done with a unique_ptrt
-	TnP_tool = new TagNProbe(refChains[0], massMin, massMax);
+	/// could perhaps be done with a unique_ptr
+	// TnP_tool = new TagNProbe( refChains[0], refChains[0], massMin, massMax);
+	TnP_tool = new TagNProbe( tag_ref, probe_ref, massMin, massMax);
 	TnP_tool->tag(tag);
 	TnP_tool->probe(probe);
-	std::cout <<  "Tag and probe pair found! \nTag  : " <<  tag << "\nProbe: " << probe <<std::endl;
+	std::cout <<  "Tag and probe pair found! \n\t  Tag    : " <<  tag << "\n\t  Probe  : " << probe 
+		  << "\n\t  tag ref: " << tag_ref 
+		  << "\n\tprobe ref: " << probe_ref 
+		  << "\n-------------------" << std::endl;
+
+	/// useful debug - leave this here ...
+	//	std::cout << *TnP_tool << std::endl;
+
 	break ;
       }
+
     }
     
     // Replace "/" with "_" in chain names, for Tag&Probe analysis
@@ -1209,15 +1421,14 @@ int main(int argc, char** argv)
     /// it is required 
 
     if ( chainConfig[i].values().size()>0 ) { 
-      std::cout << "chain:: " << chainname << "\t(" << chainConfig[i] << " : size " << chainConfig[i].values().size() << ")" << std::endl; 
+      std::cout << "chain:: " << chainname << " : size " << chainConfig[i].values().size() << std::endl; 
       for ( unsigned ik=chainConfig[i].values().size() ; ik-- ; ) {
-	 std::cout << "\tchainconfig: " << ik << "\tkey " << chainConfig[i].keys()[ik] << " " << chainConfig[i].values()[ik] << std::endl; 
+	std::cout << "\tchainconfig: " << ik << "\tkey " << chainConfig[i].keys()[ik] << " " << chainConfig[i].values()[ik] << std::endl; 
       }
     }
-  
 
-    //    for (unsigned int ic=0 ; ic<chainnames.size() ; ic++ )  analysis[chainnames[ic]] = analy_conf;
-    
+    /// still needed for the moment ...
+    //    for (unsigned int ic=0 ; ic<chainnames.size() ; ic++ )  analysis[chainnames[ic]] = analy_conf;    
 
     if ( analysis.find( chainname )==analysis.end() ) {
       analysis.insert( std::map<std::string,TrackAnalysis*>::value_type( chainname, analy_conf ) );
@@ -1632,7 +1843,6 @@ int main(int argc, char** argv)
       newfile = false;
     }
 
-
     //          if ( printflag )  std::cout << *track_ev << std::endl;   
     
     r = track_ev->run_number();
@@ -1643,13 +1853,16 @@ int main(int argc, char** argv)
     refTracks.clear();
     truthTracks.clear();
     refPurityTracks.clear();
-    //    offlineTracks.clear();
 
+    /// I don't prefer range based for loops ... 
+    for ( TIDA::ReferenceMap::iterator mit=ref.begin() ; mit!=ref.end() ; ++mit ) {
+      mit->second.selector()->clear();
+      dynamic_cast<Filter_Combined*>(mit->second.filter())->setRoi(0);
+    }
     
     Nvtxtracks = 0;
 
     const std::vector<TIDA::Chain>& chains = track_ev->chains();
-
 
     dynamic_cast<Filter_Combined*>(truthFilter)->setRoi(0);
     //// get the truth tracks if required
@@ -1674,13 +1887,11 @@ int main(int argc, char** argv)
         }
       }
     }
-    
+
     /// select the reference offline vertices
 
-    std::vector<TIDA::Vertex> vertices; // keep for now as needed for line 1709
+    std::vector<TIDA::Vertex> vertices; // keep for now as will be needed later ...
   
-    //    const std::vector<TIDA::Vertex>& mv = track_ev->vertices();
-    
     const TIDA::Chain* vtxchain = track_ev->chain(vertex_refname);
 
     if ( vtxchain && vtxchain->size()>0 ) { 
@@ -1690,8 +1901,6 @@ int main(int argc, char** argv)
       int     selectvtx = -1;
       double  selection = 0;
       
-      //  std::vector<TIDA::Vertex>& vertices = vertices;
-
       if ( debugPrintout ) std::cout << "vertices:\n" << mv << std::endl;      
       
       if ( bestPTVtx || bestPT2Vtx )  {  
@@ -1755,86 +1964,42 @@ int main(int argc, char** argv)
 
     const TIDA::Chain* refchain = 0;
 
+    /// get reference tracks and the revference TrigObjectMatcher if 
+    /// one is found in the reference chain
+
     TrigObjectMatcher tom;
 
     for ( const std::string& rc : refChains ) {
- 
-      for ( size_t ic=0 ; ic<chains.size() ; ic++ ) { 
-
-        if ( chains[ic].name()==rc ) { 
-
-          refchain = &chains[ic];
-          foundReference = true;
-
-          //Get tracks from within reference roi
-
-	  /// get any objects to exclude matched from the reference selection
-
-	  if ( exclude.empty() ) { 
-	    refTracks.selectTracks( chains[ic].rois()[0].tracks() );
-	  }
-	  else { 
-
-	    std::vector<TIDA::Track> tmptracks = chains[ic][0].tracks();
-
-	    for ( size_t ix=chains.size() ; ix-- ; ) {
-	      
-	      if ( chains[ix].name()==exclude ) {
-		
-		std::vector<TIDA::Track> extracks = chains[ix][0].tracks();
-
-		std::vector<TIDA::Track*> refp;
-		std::vector<TIDA::Track*> refx;
-		
-		for ( size_t it=tmptracks.size() ; it-- ; )  refp.push_back( &tmptracks[it] );
-		for ( size_t it=extracks.size()  ; it-- ; )  refx.push_back( &extracks[it] );
-
-		/// match between the reference tracks and the objects to be excluded, 
-		/// and rebuild the reference tracks without the matches  
-		
-		ex_matcher->match( refp, refx );
-
-		std::vector<TIDA::Track*> refp_ex;
-
-		for ( size_t it=refp.size() ; it-- ; ) { 
-		  /// if no match then add back to the standard reefrence 
-		  if ( ex_matcher->matched(refp[it])==0 ) refp_ex.push_back(refp[it]);
-		}
-		
-		refTracks.clear();
-		refTracks.selectTracks( refp_ex );
-
-		if ( debugPrintout ) { 
-		  
-		  std::cout << "\nexclude: " << refp.size() << "\t" << refp_ex.size() << std::endl;
-		  std::cout << "exclude:\n"  << extracks << std::endl;
-		  std::cout << "reference tracks: " << std::endl;
-
-		  size_t it0 = refp_ex.size();
-		  
-		  for ( size_t it=0 ; it<refp.size() && it0>0 ; it++ ) { 
-		    if ( refp[it]==refp_ex[it0-1] ) std::cout << it << "\t" << *refp[it] << "\t" << *refp_ex[--it0] << std::endl;
-		    else 		            std::cout << "\n" << it << "\t" << *refp[it] << "\t----\n" << std::endl;
-		  }
-
-		}
-
-		break;
-	      }
-
-	    }
-	  }
-
-	  /// get objects if requested
-	  
-	  if ( chains[ic].rois()[0].objects().size()>0 ) { 
-	    tom = TrigObjectMatcher( &refTracks, chains[ic].rois()[0].objects(), SelectObjectETovPT );
-	  }
-	  
-	  break; 
-	}
-      }
+      foundReference |= GetRefTracks( rc, exclude, chains, refTracks, ex_matcher, tom );
     }
+
+    /// leave this in for the moment ...
+    //    bool skip_tnp = false;
+
+    for ( TIDA::ReferenceMap::iterator mitr=ref.begin() ; mitr!=ref.end() ; ++mitr ) { 
+
+      std::string refname = mitr->first;
+
+      NtupleTrackSelector& selector = *dynamic_cast<NtupleTrackSelector*>( mitr->second.selector() );
+
+      /// reset the tom for this event
+      TrigObjectMatcher rtom;
+      
+      foundReference |= GetRefTracks( refname, exclude, chains, selector, ex_matcher, rtom );
+
+      *mitr->second.tom() = rtom;
+
+      /// if expecting an Electron or a Tau and we don't have the TrigObjectMatcher 
+      /// then we don't have any actual offline electrons or taus
+      /// so skip this event - code needs to be expanded a bit before being used ...
+      //      if ( refname.find("Tau")!=std::string::npos || refname.find("Electron")!=std::string::npos ) {	
+      //	 if ( rtom.status()==0 ) skip_tnp = true; /// maybe don't use this at the moment
+      //  } 
+
+    }
+
+
+
     
     if ( !foundReference ) continue;
     
@@ -1856,23 +2021,59 @@ int main(int argc, char** argv)
       if ( analitr==analysis.end() ) continue;
 
       if ( debugPrintout ) {
-	 std::cout << "test chain:\n" << chain << std::endl;
+	std::cout << "test chain:\n" << chain << std::endl;
       }
-
+      
       ConfAnalysis* cf = dynamic_cast<ConfAnalysis*>(analitr->second);
       
       std::vector<TIDA::Roi*> rois; /// these are the rois to process
  
       // tag and probe object retreival and filling of the roi vector
       TagNProbe* TnP_tool = cf->getTnPtool();
+
       if ( TnP_tool ) {
+	
 	foutdir->cd();
 	cf->initialiseInternal();
 	// changes to output directory and books the invariant mass histograms
 	TH1F* invmass     = cf->getHist_invmass();
 	TH1F* invmass_obj = cf->getHist_invmassObj();
-	rois = TnP_tool->GetRois( track_ev->chains(), &refTracks, refFilter, invmass, invmass_obj, &tom );
-      } 
+
+	std::map<std::string,TIDA::Reference>::iterator mit0=ref.find(TnP_tool->type0());
+
+	TrackSelector* selector0 = mit0->second.selector();
+	TrackFilter*   filter0   = mit0->second.filter();
+
+	TrigObjectMatcher* rtom = mit0->second.tom();
+
+	if ( TnP_tool->type0() == TnP_tool->type1() ) { 
+	  /// both legs have the same reference ...
+	  rois = TnP_tool->GetRois( track_ev->chains(), selector0, filter0, invmass, invmass_obj, rtom );
+	}
+	else { 
+	  /// different references for each leg ...
+
+	  /// tag leg reference ...
+	  std::map<std::string,TIDA::Reference>::iterator mit1=ref.find(TnP_tool->type1());
+	  
+	  TrackSelector* selector1 = mit1->second.selector();
+	  TrackFilter*   filter1   = mit1->second.filter();
+	  
+	  TrigObjectMatcher* rtom1 = mit1->second.tom();
+
+#if 0
+	  for ( size_t ia=0 ; ia<selector1->tracks().size() ; ia++ ) {
+	    const TIDA::Track* track = selector1->tracks()[ia];
+	    std::cout << ia << "\t" << *track << std::endl; 
+	    std::cout       << "\t" << rtom1->object(track->id()) << std::endl; 
+	  } 
+	  
+	  std::cout << *TnP_tool << std::endl;
+#endif
+
+	  rois = TnP_tool->GetRois( track_ev->chains(), selector0, filter0, selector1, filter1, invmass, invmass_obj, rtom, rtom1 );
+	} 
+      }
       else {
 	// if not a tnp analysis then fill rois in the normal way
 	rois.reserve( chain.size() );
@@ -1951,12 +2152,8 @@ int main(int argc, char** argv)
         }
         
         //extract beamline position values from rois
-        //      const std::vector<double>& beamline = chain.rois()[ir].user();
-        //beamline_test = chain.rois()[ir].user();
-        beamline_test = rois[ir]->user(); // changed for tagNprobe
+	beamline_test = rois[ir]->user(); // changed for tagNprobe
         
-        //      std::cout << "beamline: " << chain.name() << "  " << beamline_test << std::endl; 
-
         //set values of track analysis to these so can access elsewhere
         for ( size_t i=analyses.size() ; i-- ; ) {
 
@@ -2048,23 +2245,28 @@ int main(int argc, char** argv)
         
         // Choose the pT ordered refp tracks that have been asked for by the user
         if ( use_pt_ordered_ref ) {
-          std::sort(refp_vec.begin(), refp_vec.end(), trackPtGrtr); // Should this sorting be done to a temporary copied object, instead of the object itself?
+          std::sort( refp_vec.begin(), refp_vec.end(), trackPtGrtr ); // Should this sorting be done to a temporary copied object, instead of the object itself?
           
-          int nRefTracks = refp_vec.size();
+          size_t nRefTracks = refp_vec.size();
 
           std::vector<TIDA::Track*> refp_chosenPtOrd;
 
-          // Checking if any user specifed track indices are out of bounds for this event
-          for (unsigned int indexIdx = 0; indexIdx < refPtOrd_indices.size(); ++indexIdx) {
-            if (refPtOrd_indices.at(indexIdx) > nRefTracks) {
-              std::cout << "WARNING: for event " << event << ", pT ordered reference track at vector position " << refPtOrd_indices.at(indexIdx) << " requested but not found" << std::endl;
-            }
-          }
+	  if ( debugPrintout ) { 
+	    // Checking if any user specifed track indices are out of bounds for this event
+	    for ( size_t sidx=refPtOrd_indices.size() ; sidx-- ; ) {
+	      if ( refPtOrd_indices.at(sidx)>nRefTracks ) {
+		std::cout << "WARNING: for event " << event 
+			  << ", pT ordered reference track at vector position " << refPtOrd_indices.at(sidx) 
+			  << " requested but not found" << std::endl;
+		break;
+	      }
+	    }
+	  }
           
-          for (int trackIdx = 0; trackIdx < nRefTracks; ++trackIdx) {
-            for (unsigned int indexIdx = 0; indexIdx < refPtOrd_indices.size(); ++indexIdx) {
-              if ( trackIdx == refPtOrd_indices.at(indexIdx) ) {
-                refp_chosenPtOrd.push_back(refp_vec.at(trackIdx));
+	  for ( size_t sidx=refPtOrd_indices.size() ; sidx-- ; ) {
+	    for ( size_t idx=0 ; idx<refp_vec.size() ; idx++  ) {
+              if ( idx == refPtOrd_indices.at(sidx) ) {
+                refp_chosenPtOrd.push_back(refp_vec.at(idx));
                 break;
               }
             }
@@ -2302,12 +2504,13 @@ int main(int argc, char** argv)
 
          
         }
+
       } // loop through rois
       
     } // loop through chanines - this block is indented incorrectly
-    
+ 
     } // loop through nentries
-    
+ 
     delete track_ev;
     delete data;
     delete finput;
@@ -2342,6 +2545,13 @@ int main(int argc, char** argv)
 
   foutput.Write();
   foutput.Close();
+
+
+  //  for ( std::map<std::string,TIDA::Reference>::iterator mit=ref.begin() ; mit!=ref.end() ; ++mit++ ) { 
+  for ( TIDA::ReferenceMap::iterator mit=ref.begin() ; mit!=ref.end() ; ++mit++ ) { 
+    mit->second.Clean();
+  }
+    
 
   if ( ex_matcher ) delete ex_matcher;
 
