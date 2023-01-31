@@ -15,15 +15,15 @@ def CombinedTrackingPassFlagSets(flags):
     flags_set = []
 
     # Primary Pass
-    if flags.InDet.Tracking.doVtxLumi:
+    if flags.Tracking.doVtxLumi:
         flags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "InDet.Tracking.VtxLumiPass")
-    elif flags.InDet.Tracking.doVtxBeamSpot:
+    elif flags.Tracking.doVtxBeamSpot:
         flags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "InDet.Tracking.VtxBeamSpotPass")
     elif flags.Beam.Type is BeamType.Cosmics:
         flags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "InDet.Tracking.CosmicsPass")
     elif flags.Reco.EnableHI:
         flags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "InDet.Tracking.HeavyIonPass")
-    elif flags.InDet.Tracking.doHighPileup:
+    elif flags.Tracking.doHighPileup:
         flags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "InDet.Tracking.HighPileupPass")
     elif flags.InDet.Tracking.doMinBias:
         flags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "InDet.Tracking.MinBiasPass")
@@ -35,14 +35,12 @@ def CombinedTrackingPassFlagSets(flags):
     flags_set += [flags]
 
     # LRT pass
-    if flags.InDet.Tracking.doLargeD0 or flags.InDet.Tracking.doR3LargeD0 or flags.InDet.Tracking.doLowPtLargeD0:
+    if flags.Tracking.doLargeD0 or flags.Tracking.doLowPtLargeD0:
 
-        if flags.InDet.Tracking.doLowPtLargeD0:
+        if flags.Tracking.doLowPtLargeD0:
             flagsLRT = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "InDet.Tracking.LowPtLargeD0Pass")
-        elif flags.InDet.Tracking.doR3LargeD0:
+        elif flags.Tracking.doLargeD0:
             flagsLRT = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "InDet.Tracking.R3LargeD0Pass")
-        else:
-            flagsLRT = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "InDet.Tracking.LargeD0Pass")
 
         flags_set += [flagsLRT]
 

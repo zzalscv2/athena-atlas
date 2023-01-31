@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum
@@ -33,7 +33,8 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.doSlimming", True)
     # defines if the X1X mode is used for the offline or not
     icf.addFlag("InDet.selectSCTIntimeHits", lambda prevFlags: (
-        not(prevFlags.Beam.Type is BeamType.Cosmics or prevFlags.InDet.Tracking.doVtxBeamSpot)))
+        not(prevFlags.Beam.Type is BeamType.Cosmics or \
+            prevFlags.Tracking.doVtxBeamSpot)))
     icf.addFlag("InDet.useDCS", True)
     icf.addFlag("InDet.usePixelDCS", lambda prevFlags: (
         prevFlags.InDet.useDCS and prevFlags.Detector.EnablePixel))
@@ -84,8 +85,8 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.Tracking.doTIDE_Ambi", True)
     # Turn on running of Brem Recovery in tracking
     icf.addFlag("InDet.Tracking.doBremRecovery", lambda prevFlags: (
-        not (prevFlags.InDet.Tracking.doVtxLumi or
-             prevFlags.InDet.Tracking.doVtxBeamSpot or
+        not (prevFlags.Tracking.doVtxLumi or
+             prevFlags.Tracking.doVtxBeamSpot or
              prevFlags.InDet.Tracking.doLowMu or
              prevFlags.Beam.Type is not BeamType.Collisions or
              not prevFlags.BField.solenoidOn)))
@@ -131,8 +132,6 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.Tracking.doTrackSegmentsTRT",
                 lambda prevFlags: (prevFlags.InDet.Tracking.doLowMu or
                                    prevFlags.InDet.Tracking.doInnerDetectorCommissioning))
-    # Turn running of high pile-up reconstruction on and off
-    icf.addFlag("InDet.Tracking.doHighPileup", False)
     # turn on / off TRT extensions
     icf.addFlag("InDet.Tracking.doTRTExtension", True)
     # control to run TRT Segment finding (do it always after new tracking!)
@@ -143,19 +142,9 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.Tracking.doBackTracking", lambda prevFlags: (
         not(prevFlags.Beam.Type in [BeamType.SingleBeam, BeamType.Cosmics] or
             prevFlags.Reco.EnableHI or
-            prevFlags.InDet.Tracking.doHighPileup or
-            prevFlags.InDet.Tracking.doVtxLumi or
-            prevFlags.InDet.Tracking.doVtxBeamSpot)))
-    icf.addFlag("InDet.Tracking.doLargeD0", False)
-    icf.addFlag("InDet.Tracking.doR3LargeD0", lambda prevFlags: (
-        not(prevFlags.Beam.Type in [BeamType.SingleBeam, BeamType.Cosmics] or
-            prevFlags.Reco.EnableHI or
-            prevFlags.InDet.Tracking.doHighPileup or
-            prevFlags.InDet.Tracking.doVtxLumi or
-            prevFlags.InDet.Tracking.doVtxBeamSpot)))
-    # Turn running of doLargeD0 second pass down to 100 MeV on and off Turn running of doLargeD0 second pass on and off
-    icf.addFlag("InDet.Tracking.doLowPtLargeD0", False)
-    icf.addFlag("InDet.Tracking.storeSeparateLargeD0Container", True)
+            prevFlags.Tracking.doHighPileup or
+            prevFlags.Tracking.doVtxLumi or
+            prevFlags.Tracking.doVtxBeamSpot)))
     # Turn running of doLowPt second pass on and off
     icf.addFlag("InDet.Tracking.doLowPt",
                 lambda prevFlags: prevFlags.InDet.Tracking.doLowMu)
@@ -164,16 +153,16 @@ def createInDetConfigFlags():
     # control TRT Standalone
     icf.addFlag("InDet.Tracking.doTRTStandalone", lambda prevFlags: (
         not(prevFlags.Reco.EnableHI or
-            prevFlags.InDet.Tracking.doHighPileup or
-            prevFlags.InDet.Tracking.doVtxLumi or
-            prevFlags.InDet.Tracking.doVtxBeamSpot)))
+            prevFlags.Tracking.doHighPileup or
+            prevFlags.Tracking.doVtxLumi or
+            prevFlags.Tracking.doVtxBeamSpot)))
     # Turn running of doForwardTracks pass on and off
     icf.addFlag("InDet.Tracking.doForwardTracks", lambda prevFlags: (
         not(prevFlags.Beam.Type in [BeamType.SingleBeam, BeamType.Cosmics] or
             prevFlags.Reco.EnableHI or
-            prevFlags.InDet.Tracking.doHighPileup or
-            prevFlags.InDet.Tracking.doVtxLumi or
-            prevFlags.InDet.Tracking.doVtxBeamSpot or
+            prevFlags.Tracking.doHighPileup or
+            prevFlags.Tracking.doVtxLumi or
+            prevFlags.Tracking.doVtxBeamSpot or
             prevFlags.InDet.Tracking.doMinBias or
             prevFlags.InDet.Tracking.doLowMu)))
     icf.addFlag("InDet.Tracking.doTrackSegmentsDisappearing", lambda prevFlags: (
@@ -192,10 +181,6 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.Tracking.doInnerDetectorCommissioning", lambda prevFlags: prevFlags.Beam.Type is BeamType.Cosmics)
     # Special reconstruction for BLS physics
     icf.addFlag("InDet.Tracking.doBLS", False)
-    # Special reconstruction for vertex lumi measurement
-    icf.addFlag("InDet.Tracking.doVtxLumi", False)
-    # Special reconstruction for vertex beamspot measurement
-    icf.addFlag("InDet.Tracking.doVtxBeamSpot", False)
     # Special configuration for low-mu runs
     icf.addFlag("InDet.Tracking.doLowMu", False)
     icf.addFlag("InDet.Tracking.writeSeedValNtuple", False) # Turn writing of seed validation ntuple on and off

@@ -23,8 +23,7 @@ def PHYSVALKernelCfg(ConfigFlags, name='PHYSVALKernel', **kwargs):
     acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     # LLP-specific configs
-    if (ConfigFlags.Detector.GeometryID and ConfigFlags.InDet.Tracking.doR3LargeD0) \
-       or (ConfigFlags.Detector.GeometryITk and ConfigFlags.ITk.Tracking.doLargeD0):
+    if ConfigFlags.Tracking.doLargeD0:
         from DerivationFrameworkLLP.PhysValLLPConfig import PhysValLLPCfg
         acc.merge(PhysValLLPCfg(ConfigFlags))
 

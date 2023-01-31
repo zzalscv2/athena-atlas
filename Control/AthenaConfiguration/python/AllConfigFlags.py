@@ -261,6 +261,11 @@ def initConfigFlags():
         return createITkConfigFlags()
     _addFlagsCategory(acf, "ITk", __itk, 'InDetConfig' )
 
+    def __tracking():
+        from TrkConfig.TrkConfigFlags import createTrackingConfigFlags
+        return createTrackingConfigFlags()
+    _addFlagsCategory(acf, "Tracking", __tracking, 'TrkConfig')
+
     def __acts():
         from ActsInterop.ActsConfigFlags import createActsConfigFlags
         return createActsConfigFlags()

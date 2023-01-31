@@ -359,8 +359,7 @@ def MuonSegContainerMergerAlgCfg(flags, name = "MuonSegContainerMergerAlg", **kw
         if flags.MuonCombined.doStatisticalCombination: tag_maps+=["stacoTagMap_EMEO"]
         if flags.MuonCombined.doCombinedFit: tag_maps+=["muidcoTagMap_EMEO"]
         muon_maps += ["MuonCandidates_EMEO"]
-    if (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
-   or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0):
+    if flags.Tracking.doLargeD0:
          if flags.MuonCombined.doMuGirl: tag_maps+=["MuGirlMap_LRT"]
          if flags.MuonCombined.doStatisticalCombination: tag_maps+=["stacoTagMap_LRT"]
          if flags.MuonCombined.doCombinedFit: tag_maps+=["muidcoTagMap_LRT"]
@@ -397,8 +396,7 @@ def GetCombinedTrkContainers(flags):
                     "ExtrapolatedStauTrackParticles"]
         track_coll += ["CombinedStauTracks",
                        "ExtrapolatedStauTracks"]
-    if (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
-   or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0):
+    if flags.Tracking.doLargeD0:
         tp_coll += ["CombinedMuonsLRTTrackParticles",
                     "ExtraPolatedMuonsLRTTrackParticles",
                     "MSOnlyExtraPolatedMuonsLRTTrackParticles"]
@@ -436,9 +434,8 @@ def MuonDecorationAlgsCfg(flags):
                 "MSOnlyExtrapolatedMuonTrackParticles" ]
     stau_coll = ["CombinedStauTrackParticles", "ExtrapolatedStauTrackParticles"]  if flags.MuonCombined.doMuGirl and flags.MuonCombined.doMuGirlLowBeta else []
     track_coll_lrt = ["CombinedMuonsLRTTrackParticles", 
-                          "ExtraPolatedMuonsLRTTrackParticles",
-                          "MSOnlyExtraPolatedMuonsLRTTrackParticles"] if (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
-   or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0) else []
+                      "ExtraPolatedMuonsLRTTrackParticles",
+                      "MSOnlyExtraPolatedMuonsLRTTrackParticles"] if flags.Tracking.doLargeD0 else []
 
     # Decorate the muon tracks
     for coll in trk_cols + stau_coll + track_coll_lrt:
@@ -459,9 +456,7 @@ def MuonDecorationAlgsCfg(flags):
         result.merge(MuonPrecisionLayerDecorAlgCfg(flags, "MuonCombStauPrecisionLayerDecorAlg",
                                                    MuonContainer="Staus",
                                                    TrackContainer=stau_coll))
-    if (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
-   or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0):
-
+    if flags.Tracking.doLargeD0:
 
         result.merge(MuonPrecisionLayerDecorAlgCfg(flags, "MuonCombLRTPrecisionLayerDecorAlg",
                                                    MuonContainer="MuonsLRT",
@@ -492,8 +487,7 @@ def CombinedMuonTruthAssociationAlgsCfg(flags):
     from MuonConfig.MuonTruthAlgsConfig import MuonTruthAssociationAlgCfg
     result.merge(MuonTruthAssociationAlgCfg(flags))
 
-    if (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
-       or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0):
+    if flags.Tracking.doLargeD0:
         result.merge(MuonTruthAssociationAlgCfg(flags, name="MuonTruthAssociationAlgLRT",
                                                 MuonContainerName="MuonsLRT",
                                                 RecoLinkName="recoMuonLinkLRT",
@@ -651,20 +645,18 @@ def MuonCombinedReconstructionCfg(flags):
     result.merge(MuonCombinedInDetCandidateAlgCfg(flags))
     result.merge(MuonCombinedMuonCandidateAlgCfg(flags))
 
-    do_LRT = (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
-             or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0)
-    if do_LRT:
+    if flags.Tracking.doLargeD0:
         result.merge(LRT_MuonCombinedInDetCandidateAlgCfg(flags))
 
     if flags.MuonCombined.doStatisticalCombination or flags.MuonCombined.doCombinedFit:
         result.merge(MuonCombinedAlgCfg(flags))
-        if do_LRT:
+        if flags.Tracking.doLargeD0:
             result.merge(LRT_MuonCombinedAlgCfg(flags))
 
     # Perform system extensions on ID tracks where MuidCo did not succeed
     if flags.MuonCombined.doCombinedFit:
         result.merge(MuonInDetToMuonSystemExtensionAlgCfg(flags))
-        if do_LRT:
+        if flags.Tracking.doLargeD0:
             result.merge(LRT_MuonInDetToMuonSystemExtensionAlgCfg(flags))
     if flags.MuonCombined.doMuGirl:
         # Use only ID tracks rejected by MuidCo
@@ -675,17 +667,17 @@ def MuonCombinedReconstructionCfg(flags):
             # Use the InDetCandidateStaus as InDetCandidates as they've also the extensions
             # from the MuidCo tracks
             result.merge(MuGirlStauAlgCfg(flags))
-        if do_LRT:
+        if flags.Tracking.doLargeD0:
             result.merge(LRT_MuGirlAlgCfg(flags))
 
     if flags.MuonCombined.doCaloTrkMuId:
         result.merge(MuonCaloTagAlgCfg(flags))
-        if do_LRT:
+        if flags.Tracking.doLargeD0:
             result.merge(LRT_MuonCaloTagAlgCfg(flags))
 
     if flags.MuonCombined.doMuonSegmentTagger:
         result.merge(MuonSegmentTagAlgCfg(flags))
-        if do_LRT:
+        if flags.Tracking.doLargeD0:
             result.merge(LRT_MuonSegmentTagAlgCfg(flags))
 
     if flags.Muon.runCommissioningChain:
@@ -714,7 +706,7 @@ def MuonCombinedReconstructionCfg(flags):
         result.merge(EMEO_MuonCreatorAlgCfg(flags))
     # runs over outputs and create xAODMuon collection
     result.merge(MuonCreatorAlgCfg(flags))
-    if do_LRT:
+    if flags.Tracking.doLargeD0:
         result.merge(LRT_MuonCreatorAlgCfg(flags))
 
     if flags.MuonCombined.doMuGirlLowBeta:
@@ -765,7 +757,7 @@ if __name__ == "__main__":
     ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-07"
 
     ConfigFlags.Output.ESDFileName = args.output
-    ConfigFlags.InDet.Tracking.doR3LargeD0 = False  # Not working with this input
+    ConfigFlags.Tracking.doLargeD0 = False  # Not working with this input
     ConfigFlags.Muon.useTGCPriorNextBC = False
     ConfigFlags.MuonCombined.doMuGirlLowBeta = False # This fails due to "Hough data per sector vector not found"
 

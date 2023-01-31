@@ -457,7 +457,7 @@ def createITkLargeD0TrackingPassFlags():
     icf = createITkTrackingPassFlags()
     icf.extension             = "LargeD0"
     icf.usePrdAssociationTool = True
-    icf.storeSeparateContainer = lambda pcf : pcf.ITk.Tracking.storeSeparateLargeD0Container
+    icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container
 
     icf.useEtaDepCuts      = True
     icf.minPT              = [1000 * Units.MeV]
@@ -554,7 +554,7 @@ def createLargeD0TrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension          = "LargeD0"
     icf.usePrdAssociationTool = True
-    icf.storeSeparateContainer = lambda pcf : pcf.InDet.Tracking.storeSeparateLargeD0Container
+    icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container
     icf.maxPT              = 1.0 * Units.TeV
     icf.minPT              = 900 * Units.MeV
     icf.maxEta             = 5
@@ -587,7 +587,7 @@ def createR3LargeD0TrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension          = "R3LargeD0"
     icf.usePrdAssociationTool = True
-    icf.storeSeparateContainer = lambda pcf : pcf.InDet.Tracking.storeSeparateLargeD0Container
+    icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container
     icf.maxPT              = 1.0 * Units.TeV
     icf.minPT              = 1.0 * Units.GeV                                                                                    
     icf.maxEta             = 3                                                                                                        
@@ -628,7 +628,7 @@ def createLowPtLargeD0TrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension          = "LowPtLargeD0"
     icf.usePrdAssociationTool = True
-    icf.storeSeparateContainer = lambda pcf : pcf.InDet.Tracking.storeSeparateLargeD0Container
+    icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container
     icf.maxPT              = 1.0 * Units.TeV
     icf.minPT              = 100 * Units.MeV
     icf.maxEta             = 5

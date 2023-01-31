@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, FlagEnum
@@ -53,8 +53,6 @@ def createITkConfigFlags():
   itkcf.addFlag("ITk.Tracking.trackFitterType", TrackFitterType.GlobalChi2Fitter) # control which fitter to be used: 'DistributedKalmanFilter', 'GlobalChi2Fitter', 'GaussianSumFilter'
   itkcf.addFlag("ITk.Tracking.doFastTracking", False) # Turn running of ITk FastTracking on and off
   itkcf.addFlag("ITk.Tracking.doConversionFinding",True) # Turn running of ConversionFinding second pass on and off
-  itkcf.addFlag("ITk.Tracking.doLargeD0", False)
-  itkcf.addFlag("ITk.Tracking.storeSeparateLargeD0Container", True)
   itkcf.addFlag("ITk.Tracking.doBremRecovery", True) # Turn on running of Brem Recover in tracking
   itkcf.addFlag("ITk.Tracking.doCaloSeededBrem", True) # Brem Recover in tracking restricted to Calo ROIs
   itkcf.addFlag("ITk.Tracking.doHadCaloSeededSSS", False) # Use Recover SSS to Calo ROIs

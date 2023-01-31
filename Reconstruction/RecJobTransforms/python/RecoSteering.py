@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format
@@ -123,13 +123,8 @@ def RecoSteering(flags):
             TrackParticleCellAssociationAlgCfg)
         acc.merge(TrackParticleCellAssociationAlgCfg(flags, PtCut=10000))
 
-        from AthenaConfiguration.Enums import LHCPeriod
-        if (flags.InDet.Tracking.storeSeparateLargeD0Container if
-            flags.GeoModel.Run<=LHCPeriod.Run3 else
-            flags.ITk.Tracking.storeSeparateLargeD0Container) and \
-            (flags.InDet.Tracking.doR3LargeD0 if
-            flags.GeoModel.Run<=LHCPeriod.Run3 else
-            flags.ITk.Tracking.doLargeD0):
+        if (flags.Tracking.storeSeparateLargeD0Container and \
+            flags.Tracking.doLargeD0):
             from TrackParticleAssociationAlgs.TrackParticleAssociationAlgsConfig import (
                 LargeD0TrackParticleCellAssociationAlgCfg)
             acc.merge(LargeD0TrackParticleCellAssociationAlgCfg(flags, PtCut=10000))

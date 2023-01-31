@@ -30,6 +30,6 @@ def CaloExtensionBuilderAlgLRTCfg(flags, name="CaloExtensionBuilderAlg_LRT", **k
 
 def CaloExtensionBuilderCfg(flags):
     result = CaloExtensionBuilderAlgCfg(flags)
-    if flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0 and flags.InDet.Tracking.storeSeparateLargeD0Container:
+    if flags.Tracking.doLargeD0 and flags.Tracking.storeSeparateLargeD0Container:
         result.merge(CaloExtensionBuilderAlgLRTCfg(flags))
     return result

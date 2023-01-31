@@ -61,8 +61,8 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
                              DoVertexFinding = ConfigFlags.InDet.PriVertex.doVertexFinding if ConfigFlags.GeoModel.Run<=LHCPeriod.Run3 else ConfigFlags.ITk.PriVertex.doVertexFinding,
                              AddPseudoTracks = ConfigFlags.InDet.Tracking.doPseudoTracking and ConfigFlags.GeoModel.Run<=LHCPeriod.Run3,
                              DecoLRTTTVA = False,
-                             DoR3LargeD0 = ConfigFlags.InDet.Tracking.doR3LargeD0 if ConfigFlags.GeoModel.Run<=LHCPeriod.Run3 else ConfigFlags.ITk.Tracking.doLargeD0,
-                             StoreSeparateLargeD0Container = ConfigFlags.InDet.Tracking.storeSeparateLargeD0Container if ConfigFlags.GeoModel.Run<=LHCPeriod.Run3 else ConfigFlags.ITk.Tracking.storeSeparateLargeD0Container,
+                             DoR3LargeD0 = ConfigFlags.Tracking.doLargeD0,
+                             StoreSeparateLargeD0Container = ConfigFlags.Tracking.storeSeparateLargeD0Container,
                              MergeLRT = False)) 
     acc.merge(MuonsCommonCfg(ConfigFlags))
     acc.merge(EGammaCommonCfg(ConfigFlags))
