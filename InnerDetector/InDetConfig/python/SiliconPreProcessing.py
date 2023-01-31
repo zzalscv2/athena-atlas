@@ -90,59 +90,26 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
         acc.merge(BCM_ZeroSuppressionCfg(flags))
 
     #
-    # --- Deducing flags
+    # --- Deducing configuration from the flags
     #
-    doAthenaClustering = False
-    doActsClustering = False
-    doAthenaSpacePointFormation = False
-    doActsSpacePointFormation = False
-
-    from InDetConfig.ITkConfigFlags import TrackingComponent
-    if TrackingComponent.AthenaChain in flags.ITk.Tracking.recoChain:
-        doAthenaClustering = True
-        doAthenaSpacePointFormation = True
-    if TrackingComponent.ActsChain in flags.ITk.Tracking.recoChain:
-        doActsClustering = True
-        doActsSpacePointFormation = True
-    if TrackingComponent.ValidateActsClusters in flags.ITk.Tracking.recoChain:
-        doActsClustering = True
-        doAthenaSpacePointFormation = True
-    if TrackingComponent.ValidateActsSpacePoints in flags.ITk.Tracking.recoChain:
-        doAthenaClustering = True
-        doActsSpacePointFormation = True
-    if TrackingComponent.ValidateActsSeeds in flags.ITk.Tracking.recoChain:
-        doAthenaClustering = True
-        doActsSpacePointFormation = True
-    if TrackingComponent.ValidateActsTracks in flags.ITk.Tracking.recoChain:
-        # Trk::Track creation in ActsTrkFinding doesn't work with xAOD clusters created by doActsClustering
-        doActsClustering = False
-        doAthenaClustering = True
-        doActsSpacePointFormation = True
-
-    convertInDetClusters = doAthenaClustering and not doActsClustering and doActsSpacePointFormation
-    convertXAODClusters = doActsClustering and not doAthenaClustering and doAthenaSpacePointFormation
-    # TO-DO: flags for Space Point convertions [not available right now]
-
-    #
-    # -- Configuration check (dependencies) is done by the scheduler
-    # -- We may want to put it here in the future as well
-    #
+    from ActsInterop.TrackingComponentConfigurer import TrackingComponentConfigurer
+    configuration_settings = TrackingComponentConfigurer(flags)
          
     #
     # -- Clusterization Algorithms
     #
-    if doAthenaClustering:
+    if configuration_settings.doAthenaCluster:
         from InDetConfig.InDetPrepRawDataFormationConfig import AthenaTrkClusterizationCfg
         acc.merge(AthenaTrkClusterizationCfg(flags))
         
-    if doActsClustering:
+    if configuration_settings.doActsCluster:
         from ActsTrkClusterization.ActsTrkClusterizationConfig import ActsTrkClusterizationCfg
         acc.merge(ActsTrkClusterizationCfg(flags))
 
     #
     # ---  Cluster EDM converters
     #
-    if convertInDetClusters:
+    if configuration_settings.doAthenaToActsCluster: 
         if not flags.Detector.EnableITkPixel or not flags.Detector.EnableITkStrip:
             raise RuntimeError("Cluster EDM converter (InDet -> xAOD) must be activated for both Pixel and Strips")
         #
@@ -151,7 +118,7 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
         from InDetConfig.InDetPrepRawDataFormationConfig import ITkInDetToXAODClusterConversionCfg
         acc.merge(ITkInDetToXAODClusterConversionCfg(flags))
 
-    if convertXAODClusters:
+    if configuration_settings.doActsToAthenaCluster:
         if not flags.Detector.EnableITkPixel or not flags.Detector.EnableITkStrip:
             raise RuntimeError("Cluster EDM converter (xAOD -> InDet) must be activated for both Pixel and Strips")
         #
@@ -164,11 +131,11 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
     #
     # ----------- form SpacePoints from clusters in SCT and Pixels
     #
-    if doAthenaSpacePointFormation:
+    if configuration_settings.doAthenaSpacePoint:
         from InDetConfig.SiSpacePointFormationConfig import ITkSiTrackerSpacePointFinderCfg
         acc.merge(ITkSiTrackerSpacePointFinderCfg(flags))
 
-    if doActsSpacePointFormation:
+    if configuration_settings.doActsSpacePoint:
         from TrkConfig.ActsTrkSpacePointFormationConfig import ActsTrkSpacePointFormationCfg
         acc.merge(ActsTrkSpacePointFormationCfg(flags))
 

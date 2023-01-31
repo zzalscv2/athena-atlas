@@ -16,8 +16,7 @@ def actsWorkflowFlags(flags):
 def actsValidateClustersFlags(flags):
     """flags for Reco_tf with CA used in CI tests: use cluster conversion [xAOD -> InDet] with both Athena and Acts sequences"""
     flags.Reco.EnableHGTDExtension = False
-    flags.ITk.Tracking.recoChain = [TrackingComponent.ActsChain,
-                                    TrackingComponent.ValidateActsClusters]
+    flags.ITk.Tracking.recoChain = [TrackingComponent.ValidateActsClusters]
 
 def actsValidateSpacePointsFlags(flags):
     """flags for Reco_tf with CA used in CI tests: use for validating space point formation with Acts"""

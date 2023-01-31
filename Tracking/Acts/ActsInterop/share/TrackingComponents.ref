@@ -1,0 +1,111 @@
+========================================
+Production Mode
+----------------------------------------
+Configuration of tracking components:
+ - Athena Algorithms:
+    * Clustering: ENABLED
+    * Space Point Formation: ENABLED
+    * Seeding: ENABLED
+    * Track Finding: ENABLED
+ - Acts Algorithms:
+    * Clustering: ENABLED
+    * Space Point Formation: ENABLED
+    * Seeding: ENABLED
+    * Track Finding: DISABLED
+ - Athena -> Acts EDM Convertions:
+    * Cluster: DISABLED
+    * Space Point: DISABLED
+ - Acts -> Athena EDM Convertions:
+    * Cluster: DISABLED
+    * Space Point: DISABLED
+    * Seed: DISABLED
+========================================
+========================================
+Validation Mode - Clusters
+----------------------------------------
+Configuration of tracking components:
+ - Athena Algorithms:
+    * Clustering: DISABLED
+    * Space Point Formation: ENABLED
+    * Seeding: ENABLED
+    * Track Finding: ENABLED
+ - Acts Algorithms:
+    * Clustering: ENABLED
+    * Space Point Formation: DISABLED
+    * Seeding: DISABLED
+    * Track Finding: DISABLED
+ - Athena -> Acts EDM Convertions:
+    * Cluster: DISABLED
+    * Space Point: DISABLED
+ - Acts -> Athena EDM Convertions:
+    * Cluster: ENABLED
+    * Space Point: DISABLED
+    * Seed: DISABLED
+========================================
+========================================
+Validation Mode - Space Points
+----------------------------------------
+Configuration of tracking components:
+ - Athena Algorithms:
+    * Clustering: ENABLED
+    * Space Point Formation: DISABLED
+    * Seeding: DISABLED
+    * Track Finding: ENABLED
+ - Acts Algorithms:
+    * Clustering: DISABLED
+    * Space Point Formation: ENABLED
+    * Seeding: DISABLED
+    * Track Finding: DISABLED
+ - Athena -> Acts EDM Convertions:
+    * Cluster: ENABLED
+    * Space Point: DISABLED
+ - Acts -> Athena EDM Convertions:
+    * Cluster: DISABLED
+    * Space Point: DISABLED
+    * Seed: ENABLED
+========================================
+========================================
+Validation Mode - Seeds
+----------------------------------------
+Configuration of tracking components:
+ - Athena Algorithms:
+    * Clustering: ENABLED
+    * Space Point Formation: DISABLED
+    * Seeding: DISABLED
+    * Track Finding: ENABLED
+ - Acts Algorithms:
+    * Clustering: DISABLED
+    * Space Point Formation: ENABLED
+    * Seeding: DISABLED
+    * Track Finding: DISABLED
+ - Athena -> Acts EDM Convertions:
+    * Cluster: ENABLED
+    * Space Point: DISABLED
+ - Acts -> Athena EDM Convertions:
+    * Cluster: DISABLED
+    * Space Point: DISABLED
+    * Seed: ENABLED
+========================================
+========================================
+Validation Mode - Tracks
+----------------------------------------
+Configuration of tracking components:
+ - Athena Algorithms:
+    * Clustering: ENABLED
+    * Space Point Formation: DISABLED
+    * Seeding: DISABLED
+    * Track Finding: DISABLED
+ - Acts Algorithms:
+    * Clustering: DISABLED
+    * Space Point Formation: ENABLED
+    * Seeding: ENABLED
+    * Track Finding: ENABLED
+ - Athena -> Acts EDM Convertions:
+    * Cluster: ENABLED
+    * Space Point: DISABLED
+ - Acts -> Athena EDM Convertions:
+    * Cluster: DISABLED
+    * Space Point: DISABLED
+    * Seed: DISABLED
+========================================
+

@@ -94,10 +94,8 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(flags,
     kwargs['name'] = name
 
     # Main properties
-    from InDetConfig.ITkConfigFlags  import TrackingComponent
-
-    doSpacePointFormationActs = TrackingComponent.ActsChain in flags.ITk.Tracking.recoChain or TrackingComponent.ValidateActsSpacePoints in flags.ITk.Tracking.recoChain or TrackingComponent.ValidateActsSeeds in flags.ITk.Tracking.recoChain
-    convertInDetClusters = TrackingComponent.ValidateActsSpacePoints in flags.ITk.Tracking.recoChain or TrackingComponent.ValidateActsSeeds in flags.ITk.Tracking.recoChain
+    from ActsInterop.TrackingComponentConfigurer import TrackingComponentConfigurer
+    configuration_settings = TrackingComponentConfigurer(flags) 
 
     kwargs.setdefault('SpacePointsPixelName', 'ITkPixelSpacePoints')
     kwargs.setdefault('SpacePointsStripName', 'ITkStripSpacePoints')
@@ -105,7 +103,7 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(flags,
     kwargs.setdefault('usePixel', flags.ITk.Tracking.ActiveConfig.useITkPixel and flags.ITk.Tracking.ActiveConfig.useITkPixelSeeding)
     kwargs.setdefault('useStrip', flags.ITk.Tracking.ActiveConfig.useITkStrip and flags.ITk.Tracking.ActiveConfig.useITkStripSeeding)
     kwargs.setdefault('useOverlapSpCollection', flags.ITk.Tracking.ActiveConfig.useITkStrip and flags.ITk.Tracking.ActiveConfig.useITkStripSeeding)
-    kwargs.setdefault('doSpacePointConversion', not (convertInDetClusters and doSpacePointFormationActs))
+    kwargs.setdefault('doSpacePointConversion', not (configuration_settings.doActsSpacePoint and configuration_settings.doAthenaToActsCluster))
     kwargs.setdefault('ActsTrkSpacePointsPixelName'    , "ITkPixelSpacePoints")
     kwargs.setdefault('ActsTrkSpacePointsStripName'    , "ITkStripSpacePoints")
     kwargs.setdefault('ActsTrkSpacePointsOverlapName'  , "ITkStripOverlapSpacePoints")
