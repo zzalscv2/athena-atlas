@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """ Helper functions for configuring MET chains
 """
@@ -6,7 +6,6 @@
 from AthenaCommon.CFElements import seqAND
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from ..Menu.SignatureDicts import METChainParts_Default, METChainParts
 from ..Config.MenuComponents import (
     RecoFragmentsPool,
@@ -122,11 +121,10 @@ class AlgConfig(ABC):
         self._registry = inputRegistry
         self._inputs = inputs
 
-    def make_fex(self, name, inputs):
+    def make_fex(self, flags, name, inputs):
         """ Create the fex from its name and the inputs dict """
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
-        return conf2toConfigurable(self.make_fex_accumulator(ConfigFlags, name, inputs))
+        return conf2toConfigurable(self.make_fex_accumulator(flags, name, inputs))
 
     @abstractmethod
     def make_fex_accumulator(self, flags, name, inputs):
@@ -154,16 +152,16 @@ class AlgConfig(ABC):
         """ Create the monitoring tool """
         return getMETMonTool()
 
-    def recoAlgorithms(self):
+    def recoAlgorithms(self, flags):
         """Get the reconstruction algorithms (split by step) without the input makers"""
         if hasattr(self, "_recoAlgorithms"):
             return self._recoAlgorithms
         # Retrieve the inputss
         log.verbose("Create inputs for %s", self._suffix)
         steps, inputs = self.inputRegistry.build_steps(
-            self._inputs, metFSRoIs, self.recoDict
+            flags, self._inputs, metFSRoIs, self.recoDict
         )
-        fex = self.make_fex(self.fexName, inputs)
+        fex = self.make_fex(flags, self.fexName, inputs)
         fex.MonTool = self.getMonTool()
         fex.METContainerKey = self.outputKey
         # Add the FEX to the last list
@@ -171,13 +169,13 @@ class AlgConfig(ABC):
         self._recoAlgorithms = steps
         return self._recoAlgorithms
 
-    def athSequences(self):
+    def athSequences(self, flags):
         """ Get the reco sequences (split by step) """
         if hasattr(self, "_athSequences"):
             return self._athSequences
 
         inputMakers = self.inputMakers()
-        reco = self.recoAlgorithms()
+        reco = self.recoAlgorithms(flags)
         # Put the input makers at the start
         sequences = [
             [] if step==[] else seqAND(f"METAthSeq_step{idx}_{self._suffix}",  [inputMakers[idx]] + step)
@@ -186,7 +184,7 @@ class AlgConfig(ABC):
         self._athSequences = sequences
         return self._athSequences
 
-    def menuSequences(self):
+    def menuSequences(self, flags):
         
         """ Get the menu sequences (split by step) """
         if hasattr(self, "_menuSequences"):
@@ -194,7 +192,7 @@ class AlgConfig(ABC):
 
         sequences = []
         inputMakers = self.inputMakers()
-        ath_sequences = self.athSequences()
+        ath_sequences = self.athSequences(flags)
         for idx, seq in enumerate(ath_sequences):
             if idx == len(ath_sequences) - 1:
                 hypo = conf2toConfigurable(self.make_hypo_alg())
@@ -216,7 +214,7 @@ class AlgConfig(ABC):
     def name_step(self, idx):
         return f"step{ascii_uppercase[idx]}_{self._suffix}"
 
-    def make_steps(self, chainDict):
+    def make_steps(self, flags, chainDict):
         """ Create the actual chain steps """
         # NB - we index the steps using uppercase letters 'A', 'B', etc
         # This technically means that there is an upper limit of 26 on the
@@ -225,7 +223,7 @@ class AlgConfig(ABC):
         # shouldn't be a problem to change it
         steps=[]
 
-        for idx, seq in enumerate(self.menuSequences()):
+        for idx, seq in enumerate(self.menuSequences(flags)):
             steps+= [
                 ChainStep(
                     self.name_step(idx),
@@ -242,7 +240,7 @@ class AlgConfig(ABC):
         # Retrieve the inputs
         log.verbose("Create inputs for %s", self._suffix)
         steps, inputs = self.inputRegistry.build_steps(
-            self._inputs, metFSRoIs, self.recoDict, return_ca=True, flags=flags
+            flags, self._inputs, metFSRoIs, self.recoDict, return_ca=True
         )
         # Create the FEX and add it to the last input sequence
         fex = self.make_fex_accumulator(flags, self.fexName, inputs)
@@ -360,11 +358,11 @@ class AlgConfig(ABC):
         return cls(**kwargs)
 
     @classmethod
-    def fromRecoDict(cls, EFrecoAlg, **recoDict):
+    def fromRecoDict(cls, flags, EFrecoAlg, **recoDict):
         for subcls in cls._get_subclasses():
             if subcls.algType() == EFrecoAlg:
                 return RecoFragmentsPool.retrieve(
-                    subcls._makeCls, ConfigFlags, EFrecoAlg=EFrecoAlg, **recoDict
+                    subcls._makeCls, flags, EFrecoAlg=EFrecoAlg, **recoDict
                 )
 
         raise ValueError("Unknown EFrecoAlg '{}' requested".format(EFrecoAlg))

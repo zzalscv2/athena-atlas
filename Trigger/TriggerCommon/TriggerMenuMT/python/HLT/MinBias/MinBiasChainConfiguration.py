@@ -22,7 +22,7 @@ from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 # so let's make them functions already now
 #----------------------------------------------------------------
 def MinBiasSPSequenceCfg(flags):
-    return MinBiasSPSequence()
+    return MinBiasSPSequence(flags)
 
 def MinBiasTrkSequenceCfg(flags):
     return MinBiasTrkSequence()

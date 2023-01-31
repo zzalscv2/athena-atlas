@@ -1,10 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.Utility.MenuAlignmentTools import get_alignment_group_ordering as getAlignmentGroupOrdering
-from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuSequence, RecoFragmentsPool, EmptyMenuSequenceCA
+from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuSequence, EmptyMenuSequenceCA
 
 from AthenaCommon.Logging import logging
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 from TrigCompositeUtils.TrigCompositeUtils import legName
@@ -154,7 +153,7 @@ def getEmptySeqName(stepName, chain_index, step_number, alignGroup):
     seqName = 'Empty'+ alignGroup +'Seq'+str(step_number)+ '_'+ stepName
     return seqName
 
-def EmptyMenuSequenceCfg(flags, name):
+def EmptyMenuSequenceCfg(name):
     # to clean up
     if isComponentAccumulatorCfg():
         return EmptyMenuSequenceCA(name)
@@ -162,11 +161,9 @@ def EmptyMenuSequenceCfg(flags, name):
         return EmptyMenuSequence(name)
     
 
-def getEmptyMenuSequence(flags, name):
-    if isComponentAccumulatorCfg():
-        return EmptyMenuSequenceCfg(flags, name)
-    else:
-        return RecoFragmentsPool.retrieve(EmptyMenuSequenceCfg, flags=flags, name=name)                
+def getEmptyMenuSequence(name):
+    return EmptyMenuSequenceCfg(name)
+
 
 def isFullScanRoI(inputL1Nav):
     fsRoIList = ['HLTNav_L1FSNOSEED','HLTNav_L1MET','HLTNav_L1J']
@@ -311,10 +308,10 @@ def serial_zip(allSteps, chainName, chainDefList, legOrdering):
                     for ileg in range(len(chainDefList[stepPlacement2].L1decisions)):                        
                         if isFullScanRoI(chainDefList[stepPlacement2].L1decisions[ileg]):
                             log.debug("[serial_zip] adding FS empty sequence")                            
-                            emptySequences += [getEmptyMenuSequence(flags=ConfigFlags, name=seqNames[ileg]+"FS")]
+                            emptySequences += [getEmptyMenuSequence(seqNames[ileg]+"FS")]
                         else:
                             log.debug("[serial_zip] adding non-FS empty sequence")
-                            emptySequences += [getEmptyMenuSequence(flags=ConfigFlags, name=seqNames[ileg])]
+                            emptySequences += [getEmptyMenuSequence(seqNames[ileg])]
 
 
                     if doBonusDebug:
@@ -498,10 +495,10 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = [], cu
             seqName = getEmptySeqName(new_stepDict['signature'], chain_index, stepNumber, chainDefList[0].alignmentGroups[0])
 
             if isFullScanRoI(chainDefList[chain_index].L1decisions[0]):
-                stepSeq.append(getEmptyMenuSequence(flags=ConfigFlags, name=seqName+"FS"))                
+                stepSeq.append(getEmptyMenuSequence(seqName+"FS"))
                 currentStepName = 'Empty' + chainDefList[chain_index].alignmentGroups[0]+'Align'+str(stepNumber)+'_'+new_stepDict['chainParts'][0]['multiplicity']+new_stepDict['signature']+'FS'
             else:
-                stepSeq.append(getEmptyMenuSequence(flags=ConfigFlags, name=seqName))                
+                stepSeq.append(getEmptyMenuSequence(seqName))
                 currentStepName = 'Empty' + chainDefList[chain_index].alignmentGroups[0]+'Align'+str(stepNumber)+'_'+new_stepDict['chainParts'][0]['multiplicity']+new_stepDict['signature']
 
             log.debug("[makeCombinedStep]  chain_index: %s, step name: %s,  empty sequence name: %s", chain_index, currentStepName, seqName)

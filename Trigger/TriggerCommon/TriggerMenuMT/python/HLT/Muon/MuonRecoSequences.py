@@ -4,7 +4,6 @@
 
 from AthenaCommon.Logging import logging
 from AthenaCommon.GlobalFlags import globalflags
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 log = logging.getLogger(__name__)
 
@@ -67,6 +66,7 @@ muNamesLRT = muonNames().getNames('LRT')
 
 def isCosmic():
   #FIXME: this might not be ideal criteria to determine if this is cosmic chain but used to work in Run2 and will do for now, ATR-22758
+  from AthenaConfiguration.AllConfigFlags import ConfigFlags
   return (ConfigFlags.Beam.Type == BeamType.Cosmics)
 
 def isLRT(name):
@@ -216,7 +216,7 @@ def muonDecodeCfg(flags, RoIs):
 
     return acc
 
-def muFastRecoSequence( RoIs, doFullScanID = False, InsideOutMode=False, extraLoads=None, l2mtmode=False, calib=False ):
+def muFastRecoSequence( flags, RoIs, doFullScanID = False, InsideOutMode=False, extraLoads=None, l2mtmode=False, calib=False ):
 
   from AthenaCommon.AppMgr import ToolSvc
   from AthenaCommon.CFElements import parOR
@@ -250,7 +250,7 @@ def muFastRecoSequence( RoIs, doFullScanID = False, InsideOutMode=False, extraLo
   else:
     ViewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs )]
   ViewVerify.DataObjects += [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]
-  if ConfigFlags.Trigger.enableL1MuonPhase1:
+  if flags.Trigger.enableL1MuonPhase1:
     ViewVerify.DataObjects += [( 'xAOD::MuonRoIContainer' , 'StoreGateSvc+LVL1MuonRoIs' )]
   else:
     ViewVerify.DataObjects += [( 'DataVector< LVL1::RecMuonRoI >' , 'StoreGateSvc+HLT_RecMURoIs' )]
@@ -262,7 +262,7 @@ def muFastRecoSequence( RoIs, doFullScanID = False, InsideOutMode=False, extraLo
   muFastRecoSequence += ViewVerify
 
   from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConf import LVL1__TrigT1RPCRecRoiTool
-  trigRpcRoiTool = LVL1__TrigT1RPCRecRoiTool("RPCRecRoiTool", UseRun3Config=ConfigFlags.Trigger.enableL1MuonPhase1)
+  trigRpcRoiTool = LVL1__TrigT1RPCRecRoiTool("RPCRecRoiTool", UseRun3Config=flags.Trigger.enableL1MuonPhase1)
   from TrigL2MuonSA.TrigL2MuonSAConf import TrigL2MuonSA__RpcClusterPreparator
   L2RpcClusterPreparator = TrigL2MuonSA__RpcClusterPreparator(name = "L2RpcClusterPreparator",
                                                               TrigT1RPCRecRoiTool = trigRpcRoiTool)
@@ -291,7 +291,7 @@ def muFastRecoSequence( RoIs, doFullScanID = False, InsideOutMode=False, extraLo
     muFastAlg.multitrackMode = True
     muFastAlg.doEndcapForl2mt = False
 
-  if ConfigFlags.Trigger.enableL1MuonPhase1:
+  if flags.Trigger.enableL1MuonPhase1:
     muFastAlg.UseRun3Config = True
   else:
     muFastAlg.UseRun3Config = False

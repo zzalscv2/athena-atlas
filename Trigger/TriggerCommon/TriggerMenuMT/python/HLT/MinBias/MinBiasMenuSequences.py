@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
 from AthenaCommon.CFElements import parOR
@@ -101,7 +101,7 @@ def SPCounterRecoAlgCfg(flags):
 
 ### Now the sequences
 
-def MinBiasSPSequence():
+def MinBiasSPSequence(flags):
     spAlgsList = []
     from TrigMinBias.TrigMinBiasConf import SPCountHypoAlg
 
@@ -133,7 +133,6 @@ def MinBiasSPSequence():
 #    spAlgsList = idAlgs[:-2]
     spAlgsList = idAlgs
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags# this will disappear once the flags are transported down here
     from ..Config.MenuComponents import algorithmCAToGlobalWrapper # this will disappear once whole sequence would be configured at once
     spCount = algorithmCAToGlobalWrapper(SPCounterRecoAlgCfg, flags)[0]
 
@@ -229,7 +228,8 @@ def MinBiasMbtsSequence():
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     flags.lock()
     ca = MinBiasZVertexFinderSequenceCfg(flags)
     ca.ca.printConfig(withDetails=True)

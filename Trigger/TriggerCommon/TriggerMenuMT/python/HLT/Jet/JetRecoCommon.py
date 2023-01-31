@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 ##########################################################################################
@@ -197,11 +197,10 @@ def getTrackMods(trkopt):
 
 # Translate calib specification into something understood by
 # the calibration config helper
-def getCalibMods(jetRecoDict,dataSource,rhoKey="auto"):
+def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
 
     ## Importing temporay validation flag for testing new online derived calibration
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    calibKey = "Trigger" if ConfigFlags.Trigger.Jet.useTriggerCalib else "TrigLS2"
+    calibKey = "Trigger" if flags.Trigger.Jet.useTriggerCalib else "TrigLS2"
 
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 

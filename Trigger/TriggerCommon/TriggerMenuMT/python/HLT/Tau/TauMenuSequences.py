@@ -1,10 +1,8 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
-# menu components   
+# menu components
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
 
 from TriggerMenuMT.HLT.Tau.TauRecoSequences import tauCaloMVASequence, tauFTFCoreSequence, tauFTFLRTSequence, tauFTFIsoSequence, tauFTFIsoBDTSequence, tauMVASequence, tauLLPSequence, tauLRTSequence, tauPrecIsoTrackSequence, tauPrecLRTTrackSequence
@@ -13,8 +11,8 @@ from TriggerMenuMT.HLT.Tau.TauRecoSequences import tauCaloMVASequence, tauFTFCor
 #      Calo MVA step
 # ===============================================================================================
 
-def tauCaloMVAMenuSeq(name, is_probe_leg=False):
-    (sequence, tauCaloMVAViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauCaloMVASequence,ConfigFlags)
+def tauCaloMVAMenuSeq(flags, name, is_probe_leg=False):
+    (sequence, tauCaloMVAViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauCaloMVASequence,flags)
 
     # hypo
     from TrigTauHypo.TrigTauHypoConf import TrigTauCaloHypoAlg
@@ -33,8 +31,8 @@ def tauCaloMVAMenuSeq(name, is_probe_leg=False):
 #    Fast track finder (core) + TrackRoI Updater + RejectEmpty Hypo step (tracktwoMVA)                                             
 # ===============================================================================================                                                   
 
-def tauFTFTauCoreSeq(is_probe_leg=False):
-    (sequence, ftfCoreViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauFTFCoreSequence,ConfigFlags)
+def tauFTFTauCoreSeq(flags, is_probe_leg=False):
+    (sequence, ftfCoreViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauFTFCoreSequence,flags)
 
     from TrigTauHypo.TrigTauHypoConf import  TrigTrackPreSelHypoAlg
     fastTrkHypo                 = TrigTrackPreSelHypoAlg("TrackPreSelHypoAlg_RejectEmpty")
@@ -52,8 +50,8 @@ def tauFTFTauCoreSeq(is_probe_leg=False):
 #    Fast track finder (LRT) + TrackRoI Updater + RejectEmpty Hypo step
 # ===============================================================================================
 
-def tauFTFTauLRTSeq(is_probe_leg=False):
-    (sequence, ftfLRTViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauFTFLRTSequence,ConfigFlags)
+def tauFTFTauLRTSeq(flags, is_probe_leg=False):
+    (sequence, ftfLRTViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauFTFLRTSequence,flags)
 
     from TrigTauHypo.TrigTauHypoConf import  TrigTrackPreSelHypoAlg
     fastTrkHypo                 = TrigTrackPreSelHypoAlg("TrackPreSelLRTHypoAlg_RejectEmpty")
@@ -72,8 +70,8 @@ def tauFTFTauLRTSeq(is_probe_leg=False):
 #   Fast track finder (iso) + Dummy Hypo step (tracktwoMVA)                                                     
 # ===============================================================================================                                                            
 
-def tauFTFTauIsoSeq(is_probe_leg=False):
-    (sequence, ftfIsoViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauFTFIsoSequence,ConfigFlags )
+def tauFTFTauIsoSeq(flags, is_probe_leg=False):
+    (sequence, ftfIsoViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauFTFIsoSequence,flags )
 
     from TrigTauHypo.TrigTauHypoConf import  TrigTrackPreSelHypoAlg
     fastTrkHypo                 = TrigTrackPreSelHypoAlg("TrackPreSelHypoAlg_PassByIso")
@@ -91,8 +89,8 @@ def tauFTFTauIsoSeq(is_probe_leg=False):
 #   Fast track finder (iso bdt) + Dummy Hypo step (tracktwoMVABDT)                                                                                           
 # ===============================================================================================                                 
 
-def tauFTFTauIsoBDTSeq(is_probe_leg=False):
-    (sequence, ftfIsoBDTViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauFTFIsoBDTSequence,ConfigFlags )
+def tauFTFTauIsoBDTSeq(flags, is_probe_leg=False):
+    (sequence, ftfIsoBDTViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauFTFIsoBDTSequence,flags )
 
     from TrigTauHypo.TrigTauHypoConf import  TrigTrackPreSelHypoAlg
     fastTrkHypo                 = TrigTrackPreSelHypoAlg("TrackPreSelHypoAlg_PassByIsoBDT")
@@ -111,8 +109,8 @@ def tauFTFTauIsoBDTSeq(is_probe_leg=False):
 #     Tau Precision MVA Alg + EFMVHypo step   (tracktwoMVA)
 # ===============================================================================================
 
-def tauTrackTwoMVASeq(is_probe_leg=False):
-    (sequence, mvaViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauMVASequence,ConfigFlags )
+def tauTrackTwoMVASeq(flags, is_probe_leg=False):
+    (sequence, mvaViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauMVASequence,flags )
 
     from TrigTauHypo.TrigTauHypoConf import  TrigEFTauMVHypoAlg
     precisionHypo = TrigEFTauMVHypoAlg("EFTauMVHypoAlgMVA")
@@ -130,8 +128,8 @@ def tauTrackTwoMVASeq(is_probe_leg=False):
 #     Tau Precision LLP Alg + EFMVHypo step   (tracktwoLLP)
 # ===============================================================================================
 
-def tauTrackTwoLLPSeq(is_probe_leg=False):
-    (sequence, mvaViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauLLPSequence,ConfigFlags )
+def tauTrackTwoLLPSeq(flags, is_probe_leg=False):
+    (sequence, mvaViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauLLPSequence,flags )
 
     from TrigTauHypo.TrigTauHypoConf import  TrigEFTauMVHypoAlg
     precisionHypo = TrigEFTauMVHypoAlg("EFTauMVHypoAlgLLP")
@@ -149,8 +147,8 @@ def tauTrackTwoLLPSeq(is_probe_leg=False):
 #     Tau Precision LRT Alg + EFMVHypo step   (LRT)
 # ===============================================================================================
 
-def tauTrackLRTSeq(is_probe_leg=False):
-    (sequence, mvaViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauLRTSequence,ConfigFlags)
+def tauTrackLRTSeq(flags, is_probe_leg=False):
+    (sequence, mvaViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauLRTSequence,flags)
 
     from TrigTauHypo.TrigTauHypoConf import  TrigEFTauMVHypoAlg
     precisionHypo = TrigEFTauMVHypoAlg("EFTauMVHypoAlgLRT")
@@ -168,8 +166,8 @@ def tauTrackLRTSeq(is_probe_leg=False):
 #     Precision Tracking + TrkPrecHypo step   (tracktwoEF, tracktwoMVA, tracktwoMVABDT)                                                                                               
 # ===============================================================================================                                                           
 
-def tauPrecTrackIsoSeq(is_probe_leg=False):
-    (sequence, precTrackViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauPrecIsoTrackSequence,ConfigFlags )
+def tauPrecTrackIsoSeq(flags, is_probe_leg=False):
+    (sequence, precTrackViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauPrecIsoTrackSequence,flags )
 
     from TrigTauHypo.TrigTauHypoConf import  TrigTrkPrecHypoAlg
     precTrkHypo = TrigTrkPrecHypoAlg("TrkPrecIsoHypoAlg")
@@ -188,8 +186,8 @@ def tauPrecTrackIsoSeq(is_probe_leg=False):
 #     Precision Tracking (LRT) + TrkPrecHypo step
 # ===============================================================================================
 
-def tauPrecTrackLRTSeq(is_probe_leg=False):
-    (sequence, precTrackViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauPrecLRTTrackSequence,ConfigFlags)
+def tauPrecTrackLRTSeq(flags, is_probe_leg=False):
+    (sequence, precTrackViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(tauPrecLRTTrackSequence,flags)
 
     from TrigTauHypo.TrigTauHypoConf import  TrigTrkPrecHypoAlg
     precTrkHypo = TrigTrkPrecHypoAlg("TrkPrecLRTHypoAlg")

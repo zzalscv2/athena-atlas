@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 
@@ -6,7 +6,6 @@ from .AlgInputConfig import AlgInputConfig, InputConfigRegistry
 from AthenaCommon.Logging import logging
 
 from ..Config.MenuComponents import RecoFragmentsPool
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
 import copy
 
@@ -53,11 +52,11 @@ class CellInputConfig(AlgInputConfig):
         # Cells have no input dependencies
         return []
 
-    def create_sequence(self, inputs, RoIs, recoDict):
+    def create_sequence(self, flags, inputs, RoIs, recoDict):
         from ..CommonSequences.CaloSequences import cellRecoSequence
 
         cellSeq, cellName = RecoFragmentsPool.retrieve(
-            cellRecoSequence, flags=ConfigFlags, RoIs=RoIs
+            cellRecoSequence, flags, RoIs=RoIs
         )
         return cellSeq, {"Cells": cellName}
 
@@ -80,7 +79,7 @@ class ClusterInputConfig(AlgInputConfig):
         # Clusters have no input dependencies
         return []
 
-    def create_sequence(self, inputs, RoIs, recoDict):
+    def create_sequence(self, flags, inputs, RoIs, recoDict):
         from ..CommonSequences.CaloSequences import (
             caloClusterRecoSequence,
             LCCaloClusterRecoSequence,
@@ -91,11 +90,11 @@ class ClusterInputConfig(AlgInputConfig):
         calib = recoDict["calib"]
         if calib == "em":
             tcSeq, clusterName = RecoFragmentsPool.retrieve(
-                caloClusterRecoSequence, flags=ConfigFlags, RoIs=RoIs
+                caloClusterRecoSequence, flags, RoIs=RoIs
             )
         elif calib == "lcw":
             tcSeq, clusterName = RecoFragmentsPool.retrieve(
-                LCCaloClusterRecoSequence, flags=ConfigFlags, RoIs=RoIs
+                LCCaloClusterRecoSequence, flags, RoIs=RoIs
             )
         else:
             raise ValueError(f"Invalid value for cluster calibration: {calib}")
@@ -165,11 +164,11 @@ class EMClusterInputConfig(AlgInputConfig):
         # Clusters have no input dependencies
         return []
 
-    def create_sequence(self, inputs, RoIs, recoDict):
+    def create_sequence(self, flags, inputs, RoIs, recoDict):
         from ..CommonSequences.CaloSequences import caloClusterRecoSequence
 
         tcSeq, clusterName = RecoFragmentsPool.retrieve(
-            caloClusterRecoSequence, flags=ConfigFlags, RoIs=RoIs
+            caloClusterRecoSequence, flags, RoIs=RoIs
         )
         return [tcSeq], {"EMClusters": clusterName}
 
@@ -195,11 +194,11 @@ class TrackingInputConfig(AlgInputConfig):
         # Tracks have no input dependencies
         return []
 
-    def create_sequence(self, inputs, RoIs, recoDict):
+    def create_sequence(self, flags, inputs, RoIs, recoDict):
         from ..Jet.JetRecoSequences import JetFSTrackingSequence
 
         trkSeq, trkColls = RecoFragmentsPool.retrieve(
-            JetFSTrackingSequence, flags=ConfigFlags, trkopt="ftf", RoIs=RoIs
+            JetFSTrackingSequence, flags, trkopt="ftf", RoIs=RoIs
         )
         return [trkSeq], trkColls
 
@@ -225,14 +224,14 @@ class PFOInputConfig(AlgInputConfig):
     def dependencies(self, recoDict):
         return [self._input_clusters(recoDict), "Tracks", "Vertices", "TVA", "Cells"]
 
-    def create_sequence(self, inputs, RoIs, recoDict):
+    def create_sequence(self, flags, inputs, RoIs, recoDict):
         from eflowRec.PFHLTSequence import PFHLTSequence
         from ..Jet.JetRecoCommon import defineJetConstit
         from JetRecConfig.JetRecConfig import getConstitModAlg_nojetdef
 
         pfSeq, pfoPrefix = RecoFragmentsPool.retrieve(
             PFHLTSequence,
-            flags=ConfigFlags,
+            flags=flags,
             clustersin=inputs[self._input_clusters(recoDict)],
             tracktype="ftf",
             cellsin=inputs["Cells"],
@@ -328,8 +327,8 @@ class MergedPFOInputConfig(AlgInputConfig):
         )
 
     @staticmethod
-    def create_sequence(inputs, RoIs, recoDict):
-        prepAlg = RecoFragmentsPool.retrieve(MergedPFOInputConfig.getPFOPrepAlg, ConfigFlags, **inputs)
+    def create_sequence(flags, inputs, RoIs, recoDict):
+        prepAlg = RecoFragmentsPool.retrieve(MergedPFOInputConfig.getPFOPrepAlg, flags, **inputs)
         return (
             [prepAlg],
             {
@@ -416,12 +415,12 @@ class CVFClusterInputConfig(AlgInputConfig):
         )
 
     @staticmethod
-    def create_sequence(inputs, RoIs, recoDict):
+    def create_sequence(flags, inputs, RoIs, recoDict):
         trkopt = "ftf"
 
         cvfAlg = RecoFragmentsPool.retrieve(
             CVFClusterInputConfig.getCVFAlg,
-            ConfigFlags,
+            flags,
             inputClusters=inputs["Clusters"],
             inputTracks=inputs["Tracks"],
             inputVertices=inputs["Vertices"],
@@ -431,7 +430,7 @@ class CVFClusterInputConfig(AlgInputConfig):
 
         prepAlg = RecoFragmentsPool.retrieve(
             CVFClusterInputConfig.getCVFPrepAlg,
-            ConfigFlags,
+            flags,
             inputClusters=inputs["Clusters"],
             inputCVFKey=cvfAlg.OutputCVFKey,
             trkopt=trkopt,
@@ -482,7 +481,7 @@ class JetInputConfig(AlgInputConfig):
             deps += ["Tracks", "Vertices"]
         return deps
 
-    def create_sequence(self, inputs, RoIs, recoDict):
+    def create_sequence(self, flags, inputs, RoIs, recoDict):
         from ..Jet.JetRecoSequences import jetRecoSequence
         from ..Jet.JetRecoCommon import getTrkColls
 
@@ -497,7 +496,7 @@ class JetInputConfig(AlgInputConfig):
 
         jetSeq, jetName, jetDef = RecoFragmentsPool.retrieve(
             jetRecoSequence,
-            ConfigFlags,
+            flags,
             clustersKey=inputs[self._input_clusters(recoDict)],
             **trkcolls,
             **jetRecoDict,

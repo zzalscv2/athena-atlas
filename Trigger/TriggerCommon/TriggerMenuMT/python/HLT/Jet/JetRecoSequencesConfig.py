@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 """ ComponentAccumulator equivalents for the functions in JetRecoSequences """
@@ -201,7 +201,7 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, trkcolls=None, **jetRecoD
 
     decorList = getDecorList(jetRecoDict)
     
-    jetDef.modifiers = getCalibMods(jetRecoDict, dataSource, rhoKey)
+    jetDef.modifiers = getCalibMods(flags, jetRecoDict, dataSource, rhoKey)
     if use_FS_tracking:
         jetDef.modifiers += [f"JVT:{jetRecoDict['trkopt']}"]
 
@@ -269,7 +269,7 @@ def GroomedJetRecoCfg(flags, dataSource, clustersKey, trkcolls=None, **jetRecoDi
 
     groomDef = defineGroomedJets(jetRecoDict, ungroomedDef)
     jetsOut = recordable(groomDef.fullname())
-    groomDef.modifiers = getCalibMods(jetRecoDict, dataSource)
+    groomDef.modifiers = getCalibMods(flags,jetRecoDict, dataSource)
     groomDef.modifiers += [
         "Sort",
         "Filter:{}".format(getFilterCut(jetRecoDict["recoAlg"])),
