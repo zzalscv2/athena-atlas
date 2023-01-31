@@ -21,8 +21,7 @@ TrackInformation::TrackInformation(HepMC::GenParticlePtr p, ISF::ISFParticle* ba
 
 int TrackInformation::GetParticleBarcode() const
 {
-  HepMC::ConstGenParticlePtr p = m_theParticle;
-  return ( m_theParticle ? HepMC::barcode(p) : 0 );
+  return ( m_theParticle ? HepMC::barcode(m_theParticle) : 0 );
 }
 
 void TrackInformation::SetParticle(HepMC::GenParticlePtr p)

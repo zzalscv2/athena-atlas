@@ -22,8 +22,7 @@ void PrimaryParticleInformation::SuggestBarcode(int bc)
 
 int PrimaryParticleInformation::GetParticleBarcode() const
 {
-  HepMC::ConstGenParticlePtr p = m_theParticle;
-  return m_theParticle?HepMC::barcode(p):m_barcode;
+  return m_theParticle?HepMC::barcode(m_theParticle):m_barcode;
 }
 
 void PrimaryParticleInformation::SetParticle(HepMC::GenParticlePtr p)
