@@ -40,9 +40,8 @@ def TileCellBuilderCfg(flags, **kwargs):
     from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
     acc.merge(TileCablingSvcCfg(flags))
 
-    if 'TileBadChanTool' not in kwargs:
-        from TileConditions.TileBadChannelsConfig import TileBadChanToolCfg
-        kwargs['TileBadChanTool'] = acc.popToolsAndMerge( TileBadChanToolCfg(flags) )
+    from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
+    acc.merge( TileBadChannelsCondAlgCfg(flags) )
 
     from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
     acc.merge( TileEMScaleCondAlgCfg(flags) )
