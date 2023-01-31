@@ -55,7 +55,7 @@ StatusCode PanTau::Tool_TauConstituentGetter::GetTauConstituents(const xAOD::Tau
   unsigned int nChargedPFO = tauJet->nProtoChargedPFOs();
 
   for(unsigned int iChrgPFO=0; iChrgPFO<nChargedPFO; iChrgPFO++) {
-    xAOD::PFO* curChrgPFO = const_cast<xAOD::PFO*>(tauJet->protoChargedPFO( iChrgPFO ));
+    const xAOD::PFO* curChrgPFO = tauJet->protoChargedPFO( iChrgPFO );
 
     //convert to tau constituent
     PanTau::TauConstituent* curConst = nullptr;
@@ -76,7 +76,7 @@ StatusCode PanTau::Tool_TauConstituentGetter::GetTauConstituents(const xAOD::Tau
   unsigned int nNeutPFO = tauJet->nProtoNeutralPFOs();
     
   for(unsigned int iNeutPFO=0; iNeutPFO<nNeutPFO; iNeutPFO++) {
-    xAOD::PFO* curNeutPFO = const_cast<xAOD::PFO*>(tauJet->protoNeutralPFO( iNeutPFO ));
+    const xAOD::PFO* curNeutPFO = tauJet->protoNeutralPFO( iNeutPFO );
         
     //convert to tau constituent
     PanTau::TauConstituent* curConst = nullptr;

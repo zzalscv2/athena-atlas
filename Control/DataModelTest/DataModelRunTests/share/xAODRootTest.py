@@ -1,10 +1,20 @@
-from __future__ import print_function
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+#
+# File: share/xAODRootTest.py
+# Author: snyder@bnl.gov
+# Date: Jun 2014
+# Purpose: Test reading xAOD objects directly from root.
+#
+
 import ROOT
 import cppyy
 
 import sys
 cppyy.load_library("libDataModelTestDataCommonDict")
-cppyy.load_library("libDataModelTestDataReadDict")
+if 'LOAD_WRITE_DIR' in globals():
+    cppyy.load_library("libDataModelTestDataWriteDict")
+else:
+    cppyy.load_library("libDataModelTestDataReadDict")
 
 def CHECK(sc):
     if not sc.isSuccess():
@@ -278,6 +288,17 @@ class xAODTestClearDecor:
 
     
 
+class AllocTestRead:
+    def execute (self, tree, event=None):
+        cont = tree.AllocTest
+        print ('AllocTest: ', end='')
+        for a in cont:
+            print (a.atInt1(), a.atInt2(), end=' ')
+        print()
+        return
+
+    
+
 class Analysis:
     def __init__ (self, ifname, ofname = None):
         self.algs = []
@@ -309,7 +330,8 @@ class Analysis:
         return
 
     def finalize (self):
-        CHECK (self.event.finishWritingTo (self.fout))
+        if self.fout:
+            CHECK (self.event.finishWritingTo (self.fout))
         return
     
     

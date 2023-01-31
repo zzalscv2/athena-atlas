@@ -19,6 +19,7 @@
 #include "ISF_Event/ISFTruthIncident.h"
 
 // Gaudi & StoreGate
+#include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "StoreGate/StoreGateSvc.h"
 // CLHEP
@@ -392,7 +393,11 @@ iFatras::G4ParticleDecayHelper::decayParticle(const ISF::ISFParticle& parent,
 
 bool iFatras::G4ParticleDecayHelper::initG4RunManager() const {
 
-  static const G4RunManager* const g4runManager = m_g4RunManagerHelper->fastG4RunManager();
+  // safe because the static initialization ensures that this is only called once
+  static const G4RunManager* const g4runManager ATLAS_THREAD_SAFE = [&] ATLAS_NOT_THREAD_SAFE () {
+    auto helper_nc = const_cast<ISF::IG4RunManagerHelper*>(m_g4RunManagerHelper.get());
+    return helper_nc->fastG4RunManager();
+  }();
 
   return g4runManager ? true : false;
 }

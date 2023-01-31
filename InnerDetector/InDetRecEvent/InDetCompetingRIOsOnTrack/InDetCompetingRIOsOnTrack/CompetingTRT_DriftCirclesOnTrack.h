@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -69,8 +69,8 @@ public:
      inconsistency of the data will be very probable. */
   CompetingTRT_DriftCirclesOnTrack(
     const Trk::Surface* sf,
-    std::vector<const InDet::TRT_DriftCircleOnTrack*>* childrots,
-    std::vector<AssignmentProb>* assgnProb,
+    std::vector<const InDet::TRT_DriftCircleOnTrack*>&& childrots,
+    std::vector<AssignmentProb>&& assgnProb,
     const Trk::LocalParameters& effecLocalPars,
     const Amg::MatrixX& effecLocalErrMat,
     int ROTsHaveComSrfc // meaning of the values are described in the definition
@@ -121,12 +121,11 @@ private:
   CxxUtils::CachedUniquePtr<const Amg::Vector3D> m_globalPosition;
 
   //! The vector of contained InDet::TRT_DriftCircleOnTrack objects
-  std::vector<const InDet::TRT_DriftCircleOnTrack*>* m_containedChildRots;
+  std::vector<const InDet::TRT_DriftCircleOnTrack*> m_containedChildRots;
 
   /** Have all the contained ROTs a common associated surface?
       If withNonVanishingAssignProb==true just the ROTs with non-vanishing
-     assignment probabilities are checked.
-      - interface  from CompetingRIOsOnTrack */
+     assignment probabilities are checked.*/
   bool ROTsHaveCommonSurface(
     const bool withNonVanishingAssignProb = true) const;
   int m_ROTsHaveCommonSurface;
@@ -147,19 +146,19 @@ CompetingTRT_DriftCirclesOnTrack::associatedSurface() const
 inline const std::vector<const InDet::TRT_DriftCircleOnTrack*>&
 CompetingTRT_DriftCirclesOnTrack::containedROTs() const
 {
-  return (*m_containedChildRots);
+  return m_containedChildRots;
 }
 
 inline const InDet::TRT_DriftCircleOnTrack&
 CompetingTRT_DriftCirclesOnTrack::rioOnTrack(unsigned int indx) const
 {
-  return *std::as_const(*m_containedChildRots)[indx];
+  return *std::as_const(m_containedChildRots)[indx];
 }
 
 inline unsigned int
 CompetingTRT_DriftCirclesOnTrack::numberOfContainedROTs() const
 {
-  return m_containedChildRots->size();
+  return m_containedChildRots.size();
 }
 }
 

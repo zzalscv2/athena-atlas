@@ -1,6 +1,8 @@
 ## -- Overview of all default local settings that one can change 
 ## -- The default values are also shown.
 
+isHI_mode = False
+
 ## ------------------------------------------- name of the partition from which to read data and configuration parameters
 partitionName   = 'ATLAS'
 #partitionName   = 'GMTestPartition' #Test partition serving events from a raw data file if you want to test when no run is ongoing.
@@ -8,6 +10,11 @@ partitionName   = 'ATLAS'
 ## ------------------------------------------- set both the old flags in RecExOnline and the new flags consistently
 beamType          = 'collisions'
 #beamType          = 'cosmics'
+
+#COND tag
+ConditionsTag     = 'CONDBR2-HLTP-2022-02'
+#Current DetDesc
+DetDescrVersion   = 'ATLAS-R3S-2021-03-00-00'
 
 ## Pause this thread until the ATLAS partition is up
 include ("EventDisplaysOnline/WaitForAtlas_jobOptions.py")
@@ -21,6 +28,8 @@ autoConfigOnlineRecoFlags(ConfigFlags, partitionName)
 
 ## ------------------------------------------- update selected ConfigFlags if needed
 ConfigFlags.Beam.Type = BeamType(beamType)
+ConfigFlags.IOVDb.GlobalTag = ConditionsTag
+ConfigFlags.GeoModel.AtlasVersion = DetDescrVersion
 
 ## ------------------------------------------- flags set in: RecExOnline_jobOptions.py  
 isOnline          = True
@@ -87,11 +96,6 @@ pickleconfigfile  = './ami_recotrf.pickle'
 DataSource        = 'data'
 InputFormat       = 'bytestream'
 fileName          = './0.data'
-
-#COND tag
-ConditionsTag     = 'CONDBR2-HLTP-2022-02'
-#Current DetDesc
-DetDescrVersion   = 'ATLAS-R3S-2021-03-00-00'
 
 doESD             = True
 writeESD          = True # False - Jiggins_12Feb_v2 working version switch 
@@ -162,7 +166,14 @@ recAlgs.doMissingET.set_Value_and_Lock(False)
 ## from Global Monitoring 12 Oct 2021
 from AthenaCommon.GlobalFlags import jobproperties
 jobproperties.Global.DetGeo.set_Value_and_Lock('atlas')
-jobproperties.Beam.bunchSpacing.set_Value_and_Lock(25) # Needed for collisions
+
+if isHI_mode:
+     InDetFlags.cutLevel.set_Value_and_Lock(4)
+     jobproperties.Beam.bunchSpacing.set_Value_and_Lock(100) # Needed for collisions
+     rec.doHeavyIon.set_Value_and_Lock(True)
+     streamName = ''
+elif beamType == 'collisions':
+     jobproperties.Beam.bunchSpacing.set_Value_and_Lock(25) # Needed for collisions
 
 if (partitionName != 'ATLAS'): # Can't get some information from the test partition
      ConfigFlags.Input.RunNumber = [412343]

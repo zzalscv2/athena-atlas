@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file PoolCollectionConverter.cxx
@@ -55,7 +55,7 @@ PoolCollectionConverter::PoolCollectionConverter(const std::string& collectionTy
    }
    std::string::size_type p_slash = m_inputContainer.find('/');
    if (p_slash != std::string::npos) {
-      m_inputContainer = m_inputContainer.substr(0, p_slash);
+      m_inputContainer.resize(p_slash);
    }
 }
 //______________________________________________________________________________

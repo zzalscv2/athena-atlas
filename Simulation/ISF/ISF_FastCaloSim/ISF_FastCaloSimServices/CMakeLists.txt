@@ -26,7 +26,7 @@ atlas_add_library( ISF_FastCaloSimServices
   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}  ${LWTNN_INCLUDE_DIRS}
   LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib ${LWTNN_LIBRARIES}
   AthenaBaseComps AthenaKernel GaudiKernel IdDictParser ISF_InterfacesLib
-  TrkEventPrimitives TrkExInterfaces CaloEvent StoreGateLib NavFourMom
+  TrkEventPrimitives TrkExInterfaces CaloEvent CaloDetDescrUtils StoreGateLib NavFourMom
   GeneratorObjects FastCaloSimLib ISF_Event ISF_FastCaloSimEvent
   ISF_FastCaloSimInterfaces ISF_FastCaloSimParametrizationLib PathResolver
   ${_linkLibraries} )

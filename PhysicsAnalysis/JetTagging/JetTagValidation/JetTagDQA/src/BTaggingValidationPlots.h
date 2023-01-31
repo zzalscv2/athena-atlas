@@ -27,7 +27,7 @@ namespace JetTagDQA{
   class BTaggingValidationPlots : public PlotBase, public AthMessaging {
     public:
       // constructor
-      BTaggingValidationPlots(PlotBase* pParent, const std::string& sDir, std::string sParticleType, bool hasJetFitterNN = false);
+      BTaggingValidationPlots(PlotBase* pParent, const std::string& sDir, std::string sParticleType);
 
       // fill methods
       void fillJetKinVars(const xAOD::Jet* jet, const int& truth_label, const bool& onZprime, const xAOD::EventInfo* event);
@@ -40,7 +40,7 @@ namespace JetTagDQA{
 
       void bookNJetsThatPassedWPCutsHistos();
       void initializeNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts);
-      void updateNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts, const double& discr_IP3D, const double& discr_IP2D, const double& discr_RNNIP, const double& discr_DIPS, const double& discr_SV1, const double& discr_JetFitter, const double& discr_DL1dv00, const double& DL1dv01, const double& discr_DL1r, const double& GN1);
+      void updateNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts, const double& discr_IP3D, const double& discr_IP2D, const double& discr_RNNIP, const double& discr_DIPS, const double& discr_SV1, const double& discr_DL1dv00, const double& DL1dv01, const double& discr_DL1r, const double& GN1);
       void fillNJetsThatPassedWPCutsHistos(std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event);
 
       void setTaggerInfos();    
@@ -480,7 +480,6 @@ namespace JetTagDQA{
       TH1* m_GN1_pc = nullptr;
       TH1* m_GN1_pu = nullptr;
 
-      // TH1* m_SV0_NGTinSvx = nullptr;
       TH1* m_nGTinSV1_incl = nullptr;
       TH1* m_nGTinSV1_b = nullptr;
       TH1* m_nGTinSV1_c = nullptr;
@@ -557,13 +556,13 @@ namespace JetTagDQA{
       // a setter for the HistogramDefinitions and the jvt and TMP cuts
       void setHistogramDefinitions( std::map< std::string, std::vector< std::string > > HistogramDefinitions);
       void setIsDataJVTCutsAndTMPCut(bool isData, float JVTCutAntiKt4EMTopoJets, float JVTCutLargerEtaAntiKt4EMTopoJets, float JVTCutAntiKt4EMPFlowJets, float truthMatchProbabilityCut);
+      void setTaggerNames(const std::string& dipsName, const std::string& DL1dv00Name, const std::string& DL1dv01Name, const std::string& GN1Name);
 
       // jvt variables 
       bool m_JVT_defined;
       float m_JVT_cut = 0.0F;
       bool m_JVTLargerEta_defined;
       float m_JVTLargerEta_cut = 0.0F;
-      bool m_hasJetFitterNN = false;
 
     private:
       virtual void initializePlots();     
@@ -584,6 +583,12 @@ namespace JetTagDQA{
       void bookDiscriminantVsPTAndLxyHistograms(const std::string& tagger_name, const std::map<std::string, double>& workingPoints, const bool& isOldTagger, std::map<std::string, int>::const_iterator label_iter, const std::string& m_sParticleType);
       template <class T>
       void fillHistoWithTruthCases(T value, TH1* histo_incl, TH1* histo_b, TH1* histo_c, TH1* histo_l, TH1* histo_muon, const int& truth_label, const bool& has_muon, const xAOD::EventInfo* event);
+
+      // tagger names
+      std::string m_dipsName;
+      std::string m_DL1dv00Name;
+      std::string m_DL1dv01Name;
+      std::string m_GN1Name;
 
   };
     

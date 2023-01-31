@@ -29,7 +29,7 @@ persToTrans( const Trk::TrackStateOnSurface_p2 *persObj, Trk::TrackStateOnSurfac
   const Trk::TrackParameters* trackParameters = dynamic_cast<const Trk::TrackParameters*>(createTransFromPStore( &paramsCnv, persObj->m_trackParameters, log ));
 
   std::unique_ptr<const Trk::FitQuality>  fitQ(createTransFromPStore( &m_fitQCnv, persObj->m_fitQualityOnSurface, log));
-  auto fitQos = fitQ ? std::make_unique<Trk::FitQualityOnSurface>(*fitQ) : nullptr;
+  auto fitQos = fitQ ? Trk::FitQualityOnSurface(*fitQ) : Trk::FitQualityOnSurface{};
 
   ITPConverterFor<Trk::MaterialEffectsBase> *matBaseCnv = nullptr;
   const Trk::MaterialEffectsBase* materialEffects = createTransFromPStore( &matBaseCnv, persObj->m_materialEffects, log );
@@ -37,9 +37,9 @@ persToTrans( const Trk::TrackStateOnSurface_p2 *persObj, Trk::TrackStateOnSurfac
   std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> types;
   std::bitset<Trk::TrackStateOnSurface::NumberOfPersistencyHints> hints;
   Trk::TrackStateOnSurface::splitToBitsets(persObj->m_typeFlags, types, hints);
-  *transObj = Trk::TrackStateOnSurface (std::unique_ptr<const Trk::MeasurementBase> (meas),
+  *transObj = Trk::TrackStateOnSurface (fitQos,
+                                        std::unique_ptr<const Trk::MeasurementBase> (meas),
                                         std::unique_ptr<const Trk::TrackParameters>(trackParameters),
-                                        std::move(fitQos),
                                         std::unique_ptr<const Trk::MaterialEffectsBase>(materialEffects),
                                         types,
                                         hints);

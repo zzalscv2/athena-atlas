@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -30,7 +30,7 @@ HepMcTupleWriterTool::HepMcTupleWriterTool( const std::string& type,
 					    const IInterface* parent ) : 
   AthAlgTool( type, name, parent ),
   m_tupleSvc ( "THistSvc",     name ),
-  m_tuple    ( 0 )
+  m_tuple    ( nullptr )
 {
   //
   // Property declaration
@@ -97,8 +97,8 @@ StatusCode HepMcTupleWriterTool::finalize()
 StatusCode HepMcTupleWriterTool::execute()
 {
   // retrieve the McEventCollection
-  const McEventCollection * mcEvts = 0;
-  if ( evtStore()->retrieve( mcEvts, m_mcEventsName ).isFailure() || 0 == mcEvts ) {
+  const McEventCollection * mcEvts = nullptr;
+  if ( evtStore()->retrieve( mcEvts, m_mcEventsName ).isFailure() || nullptr == mcEvts ) {
     ATH_MSG_ERROR("Could not retrieve a McEventCollection at [" << m_mcEventsName << "] !!");
     return StatusCode::FAILURE;
   }
@@ -129,7 +129,7 @@ StatusCode HepMcTupleWriterTool::write( const HepMC::GenEvent* evt )
   m_particles.m_nParticles = std::min<std::size_t>( s_nMax, evt->particles_size() );
 #endif
   std::size_t i = 0;
-  for (auto p: *evt)
+  for (const auto& p: *evt)
   {
     if (i == static_cast<std::size_t>(m_particles.m_nParticles)) break;
     i++;
@@ -157,7 +157,7 @@ StatusCode HepMcTupleWriterTool::write( const HepMC::GenEvent* evt )
 void HepMcTupleWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*m_outputFileName*/ )
 {
   const bool createIf = false;
-  IProperty * tSvc = 0;
+  IProperty * tSvc = nullptr;
   if ( !service( m_tupleSvc.name(), tSvc, createIf ).isSuccess() ) {
     ATH_MSG_ERROR("Could not retrieve THistSvc handle !!");
     throw GaudiException( "Could not retrieve THistSvc",   name(),   StatusCode::FAILURE );
@@ -180,8 +180,7 @@ void HepMcTupleWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*m_outpu
     throw GaudiException( "Could not configure THistSvc output file !!",   name(),  StatusCode::FAILURE );
   }
 
-  return;
-}
+  }
 
 void HepMcTupleWriterTool::bookTuple()
 {
@@ -189,7 +188,7 @@ void HepMcTupleWriterTool::bookTuple()
   TTree* t = new TTree("hepmc","HepMC validation tuple");
   if ( !m_tupleSvc->regTree( "/" + streamName + "/hepmc", t ).isSuccess() ) {
     ATH_MSG_ERROR("Could not register HepMC validation tuple !!");
-    delete t; t = 0;
+    delete t; t = nullptr;
     throw GaudiException( "Could not register HepMC validation tuple !!",  name(),  StatusCode::FAILURE );
   }
 
@@ -207,5 +206,4 @@ void HepMcTupleWriterTool::bookTuple()
   t->Branch( "bc",    m_particles.m_barcode.elems, "bc[nParts]/I" );
 
   m_tuple = t;
-  return;
 }

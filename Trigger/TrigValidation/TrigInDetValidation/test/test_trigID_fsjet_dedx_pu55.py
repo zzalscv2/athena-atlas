@@ -29,16 +29,14 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
-import os
-os.system("echo 'from TrigInDetConfig.ConfigSettings import getInDetTrigConfig ; getInDetTrigConfig(\"jet\")._dodEdxTrk=True' > dodEdx.py ; cat dodEdx.py ")
-
 Slices  = ['fsjet']
 Events  = 2000
 Threads = 8
 Slots   = 8
-preinclude_file = 'RDOtoRDOTrigger:dodEdx.py'
 Input   = 'ttbar'    # defined in TrigValTools/share/TrigValInputs.json  
 GridFiles = True
+
+preinclude_file = "RDOtoRDOTrigger:TrigInDetValidation/TIDAjetdEdx_preinclude.py"
 
 Jobs = [ ( "Truth",       " TIDAdata-run3.dat                        -o data-hists.root" ), 
          ( "Offline",     " TIDAdata-run3-offline.dat     -r Offline -o data-hists-offline.root" ),

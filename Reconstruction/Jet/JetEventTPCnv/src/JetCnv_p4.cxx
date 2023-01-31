@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetCnv_p4.cxx 
@@ -167,7 +167,7 @@ void JetCnv_p4::persToTrans( const Jet_p4* pers,
         // Cross-check against getIndex() for up to the first 10 times.
         if (m_nIndexTest < 10 && !m_badIndex) {
           ++m_nIndexTest;
-          if (JetKeyDescriptorInstance::s_instance.getIndex ("JetAssociations",
+          if (JetKeyDescriptorInstance::instance()->getIndex ("JetAssociations",
                                               ass[i]->name()) != index)
             m_badIndex = true;
         }

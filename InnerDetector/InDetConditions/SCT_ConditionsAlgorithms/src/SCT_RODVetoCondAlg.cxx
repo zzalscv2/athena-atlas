@@ -30,8 +30,6 @@ StatusCode SCT_RODVetoCondAlg::initialize() {
   ATH_CHECK(m_cabling.retrieve());
   ATH_CHECK(detStore()->retrieve(m_pHelper, "SCT_ID"));
   ATH_CHECK(m_badIds.initialize());
-  ATH_CHECK(m_condSvc.retrieve());
-  ATH_CHECK(m_condSvc->regHandle(this, m_badIds));
 
   return StatusCode::SUCCESS;
 }

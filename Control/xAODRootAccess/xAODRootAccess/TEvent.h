@@ -19,6 +19,8 @@
 // EDM include(s):
 #include "xAODEventFormat/EventFormat.h"
 #include "AthContainersInterfaces/IAuxStoreHolder.h"
+#include "CxxUtils/checker_macros.h"
+#include "AthContainers/tools/threading.h"
 #include "CxxUtils/sgkey_t.h"
 
 // Interface include(s):
@@ -26,6 +28,7 @@
 
 // Local include(s):
 #include "AsgMessaging/StatusCode.h"
+#include "CxxUtils/checker_macros.h"
 #include "xAODRootAccess/tools/IProxyDict.h"
 
 // Forward declaration(s):
@@ -60,7 +63,7 @@ namespace xAOD {
    class TEvent;
    class TTreeMgr;
    class THolder;
-   ::TTree* MakeTransientTree( TEvent&, const char* );
+   ::TTree* MakeTransientTree ATLAS_NOT_THREAD_SAFE ( TEvent&, const char* );
 
    /// @short Tool for accessing xAOD files outside of Athena
    ///
@@ -472,8 +475,13 @@ namespace xAOD {
          const ::TClass* m_class = 0;
       }; // struct BranchInfo
 
+      /// Mutex and lock for multithread synchronization
+      typedef AthContainers_detail::upgrade_mutex upgrade_mutex_t;
+      typedef AthContainers_detail::upgrading_lock< upgrade_mutex_t > upgrading_lock_t;
+      mutable upgrade_mutex_t m_branchesMutex;
+
       /// Map from hashed sgkey to BranchInfo.
-      mutable SG::SGKeyMap< BranchInfo > m_branches;
+      mutable SG::SGKeyMap< BranchInfo > m_branches ATLAS_THREAD_SAFE; // protected by mutex
 
       /// @}
 

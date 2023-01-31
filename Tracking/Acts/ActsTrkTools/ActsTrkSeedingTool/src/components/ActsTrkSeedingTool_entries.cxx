@@ -3,7 +3,9 @@
 */
 
 #include "src/SeedingTool.h"
+#include "src/OrthogonalSeedingTool.h"
 #include "src/SiSpacePointsSeedMaker.h"
 
 DECLARE_COMPONENT( ActsTrk::SeedingTool )
+DECLARE_COMPONENT( ActsTrk::OrthogonalSeedingTool )
 DECLARE_COMPONENT( ActsTrk::SiSpacePointsSeedMaker )

@@ -26,9 +26,6 @@
 
 namespace HistValFunctions {
 
-  bool verbose();
-  void setVerbose(bool);
-
   template <class T> inline std::string toString(const T& t) { std::ostringstream s;s<<t;return s.str(); }
   template <class T1,class T2>
   inline std::string toString(const std::pair<T1,T2>& p) {
@@ -74,6 +71,7 @@ namespace HistValFunctions {
     return true;
   }
 
+  [[noreturn]]
   void testfailed(const std::string& testname);
 
   template <class T1, class T2>
@@ -156,7 +154,7 @@ namespace HistValFunctions {
   //____________________________________________________________________
   // Disable ubsan to turn off warnings about casting TH1F to TH1_FieldsAccess.
   template <class TH, class THLW>
-  static inline void compareMetaData NO_SANITIZE_UNDEFINED (const TH* hroot, const THLW * hlw, bool ignorename = false)
+  static inline void compareMetaData NO_SANITIZE_UNDEFINED (const TH* hroot, THLW * hlw, bool ignorename = false)
   {
     assert (hroot&&hlw);
     if (!hroot||!hlw)

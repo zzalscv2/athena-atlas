@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -52,8 +52,8 @@ namespace Muon {
     public:
         CscClusterOnTrackCreator(const std::string&, const std::string&, const IInterface*);
         virtual ~CscClusterOnTrackCreator();
-        virtual StatusCode initialize();
-        virtual StatusCode finalize();
+        virtual StatusCode initialize() override;
+        virtual StatusCode finalize() override;
 
         /** @brief Create new Muon::MuonClusterOnTrack from a Trk::PrepRawData and a predicted Trk::TrackParameter.
             @param RIO Trk::PrepRawData object to be calibrated
@@ -61,7 +61,7 @@ namespace Muon {
             @return a pointer to a new Muon::MuonClusterOnTrack object, zero if calibration failed.
             The ownership of the new Muon::MuonClusterOnTrack is passed to the client calling the tool
         */
-        virtual const MuonClusterOnTrack* createRIO_OnTrack(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP) const;
+        virtual const MuonClusterOnTrack* createRIO_OnTrack(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP) const override;
 
         /** @brief Create new Muon::MuonClusterOnTrack from a Trk::PrepRawData and a prediction of the global position and direction.
             It is only implemented for the CSCs, for RPC and TGC Trk::PrepRawData the result is the same as for the routine without the
@@ -72,8 +72,7 @@ namespace Muon {
             @return a pointer to a new Muon::MuonClusterOnTrack object, zero if calibration failed.
             The ownership of the new Muon::MuonClusterOnTrack is passed to the client calling the tool
         */
-        virtual const MuonClusterOnTrack* createRIO_OnTrack(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP,
-                                                            const Amg::Vector3D& GD) const;
+        virtual const MuonClusterOnTrack* createRIO_OnTrack(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const override;
 
         /** @brief Create new Muon::MuonClusterOnTrack from a Trk::PrepRawData and the predicted Trk::TrackParameter at the measurement
            surface.
@@ -82,11 +81,12 @@ namespace Muon {
             @return a pointer to a new Muon::MuonClusterOnTrack object, zero if calibration failed.
             The ownership of the new Muon::MuonClusterOnTrack is passed to the client calling the tool
         */
-        virtual const MuonClusterOnTrack* correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP) const;
-
-        virtual const ToolHandle<ICscStripFitter>& GetICscStripFitter() const;
-        virtual const ToolHandle<ICscClusterFitter>& GetICscClusterFitter() const;
-        virtual const ToolHandle<ICscClusterUtilTool>& GetICscClusterUtilTool() const;
+        virtual const MuonClusterOnTrack* correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP) const override;
+        virtual const MuonClusterOnTrack* correct(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const override;
+        
+        virtual const ToolHandle<ICscStripFitter>& GetICscStripFitter() const override;
+        virtual const ToolHandle<ICscClusterFitter>& GetICscClusterFitter() const override;
+        virtual const ToolHandle<ICscClusterUtilTool>& GetICscClusterUtilTool() const override;
 
     private:
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

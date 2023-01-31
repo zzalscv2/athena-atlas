@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ## @Package PyJobTransforms.trfArgs
 #  @brief Standard arguments supported by trf infrastructure
@@ -8,13 +8,13 @@ import logging
 msg = logging.getLogger(__name__)
 
 import PyJobTransforms.trfArgClasses as trfArgClasses
-from PyJobTransforms.trfArgClasses import argFactory
+from PyJobTransforms.trfArgClasses import argActionFactory, argFactory
 
 from PyJobTransforms.trfLogger import stdLogLevels
 
 ## Add standard transform arguments to an argparse ArgumentParser
 def addStandardTrfArgs(parser):
-    parser.add_argument('--CA', type=argFactory(trfArgClasses.argSubstepBool, runarg=False), nargs='?',
+    parser.add_argument('--CA', action=argActionFactory(trfArgClasses.argSubstepBool, runarg=False), nargs='*',
                         help='Use ComponentAccumulator base configuration')
     parser.add_argument('--verbose', '--debug', action='store_true', help='Set transform loglevel to DEBUG')
     parser.add_argument('--loglevel', choices=list(stdLogLevels), help='Set transform logging level')
@@ -100,25 +100,23 @@ def addAthenaArguments(parser, maxEventsDefaultSubstep='first', addValgrind=True
                         'given their own value or glob matched.')
     parser.add_argument('--athenaMPStrategy', type=trfArgClasses.argFactory(trfArgClasses.argSubstep, runarg=False), 
                         nargs='+', metavar='substep:Strategy', group='Athena',
-                        help='Set the AthenaMP scheduling strategy for a particular substep. Default is unset, '
-                        'except when n_inputFiles = n_workers, when it is "FileScheduling" (useful for '
-                        'ephemeral outputs).')
+                        help='Set the AthenaMP scheduling strategy for a particular substep. Default is unset.')
     parser.add_argument('--athenaMPUseEventOrders', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
-                        metavar='BOOL', group='Athena',
+                        metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='Change AthenaMP setup to read event numbers from event orders files')
     parser.add_argument('--athenaMPEventsBeforeFork', type=trfArgClasses.argFactory(trfArgClasses.argInt, runarg=False),
                         metavar='N', group='Athena',
                         help='Set AthenaMP to fork after processing N events (default is to fork immediately after '
                         'initialisation')
     parser.add_argument('--sharedWriter', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
-                        metavar='BOOL', group='Athena',
+                        metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='SharedWriter mode active')
     parser.add_argument('--parallelCompression',
                         type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
-                        metavar='BOOL', group='Athena',
+                        metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='Delegate event data compression to the workers while using SharedWriter')
     parser.add_argument('--eventService', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
-                        metavar='BOOL', group='Athena',
+                        metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='Switch AthenaMP to the Event Service configuration')
     parser.add_argument('--multithreaded', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
                         metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
@@ -203,7 +201,7 @@ def addDetectorArguments(parser):
 #  @param parser trfArgParser object
 def addMetadataArguments(parser):
     parser.defineArgGroup('Metadata', 'Metadata arguments that will be passed into the transform')
-    parser.add_argument('--AMIConfig', '--AMI', type=argFactory(trfArgClasses.argString, runarg=False), help='Configure transform with AMI tag parameters', group="Metadata")
+    parser.add_argument('--AMIConfig', '--AMI', type=argFactory(trfArgClasses.argString), help='Configure transform with AMI tag parameters', group="Metadata")
     parser.add_argument('--AMITag',  type=argFactory(trfArgClasses.argString), metavar='TAG', group="Metadata",
                         help='AMI tag from which this job was defined - this option simply writes the '
                         'relevant AMI tag value into the output metadata, it does not configure the job (use --AMIConfig for that)')
@@ -220,18 +218,13 @@ def addMetadataArguments(parser):
 # @param pick Optional list of DPD types to add (use short names, e.g., @c DESDM_MUON)
 # @param transform Transform object. DPD data types will be added to the correct executor (by name or substep)
 # @param multipleOK If the @c multipleOK flag should be set for this argument
-# @param RAWtoALL Flag if DPDs should be made direct from bytestream, instead of 'classic' workflow
 # \@silent
-def addPrimaryDPDArguments(parser, pick = None, transform = None, multipleOK=False, RAWtoALL=False):
+def addPrimaryDPDArguments(parser, pick = None, transform = None, multipleOK=False):
     parser.defineArgGroup('Primary DPDs', 'Primary DPD File Options')
     # list* really gives just a list of DPD names
     try:
         from PrimaryDPDMaker.PrimaryDPDFlags import listRAWtoDPD,listESDtoDPD,listAODtoDPD
-        if RAWtoALL:
-            listRAWtoDPD.extend(listESDtoDPD)
-            matchedOutputList = [(['r2a'], listRAWtoDPD), (['a2d'], listAODtoDPD)]
-        else:
-            matchedOutputList = [(['r2e'], listRAWtoDPD), (['e2d'], listESDtoDPD), (['a2d'], listAODtoDPD)]
+        matchedOutputList = [(['r2a'], listRAWtoDPD + listESDtoDPD), (['a2d'], listAODtoDPD)]
         for substep, dpdList in matchedOutputList:
             for dpdName in [ dpd.replace('Stream', '') for dpd in dpdList ]:
                 msg.debug('Handling {0}'.format(dpdName))
@@ -518,8 +511,10 @@ def addFileValidationArguments(parser):
                         group='File Validation', help='If FALSE skip output file validation (default TRUE; warning - do not use this option in production jobs!)')
     
     parser.add_argument('--parallelFileValidation', type = argFactory(trfArgClasses.argBool), metavar='BOOL',
+                        nargs='?', const=trfArgClasses.argBool('True'),
                         group='File Validation', help='Parallelise file validation if True')
     parser.add_argument('--multithreadedFileValidation', type = argFactory(trfArgClasses.argBool), metavar='BOOL',
+                        nargs='?', const=trfArgClasses.argBool('True'),
                         group='File Validation', help='Use multithreaded ROOT file validation if True')
 
 def addParallelJobProcessorArguments(parser):

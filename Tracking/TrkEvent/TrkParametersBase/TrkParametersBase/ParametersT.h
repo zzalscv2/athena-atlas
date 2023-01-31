@@ -133,9 +133,6 @@ public:
   /** Virtual clone */
   virtual ParametersT<DIM, T, S>* clone() const override final;
 
-  /** Virtual clone returning unique_ptr*/
-  std::unique_ptr<ParametersT<DIM, T, S>> uniqueClone() const;
-
   /** Return the ParametersType enum */
   virtual ParametersType type() const override final;
 

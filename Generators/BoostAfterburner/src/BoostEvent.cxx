@@ -41,7 +41,7 @@ StatusCode BoostEvent::execute()
   // Loop over all events in original McEventCollection and
   // Copy to a new (modifiable) collection 
   McEventCollection* output_collection = new  McEventCollection();
-  for (McEventCollection::const_iterator citr = input_collection->begin(); citr!=input_collection->end(); citr++)
+  for (McEventCollection::const_iterator citr = input_collection->begin(); citr!=input_collection->end(); ++citr)
   {
     output_collection->push_back(new HepMC::GenEvent(*(*citr)));
   }
@@ -58,7 +58,7 @@ StatusCode BoostEvent::execute()
 		    << std::setw(10) << "phi'"
 		    << endmsg;
 
-  for (McEventCollection::iterator itr = output_collection->begin(); itr!=output_collection->end(); itr++)
+  for (McEventCollection::iterator itr = output_collection->begin(); itr!=output_collection->end(); ++itr)
   {
     for ( auto particle: **itr){
       CLHEP::HepLorentzVector momentum(particle->momentum().px(),

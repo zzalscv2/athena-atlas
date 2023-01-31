@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:06:39 CET
  **
- **     Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -866,7 +866,6 @@ unsigned processTaus( TrigTrackSelector& selectorRef,
   Container::const_iterator tau     = container->begin();
   Container::const_iterator tau_end = container->end();
 
-  unsigned Ntaus = 0;
 
   for ( ; tau!=tau_end ; ++tau ) {
 
@@ -913,7 +912,6 @@ unsigned processTaus( TrigTrackSelector& selectorRef,
 #       else
         trk_added = selectorRef.selectTrack((*tau)->track(i));
 #       endif
-        Ntaus++;
 	if ( trk_added ) tauobj.addChild( selectorRef.tracks().back()->id() );
       }
       if ( tauvec ) tauvec->push_back( tauobj );

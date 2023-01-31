@@ -29,14 +29,6 @@ public:
     auto result = std::lower_bound(begin(),end(), hepMCLink, [](const xAODTruthParticleLink* l, const HepMcParticleLink& hepLink ) { return l->first < hepLink;});
     // { return l->first.barcode() < hepLink.barcode(); });
     if( result != end() ) {
-      // if( (*result)->hepMCLink() != hepMCLink ) {
-      // 	std::cout << " invalid link: barcode " << hepMCLink.barcode() << " evt " << hepMCLink.eventIndex()
-      // 		  << " found barcode " << (*result)->hepMCLink().barcode() << " evt " << (*result)->hepMCLink().eventIndex() << std::endl;
-      // }else{
-      // 	std::cout << " found link: barcode " << hepMCLink.barcode() << " evt " << hepMCLink.eventIndex() << std::endl;
-      // 	return (*result)->xAODTruthLink();
-      // }
-      //      if( (*result)->first.barcode() == hepMCLink.barcode() ) return (*result)->second;
          if( (*result)->first == hepMCLink ) return (*result)->second;
     }
     return ElementLink<xAOD::TruthParticleContainer>{}; 

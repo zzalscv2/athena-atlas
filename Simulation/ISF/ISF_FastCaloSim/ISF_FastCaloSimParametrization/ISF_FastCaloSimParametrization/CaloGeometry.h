@@ -7,6 +7,7 @@
 
 #include <TMath.h>
 
+#include <atomic>
 #include <vector>
 #include <map>
 #include <iostream>

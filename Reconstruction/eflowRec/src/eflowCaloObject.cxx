@@ -22,6 +22,19 @@ CREATED:  22nd November, 2004
 
 eflowCaloObject::~eflowCaloObject() = default;
 
+void eflowCaloObject::addTrackClusterLinks(const std::vector<eflowTrackClusterLink*> &trackClusterLink) {
+  for (auto *ptr : trackClusterLink) {
+    addTrackClusterLink(ptr);
+  }
+}
+
+  void eflowCaloObject::addTracks(const std::vector<eflowRecTrack*> &tracks) {
+    m_eflowRecTracks.insert(m_eflowRecTracks.end(), tracks.begin(), tracks.end());
+  }
+
+  void eflowCaloObject::addClusters(const std::vector<eflowRecCluster*> &clusters) {
+    m_eflowRecClusters.insert(m_eflowRecClusters.end(), clusters.begin(), clusters.end());
+  }
 
  double eflowCaloObject::getExpectedEnergy() const {
   double expectedEnergy(0.0);

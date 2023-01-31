@@ -7,11 +7,11 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 class TriggerAnalysisBlock (ConfigBlock):
     """the ConfigBlock for trigger analysis"""
 
-    def __init__ (self) :
-        super (TriggerAnalysisBlock, self).__init__ ()
-        self.triggerChains = []
-        self.prescaleLumiCalcFiles = []
-        self.noFilter = False
+    def __init__ (self, configName) :
+        super (TriggerAnalysisBlock, self).__init__ (configName)
+        self.addOption ('triggerChains', [], type=None)
+        self.addOption ('prescaleLumiCalcFiles', [], type=None)
+        self.addOption ('noFilter', False, type=bool)
 
 
     def makeAlgs (self, config) :
@@ -30,6 +30,8 @@ class TriggerAnalysisBlock (ConfigBlock):
             alg.triggers = list(self.triggerChains)
             alg.selectionDecoration = 'trigPassed'
             alg.noFilter = self.noFilter
+            for t in self.triggerChains :
+                config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, isEventLevel=True)
 
             # Calculate trigger prescales
             if config.dataType() == 'data' and self.prescaleLumiCalcFiles:
@@ -45,9 +47,10 @@ class TriggerAnalysisBlock (ConfigBlock):
 
 
 def makeTriggerAnalysisConfig( seq,
-                               triggerChains = [],
-                               prescaleLumiCalcFiles = [],
-                               noFilter = False):
+                               triggerChains = None,
+                               prescaleLumiCalcFiles = None,
+                               noFilter = None,
+                               configName = 'Trigger'):
     """Create a basic trigger analysis algorithm sequence
 
     Keyword arguments:
@@ -57,8 +60,8 @@ def makeTriggerAnalysisConfig( seq,
       noFilter -- do not apply an event filter (i.e. don't skip any events)
     """
 
-    config = TriggerAnalysisBlock ()
-    config.triggerChains = triggerChains
-    config.prescaleLumiCalcFiles = prescaleLumiCalcFiles
-    config.noFilter = noFilter
+    config = TriggerAnalysisBlock (configName)
+    config.setOptionValue ('triggerChains', triggerChains, noneAction='ignore')
+    config.setOptionValue ('prescaleLumiCalcFiles', prescaleLumiCalcFiles, noneAction='ignore')
+    config.setOptionValue ('noFilter', noFilter, noneAction='ignore')
     seq.append (config)

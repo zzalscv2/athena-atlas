@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,7 +18,6 @@
 
 // Database includes
 #include "RDBAccessSvc/IRDBRecordset.h"
-#include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecord.h"
 
 // AtlasDetDescr
@@ -26,7 +25,7 @@
 
 // GeoModel
 #include "GeoModelInterfaces/IGeoModelSvc.h"
-
+#include "GeoModelInterfaces/IGeoDbTagSvc.h"
 
 /** Constructor */
 DetDescrDBEnvelopeSvc::DetDescrDBEnvelopeSvc(const std::string& name, ISvcLocator* svc) :
@@ -94,6 +93,10 @@ StatusCode DetDescrDBEnvelopeSvc::initialize()
   ATH_MSG_INFO("Initializing ...");
 
   // retrieve DataBase access service
+  ServiceHandle<IGeoDbTagSvc> geoDbTag("GeoDbTagSvc",name());
+  ATH_CHECK(geoDbTag.retrieve());
+
+  m_dbAccess.setName(geoDbTag->getParamSvcName());
   if ( m_dbAccess.retrieve().isFailure()) {
     ATH_MSG_ERROR("Could not locate RDBAccessSvc");
     if ( !enableFallback()) return StatusCode::FAILURE;

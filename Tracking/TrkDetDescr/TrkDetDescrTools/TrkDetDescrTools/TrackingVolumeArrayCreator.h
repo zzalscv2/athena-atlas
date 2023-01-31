@@ -49,10 +49,6 @@ namespace Trk {
         /** Destructor */
         virtual ~TrackingVolumeArrayCreator();
 
-        /** AlgTool and IAlgTool interface methods */
-        static const InterfaceID& interfaceID() { return IID_ITrackingVolumeArrayCreator; }
-
-
         /** TrackingVolumeArrayCreator interface method -
             create a R-binned cylindrical volume array*/
         TrackingVolumeArray* cylinderVolumesArrayInR(const std::vector< TrackingVolume* >& vols,

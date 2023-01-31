@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 ########################################################################
 #                                                                      #
@@ -8,7 +8,6 @@
 #                                                                      #
 ########################################################################
 
-import os
 from AthenaCommon import Logging
 jrtlog = Logging.logging.getLogger('JetRecToolsConfig')
 
@@ -24,9 +23,9 @@ def getIDTrackSelectionTool(trkOpt, **userProps):
     idtracksel = CompFactory.getComp("InDet::InDetTrackSelectionTool")(
         "idtracksel_"+trkOpt,
         **selProperties )
-    
-    if os.environ.get("AtlasProject",None) != "AnalysisBase":
-        # thes options can not be set in AnalysisBase. (but not setting them is equivalent to set them to False)
+
+    if not isAnalysisRelease():
+        # thes options can not be set in AnalysisBase/AthAnalysis. (but not setting them is equivalent to set them to False)
         idtracksel.UseTrkTrackTools = False
         idtracksel.Extrapolator     = ""
         idtracksel.TrackSummaryTool = ""

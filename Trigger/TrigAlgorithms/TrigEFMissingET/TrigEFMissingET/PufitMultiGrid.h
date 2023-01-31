@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TRIGEFMISSINGET_PUFITMULTIGRID_H
@@ -7,6 +7,7 @@
 
 #include "TrigEFMissingET/PeriodicGridBase.h"
 #include "TrigEFMissingET/PufitGrid.h"
+#include <cstdint>
 #include <limits>
 #include <type_traits>
 

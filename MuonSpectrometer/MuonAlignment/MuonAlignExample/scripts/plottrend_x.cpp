@@ -621,7 +621,7 @@ int main(int argc, char** argv) {
     // int markerstyles[3] = {8,4,21};
     int markerstyles[3] = {8, 22, 21};
 
-    for (; graphIt != graphEnd; graphIt++, graphMinIt++, graphMaxIt++, graphNamesIt++) {
+    for (; graphIt != graphEnd; ++graphIt, ++graphMinIt, ++graphMaxIt, ++graphNamesIt) {
         string name = graphIt->first;
         vector<TGraph**>* graphs = graphIt->second;
 

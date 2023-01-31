@@ -104,7 +104,7 @@ namespace InDet {
   }
 
 //________________________________________________________________________
-  void DetailedIDNtupleTool::dumpTrack(int itrk, const Trk::AlignTrack* alignTrack) {
+  void DetailedIDNtupleTool::dumpTrack(int /* itrk*/, const Trk::AlignTrack* alignTrack) {
     ATH_MSG_DEBUG("In dumpTrack()");
     Trk::AlignTrack::AlignTrackType type = alignTrack->type();
     const EventContext& ctx = Gaudi::Hive::currentContext();
@@ -298,7 +298,7 @@ namespace InDet {
 
       const Trk::PerigeeSurface persf(refPoint);
       const Trk::Perigee* originalPerigeeAtRef =
-        dynamic_cast<const Trk::Perigee*>(m_extrapolator->extrapolate(ctx, *originalTrack, persf).release());
+        dynamic_cast<const Trk::Perigee*>(m_extrapolator->extrapolateTrack(ctx, *originalTrack, persf).release());
       if (!originalPerigeeAtRef) {
         const Trk::Perigee* originalTrackPerigee = originalTrack->perigeeParameters();
         if (originalTrackPerigee && ((originalTrackPerigee->associatedSurface())) == persf) {
@@ -317,7 +317,7 @@ namespace InDet {
       }
 
       const Trk::Perigee* PerigeeAtRef =
-        dynamic_cast<const Trk::Perigee*>(m_extrapolator->extrapolate(ctx, *alignTrack, persf).release());
+        dynamic_cast<const Trk::Perigee*>(m_extrapolator->extrapolateTrack(ctx, *alignTrack, persf).release());
       if (!PerigeeAtRef) {
         const Trk::Perigee* alignTrackPerigee = alignTrack->perigeeParameters();
         if (alignTrackPerigee && ((alignTrackPerigee->associatedSurface())) == persf) {
@@ -345,7 +345,6 @@ namespace InDet {
     m_tree->Fill();
     ATH_MSG_DEBUG("tree filled");
 
-    ++itrk;
     return;
   }
 

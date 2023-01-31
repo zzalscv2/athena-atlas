@@ -28,7 +28,7 @@ namespace InDet {
 
 namespace DerivationFramework {
   
-  class BVertexTrackIsoTool : virtual public BPhysVertexTrackBase {
+  class ATLAS_NOT_THREAD_SAFE BVertexTrackIsoTool : virtual public BPhysVertexTrackBase {
     
   private:
     typedef BPhysVertexTrackBase super;

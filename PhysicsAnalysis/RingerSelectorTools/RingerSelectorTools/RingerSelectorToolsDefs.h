@@ -74,4 +74,3 @@ const char* toStr(Requirement e);
 } // namespace Ringer
 
 #endif // RINGERSELECTORTOOLS_RINGERSELECTORTOOLSDEFS_H
-

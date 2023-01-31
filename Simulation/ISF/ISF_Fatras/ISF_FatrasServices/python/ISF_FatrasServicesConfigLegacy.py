@@ -162,7 +162,6 @@ def getFatrasTrackingGeometrySvc(name="ISF_FatrasTrackingGeometrySvc", **kwargs)
 ################################################################################
 # TRANSPORT SECTION
 #   TODO: should be in the future rationalized to one transport tool
-#         needs new ExtrapolationEngine for this
 ################################################################################
 
 
@@ -207,36 +206,6 @@ def getFatrasChargedPropagator(name="ISF_FatrasChargedPropagator", **kwargs):
     return ChargedPropagator(name, **kwargs )
     #from TrkExSTEP_Propagator.TrkExSTEP_PropagatorConf import Trk__STEP_Propagator as ChargedPropagator
     #return ChargedPropagator(name, **kwargs )
-
-# Propagators for the Extrapolation Engine
-# load the RungeKutta Propagator
-# Not used anywhere - not migrated to CA config
-def getFatrasPropagator(name="ISF_FatrasPropagator", **kwargs):
-    from TrkExRungeKuttaPropagator.TrkExRungeKuttaPropagatorConf import Trk__RungeKuttaPropagator as RungeKuttaPropagator
-    return RungeKuttaPropagator(name, **kwargs)
-
-# from the Propagator create a Propagation engine to handle path length
-def getFatrasStaticPropagator(name="ISF_FatrasStaticPropagator", **kwargs):
-    kwargs.setdefault("Propagator", getPublicTool('ISF_FatrasPropagator'))
-    # configure output formatting  
-    kwargs.setdefault("OutputPrefix", '[SP] - ')
-    kwargs.setdefault("OutputPostfix", ' - ')
-    kwargs.setdefault("OutputLevel", ISF_FatrasFlags.OutputLevelGeneral())
-    from TrkExEngine.TrkExEngineConf import Trk__PropagationEngine as StaticPropagator
-    return StaticPropagator(name, **kwargs)
-
-# load the static navigation engine
-# Not used anywhere - not migrated to CA config
-def getFatrasStaticNavigationEngine(name="ISF_FatrasStaticNavigationEngine", **kwargs):
-    #give the tools it needs
-    kwargs.setdefault("PropagationEngine", getPublicTool('ISF_FatrasStaticPropagator'))
-    kwargs.setdefault("MaterialEffectsEngine", getPublicTool('ISF_FatrasMaterialEffectsEngine'))
-    # configure output formatting  
-    kwargs.setdefault("OutputPrefix", '[SN] - ')
-    kwargs.setdefault("OutputPostfix", ' - ')
-    kwargs.setdefault("OutputLevel", ISF_FatrasFlags.OutputLevelGeneral())
-    from TrkExEngine.TrkExEngineConf import Trk__StaticNavigationEngine
-    return Trk__StaticNavigationEngine(name, **kwargs)
 
 
 ################################################################################
@@ -473,39 +442,6 @@ def getFatrasMaterialUpdator(name="ISF_FatrasMaterialUpdator", **kwargs):
     from ISF_FatrasTools.ISF_FatrasToolsConf import iFatras__McMaterialEffectsUpdator
     return iFatras__McMaterialEffectsUpdator(name, **kwargs )
 
-# Not used anywhere - not migrated to CA config
-def getFatrasMaterialEffectsEngine(name="ISF_FatrasMaterialEffectsEngine", **kwargs):
-    from G4AtlasApps.SimFlags import simFlags
-    kwargs.setdefault("RandomNumberService"         , simFlags.RandomSvc() )
-    kwargs.setdefault("RandomStreamName"            , ISF_FatrasFlags.RandomStreamName())
-    kwargs.setdefault("ParticleBroker"              , ISF_Flags.ParticleBroker())
-    kwargs.setdefault("TruthRecordSvc"              , simFlags.TruthStrategy.TruthServiceName())
-    kwargs.setdefault("ProcessSamplingTool"         , getPublicTool('ISF_FatrasProcessSamplingTool'))
-    kwargs.setdefault("ParticleDecayHelper"         , getPublicTool('ISF_FatrasParticleDecayHelper'))
-    # energy loss
-    kwargs.setdefault("EnergyLoss"                  , True)
-    kwargs.setdefault("EnergyLossSampler"           , getPublicTool('ISF_FatrasEnergyLossUpdator'))
-    kwargs.setdefault("UseElectronSampler"          , True)
-    kwargs.setdefault("ElectronEnergyLossSampler"   , getPublicTool('ISF_FatrasEnergyLossSamplerBetheHeitler'))
-    kwargs.setdefault("CreateBremPhotons"           , True)    
-    # multiple scattering
-    kwargs.setdefault("MultipleScattering"          , True)
-    kwargs.setdefault("MultipleScatteringSampler"   , getPublicTool('ISF_FatrasMultipleScatteringSamplerHighland'))
-    # the properties given throuth the JobProperties interface
-    kwargs.setdefault("MomentumCut"                 , FatrasTuningFlags.MomCutOffSec())
-    kwargs.setdefault("MinimumBremPhotonMomentum"   , FatrasTuningFlags.MomCutOffSec())
-    # MCTruth Process Code
-    kwargs.setdefault("BremProcessCode"             , 3) # TODO: to be taken from central definition
-    # the validation output
-    kwargs.setdefault("ValidationMode"              , ISF_Flags.ValidationMode())
-    kwargs.setdefault("PhysicsValidationTool"       , getPublicTool('ISF_FatrasPhysicsValidationTool'))
-    kwargs.setdefault("OutputPrefix", '[McME] - ')
-    kwargs.setdefault("OutputPostfix", ' - ')
-    kwargs.setdefault("OutputLevel", ISF_FatrasFlags.OutputLevelGeneral())
-    
-    from ISF_FatrasTools.ISF_FatrasToolsConf import iFatras__McMaterialEffectsEngine
-    return iFatras__McMaterialEffectsEngine(name, **kwargs )
-
 def getFatrasSTEP_Propagator(name="ISF_FatrasSTEP_Propagator", **kwargs):
     kwargs.setdefault("MomentumCutOff"                 , FatrasTuningFlags.MomCutOffSec() )
     kwargs.setdefault("SimulationMode"                 , True )
@@ -533,20 +469,6 @@ def getFatrasExtrapolator(name="ISF_FatrasExtrapolator", **kwargs):
     return TimedExtrapolator(name, **kwargs )
     #from TrkExTools.TrkExToolsConf import Trk__Extrapolator as Extrapolator
     #return Extrapolator(name, **kwargs )
-
-# load the Static ExtrapolationEngine
-# Not used anywhere - not migrated to CA config
-def getFatrasStaticExtrapolator(name="ISF_FatrasStaticExEngine", **kwargs):
-    # give the tools it needs 
-    kwargs.setdefault("PropagationEngine", getPublicTool('ISF_FatrasStaticPropagator'))
-    kwargs.setdefault("MaterialEffectsEngine", getPublicTool('ISF_FatrasMaterialEffectsEngine'))
-    kwargs.setdefault("NavigationEngine", getPublicTool('ISF_FatrasStaticNavigationEngine'))
-    # configure output formatting               
-    kwargs.setdefault("OutputPrefix", '[SE] - ')
-    kwargs.setdefault("OutputPostfix", ' - ')
-    kwargs.setdefault("OutputLevel", ISF_FatrasFlags.OutputLevelGeneral())
-    from TrkExEngine.TrkExEngineConf import Trk__StaticEngine
-    return Trk__StaticEngine(name, **kwargs)
 
 ################################################################################
 # HIT CREATION SECTION

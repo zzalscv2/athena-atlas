@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ServiceMaterial_H
@@ -49,7 +49,7 @@ public:
 
   void addEntry( const Entry& e) { m_components.push_back( e);}
 
-  void addEntry( std::string nam, int num, bool lin, double w=1) {
+  void addEntry( const std::string& nam, int num, bool lin, double w=1) {
     m_components.push_back( Entry( nam, num, lin, w));
   }
 

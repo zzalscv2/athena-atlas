@@ -7,6 +7,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, Format
 from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
 from LArConfiguration.LArConfigFlags import RawChannelSource 
+from OutputStreamAthenaPool.OutputStreamConfig import addToESD
 
 def LArDigitThinnerCfg(flags, **kwargs):
     """Return ComponentAccumulator for LArDigitThinner algorithm"""
@@ -37,4 +38,5 @@ def LArDigitThinnerCfg(flags, **kwargs):
         kwargs.setdefault("RawChannelContainerName","LArRawChannels_FromDigits")
 
     acc.addEventAlgo(CompFactory.LArDigitThinner(**kwargs))
+    acc.merge(addToESD(flags,["LArDigitContainer#LArDigitContainer_Thinned",]))
     return acc

@@ -7,24 +7,37 @@ void NSW_PadTriggerDataContainerCnv_p1::persToTrans(const NSW_PadTriggerDataCont
             "Converting persistent NSW_PadTriggerDataContainer_p1 to transient NSW_PadTriggerDataContainer" << endmsg;
     }
     for (const auto& pCollection : persistentObj->m_collections) {
-        std::array<std::vector<uint16_t>, 3> persistent_hitlists{ pCollection.m_precedingHitlist, pCollection.m_currentHitlist, pCollection.m_followingHitlist };
-        // Can initialize here with std::move(persistent_hitlists) and modify the transient constructor accordingly
         auto tCollection = std::make_unique<NSW_PadTriggerData>(
-            pCollection.m_identifierHash,
-            pCollection.m_sectorID,
-            static_cast<NSW_PadTriggerData::SectorSize>(pCollection.m_sectorSize),
-            static_cast<NSW_PadTriggerData::Endcap>(pCollection.m_endcap),
-            pCollection.m_BCID,
-            pCollection.m_L1ID,
-            persistent_hitlists);
-
-        tCollection->reserve(pCollection.m_segments.size());
-        for (std::size_t i{}; i < pCollection.m_segments.size(); i++) {
-            tCollection->push_back(m_segmentConverter.createTransient(&pCollection.m_segments.at(i), log));
-        }
-
-        auto idHash = tCollection->identifierHash();
-        if(transientObj->addCollection(tCollection.release(), idHash).isFailure()) {
+            pCollection.m_sourceid,
+            pCollection.m_flags,
+            pCollection.m_ec,
+            pCollection.m_fragid,
+            pCollection.m_secid,
+            pCollection.m_spare,
+            pCollection.m_orbit,
+            pCollection.m_bcid,
+            pCollection.m_l1id,
+            pCollection.m_hit_n,
+            pCollection.m_pfeb_n,
+            pCollection.m_trigger_n,
+            pCollection.m_bcid_n,
+            pCollection.m_hit_relbcid,
+            pCollection.m_hit_pfeb,
+            pCollection.m_hit_tdschannel,
+            pCollection.m_hit_vmmchannel,
+            pCollection.m_hit_vmm,
+            pCollection.m_hit_padchannel,
+            pCollection.m_pfeb_addr,
+            pCollection.m_pfeb_nchan,
+            pCollection.m_pfeb_disconnected,
+            pCollection.m_trigger_bandid,
+            pCollection.m_trigger_phiid,
+            pCollection.m_trigger_relbcid,
+            pCollection.m_bcid_rel,
+            pCollection.m_bcid_status,
+            pCollection.m_bcid_multzero
+            );
+        if(transientObj->addCollection(tCollection.release(), transientObj->numberOfCollections()).isFailure()) {
             throw std::runtime_error{ "Could not add collection to transient container!" };
         }
     }
@@ -40,25 +53,34 @@ void NSW_PadTriggerDataContainerCnv_p1::transToPers(const NSW_PadTriggerDataCont
     // Iterate over collections
     for (const NSW_PadTriggerData* tCollection : *transientObj) {
         NSW_PadTriggerData_p1 pCollection{};
-        pCollection.m_segments.reserve(tCollection->size());
-
-        pCollection.m_identifierHash = tCollection->identifierHash();
-        pCollection.m_sectorID = tCollection->sectorID();
-        pCollection.m_sectorSize = static_cast<uint8_t>(tCollection->sectorSize());
-        pCollection.m_endcap = static_cast<uint8_t>(tCollection->endcap());
-        pCollection.m_BCID = tCollection->BCID();
-        pCollection.m_L1ID = tCollection->L1ID();
-        
-        pCollection.m_precedingHitlist = tCollection->hitlists()[0];
-        pCollection.m_currentHitlist = tCollection->hitlists()[1];
-        pCollection.m_followingHitlist = tCollection->hitlists()[2];
-
-        // Convert each element in the transient collection to its persistent form
-        for (std::size_t i{}; i < tCollection->size(); i++) {
-            NSW_PadTriggerSegment_p1 pSegment{};
-            m_segmentConverter.transToPers(tCollection->at(i), &pSegment, log);
-            pCollection.m_segments.push_back(pSegment);
-        }
+        pCollection.m_sourceid = tCollection->getSourceid();
+        pCollection.m_flags = tCollection->getFlags();
+        pCollection.m_ec = tCollection->getEc();
+        pCollection.m_fragid = tCollection->getFragid();
+        pCollection.m_secid = tCollection->getSecid();
+        pCollection.m_spare = tCollection->getSpare();
+        pCollection.m_orbit = tCollection->getOrbit();
+        pCollection.m_bcid = tCollection->getBcid();
+        pCollection.m_l1id = tCollection->getL1id();
+        pCollection.m_hit_n = tCollection->getNumberOfHits();
+        pCollection.m_pfeb_n = tCollection->getNumberOfPfebs();
+        pCollection.m_trigger_n = tCollection->getNumberOfTriggers();
+        pCollection.m_bcid_n = tCollection->getNumberOfBcids();
+        pCollection.m_hit_relbcid = tCollection->getHitRelBcids();
+        pCollection.m_hit_pfeb = tCollection->getHitPfebs();
+        pCollection.m_hit_tdschannel = tCollection->getHitTdsChannels();
+        pCollection.m_hit_vmmchannel = tCollection->getHitVmmChannels();
+        pCollection.m_hit_vmm = tCollection->getHitVmms();
+        pCollection.m_hit_padchannel = tCollection->getHitPadChannels();
+        pCollection.m_pfeb_addr = tCollection->getPfebAddrs();
+        pCollection.m_pfeb_nchan = tCollection->getPfebNChannels();
+        pCollection.m_pfeb_disconnected = tCollection->getPfebDisconnecteds();
+        pCollection.m_trigger_bandid = tCollection->getTriggerBandIds();
+        pCollection.m_trigger_phiid = tCollection->getTriggerPhiIds();
+        pCollection.m_trigger_relbcid = tCollection->getTriggerRelBcids();
+        pCollection.m_bcid_rel = tCollection->getBcidRels();
+        pCollection.m_bcid_status = tCollection->getBcidStatuses();
+        pCollection.m_bcid_multzero = tCollection->getBcidMultZeros();
         persistentObj->m_collections.push_back(std::move(pCollection));
     }
 }

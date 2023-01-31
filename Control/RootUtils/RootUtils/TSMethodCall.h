@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -50,10 +50,12 @@ public:
    * @param cls The class of the object we're calling.
    * @param fname The name of the function.
    * @param args Its argument list.
+   * @param mode Controls whether to allow for conversions.
    */
   void setProto (TClass* cls,
                  const std::string& fname,
-                 const std::string& args);
+                 const std::string& args,
+                 ROOT::EFunctionMatchMode mode = ROOT::kExactMatch);
 
 
   /**
@@ -74,6 +76,9 @@ private:
 
   /// Argument list.
   std::string m_args;
+
+  /// Matching mode
+  ROOT::EFunctionMatchMode m_mode;
 
   /// Object to call the method on the payload type.
   /// This will be left invalid if the payload is not a class type.

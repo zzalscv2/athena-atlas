@@ -421,7 +421,7 @@ TEST(JetGroupProductFactoryTester, max_jet_0) {
 
   std::vector<std::size_t> siblings{1, 2};
 
-  EXPECT_EQ(0, max_jet(siblings, satisfiedBy));
+  EXPECT_EQ(0u, max_jet(siblings, satisfiedBy));
 }
 
 TEST(JetGroupProductFactoryTester, max_jet_1) {
@@ -432,7 +432,7 @@ TEST(JetGroupProductFactoryTester, max_jet_1) {
 
   std::vector<std::size_t> siblings{1, 2};
 
-  EXPECT_EQ(4, max_jet(siblings, satisfiedBy));
+  EXPECT_EQ(4u, max_jet(siblings, satisfiedBy));
 }
 
 

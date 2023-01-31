@@ -734,6 +734,9 @@ class L1MenuConfig(object):
         # check that the minimum thresholds of the TOBs sent to TOPO are below the min thresholds used in menu (ATR-15450)
         self.l1menu.checkPtMinToTopo()
 
+        # check that the ordering of the L1Topo parameters matches those expected in the L1Topo firmware
+        self.l1menu.checkL1TopoParams()
+
     def mapThresholds(self):
         """
         Set the correct mapping of thresholds according to the

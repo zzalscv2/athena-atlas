@@ -3,6 +3,7 @@
 */
 
 #include "TrigT1NSWSimTools/MMLoadVariables.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 MMLoadVariables::MMLoadVariables(StoreGateSvc* evtStore, const MuonGM::MuonDetectorManager* detManager, const MmIdHelper* idhelper):
    AthMessaging(Athena::getMessageSvc(), "MMLoadVariables") {
@@ -37,21 +38,24 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
       for(const auto it : *truthContainer) {
         const HepMC::GenEvent *subEvent = it;
 #ifdef HEPMC3
-        for(auto particle : subEvent->particles()) {
+        for(auto particle : subEvent->particles())
 #else
-        HepMC::ConstGenEventParticleRange particle_range = subEvent->particle_range();
-        for(const auto pit : particle_range) {
+        for(const auto pit : subEvent->particle_range())
+#endif
+        {
+#ifndef HEPMC3
           const HepMC::GenParticle *particle = pit;
 #endif
           const HepMC::FourVector momentum = particle->momentum();
-          if(HepMC::barcode(particle) < 1e06 && std::abs(particle->pdg_id())==13){
+          int barcodeparticle = HepMC::barcode(particle);
+          if( barcodeparticle < HepMC::SIM_REGENERATION_INCREMENT && std::abs(particle->pdg_id())==13){
             thePart.SetCoordinates(momentum.perp(),momentum.eta(),momentum.phi(),momentum.e());
             if(trackRecordCollection!=nullptr){
             for(const auto & mit : *trackRecordCollection ) {
               const CLHEP::Hep3Vector mumomentum = mit.GetMomentum();
               const CLHEP::Hep3Vector muposition = mit.GetPosition();
-              if(!trackRecordCollection->empty() && HepMC::barcode(particle)==mit.GetBarCode()) {
-                pdg_tmp         = HepMC::barcode(particle);
+              if(!trackRecordCollection->empty() && barcodeparticle ==mit.GetBarCode()) {
+                pdg_tmp         = particle->pdg_id();
                 phiEntry_tmp    = mumomentum.getPhi();
                 etaEntry_tmp    = mumomentum.getEta();
                 phiPosition_tmp = muposition.getPhi();
@@ -59,23 +63,25 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
               }
             }//muentry loop
             } // trackRecordCollection is not null
-            int l=0;
 #ifdef HEPMC3
-            for(auto vertex1 : subEvent->vertices()) {
+            for(auto vertex1 : subEvent->vertices())
 #else
-              HepMC::ConstGenEventVertexRange vertex_range = subEvent->vertex_range();
-              for(const auto vit : vertex_range) {
-                if(l!=0){break;}//get first vertex of iteration, may want to change this
-                const HepMC::GenVertex *vertex1 = vit;
+            int l=0;
+            for(const auto vit : subEvent->vertex_range())
+#endif              
+            {
+#ifndef HEPMC3
+              if(l!=0){break;}//get first vertex of iteration, may want to change this
+              l++;
+              const HepMC::GenVertex *vertex1 = vit;
 #endif
-                const HepMC::FourVector& position = vertex1->position();
-                vertex_tmp.SetXYZ(position.x(),position.y(),position.z());
-                l++;
-              }//end vertex loop
-            }
-            j++;
+              const HepMC::FourVector& position = vertex1->position();
+              vertex_tmp.SetXYZ(position.x(),position.y(),position.z());
+            }//end vertex loop
+          }
+          j++;
 
-            if(thePart.Pt() > 0. && HepMC::barcode(particle) < 1e06){
+            if(thePart.Pt() > 0. && barcodeparticle < HepMC::SIM_REGENERATION_INCREMENT){
               bool addIt = true;
               for(unsigned int ipart=0; ipart < truthParticles.size(); ipart++){
                 if( std::abs(thePart.Pt()-truthParticles[ipart].Pt()) < 0.001 ||
@@ -132,7 +138,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
             std::vector<int>    MMFE_VMM = digit->MMFE_VMM_idForTrigger();
             std::vector<int>    VMM = digit->VMM_idForTrigger();
 
-            bool isValid;
+            bool isValid = false;
             histDigVars.NSWMM_dig_stationName.push_back(stName);
             histDigVars.NSWMM_dig_stationEta.push_back(stationEta);
             histDigVars.NSWMM_dig_stationPhi.push_back(stationPhi);
@@ -148,6 +154,8 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
 
             int nstrip = 0; //counter of the number of firing strips
             for (const auto &i: stripPosition) {
+
+	      isValid = false; //reset
               // take strip index form chip information
               int cr_strip = i;
               localPosX.push_back (0.);
@@ -277,7 +285,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
           int special_time = thisTime + (event+1)*100;
 
           hitData_entry hit_entry(event,
-                               -1.,
+                               thisTime,
                                thisCharge,
                                thisVMM,
                                thisMMFE_VMM,
@@ -309,7 +317,6 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
           tru_it->second.N_hits_postVMM=0;
         }
 
-        int xhit=0,uvhit=0;
         std::vector<bool>plane_hit(pars[station]->setup.size(),false);
 
         for(std::map<hitData_key,hitData_entry>::iterator it=hit_info.begin(); it!=hit_info.end(); ++it){
@@ -318,13 +325,6 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
           if (tru_it != Event_Info.end()) tru_it->second.N_hits_postVMM++;
         }
         Hits_Data_Set_Time[std::make_pair(event,ient)] = hit_info;
-
-        for(unsigned int ipl=0;ipl<plane_hit.size();ipl++){
-          if(plane_hit[ipl]){
-            if(pars[station]->setup.substr(ipl,1)=="x") xhit++;
-            else if(pars[station]->setup.substr(ipl,1)=="u" || pars[station]->setup.substr(ipl,1)=="v") uvhit++;
-          }
-        }
         ient++;
       }
     return StatusCode::SUCCESS;

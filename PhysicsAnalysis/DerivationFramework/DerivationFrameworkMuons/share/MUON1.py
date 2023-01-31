@@ -14,18 +14,18 @@ from DerivationFrameworkJetEtMiss.ExtendedJetCommon import *
 import AthenaCommon.SystemOfUnits as Units
 
 #from MuonPerformanceAlgs.CommonMuonTPConfig import GetIDTrackCaloDepositsDecorator
-if not hasattr(ToolSvc,"IDTrackCaloDepositsDecoratorTool"):
-  from DerivationFrameworkMuons.DerivationFrameworkMuonsConf import IDTrackCaloDepositsDecoratorTool
-  DecoTool = IDTrackCaloDepositsDecoratorTool("IDTrackCaloDepositsDecoratorTool")
+if not hasattr(DerivationFrameworkJob,"IDTrackCaloDepositsDecoratorAlg"):
+  from DerivationFrameworkMuons.DerivationFrameworkMuonsConf import DerivationFramework__IDTrackCaloDepositsDecoratorAlg
+  DecoAlg = DerivationFramework__IDTrackCaloDepositsDecoratorAlg("IDTrackCaloDepositsDecoratorAlg")
   if hasattr(DecoTool, "TrackDepositInCaloTool"):
     if not hasattr(ToolSvc,"TrkDepositInCaloTool"):
         from CaloTrkMuIdTools.CaloTrkMuIdToolsConf import TrackDepositInCaloTool
         TrkDepositInCaloTool = TrackDepositInCaloTool("TrkDepositInCaloTool")
         TrkDepositInCaloTool.CaloCellContainerName = "AODCellContainer"
         ToolSvc += TrkDepositInCaloTool
-    DecoTool.TrackDepositInCaloTool = ToolSvc.TrkDepositInCaloTool
+    DecoAlg.TrackDepositInCaloTool = ToolSvc.TrkDepositInCaloTool
 
-    ToolSvc += DecoTool
+    DerivationFrameworkJob += DecoAlg
 
 
 if DerivationFrameworkHasTruth:
@@ -59,7 +59,6 @@ thinningORs = []
 brPrefix1a = 'MUON1a'
 from DerivationFrameworkMuons.DerivationFrameworkMuonsConf import DerivationFramework__dimuonTaggingTool
 MUON1AugmentTool1a = DerivationFramework__dimuonTaggingTool(name = "MUON1AugmentTool1a",
-                                                           IDTrackCaloDepoDecoTool = ToolSvc.IDTrackCaloDepositsDecoratorTool,
                                                            Mu1PtMin = 24*Units.GeV,
                                                            Mu1AbsEtaMax = 2.5,
                                                            Mu1Types = [0],
@@ -92,7 +91,6 @@ orTriggers1b = ['HLT_mu4','HLT_mu6','HLT_mu14','HLT_mu6_idperf',"HLT_mu6_bJpsi_l
 
 brPrefix1b = 'MUON1b'
 MUON1AugmentTool1b = DerivationFramework__dimuonTaggingTool(name = "MUON1AugmentTool1b",
-                                                           IDTrackCaloDepoDecoTool = ToolSvc.IDTrackCaloDepositsDecoratorTool,
                                                            OrTrigs = orTriggers1b,
                                                            AndTrigs = andTriggers1b,
                                                            Mu1PtMin = 4*Units.GeV,
@@ -127,7 +125,6 @@ orTriggers1c = []
 andTriggers1c = []
 
 MUON1AugmentTool1c = DerivationFramework__dimuonTaggingTool(name = "MUON1AugmentTool1c",
-                                                           IDTrackCaloDepoDecoTool = ToolSvc.IDTrackCaloDepositsDecoratorTool,
                                                            OrTrigs = orTriggers1c,
                                                            AndTrigs = andTriggers1c,
                                                            Mu1PtMin = 5.*Units.GeV,

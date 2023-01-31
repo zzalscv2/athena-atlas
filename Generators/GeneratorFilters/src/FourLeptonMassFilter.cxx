@@ -34,21 +34,26 @@ StatusCode FourLeptonMassFilter::filterInitialize() {
 
 StatusCode FourLeptonMassFilter::filterEvent() {
   McEventCollection::const_iterator itr;
+
   for (itr = events()->begin(); itr!=events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = *itr;
     auto genEvt_particles_begin = HepMC::begin(*genEvt);
-    auto genEvt_particles_end = HepMC::begin(*genEvt);
+    auto genEvt_particles_end = HepMC::end(*genEvt);
     for (auto  pitr1 = genEvt_particles_begin; pitr1 != genEvt_particles_end; ++pitr1) {
 	  if ((*pitr1)->status() != 1) continue;
 
 	  // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
 	  int pdgId1((*pitr1)->pdg_id());
+    
 	  if (!(std::abs(pdgId1) == 11 || std::abs(pdgId1) == 13)) continue;
+    
 	  if (!((*pitr1)->momentum().perp() >= m_minPt && std::abs((*pitr1)->momentum().pseudoRapidity()) <= m_maxEta)) continue;
 
 	  // Loop over all remaining particles in the event
 	  auto pitr2 = pitr1;
 	  pitr2++;
+    
+   
 
 	  for (; pitr2 != genEvt_particles_end; ++pitr2) {
         if ((*pitr2)->status()!=1 || pitr1 == pitr2) continue;
@@ -72,7 +77,7 @@ StatusCode FourLeptonMassFilter::filterEvent() {
           // Loop over all remaining particles in the event
 		  auto pitr4 = pitr3;
 		  pitr4++;
-
+   
 		  for (; pitr4 != genEvt_particles_end; ++pitr4) {
             if ((*pitr4)->status()!=1 || pitr1 == pitr4 || pitr2 == pitr4 || pitr3 == pitr4) continue;
 
@@ -80,7 +85,7 @@ StatusCode FourLeptonMassFilter::filterEvent() {
             int pdgId4((*pitr4)->pdg_id());
             if (!(std::abs(pdgId4) == 11 || abs(pdgId4) == 13)) continue;
             if (!((*pitr4)->momentum().perp() >= m_minPt && std::abs((*pitr4)->momentum().pseudoRapidity()) <= m_maxEta)) continue;
-
+            
             decltype(pitr1) apitr[4] = {pitr1,pitr2,pitr3,pitr4};
             int pdgIds[4]={pdgId1,pdgId2,pdgId3,pdgId4};
             for (int ii = 0; ii < 4; ii++) {

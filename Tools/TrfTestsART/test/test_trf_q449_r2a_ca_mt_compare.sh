@@ -3,7 +3,7 @@
 # art-description: Reco_tf.py q449 RAWtoALL in MT and ComponentAccumulator mode
 # art-type: grid
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # art-athena-mt: 8
 
 mkdir ca
@@ -14,7 +14,6 @@ Reco_tf.py --CA \
   --conditionsTag=CONDBR2-BLKPA-2022-07 \
   --geometryVersion=ATLAS-R3S-2021-03-00-00 \
   --multithreaded="True" \
-  --steering "doRAWtoALL" \
   --outputAODFile myAOD_ca.pool.root \
   --outputESDFile myESD_ca.pool.root \
   --outputHISTFile myHIST_ca.root \
@@ -34,7 +33,6 @@ Reco_tf.py \
   --conditionsTag=CONDBR2-BLKPA-2022-07 \
   --geometryVersion=ATLAS-R3S-2021-03-00-00 \
   --multithreaded="True" \
-  --steering "doRAWtoALL" \
   --outputAODFile myAOD_def.pool.root \
   --outputESDFile myESD_def.pool.root \
   --outputHISTFile myHIST_def.root \
@@ -84,12 +82,22 @@ comparexAODDigest.py myAOD_def.txt myAOD_ca.txt
 rc7=$?
 echo "art-result: ${rc7} comparexAODDigest.py myAOD_def.txt myAOD_ca.txt"
 
-echo "============ hist_diff.sh ca/myHIST_ca.root def/myHIST.root -i -x (TIME_execute|LAr/Coverage|MismatchEventNumbers|L1Calo/Overview/Errors)"
-hist_diff.sh ca/myHIST_ca.root def/myHIST_def.root -i -x "(TIME_execute|LAr/Coverage|MismatchEventNumbers|L1Calo/Overview/Errors)"
+echo "============ hist_diff.sh ca/myHIST_ca.root def/myHIST.root -i -x (TIME_|LAr/Coverage|MismatchEventNumbers|L1Calo/Overview/Errors|noEth_rndm_CSCveto)"
+hist_diff.sh ca/myHIST_ca.root def/myHIST_def.root -i -x "(TIME_|LAr/Coverage|MismatchEventNumbers|L1Calo/Overview/Errors|noEth_rndm_CSCveto)"
 rc8=$?
 echo "art-result: ${rc8} hist_diff.sh ca/myHIST_ca.root def/myHIST.root"
 
 echo "============ diff-root def/myAOD_def.pool.root ca/myAOD_ca.pool.root"
-acmd.py diff-root def/myAOD_def.pool.root ca/myAOD_ca.pool.root --nan-equal --error-mode resilient --ignore-leaves RecoTimingObj_p1_HITStoRDO_timings RecoTimingObj_p1_RAWtoESD_mems RecoTimingObj_p1_RAWtoESD_timings RAWtoESD_mems RAWtoESD_timings ESDtoAOD_mems ESDtoAOD_timings HITStoRDO_timings RAWtoALL_mems RAWtoALL_timings RecoTimingObj_p1_RAWtoALL_mems RecoTimingObj_p1_RAWtoALL_timings RecoTimingObj_p1_EVNTtoHITS_timings EVNTtoHITS_timings RecoTimingObj_p1_Bkg_HITStoRDO_timings index_ref  --order-trees --entries 50 --mode semi-detailed
+acmd.py diff-root def/myAOD_def.pool.root ca/myAOD_ca.pool.root --nan-equal --error-mode resilient --order-trees --entries 50 --mode semi-detailed
 rc9=$?
 echo "art-result: ${rc9} diff-root def/myAOD_def.pool.root ca/myAOD_ca.pool.root"
+
+echo "============ meta-diff def/myAOD_def.pool.root ca/myAOD_ca.pool.root"
+meta-diff --ordered --mode full --diff-format diff def/myAOD_def.pool.root ca/myAOD_ca.pool.root --drop file_guid file_size
+rc10=$?
+echo "art-result: ${rc10} meta-diff def/myAOD_def.pool.root ca/myAOD_ca.pool.root"
+
+echo "============ diff-root def/myESD_def.pool.root ca/myESD_ca.pool.root"
+acmd.py diff-root def/myESD_def.pool.root ca/myESD_ca.pool.root --nan-equal --error-mode resilient --order-trees --entries 10 --mode semi-detailed
+rc11=$?
+echo "art-result: ${rc11} diff-root def/myESD_def.pool.root ca/myESD_ca.pool.root"

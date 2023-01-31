@@ -1,17 +1,19 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
 #include <cassert>
 #include <iostream>
-#include <boost/pool/pool_alloc.hpp>
+#include <unistd.h>
 #include "CxxUtils/procmaps.h"
+#include "CxxUtils/page_access.h"
 #include "CxxUtils/PageAccessControl.h"
 // #define DEBUGIT 1
 using namespace std;
 int main(void) {
   cout << "*** PageAccessControl_test starts ***" <<endl;
+  size_t pagesize = sysconf(_SC_PAGE_SIZE);
 #ifdef DEBUGIT
   const bool DUMPMAPS(true);
 #else
@@ -20,7 +22,9 @@ int main(void) {
   procmaps pmaps(DUMPMAPS);
   PageAccessControl pac(pmaps);
   //protect a heap object
-  int* pi= new int(2);
+  void* p = malloc (3*pagesize);
+  int* pi = static_cast<int*> (athena::next_page_address (p));
+  *pi = 2;
   void* pv = malloc(10);
   //assert(pac.forbidPage(pi));
   if (!pac.forbidPage(pi)) perror("forbidPage fails");
@@ -33,7 +37,7 @@ int main(void) {
   
 
 //make valgrind happy
-  delete pi;
+  free(p);
   free(pv);
 
   cout << "*** PageAccessControl_test OK ***" <<endl;

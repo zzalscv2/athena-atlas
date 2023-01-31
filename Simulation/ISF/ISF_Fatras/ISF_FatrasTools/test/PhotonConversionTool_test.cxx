@@ -15,6 +15,9 @@
 #include <cassert>
 #include <iostream>
 
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // unit test
+
 // TestTruthSvc class
 class TestTruthSvc 
    : public extends<AthService, ISF::ITruthSvc> 
@@ -48,13 +51,13 @@ class TestParticleBroker
      StatusCode initializeEvent(ISF::ISFParticleContainer&&) { return StatusCode::SUCCESS; };
      StatusCode finalizeEvent() { return StatusCode::SUCCESS; };
      void push(ISF::ISFParticle*, const ISF::ISFParticle*) { };
-     const ISF::ConstISFParticleVector& popVector(size_t) { return m_cv; };
+     const ISF::ISFParticleVector& popVector(size_t) { return m_cv; };
      size_t numParticles() const { return 0; };
      StatusCode dump() const { return StatusCode::SUCCESS; };
 
    private:
 
-     ISF::ConstISFParticleVector m_cv;
+     ISF::ISFParticleVector m_cv;
 
 };
 DECLARE_COMPONENT( TestParticleBroker )

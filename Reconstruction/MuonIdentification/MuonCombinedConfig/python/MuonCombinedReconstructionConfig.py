@@ -7,16 +7,14 @@ from AthenaConfiguration.Enums import BeamType
 
 def MuonCaloTagAlgCfg(flags, name="MuonCaloTagAlg", **kwargs):
     from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonCaloTagToolCfg
-    tools = []
-    result = MuonCaloTagToolCfg(flags)
-    tools.append(result.popPrivateTools())
-    kwargs.setdefault("MuonCombinedInDetExtensionTools", tools)
-    result.addPublicTool(kwargs['MuonCombinedInDetExtensionTools'][0])  # Ugh
+    result = ComponentAccumulator()
+    kwargs.setdefault("MuonCombinedInDetExtensionTool", 
+                      result.popToolsAndMerge(MuonCaloTagToolCfg(flags)))
     kwargs.setdefault("TagMap", "caloTagMap")
     kwargs.setdefault("CombinedTrackCollection", "")
     kwargs.setdefault("METrackCollection", "")
     kwargs.setdefault("usePRDs", False)
-    alg = CompFactory.MuonCombinedInDetExtensionAlg(name, **kwargs)
+    alg = CompFactory.MuonCombinedInDetExtensionAlg(name ,**kwargs)
     result.addEventAlgo(alg, primary=True)
     return result
 
@@ -48,13 +46,9 @@ def LRT_MuonSegmentTagAlgCfg(flags, name="MuonSegmentTagAlg_LRT", **kwargs):
 
 def MuonInsideOutRecoAlgCfg(flags, name="MuonInsideOutRecoAlg", **kwargs):
     from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonInsideOutRecoToolCfg
-
-    tools = []
-    result = MuonInsideOutRecoToolCfg(flags)
-    insideoutrecotool = result.popPrivateTools()
-    tools.append(insideoutrecotool)
-
-    kwargs.setdefault("MuonCombinedInDetExtensionTools", tools)
+    result = ComponentAccumulator()
+    kwargs.setdefault("MuonCombinedInDetExtensionTool", 
+                      result.popToolsAndMerge(MuonInsideOutRecoToolCfg(flags)))
     kwargs.setdefault("usePRDs", True)
     kwargs.setdefault("HasCSC", flags.Detector.GeometryCSC)
     kwargs.setdefault("HasSTgc", flags.Detector.GeometrysTGC)
@@ -84,15 +78,16 @@ def LRT_MuGirlAlgCfg(flags, name="MuGirlAlg_LRT", **kwargs):
 
 def MuGirlStauAlgCfg(flags, name="MuGirlStauAlg", **kwargs):
     from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonStauRecoToolCfg
-    result = MuonStauRecoToolCfg(flags)
-    tools = [result.popPrivateTools()]
-    kwargs.setdefault("MuonCombinedInDetExtensionTools", tools)
+    result = ComponentAccumulator()    
+    kwargs.setdefault("MuonCombinedInDetExtensionTool", 
+                       result.popToolsAndMerge(MuonStauRecoToolCfg(flags)))
     kwargs.setdefault("TagMap", "stauTagMap")
     kwargs.setdefault("HasCSC", flags.Detector.GeometryCSC)
-    kwargs.setdefault("HasSTgc", flags.Detector.GeometrysTGC)
-    kwargs.setdefault("HasMM", flags.Detector.GeometryMM)
-    kwargs.setdefault("TGCPrepDataLocation",
-                      'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
+    kwargs.setdefault("HasSTgc", False)
+    kwargs.setdefault("HasMM", False)
+    # kwargs.setdefault("TGCPrepDataLocation",
+    #                   'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
+    kwargs.setdefault("TGCPrepDataLocation", 'TGC_Measurements') # This is probably wrong, but matches old-config. #FIXME
     kwargs.setdefault("CombinedTrackCollection", "MuGirlStauCombinedTracks")
     kwargs.setdefault("METrackCollection", "")
     kwargs.setdefault("SegmentCollection", "TrkStauSegments")
@@ -298,10 +293,10 @@ def LRT_MuonCreatorAlgCfg(flags, name="MuonCreatorAlg_LRT", **kwargs):
     kwargs.setdefault("MuonCreatorTool", creatorTool)
     # In cases we want to switch them off we should add the flags here
     tag_maps = []
-    if flags.MuonCombined.doCaloTrkMuId: tag_maps += ["caloTagMap_LRT"]
     if flags.MuonCombined.doMuGirl: tag_maps+=["MuGirlMap_LRT"]
     if flags.MuonCombined.doStatisticalCombination: tag_maps+=["stacoTagMap_LRT"]
     if flags.MuonCombined.doCombinedFit: tag_maps+=["muidcoTagMap_LRT"]
+    if flags.MuonCombined.doCaloTrkMuId: tag_maps += ["caloTagMap_LRT"]
     if flags.MuonCombined.doMuonSegmentTagger: tag_maps+=["segmentTagMap_LRT"]  
     kwargs.setdefault("TagMaps", tag_maps)
     kwargs.setdefault("MuonContainerLocation", "MuonsLRT")
@@ -335,7 +330,7 @@ def EMEO_MuonCreatorAlgCfg(flags, name="MuonCreatorAlg_EMEO", **kwargs):
 
 def StauCreatorAlgCfg(flags, name="StauCreatorAlg", **kwargs):
     from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonCreatorToolCfg
-    result = MuonCreatorToolCfg(flags, BuildStauContainer=True)
+    result = MuonCreatorToolCfg(flags, BuildStauContainer=True, name='StauCreatorTool')
     kwargs.setdefault("MuonCreatorTool", result.popPrivateTools())
     kwargs.setdefault("MuonContainerLocation", "Staus")
     kwargs.setdefault("CombinedLocation", "CombinedStau")

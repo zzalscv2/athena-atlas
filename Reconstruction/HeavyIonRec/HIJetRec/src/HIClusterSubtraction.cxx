@@ -139,7 +139,7 @@ int HIClusterSubtraction::execute() const
 	     *newClu=*oldCluster;
 	}
 
-  for(xAOD::CaloClusterContainer::iterator itr=copyClusters->begin(); itr!=copyClusters->end(); itr++)
+  for(xAOD::CaloClusterContainer::iterator itr=copyClusters->begin(); itr!=copyClusters->end(); ++itr)
   {
     xAOD::CaloCluster* cl= *itr;
 		xAOD::IParticle::FourMom_t p4;

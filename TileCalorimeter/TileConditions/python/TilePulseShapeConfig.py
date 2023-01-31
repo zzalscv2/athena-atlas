@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile pulse shape conditions tool and algorithm"""
 
@@ -9,7 +9,7 @@ def TilePulseShapeCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile pulse shape conditions algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of Tile pulse shape conditions (COOL, FILE). Defaults to COOL.
         TilePulseShape -- name of Tile pulse shape conditions object. Defaults to TilePulseShape.
@@ -75,10 +75,10 @@ def TilePulseShapeCondAlgCfg(flags, **kwargs):
     else:
         raise(Exception("Invalid source: %s" % source))
 
-    TileCalibFltCondAlg=CompFactory.getComp("TileCalibCondAlg<TileCalibDrawerFlt>")
-    pulseShapeCondAlg = TileCalibFltCondAlg( name = name,
-                                             ConditionsProxy = pulseProxy,
-                                             TileCalibData = pulseShape)
+    TilePulseShapeCondAlg = CompFactory.getComp("TileCondAlg<TilePulse,TileCalibDrawerFlt>")
+    pulseShapeCondAlg = TilePulseShapeCondAlg( name = name,
+                                               ConditionsProxy = pulseProxy,
+                                               TileCondData = pulseShape)
 
     acc.addCondAlgo(pulseShapeCondAlg)
 
@@ -89,7 +89,7 @@ def TileCondToolPulseShapeCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile pulse shape conditions tool
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of Tile pulse shape conditions (COOL, FILE). Defaults to COOL.
         TilePulseShape -- name of Tile pulse shape conditions object. Defaults to TilePulseShape.
@@ -133,7 +133,7 @@ def TileCondToolMuRcvPulseShapeCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -141,16 +141,17 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Tile.RunType = 'PHY'
+    flags.lock()
 
     acc = ComponentAccumulator()
 
-    pulseShapeTool =  acc.popToolsAndMerge( TileCondToolPulseShapeCfg(ConfigFlags) )
+    pulseShapeTool =  acc.popToolsAndMerge( TileCondToolPulseShapeCfg(flags) )
     print(pulseShapeTool)
 
-    muRcvPulseShapeTool =  acc.popToolsAndMerge( TileCondToolMuRcvPulseShapeCfg(ConfigFlags) )
+    muRcvPulseShapeTool =  acc.popToolsAndMerge( TileCondToolMuRcvPulseShapeCfg(flags) )
     print(muRcvPulseShapeTool)
 
     acc.printConfig(withDetails = True, summariseProps = True)

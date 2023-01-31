@@ -49,6 +49,7 @@ class TrigSignatureMoni : public extends<AthReentrantAlgorithm, IIncidentListene
   // Class representing asynchronously published histograms
   class RateHistogram {
    public:
+    RateHistogram() = default;
     ~RateHistogram();
 
     // Initialize rate histogram and create buffer
@@ -85,7 +86,7 @@ class TrigSignatureMoni : public extends<AthReentrantAlgorithm, IIncidentListene
     std::mutex m_mutex;
     std::unique_ptr<Athena::AlgorithmTimer> m_timer;
     std::unique_ptr<TimeDivider> m_timeDivider;
-    unsigned int m_duration;
+    unsigned int m_duration{0};
   };
 
   SG::ReadHandleKey<TrigCompositeUtils::DecisionContainer> m_l1DecisionsKey{ this, "L1Decisions", "HLTSeedingSummary", "Chains activated after the L1" };

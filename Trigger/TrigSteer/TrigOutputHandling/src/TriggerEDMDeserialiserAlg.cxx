@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/StorableConversions.h"
@@ -261,9 +261,10 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
     ATH_CHECK( m_clidSvc->getTypeNameOfID( clid, transientTypeName ) );
     ATH_CHECK( m_clidSvc->getTypeInfoNameOfID( clid, transientTypeInfoName ) ); // version
 
-    const std::vector<std::string> descr{ PayloadHelpers::collectionDescription( start ) };
+    const std::vector<std::string> descr( PayloadHelpers::collectionDescription( start ) );
     ATH_CHECK( descr.size() == 2 );
     std::string persistentTypeName{ descr[0] };
+    // cppcheck-suppress containerOutOfBounds; false positive
     const std::string key{ descr[1] };
     const size_t bsize{ PayloadHelpers::dataSize( start ) };
 

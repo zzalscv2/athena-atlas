@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <boost/algorithm/string.hpp>
@@ -108,7 +108,8 @@ StatusCode TrigConf::JobOptionsSvc::readOptionsDB(const std::string& db_server, 
   jodbloader.loadJobOptions( smk, jo );
   if (jo) {
     unsigned int nClients(0), nProps(0);
-    for( const auto & client : jo.getObject("properties").data()) {
+    TrigConf::DataStructure ds = jo.getObject("properties");
+    for( const auto & client : ds.data()) {
       nClients++;
       for( const auto & property : client.second ) {
         nProps++;

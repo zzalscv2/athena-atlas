@@ -30,7 +30,7 @@ if __name__=='__main__':
   parser.add_argument('-l','--addLatHeader', dest='lheader', default=True, help='Add LATOME Header to output ntuple', type=bool)
   parser.add_argument('-b','--addBCID', dest='bcid', default=True, help='Add BCID info to output ntuple', type=bool)
   parser.add_argument('-e','--expandId', dest='expid', default=False, help='Expand online Id to fields', type=bool)
-  parser.add_argument('-n','--nsamp', dest='nsamp', default=32, help='Number of samples to dump', type=int)
+  parser.add_argument('-n','--nsamp', dest='nsamp', default=0, help='Number of samples to dump', type=int)
   parser.add_argument('-c','--overEvNumber', dest='overEvN', default=False, help='Overwrite event number', type=bool)
   parser.add_argument('-d','--addHash', dest='ahash', default=False, help='Add hash number to output ntuple', type=bool)
   parser.add_argument('-j','--addOffline', dest='offline', default=False, help='Add offline Id to output ntuple', type=bool)
@@ -38,6 +38,8 @@ if __name__=='__main__':
   parser.add_argument('-t','--addGeom', dest='geom', default=False, help='Add real geom info to output ntuple', type=bool)
   parser.add_argument('-u','--addBC', dest='bc', default=False, help='Add Bad. chan info to output ntuple', type=bool)
   parser.add_argument('-w','--addROD', dest='rod', default=False, help='Add ROD energies sum to output ntuple', type=bool)
+  parser.add_argument('-v','--addEvTree', dest='evtree', default=False, help='Add tree with per event info to output ntuple', type=bool)
+  parser.add_argument('-q','--addNoisyRO', dest='noisyRO', default=False, help='Add reco and info from LArNoisyROSummary to output ntuple', type=bool)
 
   args = parser.parse_args()
   if help in args and args.help is not None and args.help:
@@ -63,6 +65,9 @@ if __name__=='__main__':
      from LArCalibProcessing.GetInputFiles import GetInputFilesFromPrefix
      ConfigFlags.Input.Files = GetInputFilesFromPrefix(args.indir,args.inpref)
 
+  if args.run != 0:
+     ConfigFlags.Input.RunNumber = [args.run]
+
   # first autoconfig
   from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
   try:
@@ -81,21 +86,27 @@ if __name__=='__main__':
      CKeys=[]
      ConfigFlags.LArSCDump.digitsKey=""
      for i in range(0,len(runinfo.streamTypes())):
-        if runinfo.streamTypes()[i] ==  "SelectedEnergy":
+        if args.EtId and runinfo.streamTypes()[i] ==  "SelectedEnergy":
               CKeys += ["SC_ET_ID"]
               ConfigFlags.LArSCDump.doEt=True
               ConfigFlags.LArSCDump.nEt=runinfo.streamLengths()[i]
-        elif runinfo.streamTypes()[i] ==  "Energy":
+        elif args.Et and runinfo.streamTypes()[i] ==  "Energy":
               CKeys += ["SC_ET"]
               ConfigFlags.LArSCDump.doEt=True
               ConfigFlags.LArSCDump.nEt=runinfo.streamLengths()[i]
-        elif runinfo.streamTypes()[i] ==  "RawADC":
+        elif args.samples and runinfo.streamTypes()[i] ==  "RawADC":
               ConfigFlags.LArSCDump.digitsKey="SC"
-              ConfigFlags.LArSCDump.nSamples=runinfo.streamLengths()[i]
-        elif runinfo.streamTypes()[i] ==  "ADC":
+              if args.nsamp > 0:
+                 ConfigFlags.LArSCDump.nSamples=args.nsamp
+              else:
+                 ConfigFlags.LArSCDump.nSamples=runinfo.streamLengths()[i]
+        elif args.samplesBas and runinfo.streamTypes()[i] ==  "ADC":
               CKeys += ["SC_ADC_BAS"]
-              ConfigFlags.LArSCDump.nSamples=runinfo.streamLengths()[i]
-     if args.nsamp < ConfigFlags.LArSCDump.nSamples:
+              if args.nsamp > 0:
+                 ConfigFlags.LArSCDump.nSamples=args.nsamp
+              else:
+                 ConfigFlags.LArSCDump.nSamples=runinfo.streamLengths()[i]
+     if  args.nsamp > 0 and args.nsamp < ConfigFlags.LArSCDump.nSamples:
         ConfigFlags.LArSCDump.nSamples=args.nsamp
   
   log.info("Autoconfigured: ")
@@ -123,6 +134,18 @@ if __name__=='__main__':
   # now construct the job
   ConfigFlags.LAr.doAlign=False
 
+  if args.evtree: # should include trigger info
+     ConfigFlags.Trigger.triggerConfig = 'DB'
+     ConfigFlags.Trigger.L1.doCTP = True
+     ConfigFlags.Trigger.L1.doMuon = False
+     ConfigFlags.Trigger.L1.doCalo = False
+     ConfigFlags.Trigger.L1.doTopo = False
+
+     ConfigFlags.Trigger.enableL1CaloLegacy = True
+     ConfigFlags.Trigger.enableL1CaloPhase1 = True
+
+  ConfigFlags.LArSCDump.fillNoisyRO=args.noisyRO
+
   ConfigFlags.lock()
 
   #Import the MainServices (boilerplate)
@@ -131,6 +154,15 @@ if __name__=='__main__':
 
   acc = MainServicesCfg(ConfigFlags)
   acc.merge(LArGMCfg(ConfigFlags))
+
+  if args.evtree: # should include trigger info
+     from LArCafJobs.LArSCDumperSkeleton import L1CaloMenuCfg
+     acc.merge(L1CaloMenuCfg(ConfigFlags))
+     from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+     tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(ConfigFlags))
+  else: 
+     tdt = None
+
 
   if args.bc:
      # FIXME should be SC version
@@ -152,6 +184,9 @@ if __name__=='__main__':
                             NSamples=ConfigFlags.LArSCDump.nSamples, FTlist={}, FillBCID=args.bcid, ContainerKey=ConfigFlags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
                             SCContainerKeys=CKeys, OverwriteEventNumber = args.overEvN,                        # from LArSC2Ntuple
                             FillRODEnergy = ConfigFlags.LArSCDump.doRawChan,
+                            FillLB=args.evtree, FillTriggerType = args.evtree,
+                            TrigNames=["L1_EM3","L1_EM7","L1_EM15","L1_EM22VHI","L1_eEM5","L1_eEM15","L1_eEM22M"],
+                            TrigDecisionTool=tdt,
                             OutputLevel=args.olevel
                            ))
   # ROOT file writing

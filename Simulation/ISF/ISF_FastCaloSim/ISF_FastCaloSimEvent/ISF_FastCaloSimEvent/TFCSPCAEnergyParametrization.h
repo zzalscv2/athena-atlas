@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCSPCAEnergyParametrization_h
@@ -41,7 +41,7 @@ class TFCSPCAEnergyParametrization:public TFCSEnergyParametrization
   
   void P2X(TVectorD*, TVectorD* , TMatrixD* , int, double* , double* , int) const;
   bool loadInputs(TFile* file);
-  bool loadInputs(TFile* file,std::string);
+  bool loadInputs(TFile* file,const std::string&);
   
   void clean();
   

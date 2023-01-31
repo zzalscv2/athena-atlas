@@ -78,7 +78,7 @@ LArIdMapFix=7
 
 # Other LAr related
 include( "LArIdCnv/LArIdCnv_joboptions.py" )
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+include( "CaloConditions/CaloConditions_jobOptions.py" )
 include( "IdDictDetDescrCnv/IdDictDetDescrCnv_joboptions.py" )
 
 include( "LArRawConditions/LArRawConditions_MC_jobOptions.py" )

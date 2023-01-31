@@ -288,8 +288,9 @@ namespace xAODMaker {
 	      xTruthEvent->setPdfInfoParameter((float)pdfInfo->pdf2(), xAOD::TruthEvent::XF2);
 #endif
 	    }
-	  }
-	  if (!isSignalProcess) xTruthPileupEventContainer->push_back( xTruthPileupEvent );
+	  }else{//not isSignalProcess
+      xTruthPileupEventContainer->push_back( xTruthPileupEvent );
+    }
                 
 	  // (2) Build particles and vertices
 	  // Map for building associations between particles and vertices
@@ -304,8 +305,8 @@ namespace xAODMaker {
 	   auto disconnectedSignalProcessVtx = HepMC::signal_process_vertex(genEvt); // Get the signal process vertex
 	  if (disconnectedSignalProcessVtx) {
 #ifdef HEPMC3
-	    if (disconnectedSignalProcessVtx->particles_in().size() == 0 &&
-		disconnectedSignalProcessVtx->particles_out().size() == 0 ) {
+	    if (disconnectedSignalProcessVtx->particles_in().empty() &&
+		disconnectedSignalProcessVtx->particles_out().empty() ) {
 #else
 	    if (disconnectedSignalProcessVtx->particles_in_size() == 0 &&
 		disconnectedSignalProcessVtx->particles_out_size() == 0 ) {
@@ -321,32 +322,27 @@ namespace xAODMaker {
 	  pair<HepMC::ConstGenParticlePtr,HepMC::ConstGenParticlePtr> beamParticles;
 	  bool genEvt_valid_beam_particles=false;
 #ifdef HEPMC3
-	  auto beamParticles_vec = genEvt->beams();
-	  genEvt_valid_beam_particles=(beamParticles_vec.size()>1);
-	  if (genEvt_valid_beam_particles){beamParticles.first=beamParticles_vec[0]; beamParticles.second=beamParticles_vec[1]; }
-#else	  
-          genEvt_valid_beam_particles=genEvt->valid_beam_particles();
-	  if ( genEvt_valid_beam_particles ) beamParticles = genEvt->beam_particles();
-#endif 
-
-#ifdef HEPMC3
-          // We want to process particles in barcode order, so need to
-          // explicitly sort them.
-          std::vector<HepMC::ConstGenParticlePtr> parts = genEvt->particles();
-          std::sort (parts.begin(), parts.end(),
-                     [] (const HepMC::ConstGenParticlePtr& a,
-                         const HepMC::ConstGenParticlePtr& b)
-                     { return HepMC::barcode(a) < HepMC::barcode(b); });
-          for (auto part: parts)
+        auto beamParticles_vec = genEvt->beams();
+        genEvt_valid_beam_particles=(beamParticles_vec.size()>1);
+        if (genEvt_valid_beam_particles){beamParticles.first=beamParticles_vec[0]; beamParticles.second=beamParticles_vec[1]; }
+        // We want to process particles in barcode order.
+        auto bcmapatt = genEvt->attribute<HepMC::GenEventBarcodes>("barcodes");
+        if (!bcmapatt) ATH_MSG_ERROR("TruthParticleCnvTool.cxx: Event does not contain barcodes attribute"); 
+        std::map<int, HepMC3::ConstGenParticlePtr> bcmap = bcmapatt->barcode_to_particle_map();
+        xTruthParticleContainer->reserve(bcmap.size());
+        for (const auto &[k,part]: bcmap) {
 #else
-          for (auto part: *genEvt)
+        genEvt_valid_beam_particles=genEvt->valid_beam_particles();
+        if ( genEvt_valid_beam_particles ) beamParticles = genEvt->beam_particles();
+        xTruthParticleContainer->reserve(genEvt->particles_size());
+        for (auto part: *genEvt) {
 #endif
-          {
 	    // (a) create TruthParticle
 	    xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
+      // (b) Put particle into container;
 	    xTruthParticleContainer->push_back( xTruthParticle );
-	    fillParticle(xTruthParticle, part); // (b) Copy HepMC info into the new particle
-	    // (c) Put particle into container; Build Event<->Particle element link
+	    fillParticle(xTruthParticle, part); // (c) Copy HepMC info into the new particle
+	    // (d) Build Event<->Particle element link
 	    const ElementLink<xAOD::TruthParticleContainer> eltp(*xTruthParticleContainer, xTruthParticleContainer->size()-1);
 	    if (isSignalProcess) xTruthEvent->addTruthParticleLink(eltp);
 	    if (!isSignalProcess) xTruthPileupEvent->addTruthParticleLink(eltp);
@@ -358,11 +354,11 @@ namespace xAODMaker {
 	    // Is this one of the beam particles?
 	    if (genEvt_valid_beam_particles) {
 	      if (isSignalProcess) {
-		if (part == beamParticles.first) xTruthEvent->setBeamParticle1Link(eltp);
-		if (part == beamParticles.second) xTruthEvent->setBeamParticle2Link(eltp);
+          if (part == beamParticles.first) xTruthEvent->setBeamParticle1Link(eltp);
+          if (part == beamParticles.second) xTruthEvent->setBeamParticle2Link(eltp);
 	      }
 	    }
-	    // (d) Particle's production vertex
+	    // (e) Particle's production vertex
 	    auto productionVertex = part->production_vertex();
             // Skip the dummy vertex that HepMC3 adds
             // Can distinguish it from real vertices because it has
@@ -370,19 +366,19 @@ namespace xAODMaker {
 	    if (productionVertex && productionVertex->parent_event() != nullptr) {
 	      VertexParticles& parts = vertexMap[productionVertex];
 	      if (parts.incoming.empty() && parts.outgoing.empty())
-		vertices.push_back (productionVertex);
+          vertices.push_back (productionVertex);
 	      parts.outgoingEL.push_back(eltp);
 	      parts.outgoing.push_back(xTruthParticle);
 	    }
 	    //
 	    // else maybe want to keep track that this is the production vertex
 	    //
-	    // (e) Particle's decay vertex
+	    // (f) Particle's decay vertex
 	    auto decayVertex = part->end_vertex();
 	    if (decayVertex) {
 	      VertexParticles& parts = vertexMap[decayVertex];
 	      if (parts.incoming.empty() && parts.outgoing.empty())
-		vertices.push_back (decayVertex);
+          vertices.push_back (decayVertex);
 	      parts.incomingEL.push_back(eltp);
 	      parts.incoming.push_back(xTruthParticle);
 	    }
@@ -391,25 +387,27 @@ namespace xAODMaker {
                 
 	  // (3) Loop over the map
 	  auto signalProcessVtx = HepMC::signal_process_vertex(genEvt); // Get the signal process vertex
-	  for (auto  vertex : vertices) {
+    xTruthVertexContainer->reserve(vertices.size());
+	  for (const auto&  vertex : vertices) {
 	    const auto& parts = vertexMap[vertex];
 	    // (a) create TruthVertex
 	    xAOD::TruthVertex* xTruthVertex = new xAOD::TruthVertex();
+      // (b) Put particle into container (so has store)
 	    xTruthVertexContainer->push_back( xTruthVertex );
-	    fillVertex(xTruthVertex, vertex); // (b) Copy HepMC info into the new vertex
-	    // (c) Put particle into container; Build Event<->Vertex element link
+	    fillVertex(xTruthVertex, vertex); // (c) Copy HepMC info into the new vertex
+	    // (d) Build Event<->Vertex element link
 	    ElementLink<xAOD::TruthVertexContainer> eltv(*xTruthVertexContainer, xTruthVertexContainer->size()-1);
 	    // Mark if this is the signal process vertex
 	    if (vertex == signalProcessVtx && isSignalProcess) xTruthEvent->setSignalProcessVertexLink(eltv);
 	    if (isSignalProcess) xTruthEvent->addTruthVertexLink(eltv);
 	    if (!isSignalProcess) xTruthPileupEvent->addTruthVertexLink(eltv);
-	    // (d) Assign incoming particles to the vertex, from the map
+	    // (e) Assign incoming particles to the vertex, from the map
 	    xTruthVertex->setIncomingParticleLinks( parts.incomingEL );
-	    // (e) Assign outgoing particles to the vertex, from the map
+	    // (f) Assign outgoing particles to the vertex, from the map
 	    xTruthVertex->setOutgoingParticleLinks( parts.outgoingEL );
-	    // (f) Set Particle<->Vertex links for incoming particles
-	    for (xAOD::TruthParticle* p : parts.incoming) p->setDecayVtxLink(eltv);
 	    // (g) Set Particle<->Vertex links for incoming particles
+	    for (xAOD::TruthParticle* p : parts.incoming) p->setDecayVtxLink(eltv);
+	    // (h) Set Particle<->Vertex links for incoming particles
 	    for (xAOD::TruthParticle* p : parts.outgoing) p->setProdVtxLink(eltv);
 	  } //end of loop over vertices
                 
@@ -476,7 +474,7 @@ namespace xAODMaker {
 
 
     // A helper to set up a TruthVertex (without filling the ELs)
-    void xAODTruthCnvAlg::fillVertex(xAOD::TruthVertex* tv, HepMC::ConstGenVertexPtr gv) {
+    void xAODTruthCnvAlg::fillVertex(xAOD::TruthVertex* tv, const HepMC::ConstGenVertexPtr& gv) {
         // id was renamed to status in HepMC3.
 #ifdef HEPMC3
         tv->setId(gv->status());
@@ -492,7 +490,7 @@ namespace xAODMaker {
     
     
     // A helper to set up a TruthParticle (without filling the ELs)
-    void xAODTruthCnvAlg::fillParticle(xAOD::TruthParticle* tp, HepMC::ConstGenParticlePtr gp) {
+    void xAODTruthCnvAlg::fillParticle(xAOD::TruthParticle* tp, const HepMC::ConstGenParticlePtr& gp) {
         tp->setPdgId(gp->pdg_id());
         tp->setBarcode(HepMC::barcode(gp));
         tp->setStatus(gp->status());

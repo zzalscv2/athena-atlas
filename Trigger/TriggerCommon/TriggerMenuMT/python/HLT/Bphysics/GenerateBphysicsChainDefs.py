@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ###########################################################################
 # SliceDef file for Bphysics chains
@@ -12,7 +12,7 @@ from TriggerMenuMT.HLT.Config.Utility.ChainDictTools import splitChainDict
 from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
 from .BphysicsChainConfiguration import BphysicsChainConfiguration
 
-def generateChainConfigs(chainDict):
+def generateChainConfigs(flags, chainDict):
 
     if not chainDict['topo']:
          log.error('No topo given -> not a bphysics chain...')
@@ -21,7 +21,7 @@ def generateChainConfigs(chainDict):
 
     listOfChainDefs=[]
     for subChainDict in listOfChainDicts:
-        subChain = BphysicsChainConfiguration(subChainDict).assembleBphysChain()
+        subChain = BphysicsChainConfiguration(subChainDict).assembleBphysChain(flags)
         listOfChainDefs += [subChain]
 
     log.debug('length of chaindefs %s', len(listOfChainDefs))

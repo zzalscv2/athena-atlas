@@ -30,11 +30,6 @@ class Material;
 class Layer;
 class TrackingVolume;
 
-/** Interface ID for ITrackingVolumeHelpers*/
-static const InterfaceID IID_ITrackingVolumeHelper("ITrackingVolumeHelper",
-                                                   1,
-                                                   0);
-
 /** @class ITrackingVolumeHelper
   Interface class ITrackingVolumeHelpers
   It inherits from IAlgTool.
@@ -47,11 +42,11 @@ class ITrackingVolumeHelper : virtual public IAlgTool
 {
 
 public:
+  /// Creates the InterfaceID and interfaceID() method
+  DeclareInterfaceID(ITrackingVolumeHelper, 1, 0);
+
   /**Virtual destructor*/
   virtual ~ITrackingVolumeHelper() {}
-
-  /** AlgTool and IAlgTool interface methods */
-  static const InterfaceID& interfaceID() { return IID_ITrackingVolumeHelper; }
 
   /** Glue Volume method: One to one
        --- Neccessary as friendship cannot be inherited: your father's friend

@@ -80,11 +80,6 @@ StatusCode HIUEModulatorTool::getShape(const xAOD::HIEventShape* & shape) const
   return StatusCode::SUCCESS;
 }
 
-StatusCode HIUEModulatorTool::retrieveShape() const
-{
-  return  getShape (const_cast<const xAOD::HIEventShape* &> (m_shape)); //TODO check for a smarter implementation
-}
-
 float HIUEModulatorTool::modulate(const std::vector<unsigned int>& nh_vector, const xAOD::HIEventShape* shape, float phi)
 {
   float modulation=0;

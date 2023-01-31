@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile DSP threshold conditions tool and algorithm"""
 
@@ -10,7 +10,7 @@ def TileDSP_ThresholdCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile DSP threshold conditions algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of Tile auto correlation conditions (COOL, FILE). Defaults to COOL.
         TileDSP_Threshold -- name of Tile auto correlation conditions object. Defaults to TileDSP_Threshold.
@@ -60,7 +60,7 @@ def TileDSP_ThresholdCondAlgCfg(flags, **kwargs):
 def TileCondToolDspThresholdCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile DSP threshold tool
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of Tile DSP threshold conditions (COOL, FILE). Defaults to COOL.
         TileDSP_Threshold -- name of Tile DSP threshold conditions object. Defaults to TileDSP_Threshold.
@@ -83,7 +83,7 @@ def TileCondToolDspThresholdCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -91,12 +91,13 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.lock()
 
     acc = ComponentAccumulator()
 
-    autoCorrelationTool = acc.popToolsAndMerge( TileCondToolDspThresholdCfg(ConfigFlags) )
+    autoCorrelationTool = acc.popToolsAndMerge( TileCondToolDspThresholdCfg(flags) )
     print(autoCorrelationTool)
 
     acc.printConfig(withDetails = True, summariseProps = True)

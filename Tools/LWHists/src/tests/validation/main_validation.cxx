@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -31,6 +31,7 @@
 #include "LWHists/TProfile2D_LW.h"
 
 #include "CxxUtils/ubsan_suppress.h"
+#include "CxxUtils/checker_macros.h"
 #include "TInterpreter.h"
 
 #include <cstdlib>
@@ -77,7 +78,7 @@ std::vector<double> getWeights(bool is_int)
 }
 
 template <class HistVal>
-void setNamesAndTitles(HistVal&hist) {
+void setNamesAndTitles(int& icount, HistVal& hist) {
   hist.setName("name1");
   hist.setName("name2");
   hist.setName("title1");//not typo
@@ -117,8 +118,7 @@ void setNamesAndTitles(HistVal&hist) {
   hist.compareAll();
   hist.SetMarkerSize( 1.02 );
   hist.compareAll();
-  static unsigned i(0);
-  switch (i++%5) {
+  switch (icount%5) {
   case 0: hist.setMinimum(12312.0); break;
   case 1: hist.setMinimum(); break;
   case 2: hist.setMinimum(0); break;
@@ -127,8 +127,7 @@ void setNamesAndTitles(HistVal&hist) {
   default: assert(false); break;
   };
   hist.compareAll();
-  static unsigned i2(0);
-  switch (i2++%5) {
+  switch (icount%5) {
   case 0: hist.setMaximum(12312.0); break;
   case 1: hist.setMaximum(); break;
   case 2: hist.setMaximum(0); break;
@@ -136,30 +135,37 @@ void setNamesAndTitles(HistVal&hist) {
   case 4: hist.setMaximum(-123.0); hist.setMaximum(); break;
   default: assert(false); break;
   };
+  ++icount;
 }
 
 template <class T1, class T2>
-void fillInVariousWays(int nbinsx, double xmin, double xmax,
+void fillInVariousWays(bool trigger_conversion_all,
+                       int nbinsx, double xmin, double xmax,
                        int nbinsy, double ymin, double ymax)
 {
   //Either Fill(x) or Fill(x,w):
-  HistVal2D<T1,T2> h1("name1a","title1",nbinsx,xmin,xmax,nbinsy,ymin,ymax);
+  HistVal2D<T1,T2> h1(trigger_conversion_all,
+                      "name1a","title1",nbinsx,xmin,xmax,nbinsy,ymin,ymax);
   fillInVariousWays_int2d(h1,true,false);
-  HistVal2D<T1,T2> h2("name1b","title1",nbinsx,xmin,xmax,nbinsy,ymin,ymax);
+  HistVal2D<T1,T2> h2(trigger_conversion_all,
+                      "name1b","title1",nbinsx,xmin,xmax,nbinsy,ymin,ymax);
   fillInVariousWays_int2d(h2,false,true);
 
   //First Fill(x), then Fill(x,w):
-  HistVal2D<T1,T2> h3("name1c","title1",nbinsx,xmin,xmax,nbinsy,ymin,ymax);
+  HistVal2D<T1,T2> h3(trigger_conversion_all,
+                      "name1c","title1",nbinsx,xmin,xmax,nbinsy,ymin,ymax);
   fillInVariousWays_int2d(h3,true,false);
   fillInVariousWays_int2d(h3,false,true);
 
   //First Fill(x,w), then Fill(x):
-  HistVal2D<T1,T2> h4("name1d","title1",nbinsx,xmin,xmax,nbinsy,ymin,ymax);
+  HistVal2D<T1,T2> h4(trigger_conversion_all,
+                      "name1d","title1",nbinsx,xmin,xmax,nbinsy,ymin,ymax);
   fillInVariousWays_int2d(h4,false,true);
   fillInVariousWays_int2d(h4,true,false);
 
   //Fill slowly to pass through char, short and full stages:
-  HistVal2D<T1,T2> h5("name1e","title1",nbinsx,xmin,xmax,nbinsy,ymin,ymax);
+  HistVal2D<T1,T2> h5(trigger_conversion_all,
+                      "name1e","title1",nbinsx,xmin,xmax,nbinsy,ymin,ymax);
   for (unsigned i=0; i<UCHAR_MAX+10;++i)
     h5.fill(17,18);
   h5.setCompareBinContentsOnEachFill(false);//Disable since we will have maaany calls.
@@ -170,26 +176,32 @@ void fillInVariousWays(int nbinsx, double xmin, double xmax,
 }
 
 template <class T1, class T2>
-void fillInVariousWays(int nbins, double xmin, double xmax)
+void fillInVariousWays(bool trigger_conversion_all,
+                       int nbins, double xmin, double xmax)
 {
   //Either Fill(x) or Fill(x,w):
-  HistVal1D<T1,T2> h1("name1a","title1",nbins,xmin,xmax);
+  HistVal1D<T1,T2> h1(trigger_conversion_all,
+                      "name1a","title1",nbins,xmin,xmax);
   fillInVariousWays_int(h1,true,false);
-  HistVal1D<T1,T2> h2("name1b","title1",nbins,xmin,xmax);
+  HistVal1D<T1,T2> h2(trigger_conversion_all,
+                      "name1b","title1",nbins,xmin,xmax);
   fillInVariousWays_int(h2,false,true);
 
   //First Fill(x), then Fill(x,w):
-  HistVal1D<T1,T2> h3("name1c","title1",nbins,xmin,xmax);
+  HistVal1D<T1,T2> h3(trigger_conversion_all,
+                      "name1c","title1",nbins,xmin,xmax);
   fillInVariousWays_int(h3,true,false);
   fillInVariousWays_int(h3,false,true);
 
   //First Fill(x,w), then Fill(x):
-  HistVal1D<T1,T2> h4("name1d","title1",nbins,xmin,xmax);
+  HistVal1D<T1,T2> h4(trigger_conversion_all,
+                      "name1d","title1",nbins,xmin,xmax);
   fillInVariousWays_int(h4,false,true);
   fillInVariousWays_int(h4,true,false);
 
   //Fill slowly to pass through char, short and full stages:
-  HistVal1D<T1,T2> h5("name1e","title1",nbins,xmin,xmax);
+  HistVal1D<T1,T2> h5(trigger_conversion_all,
+                      "name1e","title1",nbins,xmin,xmax);
   for (unsigned i=0; i<UCHAR_MAX+10;++i)
     h5.fill(17);
   h5.setCompareBinContentsOnEachFill(false);//Disable since we will have maaany calls.
@@ -201,12 +213,14 @@ void fillInVariousWays(int nbins, double xmin, double xmax)
   //short and full stages:
 
   //Char->Short->Full:
-  HistVal1D<T1,T2> h6("name1f","title1",nbins,xmin,xmax);
+  HistVal1D<T1,T2> h6(trigger_conversion_all,
+                      "name1f","title1",nbins,xmin,xmax);
   h6.fill(17,1.0);
   h6.fill(17,UCHAR_MAX+1.0);
   h6.fill(17,USHRT_MAX+1.0);
   //Char->Full:
-  HistVal1D<T1,T2> h7("name1g","title1",nbins,xmin,xmax);
+  HistVal1D<T1,T2> h7(trigger_conversion_all,
+                      "name1g","title1",nbins,xmin,xmax);
   h6.fill(17,1.0);
   h6.fill(17,UCHAR_MAX+USHRT_MAX+1.0);
 }
@@ -263,18 +277,23 @@ void fillInVariousWays_int2d(HistVal&h,bool doUnitWeight, bool doFloatWeight)
 }
 
 template <class T1, class T2>
-void basicValidation(bool do_systematic_tests =  true) {
+void basicValidation(bool trigger_conversion_all, int& icount, bool verbose, bool do_systematic_tests =  true) {
   //Test name/title:
-  HistVal1D<T1,T2> h("name1","title1",150,-10.0,80.0);
-  setNamesAndTitles(h);
-  HistVal1D<T1,T2> h2("name1","",150,0.0,17.0);
-  setNamesAndTitles(h2);
-  HistVal1D<T1,T2> h3("","title3",150,0.0,17.0);
-  setNamesAndTitles(h3);
-  HistVal1D<T1,T2> h4("","",150,0.0,17.0);
-  setNamesAndTitles(h4);
+  HistVal1D<T1,T2> h(trigger_conversion_all,
+                     "name1","title1",150,-10.0,80.0);
+  setNamesAndTitles(icount, h);
+  HistVal1D<T1,T2> h2(trigger_conversion_all,
+                      "name1","",150,0.0,17.0);
+  setNamesAndTitles(icount, h2);
+  HistVal1D<T1,T2> h3(trigger_conversion_all,
+                      "","title3",150,0.0,17.0);
+  setNamesAndTitles(icount, h3);
+  HistVal1D<T1,T2> h4(trigger_conversion_all,
+                      "","",150,0.0,17.0);
+  setNamesAndTitles(icount, h4);
   //Special basic test:
-  HistVal1D<T1,T2> h5("name1test","title1test",2,0.0,100.0);
+  HistVal1D<T1,T2> h5(trigger_conversion_all,
+                      "name1test","title1test",2,0.0,100.0);
   h5.fill(80);
   h5.compareAll();
   //  std::cout<<"basic validation of h1="<<typeid(T1).name()<<" vs. h2="<<typeid(T2).name()<<std::endl;
@@ -286,7 +305,8 @@ void basicValidation(bool do_systematic_tests =  true) {
   h5.compareAll();
 
   //Another special test for savanna bug #73561
-  HistVal1D<T1,T2> h_errbug("nameerrtest","title1test",2,0.0,100.0);
+  HistVal1D<T1,T2> h_errbug(trigger_conversion_all,
+                            "nameerrtest","title1test",2,0.0,100.0);
   h_errbug.setBinContentAndError(1,10.0,10.0);//err is now 10
   h_errbug.setBinContentAndError(1,4.0,2.0);//err is now sqrt(content)
   h_errbug.compareAll();
@@ -340,7 +360,7 @@ void basicValidation(bool do_systematic_tests =  true) {
     sys_args.push_back(20.0);
 
     const bool expecterror(false);
-#define SYSTEST(x) { if (HistValFunctions::verbose()) { std::cout<<"Systematic filling: "<<x<<std::endl;} }
+#define SYSTEST(x) { if (verbose) { std::cout<<"Systematic filling: "<<x<<std::endl;} }
     double x,a;unsigned i, itest(0);
     for (unsigned ipoint1 = 0;ipoint1<npoints;++ipoint1)
     for (unsigned ipoint2 = 0;ipoint2<npoints;++ipoint2)
@@ -358,7 +378,8 @@ void basicValidation(bool do_systematic_tests =  true) {
       {
         ++itest;
         SYSTEST("------------> 1D Test number "<<itest);
-        HistVal1D<T1,T2> h("systname","systtitle",nbins,xmin,xmax);
+        HistVal1D<T1,T2> h(trigger_conversion_all,
+                           "systname","systtitle",nbins,xmin,xmax);
         h.setCompareBinContentsOnEachFill(expecterror);
 
         i=sys_ibin.at(ipoint1);x=sys_x.at(ipoint1); a=sys_args.at(iarg1);
@@ -392,7 +413,8 @@ void basicValidation(bool do_systematic_tests =  true) {
   xbins[2] = 2.7;
   xbins[3] = 2.701;
   xbins[4] = 10.0;
-  HistVal1D<T1,T2> h6("name6","title6",4,xbins);
+  HistVal1D<T1,T2> h6(trigger_conversion_all,
+                      "name6","title6",4,xbins);
   delete[] xbins;
   h6.fill(2.6);h6.compareAll();
   h6.fill(2.7);h6.compareAll();
@@ -405,27 +427,31 @@ void basicValidation(bool do_systematic_tests =  true) {
   std::cout << " ---> Variable binning tests completed"<<std::endl;
 
   fillInVariousWays_int(h,true,true);
-  fillInVariousWays<T1,T2>(100,0.0,100.0);
-  fillInVariousWays<T1,T2>(150,0.0,100.0);
-  fillInVariousWays<T1,T2>(15000,0.0,100.0);//not small()!
+  fillInVariousWays<T1,T2>(trigger_conversion_all, 100,0.0,100.0);
+  fillInVariousWays<T1,T2>(trigger_conversion_all, 150,0.0,100.0);
+  fillInVariousWays<T1,T2>(trigger_conversion_all, 15000,0.0,100.0);//not small()!
   std::cout << " ---> Various filling tests completed"<<std::endl;
 
 }
 
 template <class T1, class T2>
-void basicValidation2D() {
+void basicValidation2D(bool trigger_conversion_all, int& icount, bool verbose) {
   //Test name/title:
-  HistVal2D<T1,T2> h("name1","title1",100,-10.0,80.0,50,10.0,1230.0);
-  setNamesAndTitles(h);
-  HistVal2D<T1,T2> h2("name1","",100,0.0,17.0,50,10.0,1230.0);
-  setNamesAndTitles(h2);
-  HistVal2D<T1,T2> h3("","title3",100,0.0,17.0,50,10.0,1230.0);
-  setNamesAndTitles(h3);
-  HistVal2D<T1,T2> h4("","",100,0.0,17.0,50,10.0,1230.0);
-  setNamesAndTitles(h4);
+  HistVal2D<T1,T2> h(trigger_conversion_all,
+                     "name1","title1",100,-10.0,80.0,50,10.0,1230.0);
+  setNamesAndTitles(icount, h);
+  HistVal2D<T1,T2> h2(trigger_conversion_all,
+                      "name1","",100,0.0,17.0,50,10.0,1230.0);
+  setNamesAndTitles(icount, h2);
+  HistVal2D<T1,T2> h3(trigger_conversion_all,
+                      "","title3",100,0.0,17.0,50,10.0,1230.0);
+  setNamesAndTitles(icount, h3);
+  HistVal2D<T1,T2> h4(trigger_conversion_all,
+                      "","",100,0.0,17.0,50,10.0,1230.0);
+  setNamesAndTitles(icount, h4);
   std::cout << " ---> Quick basic test completed"<<std::endl;
   fillInVariousWays_int2d(h,true,true);
-  fillInVariousWays<T1,T2>(100,0.0,100.0,100,0.0,100.0);
+  fillInVariousWays<T1,T2>(trigger_conversion_all, 100,0.0,100.0,100,0.0,100.0);
   std::cout << " ---> Various filling tests completed"<<std::endl;
 
   const bool do_systematic_tests = true;
@@ -461,7 +487,8 @@ void basicValidation2D() {
       {
         ++itest;
         SYSTEST("------------> 2D Test number "<<itest)
-        HistVal2D<T1,T2> h("systname","systtitle",nbins,xmin,xmax,nbins,xmin,xmax);
+        HistVal2D<T1,T2> h(trigger_conversion_all,
+                           "systname","systtitle",nbins,xmin,xmax,nbins,xmin,xmax);
         h.setCompareBinContentsOnEachFill(expecterror);
 
         ibinx=sys_ibin.at(ix);x=sys_x.at(ix);
@@ -494,10 +521,14 @@ void basicValidation2D() {
   ybinsd[0] = -20.0;
   ybinsd[1] = 0.0;
   ybinsd[2] = 100.0;
-  HistVal2D<T1,T2> h6("name6","title6",4,xbins,2,ybins);
-  HistVal2D<T1,T2> h7("name7","title7",4,xbinsd,2,ybinsd);
-  HistVal2D<T1,T2> h8("name8","title8",4,xbinsd,2,-20.0,100.0);
-  HistVal2D<T1,T2> h9("name9","title9",4,0.0,10.0,2,ybinsd);
+  HistVal2D<T1,T2> h6(trigger_conversion_all,
+                      "name6","title6",4,xbins,2,ybins);
+  HistVal2D<T1,T2> h7(trigger_conversion_all,
+                      "name7","title7",4,xbinsd,2,ybinsd);
+  HistVal2D<T1,T2> h8(trigger_conversion_all,
+                      "name8","title8",4,xbinsd,2,-20.0,100.0);
+  HistVal2D<T1,T2> h9(trigger_conversion_all,
+                      "name9","title9",4,0.0,10.0,2,ybinsd);
   delete[] xbins;
   delete[] ybins;
   delete[] xbinsd;
@@ -545,7 +576,7 @@ void basicValidation2D() {
 }
 
 template <class T1, class T2>
-void stressTestValidation() {
+void stressTestValidation(bool trigger_conversion_all) {
   const unsigned maxbins(300);
   double * xbins = new double[maxbins+1];
   for (int ih = 1; ih <= 15; ++ih) {
@@ -554,9 +585,11 @@ void stressTestValidation() {
     assert(u>l);
     std::ostringstream s;
     s<<"n"<<ih;
-    HistVal1D<T1,T2> htest1(s.str(),"t"+s.str(),rand()%maxbins+1,l,u);
+    HistVal1D<T1,T2> htest1(trigger_conversion_all,
+                            s.str(),"t"+s.str(),rand()%maxbins+1,l,u);
     s<<"b";
-    HistVal1D<T1,T2> htest2(s.str(),"t"+s.str(),rand()%maxbins+1,l,u);
+    HistVal1D<T1,T2> htest2(trigger_conversion_all,
+                            s.str(),"t"+s.str(),rand()%maxbins+1,l,u);
     s<<"c";
     double v = l;
     unsigned ibin=0;
@@ -579,7 +612,8 @@ void stressTestValidation() {
     assert(xbins[0]==l);
     assert(xbins[nvarbins]==u);
     assert(nvarbins>=1);
-    HistVal1D<T1,T2> htest3(s.str(),"t"+s.str(),nvarbins,xbins);
+    HistVal1D<T1,T2> htest3(trigger_conversion_all,
+                            s.str(),"t"+s.str(),nvarbins,xbins);
     htest1.setCompareBinContentsOnEachFill(false);
     htest2.setCompareBinContentsOnEachFill(false);
     htest3.setCompareBinContentsOnEachFill(false);
@@ -602,11 +636,15 @@ void stressTestValidation() {
   delete[] xbins;
 }
 
-void basicValidation_Profile(bool do_systematic_tests =  true)
+void basicValidation_Profile(bool trigger_conversion_all,
+                             int& icount,
+                             bool verbose,
+                             bool do_systematic_tests =  true)
 {
   //Basic usage of methods:
-  HistValProfile a("aprofilehist","a title for my profile hist",100, 0.0, 100.0 );
-  setNamesAndTitles(a);
+  HistValProfile a(trigger_conversion_all,
+                   "aprofilehist","a title for my profile hist",100, 0.0, 100.0 );
+  setNamesAndTitles(icount, a);
 
   a.compareAll();
   a.fill(7.0, 10.0);
@@ -631,7 +669,8 @@ void basicValidation_Profile(bool do_systematic_tests =  true)
 #endif
 
   //test ranges on the profile par
-  HistValProfile b("anotherprofilehist","another title for my profile hist",100, 0.0, 100.0 );
+  HistValProfile b(trigger_conversion_all,
+                   "anotherprofilehist","another title for my profile hist",100, 0.0, 100.0 );
   b.fill(30.0,-1.0);
   b.fill(30.0,0.0);
   b.fill(30.0,0.5);
@@ -644,7 +683,8 @@ void basicValidation_Profile(bool do_systematic_tests =  true)
   b.fill(30.0,2.0,weight);
   b.compareAll();
 
-  HistValProfile b2("yetanotherprofilehist","bla",100, 0.0, 100.0, -1.0,2.0 );
+  HistValProfile b2(trigger_conversion_all,
+                    "yetanotherprofilehist","bla",100, 0.0, 100.0, -1.0,2.0 );
   b2.fill(30.0,-1.0);
   b2.fill(30.0,0.0);
   b2.fill(30.0,0.5);
@@ -687,7 +727,7 @@ void basicValidation_Profile(bool do_systematic_tests =  true)
     sys_args.push_back(20.0);
 
     const bool expecterror(false);
-    //#define SYSTEST(x) { if (HistValFunctions::verbose()) { std::cout<<"Systematic filling: "<<x<<std::endl;} }
+    //#define SYSTEST(x) { if (verbose) { std::cout<<"Systematic filling: "<<x<<std::endl;} }
     double x,a,a2;unsigned i, itest(0);
     for (unsigned ipoint1 = 0;ipoint1<npoints;++ipoint1)
     for (unsigned ipoint2 = 0;ipoint2<npoints;++ipoint2)
@@ -711,7 +751,8 @@ void basicValidation_Profile(bool do_systematic_tests =  true)
       {
         ++itest;
         SYSTEST("------------> 1D-profile Test number "<<itest);
-        HistValProfile h("systname","systtitle",nbins,xmin,xmax);
+        HistValProfile h(trigger_conversion_all,
+                         "systname","systtitle",nbins,xmin,xmax);
         h.setCompareBinContentsOnEachFill(expecterror);
 
         i=sys_ibin.at(ipoint1);x=sys_x.at(ipoint1); a=sys_args.at(iarg1),a2=sys_args.at(iarg2);
@@ -747,7 +788,8 @@ void basicValidation_Profile(bool do_systematic_tests =  true)
 
   //First a quickie with many fills in one bin (well, we keep it at O(10^6) due to floats).
   unsigned ifptests(1);
-  HistValProfile h_fp("profhist_fptest0","sometitle",1, 0.0, 1.0 );
+  HistValProfile h_fp(trigger_conversion_all,
+                      "profhist_fptest0","sometitle",1, 0.0, 1.0 );
   h_fp.setCompareBinContentsOnEachFill(false);
   for (long long unsigned i=0;i<1000000;++i)
     //h_fp.fill(0.5,1.0);
@@ -790,16 +832,17 @@ void basicValidation_Profile(bool do_systematic_tests =  true)
   for (unsigned iw3 = 0; iw3<fptest_weight.size();++iw3)
     {
       ++ifptests;
-      HistValProfile h("profhist_fptest","sometitle",1, 0.0, 1.0 );
+      HistValProfile h(trigger_conversion_all,
+                       "profhist_fptest","sometitle",1, 0.0, 1.0 );
       h.setCompareBinContentsOnEachFill(expecterror);
 
-      if (HistValFunctions::verbose())
+      if (verbose)
         std::cout<<"-----> FP Test #"<<ifptests<<std::endl;
       pp = fptest_profpar.at(ipp1); w = fptest_weight.at(iw1);
 #ifdef LW_OLD_WEIGHTED_PROFILE_ERRORS
       w = 1;
 #endif
-      if (HistValFunctions::verbose())
+      if (verbose)
         std::cout<<"    --> Fill profpar = "<<pp<<", weight = "<<w<<std::endl;
       if (w!=1.0) h.fill(0.5,pp,w); else h.fill(0.5,pp);
 
@@ -807,7 +850,7 @@ void basicValidation_Profile(bool do_systematic_tests =  true)
 #ifdef LW_OLD_WEIGHTED_PROFILE_ERRORS
       w = 1;
 #endif
-      if (HistValFunctions::verbose())
+      if (verbose)
         std::cout<<"    --> Fill profpar = "<<pp<<", weight = "<<w<<std::endl;
       if (w!=1.0) h.fill(0.5,pp,w); else h.fill(0.5,pp);
 
@@ -815,7 +858,7 @@ void basicValidation_Profile(bool do_systematic_tests =  true)
 #ifdef LW_OLD_WEIGHTED_PROFILE_ERRORS
       w = 1;
 #endif
-      if (HistValFunctions::verbose())
+      if (verbose)
         std::cout<<"    --> Fill profpar = "<<pp<<", weight = "<<w<<std::endl;
       if (w!=1.0) h.fill(0.5,pp,w); else h.fill(0.5,pp);
 
@@ -828,7 +871,8 @@ void basicValidation_Profile(bool do_systematic_tests =  true)
   xbins[2] = 2.7;
   xbins[3] = 2.701;
   xbins[4] = 10.0;
-  HistValProfile c("profvarbins","profile with varbins",4, xbins );
+  HistValProfile c(trigger_conversion_all,
+                   "profvarbins","profile with varbins",4, xbins );
   delete[] xbins;
   c.fill(0.1,1.20);//,2.0);
   c.fill(2.6,2.0);c.compareAll();
@@ -848,11 +892,15 @@ void basicValidation_Profile(bool do_systematic_tests =  true)
   std::cout << " ---> Variable binning tests completed"<<std::endl;
 }
 
-void basicValidation_Profile2D(bool do_systematic_tests =  true)
+void basicValidation_Profile2D(bool trigger_conversion_all,
+                               int& icount,
+                               bool verbose,
+                               bool do_systematic_tests =  true)
 {
   //Basic usage of methods:
-  HistValProfile2D a("a2dprofilehist","a title for my 2d profile hist",100, 0.0, 100.0,100, 0.0, 100.0 );
-  setNamesAndTitles(a);
+  HistValProfile2D a(trigger_conversion_all,
+                     "a2dprofilehist","a title for my 2d profile hist",100, 0.0, 100.0,100, 0.0, 100.0 );
+  setNamesAndTitles(icount, a);
 
 
   a.compareAll();
@@ -886,7 +934,8 @@ void basicValidation_Profile2D(bool do_systematic_tests =  true)
 #endif
 
   //test ranges on the profile par
-  HistValProfile2D b("another2dprofilehist","another title for my 2dprofile hist",
+  HistValProfile2D b(trigger_conversion_all,
+                     "another2dprofilehist","another title for my 2dprofile hist",
                      100, 0.0, 100.0, 100, 0.0, 100.0, 0.0,1.0 );
   b.fill(30.0,10.0,-1.0);
   b.fill(30.0,10.0,0.0);
@@ -938,7 +987,8 @@ void basicValidation_Profile2D(bool do_systematic_tests =  true)
           continue;//We can't call setBinError unless we are sure there are some entries.
         ++itest;
         SYSTEST("------------> 2D-profile Test number "<<itest)
-        HistValProfile2D h("systname","systtitle",nbins,xmin,xmax,nbins,xmin,xmax);
+        HistValProfile2D h(trigger_conversion_all,
+                           "systname","systtitle",nbins,xmin,xmax,nbins,xmin,xmax);
         h.setCompareBinContentsOnEachFill(expecterror);
 
         ibinx=sys_ibin.at(ix);x=sys_x.at(ix);
@@ -972,7 +1022,8 @@ void basicValidation_Profile2D(bool do_systematic_tests =  true)
   ybins[0] = -20.0;
   ybins[1] = 0.0;
   ybins[2] = 100.0;
-  HistValProfile2D hvb("hvb","sometitle",4,xbins,2,ybins);
+  HistValProfile2D hvb(trigger_conversion_all,
+                       "hvb","sometitle",4,xbins,2,ybins);
   delete[] xbins;
   delete[] ybins;
   const double eps(1.0e-4);//we use epsilon to avoid edges due to
@@ -993,14 +1044,14 @@ void basicValidation_Profile2D(bool do_systematic_tests =  true)
   hvb.fill(1.2,1.0, 2.0);hvb.compareAll();
 }
 
-void usage(char**argv,int exitcode) {
+void usage ATLAS_NOT_THREAD_SAFE (char**argv,int exitcode) {
   std::cout << "Usage:"<<std::endl;
   std::cout << ""<<std::endl;
   std::cout << argv[0]<<" [-h|--help] [-v|--verbose] [--no1d] [--no2d] [--noprofile] [--quick|--noquick] [--rootbackend] [--triggerconv] [--seed=XXX]"<<std::endl;
   std::cout <<""<<std::endl;
   exit(exitcode);
 }
-int main (int argc, char** argv) {
+int main ATLAS_NOT_THREAD_SAFE (int argc, char** argv) {
 
   // Suppress ubsan warnings from cling.
   CxxUtils::ubsan_suppress ([]() { TInterpreter::Instance(); });
@@ -1085,12 +1136,10 @@ int main (int argc, char** argv) {
      usage(argv,1);
   }
 
-  HistValFunctions::setVerbose(cfg_verbose);
   LWHistControls::setROOTBackend(cfg_rootbackend);
-  HistVal_trigger_conversion_all = cfg_triggerrootconversion;
 
   if (cfg_rootbackend)
-    HistValFunctions::TH1_FieldsAccess::set_fgAddDirectory(false);//get rid of "possible memory leak" warnings
+    TH1::AddDirectory (false);//get rid of "possible memory leak" warnings
 
   std::cout<<"Starting tests"<<std::endl;
 
@@ -1101,37 +1150,38 @@ int main (int argc, char** argv) {
   unsigned actual_seed = (cfg_seed==0||cfg_seed==UINT_MAX) ? (unsigned)time(0) : cfg_seed;
   std::cout<<"NB: Stress-tests will use random seed = "<<actual_seed<<std::endl;
   srand(actual_seed);
+  int icount = 0;
 
   if (cfg_do1d) {
     std::cout<<"Performing basic validation of TH1F vs. TH1F_LW..."<<std::endl;
-    basicValidation<TH1F,TH1F_LW>();
+    basicValidation<TH1F,TH1F_LW>(cfg_triggerrootconversion, icount, cfg_verbose);
     std::cout<<"Performing basic validation of TH1D vs. TH1D_LW..."<<std::endl;
-    basicValidation<TH1D,TH1D_LW>(!cfg_quick);
+    basicValidation<TH1D,TH1D_LW>(cfg_triggerrootconversion, icount, cfg_verbose, !cfg_quick);
     std::cout<<"Performing basic validation of TH1I vs. TH1I_LW..."<<std::endl;
-    basicValidation<TH1I,TH1I_LW>(!cfg_quick);
+    basicValidation<TH1I,TH1I_LW>(cfg_triggerrootconversion, icount, cfg_verbose, !cfg_quick);
 
     std::cout<<"Performing stress-test level validations of TH1F vs. TH1F_LW..."<<std::endl;
-    stressTestValidation<TH1F,TH1F_LW>();
+    stressTestValidation<TH1F,TH1F_LW>(cfg_triggerrootconversion);
     std::cout<<"Performing stress-test level validations of TH1D vs. TH1D_LW..."<<std::endl;
-    stressTestValidation<TH1D,TH1D_LW>();
+    stressTestValidation<TH1D,TH1D_LW>(cfg_triggerrootconversion);
     std::cout<<"Performing stress-test level validations of TH1I vs. TH1I_LW..."<<std::endl;
-    stressTestValidation<TH1I,TH1I_LW>();
+    stressTestValidation<TH1I,TH1I_LW>(cfg_triggerrootconversion);
   }
 
   if (cfg_do2d) {
     std::cout<<"Performing basic validation of TH2F vs. TH2F_LW..."<<std::endl;
-    basicValidation2D<TH2F,TH2F_LW>();
+    basicValidation2D<TH2F,TH2F_LW>(cfg_triggerrootconversion, icount, cfg_verbose);
     std::cout<<"Performing basic validation of TH2D vs. TH2D_LW..."<<std::endl;
-    basicValidation2D<TH2D,TH2D_LW>();
+    basicValidation2D<TH2D,TH2D_LW>(cfg_triggerrootconversion, icount, cfg_verbose);
     std::cout<<"Performing basic validation of TH2I vs. TH2I_LW..."<<std::endl;
-    basicValidation2D<TH2I,TH2I_LW>();
+    basicValidation2D<TH2I,TH2I_LW>(cfg_triggerrootconversion, icount, cfg_verbose);
   }
 
   if (cfg_doprofile) {
     std::cout<<"Performing basic validation of TProfile vs. TProfile_LW..."<<std::endl;
-    basicValidation_Profile(!cfg_quick);
+    basicValidation_Profile(cfg_triggerrootconversion, icount, cfg_verbose, !cfg_quick);
     std::cout<<"Performing basic validation of TProfile2D vs. TProfile2D_LW..."<<std::endl;
-    basicValidation_Profile2D();
+    basicValidation_Profile2D(cfg_triggerrootconversion, icount, cfg_verbose);
   }
 
 

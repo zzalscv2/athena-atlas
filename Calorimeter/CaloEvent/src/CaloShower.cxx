@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,8 +13,7 @@ CaloShower::CaloShower(const CaloShower* pShower)
 }
 
 CaloShower::CaloShower(const CaloShower& rShower)
-  : m_momentStore (rShower.m_momentStore),
-    m_samplingStore (rShower.m_samplingStore)
-{
-}
+  
+    
+= default;
 

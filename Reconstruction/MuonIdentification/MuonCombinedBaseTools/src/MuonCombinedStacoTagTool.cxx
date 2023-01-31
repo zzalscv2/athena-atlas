@@ -66,7 +66,7 @@ namespace MuonCombined {
             // check that the to perigee surfaces are the same
             if (idPer->associatedSurface() != msPer->associatedSurface()) {
                 // extrapolate to id surface
-                exPars = m_extrapolator->extrapolate(ctx, *muonCandidate.extrapolatedTrack(), idPer->associatedSurface());
+                exPars = m_extrapolator->extrapolateTrack(ctx, *muonCandidate.extrapolatedTrack(), idPer->associatedSurface());
                 if (!exPars) {
                     ATH_MSG_DEBUG("The ID and MS candidates are not expressed at the same surface: id r "
                                   << idTP->indetTrackParticle().perigeeParameters().associatedSurface().center().perp() << " z "

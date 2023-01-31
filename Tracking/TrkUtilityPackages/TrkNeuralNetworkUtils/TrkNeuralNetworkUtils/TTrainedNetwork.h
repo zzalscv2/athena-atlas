@@ -69,7 +69,7 @@ public:
   // This avoids some chances for logical inconsistency by constructing 
   // the hidden layer size from the thresholdVectors and weightMatrices. 
   // Also runs a consistency check on thresholdVectors and weightMatrices. 
-  TTrainedNetwork(std::vector<TTrainedNetwork::Input> inputs,
+  TTrainedNetwork(const std::vector<TTrainedNetwork::Input>& inputs,
 		 unsigned nOutput,
 		 std::vector<TVectorD*> & thresholdVectors,
 		 std::vector<TMatrixD*> & weightMatrices,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4ShowerLibSvc/LArG4ShowerLibSvc.h"
@@ -45,13 +45,11 @@ StatusCode LArG4ShowerLibSvc::initialize()
 {
   ATH_MSG_INFO("Initializing");
 
-  std::vector<std::string>::const_iterator iter;
-
   // iterate through filenames in list
-  for (iter = m_fileNameList.value().begin(); iter != m_fileNameList.value().end(); iter++) {
-    std::string resolvedFilename = PathResolverFindCalibFile(*iter);
+  for (const std::string& fileName : m_fileNameList) {
+    std::string resolvedFilename = PathResolverFindCalibFile(fileName);
     if (resolvedFilename.empty()) {
-      ATH_MSG_WARNING("Could not resolve input filename " << (*iter) << ". Ignoring!");
+      ATH_MSG_WARNING("Could not resolve input filename " << (fileName) << ". Ignoring!");
       continue;
     } else {
       ATH_MSG_INFO("Resolving input filename to " << resolvedFilename);
@@ -101,11 +99,10 @@ StatusCode LArG4ShowerLibSvc::initialize()
     ATH_MSG_WARNING("No library files found");
   } else {
     ATH_MSG_INFO("List of loaded libraries:");
-    libmap::const_iterator it;
-    for(it = m_libraryMap.begin();it != m_libraryMap.end(); it++) {
-      ATH_MSG_INFO("      " << m_locations[(*it).first] << ": " << (*it).second->comment());
+    for (const auto& m : m_libraryMap) {
+      ATH_MSG_INFO("      " << m_locations[m.first] << ": " << m.second->comment());
 #ifdef DEBUG_FrozenShowers
-      m_statisticsMap[(*it).second] = (*it).second->createStatistics();
+      m_statisticsMap[m.second] = m.second->createStatistics();
 #endif
     }
   }

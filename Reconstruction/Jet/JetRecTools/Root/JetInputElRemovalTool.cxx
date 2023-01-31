@@ -282,7 +282,7 @@ int JetInputElRemovalTool::fillSelectedClustersInJets(std::vector<const xAOD::El
     xAOD::JetConstituentVector::iterator jetcons_it = jetcons.begin();
     xAOD::JetConstituentVector::iterator jetcons_itE = jetcons.end();
     
-    for( ; jetcons_it != jetcons_itE; jetcons_it++){
+    for( ; jetcons_it != jetcons_itE; ++jetcons_it){
       
       propEM=0;
       const xAOD::CaloCluster* cluster_itr= dynamic_cast<const xAOD::CaloCluster*> (jetcons_it->rawConstituent());

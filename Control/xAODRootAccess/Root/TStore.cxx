@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #include <set>
 
@@ -8,6 +8,9 @@
 
 // EDM include(s):
 #include "AthContainers/normalizedTypeinfoName.h"
+#include "CxxUtils/checker_macros.h"
+#include "CxxUtils/ConcurrentStrMap.h"
+#include "CxxUtils/SimpleUpdater.h"
 
 // Local include(s):
 #include "xAODRootAccess/TStore.h"
@@ -42,6 +45,14 @@ namespace xAOD {
       TActiveStore::setStore( this );
       return;
    }
+
+
+   const THolder* TStore::holder( const std::string& key ) const {
+      // Look up this object:
+      Objects_t::const_iterator itr = m_objects.find( key );
+      return (itr != m_objects.end() ? itr->second : nullptr);
+   }
+
 
    StatusCode TStore::remove( const std::string& key ) {
 
@@ -128,6 +139,8 @@ namespace xAOD {
                  itr->second->get() );
          ::Info( "xAOD::TStore::print", "    IsOwner: %s",
                  ( itr->second->isOwner() ? "Yes" : "No" ) );
+         ::Info( "xAOD::TStore::print", "    IsConst: %s",
+                 ( itr->second->isConst() ? "Yes" : "No" ) );
          ::Info( "xAOD::TStore::print", "    HasDictionary: %s",
                  ( cl ? "Yes" : "No" ) );
       }
@@ -184,6 +197,13 @@ namespace xAOD {
          return 0;
       }
 
+      if( itr->second->isConst() ) {
+         ::Error( "xAOD::TStore::getObject",
+                  XAOD_MESSAGE( "Cannot retrieve object with key \"%s\" of type %s as non-const" ),
+                  key.c_str(), SG::normalizedTypeinfoName( ti ).c_str() );
+         return nullptr;
+      }
+
       // Try to retrieve it as the requested type:
       return itr->second->getAs( ti );
    }
@@ -212,11 +232,14 @@ namespace xAOD {
    /// @returns The usual StatusCode types
    ///
    StatusCode TStore::record( void* obj, const std::string& key,
-                               const std::string& classname,
-                               ::Bool_t isOwner ) {
+                              const std::string& classname,
+                              ::Bool_t isOwner, ::Bool_t isConst ) {
+
+      // Cache
+      using clCache_t = CxxUtils::ConcurrentStrMap<::TClass*, CxxUtils::SimpleUpdater>;
+      static clCache_t clMap ATLAS_THREAD_SAFE {clCache_t::Updater_t()};
 
       // First check if we have this dictionary cached already:
-      static std::map< std::string, ::TClass* > clMap;
       ::TClass* cl = 0;
       auto clItr = clMap.find( classname );
       if( clItr != clMap.end() ) {
@@ -231,7 +254,7 @@ namespace xAOD {
       // If it's not cached, ask ROOT for it:
       if( ! cl ) {
          cl = ::TClass::GetClass( classname.c_str(), kTRUE, kTRUE );
-         clMap[ classname ] = cl;
+         clMap.emplace( classname, cl );
       }
       if( ( ! cl ) || ( ! cl->IsLoaded() ) ) {
          return StatusCode::RECOVERABLE;
@@ -246,13 +269,18 @@ namespace xAOD {
       }
 
       // Register the new object:
-      m_objects[ key ] = new THolder( obj, cl, isOwner );
+      if( isConst )
+         m_objects[ key ] = new THolder( const_cast<const void*>(obj), cl, isOwner );
+      else
+         m_objects[ key ] = new THolder( obj, cl, isOwner);
+
       m_keys[ Utils::hash( key ) ] = key;
       return StatusCode::SUCCESS;
    }
 
    StatusCode TStore::record( void* obj, const std::string& key,
-                               const std::type_info& ti ) {
+                              const std::type_info& ti,
+                              ::Bool_t isOwner, ::Bool_t isConst ) {
 
       // Make sure that the key is not yet taken:
       if( m_objects.find( key ) != m_objects.end() ) {
@@ -263,7 +291,11 @@ namespace xAOD {
       }
 
       // Register the new object:
-      m_objects[ key ] = new THolder( obj, ti );
+      if( isConst )
+         m_objects[ key ] = new THolder( const_cast<const void*>(obj), ti, isOwner );
+      else
+         m_objects[ key ] = new THolder( obj, ti, isOwner );
+
       m_keys[ Utils::hash( key ) ] = key;
       return StatusCode::SUCCESS;
    }

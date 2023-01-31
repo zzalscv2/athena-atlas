@@ -158,6 +158,11 @@ void ZDCPulseAnalyzer::SetDefaults()
   m_HGUnderflowADC = 20;
   m_LGOverflowADC  = 1000;
 
+  // Default values for the gain factors uswed to match low and high gain
+  //
+  m_gainFactorLG = m_gainHG;
+  m_gainFactorHG = 1;
+
   m_2ndDerivStep = 2;
 
   m_noiseSigHG = 1;
@@ -299,10 +304,14 @@ void ZDCPulseAnalyzer::Reset(bool repass)
   m_samplesDeriv2nd.clear();
 }
 
+void ZDCPulseAnalyzer::SetGainFactorsHGLG(float gainFactorHG, float gainFactorLG)
+{
+  m_gainFactorHG = gainFactorHG;
+  m_gainFactorLG = gainFactorLG;
+}
+
 void ZDCPulseAnalyzer::SetFitMinMaxAmp(float minAmpHG, float minAmpLG, float maxAmpHG, float maxAmpLG)
 {
-  std::cout << "Setting fit min,max amp values " << minAmpHG << ", " << maxAmpHG << std::endl;
-
   m_fitAmpMinHG = minAmpHG;
   m_fitAmpMinLG = minAmpLG;
 
@@ -381,7 +390,7 @@ void ZDCPulseAnalyzer::SetupFitFunctions()
 
     m_prePulseFitWrapper = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiPrePulse(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
   }
-  if (m_fitFunction == "FermiExpRun3") {
+  else if (m_fitFunction == "FermiExpRun3") {
     if (!m_fixTau1 || !m_fixTau2) {
       //
       // Use the variable tau version of the expFermiFit
@@ -484,7 +493,7 @@ bool ZDCPulseAnalyzer::LoadAndAnalyzeData(const std::vector<float>& ADCSamplesHG
     if (ADCLG > m_LGOverflowADC) {
       m_LGOverflow = true;
       m_fail = true;
-      m_amplitude = m_LGOverflowADC * m_gainHG; // Give a vale here even though we know it's wrong because
+      m_amplitude = m_LGOverflowADC * m_gainFactorLG; // Give a vale here even though we know it's wrong because
       //   the user may not check the return value and we know that
       //   amplitude is bigger than this
     }
@@ -560,7 +569,7 @@ bool ZDCPulseAnalyzer::LoadAndAnalyzeData(const std::vector<float>& ADCSamplesHG
     if (ADCLG > m_LGOverflowADC) {
       m_LGOverflow = true;
       m_fail       = true;
-      m_amplitude  = m_LGOverflowADC * m_gainHG; // Give a value here even though we know it's wrong because
+      m_amplitude  = m_LGOverflowADC * m_gainFactorLG; // Give a value here even though we know it's wrong because
       //   the user may not check the return value and we know that
       //   amplitude is bigger than this
     }
@@ -572,7 +581,7 @@ bool ZDCPulseAnalyzer::LoadAndAnalyzeData(const std::vector<float>& ADCSamplesHG
     if (ADCLGDelay > m_LGOverflowADC) {
       m_LGOverflow = true;
       m_fail       = true;
-      m_amplitude  = 1024 * m_gainHG; // Give a value here even though we know it's wrong because
+      m_amplitude  = 1024 * m_gainFactorLG; // Give a value here even though we know it's wrong because
       //   the user may not check the return value and we know that
       //   amplitude is bigger than this
     }
@@ -683,16 +692,16 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
       //
       // Multiply amplitude by gain factor
       //
-      m_amplitude     = m_fitAmplitude * m_gainHG;
-      m_ampError      = m_fitAmpError  * m_gainHG;
-      m_preSampleAmp  = m_preSample    * m_gainHG;
-      m_preAmplitude  = m_fitPreAmp    * m_gainHG;
-      m_postAmplitude = m_fitPostAmp   * m_gainHG;
-      m_expAmplitude  = m_fitExpAmp    * m_gainHG;
+      m_amplitude     = m_fitAmplitude * m_gainFactorLG;
+      m_ampError      = m_fitAmpError  * m_gainFactorLG;
+      m_preSampleAmp  = m_preSample    * m_gainFactorLG;
+      m_preAmplitude  = m_fitPreAmp    * m_gainFactorLG;
+      m_postAmplitude = m_fitPostAmp   * m_gainFactorLG;
+      m_expAmplitude  = m_fitExpAmp    * m_gainFactorLG;
 
       // BAC: also scale up the 2nd derivative so low and high gain can be treated on the same footing
       //
-      m_minDeriv2nd *= m_gainHG;
+      m_minDeriv2nd *= m_gainFactorLG;
     }
 
     return result;
@@ -713,12 +722,14 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
         }
       }
 
-      m_preSampleAmp = m_preSample;
-      m_amplitude = m_fitAmplitude;
-      m_ampError = m_fitAmpError;
-      m_preAmplitude  = m_fitPreAmp;
-      m_postAmplitude = m_fitPostAmp;
-      m_expAmplitude  = m_fitExpAmp;
+      m_preSampleAmp = m_preSample  * m_gainFactorHG;
+      m_amplitude = m_fitAmplitude  * m_gainFactorHG;
+      m_ampError = m_fitAmpError    * m_gainFactorHG;
+      m_preAmplitude  = m_fitPreAmp * m_gainFactorHG;
+      m_postAmplitude = m_fitPostAmp* m_gainFactorHG;
+      m_expAmplitude  = m_fitExpAmp * m_gainFactorHG;
+
+      m_minDeriv2nd *= m_gainFactorHG;
 
       //  If we have a non-linear correction, apply it here
       //
@@ -1101,33 +1112,34 @@ void ZDCPulseAnalyzer::DoFit()
     fitWrapper->ConstrainFit();
 
     TFitResultPtr constrFitResult_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
+    fitWrapper->UnconstrainFit();
+
     if ((int) constrFitResult_ptr != 0) {
       //
       // Even the constrained fit failed, so we quit.
       //
       m_fitFailed = true;
     }
-
-    // Now we release the constraint and re-fit
-    //
-    fitWrapper->UnconstrainFit();
-
-    TFitResultPtr unconstrFitResult_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
-    if ((int) unconstrFitResult_ptr != 0) {
+    else {
+      // Now we try the fit again with the constraint removed
       //
-      // The unconstrained fit failed again, so we redo the constrained fit
-      //
-      fitWrapper->ConstrainFit();
+      TFitResultPtr unconstrFitResult_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
+      if ((int) unconstrFitResult_ptr != 0) {
+	//
+	// The unconstrained fit failed again, so we redo the constrained fit
+	//
+	fitWrapper->ConstrainFit();
       
-      TFitResultPtr constrFit2Result_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
-      if ((int) constrFit2Result_ptr != 0) {
-      //
-      // Even the constrained fit failed the second time, so we quit.
-      //
-	m_fitFailed = true;
+	TFitResultPtr constrFit2Result_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
+	if ((int) constrFit2Result_ptr != 0) {
+	  //
+	  // Even the constrained fit failed the second time, so we quit.
+	  //
+	  m_fitFailed = true;
+	}
+	
+	fitWrapper->UnconstrainFit();
       }
-
-      fitWrapper->UnconstrainFit();
     }
   }
 
@@ -1137,11 +1149,6 @@ void ZDCPulseAnalyzer::DoFit()
   }
 
   m_bkgdMaxFraction = fitWrapper->GetBkgdMaxFraction();
-  if (std::abs(m_bkgdMaxFraction) > 0.25) {
-    m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
-    m_bkgdMaxFraction = fitWrapper->GetBkgdMaxFraction();
-  }
-
   m_fitAmplitude = fitWrapper->GetAmplitude();
   m_fitTime      = fitWrapper->GetTime();
 

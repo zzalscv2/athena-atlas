@@ -159,8 +159,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
       if (not result.ok()) {
         return result.error();
       }
-      auto &value = result.value().template get<Result>();
-      return std::move(value);
+      return result.value().template get<Result>();
     }
   };// end of SingleParticleSimulation
 
@@ -201,10 +200,10 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
 
   // ISF BaseSimulatorTool Interface methods
   virtual StatusCode initialize() override;
-  virtual StatusCode simulate(const ISFParticle& isp, ISFParticleContainer&,
+  virtual StatusCode simulate(ISFParticle& isp, ISFParticleContainer&,
                               McEventCollection*) override;
   virtual StatusCode simulateVector(
-            const ConstISFParticleVector& particles,
+            const ISFParticleVector& particles,
             ISFParticleContainer& secondaries,
             McEventCollection* mcEventCollection) override;
   virtual StatusCode setupEvent(const EventContext&) override {
@@ -230,7 +229,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
 
   // Random number service
   ServiceHandle<IAthRNGSvc> m_rngSvc{this, "RNGServec", "AthRNGSvc"};
-  ATHRNG::RNGWrapper* m_randomEngine ATLAS_THREAD_SAFE {};
+  ATHRNG::RNGWrapper* m_randomEngine {};
   Gaudi::Property<std::string> m_randomEngineName{this, "RandomEngineName",
     "RandomEngineName", "Name of random number stream"};
 

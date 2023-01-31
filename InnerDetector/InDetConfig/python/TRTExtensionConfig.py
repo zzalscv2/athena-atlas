@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ##########################################################################################################################
 # ------------------------------------------------------------
@@ -27,57 +27,82 @@ def NewTrackingTRTExtensionCfg(flags,
                                          ExtensionMap = ExtendedTracksMap))
 
     return acc
+
+def NewTrackingTRTExtensionPhaseCfg(flags,
+                                    SiTrackCollection = None,
+                                    ExtendedTrackCollection = None,
+                                    ExtendedTracksMap = None):
+    from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
+    acc = TRTPreProcessingCfg(flags)
+    #
+    # Track extension to TRT algorithm
+    #
+    from InDetConfig.TRT_TrackExtensionAlgConfig import TRT_Phase_TrackExtensionAlgCfg
+    acc.merge(TRT_Phase_TrackExtensionAlgCfg(flags,
+                                             InputTracksLocation = SiTrackCollection,
+                                             ExtendedTracksLocation = ExtendedTracksMap))
+
+    from InDetConfig.InDetExtensionProcessorConfig import InDetExtensionProcessorCfg
+    acc.merge(InDetExtensionProcessorCfg(flags,
+                                         name = "InDetExtensionProcessorPhase",
+                                         TrackName = SiTrackCollection,
+                                         NewTrackName = ExtendedTrackCollection,
+                                         ExtensionMap = ExtendedTracksMap))
+
+    return acc
+
 ##########################################################################################################################
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
     numThreads=1
-    ConfigFlags.Concurrency.NumThreads=numThreads
-    ConfigFlags.Concurrency.NumConcurrentEvents=numThreads
+    flags.Concurrency.NumThreads=numThreads
+    flags.Concurrency.NumConcurrentEvents=numThreads
 
-    ConfigFlags.Detector.GeometryPixel = True 
-    ConfigFlags.Detector.GeometrySCT = True
-    ConfigFlags.Detector.GeometryTRT = True
+    flags.Detector.GeometryPixel = True 
+    flags.Detector.GeometrySCT = True
+    flags.Detector.GeometryTRT = True
 
     # Disable calo for this test
-    ConfigFlags.Detector.EnableCalo = False
+    flags.Detector.EnableCalo = False
 
-    ConfigFlags.InDet.Tracking.doTRTExtension = True
-    ConfigFlags.InDet.Tracking.holeSearchInGX2Fit = True
+    flags.InDet.Tracking.doTRTExtension = True
+    flags.InDet.Tracking.holeSearchInGX2Fit = True
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.lock()
+    flags.dump()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    top_acc = MainServicesCfg(ConfigFlags)
+    top_acc = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    top_acc.merge(PoolReadCfg(ConfigFlags))
+    top_acc.merge(PoolReadCfg(flags))
 
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
-    top_acc.merge(BeamSpotCondAlgCfg(ConfigFlags))
+    top_acc.merge(BeamSpotCondAlgCfg(flags))
 
-    if "EventInfo" not in ConfigFlags.Input.Collections:
+    if "EventInfo" not in flags.Input.Collections:
         from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-        top_acc.merge(EventInfoCnvAlgCfg(ConfigFlags))
+        top_acc.merge(EventInfoCnvAlgCfg(flags))
 
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
-        top_acc.merge(GEN_AOD2xAODCfg(ConfigFlags))
+        top_acc.merge(GEN_AOD2xAODCfg(flags))
 
     from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
     from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
-    top_acc.merge(PixelReadoutGeometryCfg(ConfigFlags))
-    top_acc.merge(SCT_ReadoutGeometryCfg(ConfigFlags))
+    top_acc.merge(PixelReadoutGeometryCfg(flags))
+    top_acc.merge(SCT_ReadoutGeometryCfg(flags))
 
     from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
-    top_acc.merge(TRT_ReadoutGeometryCfg( ConfigFlags ))
+    top_acc.merge(TRT_ReadoutGeometryCfg( flags ))
 
     from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
-    top_acc.merge(BeamPipeGeometryCfg(ConfigFlags))
+    top_acc.merge(BeamPipeGeometryCfg(flags))
 
     InputCollections = []
 
@@ -90,28 +115,25 @@ if __name__ == "__main__":
     #######################################################################
     ################# TRTPreProcessing Configuration ######################
     from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
-    top_acc.merge(TRTPreProcessingCfg(ConfigFlags))
+    top_acc.merge(TRTPreProcessingCfg(flags))
 
     ################ TRTSegmentFinding Configuration ######################
     from InDetConfig.TRTSegmentFindingConfig import TRTSegmentFindingCfg
-    top_acc.merge(TRTSegmentFindingCfg( ConfigFlags,
-                                        extension = "",
-                                        InputCollections = InputCollections,
-                                        BarrelSegments = 'TRTSegments'))
+    top_acc.merge(TRTSegmentFindingCfg(flags))
 
     ############### SiliconPreProcessing Configuration ####################
     from InDetConfig.SiliconPreProcessing import InDetRecPreProcessingSiliconCfg
-    top_acc.merge(InDetRecPreProcessingSiliconCfg(ConfigFlags))
+    top_acc.merge(InDetRecPreProcessingSiliconCfg(flags))
 
     ####################### TrackingSiPattern #############################
     from InDetConfig.TrackingSiPatternConfig import TrackingSiPatternCfg
-    top_acc.merge(TrackingSiPatternCfg( ConfigFlags,
-                                        InputCollections = InputCollections,
-                                        ResolvedTrackCollectionKey = ResolvedTracks,
-                                        SiSPSeededTrackCollectionKey = InDetSpSeededTracksKey))
+    top_acc.merge(TrackingSiPatternCfg(flags,
+                                       InputCollections = InputCollections,
+                                       ResolvedTrackCollectionKey = ResolvedTracks,
+                                       SiSPSeededTrackCollectionKey = InDetSpSeededTracksKey))
 
     ########################### TRTExtension  #############################
-    top_acc.merge(NewTrackingTRTExtensionCfg(ConfigFlags,
+    top_acc.merge(NewTrackingTRTExtensionCfg(flags,
                                              SiTrackCollection = ResolvedTracks,
                                              ExtendedTrackCollection = ExtendedTrackCollection, 
                                              ExtendedTracksMap = ExtendedTracksMap))

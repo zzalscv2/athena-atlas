@@ -12,10 +12,11 @@
 #include "TrkGaussianSumFilter/ElectronMaterialMixtureConvolution.h"
 #include "TrkGaussianSumFilterUtils/GsfConstants.h"
 #include "TrkGaussianSumFilterUtils/KLGaussianMixtureReduction.h"
-#include "TrkGaussianSumFilterUtils/MultiComponentState.h"
 #include "TrkGaussianSumFilterUtils/MultiComponentStateAssembler.h"
 #include "TrkGaussianSumFilterUtils/MultiComponentStateCombiner.h"
 #include "TrkGaussianSumFilterUtils/QuickCloseComponentsMultiStateMerger.h"
+
+#include "TrkParameters/ComponentParameters.h"
 //
 #include "TrkGeometry/Layer.h"
 #include "TrkGeometry/MaterialProperties.h"

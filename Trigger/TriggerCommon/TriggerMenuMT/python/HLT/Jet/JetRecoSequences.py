@@ -3,7 +3,7 @@
 #
 
 from AthenaCommon.CFElements import parOR, findAllAlgorithms
-from AthenaCommon.Configurable import ConfigurableRun3Behavior
+from AthenaCommon.Configurable import ConfigurableCABehavior
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import RecoFragmentsPool
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable, appendCAtoAthena
 from JetRecConfig import JetInputConfig, JetRecConfig
@@ -21,9 +21,11 @@ from TrigInDetConfig.InDetTrigVertices import makeInDetTrigVertices
 from .JetTrackingConfig import jetTTVA
 from JetRec.JetRecConf import JetViewAlg
 
+from TrigGenericAlgs.TrigGenericAlgsConfig import TrigEventInfoRecorderAlgCfg
+
 # this code uses CA internally, needs to be in this context manager,
 # at least until ATLASRECTS-6635 is closed
-with ConfigurableRun3Behavior():
+with ConfigurableCABehavior():
     from ..Bjet.BjetFlavourTaggingConfiguration import getFastFlavourTagging
 
 from AthenaCommon.Logging import logging
@@ -297,7 +299,7 @@ def jetCaloRecoSequences( configFlags, RoIs, **jetRecoDict ):
 def getFastFlavourTaggingSequence( dummyFlags, name, inputJets, inputVertex, inputTracks, 
                                    addAlgs=[], isPFlow=False):
 
-    with ConfigurableRun3Behavior():
+    with ConfigurableCABehavior():
         ca_ft_algs = getFastFlavourTagging( dummyFlags, inputJets, inputVertex, inputTracks, isPFlow)
 
     # 1) We need to do the algorithms manually and then remove them from the CA
@@ -361,8 +363,14 @@ def JetRoITrackJetTagSequence(dummyFlags,jetsIn,trkopt,RoIs):
     viewAlgs, viewVerify = makeInDetTrigFastTracking( config = IDTrigConfig, rois=RoIs)
     viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs ),( 'xAOD::JetContainer' , 'StoreGateSvc+%s' % jetsIn)]
 
-    IDTrigConfig = getInDetTrigConfig('jetSuper')
+    vtxAlgs = makeInDetTrigVertices( "jetSuper", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex, IDTrigConfig, IDTrigConfig.adaptiveVertex )
+
     tracksIn = IDTrigConfig.tracks_FTF()
+
+    # leave this here as a reminder since we should pass this into 
+    # the getFastFlavourTaggingSequnce(), bit don't for now to avoid 
+    # changing the output 
+    # vtxIn    = IDTrigConfig.vertex
 
     jetTrkSeq=getFastFlavourTaggingSequence(
         dummyFlags,
@@ -370,7 +378,7 @@ def JetRoITrackJetTagSequence(dummyFlags,jetsIn,trkopt,RoIs):
         jetsIn,
         "",
         tracksIn,
-        addAlgs=viewAlgs,
+        addAlgs=viewAlgs+vtxAlgs,
     )
 
     return jetTrkSeq
@@ -394,6 +402,17 @@ def jetTrackingRecoSequences(configFlags, RoIs, clustersKey, **jetRecoDict):
         configFlags, clustersKey=clustersKey, **trkcolls, **jetRecoDict )
 
     return [jetTrkSeq,jetRecoSeq], jetsOut, jetDef
+
+## record event variables (NPV and rho to a TrigCompositeContainer: needed for online-derived calibration
+def eventinfoRecordSequence(configFlags, suffix, pvKey, rhoKey_PFlow = 'HLT_Kt4EMPFlowEventShape', rhoKey_EMTopo = 'HLT_Kt4EMTopoEventShape'):
+    eventInfoRecorderAlg = TrigEventInfoRecorderAlgCfg("TrigEventInfoRecorderAlg_jet")
+    eventInfoRecorderAlg.decorateTLA = True #misnomer in this case: just means write our PV&rho event variables to container
+    eventInfoRecorderAlg.trigEventInfoKey = recordable(f"HLT_TCEventInfo_{suffix}")
+    eventInfoRecorderAlg.primaryVertexInputName = pvKey
+    eventInfoRecorderAlg.RhoKey_PFlow = rhoKey_PFlow
+    eventInfoRecorderAlg.RhoKey_EMTopo = rhoKey_EMTopo
+    recordSeq = parOR("TrigEventInfoRecorderSeq_{suffix}", [eventInfoRecorderAlg])
+    return recordSeq 
 
 # Grooming needs the ungroomed jets to be built first,
 # so call the basic jet reco seq, then add a grooming alg

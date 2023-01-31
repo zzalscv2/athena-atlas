@@ -9,7 +9,7 @@ DetFlags.digitize.all_setOff()
 include( "AthenaCommon/Atlas_Gen.UnixStandardJob.py" )
 
 include( "IdDictDetDescrCnv/IdDictDetDescrCnv_joboptions.py" )
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+include( "CaloConditions/CaloConditions_jobOptions.py" )
 
 theApp.Dlls+=["LArCalibTest"]
 theApp.TopAlg+=["LArReadHadDMCoeffFile2"]

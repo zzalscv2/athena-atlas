@@ -1,8 +1,6 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ## @brief Module with standard reconstruction transform options and substeps
-
-import argparse
 
 import logging
 msg = logging.getLogger(__name__)
@@ -58,9 +56,6 @@ def addStandardRecoFiles(parser):
     parser.add_argument('--inputRDO_TRIGFile', 
                         type=trfArgClasses.argFactory(trfArgClasses.argRDOFile, io='input'),
                         help='Input RDO_TRIG file', group='Reco Files')
-    parser.add_argument('--inputRDO_FTKFile',
-                        type=trfArgClasses.argFactory(trfArgClasses.argRDOFile, io='input'),
-                        help='Input RDO_FTK file', group='Reco Files')
     parser.add_argument('--inputAODFile', nargs='+', 
                         type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='input'),
                         help='Input AOD file', group='Reco Files')
@@ -88,6 +83,9 @@ def addStandardRecoFiles(parser):
     parser.add_argument('--outputTXT_JIVEXMLTGZFile',
                         type = trfArgClasses.argFactory(trfArgClasses.argFile, io = 'output'),
                         help = 'Output JiveXML.tgz file', group = 'Reco Files')
+    parser.add_argument('--outputTLA_AODFile', nargs='+',
+                        type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='output'),
+                        help='Output AOD (TLA) file', group='Reco Files')
 
 
 ## @brief Add reconstruction substeps to a set object
@@ -97,16 +95,15 @@ def addRecoSubsteps(executorSet):
     executorSet.add(athenaExecutor(name = 'RDOtoBS', skeletonFile = 'RecJobTransforms/skeleton.RDOtoBS_tf.py',
                                    substep = 'r2b', inData = ['RDO'], outData = ['BS']))
     executorSet.add(athenaExecutor(name = 'RDOtoRDOTrigger', skeletonFile = 'RecJobTransforms/skeleton.RDOtoRDOtrigger.py',
-                                   substep = 'r2t', inData = ['RDO','RDO_FTK'], outData = ['RDO_TRIG']))
-    # Note that the RAWtoALL substep is disabled by defaut (no inputs or outputs)
-    # It will be enabled explicitly via --steering if required
+                                   substep = 'r2t', inData = ['RDO'], outData = ['RDO_TRIG']))
     executorSet.add(athenaExecutor(name = 'RAWtoALL', skeletonFile = 'RecJobTransforms/skeleton.RAWtoALL_tf.py',
                                    skeletonCA = 'RecJobTransforms.RAWtoALL_Skeleton',
-                                   substep = 'r2a', inData = [],
-                                   outData = []))
+                                   substep = 'r2a', inData = ['BS', 'RDO', 'DRAW_ZMUMU', 'DRAW_ZEE', 'DRAW_EMU', 'DRAW_RPVLL'], 
+                                   outData = ['ESD', 'AOD', 'HIST_R2A', 'TXT_JIVEXMLTGZ'],))
+    executorSet.add(athenaExecutor(name = 'RAWtoTLA_AOD', skeletonCA = 'RecJobTransforms.RAWtoTLA_AOD_Skeleton',
+                                   substep = 'r2tla', inData = ['BS'], outData = ['TLA_AOD'], ))
     executorSet.add(athenaExecutor(name = 'RAWtoESD', skeletonFile = 'RecJobTransforms/skeleton.RAWtoESD_tf.py',
-                                   substep = 'r2e', inData = ['BS', 'RDO', 'DRAW_ZMUMU', 'DRAW_ZEE', 'DRAW_EMU', 'DRAW_RPVLL', 'RDO_FTK'], 
-                                   outData = ['ESD', 'HIST_ESD_INT', 'TXT_JIVEXMLTGZ'],))
+                                   substep = 'r2e', inData = [], outData = [],))
     executorSet.add(athenaExecutor(name = 'ESDtoAOD', skeletonFile = 'RecJobTransforms/skeleton.ESDtoAOD_tf.py',
                                    substep = 'e2a', inData = ['ESD'], outData = ['AOD', 'HIST_AOD_INT']))
     executorSet.add(DQMergeExecutor(name = 'DQHistogramMerge', inData = [('HIST_ESD_INT', 'HIST_AOD_INT'), 'HIST_R2A', 'HIST_AOD'], outData = ['HIST']))
@@ -134,51 +131,9 @@ def addRecoSubsteps(executorSet):
 
 ## @brief The standard suite of reconstruction specific arguments
 #  @param trf The transform to which these arguments should be added
-#  @param RAWtoALL Flag that will be passed to some of the automated argument type parsers
-def addAllRecoArgs(trf, RAWtoALL=False):
+def addAllRecoArgs(trf):
     addCommonRecTrfArgs(trf.parser)
     addStandardRecoFiles(trf.parser)
-    addPrimaryDPDArguments(trf.parser, transform = trf, RAWtoALL=RAWtoALL)
+    addPrimaryDPDArguments(trf.parser, transform = trf)
     addExtraDPDTypes(trf.parser, transform = trf)
     addReductionArguments(trf.parser, transform = trf)
-
-
-## @brief Detect if the RAWtoALL steering argument is set
-#  This is a very special case, requiring an unfortunately hacky solution... :-(
-def detectRAWtoALL(argv):
-    limitedParser = argparse.ArgumentParser(argument_default=argparse.SUPPRESS)
-    limitedParser.add_argument("--steering", nargs="+")
-    limitedParser.add_argument("--argJSON")
-    limitedParser.add_argument("--AMIConfig", "--AMI")
-    
-    args, unknown = limitedParser.parse_known_args(argv)
-    args=vars(args)
-    
-    # Note if we have steering and it does _not_ contain doRAWtoALL we
-    # return false, as CLI overrides JSON and AMI
-    if "steering" in args:
-        if "doRAWtoALL" in args["steering"] or "doTRIGtoALL" in args["steering"]:
-            return True
-        else:
-            return False
-    
-    # JSON overrides AMI
-    if "argJSON" in args:
-        import json
-        from PyJobTransforms.trfUtils import convertToStr
-        argfile = open(args['argJSON'], 'r')
-        jsonParams = json.load(argfile)
-        jsonParams = convertToStr(jsonParams)
-        if "steering" in jsonParams:
-            if "doRAWtoALL" in jsonParams["steering"] or "doTRIGtoALL" in jsonParams["steering"]:
-                return True
-            else:
-                return False
-        
-    if "AMIConfig" in args:
-        from PyJobTransforms.trfAMI import TagInfo
-        tag=dict(TagInfo(args['AMIConfig']).trfs[0])
-        if "steering" in tag and ("doRAWtoALL" in tag["steering"] or "doTRIGtoALL" in tag["steering"]):
-            return True
-        
-    return False

@@ -77,7 +77,7 @@ public:
                    Trk::ParticleHypothesis particleHypo = Trk::pion) const override;
 
   virtual
-  std::unique_ptr<const Acts::CurvilinearTrackParameters>
+  std::optional<const Acts::CurvilinearTrackParameters>
   propagate(const EventContext& ctx,
             const Acts::BoundTrackParameters& startParameters,
             Acts::NavigationDirection navDir = Acts::NavigationDirection::Forward,
@@ -94,7 +94,7 @@ public:
                    Trk::ParticleHypothesis particleHypo = Trk::pion) const override;
 
   virtual
-  std::unique_ptr<const Acts::BoundTrackParameters>
+  std::optional<const Acts::BoundTrackParameters>
   propagate(const EventContext& ctx,
             const Acts::BoundTrackParameters& startParameters,
             const Acts::Surface& target,

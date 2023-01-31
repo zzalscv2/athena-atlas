@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCEVENTCOLLECTIONFILTER_H
@@ -10,7 +10,6 @@
 #include <GeneratorObjects/McEventCollection.h>
 #include <InDetSimEvent/TRTUncompressedHitCollection.h>
 
-
 class McEventCollectionFilter : public AthReentrantAlgorithm
 {
 public:
@@ -20,7 +19,6 @@ public:
   virtual StatusCode execute(const EventContext &ctx) const override;
 
 private:
-  StatusCode findElectronsLinkedToTRTHits(const EventContext &ctx, std::vector<int> *barcodes) const;
 
   SG::ReadHandleKey<McEventCollection> m_inputTruthCollectionKey {this, "InputTruthCollection", "TruthEventOLD", "Input truth collection name"};
   SG::WriteHandleKey<McEventCollection> m_outputTruthCollectionKey {this, "OutputTruthCollection", "TruthEvent", "Output truth collection name"};

@@ -1,5 +1,3 @@
-[ TrackingGeometrySvc ]     base material tag :  AtlasLayerMat_v21_
-[ TrackingGeometrySvc ]     translated to COOL:  /GLOBAL/TrackingGeo/LayerMaterialV2<tag>TagInfoMajor/AtlasLayerMat_v21_/GeoAtlas</tag>
 Modified SCT_DetectorElementCondAlg
 /***** Algorithm SCT_DetectorElementCondAlg/SCT_DetectorElementCondAlg *****************************
 |-AuditAlgorithms            = False

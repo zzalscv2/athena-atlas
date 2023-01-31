@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Jet_p2.h 
@@ -15,7 +15,7 @@
 #define JETEVENTTPCNV_JET_P3_H 
 
 // STL includes
-//#include <vector>
+#include <vector>
 
 // DataModelAthenaPool includes
 #include "DataModelAthenaPool/Navigable_p1.h"
@@ -45,27 +45,21 @@ public:
 
   /** Default constructor: 
    */
-  Jet_p3();
+  Jet_p3() = default;
 
-  // Warning: this is a _move_ constructor, not really a copy constructor.
-  // See the description in the .cxx file.
-  Jet_p3(const Jet_p3& other);
-
-  /** Destructor: 
+  /** Destructor:
    */
   ~Jet_p3();
   
-  Jet_p3 & operator=(const Jet_p3 &) = default;
+  // copy and move constructor defaulted
+  Jet_p3(const Jet_p3& other) noexcept = default;
+  Jet_p3(Jet_p3&& other) noexcept = default;
 
-  /////////////////////////////////////////////////////////////////// 
-  // Const methods: 
+  // copy and move assignment defaulted
+  Jet_p3 & operator=(const Jet_p3 &) noexcept = default;
+  Jet_p3 & operator=(Jet_p3 &&) noexcept = default;
+
   ///////////////////////////////////////////////////////////////////
-
-  /////////////////////////////////////////////////////////////////// 
-  // Non-const methods: 
-  /////////////////////////////////////////////////////////////////// 
-
-  /////////////////////////////////////////////////////////////////// 
   // Private data: 
   /////////////////////////////////////////////////////////////////// 
 private: 
@@ -76,11 +70,10 @@ private:
   /// the 4-mom part
   P4PxPyPzE_p1 m_momentum;
   
-  unsigned int m_author;
+  unsigned int m_author{0};
   
   /// combined likelihoods
-  //std::vector<double> m_combinedLikelihood;
-  unsigned int m_num_combinedLikelihood;
+  unsigned int m_num_combinedLikelihood{0};
 
   /// JetMomentStore
   std::vector<float> m_shapeStore;
@@ -96,32 +89,15 @@ private:
   // Therefore, it is set to true in the default constructor.
   // When the T->P converter puts pointers in one of these objects,
   // it should also clear this flag.
-  bool m_ownPointers;
+  bool m_ownPointers{true};
 
   
   // Signal states 
-  char  m_ratioE;  /**ratio for uncalibrated  E    */
-  char  m_ratioPx; /**ratio for uncalibrated  p_x  */
-  char  m_ratioPy; /**ratio for uncalibrated  p_y  */
-  char  m_ratioPz; /**ratio for uncalibrated  p_z  */
+  char  m_ratioE{0};  /**ratio for uncalibrated  E    */
+  char  m_ratioPx{0}; /**ratio for uncalibrated  p_x  */
+  char  m_ratioPy{0}; /**ratio for uncalibrated  p_y  */
+  char  m_ratioPz{0}; /**ratio for uncalibrated  p_z  */
 
-  
-
-  
 }; 
 
-/////////////////////////////////////////////////////////////////// 
-// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-
-inline Jet_p3::Jet_p3()
-  : m_author(0),
-    m_num_combinedLikelihood(0),
-    m_ownPointers (true),
-    m_ratioE(0),
-    m_ratioPx(0),
-    m_ratioPy(0),
-    m_ratioPz(0)
-{}
-
-#endif //> JETEVENTTPCNV_JET_P1_H
+#endif //> JETEVENTTPCNV_JET_P3_H

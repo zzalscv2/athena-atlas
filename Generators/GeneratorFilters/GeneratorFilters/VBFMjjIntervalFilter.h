@@ -6,9 +6,14 @@
 #define GENERATORFILTERSVBFMJJINTERVALFILTER_H
 
 #include "GeneratorModules/GenFilter.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "AthenaKernel/IAthRNGSvc.h"
+
 #include "xAODJet/JetContainer.h"
 
-class IAtRndmGenSvc;
+namespace CLHEP {
+  class HepRandomEngine;
+}
 
 
 class VBFMjjIntervalFilter : public GenFilter {
@@ -20,12 +25,15 @@ public:
 
 private:
 
+  CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName,
+                                          const EventContext& ctx) const;
+
   double m_olapPt;
   double m_yMax;                           // Rapidity acceptance
   double m_pTavgMin;                       // Required average dijet pT
   std::string m_TruthJetContainerName;     // Name of the truth jet container
 
-  ServiceHandle<IAtRndmGenSvc> m_rand;     // Random number generator
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};// Random number generator
 
   //long m_total;                            // Total number of events tested
   //long m_passed;                           // Number of events passing all cuts

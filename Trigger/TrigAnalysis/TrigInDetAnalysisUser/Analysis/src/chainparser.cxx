@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Mon 23 Jan 2017 12:30:25 CET 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 #include <iostream> 
@@ -52,8 +52,8 @@ std::vector<std::string> split( std::string& line ) {
   std::replace(line.begin(), line.end(), '\t', ' ');
 
   while ( contains( line, ' ' ) ) { 
-    std::string _s = chop( line, " " );
-    std::string  s = chop( _s, "\t" );
+    std::string stmp = chop( line, " " );
+    std::string s = chop( stmp, "\t" );
     if ( contains( s, '\t' ) ) { 
       line.replace( s.find('\t'), 1, " " );
       continue;

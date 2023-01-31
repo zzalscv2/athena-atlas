@@ -28,7 +28,7 @@ StatusCode PFMomentCalculatorTool::initialize(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode PFMomentCalculatorTool::execute(const eflowCaloObjectContainer& theEflowCaloObjectContainer) {
+StatusCode PFMomentCalculatorTool::execute(eflowCaloObjectContainer& theEflowCaloObjectContainer) {
 
   /* Collect all the clusters in a temporary container (with VIEW_ELEMENTS!) */
   bool useNonModifiedClusters = true;

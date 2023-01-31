@@ -14,6 +14,13 @@ def TRT_GeoModelCfg(flags):
     trtDetectorTool = CompFactory.TRT_DetectorTool()
     trtDetectorTool.GeometryDBSvc = db.getPrimary()
     trtDetectorTool.useDynamicAlignFolders = flags.GeoModel.Align.Dynamic
+    # Use default TRT active gas in geo model unless in simulation.
+    from AthenaConfiguration.Enums import Project, ProductionStep
+    if (flags.Common.Project is not Project.AthSimulation
+            and flags.Common.ProductionStep is not ProductionStep.Simulation):
+        trtDetectorTool.DoXenonArgonMixture = False
+        trtDetectorTool.DoKryptonMixture = False
+
     from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
     acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags, forceLegacyAccess=True))  # FIXME: if we set the tool, things break for unknown reasons
     geoModelSvc.DetectorTools += [ trtDetectorTool ]

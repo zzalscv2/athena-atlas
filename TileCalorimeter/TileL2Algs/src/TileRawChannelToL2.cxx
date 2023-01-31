@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -70,7 +70,7 @@ StatusCode TileRawChannelToL2::execute(const EventContext& ctx) const {
   }
 
   // TileL2Builder is called
-  CHECK( m_tileL2Builder->process(0, 0xFFFF, l2Container.ptr()) );
+  ATH_CHECK( m_tileL2Builder->process(0, 0xFFFF, l2Container.ptr(), ctx) );
 
   // Debug
   if (msgLvl(MSG::VERBOSE)) {

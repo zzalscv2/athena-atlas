@@ -5,13 +5,13 @@
 #include "InDetTrackSelectorTool/InDetDetailedTrackSelectorTool.h"
 // forward declares
 #include "TrkToolInterfaces/ITrackSummaryTool.h"
+#include "TrkToolInterfaces/ITrackParticleCreatorTool.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "VxVertex/Vertex.h"
 #include "VxVertex/RecVertex.h"
 #include "TrkEventPrimitives/FitQuality.h"
 #include "TrkTrack/Track.h"
 #include "TrkTrackSummary/TrackSummary.h"
-#include "TrkParticleBase/TrackParticleBase.h"
 #include "InDetRecToolInterfaces/ITrtDriftCircleCutTool.h"
 #include "InDetRecToolInterfaces/IInDetTestPixelLayerTool.h"
 
@@ -37,10 +37,12 @@ namespace InDet
   InDetDetailedTrackSelectorTool::InDetDetailedTrackSelectorTool(const std::string& t, const std::string& n, const IInterface*  p)
     : AthAlgTool(t,n,p)
     , m_trackSumTool("Trk::TrackSummaryTool", this)
+    , m_particleCreator("", this)
     , m_extrapolator("Trk::Extrapolator", this)
     , m_trtDCTool("InDet::InDetTrtDriftCircleCutTool", this)
     , m_inDetTestPixelLayerTool("", this)
     , m_trackSumToolAvailable(true)
+    , m_partCreatorToolAvailable(false)
     , m_usePtDependentCuts(false)
     , m_useEventInfoBs(false)
 
@@ -105,6 +107,7 @@ namespace InDet
     declareProperty("addToMinHitTrtWithOutliers"          , m_addToMinHitTrtWithOutliers           = 0);
     
     declareProperty("TrackSummaryTool"   , m_trackSumTool);
+    declareProperty("TrackParticleCreatorTool", m_particleCreator);
     declareProperty("Extrapolator"       , m_extrapolator);
     declareProperty("TrtDCCutTool"       , m_trtDCTool);
     declareProperty("InDetTestPixelLayerTool", m_inDetTestPixelLayerTool);
@@ -147,21 +150,24 @@ namespace InDet
   // ---------------------------------------------------------------------
   StatusCode  
   InDetDetailedTrackSelectorTool::initialize(){
-    m_trackSumToolAvailable=false;
-    if (!m_trackSumTool.empty()) {  
-	    if(m_trackSumTool.retrieve().isFailure()){
-	      ATH_MSG_INFO(" Unable to retrieve. OK if running on AOD. "<<m_trackSumTool);
-	    }else{
-	      ATH_MSG_INFO("Track summary tool retrieved");
-	      m_trackSumToolAvailable=true;
-	    }
-    } 
+    if(m_trackSumTool.empty()){
+      ATH_MSG_INFO("No TrackSummaryTool set. OK if running on AOD.");
+    }
+    m_trackSumToolAvailable = !m_trackSumTool.empty();
+    ATH_CHECK(m_trackSumTool.retrieve(DisableTool{!m_trackSumToolAvailable}));
+
+    if(m_useSharedHitInfo && m_particleCreator.empty()){
+      ATH_MSG_INFO("No TrackParticleCreatorTool set but shared hit selection used. OK if running on AOD.");
+    }
+    m_partCreatorToolAvailable = m_useSharedHitInfo && !m_particleCreator.empty();
+    ATH_CHECK(m_particleCreator.retrieve(DisableTool{!m_partCreatorToolAvailable}));
+
     ATH_CHECK( m_extrapolator.retrieve() );
     ATH_CHECK(m_beamSpotKey.initialize(!m_useEventInfoBs));
     ATH_CHECK(m_eventInfo_key.initialize(m_useEventInfoBs));
     if (m_useEtaDepententMinHitTrt || m_useEtaDepententMinHitTrtWithOutliers){
 	    if(m_trtDCTool.empty()) {
-	      ATH_MSG_ERROR(" Eta delendent cut on number of TRT hits requested but TrtDCCutTool not specified. ");
+	      ATH_MSG_ERROR(" Eta dependent cut on number of TRT hits requested but TrtDCCutTool not specified. ");
 	      return StatusCode::FAILURE;
 	    } else if(m_trtDCTool.retrieve().isFailure()) {
 	      ATH_MSG_ERROR(" Unable to retrieve tool "<<m_trtDCTool);
@@ -224,9 +230,9 @@ namespace InDet
     }
     Trk::PerigeeSurface perigeeSurface(myVertex->position());
     const Trk::TrackParameters *firstmeaspar=nullptr;
-    for (unsigned int i=0;i<track.trackParameters()->size();i++){
-      if ( (*track.trackParameters())[i]->covariance() && !dynamic_cast<const Trk::Perigee*>((*track.trackParameters())[i])) {
-        firstmeaspar=(*track.trackParameters())[i];
+    for (const auto *i : *track.trackParameters()){
+      if ( i->covariance() && !dynamic_cast<const Trk::Perigee*>(i)) {
+        firstmeaspar=i;
         break;
       }
     }
@@ -302,6 +308,14 @@ namespace InDet
         ATH_MSG_FATAL( "Track preselection: cannot create a track summary (but useTrackSummary is true). Selection failed." );
         return false;
       }
+
+      // Create xAOD::TrackParticle to retrieve shared hit info
+      const xAOD::TrackParticle* tp = m_partCreatorToolAvailable ? m_particleCreator->createParticle(track) : nullptr;
+      if(m_useSharedHitInfo && tp==nullptr){
+        ATH_MSG_FATAL( "Track preselection: cannot create a track particle (but useSharedHitInfo is true). Selection failed." );
+        return false;
+      }
+
       // get the minimum nimber of TRT hits based on eta of the track
       if(m_useEtaDepententMinHitTrt) {
         nHitTrt = m_trtDCTool->minNumberDCs( (*track.trackParameters())[0] );
@@ -311,6 +325,7 @@ namespace InDet
           nHitTrt = (int)((double)nHitTrt*m_scaleMinHitTrt);
         }
       }
+
       // get the minimum nimber of TRT hits + outliers based on eta of the track
       if(m_useEtaDepententMinHitTrtWithOutliers) {
         nHitTrtPlusOutliers = m_trtDCTool->minNumberDCs( (*track.trackParameters())[0] );
@@ -320,7 +335,8 @@ namespace InDet
           nHitTrtPlusOutliers = (int)((double)nHitTrtPlusOutliers*m_scaleMinHitTrtWithOutliers);
         }
       }
-      if (!decision(summary,m_useSharedHitInfo,isInTrtAcceptance, perigeeBeforeExtrapolation,
+
+      if (!decision(summary, tp, m_useSharedHitInfo,isInTrtAcceptance, perigeeBeforeExtrapolation,
                     nHitTrt, nHitTrtPlusOutliers)) {
         return false;
       }
@@ -365,6 +381,14 @@ namespace InDet
         ATH_MSG_WARNING( "Track preselection: cannot create a track summary (but useTrackSummary is true). Selection failed." );
         return false;
       }
+
+
+      if (m_useSharedHitInfo) {
+	ATH_MSG_ERROR( "Use of InDetDetailedTrackSelectorTool with Trk::TrackParticleBase and useSharedHitInfo is not supported");
+	return false;
+      }
+      const xAOD::TrackParticle* tp = nullptr;
+
       if(m_useEtaDepententMinHitTrt) {
         nHitTrt = m_trtDCTool->minNumberDCs( (track.trackParameters())[0] );
         if(m_addToMinHitTrt!=0){
@@ -373,6 +397,7 @@ namespace InDet
           nHitTrt = (int)((double)nHitTrt*m_scaleMinHitTrt);
         }
       }
+
       if(m_useEtaDepententMinHitTrtWithOutliers) {
         nHitTrtPlusOutliers = m_trtDCTool->minNumberDCs( (track.trackParameters())[0] );
         if(m_addToMinHitTrtWithOutliers!=0){
@@ -381,8 +406,9 @@ namespace InDet
           nHitTrtPlusOutliers = (int)((double)nHitTrtPlusOutliers*m_scaleMinHitTrtWithOutliers);
         }
       }
+
       if ((!perigeeBeforeExtrapolation) or
-          (!decision(summary, m_useSharedHitInfo, isInTrtAcceptance, perigeeBeforeExtrapolation,
+          (!decision(summary, tp, m_useSharedHitInfo, isInTrtAcceptance, perigeeBeforeExtrapolation,
                      nHitTrt, nHitTrtPlusOutliers))) {
 	      return false;
       }      
@@ -394,10 +420,10 @@ namespace InDet
     }
     Trk::PerigeeSurface perigeeSurface(myVertex->position());
     const Trk::TrackParameters *firstmeaspar=nullptr;
-    for (unsigned int i=0;i<track.trackParameters().size();i++) {
-      if ((track.trackParameters())[i]->covariance() &&
-	     !dynamic_cast<const Trk::Perigee*>((track.trackParameters())[i])) {
-        firstmeaspar=(track.trackParameters())[i];
+    for (const auto *i : track.trackParameters()) {
+      if (i->covariance() &&
+	     !dynamic_cast<const Trk::Perigee*>(i)) {
+        firstmeaspar=i;
         break;
       }
     }
@@ -448,7 +474,7 @@ namespace InDet
       return false;
     }
     return true;
-  }
+    }
 
   Amg::Vector3D InDetDetailedTrackSelectorTool::getPosOrBeamSpot(const xAOD::Vertex* vertex) const
   {
@@ -880,7 +906,7 @@ namespace InDet
       ATH_MSG_DEBUG("Track rejected because of fit probability "<<proba<<" > "<<m_fitProb);
       return false;
     }
-    if(ndf>0 && chi2/double(ndf)>m_fitChi2OnNdfMax) {
+    if(!ndf || chi2/double(ndf)>m_fitChi2OnNdfMax) {
       ATH_MSG_DEBUG("Track rejected because of chi2/ndof "<<chi2/double(ndf)<<" > "<<m_fitChi2OnNdfMax);
       return false;
     }
@@ -890,9 +916,13 @@ namespace InDet
 
 
   // ---------------------------------------------------------------------
-  bool InDetDetailedTrackSelectorTool::decision(const Trk::TrackSummary* summary,bool useSharedHitInfo,bool useTrtHitInfo,
+  bool InDetDetailedTrackSelectorTool::decision(const Trk::TrackSummary* summary,
+						const xAOD::TrackParticle* tp,
+						bool useSharedHitInfo,
+						bool useTrtHitInfo,
 						const Trk::Perigee * track,
-                                                const int nHitTrt, const int nHitTrtPlusOutliers) const
+						const int nHitTrt,
+						const int nHitTrtPlusOutliers) const
   {
     if (summary==nullptr) {
       ATH_MSG_WARNING( "Null TrackSummary pointer passed. Selection failed." );
@@ -1078,8 +1108,12 @@ namespace InDet
     }
 
     if (useSharedHitInfo) {
+      if(!tp){
+	ATH_MSG_DEBUG("Track rejected because xAOD::TrackParticle not available");
+	return false;
+      }
 
-      int nbs = summary->get(Trk::numberOfInnermostPixelLayerSharedHits);
+      int nbs = getCount(*tp,xAOD::numberOfInnermostPixelLayerSharedHits);
       if(nbs < 0) nbs = 0;
       if (nbs>1) nbs=1;
       if(nbs>m_nSharedBLayer) {
@@ -1087,14 +1121,14 @@ namespace InDet
 	return false;
       }
 
-      int nps = summary->get(Trk::numberOfPixelSharedHits);
+      int nps = getCount(*tp,xAOD::numberOfPixelSharedHits);
       if(nps < 0) nps = 0;
       if(nps>m_nSharedPix) {
 	ATH_MSG_DEBUG("Track rejected because of nSharedPix "<<nps<<" < "<<m_nSharedPix);
 	return false;
       }
 
-      int nss = summary->get(Trk::numberOfSCTSharedHits);
+      int nss = getCount(*tp,xAOD::numberOfSCTSharedHits);
       if(nss < 0) nss = 0;
       if(nss > m_nSharedSct) {
 	ATH_MSG_DEBUG("Track rejected because of nSharedSct "<<nss<<" < "<<m_nSharedSct);

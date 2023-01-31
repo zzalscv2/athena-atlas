@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile correction tools and algorithm"""
 
@@ -9,7 +9,7 @@ def TileRawChannelOF1CorrectorCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile OF1 raw channel correction tool
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     acc = ComponentAccumulator()
@@ -40,10 +40,8 @@ def TileRawChannelOF1CorrectorCfg(flags, **kwargs):
             from TileConditions.TileDSPThresholdConfig import TileCondToolDspThresholdCfg
             kwargs['TileCondToolDspThreshold'] = acc.popToolsAndMerge( TileCondToolDspThresholdCfg(flags) )
 
-        if 'TileCondToolEmscale' not in kwargs:
-            from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-            kwargs['TileCondToolEmscale'] = acc.popToolsAndMerge( TileCondToolEmscaleCfg(flags) )
-
+        from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+        acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     TileRawChannelOF1Corrector=CompFactory.TileRawChannelOF1Corrector
     acc.setPrivateTools( TileRawChannelOF1Corrector(**kwargs) )
@@ -67,10 +65,8 @@ def TileRawChannelNoiseFilterCfg(flags, **kwargs):
     from TileConditions.TileInfoLoaderConfig import TileInfoLoaderCfg
     acc.merge( TileInfoLoaderCfg(flags) )
 
-    if 'TileCondToolEmscale' not in kwargs:
-        from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-        emScaleTool = acc.popToolsAndMerge( TileCondToolEmscaleCfg(flags) )
-        kwargs['TileCondToolEmscale'] = emScaleTool
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     if 'TileCondToolNoiseSample' not in kwargs:
         from TileConditions.TileSampleNoiseConfig import TileCondToolNoiseSampleCfg
@@ -115,19 +111,17 @@ def TileTimeBCOffsetFilterCfg(flags, **kwargs):
     from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
     acc.merge(TileCablingSvcCfg(flags))
 
-    if 'TileCondToolEmscale' not in kwargs:
-        from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-        emScaleTool = acc.popToolsAndMerge( TileCondToolEmscaleCfg(flags) )
-        kwargs['TileCondToolEmscale'] = emScaleTool
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     if 'TileBadChanTool' not in kwargs:
         from TileConditions.TileBadChannelsConfig import TileBadChanToolCfg
         badChanTool = acc.popToolsAndMerge( TileBadChanToolCfg(flags) )
         kwargs['TileBadChanTool'] = badChanTool
 
-    if kwargs['CheckDCS'] and 'TileDCSTool' not in kwargs:
-        from TileConditions.TileDCSConfig import TileDCSToolCfg
-        kwargs['TileDCSTool'] = acc.popToolsAndMerge( TileDCSToolCfg(flags) )
+    if kwargs['CheckDCS']:
+        from TileConditions.TileDCSConfig import TileDCSCondAlgCfg
+        acc.merge( TileDCSCondAlgCfg(flags) )
 
     TileTimeBCOffsetFilter=CompFactory.TileTimeBCOffsetFilter
     acc.setPrivateTools( TileTimeBCOffsetFilter(**kwargs) )
@@ -189,7 +183,7 @@ def TileRawChannelCorrectionAlgCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -197,21 +191,22 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.Tile.correctPedestalDifference = True
-    ConfigFlags.Tile.zeroAmplitudeWithoutDigits = True
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Tile.RunType = 'PHY'
+    flags.Tile.correctPedestalDifference = True
+    flags.Tile.zeroAmplitudeWithoutDigits = True
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
+    acc = MainServicesCfg(flags)
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    acc.merge( ByteStreamReadCfg(ConfigFlags, ['TileRawChannelContainer/TileRawChannelCnt', 'TileDigitsContainer/TileDigitsCnt']) )
+    acc.merge( ByteStreamReadCfg(flags, ['TileRawChannelContainer/TileRawChannelCnt', 'TileDigitsContainer/TileDigitsCnt']) )
 
-    acc.merge( TileRawChannelCorrectionAlgCfg(ConfigFlags) )
+    acc.merge( TileRawChannelCorrectionAlgCfg(flags) )
 
-    ConfigFlags.dump()
+    flags.dump()
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.store( open('TileRawChannelCorrection.pkl','wb') )
 

@@ -6,6 +6,7 @@ test4
 test5
 test6
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
-RootAuxVectorFa...  ERROR AthContainersRoot/src/RootAuxVectorFactory.cxx:486: Cannot apply thinning for ElementLink with non-pointer element: vector<ElementLink<vector<AthContainersRootTest::Foo> > >
+RootAuxVectorFa...  ERROR ../RootAuxVectorFactory.cxx: Cannot apply thinning for ElementLink with non-pointer element: vector<ElementLink<vector<AthContainersRootTest::Foo> > >
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
-RootAuxVectorFa...  ERROR AthContainersRoot/src/RootAuxVectorFactory.cxx:486: Cannot apply thinning for ElementLink with non-pointer element: vector<vector<ElementLink<vector<AthContainersRootTest::Foo> > > >
+RootAuxVectorFa...  ERROR ../RootAuxVectorFactory.cxx: Cannot apply thinning for ElementLink with non-pointer element: vector<vector<ElementLink<vector<AthContainersRootTest::Foo> > > >
+test7

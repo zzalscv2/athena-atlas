@@ -1,17 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
-#include "Gaudi/Property.h"
-#include "GaudiKernel/ListItem.h"
-#include "GaudiKernel/IToolSvc.h"
-
 #include "AthenaKernel/errorcheck.h"
-#include "EventKernel/INavigable4Momentum.h"
-#include "NavFourMom/INavigable4MomentumCollection.h"
 
-#include "CaloUtils/CaloCollectionHelper.h"
 #include "CaloEvent/CaloTowerSeg.h"
 #include "CaloEvent/CaloTowerContainer.h"
 #include "CaloTowerAlgorithm.h"
@@ -46,7 +39,7 @@ CaloTowerAlgorithm::CaloTowerAlgorithm(const std::string& name,
 }
 
 CaloTowerAlgorithm::~CaloTowerAlgorithm()
-{ }
+= default;
 
 ////////////////
 // Initialize //
@@ -54,13 +47,6 @@ CaloTowerAlgorithm::~CaloTowerAlgorithm()
 
 StatusCode CaloTowerAlgorithm::initialize()
 {
-  ///////////////////////
-  // Allocate Services //
-  ///////////////////////
-
-  // tool service
-  IToolSvc* myToolSvc;
-  ATH_CHECK(service("ToolSvc",myToolSvc));
   ATH_CHECK(m_towerContainerKey.initialize());
   ////////////////////
   // Allocate Tools //

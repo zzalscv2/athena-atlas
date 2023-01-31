@@ -96,7 +96,8 @@ class IDPerfMonZmumu : public AthAlgorithm
   void                RegisterHistograms ();
   void                ResetCommonNtupleVectors ();
   const xAOD::Vertex* GetDiMuonVertex (const xAOD::TrackParticle*,const  xAOD::TrackParticle*);
-  StatusCode          FillRecParameters (const Trk::Track* track, const xAOD::TrackParticle* trackp_for_unbias, double charge,const xAOD::Vertex* vertex);
+  StatusCode          FillRecParameters       (const Trk::Track* track, const xAOD::TrackParticle* trackp_for_unbias, double charge,const xAOD::Vertex* vertex, const EventContext& ctx);
+  StatusCode          FillRecParametersSimple (const Trk::Track* track, float charge, const xAOD::Vertex* vertex, const EventContext& ctx);
   StatusCode          FillRecParametersTP (const xAOD::TrackParticle* trackp, const xAOD::TrackParticle* trackp_for_unbias,double charge,const xAOD::Vertex* vertex = nullptr);
   StatusCode          FillTruthParameters (const xAOD::TrackParticle* track);
   const xAOD::TruthParticle* getTruthParticle( const xAOD::IParticle& p );
@@ -123,6 +124,9 @@ class IDPerfMonZmumu : public AthAlgorithm
   bool m_storeZmumuNtuple;
   bool m_skipMS;
   bool m_useCustomMuonSelector;
+  int  m_minGoodLumiBlock;
+  int  m_maxGoodLumiBlock;
+
 
   /** @brief The track refitter */
   ToolHandle<IegammaTrkRefitterTool>  m_TrackRefitter1;

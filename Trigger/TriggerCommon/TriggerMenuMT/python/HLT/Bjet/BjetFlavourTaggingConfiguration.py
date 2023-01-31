@@ -1,36 +1,28 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
 # standard b-tagging
 from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
-from BTagging.BTagRun3Config import BTagAlgsCfg
-from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
+from BTagging.BTagConfig import BTagAlgsCfg
 
 # fast btagging
 from FlavorTagDiscriminants.FlavorTagNNConfig import getStaticTrackVars
 from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
 
-def getFlavourTagging( inputJets, inputVertex, inputTracks, BTagName,
+def getFlavourTagging( flags, inputJets, inputVertex, inputTracks, BTagName,
                        inputMuons = ""):
 
     # because Cfg functions internally re-append the 'Jets' string
     inputJetsPrefix = inputJets.replace("bJets","b")
 
-    trigFlags = ConfigFlags
-
     acc = ComponentAccumulator()
 
-    # Jet Calibration
-    acc.merge(JetTagCalibCfg(trigFlags))
-    # "HLT_bJets" is the name of the b-jet JetContainer
-
-        #Track Augmenter
+    #Track Augmenter
     acc.merge(BTagTrackAugmenterAlgCfg(
-        trigFlags,
+        flags,
         TrackCollection=inputTracks,
         PrimaryVertexCollectionName=inputVertex
     ))
@@ -47,18 +39,10 @@ def getFlavourTagging( inputJets, inputVertex, inputTracks, BTagName,
         'BTagging/20211216trig/dl1d/AntiKt4EMPFlow/network.json',
         # Trigger GN1 training
         'BTagging/20220813trig/gn1/antikt4empflow/network.onnx',
-        #
-        # anti-bb tagger, see ATLINFR-4511
-        # this is required by the above tagger, but isn't a trigger
-        # training. Ideally should be replaced with 20211216trig
-        'BTagging/20210729/dipsLoose/antikt4empflow/network.json',
-        # This is the trigger specific one
-        'BTagging/20220331trig/DL1bb/antikt4empflow/network.json',
-
     ]
 
     acc.merge(BTagAlgsCfg(
-        inputFlags=trigFlags,
+        inputFlags=flags,
         JetCollection=inputJetsPrefix,
         nnList=nnList,
         trackCollection=inputTracks,

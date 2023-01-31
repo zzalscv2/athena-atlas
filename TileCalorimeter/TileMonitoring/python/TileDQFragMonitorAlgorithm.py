@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -26,9 +26,11 @@ def TileDQFragMonitoringConfig(flags, **kwargs):
     from TileConditions.TileInfoLoaderConfig import TileInfoLoaderCfg
     result.merge( TileInfoLoaderCfg(flags) )
 
-    from TileConditions.TileBadChannelsConfig import TileBadChanToolCfg
-    badChanTool = result.popToolsAndMerge( TileBadChanToolCfg(flags) )
-    kwargs['TileBadChanTool'] = badChanTool
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    result.merge( TileEMScaleCondAlgCfg(flags) )
+
+    from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
+    result.merge( TileBadChannelsCondAlgCfg(flags) )
 
     kwargs.setdefault('CheckDCS', flags.Tile.useDCS)
     if kwargs['CheckDCS']:
@@ -91,6 +93,10 @@ def TileDQFragMonitoringConfigOld(flags, **kwargs):
 def _TileDQFragMonitoringCore(helper, algConfObj, runNumber, **kwargs):
 
     ''' Function to configure TileDQFragMonitorAlgorithm algorithm in the monitoring system.'''
+
+    from AthenaCommon.SystemOfUnits import GeV
+    kwargs.setdefault('MinEnergyChan', -5.0 * GeV)
+    kwargs.setdefault('MinEnergyGap', -10.0 * GeV)
 
     run = str(runNumber)
 
@@ -167,6 +173,7 @@ def _TileDQFragMonitoringCore(helper, algConfObj, runNumber, **kwargs):
     dmuErrorLabels += ['0 -> 1023', 'Zeros', 'Two 1023 + ped', 'Jump 2 levels', 'Single Up + ped']
     dmuErrorLabels += ['Single Dn + ped', 'Single Up + sig', 'Single Dn + sig', 'Ped > 200 LG']
     dmuErrorLabels += ['Single Dn LG_s0', 'Single Dn LG_s6', 'Up LG_s0_s6 or Gap', 'Dn LG_s0_s6 or Gap']
+    dmuErrorLabels += ['Bad quality', 'Big negative ene']
 
     maxErrors = len(dmuErrorLabels)
 
@@ -176,7 +183,7 @@ def _TileDQFragMonitoringCore(helper, algConfObj, runNumber, **kwargs):
         ros, module = [int(x) for x in postfix.split('_')[1:]]
 
         moduleName = Tile.getDrawerString(ros + 1, module)
-        title = 'Run ' + run + ': ' + moduleName + ' DMU Header Errors;DMU'
+        title = 'Run ' + run + ': ' + moduleName + ' Channel and DMU Header Errors;DMU'
         name = 'DMU,Error;TileDigiErrors' + moduleName
 
         tool.defineHistogram(name, title = title, type = 'TH2F', path = 'DMUErrors',
@@ -231,6 +238,10 @@ def _TileDQFragMonitoringCore(helper, algConfObj, runNumber, **kwargs):
                                   title = '# Not masked negative amplitude')
 
 
+    # 14) Configure histograms with Tile with negative energy below threshold
+    negEneMapTitle = f"# Negative energy below {kwargs['MinEnergyChan']/GeV} ({kwargs['MinEnergyGap']/GeV} for E cels) GeV"
+    addTileModuleChannelMapsArray(helper, tileDQFragMonAlg, path = 'Tile/DMUErrors/BadDrawers',
+                                  name = 'TileNegativeEnergyMap', run = run, title = negEneMapTitle)
 
 
 if __name__=='__main__':
@@ -241,30 +252,30 @@ if __name__=='__main__':
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Output.HISTFileName = 'TileDQFragMonitorOutput.root'
-    ConfigFlags.DQ.useTrigger = False
-    ConfigFlags.DQ.enableLumiAccess = False
-    ConfigFlags.Tile.doOptATLAS = True
-    ConfigFlags.Exec.MaxEvents = 3
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Output.HISTFileName = 'TileDQFragMonitorOutput.root'
+    flags.DQ.useTrigger = False
+    flags.DQ.enableLumiAccess = False
+    flags.Tile.doOptATLAS = True
+    flags.Exec.MaxEvents = 3
+    flags.fillFromArgs()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     tileTypeNames = ['TileRawChannelContainer/TileRawChannelCnt', 'TileDigitsContainer/TileDigitsCnt']
-    cfg.merge( ByteStreamReadCfg(ConfigFlags, type_names = tileTypeNames) )
+    cfg.merge( ByteStreamReadCfg(flags, type_names = tileTypeNames) )
 
     from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
-    cfg.merge( TileRawChannelMakerCfg(ConfigFlags) )
+    cfg.merge( TileRawChannelMakerCfg(flags) )
 
-    cfg.merge( TileDQFragMonitoringConfig(ConfigFlags) )
+    cfg.merge( TileDQFragMonitoringConfig(flags) )
 
     cfg.printConfig(withDetails = True, summariseProps = True)
 

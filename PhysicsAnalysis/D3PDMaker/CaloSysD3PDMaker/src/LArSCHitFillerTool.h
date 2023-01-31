@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -16,11 +16,13 @@
 
 // Gaudi/Athena include(s):
 #include "GaudiKernel/ToolHandle.h"
+#include "StoreGate/ReadCondHandleKey.h"
 #include "D3PDMakerUtils/BlockFillerTool.h"
 #include "D3PDMakerUtils/SGCollectionGetterTool.h"
 #include "LArSimEvent/LArHitContainer.h"
 #include "LArElecCalib/ILArfSampl.h"
 #include "CaloDetDescr/ICaloSuperCellIDTool.h"
+#include "CaloDetDescr/CaloDetDescrManager.h"
 #include <vector>
 #include <list>
 #include <map>
@@ -32,8 +34,6 @@ class LArHEC_ID;
 class TileID;
 class LArOnlineID;
 class Identifier;
-
-class CaloSuperCellDetDescrManager;
 
 class CaloCell_SuperCell_ID; 
 
@@ -104,9 +104,10 @@ private:
 
   /// Property: Offline / supercell mapping tool.
   ToolHandle<ICaloSuperCellIDTool>     m_scidtool;
+  
+  SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_caloSuperCellMgrKey{
+    this,"CaloSuperCellDetDescrManager","CaloSuperCellDetDescrManager","SG key of the resulting CaloSuperCellDetDescrManager" };
 
-  /// Geometry manager.
-  const CaloSuperCellDetDescrManager* m_sc_dd_mgr;
   /// idHlper 
   const CaloCell_SuperCell_ID* m_sc_idHelper ; 
 

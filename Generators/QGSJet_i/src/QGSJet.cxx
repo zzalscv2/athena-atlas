@@ -1,23 +1,23 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// ---------------------------------------------------------------------- 
+// ----------------------------------------------------------------------
 // Generators/QGSJet.cxx
-//  
-// Description: Allows the user to generate crmc (model qgsjet) events and store the result 
+//
+// Description: Allows the user to generate crmc (model qgsjet) events and store the result
 // in the Transient Store.
 //
-// AuthorList: 
+// AuthorList:
 //   Sami tyKama:       Initial code.
 //   Sebastian Piec:  Adaptation for Epos 1.99.crmc.r2790.
-// ---------------------------------------------------------------------- 
+// ----------------------------------------------------------------------
 
 #include "TruthUtils/GeneratorName.h"
 
 #include "GaudiKernel/MsgStream.h"
 #include "CLHEP/Random/RandFlat.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
+#include "AthenaKernel/RNGWrapper.h"
 
 #include "AtlasHepMC/IO_HEPEVT.h"
 
@@ -28,30 +28,29 @@
 
 namespace{
   static std::string qgsjet_rndm_stream = "QGSJET_INIT";
-  static IAtRndmGenSvc* p_AtRndmGenSvcQGSJet = 0;
+  static CLHEP::HepRandomEngine* p_rndmEngine{};
 }
 
-extern "C" double atl_qgsjet_rndm_( int* ) 
+extern "C" double atl_qgsjet_rndm_( int* )
 {
-  CLHEP::HepRandomEngine* engine = p_AtRndmGenSvcQGSJet->GetEngine(qgsjet_rndm_stream);
-  return CLHEP::RandFlat::shoot(engine);
+  return CLHEP::RandFlat::shoot(p_rndmEngine);
 }
 
-// ---------------------------------------------------------------------- 
+// ----------------------------------------------------------------------
 // QGSJet Fortran bindings.
-// ---------------------------------------------------------------------- 
-extern "C"   
+// ----------------------------------------------------------------------
+extern "C"
 {
     // generator initialization
  void crmc_set_f_(int &nEvents,int &iSeed,double &beamMomentum, double &targetMomentum, int &primaryParticle, int &targetParticle, int &model, int &itab, int &ilheout, const char *paramFile);
   void crmc_init_f_();
   //  void crmc_init_f_( int &iSeed, double &beamMomentum, double &targetMomentum, int &primaryParticle, int &targetParticle, int &model, const char *paramFile );
     // event generation
-  void crmc_f_( int &iout, int &ievent, int &nParticles, double &impactParam, int &partPdg, 
-		double &partPx, double &partPy, double &partPz, double &partEnergy, double &partMass, int &outstat );
- 
-    // cross section info 
-  void crmc_xsection_f_(double &xsigtot, double &xsigine, double &xsigela, double &xsigdd, 
+  void crmc_f_( int &iout, int &ievent, int &nParticles, double &impactParam, int &partPdg,
+                double &partPx, double &partPy, double &partPz, double &partEnergy, double &partMass, int &outstat );
+
+    // cross section info
+  void crmc_xsection_f_(double &xsigtot, double &xsigine, double &xsigela, double &xsigdd,
       double &xsigsd, double &xsloela, double &xsigtotaa, double &xsigineaa, double &xsigelaaa);
 
 #ifdef HEPMC3
@@ -65,7 +64,7 @@ extern struct eposhepevt
     int        jdahep[HEPEVT_EntriesAllocation][2];
     double     phep  [HEPEVT_EntriesAllocation][5];
     double     vhep  [HEPEVT_EntriesAllocation][4];
-} hepevt_;                              
+} hepevt_;
 struct hepmc3hepevt
 {
     int        nevhep;
@@ -76,10 +75,10 @@ struct hepmc3hepevt
     int        jdahep[10000][2];
     double     phep  [10000][5];
     double     vhep  [10000][4];
-} localhepevt_;  
+} localhepevt_;
 #endif
 
-} 
+}
 extern "C"
 {
   extern struct
@@ -174,25 +173,10 @@ extern "C"
 
 
 // ----------------------------------------------------------------------
-QGSJet::QGSJet( const std::string &name, ISvcLocator *pSvcLocator ): 
+QGSJet::QGSJet( const std::string &name, ISvcLocator *pSvcLocator ):
   GenModule( name, pSvcLocator )
 {
   qgsjet_rndm_stream = "QGSJET_INIT";
-  
-  declareProperty( "BeamMomentum",    m_beamMomentum    = -3500.0 );      // GeV
-  declareProperty( "TargetMomentum",  m_targetMomentum  = 3500.0 );
-  declareProperty( "Model",           m_model           = 7 );            // 0=EPOS 1.99 LHC, 1=EPOS 1.99, 7=QGSJETII04
-  declareProperty( "PrimaryParticle", m_primaryParticle = 1 );            // 1=p, 12=C, 120=pi+, 207=Pb 
-  declareProperty( "TargetParticle",  m_targetParticle  = 1 );
-  declareProperty( "ParamFile",       m_paramFile       = "crmc.param" );
-  declareProperty( "LheOutput",       m_ilheout       = 0 );
-  declareProperty( "LheFile",         m_lheout       = "qgsjet.lhe" );
-  declareProperty( "TabCreate",       m_itab       = 0 );
-  declareProperty( "nEvents",         m_nEvents    = 5500 );
-  
-  m_events = 0; // current event number (counted by interface)
-  m_ievent = 0;  // current event number counted by QGSJet
-  m_iout = 0; // output type (output)
 
   // initialize internally used arrays
   m_partID.resize (kMaxParticles);
@@ -211,47 +195,32 @@ QGSJet::QGSJet( const std::string &name, ISvcLocator *pSvcLocator ):
 }
 
 // ----------------------------------------------------------------------
-QGSJet::~QGSJet()
-{}
-
-// ----------------------------------------------------------------------
-StatusCode QGSJet::genInitialize() 
+StatusCode QGSJet::genInitialize()
 {
   ATH_MSG_INFO( " CRMC INITIALISING.\n" );
 
-  static const bool CREATEIFNOTTHERE = true;
-  
-  StatusCode RndmStatus = service("AtRndmGenSvc", p_AtRndmGenSvcQGSJet, CREATEIFNOTTHERE);
-  if ( !RndmStatus.isSuccess() || 0 == p_AtRndmGenSvcQGSJet ) {
-    ATH_MSG_ERROR( " Could not initialize Random Number Service!" );
-    return RndmStatus;
-  }
-   
-  CLHEP::HepRandomEngine *engine = p_AtRndmGenSvcQGSJet->GetEngine(qgsjet_rndm_stream);
-  const long *sip = engine->getSeeds();
+  p_rndmEngine = getRandomEngineDuringInitialize(qgsjet_rndm_stream, m_randomSeed, m_dsid); // NOT THREAD-SAFE
+  const long *sip = p_rndmEngine->getSeeds();
   long int si1 = sip[0];
   long int si2 = sip[1];
 
   // eA
 
-  std::cout << "eA seed: " << si1 << " " << si2 << std::endl; 
+  std::cout << "eA seed: " << si1 << " " << si2 << std::endl;
 
   int iSeed = si1%1000000000;     // FIXME ?
 
   // set up initial values
 
-  std::cout << "parameters " << m_nEvents << " " << iSeed << " " << m_beamMomentum << " " << m_targetMomentum << " " << m_primaryParticle << " " << m_targetParticle << " " << m_model << " " << m_itab << " " << m_ilheout << " " <<  m_lheout.c_str()<< " " <<  m_paramFile.c_str() << std::endl;
+  std::cout << "parameters " << m_nEvents << " " << iSeed << " " << m_beamMomentum << " " << m_targetMomentum << " " << m_primaryParticle << " " << m_targetParticle << " " << m_model << " " << m_itab << " " << m_ilheout << " " <<  m_lheout.value().c_str()<< " " <<  m_paramFile.value().c_str() << std::endl;
 
-//  crmc_set_f_(m_nEvents, iSeed, m_beamMomentum, m_targetMomentum, m_primaryParticle, m_targetParticle, m_model, m_itab, m_ilheout,  m_paramFile.c_str() ); 
+//  crmc_set_f_(m_nEvents, iSeed, m_beamMomentum, m_targetMomentum, m_primaryParticle, m_targetParticle, m_model, m_itab, m_ilheout,  m_paramFile.c_str() );
 
-  crmc_set_f_(m_nEvents, iSeed, m_beamMomentum, m_targetMomentum, m_primaryParticle, m_targetParticle, m_model, m_itab, m_ilheout, (m_paramFile + " ").c_str() );
+  crmc_set_f_(m_nEvents.value(), iSeed, m_beamMomentum.value(), m_targetMomentum.value(), m_primaryParticle.value(), m_targetParticle.value(), m_model.value(), m_itab.value(), m_ilheout.value(), (m_paramFile.value() + " ").c_str() );
 
     // initialize QGSJet
   //  crmc_init_f_( iSeed, m_beamMomentum, m_targetMomentum, m_primaryParticle, m_targetParticle, m_model, m_paramFile.c_str() );
   crmc_init_f_();
-
-    // ... and set them back to the stream for proper save
-  p_AtRndmGenSvcQGSJet->CreateStream( si1, si2, qgsjet_rndm_stream );
 
   qgsjet_rndm_stream = "QGSJet";
 
@@ -267,40 +236,44 @@ StatusCode QGSJet::genInitialize()
 
   m_events = 0;
 
- 
+
  return StatusCode::SUCCESS;
 }
 
-// ---------------------------------------------------------------------- 
-StatusCode QGSJet::callGenerator() 
+// ----------------------------------------------------------------------
+StatusCode QGSJet::callGenerator()
 {
   // ATH_MSG_INFO( " QGSJet Generating." );
 
-    // save the random number seeds in the event
-    CLHEP::HepRandomEngine* engine = p_AtRndmGenSvcQGSJet->GetEngine( qgsjet_rndm_stream );
-   const long *s = engine->getSeeds();
+  //Re-seed the random number stream
+  long seeds[7];
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  ATHRNG::calculateSeedsMC21(seeds, qgsjet_rndm_stream, ctx.eventID().event_number(), m_dsid, m_randomSeed);
+  p_rndmEngine->setSeeds(seeds, 0); // NOT THREAD-SAFE
 
-   std:: cout << "eA seed s : " << s[0] << " " << s[1] << std::endl;
-  
-   m_seeds.clear();
-   m_seeds.push_back(s[0]);
-   m_seeds.push_back(s[1]);
+  // save the random number seeds in the event
+  const long *s = p_rndmEngine->getSeeds();
+
+  std:: cout << "eA seed s : " << s[0] << " " << s[1] << std::endl;
+  m_seeds.clear();
+  m_seeds.push_back(s[0]);
+  m_seeds.push_back(s[1]);
 
    ++m_events;
-  
+
     // as in crmchep.h
   int nParticles = 0;
   double impactParameter = -1.0;
- 
-    // generate event 
-  crmc_f_( m_iout, m_ievent ,nParticles, impactParameter, m_partID[0], m_partPx[0], m_partPy[0], m_partPz[0], 
-	   m_partEnergy[0], m_partMass[0], m_partStat[0]  );
+
+    // generate event
+  crmc_f_( m_iout, m_ievent ,nParticles, impactParameter, m_partID[0], m_partPx[0], m_partPy[0], m_partPz[0],
+           m_partEnergy[0], m_partMass[0], m_partStat[0]  );
 
   return StatusCode::SUCCESS;
 }
 
-// ---------------------------------------------------------------------- 
-StatusCode QGSJet::genFinalize() 
+// ----------------------------------------------------------------------
+StatusCode QGSJet::genFinalize()
 {
   ATH_MSG_INFO("QGSJet finalizing.");
 
@@ -309,9 +282,9 @@ StatusCode QGSJet::genFinalize()
     // retrieve information about the total cross-section from QGSJet
   double xsigtot, xsigine, xsigela, xsigdd, xsigsd, xsloela, xsigtotaa, xsigineaa, xsigelaaa;
   xsigtot = xsigine = xsigela = xsigdd = xsigsd = xsloela = xsigtotaa = xsigineaa = xsigelaaa = 0.0;
-   
+
   crmc_xsection_f_(xsigtot, xsigine, xsigela, xsigdd, xsigsd, xsloela, xsigtotaa, xsigineaa, xsigelaaa);
-  
+
   xsigtot *= 1000000;         // [mb] to [nb] conversion
   std::cout << "MetaData: cross-section (nb) = " << xsigtot << std::endl;
   xsigine *= 1000000;        //[mb] to [nb] conversion
@@ -328,8 +301,8 @@ StatusCode QGSJet::genFinalize()
   return StatusCode::SUCCESS;
 }
 
-// ---------------------------------------------------------------------- 
-StatusCode QGSJet::fillEvt( HepMC::GenEvent* evt ) 
+// ----------------------------------------------------------------------
+StatusCode QGSJet::fillEvt( HepMC::GenEvent* evt )
 {
   //  ATH_MSG_INFO( " QGSJet Filling.\n" );
 
@@ -354,19 +327,19 @@ StatusCode QGSJet::fillEvt( HepMC::GenEvent* evt )
     localhepevt_.jmohep[i][1] = std::max(localhepevt_.jmohep[i][0],localhepevt_.jmohep[i][1]);
     localhepevt_.jdahep[i][1] = std::max(localhepevt_.jdahep[i][0],localhepevt_.jdahep[i][1]);
     /// For some interesting reason EPOS marks beam particle parents as -1 -1
-    if (localhepevt_.jmohep[i][0] <= 0 && localhepevt_.jmohep[i][1] <= 0 ) 
+    if (localhepevt_.jmohep[i][0] <= 0 && localhepevt_.jmohep[i][1] <= 0 )
     {
       localhepevt_.jmohep[i][0] = 0;
       localhepevt_.jmohep[i][1] = 0;
       localhepevt_.isthep[i] = 4;
     }
-   } 
+   }
   /// Compiled!
   HepMC::HEPEVT_Wrapper::HEPEVT_to_GenEvent(evt);
-#else 
+#else
   HepMC::IO_HEPEVT hepio;
 
- 
+
   hepio.set_trust_mothers_before_daughters(0);
   hepio.set_print_inconsistency_errors(0);
   hepio.fill_next_event(evt);
@@ -386,17 +359,17 @@ GeVToMeV(evt);
 //    std::cout << " print::printing QGSJet " << std::endl;
 //    evt->print();
 #endif
- 
+
   std::vector<HepMC::GenParticlePtr> beams;
 
   for (auto p: *evt) {
     if (p->status() == 4) {
       beams.push_back(p);
     }
-  } 
+  }
 
  if (beams.size()>=2){
-  evt->set_beam_particles(beams[0], beams[1]); 
+  evt->set_beam_particles(beams[0], beams[1]);
  }
 
    int sig_id = -1;
@@ -430,4 +403,3 @@ GeVToMeV(evt);
 
  return StatusCode::SUCCESS;
 }
-

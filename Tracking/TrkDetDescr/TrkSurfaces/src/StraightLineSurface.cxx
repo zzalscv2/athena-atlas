@@ -94,6 +94,45 @@ Trk::StraightLineSurface::operator==(const Trk::Surface& sf) const
   return boundsEqual;
 }
 
+/** Use the Surface as a ParametersBase constructor, from local parameters -
+ * charged */
+Trk::Surface::ChargedTrackParametersUniquePtr
+Trk::StraightLineSurface::createUniqueTrackParameters(
+    double l1, double l2, double phi, double theta, double qop,
+    std::optional<AmgSymMatrix(5)> cov) const {
+  return std::make_unique<ParametersT<5, Charged, StraightLineSurface>>(
+      l1, l2, phi, theta, qop, *this, std::move(cov));
+}
+/** Use the Surface as a ParametersBase constructor, from global parameters -
+ * charged*/
+Trk::Surface::ChargedTrackParametersUniquePtr
+Trk::StraightLineSurface::createUniqueTrackParameters(
+    const Amg::Vector3D& position, const Amg::Vector3D& momentum, double charge,
+    std::optional<AmgSymMatrix(5)> cov) const {
+  return std::make_unique<ParametersT<5, Charged, StraightLineSurface>>(
+      position, momentum, charge, *this, std::move(cov));
+}
+
+/** Use the Surface as a ParametersBase constructor, from local parameters -
+ * neutral */
+Trk::Surface::NeutralTrackParametersUniquePtr
+Trk::StraightLineSurface::createUniqueNeutralParameters(
+    double l1, double l2, double phi, double theta, double qop,
+    std::optional<AmgSymMatrix(5)> cov) const {
+  return std::make_unique<ParametersT<5, Neutral, StraightLineSurface>>(
+      l1, l2, phi, theta, qop, *this, std::move(cov));
+}
+
+/** Use the Surface as a ParametersBase constructor, from global parameters -
+ * neutral */
+Trk::Surface::NeutralTrackParametersUniquePtr
+Trk::StraightLineSurface::createUniqueNeutralParameters(
+    const Amg::Vector3D& position, const Amg::Vector3D& momentum, double charge,
+    std::optional<AmgSymMatrix(5)> cov) const {
+  return std::make_unique<ParametersT<5, Neutral, StraightLineSurface>>(
+      position, momentum, charge, *this, std::move(cov));
+}
+
 // true local to global method - fully defined
 #if defined(__GNUC__)
 [[gnu::flatten]]
@@ -145,7 +184,7 @@ Trk::StraightLineSurface::globalToLocal(const Amg::Vector3D& glopos,
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-__attribute__ ((flatten))
+[[gnu::flatten]]
 #endif
 // isOnSurface check
 bool

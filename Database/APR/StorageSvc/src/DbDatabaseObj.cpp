@@ -220,7 +220,12 @@ const DbTypeInfo* DbDatabaseObj::objectShape(const Guid& id)  {
 const DbTypeInfo* DbDatabaseObj::objectShape(const TypeH& id)  {
   if ( 0 == m_info ) open();
   std::map<TypeH, const DbTypeInfo*>::const_iterator i = m_classMap.find(id);
-  return (i == m_classMap.end()) ? 0 : (*i).second;
+  if( i != m_classMap.end() ) return i->second;
+  if( id == m_string_t->clazz() or id.Name() == "string" ) {
+     // hack to enable reading DbStrings from KeyContainer::fetch()
+     return m_string_t;
+  }
+  return nullptr;
 }
 
 // Retrieve shape information for a specified object by container name
@@ -601,12 +606,13 @@ DbStatus DbDatabaseObj::retire()  {
       DbContainerObj* curr = (*j).second;
       curr->retire();
     }
+    DbStatus ret = Success;
     if ( m_info )    {
-      m_info->close(mode());
+      ret = m_info->close(mode());
     }
     cleanup();
     m_fileAge = 0;
-    return Success;
+    return ret;
   }
   return Error;
 }

@@ -57,6 +57,7 @@ private slots:
   void handleEtaCutSymmetry();
   void possibleChange_allowedEta();
   void possibleChange_allowedPhi();
+  void togglePhiCheckboxes();
 };
 
 #endif

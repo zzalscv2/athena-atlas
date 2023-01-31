@@ -1,31 +1,35 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-// ROOT include(s):
+#include "CxxUtils/checker_macros.h"
+#include "xAODRootAccess/tools/TEventFormatRegistry.h"
+
 #include <TFile.h>
 
-// Local include(s):
-#include "xAODRootAccess/tools/TEventFormatRegistry.h"
+#include <mutex>
 
 namespace xAOD {
 
-   TEventFormatRegistry& TEventFormatRegistry::instance() {
+   const TEventFormatRegistry& TEventFormatRegistry::instance() {
 
-      static TEventFormatRegistry instance;
+      static const TEventFormatRegistry instance;
       return instance;
    }
 
-   EventFormat& TEventFormatRegistry::getEventFormat( const TFile* file ) {
+   EventFormat& TEventFormatRegistry::getEventFormat( const TFile* file ) const {
 
-      return m_eventFormats[ file ];
+      static std::mutex mutex;
+      std::scoped_lock lock(mutex);
+      auto this_nc ATLAS_THREAD_SAFE = const_cast<TEventFormatRegistry*>(this);
+      return this_nc->m_eventFormats[ file ];
    }
 
    void TEventFormatRegistry::merge( const TFile* file,
                                      const EventFormat& ef ) {
 
       // Get the local EventFormat object:
-      EventFormat& localEf = m_eventFormats[ file ];
+      EventFormat& localEf = getEventFormat( file );
 
       // Loop over the contents of the new object:
       EventFormat::const_iterator itr = ef.begin();
@@ -36,8 +40,6 @@ namespace xAOD {
          // If not, let's add it:
          localEf.add( *( ef.get( itr->first ) ) );
       }
-
-      return;
    }
 
    TEventFormatRegistry::TEventFormatRegistry()

@@ -12,6 +12,7 @@
         <fileOffset>-1</fileOffset>
         <library>DFDcmEmuBackend</library>
         <loopOverFiles>False</loopOverFiles>
+        <maxInputFullEventSizeMb>5</maxInputFullEventSizeMb>
         <numEvents>-1</numEvents>
         <preload>False</preload>
         <rosHitStatFileName>ros_hitstats</rosHitStatFileName>

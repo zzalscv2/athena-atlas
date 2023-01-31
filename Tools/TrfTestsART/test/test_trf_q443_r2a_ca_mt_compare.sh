@@ -3,7 +3,7 @@
 # art-description: Reco_tf.py q443 RAWtoALL in MT and ComponentAccumulator mode
 # art-type: grid
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # art-athena-mt: 8
 
 mkdir ca
@@ -92,3 +92,13 @@ echo "============ diff-root def/myAOD_def.pool.root ca/myAOD_ca.pool.root"
 acmd.py diff-root def/myAOD_def.pool.root ca/myAOD_ca.pool.root --nan-equal --error-mode resilient --ignore-leaves RecoTimingObj_p1_HITStoRDO_timings RecoTimingObj_p1_RAWtoESD_mems RecoTimingObj_p1_RAWtoESD_timings RAWtoESD_mems RAWtoESD_timings ESDtoAOD_mems ESDtoAOD_timings HITStoRDO_timings RAWtoALL_mems RAWtoALL_timings RecoTimingObj_p1_RAWtoALL_mems RecoTimingObj_p1_RAWtoALL_timings RecoTimingObj_p1_EVNTtoHITS_timings EVNTtoHITS_timings RecoTimingObj_p1_Bkg_HITStoRDO_timings index_ref  --order-trees --entries 50 --mode semi-detailed
 rc8=$?
 echo "art-result: ${rc8} diff-root def/myAOD_def.pool.root ca/myAOD_ca.pool.root"
+
+echo "============ meta-diff def/myAOD_def.pool.root ca/myAOD_ca.pool.root"
+meta-diff --ordered --mode full --diff-format diff def/myAOD_def.pool.root ca/myAOD_ca.pool.root --drop file_guid file_size
+rc9=$?
+echo "art-result: ${rc9} meta-diff def/myAOD_def.pool.root ca/myAOD_ca.pool.root"
+
+echo "============ diff-root def/myESD_def.pool.root ca/myESD_ca.pool.root"
+acmd.py diff-root def/myESD_def.pool.root ca/myESD_ca.pool.root --nan-equal --error-mode resilient --order-trees --entries 10 --mode semi-detailed
+rc10=$?
+echo "art-result: ${rc10} diff-root def/myESD_def.pool.root ca/myESD_ca.pool.root"

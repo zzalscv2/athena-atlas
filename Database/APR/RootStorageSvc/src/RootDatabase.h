@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -22,7 +22,11 @@
 // Forward declarations
 class TFile;
 class TTree;
+class TBranch;
 class IFileMgr;
+namespace RootAuxDynIO {
+   class IRootAuxDynReader;
+}
 
 /*
  * POOL namespace declaration
@@ -44,6 +48,7 @@ namespace pool  {
    {
   public:
     enum { READ_COUNTER = 0, WRITE_COUNTER = 1, OTHER_COUNTER = 2 };
+
   private:
     /// Parent Database handle
     DbDatabase    m_dbH;
@@ -82,7 +87,7 @@ namespace pool  {
     long long     m_indexMasterID;
 
     /// marks if the index (for index Containers) was rebuilt for given TTree
-    std::set< std::string> m_indexRebuilt;
+    std::set< std::string > m_indexRebuilt;
 
     /* ---  variables used with TREE_AUTO_FLUSH option for
             managing combined TTree::Fill for branch containers
@@ -100,6 +105,9 @@ namespace pool  {
 
     // mutex to prevent concurrent read I/O from AuxDynReader
     std::recursive_mutex  m_iomutex;
+
+    // remember all branchAuxTrees created for Fill at Commit
+    std::map<TTree*, TTree*>  m_branchAuxTreeMap;
 
   public:
     /// Standard Constuctor
@@ -198,6 +206,18 @@ namespace pool  {
 
     /// Execute Database Transaction action
     virtual DbStatus transAct(Transaction::Action action);
-  };
+
+  protected:
+    // Execute any pending Fills before commit or flush
+    DbStatus            fillBranchContainerTrees();
+
+    // Reduce branches' baskets' size to m_maxBufferSize for a give TTree
+    void                reduceBasketsSize(TTree* tree);
+
+    void                increaseBasketsSize(TTree* tree);
+
+    DbStatus close();
+   };
+
 }       // End namespace pool
 #endif  /* POOL_ROOTSTORAGESVC_ROOTDBASE_H */

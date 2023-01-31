@@ -33,7 +33,7 @@ SensorSim3DTool::SensorSim3DTool(const std::string& type, const std::string& nam
   SensorSimTool(type, name, parent) {
 }
 
-SensorSim3DTool::~SensorSim3DTool() { }
+SensorSim3DTool::~SensorSim3DTool() = default;
 
 //===============================================
 //    I N I T I A L I Z E
@@ -156,9 +156,7 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
     std::vector<double> rdifElectron (ncharges, 0.);
     std::vector<double> rdifHole (ncharges, 0.);
 
-    for (size_t istep = 0; istep < trfHitRecord.size(); istep++) {
-      std::pair< double,double> const & iHitRecord = trfHitRecord[istep];
-
+    for (auto & iHitRecord : trfHitRecord) {
       double eta_i = eta_0;
       double phi_i = phi_0;
       double depth_i = depth_0;
@@ -513,9 +511,7 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
     //**************************************//
     //*** Now diffuse charges to surface *** //
     //**************************************//
-    for (unsigned int istep = 0; istep < trfHitRecord.size(); istep++) {
-      std::pair<double, double> iHitRecord = trfHitRecord[istep];
-
+    for (auto iHitRecord : trfHitRecord) {
       double eta_i = eta_0;
       double phi_i = phi_0;
       double depth_i = depth_0;

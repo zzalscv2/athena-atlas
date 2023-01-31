@@ -18,7 +18,7 @@ def ITkStripLorentzAngleToolCfg(flags, name="ITkStripLorentzAngleTool", **kwargs
     return acc
 
 def ITkStripLorentzAngleCondAlgCfg(flags, name="ITkStripSiLorentzAngleCondAlg",
-                                   forceUseGeoModel=False, **kwargs):
+                                   forceUseGeoModel=True, **kwargs):
     # Condition algorithm
     # construct with field services
     acc = AtlasFieldCacheCondAlgCfg(flags)

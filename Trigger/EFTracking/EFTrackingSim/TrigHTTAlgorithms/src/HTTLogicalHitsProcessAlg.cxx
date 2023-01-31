@@ -51,7 +51,7 @@ StatusCode HTTLogicalHitsProcessAlg::initialize()
     std::stringstream ss(m_description);
     std::string line;
     ATH_MSG_INFO("Tag config:");
-    if (m_description != nullptr) {
+    if (!m_description.empty()) {
         while (std::getline(ss, line, '\n')) {
             ATH_MSG_INFO('\t' << line);
         }
@@ -97,6 +97,11 @@ StatusCode HTTLogicalHitsProcessAlg::initialize()
       m_outputHitTxtStream.open(m_outputHitTxtName);
     }
 
+
+    if (!m_monTool.empty())
+        ATH_CHECK(m_monTool.retrieve());
+
+
     ATH_MSG_DEBUG("initialize() Finished");
     return StatusCode::SUCCESS;
 }
@@ -141,6 +146,12 @@ StatusCode HTTLogicalHitsProcessAlg::execute()
 
     // Get reference to hits
     unsigned regionID = m_evtSel->getRegionID();
+
+
+    // Recording Data
+    auto mon_regionID = Monitored::Scalar<unsigned>("regionID", regionID);
+    Monitored::Group(m_monTool, mon_regionID);
+
     std::vector<HTTHit> const & hits_1st = m_logicEventHeader_1st->towers().at(regionID).hits();
 
     TIME(m_tprocess);
@@ -300,6 +311,7 @@ StatusCode HTTLogicalHitsProcessAlg::execute()
         roadCount++;
       }
     }
+
 
     // Reset data pointers
     m_eventHeader.reset();

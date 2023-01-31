@@ -97,10 +97,6 @@ def PrepareStandAloneBTagCfg(inputFlags):
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     result.merge(PoolReadCfg(inputFlags))
 
-    from TrkConfig.AtlasTrackingGeometrySvcConfig import TrackingGeometrySvcCfg
-    acc = TrackingGeometrySvcCfg(inputFlags)
-    result.merge(acc)
-
     # get standard config for magnetic field - map and cache
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     result.merge(AtlasFieldCacheCondAlgCfg( inputFlags ))
@@ -168,9 +164,9 @@ def registerOutputBTaggingContainers(flags, JetCollection, suffix = ''):
 
 if __name__=="__main__":
 
-    inputESD = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc20e_13TeV/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.ESD.e4993_s3227_r12689/myESD.pool.root"
+    inputESD = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc21_13p6TeV/ESDFiles/mc21_13p6TeV.421450.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep_fct.recon.ESD.e8445_e8447_s3822_r13565/ESD.28877240._000046.pool.root.1"
     import argparse
-    parser = argparse.ArgumentParser(prog="BTagRun3Config: An example configuration module for btagging reconstruction reading an ESD",
+    parser = argparse.ArgumentParser(prog="BTagConfig: An example configuration module for btagging reconstruction reading an ESD",
                             usage="Call with an input file, pass -n=0 to skip execution, -t 0 for serial or 1 for threaded execution.")
     parser.add_argument("-f", "--filesIn", default = inputESD, type=str, help="Comma-separated list of input files")
     parser.add_argument("-t", "--nThreads", default=1, type=int, help="The number of concurrent threads to run. 0 uses serial Athena.")
@@ -178,11 +174,9 @@ if __name__=="__main__":
 
     args = parser.parse_args()
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as cfgFlags
-
-    cfgFlags.Input.Files= args.filesIn.split(",")
-    #cfgFlags.Input.isMC=False
-    #cfgFlags.Input.Files=["/atlas/guirriec/git-athena/q431_2019-03-02T2147/myESD_2019.pool.root"]
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    cfgFlags = initConfigFlags()
+    cfgFlags.Input.Files= args.filesIn.split(",")    
 
     cfgFlags.Output.ESDFileName="esdOut.pool.root"
 
@@ -210,7 +204,8 @@ if __name__=="__main__":
 
     acc.setAppProperty("EvtMax",-1)
 
-    acc.run()
     f=open("BTag.pkl","wb")
     acc.store(f)
     f.close()
+
+    acc.run()

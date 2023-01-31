@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile hits to TTL1 algorithm"""
 
@@ -12,7 +12,7 @@ def TileHitToTTL1Cfg(flags, **kwargs):
     """Return component accumulator with configured Tile hits to TTL1 algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     kwargs.setdefault('name', 'TileHitToTTL1')
@@ -38,9 +38,8 @@ def TileHitToTTL1Cfg(flags, **kwargs):
         badChannelsTool = acc.popToolsAndMerge( TileBadChanToolCfg(flags) )
         kwargs['TileBadChanTool'] = badChannelsTool
 
-    if 'TileCondToolEmscale' not in kwargs:
-        from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-        kwargs['TileCondToolEmscale'] = acc.popToolsAndMerge(TileCondToolEmscaleCfg(flags))
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault('TileTTL1Container', flags.Overlay.BkgPrefix + 'TileTTL1Cnt')
@@ -71,7 +70,7 @@ def TileHitToTTL1CosmicsCfg(flags, **kwargs):
     """Return component accumulator with configured Tile hits to TTL1 algorithm for cosmics
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     kwargs.setdefault('name', 'TileHitToTTL1_Cosmics')
@@ -117,7 +116,7 @@ def TileHitToTTL1OutputCfg(flags, **kwargs):
     """Return component accumulator with configured Tile hits to TTL1 algorithm and Output Stream
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     acc = TileHitToTTL1Cfg(flags, **kwargs)
@@ -130,7 +129,7 @@ def TileHitToTTL1CosmicsOutputCfg(flags, **kwargs):
     """Return component accumulator with configured Tile hits to TTL1 algorithm for cosmics and Output Stream
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     acc = TileHitToTTL1CosmicsCfg(flags, **kwargs)
@@ -141,7 +140,7 @@ def TileHitToTTL1CosmicsOutputCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -149,29 +148,30 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.HITS_RUN2
-    ConfigFlags.IOVDb.GlobalTag = 'OFLCOND-MC16-SDR-16'
-    ConfigFlags.Digitization.PileUp = False
-    ConfigFlags.Output.RDOFileName = "myRDO.pool.root"
-    ConfigFlags.Exec.MaxEvents = 3
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.HITS_RUN2
+    flags.IOVDb.GlobalTag = 'OFLCOND-MC16-SDR-16'
+    flags.Digitization.PileUp = False
+    flags.Output.RDOFileName = "myRDO-TileHitToTTL1.pool.root"
+    flags.Exec.MaxEvents = 3
+    flags.fillFromArgs()
+    flags.lock()
 
     # Construct our accumulator to run
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
+    acc = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    acc.merge(PoolReadCfg(ConfigFlags))
+    acc.merge(PoolReadCfg(flags))
 
-    if 'EventInfo' not in ConfigFlags.Input.Collections:
+    if 'EventInfo' not in flags.Input.Collections:
         from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-        acc.merge(EventInfoCnvAlgCfg(ConfigFlags,
+        acc.merge(EventInfoCnvAlgCfg(flags,
                                      inputKey='McEventInfo',
                                      outputKey='EventInfo'))
 
-    acc.merge( TileHitToTTL1OutputCfg(ConfigFlags) )
-    ConfigFlags.dump()
+    acc.merge( TileHitToTTL1OutputCfg(flags) )
+    flags.dump()
 
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.store( open('TileHitToTTL1.pkl','wb') )

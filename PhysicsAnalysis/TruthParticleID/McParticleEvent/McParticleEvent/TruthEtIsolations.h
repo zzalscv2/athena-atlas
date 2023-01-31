@@ -23,9 +23,6 @@
 #include <stdexcept>
 #include <unordered_map>
 
-// Boost includes
-#include "boost/array.hpp"
-
 // Gaudi includes
 
 #include "AthLinks/ElementLink.h"

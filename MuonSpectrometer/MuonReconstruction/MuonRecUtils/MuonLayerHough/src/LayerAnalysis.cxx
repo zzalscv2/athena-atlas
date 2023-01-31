@@ -399,8 +399,6 @@ namespace MuonHough {
         std::vector<double> rmin(3, 1e9);
         std::vector<double> rmax(3, -1e9);
         std::vector<std::vector<TObject*>> shapes(3);
-        unsigned int ntubes(0);
-        unsigned int nstrips(0);
 
         // loop over layers in sector
         for (SectorData::const_iterator it = data.begin(); it != data.end(); ++it) {
@@ -437,7 +435,6 @@ namespace MuonHough {
                         tube->SetLineWidth(5);
                     }
                     tube->Draw("SAME");
-                    ++ntubes;
                 } else {
                     TLine* box = new TLine(hit.x, hit.ymin - 5, hit.x, hit.ymax + 5);
                     int color = 1;
@@ -449,7 +446,6 @@ namespace MuonHough {
                         box->SetLineWidth(5);
                     }
                     shapes[layer].push_back(box);
-                    ++nstrips;
                 }
             }
         }

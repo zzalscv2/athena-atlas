@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackSteering.h"
@@ -82,11 +82,6 @@ namespace Muon {
             ATH_CHECK(m_trackSelector.retrieve());
             ATH_MSG_INFO("Track selection enabled: " << m_trackSelector);
         }
-        if (!m_segmentMerger.empty()) {
-            ATH_CHECK(m_segmentMerger.retrieve());
-            ATH_MSG_INFO("Segment merging enabled: " << m_segmentMerger);
-        }
-
         return StatusCode::SUCCESS;
     }
 
@@ -111,16 +106,10 @@ namespace Muon {
                                             ChSet& chambersWithSegments, StSet& stationsWithSegments, GarbageContainer& trash_bin) const {
         if (coll.empty()) return false;
 
-        MuonSegmentCollection theSegments;
-        if (!m_segmentMerger.empty()) {
-            theSegments = m_segmentMerger->findDuplicates(coll);
-        } else {
-            theSegments = coll;
-        }
-        ATH_MSG_DEBUG("New collection " << theSegments.size());
+        ATH_MSG_DEBUG("New collection " << coll.size());
 
         // Sort the input collection by chamber & station IDs
-        for (const MuonSegment* segment : theSegments) {
+        for (const MuonSegment* segment : coll) {
             ATH_MSG_DEBUG("Adding segment ");
             std::unique_ptr<MuPatSegment> aSeg = m_candidateTool->createSegInfo(ctx, *segment, trash_bin);
             ATH_MSG_DEBUG(" -> MuPatSegment " << m_candidateTool->print(*aSeg));
@@ -523,7 +512,7 @@ namespace Muon {
 
                         // generate a track summary for this track
                         if (m_trackSummaryTool.isEnabled()) {
-                            m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *segmentTrack, nullptr, false);
+                            m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *segmentTrack, false);
                         }
 
                         std::unique_ptr<MuPatTrack> can = m_candidateTool->createCandidate(*sit, segmentTrack, trash_bin);
@@ -671,7 +660,7 @@ namespace Muon {
             else
                 track = &thisTrack;
             // add track summary to this track
-            if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(*track, nullptr, false); }
+            if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(*track, false); }
             result->push_back(track);
         }
         return result;

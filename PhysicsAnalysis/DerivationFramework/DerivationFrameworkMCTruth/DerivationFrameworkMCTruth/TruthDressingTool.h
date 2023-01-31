@@ -30,6 +30,8 @@ namespace DerivationFramework {
       std::string m_dressParticlesKey;
       /// Parameter: Use photons from hadron decays?
       bool m_usePhotonsFromHadrons;
+      /// Parameter: Use leptons from hadron decays?
+      bool m_useLeptonsFromHadrons;
       /// Parameter: Cone size for dressing
       float m_coneSize;
       /// Parameter: List of pdgIDs of particles to dress

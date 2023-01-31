@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TrackParticleCnvAlg.cxx 298303 2013-12-05 08:41:30Z emoyse $
@@ -55,6 +55,7 @@ TrackParticleCnvAlg::initialize()
   ATH_CHECK(m_xaodTrackParticlesout.initialize(m_convertAODTrackParticles));
   ATH_CHECK(m_aod.initialize(m_convertAODTrackParticles));
   ATH_CHECK(m_tracks.initialize(m_convertTracks));
+  ATH_CHECK(m_primaryVertexContainer.initialize(!m_primaryVertexContainer.key().empty()));
   ATH_CHECK(m_truthParticleLinkVec.initialize(m_addTruthLink));
   ATH_CHECK(
     m_aodTruth.initialize(m_addTruthLink && m_convertAODTrackParticles));
@@ -92,6 +93,7 @@ TrackParticleCnvAlg::execute(const EventContext& ctx) const
   const TrackParticleTruthCollection* aodTruth = nullptr;
   const TrackTruthCollection* trackTruth = nullptr;
   const ObservedTrackMap* tracksMap = nullptr;
+  const xAOD::Vertex* primaryVertex = nullptr;
 
   //timer object for total execution time
   auto mnt_timer_Total  = Monitored::Timer<std::chrono::milliseconds>("TIME_Total");
@@ -150,6 +152,40 @@ TrackParticleCnvAlg::execute(const EventContext& ctx) const
     } else
       truthLinks = rh_truthParticleLinkVec.cptr();
   }
+
+  if(!m_primaryVertexContainer.key().empty())
+  {
+    SG::ReadHandle<xAOD::VertexContainer> vtx_container(m_primaryVertexContainer, ctx);
+    if (!vtx_container.isValid()) {
+      ATH_MSG_WARNING("No xAOD::VertexContainer with key "<< m_primaryVertexContainer.key() << " found. Do nothing.");
+      return StatusCode::SUCCESS;
+    }
+    const xAOD::Vertex* dummyVertex = nullptr;
+    for(auto vtx : *vtx_container) {
+      if(vtx->vertexType()==xAOD::VxType::PriVtx) {
+        primaryVertex = vtx;
+        break;
+      }
+      if(vtx->vertexType()==xAOD::VxType::NoVtx) {
+        // in case of no primary vertex
+        dummyVertex = vtx;
+      }
+    }
+    if(!primaryVertex)
+    {
+      if(dummyVertex)
+      {
+        ATH_MSG_INFO("No primary vertex found, will use dummy vertex at "<<dummyVertex->x()<<","<<dummyVertex->y()<<","<<dummyVertex->z());
+        primaryVertex=dummyVertex;
+      }
+      else
+      {
+        ATH_MSG_WARNING("Neither primary nor dummy vertex found. Do Nothing.");
+        return StatusCode::SUCCESS;
+      }
+    }
+  }
+
   if (m_convertTracks) {
     SG::WriteHandle<xAOD::TrackParticleContainer> wh_xaodout(m_xaodout, ctx);
     ATH_CHECK(
@@ -170,11 +206,11 @@ TrackParticleCnvAlg::execute(const EventContext& ctx) const
       }
 
       convert(
-        (*tracks), trackTruth, m_TrackCollectionCnvTool, wh_xaodout, truthLinks, tracksMap);
+        (*tracks), trackTruth, m_TrackCollectionCnvTool, wh_xaodout, truthLinks, primaryVertex, tracksMap);
     }
     else{
       convert(
-        (*tracks), trackTruth, m_TrackCollectionCnvTool, wh_xaodout, truthLinks);
+        (*tracks), trackTruth, m_TrackCollectionCnvTool, wh_xaodout, truthLinks, primaryVertex);
     }
     // Monitor track parameters
     if (m_doMonitoring)
@@ -250,6 +286,7 @@ TrackParticleCnvAlg::convert(
   CONVTOOL& conv_tool,
   SG::WriteHandle<xAOD::TrackParticleContainer>& xaod,
   const xAODTruthParticleLinkVector* truthLinkVec,
+  const xAOD::Vertex* primaryVertex,
   const ObservedTrackMap* obs_track_map /*=0*/) const
 {
   // Create the xAOD container and its auxiliary store:
@@ -259,14 +296,14 @@ TrackParticleCnvAlg::convert(
   ATH_MSG_DEBUG("calling the converting tool for " << xaod.name());
   // Augment track particles using track map if available
   if (obs_track_map){
-    if (conv_tool->convertAndAugment(&container, xaod.ptr(), obs_track_map).isFailure()) {
+    if (conv_tool->convertAndAugment(&container, xaod.ptr(), obs_track_map, primaryVertex).isFailure()) {
       ATH_MSG_ERROR("Couldn't convert and augment aod to xaod ("
                     << xaod.name() << ") with the converting tool");
       return -1;
     }
   }
   else{
-    if (conv_tool->convert(&container, xaod.ptr()).isFailure()) {
+    if (conv_tool->convert(&container, xaod.ptr(), primaryVertex).isFailure()) {
       ATH_MSG_ERROR("Couldn't convert aod to xaod ("
                     << xaod.name() << ") with the converting tool");
       return -1;
@@ -307,9 +344,6 @@ TrackParticleCnvAlg::convert(
 	  ntrt = ts->get(Trk::numberOfTRTHits);
 	  nscth= ts->get(Trk::numberOfSCTHoles);
 	  npixh= ts->get(Trk::numberOfPixelHoles);
-	  npixshim = ts->get(Trk::numberOfInnermostPixelLayerSharedHits);
-	  npixsplit= ts->get(Trk::numberOfPixelSplitHits);
-	  
 	}
       }
       msg() << MSG::DEBUG << "REGTEST: " << std::setw(5) << trackCounter
@@ -319,7 +353,6 @@ TrackParticleCnvAlg::convert(
 	    << "  d0:  " << particle->d0()
 	    << "  z0:  " << particle->z0()
 	    << "\t" << npix << "/" << nsct << "/" << ntrt << "/holes/" << npixh << "/" << nscth
-	    << "/sharedIM/" << npixshim << "/pixsplit/" << npixsplit 
 	    << endmsg;
 
     }

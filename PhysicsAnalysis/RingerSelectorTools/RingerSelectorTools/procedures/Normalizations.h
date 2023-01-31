@@ -25,7 +25,6 @@
 #include "RingerSelectorTools/procedures/IRingerProcedure.h"
 #include "RingerSelectorTools/tools/RingerIOVarDepObj.h"
 #include "RingerSelectorTools/tools/VariableDependency.h"
-#include "RingerSelectorTools/tools/RedirectMsgStream.h"
 
 /**
  * @brief Namespace dedicated for Ringer utilities

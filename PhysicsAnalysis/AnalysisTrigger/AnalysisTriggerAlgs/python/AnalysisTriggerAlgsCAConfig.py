@@ -10,7 +10,7 @@ def RoIBResultToxAODCfg(flags):
     if flags.Trigger.enableL1MuonPhase1 and not flags.Trigger.enableL1CaloLegacy:
         # No Run-2 L1 RoIs -> nothing to covert to xAOD -> don't add RoIBResultToxAOD
         _log.debug('Not adding RoIBResultToxAOD because no Run-2 L1 system is enabled by flags')
-        return ComponentAccumulator()
+        return ComponentAccumulator(), []
 
     acc = ComponentAccumulator()
     alg = CompFactory.RoIBResultToxAOD('RoIBResultToxAOD')
@@ -28,7 +28,7 @@ def RoIBResultToxAODCfg(flags):
 
     if not alg.DoMuon and not alg.DoCalo:
         _log.debug('Not adding RoIBResultToxAOD because both DoMuon and DoCalo properties are False')
-        return ComponentAccumulator()
+        return ComponentAccumulator(), []
 
     if flags.Input.Format is Format.BS:
         from TrigT1CaloByteStream.LVL1CaloRun2ByteStreamConfig import LVL1CaloRun2ReadBSCfg
@@ -66,13 +66,12 @@ def RoIBResultToxAODCfg(flags):
 
 if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaCommon import Configurable
-    Configurable.ConfigurableRun3Behavior = 1
     from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     flags.Input.Files = defaultTestFiles.RAW
     flags.Exec.MaxEvents = 20
+    flags.fillFromArgs()
     flags.lock()
 
     topCA = MainServicesCfg(flags)

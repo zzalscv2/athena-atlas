@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,9 +19,6 @@ namespace Trk {
 
     class Surface;
 
-  /** Interface ID for ISurfaceBuilders*/  
-  static const InterfaceID IID_ISurfaceBuilder("ISurfaceBuilder", 1, 0);
-  
   /** @class ISurfaceBuilder
   
     Interface class ISurfaceBuilders
@@ -33,11 +30,11 @@ namespace Trk {
   class ISurfaceBuilder : virtual public IAlgTool {
     
     public:
+    /// Creates the InterfaceID and interfaceID() method
+    DeclareInterfaceID(ISurfaceBuilder, 1, 0);
+
       /**Virtual destructor*/
       virtual ~ISurfaceBuilder(){}
-      
-      /** AlgTool and IAlgTool interface methods */
-      static const InterfaceID& interfaceID() { return IID_ISurfaceBuilder; }
 
       /** SurfaceBuilder interface method - provide a vector of surfaces - */
       virtual const std::vector< const Surface* >* surfaces() const = 0; 

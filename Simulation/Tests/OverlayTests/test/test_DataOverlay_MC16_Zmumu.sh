@@ -22,7 +22,7 @@ OverlayChain_tf.py \
 --geometryVersion ATLAS-R2-2015-03-01-00 \
 --conditionsTag CONDBR2-BLKPA-2016-12-01 \
 --digiSeedOffset1=211 --digiSeedOffset2=122 \
---samplingFractionDbTag FTFP_BERT_BIRK --fSampltag LARElecCalibMCfSampl-G496-19213- \
+--samplingFractionDbTag FTFP_BERT_BIRK \
 --preInclude 'sim:EventOverlayJobTransforms/custom.py,EventOverlayJobTransforms/magfield.py' 'overlayBS:EventOverlayJobTransforms/custom.py' \
 --preExec 'from LArROD.LArRODFlags import larRODFlags;larRODFlags.nSamples.set_Value_and_Lock(4);from LArConditionsCommon.LArCondFlags import larCondFlags; larCondFlags.OFCShapeFolder.set_Value_and_Lock("4samples1phase")' \
 --postInclude 'sim:EventOverlayJobTransforms/Rt_override_CONDBR2-BLKPA-2015-12.py,EventOverlayJobTransforms/muAlign.py,EventOverlayJobTransforms/g4runnumber.py' 'overlayBS:EventOverlayJobTransforms/Rt_override_CONDBR2-BLKPA-2015-12.py' \
@@ -51,15 +51,17 @@ then
 fi
 echo "art-result: $rc2 reco"
 
-rc3=-9999
-if [ $rc -eq 0 ]
-then
-    ArtPackage=$1
-    ArtJobName=$2
-    art.py compare grid --entries 10 "${ArtPackage}" "${ArtJobName}" --mode=semi-detailed --file testRTT.RDO.pool.root --diff-root
-    rc3=$?
-    status=$rc3
+if command -v art.py >/dev/null 2>&1; then
+    rc3=-9999
+    if [ $rc -eq 0 ]
+    then
+        ArtPackage=$1
+        ArtJobName=$2
+        art.py compare grid --entries 10 "${ArtPackage}" "${ArtJobName}" --mode=semi-detailed --file testRTT.RDO.pool.root --diff-root
+        rc3=$?
+        status=$rc3
+    fi
+    echo "art-result: $rc3 regression"
 fi
-echo "art-result: $rc3 regression"
 
 exit $status

@@ -1,12 +1,13 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the name of this package:
-atlas_subdir( AthLinks )
+atlas_subdir( AthLinksSA )
 
 # This package uses ROOT:
 find_package( ROOT COMPONENTS Core )
 
-# Build a library that other components can link against:
+# Build a library that other components can link against. The name
+# is the same as for the standard AthLinks package (see README.md):
 atlas_add_library( AthLinks
    AthLinks/*.h AthLinks/*.icc AthLinks/tools/*.h Root/*.cxx
    PUBLIC_HEADERS AthLinks

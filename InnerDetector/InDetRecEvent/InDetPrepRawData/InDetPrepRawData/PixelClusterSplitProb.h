@@ -36,20 +36,13 @@ namespace InDet {
       m_splitProbabilities(splitProbabilities)
     {}
 
-    /** copy constructor */
-    PixelClusterSplitProb(const PixelClusterSplitProb& pcp) : 
-      m_splitProbabilities(pcp.m_splitProbabilities)
-    {}
-    
-    /** assignment */
-    PixelClusterSplitProb & operator=(const PixelClusterSplitProb & rhs){
-    	if (&rhs == this) return *this;
-    	m_splitProbabilities = rhs.m_splitProbabilities;
-    	return *this;
-    }
-    
+    /** default operations */
+    PixelClusterSplitProb(const PixelClusterSplitProb& pcp) = default;
+    PixelClusterSplitProb & operator=(const PixelClusterSplitProb & rhs) = default;
+    PixelClusterSplitProb(PixelClusterSplitProb&& pcp) = default;
+    PixelClusterSplitProb & operator=(PixelClusterSplitProb&& rhs) = default;
     /** destructor */
-    ~PixelClusterSplitProb(){}
+    ~PixelClusterSplitProb() = default;
     
     /** return method : total split probability */
     double splitProbability(unsigned int nParticles=2) const;

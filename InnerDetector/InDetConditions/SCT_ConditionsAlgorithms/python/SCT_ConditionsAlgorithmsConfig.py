@@ -142,28 +142,29 @@ if __name__=="__main__":
 
     algorithm = ""
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.isMC = False
-    ConfigFlags.Input.Files = ["./myESD.pool.root"]
-    ConfigFlags.Input.ProjectName = "data17_13TeV" # q431 input
-    ConfigFlags.Input.RunNumber = 330470 # q431 input
-    ConfigFlags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2018-03" # q431 setup
-    ConfigFlags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01" # q431 setup
-    ConfigFlags.lock()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.isMC = False
+    flags.Input.Files = ["./myESD.pool.root"]
+    flags.Input.ProjectName = "data17_13TeV" # q431 input
+    flags.Input.RunNumber = 330470 # q431 input
+    flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2018-03" # q431 setup
+    flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01" # q431 setup
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg.merge(PoolReadCfg(flags))
 
     algkwargs = {}
     algkwargs["OutputLevel"] = INFO
     if algorithm == "AlignCondAlg":
-        cfg.merge(SCT_AlignCondAlgCfg(ConfigFlags, **algkwargs))
+        cfg.merge(SCT_AlignCondAlgCfg(flags, **algkwargs))
     elif algorithm == "ConfigurationCondAlg":
-        cfg.merge(SCT_ConfigurationCondAlgCfg(ConfigFlags, **algkwargs))
+        cfg.merge(SCT_ConfigurationCondAlgCfg(flags, **algkwargs))
     elif algorithm == "DetectorElementCondAlg":
-        cfg.merge(SCT_DetectorElementCondAlgCfg(ConfigFlags, **algkwargs))
+        cfg.merge(SCT_DetectorElementCondAlgCfg(flags, **algkwargs))
 
     cfg.run(maxEvents=25)

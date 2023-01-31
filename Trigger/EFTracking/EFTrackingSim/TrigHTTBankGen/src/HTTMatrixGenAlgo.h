@@ -144,11 +144,11 @@ class HTTMatrixGenAlgo : public AthAlgorithm
         // Histograms
 
         // These are ordered as in HTTTrackPars, phi, curvature, d0, z0, eta
-        TH1I* m_h_trainingTrack[HTTTrackPars::NPARS];
-        TH1I* m_h_sectorPars[HTTTrackPars::NPARS];
-        TH1I* m_h_SHfailure[HTTTrackPars::NPARS];
-        TH1I* m_h_3hitsInLayer[HTTTrackPars::NPARS];
-        TH1I* m_h_notEnoughHits[HTTTrackPars::NPARS];
+        TH1I* m_h_trainingTrack[HTTTrackPars::NPARS]{};
+        TH1I* m_h_sectorPars[HTTTrackPars::NPARS]{};
+        TH1I* m_h_SHfailure[HTTTrackPars::NPARS]{};
+        TH1I* m_h_3hitsInLayer[HTTTrackPars::NPARS]{};
+        TH1I* m_h_notEnoughHits[HTTTrackPars::NPARS]{};
 
         TH1I* m_h_trackQoP_okHits = nullptr;
         TH1I* m_h_trackQoP_okRegion = nullptr;

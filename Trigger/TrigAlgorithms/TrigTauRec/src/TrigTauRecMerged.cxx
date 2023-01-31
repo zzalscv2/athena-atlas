@@ -394,7 +394,6 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
   //-------------------------------------------------------------------------
   // loop over booked tau tools
   //-------------------------------------------------------------------------
-  int toolnum = 0;
   processStatus = StatusCode::SUCCESS;
   
   // dummy container passed to TauVertexVariables, not used in trigger though
@@ -406,7 +405,6 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
     // loop stops only when Failure indicated by one of the tools
     ATH_MSG_DEBUG("Starting Tool: " <<  tool->name() );
     // time in the various tools
-    ++toolnum;
 
     if (tool->type() == "TauVertexFinder" ) {
       processStatus = tool->executeVertexFinder(*p_tau,RoIVxContainer);

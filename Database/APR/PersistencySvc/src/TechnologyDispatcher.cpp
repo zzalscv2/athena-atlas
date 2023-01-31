@@ -85,11 +85,13 @@ pool::PersistencySvc::TechnologyDispatcher::microSessionManager( const std::stri
   }
 }
 
-void
+bool
 pool::PersistencySvc::TechnologyDispatcher::disconnectAll()
 {
+  bool ret = true;
   for ( std::map< long, pool::PersistencySvc::MicroSessionManager* >::iterator iManager = m_technologyTypes.begin();
         iManager != m_technologyTypes.end(); ++iManager ) {
-    iManager->second->disconnectAll();
+    if (!iManager->second->disconnectAll()) ret = false;
   }
+  return ret;
 }

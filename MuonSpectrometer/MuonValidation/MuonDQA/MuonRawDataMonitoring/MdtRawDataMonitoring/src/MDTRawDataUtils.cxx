@@ -1032,8 +1032,7 @@ StatusCode MdtRawDataValAlg::fillMDTMaskedTubes(IdentifierHash idHash, const std
     }
 
     std::set<Identifier> noisyTubes = m_masked_tubes->getNoiseList(idHash);
-    for (std::set<Identifier>::const_iterator itr = noisyTubes.begin(); itr != noisyTubes.end(); ++itr) {
-        Identifier digcoll_id = *itr;
+    for (auto digcoll_id : noisyTubes) {
         int mdtlayer = m_idHelperSvc->mdtIdHelper().tubeLayer(digcoll_id);
         if (m_idHelperSvc->mdtIdHelper().multilayer(digcoll_id) == 2) {
             if (hardware_name.at(1) == 'I' && hardware_name.at(3) != '8')
@@ -1060,7 +1059,7 @@ void MdtRawDataValAlg::mdtchamberId() {
     IdContext mdtModuleContext = m_idHelperSvc->mdtIdHelper().module_context();
     Identifier Id;
     IdentifierHash Idhash;
-    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; i++) {
+    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; ++i) {
         Id = *i;
         int gethash_code = m_idHelperSvc->mdtIdHelper().get_hash(Id, Idhash, &mdtModuleContext);
         m_chambersId.push_back(Id);
@@ -1075,8 +1074,7 @@ void MdtRawDataValAlg::mdtchamberId() {
         }
     }
 
-    return;
-}
+    }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 int MdtRawDataValAlg::mezzmdt(Identifier digcoll_id) {  // int mezz_chamber, int mezz_eta, int mezz_ml, int mezz_tube, int max_tube) {
@@ -1129,8 +1127,8 @@ int MdtRawDataValAlg::GetTubeMax(const Identifier& digcoll_id, std::string_view 
 }
 
 bool MdtRawDataValAlg::AinB(int A, std::vector<int>& B) {
-    for (unsigned int i = 0; i < B.size(); ++i) {
-        if (B.at(i) == A) return true;
+    for (int i : B) {
+        if (i == A) return true;
     }
     return false;
 }

@@ -180,11 +180,11 @@ def createMonTool( flags, slicetag, chain ) :
     defineHisto( monTool,  "Eff_d0",     path=mypath, type="TProfile", title="d0 efficiency",       xbins=d0bins     ) 
     defineHisto( monTool,  "Eff_z0",     path=mypath, type="TProfile", title="z0 efficiency",       xbins=50,   xmin=-225., xmax=225. )
     defineHisto( monTool,  "Eff_nVtx",   path=mypath, type="TProfile", title="nVtx efficiency",     xbins=71,   xmin=-0.5,  xmax=70.5 )
-    defineHisto( monTool,  "Eff_lb",     path=mypath, type="TProfile", title="efficinecy vs lumiblock",      xbins=301, xmin=-0.5, xmax=3009.5 )
+    defineHisto( monTool,  "Eff_lb",     path=mypath, type="TProfile", title="efficinecy vs lumiblock",      xbins=3010, xmin=-0.5, xmax=3009.5 )
     
     defineHisto( monTool,  "trkvtx_x_vs_lb", path=mypath, type="TProfile", title="track vertex x vs lumiblock", xbins=301, xmin=-0.5, xmax=3009.5 )
     defineHisto( monTool,  "trkvtx_y_vs_lb", path=mypath, type="TProfile", title="track vertex y vs lumiblock", xbins=301, xmin=-0.5, xmax=3009.5 )
-    defineHisto( monTool,  "trkvtx_z_vs_lb", path=mypath, type="TProfile", title="track vertex z vs lumiblock", xbins=301, xmin=-0.5, xmax=3009.5 )
+    defineHisto( monTool,  "trkvtx_z_vs_lb", path=mypath, type="TProfile", title="track vertex z vs lumiblock", xbins=3010, xmin=-0.5, xmax=3009.5 )
 
     defineHisto( monTool,  "npix_vs_eta",     path=mypath, type="TProfile", title="offline npix vs eta;offline #eta; mean number of offline pixel hits", xbins=30,   xmin=-2.5,  xmax=2.5 )
     defineHisto( monTool,  "npix_vs_eta_rec", path=mypath, type="TProfile", title="trigger npix vs eta;offline #eta; mean number of trigger pixel hits", xbins=30,   xmin=-2.5,  xmax=2.5 )

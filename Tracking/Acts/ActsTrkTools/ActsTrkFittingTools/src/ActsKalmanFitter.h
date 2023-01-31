@@ -118,19 +118,24 @@ public:
         return false;
       }
       return Acts::visit_measurement(
-          state.calibrated(), state.calibratedCovariance(),
           state.calibratedSize(),
-          [&](const auto calibrated, const auto calibratedCovariance) {
-            // Determine the mesurement size
-            constexpr size_t kMeasurementSize =
-                decltype(calibrated)::RowsAtCompileTime;
-            // Resize the projector with the measurement size
+	  [&] (auto N) -> bool {
+	    constexpr size_t kMeasurementSize = decltype(N)::value;
+
+	    typename Acts::TrackStateTraits<kMeasurementSize, true>::Measurement calibrated{
+	      state.template calibrated<Acts::MultiTrajectoryTraits::MeasurementSizeMax>().data()};
+	    
+	    typename Acts::TrackStateTraits<kMeasurementSize, true>::MeasurementCovariance
+	      calibratedCovariance{state.template calibratedCovariance<Acts::MultiTrajectoryTraits::MeasurementSizeMax>().data()};
+	    
+	    // Take the projector (measurement mapping function)
             const auto H =
                 state.projector()
                     .template topLeftCorner<kMeasurementSize, Acts::BoundIndices::eBoundSize>()
                     .eval();
-            const auto residual = calibrated - H * state.predicted(); 
-            double chi2 = (residual.transpose() * ((calibratedCovariance + H * state.predictedCovariance() * H.transpose())).inverse() * residual).value();
+	    
+	    const auto residual = calibrated - H * state.predicted();
+	    double chi2 = (residual.transpose() * ((calibratedCovariance + H * state.predictedCovariance() * H.transpose())).inverse() * residual).value();	    
             return bool(chi2 > StateChiSquaredPerNumberDoFCut * kMeasurementSize);
           });
     }

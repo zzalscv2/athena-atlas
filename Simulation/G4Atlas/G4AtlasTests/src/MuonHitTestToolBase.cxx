@@ -12,6 +12,7 @@
 #include "TH2D.h"
 #include <math.h>
 
+#include "AtlasHepMC/MagicNumbers.h"
 
 MuonHitTestToolBase::MuonHitTestToolBase(const std::string& type, const std::string& name, const IInterface* parent)
   : SimTestToolBase(type, name, parent),
@@ -54,7 +55,7 @@ StatusCode MuonHitTestToolBase::executeCheckEventInfo()
   DataVector<HepMC::GenEvent>::const_iterator e;
   for (e=mcEvent->begin();e!=mcEvent->end(); ++e) {
     for (auto p: (**e)) {
-      if ( HepMC::barcode(p)<200000) {
+      if ( !HepMC::is_simulation_particle(p)) {
         Amg::Vector3D temp_momentum(p->momentum().px(),
                                     p->momentum().py(),
                                     p->momentum().pz());

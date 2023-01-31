@@ -82,19 +82,21 @@ def MuonCombinedParticleCreator(name="MuonCombinedParticleCreator",**kwargs):
         import MuonCombinedRecExample.CombinedMuonTrackSummary  # noqa: F401 (import side-effects)
         kwargs.setdefault("TrackSummaryTool", ToolSvc.CombinedMuonTrackSummary )
         kwargs.setdefault("TestPixelLayerTool", TrackingCommon.getInDetTestPixelLayerToolInner())
+        kwargs.setdefault("ComputeAdditionalInfo",True )
 
-    kwargs.setdefault("ComputeAdditionalInfo",True )
+        from AthenaCommon.DetFlags import DetFlags
+        if DetFlags.haveRIO.pixel_on():
+            from PixelToTPIDTool.PixelToTPIDToolConf import InDet__PixelToTPIDTool
+            kwargs.setdefault("PixelToTPIDTool", InDet__PixelToTPIDTool(name = "CombinedMuonPixelToTPID"))
+
+        if DetFlags.haveRIO.TRT_on():
+            kwargs.setdefault("TRT_ElectronPidTool", TrackingCommon.getInDetTRT_ElectronPidTool(MinimumTrackPtForNNPid = 2000.))
+
     kwargs.setdefault("TrackToVertex", AtlasTrackToVertexTool())
     kwargs.setdefault("KeepAllPerigee",True )
     kwargs.setdefault("MuonSummaryTool", CfgMgr.Muon__MuonHitSummaryTool("MuonHitSummaryTool"))
     if beamFlags.beamType() == 'cosmics':
         kwargs.setdefault("PerigeeExpression","Origin")
-
-    from AthenaCommon.DetFlags              import DetFlags
-    if DetFlags.haveRIO.pixel_on() and not ConfigFlags.Muon.MuonTrigger:
-        from PixelToTPIDTool.PixelToTPIDToolConf import InDet__PixelToTPIDTool
-        kwargs.setdefault("PixelToTPIDTool", InDet__PixelToTPIDTool( \
-                                                                     name                       = "CombinedMuonPixelToTPID") )
 
     return CfgMgr.Trk__TrackParticleCreatorTool(name,**kwargs)
 
@@ -128,6 +130,7 @@ def MuonCreatorTool(name="MuonCreatorTool",**kwargs):
     if ConfigFlags.Muon.MuonTrigger:
         kwargs.setdefault("MuonSelectionTool", "")
         kwargs.setdefault("UseCaloCells", False)
+        kwargs.setdefault("CopyUInt8SummaryKeys", [])
     else:
         kwargs.setdefault("MomentumBalanceTool", getPublicTool("MuonMomentumBalanceSignificanceTool"))
         kwargs.setdefault("ScatteringAngleTool", getPublicTool("MuonScatteringAngleSignificanceTool"))

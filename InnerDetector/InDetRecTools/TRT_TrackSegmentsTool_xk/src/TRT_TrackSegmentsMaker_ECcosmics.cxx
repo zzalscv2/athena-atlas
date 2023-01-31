@@ -551,9 +551,9 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::find_seed(int endcap,
     
 
     int muster[3][3];
-    for(int i=0;i<3;i++)
-      for(int j=0;j<3;j++)
-	muster[i][j]=0;
+    for(auto & i : muster)
+      for(int & j : i)
+	j=0;
     
     std::vector<const InDet::TRT_DriftCircle*> *seed=new std::vector<const InDet::TRT_DriftCircle*>;
     
@@ -1372,7 +1372,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
 
   // RIOonTrack production
   //
-  DataVector<const Trk::MeasurementBase>* rio = new DataVector<const Trk::MeasurementBase>;
+  auto rio = DataVector<const Trk::MeasurementBase>{};
 
   vit=seed->begin();
   vitE=seed->end();
@@ -1457,12 +1457,12 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
 
     if(useDrift){
       ATH_MSG_VERBOSE("RIO using drift time!");
-      rio->push_back(m_riomakerD->correct(*(*vit),Tp));
+      rio.push_back(m_riomakerD->correct(*(*vit),Tp));
     }else{
       ATH_MSG_VERBOSE("RIO without using drift time!");
       chi2+=(fitted_r/1.15)*(fitted_r/1.15); // no drift time used
       ATH_MSG_VERBOSE(count<<"\t\t chi2 contribution: "<<(fitted_r/1.15)*(fitted_r/1.15));
-      rio->push_back(m_riomakerN->correct(*(*vit),Tp));
+      rio.push_back(m_riomakerN->correct(*(*vit),Tp));
     }
 
     count++;
@@ -1496,7 +1496,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
 
       delete surface;
 
-      rio->push_back(pseudo);
+      rio.push_back(pseudo);
 
     }
   }
@@ -1540,10 +1540,10 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
     0.                     , 160000./12., 0.,   0., 0.,
     0.                     ,          0., 0.1,  0., 0.,
     0.                     ,          0.,  0.,  1., 0.,
-    0.                     ,          0.,  0.,  0., 1.; 
-  Trk::TrackSegment* segment=new Trk::TrackSegment(par,cov,sur,rio,fqu,Trk::Segment::TRT_SegmentMaker);
+    0.                     ,          0.,  0.,  0., 1.;
+  Trk::TrackSegment* segment = new Trk::TrackSegment(
+    par, cov, sur, std::move(rio), fqu, Trk::Segment::TRT_SegmentMaker);
 
-  
   //add segment to list of segments
 
   ATH_MSG_VERBOSE("Add segment to list");
@@ -1901,7 +1901,6 @@ TF1 *InDet::TRT_TrackSegmentsMaker_ECcosmics::perform_fit(int count,
 double InDet::TRT_TrackSegmentsMaker_ECcosmics::classify_segment(Trk::TrackSegment* seg, int &total) const
 {
   int real=0;
-  int noise=0;
   total=0;
 
   for(unsigned int i=0;i<seg->numberOfMeasurementBases();++i){
@@ -1913,8 +1912,6 @@ double InDet::TRT_TrackSegmentsMaker_ECcosmics::classify_segment(Trk::TrackSegme
         if(dc!=nullptr){
           if(isTrueHit(dc))
             real++;
-          else
-            noise++;
           total++;
 
         }

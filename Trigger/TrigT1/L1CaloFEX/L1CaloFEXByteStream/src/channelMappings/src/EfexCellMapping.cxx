@@ -212,12 +212,10 @@ void EfexCellMapping::init(int crate, int efexnumber,
     int octantNum = ( efexcords.at(1) - '0' ) - 1; //ASCII operation
     int moduleBaseEta = -24 + (moduleCBA * 16);
     int fpgaBaseEta = moduleBaseEta + (fpga * 4);
-    int moduleLowerEta = moduleBaseEta;
-    int moduleUpperEta = moduleBaseEta + 16;
     int fpgaLowerEta = fpgaBaseEta;
     int fpgaUpperEta = fpgaBaseEta + 4;
-    if      (moduleCBA == 0 && fpga == 0) { moduleLowerEta--; fpgaLowerEta--; }
-    else if (moduleCBA == 2 && fpga == 3) { moduleUpperEta++; fpgaUpperEta++; }
+    if      (moduleCBA == 0 && fpga == 0) { fpgaLowerEta--; }
+    else if (moduleCBA == 2 && fpga == 3) { fpgaUpperEta++; }
     int shiftedPhi = (globalPhi + 62) % 64;
     int lowerShiftedPhi = octantNum * 8;
     int upperShiftedPhi = lowerShiftedPhi + 8;

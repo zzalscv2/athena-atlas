@@ -522,7 +522,7 @@ namespace Analysis {
       double z0ErrwrtPriVtx(1.);
 
       /** use new Tool for "unbiased" IP estimation */
-      const Trk::ImpactParametersAndSigma* myIPandSigma(0);
+      std::unique_ptr<Trk::ImpactParametersAndSigma> myIPandSigma = nullptr;
       if (m_trackToVertexIPEstimator) { 
         myIPandSigma = m_trackToVertexIPEstimator->estimate(trk, &priVtx, m_unbiasIPEstimation);
       }
@@ -533,8 +533,6 @@ namespace Analysis {
         d0ErrwrtPriVtx=myIPandSigma->sigmad0;
         z0wrtPriVtx=myIPandSigma->IPz0SinTheta;
         z0ErrwrtPriVtx=myIPandSigma->sigmaz0SinTheta;
-        delete myIPandSigma;
-        myIPandSigma=0;
       }
 
       /** sign of the impact parameter */

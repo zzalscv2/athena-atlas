@@ -19,7 +19,6 @@ MultiPy8Pileup::MultiPy8Pileup(const std::string& name, ISvcLocator* pSvcLocator
   m_ngen(0),
   m_nbad(0),
   // m_evnumber(1),
-  m_randomEngine(NULL),
   m_file(NULL),
   m_htgPileupProfile(NULL),
   m_htgPileupMu(NULL),
@@ -37,9 +36,6 @@ MultiPy8Pileup::~MultiPy8Pileup() {
 
 StatusCode MultiPy8Pileup::genInitialize() {
   ATH_MSG_INFO( "In MultiPy8Pileup::genInitialize" );
-
-  // should be initialized after Pythia8_i::genInitialize() ???
-  // m_randomEngine = atRndmGenSvc().GetEngine( Pythia8_i::pythia_stream );
 
   // if filename set, initialise histograms for mu/nevt profiles
   if (m_filename!="") {
@@ -79,12 +75,11 @@ StatusCode MultiPy8Pileup::genInitialize() {
 
 StatusCode MultiPy8Pileup::callGenerator() {
   // initialise random generators the first time - delayed after Pythia init
-  if ( !m_randomEngine)
-    m_randomEngine = atRndmGenSvc().GetEngine( Pythia8_i::pythia_stream() );
-
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  CLHEP::HepRandomEngine* rndmEngine = this->getRandomEngine("MultiPy8Pileup", ctx);
   // decide how many events to generate
 
-  int muval = ( m_ncollevent > 0 ? m_ncollevent : nPileupEvents() );
+  int muval = ( m_ncollevent > 0 ? m_ncollevent : nPileupEvents(rndmEngine) );
   if (m_file) m_htgPileupMu->Fill(muval+0.1);
   m_evts.clear();
 
@@ -110,6 +105,7 @@ StatusCode MultiPy8Pileup::callGenerator() {
 	  HepMC::set_signal_process_id(evt,pid+10000*bcid);
 	  ATH_MSG_DEBUG("Signal process ID " << pid << " set to " <<
 			HepMC::signal_process_id(evt) << " for BCID " << bcid);
+	  HepMC::fillBarcodesAttribute(evt);
 	  m_evts.push_back(evt);
 	  ++m_ngen;
 	} else {
@@ -157,9 +153,9 @@ StatusCode MultiPy8Pileup::genFinalize() {
 }
 
 
-int MultiPy8Pileup::nPileupEvents() {
+int MultiPy8Pileup::nPileupEvents(CLHEP::HepRandomEngine* rndmEngine) {
   // return the instantaneous mu value according to the profile
-  double threshold = m_randomEngine->flat() * m_pileupProfileIntegral.back();
+  double threshold = rndmEngine->flat() * m_pileupProfileIntegral.back();
   std::vector< double >::iterator itr = std::lower_bound( m_pileupProfileIntegral.begin(), m_pileupProfileIntegral.end(), threshold );
   return std::distance( m_pileupProfileIntegral.begin(), itr );
 }

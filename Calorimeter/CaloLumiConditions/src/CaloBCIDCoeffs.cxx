@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CaloLumiConditions/src/CaloBCIDCoeffs.cxx
@@ -17,7 +17,29 @@
 #include "CxxUtils/vec.h"
 #include "CxxUtils/features.h"
 
-namespace{
+
+namespace {
+
+
+// Vector types.
+using vf = CxxUtils::vec<float, CaloBCIDCoeffs::CHUNKSIZE>;
+using vf_vector = CxxUtils::vec_aligned_vector<vf>;
+
+
+} // anonymous namespace.
+
+
+// Clang15 seems to have trouble with implicit template instantiation
+// from multiversioned functions.  Need to explictly instantiate
+// this to prevent link failures.
+// Further, we cannot use the vec_aligned_vector alias directly
+// in an explicit instantiation.
+// (https://stackoverflow.com/questions/25118191/explicitly-instantiate-class-through-template-alias)
+template class std::vector<vf, vf_vector::allocator_type>;
+
+
+namespace {
+
 
 /**
  * @Helper method to perform the calculation 
@@ -28,13 +50,7 @@ namespace{
 #if defined(__x86_64__) && HAVE_TARGET_CLONES && HAVE_VECTOR_SIZE_ATTRIBUTE
 // If we have function multiversioning, compile specialized versions
 // for different architectures.
-// ... But including avx causes a crash at least with gcc 8.3.0.
-//     It works ok with gcc 10.  (Not tested with 9.)
-#if __GNUC__ == 8
-[[gnu::target_clones(("default,sse2"))]]
-#else
 [[gnu::target_clones("default,sse2,avx,avx2")]]
-#endif
 #endif
 inline
 void calcImpl  (const float* lumi,
@@ -49,7 +65,7 @@ void calcImpl  (const float* lumi,
   typedef CxxUtils::vec<float, CaloBCIDCoeffs::CHUNKSIZE> vf;
 
   // Broadcast the luminosity values to all vector lanes.
-  CxxUtils::vec_aligned_vector<vf> llv (ncoeff);
+  vf_vector llv (ncoeff);
   for (size_t i = 0; i < ncoeff; i++) {
     CxxUtils::vbroadcast (llv[i], lumi[i - (nshapes-1)]);
   }

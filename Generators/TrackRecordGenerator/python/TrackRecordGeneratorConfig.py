@@ -24,10 +24,8 @@ def Input_TrackRecordGeneratorCfg(ConfigFlags,name="TrackRecordGenerator", **kwa
     kwargs.setdefault('StopParticles', False) # Stop the particles or not
     kwargs.setdefault('stopped_tminus', -25.) # in ns, lower bound
     kwargs.setdefault('stopped_tplus', 25.) # in ns, upper bound
-    seed = 'COSMICS OFFSET 0 2040160768 80'
-    from RngComps.RandomServices import dSFMT
-    acc.merge(dSFMT(seed))
-    kwargs.setdefault('AtRndmGenSvc', acc.getService('AtDSFMTGenSvc'))
+    from RngComps.RandomServices import AthRNGSvcCfg
+    kwargs.setdefault('RndmSvc', acc.getPrimaryAndMerge(AthRNGSvcCfg(ConfigFlags)).name)
     #kwargs.setdefault('OutputLevel', DEBUG) # for turning up output during testing
     acc.addEventAlgo(TrackRecordGenerator(name,**kwargs))
     return acc

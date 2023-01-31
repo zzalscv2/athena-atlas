@@ -140,32 +140,32 @@ public:
 
   //!< estimator for FitQuality on Surface from a full track state, that is a
   //!< state which contains the current hit (expressed as Amg::Vector2D).
-  virtual const FitQualityOnSurface* fullStateFitQuality(
+  virtual FitQualityOnSurface fullStateFitQuality(
     const TrackParameters&,
     const Amg::Vector2D&,
     const Amg::MatrixX&) const override final;
   //!< estimator for FitQuality on Surface from a full track state, that is a
   //!< state which contains the current hit (expressed as LocalParameters).
-  virtual const FitQualityOnSurface* fullStateFitQuality(
+  virtual FitQualityOnSurface fullStateFitQuality(
     const TrackParameters&,
     const LocalParameters&,
     const Amg::MatrixX&) const override final;
   //!< estimator for FitQuality on Surface from a predicted track state, that is
   //!< a state which contains the current hit (expressed as Amg::Vector2D).
-  virtual const FitQualityOnSurface* predictedStateFitQuality(
+  virtual FitQualityOnSurface predictedStateFitQuality(
     const TrackParameters&,
     const Amg::Vector2D&,
     const Amg::MatrixX&) const override final;
   //!< estimator for FitQuality on Surface from a predicted track state, that is
   //!< a state which contains the current hit (expressed as LocalParameters).
-  virtual const FitQualityOnSurface* predictedStateFitQuality(
+  virtual FitQualityOnSurface predictedStateFitQuality(
     const TrackParameters&,
     const LocalParameters&,
     const Amg::MatrixX&) const override final;
   //!< estimator for FitQuality on Surface for the situation when a track is
   //!< fitted to the parameters of another trajectory part extrapolated to the
   //!< common surface.
-  virtual const FitQualityOnSurface* predictedStateFitQuality(
+  virtual FitQualityOnSurface predictedStateFitQuality(
     const TrackParameters&,
     const TrackParameters&) const override final;
   //!< interface for reference-track KF
@@ -194,17 +194,17 @@ private:
   //!< estimator for FitQuality on Surface from a full/predicted track state,
   //!< that is a state which contains the current hit (expressed as
   //!< Amg::Vector2D).
-  const FitQualityOnSurface* stateFitQuality(const TrackParameters&,
-                                             const Amg::Vector2D&,
-                                             const Amg::MatrixX&,
-                                             int predFull) const;
+  FitQualityOnSurface stateFitQuality(const TrackParameters&,
+                                      const Amg::Vector2D&,
+                                      const Amg::MatrixX&,
+                                      int predFull) const;
   //!< estimator for FitQuality on Surface from a full/predicted track state,
   //!< that is a state which contains the current hit (expressed as
   //!< LocalParameters).
-  const FitQualityOnSurface* stateFitQuality(const TrackParameters&,
-                                             const LocalParameters&,
-                                             const Amg::MatrixX&,
-                                             int predFull) const;
+  FitQualityOnSurface stateFitQuality(const TrackParameters&,
+                                      const LocalParameters&,
+                                      const Amg::MatrixX&,
+                                      int predFull) const;
 
   //!< common maths calculation code for all addToState and removeFromState
   //!< versions which happen to be called with 1-dim measurements.
@@ -284,7 +284,7 @@ private:
       (sign=+1) or smoothed/updated input track state (sign=-1).
   */
   //!< make chi2 object for 1D, int is the accessor in the 5-par vector
-  FitQualityOnSurface* makeChi2_1D(const AmgVector(5) & trkPar,
+  FitQualityOnSurface  makeChi2_1D(const AmgVector(5) & trkPar,
                                    const AmgSymMatrix(5) & trkCov,
                                    double measPar,
                                    double measCov,
@@ -292,7 +292,7 @@ private:
                                    int updateDirection) const;
   //!< make chi2 object for 2D-4D, int is the paramkey
   template<int DIM>
-  FitQualityOnSurface* makeChi2_T(const AmgVector(5) & trkPar,
+  FitQualityOnSurface  makeChi2_T(const AmgVector(5) & trkPar,
                                   const AmgSymMatrix(5) & trkCov,
                                   const AmgVector(DIM) &,
                                   const AmgSymMatrix(DIM) &,
@@ -517,7 +517,7 @@ AmgSymMatrix(DIM) Trk::KalmanUpdatorAmg::projection_T(const AmgSymMatrix(5) & M,
 }
 
 template<int DIM>
-Trk::FitQualityOnSurface*
+Trk::FitQualityOnSurface
 Trk::KalmanUpdatorAmg::makeChi2_T(const AmgVector(5) & trkPar,
                                   const AmgSymMatrix(5) & trkCov,
                                   const AmgVector(DIM) & measPar,
@@ -546,7 +546,7 @@ Trk::KalmanUpdatorAmg::makeChi2_T(const AmgVector(5) & trkPar,
   } else {
     chiSquared = r.transpose() * R.inverse() * r;
   }
-  return new FitQualityOnSurface(chiSquared, DIM);
+  return  FitQualityOnSurface(chiSquared, DIM);
 }
 
 inline bool

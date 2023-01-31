@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -235,6 +235,10 @@ namespace Trk {
       for( int ic=0; ic<(int)src.ConstraintList.size(); ic++){
         ConstraintList.emplace_back(src.ConstraintList[ic]->clone());
       }
+
+      std::copy (std::begin(src.T), std::end(src.T), std::begin(T));
+      std::copy (std::begin(src.wa), std::end(src.wa), std::begin(wa));
+      std::copy (std::begin(src.dxyz0), std::end(src.dxyz0), std::begin(dxyz0));
     }
     return *this;
   }

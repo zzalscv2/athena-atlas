@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -24,6 +24,7 @@
 #include <cassert>
 #include <cstring>
 #include <cmath>
+#include <mutex>
 
 //____________________________________________________________________
 void LWHist::safeDelete(LWHist*h)
@@ -94,7 +95,7 @@ void LWHist::ensureInitDecorations()
 
 short LWHist::GetMarkerColor() const
 {
-  TH1 * hroot= getROOTHistBaseNoAlloc();
+  const TH1 * hroot= getROOTHistBaseNoAlloc();
   if (hroot)
     return hroot->GetMarkerColor();
 
@@ -103,7 +104,7 @@ short LWHist::GetMarkerColor() const
 
 short LWHist::GetMarkerStyle() const
 {
-  TH1 * hroot= getROOTHistBaseNoAlloc();
+  const TH1 * hroot= getROOTHistBaseNoAlloc();
   if (hroot)
     return hroot->GetMarkerStyle();
   return m_decorations ? m_decorations->m_markerStyle : DEFAULT_MARKERSTYLE;
@@ -111,7 +112,7 @@ short LWHist::GetMarkerStyle() const
 
 float LWHist::GetMarkerSize() const
 {
-  TH1 * hroot= getROOTHistBaseNoAlloc();
+  const TH1 * hroot= getROOTHistBaseNoAlloc();
   if (hroot)
     return hroot->GetMarkerSize();
   return m_decorations ? m_decorations->m_markerSize : DEFAULT_MARKERSIZE;
@@ -205,11 +206,9 @@ LWHist::LWHist( const char* n,
     LWStrUtils::setStringFromInput(t,m_title);
   }
   ++LWHistStats::s_nActiveHists;
-  static bool first = true;
-  if (first) {
-    first = false;
-    std::cout<<"LWHists INFO: Using light weight histograms"<<std::endl;
-  }
+  static std::once_flag first_flag;
+  std::call_once (first_flag,
+                  []() { std::cout<<"LWHists INFO: Using light weight histograms"<<std::endl; });
 }
 
 //____________________________________________________________________
@@ -307,40 +306,46 @@ bool LWHist::apply(TH1*h) const
 }
 
 //____________________________________________________________________
-LWHist::LWHistAxis * LWHist::GetXaxis() const
+LWHist::LWHistAxis * LWHist::GetXaxis()
 {
-  const_cast<LWHist *>(this)->ensureInitDecorations();
+  this->ensureInitDecorations();
   if (!m_decorations->m_xAxis)
-    const_cast<LWHist *>(this)->m_decorations->m_xAxis = usingROOTBackend() ? new LWHistAxis(this) : MP_NEW(LWHistAxis)(this);
+    this->m_decorations->m_xAxis = usingROOTBackend() ? new LWHistAxis(this) : MP_NEW(LWHistAxis)(this);
 
   return m_decorations->m_xAxis;
 }
 
 //____________________________________________________________________
-LWHist::LWHistAxis * LWHist::GetYaxis() const
+LWHist::LWHistAxis * LWHist::GetYaxis()
 {
-  const_cast<LWHist *>(this)->ensureInitDecorations();
+  this->ensureInitDecorations();
   if (!m_decorations->m_yAxis)
-    const_cast<LWHist *>(this)->m_decorations->m_yAxis = usingROOTBackend() ? new LWHistAxis(this) : MP_NEW(LWHistAxis)(this);
+    this->m_decorations->m_yAxis = usingROOTBackend() ? new LWHistAxis(this) : MP_NEW(LWHistAxis)(this);
   return m_decorations->m_yAxis;
 }
 
 //____________________________________________________________________
-LWHist::LWHistAxis * LWHist::GetZaxis() const
+LWHist::LWHistAxis * LWHist::GetZaxis()
 {
-  const_cast<LWHist *>(this)->ensureInitDecorations();
+  this->ensureInitDecorations();
   if (!m_decorations->m_zAxis)
-    const_cast<LWHist *>(this)->m_decorations->m_zAxis = usingROOTBackend() ? new LWHistAxis(this) : MP_NEW(LWHistAxis)(this);
+    this->m_decorations->m_zAxis = usingROOTBackend() ? new LWHistAxis(this) : MP_NEW(LWHistAxis)(this);
   return m_decorations->m_zAxis;
 }
 
 //Axis implementation:
 //Constructor and destructor should do nothing due to our use of the mem-pool.
-LWHist::LWHistAxis::LWHistAxis(const LWHist *hist) : m_hist(hist), m_labelSize(0.035),
-						     m_title(0),m_binLabels(0) {}
-TAxis * LWHist::LWHistAxis::rootAxis() const
+LWHist::LWHistAxis::LWHistAxis(LWHist *hist) : m_hist(hist), m_labelSize(0.035),
+                                               m_title(0),m_binLabels(0) {}
+const TAxis * LWHist::LWHistAxis::rootAxis() const
 {
-  TH1*hroot=m_hist->getROOTHistBaseNoAlloc();
+  const TH1* hroot=std::as_const(m_hist)->getROOTHistBaseNoAlloc();
+  return hroot ? (isXAxis() ? hroot->GetXaxis() : (isYAxis() ? hroot->GetYaxis():hroot->GetZaxis())) : 0;
+}
+
+TAxis * LWHist::LWHistAxis::rootAxis()
+{
+  TH1* hroot=m_hist->getROOTHistBaseNoAlloc();
   return hroot ? (isXAxis() ? hroot->GetXaxis() : (isYAxis() ? hroot->GetYaxis():hroot->GetZaxis())) : 0;
 }
 
@@ -360,13 +365,13 @@ void LWHist::LWHistAxis::SetTitle(const char*t)
 
 const char* LWHist::GetName() const
 {
-  TH1 * hroot = getROOTHistBaseNoAlloc();
+  const TH1 * hroot = getROOTHistBaseNoAlloc();
   return hroot ? hroot->GetName() : m_name;
 }
 
 const char* LWHist::GetTitle() const
 {
-  TH1 * hroot = getROOTHistBaseNoAlloc();
+  const TH1 * hroot = getROOTHistBaseNoAlloc();
   return hroot ? hroot->GetTitle() : m_title;
 }
 
@@ -377,7 +382,7 @@ bool LWHist::LWHistAxis::isYAxis() const { return this==m_hist->m_decorations->m
 
 unsigned LWHist::LWHistAxis::GetNbins() const
 {
-  TAxis*a=rootAxis();
+  const TAxis*a=rootAxis();
   if (a)
     return a->GetNbins();
   return isXAxis() ? m_hist->actualGetNBinsX() : (isYAxis()?m_hist->actualGetNBinsY():0);
@@ -385,7 +390,7 @@ unsigned LWHist::LWHistAxis::GetNbins() const
 
 double LWHist::LWHistAxis::GetBinCenter(int bin) const
 {
-  TAxis*a=rootAxis();
+  const TAxis*a=rootAxis();
   if (a)
     return a->GetBinCenter(bin);
   return isXAxis()
@@ -395,7 +400,7 @@ double LWHist::LWHistAxis::GetBinCenter(int bin) const
 
 const char * LWHist::LWHistAxis::GetBinLabel(unsigned bin) const
 {
-  TAxis*a=rootAxis();
+  const TAxis*a=rootAxis();
   if (a)
     return a->GetBinLabel(bin);
   if (!m_binLabels)

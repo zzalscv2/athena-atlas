@@ -1,5 +1,5 @@
 /*
-   Copyrightf (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TopConfiguration/TopConfig.h"
@@ -277,7 +277,7 @@ namespace top {
     m_jetStoreTruthLabels("True"),
     m_doJVTInMETCalculation(true),
     m_saveFailJVTJets(false),
-    m_JVTWP("Default"),
+    m_JVTWP("FixedEffPt"),
     m_doForwardJVTInMETCalculation(false),
     m_saveFailForwardJVTJets(false),
     m_fJVTWP("None"),
@@ -286,7 +286,7 @@ namespace top {
     m_METUncertaintiesConfigDir("SetMe"),
     m_METSignif(false),
     m_METSignifSoftTermParam("Random"),
-
+    m_METJetSelectionWP("Tight"),
     
     // Ghost Track Configuration
     m_ghostTrackspT(500.),
@@ -1465,7 +1465,8 @@ namespace top {
     // MET Significance
     if(settings->value("METSignificance") == "True"){this->METSignificance(true);}
     this->METSignifSoftTermParam(settings->value("METSignificanceSoftTermParam"));
-
+    // MET JetSelection for NNJvt
+    this->setMETJetSelectionWP(settings->value("METJetSelectionWP"));
 
     // for top mass analysis, per default set to 1.0!
     m_JSF = std::stof(settings->value("JSF"));
@@ -3875,7 +3876,7 @@ namespace top {
       if (runnumber == 310000) return "2018";
       
       // Run 3 mc21a
-      if (runnumber == 330000) return "2022";
+      if (runnumber == 410000) return "2022";
 
       return "UNKNOWN";
     }

@@ -26,6 +26,9 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonIdHelpers/sTgcIdHelper.h"
 
+#include "MuonRIO_OnTrack/sTgcClusterOnTrack.h"
+#include "MuonSegment/MuonSegment.h"
+
 // stl includes                                                                                 
 #include <string>
 
@@ -34,7 +37,7 @@ namespace Muon {
 }
 
 namespace GeometricSectors {
-  static const std::array<std::string, 2> sTgc_Side = {"CSide", "ASide"};
+  static const std::array<std::string, 2> sTgcSide = {"CSide", "ASide"};
 }
 
 class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
@@ -48,12 +51,19 @@ class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     
   void fillsTgcOverviewHistograms(const Muon::sTgcPrepData*, const Muon::MuonPrepDataCollection<Muon::sTgcPrepData> &prd) const;
-  void fillsTgcSummaryHistograms(const Muon::sTgcPrepData*, const MuonGM::MuonDetectorManager*) const;
+  void fillsTgcOccupancyHistograms(const Muon::sTgcPrepData*, const MuonGM::MuonDetectorManager*) const;
+  void fillsTgcLumiblockHistograms(const Muon::sTgcPrepData*, const int lb) const;
+  void fillsTgcTimingHistograms(const Muon::sTgcPrepData*) const;
+  void fillsTgcClusterFromSegmentsHistograms(const Trk::SegmentCollection*) const;
+  void fillsTgcClusterFromTrackHistograms(const xAOD::TrackParticleContainer*) const;
 
   int getSectors(const Identifier& id) const;
+  int getLayer(const int multiplet, const int gasGap) const;
   
   SG::ReadHandleKey<Muon::sTgcPrepDataContainer> m_sTgcContainerKey{this,"sTgcPrepDataContainerName", "STGC_Measurements"};
   SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager","Key of input MuonDetectorManager condition data"};
+  SG::ReadHandleKey<Trk::SegmentCollection> m_segmentManagerKey{this, "segmentManagerKey", "TrkMuonSegments", "Muon segments"}; 
+  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_meTrkKey{this, "METrkContainer", "ExtrapolatedMuonTrackParticles"};
 
   Gaudi::Property<bool> m_dosTgcESD{this,"dosTgcESD", true};
   Gaudi::Property<bool> m_dosTgcOverview{this,"dosTgcOverview", true};

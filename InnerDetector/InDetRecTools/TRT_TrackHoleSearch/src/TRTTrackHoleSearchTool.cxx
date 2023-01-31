@@ -359,7 +359,7 @@ int TRTTrackHoleSearchTool::extrapolateBetweenHits(const Trk::TrackParameters* s
 			
 			std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
 			typePattern.set(Trk::TrackStateOnSurface::Hole);
-			holes->push_back( new Trk::TrackStateOnSurface(nullptr, (*step)->uniqueClone(), nullptr, nullptr, typePattern) );
+			holes->push_back( new Trk::TrackStateOnSurface(nullptr, (*step)->uniqueClone(), nullptr, typePattern) );
 			hole_count++;
 			previous_id = id;
 		} // end loop over parameters from extrapolation
@@ -449,13 +449,10 @@ TRTTrackHoleSearchTool::addHolesToTrack(
 
   // get states from track
   auto tsos = DataVector<const Trk::TrackStateOnSurface>();
-  for (DataVector<const Trk::TrackStateOnSurface>::const_iterator it =
-         track.trackStateOnSurfaces()->begin();
-       it != track.trackStateOnSurfaces()->end();
-       ++it) {
+  for (const auto *it : *track.trackStateOnSurfaces()) {
     // veto old holes
-    if (!(*it)->type(Trk::TrackStateOnSurface::Hole)) {
-      tsos.push_back(new Trk::TrackStateOnSurface(**it));
+    if (!it->type(Trk::TrackStateOnSurface::Hole)) {
+      tsos.push_back(new Trk::TrackStateOnSurface(*it));
     }
   }
 
@@ -466,7 +463,7 @@ TRTTrackHoleSearchTool::addHolesToTrack(
     const Trk::Track* new_track = new Trk::Track(
       track.info(),
       std::move(tsos),
-      track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+      track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
     return new_track;
   }
 
@@ -497,7 +494,7 @@ TRTTrackHoleSearchTool::addHolesToTrack(
   const Trk::Track* new_track =
     new Trk::Track(track.info(),
                    std::move(tsos),
-                   track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+                   track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
 
   return new_track;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonReadoutGeometry/CscReadoutElement.h"
@@ -53,12 +53,10 @@ namespace MuonGM {
             if (GeoFullPhysVol* pvc = dynamic_cast<GeoFullPhysVol*>(pv)) {
                 unsigned int nchildvol = pvc->getNChildVols();
                 int lgg = 0;
-                int llay = 0;
                 std::string::size_type npos;
                 for (unsigned ich = 0; ich < nchildvol; ich++) {
                     PVConstLink pc = pvc->getChildVol(ich);
                     std::string childname = (pc->getLogVol())->getName();
-                    llay++;
                     int nch1 = pc->getNChildVols();
                     lgg = 3;
                     for (int ngv = 0; ngv < nch1; ngv++) {
@@ -480,7 +478,7 @@ namespace MuonGM {
 
     //****************************************************************************
     Amg::Vector3D CscReadoutElement::localStripLayerPos(int /*chamberLayer*/, int wireLayer, int measPhi, int /*strip*/) const {
-        if (!(measPhi == 0 || measPhi == 1)) throw;
+        if (!(measPhi == 0 || measPhi == 1)) throw std::runtime_error ("CscReadoutElement::localStripLayerPos bad measPhi");
         Amg::Vector3D wireLayerPosition = localWireLayerPos(wireLayer);
         double anodeCathodeDis = anodeCathodeDistance();
         double x = wireLayerPosition.x();

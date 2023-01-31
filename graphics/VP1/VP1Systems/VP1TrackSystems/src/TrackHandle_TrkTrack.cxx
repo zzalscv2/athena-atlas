@@ -244,7 +244,7 @@ void TrackHandle_TrkTrack::fillObjectBrowser( QList<QTreeWidgetItem *>& listOfIt
       fqItem->setExpanded(true); // want it opened so subparams seen easily
       fqItem->setFlags(Qt::ItemIsEnabled);
       fqItem->setText(0,       QString("FitQuality") );
-      fqItem->setText(1, TrkObjToString::shortInfo( *((*it)->fitQualityOnSurface ()) ) );
+      fqItem->setText(1, TrkObjToString::shortInfo( (*it)->fitQualityOnSurface () ) );
       
       first=false;
     }

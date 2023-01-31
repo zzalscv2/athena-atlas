@@ -146,7 +146,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   Muon::MuonSegment trans1 (locpars,
                       cov,
                       new Trk::PlaneSurface (plsurf),
-                      new DataVector<const Trk::MeasurementBase> (mvec),
+                      DataVector<const Trk::MeasurementBase> (mvec),
                       new Trk::FitQuality(fq),
                       Trk::Segment::Muonboy);
   testit (trans1);

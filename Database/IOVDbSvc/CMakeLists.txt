@@ -20,13 +20,13 @@ atlas_add_library( IOVDbSvcLib
 
 atlas_add_component( IOVDbSvc
    src/*.h src/*.cxx src/components/*.cxx
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS}
-   ${Boost_INCLUDE_DIRS} 
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} 
+   ${Boost_INCLUDE_DIRS} CxxUtils
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} ${COOL_LIBRARIES}
    ${Boost_LIBRARIES} nlohmann_json::nlohmann_json GaudiKernel
    AthenaBaseComps AthenaKernel StoreGateLib FileCatalog AthenaPoolUtilities
    CoraCool IOVDbDataModel EventInfoUtils GeoModelInterfaces
-   IOVDbMetaDataToolsLib EventInfoMgtLib PoolSvcLib IOVDbSvcLib
+   IOVDbMetaDataToolsLib EventInfoMgtLib PoolSvcLib IOVDbSvcLib 
    CrestApiLib CxxUtils DBLock SGTools )
 
 # Install files from the package:
@@ -113,13 +113,13 @@ atlas_add_test( IOVDbFolder_test
    src/ReadFromFileMetaData.cxx src/IOVDbCoolFunctions.cxx src/TagFunctions.cxx
    src/Cool2Json.cxx src/Base64Codec.cxx src/Json2Cool.cxx 
    src/BasicFolder.cxx src/CrestFunctions.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} 
    ${ROOT_INCLUDE_DIRS} 
    LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES}
    ${ROOT_LIBRARIES} nlohmann_json::nlohmann_json
    GaudiKernel AthenaKernel AthenaBaseComps StoreGateLib SGTools CxxUtils
    TestTools CoraCool AthenaPoolUtilities GeoModelInterfaces
-   IOVDbMetaDataToolsLib IOVDbDataModel EventInfoMgtLib CrestApiLib
+   IOVDbMetaDataToolsLib IOVDbDataModel EventInfoMgtLib CrestApiLib 
    POST_EXEC_SCRIPT "nopost.sh" )
 
 atlas_add_test( IovStore_test
@@ -147,9 +147,9 @@ atlas_add_test( BasicFolder_test
 atlas_add_test( Json2Cool_test
    SOURCES test/Json2Cool_test.cxx src/Json2Cool.cxx src/BasicFolder.cxx 
    src/IOVDbStringFunctions.cxx src/Base64Codec.cxx 
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} 
    LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES}
-   nlohmann_json::nlohmann_json CxxUtils
+   nlohmann_json::nlohmann_json CxxUtils 
    POST_EXEC_SCRIPT "nopost.sh" )
 
 atlas_add_test( Cool2Json_test
@@ -157,23 +157,23 @@ atlas_add_test( Cool2Json_test
    src/IOVDbParser.cxx src/IOVDbStringFunctions.cxx src/FolderTypes.cxx
    src/Base64Codec.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
-   ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES}
+   ${ROOT_INCLUDE_DIRS} CoralUtilities
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} 
    ${ROOT_LIBRARIES} GaudiKernel AthenaKernel StoreGateLib CoraCool
-   AthenaPoolUtilities CxxUtils TestTools
+   AthenaPoolUtilities CxxUtils TestTools 
    POST_EXEC_SCRIPT "nopost.sh" )
 
 atlas_add_test( CrestFunctions_test
    SOURCES test/CrestFunctions_test.cxx src/CrestFunctions.cxx
    src/IOVDbStringFunctions.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} 
    LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} CrestApiLib
    POST_EXEC_SCRIPT "nopost.sh" )
 
 atlas_add_test( Base64Codec_test
    SOURCES test/Base64Codec_test.cxx src/Base64Codec.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${CORAL_LIBRARIES}
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} CxxUtils
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${CORAL_LIBRARIES} CxxUtils
    POST_EXEC_SCRIPT "nopost.sh" )
 
 if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )

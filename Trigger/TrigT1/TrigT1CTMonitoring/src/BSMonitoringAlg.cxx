@@ -18,6 +18,9 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::initialize() {
     ATH_CHECK( m_tgcRoiTool.retrieve() );
     }*/
 
+  ATH_MSG_DEBUG( "MUCTPI DQ DEBUG initialize BG key" );
+  ATH_CHECK( m_bgKey.initialize( true ) );
+
   ATH_MSG_DEBUG( "MUCTPI DQ DEBUG isRun3?="<<m_isRun3);
   ATH_CHECK( m_MuCTPI_Phase1_RDOKey.initialize(m_processMuctpi && m_isRun3) );
   ATH_CHECK( m_MuCTPI_RDOKey.initialize(m_processMuctpi && !m_isRun3) );
@@ -56,6 +59,29 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
   try {
     ATH_MSG_DEBUG( "begin fillHistograms()");
 
+    //BG key (used for MUCTPI Timing plot)
+    SG::ReadCondHandle<TrigConf::L1BunchGroupSet> bgkey(m_bgKey, ctx);
+    ATH_CHECK(bgkey.isValid());
+    std::vector<uint> bcidFirstInTrain={};//this is passed to the muctpi function later (need to do this every event, because BG changes in the run sometimes...)
+    const TrigConf::L1BunchGroupSet *l1bgs = *bgkey;
+    if (l1bgs)
+    {
+        for(uint i=0;i<l1bgs->size();i++)//loop over BGs
+        {
+            std::shared_ptr<TrigConf::L1BunchGroup> bg = l1bgs->getBunchGroup(i);
+            if(bg->name()=="FirstInTrain")
+            {
+                for(std::pair<size_t,size_t> pp: bg->trains())
+                    bcidFirstInTrain.push_back(pp.first);
+                break;//no need to search more if found FirstInTrain
+            }
+        }
+    }
+    else
+    {
+        ATH_MSG_ERROR("Did not find L1BunchGroupSet in DetectorStore");
+    }
+
     // Now see what exists in  StoreGate...
     const MuCTPI_RDO* theMuCTPI_RDO = 0;
     const MuCTPI_Phase1_RDO* theMuCTPI_Phase1_RDO = 0;
@@ -74,7 +100,6 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
     bool validRoIBResult = true;
     bool validTGCContainer = true;
     bool validRPCContainer = true;
-    int numberOfInvalidFragments = 0;
 
     //ERROR histos
     auto errorSummaryX = Monitored::Scalar<int>("errorSummaryX",0);
@@ -95,7 +120,6 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
           if (!theMuCTPI_Phase1_RDO) {
               ATH_MSG_WARNING( "Could not find \"" << m_MuCTPI_Phase1_RDOKey.key() << "\" in StoreGate");
               validMuCTPI_Phase1_RDO = false;
-              ++numberOfInvalidFragments;
           }
       }
       else
@@ -104,7 +128,6 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
           if (!theMuCTPI_RDO) {
               ATH_MSG_WARNING( "Could not find \"" << m_MuCTPI_RDOKey.key() << "\" in StoreGate");
               validMuCTPI_RDO = false;
-              ++numberOfInvalidFragments;
           }
       }
       // now try to get RPC and TGC SL output for comparisons
@@ -127,14 +150,12 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
       if (!theCTP_RDO) {
 	ATH_MSG_WARNING( "Could not find \"" << m_CTP_RDOKey.key() << "\" in StoreGate");
 	validCTP_RDO = false;
-	++numberOfInvalidFragments;
       }
       if (!m_runOnESD) {
 	theCTP_RIO = SG::get(m_CTP_RIOKey, ctx);
 	if (!theCTP_RIO) {
 	  ATH_MSG_WARNING( "Could not find \"" << m_CTP_RIOKey.key() << "\" in StoreGate");
 	  validCTP_RIO = false;
-	  ++numberOfInvalidFragments;
 	}
         ATH_MSG_DEBUG( "validCTP_RIO: " << validCTP_RIO );
       }
@@ -145,7 +166,6 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
       if (!roIBResult) {
 	ATH_MSG_WARNING( "Could not find \"" << m_RoIBResultKey.key() << "\" in StoreGate");
 	validRoIBResult = false;
-	++numberOfInvalidFragments;
       }
     }
 
@@ -346,7 +366,7 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
     {
         if (m_processMuctpi && validMuCTPI_Phase1_RDO && validTGCContainer && validRPCContainer) {
             ATH_MSG_DEBUG( "CTPMON before begin doMuctpi()");
-            doMuctpi(theMuCTPI_Phase1_RDO, ctx);
+            doMuctpi(theMuCTPI_Phase1_RDO,bcidFirstInTrain, ctx);
         }
     }
     ATH_MSG_DEBUG( "end fillHistograms()");
@@ -361,9 +381,10 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
 
 void
 TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* theMuCTPI_Phase1_RDO,
+                                                    const std::vector<uint>& bcidFirstInTrain,
                                                     //const RpcSectorLogicContainer* theRPCContainer,    to be re-included and compare
                                                     //const Muon::TgcCoinDataContainer* theTGCContainer, to be re-included and compare
-                            const EventContext& ctx) const
+                                                    const EventContext& ctx) const
 {
   ATH_MSG_DEBUG( "CTPMON begin doMuctpi()");
   //ERROR vector  - COMMON
@@ -381,6 +402,18 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
   auto candPtBAX = Monitored::Scalar<int>("candPtBAX",0);
   auto candPtECX = Monitored::Scalar<int>("candPtECX",0);
   auto candPtFWX = Monitored::Scalar<int>("candPtFWX",0);
+  auto candSLVsLBBAX = Monitored::Scalar<int>("candSLVsLBBAX",0);
+  auto candSLVsLBBAY = Monitored::Scalar<int>("candSLVsLBBAY",0);
+  auto candSLVsLBECX = Monitored::Scalar<int>("candSLVsLBECX",0);
+  auto candSLVsLBECY = Monitored::Scalar<int>("candSLVsLBECY",0);
+  auto candSLVsLBFWX = Monitored::Scalar<int>("candSLVsLBFWX",0);
+  auto candSLVsLBFWY = Monitored::Scalar<int>("candSLVsLBFWY",0);
+  auto candVetoFlag_RoiVsSLBAX = Monitored::Scalar<int>("candVetoFlag_RoiVsSLBAX",0);
+  auto candVetoFlag_RoiVsSLBAY = Monitored::Scalar<int>("candVetoFlag_RoiVsSLBAY",0);
+  auto candVetoFlag_RoiVsSLECX = Monitored::Scalar<int>("candVetoFlag_RoiVsSLECX",0);
+  auto candVetoFlag_RoiVsSLECY = Monitored::Scalar<int>("candVetoFlag_RoiVsSLECY",0);
+  auto candVetoFlag_RoiVsSLFWX = Monitored::Scalar<int>("candVetoFlag_RoiVsSLFWX",0);
+  auto candVetoFlag_RoiVsSLFWY = Monitored::Scalar<int>("candVetoFlag_RoiVsSLFWY",0);
   auto candRoiVsSLBACentralSliceX = Monitored::Scalar<int>("candRoiVsSLBACentralSliceX",0);
   auto candRoiVsSLBACentralSliceY = Monitored::Scalar<int>("candRoiVsSLBACentralSliceY",0);
   auto candRoiVsSLECCentralSliceX = Monitored::Scalar<int>("candRoiVsSLECCentralSliceX",0);
@@ -411,6 +444,12 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
   auto candSliceVsSLECY = Monitored::Scalar<int>("candSliceVsSLECY",0);
   auto candSliceVsSLFWX = Monitored::Scalar<int>("candSliceVsSLFWX",0);
   auto candSliceVsSLFWY = Monitored::Scalar<int>("candSliceVsSLFWY",0);
+  auto candSliceVsSLBAFirstInTrainX = Monitored::Scalar<int>("candSliceVsSLBAFirstInTrainX",0);
+  auto candSliceVsSLBAFirstInTrainY = Monitored::Scalar<int>("candSliceVsSLBAFirstInTrainY",0);
+  auto candSliceVsSLECFirstInTrainX = Monitored::Scalar<int>("candSliceVsSLECFirstInTrainX",0);
+  auto candSliceVsSLECFirstInTrainY = Monitored::Scalar<int>("candSliceVsSLECFirstInTrainY",0);
+  auto candSliceVsSLFWFirstInTrainX = Monitored::Scalar<int>("candSliceVsSLFWFirstInTrainX",0);
+  auto candSliceVsSLFWFirstInTrainY = Monitored::Scalar<int>("candSliceVsSLFWFirstInTrainY",0);
   //TOB
   auto tobEtaPhiAX = Monitored::Scalar<int>("tobEtaPhiAX",0);
   auto tobEtaPhiAY = Monitored::Scalar<int>("tobEtaPhiAY",0);
@@ -441,11 +480,12 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
   auto tobPtVsPhiCX = Monitored::Scalar<int>("tobPtVsPhiCX",0);
   auto tobPtVsPhiCY = Monitored::Scalar<int>("tobPtVsPhiCY",0);
   //mlt
-  auto multX = Monitored::Scalar<int>("multX",0);
-  auto multPerLBX = Monitored::Scalar<int>("multPerLBX",0);
-  auto multPerLBY = Monitored::Scalar<int>("multPerLBY",0);
-  auto multSliceVsMultX = Monitored::Scalar<int>("multSliceVsMultX",0);
-  auto multSliceVsMultY = Monitored::Scalar<int>("multSliceVsMultY",0);
+  auto multThrX       = Monitored::Scalar<int>("multThrX",0);
+  auto multBitsX      = Monitored::Scalar<int>("multBitsX",0);
+  auto multThrVsLBX  = Monitored::Scalar<int>("multThrVsLBX",0);
+  auto multThrVsLBY  = Monitored::Scalar<int>("multThrVsLBY",0);
+  auto multBitsVsLBX = Monitored::Scalar<int>("multBitsVsLBX",0);
+  auto multBitsVsLBY = Monitored::Scalar<int>("multBitsVsLBY",0);
 
 
 
@@ -453,6 +493,7 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
   //get event info
   auto eventInfo = GetEventInfo(ctx);
   uint32_t currentLumiBlock = eventInfo->lumiBlock();
+  uint32_t currentBCID = eventInfo->bcid();
 
   //get muctpi fragment data in the form of a vector of timeslices
   const std::vector<LVL1::MuCTPIBits::Slice> &slices = theMuCTPI_Phase1_RDO->slices();
@@ -462,17 +503,18 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 
 
   //data is grouped in slices:
-  for(uint iSlice=0;iSlice<theMuCTPI_Phase1_RDO->slices().size();iSlice++)
+  uint nSlices=theMuCTPI_Phase1_RDO->slices().size();
+  for(uint iSlice=0;iSlice<nSlices;iSlice++)
   {
 
       ATH_MSG_DEBUG( "MUCTPI DQ DEBUG: iSlice = "<<iSlice);
 
       //assuming only 1,3,5,7 possible slices:
       bool isCentralSlice=false;
-      if(theMuCTPI_Phase1_RDO->slices().size()==1)
+      if(nSlices==1)
           isCentralSlice=true;
       else
-          isCentralSlice = (theMuCTPI_Phase1_RDO->slices().size()-1)/2 == iSlice;
+          isCentralSlice = (nSlices-1)/2 == iSlice;
 
       //-------------------------------------------------
       // HEADER
@@ -493,26 +535,32 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
       /// fill histo 2D per LB
       /// fill histo 2D per (timeslice relative BCID)
 
-      //flags from 3rd Mult word
-      if(isCentralSlice)
-      {
-
-      }
-
+      //decoded thresholds
       for(uint iThr=0;iThr<slices[iSlice].mlt.cnt.size();iThr++)
       {
-          multX = iThr;
-          fill(m_packageName, multX);
-          multPerLBX = currentLumiBlock;
-          multPerLBY = iThr;
-          fill(m_packageName, multPerLBX, multPerLBY);
+          bool thr = slices[iSlice].mlt.cnt[iThr] & 0x1;
+          if(thr)
+          {
+              multThrX = iThr;
+              fill(m_packageName, multThrX);
+              multThrVsLBX = currentLumiBlock;
+              multThrVsLBY = iThr;
+              fill(m_packageName, multThrVsLBX, multThrVsLBY);
+          }
+      }
 
-          multSliceVsMultY = iThr;
-          if(isCentralSlice)
-              multSliceVsMultX = 0;
-          else
-              multSliceVsMultX = 1;
-          fill(m_packageName, multSliceVsMultX, multSliceVsMultY);
+      //(still) encoded individual bits
+      for(uint iBit=0;iBit<64;iBit++)
+      {
+          bool bit = ( slices[iSlice].mlt.bits >> iBit ) & 0x1;
+          if(bit)
+          {
+              multBitsX = iBit;
+              fill(m_packageName, multBitsX);
+              multBitsVsLBX = currentLumiBlock;
+              multBitsVsLBY = iBit;
+              fill(m_packageName, multBitsVsLBX, multBitsVsLBY);
+          }
       }
 
 
@@ -559,6 +607,36 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
               candPtBAX = slices[iSlice].cand[iCand].pt;
               fill(m_packageName, candPtBAX);
 
+              candSLVsLBBAX = currentLumiBlock;
+              candSLVsLBBAY = num;
+              fill(m_packageName, candSLVsLBBAX, candSLVsLBBAY);
+
+              bool vetoFlag = slices[iSlice].cand[iCand].vetoFlag;
+              if(vetoFlag)
+              {
+                  candVetoFlag_RoiVsSLBAX = slices[iSlice].cand[iCand].roi;
+                  candVetoFlag_RoiVsSLBAY = num;
+                  fill(m_packageName, candVetoFlag_RoiVsSLBAX, candVetoFlag_RoiVsSLBAY);
+              }
+
+              candSliceVsSLBAX = num;
+              uint sliceIndex;
+              if(nSlices==7)      sliceIndex = iSlice;   //aligning the iSlice index for the 7-bin histo
+              else if(nSlices==5) sliceIndex = iSlice+1; //aligning the iSlice index for the 7-bin histo
+              else if(nSlices==3) sliceIndex = iSlice+2; //aligning the iSlice index for the 7-bin histo
+              else /*if(nSlices==1)*/ sliceIndex = 3; //central bin in a 7-bin histo
+              candSliceVsSLBAY=sliceIndex;
+              fill(m_packageName, candSliceVsSLBAX, candSliceVsSLBAY);
+
+              //same but checking BG match
+              //if currentBCID is in vector: bcidFirstInTrain, then fill histo
+              if(std::find(bcidFirstInTrain.begin(), bcidFirstInTrain.end(), currentBCID) != bcidFirstInTrain.end())
+              {
+                  candSliceVsSLBAFirstInTrainX=num;
+                  candSliceVsSLBAFirstInTrainY=sliceIndex;
+                  fill(m_packageName, candSliceVsSLBAFirstInTrainX, candSliceVsSLBAFirstInTrainY);
+              }
+
               if(isCentralSlice)
               {
                   candRoiVsSLBACentralSliceX = num;
@@ -578,20 +656,12 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
                   candErrorFlagVsSLBACentralSlicePerLBY = currentLumiBlock;
                   if(slices[iSlice].cand[iCand].errorFlag)
                       fill(m_packageName, candErrorFlagVsSLBACentralSlicePerLBX, candErrorFlagVsSLBACentralSlicePerLBY);
-
-                  candSliceVsSLBAX = num;
-                  candSliceVsSLBAY = 0;
-                  fill(m_packageName, candSliceVsSLBAX, candSliceVsSLBAY);
               }
               else
               {
                   candRoiVsSLBAOtherSliceX = slices[iSlice].cand[iCand].num + 32*(1-slices[iSlice].cand[iCand].side);//offset side C
                   candRoiVsSLBAOtherSliceY = slices[iSlice].cand[iCand].roi;
                   fill(m_packageName, candRoiVsSLBAOtherSliceX, candRoiVsSLBAOtherSliceY);
-
-                  candSliceVsSLBAX = num;
-                  candSliceVsSLBAY = 1;
-                  fill(m_packageName, candSliceVsSLBAX, candSliceVsSLBAY);
               }
           }
           else if(slices[iSlice].cand[iCand].type==LVL1::MuCTPIBits::SubsysID::Endcap)
@@ -600,6 +670,36 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 
               candPtECX = slices[iSlice].cand[iCand].pt;
               fill(m_packageName, candPtECX);
+
+              candSLVsLBECX = currentLumiBlock;
+              candSLVsLBECY = num;
+              fill(m_packageName, candSLVsLBECX, candSLVsLBECY);
+
+              bool vetoFlag = slices[iSlice].cand[iCand].vetoFlag;
+              if(vetoFlag)
+              {
+                  candVetoFlag_RoiVsSLECX = slices[iSlice].cand[iCand].roi;
+                  candVetoFlag_RoiVsSLECY = num;
+                  fill(m_packageName, candVetoFlag_RoiVsSLECX, candVetoFlag_RoiVsSLECY);
+              }
+
+              candSliceVsSLECX = num;
+              uint sliceIndex;
+              if(nSlices==7)      sliceIndex = iSlice;   //aligning the iSlice index for the 7-bin histo
+              else if(nSlices==5) sliceIndex = iSlice+1; //aligning the iSlice index for the 7-bin histo
+              else if(nSlices==3) sliceIndex = iSlice+2; //aligning the iSlice index for the 7-bin histo
+              else /*if(nSlices==1)*/ sliceIndex = 3; //central bin in a 7-bin histo
+              candSliceVsSLECY=sliceIndex;
+              fill(m_packageName, candSliceVsSLECX, candSliceVsSLECY);
+
+              //same but checking BG match
+              //if currentBCID is in vector: bcidFirstInTrain, then fill histo
+              if(std::find(bcidFirstInTrain.begin(), bcidFirstInTrain.end(), currentBCID) != bcidFirstInTrain.end())
+              {
+                  candSliceVsSLECFirstInTrainX=num;
+                  candSliceVsSLECFirstInTrainY=sliceIndex;
+                  fill(m_packageName, candSliceVsSLECFirstInTrainX, candSliceVsSLECFirstInTrainY);
+              }
 
               if(isCentralSlice)
               {
@@ -628,20 +728,12 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
                   candErrorFlagVsSLECCentralSlicePerLBY = currentLumiBlock;
                   if(slices[iSlice].cand[iCand].errorFlag)
                       fill(m_packageName, candErrorFlagVsSLECCentralSlicePerLBX, candErrorFlagVsSLECCentralSlicePerLBY);
-
-                  candSliceVsSLECX = num;
-                  candSliceVsSLECY = 0;
-                  fill(m_packageName, candSliceVsSLECX, candSliceVsSLECY);
               }
               else
               {
                   candRoiVsSLECOtherSliceX = slices[iSlice].cand[iCand].num + 48*(1-slices[iSlice].cand[iCand].side);//offset side C
                   candRoiVsSLECOtherSliceY = slices[iSlice].cand[iCand].roi;
                   fill(m_packageName, candRoiVsSLECOtherSliceX, candRoiVsSLECOtherSliceY);
-
-                  candSliceVsSLECX = num;
-                  candSliceVsSLECY = 1;
-                  fill(m_packageName, candSliceVsSLECX, candSliceVsSLECY);
               }
           }
           else if(slices[iSlice].cand[iCand].type==LVL1::MuCTPIBits::SubsysID::Forward)
@@ -649,6 +741,36 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
               uint num = slices[iSlice].cand[iCand].num + 24*(1-slices[iSlice].cand[iCand].side);//offset side C;
               candPtFWX = slices[iSlice].cand[iCand].pt;
               fill(m_packageName, candPtFWX);
+
+              candSLVsLBFWX = currentLumiBlock;
+              candSLVsLBFWY = num;
+              fill(m_packageName, candSLVsLBFWX, candSLVsLBFWY);
+
+              bool vetoFlag = slices[iSlice].cand[iCand].vetoFlag;
+              if(vetoFlag)
+              {
+                  candVetoFlag_RoiVsSLFWX = slices[iSlice].cand[iCand].roi;
+                  candVetoFlag_RoiVsSLFWY = num;
+                  fill(m_packageName, candVetoFlag_RoiVsSLFWX, candVetoFlag_RoiVsSLFWY);
+              }
+
+              candSliceVsSLFWX = num;
+              uint sliceIndex;
+              if(nSlices==7)      sliceIndex = iSlice;   //aligning the iSlice index for the 7-bin histo
+              else if(nSlices==5) sliceIndex = iSlice+1; //aligning the iSlice index for the 7-bin histo
+              else if(nSlices==3) sliceIndex = iSlice+2; //aligning the iSlice index for the 7-bin histo
+              else /*if(nSlices==1)*/ sliceIndex = 3; //central bin in a 7-bin histo
+              candSliceVsSLFWY=sliceIndex;
+              fill(m_packageName, candSliceVsSLFWX, candSliceVsSLFWY);
+
+              //same but checking BG match
+              //if currentBCID is in vector: bcidFirstInTrain, then fill histo
+              if(std::find(bcidFirstInTrain.begin(), bcidFirstInTrain.end(), currentBCID) != bcidFirstInTrain.end())
+              {
+                  candSliceVsSLFWFirstInTrainX=num;
+                  candSliceVsSLFWFirstInTrainY=sliceIndex;
+                  fill(m_packageName, candSliceVsSLFWFirstInTrainX, candSliceVsSLFWFirstInTrainY);
+              }
 
               if(isCentralSlice)
               {
@@ -677,20 +799,12 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
                   candErrorFlagVsSLFWCentralSlicePerLBY = currentLumiBlock;
                   if(slices[iSlice].cand[iCand].errorFlag)
                       fill(m_packageName, candErrorFlagVsSLFWCentralSlicePerLBX, candErrorFlagVsSLFWCentralSlicePerLBY);
-
-                  candSliceVsSLFWX = num;
-                  candSliceVsSLFWY = 0;
-                  fill(m_packageName, candSliceVsSLFWX, candSliceVsSLFWY);
               }
               else
               {
                   candRoiVsSLFWOtherSliceX = slices[iSlice].cand[iCand].num + 24*(1-slices[iSlice].cand[iCand].side);//offset side C
                   candRoiVsSLFWOtherSliceY = slices[iSlice].cand[iCand].roi;
                   fill(m_packageName, candRoiVsSLFWOtherSliceX, candRoiVsSLFWOtherSliceY);
-
-                  candSliceVsSLFWX = num;
-                  candSliceVsSLFWY = 1;
-                  fill(m_packageName, candSliceVsSLFWX, candSliceVsSLFWY);
               }
           }
 
@@ -1224,7 +1338,7 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_RDO* theMuCTPI_
       for ( ; it_rpc_hit != (*it_rpc) -> end() ; ++it_rpc_hit )
         {
           if (!(*it_rpc_hit) -> isInput() && (*it_rpc_hit) -> rowinBcid() == 1) {
-	    std::ostringstream rpckey;
+            std::ostringstream rpckey;
             rpckey << "BA" << (*it_rpc)->sectorId() <<"-RoI" << (*it_rpc_hit) -> roi()
                    << "-Pt" << (*it_rpc_hit) -> ptId();
             rpcCandidates.insert (std::pair<std::string, const RpcSLTriggerHit* >(rpckey.str(),(*it_rpc_hit)));
@@ -1232,27 +1346,23 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_RDO* theMuCTPI_
         }
     }
 
-  Muon::TgcCoinDataContainer::const_iterator it_tgc;
-  Muon::TgcCoinDataCollection::const_iterator it_tgc_col;
-  for (it_tgc = theTGCContainer->begin(); it_tgc != theTGCContainer->end(); it_tgc++) {
-    for (it_tgc_col = (*it_tgc)->begin(); it_tgc_col != (*it_tgc)->end(); it_tgc_col++) {
-      if ((*it_tgc_col)->pt() != 0 ) {
-	std::ostringstream tgckey;
-	std::string sys = "FW";
-        if ((*it_tgc_col)->isForward()) {  // Forward sector, account for different numbering scheme in SL readout
-          int secID = (*it_tgc_col)->phi();
+  for (const Muon::TgcCoinDataCollection* tgc_coll : *theTGCContainer) {
+    for (const Muon::TgcCoinData* tgc_coin : *tgc_coll) {
+      if (tgc_coin->pt() != 0 ) {
+        std::ostringstream tgckey;
+        if (tgc_coin->isForward()) {  // Forward sector, account for different numbering scheme in SL readout
+          int secID = tgc_coin->phi();
           if (secID == 24) secID = 0;
-          tgckey << sys << secID+(24*(*it_tgc_col)->isAside()) <<"-RoI" << (*it_tgc_col)->roi()
-                 << "-Pt" << (*it_tgc_col)->pt();
+          tgckey << "FW" << secID+(24*tgc_coin->isAside()) <<"-RoI" << tgc_coin->roi()
+                 << "-Pt" << tgc_coin->pt();
         } else { // Endcap sector, account for different numbering scheme in SL readout
-	  std::string sys = "EC";
-          int secID =  (*it_tgc_col)->phi()+1;
+          int secID =  tgc_coin->phi()+1;
           if (secID == 48 ) secID = 0;
           else if (secID == 49 ) secID = 1;
-          tgckey << sys << secID + (48*(*it_tgc_col)->isAside()) <<"-RoI" << (*it_tgc_col)->roi()
-                 << "-Pt" << (*it_tgc_col)->pt();
+          tgckey << "EC" << secID + (48*tgc_coin->isAside()) <<"-RoI" << tgc_coin->roi()
+                 << "-Pt" << tgc_coin->pt();
         }
-        tgcCandidates.insert(std::pair<std::string, const Muon::TgcCoinData* >(tgckey.str(),(*it_tgc_col)));
+        tgcCandidates.emplace(tgckey.str(), tgc_coin);
       }
     }
   }
@@ -1584,9 +1694,7 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doCtp(const CTP_RDO* theCTP_RDO,
 			 << freqFromCool << " Hz => t_BC = " << bcDurationInNs << " ns"); 
 	}
 	else {
-	  //ATH_MSG_WARNING( "No valid frequency measurements found in COOL, will use hardcoded BC interval: t_BC = "
- 	  ATH_MSG_INFO( "No valid frequency measurements found in COOL, will use hardcoded BC interval: t_BC = " 
-			 << bcDurationInNs << " ns");
+      ATH_MSG_DEBUG( "No valid frequency measurements found in COOL, will use hardcoded BC interval: t_BC = " << bcDurationInNs << " ns");
 	}
 
 	uint32_t lumiBlockOfPreviousEvent = eventInfo->lumiBlock() -1 ; 

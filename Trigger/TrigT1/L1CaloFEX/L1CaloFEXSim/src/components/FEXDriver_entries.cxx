@@ -10,6 +10,7 @@
 #include "L1CaloFEXSim/eFEXFPGA.h"
 #include "L1CaloFEXSim/eFEXtauAlgo.h"
 #include "L1CaloFEXSim/eFEXegAlgo.h"
+#include "L1CaloFEXSim/eFEXTOBEtTool.h"
 #include "L1CaloFEXSim/eFEXNtupleWriter.h"
 #include "L1CaloFEXSim/jFEXDriver.h"
 #include "L1CaloFEXSim/jFEXSysSim.h"
@@ -53,6 +54,7 @@ DECLARE_COMPONENT(eSuperCellTowerMapper)
 DECLARE_COMPONENT(eFEXFPGA)
 DECLARE_COMPONENT(eFEXtauAlgo)
 DECLARE_COMPONENT(eFEXegAlgo)
+DECLARE_COMPONENT(eFEXTOBEtTool)
 DECLARE_COMPONENT(eFEXNtupleWriter)
 DECLARE_COMPONENT(eTowerMakerFromSuperCells)
 DECLARE_COMPONENT(eFEXFPGATowerIdProvider)

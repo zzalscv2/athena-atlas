@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 
@@ -28,13 +28,14 @@ outSequence = AthSequencer("AthOutSeq")
 
 # Set input file to new-style flags
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-ConfigFlags.Input.Files = athenaCommonFlags.FilesInput()
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+flags = initConfigFlags()
+flags.Input.Files = athenaCommonFlags.FilesInput()
 
 # Use new-style config of ByteStream reading and import here into old-style JO
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
 from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-CAtoGlobalWrapper(ByteStreamReadCfg,ConfigFlags)
+CAtoGlobalWrapper(ByteStreamReadCfg,flags)
 
 # Define the decoding sequence
 from TrigHLTResultByteStream.TrigHLTResultByteStreamConf import HLTResultMTByteStreamDecoderAlg
@@ -53,18 +54,17 @@ topSequence += decodingSeq
 # Configure output file name
 outputFileName = 'ESD.pool.root' if HLTModuleID==0 else 'ESD.Module{:d}.pool.root'.format(HLTModuleID)
 athenaCommonFlags.PoolESDOutput = outputFileName
-ConfigFlags.Output.ESDFileName = outputFileName
+flags.Output.ESDFileName = outputFileName
 
 # Create OutputStream for ESD writing
 from OutputStreamAthenaPool.CreateOutputStreams import createOutputStream
-StreamESD = createOutputStream("StreamESD", ConfigFlags.Output.ESDFileName, True)
+StreamESD = createOutputStream("StreamESD", flags.Output.ESDFileName, True)
 topSequence.remove( StreamESD )
 outSequence.remove( StreamESD )
 
 # Define what to write into ESD
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from TrigEDMConfig.TriggerEDM import getTriggerEDMList
-edmList = getTriggerEDMList(ConfigFlags.Trigger.ESDEDMSet, ConfigFlags.Trigger.EDMVersion)
+edmList = getTriggerEDMList(flags.Trigger.ESDEDMSet, flags.Trigger.EDMVersion)
 if len(ItemList) == 0:
     for edmType, edmKeys in edmList.items():
         for key in edmKeys:

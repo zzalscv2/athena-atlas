@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -19,8 +19,9 @@
 
 namespace LVL1 {
 
-  const int s_cells[] = {1,4,4,1,4};
-  const int s_offsets[] = {0,1,5,9,10};
+  const size_t s_nLayers = 5;
+  const int s_cells[s_nLayers] = {1,4,4,1,4};
+  const int s_offsets[s_nLayers] = {0,1,5,9,10};
   
   // default constructor
   eTower::eTower():
@@ -104,7 +105,7 @@ namespace LVL1 {
     addET(et, cell);
     
     //multi linear digitisation encoding
-    unsigned int outET = eFEXCompression::decode((unsigned int)m_et_float[cell],layer);
+    unsigned int outET = eFEXCompression::decode(std::round(m_et_float[cell]),layer);
     m_et[cell] = outET;
   }
 
@@ -122,7 +123,7 @@ namespace LVL1 {
       m_scID[cell] = ID;
     
       //multi linear digitisation encoding
-      unsigned int outET = eFEXCompression::decode((unsigned int)m_et_float[cell],layer);
+      unsigned int outET = eFEXCompression::decode(std::round(m_et_float[cell]),layer);
       m_et[cell] = outET;
     }
     else{
@@ -147,8 +148,8 @@ namespace LVL1 {
       
       m_scID.push_back(ID);
 
-      unsigned int outET1 = eFEXCompression::decode((unsigned int)m_et_float[cell],layer);
-      unsigned int outET2 = eFEXCompression::decode((unsigned int)m_et_float[cell+1],layer);
+      unsigned int outET1 = eFEXCompression::decode(std::round(m_et_float[cell]),layer);
+      unsigned int outET2 = eFEXCompression::decode(std::round(m_et_float[cell+1]),layer);
       
       m_et[cell] = outET1;
       m_et[cell+1] = outET2;
@@ -177,7 +178,7 @@ namespace LVL1 {
   unsigned int eTower::getET(unsigned int layer,  int cell) const {
     
     /// Check cell index in range for layer
-    if (layer > 5 || cell < 0 || cell >= s_cells[layer]) return 0;
+    if (layer >= s_nLayers || cell < 0 || cell >= s_cells[layer]) return 0;
     
     // Return ET
     return m_et[s_offsets[layer] + cell];
@@ -188,7 +189,7 @@ namespace LVL1 {
   float eTower::getET_float(unsigned int layer, int cell) const {
 
     /// Check cell index in range for layer
-    if (layer > 5 || cell < 0 || cell >= s_cells[layer]) return 0;
+    if (layer >= s_nLayers || cell < 0 || cell >= s_cells[layer]) return 0;
 
     // Return ET
     return m_et_float[s_offsets[layer] + cell];
@@ -227,7 +228,7 @@ namespace LVL1 {
     std::vector<unsigned int> cells;
     
     /// Check cell index in range for layer
-    if (layer > 5) return cells;
+    if (layer >= s_nLayers) return cells;
     
     /// Fill output vector
     for (int cell = 0; cell < s_cells[layer]; ++cell) cells.push_back(m_et[s_offsets[layer] + cell]);
@@ -243,7 +244,7 @@ namespace LVL1 {
     std::vector<float> cells;
 
     /// Check cell index in range for layer
-    if (layer > 5) return cells;
+    if (layer >= s_nLayers) return cells;
 
     /// Fill output vector
     for (int cell = 0; cell < s_cells[layer]; ++cell) cells.push_back(m_et_float[s_offsets[layer] + cell]);

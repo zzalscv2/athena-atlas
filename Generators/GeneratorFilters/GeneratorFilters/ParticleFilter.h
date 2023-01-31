@@ -27,7 +27,6 @@ private:
   Gaudi::Property<int>    m_StatusReq{this, "StatusReq", 1};
   Gaudi::Property<int>    m_MinParts{this, "MinParts", 1};
   Gaudi::Property<bool>   m_Exclusive{this, "Exclusive", false};
-  Gaudi::Property<int>    m_simBarcodeOffset{this, "SimBarcodeOffset", 200000};
 };
 
 #endif

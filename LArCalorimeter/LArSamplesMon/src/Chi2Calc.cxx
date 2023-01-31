@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/Chi2Calc.h"
@@ -34,7 +34,7 @@ double Chi2Calc::scalarProduct(const TVectorD& values1, const TVectorD& values2,
 
 
 TVectorD Chi2Calc::deltas(const AbsShape& data, const AbsShape& reference, CovMatrix& errors, 
-                          const ScaledErrorData* shapeError, int lw, int up, bool noDataError) const
+                          const ScaledErrorData* shapeError, int lw, int up, bool noDataError)
 {
   TVectorD refVals;
   if (!reference.interpolate(data, refVals, errors, lw, up)) {
@@ -58,7 +58,7 @@ TVectorD Chi2Calc::deltas(const AbsShape& data, const AbsShape& reference, CovMa
 
 
 double Chi2Calc::chi2(const AbsShape& data, const AbsShape& reference, const ScaledErrorData* shapeError,
-                                  int lw, int up) const
+                                  int lw, int up)
 { 
   double chi2Val = 0;
   CovMatrix errors;

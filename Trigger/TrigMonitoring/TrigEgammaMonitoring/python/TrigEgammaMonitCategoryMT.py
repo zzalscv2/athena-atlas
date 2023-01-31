@@ -119,6 +119,18 @@ validation_jpsi = [
 
 validationTP_jpsiee = ['HLT_e5_lhtight_L1EM3']
 
+monitoring_electron_cosmic=['HLT_e5_etcut_L1EM3']
+monitoring_photon_cosmic=['HLT_g3_etcut_LArPEB_L1EM3']
+monitoring_bootstrap_cosmic = {
+    'HLT_g3_etcut_LArPEB_L1EM3' : 'HLT_g3_etcut_LArPEB_L1EM3'
+     }
+
+monitoring_electron_hi=['HLT_e5_etcut_L1EM3']
+monitoring_photon_hi=['HLT_g18_etcut_L1EM10']
+monitoring_bootstrap_hi = {
+    'HLT_g18_etcut_L1EM10' : 'HLT_g18_etcut_L1EM10'
+     }
+
 
 validation_Zee = [
         'HLT_e26_lhtight_e15_etcut_Zee_L1EM22VHI',
@@ -186,10 +198,10 @@ monitoring_Zee = ['HLT_e26_lhtight_e14_etcut_probe_50invmAB130_L1EM22VHI',
                 ] + primary_single_ele
 
 monitoring_Jpsiee = [
-        'HLT_e10_lhvloose_L1EM7',
-        'HLT_e14_lhvloose_L1EM10VH',
         'HLT_e5_lhtight_e9_etcut_1invmAB5_L1JPSI-1M5-EM7',
         'HLT_e5_lhtight_e14_etcut_1invmAB5_L1JPSI-1M5-EM12',
         'HLT_e9_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-EM7',
-        'HLT_e14_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-EM12'
+        'HLT_e14_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-EM12',
+        'HLT_e10_lhvloose_L1EM7',
+        'HLT_e14_lhvloose_L1EM10VH'
         ]

@@ -2,6 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "GeneratorObjects/McEventCollection.h"
 #include "Tauolapp_i/TauolaPP.h"
 
 // Tauola header files
@@ -22,33 +23,14 @@ using TauolaHepMCParticle=TauolaHepMC3Particle;
 
 // for proper seeding
 #include "CLHEP/Random/RandFlat.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
-//for Ranlux
-#include "CLHEP/Random/Randomize.h"
+#include "AthenaKernel/RNGWrapper.h"
 
-using namespace Tauolapp;
-using namespace CLHEP;
+// Pointer to random engine
+CLHEP::HepRandomEngine*  TauolaPP::p_rndmEngine = nullptr;
 
-RanluxEngine theRanluxEngine(123456,1);
-
-double RanluxGenerator()
+double AthenaRandomGenerator ATLAS_NOT_THREAD_SAFE ()
 {
-  return RandFlat::shoot(&theRanluxEngine);
-}
-
-
-//Random number service
-IAtRndmGenSvc* &TauolaPP::atRndmGenSvc()
-{
-  static IAtRndmGenSvc *p_AtRndmGenSvc = 0;
-  return p_AtRndmGenSvc;
-}
-
-std::string &TauolaPP::tauolapp_stream()
-{
-
-  static std::string s_tauolapp_stream = "TAUOLAPP_INIT";
-  return s_tauolapp_stream;
+  return CLHEP::RandFlat::shoot(TauolaPP::p_rndmEngine);
 }
 
 
@@ -56,57 +38,17 @@ std::string &TauolaPP::tauolapp_stream()
 TauolaPP::TauolaPP(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
 {
-  //Key to HepMC record
-  declareProperty("McEventKey", m_key="GEN_EVENT");
-
-  //TAUOLA configurables
-  //TAUOLA decay mode of particles with same/opposite charge as "decay_particle"
-  declareProperty("decay_mode_same", m_decay_mode_same=1);
-  declareProperty("decay_mode_opposite", m_decay_mode_opp=2);
-  declareProperty("decay_particle",m_decay_particle=15);
-  declareProperty("tau_mass",m_tau_mass=1.77684);
-  declareProperty("spin_correlation",m_spin_correlation=true);
-  declareProperty("setRadiation",m_setRadiation=true);
-  declareProperty("setRadiationCutOff",m_setRadiationCutOff=0.01); 
-
 }
 
 
 StatusCode TauolaPP::initialize(){
 
-  // Get the Storegate collection
-  /// @todo Can't thi be removed?
-  evtStore().setName( "StoreGateSvc");
-  StatusCode sc = evtStore().retrieve();
-  if ( !sc.isSuccess() ) {
-    ATH_MSG_ERROR ("Could not locate StoreGateSvc");
-    return sc;
-  }
-
-
-
-  // Random number service
-  StatusCode RndmStatus = service("AtRndmGenSvc", atRndmGenSvc(), true);
-	 
-  if(!RndmStatus.isSuccess() || atRndmGenSvc() == 0)
-  {
-     ATH_MSG_ERROR("Could not get Random number service!");
-     return StatusCode::FAILURE;
-  }
-
-	 
-  HepRandomEngine* engine = atRndmGenSvc()->GetEngine(tauolapp_stream());
-  const long*   sip     =       engine->getSeeds();
-  long  int     si1     =       sip[0];
-  long  int     si2     =       sip[1];
-	 
-
-  atRndmGenSvc()->CreateStream(si1, si2, tauolapp_stream());
-  tauolapp_stream() = "TAUOLAPP";
-
-
+  ATH_CHECK(m_rndmSvc.retrieve());
+  p_rndmEngine = getRandomEngineDuringInitialize("TAUOLAPP_INIT", m_randomSeed, m_dsid);
+  const long*  sip  =  p_rndmEngine->getSeeds();
 
   // Setup and intialise Tauola Interface
+  using Tauolapp::Tauola;
   Tauola::setSameParticleDecayMode(m_decay_mode_same);
   Tauola::setOppositeParticleDecayMode(m_decay_mode_opp);
   // etc.... see Tauola.h for the full list of configurables
@@ -123,51 +65,70 @@ StatusCode TauolaPP::initialize(){
   Tauola::setRadiationCutOff(m_setRadiationCutOff);
 
   //call RanLux generator for ++ part of Tauola
-  Tauola::setRandomGenerator(RanluxGenerator);
+  Tauola::setRandomGenerator(AthenaRandomGenerator);
 
   //seeding tauola-fortran generator
   // See tauola.f: the first parameter should be positive int <900000000
   Tauola::setSeed(int(std::abs(sip[0])%(900000000)),0,0);
 
-  //seeding tauola++ generator
-  theRanluxEngine.setSeed(si2,1);
-
   //setting tau mass
-  parmas_.amtau=m_tau_mass;
-
-  //cout<<"tauola tau mass "<<Tauola::getTauMass()<<endl;
+  Tauolapp::parmas_.amtau=m_tau_mass;
 
   return StatusCode::SUCCESS;
 }
 
 
+void TauolaPP::reseedRandomEngine(const std::string& streamName, const EventContext& ctx)
+{
+  long seeds[7];
+  ATHRNG::calculateSeedsMC21(seeds, streamName,  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+  p_rndmEngine->setSeeds(seeds, 0); // NOT THREAD-SAFE
+}
+
+
+CLHEP::HepRandomEngine* TauolaPP::getRandomEngine(const std::string& streamName, unsigned long int randomSeedOffset,
+                                                             const EventContext& ctx) const
+{
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, streamName);
+  rngWrapper->setSeed( streamName, ctx.slot(), randomSeedOffset, ctx.eventID().run_number() );
+  return rngWrapper->getEngine(ctx);
+}
+
+
+CLHEP::HepRandomEngine* TauolaPP::getRandomEngineDuringInitialize(const std::string& streamName, unsigned long int randomSeedOffset, unsigned int conditionsRun, unsigned int lbn) const
+{
+  const size_t slot=0;
+  EventContext ctx;
+  ctx.setSlot( slot );
+  ctx.setEventID (EventIDBase (conditionsRun,
+               EventIDBase::UNDEFEVT,  // event
+               EventIDBase::UNDEFNUM,  // timestamp
+               EventIDBase::UNDEFNUM,  // timestamp ns
+               lbn));
+  Atlas::setExtendedEventContext(ctx,
+                                 Atlas::ExtendedEventContext( evtStore()->hiveProxyDict(),
+                                                              conditionsRun) );
+  return getRandomEngine(streamName, randomSeedOffset, ctx);
+}
+
+
 StatusCode TauolaPP::execute() {
 
+  //Re-seed the random number stream
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  reseedRandomEngine("TAUOLAPP", ctx);
+
   // Load HepMC info
+  // FIXME should be using Read/WriteHandles here
   const McEventCollection* mcCollptr_const;
-  if ( evtStore()->retrieve(mcCollptr_const, m_key).isFailure() ) {
-    ATH_MSG_ERROR ("Could not retrieve McEventCollection");
-    return StatusCode::FAILURE;
-  }
-
-  HepRandomEngine* engine = atRndmGenSvc()->GetEngine(tauolapp_stream());
-  const long*   sip     =       engine->getSeeds();
-  long  int     si2     =       sip[1];
-	 
-  // We leave the Fortran random engine as it is.
-
-  //seeding tauola++ generator
-  theRanluxEngine.setSeed(si2,1);
-
-
+  ATH_CHECK( evtStore()->retrieve(mcCollptr_const, m_key) );
   // Const_cast to make an event possible to update
   McEventCollection* mcCollptr =  const_cast<McEventCollection*>(mcCollptr_const);
 
   // Loop over all events in McEventCollection
-  McEventCollection::iterator itr;
-  for (itr = mcCollptr->begin(); itr!=mcCollptr->end(); ++itr) {
+  for (HepMC::GenEvent* evt : *mcCollptr) {
     // Convert event record to format readable by tauola interface
-    TauolaHepMCEvent * t_event = new TauolaHepMCEvent(*itr);
+    auto t_event = new Tauolapp::TauolaHepMCEvent(evt);
 
 #ifdef HEPMC3
 //move to GeV

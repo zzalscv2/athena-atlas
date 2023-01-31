@@ -8,6 +8,8 @@
 #include "LArCalibTools/LArDigits2Ntuple.h"
 #include "CaloDetDescr/ICaloSuperCellIDTool.h"
 #include "LArRawEvent/LArRawChannelContainer.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
+#include "xAODEventInfo/EventInfo.h"
 
 class LArSC2Ntuple : public LArDigits2Ntuple
 {
@@ -30,14 +32,22 @@ class LArSC2Ntuple : public LArDigits2Ntuple
   Gaudi::Property< bool > m_overwriteEventNumber{this, "OverwriteEventNumber", false, "overwrite the event number from EventInfo ?"};
   Gaudi::Property< unsigned int >  m_Net{this, "Net", 5, "number of energies to store"};
   Gaudi::Property< bool > m_fillRawChan{this, "FillRODEnergy", false, "Trying to fill corresponding cells energies"};
+  Gaudi::Property< bool > m_fillTType{this, "FillTriggerType", false, "Trying to fill trigger type word"};
+  Gaudi::Property< std::vector<std::string> > m_trigNames{ this, "TrigNames", {"L1_EM3","L1_EM7","L1_EM15"},"which triggers to dump"};
 
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKeyAdditional{this,"CablingKeyAdditional","LArOnOffIdMap","SG Key of LArOnOffIdMapping object for standard cells"};
   ToolHandle<ICaloSuperCellIDTool>   m_scidtool{this, "CaloSuperCellIDTool", "CaloSuperCellIDTool", "Offline / SuperCell ID mapping tool"};
+  ToolHandle< Trig::TrigDecisionTool > m_trigDec{this, "TrigDecisionTool", "", "Handle to the TrigDecisionTool"};
+  //To get the data-dependency right ... 
+  SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "LArStatusFlag", "EventInfo.larFlag", "Key for EventInfo object"};
 
   NTuple::Item<short> m_latomeChannel;
   NTuple::Item<short> m_LB;
 
   NTuple::Array<float>  m_ROD_energy;
+
+  NTuple::Item<unsigned int> m_TType;
+
 
   // From LATOME header
   NTuple::Item<uint16_t> m_bcidLATOMEHEAD;
@@ -59,6 +69,9 @@ class LArSC2Ntuple : public LArDigits2Ntuple
   NTuple::Array<unsigned short> m_bcidVec_ET_ID;
   NTuple::Array<bool> m_saturVec_ET_ID;
 
+  std::map<std::string,   NTuple::Item<unsigned int> > m_trigNameMap;
+  NTuple::Item<uint32_t> m_LArEventBits;
+  NTuple::Item<short>    m_LArInError;
 };
 
 #endif

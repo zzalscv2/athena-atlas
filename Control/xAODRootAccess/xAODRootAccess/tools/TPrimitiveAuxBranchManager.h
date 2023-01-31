@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TPrimitiveAuxBranchManager.h 595278 2014-05-03 09:31:05Z krasznaa $
 #ifndef XAODROOTACCESS_TOOLS_TPRIMITIVEAUXBRANCHMANAGER_H
 #define XAODROOTACCESS_TOOLS_TPRIMITIVEAUXBRANCHMANAGER_H
 
@@ -33,9 +32,6 @@ namespace xAOD {
    ///
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
-   /// $Revision: 595278 $
-   /// $Date: 2014-05-03 11:31:05 +0200 (Sat, 03 May 2014) $
-   ///
    class TPrimitiveAuxBranchManager : public TVirtualManager {
 
    public:
@@ -56,7 +52,7 @@ namespace xAOD {
       operator=( const TPrimitiveAuxBranchManager& rhs );
 
       /// Accessor to the branch
-      ::TBranch* branch() const;
+      ::TBranch* branch();
       /// Pointer to the branch's pointer
       ::TBranch** branchPtr();
       /// Accessor to the Holder object (constant version)
@@ -67,13 +63,17 @@ namespace xAOD {
        /// Function for updating the object in memory if needed
       virtual ::Int_t getEntry( ::Long64_t entry, ::Int_t getall = 0 );
 
+      /// Function getting a const pointer to the object being handled
+      virtual const void* object() const;
       /// Function getting a pointer to the object being handled
-      virtual void* object() const;
+      virtual void* object();
       /// Function replacing the object being handled
       virtual void setObject( void* obj );
 
+      /// Create the object for the current event
+      virtual ::Bool_t create();
       /// Check if the object was set for the current event
-      virtual ::Bool_t isSet( ::Bool_t forceSet = kTRUE ) const;
+      virtual ::Bool_t isSet() const;
       /// Reset the object at the end of processing of an event
       virtual void reset();
 
@@ -85,12 +85,12 @@ namespace xAOD {
       /// The last entry that was loaded for this branch
       ::Long64_t m_entry;
       /// Was the variable set for the current event?
-      mutable ::Bool_t m_isSet;
+      ::Bool_t m_isSet;
 
       /// Auxiliary variable type
       auxid_t m_auxId;
       /// Dummy auxiliary variable for the empty events
-      mutable SG::IAuxTypeVector* m_vector;
+      SG::IAuxTypeVector* m_vector;
 
    }; // class TPrimitiveAuxBranchManager
 

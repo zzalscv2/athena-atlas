@@ -16,10 +16,6 @@
 #include <iomanip>
 #include <ostream>
 
-namespace {
-constexpr double twoPi = 2.0 * M_PI;
-}
-
 // Class checking the interface of an ellipse with a circle
 class EllipseCollisionTest
 {
@@ -33,7 +29,7 @@ private:
     for (int t = 1; t <= m_maxIterations; t++) {
       int numNodes = 4 << t;
       // innerPolygonCoef[t] = 0.5/std::cos(4*std::acos(0.0)/numNodes);
-      innerPolygonCoef[t] = 0.5 / std::cos(twoPi / numNodes);
+      innerPolygonCoef[t] = 0.5 / std::cos(2.0*M_PI / numNodes);
       double c1x = (c0x + c2x) * innerPolygonCoef[t];
       double c1y = (c0y + c2y) * innerPolygonCoef[t];
       double tx = x - c1x; // t indicates a translated coordinate
@@ -95,8 +91,8 @@ public:
   // radius r at (x1, y1)
   bool collide(double x0, double y0, double w, double h, double x1, double y1, double r) const
   {
-    double x = std::fabs(x1 - x0);
-    double y = std::fabs(y1 - y0);
+    double x = std::abs(x1 - x0);
+    double y = std::abs(y1 - y0);
 
     //		return iterate(x, y, w, 0, 0, h, r*r);
 

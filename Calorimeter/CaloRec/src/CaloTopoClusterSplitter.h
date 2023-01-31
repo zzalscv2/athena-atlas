@@ -40,11 +40,9 @@ class Identifier;
 
 #include "CaloIdentifier/CaloCell_ID.h"
 
-#include "StoreGate/DataHandle.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "Identifier/IdentifierHash.h"
 
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 
 class CaloTopoClusterSplitter: public AthAlgTool, virtual public CaloClusterCollectionProcessor
 {

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile Cell builder tool"""
 
@@ -10,7 +10,7 @@ def TileCellBuilderCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile Cell builder tool
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
         SkipGain - skip given gain. Defaults to -1 [use all gains]. Possible values: 0 [LG], 1 [HG].
     """
 
@@ -44,17 +44,16 @@ def TileCellBuilderCfg(flags, **kwargs):
         from TileConditions.TileBadChannelsConfig import TileBadChanToolCfg
         kwargs['TileBadChanTool'] = acc.popToolsAndMerge( TileBadChanToolCfg(flags) )
 
-    if 'TileCondToolEmscale' not in kwargs:
-        from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-        kwargs['TileCondToolEmscale'] = acc.popToolsAndMerge( TileCondToolEmscaleCfg(flags) )
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     if 'TileCondToolTiming' not in kwargs:
         from TileConditions.TileTimingConfig import TileCondToolTimingCfg
         kwargs['TileCondToolTiming'] = acc.popToolsAndMerge( TileCondToolTimingCfg(flags) )
 
-    if kwargs['CheckDCS'] and 'TileDCSTool' not in kwargs:
-        from TileConditions.TileDCSConfig import TileDCSToolCfg
-        kwargs['TileDCSTool'] = acc.popToolsAndMerge( TileDCSToolCfg(flags) )
+    if kwargs['CheckDCS']:
+        from TileConditions.TileDCSConfig import TileDCSCondAlgCfg
+        acc.merge( TileDCSCondAlgCfg(flags) )
 
     if not (flags.Input.isMC or flags.Overlay.DataOverlay) and 'TileDSPRawChannelContainer' not in kwargs:
         from TileRecUtils.TileRawChannelCorrectionConfig import TileRawChannelCorrectionAlgCfg
@@ -72,7 +71,7 @@ def TileCellBuilderCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -80,17 +79,16 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Tile.RunType = 'PHY'
-
-    ConfigFlags.fillFromArgs()
-
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Tile.RunType = 'PHY'
+    flags.fillFromArgs()
+    flags.lock()
 
     acc = ComponentAccumulator()
 
-    print( acc.popToolsAndMerge( TileCellBuilderCfg(ConfigFlags) ) )
+    print( acc.popToolsAndMerge( TileCellBuilderCfg(flags) ) )
 
-    ConfigFlags.dump()
+    flags.dump()
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.store( open('TileCellBuilder.pkl','wb') )

@@ -4,24 +4,26 @@
 atlas_subdir( xAODBTaggingEfficiency )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Hist RIO )
+find_package( ROOT COMPONENTS Cint Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint )
+find_package( onnxruntime )
+
+atlas_add_root_dictionary( xAODBTaggingEfficiencyLib xAODBTaggingEfficiencyLibDictSource ROOT_HEADERS xAODBTaggingEfficiency/TruthTagResults.h Root/LinkDef.h )
 
 # Component(s) in the package:
 atlas_add_library( xAODBTaggingEfficiencyLib
+  ${xAODBTaggingEfficiencyLibDictSource}
   xAODBTaggingEfficiency/*.h Root/*.cxx
   PUBLIC_HEADERS xAODBTaggingEfficiency
-  INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-  LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AsgMessagingLib xAODBTagging
-  PATCoreAcceptLib PATInterfaces CalibrationDataInterfaceLib
-  FTagAnalysisInterfacesLib
-  PRIVATE_LINK_LIBRARIES PathResolver AsgMessagingLib )
+  INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
+  LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgTools xAODBTagging xAODJet
+  PATCoreLib PATInterfaces CalibrationDataInterfaceLib PathResolver FTagAnalysisInterfacesLib ${extra_libs} )
 
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( xAODBTaggingEfficiency
       src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES AsgMessagingLib xAODJet CalibrationDataInterfaceLib AthenaBaseComps
-      GaudiKernel FTagAnalysisInterfacesLib xAODBTaggingEfficiencyLib )
+      LINK_LIBRARIES xAODJet CalibrationDataInterfaceLib AthenaBaseComps
+      GaudiKernel PathResolver xAODBTaggingEfficiencyLib FTagAnalysisInterfacesLib )
 endif()
 
 atlas_add_dictionary( xAODBTaggingEfficiencyDict
@@ -33,6 +35,10 @@ atlas_add_dictionary( xAODBTaggingEfficiencyDict
 if( XAOD_ANALYSIS )
    atlas_add_executable( BTaggingEfficiencyToolTester
       util/BTaggingEfficiencyToolTester.cxx
+      LINK_LIBRARIES xAODRootAccess AsgTools FTagAnalysisInterfacesLib )
+
+   atlas_add_executable( SystematicStrategyComparison
+      util/SystematicStrategyComparison.cxx
       LINK_LIBRARIES xAODRootAccess AsgTools FTagAnalysisInterfacesLib )
 
    atlas_add_executable( BTaggingEigenVectorRecompositionToolTester

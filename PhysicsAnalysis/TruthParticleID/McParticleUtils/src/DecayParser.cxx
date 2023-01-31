@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -331,7 +331,8 @@ DecayParser::printMcUtilsStrings( const std::vector<McUtils::Strings>& list ) co
 
 /////////////////////////////////////////////////////////////////// 
 // Operators: 
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
+// cppcheck-suppress operatorEqVarError; m_parseFct deliberately not copied. 
 DecayParser & DecayParser::operator=(const DecayParser& rhs )
 {
   if ( this != &rhs ) {

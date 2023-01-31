@@ -1,41 +1,49 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigT1TGC_TGCTMDB_H
 #define TrigT1TGC_TGCTMDB_H
 
+#include <memory>
+
+#include "AthenaBaseComps/AthMessaging.h"
+#include "StoreGate/ReadHandle.h"
+#include "TileEvent/TileMuonReceiverContainer.h"
+
 #include "TrigT1TGC/TGCTMDBOut.h"
+#include "TrigT1TGC/TGCNumbering.h"
 
-namespace LVL1TGCTrigger {
+namespace LVL1TGC {
 
-class TGCTMDB
-{
+class TGCTMDB : public AthMessaging {
  public:
   TGCTMDB();
-  virtual ~TGCTMDB();
- 
-  TGCTMDB(const TGCTMDB& right);
-  TGCTMDB& operator=(const TGCTMDB& right);
-  int operator==(const TGCTMDB& right) const { return (this==&right); }
-  int operator!=(const TGCTMDB& right) const { return (this!=&right); }
+  virtual ~TGCTMDB() = default;
+  TGCTMDB(const TGCTMDB& right) = delete;
+  TGCTMDB& operator = (const TGCTMDB& right) = delete;
+  int operator == (const TGCTMDB& right) const = delete;
+  int operator != (const TGCTMDB& right) const = delete;
 
-  enum { NumberOfTileModule = 64 };
+  StatusCode retrieve(SG::ReadHandleKey<TileMuonReceiverContainer> key);
 
-  const TGCTMDBOut* getOutput(int side, int moduleID) const;
-  const TGCTMDBOut* getOutput(int side, int sectorID, int mod) const;
-  void  setOutput(const int side, const int module, 
-                  const TGCTMDBOut::TileModuleHit hit56, const TGCTMDBOut::TileModuleHit hit6);
+  std::shared_ptr<const TGCTMDBOut> getOutput(const TGCSide side, unsigned int moduleID) const;
+  std::shared_ptr<const TGCTMDBOut> getOutput(const TGCSide side, int sectorID, unsigned int mod) const;
 
-  void  eraseOutput();
-  int   NumberOfTileModules() const { return NumberOfTileModule; }
-  int   getInnerTileBits(int side, int sectorID) const;
+  int getInnerTileBits(const TGCSide side, int sectorID) const;
 
   void print() const;
 
- protected:
-  TGCTMDBOut* m_buffer[2*NumberOfTileModule];
+ private:
+  static constexpr unsigned int kNTileModule = 64;
 
+  void  setOutput(const TGCSide side, const unsigned int module, 
+                  const TGCTMDBOut::TileModuleHit hit56, const TGCTMDBOut::TileModuleHit hit6);
+
+  void  eraseOutput();
+
+ private:
+  std::array<std::array<std::shared_ptr<TGCTMDBOut>, kNTileModule>, TGCSide::kNSide> m_buffer;
 };
 
 

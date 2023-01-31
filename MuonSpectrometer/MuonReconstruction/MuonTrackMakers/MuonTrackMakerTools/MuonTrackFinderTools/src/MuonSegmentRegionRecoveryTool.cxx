@@ -694,9 +694,9 @@ namespace Muon {
 
             for (std::unique_ptr<const Trk::TrackStateOnSurface>& sorted : toBeSorted) { trackStateOnSurfaces.push_back(sorted.release()); }
             std::unique_ptr<Trk::Track> trackWithHoles = std::make_unique<Trk::Track>(
-                track.info(), std::move(trackStateOnSurfaces), track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+                track.info(), std::move(trackStateOnSurfaces), track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
             // generate a track summary for this track
-            if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *trackWithHoles, nullptr, false); }
+            if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *trackWithHoles, false); }
             ATH_MSG_DEBUG("Track with holes " << m_printer->print(*trackWithHoles) << std::endl
                                               << m_printer->printStations(*trackWithHoles));
             return trackWithHoles;
@@ -798,7 +798,7 @@ namespace Muon {
                                     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
                                     typePattern.set(Trk::TrackStateOnSurface::Measurement);
                                     Trk::TrackStateOnSurface* tsos =
-                                        new Trk::TrackStateOnSurface(hit->uniqueClone(), std::move(hitPars), nullptr, nullptr, typePattern);
+                                        new Trk::TrackStateOnSurface(hit->uniqueClone(), std::move(hitPars), nullptr, typePattern);
                                     states.emplace_back(tsos);
                                     const MdtDriftCircleOnTrack* mdt = dynamic_cast<const MdtDriftCircleOnTrack*>(hit);
                                     if (mdt) newMdtHashes.insert(mdt->collectionHash());
@@ -930,7 +930,7 @@ namespace Muon {
             for (std::unique_ptr<const Trk::TrackStateOnSurface>& sorted : states) { trackStateOnSurfaces.push_back(sorted.release()); }
             ATH_MSG_DEBUG("Creating new Track " << states.size());
             std::unique_ptr<Trk::Track> newTrack = std::make_unique<Trk::Track>(track.info(), std::move(trackStateOnSurfaces),
-                                                                                track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+                                                                                track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
             std::unique_ptr<Trk::Track> refittedTrack;
             if (m_onlyEO)
                 refittedTrack = std::unique_ptr<Trk::Track>(m_fitter->fit(ctx, *newTrack, m_useFitterOutlierLogic, Trk::muon));
@@ -966,7 +966,7 @@ namespace Muon {
 
         } else {
             ATH_MSG_VERBOSE("Extrapolating from track (no closest point found):\n" << m_printer->print(track));
-            exPars = m_extrapolator->extrapolate(ctx, track, detEl.surface(), Trk::anyDirection, false, Trk::muon);
+            exPars = m_extrapolator->extrapolateTrack(ctx, track, detEl.surface(), Trk::anyDirection, false, Trk::muon);
         }
         if (!exPars) {
             ATH_MSG_DEBUG("Extrapolation did not succeed");

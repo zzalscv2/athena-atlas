@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # File: CaloRec/python/ToolConstantsCondAlgConfig.py
 # Created: Jun 2020, sss
@@ -36,10 +36,9 @@ def ToolConstantsCondAlgCfg (flags, key, DetStoreKey='', COOLFolder=''):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files = []
-
-    flags = ConfigFlags.clone()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = []
     flags.lock()
 
     print ('--- detstore')

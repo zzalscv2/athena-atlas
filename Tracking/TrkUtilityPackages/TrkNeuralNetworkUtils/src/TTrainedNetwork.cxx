@@ -73,7 +73,7 @@ void TTrainedNetwork::setScales(const std::vector<double>& scales)
   m_input_node_scale = scales; 
 }
 
-TTrainedNetwork::TTrainedNetwork(std::vector<TTrainedNetwork::Input> inputs, 
+TTrainedNetwork::TTrainedNetwork(const std::vector<TTrainedNetwork::Input>& inputs, 
 			       unsigned nOutput,
 			       std::vector<TVectorD*> & thresholdVectors,
 			       std::vector<TMatrixD*> & weightMatrices,

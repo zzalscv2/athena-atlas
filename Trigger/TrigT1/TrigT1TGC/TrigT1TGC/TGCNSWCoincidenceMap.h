@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ */
+
 #ifndef TGCNSWCoincidenceMap_h
 #define TGCNSWCoincidenceMap_h
 
@@ -11,9 +15,12 @@
 
 class ITGCTriggerDbTool;
 
+namespace LVL1TGC {
+class NSWTrigOut;
+}
+
 namespace LVL1TGCTrigger {
 
-class NSWTrigOut;
 class TGCArguments;
 
 class TGCNSWCoincidenceMap : public AthMessaging {
@@ -23,18 +30,16 @@ private:
   enum {N_dEta=64,N_dPhi=16,N_Dtheta=32,N_PT_THRESH=15};//6bit eta,4bit phi,5bit Dtheta, 4bit pT
   enum ReadCW_Type{EtaPhi_CW=0,EtaDtheta_CW};
   std::map<TGCRegionType,int> m_NumberOfEtaRaw={{ENDCAP,37},{FORWARD,16}};
-  std::map<TGCRegionType,int> m_NumberOfRoI={{ENDCAP,148},{FORWARD,64}};
+  std::map<TGCRegionType,int> m_NumberOfRoI={{ENDCAP, LVL1TGC::kNumberOfEndcapRoI},{FORWARD,64}};
 
 public:
-
-
   TGCNSWCoincidenceMap(TGCArguments* tgcargs,const std::string& version,int side,int oct,int mod);
   ~TGCNSWCoincidenceMap() = default;
 
   bool isForward( int module );
 
-  int TGCNSW_pTcalcu_EtaPhi(const NSWTrigOut *nswOut, int RoI) const;
-  int TGCNSW_pTcalcu_EtaDtheta(const NSWTrigOut *nswOut, int RoI) const;
+  int TGCNSW_pTcalcu_EtaPhi(const LVL1TGC::NSWTrigOut *nswOut, int RoI) const;
+  int TGCNSW_pTcalcu_EtaDtheta(const LVL1TGC::NSWTrigOut *nswOut, int RoI) const;
 
   const std::string& getVersion() const;
   int   getSideId() const;
@@ -71,9 +76,7 @@ private:
 
 
 
-
-
-} //end of namespace bracket
+}  // end of namespace
 
 #endif // TGCNSWCoincidenceMap_hh
 

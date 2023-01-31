@@ -12,13 +12,13 @@ import PATCore.ParticleDataType
 class ElectronCalibrationConfig (ConfigBlock) :
     """the ConfigBlock for the electron four-momentum correction"""
 
-    def __init__ (self, containerName, postfix) :
-        super (ElectronCalibrationConfig, self).__init__ ()
+    def __init__ (self, containerName) :
+        super (ElectronCalibrationConfig, self).__init__ (containerName)
         self.containerName = containerName
-        self.postfix = postfix
-        self.crackVeto = False
-        self.ptSelectionOutput = False
-        self.isolationCorrection = False
+        self.addOption ('postfix', '', type=str)
+        self.addOption ('crackVeto', False, type=bool)
+        self.addOption ('ptSelectionOutput', False, type=bool)
+        self.addOption ('isolationCorrection', False, type=bool)
 
 
     def makeAlgs (self, config) :
@@ -109,6 +109,11 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.egammasOut = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
+        config.addOutputVar (self.containerName, 'pt', 'pt')
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
+
 
 
 class ElectronWorkingPointConfig (ConfigBlock) :
@@ -116,25 +121,33 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 
     This may at some point be split into multiple blocks (29 Aug 22)."""
 
-    def __init__ (self, containerName, postfix, likelihoodWP, isolationWP) :
-        super (ElectronWorkingPointConfig, self).__init__ ()
+    def __init__ (self, containerName, postfix) :
+        super (ElectronWorkingPointConfig, self).__init__ (containerName + '.' + postfix)
         self.containerName = containerName
         self.selectionName = postfix
-        self.postfix = postfix
-        if self.postfix != '' and self.postfix[0] != '_' :
-            self.postfix = '_' + self.postfix
-        self.likelihoodWP = likelihoodWP
-        self.isolationWP = isolationWP
-        self.recomputeLikelihood = False
-        self.chargeIDSelection = False
+        self.addOption ('postfix', None, type=str)
+        self.addOption ('likelihoodWP', None, type=str)
+        self.addOption ('isolationWP', None, type=str)
+        self.addOption ('recomputeLikelihood', False, type=bool)
+        self.addOption ('chargeIDSelection', False, type=bool)
 
     def makeAlgs (self, config) :
+
+        selectionPostfix = self.selectionName
+        if selectionPostfix != '' and selectionPostfix[0] != '_' :
+            selectionPostfix = '_' + selectionPostfix
+
+        postfix = self.postfix
+        if postfix is None :
+            postfix = self.selectionName
+        if postfix != '' and postfix[0] != '_' :
+            postfix = '_' + postfix
 
         if 'LH' in self.likelihoodWP:
             # Set up the likelihood ID selection algorithm
             # It is safe to do this before calibration, as the cluster E is used
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' + self.postfix )
-            alg.selectionDecoration = 'selectLikelihood' + self.postfix + ',as_bits'
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' + postfix )
+            alg.selectionDecoration = 'selectLikelihood' + selectionPostfix + ',as_bits'
             if self.recomputeLikelihood:
                 # Rerun the likelihood ID
                 config.addPrivateTool( 'selectionTool', 'AsgElectronLikelihoodTool' )
@@ -149,8 +162,8 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 algDecorCount = 1
         else:
             # Set up the DNN ID selection algorithm
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronDNNAlg' + self.postfix )
-            alg.selectionDecoration = 'selectDNN' + self.postfix + ',as_bits'
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronDNNAlg' + postfix )
+            alg.selectionDecoration = 'selectDNN' + selectionPostfix + ',as_bits'
             if self.recomputeLikelihood:
                 # Rerun the DNN ID
                 config.addPrivateTool( 'selectionTool', 'AsgElectronSelectorTool' )
@@ -167,8 +180,8 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         # Set up the isolation selection algorithm:
         if self.isolationWP != 'NonIso' :
             alg = config.createAlgorithm( 'CP::EgammaIsolationSelectionAlg',
-                                          'ElectronIsolationSelectionAlg' + self.postfix )
-            alg.selectionDecoration = 'isolated' + self.postfix + ',as_bits'
+                                          'ElectronIsolationSelectionAlg' + postfix )
+            alg.selectionDecoration = 'isolated' + selectionPostfix + ',as_bits'
             config.addPrivateTool( 'selectionTool', 'CP::IsolationSelectionTool' )
             alg.selectionTool.ElectronWP = self.isolationWP
             alg.egammas = config.readName (self.containerName)
@@ -179,8 +192,8 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         # Select electrons only if they don't appear to have flipped their charge.
         if self.chargeIDSelection:
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
-                                          'ElectronChargeIDSelectionAlg' + self.postfix )
-            alg.selectionDecoration = 'chargeID' + self.postfix + ',as_bits'
+                                          'ElectronChargeIDSelectionAlg' + postfix )
+            alg.selectionDecoration = 'chargeID' + selectionPostfix + ',as_bits'
             config.addPrivateTool( 'selectionTool',
                                    'AsgElectronChargeIDSelectorTool' )
             alg.selectionTool.TrainingFile = \
@@ -194,18 +207,19 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 
         # Set up an algorithm used for decorating baseline electron selection:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
-                                      'ElectronSelectionSummary' + self.postfix )
-        alg.selectionDecoration = 'baselineSelection' + self.postfix + ',as_char'
+                                      'ElectronSelectionSummary' + postfix )
+        alg.selectionDecoration = 'baselineSelection' + selectionPostfix + ',as_char'
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getFullSelection (self.containerName, self.selectionName)
+        config.addOutputVar (self.containerName, 'baselineSelection' + postfix, 'select' + postfix)
 
         # Set up the electron efficiency correction algorithm:
         if config.dataType() != 'data':
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
-                                          'ElectronEfficiencyCorrectionAlg' + self.postfix )
+                                          'ElectronEfficiencyCorrectionAlg' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgElectronEfficiencyCorrectionTool' )
-            alg.scaleFactorDecoration = 'effSF' + self.postfix + '_%SYS%'
+            alg.scaleFactorDecoration = 'effSF' + selectionPostfix + '_%SYS%'
             alg.efficiencyCorrectionTool.RecoKey = "Reconstruction"
             alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
             if config.dataType() == 'afii':
@@ -215,17 +229,18 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
             alg.outOfValidity = 2 #silent
-            alg.outOfValidityDeco = 'bad_eff' + self.postfix
+            alg.outOfValidityDeco = 'bad_eff' + selectionPostfix
             alg.electrons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'effSF' + postfix)
 
 
 
 
-def makeElectronCalibrationConfig( seq, containerName, postfix = '',
-                                   crackVeto = False,
-                                   ptSelectionOutput = False,
-                                   isolationCorrection = False):
+def makeElectronCalibrationConfig( seq, containerName, postfix = None,
+                                   crackVeto = None,
+                                   ptSelectionOutput = None,
+                                   isolationCorrection = None):
     """Create electron calibration configuration blocks
 
     This makes all the algorithms that need to be run first befor
@@ -242,10 +257,10 @@ def makeElectronCalibrationConfig( seq, containerName, postfix = '',
                            output containers.
     """
 
-    config = ElectronCalibrationConfig (containerName, postfix)
-    config.crackVeto = crackVeto
-    config.ptSelectionOutput = ptSelectionOutput
-    config.isolationCorrection = isolationCorrection
+    config = ElectronCalibrationConfig (containerName)
+    config.setOptionValue ('crackVeto', crackVeto, noneAction='ignore')
+    config.setOptionValue ('ptSelectionOutput', ptSelectionOutput, noneAction='ignore')
+    config.setOptionValue ('isolationCorrection', isolationCorrection, noneAction='ignore')
     seq.append (config)
 
 
@@ -253,9 +268,9 @@ def makeElectronCalibrationConfig( seq, containerName, postfix = '',
 
 
 def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
-                                    postfix = '',
-                                    recomputeLikelihood = False,
-                                    chargeIDSelection = False ):
+                                    postfix,
+                                    recomputeLikelihood = None,
+                                    chargeIDSelection = None ):
     """Create electron analysis configuration blocks
 
     Keyword arguments:
@@ -268,11 +283,14 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
       chargeIDSelection -- Whether or not to perform charge ID/flip selection
     """
 
-    splitWP = workingPoint.split ('.')
-    if len (splitWP) != 2 :
-        raise ValueError ('working point should be of format "likelihood.isolation", not ' + workingPoint)
 
-    config = ElectronWorkingPointConfig (containerName, postfix, splitWP[0], splitWP[1])
-    config.recomputeLikelihood = False
-    config.chargeIDSelection = False
+    config = ElectronWorkingPointConfig (containerName, postfix)
+    if workingPoint is not None :
+        splitWP = workingPoint.split ('.')
+        if len (splitWP) != 2 :
+            raise ValueError ('working point should be of format "likelihood.isolation", not ' + workingPoint)
+        config.setOptionValue ('likelihoodWP', splitWP[0])
+        config.setOptionValue ('isolationWP', splitWP[1])
+    config.setOptionValue ('recomputeLikelihood', recomputeLikelihood, noneAction='ignore')
+    config.setOptionValue ('chargeIDSelection', chargeIDSelection, noneAction='ignore')
     seq.append (config)

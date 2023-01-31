@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -258,7 +258,7 @@ int MaterialMap::readMapRecord() {
             }
 
             std::string::size_type locapri;
-            std::string::size_type locchiudi;
+            std::string::size_type locchiudi = 0;
             if ((locapri = s.find('(')) != std::string::npos) {
                 if ((locchiudi = s.find(')', locapri + 1)) != std::string::npos) {
                     if (print_level < 1) std::cout << "first ( is at " << locapri << " first ) at " << locchiudi << std::endl;

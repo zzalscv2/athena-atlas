@@ -14,6 +14,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaKernel/IAtRndmGenSvc.h"
+#include "CxxUtils/checker_macros.h"
 // Trk
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkExUtils/MaterialUpdateMode.h"
@@ -52,7 +53,7 @@ namespace iFatras {
      @author Sarka.Todorova@cern.ch
   */
    
-  class PhotonConversionTool : public extends<AthAlgTool, iFatras::IPhotonConversionTool> {
+  class ATLAS_NOT_THREAD_SAFE PhotonConversionTool : public extends<AthAlgTool, iFatras::IPhotonConversionTool> {  // deprecated: ATLASSIM-6020
   public:      
       /**AlgTool constructor for PhotonConversionTool*/
       PhotonConversionTool(const std::string&,const std::string&,const IInterface*);

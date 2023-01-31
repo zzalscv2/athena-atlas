@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 def CpmSimMonitoringConfig(inputFlags):
     '''Function to configure LVL1 CpmSim algorithm in the monitoring system.'''
@@ -11,10 +11,6 @@ def CpmSimMonitoringConfig(inputFlags):
     from AthenaConfiguration.ComponentFactory import CompFactory
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
-
-    # any things that need setting up for job e.g.
-    #from AtlasGeoModel.AtlasGeoModelConfig import AtlasGeometryCfg
-    #result.merge(AtlasGeometryCfg(inputFlags))
 
     # make the athena monitoring helper
     from AthenaMonitoring import AthMonitorCfgHelper
@@ -500,16 +496,17 @@ def CpmSimMonitoringConfig(inputFlags):
 
 if __name__=='__main__':
     # set input file and config options
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     import glob
 
     inputs = glob.glob('/eos/atlas/atlascerngroupdisk/data-art/build-output/master/Athena/x86_64-centos7-gcc8-opt/2020-04-06T2139/TrigP1Test/test_trigP1_v1PhysP1_T0Mon_build/ESD.pool.root')
 
-    ConfigFlags.Input.Files = inputs
-    ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1.root'
+    flags = initConfigFlags()
+    flags.Input.Files = inputs
+    flags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1.root'
 
-    ConfigFlags.lock()
-    ConfigFlags.dump() # print all the configs
+    flags.lock()
+    flags.dump() # print all the configs
 
     from AthenaCommon.AppMgr import ServiceMgr
     ServiceMgr.Dump = False
@@ -517,9 +514,9 @@ if __name__=='__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesSerialCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg = MainServicesSerialCfg()
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg.merge(PoolReadCfg(flags))
 
-    CpmSimMonitorCfg = CpmSimMonitoringConfig(ConfigFlags)
+    CpmSimMonitorCfg = CpmSimMonitoringConfig(flags)
     cfg.merge(CpmSimMonitorCfg)
 
     # message level for algorithm

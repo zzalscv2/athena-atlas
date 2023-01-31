@@ -292,7 +292,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     const Trk::Perigee* measPer = trksItr->perigeeParameters();
     const AmgSymMatrix(5)* covariance = measPer ? measPer->covariance() : nullptr;
 
-    const Trk::ImpactParametersAndSigma* myIPandSigma=nullptr;
+    std::unique_ptr<Trk::ImpactParametersAndSigma> myIPandSigma=nullptr;
     
 
     if (m_doIP){
@@ -455,8 +455,6 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     auto p_m = Monitored::Scalar<float>( "m_p", trkP );
     fill(genericTrackGroup, p_m);
 
-    delete myIPandSigma;
-    myIPandSigma=nullptr;
   } // end of loop on trks
 
   ATH_MSG_DEBUG("Number of good tracks from TrackCollection: " << ngTracks);

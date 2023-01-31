@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/test/WriteDecorHandleKey_test.cxx
@@ -99,19 +99,32 @@ void test1()
   assert (k1.key() == "ccc.fee");
   assert (k1.contHandleKey().key() == "ccc");
 
-  TestOwner owner;
-  SG::WriteDecorHandleKey<MyObj> k3 (&owner, "CCCKey", "ccc.dec", "doc string");
-  assert (k3.clid() == 293847295);
-  assert (k3.key() == "ccc.dec");
-  assert (k3.mode() == Gaudi::DataHandle::Writer);
-  assert (k3.contHandleKey().clid() == 293847295);
-  assert (k3.contHandleKey().key() == "ccc");
-  assert (k3.contHandleKey().mode() == Gaudi::DataHandle::Reader);
-  assert (owner.getProperty ("CCCKey").name() == "CCCKey");
-  assert (owner.getProperty ("CCCKey").documentation() == "doc string");
-  assert (owner.getProperty ("CCCKey").type_info() == &typeid(SG::WriteHandleKey<MyObj>));
-  assert (owner.getProperty ("CCCKey").toString() == "'StoreGateSvc+ccc.dec'");
-  assert (owner.getProperty ("CCCKey").ownerTypeName() == "TestOwner");
+  // Test auto-declaring constructors
+  auto check = [](TestOwner& owner, SG::WriteDecorHandleKey<MyObj>& k) {
+    assert (k.clid() == 293847295);
+    assert (k.key() == "ccc.dec");
+    assert (k.mode() == Gaudi::DataHandle::Writer);
+    assert (k.contHandleKey().clid() == 293847295);
+    assert (k.contHandleKey().key() == "ccc");
+    assert (k.contHandleKey().mode() == Gaudi::DataHandle::Reader);
+    assert (owner.getProperty ("CCCKey").name() == "CCCKey");
+    assert (owner.getProperty ("CCCKey").documentation() == "doc string");
+    assert (owner.getProperty ("CCCKey").type_info() == &typeid(SG::WriteHandleKey<MyObj>));
+    assert (owner.getProperty ("CCCKey").toString() == "'StoreGateSvc+ccc.dec'");
+    assert (owner.getProperty ("CCCKey").ownerTypeName() == "TestOwner");
+  };
+  {
+    TestOwner owner;
+    SG::WriteDecorHandleKey<MyObj> k (&owner, "CCCKey", "ccc.dec", "doc string");
+    check(owner, k);
+  }
+  {
+    TestOwner owner;
+    SG::WriteHandleKey<MyObj> w ("ccc");
+    SG::WriteDecorHandleKey<MyObj> k (&owner, "CCCKey", w, "dec", "doc string");
+    check(owner, k);
+  }
+
 }
 
 

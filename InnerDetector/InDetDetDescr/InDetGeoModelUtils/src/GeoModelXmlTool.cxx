@@ -8,6 +8,7 @@
 #include <GeoModelUtilities/DecodeVersionKey.h>
 #include <GeoModelXml/Gmx2Geo.h>
 #include <GeoModelXml/GmxInterface.h>
+#include <GeoModelRead/ReadGeoModel.h>
 #include <PathResolver/PathResolver.h>
 #include <RDBAccessSvc/IRDBRecord.h>
 #include <RDBAccessSvc/IRDBRecordset.h>
@@ -30,34 +31,12 @@ StatusCode GeoModelXmlTool::createBaseTool()
   return StatusCode::SUCCESS;
 }
 
-int GeoModelXmlTool::createTopVolume(GeoPhysVol* world, GmxInterface& gmxInterface, const std::string& vNode, const std::string& tableName) const
+const GeoVPhysVol* GeoModelXmlTool::createTopVolume(GeoPhysVol* world, GmxInterface& gmxInterface, const std::string& vNode, const std::string& tableName, const std::string& containingDetector, const std::string& envelopeName, const GeoModelIO::ReadGeoModel* sqlreader) const
 {
-
-  createTopVolume_impl(world, gmxInterface, vNode, tableName);
-
-  unsigned int nChildren = world->getNChildVols();
-
-  bool foundVolume = false;
-  int childIndex = -1;
-  // find the appropriate volume in the hierarchy, to allow it to be set as the topVolume in
-  // our detectorManager, by returning the index
-  for (int iChild = nChildren - 1; iChild>=0; --iChild) {
-    if (world->getNameOfChildVol(iChild) == m_detectorName) {
-      // The * converts from a ConstPVLink to a reference to a GeoVPhysVol;
-      // the & takes its address.
-      foundVolume = true;
-      childIndex = iChild;
-      break;
-    }
-  }
-  if(!foundVolume) ATH_MSG_ERROR("Couldn't find the volume in the world hierarchy!");
-  return childIndex;
-}
-
-const GeoVPhysVol* GeoModelXmlTool::createTopVolume(GeoPhysVol* world, GmxInterface& gmxInterface, const std::string& vNode, const std::string& tableName, const std::string& containingDetector, const std::string& envelopeName) const
-{
-
-  createTopVolume_impl(world, gmxInterface, vNode, tableName);
+  //If we have a valid sqlreader pointer, it means the volume should already exist,
+  // so we don't need to create it  
+  if(!sqlreader) createVolume(world, gmxInterface, vNode, tableName);
+  else ATH_MSG_INFO("Using geometry from .sqlite file for"<<m_detectorName);
 
   unsigned int nChildren = world->getNChildVols();
 
@@ -68,8 +47,13 @@ const GeoVPhysVol* GeoModelXmlTool::createTopVolume(GeoPhysVol* world, GmxInterf
   bool foundContainingDetector = false;
   // find the appropriate volume in the hierarchy, to allow it to be set as the topVolume in
   // our detectorManager
+  std::string detectorName = m_detectorName; 
+  //if a containingDetector is set, which the detector we are dealing with will sit inside, look for that first. 
+  // Otherwise its just the name of the detector we are dealing with we look for
+  if(containingDetector!="") detectorName = containingDetector;
+
   for (int iChild = nChildren - 1; iChild>=0; --iChild) {
-    if (world->getNameOfChildVol(iChild) == containingDetector) {
+    if (world->getNameOfChildVol(iChild) == detectorName) {
       // The * converts from a ConstPVLink to a reference to a GeoVPhysVol;
       // the & takes its address.
       envVol = &*world->getChildVol(iChild);
@@ -85,7 +69,7 @@ const GeoVPhysVol* GeoModelXmlTool::createTopVolume(GeoPhysVol* world, GmxInterf
     }
    }
   }
-  if(!foundContainingDetector) ATH_MSG_ERROR("Couldn't find the containing detector "<<containingDetector<<" in the world hierarchy!");
+  if(containingDetector!="" && !foundContainingDetector) ATH_MSG_ERROR("Couldn't find the containing detector "<<containingDetector<<" in the world hierarchy!");
   else if(envelopeName!="" && !foundEnvelope) ATH_MSG_ERROR("Couldn't find the envelope volume "<<envelopeName<<" in the world hierarchy!");
   return topVol;
 }
@@ -119,7 +103,7 @@ std::string GeoModelXmlTool::getBlob(const std::string& vNode, const std::string
   return clobString;
 }
 
-void GeoModelXmlTool::createTopVolume_impl(GeoPhysVol* world, GmxInterface& gmxInterface, const std::string& vNode, const std::string& tableName) const {
+void GeoModelXmlTool::createVolume(GeoPhysVol* world, GmxInterface& gmxInterface, const std::string& vNode, const std::string& tableName) const {
   int flags{};
   std::string gmxInput;
 
@@ -179,4 +163,8 @@ void GeoModelXmlTool::createTopVolume_impl(GeoPhysVol* world, GmxInterface& gmxI
   }
 
   Gmx2Geo gmx2Geo(gmxInput, world, gmxInterface, flags);  
+}
+
+const GeoModelIO::ReadGeoModel* GeoModelXmlTool::getSqliteReader() const{
+  return m_geoDbTagSvc->getSqliteReader();
 }

@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 #           Setup of offline pattern recognition tracking for ID Trigger
 #Heavily inspired by the offline version:
@@ -10,6 +10,7 @@ include("InDetTrigRecExample/InDetTrigRec_jobOptions.py") # this is needed to ge
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("EFIDTracking")
 
+from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolDecorator
 
 #Create a view verifier for necessary data collections
 def get_idtrig_view_verifier(name):
@@ -98,8 +99,14 @@ def makeInDetPatternRecognition( config, verifier = 'IDTrigViewDataVerifier'  ):
          trackingCuts = ConfiguredNewTrackingCuts( mode_name ) 
       #trackingCuts.printInfo() 
 
+      from AthenaConfiguration.AllConfigFlags import ConfigFlags
+      from InDetTrigRecExample import InDetTrigCA
 
+      InDetTrigCA.InDetTrigConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
 
+      from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
+      summaryTool = CAtoLegacyPublicToolDecorator(InDetTrigTrackSummaryToolCfg)
+      
       # --- decide if use the association tool
       usePrdAssociationTool = False 
       #FIXME: Do we need this switch? If so, make the same decision as offline (based on the tracking cuts)? ATR-22755
@@ -112,22 +119,6 @@ def makeInDetPatternRecognition( config, verifier = 'IDTrigViewDataVerifier'  ):
          prdAssociation = prdAssociation_builder( InputCollections )
          viewAlgs.append( prdAssociation )
 
-
-      #-----------------------------------------------------------------------------
-      #                      Track building stage
-
-      # not sure yet about the TRT extension ...   
-      #   from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTrackSummaryTool
-      #   from TrigInDetConf.TrigInDetRecCommonTools           import InDetTrigTrackSummaryToolSharedHitsWithTRTPid
-         
-      #   #Load shared hits with Ele PID if TRT specified
-      #   if doTRT:
-      #      return InDetTrigTrackSummaryToolSharedHitsWithTRTPid
-      #   else:
-      #      return InDetTrigTrackSummaryTool
-
-      from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTrackSummaryTool
-      summaryTool = InDetTrigTrackSummaryTool
 
 
       # FIXME Use trigger flags instead of indetflags ATR-22756
@@ -239,6 +230,18 @@ def ambiguitySolverForIDPatternRecognition( config, summaryTool, inputTracks,ver
 
    ptAlgs.append( ambiguitySolverAlg )
    
+   #-----------------------------------------------------------------------------
+   #                      TrackPRD particle conversion algorithm, can be enabled to restore shared hit computation in TrackParticleCreatorTool
+
+   #-----------------------------------------------------------------------------
+
+   # from TrigInDetConfig.InDetTrigCommon import trackPRD_Association_builder
+   # trackPRD_AssociationAlg = trackPRD_Association_builder(name = add_prefix( 'trackPRD_AssociationAlg', config.name + '_IDTrig' ),
+   #                                                        inTrackCollections = [config.trkTracks_IDTrig()+"_Amb"],
+   #                                                        associationMapName = "TrigInDetPRDtoTrackMap")
+
+   # ptAlgs.append( trackPRD_AssociationAlg )
+
    #-----------------------------------------------------------------------------
    #                      Track particle conversion algorithm
    from .InDetTrigCommon import trackParticleCnv_builder

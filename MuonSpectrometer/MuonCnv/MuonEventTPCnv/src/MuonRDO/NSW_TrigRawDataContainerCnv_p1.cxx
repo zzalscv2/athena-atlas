@@ -34,12 +34,12 @@ namespace Muon
   void NSW_TrigRawDataContainerCnv_p1::transToPers(const NSW_TrigRawDataContainer* transCont, NSW_TrigRawDataContainer_p1* persCont, MsgStream &log) {
     if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Converting transient NSW_TrigRawDataContainer to persistent NSW_TrigRawDataContainer_p1" << endmsg;
 
-    for (const auto &raw : *transCont) {
+    for (const auto raw : *transCont) {
       auto persRawData = std::make_unique<NSW_TrigRawData_p1>();
       persRawData->m_sectorId = raw->sectorId();
       persRawData->m_sectorSide = raw->sectorSide();
       persRawData->m_bcId = raw->bcId();
-      for (const auto &segment : *raw) {
+      for (const auto segment : *raw) {
         auto persRawSegm = std::make_unique<NSW_TrigRawDataSegment_p1>();
         m_segmentCnv_p1.transToPers(segment, persRawSegm.get(), log);
         persRawData->push_back(*persRawSegm);

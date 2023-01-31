@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOIDENTIFIER_CALONEIGHBOURS_H
@@ -106,9 +106,9 @@ public:
 
   int get_prevInCalo(const IdentifierHash &id,std::vector<IdentifierHash>& neighbourList) const;
 
-  int get_neighbours(const IdentifierHash &id,
+  static int get_neighbours(const IdentifierHash &id,
                      const std::vector<std::unique_ptr<CaloNeighbourRegion> > &regions,
-                     std::vector<IdentifierHash>& neighbourList) const;
+                     std::vector<IdentifierHash>& neighbourList) ;
 
  private:
   const CaloCell_Base_ID * m_calo_id;

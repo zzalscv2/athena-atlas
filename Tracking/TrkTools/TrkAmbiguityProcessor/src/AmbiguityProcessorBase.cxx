@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AmbiguityProcessorBase.h"
@@ -12,9 +12,7 @@ namespace Trk {
   AmbiguityProcessorBase::AmbiguityProcessorBase(const std::string& t, const std::string& n, const IInterface*  p ):
     AthAlgTool(t,n,p), 
     m_etaBounds{0.8, 1.6, 2.5, 4.0}, 
-    m_stat(m_etaBounds){
-      declareProperty("ObserverTool", m_observerTool, "track observer tool");
-}
+    m_stat(m_etaBounds){}
   //
   bool
   AmbiguityProcessorBase::shouldTryBremRecovery(const Trk::Track & track) const{
@@ -132,7 +130,6 @@ namespace Trk {
   void
   AmbiguityProcessorBase::addTrack(Trk::Track* in_track,const bool fitted,
                                                  TrackScoreMap &trackScoreTrackMap,
-                                                 Trk::PRDtoTrackMap &prdToTrackMap,
                                                  std::vector<std::unique_ptr<const Trk::Track> >& trackDustbin,
                                                  Counter &stat,
                                                  int parentTrackId) const {
@@ -141,7 +138,7 @@ namespace Trk {
     TrackScore score;
     bool suppressHoleSearch = fitted ? m_suppressHoleSearch : true;
     if (m_trackSummaryTool.isEnabled()) {
-       m_trackSummaryTool->computeAndReplaceTrackSummary(*atrack,&prdToTrackMap,suppressHoleSearch);
+       m_trackSummaryTool->computeAndReplaceTrackSummary(*atrack,suppressHoleSearch);
     }
     score = m_scoringTool->score( *atrack, suppressHoleSearch );
     if (m_observerTool.isEnabled()){
@@ -186,7 +183,7 @@ namespace Trk {
         stat.incrementCounterByRegion(CounterIndex::kNgoodFits,bremTrack.get());
         // rerun score
         if (m_trackSummaryTool.isEnabled()) {
-          m_trackSummaryTool->computeAndReplaceTrackSummary(*bremTrack, &prdToTrackMap,suppressHoleSearch);
+          m_trackSummaryTool->computeAndReplaceTrackSummary(*bremTrack, suppressHoleSearch);
         }
         score = m_scoringTool->score( *bremTrack, suppressHoleSearch );
         if (m_observerTool.isEnabled()){

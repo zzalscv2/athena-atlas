@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <MuonEfficiencyCorrections/KinematicSystHandler.h>
@@ -239,7 +239,7 @@ namespace CP {
     std::string BadMuonVetoSystHandler::getNextProperty(std::string &sstr) const {
         //Elimnate the beginning underscores
         while (sstr.find("_") == 0) {
-            sstr.substr(1, sstr.size());
+            sstr.erase(0, 1);
         }
         size_t pos = sstr.find("_");
         std::string Property = pos != std::string::npos ? sstr.substr(0, pos) : sstr;

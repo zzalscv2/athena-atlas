@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqiHanAlgorithmConfig_h
@@ -24,21 +24,15 @@ public:
   HanAlgorithmConfig( const HanConfigAssessor& hca, TFile* config );
 
   HanAlgorithmConfig( TObject* reference, 
-		      const std::map< std::string, double >& parameters,
-		      const std::map< std::string, double >& greenThresholds,
-		      const std::map< std::string, double >& redThresholds,
-		      const HanConfigAssessor* hca);
+                      const std::map< std::string, double >& parameters,
+                      const std::map< std::string, std::string>& stringParameters,
+                      const std::map< std::string, double >& greenThresholds,
+                      const std::map< std::string, double >& redThresholds,
+                      const HanConfigAssessor* hca);
 
   virtual ~HanAlgorithmConfig();
-  
-  virtual TObject*                                      getReference() const;
-  
-  virtual const std::map< std::string, double >&  getParameters() const;
-  
-  virtual const std::map< std::string, double >&               getGreenThresholds() const;
-  
-  virtual const std::map< std::string, double >&               getRedThresholds() const;
 
+  virtual TObject* getReference() const override;
 
 protected:
 
@@ -47,9 +41,6 @@ protected:
   TFile* m_file;
   
   TObject*  m_ref;
-  std::map< std::string, double >  m_pars;
-  std::map<std::string,double>  m_grthr;
-  std::map<std::string,double>  m_rdthr;
   const HanConfigAssessor* m_hca;
 
 private:

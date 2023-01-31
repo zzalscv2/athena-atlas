@@ -58,27 +58,6 @@ namespace LVL1MUCTPIPHASE1 {
     ATH_MSG_INFO( "Constructor for Phase1 MUCTPI_AthTool."  );
     ATH_MSG_INFO( "=======================================" );
 
-    // Declare the properties of the overlap treatment:
-    declareProperty( "OverlapStrategyName", m_overlapStrategyName = "NULL" );
-    declareProperty( "LUTXMLFile", m_lutXMLFile = "" );
-    
-    // Declare the properties of the output generation for L1Topo:
-    declareProperty( "BarrelRoIFile", m_barrelRoIFile = m_DEFAULT_barrelRoIFile );
-    declareProperty( "EndcapForwardRoIFile", m_ecfRoIFile = m_DEFAULT_ecfRoIFile );
-    declareProperty( "Side0LUTFile", m_side0LUTFile = m_DEFAULT_side0LUTFile );
-    declareProperty( "Side1LUTFile", m_side1LUTFile = m_DEFAULT_side1LUTFile );
-       
-    // Declare the properties of the input selection:
-    declareProperty( "InputSource", m_inputSource = "DIGITIZATION" );
-    declareProperty( "AODLocID", m_aodLocId = m_DEFAULT_AODLocID );
-    declareProperty( "RDOLocID", m_rdoLocId = m_DEFAULT_RDOLocID );
-    declareProperty( "RDOOutputLocID", m_rdoOutputLocId = m_DEFAULT_RDOLocID );
-    declareProperty( "RoIOutputLocID", m_roiOutputLocId = m_DEFAULT_locationMuCTPItoRoIB );
-    declareProperty( "CTPOutputLocID", m_ctpOutputLocId = m_DEFAULT_locationMuCTPItoCTP );
-
-    // These are just here for flexibility, normally they should not be changed:
-    declareProperty( "TGCLocID", m_tgcLocId = m_DEFAULT_L1MuctpiStoreLocationTGC );
-    declareProperty( "RPCLocID", m_rpcLocId = m_DEFAULT_L1MuctpiStoreLocationRPC );
   }
 
   StatusCode MUCTPI_AthTool::initialize()
@@ -452,9 +431,9 @@ namespace LVL1MUCTPIPHASE1 {
           return StatusCode::FAILURE;
         }
       }
-
-      std::pair<std::string, double> minThrInfo = m_trigThresholdDecisionTool->getMinThresholdNameAndValue(data.thresholdDecisions, roiData.eta());
-      xAODRoIs->back()->initialize(data.dataWord, roiData.eta(), roiData.phi(), minThrInfo.first, minThrInfo.second);
+      // despite the name "GetMin" we are actually getting the Max thr value here 
+      std::pair<std::string, double> maxThrInfo = m_trigThresholdDecisionTool->getMinThresholdNameAndValue(data.thresholdDecisions, roiData.eta());
+      xAODRoIs->back()->initialize(data.dataWord, roiData.eta(), roiData.phi(), maxThrInfo.first, maxThrInfo.second);
     }
 
     // Get outputs for L1Topo and store into Storegate

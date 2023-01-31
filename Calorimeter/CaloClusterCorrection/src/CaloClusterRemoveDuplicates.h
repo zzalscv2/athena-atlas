@@ -20,7 +20,7 @@ Base class: CaloClusterCollectionProcessor
 ***************************************************************************/
 
 // INCLUDE HEADER FILES:
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 

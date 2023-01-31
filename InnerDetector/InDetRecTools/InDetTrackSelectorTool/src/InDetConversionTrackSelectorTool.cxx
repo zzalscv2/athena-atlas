@@ -131,9 +131,9 @@ namespace InDet
    }
    Trk::PerigeeSurface perigeeSurface(myVertex->position());
    const Trk::TrackParameters *firstmeaspar=nullptr;
-   for (unsigned int i=0;i<track.trackParameters()->size();i++){
-     if ( (*track.trackParameters())[i]->covariance() && !dynamic_cast<const Trk::Perigee*>((*track.trackParameters())[i])) {
-       firstmeaspar=(*track.trackParameters())[i];
+   for (const auto *i : *track.trackParameters()){
+     if ( i->covariance() && !dynamic_cast<const Trk::Perigee*>(i)) {
+       firstmeaspar=i;
        break;
      }
    }
@@ -252,9 +252,9 @@ namespace InDet
 
    Trk::PerigeeSurface perigeeSurface(myVertex->position());
    const Trk::TrackParameters *firstmeaspar=nullptr;
-   for (unsigned int i=0;i<track.trackParameters().size();i++){
-     if ( (track.trackParameters())[i]->covariance() && !dynamic_cast<const Trk::Perigee*>((track.trackParameters())[i])) {
-       firstmeaspar=(track.trackParameters())[i];
+   for (const auto *i : track.trackParameters()){
+     if ( i->covariance() && !dynamic_cast<const Trk::Perigee*>(i)) {
+       firstmeaspar=i;
        break;
      }
    }

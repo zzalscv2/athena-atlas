@@ -117,7 +117,6 @@ StatusCode LArAverages2Ntuple::execute()
         ATH_MSG_DEBUG ( "LArAccumulatedCalibDigitContainer with key=" << m_contKey << " has " <<accuDigitContainer->size() << " entries" );
       }
  
-     unsigned cellCounter=0;
      for (;it!=it_e;++it) {   
        // Add protection - Modif from JF. Marchand
        if ( !(*it) ) continue;
@@ -183,7 +182,6 @@ StatusCode LArAverages2Ntuple::execute()
  
        fillFromIdentifier(chid);       
        ATH_CHECK( ntupleSvc()->writeRecord(m_nt) );
-       cellCounter++;
      }//end loop over cells
   }//end if have accumulatedDigitContainer 
   ATH_MSG_DEBUG ( "LArAverages2Ntuple has finished." );

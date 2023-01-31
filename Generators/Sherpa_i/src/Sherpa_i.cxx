@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AtlasHepMC/GenEvent.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "AthenaKernel/RNGWrapper.h"
 
 #include "Sherpa_i/Sherpa_i.h"
 
@@ -93,9 +94,9 @@ namespace SHERPA {
 
     double GetMEWeight(const ATOOLS::Cluster_Amplitude &ampl,const int mode=0) const;
 
-    inline Initialization_Handler * GetInitHandler() const
+    inline const Initialization_Handler * GetInitHandler() const
     { return p_inithandler; }
-    inline Event_Handler * GetEventHandler() const
+    inline const Event_Handler * GetEventHandler() const
     { return p_eventhandler; }
 
   };
@@ -117,29 +118,16 @@ namespace SHERPA {
 #include <stdlib.h>
 #include <sys/stat.h>
 #include "CLHEP/Random/RandFlat.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
 
-CLHEP::HepRandomEngine* p_rndEngine;
+CLHEP::HepRandomEngine* p_rndEngine{};
 
 Sherpa_i::Sherpa_i(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenModule(name, pSvcLocator), p_sherpa(NULL)
+  : GenModule(name, pSvcLocator)
 {
   #ifdef IS_SHERPA_3
   declareProperty("BaseFragment", m_inputfiles["Base.yaml"] = "");
   declareProperty("RunCard", m_inputfiles["Sherpa.yaml"] = "");
-  #else
-  declareProperty("RunCard", m_runcard = "");
-  declareProperty("Parameters", m_params);
   #endif
-  declareProperty("OpenLoopsLibs", m_openloopslibs);
-  declareProperty("ExtraFiles", m_extrafiles);
-  declareProperty("NCores", m_ncores=1);
-  declareProperty("MemoryMB", m_memorymb=2500.);
-  declareProperty("PluginCode", m_plugincode = "");
-
-  declareProperty("VariationWeightCap", m_variation_weight_cap=10.0);
-  declareProperty("CrossSectionScaleFactor", m_xsscale=1.0);
-  declareProperty("CleanupGeneratedFiles", m_cleanup=true);
 }
 
 
@@ -147,7 +135,7 @@ Sherpa_i::Sherpa_i(const std::string& name, ISvcLocator* pSvcLocator)
 StatusCode Sherpa_i::genInitialize(){
   if (m_plugincode != "") {
     compilePlugin(m_plugincode);
-    m_params.push_back("SHERPA_LDADD=Sherpa_iPlugin");
+    m_params.value().push_back("SHERPA_LDADD=Sherpa_iPlugin");
   }
 
   ATH_MSG_INFO("Sherpa initialising...");
@@ -167,16 +155,12 @@ StatusCode Sherpa_i::genInitialize(){
     #ifdef IS_SHERPA_3
     m_inputfiles["Base.yaml"] += "SHERPA_LDADD: Sherpa_iPlugin \n";
     #else
-    m_params.push_back("SHERPA_LDADD=Sherpa_iPlugin");
+    m_params.value().push_back("SHERPA_LDADD=Sherpa_iPlugin");
     #endif
   }
 
   ATH_MSG_DEBUG("... seeding Athena random number generator");
-  p_rndEngine = atRndmGenSvc().GetEngine("SHERPA");
-  const long* sip = p_rndEngine->getSeeds();
-  long int si1 = sip[0];
-  long int si2 = sip[1];
-  atRndmGenSvc().CreateStream(si1, si2, "SHERPA");
+  p_rndEngine = getRandomEngineDuringInitialize("SHERPA", m_randomSeed, m_dsid); // NOT THREAD-SAFE
 
   #ifdef IS_SHERPA_3
   ATH_MSG_DEBUG("... adapting output level");
@@ -299,13 +283,19 @@ StatusCode Sherpa_i::genInitialize(){
 
 StatusCode Sherpa_i::callGenerator() {
   ATH_MSG_DEBUG("Sherpa_i in callGenerator()");
+  //Re-seed the random number stream
+  long seeds[7];
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  ATHRNG::calculateSeedsMC21(seeds, "SHERPA",  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+  p_rndEngine->setSeeds(seeds, 0); // NOT THREAD-SAFE
 
   do {
     ATH_MSG_DEBUG("Trying to generate event with Sherpa");
   } while (p_sherpa->GenerateOneEvent()==false);
 
-  if (ATOOLS::rpa->gen.NumberOfGeneratedEvents()%1000==0) {
-    ATH_MSG_INFO("Passed "<<ATOOLS::rpa->gen.NumberOfGeneratedEvents()<<" events.");
+  const size_t genEvents = ATOOLS::rpa->gen.NumberOfGeneratedEvents();
+  if (genEvents%1000==0) {
+    ATH_MSG_INFO("Passed "<<genEvents<<" events.");
   }
 
   return StatusCode::SUCCESS;
@@ -411,7 +401,7 @@ void Sherpa_i::getParameters(int &argc, char** &argv) {
   }
 
   // disregard manual RUNDATA setting if run card given in JO
-  if (m_runcard != "") m_params.push_back("RUNDATA=Run.dat");
+  if (m_runcard != "") m_params.value().push_back("RUNDATA=Run.dat");
 
   // allow to overwrite all parameters from JO file
   params.insert(params.begin()+params.size(), m_params.begin(), m_params.end());
@@ -419,7 +409,7 @@ void Sherpa_i::getParameters(int &argc, char** &argv) {
   // create Run.dat file if runcard explicitely given
   if (m_runcard != "") {
     FILE *file = fopen("Run.dat","w");
-    fputs(m_runcard.c_str(),file);
+    fputs(m_runcard.value().c_str(),file);
     fclose(file);
   }
 

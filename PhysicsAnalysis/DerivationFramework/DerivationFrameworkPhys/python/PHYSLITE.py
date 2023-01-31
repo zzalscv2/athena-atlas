@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_PHYSLITE.py
@@ -16,143 +16,42 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for PHYSLITE"""
     acc = ComponentAccumulator()
 
-    # This block does the common physics augmentation and thinning, which isn't needed (or possible) for PHYS->PHYSLITE
+    # This block does the common physics augmentation  which isn't needed (or possible) for PHYS->PHYSLITE
     # Ensure block only runs for AOD input
-    thinningTools = []
     if 'StreamAOD' in ConfigFlags.Input.ProcessingTags:
-
         # Common augmentations
         from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
         acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
-        # Thinning tools...
-        from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, TauTrackParticleThinningCfg, DiTauTrackParticleThinningCfg, TauJetLepRMParticleThinningCfg
-        from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg
-        from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import CaloClusterThinningCfg
+    # Thinning tools
+    # These are set up in PhysCommonThinningConfig. Only thing needed here the list of tools to schedule 
+    # This differs depending on whether the input is AOD or PHYS
+    # These are needed whatever the input since they are not applied in PHYS
+    thinningToolsArgs = {
+        'ElectronCaloClusterThinningToolName' : "PHYSLITEElectronCaloClusterThinningTool",
+        'PhotonCaloClusterThinningToolName'   : "PHYSLITEPhotonCaloClusterThinningTool",     
+        'ElectronGSFTPThinningToolName'       : "PHYSLITEElectronGSFTPThinningTool",
+        'PhotonGSFTPThinningToolName'         : "PHYSLITEPhotonGSFTPThinningTool"
+    }
+    # whereas these are only needed if the input is AOD since they are applied already in PHYS
+    if 'StreamAOD' in ConfigFlags.Input.ProcessingTags:
+        thinningToolsArgs.update({
+            'TrackParticleThinningToolName'       : "PHYSLITETrackParticleThinningTool",
+            'MuonTPThinningToolName'              : "PHYSLITEMuonTPThinningTool",
+            'TauJetThinningToolName'              : "PHYSLITETauJetThinningTool",
+            'TauJets_MuonRMThinningToolName'      : "PHYSLITETauJets_MuonRMThinningTool",
+            'DiTauTPThinningToolName'             : "PHYSLITEDiTauTPThinningTool",
+            'DiTauLowPtThinningToolName'          : "PHYSLITEDiTauLowPtThinningTool",
+            'DiTauLowPtTPThinningToolName'        : "PHYSLITEDiTauLowPtTPThinningTool",
+        })
+    # Configure the thinning tools
+    from DerivationFrameworkPhys.PhysCommonThinningConfig import PhysCommonThinningCfg
+    acc.merge(PhysCommonThinningCfg(ConfigFlags, StreamName = kwargs['StreamName'], **thinningToolsArgs))
+    # Get them from the CA so they can be added to the kernel
+    thinningTools = []
+    for key in thinningToolsArgs:
+        thinningTools.append(acc.getPublicTool(thinningToolsArgs[key]))
 
-        # Inner detector group recommendations for indet tracks in analysis
-        # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
-        PHYSLITE_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
-        PHYSLITETrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
-            ConfigFlags,
-            name                    = "PHYSLITETrackParticleThinningTool",
-            StreamName              = kwargs['StreamName'], 
-            SelectionString         = PHYSLITE_thinning_expression,
-            InDetTrackParticlesKey  = "InDetTrackParticles"))
-        
-        # Include inner detector tracks associated with muons
-        PHYSLITEMuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
-            ConfigFlags,
-            name                    = "PHYSLITEMuonTPThinningTool",
-            StreamName              = kwargs['StreamName'],
-            MuonKey                 = "Muons",
-            InDetTrackParticlesKey  = "InDetTrackParticles"))
-        
-        # disable tau thinning for now
-        tau_thinning_expression = "(TauJets.ptFinalCalib >= 0)"
-        PHYSLITETauJetsThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(ConfigFlags,
-            name            = "PHYSLITETauJetThinningTool",
-            StreamName      = kwargs['StreamName'],
-            ContainerName   = "TauJets",
-            SelectionString = tau_thinning_expression))
-        
-        # Only keep tau tracks (and associated ID tracks) classified as charged tracks
-        PHYSLITETauTPThinningTool = acc.getPrimaryAndMerge(TauTrackParticleThinningCfg(
-            ConfigFlags,
-            name                   = "PHYSLITETauTPThinningTool",
-            StreamName             = kwargs['StreamName'],
-            TauKey                 = "TauJets",
-            InDetTrackParticlesKey = "InDetTrackParticles",
-            DoTauTracksThinning    = True,
-            TauTracksKey           = "TauTracks"))
-        
-        tau_murm_thinning_expression = tau_thinning_expression.replace('TauJets', 'TauJets_MuonRM')
-        PHYSLITETauJetMuonRMParticleThinningTool = acc.getPrimaryAndMerge(TauJetLepRMParticleThinningCfg(
-            ConfigFlags,
-            name                   = "PHYSLITETauJets_MuonRMThinningTool",
-            StreamName             = kwargs['StreamName'],
-            originalTauKey         = "TauJets",
-            LepRMTauKey            = "TauJets_MuonRM",
-            InDetTrackParticlesKey = "InDetTrackParticles",
-            TauTracksKey           = "TauTracks_MuonRM",
-            SelectionString        = tau_murm_thinning_expression))
-
-        # ID tracks associated with high-pt di-tau
-        PHYSLITEDiTauTPThinningTool = acc.getPrimaryAndMerge(DiTauTrackParticleThinningCfg(
-            ConfigFlags,
-            name                    = "PHYSLITEDiTauTPThinningTool",
-            StreamName              = kwargs['StreamName'],
-            DiTauKey                = "DiTauJets",
-            InDetTrackParticlesKey  = "InDetTrackParticles"))
-
-        ## Low-pt di-tau thinning
-        PHYSLITEDiTauLowPtThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(ConfigFlags,
-                                                                                     name            = "PHYSLITEDiTauLowPtThinningTool",
-                                                                                     StreamName      = kwargs['StreamName'],
-                                                                                     ContainerName   = "DiTauJetsLowPt",
-                                                                                     SelectionString = "DiTauJetsLowPt.nSubjets > 1"))
-        
-        # ID tracks associated with low-pt ditau
-        PHYSLITEDiTauLowPtTPThinningTool = acc.getPrimaryAndMerge(DiTauTrackParticleThinningCfg(ConfigFlags,
-                                                                                            name                    = "PHYSLITEDiTauLowPtTPThinningTool",
-                                                                                            StreamName              = kwargs['StreamName'],
-                                                                                            DiTauKey                = "DiTauJetsLowPt",
-                                                                                            InDetTrackParticlesKey  = "InDetTrackParticles",
-                                                                                            SelectionString         = "DiTauJetsLowPt.nSubjets > 1"))
-
-        # keep calo clusters around electrons
-        PHYSLITEElectronCaloClusterThinningTool = acc.getPrimaryAndMerge(CaloClusterThinningCfg(
-            ConfigFlags,
-            name="PHYSLITEElectronCaloClusterThinningTool",
-            StreamName=kwargs['StreamName'],
-            SGKey="AnalysisElectrons",
-            CaloClCollectionSGKey="egammaClusters",
-            ConeSize=-1.0))
-
-        # keep calo clusters around photons
-        PHYSLITEPhotonCaloClusterThinningTool = acc.getPrimaryAndMerge(CaloClusterThinningCfg(
-            ConfigFlags,
-            name="PHYSLITEPhotonCaloClusterThinningTool",
-            StreamName=kwargs['StreamName'],
-            SGKey="AnalysisPhotons",
-            CaloClCollectionSGKey="egammaClusters",
-            ConeSize=-1.0))
-
-        # GSF tracks associated to electrons
-        PHYSLITEElectronGSFTPThinningTool = CompFactory.DerivationFramework.EgammaTrackParticleThinning(
-            name = 'PHYSLITEElectronGSFTPThinningTool',
-            StreamName = kwargs['StreamName'],
-            SGKey = 'AnalysisElectrons',
-            GSFTrackParticlesKey = 'GSFTrackParticles',
-            InDetTrackParticlesKey = '',
-            BestMatchOnly = True)
-        acc.addPublicTool(PHYSLITEElectronGSFTPThinningTool)
-
-        # GSF tracks associated to photons
-        PHYSLITEPhotonGSFTPThinningTool = CompFactory.DerivationFramework.EgammaTrackParticleThinning(
-            name = 'PHYSLITEPhotonGSFTPThinningTool',
-            StreamName = kwargs['StreamName'],
-            SGKey = 'AnalysisPhotons',
-            GSFTrackParticlesKey = 'GSFTrackParticles',
-            InDetTrackParticlesKey = '',
-            BestMatchOnly = True)
-        acc.addPublicTool(PHYSLITEPhotonGSFTPThinningTool)
-
-        # Collect the thinning tools
-        thinningTools = [PHYSLITETrackParticleThinningTool,
-                         PHYSLITEMuonTPThinningTool,
-                         PHYSLITETauJetsThinningTool,
-                         PHYSLITETauTPThinningTool,
-                         PHYSLITETauJetMuonRMParticleThinningTool,
-                         PHYSLITEDiTauTPThinningTool,
-                         PHYSLITEDiTauLowPtThinningTool,
-                         PHYSLITEDiTauLowPtTPThinningTool,
-                         PHYSLITEElectronCaloClusterThinningTool,
-                         PHYSLITEPhotonCaloClusterThinningTool,
-                         PHYSLITEElectronGSFTPThinningTool,
-                         PHYSLITEPhotonGSFTPThinningTool ]
-
-    # End of block that should only be executed for AOD input
 
     #==============================================================================
     # Analysis-level variables 
@@ -240,7 +139,7 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
                        AssocConfig('Muon', 'AnalysisMuons'),
                        AssocConfig('Ele', 'AnalysisElectrons'),
                        AssocConfig('Gamma', 'AnalysisPhotons'),
-                       #AssocConfig('Tau', 'AnalysisTauJets'),
+                       AssocConfig('Tau', 'AnalysisTauJets'),
                        AssocConfig('Soft', '')]
         PHYSLITE_cfg = METAssocConfig('AnalysisMET',
                                       ConfigFlags,
@@ -266,10 +165,13 @@ def PHYSLITECfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    PHYSLITETriggerListsHelper = TriggerListsHelper()
+    PHYSLITETriggerListsHelper = TriggerListsHelper(ConfigFlags)
+
+    # Set the stream name - varies depending on whether the input is AOD or DAOD_PHYS
+    streamName = 'StreamDAOD_PHYSLITE' if 'StreamAOD' in ConfigFlags.Input.ProcessingTags else 'StreamD2AOD_PHYSLITE' 
 
     # Common augmentations
-    acc.merge(PHYSLITEKernelCfg(ConfigFlags, name="PHYSLITEKernel", StreamName = 'StreamDAOD_PHYSLITE', TriggerListsHelper = PHYSLITETriggerListsHelper))
+    acc.merge(PHYSLITEKernelCfg(ConfigFlags, name="PHYSLITEKernel", StreamName = streamName, TriggerListsHelper = PHYSLITETriggerListsHelper))
 
     # ============================
     # Define contents of the format
@@ -277,7 +179,7 @@ def PHYSLITECfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    PHYSLITESlimmingHelper = SlimmingHelper("PHYSLITESlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    PHYSLITESlimmingHelper = SlimmingHelper("PHYSLITESlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
     # Trigger content
     PHYSLITESlimmingHelper.IncludeTriggerNavigation = False
@@ -290,29 +192,42 @@ def PHYSLITECfg(ConfigFlags):
     PHYSLITESlimmingHelper.IncludeBJetTriggerContent = False
     PHYSLITESlimmingHelper.IncludeBPhysTriggerContent = False
     PHYSLITESlimmingHelper.IncludeMinBiasTriggerContent = False
-
+    
     # Trigger matching
     # Run 2
     if ConfigFlags.Trigger.EDMVersion == 2:
+        # Need to re-run matching so that new Analysis<X> containers are matched to triggers
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun2Cfg
+        acc.merge(TriggerMatchingCommonRun2Cfg(ConfigFlags, 
+                                               name = "PHYSLITETrigMatchNoTau", 
+                                               OutputContainerPrefix = "AnalysisTrigMatch_", 
+                                               ChainNames = PHYSLITETriggerListsHelper.Run2TriggerNamesNoTau,
+                                               InputElectrons = "AnalysisElectrons",
+                                               InputPhotons = "AnalysisPhotons",
+                                               InputMuons = "AnalysisMuons",
+                                               InputTaus = "AnalysisTauJets"))
+        acc.merge(TriggerMatchingCommonRun2Cfg(ConfigFlags, 
+                                               name = "PHYSLITETrigMatchTau", 
+                                               OutputContainerPrefix = "AnlaysisTrigMatch_", 
+                                               ChainNames = PHYSLITETriggerListsHelper.Run2TriggerNamesTau, 
+                                               DRThreshold = 0.2,
+                                               InputElectrons = "AnalysisElectrons",
+                                               InputPhotons = "AnalysisPhotons",
+                                               InputMuons = "AnalysisMuons",
+                                               InputTaus = "AnalysisTauJets"))
+        # Now add the resulting decorations to the output 
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSLITESlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_", 
+                                         OutputContainerPrefix = "AnalysisTrigMatch_", 
                                          TriggerList = PHYSLITETriggerListsHelper.Run2TriggerNamesTau)
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSLITESlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_",
+                                         OutputContainerPrefix = "AnalysisTrigMatch_",
                                          TriggerList = PHYSLITETriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3
     if ConfigFlags.Trigger.EDMVersion == 3:
+        # No need to run matching: just keep navigation so matching can be done by analysts
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(PHYSLITESlimmingHelper)        
-        # Run 2 is added here temporarily to allow testing/comparison/debugging
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSLITESlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_", 
-                                         TriggerList = PHYSLITETriggerListsHelper.Run3TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSLITESlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_",
-                                         TriggerList = PHYSLITETriggerListsHelper.Run3TriggerNamesNoTau)
 
     # Event content
     PHYSLITESlimmingHelper.AppendToDictionary.update({
@@ -362,17 +277,18 @@ def PHYSLITECfg(ConfigFlags):
         'CombinedMuonTrackParticles.qOverP.d0.z0.vz.phi.theta.truthOrigin.truthType.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.numberOfPixelDeadSensors.numberOfPixelHits.numberOfPixelHoles.numberOfSCTDeadSensors.numberOfSCTHits.numberOfSCTHoles.numberOfTRTHits.numberOfTRTOutliers.chiSquared.numberDoF',
         'ExtrapolatedMuonTrackParticles.d0.z0.vz.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.truthOrigin.truthType.qOverP.theta.phi',
         'MuonSpectrometerTrackParticles.phi.d0.z0.vz.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.vertexLink.theta.qOverP.truthParticleLink',
-        'AnalysisTauJets.pt.eta.phi.m.ptFinalCalib.etaFinalCalib.ptTauEnergyScale.etaTauEnergyScale.charge.isTauFlags.PanTau_DecayMode.NNDecayMode.RNNJetScore.RNNJetScoreSigTrans.RNNEleScore.RNNEleScoreSigTrans.tauTrackLinks.vertexLink.truthParticleLink.truthJetLink.IsTruthMatched.truthOrigin.truthType',
-        'AnalysisJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.NumTrkPt500.SumPtTrkPt500.DetectorEta.Jvt.JVFCorr.JvtRpt.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.PartonTruthLabelID.ConeTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID.TrueFlavor.DFCommonJets_jetClean_LooseBad.DFCommonJets_jetClean_TightBad.Timing.btagging.btaggingLink.GhostTrack.DFCommonJets_fJvt.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PSFrac.JetAccessorMap.EMFrac.Width.ActiveArea4vec_pt.ActiveArea4vec_eta.ActiveArea4vec_m.ActiveArea4vec_phi.EnergyPerSampling.SumPtChargedPFOPt500',
+        'AnalysisTauJets.pt.eta.phi.m.ptFinalCalib.etaFinalCalib.ptTauEnergyScale.etaTauEnergyScale.charge.isTauFlags.PanTau_DecayMode.NNDecayMode.RNNJetScore.RNNJetScoreSigTrans.JetDeepSetScore.JetDeepSetScoreTrans.JetDeepSetVeryLoose.JetDeepSetLoose.JetDeepSetMedium.JetDeepSetTight.RNNEleScore.RNNEleScoreSigTrans.RNNEleScoreSigTrans_v1.EleRNNLoose_v1.EleRNNMedium_v1.EleRNNTight_v1.tauTrackLinks.vertexLink.truthParticleLink.truthJetLink.IsTruthMatched.truthOrigin.truthType',
+        'AnalysisJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.NumTrkPt500.SumPtTrkPt500.DetectorEta.JVFCorr.NNJvtPass.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.PartonTruthLabelID.ConeTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID.TrueFlavor.DFCommonJets_jetClean_LooseBad.DFCommonJets_jetClean_TightBad.Timing.btagging.btaggingLink.GhostTrack.DFCommonJets_fJvt.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PSFrac.JetAccessorMap.EMFrac.Width.ActiveArea4vec_pt.ActiveArea4vec_eta.ActiveArea4vec_m.ActiveArea4vec_phi.EnergyPerSampling.SumPtChargedPFOPt500',
         'BTagging_AntiKt4EMPFlow.DL1dv00_pu.DL1dv00_pc.DL1dv00_pb.DL1dv01_pu.DL1dv01_pc.DL1dv01_pb',
         'TruthPrimaryVertices.t.x.y.z',
         'MET_Core_AnalysisMET.name.mpx.mpy.sumet.source',
         'METAssoc_AnalysisMET.',
         'InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.numberOfTRTHits.numberOfTRTOutliers',
-        'EventInfo.hardScatterVertexLink.RandomRunNumber.PileupWeight_NOSYS',
+        'EventInfo.RandomRunNumber.PileupWeight_NOSYS.GenFiltHT.GenFiltMET',
         'Kt4EMPFlowEventShape.Density',
         'TauTracks.pt.eta.phi.flagSet.trackLinks',
-        'AnalysisLargeRJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.DetectorEta.TrackSumMass.TrackSumPt.constituentLinks.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Split12.Split23.Qw.D2.C2'
+        'AnalysisLargeRJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.DetectorEta.TrackSumMass.TrackSumPt.constituentLinks.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Split12.Split23.Qw.D2.C2',
+        'EventInfo.RandomRunNumber.PileupWeight_NOSYS.GenFiltHT.GenFiltMET'
     ]
 
     if ConfigFlags.Input.isMC:

@@ -57,7 +57,7 @@ StatusCode RPC_RDOToxAOD::execute()
   // loop over the RpcPad
   ATH_MSG_DEBUG("Looping over RpcPad...");
   RpcPadContainer::const_iterator itpad = rpccol->begin(), itpadE = rpccol->end();
-  for (; itpad != itpadE; itpad++) {
+  for (; itpad != itpadE; ++itpad) {
     const RpcPad *aPad = *itpad;
     ATH_MSG_DEBUG("A RpcPad, size = " << aPad->size());
 
@@ -83,7 +83,7 @@ StatusCode RPC_RDOToxAOD::execute()
      // loop over Coincidence Matrices
      ATH_MSG_DEBUG("Looping over Coincidence Matrices...");
      RpcPad::const_iterator itmat = (*itpad)->begin(), itmatE = (*itpad)->end();
-     for (; itmat != itmatE; itmat++) {
+     for (; itmat != itmatE; ++itmat) {
 
        const RpcCoinMatrix *aMat = *itmat;
        ATH_MSG_DEBUG("A Coincidence Matrix, size = " << aMat->size());
@@ -104,7 +104,7 @@ StatusCode RPC_RDOToxAOD::execute()
        // loop over Fired Channels
        ATH_MSG_DEBUG("Looping over Coincidence Matrix...");
        RpcCoinMatrix::const_iterator itchan = (*itmat)->begin(), itchanE = (*itmat)->end();
-       for (; itchan != itchanE; itchan++) {
+       for (; itchan != itchanE; ++itchan) {
 
 	 const RpcFiredChannel *aChan = *itchan;
 

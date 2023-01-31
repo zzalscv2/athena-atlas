@@ -5,7 +5,6 @@
 #include "Pythia8_i/UserProcessFactory.h"
 #include "Pythia8_i/UserResonanceFactory.h"
 #include "PathResolver/PathResolver.h"
-#include "Pythia8_i/IPythia8Custom.h"
 
 #include "PathResolver/PathResolver.h"
 #include "GeneratorObjects/McEventCollection.h"
@@ -13,15 +12,18 @@
 #include <boost/lexical_cast.hpp>
 
 // calls to fortran routines
-#include "CLHEP/Random/RandFlat.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
+#include "AthenaKernel/RNGWrapper.h"
 
 #include <sstream>
 // For limits
 #include <limits>
 
-// Name of AtRndmGenSvc stream
-std::string     Pythia8_i::m_pythia_stream   = "PYTHIA8_INIT";
+
+namespace {
+  // Name of random number stream
+  std::string s_pythia_stream{"PYTHIA8_INIT"};
+}
+
 
 // fix Pythia8 shower weights change in conventions
 #define PYTHIA8_NWEIGHTS nWeights
@@ -30,7 +32,6 @@ std::string     Pythia8_i::m_pythia_stream   = "PYTHIA8_INIT";
 #define PYTHIA8_CONVERSION 1.0
 
 #ifdef PYTHIA_VERSION_INTEGER
-  #if PYTHIA_VERSION_INTEGER > 8230
   #undef PYTHIA8_NWEIGHTS
   #undef PYTHIA8_WEIGHT
   #undef PYTHIA8_WLABEL
@@ -41,11 +42,6 @@ std::string     Pythia8_i::m_pythia_stream   = "PYTHIA8_INIT";
   #endif
   #define PYTHIA8_WEIGHT getGroupWeight
   #define PYTHIA8_WLABEL getGroupName
-  #if PYTHIA_VERSION_INTEGER < 8244
-    #undef PYTHIA8_CONVERSION
-    #define PYTHIA8_CONVERSION 1.0e9
-  #endif
-  #endif
 #endif
 
 /**
@@ -70,40 +66,8 @@ std::string py8version()
 
 ////////////////////////////////////////////////////////////////////////////////
 Pythia8_i::Pythia8_i(const std::string &name, ISvcLocator *pSvcLocator)
-: GenModule(name, pSvcLocator),
-m_internal_event_number(0),
-m_version(-1.),
-m_atlasRndmEngine(0),
-m_nAccepted(0.),
-m_nMerged(0.),
-m_sigmaTotal(0.),
-m_conversion(1.),
-m_failureCount(0),
-m_procPtr(0),
-m_userHooksPtrs(),
-m_doLHE3Weights(false),
-m_athenaTool("")
+: GenModule(name, pSvcLocator)
 {
-  declareProperty("Commands", m_commands);
-  declareProperty("CollisionEnergy", m_collisionEnergy = 14000.0);
-  declareProperty("useRndmGenSvc", m_useRndmGenSvc = true);
-  declareProperty("Beam1", m_beam1 = "PROTON");
-  declareProperty("Beam2", m_beam2 = "PROTON");
-  declareProperty("LHEFile", m_lheFile = "");
-  declareProperty("StoreLHE", m_storeLHE=false);
-  declareProperty("CKKWLAcceptance", m_doCKKWLAcceptance = false);
-  declareProperty("FxFxXS", m_doFxFxXS = false);
-  declareProperty("MaxFailures", m_maxFailures = 10);//the max number of consecutive failures
-  declareProperty("UserProcess", m_userProcess="");
-  declareProperty("UserHooks", m_userHooks={});
-  declareProperty("UserResonances", m_userResonances="");
-  declareProperty("UseLHAPDF", m_useLHAPDF=true);
-  declareProperty("ParticleData", m_particleDataFile="");
-  declareProperty("OutputParticleData",m_outputParticleDataFile="ParticleData.local.xml");
-  declareProperty("ShowerWeightNames",m_showerWeightNames);
-  declareProperty("CustomInterface",m_athenaTool);
-
-
   m_particleIDs["PROTON"]      = PROTON;
   m_particleIDs["ANTIPROTON"]  = ANTIPROTON;
   m_particleIDs["ELECTRON"]    = ELECTRON;
@@ -120,16 +84,12 @@ m_athenaTool("")
   m_runinfo = std::make_shared<HepMC3::GenRunInfo>();
   /// Here one can fill extra information, e.g. the used tools in a format generator name, version string, comment.
   struct HepMC3::GenRunInfo::ToolInfo generator={std::string("Pythia8"),py8version(),std::string("Used generator")};
-  m_runinfo->tools().push_back(generator);  
+  m_runinfo->tools().push_back(generator);
 #endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 Pythia8_i::~Pythia8_i() {
-
-  delete m_atlasRndmEngine;
-
-  if(m_procPtr != 0)     delete m_procPtr;
 
   #ifndef PYTHIA8_3SERIES
 //  if(m_userHookPtr != 0) delete m_userHookPtr;
@@ -149,9 +109,10 @@ StatusCode Pythia8_i::genInitialize() {
 
   m_version = m_pythia->settings.parm("Pythia:versionNumber");
 
-  Pythia8_i::m_pythia_stream =       "PYTHIA8_INIT";
+  s_pythia_stream = "PYTHIA8_INIT";
 
   // By default add "nominal" to the list of shower weight names
+  m_showerWeightNames = m_showerWeightNamesProp.value();
   m_showerWeightNames.insert(m_showerWeightNames.begin(), "nominal");
 
   // We do explicitly set tune 4C, since it is the starting point for many other tunes
@@ -245,46 +206,33 @@ StatusCode Pythia8_i::genInitialize() {
   if(m_useRndmGenSvc){
 
     ATH_MSG_INFO(" !!!!!!!!!!!!  WARNING ON PYTHIA RANDOM NUMBERS !!!!!!!!!! ");
-    ATH_MSG_INFO("           THE ATHENA SERVICE AtRndmGenSvc IS USED.");
+    ATH_MSG_INFO("           THE ATHENA SERVICE AthRNGenSvc IS USED.");
     ATH_MSG_INFO(" !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ");
 
-    if(m_atlasRndmEngine) delete m_atlasRndmEngine;
-    m_atlasRndmEngine = new customRndm();
+    m_atlasRndmEngine = std::make_unique<customRndm>();
 
-    m_atlasRndmEngine->init(atRndmGenSvc(),Pythia8_i::m_pythia_stream);
-    m_pythia->setRndmEnginePtr(m_atlasRndmEngine);
-
-    // Save the PYTHIA_INIT stream seeds....
-    CLHEP::HepRandomEngine* engine = atRndmGenSvc().GetEngine(Pythia8_i::m_pythia_stream);
-
-    const long*   sip     =       engine->getSeeds();
-    long  int     si1     =       sip[0];
-    long  int     si2     =       sip[1];
-
-    atRndmGenSvc().CreateStream(si1, si2, Pythia8_i::m_pythia_stream);
-    Pythia8_i::m_pythia_stream =       "PYTHIA8";
-    m_atlasRndmEngine->m_stream=Pythia8_i::m_pythia_stream;
-
+    CLHEP::HepRandomEngine* rndmEngine = getRandomEngineDuringInitialize(s_pythia_stream, m_randomSeed, m_dsid); // NOT THREAD-SAFE
+    m_atlasRndmEngine->init(rndmEngine);
+    m_pythia->setRndmEnginePtr(m_atlasRndmEngine.get());
+    s_pythia_stream = "PYTHIA8";
   }else{
     ATH_MSG_INFO(" !!!!!!!!!!!!  WARNING ON PYTHIA RANDOM NUMBERS !!!!!!!!!! ");
     ATH_MSG_INFO("    THE STANDARD PYTHIA8 RANDOM NUMBER SERVICE IS USED.");
-    ATH_MSG_INFO("    THE ATHENA SERVICE AtRndmGenSvc IS ***NOT*** USED.");
+    ATH_MSG_INFO("    THE ATHENA SERVICE AthRNGSvc IS ***NOT*** USED.");
     ATH_MSG_INFO(" !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ");
   }
 
-  m_procPtr = 0;
-
   if(m_userProcess != ""){
-    m_procPtr = Pythia8_UserProcess::UserProcessFactory::create(m_userProcess);
+    m_procPtr = std::unique_ptr<Pythia8::Sigma2Process>(Pythia8_UserProcess::UserProcessFactory::create(m_userProcess));
   }
 
 
 
-  if(m_userResonances != ""){
+  if(m_userResonances.value() != ""){
 
     std::vector<std::string> resonanceArgs;
 
-    boost::split(resonanceArgs, m_userResonances, boost::is_any_of(":"));
+    boost::split(resonanceArgs, m_userResonances.value(), boost::is_any_of(":"));
     if(resonanceArgs.size() != 2){
       ATH_MSG_ERROR("Cannot Understand UserResonance job option!");
       ATH_MSG_ERROR("You should specify it as a 'name:id1,id2,id3...'");
@@ -322,7 +270,7 @@ StatusCode Pythia8_i::genInitialize() {
   }
 
   if(m_lheFile != ""){
-    if(m_procPtr != 0){
+    if(m_procPtr){
       ATH_MSG_ERROR("Both LHE file and user process have been specified");
       ATH_MSG_ERROR("LHE input does not make sense with a user process!");
       canInit = false;
@@ -341,8 +289,8 @@ StatusCode Pythia8_i::genInitialize() {
     canInit = canInit && m_pythia->readString("Beams:eCM = " + std::to_string(m_collisionEnergy));
   }
 
-  if(m_procPtr != 0){
-    if(!m_pythia->setSigmaPtr(m_procPtr)){
+  if(m_procPtr){
+    if(!m_pythia->setSigmaPtr(m_procPtr.get())) {
       ATH_MSG_ERROR("Unable to set requested user process: " + m_userProcess + " !!");
       ATH_MSG_ERROR("Pythia 8 initialisation will FAIL!");
       canInit = false;
@@ -351,7 +299,7 @@ StatusCode Pythia8_i::genInitialize() {
 
   StatusCode returnCode = StatusCode::SUCCESS;
 
-  m_pythia->particleData.listXML(m_outputParticleDataFile.substr(0,m_outputParticleDataFile.find("xml"))+"orig.xml");
+  m_pythia->particleData.listXML(m_outputParticleDataFile.value().substr(0,m_outputParticleDataFile.value().find("xml"))+"orig.xml");
   m_pythia->settings.writeFile("Settings_before.log",true);
 
   if(canInit){
@@ -375,6 +323,7 @@ StatusCode Pythia8_i::genInitialize() {
   m_pythiaToHepMC.set_print_inconsistency(  m_pythia->settings.flag("AthenaPythia8ToHepMC:print_inconsistency")  );
 
   m_pythiaToHepMC.set_store_pdf(true);
+  m_pythiaToHepMC.set_store_weights(false);
 
   return returnCode;
 }
@@ -385,12 +334,14 @@ StatusCode Pythia8_i::callGenerator(){
   ATH_MSG_DEBUG(">>> Pythia8_i from callGenerator");
 
   if(m_useRndmGenSvc){
-    // Save the random number seeds in the event
-    CLHEP::HepRandomEngine*  engine  = atRndmGenSvc().GetEngine(Pythia8_i::m_pythia_stream);
-    const long* s =  engine->getSeeds();
+    //Re-seed the random number stream
+    long seeds[7];
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    ATHRNG::calculateSeedsMC21(seeds, s_pythia_stream,  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+    m_atlasRndmEngine->getEngine()->setSeeds(seeds, 0); // NOT THREAD-SAFE
     m_seeds.clear();
-    m_seeds.push_back(s[0]);
-    m_seeds.push_back(s[1]);
+    m_seeds.push_back(seeds[0]);
+    m_seeds.push_back(seeds[1]);
   }
 
   bool status = m_pythia->next();
@@ -494,16 +445,16 @@ StatusCode Pythia8_i::fillEvt(HepMC::GenEvent *evt){
   if(m_useRndmGenSvc) HepMC::set_random_states(evt,m_seeds);
 
   // fill weights
-  StatusCode returnCode = fillWeights(evt);
+  ATH_CHECK(fillWeights(evt));
 
-  return returnCode;
+  return StatusCode::SUCCESS;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 StatusCode Pythia8_i::fillWeights(HepMC::GenEvent *evt){
 
   // reset
-  m_mergingWeight    = m_pythia->info.mergingWeightNLO(); // first initialisation, good for the nominal weightin any case (see Merging:includeWeightInXsection).
+  m_mergingWeight    = m_pythia->info.mergingWeightNLO(); // first initialisation, good for the nominal weight in any case (see Merging:includeWeightInXsection).
   m_enhanceWeight    = 1.0;  // better to keep the enhancement from UserHooks in a separate variable, to keep the code clear
 
 #ifndef PYTHIA8_304SERIES
@@ -621,17 +572,18 @@ StatusCode Pythia8_i::fillWeights(HepMC::GenEvent *evt){
 #ifdef HEPMC3
   if (!evt->run_info()) {
      evt->set_run_info(m_runinfo);
-}
+  }
   evt->run_info()->set_weight_names(m_weightNames);
 
-// for the first event, weight AUX_bare_not_for_analyses is not present in evt->weights(), so we need to book a place for it by hand
+  // for the first event, weight AUX_bare_not_for_analyses is not present in evt->weights(), so we need to book a place for it by hand
   if (m_internal_event_number == 1 && evt->run_info()->weight_names().size() == evt->weights().size()+1 ) {
      evt->weights().push_back(1.0);
-}
+  }
 
   // added conversion GeV ->  MeV to ensure correct units
   evt->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
 
+  evt->weights().resize(fWeights.size(), 1.0);
   for (auto w: fWeights) {
       evt->weight(w.first)=w.second;
   }
@@ -721,7 +673,8 @@ void Pythia8_i::addLHEToHepMC(HepMC::GenEvent *evt){
   if(beams[0]->momentum().pz() * procBeams[0]->momentum().pz() < 0.) std::swap(procBeams[0],procBeams[1]);
   for (auto p: procBeams[0]->end_vertex()->particles_out())  beams[0]->end_vertex()->add_particle_out(p);
   for (auto p: procBeams[1]->end_vertex()->particles_out())  beams[1]->end_vertex()->add_particle_out(p);
-
+   
+  HepMC::fillBarcodesAttribute(procEvent);
 #else
   HepMC::GenEvent *procEvent = new HepMC::GenEvent(evt->momentum_unit(), evt->length_unit());
 
@@ -797,7 +750,7 @@ double Pythia8_i::pythiaVersion()const{
 
 ////////////////////////////////////////////////////////////////////////
 const std::string& Pythia8_i::pythia_stream() {
-  return m_pythia_stream;
+  return s_pythia_stream;
 }
 
 ////////////////////////////////////////////////////////////////////////

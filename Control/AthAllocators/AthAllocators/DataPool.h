@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHALLOCATORS_DATAPOOL_H
@@ -18,8 +18,15 @@
  * Therefore, if you try to create two pool instances referencing
  * the same allocator (i.e, same type and same thread), you'll get a deadlock.
  *
- * @author Srini Rajagopalan - ATLAS Collaboration
- *$Id: DataPool.h 470529 2011-11-24 23:54:22Z ssnyder $	
+ * You can optionally provide (as a template argument) a function to be called
+ * on an object when it is returned to the pool.  This can be used to reset
+ * the state, release memory, etc.  This must be a static function, not
+ * a lambda, and since it's used as a template argument, it should not be
+ * in an anonymous namespace (should have public linkage).  Also be aware
+ * that @c clear argument will have an effect only for the first @c DataPool
+ * object to be created for a given @c VALUE.
+ *
+ * @author Srini Rajagopalan, scott snyder
  */
 
 #include "AthAllocators/ArenaCachingHandle.h"
@@ -28,6 +35,9 @@
 #include "boost/iterator/iterator_adaptor.hpp"
 
 template <typename VALUE>
+using DataPoolClearFuncPtr_t = void (*)(VALUE*);
+
+template <typename VALUE, DataPoolClearFuncPtr_t<VALUE> clear = nullptr>
 class DataPool
 {
 private:
@@ -147,19 +157,22 @@ public:
   /// DANGEROUS --- do we need this???
   void *operator ()();
 
-   /// typename of pool
-   static const std::string& typeName();
+  /// typename of pool
+  static const std::string& typeName();
 
 //-----------------------------------------------------------//
 
  private:
 
-   handle_t m_handle;
+  handle_t m_handle;
 
-   const static typename alloc_t::Params s_params;
+  const static typename alloc_t::Params s_params;
 
   /// minimum number of elements in pool
   static constexpr size_t s_minRefCount = 1024;
+
+  static typename alloc_t::Params initParams();
+  static void callClear (SG::ArenaAllocatorBase::pointer p);
 };
 
 

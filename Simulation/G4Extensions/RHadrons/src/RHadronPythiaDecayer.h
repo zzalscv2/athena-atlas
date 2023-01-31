@@ -5,6 +5,8 @@
 #ifndef RHadronPythiaDecayer_H
 #define RHadronPythiaDecayer_H
 
+#include "G4ExternalDecay/Pythia8ForDecays.h"
+
 #include "G4VExtDecayer.hh"
 #include "G4Track.hh"
 #include <string>
@@ -16,6 +18,8 @@ class RHadronPythiaDecayer: public G4VExtDecayer
   public:
    RHadronPythiaDecayer( const std::string& s );
    virtual G4DecayProducts* ImportDecayProducts(const G4Track&);
+  private:
+   Pythia8ForDecays m_pythia;
 };
 
 #endif

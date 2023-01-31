@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -18,7 +18,7 @@
 #define STEP_Propagator_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkEventPrimitives/SurfaceTypes.h"
@@ -41,6 +41,11 @@
 #include <list>
 #include <vector>
 
+namespace CLHEP{
+  class HepRandomEngine;
+}
+
+#include "TrkExInterfaces/ITimedMatEffUpdator.h"
 namespace Trk {
 class Surface;
 class TrackingVolume;
@@ -60,8 +65,8 @@ class ExtrapolationCache;
    track parameters at the destination surface. This is useful for Chi2
    fitting.
 
-   One can choose to perform the transport of the parameters only and omit the transport
-   of the associated covariances (propagateParameters).
+   One can choose to perform the transport of the parameters only and omit the
+   transport of the associated covariances (propagateParameters).
 
    The implementation performs the propagation in global coordinates and uses
    Jacobian matrices (see RungeKuttaUtils) for the transformations between the
@@ -76,7 +81,8 @@ class ExtrapolationCache;
    1.The first step of the algorithm is track parameters transformation from
    local presentation for given start surface to global Runge Kutta coordinates.
 
-   2.The second step is propagation through magnetic field with or without jacobian.
+   2.The second step is propagation through magnetic field with or without
+   jacobian.
 
    3.Third step is transformation from global Runge Kutta presentation to local
    presentation of given output surface.
@@ -134,19 +140,21 @@ class ExtrapolationCache;
 
    The Runge-Kutta method:
 
-   The equations of motion are solved using an embedded pair of Runge-Kutta formulas.
-   This method, Runge-Kutta-Fehlberg, calculates a number of points along the step and
-   adds them up in different ways to get two different solutions, of different order, for the
-   integration. The higher order solution is used for the propagation and the lower order solution for
-   error control. The difference between these solutions is used to estimate the quality of the
-   integration (propagation), and to calculate the step size for the next step. If the quality is below
-   a given tolerance then the step is rejected and repeated with a shorter step length. This propagator
-   uses the TP43 (Tsitouras-Papakostas 4th and 3rd order) Runge-Kutta pair.
+   The equations of motion are solved using an embedded pair of Runge-Kutta
+   formulas. This method, Runge-Kutta-Fehlberg, calculates a number of points
+   along the step and adds them up in different ways to get two different
+   solutions, of different order, for the integration. The higher order solution
+   is used for the propagation and the lower order solution for error control.
+The difference between these solutions is used to estimate the quality of the
+   integration (propagation), and to calculate the step size for the next step.
+   If the quality is below a given tolerance then the step is rejected and
+repeated with a shorter step length. This propagator uses the TP43
+   (Tsitouras-Papakostas 4th and 3rd order) Runge-Kutta pair.
 
-   The step size algoritm by L.P.Endresen and J.Myrheim was choosen for its low step rejection and
-   effective step size calculation. The low step rejection is achieved by letting the step size
-   oscillate around the optimal value instead of repeating steps every time they fall below the
-   tolerance level.
+   The step size algoritm by L.P.Endresen and J.Myrheim was choosen for its low
+   step rejection and effective step size calculation. The low step rejection is
+   achieved by letting the step size oscillate around the optimal value instead
+   of repeating steps every time they fall below the tolerance level.
 
    Units are mm, MeV and kiloGauss.
 
@@ -161,14 +169,13 @@ class STEP_Propagator final
   // Public methods:
   /////////////////////////////////////////////////////////////////////////////////
 public:
-
   using IPropagator::propagate;
 
   STEP_Propagator(const std::string&, const std::string&, const IInterface*);
 
   virtual ~STEP_Propagator();
 
-  /** AlgTool initailize method.*/
+  /** AlgTool initialize method.*/
   virtual StatusCode initialize() override final;
 
   /** AlgTool finalize method */
@@ -315,6 +322,28 @@ public:
     ParticleHypothesis particle,
     const Trk::TrackingVolume* tVol = 0) const override final;
 
+  /** unimplemented  multiStatePropagate*/
+  virtual Trk::MultiComponentState multiStatePropagate(
+    const EventContext&,
+    const MultiComponentState&,
+    const Surface&,
+    const MagneticFieldProperties&,
+    const PropDirection,
+    const BoundaryCheck&,
+    const ParticleHypothesis) const override final
+  {
+    ATH_MSG_ERROR("Call to non-implemented multiStatePropagate");
+    return {};
+  }
+  virtual Trk::ExtrapolationCode propagate(
+    const EventContext&,
+    Trk::ExCellCharged&,
+    Trk::TargetSurfaces&,
+    Trk::TargetSurfaceVector&) const override final
+  {
+    return Trk::ExtrapolationCode::FailureConfiguration;
+  }
+
   /////////////////////////////////////////////////////////////////////////////////
   // Private methods:
   /////////////////////////////////////////////////////////////////////////////////
@@ -326,14 +355,16 @@ public:
   {
     bool m_energyLoss{ true };
     bool m_detailedElossFlag{ true };
-    bool m_straggling {true};
+    bool m_straggling{ true };
     bool m_solenoid{ false };
-    bool m_matPropOK{ true }; //!< Switch for turning off material effects temporarily
+    bool m_matPropOK{
+      true
+    }; //!< Switch for turning off material effects temporarily
     bool m_brem{ false };
-    bool m_includeBgradients{true};
-    bool m_includeGgradient{false};
-    bool m_MPV{false};
-    bool m_multipleScattering{true};
+    bool m_includeBgradients{ true };
+    bool m_includeGgradient{ false };
+    bool m_MPV{ false };
+    bool m_multipleScattering{ true };
     int m_propagateWithPathLimit{};
     size_t m_currentLayerBin{};
     double m_matupd_lastmom{};
@@ -353,12 +384,12 @@ public:
     double m_particleMass{ 0 }; //!< cache
     double m_charge{};
     double m_combinedThickness{};
-    double m_tolerance{1e-05};
-    double m_momentumCutOff{50.};
-    double m_scatteringScale{1.};
-    double m_maxPath{100000.};
-    double m_maxSteps {10000};
-    double m_layXmax{1.};
+    double m_tolerance{ 1e-05 };
+    double m_momentumCutOff{ 50. };
+    double m_scatteringScale{ 1. };
+    double m_maxPath{ 100000. };
+    double m_maxSteps{ 10000 };
+    double m_layXmax{ 1. };
     // secondary interactions
     double m_timeIn{};
     double m_bremMom{ 0. };
@@ -368,10 +399,13 @@ public:
 
     const Trk::BinnedMaterial* m_binMat{ nullptr };
     //!< cache of TrackStateOnSurfaces
-    std::vector<const Trk::TrackStateOnSurface*>* m_matstates{ nullptr }; //!< cache of TrackStateOnSurfaces
+    std::vector<const Trk::TrackStateOnSurface*>* m_matstates{
+      nullptr
+    }; //!< cache of TrackStateOnSurfaces
 
     //!< cache of intersections
-    std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>* m_identifiedParameters{ nullptr };
+    std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>*
+      m_identifiedParameters{ nullptr };
 
     //!< cache of intersections/hit info
     std::vector<Trk::HitInfo>* m_hitVector{ nullptr };
@@ -383,18 +417,21 @@ public:
     Trk::ExtrapolationCache* m_extrapolationCache{ nullptr };
     // cache for combined covariance matrix contribution
     AmgSymMatrix(5) m_combinedCovariance;
-    // cache for differential covariance matrix contribution ( partial material dump )
+    // cache for differential covariance matrix contribution ( partial material
+    // dump )
     AmgSymMatrix(5) m_covariance;
     Trk::EnergyLoss m_combinedEloss;
     std::vector<std::pair<int, std::pair<double, double>>> m_currentDist;
     MagField::AtlasFieldCache m_fieldCache;
+    CLHEP::HepRandomEngine* m_randomEngine { nullptr };
+    const EventContext& m_ctx;
 
-    Cache() { m_currentDist.reserve(100); }
+    Cache (const EventContext& ctx) : m_ctx (ctx) { m_currentDist.reserve(100); }
   };
 
 private:
-  ///initialize cache with the variables we need to take from
-  //the configured properties.
+  /// initialize cache with the variables we need to take from
+  // the configured properties.
   void setCacheFromProperties(Cache& cache) const
   {
     cache.m_includeBgradients = m_includeBgradients;
@@ -482,9 +519,9 @@ private:
   /** secondary interactions (brem photon emission)*/
   ToolHandle<ITimedMatEffUpdator> m_simMatUpdator;
   /** Random Generator service */
-  ServiceHandle<IAtRndmGenSvc> m_rndGenSvc;
+  ServiceHandle<IAthRNGSvc> m_rndGenSvc;
   /** Random engine */
-  CLHEP::HepRandomEngine* m_randomEngine;
+  ATHRNG::RNGWrapper*                   m_rngWrapper;
   std::string m_randomEngineName;
 
   // Read handle for conditions object to get the field cache
@@ -495,8 +532,10 @@ private:
     "Name of the Magnetic Field conditions object key"
   };
   void getFieldCacheObject(Cache& cache, const EventContext& ctx) const;
+
+  CLHEP::HepRandomEngine* getRandomEngine (const EventContext& ctx) const;
 };
 
-}//end of namespace Trk
+} // end of namespace Trk
 
 #endif // STEP_Propagator_H

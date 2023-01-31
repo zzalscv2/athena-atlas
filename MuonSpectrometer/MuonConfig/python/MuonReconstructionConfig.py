@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Core configuration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -69,11 +69,12 @@ def StandaloneMuonOutputCfg(flags):
     esd_items = []
     esd_items += aod_items
 
-    # PRDs
+    # PRDs et al
     if flags.Detector.EnableMM:
         esd_items += ["Muon::MMPrepDataContainer#MM_Measurements"]
     if flags.Detector.EnablesTGC:
         esd_items += ["Muon::sTgcPrepDataContainer#STGC_Measurements"]
+        esd_items += ["Muon::NSW_PadTriggerDataContainer#NSW_PadTrigger_RDO"]
     if flags.Detector.EnableCSC:
         esd_items += ["Muon::CscPrepDataContainer#CSC_Clusters"]
         esd_items += ["Muon::CscStripPrepDataContainer#CSC_Measurements"]
@@ -85,6 +86,7 @@ def StandaloneMuonOutputCfg(flags):
     esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollection"]
     esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionPriorBC"]
     esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionNextBC"]
+    esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionNextNextBC"]
     esd_items += ["Muon::RpcCoinDataContainer#RPC_triggerHits"]
     esd_items += ["RpcSectorLogicContainer#RPC_SECTORLOGIC"]
 
@@ -160,6 +162,18 @@ def MuonReconstructionCfg(flags):
     # FIXME - this is copied from the old configuration, but I'm not sure it really belongs here. 
     # It's probably better to have as part of TrackBuilding, or Segment building...
     if flags.Input.isMC:
+        # filter TrackRecordCollection (true particles in muon spectrometer)
+        if "MuonEntryLayerFilter" not in flags.Input.Collections:
+            result.addEventAlgo( CompFactory.TrackRecordFilter())
+        if "MuonExitLayerFilter" not in flags.Input.Collections:
+            result.addEventAlgo( CompFactory.TrackRecordFilter("TrackRecordFilterMuonExitLayer",
+                                         inputName="MuonExitLayer",
+                                         outputName="MuonExitLayerFilter"))
+
+        # Segment truth association decorations
+        result.addEventAlgo( CompFactory.Muon.MuonSegmentTruthAssociationAlg("MuonSegmentTruthAssociationAlg"))
+
+        # Now tracks
         track_cols = ["MuonSpectrometerTracks"]
         track_colstp = ["MuonSpectrometerTrackParticles"]
         if flags.Muon.runCommissioningChain:
@@ -215,11 +229,11 @@ if __name__ == "__main__":
     from MuonConfig.MuonConfigUtils import SetupMuonStandaloneArguments, SetupMuonStandaloneConfigFlags, SetupMuonStandaloneCA
 
     args = SetupMuonStandaloneArguments()
-    ConfigFlags = SetupMuonStandaloneConfigFlags(args)
-    cfg = SetupMuonStandaloneCA(args, ConfigFlags)
+    flags = SetupMuonStandaloneConfigFlags(args)
+    cfg = SetupMuonStandaloneCA(args, flags)
 
     # Run the actual test.
-    acc = MuonReconstructionCfg(ConfigFlags)
+    acc = MuonReconstructionCfg(flags)
     cfg.merge(acc)
 
     if args.threads > 1 and args.forceclone:

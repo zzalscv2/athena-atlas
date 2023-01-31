@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArMinBiasAlg.h"
@@ -34,9 +34,7 @@
   
   //__________________________________________________________________________
   //Destructor
-  LArMinBiasAlg::~LArMinBiasAlg()
-  {
-  }
+  LArMinBiasAlg::~LArMinBiasAlg() = default;
   //__________________________________________________________________________
   StatusCode LArMinBiasAlg::initialize()
   {
@@ -225,10 +223,8 @@
     {
       const LArHitContainer* hit_container ;
       ATH_CHECK(evtStore()->retrieve(hit_container,HitContainer[iHitContainer]));
-      int ihit = 0;
       for (const LArHit* hit : *hit_container)
       {       
-          ihit++; 
           Identifier cellID=hit->cellID();
           double energy = hit->energy(); 
           double time =hit->time();

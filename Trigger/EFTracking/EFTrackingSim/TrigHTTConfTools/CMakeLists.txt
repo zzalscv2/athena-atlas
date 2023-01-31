@@ -12,7 +12,7 @@ atlas_add_library( TrigHTTConfToolsLib
    PUBLIC_HEADERS TrigHTTConfTools
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib
-   LINK_LIBRARIES AthenaBaseComps GaudiKernel TrigHTTObjectsLib )
+   LINK_LIBRARIES AthenaBaseComps AtlasHepMCLib GaudiKernel TrigHTTObjectsLib )
 
 atlas_add_component( TrigHTTConfTools
    src/components/*.cxx
@@ -30,4 +30,8 @@ atlas_add_test( HTTRegionSlices_test
 
 atlas_add_test( HTTEventSelectionSvc_test
                 SCRIPT python -m TrigHTTConfTools.HTTConfigCompInit
+                POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( HTTConfigFlags_test
+                SCRIPT python -m TrigHTTConfTools.HTTConfigFlags
                 POST_EXEC_SCRIPT noerror.sh )

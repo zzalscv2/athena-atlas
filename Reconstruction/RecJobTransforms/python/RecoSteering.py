@@ -38,12 +38,18 @@ def RecoSteering(flags):
             acc.merge(EventInfoCnvAlgCfg(flags))
         log.info("---------- Configured POOL reading")
 
-    # AOD2xAOD Truth conversion
     acc.flagPerfmonDomain('Truth')
     if flags.Input.isMC:
+        # AOD2xAOD Truth conversion
         from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
         acc.merge(GEN_AOD2xAODCfg(flags))
         log.info("---------- Configured AODtoxAOD Truth Conversion")
+
+        # We always want to write pileup truth jets to AOD, irrespective of whether we write jets to AOD in general
+        # This is because we cannot rebuild jets from pileup truth particles from the AOD
+        from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg
+        acc.merge(addTruthPileupJetsToOutputCfg(flags))
+        log.info("---------- Configured Truth pileup jet writing")
 
     # trigger
     acc.flagPerfmonDomain('Trigger')
@@ -115,7 +121,18 @@ def RecoSteering(flags):
     if flags.Reco.EnableTrackCellAssociation:
         from TrackParticleAssociationAlgs.TrackParticleAssociationAlgsConfig import (
             TrackParticleCellAssociationAlgCfg)
-        acc.merge(TrackParticleCellAssociationAlgCfg(flags))
+        acc.merge(TrackParticleCellAssociationAlgCfg(flags, PtCut=10000))
+
+        from AthenaConfiguration.Enums import LHCPeriod
+        if (flags.InDet.Tracking.storeSeparateLargeD0Container if
+            flags.GeoModel.Run<=LHCPeriod.Run3 else
+            flags.ITk.Tracking.storeSeparateLargeD0Container) and \
+            (flags.InDet.Tracking.doR3LargeD0 if
+            flags.GeoModel.Run<=LHCPeriod.Run3 else
+            flags.ITk.Tracking.doLargeD0):
+            from TrackParticleAssociationAlgs.TrackParticleAssociationAlgsConfig import (
+                LargeD0TrackParticleCellAssociationAlgCfg)
+            acc.merge(LargeD0TrackParticleCellAssociationAlgCfg(flags, PtCut=10000))
         log.info("---------- Configured track particle-cell association")
 
     # PFlow
@@ -147,7 +164,7 @@ def RecoSteering(flags):
     # btagging
     acc.flagPerfmonDomain('FTag')
     if flags.Reco.EnableBTagging:
-        from BTagging.BTagRun3Config import BTagRecoSplitCfg
+        from BTagging.BTagConfig import BTagRecoSplitCfg
         acc.merge(BTagRecoSplitCfg(flags))
         log.info("---------- Configured btagging")
 
@@ -190,6 +207,13 @@ def RecoSteering(flags):
         from ForwardRec.AFPRecConfig import AFPRecCfg
         acc.merge(AFPRecCfg(flags))
         log.info("---------- Configured AFP reconstruction")
+
+    #Lucid
+    acc.flagPerfmonDomain('Lucid')
+    if flags.Detector.EnableLucid:
+        from ForwardRec.LucidRecConfig import LucidRecCfg
+        acc.merge(LucidRecCfg(flags))
+        log.info("---------- Configured Lucid reconstruction")
 
     # ZDC under construction but disabled as per APR-90
     #acc.flagPerfmonDomain('ZDC')

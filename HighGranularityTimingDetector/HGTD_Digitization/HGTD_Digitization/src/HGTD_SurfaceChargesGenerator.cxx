@@ -120,10 +120,10 @@ void HGTD_SurfaceChargesGenerator::createSurfaceChargesFromHit(
 
   if (m_smear_meantime) {
     // Smearing based on radius and luminosity, and substract the time shift
-    // due to pulse leading edge (0.4 ns)
+    // due to pulse leading edge (0.408 ns)
     time_of_flight = m_hgtd_timing_resolution_tool->calculateTime(
                          time_of_flight, tot_eloss, element_r, rndm_engine) -
-                     0.4;
+                     0.408;
   }
   ATH_MSG_DEBUG(">>>>>>> after processing, t: " << time_of_flight);
 

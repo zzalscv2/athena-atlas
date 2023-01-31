@@ -249,7 +249,7 @@ void HepMCWeightSvc::WeightInfo::fillVec()
     sorted.emplace_back (i);
   }
   std::sort (sorted.begin(), sorted.end(),
-             [](const WPair& a, const WPair& b) {return a.second > b.second; });
+             [](const WPair& a, const WPair& b) {return a.second < b.second; });
   for (auto& a: sorted) {
     m_weightNameVec.emplace_back (std::move (a.first));
   }

@@ -62,8 +62,6 @@ class AtlasTrackSummaryTool( Trk__TrackSummaryTool ):
         AtlasTrackSummaryHelperTool = InDet__InDetTrackSummaryHelperTool(
             name           = "AtlasTrackSummaryHelperTool",
             HoleSearch     = AtlasHoleSearchTool,
-            AssoTool       = AtlasPrdAssociationTool,
-            DoSharedHits   = False,
             useTRT         = DetFlags.haveRIO.TRT_on()
         )
 
@@ -79,6 +77,5 @@ class AtlasTrackSummaryTool( Trk__TrackSummaryTool ):
         Trk__TrackSummaryTool.__init__(self, name = name,
                                              InDetSummaryHelperTool = AtlasTrackSummaryHelperTool,
                                              doHolesOnTrack    = True,
-                                             doSharedHits      = AtlasTrackSummaryHelperTool.DoSharedHits
                                       )
 

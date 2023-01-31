@@ -76,7 +76,7 @@ public:
                                           const ServiceHandle<ITRT_StrawNeighbourSvc>& m_TRTStrawNeighbourSvc,
                                           CLHEP::HepRandomEngine* noiseRndmEngine);
 
-  void sortDigits(std::vector<TRTDigit>& digitVect);
+  static void sortDigits(std::vector<TRTDigit>& digitVect);
 
   ~TRTNoise();
 
@@ -157,7 +157,7 @@ private:
    * @param min_x:     lowest tabulated @a x value
    * @param max_x:     highest tabulated @a x value
    */
-  float useLookupTable(const float& x,
+  static float useLookupTable(const float& x,
                        const std::vector<float>& y_given_x,
                        const float & min_x,
                        const float & max_x);
@@ -173,7 +173,7 @@ private:
    * @param min_y:     lower @a y value  (output)
    * @param max_y:     higher @a y value (output)
    */
-  void makeInvertedLookupTable( const std::vector<float>& y_given_x,
+  static void makeInvertedLookupTable( const std::vector<float>& y_given_x,
                                 const float & min_x,
                                 const float & max_x,
                                 std::vector<float>& x_given_y,
@@ -196,7 +196,7 @@ private:
    * @param new_max_lt2na: higher LT/NA value after smearing (output)
    * @param number_new_bins: LUT is expanded to this number of bins (input)
    */
-  void evolve_LT2AmpVsNL_to_include_LTfluct( std::vector<float>& nl_given_lt2na,
+  static void evolve_LT2AmpVsNL_to_include_LTfluct( std::vector<float>& nl_given_lt2na,
                                              const float & min_lt2na,
                                              const float & max_lt2na,
                                              const float relativeLTFluct,

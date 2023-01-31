@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: GenObjectsFilterTool.h 465784 2011-11-01 17:16:56Z aad $
@@ -92,7 +92,6 @@ private:
   int m_bcHadronsDescendantsBarcodeCut;
   double m_bcHadronsDescendantsEtaCut;
   std::vector<int> m_keepParticleWithPdgId;
-  int m_keepFirstParticles; /// number of particles to keep starting from the begining
   bool m_keepLeptonicWZBosons; /// W/Z bosons decaying leptonically
   bool m_keepLeptonicWZBosonDecayChains; /// Descendants of W/Z bosons decaying leptonically; no G4
   bool m_keepLeptonicWZBosonsParents;  /// direct parents fo W/Z bosons

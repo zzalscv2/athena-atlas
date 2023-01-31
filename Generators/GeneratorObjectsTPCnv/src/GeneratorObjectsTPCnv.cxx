@@ -68,9 +68,9 @@ DECLARE_TPCNV_FACTORY(McEventCollectionCnv_p4,
 DECLARE_TPCNV_FACTORY(McEventCollectionCnv_p5,
                       McEventCollection,
                       McEventCollection_p5,
-                      Athena::TPCnvVers::Current)
+                      Athena::TPCnvVers::Old)
 
 DECLARE_TPCNV_FACTORY(McEventCollectionCnv_p6,
                       McEventCollection,
                       McEventCollection_p6,
-                      Athena::TPCnvVers::Old)
+                      Athena::TPCnvVers::Current)

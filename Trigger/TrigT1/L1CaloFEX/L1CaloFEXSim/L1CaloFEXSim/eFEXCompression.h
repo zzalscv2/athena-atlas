@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           eFEXCompression.h  -  description
@@ -49,9 +49,9 @@ public:
  
 private: 
   /** Maximum ET value that can be encoded */
-  static const int s_maxET = 1019200;
+  static const int s_maxET = 144800;
   /** Number of ranges */
-  static const unsigned int s_nRanges = 6;
+  static const unsigned int s_nRanges = 4;
   /** Step sizes in each range, MeV */
   static const int s_steps[s_nRanges];
   /** Minimum ET values in each range, MeV */
@@ -79,11 +79,11 @@ private:
   /** Error return value */
   static const int s_error = -999;
   /** Noise Cuts per layer **/
-  static const unsigned int m_noisecutPS = 36; // corresponds to 100 MeV
-  static const unsigned int m_noisecutL1 = 36;
-  static const unsigned int m_noisecutL2 = 36;
-  static const unsigned int m_noisecutL3 = 36;
-  static const unsigned int m_noisecutHad = 36;
+  static const unsigned int m_noisecutPS = 64; // corresponds to 800 MeV
+  static const unsigned int m_noisecutL1 = 48; // 400 MeV
+  static const unsigned int m_noisecutL2 = 48;
+  static const unsigned int m_noisecutL3 = 48;
+  static const unsigned int m_noisecutHad = 48; // should only be applied for HEC
 };
 
 

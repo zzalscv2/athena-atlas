@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 '''@file TileTMDBRawChannelMonitorAlgorithm.py
 @author
@@ -164,28 +164,28 @@ if __name__=='__main__':
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
-    ConfigFlags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q431/22.0/v1/myESD.pool.root']
-    ConfigFlags.Output.HISTFileName = 'TileTMDBRawChannelMonitorOutput.root'
-    ConfigFlags.DQ.useTrigger = False
-    ConfigFlags.DQ.enableLumiAccess = False
-    ConfigFlags.Exec.MaxEvents = 3
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q431/22.0/v1/myESD.pool.root']
+    flags.Output.HISTFileName = 'TileTMDBRawChannelMonitorOutput.root'
+    flags.DQ.useTrigger = False
+    flags.DQ.enableLumiAccess = False
+    flags.Exec.MaxEvents = 3
+    flags.fillFromArgs()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg.merge(PoolReadCfg(flags))
 
-    cfg.merge( TileTMDBRawChannelMonitoringConfig(ConfigFlags, MuRcvRawChCnt = "MuRcvRawChCnt", FillEfficiencyHistograms = True) )
-    cfg.merge( TileTMDBRawChannelMonitoringConfig(ConfigFlags, MuRcvRawChCnt = "TileMuRcvRawChannelOpt2") )
+    cfg.merge( TileTMDBRawChannelMonitoringConfig(flags, MuRcvRawChCnt = "MuRcvRawChCnt", FillEfficiencyHistograms = True) )
+    cfg.merge( TileTMDBRawChannelMonitoringConfig(flags, MuRcvRawChCnt = "TileMuRcvRawChannelOpt2") )
 
     cfg.printConfig(withDetails = True, summariseProps = True)
-    ConfigFlags.dump()
+    flags.dump()
 
     cfg.store( open('TileTMDBRawChannelMonitorAlgorithm.pkl','wb') )
 

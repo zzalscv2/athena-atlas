@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -52,8 +52,7 @@ def LArPileUpAutoCorrCfg(flags):
     result.merge(LArElecCalibDbCfg(flags,requiredConditions))
     result.addCondAlgo(CompFactory.LArADC2MeVCondAlg(UseFEBGainTresholds=False))
     theLArAutoCorrTotalCondAlg=CompFactory.LArAutoCorrTotalCondAlg()
-    theLArAutoCorrTotalCondAlg.Nminbias=nColl
-    theLArAutoCorrTotalCondAlg.Nsamples=flags.LArCalib.OFC.Nsamples
+    theLArAutoCorrTotalCondAlg.Nsamples=5 #Hardcoded ... 
     from AthenaCommon.SystemOfUnits import ns
     theLArAutoCorrTotalCondAlg.deltaBunch=int(flags.Beam.BunchSpacing/( 25.*ns)+0.5)
     theLArAutoCorrTotalCondAlg.isSuperCell=flags.LArCalib.isSC
@@ -62,13 +61,14 @@ def LArPileUpAutoCorrCfg(flags):
     theLArAutoCorrTotalCondAlg.LArAutoCorrTotalObjKey="LArPhysAutoCorr"  
     result.addCondAlgo(theLArAutoCorrTotalCondAlg)
     
-    result.addEventAlgo(CompFactory.LArAutoCorrAlgToDB(NMinbias=nColl))
+    result.addEventAlgo(CompFactory.LArAutoCorrAlgToDB(GroupingType=flags.LArCalib.GroupingType,
+                                                       NMinbias=nColl))
 
     
     #Ntuple writing
     rootfile=flags.LArCalib.Output.ROOTFile
     if rootfile != "":
-        result.addEventAlgo(CompFactory.LArAutoCorr2Ntuple(ContainerKey="LArPhysAutoCorr"))
+        result.addEventAlgo(CompFactory.LArAutoCorr2Ntuple(ContainerKey="LArPhysAutoCorr",OffId=True))
         import os
         if os.path.exists(rootfile):
             os.remove(rootfile)
@@ -100,6 +100,10 @@ def LArPileUpAutoCorrCfg(flags):
                                     InitialTimeStamp  = 0,
                                     TimeStampInterval = 1))
 
+
+    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+    result.merge(PerfMonMTSvcCfg(flags))
+
     return result
 
 
@@ -108,7 +112,8 @@ def LArPileUpAutoCorrCfg(flags):
 if __name__ == "__main__":
 
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    ConfigFlags=initConfigFlags()
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
     addLArCalibFlags(ConfigFlags)
 
@@ -125,6 +130,8 @@ if __name__ == "__main__":
     #ConfigFlags.Exec.OutputLevel=1
     ConfigFlags.LArCalib.OFC.Ncoll=20
     ConfigFlags.LArCalib.OFC.Nsamples=5
+
+    ConfigFlags.fillFromArgs()
     ConfigFlags.lock()
 
     cfg=MainServicesCfg(ConfigFlags)

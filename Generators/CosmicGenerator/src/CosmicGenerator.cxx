@@ -61,6 +61,7 @@
 #include "CLHEP/Geometry/Normal3D.h"
 #include "CLHEP/Units/PhysicalConstants.h"
 #include "CLHEP/Random/RandFlat.h"
+#include "AthenaKernel/RNGWrapper.h"
 
 #include <limits>
 #include <cmath>
@@ -69,12 +70,10 @@
 #include <fstream>
 
 
-// Pointer On AtRndmGenSvc
-IAtRndmGenSvc*         CosmicGenerator::p_AtRndmGenSvc = 0;
+CLHEP::HepRandomEngine* CosmicGenerator::COSMIC_RANDOM_ENGINE{};
 extern "C" float cosmicrndm_(int* /*dummy*/)
 {
-  CLHEP::HepRandomEngine* engine = CosmicGenerator::p_AtRndmGenSvc->GetEngine("COSMICS");
-  return CLHEP::RandFlat::shoot(engine);
+  return CLHEP::RandFlat::shoot(CosmicGenerator::COSMIC_RANDOM_ENGINE);
 }
 
 //--------------------------------------------------------------------------
@@ -83,68 +82,7 @@ CosmicGenerator::CosmicGenerator(const std::string& name,
   : GenModule(name,pSvcLocator)
 //--------------------------------------------------------------------------
 {
-  //
-  // Migration to MeV and mm units: all conversions are done in this interface
-  // to the CosmicGun. The CosmicGun itself uses GeV units internally - to call
-  // the fortran code.
-  //
-
-  m_GeV = 1000;
-  m_mm  = 10;
-  m_readfile = false;
-
-  m_events = 0;
-  m_rejected = 0;
-  m_accepted = 0;
-  m_selection = 0;
-
-  declareProperty("eventfile",  m_infile = "NONE" );
-  declareProperty("emin",       m_emin =10.*m_GeV );
-  declareProperty("emax",       m_emax =100*m_GeV );
-  declareProperty("xvert_low",  m_xlow =0. *m_mm);
-  declareProperty("xvert_hig",  m_xhig =10.*m_mm );
-  declareProperty("zvert_low",  m_zlow =0. *m_mm);
-  declareProperty("zvert_hig",  m_zhig =10.*m_mm );
-  declareProperty("yvert_val",  m_yval = 81*m_mm );
-  declareProperty("tmin",       m_tmin =0. );
-  declareProperty("tmax",       m_tmax =0. );
-
-  declareProperty("IPx",  m_IPx =0. );
-  declareProperty("IPy",  m_IPy =0. );
-  declareProperty("IPz",  m_IPz =0. );
-  declareProperty("Radius",  m_radius =0. );
-  declareProperty("ExzCut",  m_exzCut = false );
-  declareProperty("OptimizeForCavern",  m_cavOpt = false );
-  declareProperty("OptimizeForSR1", m_srOneOpt = 0);
-  declareProperty("OptimizeForSR1PixelEndCap", m_srOnePixECOpt = false);
-  declareProperty("SwapYZAxis", m_swapYZAxis = false);
-  declareProperty("OptimizeForMuonEndCap", m_muonECOpt = false);
-  declareProperty("ctcut",      m_ctcut =0.35 );
-  declareProperty("PrintEvent", m_printEvent=10);
-  declareProperty("PrintMod",   m_printMod=100);
-  declareProperty("RMax",       m_rmax = 10000000. );
-  declareProperty("ThetaMin", m_thetamin = 0.);
-  declareProperty("ThetaMax", m_thetamax = 1.);
-  declareProperty("PhiMin", m_phimin = -1*M_PI);
-  declareProperty("PhiMax", m_phimax = M_PI);
-  declareProperty("Zposition", m_zpos = 14500);
-
-  // Job options for new optimzation options (November 2007)
-  declareProperty("doPathLengthCut",m_doPathlengthCut = false);
-  declareProperty("doAimedAtPixelsCut",m_doAimedAtPixelsCut = false);
-  declareProperty("doReweighting",m_doReweighting = false);
-  declareProperty("energyCutThreshold",m_energyCutThreshold = 1.0);
-  declareProperty("ysurface",m_ysurface = 81*m_mm);
-  declareProperty("rvert_max",m_rvertmax = 300*m_mm);   // replaces rectangle in case of reweighting
-  declareProperty("pixelplane_maxx",m_pixelplanemaxx = 1150);
-  declareProperty("pixelplane_maxz",m_pixelplanemaxz = 1650);
-
 }
-
-//--------------------------------------------------------------------------
- CosmicGenerator::~CosmicGenerator()
-//--------------------------------------------------------------------------
-{}
 
 //---------------------------------------------------------------------------
 StatusCode CosmicGenerator::genInitialize() {
@@ -157,38 +95,33 @@ StatusCode CosmicGenerator::genInitialize() {
   m_accepted=0;
   m_rejected=0;
 
-  if(m_infile=="NONE")
+  if(m_infile.value()=="NONE") {
+    COSMIC_RANDOM_ENGINE = getRandomEngineDuringInitialize("COSMICS", m_randomSeed, m_dsid); // NOT THREAD-SAFE
+    CosmicGun* gun = CosmicGun::GetCosmicGun();
 
-    {
-      // Get the random number service
-      CosmicGenerator::p_AtRndmGenSvc = &(GenModule::atRndmGenSvc());
-      CosmicGun* gun = CosmicGun::GetCosmicGun();
+    gun->SetEnergyRange(m_emin/m_GeV,m_emax/m_GeV);
+    gun->SetCosCut(m_ctcut);
+    gun->PrintLevel(m_printEvent, m_printMod);
+    float flux_withCT = gun->InitializeGenerator();
 
-      gun->SetEnergyRange(m_emin/m_GeV,m_emax/m_GeV);
-      gun->SetCosCut(m_ctcut);
-      gun->PrintLevel(m_printEvent, m_printMod);
-      float flux_withCT = gun->InitializeGenerator();
-
-      ATH_MSG_INFO( "Initialisation cosmic gun done." );
-      ATH_MSG_INFO( "Accepted diff  flux after E and cos(theta) cuts = " << flux_withCT << " /cm^2/s" );
-      if (! m_doReweighting) {
-        // The following is only correct w/o reweighting
+    ATH_MSG_INFO( "Initialisation cosmic gun done." );
+    ATH_MSG_INFO( "Accepted diff  flux after E and cos(theta) cuts = " << flux_withCT << " /cm^2/s" );
+    if (! m_doReweighting) {
+      // The following is only correct w/o reweighting
         ATH_MSG_INFO( "Accepted total flux after E and cos(theta) cuts = " <<
-          flux_withCT*(m_xhig-m_xlow)/m_mm*(m_zhig-m_zlow)/m_mm << " /s" );
-      }
+                      flux_withCT*(m_xhig-m_xlow)/m_mm*(m_zhig-m_zlow)/m_mm << " /s" );
+    }
 
+  }
+  else {
+    ATH_MSG_INFO( "Cosmics are read from file " << m_infile );
+    m_ffile.open(m_infile.value().c_str());
+    if(!m_ffile) {
+      ATH_MSG_FATAL( "Could not open input file - stop! " );
+      return StatusCode::FAILURE;
     }
-  else
-    {
-      ATH_MSG_INFO( "Cosmics are read from file " << m_infile );
-      m_ffile.open(m_infile.c_str());
-      if(!m_ffile)
-        {
-          ATH_MSG_FATAL( "Could not open input file - stop! " );
-          return StatusCode::FAILURE;
-        }
-      m_readfile = true;
-    }
+    m_readfile = true;
+  }
 
   m_center=CLHEP::Hep3Vector(m_IPx, m_IPy, m_IPz);
 
@@ -200,7 +133,7 @@ CLHEP::HepLorentzVector CosmicGenerator::generateVertex(void) {
 
   // Get the pointer to the engine of the stream named SINGLE. If the
   // stream does not exist is created automaticaly
-  CLHEP::HepRandomEngine* engine = CosmicGenerator::p_AtRndmGenSvc->GetEngine("COSMICS");
+  CLHEP::HepRandomEngine* engine = COSMIC_RANDOM_ENGINE;
 
   // Generate a random number according to the distribution.
 
@@ -212,7 +145,7 @@ CLHEP::HepLorentzVector CosmicGenerator::generateVertex(void) {
   if(m_tmin < m_tmax){
     t_val = CLHEP::RandFlat::shoot(engine, m_tmin, m_tmax);
   }
-  else if(m_tmin == m_tmax){
+  else if(m_tmin.value() == m_tmax.value()){
     t_val = m_tmin;
   }
   else ATH_MSG_FATAL("You specified m_tmin = " << m_tmin << " and m_tmax " << m_tmax);
@@ -226,7 +159,7 @@ CLHEP::HepLorentzVector CosmicGenerator::generateVertexReweighted(void) {
 
   // Get the pointer to the engine of the stream named SINGLE. If the
   // stream does not exist is created automaticaly
-  CLHEP::HepRandomEngine* engine = CosmicGenerator::p_AtRndmGenSvc->GetEngine("COSMICS");
+  CLHEP::HepRandomEngine* engine = COSMIC_RANDOM_ENGINE;
 
   // Generate non-uniform distribution of vertices to reflect azimuthal
   // angle subtended by the sphere of radiusm m_radius
@@ -267,7 +200,7 @@ CLHEP::HepLorentzVector CosmicGenerator::generateVertexReweighted(void) {
   if(m_tmin < m_tmax){
     t_val = CLHEP::RandFlat::shoot(engine, m_tmin, m_tmax);
   }
-  else if(m_tmin == m_tmax){
+  else if(m_tmin.value() == m_tmax.value()){
     t_val = m_tmin;
   }
   else ATH_MSG_FATAL( " You specified m_tmin = " << m_tmin << " and m_tmax " << m_tmax );
@@ -284,7 +217,13 @@ StatusCode CosmicGenerator::callGenerator() {
   ++m_events;
   ATH_MSG_DEBUG( "Event #" << m_events);
 
-  CLHEP::HepRandomEngine* engine = CosmicGenerator::p_AtRndmGenSvc->GetEngine("COSMICS");
+  assert(COSMIC_RANDOM_ENGINE != 0);
+  //Re-seed the random number stream
+  long seeds[7];
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  ATHRNG::calculateSeedsMC21(seeds, "COSMICS",  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+  COSMIC_RANDOM_ENGINE->setSeeds(seeds, 0); // NOT THREAD-SAFE
+  CLHEP::HepRandomEngine* engine = COSMIC_RANDOM_ENGINE;
 
   // clear up the vectors
   m_fourPos.clear();

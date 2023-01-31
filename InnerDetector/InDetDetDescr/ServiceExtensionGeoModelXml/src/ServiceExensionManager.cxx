@@ -6,9 +6,9 @@
 
 namespace ITk {
 
-ServiceExtensionManager::ServiceExtensionManager() 
+ServiceExtensionManager::ServiceExtensionManager(const std::string & name) 
 {
-  setName("ITkServiceExtension");
+  setName(name);
 }
 
 

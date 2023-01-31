@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file TrackD3PDMaker/src/PerigeeBLPredictionFillerTool.h
  * @author remi zaidan <remi.zaidan@cern.ch>
@@ -42,10 +39,10 @@ public:
 				 const IInterface* parent);
 
   /// Standard Gaudi initialize method.
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
 
   /// Book variables for this block.
-  virtual StatusCode book();
+  virtual StatusCode book() final;
 
   /**
    * @brief Fill one block --- type-safe version.
@@ -55,7 +52,7 @@ public:
    * is responsible for arranging that all the pointers for booked variables
    * are set appropriately upon entry.
    */
-  virtual StatusCode fill (const Trk::Perigee& p);
+  virtual StatusCode fill (const Trk::Perigee& p) override;
 
 private:
 

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: JetObjectCollectionMaker.cxx 809674 2017-08-23 14:10:24Z iconnell $
@@ -52,7 +52,7 @@ namespace top {
     m_jetUncertaintiesToolLargeRPseudoData("JetUncertaintiesToolLargeRPseudoData"),
     m_FFJetSmearingTool("FFJetSmearingTool"),
 
-    m_jetUpdateJvtTool("JetUpdateJvtTool"),
+    m_jetJvtEfficiencyTool("JetJvtEfficiencyTool"),
     m_jetSelectfJvtTool("JetSelectfJvtTool"),
 
     m_jetSubstructure(nullptr),
@@ -80,7 +80,7 @@ namespace top {
     declareProperty("JetUncertaintiesToolLargeRPseudoData", m_jetUncertaintiesToolLargeRPseudoData);
     declareProperty("FFJetSmearingTool", m_FFJetSmearingTool);
 
-    declareProperty("JetUpdateJvtTool", m_jetUpdateJvtTool);
+    declareProperty("JetJvtEfficiencyTool", m_jetJvtEfficiencyTool);
 
     declareProperty("TruthJetCollectionForHSTagging", m_truthJetCollForHS = "AntiKt4TruthDressedWZJets");
   }
@@ -153,8 +153,9 @@ namespace top {
       }
     }
 
+    // Use JetJvtEfficiencyTool to recalculate scores for NNJvt algorithm
+    top::check(m_jetJvtEfficiencyTool.retrieve(), "Failed to retrieve JetJvtEfficiencyTool");
 
-    top::check(m_jetUpdateJvtTool.retrieve(), "Failed to retrieve JetUpdateJvtTool");
     //fJVT tool isn't setup unless requested
     if (m_config->doForwardJVTinMET() || m_config->getfJVTWP() != "None") {
       top::check(m_jetSelectfJvtTool.retrieve(), "Failed to retrieve JetSelectfJvtTool");
@@ -499,11 +500,13 @@ namespace top {
           }
         }
       }
+    }
 
-      ///-- Update JVT --///
-      if (!isLargeR) {
-        jet->auxdecor<float>("AnalysisTop_JVT") = m_jetUpdateJvtTool->updateJvt(*jet);
-      }
+    ///-- Update JVT --///
+    // Recalculate Jvt directly in JetJvtEfficiency tool for NNJvt
+    if (!isLargeR) {
+      top::check(m_jetJvtEfficiencyTool->recalculateScores(*shallow_xaod_copy.first),
+                 "Failed to recalculate JVT scores");
     }
 
     // Check if the derivation we are running on contains
@@ -515,12 +518,14 @@ namespace top {
         if (evtStore()->contains<xAOD::MissingETContainer>("MET_Track")) {
           m_do_fjvt = true;
         } else {
-          ATH_MSG_ERROR(" Cannot retrieve MET_Track, fJVT values can't be calculated correctly!!"); 
-          return StatusCode::FAILURE; 
+          ATH_MSG_ERROR(" Cannot retrieve MET_Track, fJVT values can't be calculated correctly!!");
+          return StatusCode::FAILURE;
         }
         checked_track_MET = true;
       }
     }
+
+    ///-- Update fJVT --///
     if (m_do_fjvt) {
       top::check(!m_jetSelectfJvtTool->modify(*shallow_xaod_copy.first),
                  "Failed to apply fJVT decoration");
@@ -693,33 +698,32 @@ namespace top {
                    "Failed to JMR uncertainties for " + msg_jet_collection);
       }
 
-      ///-- Loop over the xAOD Container --///
-      //FIXME -- update JVT tools to container interface
-      for (auto jet : *(shallow_xaod_copy.first)) {
+      ///-- Update JVT --///
+      if (!isLargeR) {
+        top::check(m_jetJvtEfficiencyTool->recalculateScores(*shallow_xaod_copy.first),
+                   "Failed to recalculate JVT scores");
+      }
 
-        ///-- Apply Corrrection --///
-        ///-- Update JVT --///
-        if (!isLargeR) jet->auxdecor<float>("AnalysisTop_JVT") = m_jetUpdateJvtTool->updateJvt(*jet);
-
-        ///-- Decorate fJVT for systematics too --///
-        // Check if the derivation we are running on contains
-        // MET_Track (once) before applying the fJVT decoration
-        if (!isLargeR && (m_config->doForwardJVTinMET() || m_config->getfJVTWP() != "None")) {
-          static bool checked_track_MET = false;
-          if (!checked_track_MET) {
-            if (evtStore()->contains<xAOD::MissingETContainer>("MET_Track")) {
-              m_do_fjvt = true;
-            } else {
-              ATH_MSG_ERROR(" Cannot retrieve MET_Track, fJVT values can't be calculated correctly!!");
-              return StatusCode::FAILURE;
-            }
-            checked_track_MET = true;
+      ///-- Apply Corrrection --///
+      // Check if the derivation we are running on contains
+      // MET_Track (once) before applying the fJVT decoration
+      if (!isLargeR && (m_config->doForwardJVTinMET() || m_config->getfJVTWP() != "None")) {
+        static bool checked_track_MET = false;
+        if (!checked_track_MET) {
+          if (evtStore()->contains<xAOD::MissingETContainer>("MET_Track")) {
+            m_do_fjvt = true;
+          } else {
+            ATH_MSG_ERROR(" Cannot retrieve MET_Track, fJVT values can't be calculated correctly!!");
+            return StatusCode::FAILURE;
           }
+          checked_track_MET = true;
         }
-        if (m_do_fjvt) {
-          top::check(!m_jetSelectfJvtTool->modify(*shallow_xaod_copy.first),
-                      "Failed to apply fJVT decoration");
-        }
+      }
+
+      ///-- Decorate fJVT for systematics too --///
+      if (m_do_fjvt) {
+        top::check(!m_jetSelectfJvtTool->modify(*shallow_xaod_copy.first),
+                   "Failed to apply fJVT decoration");
       }
 
       ///-- set links to original objects- needed for MET calculation --///

@@ -11,11 +11,6 @@ find_package( Boost COMPONENTS filesystem thread system )
 find_package( ROOT COMPONENTS Core Gpad Tree MathCore Hist RIO pthread )
 find_package( onnxruntime )
 
-atlas_add_library( RingerSelectorToolsEnumsLib
-                   Root/enums/*.cxx
-                   PUBLIC_HEADERS RingerSelectorTools
-                   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils PATCoreAcceptLib )
 
 
 atlas_add_library( RingerSelectorToolsLib
@@ -26,7 +21,7 @@ atlas_add_library( RingerSelectorToolsLib
                    PUBLIC_HEADERS RingerSelectorTools
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
                    LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgTools CxxUtils xAODCaloRings xAODEgamma xAODTracking 
-                   PATCoreLib EgammaAnalysisInterfacesLib RingerSelectorToolsEnumsLib xAODTrigRinger xAODTrigCalo xAODTrigEgamma
+                   PATCoreLib EgammaAnalysisInterfacesLib xAODTrigRinger xAODTrigCalo xAODTrigEgamma
                    PRIVATE_LINK_LIBRARIES xAODBase PathResolver TrkTrackSummary AthOnnxruntimeServiceLib AthenaMonitoringKernelLib)
 
 if( NOT XAOD_STANDALONE )
@@ -37,17 +32,6 @@ if( NOT XAOD_STANDALONE )
 endif()
 
 
-atlas_add_dictionary( RingerSelectorToolsDict
-                      RingerSelectorTools/RingerSelectorToolsDict.h
-                      RingerSelectorTools/selection.xml
-                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${ROOT_LIBRARIES} RingerSelectorToolsLib )
-
-atlas_add_dictionary( RingerSelectorToolsEnumsDict
-                      RingerSelectorTools/RingerSelectorToolsEnumsDict.h
-                      RingerSelectorTools/selection_enums.xml
-                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${ROOT_LIBRARIES} RingerSelectorToolsEnumsLib )
 
 # Install files from the package:
 if( XAOD_STANDALONE )

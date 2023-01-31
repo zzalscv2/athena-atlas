@@ -20,7 +20,7 @@ include( "AtlasGeoModel/SetGeometryVersion.py" )
 include( "AtlasGeoModel/GeoModelInit.py" )
 include( "LArDetDescr/LArDetDescr_joboptions.py" )
 include( "TileIdCnv/TileIdCnv_jobOptions.py" )
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+include( "CaloConditions/CaloConditions_jobOptions.py" )
 
 
 

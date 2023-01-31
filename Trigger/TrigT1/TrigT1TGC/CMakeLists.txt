@@ -11,7 +11,7 @@ atlas_add_library( TrigT1TGCLib
                    src/*.cxx
                    PUBLIC_HEADERS TrigT1TGC
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel GaudiKernel Identifier MuonCondSvcLib MuonDigitContainer MuonRDO StoreGateLib TileEvent TrigT1Interfaces TGCTriggerCondSvcLib xAODMuon
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel ByteStreamData GaudiKernel Identifier MuonCondSvcLib MuonDigitContainer MuonRDO StoreGateLib TileEvent TrigT1Interfaces TGCTriggerCondSvcLib xAODMuon
                    PRIVATE_LINK_LIBRARIES AthenaPoolUtilities MuonCondInterface PathResolver TGCcablingInterfaceLib TrigConfL1Data )
 
 atlas_add_component( TrigT1TGC

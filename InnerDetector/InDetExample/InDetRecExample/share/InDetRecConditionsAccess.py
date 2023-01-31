@@ -158,9 +158,7 @@ if DetFlags.pixel_on():
             conddb.addFolderSplitOnline("PIXEL", "/PIXEL/Onl/PixReco", "/PIXEL/PixReco", className="DetCondCFloat")
 
         from PixelConditionsAlgorithms.PixelConditionsAlgorithmsConf import PixelOfflineCalibCondAlg
-        condSeq += PixelOfflineCalibCondAlg(name="PixelOfflineCalibCondAlg", ReadKey="/PIXEL/PixReco")
-        PixelOfflineCalibCondAlg.InputSource = 2
-        conddb.addFolderSplitOnline("PIXEL", "/PIXEL/Onl/PixReco", "/PIXEL/PixReco", className="DetCondCFloat")
+        condSeq += PixelOfflineCalibCondAlg(name="PixelOfflineCalibCondAlg", ReadKey="/PIXEL/PixReco", InputSource=2)
         
     if not hasattr(ToolSvc, "PixelLorentzAngleTool"):
         from SiLorentzAngleTool.PixelLorentzAngleToolSetup import PixelLorentzAngleToolSetup
@@ -172,15 +170,16 @@ if DetFlags.pixel_on():
 
     if not hasattr(condSeq, 'PixeldEdxAlg'):
         from PixelConditionsAlgorithms.PixelConditionsAlgorithmsConf import PixeldEdxAlg
-        condSeq += PixeldEdxAlg(name="PixeldEdxAlg")
+        dedxAlg = PixeldEdxAlg(name="PixeldEdxAlg")
         if not athenaCommonFlags.isOnline():
-            PixeldEdxAlg.ReadFromCOOL = True
+            dedxAlg.ReadFromCOOL = True
         else:
-            PixeldEdxAlg.ReadFromCOOL = False
+            dedxAlg.ReadFromCOOL = False
             if (globalflags.DataSource=='data'):
-                PixeldEdxAlg.CalibrationFile="dtpar_signed_234.txt"
+                dedxAlg.CalibrationFile="dtpar_signed_234.txt"
             else:
-                PixeldEdxAlg.CalibrationFile="mcpar_signed_234.txt"
+                dedxAlg.CalibrationFile="mcpar_signed_234.txt"
+        condSeq += dedxAlg
 
     ################
     # RUN-1 legacy #

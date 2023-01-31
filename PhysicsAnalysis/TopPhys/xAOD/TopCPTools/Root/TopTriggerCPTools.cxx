@@ -335,8 +335,8 @@ namespace top {
       if (muonQuality != "None") top::check(m_muonTool.setProperty("MuonQuality",
                                                                    muonQuality), "Failed to set MuonQuality");
       top::check(m_muonTool.setProperty("AllowZeroSF", true), "Failed to set AllowZeroSF");
-      if (m_config->muonSFCustomInputFolder() != " ") {
-        top::check(m_muonTool.setProperty("CustomInputFolder", m_config->muonSFCustomInputFolder()), "Failed to set CustomInputFolder property for MuonTriggerScaleFactors tool");
+      if (m_config->muonSFCustomInputFolderTrigger() != " ") {
+        top::check(m_muonTool.setProperty("CustomInputFolder", m_config->muonSFCustomInputFolderTrigger()), "Failed to set CustomInputFolder property for MuonTriggerScaleFactors tool");
       }
       if (m_config->muonForcePeriod() != " ") {
         top::check(m_muonTool.setProperty("forcePeriod", m_config->muonForcePeriod()), "Failed to set forcePeriod property for MuonTriggerScaleFactors tool");
@@ -362,8 +362,8 @@ namespace top {
                                                                              muonQualityLoose),
         "Failed to set MuonQuality");
       top::check(m_muonToolLoose.setProperty("AllowZeroSF", true), "Failed to set AllowZeroSF");
-      if (m_config->muonSFCustomInputFolder() != " ") {
-        top::check(m_muonToolLoose.setProperty("CustomInputFolder", m_config->muonSFCustomInputFolder()), "Failed to set CustomInputFolder property for MuonTriggerScaleFactors loose tool");
+      if (m_config->muonSFCustomInputFolderTrigger() != " ") {
+        top::check(m_muonToolLoose.setProperty("CustomInputFolder", m_config->muonSFCustomInputFolderTrigger()), "Failed to set CustomInputFolder property for MuonTriggerScaleFactors loose tool");
       }
       top::check(m_muonToolLoose.initialize(), "Failed to initialise");
       muonToolsLoose.push_back(m_muonToolLoose.getHandle());

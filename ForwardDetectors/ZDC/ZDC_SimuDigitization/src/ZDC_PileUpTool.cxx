@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -150,7 +150,7 @@ StatusCode ZDC_PileUpTool::processBunchXing(int bunchXing,
                                                  SubEventIterator eSubEvents) {
   ATH_MSG_DEBUG ( "ZDC_PileUpTool::processBunchXing() " << bunchXing );
   SubEventIterator iEvt = bSubEvents;
-  for (; iEvt!=eSubEvents; iEvt++) {
+  for (; iEvt!=eSubEvents; ++iEvt) {
     StoreGateSvc& seStore = *iEvt->ptr()->evtStore();
     //PileUpTimeEventIndex thisEventIndex = PileUpTimeEventIndex(static_cast<int>(iEvt->time()),iEvt->index());
     ATH_MSG_VERBOSE("SubEvt StoreGate " << seStore.name() << " :"
@@ -214,7 +214,7 @@ void ZDC_PileUpTool::fillStripDigitContainer(TimedHitCollection<ZDC_SimStripHit>
   TimedHitCollection<ZDC_SimStripHit>                 thpc = thpczdc;
   TimedHitCollection<ZDC_SimStripHit>::const_iterator i, e, it;
   
-  while (thpc.nextDetectorElement(i, e)) for (it = i; it != e; it++) {
+  while (thpc.nextDetectorElement(i, e)) for (it = i; it != e; ++it) {
     
     int Side     = (*it)->GetSide();
     int ModuleNo = (*it)->GetMod();
@@ -229,7 +229,7 @@ void ZDC_PileUpTool::fillStripDigitContainer(const ZDC_SimStripHit_Collection* Z
   ZDC_SimStripHit_ConstIterator it    = ZDC_SimStripHit_Collection->begin();
   ZDC_SimStripHit_ConstIterator itend = ZDC_SimStripHit_Collection->end();
   
-  for (; it != itend; it++) {
+  for (; it != itend; ++it) {
 
     int Side     = it->GetSide();
     int ModuleNo = it->GetMod();
@@ -346,7 +346,7 @@ void ZDC_PileUpTool::fillPixelDigitContainer(TimedHitCollection<ZDC_SimPixelHit>
   TimedHitCollection<ZDC_SimPixelHit>                 thpc = thpczdc;
   TimedHitCollection<ZDC_SimPixelHit>::const_iterator i, e, it;
   
-  while (thpc.nextDetectorElement(i, e)) for (it = i; it != e; it++) {
+  while (thpc.nextDetectorElement(i, e)) for (it = i; it != e; ++it) {
     
     int Side     = (*it)->GetSide();
     int ModuleNo = (*it)->GetMod() ;
@@ -362,7 +362,7 @@ void ZDC_PileUpTool::fillPixelDigitContainer(const ZDC_SimPixelHit_Collection* Z
   ZDC_SimPixelHit_ConstIterator it    = ZDC_SimPixelHit_Collection->begin();
   ZDC_SimPixelHit_ConstIterator itend = ZDC_SimPixelHit_Collection->end();
 
-  for (; it != itend; it++) {
+  for (; it != itend; ++it) {
 
     int Side     = it->GetSide();
     int ModuleNo = it->GetMod() ;

@@ -614,11 +614,7 @@ namespace Trk {
       GXFTrajectory &,
       const ParticleHypothesis
     ) const;
-
-    std::unique_ptr<TrackStateOnSurface> makeTSOS(
-      GXFTrackState &
-    ) const;
-
+    
     void fillResiduals(
       const EventContext& ctx,
       Cache &,
@@ -867,7 +863,7 @@ namespace Trk {
     std::unique_ptr<TransportJacobian> numericalDerivatives(
       const EventContext& ctx,
       const TrackParameters *,
-      const Surface *,
+      const Surface &,
       PropDirection,
       const MagneticFieldProperties&
     ) const;

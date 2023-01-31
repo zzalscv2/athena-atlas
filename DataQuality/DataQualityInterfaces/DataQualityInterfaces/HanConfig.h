@@ -21,6 +21,9 @@
 #include <boost/shared_ptr.hpp>
 #endif
 
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // standalone application
+
 class TDirectory;
 class TFile;
 class TKey;

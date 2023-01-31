@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L2MuonSAIOMon.h"
@@ -805,7 +805,7 @@ bool L2MuonSAIOMon :: isOverlap( const xAOD::L2CombinedMuon* matchSA_L2IOobject1
   // dR(by L2SA) cut
   bool dRbySAisClose = false;
   const xAOD::L2StandAloneMuon* muSA1 = matchSA_L2IOobject1->muSATrack();
-  const xAOD::L2StandAloneMuon* muSA2 = matchSA_L2IOobject1->muSATrack();
+  const xAOD::L2StandAloneMuon* muSA2 = matchSA_L2IOobject2->muSATrack();
   if( m_RequireDRbySA ) {
     // here, we do not check (eta,phi) of mF is not (0,0)
     // (i.e. we apply muComb based cut even if muFast rec is failed)
@@ -959,7 +959,7 @@ bool L2MuonSAIOMon :: isPassedmuCombHypo( const std::string &chain, const xAOD::
   bool my_pikCuts = true;
   float my_maxPtToApplyPik = 25.;
   float my_chi2MaxID = 3.5;
-  ATH_MSG_INFO( "decision_ptthreshold:   " << decision_ptthreshold( chain, my_EtaBins, my_muCombThres, my_pikCuts, my_maxPtToApplyPik, my_chi2MaxID ) );
+  ATH_MSG_DEBUG( "decision_ptthreshold:   " << decision_ptthreshold( chain, my_EtaBins, my_muCombThres, my_pikCuts, my_maxPtToApplyPik, my_chi2MaxID ) );
 
   bool pikCut = true;
   bool stdCut = true;

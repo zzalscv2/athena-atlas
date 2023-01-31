@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArHVScaleCorr2Ntuple.h"
@@ -43,7 +43,6 @@ StatusCode LArHVScaleCorr2Ntuple::stop() {
      return StatusCode::FAILURE;
  }
 
- unsigned cellCounter=0;
  std::vector<HWIdentifier>::const_iterator itOnId = m_onlineId->channel_begin();
  std::vector<HWIdentifier>::const_iterator itOnIdEnd = m_onlineId->channel_end();
  for(; itOnId!=itOnIdEnd;++itOnId){
@@ -60,7 +59,6 @@ StatusCode LArHVScaleCorr2Ntuple::stop() {
 	 }
        }// end if object exists
      }//end if isConnected
-  cellCounter++;
  }//end loop over online ID
 
  ATH_MSG_INFO( "LArHVScaleCorr2Ntuple has finished." );

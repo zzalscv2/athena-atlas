@@ -421,8 +421,14 @@ StatusCode RpcDigitizationTool::mergeEvent(const EventContext& ctx) {
     m_sdo_tmp_map.clear();
     /////////////////////////
 
-    status = doDigitization(ctx, digitContainer.ptr(), sdoContainer.ptr());
+    Collections_t collections;
+    status = doDigitization(ctx, collections, sdoContainer.ptr());
     if (status.isFailure()) { ATH_MSG_ERROR("doDigitization Failed"); }
+    for (size_t coll_hash = 0; coll_hash < collections.size(); ++coll_hash) {
+      if (collections[coll_hash]) {
+        ATH_CHECK( digitContainer->addCollection (collections[coll_hash].release(), coll_hash) );
+      }
+    }
 
     // Clean-up
     m_RPCHitCollList.clear();
@@ -466,13 +472,20 @@ StatusCode RpcDigitizationTool::processAllSubEvents(const EventContext& ctx) {
         }
     }
 
-    ATH_CHECK(doDigitization(ctx, digitContainer.ptr(), sdoContainer.ptr()));
+    Collections_t collections;
+    ATH_CHECK(doDigitization(ctx, collections, sdoContainer.ptr()));
+    for (size_t coll_hash = 0; coll_hash < collections.size(); ++coll_hash) {
+      if (collections[coll_hash]) {
+        ATH_CHECK( digitContainer->addCollection (collections[coll_hash].release(), coll_hash) );
+      }
+    }
 
     return status;
 }
 
 //--------------------------------------------
-StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx, RpcDigitContainer* digitContainer,
+StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
+                                               Collections_t& collections,
                                                MuonSimDataCollection* sdoContainer) {
     ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this);
     rngWrapper->setSeed(name(), ctx);
@@ -847,8 +860,7 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx, RpcDigit
                 // this is an accepted hit to become digit
                 last_time = (*map_dep_iter).first;
 
-                RpcDigit* newDigit =
-                    new RpcDigit(theId, newDigit_time);  // RpcDigit::time MUST be a double, or we will lose the precision we need
+                auto newDigit = std::make_unique<RpcDigit>(theId, newDigit_time);  // RpcDigit::time MUST be a double, or we will lose the precision we need
                 Identifier elemId = m_idHelper->elementID(theId);
                 RpcDigitCollection* digitCollection = nullptr;
 
@@ -863,26 +875,16 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx, RpcDigit
                 // make new digit
                 ATH_MSG_DEBUG("Digit Id = " << m_idHelper->show_to_string(theId) << " digit time " << newDigit_time);
 
-                // put new collection in storegate
-                RpcDigitCollection* coll = nullptr;
-                ATH_CHECK(digitContainer->naughtyRetrieve(coll_hash, coll));
-                if (!coll) {
-                    digitCollection = new RpcDigitCollection(elemId, coll_hash);
-                    digitCollection->push_back(newDigit);
-                    StatusCode status = digitContainer->addCollection(digitCollection, coll_hash);
-                    if (status.isFailure()) {
-                        ATH_MSG_ERROR("Couldn't record RpcDigitCollection with key=" << coll_hash << " in StoreGate!");
-                        // else
-                        delete digitCollection;
-                        digitCollection = nullptr;
-                        return StatusCode::RECOVERABLE;  // consistent with ERROR message above.
-                    } else {
-                        ATH_MSG_DEBUG("New RpcHitCollection with key=" << coll_hash << " recorded in StoreGate.");
-                    }
-                } else {
-                    digitCollection = coll;
-                    digitCollection->push_back(newDigit);
+                // remember new collection.
+                if (coll_hash >= collections.size()) {
+                  collections.resize (coll_hash+1);
                 }
+                digitCollection = collections[coll_hash].get();
+                if (!digitCollection) {
+                    collections[coll_hash] = std::make_unique<RpcDigitCollection>(elemId, coll_hash);
+                    digitCollection = collections[coll_hash].get();
+                }
+                digitCollection->push_back(std::move(newDigit));
 
                 if (!m_muonOnlySDOs && m_sdoAreOnlyDigits) {
                     // put SDO collection in StoreGate

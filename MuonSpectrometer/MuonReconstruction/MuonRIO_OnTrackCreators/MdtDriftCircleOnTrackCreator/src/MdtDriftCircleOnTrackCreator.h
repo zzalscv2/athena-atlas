@@ -179,7 +179,7 @@ namespace Muon {
       double getTriggerTimeTestbeam() const { return 0.; }
 
       // parametrised error function
-      double parametrisedSigma( double r ) const;
+      static double parametrisedSigma( double r ) ;
       
       double mooreErrorStrategy(const MuonDriftCircleErrorStrategy* myStrategy, double sigmaR, const Identifier& id) const;
       double mooreErrorStrategyMC(const MuonDriftCircleErrorStrategy* myStrategy, double sigmaR, const Identifier& id) const;

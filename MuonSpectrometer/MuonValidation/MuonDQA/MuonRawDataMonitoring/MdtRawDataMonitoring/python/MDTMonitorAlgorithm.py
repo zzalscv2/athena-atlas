@@ -1,5 +1,5 @@
 #
-#Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration                                                                                           
+#Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration                                                                                           
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -835,50 +835,51 @@ def MdtMonitoringConfig(inputFlags):
 if __name__=='__main__':
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.ESD
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.ESD
     
-    #ConfigFlags.Input.isMC = True
-    #ConfigFlags.Common.isOnline = True
-    ConfigFlags.Output.HISTFileName = 'MdtMonitorOutput.root'
-    #ConfigFlags.Output.AODFileName='aod.root'
+    #flags.Input.isMC = True
+    #flags.Common.isOnline = True
+    flags.Output.HISTFileName = 'MdtMonitorOutput.root'
+    #flags.Output.AODFileName='aod.root'
 
-    #ConfigFlags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2018-12"
-    #ConfigFlags.IOVDb.GlobalTag =  "CONDBR2-BLKPA-2018-10" 
-    #ConfigFlags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
-    #ConfigFlags.IOVDb.DatabaseInstance=""
-    #ConfigFlags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01  "
+    #flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2018-12"
+    #flags.IOVDb.GlobalTag =  "CONDBR2-BLKPA-2018-10" 
+    #flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
+    #flags.IOVDb.DatabaseInstance=""
+    #flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01  "
 
-    ConfigFlags.Detector.GeometryMuon = False
-    ConfigFlags.Detector.GeometryCSC = False
-    ConfigFlags.Detector.GeometryRPC = False
-    ConfigFlags.Detector.GeometryTGC = False
-    ConfigFlags.Detector.GeometrysTGC = False
-    ConfigFlags.Detector.GeometryMM = False
+    flags.Detector.GeometryMuon = False
+    flags.Detector.GeometryCSC = False
+    flags.Detector.GeometryRPC = False
+    flags.Detector.GeometryTGC = False
+    flags.Detector.GeometrysTGC = False
+    flags.Detector.GeometryMM = False
 
-    ConfigFlags.Detector.GeometryMDT = True
+    flags.Detector.GeometryMDT = True
 
-    ConfigFlags.Muon.Align.UseILines = False
-    ConfigFlags.Muon.Align.UseALines = False
-    ConfigFlags.Muon.Align.UseBLines = False
+    flags.Muon.Align.UseILines = False
+    flags.Muon.Align.UseALines = False
+    flags.Muon.Align.UseBLines = False
 
-    ConfigFlags.DQ.useTrigger=False
+    flags.DQ.useTrigger=False
 
 
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.lock()
+    flags.dump()
     
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg.merge(PoolReadCfg(flags))
     
 
-    #mdtMonitorAcc,mdtMonitorAlg =  MdtMonitoringConfig(ConfigFlags)
-    mdtMonitorAcc =  MdtMonitoringConfig(ConfigFlags)
+    #mdtMonitorAcc,mdtMonitorAlg =  MdtMonitoringConfig(flags)
+    mdtMonitorAcc =  MdtMonitoringConfig(flags)
     
     #mdtMonitorAcc.OutputLevel=DEBUG
     

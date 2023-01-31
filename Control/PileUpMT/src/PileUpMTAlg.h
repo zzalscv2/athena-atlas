@@ -70,6 +70,7 @@ class PileUpMTAlg : public AthAlgorithm {
           this, "xAODCnvTool", "xAODMaker::EventInfoCnvTool/EventInfoCnvTool",
           "xAOD EventInfo conversion tool"};
     ToolHandleArray<IPileUpTool> m_puTools{this, "PileUpTools", {}, "Pileup tools"};
+    Gaudi::Property<int> m_skippedHSEvents{this, "SkippedHSEvents", 0, "Number of skipped HS events"};
     Gaudi::Property<float> m_avgMu{this, "AverageMu", 200, "Average mu"};
     Gaudi::Property<float> m_fracLowPt{this, "FracLowPt", 0., "Fraction of pileup that has low pT"};
     Gaudi::Property<float> m_fracHighPt{this, "FracHighPt", 0.,

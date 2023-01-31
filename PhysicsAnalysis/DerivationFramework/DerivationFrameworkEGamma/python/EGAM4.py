@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # EGAM4.py
@@ -295,21 +295,28 @@ def EGAM4Cfg(ConfigFlags):
     # TODO: this should ideally be called higher up to avoid it being run
     # multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    EGAM4TriggerListsHelper = TriggerListsHelper()
+    EGAM4TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # configure skimming/thinning/augmentation tools
     acc.merge(EGAM4KernelCfg(ConfigFlags,
                              name = 'EGAM4Kernel',
                              StreamName = 'StreamDAOD_EGAM4',
                              TriggerListsHelper = EGAM4TriggerListsHelper))
-    
+
+    # To have ptcone40
+    from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg
+    acc.merge(DerivationTrackIsoCfg(ConfigFlags,
+                                    object_types = ('Photons',),
+                                    ptCuts = (500,1000),
+                                    postfix = 'Extra'))
 
     # configure slimming
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     EGAM4SlimmingHelper = SlimmingHelper(
         'EGAM4SlimmingHelper',
-        NamesAndTypes = ConfigFlags.Input.TypedCollections )
+        NamesAndTypes = ConfigFlags.Input.TypedCollections,
+        ConfigFlags = ConfigFlags )
 
     # ------------------------------------------
     # containers for which we save all variables
@@ -400,24 +407,15 @@ def EGAM4Cfg(ConfigFlags):
 
     # photons and electrons: gain and cluster energy per layer
     # code would not be needed for photons since we save every photon variable
-    from DerivationFrameworkCalo.DerivationFrameworkCaloFactories import (
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
         getGainDecorations, getClusterEnergyPerLayerDecorations )
-    GainDecoratorTool = None
-    ClusterEnergyPerLayerDecorators = []  
-    for toolStr in acc.getEventAlgo('EGAM4Kernel').AugmentationTools:
-        toolStr  = f'{toolStr}'
-        splitStr = toolStr.split('/')
-        tool =  acc.getPublicTool(splitStr[1])
-        if splitStr[0] == 'DerivationFramework::GainDecorator':
-            GainDecoratorTool = tool
-        elif splitStr[0] == 'DerivationFramework::ClusterEnergyPerLayerDecorator':
-            ClusterEnergyPerLayerDecorators.append( tool )
-    if GainDecoratorTool : 
-        EGAM4SlimmingHelper.ExtraVariables.extend(
-            getGainDecorations(GainDecoratorTool) )
-    for tool in ClusterEnergyPerLayerDecorators:
-        EGAM4SlimmingHelper.ExtraVariables.extend(
-            getClusterEnergyPerLayerDecorations( tool ) )
+    gainDecorations = getGainDecorations(acc, 'EGAM4Kernel')
+    print('EGAM4 gain decorations: ', gainDecorations)
+    EGAM4SlimmingHelper.ExtraVariables.extend(gainDecorations)
+    clusterEnergyDecorations = getClusterEnergyPerLayerDecorations(
+        acc, 'EGAM4Kernel' )
+    print('EGAM4 cluster energy decorations: ', clusterEnergyDecorations)
+    EGAM4SlimmingHelper.ExtraVariables.extend(clusterEnergyDecorations)
 
     # truth
     if ConfigFlags.Input.isMC:
@@ -440,10 +438,6 @@ def EGAM4Cfg(ConfigFlags):
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
             AddRun2TriggerMatchingToSlimmingHelper )
         AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper = EGAM4SlimmingHelper,
-            OutputContainerPrefix = 'TrigMatch_', 
-            TriggerList = EGAM4TriggerListsHelper.Run2TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(
             SlimmingHelper = EGAM4SlimmingHelper, 
             OutputContainerPrefix = 'TrigMatch_',
             TriggerList = EGAM4TriggerListsHelper.Run2TriggerNamesNoTau)
@@ -455,10 +449,6 @@ def EGAM4Cfg(ConfigFlags):
         # Run 2 is added here temporarily to allow testing/comparison/debugging
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
             AddRun2TriggerMatchingToSlimmingHelper )
-        AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper = EGAM4SlimmingHelper, 
-            OutputContainerPrefix = 'TrigMatch_', 
-            TriggerList = EGAM4TriggerListsHelper.Run3TriggerNamesTau)
         AddRun2TriggerMatchingToSlimmingHelper(
             SlimmingHelper = EGAM4SlimmingHelper, 
             OutputContainerPrefix = 'TrigMatch_',

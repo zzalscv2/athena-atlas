@@ -21,7 +21,7 @@ namespace LArSamples {
   class EventData;
   class RunData;
   
-  class Accessor : public AbsLArCells {
+  class ATLAS_NOT_THREAD_SAFE Accessor : public AbsLArCells {
   
     public:
       

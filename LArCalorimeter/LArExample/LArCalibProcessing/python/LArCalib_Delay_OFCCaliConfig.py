@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -8,6 +8,10 @@ def LArDelay_OFCCaliCfg(flags):
     #Get basic services and cond-algos
     from LArCalibProcessing.LArCalibBaseConfig import LArCalibBaseCfg,chanSelStr
     result=LArCalibBaseCfg(flags)
+
+    #Add ByteStream reading
+    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+    result.merge(ByteStreamReadCfg(flags))
 
     #Calibration runs are taken in fixed gain. 
     #The SG key of the digit-container is name of the gain
@@ -124,13 +128,15 @@ def LArDelay_OFCCaliCfg(flags):
                                                             NtupleName  = "CALIWAVE",
                                                             AddFEBTempInfo = False,
                                                             SaveDerivedInfo = True,
-                                                            ApplyCorrection = True
+                                                            ApplyCorrection = True,
+                                                            OffId=True
                                                         ))
 
         if rootfile2 == "":
            result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
-                                                      AddFEBTempInfo  = False
-                                                  ))
+                                                         AddFEBTempInfo  = False,
+                                                         OffId=True
+                                                     ))
 
         import os
         if os.path.exists(rootfile):
@@ -179,30 +185,32 @@ def LArDelay_OFCCaliCfg(flags):
 
     result.getService("IOVDbSvc").DBInstance=""
 
+    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+    result.merge(PerfMonMTSvcCfg(flags))
+
     return result
 
 
 if __name__ == "__main__":
-
-
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
+    ConfigFlags=initConfigFlags()
     addLArCalibFlags(ConfigFlags)
 
-    ConfigFlags.LArCalib.Input.Dir = "/scratch/wlampl/calib21/Aug27"
+    ConfigFlags.LArCalib.Input.Dir = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/LArCalibProcessing"
     ConfigFlags.LArCalib.Input.Type="calibration_LArElec-Delay"
-    ConfigFlags.LArCalib.Input.RunNumbers=[400268,]
-    ConfigFlags.LArCalib.Input.Database="db.sqlite"
-    ConfigFlags.LArCalib.Preselection.BEC=[1]
-    ConfigFlags.LArCalib.Preselection.Side=[0]
+    ConfigFlags.LArCalib.Input.RunNumbers=[441251,]
+    ConfigFlags.LArCalib.Input.Database="output.sqlite"
     ConfigFlags.Input.Files=ConfigFlags.LArCalib.Input.Files
 
 
     ConfigFlags.LArCalib.Output.ROOTFile="ofccali.root"
+    ConfigFlags.LArCalib.Output.POOLFile="ofccali.pool.root"
 
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema=output.sqlite;dbname=CONDBR2"
     ConfigFlags.IOVDb.GlobalTag="LARCALIB-RUN2-02"
     #ConfigFlags.Exec.OutputLevel=1
+    ConfigFlags.fillFromArgs()
     print ("Input files to be processed:")
     for f in ConfigFlags.Input.Files:
         print (f)

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile raw channel maker algorithm"""
 
@@ -10,7 +10,7 @@ def TileRawChannelMakerCfg(flags, **kwargs):
     """Return component accumulator with configured Tile raw channel maker algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     acc = ComponentAccumulator()
@@ -89,7 +89,7 @@ def TileRawChannelMakerDigiHSTruthCfg(flags, **kwargs):
     """Return component accumulator with configured Tile raw channel maker algorithm for HS
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     kwargs.setdefault('name', 'TileRChMaker_DigiHSTruth')
@@ -110,7 +110,7 @@ def TileRawChannelOutputCfg(flags, tileRawChannelMaker, streamName):
     """Return component accumulator with configured Output stream for Tile raw channel maker algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
         tileRawChannelMaker -- Tile raw channel maker algorithm
         streamName -- name of output stream.
     """
@@ -131,7 +131,7 @@ def TileRawChannelMakerOutputCfg(flags, streamName = 'ESD', **kwargs):
     """Return component accumulator with configured Tile raw channel maker algorithm and Output stream
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
         streamName -- name of output stream. Defaults to ESD.
     """
 
@@ -145,7 +145,7 @@ def TileRawChannelMakerDigiHSTruthOutputCfg(flags, streamName = 'ESD', **kwargs)
     """Return component accumulator with configured Tile raw channel maker algorithm and Output stream
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
         streamName -- name of output stream. Defaults to ESD.
     """
 
@@ -157,7 +157,7 @@ def TileRawChannelMakerDigiHSTruthOutputCfg(flags, streamName = 'ESD', **kwargs)
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -165,30 +165,31 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.Tile.doFit = True
-    ConfigFlags.Tile.doOF1 = True
-    ConfigFlags.Tile.doWiener = True
-    ConfigFlags.Tile.doOpt2 = True
-    ConfigFlags.Tile.doOptATLAS = True
-    ConfigFlags.Tile.correctTimeJumps = True
-    ConfigFlags.Tile.NoiseFilter = 1
-    ConfigFlags.Output.ESDFileName = "myESD.pool.root"
-    ConfigFlags.Exec.MaxEvents=3
-    ConfigFlags.fillFromArgs()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Tile.RunType = 'PHY'
+    flags.Tile.doFit = True
+    flags.Tile.doOF1 = True
+    flags.Tile.doWiener = True
+    flags.Tile.doOpt2 = True
+    flags.Tile.doOptATLAS = True
+    flags.Tile.correctTimeJumps = True
+    flags.Tile.NoiseFilter = 1
+    flags.Output.ESDFileName = "myESD.pool.root"
+    flags.Exec.MaxEvents=3
+    flags.fillFromArgs()
 
-    ConfigFlags.lock()
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
+    acc = MainServicesCfg(flags)
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    acc.merge( ByteStreamReadCfg(ConfigFlags, ['TileRawChannelContainer/TileRawChannelCnt', 'TileDigitsContainer/TileDigitsCnt']) )
+    acc.merge( ByteStreamReadCfg(flags, ['TileRawChannelContainer/TileRawChannelCnt', 'TileDigitsContainer/TileDigitsCnt']) )
 
-    acc.merge( TileRawChannelMakerOutputCfg(ConfigFlags) )
+    acc.merge( TileRawChannelMakerOutputCfg(flags) )
 
-    ConfigFlags.dump()
+    flags.dump()
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.store( open('TileRawChannelMaker.pkl','wb') )
 

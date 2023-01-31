@@ -9,7 +9,7 @@ atlas_add_component( TrkGaussianSumFilter
                      src/components/*.cxx
                      LINK_LIBRARIES AthenaBaseComps GeoPrimitives GaudiKernel TrkGaussianSumFilterUtilsLib
                      TrkGeometry  TrkSurfaces TrkEventPrimitives TrkEventUtils TrkMaterialOnTrack 
-                     TrkMultiComponentStateOnSurface TrkParameters TrkExInterfaces TrkExUtils TrkFitterInterfaces 
+                     TrkParameters TrkExInterfaces TrkExUtils TrkFitterInterfaces 
                      TrkFitterUtils TrkToolInterfaces CxxUtils TrkDetElementBase TrkCaloCluster_OnTrack 
                      TrkPrepRawData TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkTrack ${Boost_LIBRARIES} )
 

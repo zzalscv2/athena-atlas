@@ -5,10 +5,7 @@ from AnaAlgorithm.AnaAlgSequence import AnaAlgSequence
 from AnaAlgorithm.DualUseConfig import createAlgorithm, addPrivateTool
 from Campaigns.Utils import Campaign
 
-try:
-    from AthenaCommon.Logging import logging
-except ImportError:
-    import logging
+import logging
 log = logging.getLogger('makePileupAnalysisSequence')
 
 def makePileupAnalysisSequence( dataType, campaign=None, files=None, useDefaultConfig=False, userLumicalcFiles=None, userPileupConfigs=None ):

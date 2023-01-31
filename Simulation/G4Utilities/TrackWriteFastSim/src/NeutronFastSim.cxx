@@ -12,6 +12,8 @@
 #include "G4EventManager.hh"
 #include "TrackWriteFastSim/TrackFastSimSD.h"
 
+#include "AtlasHepMC/MagicNumbers.h"
+
 NeutronFastSim::NeutronFastSim(const std::string& name, const std::string& fsSDname, const double etaCut, const double timeCut)
   : G4VFastSimulationModel(name)
   , m_Energy(5)
@@ -52,7 +54,7 @@ G4bool NeutronFastSim::ModelTrigger(const G4FastTrack& fastTrack)
   // Not a neutron... Pick it up if the primary had eta>6.0
   AtlasG4EventUserInfo *atlasG4EvtUserInfo=static_cast<AtlasG4EventUserInfo*>(G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetUserInformation());
   HepMC::ConstGenParticlePtr gp = atlasG4EvtUserInfo->GetCurrentPrimary();
-  if (std::abs(gp->momentum().eta())>m_etaCut && HepMC::barcode(gp)<200000){
+  if (std::abs(gp->momentum().eta())>m_etaCut && !HepMC::is_simulation_particle(gp)){
     return true;
   } else {
     return false;

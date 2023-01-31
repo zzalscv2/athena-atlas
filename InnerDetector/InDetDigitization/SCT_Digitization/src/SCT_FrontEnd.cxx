@@ -994,7 +994,7 @@ StatusCode SCT_FrontEnd::addNoiseDiode(SiChargedDiodeCollection& collection, int
   return StatusCode::SUCCESS;
 }
 
-float SCT_FrontEnd::meanValue(std::vector<float>& calibDataVect) const {
+float SCT_FrontEnd::meanValue(std::vector<float>& calibDataVect) {
   float mean_value = 0.0;
   int nData = 0;
   const unsigned int vec_size = calibDataVect.size();

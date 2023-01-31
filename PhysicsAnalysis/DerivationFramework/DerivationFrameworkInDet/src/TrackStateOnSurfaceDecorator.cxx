@@ -488,7 +488,7 @@ namespace DerivationFramework {
           Trk::TrackStateOnSurfaceComparisonFunction CompFunc( trkTrack->perigeeParameters()->momentum() );
           stable_sort( tsoss.begin(), tsoss.end(), CompFunc );
         } else {
-          ATH_MSG_ERROR("Track has not perigee parameters");
+          ATH_MSG_ERROR("Track has no perigee parameters");
         }
       }
 
@@ -654,7 +654,7 @@ namespace DerivationFramework {
 
 
         // Track extrapolation
-        std::unique_ptr<const Trk::TrackParameters> extrap( m_extrapolator->extrapolate(ctx,*trkTrack,trackState->surface()) );
+        std::unique_ptr<const Trk::TrackParameters> extrap( m_extrapolator->extrapolateTrack(ctx,*trkTrack,trackState->surface()) );
 
         // Set local positions on the surface
         if (tp) { 
@@ -755,21 +755,21 @@ namespace DerivationFramework {
           std::unique_ptr<const Trk::ResidualPull> biased;
           std::unique_ptr<const Trk::ResidualPull> unbiased;
           if (tp) { 
-            biased.reset(m_residualPullCalculator->residualPull(measurement, tp, Trk::ResidualPull::Biased));
+            biased= m_residualPullCalculator->residualPull(measurement, tp, Trk::ResidualPull::Biased);
 	    if (m_storeTRT) msos->auxdata<float>("TrackError_biased") = sqrt(fabs((*tp->covariance())(Trk::locX,Trk::locX)));
 
 	    if (m_storeTRT) msos->auxdata<float>("TrackError_biased") = sqrt(fabs((*tp->covariance())(Trk::locX,Trk::locX)));
             std::unique_ptr<const Trk::TrackParameters> unbiasedTp( m_updator->removeFromState(*tp, measurement->localParameters(), measurement->localCovariance()) );
             if(unbiasedTp.get()) {
                if (m_storeTRT) msos->auxdata<float>("TrackError_unbiased") = sqrt(fabs((*unbiasedTp.get()->covariance())(Trk::locX,Trk::locX)));
-               unbiased.reset(m_residualPullCalculator->residualPull(measurement, unbiasedTp.get(), Trk::ResidualPull::Unbiased));
+               unbiased = m_residualPullCalculator->residualPull(measurement, unbiasedTp.get(), Trk::ResidualPull::Unbiased);
             }
           }
           else {
             if (extrap.get()) {
 	      if (m_storeTRT) msos->auxdata<float>("TrackError_unbiased") = sqrt(fabs((*extrap.get()->covariance())(Trk::locX,Trk::locX)));
-              biased.reset(m_residualPullCalculator->residualPull(measurement, extrap.get(), Trk::ResidualPull::Biased));
-              unbiased.reset(m_residualPullCalculator->residualPull(measurement, extrap.get(), Trk::ResidualPull::Unbiased));
+              biased = m_residualPullCalculator->residualPull(measurement, extrap.get(), Trk::ResidualPull::Biased);
+              unbiased = m_residualPullCalculator->residualPull(measurement, extrap.get(), Trk::ResidualPull::Unbiased);
             }
           }
 

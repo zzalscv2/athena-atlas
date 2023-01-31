@@ -769,3 +769,30 @@ void InDet::SiTrajectoryElement_xk::CloseClusterSeach
   m_cluster = m_linkForward[0].cluster();
   m_xi2Forward    = m_linkForward[0].xi2    ();
 }
+
+
+inline const Trk::PatternTrackParameters *
+InDet::SiTrajectoryElement_xk::parameters() const
+{
+  // logic from SiTrajectoryElement_xk::trackParameters(bool, int Q) with Q==1
+
+  if (m_status == 1) {
+    if (m_cluster) {
+      return &m_parametersUpdatedForward;
+    } else {
+      return &m_parametersPredForward;
+    }
+  } else if (m_status == 2) {
+    if (m_cluster) {
+      return &m_parametersUpdatedBackward;
+    } else {
+      return &m_parametersPredBackward;
+    }
+  } else if (m_status == 3) {
+    if (m_cluster) {
+      return &m_parametersUpdatedBackward;
+    }
+  }
+  return nullptr;
+}
+

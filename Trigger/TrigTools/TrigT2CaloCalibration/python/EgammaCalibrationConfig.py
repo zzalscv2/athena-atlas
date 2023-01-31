@@ -23,7 +23,6 @@ class EgammaHitsCalibrationBarrelConfig(CompFactory.EgammaHitsCalibration):
       self.etamax = 2.5
       self.use_raw_eta=True
       self.preserve_offset=False
-      self.OutputLevel=0
 
 class EgammaHitsCalibrationEndcapConfig(CompFactory.EgammaHitsCalibration):
     __slots__=[]
@@ -37,7 +36,6 @@ class EgammaHitsCalibrationEndcapConfig(CompFactory.EgammaHitsCalibration):
       self.etamax = 2.5
       self.use_raw_eta=True
       self.preserve_offset=False
-      self.OutputLevel=0
 
 
 #############################
@@ -99,4 +97,3 @@ class EgammaTransitionRegionsConfig(CompFactory.EgammaTransitionRegions):
       self.etamin_TR08 =0.78
       self.etamax_TR08 =0.82
       self.use_raw_eta=True
-      self.OutputLevel=0

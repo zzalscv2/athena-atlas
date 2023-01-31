@@ -54,7 +54,7 @@ namespace iGeant4
       @author Robert Harrington
   */
 
-  class G4LegacyTransportTool : public ISF::BaseSimulatorTool {
+  class ATLAS_NOT_THREAD_SAFE G4LegacyTransportTool : public ISF::BaseSimulatorTool {
 
   public:
     /** Constructor */
@@ -68,7 +68,7 @@ namespace iGeant4
 
     /// G4 initialization called only by the first tool instance.
     /// This is done (for now) because we get multiple tool instances in hive.
-    void initializeOnce();
+    void initializeOnce ATLAS_NOT_THREAD_SAFE ();
 
     /** AlgTool finalize method */
     virtual StatusCode finalize() override final;
@@ -77,9 +77,9 @@ namespace iGeant4
     /// This is done (for now) because we get multiple tool instances in hive.
     void finalizeOnce();
 
-    virtual StatusCode simulate( const ISF::ISFParticle& isp, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection ) override;
+    virtual StatusCode simulate( ISF::ISFParticle& isp, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection ) override;
 
-    virtual StatusCode simulateVector( const ISF::ConstISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection ) override;
+    virtual StatusCode simulateVector( const ISF::ISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection ) override;
 
     virtual StatusCode setupEvent(const EventContext&) override;
 

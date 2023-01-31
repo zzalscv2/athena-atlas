@@ -21,7 +21,7 @@
 #ifndef MultiComponentStateAssembler_H
 #define MultiComponentStateAssembler_H
 
-#include "TrkGaussianSumFilterUtils/MultiComponentState.h"
+#include "TrkParameters/ComponentParameters.h"
 #include <vector>
 
 namespace Trk {

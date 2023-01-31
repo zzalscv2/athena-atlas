@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -28,8 +28,6 @@ def LArRTMParamsCfg(flags):
 
     
     LArRTMParamExtractor = CompFactory.LArRTMParamExtractor()
-
-    LArRTMParamExtractor.useTBB=True
 
     LArRTMParamExtractor.KeyList        = ["LArCaliWave"]
     LArRTMParamExtractor.TestMode       = False
@@ -121,12 +119,16 @@ def LArRTMParamsCfg(flags):
                                     InitialTimeStamp  = 0,
                                     TimeStampInterval = 1))
 
+    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+    result.merge(PerfMonMTSvcCfg(flags))
+
     return result
 
 if __name__ == "__main__":
 
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    ConfigFlags=initConfigFlags()
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
     addLArCalibFlags(ConfigFlags)
 
@@ -140,9 +142,14 @@ if __name__ == "__main__":
     ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema=output.sqlite;dbname=CONDBR2"
     ConfigFlags.IOVDb.GlobalTag="LARCALIB-RUN2-02"
+    ConfigFlags.GeoModel.AtlasVersion="ATLAS-R3S-2021-03-00-00"
+    ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
+    ConfigFlags.LAr.doAlign=False
+    ConfigFlags.Input.RunNumber=ConfigFlags.LArCalib.Input.RunNumbers[0]
     #ConfigFlags.Exec.OutputLevel=1
 
     ConfigFlags.lock()
+    ConfigFlags.fillFromArgs()
     cfg=MainServicesCfg(ConfigFlags)
     cfg.merge(LArRTMParamsCfg(ConfigFlags))
 

@@ -9,22 +9,22 @@
 namespace TruthHelper {
 
 
-  bool NCutter::operator()(HepMC::ConstGenParticlePtr p ) const {
+bool NCutter::operator()(HepMC::ConstGenParticlePtr p ) const {
     for (const GenIMCselector* i : m_selectors) {
-      if ( !i->operator()(p) ) return false;
+        if ( !i->operator()(p) ) return false;
     }
     return true;
-  }
-    NCutter& NCutter::operator=(const NCutter& rhs) {
-      NCutter tmp(rhs);
-      std::swap(m_selectors, tmp.m_selectors);
-      return *this;
+}
+NCutter& NCutter::operator=(const NCutter& rhs) {
+    NCutter tmp(rhs);
+    std::swap(m_selectors, tmp.m_selectors);
+    return *this;
 }
 
 
-  GenIMCselector* NCutter::create() const {
+GenIMCselector* NCutter::create() const {
     return new NCutter(*this);
-  }
+}
 
 
 }

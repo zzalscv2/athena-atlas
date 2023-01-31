@@ -26,7 +26,7 @@
 #include "AsgTools/ToolHandle.h"
 #include <HIJetRec/IHISubtractorTool.h>
 #include <HIJetRec/IHIUEModulatorTool.h>
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "xAODTracking/VertexContainer.h"
 #include "HIEventUtils/HIEventShapeMapTool.h"
 

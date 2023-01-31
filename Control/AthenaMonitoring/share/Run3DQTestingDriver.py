@@ -13,6 +13,7 @@
 if __name__=='__main__':
     import sys
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.ComponentFactory import CompFactory
     from AthenaConfiguration.Enums import Format
 
     parser = ConfigFlags.getArgumentParser()
@@ -34,13 +35,9 @@ if __name__=='__main__':
     parser.set_defaults(threads=1)
     args, _ = parser.parse_known_args()
 
-    # Setup the Run III behavior
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior = 1
-    
     # default input if nothing specified
     ConfigFlags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/AthenaMonitoring/q431/21.0/f946/myESD.pool.root']
-    ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput.root'
+    ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput.root'    
     if args.dqOffByDefault:
         from AthenaMonitoring.DQConfigFlags import allSteeringFlagsOff
         allSteeringFlagsOff()
@@ -102,10 +99,6 @@ if __name__=='__main__':
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(ConfigFlags)
-
-    # add FPE auditor
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    cfg.addAuditor(CompFactory.FPEAuditor())
 
     # add perfmon
     if args.perfmon:

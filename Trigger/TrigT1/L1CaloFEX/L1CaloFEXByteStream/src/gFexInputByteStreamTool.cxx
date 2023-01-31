@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -49,8 +49,7 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
     SG::WriteHandle<xAOD::gFexTowerContainer> gTowersContainer(m_gTowersWriteKey, ctx);
     ATH_CHECK(gTowersContainer.record(std::make_unique<xAOD::gFexTowerContainer>(), std::make_unique<xAOD::gFexTowerAuxContainer>()));
     ATH_MSG_DEBUG("Recorded gFexTowerContainer with key " << gTowersContainer.key());
-    
-
+        
     // Iterate over ROBFragments to decode
     for (const ROBF* rob : vrobf) {
         // Iterate over ROD words and decode
@@ -202,56 +201,70 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         int Et  = 0;
         int Fpga = 0;
         char IsSaturated = 0;
+        int towerID = 0;
+
+        // Assign ID based on FPGA (FPGA-A 0->0; FPGA-B 1->10000, FPGA-C 2->20000) and gTower number assigned as per firmware convention
+
 
         int twr_rows = AtwrS.size();
         int twr_cols = AtwrS[0].size();
         
+        Fpga = 0;
+
         // Save towers from FPGA A in gTower EDM
         for (int irow = 0; irow < twr_rows; irow++){
             for (int icol = 0; icol < twr_cols; icol++){
                 iEta = icol + 8;
                 iPhi = irow;
                 Et = AtwrS[irow][icol];
-                Fpga = 0;
-                getEtaPhi(Eta, Phi, iEta, iPhi);
+                getEtaPhi(Eta, Phi, iEta, iPhi, towerID);
                 gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated);                    
+                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);  
+                towerID += 1;
 
   
-
             }
         }
+
+        // Save towers from FPGA B in gTower EDM
+        Fpga = 1;
+        towerID = 10000;
         // Save towers from FPGA B in gTower EDM             
         for (int irow = 0; irow < twr_rows; irow++){
             for (int icol = 0; icol < twr_cols; icol++){
                 iEta = icol + 20;
                 iPhi = irow;
                 Et = BtwrS[irow][icol];
-                Fpga = 1;
-                getEtaPhi(Eta, Phi, iEta, iPhi);
+                getEtaPhi(Eta, Phi, iEta, iPhi, towerID);
                 gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated);     
+                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);  
+                towerID += 1;
+
             }
         }
+
         // Save towers from FPGA C in gTower EDM
+        Fpga = 2;
+        towerID = 20000;
         for (int irow = 0; irow < twr_rows; irow++){
             for (int icol = 0; icol < twr_cols/2; icol++){                
                 iEta = icol + 2;
                 iPhi = irow;
                 Et = CtwrS[irow][icol];
-                Fpga = 2;
-                getEtaPhi(Eta, Phi, iEta, iPhi);
+                getEtaPhi(Eta, Phi, iEta, iPhi, towerID);
                 gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated);     
+                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);  
+                towerID += 1;   
             }
             for (int icol = twr_cols/2; icol < twr_cols; icol++){                
                 iEta = icol + 26;
                 iPhi = irow;
                 Et = CtwrS[irow][icol];
-                Fpga = 2;
-                getEtaPhi(Eta, Phi, iEta, iPhi);
+                getEtaPhi(Eta, Phi, iEta, iPhi, towerID);
                 gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated);     
+                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);  
+                towerID += 1;
+
             }
         }  
         
@@ -1066,19 +1079,92 @@ void gFexInputByteStreamTool::gtRescale(gtFPGA twr, gtFPGA &twrScaled, int scale
     }
 }
 
-void gFexInputByteStreamTool::getEtaPhi ( float &Eta, float &Phi, int iEta, int iPhi) const{
+void gFexInputByteStreamTool::getEtaPhi ( float &Eta, float &Phi, int iEta, int iPhi, int gFEXtowerID) const{
     
     float s_centralPhiWidth = (2*M_PI)/32; //In central region, gFex has 32 bins in phi
+    float s_forwardPhiWidth = (2*M_PI)/16; //In forward region, gFex has 16 bins in phi (before rearranging bins)
+
     const std::vector<float> s_EtaCenter = { -4.7, -4.2, -3.7, -3.4, -3.2, -3, 
                                              -2.8, -2.6, -2.35, -2.1, -1.9, -1.7, -1.5, -1.3, -1.1, -0.9,  
                                              -0.7, -0.5, -0.3, -0.1, 0.1, 0.3, 0.5, 0.7, 0.9, 1.1,                                                 
                                              1.3, 1.5, 1.7, 1.9, 2.1, 2.35, 2.6, 2.8, 3.0,
                                              3.2, 3.4, 3.7, 4.2, 4.7};
-    
 
-    Eta = s_EtaCenter[iEta];     
-    Phi = ( (iPhi * s_centralPhiWidth) + s_centralPhiWidth/2) - M_PI;
-  
+    // Transform Eta and Phi indices for the most forward towers into the "original" indices, 
+    // as before rearranging the towers such that the forward region is 12(ieta)x32(iphi).
+    // The FPGA-C has now the same format (12*32) as FPGA-A and FPGA-B. 
+    // This is the result of a transformation in the firmware.
+    // Note that for the most forward towers, the Phi index and Eta index have been considered accordingly, 
+    // so in order to get the correct float values of Phi and Eta we need to retrieve the "original" indices.
+    int towerID_base = 20000;
+    int iEtaOld=0, iPhiOld=0;
+
+    if (iEta == 2){
+        if (iPhi == ((gFEXtowerID - towerID_base)/24)*2){
+            iEtaOld = 0;
+            iPhiOld = iPhi/2;
+        }
+        if (iPhi == (((gFEXtowerID - towerID_base - 12)/24)*2) + 1){
+            iEtaOld = 1;
+            iPhiOld = (iPhi-1)/2;
+        }
+    }
+
+    else if (iEta == 3){
+        if (iPhi == ((gFEXtowerID - towerID_base - 1)/24)*2){
+            iEtaOld = 2;
+            iPhiOld = iPhi/2;
+        }
+        if (iPhi == (((gFEXtowerID - towerID_base - 13)/24)*2) + 1){
+            iEtaOld = 3;
+            iPhiOld = (iPhi-1)/2;
+        }
+    }
+
+    else if (iEta == 36){
+        if (iPhi == (((gFEXtowerID - towerID_base - 22)/24)*2) + 1){
+            iEtaOld = 36;
+            iPhiOld = (iPhi-1)/2;
+        }
+        if (iPhi == ((gFEXtowerID - towerID_base - 10)/24)*2){
+            iEtaOld = 37;
+            iPhiOld = iPhi/2;
+        }
+    }
+
+    else if (iEta == 37){
+        if (iPhi == (((gFEXtowerID - towerID_base - 23)/24)*2) + 1){
+            iEtaOld = 38;
+            iPhiOld = (iPhi-1)/2;
+        }
+        if (iPhi == ((gFEXtowerID - towerID_base - 11)/24)*2){
+            iEtaOld = 39;
+            iPhiOld = iPhi/2;
+        }
+    }
+
+    else {
+        iEtaOld = iEta;
+        iPhiOld = iPhi;
+    }
+    
+    Eta = s_EtaCenter[iEtaOld]; 
+
+    float Phi_gFex = -99;
+
+    if (( iEtaOld <= 3 ) || ( (iEtaOld >= 36) )){
+       Phi_gFex = ( (iPhiOld * s_forwardPhiWidth) + s_forwardPhiWidth/2);
+    }  
+    else {
+       Phi_gFex = ( (iPhiOld * s_centralPhiWidth) + s_centralPhiWidth/2);
+    }
+   
+    if (Phi_gFex < M_PI) {
+       Phi = Phi_gFex;
+    }
+    else {
+       Phi = (Phi_gFex - 2*M_PI);
+    }
 }
 
 /// xAOD->BS conversion

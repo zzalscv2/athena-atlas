@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERS_XAODCHARGEDTRACKSWEIGHTFILTER_H
@@ -7,9 +7,14 @@
 
 #include "GeneratorModules/GenFilter.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 
 #include "xAODTruth/TruthEvent.h"
 #include "xAODTruth/TruthEventContainer.h"
+
+namespace CLHEP {
+  class HepRandomEngine;
+}
 
 /// Filter events based on presence of charged tracks
 class xAODChargedTracksWeightFilter : public GenFilter {
@@ -47,6 +52,9 @@ public:
 
 private:
 
+  CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName,
+                                          const EventContext& ctx) const;
+
   /// get weight to filter and weight events
   double get_nch_weight(int nch) const;
   
@@ -57,7 +65,7 @@ private:
   void weight_event(double weight);
 
   /// Rndm generator service
-  ServiceHandle<IAtRndmGenSvc> m_randSvc;  
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};
 
   // Minimum pT for a track to count
   double m_Ptmin;

@@ -122,7 +122,7 @@ class TrigEgammaMonAlgBuilder:
   def get_monitoring_mode(self):
 
     self.__logger.info("TrigEgammaMonAlgBuilder.get_monitoring_mode()")
-    self.data_type = dqflags.monManDataType()
+    self.data_type = dqflags.monManDataType()    
     if self.data_type == 'monteCarlo': 
       self.mc_mode = True
       return True
@@ -167,9 +167,11 @@ class TrigEgammaMonAlgBuilder:
 
 
 
+
+
   def setDefaultProperties(self):
    
-    from TrigEgammaMonitoring.TrigEgammaMonitCategoryMT import monitoring_bootstrap, monitoring_photon, monitoring_electron, monitoringTP_electron, monitoring_topo, validation_photon , validation_electron, validationTP_electron, validation_jpsi, validationTP_jpsiee, monitoring_tags, validationTP_electron_eEM 
+    from TrigEgammaMonitoring.TrigEgammaMonitCategoryMT import monitoring_bootstrap, monitoring_photon, monitoring_electron, monitoringTP_electron, monitoring_topo, validation_photon , validation_electron, validationTP_electron, validation_jpsi, validationTP_jpsiee, monitoring_tags, validationTP_electron_eEM, monitoring_photon_cosmic, monitoring_electron_cosmic, monitoring_bootstrap_cosmic, monitoring_photon_hi, monitoring_electron_hi, monitoring_bootstrap_hi
     
     if self.pp_mode:
         self.electronList = monitoring_electron
@@ -181,12 +183,21 @@ class TrigEgammaMonAlgBuilder:
     elif self.mc_mode:
         self.electronList = validation_electron # + validation_Zee (no T&P chains yet)
         self.photonList   = validation_photon
-        self.bootstrapMap = {}
+        self.bootstrapMap = monitoring_bootstrap
         self.tpList       = validationTP_electron + validationTP_electron_eEM 
         self.jpsiList     = validation_jpsi
         self.jpsitagItems = validationTP_jpsiee
         self.tagItems     = monitoring_tags
         self.topoList     = monitoring_topo
+    elif self.cosmic_mode:
+        self.electronList = monitoring_electron_cosmic 
+        self.photonList   = monitoring_photon_cosmic
+        self.bootstrapMap = monitoring_bootstrap_cosmic
+    elif self.HI_mode or self.pPb_mode:
+        self.electronList = monitoring_electron_hi
+        self.photonList   = monitoring_photon_hi
+        self.bootstrapMap = monitoring_bootstrap_hi
+
 
 
   #
@@ -425,6 +436,8 @@ class TrigEgammaMonAlgBuilder:
       self.phMonAlg.DoUnconverted=False
       self.phMonAlg.DoEmulation = False
 
+
+
       if self.emulator:
         self.phMonAlg.DoEmulation = True
         self.emulator.TriggerList += self.photonList
@@ -520,7 +533,7 @@ class TrigEgammaMonAlgBuilder:
         self.bookL1CaloDistributions( monAlg, trigger )
         self.bookL2CaloDistributions( monAlg, trigger )
         self.bookEFCaloDistributions( monAlg, trigger )
-        
+
         self.bookL1CaloResolutions( monAlg, trigger )
         self.bookL1CaloAbsResolutions( monAlg, trigger )
         self.bookL2CaloResolutions( monAlg, trigger )
@@ -544,7 +557,7 @@ class TrigEgammaMonAlgBuilder:
 
         
         #
-        # Efficiecies
+        # Efficiencies
         #
 
         self.bookEfficiencies( monAlg, trigger, "L1Calo" )
@@ -566,6 +579,7 @@ class TrigEgammaMonAlgBuilder:
           self.bookEfficiencies( monAlg, trigger, "PrecisionCalo" , doEmulation=True)
           self.bookEfficiencies( monAlg, trigger, "FastPhoton" if info.isPhoton() else "FastElectron", doEmulation=True)         
           self.bookEfficiencies( monAlg, trigger, "HLT" , doEmulation=True)
+
 
 
 
@@ -779,8 +793,11 @@ class TrigEgammaMonAlgBuilder:
     # Efficiency
     self.addHistogram(monGroup, TProfile("pt,pt_passed", "#epsilon(p_T); p_{T} ; Efficiency", self._nEtbins, self._etbins))
     self.addHistogram(monGroup, TProfile("et,et_passed", "#epsilon(E_T); E_{T} [GeV] ; Efficiency", self._nEtbins, self._etbins))
+    self.addHistogram(monGroup, TProfile("et_failed", "#epsilon(E_T); E_{T} [GeV] ; Inefficiency", self._nEtbins, self._etbins))
     self.addHistogram(monGroup, TProfile("highet,highet_passed", "#epsilon(E_T); E_{T} [GeV] ; Efficiency", 40, 0., 500.))
+    self.addHistogram(monGroup, TProfile("highet_failed", "#epsilon(E_T); E_{T} [GeV] ; Inefficiency", 40, 0., 500.))
     self.addHistogram(monGroup, TProfile("eta,eta_passed", "#epsilon(#eta); #eta ; Efficiency", self._nEtabins, self._etabins))
+    self.addHistogram(monGroup, TProfile("eta_failed", "#epsilon(#eta); #eta ; Inefficiency", self._nEtabins, self._etabins))
     self.addHistogram(monGroup, TProfile("phi,phi_passed", "#epsilon(#phi); #phi ; Efficiency", 20, -3.2, 3.2))
     self.addHistogram(monGroup, TProfile("avgmu,avgmu_passed", "#epsilon(<#mu>); <#mu> ; Efficiency", 16, 0, 80))
     self.addHistogram(monGroup, TProfile("npvtx,npvtx_passed", "#epsilon(npvtx); npvtx ; Efficiency", 16, 0, 80))

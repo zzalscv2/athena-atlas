@@ -540,7 +540,8 @@ StatusCode LArPhysWavePredictor::stop()
 					     theLArCaliWave.getErrors(),
 					     theLArCaliWave.getTriggers(),
 					     theLArCaliWave.getDt(), 
-					     theLArCaliWave.getDAC(), 
+					     theLArCaliWave.getDAC(),
+					     theLArCaliWave.getIsPulsedInt(),
 					     theLArCaliWave.getFlag() );
             }
           } 

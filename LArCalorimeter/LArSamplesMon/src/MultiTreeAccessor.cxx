@@ -241,7 +241,7 @@ std::vector<MultiTreeAccessor*> MultiTreeAccessor::filterComponents(const Filter
 	  nslashes++;
 	  slpos = k1;
 	}
-	pathname = pathname.substr( 0, slpos );
+	pathname.resize( slpos );
       }
       TString thisFN = Form("%s_filter%d.root", pathname.c_str(), i );//filterList.fileName(f).Data(), i);
       //if (treeAcc) thisFN = treeAcc->fileName() + Form("_filter%d.root", f);

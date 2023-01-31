@@ -7,11 +7,11 @@ AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent = [
 "AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.ThrustMaj.L2.L3",
 "AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.Parent.DetectorEta.DetectorY",
 "AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.GhostCHadronsFinalCount.GhostBHadronsFinalCount",
-"AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.R10TruthLabel_R21Precision.R10TruthLabel_R21Precision_2022v1",
+"AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.R10TruthLabel_R21Precision.R10TruthLabel_R21Precision_2022v1.R10TruthLabel_R22v1",
 "AntiKt10UFOCSSKJets",
 "AntiKt10UFOCSSKJetsAux.NumTrkPt500.GhostAntiKtVR30Rmax4Rmin02PV0TrackJets",
 "AntiKt10TruthSoftDropBeta100Zcut10Jets",
-"AntiKt10TruthSoftDropBeta100Zcut10JetsAux.pt.eta.phi.m.D2.Tau1_wta.Tau2_wta.Tau3_wta.Qw.GhostCHadronsFinalCount.GhostBHadronsFinalCount",
+"AntiKt10TruthSoftDropBeta100Zcut10JetsAux.pt.eta.phi.m.Parent.D2.Tau1_wta.Tau2_wta.Tau3_wta.Qw.GhostCHadronsFinalCount.GhostBHadronsFinalCount",
 "AntiKt10TruthJets",
 "AntiKt10TruthJetsAux.pt.eta.phi.m.Split12.Split23.GhostCHadronsFinalCount.GhostBHadronsFinalCount"
 ]

@@ -174,7 +174,7 @@ public:
       addToState if you have kept the original prediction, thus
       saving CPU time.
   */
-  virtual const FitQualityOnSurface* fullStateFitQuality(
+  virtual FitQualityOnSurface fullStateFitQuality(
     const TrackParameters&,
     const Amg::Vector2D&,
     const Amg::MatrixX&) const = 0;
@@ -184,7 +184,7 @@ public:
       addToState if you have kept the original prediction, thus
       saving CPU time.
   */
-  virtual const FitQualityOnSurface* fullStateFitQuality(
+  virtual FitQualityOnSurface fullStateFitQuality(
     const TrackParameters&,
     const LocalParameters&,
     const Amg::MatrixX&) const = 0;
@@ -194,7 +194,7 @@ public:
       addToState if you use the addToState(TP,LP,Err,FQoS) interface,
       thus saving CPU time.
   */
-  virtual const FitQualityOnSurface* predictedStateFitQuality(
+  virtual FitQualityOnSurface predictedStateFitQuality(
     const TrackParameters&,
     const Amg::Vector2D&,
     const Amg::MatrixX&) const = 0;
@@ -204,7 +204,7 @@ public:
       addToState if you use the addToState(TP,LP,Err,FQoS) interface,
       thus saving CPU time.
   */
-  virtual const FitQualityOnSurface* predictedStateFitQuality(
+  virtual FitQualityOnSurface predictedStateFitQuality(
     const TrackParameters&,
     const LocalParameters&,
     const Amg::MatrixX&) const = 0;
@@ -212,7 +212,7 @@ public:
       is fitted to the parameters of another trajectory part extrapolated
       to the common surface.
   */
-  virtual const FitQualityOnSurface* predictedStateFitQuality(
+  virtual FitQualityOnSurface predictedStateFitQuality(
     const TrackParameters&,
     const TrackParameters&) const = 0;
 

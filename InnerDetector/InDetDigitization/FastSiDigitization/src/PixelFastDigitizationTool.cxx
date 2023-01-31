@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////
@@ -20,6 +20,7 @@
 #include "InDetSimData/InDetSimDataCollection.h"
 
 // Random numbers
+#include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandLandau.h"
@@ -40,7 +41,6 @@
 #include "InDetPrepRawData/PixelGangedClusterAmbiguities.h"
 #include "InDetPrepRawData/SiClusterContainer.h"
 #include "TrkTruthData/PRD_MultiTruthCollection.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
 
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "AtlasHepMC/GenParticle.h"
@@ -68,72 +68,8 @@ using namespace InDet;
 PixelFastDigitizationTool::PixelFastDigitizationTool(const std::string &type, const std::string &name,
                                                      const IInterface* parent):
 
-  PileUpToolBase(type, name, parent),
-  m_thpcsi(nullptr),
-  m_rndmSvc("AtRndmGenSvc",name),
-  m_randomEngine(nullptr),
-  m_randomEngineName("FastPixelDigitization"),
-  m_pixel_ID(nullptr),
-  m_clusterMaker("InDet::ClusterMakerTool/FatrasClusterMaker"),
-  m_pixUseClusterMaker(true),
-  m_pixelClusterContainer(nullptr),
-  m_pixel_SiClustersName("PixelClusters"),
-  m_mergeSvc("PileUpMergeSvc",name),
-  m_HardScatterSplittingMode(0),
-  m_HardScatterSplittingSkipper(false),
-  m_pixelClusterMap(nullptr),
-  m_prdTruthNamePixel("PRD_MultiTruthPixel"),
-  m_pixPrdTruth(nullptr),
-  //  m_pixelCondSummarySvc("PixelConditionsSummarySvc", name),
-  m_gangedAmbiguitiesFinder("InDet::PixelGangedAmbiguitiesFinder"),
-  m_inputObjectName("PixelHits"),
-  m_pixTanLorentzAngleScalor(1.),
-  m_pixEmulateSurfaceCharge(true),
-  m_pixSmearPathLength(0.01),
-  m_pixSmearLandau(true),
-  m_pixMinimalPathCut(0.06),// Optimized choice of threshold (old 0.02)
-  m_pixPathLengthTotConv(125.),
-  m_pixModuleDistortion(true), // default: false
-  m_pixErrorStrategy(2),
-  m_pixDiffShiftBarrX(0.005),
-  m_pixDiffShiftBarrY(0.005),
-  m_pixDiffShiftEndCX(0.008),
-  m_pixDiffShiftEndCY(0.008),
-  m_ThrConverted(50000),
-  m_mergeCluster(true),
-  m_splitClusters(0),
-  m_acceptDiagonalClusters(true),
-  m_pixelClusterAmbiguitiesMapName("PixelClusterAmbiguitiesMap"),
-  m_ambiguitiesMap(nullptr),
-  m_digitizationStepper("Trk::PlanarModuleStepper")
+  PileUpToolBase(type, name, parent)
 {
-  declareProperty("RndmSvc"                        , m_rndmSvc,                  "Random Number Service used in Pixel digitization" );
-  declareProperty("RndmEngine"                     , m_randomEngineName,         "Random engine name");
-  declareProperty("ClusterMaker"                   , m_clusterMaker);
-  declareProperty("PixelUseClusterMaker"           , m_pixUseClusterMaker);
-  declareProperty("PixelClusterContainerName"      , m_pixel_SiClustersName);
-  declareProperty("MergeSvc"                       , m_mergeSvc,                 "Merge service" );
-  declareProperty("TruthNamePixel"                 , m_prdTruthNamePixel);
-  //declareProperty("PixelConditionsSummarySvc"      , m_pixelCondSummarySvc,      "Name of the pixel conditions service");
-  declareProperty("gangedAmbiguitiesFinder"        , m_gangedAmbiguitiesFinder);
-  declareProperty("InputObjectName"                , m_inputObjectName,          "Input Object name" );
-  declareProperty("PixelEmulateSurfaceCharge"      , m_pixEmulateSurfaceCharge);
-  declareProperty("PixelSmearPathSigma"            , m_pixSmearPathLength);
-  declareProperty("PixelSmearLandau"               , m_pixSmearLandau);
-  declareProperty("PixelMinimalPathLength"         , m_pixMinimalPathCut);
-  declareProperty("PixelPathLengthTotConversion"   , m_pixPathLengthTotConv);
-  declareProperty("PixelEmulateModuleDistortion"   , m_pixModuleDistortion);
-  declareProperty("PixelErrorPhi"                  , m_pixPhiError);
-  declareProperty("PixelErrorEta"                  , m_pixEtaError);
-  declareProperty("PixelErrorStrategy"             , m_pixErrorStrategy);
-  declareProperty("PixelClusterAmbiguitiesMapName" , m_pixelClusterAmbiguitiesMapName);
-  declareProperty("HardScatterSplittingMode"       , m_HardScatterSplittingMode, "Control pileup & signal splitting" );
-  declareProperty("DigitizationStepper",     m_digitizationStepper);
-  declareProperty("PixDiffShiftBarrX", m_pixDiffShiftBarrX);
-  declareProperty("PixDiffShiftBarrY", m_pixDiffShiftBarrY);
-  declareProperty("PixDiffShiftEndCX", m_pixDiffShiftEndCX);
-  declareProperty("PixDiffShiftEndCY", m_pixDiffShiftEndCY);
-  declareProperty("ThrConverted", m_ThrConverted);
 }
 
 PixelFastDigitizationTool::~PixelFastDigitizationTool() {
@@ -161,13 +97,6 @@ StatusCode PixelFastDigitizationTool::initialize()
 
   if (detStore()->retrieve(m_pixel_ID, "PixelID").isFailure()) {
     ATH_MSG_ERROR ( "Could not get Pixel ID helper" );
-    return StatusCode::FAILURE;
-  }
-
-  //Get own engine with own seeds:
-  m_randomEngine = m_rndmSvc->GetEngine(m_randomEngineName);
-  if (!m_randomEngine) {
-    ATH_MSG_ERROR( "Could not get random engine '" << m_randomEngineName << "'" );
     return StatusCode::FAILURE;
   }
 
@@ -243,7 +172,7 @@ StatusCode PixelFastDigitizationTool::processBunchXing(int bunchXing,
 
   if (!(m_mergeSvc->retrieveSubSetEvtData(m_inputObjectName, hitCollList, bunchXing,
                                           bSubEvents, eSubEvents).isSuccess()) &&
-      hitCollList.size() == 0) {
+      hitCollList.empty()) {
     ATH_MSG_ERROR("Could not fill TimedHitCollList");
     return StatusCode::FAILURE;
   } else {
@@ -323,7 +252,7 @@ StatusCode PixelFastDigitizationTool::processAllSubEvents(const EventContext& ct
   //this is a list<pair<time_t, DataLink<SCTUncompressedHitCollection> > >
   TimedHitCollList hitCollList;
   unsigned int numberOfSimHits(0);
-  if ( !(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSimHits).isSuccess()) && hitCollList.size()==0 ) {
+  if ( !(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSimHits).isSuccess()) && hitCollList.empty() ) {
     ATH_MSG_ERROR ( "Could not fill TimedHitCollList" );
     return StatusCode::FAILURE;
   } else {
@@ -349,10 +278,9 @@ StatusCode PixelFastDigitizationTool::processAllSubEvents(const EventContext& ct
     ATH_MSG_DEBUG ( "SiHitCollection found with " << p_collection->size() << " hits" );
     ++iColl;
   }
-  m_thpcsi = &thpcsi;
 
   // Process the Hits straw by straw: get the iterator pairs for given straw
-  if(this->digitize(ctx).isFailure()) {
+  if(this->digitize(ctx, thpcsi).isFailure()) {
     ATH_MSG_FATAL ( "digitize method failed!" );
     return StatusCode::FAILURE;
   }
@@ -433,7 +361,7 @@ StatusCode PixelFastDigitizationTool::mergeEvent(const EventContext& ctx)
   m_ambiguitiesMap =new PixelGangedClusterAmbiguities();
 
   if (m_thpcsi != nullptr) {
-    if(digitize(ctx).isFailure()) {
+    if(digitize(ctx, *m_thpcsi).isFailure()) {
       ATH_MSG_FATAL ( "Pixel digitize method failed!" );
       return StatusCode::FAILURE;
     }
@@ -470,8 +398,15 @@ StatusCode PixelFastDigitizationTool::mergeEvent(const EventContext& ctx)
 }
 
 
-StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx)
+StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
+                                               TimedHitCollection<SiHit>& thpcsi)
 {
+  // Set the RNG to use for this event.
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomEngineName);
+  const std::string rngName = name()+m_randomEngineName;
+  rngWrapper->setSeed( rngName, ctx );
+  CLHEP::HepRandomEngine *rndmEngine = rngWrapper->getEngine(ctx);
+
   SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey, ctx);
   const InDetDD::SiDetectorElementCollection* elements(*pixelDetEleHandle);
   if (not pixelDetEleHandle.isValid() or elements==nullptr) {
@@ -489,7 +424,7 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx)
   std::vector<int> trkNo;
   std::vector<Identifier> detEl;
 
-  while (m_thpcsi->nextDetectorElement(i, e)) {
+  while (thpcsi.nextDetectorElement(i, e)) {
 
     Pixel_detElement_RIO_map PixelDetElClusterMap;
 
@@ -525,9 +460,9 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx)
 
       bool isRep = false;
 
-      for (unsigned int j=0; j<trkNo.size();j++) {
-        for (unsigned int k=0; k<detEl.size();k++) {
-          if ((trkn > 0) && (trkn == trkNo[j]) && (hitId == detEl[k])) {isRep = true; break;}
+      for (int j : trkNo) {
+        for (auto & k : detEl) {
+          if ((trkn > 0) && (trkn == j) && (hitId == k)) {isRep = true; break;}
         }
         if (isRep) break;
       }
@@ -663,8 +598,8 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx)
         if ( m_pixSmearPathLength > 0. ) {
           // create the smdar parameter
           double sPar = m_pixSmearLandau ?
-            m_pixSmearPathLength*CLHEP::RandLandau::shoot(m_randomEngine) :
-            m_pixSmearPathLength*CLHEP::RandGaussZiggurat::shoot(m_randomEngine);
+            m_pixSmearPathLength*CLHEP::RandLandau::shoot(rndmEngine) :
+            m_pixSmearPathLength*CLHEP::RandGaussZiggurat::shoot(rndmEngine);
           pathlength *=  (1.+sPar);
         }
 
@@ -710,8 +645,8 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx)
       int totalToT=std::accumulate(totList.begin(), totList.end(), 0);;
 
       // bail out if 0 pixel or path length problem
-      if (!rdoList.size() || accumulatedPathLength < pixMinimalPathCut || totalToT == 0) {
-        if (totalToT == 0 && rdoList.size() > 0 ) ATH_MSG_WARNING("The total ToT of the cluster is 0, this should never happen");
+      if (rdoList.empty() || accumulatedPathLength < pixMinimalPathCut || totalToT == 0) {
+        if (totalToT == 0 && !rdoList.empty() ) ATH_MSG_WARNING("The total ToT of the cluster is 0, this should never happen");
         continue;
       }
 
@@ -731,8 +666,8 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx)
           InDet::PixelCluster* currentCluster = clusIter->second;
           const std::vector<Identifier> &currentRdoList = currentCluster->rdoList();
           bool areNb = false;
-          for (std::vector<Identifier>::const_iterator rdoIter = rdoList.begin(); rdoIter != rdoList.end(); ++rdoIter) {
-            areNb = this->areNeighbours(currentRdoList, *rdoIter, hitSiDetElement,*m_pixel_ID);
+          for (auto rdoIter : rdoList) {
+            areNb = PixelFastDigitizationTool::areNeighbours(currentRdoList, rdoIter, hitSiDetElement,*m_pixel_ID);
             if (areNb) { break; }
           }
           if (areNb) {
@@ -762,16 +697,16 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx)
       }
 
       bool not_valid = false;
-      for (unsigned int entry=0; entry < rdoList.size(); entry++) {
-        if (!(rdoList[entry].is_valid())) { not_valid = true; break;}
+      for (auto & entry : rdoList) {
+        if (!(entry.is_valid())) { not_valid = true; break;}
       }
 
       if (not_valid) continue;
 
       if(merged) {
         //Hacks for merged clusters
-        for (std::vector<Identifier>::const_iterator rdoIter = rdoList.begin(); rdoIter != rdoList.end(); ++rdoIter) {
-          const InDetDD::SiCellId& chargeCellId =  hitSiDetElement->cellIdFromIdentifier(*rdoIter);
+        for (auto rdoIter : rdoList) {
+          const InDetDD::SiCellId& chargeCellId =  hitSiDetElement->cellIdFromIdentifier(rdoIter);
           // phi/ eta index
           int chargePhiIndex = chargeCellId.phiIndex();
           int chargeEtaIndex = chargeCellId.etaIndex();
@@ -802,7 +737,7 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx)
         //           clusterPosition = SG::ReadCondHandle<PixelDistortionData>(m_distortionKey)->correctSimulation(m_pixel_ID->wafer_hash(hitSiDetElement->identify()), clusterPosition, localDirection);
 
         // from InDetReadoutGeometry: width from eta
-        auto pixModDesign = dynamic_cast<const InDetDD::PixelModuleDesign*>(&hitSiDetElement->design());
+        const auto *pixModDesign = dynamic_cast<const InDetDD::PixelModuleDesign*>(&hitSiDetElement->design());
         if (!pixModDesign) {
           return StatusCode::FAILURE;
         }
@@ -912,7 +847,7 @@ StatusCode PixelFastDigitizationTool::createAndStoreRIOs(const EventContext& ctx
 
 
     if (clusterCollection) {
-      if (clusterCollection->size() != 0) {
+      if (!clusterCollection->empty()) {
         ATH_MSG_DEBUG ( "Filling ambiguities map" );
         m_gangedAmbiguitiesFinder->execute(clusterCollection,*m_ambiguitiesMap);
         ATH_MSG_DEBUG ( "Ambiguities map: " << m_ambiguitiesMap->size() << " elements" );
@@ -935,7 +870,7 @@ bool PixelFastDigitizationTool::areNeighbours
 (const std::vector<Identifier>& group,
  const Identifier& rdoID,
  const InDetDD::SiDetectorElement* /*element*/,
- const PixelID& pixelID) const
+ const PixelID& pixelID) 
 {
   // note: in the PixelClusteringToolBase, m_splitClusters is a variable; here
   // splitClusters was explicitly set to zero, acceptDiagonalClusters = 1
@@ -1031,7 +966,7 @@ Trk::DigitizationModule* PixelFastDigitizationTool::buildDetectorModule(const In
 }
 
 
-Amg::Vector3D PixelFastDigitizationTool::CalculateIntersection(const Amg::Vector3D & Point, const Amg::Vector3D & Direction, Amg::Vector2D PlaneBorder, double halfthickness) const
+Amg::Vector3D PixelFastDigitizationTool::CalculateIntersection(const Amg::Vector3D & Point, const Amg::Vector3D & Direction, Amg::Vector2D PlaneBorder, double halfthickness) 
 {
   Amg::Vector3D Intersection(0.,0.,0.);
 
@@ -1064,7 +999,7 @@ Amg::Vector3D PixelFastDigitizationTool::CalculateIntersection(const Amg::Vector
   return Intersection;
 }
 
-void PixelFastDigitizationTool::Diffuse(HepGeom::Point3D<double>& localEntry, HepGeom::Point3D<double>& localExit, double shiftX, double shiftY) const{
+void PixelFastDigitizationTool::Diffuse(HepGeom::Point3D<double>& localEntry, HepGeom::Point3D<double>& localExit, double shiftX, double shiftY) {
 
   double localEntryX = localEntry.x();
   double localEntryY = localEntry.y();

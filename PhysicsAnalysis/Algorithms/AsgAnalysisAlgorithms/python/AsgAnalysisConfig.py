@@ -8,12 +8,12 @@ class PileupReweightingBlock (ConfigBlock):
     """the ConfigBlock for pileup reweighting"""
 
     def __init__ (self) :
-        super (PileupReweightingBlock, self).__init__ ()
-        self.campaign=None
-        self.files=None
-        self.useDefaultConfig=False
-        self.userLumicalcFiles=None
-        self.userPileupConfigs=None
+        super (PileupReweightingBlock, self).__init__ ('Event')
+        self.addOption ('campaign', None, type=None)
+        self.addOption ('files', None, type=None)
+        self.addOption ('useDefaultConfig', False, type=bool)
+        self.addOption ('userLumicalcFiles', None, type=None)
+        self.addOption ('userPileupConfigs', None, type=None)
 
 
     def makeAlgs (self, config) :
@@ -40,16 +40,17 @@ class PileupReweightingBlock (ConfigBlock):
                 else:
                     log.info('Campaign could not be determined.')
 
-            if campaign:
-                if self.userPileupConfigs is None:
-                    from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
-                    toolConfigFiles = getConfigurationFiles(campaign=campaign, files=self.files, useDefaultConfig=self.useDefaultConfig)
-                    log.info('Setting PRW configuration based on input files')
+        if campaign:
+            if self.userPileupConfigs is None:
+                from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
+                toolConfigFiles = getConfigurationFiles(campaign=campaign, files=self.files, useDefaultConfig=self.useDefaultConfig,
+                                                        data_type=config.dataType())
+                log.info('Setting PRW configuration based on input files')
 
-                    if toolConfigFiles:
-                        log.info(f'Using PRW configuration: {", ".join(toolConfigFiles)}')
-                else:
-                    log.info('Using user provided PRW configuration')
+                if toolConfigFiles:
+                    log.info(f'Using PRW configuration: {", ".join(toolConfigFiles)}')
+            else:
+                log.info('Using user provided PRW configuration')
 
         if self.userPileupConfigs is not None:
             toolConfigFiles = self.userPileupConfigs[:]
@@ -77,10 +78,10 @@ class GeneratorAnalysisBlock (ConfigBlock):
     """the ConfigBlock for generator algorithms"""
 
     def __init__ (self) :
-        super (GeneratorAnalysisBlock, self).__init__ ()
-        self.saveCutBookkeepers = False
-        self.runNumber = 0
-        self.cutBookkeepersSystematics = False
+        super (GeneratorAnalysisBlock, self).__init__ ('Generator')
+        self.addOption ('saveCutBookkeepers', False, type=bool)
+        self.addOption ('runNumber', 0, type=int)
+        self.addOption ('cutBookkeepersSystematics', False, type=bool)
 
     def makeAlgs (self, config) :
 
@@ -101,36 +102,26 @@ class GeneratorAnalysisBlock (ConfigBlock):
         alg = config.createAlgorithm( 'CP::PMGTruthWeightAlg', 'PMGTruthWeightAlg' )
         config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
         alg.decoration = 'generatorWeight_%SYS%'
-
-
-
-class PrimaryVertexBlock (ConfigBlock):
-    """the ConfigBlock for requiring primary vertices"""
-
-    def __init__ (self) :
-        super (PrimaryVertexBlock, self).__init__ ()
-
-
-    def makeAlgs (self, config) :
-
-        config.createAlgorithm( 'CP::VertexSelectionAlg',
-                                'PrimaryVertexSelectorAlg' )
-        config.VertexContainer = 'PrimaryVertices'
-        config.MinVertices = 1
+        config.addOutputVar ('EventInfo', 'generatorWeight_%SYS%', 'generatorWeight', isEventLevel=True)
 
 
 
 class PtEtaSelectionBlock (ConfigBlock):
     """the ConfigBlock for a pt-eta selection"""
 
-    def __init__ (self, containerName, *, postfix, minPt, maxEta,
-                  selectionDecoration) :
-        super (PtEtaSelectionBlock, self).__init__ ()
+    def __init__ (self, containerName, selectionName) :
+        groupName = containerName
+        if selectionName != '' :
+            groupName += '.' + selectionName
+        super (PtEtaSelectionBlock, self).__init__ (groupName)
         self.containerName = containerName
-        self.postfix = postfix
-        self.minPt = minPt
-        self.maxEta = maxEta
-        self.selectionDecoration = selectionDecoration
+        self.selectionName = selectionName
+        self.addOption ('postfix', '', type=str)
+        self.addOption ('minPt', None, type=float,
+                        duplicateAction='skip')
+        self.addOption ('maxEta', None, type=float,
+                        duplicateAction='skip')
+        self.addOption ('selectionDecoration', 'selectPtEta', type=str)
 
     def makeAlgs (self, config) :
 
@@ -152,7 +143,7 @@ class PtEtaSelectionBlock (ConfigBlock):
         alg.selectionDecoration = self.selectionDecoration
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
-        config.addSelection (self.containerName, '', alg.selectionDecoration,
+        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
                              bits=bits)
 
 
@@ -160,12 +151,13 @@ class PtEtaSelectionBlock (ConfigBlock):
 class OutputThinningBlock (ConfigBlock):
     """the ConfigBlock for output thinning"""
 
-    def __init__ (self, containerName, *, postfix) :
-        super (OutputThinningBlock, self).__init__ ()
+    def __init__ (self, containerName, configName) :
+        super (OutputThinningBlock, self).__init__ (containerName + '.' + configName)
         self.containerName = containerName
-        self.postfix = postfix
-        self.selection = None
-        self.outputName = None
+        self.addOption ('postfix', '', type=str)
+        self.addOption ('selection', '', type=str)
+        self.addOption ('selectionName', '', type=str)
+        self.addOption ('outputName', None, type=str)
 
     def makeAlgs (self, config) :
 
@@ -173,7 +165,7 @@ class OutputThinningBlock (ConfigBlock):
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
-        selection = config.getPreselection (self.containerName, '')
+        selection = config.getFullSelection (self.containerName, self.selectionName)
         if selection == '' :
             selection = self.selection
         elif self.selection != '' :
@@ -189,6 +181,7 @@ class OutputThinningBlock (ConfigBlock):
         alg.input = config.readName (self.containerName)
         if self.outputName is not None :
             alg.output = self.outputName + '_%SYS%'
+            config.addOutputContainer (self.containerName, self.outputName)
         else :
             alg.output = config.copyName (self.containerName)
         if selection != '' :
@@ -199,7 +192,7 @@ class OutputThinningBlock (ConfigBlock):
 
 
 
-def makePileupReweightingConfig( seq, campaign=None, files=None, useDefaultConfig=False, userLumicalcFiles=None, userPileupConfigs=None ):
+def makePileupReweightingConfig( seq, campaign=None, files=None, useDefaultConfig=None, userLumicalcFiles=None, userPileupConfigs=None ):
     """Create a PRW analysis config
 
     Keyword arguments:
@@ -207,19 +200,19 @@ def makePileupReweightingConfig( seq, campaign=None, files=None, useDefaultConfi
     # TO DO: add explanation of the keyword arguments, left to experts
 
     config = PileupReweightingBlock ()
-    config.campaign = campaign
-    config.files = files
-    config.useDefaultConfig = useDefaultConfig
-    config.userLumicalcFiles = userLumicalcFiles
-    config.userPileupConfigs = userPileupConfigs
+    config.setOptionValue ('campaign', campaign, noneAction='ignore')
+    config.setOptionValue ('files', files, noneAction='ignore')
+    config.setOptionValue ('useDefaultConfig', useDefaultConfig, noneAction='ignore')
+    config.setOptionValue ('userLumicalcFiles', userLumicalcFiles, noneAction='ignore')
+    config.setOptionValue ('userPileupConfigs', userPileupConfigs, noneAction='ignore')
     seq.append (config)
 
 
 
 def makeGeneratorAnalysisConfig( seq,
-                                 saveCutBookkeepers=False,
-                                 runNumber=0,
-                                 cutBookkeepersSystematics=False ):
+                                 saveCutBookkeepers=None,
+                                 runNumber=None,
+                                 cutBookkeepersSystematics=None ):
     """Create a generator analysis algorithm sequence
 
     Keyword arguments:
@@ -229,25 +222,16 @@ def makeGeneratorAnalysisConfig( seq,
     """
 
     config = GeneratorAnalysisBlock ()
-    config.saveCutBookkeepers = saveCutBookkeepers
-    config.runNumber = runNumber
-    config.cutBookkeepersSystematics = cutBookkeepersSystematics
-    seq.append (config)
-
-
-
-def makePrimaryVertexConfig( seq ) :
-    """Create config block that requires a primary vertex
-    """
-
-    config = PrimaryVertexBlock ()
+    config.setOptionValue ('saveCutBookkeepers', saveCutBookkeepers, noneAction='ignore')
+    config.setOptionValue ('runNumber', runNumber, noneAction='ignore')
+    config.setOptionValue ('cutBookkeepersSystematics', cutBookkeepersSystematics, noneAction='ignore')
     seq.append (config)
 
 
 
 def makePtEtaSelectionConfig( seq, containerName,
-                              *, postfix = '', minPt = None, maxEta = None,
-                              selectionDecoration):
+                              *, postfix = None, minPt = None, maxEta = None,
+                              selectionDecoration = None, selectionName = ''):
     """Create a pt-eta kinematic selection config
 
     Keyword arguments:
@@ -259,17 +243,20 @@ def makePtEtaSelectionConfig( seq, containerName,
       minPt -- minimum pt value
       maxEta -- maximum eta value
       selectionDecoration -- the name of the decoration to set
+      selectionName -- the name of the selection to append this to
     """
 
-    config = PtEtaSelectionBlock (containerName, postfix=postfix,
-                                  minPt=minPt,maxEta=maxEta,
-                                  selectionDecoration=selectionDecoration)
+    config = PtEtaSelectionBlock (containerName, selectionName)
+    config.setOptionValue ('postfix',postfix, noneAction='ignore')
+    config.setOptionValue ('minPt',minPt, noneAction='ignore')
+    config.setOptionValue ('maxEta',maxEta, noneAction='ignore')
+    config.setOptionValue ('selectionDecoration',selectionDecoration, noneAction='ignore')
     seq.append (config)
 
 
 
 def makeOutputThinningConfig( seq, containerName,
-                              *, postfix = '', selection = None, outputName = None):
+                              *, postfix = None, selection = None, selectionName = None, outputName = None, configName='Thinning'):
     """Create an output thinning config
 
     This will do a consistent selection of output containers (if there
@@ -287,7 +274,9 @@ def makeOutputThinningConfig( seq, containerName,
 
     """
 
-    config = OutputThinningBlock (containerName, postfix=postfix)
-    config.selection = selection
-    config.outputName = outputName
+    config = OutputThinningBlock (containerName, configName)
+    config.setOptionValue ('postfix', postfix, noneAction='ignore')
+    config.setOptionValue ('selection', selection, noneAction='ignore')
+    config.setOptionValue ('selectionName', selectionName, noneAction='ignore')
+    config.setOptionValue ('outputName', outputName, noneAction='ignore')
     seq.append (config)

@@ -114,7 +114,7 @@ const Trk::Track * TrackHandle_TrackParticle::provide_pathInfoTrkTrack() const
     if (needresorting) {
       const Trk::TrackParameters* p = trackpars.at(trackpars.size()-1);
       if (p)
-        trackStateOnSurfaces->push_back(new Trk::TrackStateOnSurface(nullptr,p->uniqueClone(),nullptr,nullptr));
+        trackStateOnSurfaces->push_back(new Trk::TrackStateOnSurface(nullptr,p->uniqueClone(),nullptr));
     }
     unsigned limit(needresorting?trackpars.size()-1:trackpars.size());
 
@@ -125,7 +125,7 @@ const Trk::Track * TrackHandle_TrackParticle::provide_pathInfoTrkTrack() const
         continue;
       if (!common()->trackSanityHelper()->isSafe(p))
         continue;
-      trackStateOnSurfaces->push_back(new Trk::TrackStateOnSurface(nullptr,p->uniqueClone(),nullptr,nullptr));
+      trackStateOnSurfaces->push_back(new Trk::TrackStateOnSurface(nullptr,p->uniqueClone(),nullptr));
     }
   }
 

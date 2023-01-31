@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #********************************************************************
 # MuonsCommonConfig.py 
@@ -10,7 +10,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def MuonsCommonCfg(ConfigFlags, suff=""):
+def MuonsCommonCfg(flags, suff=""):
     """Main method configuring common muon augmentations"""
     
     Container = "Muons"+suff
@@ -29,13 +29,12 @@ def MuonsCommonCfg(ConfigFlags, suff=""):
     ### IDHits
     # turn of the momentum correction which is not needed for IDHits cut and Preselection
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
     from AthenaConfiguration.Enums import LHCPeriod
     isRun3 = False
-    if ConfigFlags.GeoModel.Run == LHCPeriod.Run3: isRun3 = True
+    if flags.GeoModel.Run == LHCPeriod.Run3: isRun3 = True
     if not hasattr(acc, "DFCommonMuonsSelector"):
         DFCommonMuonsSelector = acc.popToolsAndMerge(MuonSelectionToolCfg(
-            ConfigFlags,
+            flags,
             name            = "DFCommonMuonsSelector",
             MaxEta          = 3.,
             MuQuality       = 3,
@@ -44,7 +43,7 @@ def MuonsCommonCfg(ConfigFlags, suff=""):
         acc.addPublicTool(DFCommonMuonsSelector)
     if DFCommonMuonsTrtCutOff is not None: DFCommonMuonsSelector.TrtCutOff = DFCommonMuonsTrtCutOff
     DFCommonMuonToolWrapperIDCuts = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(
-        ConfigFlags,
+        flags,
         name               = "DFCommonMuonToolWrapperIDCuts"+suff,
         AsgSelectionTool   = DFCommonMuonsSelector,
         CutType            = "IDHits",
@@ -53,7 +52,7 @@ def MuonsCommonCfg(ConfigFlags, suff=""):
     DFCommonMuonToolWrapperTools.append(DFCommonMuonToolWrapperIDCuts)
    
     DFCommonMuonToolWrapperPreselection = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(
-        ConfigFlags,
+        flags,
         name               = "DFCommonMuonToolWrapperPreselection"+suff,
         AsgSelectionTool   = DFCommonMuonsSelector,
         CutType            = "Preselection",
@@ -80,17 +79,16 @@ def MuonsCommonCfg(ConfigFlags, suff=""):
     #                 'Nonprompt_Medium_MaxWeight',
     #                 'Nonprompt_All_MaxWeight' ]
     for WP in [ 'Nonprompt_All_MaxWeight' ]:
-        acc.merge(DerivationTrackIsoCfg(ConfigFlags, WP = WP, object_types = ('Electrons', 'Muons'), postfix=suff))
+        acc.merge(DerivationTrackIsoCfg(flags, WP = WP, object_types = ('Electrons', 'Muons'), postfix=suff))
 
     if "LRT" in Container and not hasattr(acc, 'LRTMuonCaloIsolationBuilder'):
         from IsolationAlgs.IsolationSteeringDerivConfig import LRTMuonIsolationSteeringDerivCfg
-        acc.merge(LRTMuonIsolationSteeringDerivCfg(ConfigFlags))
+        acc.merge(LRTMuonIsolationSteeringDerivCfg(flags))
 
         from IsolationAlgs.IsolationBuilderConfig import muIsolationCfg
-        acc.merge(muIsolationCfg(ConfigFlags,
+        acc.merge(muIsolationCfg(flags,
                                  name="muonIsolationLRT",
                                  MuonCollectionContainerName = Container
         ))
 
     return acc
-

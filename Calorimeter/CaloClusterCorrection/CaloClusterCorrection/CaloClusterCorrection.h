@@ -45,7 +45,7 @@ Updated:  February, 2006 (DLelas)
 ********************************************************************/
 
 // INCLUDE HEADER FILES:
-#include "CaloRec/CaloClusterProcessor.h"
+#include "CaloUtils/CaloClusterProcessor.h"
 #include "CaloUtils/ToolWithConstants.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "StoreGate/ReadCondHandleKey.h"

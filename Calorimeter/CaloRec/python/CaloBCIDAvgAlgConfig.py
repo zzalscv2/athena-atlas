@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # File: CaloRec/python/CaloBCIDAvgAlgConfig.py
 # Created: Mar 2019, sss
@@ -27,7 +27,7 @@ def CaloBCIDAvgAlgCfg (flags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
     only = ['CaloBCIDAvgAlg',
             'CaloBCIDCoeffsCondAlg',
@@ -42,7 +42,7 @@ if __name__ == "__main__":
             'BunchCrossingCondAlg',
             ]
     print ('--- data')
-    flags1 = ConfigFlags.clone()
+    flags1 = initConfigFlags()
     flags1.Input.Files = []
     flags1.lock()
     acc1 = CaloBCIDAvgAlgCfg (flags1)
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     acc1.wasMerged()
 
     print ('--- mc')
-    flags2 = ConfigFlags.clone()
+    flags2 = initConfigFlags()
     flags2.Input.Files = []
     flags2.Input.isMC = True
     flags2.lock()
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     acc2.wasMerged()
 
     print ('--- online')
-    flags3 = ConfigFlags.clone()
+    flags3 = initConfigFlags()
     flags3.Input.Files = []
     flags3.Common.isOnline = True
     flags3.lock()

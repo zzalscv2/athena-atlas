@@ -160,11 +160,11 @@ StatusCode InDet::SiDetElementsRoadCondAlg_xk::execute(const EventContext& ctx) 
 
           InDet::SiDetElementsLayer_xk layer;
 
-          for (unsigned int j=0; j!=pE.size(); ++j) {
+          for (auto & j : pE) {
 
-            if (pE[j]) {
+            if (j) {
 
-              InDet::SiDetElementsRoadUtils_xk::detElementInformation(*(pE[j]),P);
+              InDet::SiDetElementsRoadUtils_xk::detElementInformation(*j,P);
 
               if ( P[ 9] < rmin ) rmin = P[ 9];
               if ( P[10] > rmax ) rmax = P[10];
@@ -178,7 +178,7 @@ StatusCode InDet::SiDetElementsRoadCondAlg_xk::execute(const EventContext& ctx) 
               if (df1>dfm) dfm = df1;
               if (df2>dfm) dfm = df2;
 
-              InDet::SiDetElementLink_xk link(pE[j], P, m_ITkGeometry);
+              InDet::SiDetElementLink_xk link(j, P, m_ITkGeometry);
               layer.add(link);
             }
           }

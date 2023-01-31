@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -50,6 +50,18 @@ def setupMessageSvc():
    MessageSvc.statLevel = WARNING
 
 
+def getTHistSvc():
+   from TrigServices.TriggerUnixStandardSetup import _Conf  # could also use flags for this
+   if _Conf.useOnlineTHistSvc:
+      log.debug("Using online histogramming service (TrigMonTHistSvc)")
+      svc = CompFactory.TrigMonTHistSvc("THistSvc")
+   else:
+      log.debug("Using offline histogramming service (THistSvc)")
+      svc = CompFactory.THistSvc()
+
+   return svc
+
+
 # Finalize COOL update configuration (called from TriggerUnixStandardSetup.setupCommonServicesEnd)
 def enableCOOLFolderUpdates():
    '''Enable COOL folder updates'''
@@ -72,9 +84,9 @@ def enableCOOLFolderUpdates():
             log.info('IOVDbSvc folder %s not marked as extensible. Fixing this...', f)
 
 
-def getTrigCOOLUpdateHelper(name='TrigCOOLUpdateHelper'):
+def getTrigCOOLUpdateHelper(flags, name='TrigCOOLUpdateHelper'):
    cool_helper = CompFactory.TrigCOOLUpdateHelper(name)
-   cool_helper.MonTool = GenericMonitoringTool('MonTool', HistPath='HLTFramework/'+name)
+   cool_helper.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
    cool_helper.MonTool.defineHistogram('TIME_CoolFolderUpdate', path='EXPERT', type='TH1F',
                                        title='Time for conditions update;time [ms]',
                                        xbins=100, xmin=0, xmax=200)
@@ -93,7 +105,7 @@ def getTrigCOOLUpdateHelper(name='TrigCOOLUpdateHelper'):
 def getHltROBDataProviderSvc(flags, name='ROBDataProviderSvc'):
    '''online ROB data provider service'''
    svc = CompFactory.HltROBDataProviderSvc(name)
-   svc.MonTool = GenericMonitoringTool('MonTool', HistPath='HLTFramework/'+name)
+   svc.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
    svc.MonTool.defineHistogram('TIME_ROBReserveData', path='EXPERT', type='TH1F',
                                title='Time to reserve ROBs for later retrieval;time [mu s]',
                                xbins=100, xmin=0, xmax=1000),
@@ -119,8 +131,7 @@ def getHltROBDataProviderSvc(flags, name='ROBDataProviderSvc'):
 def getHltEventLoopMgr(flags, name='HltEventLoopMgr'):
    '''online event loop manager'''
    svc = CompFactory.HltEventLoopMgr(name)
-   svc.MonTool = GenericMonitoringTool('MonTool', HistPath='HLTFramework/'+name)
-   svc.MonTool = GenericMonitoringTool('MonTool', HistPath='HLTFramework/'+name)
+   svc.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
 
    svc.MonTool.defineHistogram('TotalTime', path='EXPERT', type='TH1F',
                               title='Total event processing time (all events);Time [ms];Events',
@@ -165,7 +176,7 @@ def getHltEventLoopMgr(flags, name='HltEventLoopMgr'):
                               xbins=50, xmin=0, xmax=50)
 
    from TrigSteerMonitor.TrigSteerMonitorConfig import getTrigErrorMonTool
-   svc.TrigErrorMonTool = getTrigErrorMonTool()
+   svc.TrigErrorMonTool = getTrigErrorMonTool(flags)
 
    if flags.Trigger.CostMonitoring.doCostMonitoring:
       svc.TrigErrorMonTool.TrigCostSvc = CompFactory.TrigCostSvc()
@@ -176,14 +187,14 @@ def getHltEventLoopMgr(flags, name='HltEventLoopMgr'):
 def TrigServicesCfg(flags):
    acc = ComponentAccumulator()
 
-   rob_data_provider = getHltROBDataProviderSvc(flags)
-   acc.addService(rob_data_provider)
+   acc.addService( getTHistSvc() )
+   acc.addService( getHltROBDataProviderSvc(flags) )
 
    loop_mgr = getHltEventLoopMgr(flags)
-   loop_mgr.CoolUpdateTool = getTrigCOOLUpdateHelper()
+   loop_mgr.CoolUpdateTool = getTrigCOOLUpdateHelper(flags)
 
    from TrigOutputHandling.TrigOutputHandlingConfig import HLTResultMTMakerCfg
-   loop_mgr.ResultMaker = HLTResultMTMakerCfg()
+   loop_mgr.ResultMaker = HLTResultMTMakerCfg(flags)
 
    from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
    acc.merge(ByteStreamReadCfg(flags))

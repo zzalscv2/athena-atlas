@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FORWARDTRACKER_MAGNET_H
@@ -24,14 +24,14 @@ namespace ForwardTracker {
 	   double              y,
 	   double              z,
 	   double              length,
-	   std::string         aperType,  
+	   const std::string&  aperType,  
 	   double              A1,
 	   double              A2,
 	   double              A3,
 	   double              A4,
 	   Side                side,
 	   IBender::ConstPtr_t bender, 
-	   std::string         label);
+	   const std::string&  label);
     
     enum Type {hbDipole, hfQuadrupole, vfQuadrupole, vbDipole, notAMagnet};
 

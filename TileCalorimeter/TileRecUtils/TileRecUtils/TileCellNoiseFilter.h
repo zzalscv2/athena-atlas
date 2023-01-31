@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////
@@ -10,7 +10,7 @@
 
 // Tile includes
 #include "TileConditions/ITileBadChanTool.h"
-#include "TileConditions/TileCondToolEmscale.h"
+#include "TileConditions/TileEMScale.h"
 #include "TileConditions/TileCondToolNoiseSample.h"
 
 // Calo includes
@@ -68,10 +68,10 @@ class TileCellNoiseFilter: public extends<AthAlgTool, ICaloCellMakerTool> {
     typedef float cmdata_t[s_maxPartition][s_maxDrawer][s_maxMOB];
 
     // set common-mode subtructed energy
-    void setCMSEnergy(const cmdata_t& commonMode, TileCell *cell) const;
+    void setCMSEnergy(const TileEMScale* emScale, const cmdata_t& commonMode, TileCell *cell) const;
 
     // calculate common-mode for all the motherboards
-    int calcCM(const CaloNoise* caloNoise,
+    int calcCM(const CaloNoise* caloNoise, const TileEMScale* emScale,
                const CaloCellContainer *cellcoll, cmdata_t& commonMode,
                const EventContext& ctx) const;
 
@@ -82,11 +82,14 @@ class TileCellNoiseFilter: public extends<AthAlgTool, ICaloCellMakerTool> {
       return commonMode[partition][drawer][channel / s_maxChannel];
     }
 
-    const TileID* m_tileID;   //!< Pointer to TileID
-    const TileHWID* m_tileHWID; //!< Pointer to TileHWID
+    const TileID* m_tileID{nullptr};   //!< Pointer to TileID
+    const TileHWID* m_tileHWID{nullptr}; //!< Pointer to TileHWID
 
-    ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this,
-        "TileCondToolEmscale", "TileCondToolEmscale", "Tile EM scale calibration tool"};
+   /**
+    * @brief Name of TileEMScale in condition store
+    */
+    SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
+        "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
     ToolHandle<TileCondToolNoiseSample> m_tileToolNoiseSample{this,
         "TileCondToolNoiseSample", "TileCondToolNoiseSample", "Tile noise sample tool"};

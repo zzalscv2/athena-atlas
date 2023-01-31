@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -40,6 +40,7 @@ public:
   double getXMin() const { return m_xmin; }
   double getXMax() const { return m_xmax; }
   const float * getVarBins() const { return m_varBins; }
+  float * getVarBins() { return m_varBins; }
 
   void fill(const double& x, const double& profiledpar);
   void fill(const double& x, const double& profiledpar, const double& weight);

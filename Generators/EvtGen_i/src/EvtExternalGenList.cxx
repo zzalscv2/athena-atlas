@@ -43,10 +43,10 @@ using namespace Belle2;
 EvtExternalGenList::EvtExternalGenList( bool convertPythiaCodes,
                                         std::string pythiaXmlDir,
                                         std::string photonType,
-                                        bool useEvtGenRandom )
+                                        bool useEvtGenRandom ) ATLAS_NOT_THREAD_SAFE
 {
     // Instantiate the external generator factory
-    EvtExternalGenFactory* extFactory = EvtExternalGenFactory::getInstance();
+    EvtExternalGenFactory* extFactory = EvtExternalGenFactory::getInstance_mutable();
 
     // Define the external generator "engines" here
     extFactory->definePhotosGenerator( photonType, useEvtGenRandom );

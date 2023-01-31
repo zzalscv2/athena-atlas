@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaCommon.Include import include
@@ -29,6 +29,12 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
   from TrigInDetConfig.TrigInDetConfig import InDetCacheNames
   from AthenaCommon.GlobalFlags import globalflags
 
+  from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolDecorator
+  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from InDetTrigRecExample import InDetTrigCA
+  
+  InDetTrigCA.InDetTrigConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
+  
   # Load RDOs if we aren't loading bytestream                                                                                       
   from AthenaCommon.AlgSequence import AlgSequence
   topSequence = AlgSequence()
@@ -309,7 +315,13 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
   #FIXME have a flag for now set for True( as most cases call FTF) but potentially separate
   #do not add if the config is LRT
   if doFTF:
+    
+      from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
+      trackSummaryTool = CAtoLegacyPublicToolDecorator(InDetTrigTrackSummaryToolCfg)
 
+      from TrkConfig.TrkParticleCreatorConfig import InDetTrigParticleCreatorToolFTFCfg
+      InDetTrigParticleCreatorToolFTF = CAtoLegacyPublicToolDecorator(InDetTrigParticleCreatorToolFTFCfg)
+      
       if config is None:
             raise ValueError('makeInDetTrigFastTracking() No signature config specified')
 
@@ -317,8 +329,6 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
         # use SiSPSeededTrackFinder for fast tracking
         from InDetRecExample.ConfiguredNewTrackingCuts import ConfiguredNewTrackingCuts
         trackingCuts = ConfiguredNewTrackingCuts( "R3LargeD0" )
-        from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTrackSummaryTool
-        summaryTool = InDetTrigTrackSummaryTool
         # --- Loading Pixel, SCT conditions
         from AthenaCommon.AlgSequence import AthSequencer
         condSeq = AthSequencer("AthCondSeq")
@@ -345,7 +355,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
                                                                trackingCuts          = trackingCuts,
                                                                usePrdAssociationTool = False,
                                                                nameSuffix            = config.input_name,
-                                                               trackSummaryTool      = summaryTool )
+                                                               trackSummaryTool      = trackSummaryTool )
 
 
         viewAlgs.append( siSPSeededTrackFinder )
@@ -365,9 +375,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
 
       if not config.doZFinderOnly: 
 
-        from InDetTrigRecExample.InDetTrigConfigRecLoadToolsPost import  InDetTrigParticleCreatorToolFTF
         from InDetTrigParticleCreation.InDetTrigParticleCreationConf import InDet__TrigTrackingxAODCnvMT
-
         theTrackParticleCreatorAlg = InDet__TrigTrackingxAODCnvMT(name = "InDetTrigTrackParticleCreatorAlg" + signature,
                                                                   TrackName = config.trkTracks_FTF(),
                                                                   ParticleCreatorTool = InDetTrigParticleCreatorToolFTF)
@@ -388,11 +396,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
           viewAlgs.append(theFTF2)
 
           
-          from InDetTrigRecExample.InDetTrigConfigRecLoadToolsPost import  InDetTrigParticleCreatorToolFTF
           from InDetTrigParticleCreation.InDetTrigParticleCreationConf import InDet__TrigTrackingxAODCnvMT
-          
-          
-          
           theTrackParticleCreatorAlg2 = InDet__TrigTrackingxAODCnvMT(name = "InDetTrigTrackParticleCreatorAlg_" + secondStageConfig.input_name,
                                                                   TrackName = secondStageConfig.trkTracks_FTF(),
                                                                      ParticleCreatorTool = InDetTrigParticleCreatorToolFTF)

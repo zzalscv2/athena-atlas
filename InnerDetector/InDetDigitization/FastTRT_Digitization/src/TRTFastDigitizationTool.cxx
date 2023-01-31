@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -7,8 +7,6 @@
 //
 //   Implementation file for class TRTFastDigitizationTool
 //
-///////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
 #include "FastTRT_Digitization/TRTFastDigitizationTool.h"
@@ -29,7 +27,6 @@
 
 // Other includes
 #include "PileUpTools/PileUpMergeSvc.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
 
 #include "TrkDetElementBase/TrkDetElementBase.h"
 #include "TrkParameters/TrackParameters.h"
@@ -39,6 +36,7 @@
 #include "InDetPrepRawData/TRT_DriftCircle.h"
 
 // CLHEP
+#include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Vector/ThreeVector.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
@@ -49,51 +47,14 @@
 
 #include <memory>
 
-//static constexpr unsigned int crazyParticleBarcode( std::numeric_limits< int32_t >::max() );
-// Barcodes at the HepMC level are int
-
 // select the High threshold bits of TRT RDO words
 static const unsigned int maskHT=0x04020100;
 
 TRTFastDigitizationTool::TRTFastDigitizationTool( const std::string &type,
                                                   const std::string &name,
                                                   const IInterface *parent )
-  : PileUpToolBase( type, name, parent ),
-    m_trtDriftFunctionTool( "TRT_DriftFunctionTool/FatrasTrtDriftFunctionTool" ),
-    m_useTrtElectronPidTool( true ),
-    m_trtElectronPidTool( "InDet::TRT_ElectronPidToolRun2/InDetTRT_ElectronPidTool" ),
-    m_trtStrawStatusSummaryTool( "InDetTRTStrawStatusSummaryTool", this ),
-    m_mergeSvc( "PileUpMergeSvc", name ),
-    m_atRndmGenSvc ( "AtRndmGenSvc", name ),
-    m_randomEngine( nullptr ),
-    m_randomEngineName( "FatrasRnd" ),
-    m_trtHitCollectionKey( "TRTUncompressedHits" ),
-    m_trtDriftCircleContainer( "TRT_DriftCircles" ),
-    m_trtPrdTruth( "PRD_MultiTruthTRT" ),
-    m_thpctrt( nullptr ),
-    m_trt_manager( nullptr ),
-    m_trt_id( nullptr ),
-    m_HardScatterSplittingMode( 0 ),
-    m_HardScatterSplittingSkipper( false ),
-    m_vetoThisBarcode( crazyParticleBarcode ),
-    m_useEventInfo( false ),
-    m_NCollPerEvent( 30 ),
-    m_trtHighProbabilityBoostBkg(1.), 
-    m_trtHighProbabilityBoostEle(1.)
+  : PileUpToolBase( type, name, parent )
 {
-  declareProperty( "TRT_DriftFunctionTool",       m_trtDriftFunctionTool );
-  declareProperty( "TRT_ElectronPidTool",         m_trtElectronPidTool );
-  declareProperty( "TRT_StrawStatusSummaryTool",   m_trtStrawStatusSummaryTool );
-  declareProperty( "MergeSvc",                    m_mergeSvc );
-  declareProperty( "RndmSvc",                     m_atRndmGenSvc );
-  declareProperty( "RandomStreamName",            m_randomEngineName );
-  declareProperty( "trtHitCollectionName",        m_trtHitCollectionKey );
-  declareProperty( "trtDriftCircleContainer",     m_trtDriftCircleContainer );
-  declareProperty( "trtPrdMultiTruthCollection",  m_trtPrdTruth );
-  declareProperty( "HardScatterSplittingMode",    m_HardScatterSplittingMode, "Control pileup & signal splitting" );
-  declareProperty( "ParticleBarcodeVeto",         m_vetoThisBarcode, "Barcode of particle to ignore");
-  declareProperty( "useEventInfo",                m_useEventInfo);
-  declareProperty( "NCollPerEvent",               m_NCollPerEvent);
 }
 
 
@@ -102,12 +63,7 @@ StatusCode TRTFastDigitizationTool::initialize()
   ATH_MSG_DEBUG( "TRTFastDigitizationTool::initialize()" );
 
   // Get Random Service
-  CHECK( m_atRndmGenSvc.retrieve() );
-  m_randomEngine = m_atRndmGenSvc->GetEngine( m_randomEngineName );
-  if ( !m_randomEngine ) {
-    ATH_MSG_ERROR( "Could not get random engine '" << m_randomEngineName << "'" );
-    return StatusCode::FAILURE;
-  }
+  CHECK( m_rndmSvc.retrieve() );
 
   // Get the TRT Detector Manager
   CHECK( detStore()->retrieve( m_trt_manager, "TRT" ) );
@@ -129,6 +85,9 @@ StatusCode TRTFastDigitizationTool::initialize()
   } else {
     ATH_MSG_DEBUG( "Input hits: " << m_trtHitCollectionKey );
   }
+
+  ATH_CHECK(m_trtPrdTruthKey.initialize());
+  ATH_CHECK(m_trtDriftCircleContainerKey.initialize());
 
   CHECK( m_trtDriftFunctionTool.retrieve() );
 
@@ -171,7 +130,7 @@ StatusCode TRTFastDigitizationTool::processBunchXing( int bunchXing,
 
   if (!(m_mergeSvc->retrieveSubSetEvtData(m_trtHitCollectionKey, hitCollList, bunchXing,
                                           bSubEvents, eSubEvents).isSuccess()) &&
-      hitCollList.size() == 0) {
+      hitCollList.empty()) {
     ATH_MSG_ERROR("Could not fill TimedHitCollList");
     return StatusCode::FAILURE;
   } else {
@@ -291,8 +250,19 @@ StatusCode TRTFastDigitizationTool::setNumericalConstants() {
    return StatusCode::SUCCESS;
 }
 
-StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx) {
-  
+StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx,
+                                                        CLHEP::HepRandomEngine* rndmEngine,
+                                                        TimedHitCollection< TRTUncompressedHit >& thpctrt)
+{
+  // Create OUTPUT PRD_MultiTruthCollection for TRT measurements
+  SG::WriteHandle< PRD_MultiTruthCollection > trtPrdTruth(m_trtPrdTruthKey, ctx);
+  trtPrdTruth = std::make_unique< PRD_MultiTruthCollection >();
+  if ( !trtPrdTruth.isValid() ) {
+    ATH_MSG_FATAL( "Could not record collection " << trtPrdTruth.name() );
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_DEBUG( "PRD_MultiTruthCollection " << trtPrdTruth.name() << " registered in StoreGate" );
+
   if(m_useEventInfo){
 
      SG::ReadHandle<xAOD::EventInfo> eventInfoContainer(m_EventInfoKey, ctx);
@@ -310,7 +280,7 @@ StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx)
   m_driftCircleMap.clear();
 
   TimedHitCollection< TRTUncompressedHit >::const_iterator itr1, itr2;
-  while ( m_thpctrt->nextDetectorElement( itr1, itr2 ) ) {
+  while ( thpctrt.nextDetectorElement( itr1, itr2 ) ) {
 
     for ( ; itr1 != itr2; ++itr1 ) {
 
@@ -348,10 +318,10 @@ StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx)
       efficiency *= m_cFit[ idx ][ 0 ];
 
       // Decide wether to throw away this cluster or not
-      if ( CLHEP::RandFlat::shoot( m_randomEngine ) < ( 1. - efficiency ) ) continue;
+      if ( CLHEP::RandFlat::shoot( rndmEngine ) < ( 1. - efficiency ) ) continue;
 
       // Decide core/tail fraction
-      bool isTail = ( CLHEP::RandFlat::shoot( m_randomEngine ) < m_trtTailFraction );
+      bool isTail = ( CLHEP::RandFlat::shoot( rndmEngine ) < m_trtTailFraction );
 
       double sigmaTrt = m_trtSigmaDriftRadiusTail;
       if ( !isTail ) {
@@ -363,8 +333,8 @@ StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx)
       double dR = 0;
       int ii = 0;
       do {
-        double tailSmearing = CLHEP::RandFlat::shoot( m_randomEngine );
-        dR = CLHEP::RandGaussZiggurat::shoot( m_randomEngine, 0., ( tailSmearing < m_cFit[ idx ][ 2 ] ? m_cFit[ idx ][ 3 ] : m_cFit[ idx ][ 4 ] ) ) * sigmaTrt;
+        double tailSmearing = CLHEP::RandFlat::shoot( rndmEngine );
+        dR = CLHEP::RandGaussZiggurat::shoot( rndmEngine, 0., ( tailSmearing < m_cFit[ idx ][ 2 ] ? m_cFit[ idx ][ 3 ] : m_cFit[ idx ][ 4 ] ) ) * sigmaTrt;
         ++ii;
         if ( ii > 50 ) {  // should not appear in simulation
           dR = 2. - driftRadiusLoc;
@@ -402,7 +372,7 @@ StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx)
            probability = m_trtHighProbabilityBoostBkg*getProbHT( particleEncoding, kineticEnergy, straw_id, smearedRadius, position);
         }
 
-        if ( CLHEP::RandFlat::shoot( m_randomEngine ) < probability ) word |= maskHT;
+        if ( CLHEP::RandFlat::shoot( rndmEngine ) < probability ) word |= maskHT;
       }
       else {
 
@@ -413,11 +383,11 @@ StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx)
 
         if ( abs( particleEncoding ) == 11 && p > 5000. ) {  // electron
           double probability = ( p < 20000. ? HTProbabilityElectron_low_pt( eta ) : HTProbabilityElectron_high_pt( eta ) );
-          if ( CLHEP::RandFlat::shoot( m_randomEngine ) < probability ) word |= maskHT;
+          if ( CLHEP::RandFlat::shoot( rndmEngine ) < probability ) word |= maskHT;
         }
         else if ( abs( particleEncoding ) == 13 || abs( particleEncoding ) > 100 ) {  // muon or other particle
           double probability = ( p < 20000. ? HTProbabilityMuon_5_20( eta ) : HTProbabilityMuon_60( eta ) );
-          if ( CLHEP::RandFlat::shoot( m_randomEngine ) < probability ) word |= maskHT;
+          if ( CLHEP::RandFlat::shoot( rndmEngine ) < probability ) word |= maskHT;
         }
 
       }
@@ -437,7 +407,7 @@ StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx)
       if ( hit->particleLink().isValid() ) {
         const int barcode( hit->particleLink().barcode() );
         if ( barcode !=0 && barcode != m_vetoThisBarcode ) {
-          m_trtPrdTruth->insert( std::make_pair( trtDriftCircle->identify(), hit->particleLink() ) );
+          trtPrdTruth->insert( std::make_pair( trtDriftCircle->identify(), hit->particleLink() ) );
           ATH_MSG_DEBUG( "Truth map filled with cluster " << trtDriftCircle << " and link = " << hit->particleLink() );
         }
       }
@@ -456,8 +426,6 @@ StatusCode TRTFastDigitizationTool::processAllSubEvents(const EventContext& ctx)
 
   ATH_MSG_DEBUG( "TRTFastDigitizationTool::processAllSubEvents()" );
 
-  CHECK( this->createOutputContainers() );
-
   using HitCollectionTimedList = PileUpMergeSvc::TimedList<TRTUncompressedHitCollection>::type;
 
   HitCollectionTimedList hitCollectionTimedList;
@@ -472,48 +440,25 @@ StatusCode TRTFastDigitizationTool::processAllSubEvents(const EventContext& ctx)
 
   m_HardScatterSplittingSkipper = false;
   TimedHitCollection< TRTUncompressedHit > timedHitCollection( numberOfSimHits );
-  for ( HitCollectionTimedList::iterator itr = hitCollectionTimedList.begin(); itr != hitCollectionTimedList.end(); ++itr ) {
+  for (auto & itr : hitCollectionTimedList) {
     // decide if this event will be processed depending on HardScatterSplittingMode & bunchXing
     if ( m_HardScatterSplittingMode == 2 && !m_HardScatterSplittingSkipper ) { m_HardScatterSplittingSkipper = true; continue; }
     if ( m_HardScatterSplittingMode == 1 && m_HardScatterSplittingSkipper )  { continue; }
     if ( m_HardScatterSplittingMode == 1 && !m_HardScatterSplittingSkipper ) { m_HardScatterSplittingSkipper = true; }
-    timedHitCollection.insert( itr->first, static_cast< const TRTUncompressedHitCollection * >( itr->second ) );
+    timedHitCollection.insert( itr.first, static_cast< const TRTUncompressedHitCollection * >( itr.second ) );
   }
-  m_thpctrt = &timedHitCollection;
+
+  // Set the RNG to use for this event.
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomEngineName);
+  const std::string rngName = name()+m_randomEngineName;
+  rngWrapper->setSeed( rngName, ctx );
+  CLHEP::HepRandomEngine *rndmEngine = rngWrapper->getEngine(ctx);
 
   // Process the Hits straw by straw: get the iterator pairs for given straw
-  CHECK( this->produceDriftCircles(ctx) );
+  CHECK( this->produceDriftCircles(ctx, rndmEngine, timedHitCollection ) );
 
-  CHECK( this->createAndStoreRIOs() );
+  CHECK( this->createAndStoreRIOs(ctx, rndmEngine) );
   ATH_MSG_DEBUG ( "createAndStoreRIOs() succeeded" );
-
-  return StatusCode::SUCCESS;
-}
-
-
-StatusCode TRTFastDigitizationTool::createOutputContainers() {
-
-  ATH_MSG_DEBUG( "TRTFastDigitizationTool::createOutputContainers()" );
-
-  // Create OUTPUT TRT_DriftCircleContainer and register it in StoreGate
-  if ( !m_trtDriftCircleContainer.isValid() ) {
-    m_trtDriftCircleContainer = std::make_unique< InDet::TRT_DriftCircleContainer >( m_trt_id->straw_layer_hash_max() );
-    if ( !m_trtDriftCircleContainer.isValid() ) {
-      ATH_MSG_FATAL( "Could not create TRT_DriftCircleContainer" );
-      return StatusCode::FAILURE;
-    }
-  }
-  ATH_MSG_DEBUG( "InDet::TRT_DriftCircleContainer " << m_trtDriftCircleContainer.name() << " registered in StoreGate" );
-
-  // Create OUTPUT PRD_MultiTruthCollection for TRT measurements
-  if ( !m_trtPrdTruth.isValid() ) {
-    m_trtPrdTruth = std::make_unique< PRD_MultiTruthCollection >();
-    if ( !m_trtPrdTruth.isValid() ) {
-      ATH_MSG_FATAL( "Could not record collection " << m_trtPrdTruth.name() );
-      return StatusCode::FAILURE;
-    }
-  }
-  ATH_MSG_DEBUG( "PRD_MultiTruthCollection " << m_trtPrdTruth.name() << " registered in StoreGate" );
 
   return StatusCode::SUCCESS;
 }
@@ -523,11 +468,15 @@ StatusCode TRTFastDigitizationTool::mergeEvent(const EventContext& ctx) {
 
   ATH_MSG_DEBUG( "TRTFastDigitizationTool::mergeEvent()" );
 
-  CHECK( this->createOutputContainers() );
+  // Set the RNG to use for this event.
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomEngineName);
+  const std::string rngName = name()+m_randomEngineName;
+  rngWrapper->setSeed( rngName, ctx );
+  CLHEP::HepRandomEngine *rndmEngine = rngWrapper->getEngine(ctx);
 
   // Process the Hits straw by straw: get the iterator pairs for given straw
   if ( m_thpctrt != nullptr ) {
-    CHECK( this->produceDriftCircles(ctx) );
+    CHECK( this->produceDriftCircles(ctx, rndmEngine, *m_thpctrt) );
   }
 
   // Clean up temporary containers
@@ -535,15 +484,24 @@ StatusCode TRTFastDigitizationTool::mergeEvent(const EventContext& ctx) {
   for(TRTUncompressedHitCollection* ptr : m_trtHitCollList) delete ptr;
   m_trtHitCollList.clear();
 
-  CHECK( this->createAndStoreRIOs() );
+  CHECK( this->createAndStoreRIOs(ctx, rndmEngine) );
   ATH_MSG_DEBUG ( "createAndStoreRIOs() succeeded" );
 
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode TRTFastDigitizationTool::createAndStoreRIOs()
+StatusCode TRTFastDigitizationTool::createAndStoreRIOs(const EventContext& ctx, CLHEP::HepRandomEngine* rndmEngine)
 {
+  // Create OUTPUT TRT_DriftCircleContainer and register it in StoreGate
+  SG::WriteHandle<InDet::TRT_DriftCircleContainer > trtDriftCircleContainer(m_trtDriftCircleContainerKey, ctx);
+  trtDriftCircleContainer = std::make_unique< InDet::TRT_DriftCircleContainer >( m_trt_id->straw_layer_hash_max() );
+  if ( !trtDriftCircleContainer.isValid() ) {
+    ATH_MSG_FATAL( "Could not create TRT_DriftCircleContainer" );
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_DEBUG( "InDet::TRT_DriftCircleContainer " << trtDriftCircleContainer.name() << " registered in StoreGate" );
+
   using DriftCircleMapItr = std::multimap<Identifier, InDet::TRT_DriftCircle *>::iterator;
   using HashMapItr = std::multimap<IdentifierHash, InDet::TRT_DriftCircle *>::iterator;
 
@@ -575,7 +533,7 @@ StatusCode TRTFastDigitizationTool::createAndStoreRIOs()
   // set the word of the first hit to high threshold with some probability, unless any of the hits is HT already
     if( !(trtDriftCircle->getWord() & maskHT) && !isHT && numberOfHitsInOneStraw > 1) {
       unsigned int newword = 0;
-      if(highTRMergeProb*(numberOfHitsInOneStraw-1) > CLHEP::RandFlat::shoot( m_randomEngine )) newword += 1 << (26-9); 
+      if(highTRMergeProb*(numberOfHitsInOneStraw-1) > CLHEP::RandFlat::shoot( rndmEngine )) newword += 1 << (26-9); 
       const unsigned int newword2 = newword;
       const Amg::Vector2D locpos = trtDriftCircle->localPosition();
       const std::vector<Identifier> &rdolist = trtDriftCircle->rdoList();
@@ -614,7 +572,7 @@ StatusCode TRTFastDigitizationTool::createAndStoreRIOs()
       trtDriftCircleCollection->push_back( trtDriftCircle );
     }
 
-    if ( m_trtDriftCircleContainer->addCollection( trtDriftCircleCollection, hash ).isFailure() ) {
+    if ( trtDriftCircleContainer->addCollection( trtDriftCircleCollection, hash ).isFailure() ) {
       ATH_MSG_WARNING( "Could not add collection to Identifyable container" );
     }
   }
@@ -761,7 +719,7 @@ bool TRTFastDigitizationTool::isArgonStraw( const Identifier &straw_id ) const
 {
   // TRTCond::StrawStatus::Good == Xenon
   // return ( m_trtStrawStatusSummarySvc->getStatusHT( straw_id ) != TRTCond::StrawStatus::Good ? true : false );
-  return ( gasType( straw_id ) == 1 ? true : false );
+  return ( gasType( straw_id ) == 1 );
 } 
 
 

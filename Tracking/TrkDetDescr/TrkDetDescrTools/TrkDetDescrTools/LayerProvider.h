@@ -1,16 +1,14 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// LayerProvider.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef TRKDETDESCRTOOLS_LAYERPROVIDER_H
 #define TRKDETDESCRTOOLS_LAYERPROVIDER_H
 
 // Trk
+#include "TrkDetDescrTools/LayerProviderImpl.h"
 #include "TrkDetDescrInterfaces/ILayerProvider.h"
+#include "TrkDetDescrInterfaces/ILayerBuilder.h"
 // Gaudi & Athena
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -19,8 +17,6 @@
 namespace Trk {
 
     class Layer;
-    class ILayerBuilder;
-
 
     /** @class LayerProvider
 
@@ -29,8 +25,7 @@ namespace Trk {
       @author Andreas.Salzburger@cern.ch
      */
     class ATLAS_NOT_THREAD_SAFE LayerProvider
-      : public AthAlgTool
-      , virtual public ILayerProvider
+      : public extends<LayerProviderImpl, ILayerProvider>
     {
 
       public:
@@ -38,37 +33,26 @@ namespace Trk {
         LayerProvider(const std::string&,const std::string&,const IInterface*);
 
         /** Destructor */
-        virtual ~LayerProvider();
-        
-        /** initialize */
-        StatusCode initialize();
-        
-        /** finalize */
-        StatusCode finalize();
+        virtual ~LayerProvider() = default;
 
-        /** LayerBuilder interface method - returning the layers at negative side */
-        const std::vector<Layer*> negativeLayers() const; 
-      
+        /** initialize */
+        virtual StatusCode initialize() override final;
+
+        /** LayerBuilder interface method - returning the endcap layer */
+        virtual std::pair<const std::vector<Layer*>, const std::vector<Layer*> >
+          endcapLayer() const override final;
+
         /** LayerBuilder interface method - returning the central layers */
-        const std::vector<Layer*> centralLayers() const; 
-      
-        /** LayerBuilder interface method - returning the layers at negative side */
-        const std::vector<Layer*> positiveLayers() const; 
+        virtual const std::vector<Layer*> centralLayers() const override final;
 
         /** Name identification */
-        const std::string& identification() const;
+        virtual const std::string& identification() const override final;
 
       private:
-        /** LayerBuilder interface method - returning the layers at negative side */
-        const std::vector<Layer*> discLayers(int posneg) const;   
-      
-        ToolHandle<ILayerBuilder>               m_layerBuilder;
-        mutable std::vector<Trk::Layer*>  m_layerCache;
-        
+        PublicToolHandle<ILayerBuilder> m_layerBuilder{this, "LayerBuilder", ""};  // Name specification from outside
     };
 
 
 } // end of namespace
 
 #endif // TRKDETDESCRTOOLS_LAYERPROVIDER_H
-

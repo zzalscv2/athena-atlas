@@ -19,8 +19,9 @@
 
 namespace LVL1 {
 
-  const int s_cells[] = {1,1};
-  const int s_offsets[] = {0,1};
+  const int s_nLayers = 2;
+  const int s_cells[s_nLayers]   = {1,1};
+  const int s_offsets[s_nLayers] = {0,1};
   
   // default constructor
   jTower::jTower():
@@ -84,7 +85,7 @@ void jTower::setPosNeg(int posneg) {
 /** Add ET to a specified cell */
 void jTower::addET(float et, int layer)
 {
-    if (layer < 0  || layer > 2) {
+    if (layer < 0  || layer >= s_nLayers) {
         std::stringstream errMsg;
         errMsg << "addET: Attempt to set an invalid JTower layer with value: " << layer << ". Must be 0 (EM) or 1 (HAD) ";
         throw std::runtime_error(errMsg.str().c_str());
@@ -100,7 +101,7 @@ void jTower::addET(float et, int layer)
 
 void jTower::set_TileCal_Et(int layer, float et) {
 
-    if (layer < 0  || layer > 2) {
+    if (layer < 0  || layer >= s_nLayers) {
         std::stringstream errMsg;
         errMsg << "set_TileCal_Et: Attempt to set an invalid JTower layer with value: " << layer << ". Must be 0 (EM) or 1 (HAD) ";
         throw std::runtime_error(errMsg.str().c_str());
@@ -118,7 +119,7 @@ void jTower::set_TileCal_Et(int layer, float et) {
 void jTower::set_LAr_Et(Identifier ID, int cell, float et, int layer)
 {
 
-    if((layer < 0) || (layer > 2)) {
+    if((layer < 0) || (layer >= s_nLayers)) {
         std::stringstream errMsg;
         errMsg << "Attempt to set jTower SCID in invalid layer (" << layer << ")";
         throw std::runtime_error(errMsg.str().c_str());
@@ -132,7 +133,7 @@ void jTower::set_LAr_Et(Identifier ID, int cell, float et, int layer)
         throw std::runtime_error(errMsg.str().c_str());
         return;
     }
-
+    
     addET(et, cell);
 
     if(layer == 0) {
@@ -151,7 +152,7 @@ void jTower::Do_LAr_encoding(){
     
     //multi linear digitisation encoding
     for(uint layer=0; layer<m_et_float_raw.size(); layer++){
-        unsigned int ecode = jFEXCompression::Compress(m_et_float_raw[layer]); 
+        unsigned int ecode = jFEXCompression::Compress( std::round( m_et_float_raw[layer]) ); 
         int outET = jFEXCompression::Expand(ecode); 
         
         m_et[layer] = outET;         
@@ -179,7 +180,7 @@ int jTower::iPhi() const {
 int jTower::getET(unsigned int layer,  int cell) const {
 
     /// Check cell index in range for layer
-    if (layer > 2 || cell < 0 || cell >= s_cells[layer]) return 0;
+    if (layer >= s_nLayers || cell < 0 || cell >= s_cells[layer]) return 0;
 
     // Return ET
     return m_et[s_offsets[layer] + cell];
@@ -190,7 +191,7 @@ int jTower::getET(unsigned int layer,  int cell) const {
 float jTower::getET_float(unsigned int layer, int cell) const {
 
     /// Check cell index in range for layer
-    if (layer > 2 || cell < 0 || cell >= s_cells[layer]) return 0;
+    if (layer >= s_nLayers || cell < 0 || cell >= s_cells[layer]) return 0;
 
     // Return ET
     return m_et_float_raw[s_offsets[layer] + cell];
@@ -229,7 +230,7 @@ std::vector<int> jTower::getLayerETvec(unsigned int layer) const {
     std::vector<int> cells;
 
     /// Check cell index in range for layer
-    if (layer > 2) return cells;
+    if (layer >= s_nLayers) return cells;
 
     /// Fill output vector
     for (int cell = 0; cell < s_cells[layer]; ++cell) cells.push_back(m_et[s_offsets[layer] + cell]);
@@ -245,7 +246,7 @@ std::vector<float> jTower::getLayerETvec_float(unsigned int layer) const {
     std::vector<float> cells;
 
     /// Check cell index in range for layer
-    if (layer > 2) return cells;
+    if (layer >= s_nLayers) return cells;
 
     /// Fill output vector
     for (int cell = 0; cell < s_cells[layer]; ++cell) cells.push_back(m_et_float_raw[s_offsets[layer] + cell]);

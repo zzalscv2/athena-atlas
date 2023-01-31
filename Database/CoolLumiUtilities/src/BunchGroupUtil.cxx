@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CoolLumiUtilities/BunchGroupUtil.h"
@@ -8,6 +8,7 @@
 #include "CoralBase/Attribute.h"
 #include <sstream>
 #include <iostream>
+#include <cstdint>
 
 
 BunchGroupUtil::BunchGroupUtil() {
@@ -73,7 +74,6 @@ BunchGroupUtil::setValue(const coral::AttributeList& attrList) {
 
   // Pointer to blob to allow unpacking from binary
   const uint8_t *p=static_cast<const uint8_t*>(blobBC.startingAddress());
-  unsigned int c0 = 0;
   unsigned int c1 = 0;
   unsigned int c3 =0;
   unsigned int c5 = 0;
@@ -122,9 +122,6 @@ BunchGroupUtil::setValue(const coral::AttributeList& attrList) {
     else if (tmp==1) {
       c1++;
       //      std::cout << "1   " << i << std::endl;
-    }
-    else if (tmp==0) {
-      c0++;
     }
     else {
       other++;

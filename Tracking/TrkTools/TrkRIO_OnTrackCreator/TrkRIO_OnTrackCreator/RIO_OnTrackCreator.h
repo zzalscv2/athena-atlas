@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // RIO_OnTrackCreator.h
@@ -87,11 +87,8 @@ namespace Trk {
     ToolHandle<IRIO_OnTrackCreator>  m_trt_Cor{this, "ToolTRT_DriftCircle","InDet::TRT_DriftCircleOnTrackTool/TRT_DriftCircleOnTrackTool" };
     //! Detector-specific helper tool, performing the actual calibration corrections for every Muon::MdtPrepData 
     ToolHandle<IRIO_OnTrackCreator>  m_muonDriftCircleCor{this, "ToolMuonDriftCircle", "Muon::MdtDriftCircleOnTrackCreator/MdtDriftCircleOnTrackTool" };
-    //! Detector-specific helper tool, performing the actual calibration corrections for the remaining muon detector technologies: RPC, TGC and CSC.
+    //! Detector-specific helper tool, performing the actual calibration corrections for the remaining muon detector technologies: RPC, TGC, CSC, MM, sTGC.
     ToolHandle<IRIO_OnTrackCreator>  m_muonClusterCor{this,"ToolMuonCluster", "Muon::MuonClusterOnTrackCreator/MuonClusterOnTrackTool" } ;
-    //! Detector-specific helper tool, performing the actual calibration corrections for every Muon::MMPrepData 
-    ToolHandle<IRIO_OnTrackCreator>  m_mmClusterCor{this, "ToolMuonMMCluster", ""};
-     
 
     Gaudi::Property<std::string>m_mode{this, "Mode" ,"all" };   //!< flag: can be 'all', 'indet' or 'muon'
     bool                             m_doPixel{true}; //!< Load Pixel IRIO_OnTrackCreator

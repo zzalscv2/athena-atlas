@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -61,11 +61,17 @@
 
 namespace {
     // thresholds for the shortest and longest strips
-    // values from https://indico.cern.ch/event/1002207/contributions/4240818
-    // slide 10
+    //values from https://indico.cern.ch/event/1131762/contributions/4749097/attachments/2431773/4164431/MMGcoord2022.04.26.pdf
 
-    constexpr float maxNoise = 2600;
-    constexpr float minNoise = 1000;
+    constexpr float maxNoiseSmall_eta1 = 2100;
+    constexpr float minNoiseSmall_eta1 = 1000;
+    constexpr float maxNoiseSmall_eta2 = 2600;
+    constexpr float minNoiseSmall_eta2 = 2100;
+
+    constexpr float maxNoiseLarge_eta1 = 2500;
+    constexpr float minNoiseLarge_eta1 = 1200;
+    constexpr float maxNoiseLarge_eta2 = 3000;
+    constexpr float minNoiseLarge_eta2 = 2500;
 
 }  // namespace
 
@@ -169,37 +175,96 @@ StatusCode MM_DigitizationTool::initialize() {
     if (m_doSmearing) ATH_MSG_INFO("Running in smeared mode!");
 
     // get shortest and longest strip length for threshold scaling
-    //
-    Identifier tmpId;  // temporary identifier to work with ReadoutElement
-
-    // identifier for first gas gap in a large MM sector, layer is eta layer, station Eta = 1 to get shortest strip
-    tmpId = m_idHelperSvc->mmIdHelper().channelID("MML", 1, 1, 1, 1, 1);
-
+    Identifier tmpId{0};  // temporary identifier to work with ReadoutElement
     const MuonGM::MuonDetectorManager* muonGeoMgr{nullptr};
     ATH_CHECK(detStore()->retrieve(muonGeoMgr));
+    int stripNumberShortestStrip{-1}, stripNumberLongestStrip{-1};
+    Identifier tmpIdShortestStrip{0},tmpIdLongestStrip{0};
+    float shortestStripLength{FLT_MAX}, longestStripLength{0};   
+
+    //============================
+    //SMALL SECTORS - ETA 1 CHAMBERS
+    // identifier for first gas gap in a small MM sector, layer is eta layer
+    tmpId = m_idHelperSvc->mmIdHelper().channelID("MMS", 1, 1, 1, 1, 1);
     const MuonGM::MMReadoutElement* detectorReadoutElement = muonGeoMgr->getMMReadoutElement(tmpId);
-    int stripNumberShortestStrip = (detectorReadoutElement->getDesign(tmpId))->nMissedBottomEta + 1;
-    Identifier tmpIdShortestStrip = m_idHelperSvc->mmIdHelper().channelID(
-        "MML", 1, 1, 1, 1, stripNumberShortestStrip);  // identifier for first gas gap in a large MM sector, layer is eta layer
-    float shortestStripLength = detectorReadoutElement->stripLength(tmpIdShortestStrip);
+    stripNumberShortestStrip = (detectorReadoutElement->getDesign(tmpId))->nMissedBottomEta + 1;
+    tmpIdShortestStrip = m_idHelperSvc->mmIdHelper().channelID("MMS", 1, 1, 1, 1, stripNumberShortestStrip);  // identifier for the shortest strip
+    shortestStripLength = detectorReadoutElement->stripLength(tmpIdShortestStrip);
 
-    // identifier for first gas gap in a large MM sector, layer is eta layer, station Eta = 2 to get the longest strip
-    Identifier tmpId2 = m_idHelperSvc->mmIdHelper().channelID("MML", 2, 1, 1, 1, 1);
-
-    detectorReadoutElement = muonGeoMgr->getMMReadoutElement(tmpId2);
-    int stripNumberLongestStrip =
-        (detectorReadoutElement->getDesign(tmpId))->totalStrips - (detectorReadoutElement->getDesign(tmpId))->nMissedTopEta;
-    Identifier tmpIdLongestStrip = m_idHelperSvc->mmIdHelper().channelID(
-        "MML", 2, 1, 1, 1, stripNumberLongestStrip);  // identifier for first gas gap in a large MM sector, layer is eta layer
-    float longestStripLength = detectorReadoutElement->stripLength(tmpIdLongestStrip);
+    stripNumberLongestStrip = (detectorReadoutElement->getDesign(tmpId))->totalStrips - (detectorReadoutElement->getDesign(tmpId))->nMissedTopEta;
+    tmpIdLongestStrip = m_idHelperSvc->mmIdHelper().channelID("MMS", 1, 1, 1, 1, stripNumberLongestStrip);  // identifier for the longest strip
+    longestStripLength = detectorReadoutElement->stripLength(tmpIdLongestStrip);
 
     // now get the slope and intercept for the threshold scaling
     // function is m_noiseSlope * stripLength + m_noiseIntercept
-    m_noiseSlope = (maxNoise - minNoise) / (longestStripLength - shortestStripLength);
-    m_noiseIntercept = minNoise - m_noiseSlope * shortestStripLength;
+    /// Small wedges first eta station
+    NoiseCalibConstants& noise_smallEta1 = m_noiseParams[m_idHelperSvc->stationName(tmpId)];
+    noise_smallEta1.slope = (maxNoiseSmall_eta1 - minNoiseSmall_eta1) / (longestStripLength - shortestStripLength);
+    noise_smallEta1.intercept =  minNoiseSmall_eta1 - noise_smallEta1.slope* shortestStripLength;    
+    //============================
 
-    ATH_MSG_DEBUG(" Shortest strip number: " << stripNumberShortestStrip << " length: " << shortestStripLength
-                                             << " longest strip number: " << stripNumberLongestStrip << " length " << longestStripLength);
+    //============================
+    //SMALL SECTORS - ETA 2 CHAMBERS
+    // identifier for first gas gap in a small MM sector, layer is eta layer
+    tmpId = m_idHelperSvc->mmIdHelper().channelID("MMS", 2, 1, 1, 1, 1);
+    detectorReadoutElement = muonGeoMgr->getMMReadoutElement(tmpId);
+    stripNumberShortestStrip = (detectorReadoutElement->getDesign(tmpId))->nMissedBottomEta + 1;
+    tmpIdShortestStrip = m_idHelperSvc->mmIdHelper().channelID("MMS", 2, 1, 1, 1, stripNumberShortestStrip);  // identifier for the shortest strip
+    shortestStripLength = detectorReadoutElement->stripLength(tmpIdShortestStrip);
+
+    stripNumberLongestStrip = (detectorReadoutElement->getDesign(tmpId))->totalStrips - (detectorReadoutElement->getDesign(tmpId))->nMissedTopEta;
+    tmpIdLongestStrip = m_idHelperSvc->mmIdHelper().channelID("MMS", 2, 1, 1, 1, stripNumberLongestStrip);  // identifier for the longest strip
+    longestStripLength = detectorReadoutElement->stripLength(tmpIdLongestStrip);
+
+    // now get the slope and intercept for the threshold scaling
+    // function is m_noiseSlope * stripLength + m_noiseIntercept
+    /// Small wedges second eta station
+    NoiseCalibConstants& noise_smallEta2 = m_noiseParams[m_idHelperSvc->stationName(tmpId)*2];
+    noise_smallEta2.slope = (maxNoiseSmall_eta2 - minNoiseSmall_eta2) / (longestStripLength - shortestStripLength);
+    noise_smallEta2.intercept =  minNoiseSmall_eta2 - noise_smallEta2.slope * shortestStripLength;
+    //============================
+
+    //============================
+    //LARGE SECTORS - ETA 1 CHAMBERS
+    // identifier for first gas gap in a small MM sector, layer is eta layer
+    tmpId = m_idHelperSvc->mmIdHelper().channelID("MML", 1, 1, 1, 1, 1);
+    detectorReadoutElement = muonGeoMgr->getMMReadoutElement(tmpId);
+    stripNumberShortestStrip = (detectorReadoutElement->getDesign(tmpId))->nMissedBottomEta + 1;
+    tmpIdShortestStrip = m_idHelperSvc->mmIdHelper().channelID("MML", 1, 1, 1, 1, stripNumberShortestStrip);  // identifier for the shortest strip
+    shortestStripLength = detectorReadoutElement->stripLength(tmpIdShortestStrip);
+
+    stripNumberLongestStrip = (detectorReadoutElement->getDesign(tmpId))->totalStrips - (detectorReadoutElement->getDesign(tmpId))->nMissedTopEta;
+    tmpIdLongestStrip = m_idHelperSvc->mmIdHelper().channelID("MML", 1, 1, 1, 1, stripNumberLongestStrip);  // identifier for the longest strip
+    longestStripLength = detectorReadoutElement->stripLength(tmpIdLongestStrip);
+
+    // now get the slope and intercept for the threshold scaling
+    // function is m_noiseSlope * stripLength + m_noiseIntercept
+    /// Large wedges first eta station
+    NoiseCalibConstants& noise_largeEta1 = m_noiseParams[m_idHelperSvc->stationName(tmpId)];
+    noise_largeEta1.slope = (maxNoiseLarge_eta1 - minNoiseLarge_eta1) / (longestStripLength - shortestStripLength);
+    noise_largeEta1.intercept =  minNoiseLarge_eta1 - noise_largeEta1.slope * shortestStripLength;    
+    //============================
+
+    //============================
+    //LARGE SECTORS - ETA 2 CHAMBERS
+    // identifier for first gas gap in a small MM sector, layer is eta layer
+    tmpId = m_idHelperSvc->mmIdHelper().channelID("MML", 2, 1, 1, 1, 1);
+    detectorReadoutElement = muonGeoMgr->getMMReadoutElement(tmpId);
+    stripNumberShortestStrip = (detectorReadoutElement->getDesign(tmpId))->nMissedBottomEta + 1;
+    tmpIdShortestStrip = m_idHelperSvc->mmIdHelper().channelID("MML", 2, 1, 1, 1, stripNumberShortestStrip);  // identifier for the shortest strip
+    shortestStripLength = detectorReadoutElement->stripLength(tmpIdShortestStrip);
+
+    stripNumberLongestStrip = (detectorReadoutElement->getDesign(tmpId))->totalStrips - (detectorReadoutElement->getDesign(tmpId))->nMissedTopEta;
+    tmpIdLongestStrip = m_idHelperSvc->mmIdHelper().channelID("MML", 2, 1, 1, 1, stripNumberLongestStrip);  // identifier for the longest strip
+    longestStripLength = detectorReadoutElement->stripLength(tmpIdLongestStrip);
+
+    // now get the slope and intercept for the threshold scaling
+    // function is m_noiseSlope * stripLength + m_noiseIntercept
+    /// Large wedges first eta station
+    NoiseCalibConstants& noise_largeEta2 = m_noiseParams[m_idHelperSvc->stationName(tmpId)*2];
+    noise_largeEta2.slope = (maxNoiseLarge_eta2 - minNoiseLarge_eta2) / (longestStripLength - shortestStripLength);
+    noise_largeEta2.intercept =  minNoiseLarge_eta1 - noise_largeEta2.slope * shortestStripLength;    
+    //============================
 
     ATH_MSG_DEBUG("Configuration  MM_DigitizationTool ");
     ATH_MSG_INFO("RndmSvc                " << m_rndmSvc);
@@ -392,7 +457,8 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
 
     // iterate over hits and fill id-keyed drift time map
     TimedHitCollection<MMSimHit>::const_iterator i, e;
-    int nhits = 0;
+
+    std::vector<std::unique_ptr<MmDigitCollection> > collections;
 
     // nextDetectorElement-->sets an iterator range with the hits of current detector element , returns a bool when done
     while (m_timedHitCollection_MM->nextDetectorElement(i, e)) {
@@ -601,8 +667,6 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             Identifier parentID = m_idHelperSvc->mmIdHelper().parentID(layerID);
             Identifier digitID = m_idHelperSvc->mmIdHelper().channelID(parentID, m_idHelperSvc->mmIdHelper().multilayer(layerID),
                                                                        m_idHelperSvc->mmIdHelper().gasGap(layerID), stripNumber);
-
-            ++nhits;
 
             // contain (name, eta, phi, multiPlet)
             m_idHelperSvc->mmIdHelper().get_module_hash(layerID, moduleHash);
@@ -873,17 +937,16 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
         }
         m_idHelperSvc->mmIdHelper().get_module_hash(elemId, moduleHash);
 
-        // put new collection in storegate
-        // Get the messaging service, print where you are
-        MmDigitCollection* coll = nullptr;
-        ATH_CHECK(digitContainer->naughtyRetrieve(moduleHash, coll));
-        if (!coll) {
-            coll = new MmDigitCollection(elemId, moduleHash);
-            coll->push_back(std::move(newDigit));
-            ATH_CHECK(digitContainer->addCollection(coll, moduleHash));
-        } else {
-            coll->push_back(std::move(newDigit));
+        // store new collection
+        if (moduleHash >= collections.size()) {
+          collections.resize (moduleHash+1);
         }
+        MmDigitCollection* coll = collections[moduleHash].get();
+        if (!coll) {
+            collections[moduleHash] = std::make_unique<MmDigitCollection>(elemId, moduleHash);
+            coll = collections[moduleHash].get();
+        }
+        coll->push_back(std::move(newDigit));
 
         //
         // (VMM-Level) Output Of Digitization
@@ -891,6 +954,12 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
         ////////////////////////////////////////////////////////////////////
 
         v_stripDigitOutput.clear();
+    }
+
+    for (size_t coll_hash = 0; coll_hash < collections.size(); ++coll_hash) {
+      if (collections[coll_hash]) {
+        ATH_CHECK( digitContainer->addCollection (collections[coll_hash].release(), coll_hash) );
+      }
     }
 
     ATH_MSG_DEBUG("MM_Digitization Done!");
@@ -956,7 +1025,9 @@ MM_ElectronicsToolInput MM_DigitizationTool::combinedStripResponseAllHits(const 
                                                                           m_idHelperSvc->mmIdHelper().gasGap(digitID), strip_id);
                     const MuonGM::MMReadoutElement* detectorReadoutElement = muonGeoMgr->getMMReadoutElement(id);
                     float stripLength = detectorReadoutElement->stripLength(id);
-                    float threshold = (m_noiseSlope * stripLength + m_noiseIntercept) * m_thresholdScaleFactor;
+                    const int noise_id = m_idHelperSvc->stationName(digitID) * std::abs(m_idHelperSvc->stationEta(digitID));
+                    const NoiseCalibConstants& noise = m_noiseParams.at(noise_id);
+                    float threshold = (noise.slope * stripLength + noise.intercept) * m_thresholdScaleFactor;
                     v_stripThresholdResponseAllHits.push_back(threshold);
                 } else {
                     v_stripThresholdResponseAllHits.push_back(m_electronicsThreshold);

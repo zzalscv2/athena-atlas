@@ -386,6 +386,7 @@ SCTErrMonAlg::fillByteStreamErrorsHelper(const std::set<IdentifierHash>& errors,
   std::array<bool, CategoryErrors::N_ERRCATEGORY> b_category{};
   b_category.fill(false);
 
+  // Error summaries
   b_category[CategoryErrors::MASKEDLINKALL] =
     (err_type == SCT_ByteStreamErrors::MaskedLink) or (err_type == SCT_ByteStreamErrors::MaskedROD);
 
@@ -420,6 +421,43 @@ SCTErrMonAlg::fillByteStreamErrorsHelper(const std::set<IdentifierHash>& errors,
     (err_type == SCT_ByteStreamErrors::TempMaskedChip2) or (err_type == SCT_ByteStreamErrors::TempMaskedChip3) or
     (err_type == SCT_ByteStreamErrors::TempMaskedChip4) or (err_type == SCT_ByteStreamErrors::TempMaskedChip5);
 
+  // Each error
+  b_category[CategoryErrors::BYTESTREAMPARSEERROR] = (err_type == SCT_ByteStreamErrors::ByteStreamParseError);
+  b_category[CategoryErrors::TIMEOUTERROR] = (err_type == SCT_ByteStreamErrors::TimeOutError);
+  b_category[CategoryErrors::BCIDERROR] = (err_type == SCT_ByteStreamErrors::BCIDError);
+  b_category[CategoryErrors::LVL1IDERROR] = (err_type == SCT_ByteStreamErrors::LVL1IDError);
+  b_category[CategoryErrors::PREAMBLEERROR] = (err_type == SCT_ByteStreamErrors::PreambleError);
+  b_category[CategoryErrors::FORMATTERERROR] = (err_type == SCT_ByteStreamErrors::FormatterError);
+  b_category[CategoryErrors::TRAILERERROR] = (err_type == SCT_ByteStreamErrors::TrailerError);
+  b_category[CategoryErrors::TRAILEROVERFLOWERROR] = (err_type == SCT_ByteStreamErrors::TrailerOverflowError);
+  b_category[CategoryErrors::HEADERTRAILERLIMITERROR] = (err_type == SCT_ByteStreamErrors::HeaderTrailerLimitError);
+  b_category[CategoryErrors::ABCDERROR] = (err_type == SCT_ByteStreamErrors::ABCDError);
+  b_category[CategoryErrors::RAWERROR] = (err_type == SCT_ByteStreamErrors::RawError);
+  b_category[CategoryErrors::MASKEDLINK] = (err_type == SCT_ByteStreamErrors::MaskedLink);
+  b_category[CategoryErrors::RODCLOCKERROR] = (err_type == SCT_ByteStreamErrors::RODClockError);
+  b_category[CategoryErrors::TRUNCATEDROD] = (err_type == SCT_ByteStreamErrors::TruncatedROD);
+  b_category[CategoryErrors::ROBFRAGMENTERROR] = (err_type == SCT_ByteStreamErrors::ROBFragmentError);
+  b_category[CategoryErrors::MISSINGLINKHEADERERROR] = (err_type == SCT_ByteStreamErrors::MissingLinkHeaderError);
+  b_category[CategoryErrors::MASKEDROD] = (err_type == SCT_ByteStreamErrors::MaskedROD);
+  b_category[CategoryErrors::ABCDERROR_CHIP0] = (err_type == SCT_ByteStreamErrors::ABCDError_Chip0);
+  b_category[CategoryErrors::ABCDERROR_CHIP1] = (err_type == SCT_ByteStreamErrors::ABCDError_Chip1);
+  b_category[CategoryErrors::ABCDERROR_CHIP2] = (err_type == SCT_ByteStreamErrors::ABCDError_Chip2);
+  b_category[CategoryErrors::ABCDERROR_CHIP3] = (err_type == SCT_ByteStreamErrors::ABCDError_Chip3);
+  b_category[CategoryErrors::ABCDERROR_CHIP4] = (err_type == SCT_ByteStreamErrors::ABCDError_Chip4);
+  b_category[CategoryErrors::ABCDERROR_CHIP5] = (err_type == SCT_ByteStreamErrors::ABCDError_Chip5);
+  b_category[CategoryErrors::ABCDERROR_ERROR1] = (err_type == SCT_ByteStreamErrors::ABCDError_Error1);
+  b_category[CategoryErrors::ABCDERROR_ERROR2] = (err_type == SCT_ByteStreamErrors::ABCDError_Error2);
+  b_category[CategoryErrors::ABCDERROR_ERROR4] = (err_type == SCT_ByteStreamErrors::ABCDError_Error4);
+  b_category[CategoryErrors::TEMPMASKEDCHIP0] = (err_type == SCT_ByteStreamErrors::TempMaskedChip0);
+  b_category[CategoryErrors::TEMPMASKEDCHIP1] = (err_type == SCT_ByteStreamErrors::TempMaskedChip1);
+  b_category[CategoryErrors::TEMPMASKEDCHIP2] = (err_type == SCT_ByteStreamErrors::TempMaskedChip2);
+  b_category[CategoryErrors::TEMPMASKEDCHIP3] = (err_type == SCT_ByteStreamErrors::TempMaskedChip3);
+  b_category[CategoryErrors::TEMPMASKEDCHIP4] = (err_type == SCT_ByteStreamErrors::TempMaskedChip4);
+  b_category[CategoryErrors::TEMPMASKEDCHIP5] = (err_type == SCT_ByteStreamErrors::TempMaskedChip5);
+  b_category[CategoryErrors::ABCDERROR_ERROR7] = (err_type == SCT_ByteStreamErrors::ABCDError_Error7);
+  b_category[CategoryErrors::ABCDERROR_INVALID] = (err_type == SCT_ByteStreamErrors::ABCDError_Invalid);
+  b_category[CategoryErrors::RODSIMULATEDDATA] = (err_type == SCT_ByteStreamErrors::RODSimulatedData);
+  
   std::vector<int> numErrorsPerLumi[N_REGIONS];
   if (m_doPerLumiErrors) {
     for (int reg{0}; reg<N_REGIONS; reg++) {

@@ -47,8 +47,7 @@ StripDigitizationTool::StripDigitizationTool(const std::string& type,
   m_WriteSCT1_RawData.declareUpdateHandler(&StripDigitizationTool::SetupRdoOutputType, this);
 }
 
-StripDigitizationTool::~StripDigitizationTool() {
-}
+StripDigitizationTool::~StripDigitizationTool() = default;
 
 // ----------------------------------------------------------------------
 // Initialize method:
@@ -349,7 +348,6 @@ void StripDigitizationTool::digitizeAllHits(const EventContext& ctx, SG::WriteHa
   }
   }
   ATH_MSG_DEBUG("hits processed");
-  return;
 }
 
 // digitize elements without hits
@@ -399,8 +397,7 @@ void StripDigitizationTool::digitizeNonHits(const EventContext& ctx, SG::WriteHa
     }
   }
 
-  return;
-}
+  }
 
 bool StripDigitizationTool::digitizeElement(const EventContext& ctx, SiChargedDiodeCollectionMap& chargedDiodesMap, TimedHitCollection<SiHit>*& thpcsi, CLHEP::HepRandomEngine * rndmEngine) {
   if (nullptr == thpcsi) {
@@ -414,7 +411,7 @@ bool StripDigitizationTool::digitizeElement(const EventContext& ctx, SiChargedDi
   // get the iterator pairs for this DetEl
 
   TimedHitCollection<SiHit>::const_iterator i, e;
-  if (thpcsi->nextDetectorElement(i, e) == false) { // no more hits
+  if (!thpcsi->nextDetectorElement(i, e)) { // no more hits
     return false;
   }
 
@@ -575,7 +572,7 @@ StatusCode StripDigitizationTool::processBunchXing(int bunchXing,
 
     if ((not (m_mergeSvc->retrieveSubSetEvtData(m_inputObjectName, hitCollList, bunchXing,
                                                 bSubEvents, eSubEvents).isSuccess())) and
-        hitCollList.size() == 0) {
+        hitCollList.empty()) {
       ATH_MSG_ERROR("Could not fill TimedHitCollList");
       return StatusCode::FAILURE;
     } else {
@@ -719,8 +716,8 @@ std::unique_ptr<SCT_RDO_Collection> StripDigitizationTool::createRDO(SiChargedDi
             if (it2->second.flag() & 0xDE) {
               int tmp{cluscounter};
               while ((it2 != i_chargedDiode_end) and (cluscounter < size - 1) and (it2->second.flag() & 0xDE)) {
-                it2++;
-                cluscounter++;
+                ++it2;
+                ++cluscounter;
               }
               if ((it2 != collection->end()) and !(it2->second.flag() & 0xDE)) {
                 SiHelper::ClusterUsed(it2->second, false);
@@ -837,7 +834,7 @@ StatusCode StripDigitizationTool::getNextEvent(const EventContext& ctx) {
 
   TimedHitCollList hitCollList;
   unsigned int numberOfSiHits{0};
-  if (not (m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSiHits).isSuccess()) and hitCollList.size() == 0) {
+  if (not (m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSiHits).isSuccess()) and hitCollList.empty()) {
     ATH_MSG_ERROR("Could not fill TimedHitCollList");
     return StatusCode::FAILURE;
   } else {

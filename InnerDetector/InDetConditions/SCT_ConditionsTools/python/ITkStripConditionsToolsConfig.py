@@ -82,7 +82,8 @@ def ITkStripConfigurationConditionsToolCfg(flags, name="ITkStripConfigurationCon
 def ITkStripDCSConditionsCfg(flags, name="ITkStripDCSConditions", **kwargs):
     """Return a ComponentAccumulator configured for ITk Strip DCS Conditions"""
     from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_DCSConditionsCfg
-    return SCT_DCSConditionsCfg(flags, name, **kwargs)
+    return SCT_DCSConditionsCfg(flags, name, ReturnHVTemp=False,      #do not use DCS conditions until they're ready for ITk
+                                **kwargs)
 
 
 
@@ -179,9 +180,11 @@ def ITkStripReadoutToolCfg(flags, name="ITkStripReadoutTool", **kwargs):
 def ITkStripSiliconConditionsCfg(flags, name="ITkStripSilicon", **kwargs):
     """Return a ComponentAccumulator configured for ITk Strip SiliconConditions"""
     acc = ComponentAccumulator()
+    
     kwargs["DCSConditionsTool"] = acc.popToolsAndMerge(ITkStripDCSConditionsCfg(flags))
+
     from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_SiliconConditionsCfg
-    acc.setPrivateTools(acc.popToolsAndMerge(SCT_SiliconConditionsCfg(flags, name, **kwargs)))
+    acc.setPrivateTools(acc.popToolsAndMerge(SCT_SiliconConditionsCfg(flags, name, useDCS = False, **kwargs)))
     return acc
 
 

@@ -32,7 +32,6 @@ Trk::EventDataModelMonitor::~EventDataModelMonitor() {
 #ifndef NDEBUG
     ATH_MSG_INFO( "EventDataModelMonitor AFTER finalize of algorithms (dbg only):" );
     ATH_MSG_INFO( "left over all Surfaces    : \t"<<Trk::Surface::numberOfInstantiations() ); 
-    ATH_MSG_INFO( "left over free Surfaces   : \t"<<Trk::Surface::numberOfFreeInstantiations() ); 
     ATH_MSG_INFO( "left over PrepRawDatas    : \t"<<Trk::PrepRawData::numberOfInstantiations() ); 
     ATH_MSG_INFO( "left over RIO_OnTracks    : \t"<<Trk::RIO_OnTrack::numberOfInstantiations() ); 
     ATH_MSG_INFO( "left over Segments        : \t"<<Trk::Segment::numberOfInstantiations() ); 
@@ -62,7 +61,6 @@ StatusCode Trk::EventDataModelMonitor::execute() {
 #ifndef NDEBUG
     ATH_MSG_INFO( "EventDataModelMonitor at start of event (dbg only):" );
     ATH_MSG_INFO( "number of all Surfaces    (about const) : \t"<<Trk::Surface::numberOfInstantiations() ); 
-    ATH_MSG_INFO( "number of free Surfaces   (about const) : \t"<<Trk::Surface::numberOfFreeInstantiations() ); 
     ATH_MSG_INFO( "number of PrepRawData     (about const) : \t"<<Trk::PrepRawData::numberOfInstantiations() ); 
     ATH_MSG_INFO( "number of RIO_OnTrack     (should be 0) : \t"<<Trk::RIO_OnTrack::numberOfInstantiations() ); 
     ATH_MSG_INFO( "number of Segments        (should be 0) : \t"<<Trk::Segment::numberOfInstantiations() ); 

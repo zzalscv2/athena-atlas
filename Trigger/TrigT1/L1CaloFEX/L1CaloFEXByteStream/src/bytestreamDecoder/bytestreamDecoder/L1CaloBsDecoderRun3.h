@@ -30,6 +30,7 @@ public:
     */
    class Logging {
      public:
+       virtual ~Logging() = default;
        virtual void err(const std::string& location, const std::string& title, const std::string& detail) const {
            std::cerr << "L1CaloBsDecoderRun3::" << location << " : " << title << " - " << detail << std::endl;
        }

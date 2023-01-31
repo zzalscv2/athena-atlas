@@ -8,7 +8,7 @@ topSeq = AlgSequence()
 
 import ParticleGun as PG
 from G4AtlasApps.SimFlags import simFlags
-pg = PG.ParticleGun(randomSvcName=simFlags.RandomSvc.get_Value(), randomStream="SINGLE")
+pg = PG.ParticleGun(randomStream = "SINGLE", randomSeed = simFlags.RandomSeedOffset.get_Value())
 pg.sampler.pid = 13
 pg.sampler.mom = PG.EEtaMPhiSampler(energy=10000, eta=[-1,1])
 topSeq += pg

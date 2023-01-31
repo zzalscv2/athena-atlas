@@ -47,6 +47,7 @@ class FitQuality;
     Trk::TrackSegment is expressed to.
 
     @author Andreas.Salzburger@cern.ch
+    @author Christos Anastopoulos Athena MT
     */
 
 class TrackSegment final
@@ -70,7 +71,7 @@ public:
   TrackSegment(const LocalParameters& locpars,
                const Amg::MatrixX& locerr,
                const Surface* sf,
-               DataVector<const MeasurementBase>* crots,
+               DataVector<const MeasurementBase>&& crots,
                FitQuality* fqual,
                Segment::Author author = Segment::AuthorUnknown);
 

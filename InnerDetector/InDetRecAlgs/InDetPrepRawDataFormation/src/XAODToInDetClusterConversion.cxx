@@ -87,7 +87,7 @@ namespace InDet {
 		      pixElements->size());
     
     const auto& allIdHashes = pixelAccessor.allIdentifiers();
-    for (auto& hashId : allIdHashes) {
+    for (const auto& hashId : allIdHashes) {
       const InDetDD::SiDetectorElement *element = pixElements->getDetectorElement(hashId);
       if ( element == nullptr ) {
         ATH_MSG_FATAL( "Invalid pixel detector element for hash " << hashId);
@@ -103,7 +103,7 @@ namespace InDet {
       std::unique_ptr<InDet::PixelClusterCollection> collection = std::make_unique<InDet::PixelClusterCollection>(hashId);
       
       // Get the detector element and range for the idHash
-      for (auto& this_range : pixelAccessor.rangesForIdentifierDirect(hashId)) {
+      for (const auto& this_range : pixelAccessor.rangesForIdentifierDirect(hashId)) {
 	for (auto start = this_range.first; start != this_range.second; start++) {
 	  const xAOD::PixelCluster* in_cluster = *start;
 	  
@@ -215,7 +215,7 @@ namespace InDet {
 
 
     const auto& allIdHashes = stripAccessor.allIdentifiers();
-    for (auto& hashId : allIdHashes) {
+    for (const auto& hashId : allIdHashes) {
       const InDetDD::SiDetectorElement *element = stripElements->getDetectorElement(hashId);
       if ( element == nullptr ) {
         ATH_MSG_FATAL( "Invalid strip detector element for hash " << hashId);
@@ -246,7 +246,7 @@ namespace InDet {
 
 
       // Get the detector element and range for the idHash
-      for (auto& this_range : stripAccessor.rangesForIdentifierDirect(hashId)) {
+      for (const auto& this_range : stripAccessor.rangesForIdentifierDirect(hashId)) {
         for (auto start = this_range.first; start != this_range.second; start++) {
           const xAOD::StripCluster* in_cluster = *start;
 

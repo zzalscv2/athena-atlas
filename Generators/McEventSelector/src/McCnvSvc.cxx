@@ -25,7 +25,7 @@
 
 /// Standard constructor
 McCnvSvc::McCnvSvc(const std::string& name, ISvcLocator* svc)
-: ConversionSvc( name, svc, repSvcType())
+    : ConversionSvc( name, svc, repSvcType())
 { }
 
 /// Standard Destructor
@@ -34,25 +34,25 @@ McCnvSvc::~McCnvSvc()   {
 
 /// Initialize the service.
 StatusCode McCnvSvc::initialize()     {
-  StatusCode status = ConversionSvc::initialize();
-  return status;
+    StatusCode status = ConversionSvc::initialize();
+    return status;
 }
 
 /// Update state of the service
 StatusCode McCnvSvc::updateServiceState(IOpaqueAddress* pAddress)    {
-  if ( pAddress != nullptr)    {
-    ATH_CHECK( dynamic_cast<GenericAddress*>(pAddress)!=nullptr );
-    return StatusCode::SUCCESS;
-  }
-  return StatusCode::FAILURE;
+    if ( pAddress != nullptr)    {
+        ATH_CHECK( dynamic_cast<GenericAddress*>(pAddress)!=nullptr );
+        return StatusCode::SUCCESS;
+    }
+    return StatusCode::FAILURE;
 }
 
 long
 McCnvSvc::repSvcType() const {
-  return storageType();
+    return storageType();
 }
 
 long
 McCnvSvc::storageType() {
-  return 0x10;
+    return 0x10;
 }

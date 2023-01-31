@@ -50,28 +50,22 @@ ALFA_PileUpTool::ALFA_PileUpTool(const std::string& type,
 								const std::string& name,
 								const IInterface* parent) :
   PileUpToolBase(type, name, parent),  
+  m_SimHitCollectionName ("ALFA_HitCollection"),
+  m_SimODHitCollectionName ("ALFA_ODHitCollection"),
+  m_key_DigitCollection ("ALFA_DigitCollection"),
+  m_key_ODDigitCollection ("ALFA_ODDigitCollection"),
+  m_digitCollection (nullptr),
+  m_ODdigitCollection (nullptr),
   m_sigma0          (0.1),
   m_sigma1          (1.0),
   m_meanE_dep       (0.0863), //MeV 
   m_meanN_photo     (4.11), 
   m_mean            (0.0), 
   m_stdDev          (1.0),
-  m_AmplitudeCut    (0.24)  
-//  m_fillRootTree    (false) 
+  m_AmplitudeCut    (0.24),
+  m_mergedALFA_HitList (nullptr),
+  m_mergedALFA_ODHitList (nullptr)
 { 
-  
-  m_SimHitCollectionName = "ALFA_HitCollection";
-  m_SimODHitCollectionName = "ALFA_ODHitCollection";
-  
-  m_digitCollection = nullptr;	// initializing to null pointer
-  m_ODdigitCollection = nullptr;	// initializing to null pointer
-  
-  m_mergedALFA_HitList = nullptr;
-  m_mergedALFA_ODHitList = nullptr;
-  
-  m_key_DigitCollection  = "ALFA_DigitCollection";
-  m_key_ODDigitCollection  = "ALFA_ODDigitCollection";  
-
   // Properties  
   declareProperty("SimHitCollection", m_SimHitCollectionName, "Name of the input ALFA Sim Hit Collection of simulated hits");
   declareProperty("SimODHitCollection", m_SimODHitCollectionName, "Name of the input ALFA Sim OD Hit Collection of simulated hits");  
@@ -251,7 +245,7 @@ StatusCode ALFA_PileUpTool::processBunchXing(int bunchXing,
                                                  SubEventIterator eSubEvents) {
   ATH_MSG_DEBUG ( "ALFA_PileUpTool::processBunchXing() " << bunchXing );
   SubEventIterator iEvt = bSubEvents;
-  for (; iEvt!=eSubEvents; iEvt++) {
+  for (; iEvt!=eSubEvents; ++iEvt) {
     StoreGateSvc& seStore = *iEvt->ptr()->evtStore();
     //PileUpTimeEventIndex thisEventIndex = PileUpTimeEventIndex(static_cast<int>(iEvt->time()),iEvt->index()); not used 
     ATH_MSG_VERBOSE("SubEvt StoreGate " << seStore.name() << " :"
@@ -429,7 +423,7 @@ void ALFA_PileUpTool::ALFA_MD_info(const ALFA_HitCollection* ALFA_HitCollection)
   ALFA_HitConstIter it    = ALFA_HitCollection->begin();
   ALFA_HitConstIter itend = ALFA_HitCollection->end();
   
-  for (; it != itend; it++) {
+  for (; it != itend; ++it) {
 
     station = it->GetStationNumber();
     plate   = it->GetPlateNumber();
@@ -518,7 +512,7 @@ void ALFA_PileUpTool::ALFA_OD_info(const ALFA_ODHitCollection* ALFA_ODHitCollect
   ALFA_ODHitConstIter it    = ALFA_ODHitCollection->begin();
   ALFA_ODHitConstIter itend = ALFA_ODHitCollection->end();
 
-  for (; it != itend; it++) {
+  for (; it != itend; ++it) {
 
      
     station = it->GetStationNumber();
@@ -691,7 +685,7 @@ StatusCode ALFA_PileUpTool::fill_OD_DigitCollection(CLHEP::HepRandomEngine* rndE
 		
 		ATH_MSG_DEBUG("file name " << m_filename.c_str() );
 		
-		std::string filePath = PathResolver::find_file(m_filename.c_str(),"DATAPATH", PathResolver::RecursiveSearch);
+		std::string filePath = PathResolver::find_file(m_filename,"DATAPATH", PathResolver::RecursiveSearch);
 		
 		if(filePath.length() == 0)
 		{

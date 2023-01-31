@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <cstdint>
 /*
  * @brief: Helper struct containing all information to convert from the offline identifiers to the online identifiers
  */

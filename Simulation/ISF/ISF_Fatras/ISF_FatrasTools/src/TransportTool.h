@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,6 +14,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "AthenaKernel/IAtRndmGenSvc.h"
+#include "CxxUtils/checker_macros.h"
 #include "TrkExInterfaces/ITimedExtrapolator.h"
 
 // IFS
@@ -50,7 +51,7 @@ namespace iFatras
       @author Andreas.Salzburger -at- cern.ch
   */  
   
-  class TransportTool : public extends<AthAlgTool, ISF::IParticleProcessor>
+  class ATLAS_NOT_THREAD_SAFE TransportTool : public extends<AthAlgTool, ISF::IParticleProcessor>  // deprecated: ATLASSIM-6020
   {
   public:
     /** Constructor */

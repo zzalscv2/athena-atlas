@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -120,7 +120,7 @@ class BeamspotChainConfiguration(ChainConfigurationBase):
                 self.jc_name=jc_name
 
 
-        def assembleChainImpl(self):
+        def assembleChainImpl(self, flags):
                 chainSteps = []
                 log.debug("Assembling chain for %s", self.chainName)
                 stepDictionary = self.getStepDictionary()
@@ -128,14 +128,14 @@ class BeamspotChainConfiguration(ChainConfigurationBase):
 
                 if self.chainPart['beamspotChain'] != '':
                         stepName = f"Step4_{self.jc_name}_beamspotJet"
-                        chainSteps = [self.getStep(4, stepName, [getBeamspotVtxCfg])]
+                        chainSteps = [self.getStep(flags, 4, stepName, [getBeamspotVtxCfg])]
 
                 else:
                         key = self.chainPart['addInfo'][0] + "_" + self.chainPart['l2IDAlg'][0] #TODO: hardcoded index
 
                         steps=stepDictionary[key]
                         for step in steps:
-                                chainstep = getattr(self, step)()
+                                chainstep = getattr(self, step)(flags)
                                 chainSteps+=[chainstep]
                         
                 myChain = self.buildChain(chainSteps)
@@ -154,11 +154,11 @@ class BeamspotChainConfiguration(ChainConfigurationBase):
         # --------------------
         # Configuration TrkFS step
         # --------------------
-        def getTrkFSStep(self):
-                return self.getStep(1,"trkFS_trkfast",[trkFS_trkfast_Cfg])
+        def getTrkFSStep(self, flags):
+                return self.getStep(flags,1,"trkFS_trkfast",[trkFS_trkfast_Cfg])
 
         # --------------------
         # Configuration of costmonitor (costmonitor ?? but isn't this is the actua chain configuration ??)
         # --------------------
-        def getAllTEStep(self):
-                return self.getStep(1,"allTE_trkfast",[allTE_trkfast_Cfg])
+        def getAllTEStep(self, flags):
+                return self.getStep(flags,1,"allTE_trkfast",[allTE_trkfast_Cfg])

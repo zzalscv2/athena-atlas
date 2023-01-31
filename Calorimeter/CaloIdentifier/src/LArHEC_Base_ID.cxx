@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloIdentifier/src/LArHEC_Base_ID.cxx
@@ -879,7 +879,7 @@ int   LArHEC_Base_ID::get_neighbours(const IdentifierHash id, const LArNeighbour
 }
 
 int   LArHEC_Base_ID::get_prevInPhi(const LArHEC_region* hecRegion, const unsigned int& index, const short int& nPhi, const unsigned int& minHash, 
-			       int& neighbourIndex, IdentifierHash* neighbList) const
+			       int& neighbourIndex, IdentifierHash* neighbList) 
 {
   int result = 1; 
   if(!hecRegion->isPhiMin(index)) {
@@ -894,7 +894,7 @@ int   LArHEC_Base_ID::get_prevInPhi(const LArHEC_region* hecRegion, const unsign
 }
 
 int   LArHEC_Base_ID::get_nextInPhi(const LArHEC_region* hecRegion, const unsigned int& index, const short int& nPhi, const unsigned int& minHash, 
-			       int& neighbourIndex, IdentifierHash* neighbList) const
+			       int& neighbourIndex, IdentifierHash* neighbList) 
 {
   int result = 1; 
   if(!hecRegion->isPhiMax(index)) {

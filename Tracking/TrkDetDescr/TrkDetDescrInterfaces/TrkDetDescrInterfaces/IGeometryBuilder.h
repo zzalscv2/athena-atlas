@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -25,9 +25,6 @@ namespace Trk {
   class TrackingVolume;
   class Layer;
 
-  /** Interface ID for IGeometryBuilders*/  
-  static const InterfaceID IID_IGeometryBuilder("IGeometryBuilder", 1, 0);
-  
   /** @class IGeometryBuilder
     
     Interface class IGeometryBuilders,
@@ -43,17 +40,17 @@ namespace Trk {
   class IGeometryBuilder : virtual public IAlgTool {
     
     public:
+    /// Creates the InterfaceID and interfaceID() method
+    DeclareInterfaceID(IGeometryBuilder, 1, 0);
+
       /**Virtual destructor*/
       virtual ~IGeometryBuilder(){}
-      
-      /** AlgTool and IAlgTool interface methods */
-      static const InterfaceID& interfaceID() { return IID_IGeometryBuilder; }
 
       /** TrackingGeometry Interface methode -
            - optionally a pointer to a tvol is given to wrap the TrackingGeometry around
            - optionally a vector of pointers to TrackingVolume is given for glueing
         */
-      virtual TrackingGeometry* trackingGeometry (TrackingVolume* tvol = 0) const = 0;
+      virtual std::unique_ptr<TrackingGeometry> trackingGeometry (TrackingVolume* tvol = 0) const = 0;
 
       /** The unique signature */
       virtual GeometrySignature geometrySignature() const = 0;

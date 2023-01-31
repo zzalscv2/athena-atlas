@@ -3,8 +3,8 @@
 # art-description: Reco_tf.py data18 RAWtoALL in MP mode, use 4 cores due to large memory usage of MP
 # art-type: grid
 # art-include: master/Athena
-# art-include: 22.0-mc20/Athena
-# art-include: 22.0/Athena
+
+# art-include: 23.0/Athena
 # art-athena-mt: 8
 
 export ATHENA_CORE_NUMBER=4
@@ -20,7 +20,7 @@ timeout 64800 Reco_tf.py \
   --postExec 'FPEAuditor.NStacktracesOnFPE=10' \
   --autoConfiguration='everything' \
   --conditionsTag 'all:CONDBR2-BLKPA-RUN2-09' --geometryVersion='default:ATLAS-R2-2016-01-00-01' \
-  --runNumber='357750' --steering='doRAWtoALL' --maxEvents='-1'
+  --runNumber='357750' --maxEvents='-1'
 
 rc1=$?
 echo "art-result: ${rc1} Reco_tf_data18_mp"

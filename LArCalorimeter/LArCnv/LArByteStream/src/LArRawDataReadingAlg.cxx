@@ -143,32 +143,12 @@ StatusCode LArRawDataReadingAlg::execute(const EventContext& ctx) const {
            case 12:
              rodBlock.reset(new LArRodBlockCalibrationV3);
              break;
-	default:  //Unknown version of rod block type 2 (Transparent mode)
-	     if (m_failOnCorruption) {
-	       ATH_MSG_ERROR("Found unsupported ROD Block version " << rodMinorVersion 
-			     << " of ROD block type " << rodBlockType << ". ROD Source id: 0x" <<std::hex<<rob.rod_source_id());
-	       return StatusCode::FAILURE;
-	     }
-	     else {
-	       ATH_MSG_WARNING("Found unsupported ROD Block version " << rodMinorVersion 
-			       << " of ROD block type " << rodBlockType << ". ROD Source id: 0x" <<std::hex<<rob.rod_source_id());
-	       continue;
-	     }
-        } // end switch(rodMinorVersion)
-      }// end rodBlockType==2 (transparent mode)
-      else {
-	//Unknown rod block type if arriving here
-	if (m_failOnCorruption) {
-	  ATH_MSG_ERROR("Found unsupported ROD Block version " << rodMinorVersion 
-			<< " of ROD block type " << rodBlockType << ". ROD Source id: 0x" <<std::hex<<rob.rod_source_id());
-	  return StatusCode::FAILURE;
-	}
-	else {
-	  ATH_MSG_WARNING("Found unsupported ROD Block version " << rodMinorVersion 
-			  << " of ROD block type " << rodBlockType << ". ROD Source id: 0x" <<std::hex<<rob.rod_source_id());
-	  continue;
-	}
-      }
+           default:  
+	     ATH_MSG_WARNING("Found unsupported ROD Block version " << rodMinorVersion 
+			<< " of ROD block type " << rodBlockType);
+	     return m_failOnCorruption ? StatusCode::FAILURE : StatusCode::SUCCESS;
+        }
+      } 
     }//End if need to re-init RodBlock
 
     const uint32_t* pData=rob.rod_data();

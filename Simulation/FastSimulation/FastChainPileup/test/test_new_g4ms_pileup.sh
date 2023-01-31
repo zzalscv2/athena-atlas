@@ -4,7 +4,6 @@
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
-# art-include: 22.0-mc20/Athena
 # art-architecture: '#x86_64-intel'
 
 maxevent=25
@@ -56,7 +55,7 @@ then
                --skipEvents '0' --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-09' \
                --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
                --outputAODFile ${aodFile} \
-               --steering 'doRDO_TRIG' \
+               --steering 'doRDO_TRIG' 'doTRIGtoALL' \
                --athenaopts "all:--threads=1" \
                --imf False
      rc1_1=$?

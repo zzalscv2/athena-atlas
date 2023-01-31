@@ -20,7 +20,7 @@ HLTCalo_L2CaloEMClustersMonitor::HLTCalo_L2CaloEMClustersMonitor( const std::str
   declareProperty("HLTContainer", m_HLT_cont_key = "HLT_FastCaloEMClusters");
   declareProperty("OFFContainer", m_OFF_cont_key = "egammaClusters");
   declareProperty("MonGroupName", m_mongroup_name = "TrigCaloMonitor");
-
+  declareProperty("HLTChainsT0", m_hltChainsT0 = "All");
   declareProperty("OFFTypes",  m_OFF_types);
   declareProperty("HLThighET", m_HLT_high_et = 10000.0);
   declareProperty("HLTMinET",  m_HLT_min_et  = -1.0);
@@ -41,10 +41,10 @@ StatusCode HLTCalo_L2CaloEMClustersMonitor::initialize() {
 StatusCode HLTCalo_L2CaloEMClustersMonitor::fillHistograms( const EventContext& ctx ) const {
   using namespace Monitored;
 
-    // Protect against noise bursts
-    SG::ReadDecorHandle<xAOD::EventInfo,uint32_t> thisEvent(m_eventInfoKey, ctx);
-    if ( thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO)) 
-               return StatusCode::SUCCESS;
+  // Protect against noise bursts
+  SG::ReadDecorHandle<xAOD::EventInfo,uint32_t> thisEvent(m_eventInfoKey, ctx);
+  if ( thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO)) 
+        return StatusCode::SUCCESS;
 
   // Get HLT cluster collections
   SG::ReadHandle<xAOD::TrigEMClusterContainer> hltCluster_readHandle(m_HLT_cont_key, ctx);
@@ -81,12 +81,24 @@ StatusCode HLTCalo_L2CaloEMClustersMonitor::fillHistograms( const EventContext& 
 
   // prepare HLT clusters
   std::vector<clus_kin<const xAOD::TrigEMCluster*> > vec_hlt_clusters;
-  for (const auto hlt_cluster : *hltCluster_readHandle) {
+  std::vector<const xAOD::TrigEMCluster*> accepted_hlt_clusters = ifStepPassed(m_hltChainsT0);
+
+  // For monitoring all hlt clusters
+  if(m_hltChainsT0 == "All"){  
+    for (const auto hlt_cluster : *hltCluster_readHandle) {
 	auto hlt_clus_et = hlt_cluster->et();
 	if (hlt_clus_et < m_HLT_min_et) continue;
 	vec_hlt_clusters.push_back({hlt_clus_et*0.001, hlt_cluster->eta(), hlt_cluster->phi(), hlt_cluster});
+    }
   }
-
+  // For monitoring signature specific clusters
+  else if (accepted_hlt_clusters.size()>0){
+    for (const auto* hlt_cluster : accepted_hlt_clusters) {
+        auto hlt_clus_et = hlt_cluster->et();
+        if (hlt_clus_et < m_HLT_min_et) continue;
+        vec_hlt_clusters.push_back({hlt_clus_et*0.001, hlt_cluster->eta(), hlt_cluster->phi(), hlt_cluster});
+    }
+  }
   // prepare OFF clusters
   std::vector<clus_kin<const xAOD::CaloCluster*> > vec_off_clusters;
   for (const auto off_cluster : *offCluster_readHandle) {
@@ -311,29 +323,54 @@ StatusCode HLTCalo_L2CaloEMClustersMonitor::fillHistograms( const EventContext& 
     OFF_matched_fraction = static_cast<float>(n_off_clusters_with_match) / n_off_clusters;
   }
 
-  // Fill everything
-  fill(m_mongroup_name,
-        // HLT clusters
-        HLT_num, HLT_et, HLT_eta, HLT_phi, HLT_size, HLT_barrel_high_et_num, HLT_bc,
+  if(m_hltChainsT0 == "All") {
+    ATH_MSG_DEBUG("Filling for : "<<m_hltChainsT0);
+    fill(m_mongroup_name,
+         // HLT clusters
+         HLT_num, HLT_et, HLT_eta, HLT_phi, HLT_size, HLT_barrel_high_et_num, HLT_bc,
 
-	// HLT cutmasks
-	HLT_barrel_high_et, HLT_no_OFF_match, HLT_with_OFF_match,
+         // HLT cutmasks
+          HLT_barrel_high_et, HLT_no_OFF_match, HLT_with_OFF_match,
 
-        // OFF clusters
-        OFF_num, OFF_et, OFF_eta, OFF_phi, OFF_type, 
+         // OFF clusters
+         OFF_num, OFF_et, OFF_eta, OFF_phi, OFF_type,
 
-	// OFF cutmasks
-	OFF_no_HLT_match, OFF_with_HLT_match,
+         // OFF cutmasks
+         OFF_no_HLT_match, OFF_with_HLT_match,
 
-        // HLT matched to OFF
-        HLT_matched_fraction, HLT_no_OFF_match_num, HLT_vs_OFF_minimum_delta_r, HLT_with_OFF_match_num, 
-	OFF_match_et, HLT_vs_OFF_resolution, HLT_vs_OFF_minimum_delta_eta, HLT_vs_OFF_minimum_delta_phi,
+         // HLT matched to OFF
+         HLT_matched_fraction, HLT_no_OFF_match_num, HLT_vs_OFF_minimum_delta_r, HLT_with_OFF_match_num,
+         OFF_match_et, HLT_vs_OFF_resolution, HLT_vs_OFF_minimum_delta_eta, HLT_vs_OFF_minimum_delta_phi,
 
-	// OFF matched to OFF
-	OFF_matched_fraction, OFF_no_HLT_match_num, OFF_vs_HLT_minimum_delta_r, OFF_with_HLT_match_num, 
-	HLT_match_et, OFF_vs_HLT_resolution, OFF_vs_HLT_minimum_delta_eta, OFF_vs_HLT_minimum_delta_phi
-  );
+         // OFF matched to OFF
+         OFF_matched_fraction, OFF_no_HLT_match_num, OFF_vs_HLT_minimum_delta_r, OFF_with_HLT_match_num,
+          HLT_match_et, OFF_vs_HLT_resolution, OFF_vs_HLT_minimum_delta_eta, OFF_vs_HLT_minimum_delta_phi
+   );
+  }
+  else if(accepted_hlt_clusters.size()>0){
+    ATH_MSG_DEBUG("Filling for : "<<m_hltChainsT0);
+    fill(m_mongroup_name,
+            // HLT clusters
+            HLT_num, HLT_et, HLT_eta, HLT_phi, HLT_size, HLT_barrel_high_et_num, HLT_bc,
 
+            // HLT cutmasks
+            HLT_barrel_high_et, HLT_no_OFF_match, HLT_with_OFF_match,
+
+            // OFF clusters
+            OFF_num, OFF_et, OFF_eta, OFF_phi, OFF_type,
+
+            // OFF cutmasks
+            OFF_no_HLT_match, OFF_with_HLT_match,
+
+            // HLT matched to OFF
+            HLT_matched_fraction, HLT_no_OFF_match_num, HLT_vs_OFF_minimum_delta_r, HLT_with_OFF_match_num,
+            OFF_match_et, HLT_vs_OFF_resolution, HLT_vs_OFF_minimum_delta_eta, HLT_vs_OFF_minimum_delta_phi,
+
+            // OFF matched to OFF
+            OFF_matched_fraction, OFF_no_HLT_match_num, OFF_vs_HLT_minimum_delta_r, OFF_with_HLT_match_num,
+            HLT_match_et, OFF_vs_HLT_resolution, OFF_vs_HLT_minimum_delta_eta, OFF_vs_HLT_minimum_delta_phi
+          );
+      }
   return StatusCode::SUCCESS;
 }
 
@@ -344,4 +381,21 @@ float HLTCalo_L2CaloEMClustersMonitor::calculateDeltaR( float max_deltar, float 
   double DeltaPhi = std::abs(CxxUtils::deltaPhi(phi_1, phi_2));
   if (DeltaPhi > max_deltar) return 99.9;
   return sqrt( ((eta_1-eta_2)*(eta_1-eta_2)) + (DeltaPhi*DeltaPhi) );
+}
+
+std::vector<const xAOD::TrigEMCluster*> HLTCalo_L2CaloEMClustersMonitor::ifStepPassed(const std::string& chain) const{
+  Trig::FeatureRequestDescriptor featureRequestDescriptor;
+  featureRequestDescriptor.setChainGroup(chain);
+  featureRequestDescriptor.setCondition(TrigDefs::includeFailedDecisions);
+  std::vector<TrigCompositeUtils::LinkInfo<xAOD::TrigEMClusterContainer>> fVec = getTrigDecisionTool()->features<xAOD::TrigEMClusterContainer>(featureRequestDescriptor);
+  std::vector<const xAOD::TrigEMCluster*> clustersToMonitorForChain;
+  for (const TrigCompositeUtils::LinkInfo<xAOD::TrigEMClusterContainer>& f : fVec) {
+     if (f.state == TrigCompositeUtils::ActiveState::ACTIVE) {
+       clustersToMonitorForChain.push_back( *(f.link) );
+    }
+  }
+  ATH_MSG_DEBUG("clustersToMonitorForChain.size(): "<<clustersToMonitorForChain.size());
+  for(auto &p: clustersToMonitorForChain)
+    ATH_MSG_DEBUG("clustersToMonitorForChain->et(): "<<p->et());
+  return clustersToMonitorForChain;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -98,9 +98,7 @@ StatusCode TileHitToRawChannel::initialize() {
   ATH_CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
 
   ATH_CHECK( m_samplingFractionKey.initialize() );
-
-  //=== get TileCondToolEmscale
-  ATH_CHECK( m_tileToolEmscale.retrieve() );
+  ATH_CHECK( m_emScaleKey.initialize() );
 
   ATH_CHECK( m_tileToolNoiseSample.retrieve() );
 
@@ -177,6 +175,9 @@ StatusCode TileHitToRawChannel::execute() {
 
   SG::ReadCondHandle<TileSamplingFraction> samplingFraction(m_samplingFractionKey, ctx);
   ATH_CHECK( samplingFraction.isValid() );
+
+  SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+  ATH_CHECK( emScale.isValid() );
 
   // step1: read hits from TES
   SG::ReadHandle<TileHitContainer> hitContainer(m_hitContainerKey, ctx);
@@ -290,15 +291,15 @@ StatusCode TileHitToRawChannel::execute() {
       /* Convert to amplitude of channel (assuming high gain) */
       /* need to divide here, because "calib" converts amp to energy */
       int gain = TileID::HIGHGAIN;
-      double amp_ch = e_ch / m_tileToolEmscale->channelCalib(drawerIdx, ch, gain, 1., m_rChUnit
-                                                             , TileRawChannelUnit::MegaElectronVolts);
+      double amp_ch = e_ch / emScale->calibrateChannel(drawerIdx, ch, gain, 1., m_rChUnit
+                                                       , TileRawChannelUnit::MegaElectronVolts);
       double noise;
       // If high saturates, convert adc_id to low-gain value and recalculate.
       if (adc_ampl[ch] + amp_ch + m_tileToolNoiseSample->getPed(drawerIdx, ch, gain, TileRawChannelUnit::ADCcounts, ctx) > m_ampMaxHi) {
 
         gain = TileID::LOWGAIN;
-        amp_ch = e_ch / m_tileToolEmscale->channelCalib(drawerIdx, ch, gain, 1., m_rChUnit
-                                                        , TileRawChannelUnit::MegaElectronVolts);
+        amp_ch = e_ch / emScale->calibrateChannel(drawerIdx, ch, gain, 1., m_rChUnit
+                                                  , TileRawChannelUnit::MegaElectronVolts);
 
         // If Noise is requested, 
         // recalculate noise using the SAME random number as for high.

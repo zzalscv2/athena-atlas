@@ -19,6 +19,7 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/MagicNumbers.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "GaudiKernel/IPartPropSvc.h"
 
@@ -137,7 +138,7 @@ namespace Trk
       
       //get "intensity" (scalar sum ot p_T^2)
       double sum_pt2(0.0);
-      for (auto part: *myEvent) {
+      for (const auto& part: *myEvent) {
 	if(!pass(part, mcEventCollection.cptr())) continue; //select stable charged particles
 	sum_pt2 += part->momentum().perp2();
       }
@@ -183,7 +184,7 @@ namespace Trk
 
 
 #ifdef HEPMC3
-    bool isEmpty = ( evt->particles().size() == 0 );
+    bool isEmpty = ( evt->particles().empty() );
 #else
     bool isEmpty = ( evt->particles_size() == 0 );
 #endif
@@ -222,14 +223,14 @@ namespace Trk
     return true;
   }
 
-  bool MCTrueSeedFinder::pass( HepMC::ConstGenParticlePtr part,
+  bool MCTrueSeedFinder::pass( const HepMC::ConstGenParticlePtr& part,
 			       const McEventCollection* coll ) const {
 
     // Check if the particle is coming from a "good" GenEvent:
     if( ! pass( part->parent_event(), coll ) ) return false;
 
     // Now check for stable particles
-    if (HepMC::barcode(part) < 200000) {
+    if (!HepMC::is_simulation_particle(part)) {
       if( ! TruthHelper::IsGenStable()( part ) ) return false;
       if( ! TruthHelper::IsGenInteracting()( part ) ) return false;
     }
@@ -242,8 +243,7 @@ namespace Trk
 
     const HepPDT::ParticleData* pd = m_partPropSvc->PDT()->particle( std::abs( pdg ) );
     if( ! pd ) {
-      ATH_MSG_DEBUG( "Could not get particle data for pdg = " << pdg 
-		     << " status " << part->status() << " barcode " <<HepMC::barcode(part)
+      ATH_MSG_DEBUG( "Could not get particle data for = " << part 
 		     << " process id " <<HepMC::signal_process_id(part->parent_event()));
       return false;
     }

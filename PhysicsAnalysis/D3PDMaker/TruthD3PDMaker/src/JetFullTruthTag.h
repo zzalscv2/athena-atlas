@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -35,7 +35,7 @@ public:
                    const IInterface* parent);
 
   /// Book variables for this block.
-  virtual StatusCode book();
+  virtual StatusCode book() final;
 
 
   /**
@@ -46,7 +46,7 @@ public:
    * is responsible for arranging that all the pointers for booked variables
    * are set appropriately upon entry.
    */
-  virtual StatusCode fill (const Jet& p);
+  virtual StatusCode fill (const Jet& p) override;
 
 private:
   float m_hadronMatch_dr,m_partonMatch_dr;

@@ -107,13 +107,15 @@ StatusCode JetTrackMomentsTool::decorate(const xAOD::JetContainer& jets) const {
             pflowTracks.push_back(thisTrack);
           }// We have a charged PFO
         }// Loop on jet constituents
-      }// This jet is made from xAOD::PFO, so we do calculate the pflow moments
+      }// This jet is either a PFlow jet (constituent type: xAOD::FlowElement::PFlow) or UFO jets
       else if (ctype  == xAOD::Type::FlowElement) {
+	isPFlowJet = true;
         size_t numConstit = jet->numConstituents();
         for ( size_t i=0; i<numConstit; i++ ) {
           const xAOD::FlowElement* constit = dynamic_cast<const xAOD::FlowElement*>(jet->rawConstituent(i));
-          if(constit != nullptr && (constit->signalType() & xAOD::FlowElement::PFlow)){
-            isPFlowJet = true;
+	  // UFO jet constituents have signalType xAOD::FlowElement::Charged or xAOD::FlowElement::Neutral
+	  // PFlow jet constituents have signalType xAOD::FlowElement::ChargedPFlow or xAOD::FlowElement::NeutralPFlow
+          if(constit != nullptr && ((constit->signalType() & xAOD::FlowElement::PFlow) || constit->signalType() == xAOD::FlowElement::Charged)){
             if (constit->isCharged()){
               const xAOD::TrackParticle *thisTrack = dynamic_cast<const xAOD::TrackParticle*>(constit->chargedObject(0));//PFO should have only 1 track
               if(thisTrack != nullptr) pflowTracks.push_back(thisTrack);

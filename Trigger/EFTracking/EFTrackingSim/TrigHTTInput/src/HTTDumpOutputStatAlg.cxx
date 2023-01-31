@@ -25,7 +25,7 @@ StatusCode HTTDumpOutputStatAlg::initialize()
 
 
 StatusCode HTTDumpOutputStatAlg::BookHistograms(){
-  m_hits_r_vs_z = new TH2F("h_hits_r_vs_z", "r/z ITK hit map; z[mm];r[mm]", 3500, 0., 3500., 450, 0., 450.);
+  //m_hits_r_vs_z = new TH2F("h_hits_r_vs_z", "r/z ITK hit map; z[mm];r[mm]", 3500, 0., 3500., 450, 0., 450.);
   return StatusCode::SUCCESS;
 }
 

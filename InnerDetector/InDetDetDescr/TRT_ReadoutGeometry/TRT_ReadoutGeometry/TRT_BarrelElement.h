@@ -84,9 +84,6 @@ namespace InDetDD {
        DEPRECATED. Please use starwCenter(i).z() */
     inline double strawZPos (unsigned int i) const;
 
-    /** Default Local -> global transform of the straw (ie before alignment corrections) */
-    virtual HepGeom::Transform3D defStrawTransform(int straw) const override final;
-
     /** Get the length of the straws (active length): */
     virtual const double & strawLength() const override final;
 

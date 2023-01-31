@@ -20,6 +20,7 @@
 
 // Athena includes
 #include "AtlasDetDescr/AtlasRegion.h"
+#include "CxxUtils/checker_macros.h"
 
 #include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/PrimaryParticleInformation.h"
@@ -86,7 +87,7 @@ void TrackProcessorUserActionBase::UserSteppingAction(const G4Step* aStep)
   const std::vector<const G4Track*>  *secondaryVector = aStep->GetSecondaryInCurrentStep();
   for ( auto* aConstSecondaryTrack : *secondaryVector ) {
     // get a non-const G4Track for current secondary (nasty!)
-    G4Track* aSecondaryTrack = const_cast<G4Track*>( aConstSecondaryTrack );
+    G4Track* aSecondaryTrack ATLAS_THREAD_SAFE = const_cast<G4Track*>( aConstSecondaryTrack ); // imposed by Geant4 interface
 
     auto *trackInfo = ::iGeant4::ISFG4Helper::getISFTrackInfo(*aSecondaryTrack);
 
@@ -108,7 +109,7 @@ void TrackProcessorUserActionBase::PreUserTrackingAction(const G4Track* aTrack)
 {
   bool isPrimary = ! aTrack->GetParentID();
   if (isPrimary) {
-    G4Track* nonConstTrack = const_cast<G4Track*> (aTrack); // love it :)
+    G4Track* nonConstTrack ATLAS_THREAD_SAFE = const_cast<G4Track*> (aTrack); // imposed by Geant4 interface
     setupPrimary(*nonConstTrack);
   } else {
     setupSecondary(*aTrack);
@@ -155,7 +156,7 @@ void TrackProcessorUserActionBase::setupPrimary(G4Track& aTrack)
     return; // The G4Exception call above should abort the job, but Coverity does not seem to pick this up.
   }
 
-  auto* truthBinding = baseISP->getTruthBinding();
+  ISF::TruthBinding* truthBinding = baseISP->getTruthBinding();
   if (!truthBinding) {
     G4ExceptionDescription description;
     description << G4String("PreUserTrackingAction: ") + "No ISF::TruthBinding associated with primary particle (trackID: "
@@ -166,15 +167,11 @@ void TrackProcessorUserActionBase::setupPrimary(G4Track& aTrack)
   }
 
   int regenerationNr = ppInfo->GetRegenerationNr();
-#ifdef HEPMC3
-  auto primaryTruthParticle = truthBinding->getGenerationZeroTruthParticle();
-  auto generationZeroTruthParticle = truthBinding->getGenerationZeroTruthParticle();
-  auto currentlyTracedHepPart = truthBinding->getTruthParticle();
-#else
-  auto* primaryTruthParticle = truthBinding->getGenerationZeroTruthParticle();
-  auto* generationZeroTruthParticle = truthBinding->getGenerationZeroTruthParticle();
-  auto* currentlyTracedHepPart = truthBinding->getTruthParticle();
-#endif
+
+  HepMC::GenParticlePtr primaryTruthParticle = truthBinding->getGenerationZeroTruthParticle();
+  HepMC::GenParticlePtr generationZeroTruthParticle = truthBinding->getGenerationZeroTruthParticle();
+  HepMC::GenParticlePtr currentlyTracedHepPart = truthBinding->getTruthParticle();
+
   auto classification = classify(primaryTruthParticle,
                                  generationZeroTruthParticle,
                                  currentlyTracedHepPart,
@@ -186,9 +183,10 @@ void TrackProcessorUserActionBase::setupPrimary(G4Track& aTrack)
                                                                  generationZeroTruthParticle );
   newTrackInfo->SetRegenerationNr(regenerationNr);
 
-  setCurrentParticle(const_cast<ISF::ISFParticle*>(baseISP),
+  setCurrentParticle(baseISP,
                      primaryTruthParticle,
                      currentlyTracedHepPart);
+
   return;
 }
 
@@ -196,20 +194,12 @@ void TrackProcessorUserActionBase::setupSecondary(const G4Track& aTrack)
 {
   auto* trackInfo = ::iGeant4::ISFG4Helper::getISFTrackInfo(aTrack);
 
-  // why does TrackInformation return *const* GenParticle and ISFParticle objects!?
-#ifdef HEPMC3
-  HepMC::GenParticlePtr currentlyTracedTruthParticle =  std::const_pointer_cast<HepMC3::GenParticle>( trackInfo->GetHepMCParticle() );
-  HepMC::GenParticlePtr primaryTruthParticle =  std::const_pointer_cast<HepMC3::GenParticle>( trackInfo->GetPrimaryHepMCParticle() );
-  auto* baseISFParticle = const_cast<ISF::ISFParticle*>( trackInfo->GetBaseISFParticle() );
+  HepMC::GenParticlePtr currentlyTracedTruthParticle = trackInfo->GetHepMCParticle();
+  HepMC::GenParticlePtr primaryTruthParticle = trackInfo->GetPrimaryHepMCParticle();
+  ISF::ISFParticle* baseISFParticle = trackInfo->GetBaseISFParticle();
 
   setCurrentParticle(baseISFParticle, primaryTruthParticle, currentlyTracedTruthParticle);
-#else
-  HepMC::GenParticlePtr currentlyTracedTruthParticle = const_cast<HepMC::GenParticlePtr>( trackInfo->GetHepMCParticle() );
-  HepMC::GenParticlePtr primaryTruthParticle = const_cast<HepMC::GenParticlePtr>( trackInfo->GetPrimaryHepMCParticle() );
-  auto* baseISFParticle = const_cast<ISF::ISFParticle*>( trackInfo->GetBaseISFParticle() );
 
-  setCurrentParticle(baseISFParticle, primaryTruthParticle, currentlyTracedTruthParticle);
-#endif
   return;
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -300,13 +300,11 @@ CollSplitByGUIDBase::openDestCollections()
       sort( sortedGuids.begin(), sortedGuids.end(), guidPairSort );
 
       int rowCounter = 0;
-      unsigned guidCounter = 0;
       pool::ICollection* subCollection = 0;
       string subCollName;
       vector<pair<Guid, int> >::iterator guidIter2 = sortedGuids.begin();
       while( guidIter2 != sortedGuids.end() )
       {
-	 guidCounter++;
 	 std::string guid = guidIter2->first.toString();
 	 int thisNumEvents = guidIter2->second;
 	 bool collLimit = ( createdCollections >= m_maxSplit );
@@ -376,9 +374,7 @@ CollSplitByGUIDBase::copyRows()
       const std::string dstRefName = m_collectionPool->getDstRefName();
       // Token name to split on (if not specified, use default for each source coll)
       const std::string splitRefName = ( m_splitRef.size()? m_splitRef : srcRefName );
-      size_t row = 0;
       while( cursor.next() ) {
-	 row ++;
 	 // get file GUID from event
 	 const TokenList &tokens = cursor.currentRow().tokenList();
 	 string guid = tokens[ splitRefName ].dbID().toString();

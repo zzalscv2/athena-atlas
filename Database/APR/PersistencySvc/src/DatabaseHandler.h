@@ -54,6 +54,9 @@ namespace pool {
       /// Rolls back the transaction
       void rollBackTransaction();
 
+      /// Disconnects the transaction
+      bool disconnectTransaction();
+
       /// Gives the list of containers
       std::vector< std::string > containers();
 

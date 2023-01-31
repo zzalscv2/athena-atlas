@@ -14,6 +14,7 @@
 #include "AtlasDetDescr/AtlasDetectorID.h"
 // HepMC
 #include "AtlasHepMC/GenParticle.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 
 InDet::PRD_TruthTrajectorySelectorID::PRD_TruthTrajectorySelectorID(const std::string& t, const std::string& n, const IInterface* p) :
@@ -90,7 +91,7 @@ void ThreePointCircle::constructCircle(	const Amg::Vector3D& p1,
 	m_pt = m_radius*(0.3*2.);
 
 	// transverse parameters
-	m_d0 = sqrt(cRx*cRx+cRy*cRy)-m_radius;
+	m_d0 = std::sqrt(cRx*cRx+cRy*cRy)-m_radius;
 
 	// longitudinal parameters
 	double theta = 1./3*(p1.theta() + p2.theta() + p3.theta());
@@ -121,7 +122,7 @@ void ThreePointCircle::constructCircle(	const Amg::Vector3D& p1,
 
 	// now sign d0
 	Amg::Vector3D pocaDir(poca.x(),poca.y(),0.);
-	Amg::Vector3D momDir(cos(m_phi0),sin(m_phi0),0.);
+	Amg::Vector3D momDir(std::cos(m_phi0),std::sin(m_phi0),0.);
   double signD0 = pocaDir.cross(momDir).z() > 0. ? 1. : -1.;    
 	m_d0 = signD0 * std::abs(m_d0);
 	    
@@ -165,7 +166,7 @@ bool InDet::PRD_TruthTrajectorySelectorID::pass( const Trk::PRD_TruthTrajectory 
   
   ThreePointCircle circle(pos);
   // trajectory only selected when within cuts
-  if( ( std::abs(circle.d0()) <= 15 && HepMC::barcode(*prdvec.genParticle)<= m_simBarcodeOffset )  )  return true;
+  if( ( std::abs(circle.d0()) <= 15 && !HepMC::is_simulation_particle(*prdvec.genParticle)  ))  return true;
   
   return false;
 }

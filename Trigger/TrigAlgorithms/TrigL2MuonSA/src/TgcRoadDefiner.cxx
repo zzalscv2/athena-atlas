@@ -225,7 +225,7 @@ StatusCode TrigL2MuonSA::TgcRoadDefiner::defineRoad(const TrigRoiDescriptor*    
       double phi;
       double sigma_phi;
 
-      if (m_backExtrapolatorTool && muonSA) {
+      if (m_backExtrapolatorTool) {
         StatusCode sc
           = (*m_backExtrapolatorTool)->give_eta_phi_at_vertex(muonSA, eta,sigma_eta,phi,sigma_phi,0.);
         if (sc.isSuccess() ){

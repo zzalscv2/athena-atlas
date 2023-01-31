@@ -14,8 +14,8 @@
 #include "AthenaPoolCnvSvc/T_AthenaPoolTPConverter.h"
 
 #include "TrkTrack/TrackStateOnSurface.h"
+#include "TrkTrack/MultiComponentStateOnSurface.h"
 #include "TrkEventTPCnv/TrkTrack/TrackStateOnSurface_p3.h"
-#include "TrkMultiComponentStateOnSurface/MultiComponentStateOnSurface.h"
 
 #include "TrkEventTPCnv/TrkEventPrimitives/FitQualityCnv_p1.h"
 #include "TrkEventTPCnv/TrkMaterialOnTrack/MaterialEffectsBaseCnv_p1.h"

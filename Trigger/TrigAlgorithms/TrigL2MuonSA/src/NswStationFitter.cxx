@@ -1320,7 +1320,7 @@ void TrigL2MuonSA::NswStationFitter::findSetOfMmHitIds(TrigL2MuonSA::MmHits& mmH
         } else {
           jHitId = hitIdByLayer[iPair+2].at(jHit);
         }
-        int encodedIds = (0xffff<<16) + jHitId; // fill all bits with 1 for hit id for the layer with no hit
+        int encodedIds = (0xFFFFu<<16) + jHitId; // fill all bits with 1 for hit id for the layer with no hit
         hitIdsInTwo[iPair].push_back(encodedIds);
         slopeInTwo[iPair].push_back(mmHits.at(jHitId).r/mmHits.at(jHitId).z);
         interceptInTwo[iPair].push_back(0.);

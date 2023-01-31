@@ -665,7 +665,7 @@ StatusCode GetLCSinglePionsPerf::execute()
     ATH_MSG_ERROR( "No particles in McEventCollection" );
     return StatusCode::FAILURE;
   }
-   HepMC::ConstGenParticlePtr gen=truthEvent->at(0)->particles().front();
+  const HepMC::ConstGenParticlePtr& gen=truthEvent->at(0)->particles().front();
 #else  
   if( truthEvent->at(0)->particles_empty() ){
     ATH_MSG_ERROR( "No particles in McEventCollection" );
@@ -1239,9 +1239,7 @@ int GetLCSinglePionsPerf::fill_calibhits (const xAOD::CaloClusterContainer& clus
   // retrieving cluster moments
   double engCalibAssigned = 0.0;
   double engClusSumCalibPresOnly = 0.0;
-  unsigned int iClus = -1;
   for (const xAOD::CaloCluster* theCluster : clusColl) {
-    ++iClus;
     double mx_calib_tot, mx_calib_ooc, mx_calib_dm;
 //     if( !theCluster->retrieveMoment(xAOD::CaloCluster::ENG_CALIB_TOT, mx_calib_tot)
 //          || !theCluster->retrieveMoment(xAOD::CaloCluster::ENG_CALIB_OUT_L, mx_calib_ooc)

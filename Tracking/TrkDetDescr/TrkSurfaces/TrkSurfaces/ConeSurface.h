@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -104,8 +104,6 @@ public:
   /**Implicit Constructor*/
   virtual ConeSurface* clone() const override;
   
-  std::unique_ptr<ConeSurface> uniqueClone() const;
-
   /** Use the Surface as a ParametersBase constructor, from local parameters -
    * charged */
   virtual Surface::ChargedTrackParametersUniquePtr createUniqueTrackParameters(
@@ -156,24 +154,6 @@ public:
   /** Use the Surface as a ParametersBase constructor, from global parameters */
   template<int DIM, class T>
   std::unique_ptr<ParametersT<DIM, T, ConeSurface>> createUniqueParameters(
-    const Amg::Vector3D& position,
-    const Amg::Vector3D& momentum,
-    double charge,
-    std::optional<AmgSymMatrix(DIM)> cov = std::nullopt) const;
-
-  /** Use the Surface as a ParametersBase constructor, from local parameters */
-  template<int DIM, class T>
-  ParametersT<DIM, T, ConeSurface> createParameters(
-    double l1,
-    double l2,
-    double phi,
-    double theta,
-    double qop,
-    std::optional<AmgSymMatrix(DIM)> cov = std::nullopt) const;
-
-  /** Use the Surface as a ParametersBase constructor, from global parameters */
-  template<int DIM, class T>
-  ParametersT<DIM, T, ConeSurface> createParameters(
     const Amg::Vector3D& position,
     const Amg::Vector3D& momentum,
     double charge,

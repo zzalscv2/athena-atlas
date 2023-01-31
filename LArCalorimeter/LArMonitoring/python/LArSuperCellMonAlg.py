@@ -31,7 +31,7 @@ def LArSuperCellMonConfigOld(inputFlags):
     from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
     CaloNoiseCondAlg()
 
-    algo = LArSuperCellMonConfigCore(helper, LArSuperCellMonAlg,inputFlags,isCosmics, isMC)
+    algo = LArSuperCellMonConfigCore(helper, LArSuperCellMonAlg,inputFlags,isCosmics, isMC, RemoveMasked=True)
 
     from AthenaMonitoring.AtlasReadyFilterTool import GetAtlasReadyFilterTool
     algo.ReadyFilterTool = [GetAtlasReadyFilterTool()]
@@ -45,6 +45,7 @@ def LArSuperCellMonConfig(inputFlags, **kwargs):
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     from AthenaConfiguration.ComponentFactory import CompFactory
     mlog = logging.getLogger( 'LArSuperCellMonConfig' )
+    mask=True
 
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags,'LArSuperCellMonAlgCfg')
@@ -82,9 +83,8 @@ def LArSuperCellMonConfig(inputFlags, **kwargs):
     sCellType = "EmulatedSCell"
     cfg.merge(emulateSC_Cfg(inputFlags,SCOut=sCellType))
 
-    from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
-    cfg.merge(LArOnOffIdMappingSCCfg(inputFlags))
-    cfg.addEventAlgo(CompFactory.LArRAWtoSuperCell(SCellContainerIn="SC_ET",**kwargs))
+    from LArCellRec.LArRAWtoSuperCellConfig import LArRAWtoSuperCellCfg
+    cfg.merge(LArRAWtoSuperCellCfg(inputFlags,mask=mask) )
 
     #return cfg
     lArCellMonAlg=CompFactory.LArSuperCellMonAlg
@@ -104,19 +104,19 @@ def LArSuperCellMonConfig(inputFlags, **kwargs):
 
     algo = LArSuperCellMonConfigCore(helper, lArCellMonAlg, inputFlags,
                                      inputFlags.Beam.Type is BeamType.Cosmics,
-                                     inputFlags.Input.isMC, algname)
+                                     inputFlags.Input.isMC, algname, RemoveMasked=mask)
 
     if not inputFlags.Input.isMC and not inputFlags.Common.isOnline:
        from AthenaMonitoring.BadLBFilterToolConfig import LArBadLBFilterToolCfg
        algo.BadLBTool=cfg.popToolsAndMerge(LArBadLBFilterToolCfg(inputFlags))
-    mlog.info("Check the Algorithm properties",algo)
+    #mlog.info("Check the Algorithm properties",algo)
 
     cfg.merge(helper.result())
 
     return cfg
 
 
-def LArSuperCellMonConfigCore(helper, algclass, inputFlags, isCosmics=False, isMC=False, algname='LArSuperCellMonAlg'):
+def LArSuperCellMonConfigCore(helper, algclass, inputFlags, isCosmics=False, isMC=False, algname='LArSuperCellMonAlg', RemoveMasked=True):
 
 
     LArSuperCellMonAlg = helper.addAlgorithm(algclass, algname)
@@ -128,6 +128,7 @@ def LArSuperCellMonConfigCore(helper, algclass, inputFlags, isCosmics=False, isM
     LArSuperCellMonAlg.EnableLumi = False
     LArSuperCellMonAlg.CaloCellContainer = "SCell_ET"
     LArSuperCellMonAlg.CaloCellContainerRef = "EmulatedSCell"
+    LArSuperCellMonAlg.RemoveMasked = RemoveMasked
     
 
     do2DOcc = True #TMP
@@ -330,7 +331,7 @@ if __name__=='__main__':
     # Setup logs
     from AthenaCommon.Constants import DEBUG
     from AthenaCommon.Constants import WARNING
-    from AthenaConfiguration.Enums import LHCPeriod
+    from AthenaConfiguration.Enums import LHCPeriod, BunchStructureSource
     from AthenaCommon.Logging import log
     log.setLevel(DEBUG)
 
@@ -341,17 +342,21 @@ if __name__=='__main__':
     # to test tier0 workflow:
     #ConfigFlags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/data15_13TeV.00278748.physics_ZeroBias.merge.RAW._lb0384._SFO-ALL._0001.1']
     #ConfigFlags.Input.Files = ['../data22_13p6TeV/data22_13p6TeV.00432180.physics_Main.daq.RAW._lb0335._SFO-16._0001.data']
-    ConfigFlags.Input.Files = ['/eos/atlas/atlastier0/daq/data22_13p6TeV/express_express/00432180/data22_13p6TeV.00432180.express_express.daq.RAW/data22_13p6TeV.00432180.express_express.daq.RAW._lb0374._SFO-12._0001.data']
+    #ConfigFlags.Input.Files = ['/eos/atlas/atlastier0/daq/data22_13p6TeV/express_express/00432180/data22_13p6TeV.00432180.express_express.daq.RAW/data22_13p6TeV.00432180.express_express.daq.RAW._lb0374._SFO-12._0001.data']
+    ConfigFlags.Input.Files = ['/eos/atlas/atlastier0/daq/data22_13p6TeV/express_express/00439798/data22_13p6TeV.00439798.express_express.daq.RAW/data22_13p6TeV.00439798.express_express.daq.RAW._lb1085._SFO-16._0001.data']
 
     #ConfigFlags.Calo.Cell.doPileupOffsetBCIDCorr=True
     ConfigFlags.Output.HISTFileName = 'LArSuperCellMonOutput.root'
-    ConfigFlags.DQ.enableLumiAccess = False
+    ConfigFlags.DQ.enableLumiAccess = True
     ConfigFlags.DQ.useTrigger = False
     ConfigFlags.DQ.Environment = 'tier0'
+    #ConfigFlags.DQ.Environment = 'online'
     ConfigFlags.IOVDb.GlobalTag = "CONDBR2-ES1PA-2022-07"
     ConfigFlags.Common.isOnline = True
     ConfigFlags.GeoModel.Run=LHCPeriod.Run3
     ConfigFlags.Exec.OutputLevel=WARNING
+    ConfigFlags.Beam.BunchStructureSource=BunchStructureSource.FILLPARAMS
+    #ConfigFlags.Beam.BunchStructureSource=BunchStructureSource.Lumi
     ConfigFlags.lock()
 
 
@@ -360,7 +365,6 @@ if __name__=='__main__':
     cfg = MainServicesCfg(ConfigFlags)
     storeGateSvc = cfg.getService("StoreGateSvc")
     storeGateSvc.Dump=True
-    print(storeGateSvc)
 
     # in case of tier0 workflow:
     #from CaloRec.CaloRecoConfig import CaloRecoCfg
@@ -371,6 +375,7 @@ if __name__=='__main__':
 
     if not ConfigFlags.DQ.Environment == 'online':
        from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
+       # FillParamsFolderKey = /TDAQ/OLC/LHC/FILLPARAMS
        cfg.merge(BunchCrossingCondAlgCfg(ConfigFlags))
 
     cfg.merge(LArSuperCellMonConfig(ConfigFlags)) 
@@ -379,4 +384,4 @@ if __name__=='__main__':
     cfg.store(f)
     f.close()
 
-    cfg.run() #use cfg.run() to run on all events
+    cfg.run(100) #use cfg.run() to run on all events

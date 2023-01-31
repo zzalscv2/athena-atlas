@@ -32,7 +32,7 @@ namespace CP {
                 m_efficiency_decoration_name_mc(),
                 m_sf_decoration_name(),
                 m_calibration_version("220725_Preliminary_r22run2"),
-                m_lowpt_threshold(15.e3),
+                m_lowpt_threshold(-1.),
                 m_iso_jet_dR("dRJet"),
                 m_use2DIsoCorr(false),
                 m_affectingSys(),
@@ -134,12 +134,21 @@ namespace CP {
         }
         ATH_MSG_INFO("Efficiency type is = " << EfficiencyTypeName(m_Type));
 
+        // temporary workaround to avoid bad Jpsi scale factors
+        if (m_lowpt_threshold < 0) { // not set by the user, use default values
+            if (m_calibration_version.find("Preliminary_r22run3") != std::string::npos) {
+                m_lowpt_threshold = 1e4;
+            } else {
+                m_lowpt_threshold = 15e3;
+            }
+        }
+
         /// for isolation efficiencies, we don't use a low pt component for now - set the low pt threshold to -1
         /// same holds for TTVA SF, and for the HighPt WP
         if (m_Type == CP::MuonEfficiencyType::Iso || m_Type == CP::MuonEfficiencyType::TTVA || m_Type == MuonEfficiencyType::BadMuonVeto || (m_Type == CP::MuonEfficiencyType::Reco && m_wp.find("HighPt") != std::string::npos)) {
             ATH_MSG_DEBUG("We are running Isolation or TTVA or High Pt reco SF, so we use Zmumu based SF for the whole pt range!");
             m_lowpt_threshold = -1;
-        } else if (m_lowpt_threshold < 0) {
+        } else if (m_lowpt_threshold <= 0) {
             ATH_MSG_INFO("Low pt SF turned off as crossover threshold is negative! Using Zmumu based SF for all pt values.");
         } else {
             ATH_MSG_INFO("JPsi based low pt SF will start to rock below " << m_lowpt_threshold / 1000. << " GeV!");
@@ -339,7 +348,7 @@ namespace CP {
         if (!m_custom_file_Calo.empty()) return resolve_file_location(m_custom_file_Calo);
         else if (m_Type != CP::MuonEfficiencyType::Reco) {
             return filename_Central();
-        } else return resolve_file_location("Reco_CaloTag_Z.root");
+        } else return resolve_file_location("Reco_CaloTag_Z.root"); //note that in rel22 we switched from CaloTag to CaloScore. Now, we're not updating the filename yet to ensure backward compatibility, but it must be clear that in rel22 calibration areas this file will actually contain the CaloScore SFs. 
     }
     std::string MuonEfficiencyScaleFactors::filename_HighEta()const {
 
@@ -362,7 +371,7 @@ namespace CP {
         // for the no reco WPs, we currently use the existing Z SF also for the low pt regime
         else if (m_Type != CP::MuonEfficiencyType::Reco || m_lowpt_threshold < 0) {
             return filename_Central();
-        } else return resolve_file_location("Reco_CaloTag_JPsi.root");
+        } else return resolve_file_location("Reco_CaloTag_JPsi.root"); //note that in rel22 we switched from CaloTag to CaloScore. Now, we're not updating the filename yet to ensure backward compatibility, but it must be clear that in rel22 calibration areas this file will actually contain the CaloScore SFs. 
     }
     // load the SF histos
     

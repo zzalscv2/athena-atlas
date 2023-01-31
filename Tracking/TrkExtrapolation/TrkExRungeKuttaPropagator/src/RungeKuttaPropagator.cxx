@@ -22,7 +22,7 @@
 #include "TrkGeometry/MagneticFieldProperties.h"
 //
 #include "TrkExUtils/IntersectionSolution.h"
-#include "TrkExUtils/TransportJacobian.h"
+#include "TrkEventPrimitives/TransportJacobian.h"
 //
 #include "TrkPatternParameters/PatternTrackParameters.h"
 
@@ -213,7 +213,7 @@ rungeKuttaStep(Cache& cache, bool Jac, double S, double* ATH_RESTRICT P, bool& I
 /////////////////////////////////////////////////////////////////////////////////
 
 double
-straightLineStep(bool Jac, double S, double* P)
+straightLineStep(bool Jac, double S, double* ATH_RESTRICT P)
 {
   double* R = &P[0]; // Start coordinates
   const double* A = &P[3]; // Start directions
@@ -607,31 +607,6 @@ crossPoint(const Trk::TrackParameters& Tp,
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-// step estimation to surfaces
-/////////////////////////////////////////////////////////////////////////////////
-double
-stepEstimator(int kind, double* Su, const double* P, bool& Q)
-{
-  switch (kind) {
-    case 0: {
-      return Trk::RungeKuttaUtils::stepEstimatorToStraightLine(Su, P, Q);
-    }
-    case 1: {
-      return Trk::RungeKuttaUtils::stepEstimatorToPlane(Su, P, Q);
-    }
-    case 2: {
-      return Trk::RungeKuttaUtils::stepEstimatorToCylinder(Su, P, Q);
-    }
-    case 3: {
-      return Trk::RungeKuttaUtils::stepEstimatorToCone(Su, P, Q);
-    }
-    default: {
-      return 1000000.;
-    }
-  }
-}
-
-/////////////////////////////////////////////////////////////////////////////////
 // Step estimator take into accout curvature
 /////////////////////////////////////////////////////////////////////////////////
 double
@@ -642,7 +617,7 @@ stepEstimatorWithCurvature(Cache& cache,
                            bool& Q)
 {
   // Straight step estimation
-  double Step = stepEstimator(kind, Su, P, Q);
+  double Step = Trk::RungeKuttaUtils::stepEstimator(kind, Su, P, Q);
   if (!Q)
     return 0.;
   const double AStep = std::abs(Step);
@@ -658,7 +633,7 @@ stepEstimatorWithCurvature(Cache& cache,
   const double As = 1. / std::sqrt(Ax * Ax + Ay * Ay + Az * Az);
 
   const double PN[6] = { P[0], P[1], P[2], Ax * As, Ay * As, Az * As };
-  const double StepN = stepEstimator(kind, Su, PN, Q);
+  const double StepN = Trk::RungeKuttaUtils::stepEstimator(kind, Su, PN, Q);
   if (!Q) {
     Q = true;
     return Step;
@@ -695,7 +670,7 @@ propagateWithJacobian(Cache& cache,
   //
   bool Q = 0;
   double S = 0;
-  double Step = stepEstimator(kind, Su, P, Q);
+  double Step = Trk::RungeKuttaUtils::stepEstimator(kind, Su, P, Q);
   if (!Q)
     return false;
 
@@ -1875,6 +1850,55 @@ Trk::RungeKuttaPropagator::propagateParameters(const ::EventContext& ctx,
 
   cache.m_maxPath = 10000.;
   return propagateRungeKutta(cache, false, Tp, Su, D, B, M, J, returnCurv);
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// Main function for MultiComponentState propagation used by the GSF
+/////////////////////////////////////////////////////////////////////////////////
+Trk::MultiComponentState
+Trk::RungeKuttaPropagator::multiStatePropagate(
+  const ::EventContext& ctx,
+  const Trk::MultiComponentState& multiComponentState,
+  const Trk::Surface& surface,
+  const Trk::MagneticFieldProperties& fieldProperties,
+  const Trk::PropDirection direction,
+  const Trk::BoundaryCheck& boundaryCheck,
+  const Trk::ParticleHypothesis particleHypothesis) const
+{
+
+  Trk::MultiComponentState propagatedState{};
+  propagatedState.reserve(multiComponentState.size());
+  Trk::MultiComponentState::const_iterator component =
+    multiComponentState.begin();
+  double sumw(0); // sum of the weights of the propagated parameters
+  for (; component != multiComponentState.end(); ++component) {
+    const Trk::TrackParameters* currentParameters = component->first.get();
+    if (!currentParameters) {
+      continue;
+    }
+    auto propagatedParameters = propagate(ctx,
+                                          *currentParameters,
+                                          surface,
+                                          direction,
+                                          boundaryCheck,
+                                          fieldProperties,
+                                          particleHypothesis,
+                                          false,
+                                          nullptr);
+    if (!propagatedParameters) {
+      continue;
+    }
+    sumw += component->second;
+    // Propagation does not affect the weightings of the states
+    propagatedState.emplace_back(std::move(propagatedParameters),
+                                 component->second);
+  }
+  // Protect low weight propagation
+  constexpr double minPropWeight = (1./12.);
+  if (sumw < minPropWeight) {
+    propagatedState.clear();
+  }
+  return propagatedState;
 }
 
 /////////////////////////////////////////////////////////////////////////////////

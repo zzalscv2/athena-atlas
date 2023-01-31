@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -27,11 +27,11 @@ def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
     LArPhysOFCAlg.KeyOFC   = "LArOFC_"+postfix
     LArPhysOFCAlg.KeyShape = "LArShape_"+postfix
     if (nColl==0):
-        LArPhysOFCAlg.DecoderTool = CompFactory.LArAutoCorrDecoderTool(UseAlwaysHighGain=True,
+        LArPhysOFCAlg.DecoderTool = CompFactory.LArAutoCorrDecoderTool(UseAlwaysHighGain=flags.LArCalib.PhysACuseHG,
                                                                        isSC = flags.LArCalib.isSC)
     else:
         LArPhysOFCAlg.DecoderTool = CompFactory.LArAutoCorrDecoderTool(DecodeMode=1,
-                                                                       UseAlwaysHighGain=True,
+                                                                       UseAlwaysHighGain=flags.LArCalib.PhysACuseHG,
                                                                        isSC = flags.LArCalib.isSC,
                                                                        KeyAutoCorr="LArPhysAutoCorr")
                                                             
@@ -76,7 +76,7 @@ def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
     return result
 
 
-def LArOFCPhysCfg(flags):
+def LArOFCPhysCfg(flags,loadPhysAC=True):
 
     #Get basic services and cond-algos
     from LArCalibProcessing.LArCalibBaseConfig import LArCalibBaseCfg,chanSelStr
@@ -88,7 +88,6 @@ def LArOFCPhysCfg(flags):
     rs=FolderTagResolver()
     PhysWaveTag=rs.getFolderTag(flags.LArCalib.PhysWave.Folder)
     AutoCorrTag=rs.getFolderTag(flags.LArCalib.AutoCorr.Folder)
-    #PhysAutoCorrTag= "_mu_"+str(flags.LArCalib.NColl)+rs.getFolderTagSuffix(flags.LArCalib.PhysAutoCorr.Folder)
     PhysAutoCorrTag= rs.getFolderTag(flags.LArCalib.PhysAutoCorr.Folder)
     if (nColl>0):
         #Insert mu in tag-name:
@@ -101,7 +100,8 @@ def LArOFCPhysCfg(flags):
 
     result.merge(addFolders(flags,flags.LArCalib.PhysWave.Folder,detDb=flags.LArCalib.Input.Database, tag=PhysWaveTag, modifiers=chanSelStr(flags)))
     result.merge(addFolders(flags,flags.LArCalib.AutoCorr.Folder,detDb=flags.LArCalib.Input.Database, tag=AutoCorrTag, modifiers=chanSelStr(flags)))
-    result.merge(addFolders(flags,flags.LArCalib.PhysAutoCorr.Folder,detDb=flags.LArCalib.Input.Database, tag=PhysAutoCorrTag,modifiers=chanSelStr(flags)))
+    if loadPhysAC:
+        result.merge(addFolders(flags,flags.LArCalib.PhysAutoCorr.Folder,detDb=flags.LArCalib.Input.Database, tag=PhysAutoCorrTag,modifiers=chanSelStr(flags)))
 
     
     
@@ -145,6 +145,10 @@ def LArOFCPhysCfg(flags):
                                     FirstEvent	      = 1,
                                     InitialTimeStamp  = 0,
                                     TimeStampInterval = 1))
+
+    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+    result.merge(PerfMonMTSvcCfg(flags))
+    
     return result
 
 
@@ -152,7 +156,8 @@ def LArOFCPhysCfg(flags):
 if __name__ == "__main__":
 
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    ConfigFlags=initConfigFlags()
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
     addLArCalibFlags(ConfigFlags)
 
@@ -167,8 +172,12 @@ if __name__ == "__main__":
     ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema=output.sqlite;dbname=CONDBR2"
     ConfigFlags.IOVDb.GlobalTag="LARCALIB-RUN2-02"
+    ConfigFlags.GeoModel.AtlasVersion="ATLAS-R3S-2021-03-00-00"
+    ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
+    ConfigFlags.LAr.doAlign=False
+    ConfigFlags.Input.RunNumber=ConfigFlags.LArCalib.Input.RunNumbers[0]
     #ConfigFlags.Exec.OutputLevel=1
-
+    ConfigFlags.fillFromArgs()
     ConfigFlags.lock()
     cfg=MainServicesCfg(ConfigFlags)
     cfg.merge(LArOFCPhysCfg(ConfigFlags))

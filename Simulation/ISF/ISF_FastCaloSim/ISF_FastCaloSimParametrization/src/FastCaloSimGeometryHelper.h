@@ -28,7 +28,7 @@ class FastCaloSimGeometryHelper:public AthAlgTool, public CaloGeometry, virtual 
  private:
   /// DetDescr mgr for access to the calo helper
   const CaloDetDescrManager* m_caloMgr{nullptr};
-    
+
   bool LoadGeometryFromCaloDDM();
 };
 

@@ -244,14 +244,6 @@ CurvilinearParametersT<DIM, T, S>::clone() const
   return new CurvilinearParametersT<DIM, T, S>(*this);
 }
 
-/** unique clone */
-template<int DIM, class T, class S>
-std::unique_ptr<CurvilinearParametersT<DIM, T, S>>
-CurvilinearParametersT<DIM, T, S>::uniqueClone() const
-{
-  return std::unique_ptr<CurvilinearParametersT<DIM, T, S>>(clone());
-}
-
 /** Return the ParametersType enum */
 template<int DIM, class T, class S>
 inline ParametersType

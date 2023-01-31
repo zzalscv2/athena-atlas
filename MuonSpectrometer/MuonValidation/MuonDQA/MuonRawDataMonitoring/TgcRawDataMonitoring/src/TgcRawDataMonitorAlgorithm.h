@@ -168,6 +168,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
   SG::ReadHandleKey<xAOD::VertexContainer> m_PrimaryVertexContainerKey{this,"PrimaryVertexContainerName","PrimaryVertices","Primary Vertex Container"};
   
   DoubleProperty m_muonToPVdz{this,"MuonToPVdz",50.,"Window size in deltaZ between muon track and primary vertex"};
+  DoubleProperty m_muonToPVdzOffset{this,"MuonToPVdzOffset",0.,"Offset of deltaZ between muon track and primary vertex"};
   DoubleProperty m_muonToPVdca{this,"MuonToPVdca",0.5,"Distance to closest approach of muon track to primary vertex"};
   BooleanProperty m_doExpressProcessing{this,"doExpressProcessing",false,"Processing express_express data"};
   StringProperty m_packageName{this,"PackageName","TgcRawDataMonitor","group name for histograming"};
@@ -176,6 +177,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
   BooleanProperty m_printAvailableMuonTriggers{this,"PrintAvailableMuonTriggers",false,"debugging purpose. print out all available muon triggers in the event"};
   BooleanProperty m_TagAndProbe{this,"TagAndProbe",true,"switch to perform tag-and-probe method"};
   BooleanProperty m_TagAndProbeZmumu{this,"TagAndProbeZmumu",false,"switch to perform tag-and-probe method Z->mumu"};
+  BooleanProperty m_tagMuonInDifferentSystem{this,"TagMuonInDifferentSystem",false,"restrict the tag muons to be only in the other system (barrel or endcap)"};
   BooleanProperty m_anaTgcPrd{this,"AnaTgcPrd",false,"switch to perform analysis on TGC PRD"};
   BooleanProperty m_anaTgcCoin{this,"AnaTgcCoin",false,"switch to perform analysis on TGC Coin"};
   BooleanProperty m_fillGapByGapHistograms{this,"FillGapByGapHistograms",true,"filling gap-by-gap histograms (many many)"};
@@ -215,7 +217,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
   DoubleProperty m_barrelPivotPlaneHalfLength{this,"barrelPivotPlaneHalfLength", 9500.,"half length of pivot plane in barrel region"};
   DoubleProperty m_residualWindow{this,"ResidualWindow", 200.,"Window size in mm between hit position and track-extrapolated position"};
   DoubleProperty m_dPhiCutOnM3{this,"dPhiCutOnM3", 0.2,"Window size in delta phi on M3 between hit position and track-extrapolated position"};
-  DoubleProperty m_dRCutOnM3{this,"dRCutOnM3", 1000.,"Window size in delta R (radious) on M3 between hit position and track-extrapolated position"};
+  DoubleProperty m_dRCutOnM3{this,"dRCutOnM3", 3000.,"Window size in delta R (radious) on M3 between hit position and track-extrapolated position"};
   IntegerProperty m_nHitsInOtherBWTGCWire{this,"nHitsInOtherTGCWire",3,"Number of hits in other BW-TGC wire channels"};
   IntegerProperty m_nHitsInOtherBWTGCStrip{this,"nHitsInOtherTGCStrip",2,"Number of hits in other BW-TGC strip channels"};
   BooleanProperty m_dumpFullChannelList{this,"DumpFullChannelList",false,"Dump full channel list"};

@@ -55,29 +55,29 @@ if __name__ == '__main__':
     until = parse_runlumi(opts.until)
     channels = parse_channels(opts.defects)
 
-    print 'Reading in IOVs...'
+    print('Reading in IOVs...')
     iniovs = indb.retrieve(since=since, until=until, channels=channels, primary_only=True, nonpresent=(not opts.noabsent))
-    print '%d IOVs retrieved from input database' % len(iniovs)
+    print('%d IOVs retrieved from input database' % len(iniovs))
     #inchannels = set((x.channel for x in iniovs))
     inchannels = set(channels if channels is not None else indb.defect_names)
     outchannels = set(outdb.defect_names)
     missingchannels = inchannels-outchannels
     if len(missingchannels) != 0:
         if not opts.createdefects:
-            print 'Missing defect(s) in target database:'
-            print list(missingchannels)
-            print 'Rerun with a restricted defect list (--defects) or with --createdefects'
+            print('Missing defect(s) in target database:')
+            print(list(missingchannels))
+            print('Rerun with a restricted defect list (--defects) or with --createdefects')
             sys.exit(1)
         else:
-            print 'Creating missing channels on output database'
+            print('Creating missing channels on output database')
             descriptions = indb.get_channel_descriptions(missingchannels)
             for channel in missingchannels:
                 outdb.create_defect(channel, descriptions[channel])
     
     with outdb.storage_buffer:
-        print 'Writing out IOVs...'
+        print('Writing out IOVs...')
         for iov in iniovs:
             outdb.insert(iov.channel, iov.since, iov.until, iov.comment,
                          iov.user, iov.present, iov.recoverable)
 
-    print 'Done.'
+    print('Done.')

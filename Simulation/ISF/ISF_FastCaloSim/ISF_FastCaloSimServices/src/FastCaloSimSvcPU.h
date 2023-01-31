@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMSVCPU_H
@@ -15,6 +15,7 @@
 #include "GaudiKernel/IChronoStatSvc.h"
 #include "CaloInterface/ICaloCellMakerTool.h"
 #include "AthenaBaseComps/AthService.h"
+#include "CxxUtils/checker_macros.h"
 
 // ISF includes
 #include "ISF_Interfaces/BaseSimulationSvc.h"
@@ -51,7 +52,8 @@ namespace ISF
   @author Michael.Duehrssen -at- cern.ch
   */
   
-  class FastCaloSimSvcPU : public BaseSimulationSvc
+  class ATLAS_NOT_THREAD_SAFE FastCaloSimSvcPU : public BaseSimulationSvc
+  //    ^ use of FastShowerCellBuilderTool
   { 
     public: 
       
@@ -66,7 +68,7 @@ namespace ISF
       StatusCode  finalize();
 
       /** Simulation Call */
-      StatusCode simulate(const ISFParticle& isp, McEventCollection* mcEventCollection);
+      StatusCode simulate(ISFParticle& isp, McEventCollection* mcEventCollection);
                                                                  
       /** Setup Event chain - in case of a begin-of event action is needed */
       StatusCode setupEvent();

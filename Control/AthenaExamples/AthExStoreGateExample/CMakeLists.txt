@@ -1,4 +1,4 @@
-# Copyright (C) 20022020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthExStoreGateExample )
@@ -32,5 +32,11 @@ atlas_add_dictionary( AthExStoreGateExampleDict
                       LINK_LIBRARIES SGTutorialLib )
 
 # Install files from the package:
-atlas_install_joboptions( share/StoreGateExample_Gen_jobOptions.py share/StoreGateExample_Del_jobOptions.py share/StoreGateExample_Reentrant_jobOptions.py share/dflow_jobo.py share/StoreGateHiveExample.py share/HandleTest_jobOptions.py )
+atlas_install_joboptions( share/StoreGateExample_Gen_jobOptions.py
+                          share/StoreGateExample_Del_jobOptions.py
+                          share/StoreGateExample_Reentrant_jobOptions.py
+                          share/dflow_jobo.py
+                          share/StoreGateHiveExample.py
+                          share/HandleTest_jobOptions.py
+                          share/DecorHandleTest_jobOptions.py )
 

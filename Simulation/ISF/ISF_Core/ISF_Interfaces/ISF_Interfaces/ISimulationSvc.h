@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_INTERFACES_ISIMULATIONSVC_H
@@ -17,6 +17,8 @@
 #include "ISF_Event/ISFParticleContainer.h"
 #include "ISF_Event/SimSvcID.h"
 
+#include "CxxUtils/checker_macros.h"
+
 class McEventCollection;
 
 namespace ISF {
@@ -32,7 +34,7 @@ namespace ISF {
 
       @ author Andreas.Salzburger -at- cern.ch, Michael.Duehrssen -at- cern.ch , Elmar.Ritsch -at- cern.ch
   */
-  class ISimulationSvc : virtual public IInterface {
+  class ATLAS_NOT_THREAD_SAFE ISimulationSvc : virtual public IInterface {
 
     ///////////////////////////////////////////////////////////////////
     // Public methods:
@@ -47,10 +49,10 @@ namespace ISF {
     virtual StatusCode setParticleBroker( IParticleBroker *broker) = 0;
 
     /** Simulation call for vectors of particles*/
-    virtual StatusCode simulateVector(const ConstISFParticleVector &particles, McEventCollection* mcEventCollection) = 0;
+    virtual StatusCode simulateVector(const ISFParticleVector &particles, McEventCollection* mcEventCollection) = 0;
 
     /** Simulation call for individual particles*/
-    virtual StatusCode simulate(const ISFParticle& isp, McEventCollection* mcEventCollection) = 0;
+    virtual StatusCode simulate(ISFParticle& isp, McEventCollection* mcEventCollection) = 0;
 
     /** Return the simulation service descriptor */
     virtual std::string& simSvcDescriptor() = 0;

@@ -285,7 +285,7 @@ InDetPhysHitDecoratorAlg::decorateTrack(const xAOD::TrackParticle &particle,
           Trk::ResidualPull::ResidualType resType =
             (isUnbiased) ? (Trk::ResidualPull::Unbiased) : (Trk::ResidualPull::Biased);
 
-          residualPull.reset(m_residualPullCalculator->residualPull(hit, trackParameters, resType));
+          residualPull= m_residualPullCalculator->residualPull(hit, trackParameters, resType);
           ATH_MSG_VERBOSE("checking residual pull");
           if (not residualPull) {
             ATH_MSG_DEBUG("residualPull is NULL");

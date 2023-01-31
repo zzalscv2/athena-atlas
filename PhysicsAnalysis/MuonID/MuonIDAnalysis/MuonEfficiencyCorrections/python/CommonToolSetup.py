@@ -72,7 +72,6 @@ def GetMuonEfficiencyTool(MuonWP="Medium", Release="", CustomInput = "", BreakDo
         from MuonEfficiencyCorrections.MuonEfficiencyCorrectionsConf import CP__MuonEfficiencyScaleFactors  # noqa: F401
         EffiTool = CfgMgr.CP__MuonEfficiencyScaleFactors(ToolName)
         EffiTool.WorkingPoint = MuonWP
-        EffiTool.LowPtThreshold = 15.e3
         EffiTool.ApplyKinematicSystematic = True
         EffiTool.BreakDownSystematics = BreakDownSystematics
         EffiTool.UncorrelateSystematics = UncorrelateSystematics

@@ -320,7 +320,7 @@ StatusCode AFP_PileUpTool::processBunchXing(int bunchXing, SubEventIterator bSub
 {
   ATH_MSG_DEBUG ( "AFP_PileUpTool::processBunchXing() " << bunchXing );
   SubEventIterator iEvt = bSubEvents;
-  for (; iEvt!=eSubEvents; iEvt++) {
+  for (; iEvt!=eSubEvents; ++iEvt) {
     StoreGateSvc& seStore = *iEvt->ptr()->evtStore();
     ATH_MSG_VERBOSE ("SubEvt StoreGate " << seStore.name() << " :"
                      << " bunch crossing : " << bunchXing
@@ -407,7 +407,7 @@ StatusCode AFP_PileUpTool::fillTDDigiCollection(TimedHitCollection<AFP_TDSimHit>
   TimedHitCollection<AFP_TDSimHit>::const_iterator i, e, it;
     
   while (thpc.nextDetectorElement(i, e)) {
-    for (it = i; it != e; it++) {
+    for (it = i; it != e; ++it) {
       int Station     = (*it)->m_nStationID;
       int Detector    = (*it)->m_nDetectorID;
       int SensitiveElement = (*it)->m_nSensitiveElementID;
@@ -430,7 +430,7 @@ StatusCode AFP_PileUpTool::fillTDDigiCollection(AFP_TDSimHitCollection& AFP_TDSi
   AFP_TDSimHitConstIter it    = AFP_TDSimHitColl.begin();
   AFP_TDSimHitConstIter itend = AFP_TDSimHitColl.end();
 
-  for (; it != itend; it++) {
+  for (; it != itend; ++it) {
     int Station     = it->m_nStationID;
     int Detector = it->m_nDetectorID;
     int SensitiveElement = it->m_nSensitiveElementID;
@@ -454,7 +454,7 @@ StatusCode AFP_PileUpTool::fillSiDigiCollection(TimedHitCollection<AFP_SIDSimHit
   m_deposited_charge.assign(m_ArrSize, 0.f);  // here just 6 layers per detector are considered
 
   while (thpc.nextDetectorElement(i, e)) {
-    for (it = i; it != e; it++) {
+    for (it = i; it != e; ++it) {
       int Station     = (*it)->m_nStationID;
       int Detector    = (*it)->m_nDetectorID;
       int PixelRow    = (*it)->m_nPixelRow;
@@ -482,7 +482,7 @@ StatusCode AFP_PileUpTool::fillSiDigiCollection(AFP_SIDSimHitCollection& AFP_SID
 
   m_deposited_charge.assign(m_ArrSize, 0.f);  // here just 6 layers per detector are considered
 
-  for (; it != itend; it++) {
+  for (; it != itend; ++it) {
     int Station     = it->m_nStationID;
     int Detector    = it->m_nDetectorID;
     int PixelRow    = it->m_nPixelRow;

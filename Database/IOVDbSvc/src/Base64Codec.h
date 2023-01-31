@@ -17,6 +17,6 @@ namespace IOVDbNamespace{
   base64Encode(const coral::Blob & blob);
 
   coral::Blob
-  base64Decode(const std::string & /*base64String*/);
+  base64Decode(const std::string & base64String);
 }
 #endif

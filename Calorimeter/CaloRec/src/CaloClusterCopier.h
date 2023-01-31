@@ -28,7 +28,7 @@ Updated:  May 5, 2004    (Sven Menke)
 
 //  cluster builder with simple  Algorithm (fixed cone around seed)
 
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 class CaloClusterCopier : public AthAlgTool, virtual public CaloClusterCollectionProcessor {

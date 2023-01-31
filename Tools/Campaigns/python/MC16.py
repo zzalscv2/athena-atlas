@@ -53,6 +53,8 @@ def MC16e(flags):
 
 def MC16NoPileUp(flags):
     """MC16 flags for MC without pile-up"""
+    flags.Input.MCCampaign = Campaign.MC16a
+
     flags.Beam.NumberOfCollisions = 0.
 
     from LArConfiguration.LArConfigRun2 import LArConfigRun2NoPileUp
@@ -61,6 +63,8 @@ def MC16NoPileUp(flags):
 
 def MC16SimulationNoIoV(flags):
     """MC16 flags for simulation without specifying conditions IoVs"""
+    flags.Input.MCCampaign = Campaign.MC16a
+
     from SimulationConfig.SimEnums import SimulationFlavour, TruthStrategy
     flags.Sim.PhysicsList = 'FTFP_BERT_ATL'
     flags.Sim.TruthStrategy = TruthStrategy.MC15aPlus

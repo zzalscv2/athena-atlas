@@ -16,52 +16,68 @@ StatusCode EfexMonitorAlgorithm::initialize() {
   ATH_MSG_DEBUG("Package Name "<< m_packageName);
   ATH_MSG_DEBUG("Low Pt Cut "<< m_lowPtCut);
   ATH_MSG_DEBUG("High Pt Cut "<< m_hiPtCut);
-  ATH_MSG_DEBUG("m_eFexContainer"<< m_eFexContainerKey); 
-  ATH_MSG_DEBUG("m_eFexTauContainer"<< m_eFexTauContainerKey);
+
+  ATH_MSG_INFO("m_eFexEMTobKeyList "<< m_eFexEMTobKeyList);
+  ATH_MSG_INFO("m_eFexTauTobKeyList "<< m_eFexTauTobKeyList);
 
   // we initialise all the containers that we need
-  ATH_CHECK( m_eFexContainerKey.initialize() );
-  ATH_CHECK( m_eFexTauContainerKey.initialize() );
-  
-  return AthMonitorAlgorithm::initialize();
+  ATH_CHECK( m_eFexEMTobKeyList.initialize() );
+  ATH_CHECK( m_eFexTauTobKeyList.initialize() );
+
+  StatusCode initResult = AthMonitorAlgorithm::initialize();
+  ATH_MSG_INFO("initResult "<< initResult);  
+
+  return StatusCode::SUCCESS;//  AthMonitorAlgorithm::initialize();
 }
 
 StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const {
 
   ATH_MSG_DEBUG("EfexMonitorAlgorithm::fillHistograms");
 
-  // Begin the EM processing
-  // Access eFex EM container
-  SG::ReadHandle<xAOD::eFexEMRoIContainer> eFexContainer{m_eFexContainerKey, ctx};
-  if(!eFexContainer.isValid()){
-    ATH_MSG_ERROR("No eFex EM container found in storegate  "<< m_eFexContainerKey); 
-    return StatusCode::SUCCESS;
-  }
-  const xAOD::eFexEMRoIContainer* emDataContPtr = eFexContainer.cptr();
-  ATH_CHECK(fillEMHistograms("LowPtCut", emDataContPtr, m_lowPtCut));
-  ATH_CHECK(fillEMHistograms("HiPtCut", emDataContPtr, m_hiPtCut));
-
-  // Begin the Tau processing
-  // Access eFex Tau container
-  SG::ReadHandle<xAOD::eFexTauRoIContainer> eFexTauContainer{m_eFexTauContainerKey, ctx};
-  if(!eFexTauContainer.isValid()){
-    ATH_MSG_ERROR("No eFex Tau container found in storegate  "<< m_eFexTauContainerKey);
-    return StatusCode::SUCCESS;
-  }
-  const xAOD::eFexTauRoIContainer* tauDataContPtr = eFexTauContainer.cptr();
-  ATH_CHECK(fillTauHistograms("LowPtCut", tauDataContPtr, m_lowPtCut));
-  ATH_CHECK(fillTauHistograms("HiPtCut", tauDataContPtr, m_hiPtCut));
+  // Loop over EM read handle keys in key array
+  for (const SG::ReadHandleKey<xAOD::eFexEMRoIContainer>& key : m_eFexEMTobKeyList){
+    SG::ReadHandle<xAOD::eFexEMRoIContainer> eFexContainer (key, ctx);
+    // Check that this container is present
+    if ( !eFexContainer.isValid() ) {
+      ATH_MSG_WARNING("No eFex EM container found in storegate  "<< key.key());
+    }
+    else {
+      auto nEmTOBs_total = Monitored::Scalar<int>(key.key() +"_nEMTOBs_nocut",0.0);
+      nEmTOBs_total = eFexContainer->size();
+      fill(m_packageName, nEmTOBs_total);
+      // Fill EM histograms for the low/high cuts
+      const xAOD::eFexEMRoIContainer* emDataContPtr = eFexContainer.cptr();
+      ATH_CHECK(fillEMHistograms(m_packageName+'_'+key.key()+"_LowPtCut", emDataContPtr, m_lowPtCut));
+      ATH_CHECK(fillEMHistograms(m_packageName+'_'+key.key()+"_HiPtCut", emDataContPtr, m_hiPtCut));
+    }
+  } // Finished EM loop
+  
+  // Loop over Tau read handle keys in key array
+  for (const SG::ReadHandleKey<xAOD::eFexTauRoIContainer>& key : m_eFexTauTobKeyList){
+    SG::ReadHandle<xAOD::eFexTauRoIContainer> eFexTauContainer(key, ctx);
+    // Check that this container is present
+    if ( !eFexTauContainer.isValid() ) {
+      ATH_MSG_WARNING("No eFex Tau container found in storegate  "<< key.key());
+    }
+    else {
+      auto nTauTOBs_total = Monitored::Scalar<int>(key.key()+"_nTauTOBs_nocut",0.0);
+      nTauTOBs_total = eFexTauContainer->size();
+      fill(m_packageName, nTauTOBs_total);
+      // Fill Tau histograms for the low/high cuts
+      const xAOD::eFexTauRoIContainer* tauDataContPtr = eFexTauContainer.cptr();
+      ATH_CHECK(fillTauHistograms(m_packageName+'_'+key.key()+"_LowPtCut", tauDataContPtr, m_lowPtCut));
+      ATH_CHECK(fillTauHistograms(m_packageName+'_'+key.key()+"_HiPtCut", tauDataContPtr, m_hiPtCut));
+    }
+  } // Finished Tau loop
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode EfexMonitorAlgorithm::fillEMHistograms(const std::string& cut_name, const xAOD::eFexEMRoIContainer *emcont, const float &cut_et) const {
+StatusCode EfexMonitorAlgorithm::fillEMHistograms(const std::string& groupName, const xAOD::eFexEMRoIContainer *emcont, const float &cut_et) const {
   
   ATH_MSG_DEBUG("EfexMonitorAlgorithm::fillEMHistograms");
-  std::string groupName = m_packageName+'_'+cut_name;
 
   // monitored variables for histograms
-  auto nEmTOBs_total = Monitored::Scalar<int>("nEMTOBs_nocut",0.0); // Overall number of ToBs
   auto nEmTOBs_passcut = Monitored::Scalar<int>("nEMTOBs",0.0); // Number of ToBs passing the cut
   auto TOBeT = Monitored::Scalar<float>("TOBTransverseEnergy",0.0);
   auto TOBeta = Monitored::Scalar<float>("TOBEta",0.0);
@@ -77,7 +93,6 @@ StatusCode EfexMonitorAlgorithm::fillEMHistograms(const std::string& cut_name, c
   auto TOBRhad_threshold = Monitored::Scalar<float>("TOBRhad_threshold",0.0);
   auto TOBWstot_threshold = Monitored::Scalar<float>("TOBWstot_threshold",0.0);
 
-  nEmTOBs_total = emcont->size();
   for(const xAOD::eFexEMRoI* efexEmRoI : *emcont){
     if (efexEmRoI->et() > cut_et){
       nEmTOBs_passcut += 1;
@@ -112,19 +127,16 @@ StatusCode EfexMonitorAlgorithm::fillEMHistograms(const std::string& cut_name, c
       fill(groupName, TOBWstot_threshold);
     }
   }
-  fill(groupName, nEmTOBs_total);
   fill(groupName, nEmTOBs_passcut);
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode EfexMonitorAlgorithm::fillTauHistograms(const std::string& cut_name, const xAOD::eFexTauRoIContainer *taucont, const float &cut_et) const {
+StatusCode EfexMonitorAlgorithm::fillTauHistograms(const std::string& groupName, const xAOD::eFexTauRoIContainer *taucont, const float &cut_et) const {
 
-  ATH_MSG_DEBUG("EfexMonitorAlgorithm::fillEMHistograms");
-  std::string groupName = m_packageName+'_'+cut_name;
+  ATH_MSG_DEBUG("EfexMonitorAlgorithm::fillTauHistograms");
 
   // monitored variables for histograms
-  auto nTauTOBs_total = Monitored::Scalar<int>("nTauTOBs_nocut",0.0); // Overall number of ToBs
   auto nTauTOBs_passcut = Monitored::Scalar<int>("nTauTOBs",0.0); // Number of ToBs passing the cut
   auto tauTOBeT = Monitored::Scalar<float>("tauTOBTransverseEnergy",0.0);
   auto tauTOBeta = Monitored::Scalar<float>("tauTOBEta",0.0);
@@ -139,7 +151,6 @@ StatusCode EfexMonitorAlgorithm::fillTauHistograms(const std::string& cut_name, 
   auto tauTOBRhad_threshold = Monitored::Scalar<float>("tauTOBRhad_threshold",0.0);
   auto tauTOBthree_threshold = Monitored::Scalar<float>("tauTOBthree_threshold",0.0);
 
-  nTauTOBs_total = taucont->size();
   for(const xAOD::eFexTauRoI* efexTauRoI : *taucont){
     if (efexTauRoI->et() > cut_et){
       nTauTOBs_passcut += 1;
@@ -172,7 +183,6 @@ StatusCode EfexMonitorAlgorithm::fillTauHistograms(const std::string& cut_name, 
       fill(groupName, tauTOBthree_threshold);
     }
   }
-  fill(groupName, nTauTOBs_total);
   fill(groupName, nTauTOBs_passcut);
 
   return StatusCode::SUCCESS;

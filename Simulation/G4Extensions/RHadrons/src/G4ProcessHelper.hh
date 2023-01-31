@@ -5,6 +5,8 @@
 #ifndef RHADRONS_G4PROCESSHELPER_HH
 #define RHADRONS_G4PROCESSHELPER_HH 1
 
+#include "CxxUtils/checker_macros.h"
+
 #include"globals.hh"
 #include"G4ParticleDefinition.hh"
 #include"G4DynamicParticle.hh"
@@ -23,7 +25,7 @@ class G4ParticleTable;
 class G4ProcessHelper {
 
 public:
-  static G4ProcessHelper* Instance();
+  static const G4ProcessHelper* Instance();
 
   G4bool ApplicabilityTester(const G4ParticleDefinition& aPart) const;
 
@@ -31,7 +33,7 @@ public:
                                     const G4Element *anElement) const;
 
   //Make sure the element is known (for n/p-decision)
-  ReactionProduct GetFinalState(const G4Track& aTrack,G4ParticleDefinition*& aTarget);
+  ReactionProduct GetFinalState(const G4Track& aTrack,G4ParticleDefinition*& aTarget) const;
 
 protected:
   G4ProcessHelper();
@@ -40,29 +42,22 @@ protected:
 
 private:
 
-  G4double checkfraction;
-  G4int n_22;
-  G4int n_23;
-
-  G4ParticleDefinition* theTarget;
   G4ParticleDefinition* theProton;
   G4ParticleDefinition* theNeutron;
   G4ParticleDefinition* theRmesoncloud;
   G4ParticleDefinition* theRbaryoncloud;
 
-  ReactionMap* theReactionMap;
-
   // Version where we know if we baryonize already
-  ReactionProduct GetFinalStateInternal(const G4Track& aTrack,G4ParticleDefinition*& aTarget, const bool baryonize_failed);
+  ReactionProduct GetFinalStateInternal(const G4Track& aTrack,G4ParticleDefinition*& aTarget, const bool baryonize_failed) const;
 
   G4double Regge(const double boost) const;
   G4double Pom(const double boost) const;
 
-  G4double PhaseSpace(const ReactionProduct& aReaction,const G4DynamicParticle* aDynamicParticle) const;
+  G4double PhaseSpace(const ReactionProduct& aReaction,const G4ParticleDefinition& aTarget,const G4DynamicParticle* aDynamicParticle) const;
 
-  G4double ReactionProductMass(const ReactionProduct& aReaction,const G4DynamicParticle* aDynamicParticle) const;
+  G4double ReactionProductMass(const ReactionProduct& aReaction,const G4ParticleDefinition& aTarget,const G4DynamicParticle* aDynamicParticle) const;
 
-  G4bool ReactionIsPossible(const ReactionProduct& aReaction,const G4DynamicParticle* aDynamicParticle) const;
+  G4bool ReactionIsPossible(const ReactionProduct& aReaction,const G4ParticleDefinition& aTarget,const G4DynamicParticle* aDynamicParticle) const;
   G4bool ReactionGivesBaryon(const ReactionProduct& aReaction) const;
   void ReadAndParse(const G4String& str,
                     std::vector<G4String>& tokens,

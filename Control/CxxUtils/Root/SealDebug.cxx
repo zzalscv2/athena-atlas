@@ -365,7 +365,16 @@ void DebugAids::stacktraceLine ATLAS_NOT_THREAD_SAFE (IOFD fd,
     // difference of two pointers
     unsigned long libaddr = (unsigned long) info.dli_fbase;
     unsigned long relative_address = (addr >= libaddr) ? addr - libaddr : libaddr - addr;
-    if (strstr (info.dli_fname, ".so") == 0)
+    // ELF executables are usually not relocatable, and on 64-bit platforms
+    // are usually loaded starting at 0x400000.  In that case, we should _not_
+    // subtract the base address.  But clang15 by default appears to produce
+    // position-independent executables (PIE) by default.  In that case,
+    // we do need to subtract the offset.
+    // I'm not sure how to reliably tell the difference short of parsing
+    // the object headers.  For now, just assume that something
+    // that doesn't have .so in the name and is loaded at 0x400000
+    // is not relocatable.  This is not really portable, though.
+    if (strstr (info.dli_fname, ".so") == 0 && libaddr == 0x400000)
       relative_address = addr;
 
     // need popen for addr2line ...

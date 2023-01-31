@@ -36,39 +36,41 @@ if (objKeyStore.isInInput( "xAOD::TruthEventContainer", "TruthEvents" ) and
     job += xAODMaker__RedoTruthLinksAlg("GEN_AOD2xAOD_links")
 
 # Create filtered GEN_AOD (EtaPt Filter) and write SpclMC TruthParticles
-if (objKeyStore.isInInput("McEventCollection", "TruthEvent") and
-        not objKeyStore.isInInput("McEventCollection", "GEN_AOD")):
-    job += McAodBuilder()
-    pass
+# TODO: disabled with HepMC3 migration
+# if (objKeyStore.isInInput("McEventCollection", "TruthEvent") and
+#         not objKeyStore.isInInput("McEventCollection", "GEN_AOD")):
+#     job += McAodBuilder()
+#     pass
 
 
+# TODO: disabled with HepMC3 migration
+# def getMcAODBuilder(putype):
+#     """ putype is expected to be a string ! """
+#     builder =  createMcAodBuilder(
+#         name = "McAodBuilder"+putype,
+#         outMcEvtCollection  = "GEN_AOD", # this is the input to the CnvTool
+#         outTruthParticles   = "SpclMC"+putype,
+#         )
+#     builder.CnvTool.SelectSignalType =  PileUpClassification.fromString(putype) # min bias only
 
-def getMcAODBuilder(putype):
-    """ putype is expected to be a string ! """
-    builder =  createMcAodBuilder(
-        name = "McAodBuilder"+putype,
-        outMcEvtCollection  = "GEN_AOD", # this is the input to the CnvTool
-        outTruthParticles   = "SpclMC"+putype,
-        )
-    builder.CnvTool.SelectSignalType =  PileUpClassification.fromString(putype) # min bias only
-
-    objKeyStore.addStreamAOD("TruthParticleContainer","SpclMC"+putype)
-    return builder
+#     objKeyStore.addStreamAOD("TruthParticleContainer","SpclMC"+putype)
+#     return builder
 
 
 # below, build a new TruthParticleContainer for each type of pile-up.
 # we get the list of existing ESD TruthParticleContainer, and guess its pile-up type
 # according to its suffix. 
-inputTPContainer = objKeyStore['inputFile'].list("TruthParticleContainer")
-prefix = "TruthParticleContainer#INav4MomTruthEvent"
-for cont in inputTPContainer:
-    suffix = cont[len(prefix):]
-    if suffix == "":
-        # the truth SIGNAL has already been scheduled above
-        continue
-    builder = getMcAODBuilder(suffix)
-    builder.DoFiltering = False    
-    job += builder
+# TODO: disabled with HepMC3 migration
+# inputTPContainer = objKeyStore['inputFile'].list("TruthParticleContainer")
+# prefix = "TruthParticleContainer#INav4MomTruthEvent"
+# for cont in inputTPContainer:
+#     suffix = cont[len(prefix):]
+#     if suffix == "":
+#         # the truth SIGNAL has already been scheduled above
+#         continue
+#     builder = getMcAODBuilder(suffix)
+#     builder.DoFiltering = False    
+#     job += builder
 
 
 from PyUtils.MetaReaderPeeker import metadata

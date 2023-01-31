@@ -90,16 +90,9 @@ printfunc (Stream1.ItemList)
 svcMgr.MessageSvc.OutputLevel = WARNING
 svcMgr.MessageSvc.debugLimit  = 100000
 
-#rds svcMgr.ClassIDSvc = Service( "ClassIDSvc" )
-#rds svcMgr.ClassIDSvc.OutputLevel = 3
-
 from AthenaServices import AthenaServicesConf
 AthenaEventLoopMgr = AthenaServicesConf.AthenaEventLoopMgr()
 AthenaEventLoopMgr.OutputLevel = INFO
-
-#svcMgr.StoreGateSvc = Service( "StoreGateSvc" )
-#svcMgr.StoreGateSvc.Dump = TRUE 
-#svcMgr.StoreGateSvc.OutputLevel = 2
 
 # No stats printout
 include( "AthenaPoolTest/NoStats_jobOptions.py" )

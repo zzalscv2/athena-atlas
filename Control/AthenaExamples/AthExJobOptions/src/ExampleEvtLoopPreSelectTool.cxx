@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ExampleEvtLoopPreSelectTool.h"
 #include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 #include "EventInfo/EventType.h"
 
 
@@ -59,6 +58,6 @@ bool  ExampleEvtLoopPreSelectTool::passEvent(const EventIDBase& pEvent)
    ATH_MSG_DEBUG ("Entering PassEvent ");
 
 
-   EventID::number_type evtNumber = pEvent.event_number();
+   EventID::event_number_t evtNumber = pEvent.event_number();
    return (0 == (evtNumber % m_prescale));
  }

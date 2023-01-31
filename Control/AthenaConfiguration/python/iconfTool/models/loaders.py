@@ -84,7 +84,7 @@ baseParser.add_argument(
 
 baseParser.add_argument(
     "--shortenDefaultComponents",
-    help="Automatically shorten componet names that have a default name i.e. ToolX/ToolX to ToolX. It helps comparing Run2 & Run3 configurations where these are handled differently",
+    help="Automatically shorten component names that have a default name i.e. ToolX/ToolX to ToolX. It helps comparing Run2 & Run3 configurations where these are handled differently",
     action="store_true",
 )
 
@@ -94,6 +94,12 @@ baseParser.add_argument(
     action="store_true",
 )
 
+baseParser.add_argument(
+    "--follow",
+    help="Follow to related components up to given recursion depth",
+    type=int,
+    default=0
+)
 
 baseParser.add_argument(
     "--debug",
@@ -105,24 +111,66 @@ def __flatten_list(l):
     return [item for elem in l for item in elem] if l else []
 
 
-def excludeIncludeComps(dic, args) -> Dict:
+def types_in_properties(value, dict_to_update):
+    """Updates updates the dictionary with (potentially) component name -> component type"""
+    parsable = False
+    try:
+        s = ast.literal_eval(str(value))
+        parsable = True
+        if isinstance(s, list):
+            for el in s:
+                types_in_properties(el, dict_to_update)
+    except Exception:
+        pass
+    if isinstance(value,str) and "/" in value and not parsable:
+        comp = value.split("/")
+        if len(comp) == 2:
+            dict_to_update[comp[1]] = comp[0]
+            logger.debug("Found type of %s to be %s", comp[1], comp[0])
+    if isinstance(value, dict):
+        [ types_in_properties(v, dict_to_update) for v in value.values() ]
+
+
+def collect_types(conf):
+    name_to_type = {}
+    for (comp_name, comp_settings) in conf.items():
+        types_in_properties(comp_settings, name_to_type)
+    return name_to_type
+
+
+def excludeIncludeComps(dic, args, depth, compsToFollow=[]) -> Dict:
+    conf = {}
+    if depth == 0:
+        return conf
     compsToReport = __flatten_list(args.includeComps)
     compsToExclude = __flatten_list(args.excludeComps)
+
     def eligible(component):
-        include = any(re.match(s, component) for s in compsToReport)
         exclude = any(re.match(s, component) for s in compsToExclude)
+        if (component in compsToFollow or component.lstrip("ToolSvc.") in compsToFollow) and not (exclude or component in args.ignore):
+            logger.debug("Considering this component: %s because some other one depends on it", component)
+            return True
+        include = any(re.match(s, component) for s in compsToReport)
         if args.includeComps and args.excludeComps:
             return include and not exclude
         elif args.includeComps:
             return include
         elif args.excludeComps:
             return not exclude
-    conf = {}
-    for (key, value) in dic.items():
-        if eligible(key):
-            conf[key] = value
+
+    for (comp_name, comp_attributes) in dic.items():
+        if eligible(comp_name):
+            conf[comp_name] = comp_attributes
+            if depth > 0:
+                types = {}
+                types_in_properties(comp_attributes, types)
+                logger.debug("Following up for types included in here %s whole set of components to follow %s ", types, compsToFollow)
+                compsToFollow += types.keys()         
+            logger.debug("Included component %s", comp_name)
         else:
-            logger.debug("Ignored component %s", key)
+            logger.debug("Ignored component %s", comp_name)
+    if depth > 0:
+        conf.update(excludeIncludeComps(dic, args, depth-1, compsToFollow))
     return conf
 
 def ignoreIrrelevant(dic, args) -> Dict:
@@ -186,20 +234,19 @@ def renameComps(dic, args) -> Dict:
         conf[renamed] = value
     return conf
 
-def ignoreDefaults(allconf, args) -> Dict:
-    name_to_type=dict()
+def ignoreDefaults(allconf, args, known) -> Dict:
     conf = {}
-
     def drop_defaults(component_name, val_dict):
-        # try picking the name from the dict, if missing use last part of the name, if that fails use the componet_name (heuristic)
+        # try picking the name from the dict, if missing use last part of the name, if that fails use the component_name (heuristic)
         component_name_last_part = component_name.split(".")[-1]
-        component_type = name_to_type.get(component_name, name_to_type.get(component_name_last_part, component_name_last_part))
+        component_type = known.get(component_name, known.get(component_name_last_part, component_name_last_part))
         comp_cls = None
         try:
             from AthenaConfiguration.ComponentFactory import CompFactory
             comp_cls = CompFactory.getComp(component_type)
+            logger.debug("Loaded the configuration class %s/%s for defaults elimination", component_type, component_name)
         except Exception:
-            logger.debug("Could not find the configuration class %s no defaults for it can be eliminated", component_name)
+            logger.debug("Could not find the configuration class %s/%s, no defaults for it can be eliminated", component_type, component_name)
             return val_dict
         c = {}
 
@@ -218,27 +265,7 @@ def ignoreDefaults(allconf, args) -> Dict:
                     logger.debug("Keep value %s of property %s in %s because it is different from default %s", str(v), str(k), component_name, str(comp_cls._descriptors[k].default))
         return c
 
-     # collect types for all componets (we look for A/B or lost of A/B strings)
-    def collect_types(value):
-        """Updates name_to_type mapping"""
-        parseable = False
-        try:
-            s = ast.literal_eval(str(value))
-            parseable = True
-            if isinstance(s, list):
-                for el in s:
-                    collect_types(el)
-        except Exception:
-            pass
-        if isinstance(value,str) and "/" in value and not parseable:
-            comp = value.split("/")
-            if len(comp) == 2:
-                name_to_type[comp[1]] = comp[0]
-        if isinstance(value, dict):
-            [ collect_types(v) for v in value.values() ]
-
-    for (comp_name, comp_settings) in allconf.items():
-        collect_types(comp_settings)
+     # collect types for all components (we look for A/B or lost of A/B strings)
     for (comp_name, comp_settings) in allconf.items():
         remaining = drop_defaults(comp_name, comp_settings)
         if len(remaining) != 0: # ignore components that have only default settings
@@ -413,9 +440,10 @@ def loadConfigFile(fname, args) -> Dict:
     if conf is None:
         sys.exit("Unable to load %s file" % fname)
 
+    known_types = collect_types(conf)
 
     if args.includeComps or args.excludeComps:
-        conf = excludeIncludeComps(conf, args)
+        conf = excludeIncludeComps(conf, args, depth=args.follow)
 
     if args.ignoreIrrelevant:
         conf = ignoreIrrelevant(conf, args)
@@ -424,7 +452,7 @@ def loadConfigFile(fname, args) -> Dict:
         conf = renameComps(conf, args)
 
     if args.ignoreDefaults:
-        conf = ignoreDefaults(conf, args)
+        conf = ignoreDefaults(conf, args, known_types)
 
     if args.shortenDefaultComponents:
         conf = shortenDefaultComponents(conf, args)

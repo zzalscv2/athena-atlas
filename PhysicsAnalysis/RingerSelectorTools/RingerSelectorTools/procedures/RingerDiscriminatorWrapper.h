@@ -443,4 +443,3 @@ class RingerProcedureWrapper<
 #ifndef INCLUDE_HEADER_ONLY // Use to avoid circular includes
 #include "RingerDiscriminatorWrapper.icc"
 #endif // INCLUDE_HEADER_ONLY
-

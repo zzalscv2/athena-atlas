@@ -47,14 +47,15 @@ StatusCode HiggsTruthCategoryTool :: finalize () {
 }
 
 HTXS::HiggsClassification* HiggsTruthCategoryTool :: getHiggsTruthCategoryObject (const HepMC::GenEvent& HepMCEvent, const HTXS::HiggsProdMode prodMode) const {
-
-  static std::once_flag flag;
-  std::call_once(flag, [&]() {
-    higgsTemplateCrossSections->setHiggsProdMode(prodMode);
-    rivetAnaHandler->init(HepMCEvent);
-  });
+  if ( !m_isInitialized.test_and_set() ) {
+    [&]() {
+      higgsTemplateCrossSections->setHiggsProdMode(prodMode);
+      rivetAnaHandler->init(HepMCEvent);
+    }();
+  }
   // fill histos if flag is specified
-  if ( m_outHistos ) rivetAnaHandler->analyze(HepMCEvent);
+  // if ( m_outHistos ) rivetAnaHandler->analyze(HepMCEvent);
+
   // get the category output object containing the template cross section category,
   // and Higgs, V-boson, jets 4-vectors
   const Rivet::HiggsClassification htxs_cat_rivet = higgsTemplateCrossSections->classifyEvent(HepMCEvent,prodMode);  

@@ -83,7 +83,7 @@ TGCRPhiCoincidenceOut* TGCRPhiCoincidenceMatrix::doCoincidence()
 
     // calculate pT of muon candidate
     int type = m_lut->getMapType(m_ptR, m_ptPhi[j]);
-    int pt = m_lut->test(m_sectorLogic->getOctantID(), m_sectorLogic->getModuleID(),
+    int pt = m_lut->test(m_sideId, m_sectorLogic->getOctantID(), m_sectorLogic->getModuleID(),
                          subsector,type,m_dR,m_dPhi[j]);
     uint8_t ptOut = std::abs(pt);   // 0 is no candidate.
     chargeOut = pt<0 ? 0:1;

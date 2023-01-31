@@ -75,18 +75,19 @@ def MuonDetectorToolCfg(flags):
         if flags.Common.ProductionStep == ProductionStep.Simulation:
             detTool.FillCacheInitTime = 0
 
-    ## Additional material in the muon system
-    AGDD2Geo = CompFactory.AGDDtoGeoSvc()
-    muonAGDDTool = CompFactory.MuonAGDDTool("MuonSpectrometer", BuildNSW=False)
-    AGDD2Geo.Builders += [ muonAGDDTool ]
-    if (flags.Detector.GeometrysTGC and flags.Detector.GeometryMM):
-        nswAGDDTool = CompFactory.NSWAGDDTool("NewSmallWheel", Locked=False)
-        nswAGDDTool.Volumes = ["NewSmallWheel"]
-        nswAGDDTool.DefaultDetector = "Muon"
-        AGDD2Geo.Builders += [ nswAGDDTool ]
+    if not flags.GeoModel.SQLiteDB:
+        ## Additional material in the muon system
+        AGDD2Geo = CompFactory.AGDDtoGeoSvc()
+        muonAGDDTool = CompFactory.MuonAGDDTool("MuonSpectrometer", BuildNSW=False)
+        AGDD2Geo.Builders += [ muonAGDDTool ]
+        if (flags.Detector.GeometrysTGC and flags.Detector.GeometryMM):
+            nswAGDDTool = CompFactory.NSWAGDDTool("NewSmallWheel", Locked=False)
+            nswAGDDTool.Volumes = ["NewSmallWheel"]
+            nswAGDDTool.DefaultDetector = "Muon"
+            AGDD2Geo.Builders += [ nswAGDDTool ]
 
-    #create=True is needed for the service to be initialised in the new style
-    acc.addService(AGDD2Geo, create=True)
+        #create=True is needed for the service to be initialised in the new style
+        acc.addService(AGDD2Geo, create=True)
 
     # call fill cache of MuonDetectorTool such that all MdtReadoutElement caches are filled
     # already during initialize() -> this will increase memory -> needs to be measured

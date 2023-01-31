@@ -167,7 +167,7 @@ def SCTErrMonAlgConfig(inputFlags):
     # Filled in fillByteStreamErrorsHelper
     myMonGroup.defineHistogram(varname = "maskedLinksBin;Masked Links",
                                weight = "maskedLinks",
-                               type = "TH1I",
+                               type = "TProfile",
                                title = "Number of Masked Links for SCT,ECA,B,ECC",
                                path = "GENERAL/errors",
                                xbins = sctMon.N_REGIONS_INC_GENERAL,

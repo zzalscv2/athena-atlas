@@ -8,38 +8,39 @@
 #include <stdint.h>
 #include <string>
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "LUCID_RawEvent/LUCID_DigitContainer.h"
-#include "LUCID_RawEvent/LUCID_RawDataContainer.h"
 #include "LUCID_RawEvent/LUCID_RawData.h"
+#include "LUCID_RawEvent/LUCID_RawDataContainer.h"
 
 #include "LUCID_RawDataByteStreamCnv/LUCID_RodEncoder.h"
 
-class StoreGateSvc;
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
 class LUCID_RodEncoder;
 
-class LUCID_DigitRawDataCnv: public AthAlgorithm {
+class LUCID_DigitRawDataCnv : public AthReentrantAlgorithm
+{
 
- public:
-  
-  LUCID_DigitRawDataCnv (const std::string &name, ISvcLocator* pSvcLocator);
+public:
+  LUCID_DigitRawDataCnv(const std::string& name, ISvcLocator* pSvcLocator);
   ~LUCID_DigitRawDataCnv();
 
-  StatusCode initialize();
-  StatusCode execute();
-  StatusCode finalize();
+  StatusCode initialize() override;
+  StatusCode execute(const EventContext& ctx) const override;
 
 private:
-  
-  ServiceHandle<StoreGateSvc> m_storeGate;
-  std::string                 m_lucid_RawDataContainerKey;
-  std::string                 m_digitContainerKey;
+  SG::WriteHandleKey<LUCID_RawDataContainer> m_lucid_RawDataContainerKey{
+    this,
+    "lucid_RawDataContainerKey",
+    "Lucid_RawData",
+    ""
+  };
+  SG::ReadHandleKey<LUCID_DigitContainer>
+    m_digitContainerKey{ this, "lucid_DigitContainerKey", "Lucid_Digits", "" };
 
-  const LUCID_DigitContainer* m_digitContainer;
-
-  LUCID_RawDataContainer* m_LUCID_RawDataContainer;
-  LUCID_RodEncoder        m_rodEncoder;
+  LUCID_RodEncoder m_rodEncoder;
 };
 
 #endif

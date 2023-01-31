@@ -5,7 +5,7 @@
 // Header for this module
 #include "GeneratorFilters/M4MuIntervalFilter.h"
 
-#include "AthenaKernel/IAtRndmGenSvc.h" // For random numbers...
+#include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 
 // Pt  High --> Low
@@ -20,8 +20,7 @@ namespace {
 
 
 M4MuIntervalFilter::M4MuIntervalFilter(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenFilter(name, pSvcLocator),
-    m_rand("AtRndmGenSvc", name)
+  : GenFilter(name, pSvcLocator)
 {
   declareProperty("MaxEta", m_maxEta = 5.0);
   declareProperty("MinPt", m_minPt = 1000);
@@ -36,10 +35,9 @@ M4MuIntervalFilter::M4MuIntervalFilter(const std::string& name, ISvcLocator* pSv
 M4MuIntervalFilter::~M4MuIntervalFilter(){}
 
 StatusCode M4MuIntervalFilter::filterInitialize() {
-  if (m_rand.retrieve().isFailure()) {
-    ATH_MSG_ERROR("Unable to retrieve AtRndmGenSvc " << m_rand);
-    return StatusCode::FAILURE;
-  }
+
+  CHECK(m_rndmSvc.retrieve());
+
   ATH_MSG_DEBUG( "MaxEta           "  << m_maxEta);
   ATH_MSG_DEBUG( "MinPt          "  << m_minPt);
   ATH_MSG_DEBUG( "LowM4muProbability         "  << m_prob2low);
@@ -57,7 +55,8 @@ StatusCode M4MuIntervalFilter::filterFinalize() {
 
 StatusCode M4MuIntervalFilter::filterEvent() {
   // Get random number engine
-  CLHEP::HepRandomEngine* rndm = m_rand->GetEngine("M4MuIntervalFilter");
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  CLHEP::HepRandomEngine* rndm = this->getRandomEngine(name(), ctx);
   if (!rndm) {
     ATH_MSG_ERROR("Failed to retrieve random number engine M4MuIntervalFilter");
     setFilterPassed(false);
@@ -144,4 +143,14 @@ double M4MuIntervalFilter::getEventWeight(double mass) {
     }
   ATH_MSG_DEBUG("WEIGHTING:: " << mass << "\t" << weight);
   return weight;
+}
+
+
+CLHEP::HepRandomEngine* M4MuIntervalFilter::getRandomEngine(const std::string& streamName,
+                                                                const EventContext& ctx) const
+{
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, streamName);
+  std::string rngName = name()+streamName;
+  rngWrapper->setSeed( rngName, ctx );
+  return rngWrapper->getEngine(ctx);
 }

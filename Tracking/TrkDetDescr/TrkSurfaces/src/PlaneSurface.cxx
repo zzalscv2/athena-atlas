@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ Trk::PlaneSurface::PlaneSurface(const PlaneSurface& psf, const Amg::Transform3D&
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-__attribute__ ((flatten))
+[[gnu::flatten]]
 #endif
 // constructor from CurvilinearUVT
 Trk::PlaneSurface::PlaneSurface(const Amg::Vector3D& position, const CurvilinearUVT& curvUVT)
@@ -121,52 +121,16 @@ Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, double minhalep
   , m_bounds(std::make_shared<Trk::TrapezoidBounds>(minhalephi, maxhalephi, haleta))
 {}
 
-// construct annulus module with parameters
-Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, Trk::AnnulusBounds* tbounds)
+// construct with bounds
+Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, const Trk::SurfaceBounds* tbounds)
   : Trk::Surface(htrans)
   , m_bounds(tbounds)
 {}
 
-// construct rectangle surface by giving RectangleBounds
-Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D& htrans, Trk::RectangleBounds* rbounds)
-  : Trk::Surface(htrans)
-  , m_bounds(rbounds)
-{}
-
-// construct triangle surface by giving TriangleBounds
-Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, Trk::TriangleBounds* rbounds)
-  : Trk::Surface(htrans)
-  , m_bounds(rbounds)
-{}
-
-// construct trapezoidal module with parameters
-Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, Trk::TrapezoidBounds* tbounds)
-  : Trk::Surface(htrans)
-  , m_bounds(tbounds)
-{}
-
-// construct rotated trapezoidal module with parameters
-Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, Trk::RotatedTrapezoidBounds* tbounds)
-  : Trk::Surface(htrans)
-  , m_bounds(tbounds)
-{}
-
-// construct diamond module with parameters
-Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, Trk::DiamondBounds* tbounds)
-  : Trk::Surface(htrans)
-  , m_bounds(tbounds)
-{}
-
-// construct elliptic module with parameters
-Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, Trk::EllipseBounds* tbounds)
-  : Trk::Surface(htrans)
-  , m_bounds(tbounds)
-{}
-
-// construct module with shared boundaries - change to reference
+// construct module with shared boundaries
 Trk::PlaneSurface::PlaneSurface(
     const Amg::Transform3D & htrans,
-    Trk::SharedObject<const Trk::SurfaceBounds>& tbounds)
+    const Trk::SharedObject<const Trk::SurfaceBounds>& tbounds)
     : Trk::Surface(htrans), m_bounds(tbounds) {}
 
 bool
@@ -183,6 +147,62 @@ Trk::PlaneSurface::operator==(const Trk::Surface& sf) const
   bool boundsEqual = bounds() == psf->bounds();
   return transfEqual && centerEqual && boundsEqual;
 }
+
+/** Use the Surface as a ParametersBase constructor, from local parameters -
+ * charged */
+Trk::Surface::ChargedTrackParametersUniquePtr
+Trk::PlaneSurface::createUniqueTrackParameters(
+  double l1,
+  double l2,
+  double phi,
+  double theta,
+  double qop,
+  std::optional<AmgSymMatrix(5)> cov) const
+{
+  return std::make_unique<ParametersT<5, Charged, PlaneSurface>>(
+    l1, l2, phi, theta, qop, *this, std::move(cov));
+}
+/** Use the Surface as a ParametersBase constructor, from global parameters -
+ * charged*/
+Trk::Surface::ChargedTrackParametersUniquePtr
+Trk::PlaneSurface::createUniqueTrackParameters(
+  const Amg::Vector3D& position,
+  const Amg::Vector3D& momentum,
+  double charge,
+  std::optional<AmgSymMatrix(5)> cov) const
+{
+  return std::make_unique<ParametersT<5, Charged, PlaneSurface>>(
+    position, momentum, charge, *this, std::move(cov));
+}
+
+/** Use the Surface as a ParametersBase constructor, from local parameters -
+ * neutral */
+Trk::Surface::NeutralTrackParametersUniquePtr
+Trk::PlaneSurface::createUniqueNeutralParameters(
+  double l1,
+  double l2,
+  double phi,
+  double theta,
+  double oop,
+  std::optional<AmgSymMatrix(5)> cov) const
+{
+  return std::make_unique<ParametersT<5, Neutral, PlaneSurface>>(
+    l1, l2, phi, theta, oop, *this, std::move(cov));
+}
+
+/** Use the Surface as a ParametersBase constructor, from global parameters -
+ * neutral */
+Trk::Surface::NeutralTrackParametersUniquePtr
+Trk::PlaneSurface::createUniqueNeutralParameters(
+  const Amg::Vector3D& position,
+  const Amg::Vector3D& momentum,
+  double charge,
+  std::optional<AmgSymMatrix(5)> cov) const
+{
+  return std::make_unique<ParametersT<5, Neutral, PlaneSurface>>(
+    position, momentum, charge, *this, std::move(cov));
+}
+
 #if defined(__GNUC__)
 [[gnu::flatten]]
 // Avoid out-of-line Eigen calls
@@ -197,11 +217,32 @@ Trk::PlaneSurface::localToGlobal(const Amg::Vector2D& locpos,
 }
 
 bool
-Trk::PlaneSurface::globalToLocal(const Amg::Vector3D& glopos, const Amg::Vector3D&, Amg::Vector2D& locpos) const
-{
+Trk::PlaneSurface::globalToLocal(const Amg::Vector3D& glopos,
+                                      const Amg::Vector3D&,
+                                      Amg::Vector2D& locpos) const {
   Amg::Vector3D loc3Dframe = inverseTransformMultHelper(glopos);
   locpos = Amg::Vector2D(loc3Dframe.x(), loc3Dframe.y());
-  return (loc3Dframe.z() * loc3Dframe.z() <= s_onSurfaceTolerance * s_onSurfaceTolerance);
+  return (loc3Dframe.z() * loc3Dframe.z() <=
+          s_onSurfaceTolerance * s_onSurfaceTolerance);
+}
+
+Trk::Intersection
+Trk::PlaneSurface::straightLineIntersection(const Amg::Vector3D& pos,
+                                            const Amg::Vector3D& dir,
+                                            bool forceDir,
+                                            Trk::BoundaryCheck bchk) const {
+  double denom = dir.dot(normal());
+  if (denom) {
+    double u = (normal().dot((center() - pos))) / (denom);
+    Amg::Vector3D intersectPoint(pos + u * dir);
+    // evaluate the intersection in terms of direction
+    bool isValid = forceDir ? (u > 0.) : true;
+    // evaluate (if necessary in terms of boundaries)
+    isValid = bchk ? (isValid && isOnSurface(intersectPoint)) : isValid;
+    // return the result
+    return Trk::Intersection(intersectPoint, u, isValid);
+  }
+  return Trk::Intersection(pos, 0., false);
 }
 
 void

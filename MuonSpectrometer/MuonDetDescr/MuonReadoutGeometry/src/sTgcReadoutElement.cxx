@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -157,12 +157,7 @@ namespace MuonGM {
         sTGCDetectorDescription* stgc = aHelper.Get_sTGCDetector(sector_l, stEta, getStationPhi(), m_ml, side.back());
    
 #ifndef NDEBUG
-        if (stgc)
-            log << MSG::DEBUG << "Found sTGC Detector " << stgc->GetName() << endmsg;
-        else {
-            log << MSG::DEBUG << "No sTGC Detector" << endmsg;
-            log << MSG::DEBUG << sector_l << "  " << getStationEta() << " " << getStationPhi() << "  " << m_ml << " " << sector_l << endmsg;
-        }
+        log << MSG::DEBUG << "Found sTGC Detector " << stgc->GetName() << endmsg;
 #endif
 
         auto tech = stgc->GetTechnology();
@@ -211,8 +206,11 @@ namespace MuonGM {
 
             m_etaDesign[il].type        = MuonChannelDesign::ChannelType::etaStrip;
             m_etaDesign[il].detType     = MuonChannelDesign::DetType::STGC;
-            m_etaDesign[il].defineTrapezoid(0.5 * roParam.sStripWidth, 0.5 * roParam.lStripWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame));
-            m_etaDesign[il].yCutout     = yCutout;
+            if (yCutout == 0.)
+                m_etaDesign[il].defineTrapezoid(0.5 * roParam.sStripWidth, 0.5 * roParam.lStripWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame));
+            else 
+                m_etaDesign[il].defineDiamond(0.5 * roParam.sStripWidth, 0.5 * roParam.lStripWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame), yCutout);
+
             m_etaDesign[il].inputPitch  = stgc->stripPitch();
             m_etaDesign[il].inputWidth  = stgc->stripWidth();
             m_etaDesign[il].thickness   = tech->gasThickness;
@@ -241,8 +239,10 @@ namespace MuonGM {
         for (int il = 0; il < m_nlayers; il++) {
             m_phiDesign[il].type        = MuonChannelDesign::ChannelType::phiStrip;
             m_phiDesign[il].detType     = MuonChannelDesign::DetType::STGC;
-            m_phiDesign[il].defineTrapezoid(0.5 * roParam.sPadWidth, 0.5 * roParam.lPadWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame) );
-            m_etaDesign[il].yCutout     = yCutout;
+            if (yCutout == 0.)
+                m_phiDesign[il].defineTrapezoid(0.5 * roParam.sPadWidth, 0.5 * roParam.lPadWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame) );
+            else 
+                m_phiDesign[il].defineDiamond(0.5 * roParam.sPadWidth, 0.5 * roParam.lPadWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame), yCutout);
             m_phiDesign[il].inputPitch  = stgc->wirePitch();
             m_phiDesign[il].inputWidth  = 0.015;
             m_phiDesign[il].thickness   = m_tckChamber;
@@ -350,7 +350,7 @@ namespace MuonGM {
 
             if (m_diamondShape) {
                 m_surfaceData->m_surfBounds.push_back(std::make_unique<Trk::RotatedDiamondBounds>(
-                    m_minHalfY[layer], m_maxHalfY[layer], m_maxHalfY[layer], m_halfX[layer] - m_etaDesign[layer].yCutout / 2, m_etaDesign[layer].yCutout / 2));  // strips
+                    m_minHalfY[layer], m_maxHalfY[layer], m_maxHalfY[layer], m_halfX[layer] - m_etaDesign[layer].yCutout() / 2, m_etaDesign[layer].yCutout() / 2));  // strips
                 m_surfaceData->m_surfBounds.push_back(std::make_unique<Trk::DiamondBounds>(
                     m_PadminHalfY[layer], m_PadmaxHalfY[layer], m_PadmaxHalfY[layer], m_PadhalfX[layer] - m_padDesign[layer].yCutout / 2, m_padDesign[layer].yCutout / 2));  // pad and wires
                     
@@ -385,8 +385,7 @@ namespace MuonGM {
             // Strips
             //-------------------
 
-            double shift{0.01};
-            if (layer % 2) shift = -shift;  // In layers indexed 1 and 3, order is reversed
+            const double shift{layer%2 == 0 ? 0.01 : -0.01}; // 1st layer gets +0.01; layer numbering starts from 0 here!
 
             // identifier of the first channel - strip plane
             id = manager()->stgcIdHelper()->channelID(getStationName(), getStationEta(), getStationPhi(), m_ml, layer + 1, 1, 1);
@@ -626,6 +625,14 @@ namespace MuonGM {
         }
     }
 
+    //============================================================================
+    void sTgcReadoutElement::clearALinePar() {
+        if (has_ALines()) {
+            m_ALinePar = nullptr; 
+            m_delta = Amg::Transform3D::Identity(); 
+            refreshCache();
+        }
+    }
 
     //============================================================================
     void sTgcReadoutElement::setBLinePar(const BLinePar& bLine) {
@@ -719,6 +726,8 @@ namespace MuonGM {
     //============================================================================
     void sTgcReadoutElement::spacePointPosition(const Identifier& layerId, double locXpos, double locYpos, Amg::Vector3D& pos) const {
 
+        pos = Amg::Vector3D(locXpos, locYpos, 0.);
+
         const MuonChannelDesign* design = getDesign(layerId);
         if (!design) {
             MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
@@ -734,51 +743,65 @@ namespace MuonGM {
         // As-Built (MuonNswAsBuilt is not included in AthSimulation)
         //*********************
         const NswAsBuilt::StgcStripCalculator* sc = manager()->getStgcAsBuiltCalculator();
-        if (sc) {
-            // nearest strip to locXpos
-            Amg::Vector2D lpos(locXpos, 0.);
-            int istrip = stripNumber(lpos, layerId);          
+        if (sc && design->type == MuonChannelDesign::ChannelType::etaStrip) {
+
+            Amg::Vector2D lpos(locXpos, locYpos);
+            
+            // express the local position w.r.t. the nearest active strip
+            Amg::Vector2D rel_pos;
+            int istrip = design->positionRelativeToStrip(lpos, rel_pos);
+            if (istrip < 0) {
+                MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
+                log << MSG::WARNING << "As-built corrections are provided only for eta strips within the active area. Returning." << endmsg;
+                return;
+            }
 
             // setup strip calculator
-            NswAsBuilt::stripIdentifier_t stgcStrip_id;
-            stgcStrip_id.quadruplet = { (largeSector() ? NswAsBuilt::quadrupletIdentifier_t::STL : NswAsBuilt::quadrupletIdentifier_t::STS), getStationEta(), getStationPhi(), m_ml };
-            stgcStrip_id.ilayer     = manager()->stgcIdHelper()->gasGap(layerId);
-            stgcStrip_id.istrip     = istrip;
+            NswAsBuilt::stripIdentifier_t strip_id;
+            strip_id.quadruplet = { (largeSector() ? NswAsBuilt::quadrupletIdentifier_t::STL : NswAsBuilt::quadrupletIdentifier_t::STS), getStationEta(), getStationPhi(), m_ml };
+            strip_id.ilayer     = manager()->stgcIdHelper()->gasGap(layerId);
+            strip_id.istrip     = istrip;
+
+            // get the position coordinates, in the chamber frame, from NswAsBuilt.
+            // applying the 10um shift along the beam axis for strips (see fillCache()).
+            NswAsBuilt::StgcStripCalculator::position_t calcPos = sc->getPositionAlongStgcStrip(NswAsBuilt::Element::ParameterClass::CORRECTION, strip_id, rel_pos.y(), rel_pos.x());
             
-            // length of the strip with index "istrip"  
-            // (formula copied from MuonChannelDesign.h)
-            double ylength = design->inputLength + ((design->maxYSize() - design->minYSize())*(istrip - design->nMissedBottomEta + 0.5)*design->inputPitch / design->xSize());
-            double sy      = 2*locYpos/ylength; // in [-1, 1]
+            if (calcPos.isvalid == NswAsBuilt::StgcStripCalculator::IsValid::VALID) {
+                pos = calcPos.pos;
+                pos[0] += (strip_id.ilayer%2) ? 0.01 : -0.01; // 1st layer gets +0.01; layer numbering starts from 1
 
-            // get the position coordinates, in the multilayer frame, from NswAsBuilt.
-            NswAsBuilt::StgcStripCalculator::position_t calcPos = sc->getPositionAlongStgcStrip(NswAsBuilt::Element::ParameterClass::CORRECTION, stgcStrip_id, sy);
-            pos     = calcPos.pos;
-
-            // signal that we are in the multilayer reference frame
-            conditionsApplied = true;
-            trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);     
+                // signal that pos is now in the chamber reference frame
+                // (don't go back to the layer frame yet, since we may apply b-lines later on)
+                trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);   
+                conditionsApplied = true;
+            }
+#ifndef NDEBUG
+            else {
+                MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
+                if (log.level() <= MSG::DEBUG) {    
+                    log << MSG::DEBUG << "No as-built corrections provided for stEta: "<<getStationEta() << " stPhi: "<<getStationPhi()<<" ml: "<<m_ml<<" layer: "<<strip_id.ilayer<< endmsg;
+                }
+            }
+#endif
         }
 #endif 
 
         //*********************
-        // Case as-built is not applied: 
-        //*********************
-        if (!conditionsApplied) pos = Amg::Vector3D(locXpos, locYpos, 0.);
-
-        //*********************
         // B-Lines
         //*********************
-        // if (!has_BLines()) return;
         if (has_BLines()) {
           // go to the multilayer reference frame if we are not already there
           if (!conditionsApplied) {
-             conditionsApplied = true; 
              trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);
              pos = trfToML*pos;
+             
+             // signal that pos is now in the multilayer reference frame
+             conditionsApplied = true; 
           }
           posOnDefChamber(pos);
         }
-               // back to nominal layer frame from where we started
+        
+        // back to the layer reference frame from where we started
         if (conditionsApplied) pos = trfToML.inverse()*pos;
     }
 

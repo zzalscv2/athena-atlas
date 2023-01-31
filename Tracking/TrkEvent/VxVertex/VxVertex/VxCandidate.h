@@ -1,158 +1,162 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VXVERTEX_VXCANDIDATE_H
 #define VXVERTEX_VXCANDIDATE_H
 
-#include <vector>
-#include "VxVertex/RecVertex.h"
+#include "TrkEventPrimitives/TrkObjectCounter.h"
 #include "TrkEventPrimitives/VertexType.h"
+#include "VxVertex/RecVertex.h"
+#include <vector>
 
 /**
- * @class Trk::VxCandidate.h 
- *                         
- *    @authors andreas.wildauer@cern.ch, Kirill.Prokofiev@cern.ch, Nicola.Giacinto.Piacquadio@cern.ch 
+ * @class Trk::VxCandidate.h
+ *
+ *    @authors andreas.wildauer@cern.ch, Kirill.Prokofiev@cern.ch,
+ *     Nicola.Giacinto.Piacquadio@cern.ch
  */
 
 class MsgStream;
 
-namespace Trk
-{
+namespace Trk {
 
 class VxTrackAtVertex;
-  
-class VxCandidate
+
+class VxCandidate : public Trk::ObjectCounter<Trk::VxCandidate>
 {
-  public:
-  
-/**
- * Default constructor for persistency
- */
-    VxCandidate();
-     
-/**
- * Constructor using vertex position, fit quality and covariance matrix
- * and a vector of fitted VxTrackAtVertex
- */   
-    VxCandidate(const Trk::RecVertex& recVertex,
-                const std::vector<Trk::VxTrackAtVertex*>& vxTrackAtVertex);
+public:
+  /**
+   * Default constructor for persistency
+   */
+  VxCandidate();
 
-    VxCandidate(Trk::RecVertex&& recVertex,
-                std::vector<Trk::VxTrackAtVertex*>&& vxTrackAtVertex);
-				
-/**
- * Virtual destructor, copy-constructor and assignement operator
- */   	
-    virtual ~VxCandidate();
-    VxCandidate(const VxCandidate& rhs);
-    VxCandidate &operator= (const VxCandidate &); 
-    VxCandidate &operator= (VxCandidate &&) noexcept; 
-    virtual VxCandidate* clone() const;                
+  /**
+   * Constructor using vertex position, fit quality and covariance matrix
+   * and a vector of fitted VxTrackAtVertex
+   */
+  VxCandidate(const Trk::RecVertex& recVertex,
+              const std::vector<Trk::VxTrackAtVertex*>& vxTrackAtVertex);
 
-/** Output Method for MsgStream, to be overloaded by child classes */
-    virtual MsgStream& dump(MsgStream& sl) const;
-/** Output Method for std::ostream, to be overloaded by child classes */
-    virtual std::ostream& dump(std::ostream& sl) const;
+  VxCandidate(Trk::RecVertex&& recVertex, std::vector<Trk::VxTrackAtVertex*>&& vxTrackAtVertex);
 
-/**
- * Returns a reference to reconstructed vertex
- */       
-    const Trk::RecVertex& recVertex(void) const; 
-    
-/**
- * Returns unconst reference to a reconstructed vertex
- * Required by some of the vertex fitters
- */               
-    Trk::RecVertex& recVertex(void);
-    
-/**
- * RecVertex set method
- */                  
-    void setRecVertex(Trk::RecVertex& recVertex);
+  /**
+   * Virtual destructor, copy-constructor and assignement operator
+   */
+  virtual ~VxCandidate();
+  VxCandidate(const VxCandidate& rhs);
+  VxCandidate& operator=(const VxCandidate&);
+  VxCandidate& operator=(VxCandidate&&) noexcept;
+  virtual VxCandidate* clone() const;
 
-/**
- *  Unconst pointer to the vector of tracks
- *  Required by some of the vertex fitters
- */                  
-    std::vector<Trk::VxTrackAtVertex*>* vxTrackAtVertex(void); 
- 
-/**
- * Const access to the vector of tracks fitted to the vertex 
- */ 
-    const std::vector<Trk::VxTrackAtVertex*>* vxTrackAtVertex(void) const; 
-    
-/**
- * return the type of the vertex
- */ 
-    void setVertexType(VertexType vertexType);
-    
-/**
- * return the type of the vertex
- */ 
-    VertexType vertexType() const;
+  /** Output Method for MsgStream, to be overloaded by child classes */
+  virtual MsgStream& dump(MsgStream& sl) const;
+  /** Output Method for std::ostream, to be overloaded by child classes */
+  virtual std::ostream& dump(std::ostream& sl) const;
 
-/**return number of objects currently created*/
-    static unsigned int numberOfInstantiations() ;
-    
-  protected:
-// the type of the vertex (see TrkEventPrimitives/VertexType.h for details) 
-    Trk::VertexType m_vertexType;
-    
-// the fitted vertex (position plus error matrix)
-    Trk::RecVertex m_recVertex; 
+  /**
+   * Returns a reference to reconstructed vertex
+   */
+  const Trk::RecVertex& recVertex(void) const;
 
-// information on used tracks
-    std::vector<Trk::VxTrackAtVertex*> m_vxTrackAtVertex; 
-   
-  private:
-    static std::atomic<unsigned int> s_numberOfInstantiations;
+  /**
+   * Returns unconst reference to a reconstructed vertex
+   * Required by some of the vertex fitters
+   */
+  Trk::RecVertex& recVertex(void);
 
-};//end of class definitions
+  /**
+   * RecVertex set method
+   */
+  void setRecVertex(Trk::RecVertex& recVertex);
 
-/**Overload of << operator for both, MsgStream and std::ostream for debug 
-output; only needed in base class?*/ 
-MsgStream& operator << ( MsgStream& sl, const VxCandidate& sf);
-std::ostream& operator << ( std::ostream& sl, const VxCandidate& sf); 
+  /**
+   *  Unconst pointer to the vector of tracks
+   *  Required by some of the vertex fitters
+   */
+  std::vector<Trk::VxTrackAtVertex*>* vxTrackAtVertex(void);
 
-  inline void VxCandidate::setVertexType(VertexType vertexType)
-  {
-    m_vertexType = vertexType;
-  }
-  
-  inline VertexType VxCandidate::vertexType() const {
-    return m_vertexType;
-  }
+  /**
+   * Const access to the vector of tracks fitted to the vertex
+   */
+  const std::vector<Trk::VxTrackAtVertex*>* vxTrackAtVertex(void) const;
 
- inline void VxCandidate::setRecVertex(Trk::RecVertex& recVertex)
-  {
-    m_recVertex=recVertex;
-  }
+  /**
+   * return the type of the vertex
+   */
+  void setVertexType(VertexType vertexType);
 
-  inline const Trk::RecVertex& VxCandidate::recVertex(void) const
-  {
-    return m_recVertex;
-  }
+  /**
+   * return the type of the vertex
+   */
+  VertexType vertexType() const;
 
-  inline Trk::RecVertex& VxCandidate::recVertex(void)
-  {
-    return m_recVertex;
-  }
+protected:
+  // the type of the vertex (see TrkEventPrimitives/VertexType.h for details)
+  Trk::VertexType m_vertexType;
 
-  inline std::vector<Trk::VxTrackAtVertex*>* VxCandidate::vxTrackAtVertex(void)
-  {
-    return &m_vxTrackAtVertex;
-  }
+  // the fitted vertex (position plus error matrix)
+  Trk::RecVertex m_recVertex;
 
-  inline const std::vector<Trk::VxTrackAtVertex*>* VxCandidate::vxTrackAtVertex(void) const
-  {
-    return &m_vxTrackAtVertex;
-  }
+  // information on used tracks
+  std::vector<Trk::VxTrackAtVertex*> m_vxTrackAtVertex;
 
-  inline Trk::VxCandidate* Trk::VxCandidate::clone() const
-  {
-    return new Trk::VxCandidate(*this);
-  }
+}; // end of class definitions
 
-}//end of namespace definitions
+/**Overload of << operator for both, MsgStream and std::ostream for debug
+output; only needed in base class?*/
+MsgStream&
+operator<<(MsgStream& sl, const VxCandidate& sf);
+std::ostream&
+operator<<(std::ostream& sl, const VxCandidate& sf);
+
+inline void
+VxCandidate::setVertexType(VertexType vertexType)
+{
+  m_vertexType = vertexType;
+}
+
+inline VertexType
+VxCandidate::vertexType() const
+{
+  return m_vertexType;
+}
+
+inline void
+VxCandidate::setRecVertex(Trk::RecVertex& recVertex)
+{
+  m_recVertex = recVertex;
+}
+
+inline const Trk::RecVertex&
+VxCandidate::recVertex(void) const
+{
+  return m_recVertex;
+}
+
+inline Trk::RecVertex&
+VxCandidate::recVertex(void)
+{
+  return m_recVertex;
+}
+
+inline std::vector<Trk::VxTrackAtVertex*>*
+VxCandidate::vxTrackAtVertex(void)
+{
+  return &m_vxTrackAtVertex;
+}
+
+inline const std::vector<Trk::VxTrackAtVertex*>*
+VxCandidate::vxTrackAtVertex(void) const
+{
+  return &m_vxTrackAtVertex;
+}
+
+inline Trk::VxCandidate*
+Trk::VxCandidate::clone() const
+{
+  return new Trk::VxCandidate(*this);
+}
+
+} // end of namespace definitions
 #endif

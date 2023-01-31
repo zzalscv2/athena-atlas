@@ -12,6 +12,7 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthVertex.h"
+#include "TruthUtils/MagicNumbers.h"
 #include <cmath> // std::isnan()
 #include <limits>
 
@@ -99,17 +100,17 @@ InDetRttPlots::fill(const xAOD::TrackParticle& particle, const xAOD::TruthPartic
   // fill ITK resolutions (bias / resolutions)
   if (particle.isAvailable<float>(m_trackParticleTruthProbKey)) {
     const float prob = particle.auxdata<float>(m_trackParticleTruthProbKey);
-    float barcode = truthParticle.barcode();
-    if (barcode < 200000 && barcode != 0 && prob > 0.5) {
+    int barcode = truthParticle.barcode();
+    if (!HepMC::is_simulation_particle(barcode) && barcode != 0 && prob > 0.5) {
         if (m_resolutionPlotPrim) m_resolutionPlotPrim->fill(particle, truthParticle, weight);
-    } else if (barcode >= 200000 && prob > 0.7 && m_iDetailLevel >= 200) {
+    } else if (HepMC::is_simulation_particle(barcode) && prob > 0.7 && m_iDetailLevel >= 200) {
         if (m_resolutionPlotSecd) m_resolutionPlotSecd->fill(particle, truthParticle, weight);
     }
     if ( isFromB ) {
       if (m_resolutionPlotPrim_truthFromB) m_resolutionPlotPrim_truthFromB->fill(particle, truthParticle, weight);
     }
 
-    if(m_config.doResolutionsPerAuthor &&  m_iDetailLevel >= 200 and (barcode < 200000 and barcode != 0 and prob > 0.5)){
+    if(m_config.doResolutionsPerAuthor &&  m_iDetailLevel >= 200 and ( !HepMC::is_simulation_particle(barcode) and barcode != 0 and prob > 0.5)){
       std::bitset<xAOD::TrackPatternRecoInfo::NumberOfTrackRecoInfo>  patternInfo = particle.patternRecoInfo();
       
       bool isSiSpSeededFinder = patternInfo.test(xAOD::TrackPatternRecoInfo::SiSPSeededFinder);
@@ -126,12 +127,12 @@ InDetRttPlots::fill(const xAOD::TrackParticle& particle, const xAOD::TruthPartic
 
     }
 
-    if (m_trtExtensionPlots && barcode < 200000 && barcode != 0 && prob > 0.5 ) m_trtExtensionPlots->fill(particle, truthParticle, weight);
+    if (m_trtExtensionPlots && !HepMC::is_simulation_particle(barcode) && barcode != 0 && prob > 0.5 ) m_trtExtensionPlots->fill(particle, truthParticle, weight);
   }
  
   if(m_hitsMatchedTracksPlots){
-    float barcode = truthParticle.barcode();
-    if (barcode < 200000 && barcode != 0) { 
+    int barcode = truthParticle.barcode();
+    if (!HepMC::is_simulation_particle(barcode) && barcode != 0) { 
       m_hitsMatchedTracksPlots->fill(particle, mu, weight);
     }
   }

@@ -4,85 +4,17 @@
 
 #include "ExpressionEvaluation/xAODVariableProxyLoaders.h"
 #include "AthContainers/normalizedTypeinfoName.h"
+#include "CxxUtils/checker_macros.h"
 
 #include "TClass.h"
 
-#define TRY_TYPE(DATANAME, VT_PREFIX, TYPE, VT_TYPE) do { \
-  if (*ti == typeid(TYPE)) { \
-    BaseAccessorWrapper *accWrap = new AccessorWrapper<TYPE>(varname); \
-    if (accWrap && accWrap->isValid(DATANAME)) { \
-      m_accessorCache[varname] = accWrap;  \
-      return VT_PREFIX ## VT_TYPE; \
-    } else if (accWrap) { \
-      accessorNotAvailableForThisContainer = true; \
-      delete accWrap; \
-    } \
-  } \
-} while(0)
-
-#define TRY_ALL_KNOWN_TYPES(DATANAME, VT_PREFIX) do { \
-  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance(); \
-  SG::auxid_t auxid = r.findAuxID(varname); \
-  if (auxid != SG::null_auxid) { \
-    bool accessorNotAvailableForThisContainer = false; \
-    const std::type_info *ti = r.getType(auxid); \
-    TRY_TYPE(DATANAME, VT_PREFIX, int, INT); \
-    TRY_TYPE(DATANAME, VT_PREFIX, bool, INT); \
-    TRY_TYPE(DATANAME, VT_PREFIX, unsigned int, INT); \
-    TRY_TYPE(DATANAME, VT_PREFIX, char, INT); \
-    TRY_TYPE(DATANAME, VT_PREFIX, uint8_t, INT); \
-    TRY_TYPE(DATANAME, VT_PREFIX, unsigned short, INT); \
-    TRY_TYPE(DATANAME, VT_PREFIX, short, INT); \
-    TRY_TYPE(DATANAME, VT_PREFIX, float, DOUBLE); \
-    TRY_TYPE(DATANAME, VT_PREFIX, double, DOUBLE); \
-    if (!accessorNotAvailableForThisContainer) { \
-      throw std::runtime_error("Unsupported aux element type '"+r.getTypeName(auxid)+"' for '"+varname+"'"); \
-    } \
-  } \
-} while(0)
-
-#define TRY_TMETHOD_WRAPPER() do { \
-  auto container = m_auxElement->container(); \
-  const std::type_info &containerTypeinfo = typeid(*container); \
-  TClass *containerClass = TClass::GetClass(containerTypeinfo); \
-  if (!containerClass) { \
-    containerClass = TClass::GetClass(SG::normalizedTypeinfoName(containerTypeinfo).c_str()); \
-  } \
-  if (containerClass) { \
-    TMethodWrapper* accWrap(0);						\
-    if( !strcmp(containerClass->GetName(),"SG::AuxElementStandaloneData") ) { /* special case where the element type is the aux element */ \
-      accWrap = new TMethodWrapper( typeid(*m_auxElement) , varname ); \
-    } else {							\
-      TVirtualCollectionProxy* collProxy = containerClass->GetCollectionProxy(); \
-      if(collProxy) { \
-	const std::type_info &elementTypeinfo = *(collProxy->GetValueClass()->GetTypeInfo()); \
-	std::cout << " element type = " << System::typeinfoName( elementTypeinfo ) << std::endl; \
-	accWrap = new TMethodWrapper(elementTypeinfo, varname); \
-      }									\
-    }								\
-    if (accWrap && accWrap->isValid(m_auxElement)) { \
-      m_accessorCache[varname] = accWrap;  \
-      return accWrap->variableType(); \
-    } \
-    else if(accWrap) delete accWrap;		\
-  } \
-} while(0)
-
-#define TRY_TMETHOD_COLLECTION_WRAPPER() do { \
-  TMethodCollectionWrapper *accWrap = new TMethodCollectionWrapper(typeid(*m_auxVectorData), varname); \
-  if (accWrap && accWrap->isValid(m_auxVectorData)) { \
-    m_accessorCache[varname] = accWrap;  \
-    return accWrap->variableType(); \
-  } \
-  else delete accWrap; \
-} while(0)
-
+#include <memory>
 
 namespace ExpressionParsing {
 
   TMethodWrapper::TMethodWrapper(const std::type_info &elementTypeinfo, 
       const std::string &methodName)
-    : m_methodCall(NULL), m_valid(false)
+    : m_valid(false)
   {
     TClass *cls = TClass::GetClass(elementTypeinfo);
     if (!cls) {
@@ -90,24 +22,20 @@ namespace ExpressionParsing {
       if (!cls) return;
     }
 
-    m_methodCall = new TMethodCall(cls, methodName.c_str(), "");
-    if (!m_methodCall) return;
+    m_methodCall.setProto (cls, methodName, "");
 
-    m_valid = m_methodCall->IsValid();
+    m_valid = m_methodCall.call() != nullptr;
   }
 
   TMethodWrapper::~TMethodWrapper()
   {
-    if (m_methodCall) {
-      delete m_methodCall;
-      m_methodCall = NULL;
-    }
   }
 
-  IProxyLoader::VariableType TMethodWrapper::variableType() const
+  IProxyLoader::VariableType TMethodWrapper::variableType()
   {
-    if (!m_methodCall) return IProxyLoader::VT_UNK;
-    switch (m_methodCall->ReturnType()) {
+    TMethodCall* mc = m_methodCall.call();
+    if (!mc) return IProxyLoader::VT_UNK;
+    switch (mc->ReturnType()) {
       case TMethodCall::kLong:
         return IProxyLoader::VT_INT;
       case TMethodCall::kDouble: 
@@ -132,34 +60,36 @@ namespace ExpressionParsing {
   int TMethodWrapper::getIntValue(const SG::AuxElement *auxElement) const
   {
     long retLong;
-    m_methodCall->Execute((void *)auxElement, retLong);
+    auto aux_nc ATLAS_THREAD_SAFE = const_cast<SG::AuxElement*>(auxElement);  // required by TMethodCall
+    m_methodCall.call()->Execute(aux_nc, retLong);
     return (int) retLong;
   }
 
   double TMethodWrapper::getDoubleValue(const SG::AuxElement *auxElement) const
   {
     double retDouble;
-    m_methodCall->Execute((void *)auxElement, retDouble);
+    auto aux_nc ATLAS_THREAD_SAFE = const_cast<SG::AuxElement*>(auxElement);  // required by TMethodCall
+    m_methodCall.call()->Execute(aux_nc, retDouble);
     return retDouble;
   }
 
-  std::vector<int> TMethodWrapper::getVecIntValue(const SG::AuxVectorData *) const
+  std::vector<int> TMethodWrapper::getVecIntValue(const SG::AuxVectorData *)
   {
     throw std::runtime_error("TMethodWrapper doesn't deal with containers");
   }
 
-  std::vector<double> TMethodWrapper::getVecDoubleValue(const SG::AuxVectorData *) const
+  std::vector<double> TMethodWrapper::getVecDoubleValue(const SG::AuxVectorData *)
   {
     throw std::runtime_error("TMethodWrapper doesn't deal with containers");
   }
 
 
 
-
+  // ********************************************************************************
   TMethodCollectionWrapper::TMethodCollectionWrapper(const std::type_info &containerTypeinfo, 
       const std::string &methodName)
     : m_collectionProxy(nullptr),
-      m_methodCall(NULL), m_valid(false)
+      m_valid(false)
   {
     TClass *containerClass = TClass::GetClass(containerTypeinfo);
     if (!containerClass) {
@@ -173,24 +103,20 @@ namespace ExpressionParsing {
     TClass *elementClass = m_collectionProxy->GetValueClass();
     if (!elementClass) return;
 
-    m_methodCall = new TMethodCall(elementClass, methodName.c_str(), "");
-    if (!m_methodCall) return;
+    m_methodCall.setProto (elementClass, methodName, "");
 
-    m_valid = m_methodCall->IsValid();
+    m_valid = m_methodCall.call() != nullptr;
   }
 
   TMethodCollectionWrapper::~TMethodCollectionWrapper()
   {
-    if (m_methodCall) {
-      delete m_methodCall;
-      m_methodCall = NULL;
-    }
   }
 
-  IProxyLoader::VariableType TMethodCollectionWrapper::variableType() const
+  IProxyLoader::VariableType TMethodCollectionWrapper::variableType()
   {
-    if (!m_methodCall) return IProxyLoader::VT_UNK;
-    switch (m_methodCall->ReturnType()) {
+    TMethodCall* mc = m_methodCall.call();
+    if (!mc) return IProxyLoader::VT_UNK;
+    switch (mc->ReturnType()) {
       case TMethodCall::kLong:
         return IProxyLoader::VT_VECINT;
       case TMethodCall::kDouble: 
@@ -222,30 +148,32 @@ namespace ExpressionParsing {
     throw std::runtime_error("TMethodCollectionWrapper doesn't deal with scalars");
   }
 
-  std::vector<int> TMethodCollectionWrapper::getVecIntValue(const SG::AuxVectorData *auxVectorData) const
+  std::vector<int> TMethodCollectionWrapper::getVecIntValue(const SG::AuxVectorData *auxVectorData)
   {
     long retLong;
-    m_collectionProxy->PushProxy((void *)auxVectorData);
+    auto data_nc ATLAS_THREAD_SAFE = const_cast<SG::AuxVectorData*>(auxVectorData);  // required by TVirtualCollectionProxy
+    m_collectionProxy->PushProxy(data_nc);
     const UInt_t N = m_collectionProxy->Size();
     std::vector<int> result(N);
     for (UInt_t i = 0; i < N; ++i) {
       void *element = (*m_collectionProxy)[i];
-      m_methodCall->Execute(element, retLong);
+      m_methodCall.call()->Execute(element, retLong);
       result[i] = (int) retLong;
     }
     m_collectionProxy->PopProxy();
     return result;
   }
 
-  std::vector<double> TMethodCollectionWrapper::getVecDoubleValue(const SG::AuxVectorData *auxVectorData) const
+  std::vector<double> TMethodCollectionWrapper::getVecDoubleValue(const SG::AuxVectorData *auxVectorData)
   {
     double retDouble;
-    m_collectionProxy->PushProxy((void *)auxVectorData);
+    auto data_nc ATLAS_THREAD_SAFE = const_cast<SG::AuxVectorData*>(auxVectorData);  // required by TVirtualCollectionProxy
+    m_collectionProxy->PushProxy(data_nc);
     const UInt_t N = m_collectionProxy->Size();
     std::vector<double> result(N);
     for (UInt_t i = 0; i < N; ++i) {
       void *element = (*m_collectionProxy)[i];
-      m_methodCall->Execute(element, retDouble);
+      m_methodCall.call()->Execute(element, retDouble);
       result[i] = (double) retDouble;
     }
     m_collectionProxy->PopProxy();
@@ -254,31 +182,73 @@ namespace ExpressionParsing {
 
 
 
-
-  xAODElementProxyLoader::xAODElementProxyLoader()
-    : m_auxElement(NULL)
+  // ********************************************************************************
+  xAODProxyLoader::xAODProxyLoader() :
+    m_accessorCache(accessorCache_t::Updater_t())
   {
   }
 
+  xAODProxyLoader::~xAODProxyLoader()
+  {
+    xAODProxyLoader::reset();
+  }
+
+  void xAODProxyLoader::reset()
+  {
+    for (auto x : m_accessorCache) delete x.second;
+    // m_accessorCache.clear();  // not supported by ConcurrentStrMap
+  }
+
+  template <class TYPE, class AUX>
+  bool xAODProxyLoader::try_type(const std::string& varname, const std::type_info* ti, const AUX* data) const
+  {
+    if (*ti == typeid(TYPE)) {
+      auto accWrap = std::make_unique<AccessorWrapper<TYPE>>(varname);
+      if (accWrap && accWrap->isValid(data)) {
+        m_accessorCache.insert_or_assign(varname, accWrap.release());
+        return true;
+      } else if (accWrap) {
+        const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+        const SG::auxid_t auxid = r.findAuxID(varname);
+        throw std::runtime_error("Unsupported aux element type '"+r.getTypeName(auxid)+"' for '"+varname+"'");
+      }
+    }
+    return false;
+  }
+
+  template <class AUX>
+  IProxyLoader::VariableType xAODProxyLoader::try_all_known_types(const std::string& varname,
+                                                                  const AUX* data, bool isVector) const
+  {
+    const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+    const SG::auxid_t auxid = r.findAuxID(varname);
+    if (auxid != SG::null_auxid) {
+      const std::type_info *ti = r.getType(auxid);
+      // Try integer types:
+      if ( try_type<int>(varname, ti, data) ||
+           try_type<bool>(varname, ti, data) ||
+           try_type<unsigned int>(varname, ti, data) ||
+           try_type<char>(varname, ti, data) ||
+           try_type<uint8_t>(varname, ti, data) ||
+           try_type<unsigned short>(varname, ti, data) ||
+           try_type<short>(varname, ti, data) ) {
+        return isVector ? IProxyLoader::VT_VECINT : IProxyLoader::VT_INT;
+      }
+      // Try floating point types:
+      if ( try_type<float>(varname, ti, data) ||
+           try_type<double>(varname, ti, data) ) {
+        return isVector ? IProxyLoader::VT_VECDOUBLE : IProxyLoader::VT_DOUBLE;
+      }
+    }
+    return VT_UNK;
+  }
+
+
+
+  // ********************************************************************************
   xAODElementProxyLoader::xAODElementProxyLoader(const SG::AuxElement *auxElement)
     : m_auxElement(auxElement)
   {
-  }
-
-  xAODElementProxyLoader::~xAODElementProxyLoader()
-  {
-    xAODElementProxyLoader::reset();
-  }
-
-  void xAODElementProxyLoader::reset()
-  {
-    for (auto &x : m_accessorCache) {
-      if (x.second != NULL) {
-        delete x.second;
-      }
-      x.second = NULL;
-    }
-    m_accessorCache.clear();
   }
 
   void xAODElementProxyLoader::setData(const SG::AuxElement *auxElement)
@@ -286,60 +256,62 @@ namespace ExpressionParsing {
     m_auxElement = auxElement;
   }
 
-  IProxyLoader::VariableType xAODElementProxyLoader::variableTypeFromString(const std::string &varname)
+  IProxyLoader::VariableType xAODElementProxyLoader::variableTypeFromString(const std::string &varname) const
   {
-    TRY_TMETHOD_WRAPPER();
-    TRY_ALL_KNOWN_TYPES(m_auxElement, VT_);
-    return VT_UNK;
+    // Try TMethodWrapper
+    auto container = m_auxElement->container();
+    const std::type_info &containerTypeinfo = typeid(*container);
+    TClass *containerClass = TClass::GetClass(containerTypeinfo);
+    if (!containerClass) {
+      containerClass = TClass::GetClass(SG::normalizedTypeinfoName(containerTypeinfo).c_str());
+    }
+    if (containerClass) {
+      std::unique_ptr<TMethodWrapper> accWrap;
+      if( !strcmp(containerClass->GetName(),"SG::AuxElementStandaloneData") ) { /* special case where the element type is the aux element */
+        accWrap = std::make_unique<TMethodWrapper>( typeid(*m_auxElement) , varname );
+      } else {
+        TVirtualCollectionProxy* collProxy = containerClass->GetCollectionProxy();
+        if(collProxy) {
+          const std::type_info &elementTypeinfo = *(collProxy->GetValueClass()->GetTypeInfo());
+          accWrap = std::make_unique<TMethodWrapper>(elementTypeinfo, varname);
+        }
+      }
+      if (accWrap && accWrap->isValid(m_auxElement)) {
+        const IProxyLoader::VariableType vtype = accWrap->variableType();
+        m_accessorCache.insert_or_assign(varname, accWrap.release());
+        return vtype;
+      }
+    }
+
+    return try_all_known_types(varname, m_auxElement, false);
   }
 
-  int xAODElementProxyLoader::loadIntVariableFromString(const std::string &varname)
+  int xAODElementProxyLoader::loadIntVariableFromString(const std::string &varname) const
   {
-    return m_accessorCache[varname]->getIntValue(m_auxElement);
+    return m_accessorCache.at(varname)->getIntValue(m_auxElement);
   }
 
-  double xAODElementProxyLoader::loadDoubleVariableFromString(const std::string &varname)
+  double xAODElementProxyLoader::loadDoubleVariableFromString(const std::string &varname) const
   {
-    return m_accessorCache[varname]->getDoubleValue(m_auxElement);
+    return m_accessorCache.at(varname)->getDoubleValue(m_auxElement);
   }
 
-  std::vector<int> xAODElementProxyLoader::loadVecIntVariableFromString(const std::string &)
+  std::vector<int> xAODElementProxyLoader::loadVecIntVariableFromString(const std::string &) const
   {
     throw std::runtime_error("xAODElementProxyLoader can't load vector types");
   }
 
-  std::vector<double> xAODElementProxyLoader::loadVecDoubleVariableFromString(const std::string &)
+  std::vector<double> xAODElementProxyLoader::loadVecDoubleVariableFromString(const std::string &) const
   {
     throw std::runtime_error("xAODElementProxyLoader can't load vector types");
   }
 
 
 
-
-  xAODVectorProxyLoader::xAODVectorProxyLoader()
-    : m_auxVectorData(NULL)
-  {
-  }
-
+  // ********************************************************************************
   xAODVectorProxyLoader::xAODVectorProxyLoader(const SG::AuxVectorData *auxVectorData)
     : m_auxVectorData(auxVectorData)
   {
-  }
-
-  xAODVectorProxyLoader::~xAODVectorProxyLoader()
-  {
-    xAODVectorProxyLoader::reset();
-  }
-
-  void xAODVectorProxyLoader::reset()
-  {
-    for (auto &x : m_accessorCache) {
-      if (x.second != NULL) {
-        delete x.second;
-      }
-      x.second = NULL;
-    }
-    m_accessorCache.clear();
   }
 
   void xAODVectorProxyLoader::setData(const SG::AuxVectorData *auxVectorData)
@@ -347,43 +319,49 @@ namespace ExpressionParsing {
     m_auxVectorData = auxVectorData;
   }
 
-  IProxyLoader::VariableType xAODVectorProxyLoader::variableTypeFromString(const std::string &varname)
+  IProxyLoader::VariableType xAODVectorProxyLoader::variableTypeFromString(const std::string &varname) const
   {
-    TRY_TMETHOD_COLLECTION_WRAPPER();
-    TRY_ALL_KNOWN_TYPES(m_auxVectorData, VT_VEC);
+    auto accWrap = std::make_unique<TMethodCollectionWrapper>(typeid(*m_auxVectorData), varname);
+    if (accWrap && accWrap->isValid(m_auxVectorData)) {
+      const IProxyLoader::VariableType vtype = accWrap->variableType();
+      m_accessorCache.insert_or_assign(varname, accWrap.release());
+      return vtype;
+    }
+
+    IProxyLoader::VariableType vtype = try_all_known_types(varname, m_auxVectorData, true);
 
     // Before giving up completely, check the size of the vector. If it's
     // 0, it may be that it's empty on *all* events of the current input
     // file. Meaning that dynamic variables will be missing from each event.
-    if( m_auxVectorData->size_v() == 0 ) {
+    if( vtype==VT_UNK && m_auxVectorData->size_v() == 0 ) {
        // Let's claim a vector<double> type, that seems to be the safest bet.
        // Even if the variable should actually be vector<int>, this is a
        // simple conversion at least.
-       return VT_VECDOUBLE;
+       vtype = VT_VECDOUBLE;
     }
 
-    return VT_UNK;
+    return vtype;
   }
 
-  int xAODVectorProxyLoader::loadIntVariableFromString(const std::string &)
+  int xAODVectorProxyLoader::loadIntVariableFromString(const std::string &) const
   {
     throw std::runtime_error("xAODVectorProxyLoader can't load scalar types");
   }
 
-  double xAODVectorProxyLoader::loadDoubleVariableFromString(const std::string &)
+  double xAODVectorProxyLoader::loadDoubleVariableFromString(const std::string &) const
   {
     throw std::runtime_error("xAODVectorProxyLoader can't load scalar types");
   }
 
-  std::vector<int> xAODVectorProxyLoader::loadVecIntVariableFromString(const std::string &varname)
+  std::vector<int> xAODVectorProxyLoader::loadVecIntVariableFromString(const std::string &varname) const
   {
-    return m_accessorCache[varname]->getVecIntValue(m_auxVectorData);
+    return m_accessorCache.at(varname)->getVecIntValue(m_auxVectorData);
   }
 
-  std::vector<double> xAODVectorProxyLoader::loadVecDoubleVariableFromString(const std::string &varname)
-  {
+  std::vector<double> xAODVectorProxyLoader::loadVecDoubleVariableFromString(const std::string &varname) const
+  {/*
      // Check whether we have an accessor already:
-     std::map< std::string, BaseAccessorWrapper* >::iterator itr;
+     std::map< std::string, BaseAccessorWrapper* >::const_iterator itr;
      if( ( itr = m_accessorCache.find( varname ) ) == m_accessorCache.end() ) {
         // For an empty container let's not bother too much:
         if( m_auxVectorData->size_v() == 0 ) {
@@ -401,7 +379,8 @@ namespace ExpressionParsing {
      // Now do the "regular thing". Note that even if the type turns out
      // to be an integer type, the accessor wrapper does the conversion
      // reasonably anyway, behind the scenes.
-     return itr->second->getVecDoubleValue(m_auxVectorData);
+     return itr->second->getVecDoubleValue(m_auxVectorData);*/
+    return m_accessorCache.at(varname)->getVecDoubleValue(m_auxVectorData);
   }
 
 }

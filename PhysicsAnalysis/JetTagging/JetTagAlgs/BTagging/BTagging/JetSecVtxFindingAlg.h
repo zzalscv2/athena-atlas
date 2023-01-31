@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BTAGGING_JETSECVTXFINDINGALG_H
 #define BTAGGING_JETSECVTXFINDINGALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include <string>
@@ -26,7 +26,7 @@ namespace InDet {
 namespace Analysis
 {
 
-  class JetSecVtxFindingAlg : public AthAlgorithm
+  class JetSecVtxFindingAlg : public AthReentrantAlgorithm
   {
       public:
         /** Constructors and destructors */
@@ -34,8 +34,8 @@ namespace Analysis
         virtual ~JetSecVtxFindingAlg();
     
         /** Main routines specific to an ATHENA algorithm */
-        virtual StatusCode initialize();
-        virtual StatusCode execute();
+        virtual StatusCode initialize() override final;
+        virtual StatusCode execute(const EventContext& ctx) const override final;
 
       private:
         

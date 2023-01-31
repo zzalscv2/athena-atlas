@@ -53,7 +53,7 @@ StatusCode LArRampBuilder::initialize()
 
   //Intermediate ramp object (DAC/ADC pairs)
   m_ramps=std::make_unique<LArConditionsContainer<ACCRAMP> >();
-  m_ramps->setGroupingType(LArConditionsContainerBase::SingleGroup); 
+  ATH_CHECK(m_ramps->setGroupingType(m_groupingType,msg())); 
   ATH_CHECK(m_ramps->initialize()); 
   
   chooseRecoMode() ;
@@ -62,19 +62,6 @@ StatusCode LArRampBuilder::initialize()
   unsigned int online_id_max = m_onlineHelper->channelHashMax() ; 
   m_thePedestal.resize(online_id_max,-1); 
   
-  if(m_ishec) {
-     sc = detStore()->regHandle(m_dd_rinj,m_hec_key);
-     if (sc!=StatusCode::SUCCESS) {
-       ATH_MSG_ERROR( "Cannot get register callback for HEC map" ); 
-       ATH_MSG_ERROR( "Will use default ");
-     } else {
-       ATH_MSG_INFO( " register callback for HEC map " );
-     }
-  }
- 
-  
-
-
   return StatusCode::SUCCESS;
 }
 
@@ -294,7 +281,11 @@ StatusCode LArRampBuilder::execute()
     ++foundkey;
     HWIdentifier  lastFailedFEB(0);
     
-    if(larAccumulatedCalibDigitContainer->empty()) ATH_MSG_DEBUG("LArAccumulatedCalibDigitContainer with key=" << *key_it << " is empty ");
+    if(larAccumulatedCalibDigitContainer->empty()) {
+       ATH_MSG_DEBUG("LArAccumulatedCalibDigitContainer with key=" << *key_it << " is empty ");
+    } else {
+       ATH_MSG_DEBUG("LArAccumulatedCalibDigitContainer with key=" << *key_it << " has size " << larAccumulatedCalibDigitContainer->size());
+    }
 
     for (const LArAccumulatedCalibDigit* digit : *larAccumulatedCalibDigitContainer) {  //Loop over all cells
     
@@ -366,7 +357,7 @@ StatusCode LArRampBuilder::execute()
 	    continue;
 	  }
 
-	  ATH_MSG_DEBUG(" channel,pedestal " << chid_hash << " " 
+	  ATH_MSG_DEBUG(" channel,pedestal " <<  m_onlineHelper->channel_name(chid) << " " 
 	      << m_thePedestal[chid_hash]);
 
 	} // m_ipassPedestal 	 
@@ -424,6 +415,12 @@ StatusCode LArRampBuilder::stop()
       ATH_MSG_ERROR("Do not have mapping object " << m_cablingKey.key());
       return StatusCode::FAILURE;
     }   
+  }
+
+  
+  const ILArRinj* rinj=nullptr;
+  if(m_ishec) {
+    ATH_CHECK(detStore()->retrieve(rinj,m_hec_key));
   }
 
   int containerCounter=0;
@@ -632,9 +629,9 @@ StatusCode LArRampBuilder::stop()
 	ramppoint.DAC        = dac_it->first; 
 
         if(m_ishec && m_onlineHelper->isHECchannel(chid)) {
-           if(m_dd_rinj) {
-              const float rinj = m_dd_rinj->Rinj(chid);
-              if(rinj < 4) ramppoint.DAC /= 2;
+           if(rinj) {
+              const float rinjval = rinj->Rinj(chid);
+              if(rinjval < 4) ramppoint.DAC /= 2;
            }
         }
 
@@ -650,7 +647,7 @@ StatusCode LArRampBuilder::stop()
 	}
 	else if ((m_maxADC > 0)&&(MaxADC >= m_maxADC)) { 
 	  isADCsat = true; // if ADC saturated at least once, it should be notified
-	  ATH_MSG_DEBUG("Saturated: "<<chid<<" "<<dac_it->first<<" "<<m_minDAC<<" "<<ramppoint.ADC<<" "<<MaxADC<<" "<<m_maxADC);
+	  ATH_MSG_DEBUG("Saturated: "<<m_onlineHelper->channel_name(chid)<<" at DAC "<<dac_it->first<<" ADC "<< MaxADC);
 	}else{
 	  ATH_MSG_DEBUG("Fail ramp selection: "<<chid<<" "<<dac_it->first<<" "<<m_minDAC<<" "<<ramppoint.ADC<<" "<<MaxADC<<" "<<m_maxADC);
 	} 

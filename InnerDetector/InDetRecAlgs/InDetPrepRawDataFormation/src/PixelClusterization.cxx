@@ -165,11 +165,11 @@ namespace InDet{
         ATH_MSG_VERBOSE(**roi);
         ATH_MSG_VERBOSE( "REGTEST: Pixel : Roi contains " 
 		     << listOfPixIds.size() << " det. Elements" );
-        for (unsigned int i=0; i < listOfPixIds.size(); i++) {
-          const InDetRawDataCollection<PixelRDORawData>* RDO_Collection (rdoContainer->indexFindPtr(listOfPixIds[i]));
+        for (auto & listOfPixId : listOfPixIds) {
+          const InDetRawDataCollection<PixelRDORawData>* RDO_Collection (rdoContainer->indexFindPtr(listOfPixId));
 
           if (!RDO_Collection) continue;
-          PixelClusterContainer::IDC_WriteHandle lock = clusterContainer->getWriteHandle(listOfPixIds[i]);
+          PixelClusterContainer::IDC_WriteHandle lock = clusterContainer->getWriteHandle(listOfPixId);
           if( lock.OnlineAndPresentInAnotherView() ) continue;
 
           // Use one of the specific clustering AlgTools to make clusters

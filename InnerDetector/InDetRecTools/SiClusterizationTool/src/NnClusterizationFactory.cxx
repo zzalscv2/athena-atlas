@@ -556,7 +556,7 @@ namespace InDet {
     }
     std::vector<Amg::Vector2D> myPositions = getPositionsFromOutput(positionValues,rawInput,pCluster);
     ATH_MSG_DEBUG(" Estimated myPositions (1) x: " << myPositions[0][Trk::locX] << " y: " << myPositions[0][Trk::locY]);
-    for (unsigned int index = 0; index < errorMatrices.size(); index++) errors.push_back(errorMatrices.at(index));
+    for (auto & errorMatrice : errorMatrices) errors.push_back(errorMatrice);
     return myPositions;
   }
 

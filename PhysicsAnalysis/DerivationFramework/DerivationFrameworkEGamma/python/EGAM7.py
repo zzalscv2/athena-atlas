@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # EGAM7.py
@@ -314,11 +314,7 @@ def EGAM7Cfg(ConfigFlags):
     # multiple times in a train.
     # DODO: restrict it to relevant triggers
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    EGAM7TriggerListsHelper = TriggerListsHelper()
-    #EGAM7TriggerListsHelper.Run3TriggerNames = EGAM7TriggerListsHelper.Run3TriggerNamesNoTau
-    #EGAM7TriggerListsHelper.Run3TriggerNamesTau = []
-    EGAM7TriggerListsHelper.Run2TriggerNames = EGAM7TriggerListsHelper.Run2TriggerNamesNoTau
-    EGAM7TriggerListsHelper.Run2TriggerNamesTau = []
+    EGAM7TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # configure skimming/thinning/augmentation tools
     acc.merge(EGAM7KernelCfg(ConfigFlags,
@@ -332,7 +328,8 @@ def EGAM7Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     EGAM7SlimmingHelper = SlimmingHelper(
         'EGAM7SlimmingHelper',
-        NamesAndTypes = ConfigFlags.Input.TypedCollections )
+        NamesAndTypes = ConfigFlags.Input.TypedCollections,
+        ConfigFlags = ConfigFlags )
 
 
     # ------------------------------------------
@@ -416,25 +413,15 @@ def EGAM7Cfg(ConfigFlags):
     EGAM7SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
 
     # photons: gain and cluster energy per layer
-    from DerivationFrameworkCalo.DerivationFrameworkCaloFactories import (
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
         getGainDecorations, getClusterEnergyPerLayerDecorations )
-    GainDecoratorTool = None
-    ClusterEnergyPerLayerDecorators = []  
-    for toolStr in acc.getEventAlgo('EGAM7Kernel').AugmentationTools:
-        toolStr  = f'{toolStr}'
-        splitStr = toolStr.split('/')
-        tool =  acc.getPublicTool(splitStr[1])
-        if splitStr[0] == 'DerivationFramework::GainDecorator':
-            GainDecoratorTool = tool
-        elif splitStr[0] == 'DerivationFramework::ClusterEnergyPerLayerDecorator':
-            ClusterEnergyPerLayerDecorators.append( tool )
-
-    if GainDecoratorTool : 
-        EGAM7SlimmingHelper.ExtraVariables.extend(
-            getGainDecorations(GainDecoratorTool) )
-    for tool in ClusterEnergyPerLayerDecorators:
-        EGAM7SlimmingHelper.ExtraVariables.extend(
-            getClusterEnergyPerLayerDecorations( tool ) )
+    gainDecorations = getGainDecorations(acc, 'EGAM7Kernel')
+    print('EGAM7 gain decorations: ', gainDecorations)
+    EGAM7SlimmingHelper.ExtraVariables.extend(gainDecorations)
+    clusterEnergyDecorations = getClusterEnergyPerLayerDecorations(
+        acc, 'EGAM7Kernel' )
+    print('EGAM7 cluster energy decorations: ', clusterEnergyDecorations)
+    EGAM7SlimmingHelper.ExtraVariables.extend(clusterEnergyDecorations)
 
     # energy density
     EGAM7SlimmingHelper.ExtraVariables += [ 
@@ -465,10 +452,6 @@ def EGAM7Cfg(ConfigFlags):
     if ConfigFlags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
             AddRun2TriggerMatchingToSlimmingHelper )
-        AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper = EGAM7SlimmingHelper,
-            OutputContainerPrefix = 'TrigMatch_', 
-            TriggerList = EGAM7TriggerListsHelper.Run2TriggerNamesTau)
         AddRun2TriggerMatchingToSlimmingHelper(
             SlimmingHelper = EGAM7SlimmingHelper, 
             OutputContainerPrefix = 'TrigMatch_',

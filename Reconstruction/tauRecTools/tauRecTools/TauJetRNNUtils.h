@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUJETRNNUTILS_H
@@ -192,6 +192,18 @@ bool eProbabilityNN(
     const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
 
 bool eProbabilityNNorHT(
+    const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
+
+bool chargedScoreRNN(
+    const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
+
+bool isolationScoreRNN(
+    const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
+
+bool conversionScoreRNN(
+    const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
+
+bool fakeScoreRNN(
     const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
 
 } // namespace Track

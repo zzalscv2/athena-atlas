@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -23,7 +23,6 @@ def getNSubregions(path):
 def HTTEventSelectionCfg():
     result=ComponentAccumulator()
     eventSelector = CompFactory.HTTEventSelectionSvc()
-    eventSelector.OutputLevel=2
     eventSelector.regions = "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/slices_v01_Jan21.txt"
     eventSelector.regionID = 0
     eventSelector.sampleType = 'singleMuons'
@@ -42,7 +41,6 @@ def TrigHTTMappingCfg():
     HTTMapping.modulemap = f'{pathMapping}map_file/ITk.global-to-local.moduleidmap'
     HTTMapping.NNmap = f'{pathMapping}map_file/NN_DNN_Region_0p1_0p3_HTTFake_HTTTrueMu_SingleP_8L_Nom_v6.json'
     HTTMapping.layerOverride = {}
-    HTTMapping.OutputLevel=2 
     result.addService(HTTMapping, create=True, primary=True)
     return result
 
@@ -81,17 +79,17 @@ def HTTRoadUnionToolCfg(configFlags):
     result=ComponentAccumulator()
     RF = CompFactory.HTTRoadUnionTool()
     
-    xBins = configFlags.Trigger.HoughHTT.xBins
-    xBufferBins = configFlags.Trigger.HoughHTT.xBufferBins
-    yBins = configFlags.Trigger.HoughHTT.yBins
-    yBufferBins = configFlags.Trigger.HoughHTT.yBufferBins
-    xMin = configFlags.Trigger.HoughHTT.phiMin
-    xMax = configFlags.Trigger.HoughHTT.phiMax
+    xBins = configFlags.Trigger.HTT.ActiveConfig.xBins
+    xBufferBins = configFlags.Trigger.HTT.ActiveConfig.xBufferBins
+    yBins = configFlags.Trigger.HTT.ActiveConfig.yBins
+    yBufferBins = configFlags.Trigger.HTT.ActiveConfig.yBufferBins
+    xMin = configFlags.Trigger.HTT.ActiveConfig.phiMin
+    xMax = configFlags.Trigger.HTT.ActiveConfig.phiMax
     xBuffer = (xMax - xMin) / xBins * xBufferBins
     xMin = xMin - xBuffer
     xMax = xMax +  xBuffer
-    yMin = configFlags.Trigger.HoughHTT.qptMin
-    yMax = configFlags.Trigger.HoughHTT.qptMax
+    yMin = configFlags.Trigger.HTT.ActiveConfig.qptMin
+    yMax = configFlags.Trigger.HTT.ActiveConfig.qptMax
     yBuffer = (yMax - yMin) / yBins * yBufferBins
     yMin -= yBuffer
     yMax += yBuffer
@@ -103,24 +101,24 @@ def HTTRoadUnionToolCfg(configFlags):
         HoughTransform.HTTEventSelectionSvc = HTTEventSelectionCfg().getService("HTTEventSelectionSvc")
         HoughTransform.TrigHTTBankSvc = HTTBankSvcCfg().getService("TrigHTTBankSvc")
         HoughTransform.TrigHTTMappingSvc = HTTMapping 
-        HoughTransform.combine_layers = configFlags.Trigger.HoughHTT.combineLayers 
-        HoughTransform.convSize_x = configFlags.Trigger.HoughHTT.convSizeX 
-        HoughTransform.convSize_y = configFlags.Trigger.HoughHTT.convSizeY 
-        HoughTransform.convolution = configFlags.Trigger.HoughHTT.convolution 
+        HoughTransform.combine_layers = configFlags.Trigger.HTT.ActiveConfig.combineLayers 
+        HoughTransform.convSize_x = configFlags.Trigger.HTT.ActiveConfig.convSizeX 
+        HoughTransform.convSize_y = configFlags.Trigger.HTT.ActiveConfig.convSizeY 
+        HoughTransform.convolution = configFlags.Trigger.HTT.ActiveConfig.convolution 
         HoughTransform.d0_max = 0 
         HoughTransform.d0_min = 0 
-        HoughTransform.fieldCorrection = configFlags.Trigger.HoughHTT.fieldCorrection
-        HoughTransform.hitExtend_x = configFlags.Trigger.HoughHTT.hitExtendX
-        HoughTransform.localMaxWindowSize = configFlags.Trigger.HoughHTT.localMaxWindowSize        
+        HoughTransform.fieldCorrection = configFlags.Trigger.HTT.ActiveConfig.fieldCorrection
+        HoughTransform.hitExtend_x = configFlags.Trigger.HTT.ActiveConfig.hitExtendX
+        HoughTransform.localMaxWindowSize = configFlags.Trigger.HTT.ActiveConfig.localMaxWindowSize        
         HoughTransform.nBins_x = xBins + 2 * xBufferBins
         HoughTransform.nBins_y = yBins + 2 * yBufferBins
         HoughTransform.phi_max = xMax
         HoughTransform.phi_min = xMin
         HoughTransform.qpT_max = yMax 
         HoughTransform.qpT_min = yMin 
-        HoughTransform.scale = configFlags.Trigger.HoughHTT.scale
+        HoughTransform.scale = configFlags.Trigger.HTT.ActiveConfig.scale
         HoughTransform.subRegion = number
-        HoughTransform.threshold = configFlags.Trigger.HoughHTT.threshold 
+        HoughTransform.threshold = configFlags.Trigger.HTT.ActiveConfig.threshold 
         HoughTransform.traceHits = False
         tools.append(HoughTransform)
 
@@ -133,7 +131,7 @@ def HTTRawLogicCfg(configFlags):
     result=ComponentAccumulator()
     HTTRawLogic = CompFactory.HTTRawToLogicalHitsTool()
     HTTRawLogic.SaveOptional = 2
-    if (configFlags.Trigger.HTT.sampleType == 'skipTruth'): 
+    if (configFlags.Trigger.HTT.ActiveConfig.sampleType == 'skipTruth'): 
         HTTRawLogic.SaveOptional = 1
     HTTRawLogic.TowersToMap = [0] # TODO TODO why is this hardcoded?
     HTTRawLogic.HTTEventSelectionSvc = HTTEventSelectionCfg().getService("HTTEventSelectionSvc")
@@ -153,7 +151,7 @@ def HTTDataFlowToolCfg():
 def HTTSpacePointsToolCfg(configFlags):
     result=ComponentAccumulator()
     SpacePointTool = CompFactory.HTTSpacePointsTool_v2()
-    SpacePointTool.Filtering = configFlags.Trigger.HTT.spacePointFiltering
+    SpacePointTool.Filtering = configFlags.Trigger.HTT.ActiveConfig.spacePointFiltering
     SpacePointTool.FilteringClosePoints = False
     SpacePointTool.PhiWindow = 0.008
     SpacePointTool.Duplication = True
@@ -191,11 +189,11 @@ def LRTRoadFinderCfg(configFlags):
     LRTRoadFinder =CompFactory.HTTHoughTransform_d0phi0_Tool()
     LRTRoadFinder.TrigHTTBankSvc = HTTBankSvcCfg().getService("TrigHTTBankSvc")
     LRTRoadFinder.TrigHTTMappingSvc = TrigHTTMappingCfg().getService("TrigHTTMappingSvc")
-    LRTRoadFinder.combine_layers = configFlags.Trigger.HoughHTT.lrtStraighttrackCombineLayers
-    LRTRoadFinder.convolution = configFlags.Trigger.HoughHTT.lrtStraighttrackConvolution
-    LRTRoadFinder.hitExtend_x = configFlags.Trigger.HoughHTT.lrtStraighttrackHitExtendX
-    LRTRoadFinder.scale = configFlags.Trigger.HoughHTT.scale
-    LRTRoadFinder.threshold = configFlags.Trigger.HoughHTT.lrtStraighttrackThreshold
+    LRTRoadFinder.combine_layers = configFlags.Trigger.HTT.ActiveConfig.lrtStraighttrackCombineLayers
+    LRTRoadFinder.convolution = configFlags.Trigger.HTT.ActiveConfig.lrtStraighttrackConvolution
+    LRTRoadFinder.hitExtend_x = configFlags.Trigger.HTT.ActiveConfig.lrtStraighttrackHitExtendX
+    LRTRoadFinder.scale = configFlags.Trigger.HTT.ActiveConfig.scale
+    LRTRoadFinder.threshold = configFlags.Trigger.HTT.ActiveConfig.lrtStraighttrackThreshold
     result.setPrivateTools(LRTRoadFinder)
     return result
 
@@ -212,23 +210,23 @@ def HTTWriteOutputCfg(configFlags):
     HTTWriteOutput = CompFactory.HTTOutputHeaderTool("HTTWriteOutput")
     HTTWriteOutput.InFileName = ["test"]
     HTTWriteOutput.RWstatus = "HEADER" # do not open file, use THistSvc
-    HTTWriteOutput.RunSecondStage = configFlags.Trigger.HTT.secondStage
+    HTTWriteOutput.RunSecondStage = configFlags.Trigger.HTT.ActiveConfig.secondStage
     result.addPublicTool(HTTWriteOutput, primary=True)
     return result
 
 def HTTTrackFitterToolCfg(configFlags):
     result=ComponentAccumulator()
     TF_1st = CompFactory.HTTTrackFitterTool("HTTTrackFitterTool_1st")
-    TF_1st.GuessHits = configFlags.Trigger.HTT.guessHits
-    TF_1st.IdealCoordFitType = configFlags.Trigger.HTT.idealCoordFitType
+    TF_1st.GuessHits = configFlags.Trigger.HTT.ActiveConfig.guessHits
+    TF_1st.IdealCoordFitType = configFlags.Trigger.HTT.ActiveConfig.idealCoordFitType
     TF_1st.TrigHTTBankSvc = HTTBankSvcCfg().getService("TrigHTTBankSvc")
     TF_1st.TrigHTTMappingSvc = TrigHTTMappingCfg().getService("TrigHTTMappingSvc")
-    TF_1st.chi2DofRecoveryMax = configFlags.Trigger.HTT.chi2DoFRecoveryMax
-    TF_1st.chi2DofRecoveryMin = configFlags.Trigger.HTT.chi2DoFRecoveryMin
-    TF_1st.doMajority = configFlags.Trigger.HTT.doMajority
-    TF_1st.nHits_noRecovery = configFlags.Trigger.HTT.nHitsNoRecovery
-    TF_1st.DoDeltaGPhis = configFlags.Trigger.HTT.doDeltaGPhis
-    TF_1st.DoMissingHitsChecks = configFlags.Trigger.HTT.doMissingHitsChecks
+    TF_1st.chi2DofRecoveryMax = configFlags.Trigger.HTT.ActiveConfig.chi2DoFRecoveryMax
+    TF_1st.chi2DofRecoveryMin = configFlags.Trigger.HTT.ActiveConfig.chi2DoFRecoveryMin
+    TF_1st.doMajority = configFlags.Trigger.HTT.ActiveConfig.doMajority
+    TF_1st.nHits_noRecovery = configFlags.Trigger.HTT.ActiveConfig.nHitsNoRecovery
+    TF_1st.DoDeltaGPhis = configFlags.Trigger.HTT.ActiveConfig.doDeltaGPhis
+    TF_1st.DoMissingHitsChecks = configFlags.Trigger.HTT.ActiveConfig.doMissingHitsChecks
     result.addPublicTool(TF_1st, primary=True)
     return result
 
@@ -236,14 +234,14 @@ def HTTOverlapRemovalToolCfg(configFlags):
     result=ComponentAccumulator()
     OR_1st = CompFactory.HTTOverlapRemovalTool("HTTOverlapRemovalTool_1st")
     OR_1st.ORAlgo = "Normal"
-    OR_1st.doFastOR =configFlags.Trigger.HTT.doFastOR
+    OR_1st.doFastOR =configFlags.Trigger.HTT.ActiveConfig.doFastOR
     OR_1st.NumOfHitPerGrouping = 5
     OR_1st.TrigHTTMappingSvc = TrigHTTMappingCfg().getService("TrigHTTMappingSvc")
-    if configFlags.Trigger.HTT.hough:
-        OR_1st.nBins_x = configFlags.Trigger.HTT.xBins + 2 * configFlags.Trigger.HTT.xBufferBins
-        OR_1st.nBins_y = configFlags.Trigger.HTT.yBins + 2 * configFlags.Trigger.HTT.yBufferBins
-        OR_1st.localMaxWindowSize = configFlags.Trigger.HTT.localMaxWindowSize
-        OR_1st.roadSliceOR = configFlags.Trigger.HTT.roadSliceOR
+    if configFlags.Trigger.HTT.ActiveConfig.hough:
+        OR_1st.nBins_x = configFlags.Trigger.HTT.ActiveConfig.xBins + 2 * configFlags.Trigger.HTT.ActiveConfig.xBufferBins
+        OR_1st.nBins_y = configFlags.Trigger.HTT.ActiveConfig.yBins + 2 * configFlags.Trigger.HTT.ActiveConfig.yBufferBins
+        OR_1st.localMaxWindowSize = configFlags.Trigger.HTT.ActiveConfig.localMaxWindowSize
+        OR_1st.roadSliceOR = configFlags.Trigger.HTT.ActiveConfig.roadSliceOR
     
     result.addPublicTool(OR_1st, primary=True)
     return result
@@ -253,10 +251,10 @@ def HTTOverlapRemovalTool_2ndCfg(configFlags):
     result=ComponentAccumulator()
     OR_2nd = CompFactory.HTTOverlapRemovalTool("HTTOverlapRemovalTool_2nd")
     OR_2nd.TrigHTTMappingSvc = TrigHTTMappingCfg().getService("TrigHTTMappingSvc")
-    if configFlags.Trigger.HTT.secondStage:
+    if configFlags.Trigger.HTT.ActiveConfig.secondStage:
         OR_2nd.DoSecondStage = True
         OR_2nd.ORAlgo = "Normal"
-        OR_2nd.doFastOR = configFlags.Trigger.HTT.doFastOR
+        OR_2nd.doFastOR = configFlags.Trigger.HTT.ActiveConfig.doFastOR
         OR_2nd.NumOfHitPerGrouping = 5
     result.setPrivateTools(OR_2nd)
     return result
@@ -267,24 +265,32 @@ def HTTTrackFitterTool_2ndCfg(configFlags):
     TF_2nd = CompFactory.HTTTrackFitterTool("HTTTrackFitterTool_2nd")
     TF_2nd.TrigHTTBankSvc = HTTBankSvcCfg().getService("TrigHTTBankSvc")
     TF_2nd.TrigHTTMappingSvc = TrigHTTMappingCfg().getService("TrigHTTMappingSvc")
-    if configFlags.Trigger.HTT.secondStage:
+    if configFlags.Trigger.HTT.ActiveConfig.secondStage:
         TF_2nd.Do2ndStageTrackFit = True 
     result.setPrivateTools(TF_2nd)
     return result
+
+
+def checkIfAlgoTagExist(flags, tag):
+    try:
+        getattr(flags, tag)
+    except RuntimeError:
+        raise Exception(f'{tag} does not appear to be flag category')
 
 
 def HTTLogicalHistProcessAlgCfg(configFlags):
    
     result=ComponentAccumulator()
 
+   
     theHTTLogicalHistProcessAlg=CompFactory.HTTLogicalHitsProcessAlg()
-    theHTTLogicalHistProcessAlg.HitFiltering = configFlags.Trigger.HTT.hitFiltering
-    theHTTLogicalHistProcessAlg.writeOutputData = configFlags.Trigger.HTT.writeOutputData
+    theHTTLogicalHistProcessAlg.HitFiltering = configFlags.Trigger.HTT.ActiveConfig.hitFiltering
+    theHTTLogicalHistProcessAlg.writeOutputData = configFlags.Trigger.HTT.ActiveConfig.writeOutputData
     theHTTLogicalHistProcessAlg.Clustering = True
-    theHTTLogicalHistProcessAlg.tracking = configFlags.Trigger.HTT.doTracking
-    theHTTLogicalHistProcessAlg.outputHitTxt = configFlags.Trigger.HTT.outputHitTxt
-    theHTTLogicalHistProcessAlg.RunSecondStage = configFlags.Trigger.HTT.secondStage
-    theHTTLogicalHistProcessAlg.DoMissingHitsChecks = configFlags.Trigger.HTT.doMissingHitsChecks
+    theHTTLogicalHistProcessAlg.tracking = configFlags.Trigger.HTT.ActiveConfig.doTracking
+    theHTTLogicalHistProcessAlg.outputHitTxt = configFlags.Trigger.HTT.ActiveConfig.outputHitTxt
+    theHTTLogicalHistProcessAlg.RunSecondStage = configFlags.Trigger.HTT.ActiveConfig.secondStage
+    theHTTLogicalHistProcessAlg.DoMissingHitsChecks = configFlags.Trigger.HTT.ActiveConfig.doMissingHitsChecks
     theHTTLogicalHistProcessAlg.DoHoughRootOutput = False
     theHTTLogicalHistProcessAlg.DoNNTrack = False
     theHTTLogicalHistProcessAlg.eventSelector = result.getPrimaryAndMerge(HTTEventSelectionCfg())
@@ -337,21 +343,30 @@ def HTTLogicalHistProcessAlgCfg(configFlags):
     theHTTLogicalHistProcessAlg.TrackFitter_2nd = result.getPrimaryAndMerge(HTTTrackFitterTool_2ndCfg(configFlags))
 
 
-    if configFlags.Trigger.HTT.secondStage:
+    if configFlags.Trigger.HTT.ActiveConfig.secondStage:
         HTTExtrapolatorTool = CompFactory.HTTExtrapolator()
         HTTExtrapolatorTool.Ncombinations = 16
         theHTTLogicalHistProcessAlg.Extrapolator = HTTExtrapolatorTool
 
 
-    if configFlags.Trigger.HTT.lrt:
-        assert configFlags.Trigger.HTT.lrtUseBasicHitFilter != configFlags.Trigger.HTT.lrtUseMlHitFilter, 'Inconsistent LRT hit filtering setup, need either ML of Basic filtering enabled'
-        assert configFlags.Trigger.HTT.lrtUseStraightTrackHT != configFlags.Trigger.HTT.lrtUseDoubletHT, 'Inconsistent LRT HT setup, need either double or strightTrack enabled'
+    if configFlags.Trigger.HTT.ActiveConfig.lrt:
+        assert configFlags.Trigger.HTT.ActiveConfig.lrtUseBasicHitFilter != configFlags.Trigger.HTT.ActiveConfig.lrtUseMlHitFilter, 'Inconsistent LRT hit filtering setup, need either ML of Basic filtering enabled'
+        assert configFlags.Trigger.HTT.ActiveConfig.lrtUseStraightTrackHT != configFlags.Trigger.HTT.ActiveConfig.lrtUseDoubletHT, 'Inconsistent LRT HT setup, need either double or strightTrack enabled'
         theHTTLogicalHistProcessAlg.doLRT = True
-        theHTTLogicalHistProcessAlg.LRTHitFiltering = (not configFlags.Trigger.HTT.lrtSkipHitFiltering)
+        theHTTLogicalHistProcessAlg.LRTHitFiltering = (not configFlags.Trigger.HTT.ActiveConfig.lrtSkipHitFiltering)
 
-    
+    from TrigHTTAlgorithms.HTTAlgorithmConfig import HTTLogicalHitsProcessAlgMonitoringCfg
+    theHTTLogicalHistProcessAlg.MonTool = result.getPrimaryAndMerge(HTTLogicalHitsProcessAlgMonitoringCfg(configFlags))
+
     result.addEventAlgo(theHTTLogicalHistProcessAlg)
     return result
+
+
+def prepareFlagsForHTTLogicalHistProcessAlg(flags):
+    flags.Trigger.HTT.algoTag="Hough"
+    checkIfAlgoTagExist(flags.Trigger.HTT, flags.Trigger.HTT.algoTag)
+    newFlags = flags.cloneAndReplace("Trigger.HTT.ActiveConfig", "Trigger.HTT." + flags.Trigger.HTT.algoTag)
+    return newFlags
 
 
 if __name__ == "__main__":
@@ -359,13 +374,14 @@ if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
     ConfigFlags.Input.Files = ['/ATLAS/tbold/DATA/HTTWrapper.singlemu_Pt10.root']
-    
-    def __houghHttFlags():
-        from TrigHTTConfTools.HTTConfigFlags import createHoughHTTConfigFlags
-        return createHoughHTTConfigFlags()
-    ConfigFlags.addFlagsCategory("Trigger.HoughHTT", __houghHttFlags, prefix=True )
 
-    acc=MainServicesCfg(ConfigFlags)
-    acc.merge(HTTLogicalHistProcessAlgCfg(ConfigFlags)) 
+    newFlags = prepareFlagsForHTTLogicalHistProcessAlg(ConfigFlags)
+
+    acc=MainServicesCfg(newFlags)
+    acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
+    acc.merge(HTTLogicalHistProcessAlgCfg(newFlags)) 
     acc.store(open('AnalysisConfig.pkl','wb'))
+    
+    statusCode = acc.run()
+    assert statusCode.isSuccess() is True, "Application execution did not succeed"
 

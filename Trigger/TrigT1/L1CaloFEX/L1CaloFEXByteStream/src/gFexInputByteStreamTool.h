@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -69,10 +69,10 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
         Gaudi::Property<std::vector<uint32_t>> m_robIds {this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
 
          //Write handle keys for the L1Calo EDMs for BS->xAOD mode of operation
-        SG::WriteHandleKey< xAOD::gFexTowerContainer> m_gTowersWriteKey   {this,"gTowersWriteKey"  ,"L1_gTowers","Write gFexEDM Trigger Tower container"};
+        SG::WriteHandleKey< xAOD::gFexTowerContainer> m_gTowersWriteKey   {this,"gTowersWriteKey"  ,"L1_gFexDataTowers","Write gFexEDM Trigger Tower container"};
         
         // Read handle keys for the L1Calo EDMs for xAOD->BS mode of operation
-        SG::ReadHandleKey < xAOD::gFexTowerContainer> m_gTowersReadKey    {this,"gTowersReadKey"   ,"L1_gTowers","Read gFexEDM Trigger Tower container"};
+        SG::ReadHandleKey < xAOD::gFexTowerContainer> m_gTowersReadKey    {this,"gTowersReadKey"   ,"L1_gFexDataTowers","Read gFexEDM Trigger Tower container"};
 
         virtual void a_gtrx_map( const gfiber &inputData, gfiber &jf_lar_rx_data) const;
 
@@ -99,7 +99,7 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
 
         virtual void gtRescale(gtFPGA twr, gtFPGA &twrScaled, int scale) const;
         
-        virtual void getEtaPhi(float &Eta, float &Phi, int iEta, int iPhi) const;
+        virtual void getEtaPhi(float &Eta, float &Phi, int iEta, int iPhi, int gFEXtowerID) const;
         
 };
 

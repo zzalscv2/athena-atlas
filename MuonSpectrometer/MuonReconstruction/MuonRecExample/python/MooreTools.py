@@ -407,8 +407,7 @@ def MuonChamberHoleRecoveryTool(name="MuonChamberHoleRecoveryTool",extraFlags=No
         # switch off whatever is set
         kwargs["CscRotCreator"] = ""
         kwargs["CscPrepDataContainer"] = ""
-    if reco_mm or reco_stgcs:
-            kwargs.setdefault("MmClusterRotCreator", getPublicTool("MMClusterOnTrackCreator"))
+
     # add in missing C++ dependency. TODO: fix in C++
     getPublicTool("ResidualPullCalculator")
 

@@ -21,11 +21,11 @@ from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 from AthenaCommon.AppMgr import theApp
 if not hasattr(svcMgr, 'OnlineEventDisplaysSvc'):
     if rec.doHeavyIon:
-        maxEvents=250
+        maxEvents=200
         projectTags=['data22_hi']
-        publicStreams=['HardProbes', 'MinBias']
+        publicStreams=['physics_MinBias']
     else:
-        maxEvents=250
+        maxEvents=200
         projectTags=['data22_13p6TeV']
         publicStreams=['physics_Main']
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: RingerPreProcessorWrapper.icc 791627 2017-01-10 04:45:53Z wsfreund $
@@ -8,14 +8,12 @@
 
 #include "RingerPreProcessorWrapper.h"
 #include "RingerProcedureWrapper.icc"
-
 #include "Normalizations.h"
-
 #include "RingerSelectorTools/RingerSelectorToolsDefs.h"
 
 #include <type_traits>
 
-#undef NDEBUG
+//#undef NDEBUG
 
 namespace Ringer {
 

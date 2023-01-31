@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestDriver.h"
@@ -65,7 +65,7 @@ pool::TestDriver::clearCache()
 
 
 void
-pool::TestDriver::write()
+pool::TestDriver::write(pool::DbType storageType)
 {
   pool::IFileCatalog& catalog = *m_fileCatalog;
   catalog.start();
@@ -94,22 +94,22 @@ pool::TestDriver::write()
   Placement placementHint_SimpleTestClass;
   placementHint_SimpleTestClass.setFileName( m_fileName1 );
   placementHint_SimpleTestClass.setContainerName( "SimpleTestClass_Container" );
-  placementHint_SimpleTestClass.setTechnology( pool::ROOTKEY_StorageType.type() );
+  placementHint_SimpleTestClass.setTechnology( storageType.type() );
 
   Placement placementHint_TestClassPrimitives;
   placementHint_TestClassPrimitives.setFileName( m_fileName1 );
   placementHint_TestClassPrimitives.setContainerName( "TestClassPrimitives_Container" );
-  placementHint_TestClassPrimitives.setTechnology( pool::ROOTTREE_StorageType.type() );
+  placementHint_TestClassPrimitives.setTechnology( storageType.type() );
 
   Placement placementHint_TestClassSimpleContainers;
   placementHint_TestClassSimpleContainers.setFileName( m_fileName2 );
   placementHint_TestClassSimpleContainers.setContainerName( "TestClassSimpleContainers_Container" );
-  placementHint_TestClassSimpleContainers.setTechnology( pool::ROOTTREE_StorageType.type() );
+  placementHint_TestClassSimpleContainers.setTechnology( storageType.type() );
 
   Placement placementHint_TestClassVectors;
   placementHint_TestClassVectors.setFileName( m_fileName2 );
   placementHint_TestClassVectors.setContainerName( "TestClassVectors_Container" );
-  placementHint_TestClassVectors.setTechnology( pool::ROOTTREE_StorageType.type() );
+  placementHint_TestClassVectors.setTechnology( storageType.type() );
 
   std::vector< SimpleTestClass* > v_simpleTestClass;
   std::vector< TestClassPrimitives* > v_testClassPrimitives;
@@ -149,10 +149,10 @@ pool::TestDriver::write()
     v_testClassSimpleContainers.push_back( object_TestClassSimpleContainers );
     object_TestClassSimpleContainers->setNonZero();
     Token* token_TestClassSimpleContainers = persistencySvc->registerForWrite( placementHint_TestClassSimpleContainers,
-                                                                                     object_TestClassSimpleContainers,
-                                                                                     class_TestClassSimpleContainers );
+                                                                               object_TestClassSimpleContainers,
+                                                                               class_TestClassSimpleContainers );
     if ( ! token_TestClassSimpleContainers ) {
-      throw std::runtime_error( "Could not write an object" );
+       throw std::runtime_error( "Could not write an object" );
     }
     m_tokens.push_back( token_TestClassSimpleContainers );
     m_testClassSimpleContainers.push_back( *object_TestClassSimpleContainers );
@@ -172,8 +172,8 @@ pool::TestDriver::write()
 
 
     // Commit and hold the transaction
-    if ( ( i + 1 ) % m_eventsToCommitAndHold == 0 ) {
-      if ( ! persistencySvc->session().transaction().commitAndHold() ) {
+    if( ( i + 1 ) % m_eventsToCommitAndHold == 0 ) {
+      if( ! persistencySvc->session().transaction().commitAndHold() ) {
         throw std::runtime_error( "Could not commit and hold the transaction." );
       }
     }
@@ -279,22 +279,27 @@ pool::TestDriver::read()
     ++j;
 
     ///////////////////////////////////////////////////////////
-    void* data_testClassSimpleContainers = persistencySvc->readObject( *( m_tokens[numberOfTypes*i + j] ) );
-    if ( data_testClassSimpleContainers == 0 ) {
-      throw std::runtime_error( "Could not read the stored data" );
+    const Token& token = *( m_tokens.at(numberOfTypes*i + j) );
+    Guid SimpleContainersClassID;
+    SimpleContainersClassID.fromString("4E1F4DBB-1973-1974-1999-204F37331A02");
+    if( token.classID() == SimpleContainersClassID ) {
+       void* data_testClassSimpleContainers = persistencySvc->readObject(token);
+       if ( data_testClassSimpleContainers == 0 ) {
+          throw std::runtime_error( "Could not read the stored data" );
+       }
+       TestClassSimpleContainers* object_testClassSimpleContainers = reinterpret_cast< TestClassSimpleContainers* >( data_testClassSimpleContainers );
+       if ( *object_testClassSimpleContainers != m_testClassSimpleContainers[i] ) {
+          std::ostringstream error;
+          error << "TestClassSimpleContainers object written is different from object read:" << std::endl << "Original : ";
+          m_testClassSimpleContainers[i].streamOut( error );
+          error << std::endl << "Read from persistency : ";
+          object_testClassSimpleContainers->streamOut( error );
+          throw std::runtime_error( error.str() );
+       }
+       delete object_testClassSimpleContainers;
+       ++j;
     }
-    TestClassSimpleContainers* object_testClassSimpleContainers = reinterpret_cast< TestClassSimpleContainers* >( data_testClassSimpleContainers );
-    if ( *object_testClassSimpleContainers != m_testClassSimpleContainers[i] ) {
-      std::ostringstream error;
-      error << "TestClassSimpleContainers object written is different from object read:" << std::endl << "Original : ";
-      m_testClassSimpleContainers[i].streamOut( error );
-      error << std::endl << "Read from persistency : ";
-      object_testClassSimpleContainers->streamOut( error );
-      throw std::runtime_error( error.str() );
-    }
-    delete object_testClassSimpleContainers;
-    ++j;
-
+    
     ///////////////////////////////////////////////////////////
     void* data_testClassVectors = persistencySvc->readObject( *( m_tokens[numberOfTypes*i + j] ) );
     if ( data_testClassVectors == 0 ) {

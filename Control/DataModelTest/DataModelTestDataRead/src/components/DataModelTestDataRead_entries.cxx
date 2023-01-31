@@ -20,6 +20,8 @@
 #include "../xAODTestTypelessRead.h"
 #include "../xAODTestShallowCopyHVec.h"
 #include "../HLTResultReader.h"
+#include "../AllocTestReadWithAlloc.h"
+#include "../AllocTestWriteWithAlloc.h"
 
 DECLARE_COMPONENT( DMTest::DMTestRead )
 DECLARE_COMPONENT( DMTest::AuxDataTestRead )
@@ -35,4 +37,5 @@ DECLARE_COMPONENT( DMTest::xAODTestClearDecor )
 DECLARE_COMPONENT( DMTest::xAODTestTypelessRead )
 DECLARE_COMPONENT( DMTest::xAODTestShallowCopyHVec )
 DECLARE_COMPONENT( DMTest::HLTResultReader )
-
+DECLARE_COMPONENT( DMTest::AllocTestReadWithAlloc )
+DECLARE_COMPONENT( DMTest::AllocTestWriteWithAlloc )

@@ -100,12 +100,12 @@ namespace ISF {
     }
 
     /** Simulation call for vectors of particles */
-    virtual StatusCode simulateVector(const ConstISFParticleVector& particles, McEventCollection* mcEventCollection) {
+    virtual StatusCode simulateVector(const ISFParticleVector& particles, McEventCollection* mcEventCollection) {
       // this implementation is a wrapper in case the simulator does
       // implement particle-vector input
       bool success = true;
       // simulate each particle individually
-      for (const ISF::ISFParticle* part : particles) {
+      for (ISF::ISFParticle* part : particles) {
         ATH_MSG_VERBOSE( m_screenOutputPrefix <<  "Starting simulation of particle: " << part );
         if ( this->simulate(*part, mcEventCollection).isFailure()) {
           ATH_MSG_WARNING("Simulation of particle failed!" << endmsg <<
@@ -118,7 +118,7 @@ namespace ISF {
     }
 
     /** Simulation call for individual particles */
-    virtual StatusCode simulate(const ISFParticle& isp, McEventCollection* mcEventCollection);
+    virtual StatusCode simulate(ISFParticle& isp, McEventCollection* mcEventCollection);
 
     /** wrapper call to start chrono with given tag */
     const ChronoEntity* chronoStart(const IChronoSvc::ChronoTag& tag ) {
@@ -229,7 +229,7 @@ namespace ISF {
 
 
   /** Simulation Call --- hand over to the particleProcessor if it exists */
-  inline StatusCode BaseSimulationSvc::simulate(const ISFParticle& /*isp*/, McEventCollection*)
+  inline StatusCode BaseSimulationSvc::simulate(ISFParticle& /*isp*/, McEventCollection*)
   {
     return StatusCode::SUCCESS;
   }

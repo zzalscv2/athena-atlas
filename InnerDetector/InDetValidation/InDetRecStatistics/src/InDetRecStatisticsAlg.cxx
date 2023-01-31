@@ -9,7 +9,7 @@
 //     o write out percentage of tracks with bad tracksummary
 //     o add energy of mctracks for Michael
 //     o don't save intermediate newTracking track's to ntuple
-//     o statistics prints hit association purity, (holes, shared hits in sct/pixels/b-layer, outliers, etc...)
+//     o statistics prints hit association purity, (holes in sct/pixels/b-layer, outliers, etc...)
 //     o navigation between hits and tracks
 //     X check Propagator defaults (check with Andrei regarding Tool)
 //     o count tracks with without associated hits, without truth, truth without beginvertex
@@ -82,7 +82,6 @@ InDet::InDetRecStatisticsAlg::InDetRecStatisticsAlg(const std::string& name, ISv
   m_residualPullCalculator     ("Trk::ResidualPullCalculator/ResidualPullCalculator"),
   m_McTrackCollection_key      ("TruthEvent"),
   m_trackSelectorTool          ("InDet::InDetDetailedTrackSelectorTool"),
-  m_doSharedHits               (true),
   m_UseTrackSummary            (true),
   m_printSecondary             (false),
   m_minPt                      (1000),
@@ -125,7 +124,6 @@ InDet::InDetRecStatisticsAlg::InDetRecStatisticsAlg(const std::string& name, ISv
   declareProperty("UseTrackSelection"       ,   m_useTrackSelection);
   declareProperty("DoTruth"                 ,   m_doTruth);
   declareProperty("TrackSelectorTool"       ,   m_trackSelectorTool);
-  declareProperty("DoSharedHits",               m_doSharedHits);
   declareProperty("UseTrackSummary",            m_UseTrackSummary);
   declareProperty("PrintSecondary",             m_printSecondary);
   declareProperty("minPt",		        m_minPt);
@@ -159,8 +157,6 @@ StatusCode InDet::InDetRecStatisticsAlg::initialize(){
 
   // Part 1: Get the messaging service, print where you are
   ATH_MSG_DEBUG("initialize()");
-
-  ATH_CHECK(m_assoTool.retrieve());
 
   StatusCode sc1 = getServices();           // retrieve store gate service etc
   if (sc1.isFailure()) {
@@ -343,21 +339,6 @@ StatusCode InDet::InDetRecStatisticsAlg::execute(const EventContext &ctx)  const
 
       //start process of getting correct track summary
 
-      // clean up association tool
-      std::unique_ptr<Trk::PRDtoTrackMap> prd_to_track_map;
-      if (m_doSharedHits) {
-        prd_to_track_map = m_assoTool->createPRDtoTrackMap();
-	// clear prdAssociationTool (this may be altered)
-	// loop over tracks and add PRD
-	TrackCollection::const_iterator trackIt    = RecCollection->begin();
-	TrackCollection::const_iterator trackItEnd = RecCollection->end();
-	for ( ; trackIt != trackItEnd ; ++trackIt) {
-	  if ( (m_assoTool->addPRDs(*prd_to_track_map, **trackIt)).isFailure() ) {
-	    ATH_MSG_ERROR("could not add PRDs to association tool" );
-	  }
-	}
-      }
-
       std::vector <const Trk::Track *>          RecTracks, RecSignal;
       selectRecSignal                     (RecCollection, RecTracks,RecSignal,counter);
 
@@ -368,7 +349,6 @@ StatusCode InDet::InDetRecStatisticsAlg::execute(const EventContext &ctx)  const
       ATH_MSG_DEBUG("Accumulating Statistics...");
       (*statHelper)->addEvent    (RecCollection,
 				  RecTracks,
-                                  prd_to_track_map.get(),
 				  GenSignal,
 				  TruthMap,
 				  m_idHelper,
@@ -493,17 +473,6 @@ StatusCode InDet :: InDetRecStatisticsAlg :: getServices ()
      m_trkSummaryTool.disable();
    }
 
-   if (m_doSharedHits) {
-     if ( m_assoTool.retrieve().isFailure() ) {
-       ATH_MSG_FATAL("Failed to retrieve tool " << m_assoTool);
-       return StatusCode::FAILURE;
-     } else {
-       ATH_MSG_INFO("Retrieved tool " << m_assoTool);
-     }
-   } else {
-     m_assoTool.disable();
-   }
-
    // AG: init truthToTrack
    if (m_doTruth) {
      if (m_truthToTrack.retrieve().isFailure() ) {
@@ -602,9 +571,7 @@ selectGenSignal  (const McEventCollection* SimTracks,
 	  int   pdgCode = particle->pdg_id();
 	  const HepPDT::ParticleData* pd = m_particleDataTable->particle(std::abs(pdgCode));
 	  if (!pd) {
-	    ATH_MSG_DEBUG("Could not get particle data for particle with "
-			 <<"pdgCode="<<pdgCode<< ", status=" << particle->status()
-			 << ", barcode=" << HepMC::barcode(particle));
+	    ATH_MSG_DEBUG("Could not get particle data for particle "<< particle);
 	    ATH_MSG_DEBUG("GenParticle= " << particle);
 	    continue;
 	  }

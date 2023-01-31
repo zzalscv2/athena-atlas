@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_RDO_ANALYSIS_H
@@ -7,6 +7,7 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 
+#include "GeneratorObjects/McEventCollection.h"
 #include "InDetRawData/InDetRawDataCLASS_DEF.h"
 #include "InDetRawData/InDetRawDataContainer.h"
 #include "InDetSimData/InDetSimDataCollection.h"
@@ -38,6 +39,7 @@ class SCT_RDOAnalysis : public AthAlgorithm {
  private:
   SG::ReadHandleKey<SCT_RDO_Container> m_inputKey{this, "InputKey", "SCT_RDOs"};
   SG::ReadHandleKey<InDetSimDataCollection> m_inputTruthKey{this, "InputTruthKey", "SCT_SDO_Map"};
+  SG::ReadHandleKey<McEventCollection> m_inputMcEventCollectionKey{this, "InputMcEventCollectionKey", "TruthEvent"};
   const SCT_ID* m_sctID;
   // RDO
   std::vector<unsigned long long>* m_rdoID;

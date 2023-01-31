@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -51,7 +51,7 @@ namespace SG {
  */
 namespace DerivationFramework {
 
-  class Select_Bmumu : public CfAthAlgTool, public IAugmentationTool {
+  class ATLAS_NOT_THREAD_SAFE Select_Bmumu : public CfAthAlgTool, public IAugmentationTool {
     public: 
       Select_Bmumu(const std::string& t, const std::string& n, const IInterface* p);
 

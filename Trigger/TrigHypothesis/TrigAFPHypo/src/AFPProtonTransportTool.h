@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TRIGAFPHYPO_AFPPROTONTRANSPORTTOOL_H
@@ -27,15 +27,15 @@ public:
 
   virtual ~AFPProtonTransportTool();
   
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
   
   /// Loads parametrization file and gets the value of positions, slopes and nominal energy. It takes as argument the path to the txt file containing this information.
-  StatusCode load();
+  virtual StatusCode load() override;
 
-  void setParamFile(std::string paramFile) { m_filename = paramFile; }
+  virtual void setParamFile(const std::string& paramFile) override { m_filename = paramFile; }
 
   /// Evaluates value of the horizontal position equation. It takes as arguments the initial position, slope and nominal beam energy.
-  double x(double x0, double y0, double z0, double sx0, double sy0, double E) const {
+  virtual double x(double x0, double y0, double z0, double sx0, double sy0, double E) const override {
     return m_x_position->evaluate(x0 + m_xPositionInitIP, y0 + m_yPositionInitIP, z0 + m_zPositionInitIP, sx0 + m_xSlopeInitIP,
                           sy0 + m_ySlopeInitIP, E);
   }

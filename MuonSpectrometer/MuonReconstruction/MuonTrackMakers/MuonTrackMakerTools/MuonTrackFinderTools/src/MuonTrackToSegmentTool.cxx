@@ -52,8 +52,8 @@ namespace Muon {
         std::set<Identifier> chIds;
 
         // copy rots, get surface
-        std::unique_ptr<DataVector<const Trk::MeasurementBase>> rots = std::make_unique<DataVector<const Trk::MeasurementBase>>();
-        rots->reserve(track.measurementsOnTrack()->size());
+        auto rots = DataVector<const Trk::MeasurementBase>();
+        rots.reserve(track.measurementsOnTrack()->size());
 
         // loop over TSOS
         const Trk::TrackStates* states = track.trackStateOnSurfaces();
@@ -78,7 +78,7 @@ namespace Muon {
             // check whether state is a measurement
             const Trk::MeasurementBase* meas = tsos->measurementOnTrack();
             if (!meas || tsos->type(Trk::TrackStateOnSurface::Outlier)) continue;
-            rots->push_back(meas->clone());
+            rots.push_back(meas->clone());
 
             // only consider eta hits
             Identifier id = m_edmHelperSvc->getIdentifier(*meas);
@@ -196,7 +196,7 @@ namespace Muon {
             // calculate holes
             std::vector<Identifier> holes;
             for (const Identifier& chid : chIds) {
-                std::vector<Identifier> holesChamber = calculateHoles(ctx, chid, *exPars, rots->stdcont());
+                std::vector<Identifier> holesChamber = calculateHoles(ctx, chid, *exPars, rots.stdcont());
                 holes.insert(holes.end(), holesChamber.begin(), holesChamber.end());
             }
             quality = new MuonSegmentQuality(fq->chiSquared(), fq->numberDoF(), holes);
@@ -204,7 +204,8 @@ namespace Muon {
         } else {
             quality = new Trk::FitQuality(fq->chiSquared(), fq->numberDoF());
         }
-        MuonSegment* seg = new MuonSegment(locPos, locDir, cov, surf.release(), rots.release(), quality);
+        MuonSegment* seg = new MuonSegment(
+          locPos, locDir, cov, surf.release(), std::move(rots), quality);
         return seg;
     }
 

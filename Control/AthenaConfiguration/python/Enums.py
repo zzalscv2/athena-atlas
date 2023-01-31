@@ -84,6 +84,7 @@ class BeamType(FlagEnum):
     Collisions = 'collisions'
     SingleBeam = 'singlebeam'
     Cosmics = 'cosmics'
+    TestBeam = 'testbeam'
 
 
 class BunchStructureSource(FlagEnum):

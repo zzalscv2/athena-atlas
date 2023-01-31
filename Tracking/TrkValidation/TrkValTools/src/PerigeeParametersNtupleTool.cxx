@@ -180,7 +180,7 @@ StatusCode Trk::PerigeeParametersNtupleTool::fillTrackData (
         !m_extrapolator.empty() ) {
       ATH_MSG_VERBOSE ("try extrapolate SiSPSeeded track to perigee");
       const Trk::PerigeeSurface perSurf;
-      std::unique_ptr<const Trk::TrackParameters> tmp = m_extrapolator->extrapolate(
+      std::unique_ptr<const Trk::TrackParameters> tmp = m_extrapolator->extrapolateTrack(
         ctx, track, perSurf, Trk::anyDirection, false, Trk::nonInteracting);
       if (tmp && tmp->associatedSurface().type() == Trk::SurfaceType::Perigee) {
         perpars = static_cast<const Trk::Perigee *> (tmp.release());

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -45,11 +45,14 @@ StatusCode FixHepMC::execute() {
     }
 
     // Catch cases with more than 2 beam particles (16.11.2021)
-    auto beams_t = evt->beams();
+    std::vector<HepMC::GenParticlePtr> beams_t;
+    for (const HepMC::GenParticlePtr& p : evt->beams()) {
+      if (p->status() == 4)  beams_t.push_back(p);
+    }
     if (beams_t.size() > 2) {
       ATH_MSG_INFO("Invalid number of beam particles " <<  beams_t.size() << ". Will try to fix.");
       std::vector<HepMC::GenParticlePtr> bparttoremove;
-      for (auto bpart: beams_t) {
+      for (const auto& bpart : beams_t) {
         if (bpart->id() == 0 && bpart->production_vertex()) bparttoremove.push_back(bpart);
       }
       for (auto bpart: bparttoremove) {
@@ -146,12 +149,10 @@ StatusCode FixHepMC::execute() {
 
     // Event particle content cleaning -- remove "bad" structures
     std::vector<HepMC::GenParticlePtr> toremove;
-    long seenThisEvent = 0;
     for (auto ip: evt->particles()) {
       // Skip this particle if (somehow) its pointer is null
       if (!ip) continue;
       m_totalSeen += 1;
-      seenThisEvent += 1;
       // Flag to declare if a particle should be removed
       bool bad_particle = false;
       // Check for loops
@@ -407,22 +408,23 @@ StatusCode FixHepMC::finalize() {
 //@{
 
 // Identify PDG ID = 0 particles, usually from HEPEVT padding
-bool FixHepMC::isPID0(HepMC::ConstGenParticlePtr p) {
+bool FixHepMC::isPID0(const HepMC::ConstGenParticlePtr& p) const {
   return p->pdg_id() == 0;
 }
 
 // Identify non-transportable stuff _after_ hadronisation
-bool FixHepMC::isNonTransportableInDecayChain(HepMC::ConstGenParticlePtr p) {
+bool FixHepMC::isNonTransportableInDecayChain(const HepMC::ConstGenParticlePtr& p) const {
   return !MC::PID::isTransportable(p->pdg_id()) && MC::fromDecay(p);
 }
 
 // Identify internal "loop" particles
-bool FixHepMC::isLoop(HepMC::ConstGenParticlePtr p) {
+bool FixHepMC::isLoop(const HepMC::ConstGenParticlePtr& p) const {
   if (p->production_vertex() == p->end_vertex() && p->end_vertex() != NULL) return true;
   if (m_loopByBC && p->production_vertex()) {
     /// @todo Use new particle MC::parents(...) tool
+    int barcodep = HepMC::barcode(p);
     for (auto itrParent: *(p->production_vertex())) {
-      if ( HepMC::barcode(itrParent) > HepMC::barcode(p) ) {
+      if ( HepMC::barcode(itrParent) >  barcodep) {
         ATH_MSG_VERBOSE("Found a loop (a la Sherpa sample) via barcode.");
         return true; // Cannot vectorize, but this is a pretty short loop
       } // Check on barcodes

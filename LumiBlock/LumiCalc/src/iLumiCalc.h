@@ -160,7 +160,7 @@ void ProgressBar::DrawProgressBar( Int_t i )
 
 
 //______________________________________________________________
-bool FileExists(std::string strFilename) { 
+bool FileExists(const std::string& strFilename) { 
   struct stat stFileInfo; 
   bool blnReturn; 
   int intStat; 

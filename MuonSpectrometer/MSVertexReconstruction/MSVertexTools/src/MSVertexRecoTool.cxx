@@ -791,7 +791,7 @@ namespace Muon {
                 old_prelim_vx = new_prelim_vx;
                 new_prelim_vx.clear();
 
-                for (std::set<std::set<int> >::iterator itr = old_prelim_vx.begin(); itr != old_prelim_vx.end(); itr++) {
+                for (std::set<std::set<int> >::iterator itr = old_prelim_vx.begin(); itr != old_prelim_vx.end(); ++itr) {
                     for (unsigned int i_trks = 0; i_trks < trks.size(); i_trks++) {
                         std::set<int> tempCluster = *itr;
                         if (tempCluster.insert(i_trks).second) {
@@ -817,7 +817,7 @@ namespace Muon {
         // Find the preliminary vertex with the maximum number of tracklets - that is the final vertex.  If
         // multiple preliminary vertices with same number of tracklets, the first one found is returned
         std::set<std::set<int> >::iterator prelim_vx_max = prelim_vx.begin();
-        for (std::set<std::set<int> >::iterator itr = prelim_vx.begin(); itr != prelim_vx.end(); itr++) {
+        for (std::set<std::set<int> >::iterator itr = prelim_vx.begin(); itr != prelim_vx.end(); ++itr) {
             if ((*itr).size() > (*prelim_vx_max).size()) prelim_vx_max = itr;
         }
 
@@ -835,7 +835,7 @@ namespace Muon {
         float vxphi = vxPhiFinder(std::abs(vxtheta), tracklet_vxphi, ctx);
         Amg::Vector3D vxpos(MyVx.x() * std::cos(vxphi), MyVx.x() * std::sin(vxphi), MyVx.z());
         std::vector<xAOD::TrackParticle*> vxTrkTracks;
-        for (std::vector<Tracklet>::iterator tracklet = tracklets.begin(); tracklet != tracklets.end(); tracklet++) {
+        for (std::vector<Tracklet>::iterator tracklet = tracklets.begin(); tracklet != tracklets.end(); ++tracklet) {
             AmgSymMatrix(5) covariance = AmgSymMatrix(5)(((Tracklet)*tracklet).errorMatrix());
             Trk::Perigee* myPerigee = new Trk::Perigee(vxpos, ((Tracklet)*tracklet).momentum(), 0, vxpos, covariance);
             xAOD::TrackParticle* myTrack = new xAOD::TrackParticle();
@@ -952,7 +952,7 @@ namespace Muon {
 
     std::vector<Tracklet> MSVertexRecoTool::getTracklets(const std::vector<Tracklet>& trks, const std::set<int>& tracklet_subset) const {
         std::vector<Tracklet> returnVal;
-        for (auto itr = tracklet_subset.cbegin(); itr != tracklet_subset.cend(); itr++) {
+        for (auto itr = tracklet_subset.cbegin(); itr != tracklet_subset.cend(); ++itr) {
             if ((unsigned int)*itr > trks.size()) ATH_MSG_ERROR("ERROR - Index out of bounds in getTracklets");
             returnVal.push_back(trks.at(*itr));
         }
@@ -967,7 +967,7 @@ namespace Muon {
         if (Vx.x() == 0 && Vx.z() == 0) return true;
         // loop on all tracks and find the worst
         float WorstTrkDist = MaxTollDist;
-        for (auto track = tracks.cbegin(); track != tracks.cend(); track++) {
+        for (auto track = tracks.cbegin(); track != tracks.cend(); ++track) {
             float TrkSlope = std::tan(((Tracklet)*track).getML1seg().alpha());
             float TrkInter =
                 ((Tracklet)*track).getML1seg().globalPosition().perp() - ((Tracklet)*track).getML1seg().globalPosition().z() * TrkSlope;

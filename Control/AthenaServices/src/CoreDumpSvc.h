@@ -96,7 +96,7 @@ private:
   std::vector<UserCore_t>  m_usrCoreDumps;               ///< User defined core dump info
   std::vector<sysDumpRec> m_sysCoreDumps;                ///< Core dump info collected by this service  
   siginfo_t* m_siginfo{nullptr};                         ///< Pointer to siginfo_t struct (set by signal handler)
-  std::atomic<EventID::number_type> m_eventCounter{0};   ///< Event counter
+  std::atomic<EventID::event_number_t> m_eventCounter{0};   ///< Event counter
 
   thread_local static std::vector<uint8_t> s_stack;      /// Alternate stack for signal handler
   

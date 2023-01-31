@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PyJobTransforms )
@@ -29,7 +29,7 @@ endfunction( _add_test )
 
 # Tests in the package:
 foreach( test Echo_tf Sleep_tf
-         transform trfAMI trfArgs trfDecorators trfEnv
+         transform TransformUtils trfAMI trfArgs trfDecorators trfEnv
          trfExceptions trfExe trfExitCodes trfFileUtils trfGraph trfJobOptions trfLogger
          trfMPTools trfReports trfReportsSignaledExit trfSignal trfSignatures
          trfUtils trfUtilsDBRelease trfUtilsParallelJobProcessor trfUtilsParallelJobProcessorData

@@ -168,6 +168,45 @@ Trk::DiscSurface::operator==(const Trk::Surface& sf) const
   return boundsEqual;
 }
 
+/* Use the Surface as a ParametersBase constructor, from local parameters -
+ * charged */
+Trk::Surface::ChargedTrackParametersUniquePtr
+Trk::DiscSurface::createUniqueTrackParameters(
+    double l1, double l2, double phi, double theta, double qop,
+    std::optional<AmgSymMatrix(5)> cov) const {
+  return std::make_unique<ParametersT<5, Charged, DiscSurface>>(
+      l1, l2, phi, theta, qop, *this, std::move(cov));
+}
+/** Use the Surface as a ParametersBase constructor, from global parameters -
+ * charged*/
+Trk::Surface::ChargedTrackParametersUniquePtr
+Trk::DiscSurface::createUniqueTrackParameters(
+    const Amg::Vector3D& position, const Amg::Vector3D& momentum, double charge,
+    std::optional<AmgSymMatrix(5)> cov) const {
+  return std::make_unique<ParametersT<5, Charged, DiscSurface>>(
+      position, momentum, charge, *this, std::move(cov));
+}
+
+/** Use the Surface as a ParametersBase constructor, from local parameters -
+ * neutral */
+Trk::Surface::NeutralTrackParametersUniquePtr
+Trk::DiscSurface::createUniqueNeutralParameters(
+    double l1, double l2, double phi, double theta, double qop,
+    std::optional<AmgSymMatrix(5)> cov) const {
+  return std::make_unique<ParametersT<5, Neutral, DiscSurface>>(
+      l1, l2, phi, theta, qop, *this, std::move(cov));
+}
+
+/** Use the Surface as a ParametersBase constructor, from global parameters -
+ * neutral */
+Trk::Surface::NeutralTrackParametersUniquePtr
+Trk::DiscSurface::createUniqueNeutralParameters(
+    const Amg::Vector3D& position, const Amg::Vector3D& momentum, double charge,
+    std::optional<AmgSymMatrix(5)> cov) const {
+  return std::make_unique<ParametersT<5, Neutral, DiscSurface>>(
+      position, momentum, charge, *this, std::move(cov));
+}
+
 const Amg::Vector3D&
 Trk::DiscSurface::globalReferencePoint() const
 {
@@ -221,47 +260,23 @@ Trk::DiscSurface::globalToLocal(const Amg::Vector3D& glopos,
   return (std::fabs(loc3Dframe.z()) <= s_onSurfaceTolerance);
 }
 
-Amg::Vector2D
-Trk::DiscSurface::localPolarToLocalCartesian(const Amg::Vector2D& locpol) const
-{
-  const Trk::DiscTrapezoidalBounds* dtbo =
-    dynamic_cast<const Trk::DiscTrapezoidalBounds*>(&(bounds()));
-  if (dtbo) {
-    double rMedium = dtbo->rCenter();
-    double phi = dtbo->averagePhi();
-
-    Amg::Vector2D polarCenter(rMedium, phi);
-    const Amg::Vector2D cartCenter = localPolarToCartesian(polarCenter);
-    const Amg::Vector2D cartPos = localPolarToCartesian(locpol);
-    Amg::Vector2D Pos = cartPos - cartCenter;
-    Amg::Vector2D locPos(Pos[Trk::locX] * sin(phi) - Pos[Trk::locY] * cos(phi),
-                         Pos[Trk::locY] * sin(phi) + Pos[Trk::locX] * cos(phi));
-
-    return {locPos[Trk::locX], locPos[Trk::locY]};
+Trk::Intersection
+Trk::DiscSurface::straightLineIntersection(const Amg::Vector3D& pos,
+                                           const Amg::Vector3D& dir,
+                                           bool forceDir,
+                                           Trk::BoundaryCheck bchk) const {
+  double denom = dir.dot(normal());
+  if (denom) {
+    double u = (normal().dot((center() - pos))) / (denom);
+    Amg::Vector3D intersectPoint(pos + u * dir);
+    // evaluate the intersection in terms of direction
+    bool isValid = forceDir ? (u > 0.) : true;
+    // evaluate (if necessary in terms of boundaries)
+    isValid = bchk ? (isValid && isOnSurface(intersectPoint)) : isValid;
+    // return the result
+    return Trk::Intersection(intersectPoint, u, isValid);
   }
-
-  return { locpol[Trk::locR] * cos(locpol[Trk::locPhi]),
-           locpol[Trk::locR] * sin(locpol[Trk::locPhi]) };
-}
-
-/** local<->global transformation in case of polar local coordinates */
-Amg::Vector3D
-Trk::DiscSurface::localCartesianToGlobal(const Amg::Vector2D& locpos) const
-{
-  Amg::Vector3D loc3Dframe(locpos[Trk::locX], locpos[Trk::locY], 0.);
-  return Amg::Vector3D(transform() * loc3Dframe);
-}
-
-/** local<->global transformation in case of polar local coordinates */
-std::optional<Amg::Vector2D>
-Trk::DiscSurface::globalToLocalCartesian(const Amg::Vector3D& glopos,
-                                         double tol) const
-{
-  Amg::Vector3D loc3Dframe = inverseTransformMultHelper(glopos);
-  if (std::abs(loc3Dframe.z()) > s_onSurfaceTolerance + tol) {
-    return std::nullopt;
-  }
-  return Amg::Vector2D(loc3Dframe.x(), loc3Dframe.y());
+  return Trk::Intersection(pos, 0., false);
 }
 
 #if defined(FLATTEN) && defined(__GNUC__)
@@ -270,7 +285,7 @@ Trk::DiscSurface::globalToLocalCartesian(const Amg::Vector3D& glopos,
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-__attribute__((flatten))
+[[gnu::flatten]]
 #endif
 bool
 Trk::DiscSurface::isOnSurface(const Amg::Vector3D& glopo,

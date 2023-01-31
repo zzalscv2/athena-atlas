@@ -33,6 +33,7 @@ class SCTSiPropertiesCondAlg : public AthReentrantAlgorithm
   DoubleProperty m_temperatureMin{this, "TemperatureMin", -80., "Minimum temperature allowed in Celcius."};
   DoubleProperty m_temperatureMax{this, "TemperatureMax", 100., "Maximum temperature allowed in Celcius."};
   DoubleProperty m_temperatureDefault{this, "TemperatureDefault", -7., "Default temperature in Celcius."};
+  BooleanProperty m_forceGeoModel{this, "ForceUseGeoModel", false, "Flag to avoid using HV and temp from conditions"};
   SG::ReadCondHandleKey<SCT_DCSFloatCondData> m_readKeyTemp{this, "ReadKeyeTemp", "SCT_SiliconTempCondData", "Key of input sensor temperature conditions folder"};
   SG::ReadCondHandleKey<SCT_DCSFloatCondData> m_readKeyHV{this, "ReadKeyHV", "SCT_SiliconBiasVoltCondData", "Key of input bias voltage conditions folder"};
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey{this, "SCTDetEleCollKey", "SCT_DetectorElementCollection", "Key of SiDetectorElementCollection for SCT"};

@@ -86,7 +86,6 @@ ATH_MSG_DEBUG("SCTTracksMonAlg::fillHistograms()");
 
   ATH_MSG_DEBUG("Begin loop over " << tracks->size() << " tracks");
   int goodTrks_N{0};
-  int local_tot_trkhits{0};
   for (const Trk::Track* track: *tracks) {
     if (track==nullptr) {
       ATH_MSG_ERROR("No pointer to track");
@@ -219,7 +218,6 @@ ATH_MSG_DEBUG("SCTTracksMonAlg::fillHistograms()");
               ATH_MSG_WARNING("No measured local parameters, pull won't be calculated");
             }
             ++local_scthits; // TODO This is not correct, change it
-            ++local_tot_trkhits;
           } // end if SCT..
         } // end if (clus)
       } // if (tsos->type(Trk::TrackStateOnSurface::Measurement))

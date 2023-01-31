@@ -798,7 +798,7 @@ void EvtPythiaEngine::updatePhysicsParameters()
         EvtExtGeneratorCommandsTable::getInstance()->getCommands( "PYTHIA" );
     GeneratorCommands::iterator it = commands.begin();
 
-    for ( ; it != commands.end(); it++ ) {
+    for ( ; it != commands.end(); ++it ) {
         Command command = *it;
         std::vector<std::string> commandStrings;
 
@@ -828,7 +828,7 @@ void EvtPythiaEngine::updatePhysicsParameters()
              generator == "generic" || generator == "BOTH" ||
              generator == "Both" || generator == "both" ) {
             std::vector<std::string>::iterator it2 = commandStrings.begin();
-            for ( ; it2 != commandStrings.end(); it2++ ) {
+            for ( ; it2 != commandStrings.end(); ++it2 ) {
                 EvtGenReport( EVTGEN_INFO, "EvtGen" )
                     << "Configuring generic Pythia generator: " << ( *it2 )
                     << endl;
@@ -839,7 +839,7 @@ void EvtPythiaEngine::updatePhysicsParameters()
              generator == "alias" || generator == "BOTH" ||
              generator == "Both" || generator == "both" ) {
             std::vector<std::string>::iterator it2 = commandStrings.begin();
-            for ( ; it2 != commandStrings.end(); it2++ ) {
+            for ( ; it2 != commandStrings.end(); ++it2 ) {
                 EvtGenReport( EVTGEN_INFO, "EvtGen" )
                     << "Configuring alias Pythia generator: " << ( *it2 )
                     << endl;

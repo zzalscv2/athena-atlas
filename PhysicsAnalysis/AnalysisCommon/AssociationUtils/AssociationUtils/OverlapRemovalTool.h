@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASSOCIATIONUTILS_OVERLAPREMOVALTOOL_H
@@ -89,9 +89,6 @@ namespace ORUtils
       //
       // Overlap tool handles
       //
-
-      /// PFlow-Mu-jet overlap handle
-      ToolHandle<IOverlapTool> m_muPFJetORT;
 
       /// Ele-ele overlap handle
       ToolHandle<IOverlapTool> m_eleEleORT;

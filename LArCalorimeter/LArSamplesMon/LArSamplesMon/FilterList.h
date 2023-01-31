@@ -14,11 +14,11 @@
 #include "LArSamplesMon/FilterParams.h"
 #include "TString.h"
 #include <vector>
-
+#include "CxxUtils/checker_macros.h"
 
 namespace LArSamples {
   
-  class FilterList  {
+  class ATLAS_NOT_THREAD_SAFE FilterList  {
   
    public:
    

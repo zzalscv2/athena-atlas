@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -843,7 +843,6 @@ void CaloHadDMCoeffFit::make_report(std::string &sreport)
             for(int i_lambda=0; i_lambda<dimLambda->getNbins()+1; i_lambda++){
               yy[i_lambda] = dimLambda->getXmin() + dimLambda->getDx()*i_lambda;
             }
-            int nbins = 0;
             int ibin_min = m_HadDMCoeff->getBin(i_dms, v_indx);
             v_indx[CaloLocalHadCoeffHelper::DIM_ENER] = dimEner->getNbins() - 1;
             v_indx[CaloLocalHadCoeffHelper::DIM_LAMBDA] = dimLambda->getNbins() - 1;
@@ -878,7 +877,6 @@ void CaloHadDMCoeffFit::make_report(std::string &sreport)
                 x = float(m_engDm[iBin]->size());
                 hp2[1]->Fill(dimEner->getXmin() + dimEner->getDx()*(i_ener+0.5), dimLambda->getXmin() + dimLambda->getDx()*(i_lambda+0.5), x );
                 hp_aver[1] += x;
-                nbins ++;
                 std::pair<int, int> pp;
                 pp.first = int(m_engDmOverClus[iBin]->size());
                 pp.second = iBin;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACK_TRUTH_DECORATOR_ALG_HH
@@ -17,7 +17,6 @@
 
 
 namespace FlavorTagDiscriminants {
-
 
   class TrackTruthDecoratorAlg: public AthReentrantAlgorithm {
   public:
@@ -41,6 +40,9 @@ namespace FlavorTagDiscriminants {
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_origin_label {
       this, "truthOriginLabel", "truthOriginLabel", 
         "Exclusive origin label of the track"};
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_type_label {
+      this, "truthTypeLabel", "truthTypeLabel", 
+        "Exclusive truth type label of the track"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_vertex_index {
       this, "truthVertexIndex", "truthVertexIndex", 
         "Truth vertex index of the track"};
@@ -59,13 +61,6 @@ namespace FlavorTagDiscriminants {
     Gaudi::Property<float> m_truthVertexMergeDistance {
       this, "truthVertexMergeDistance", 0.1, 
         "Merge any truth vertices within this distance [mm]"};
-
-    static bool sort_tracks(const xAOD::TrackParticle* track_A, const xAOD::TrackParticle* track_B);
-    const xAOD::TruthVertex* get_truth_vertex(const xAOD::TrackParticle* track ) const;
-    const xAOD::TruthVertex* get_nearest_vertex(const xAOD::TruthVertex* search_vertex, 
-                                                std::vector<const xAOD::TruthVertex*> vertices) const;
-    float get_distance(const xAOD::TruthVertex* vertex_A, const xAOD::TruthVertex* vertex_B) const;
-    const xAOD::TruthParticle* get_parent_hadron(const xAOD::TruthParticle* truth_particle) const;
   };
 
 }

@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BTAGGING_JETSECVERTEXINGALG_H
 #define BTAGGING_JETSECVERTEXINGALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
 namespace InDet {
@@ -40,7 +40,7 @@ namespace Analysis
 {
   class IMSVVariablesFactory;
 
-  class JetSecVertexingAlg : public AthAlgorithm
+  class JetSecVertexingAlg : public AthReentrantAlgorithm
   {
       public:
         /** Constructors and destructors */
@@ -48,8 +48,8 @@ namespace Analysis
         virtual ~JetSecVertexingAlg();
     
         /** Main routines specific to an ATHENA algorithm */
-        virtual StatusCode initialize();
-        virtual StatusCode execute();
+        virtual StatusCode initialize() override;
+        virtual StatusCode execute(const EventContext& ctx) const override;
 
       private:
         

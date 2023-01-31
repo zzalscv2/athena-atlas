@@ -6,6 +6,9 @@
 #include "LArRawEvent/LArRawSCContainer.h"
 #include "LArRawEvent/LArSCDigit.h"
 #include "LArRawEvent/LArLATOMEHeaderContainer.h"
+#include "TrigDecisionTool/ChainGroup.h"
+#include "TrigDecisionTool/FeatureContainer.h"
+#include "TrigDecisionTool/Feature.h"
 
 LArSC2Ntuple::LArSC2Ntuple(const std::string& name, ISvcLocator* pSvcLocator):
   LArDigits2Ntuple(name, pSvcLocator) {
@@ -18,11 +21,13 @@ StatusCode LArSC2Ntuple::initialize() {
   ATH_MSG_DEBUG( "LArSC2Ntuple in initialize" ); 
 
   m_isSC = true;
+  if(m_fillTType && (! m_fillLB)) m_fillLB = true;
 
   ATH_CHECK( LArDigits2Ntuple::initialize() );
   ATH_CHECK( m_scidtool.retrieve() );
 
   ATH_CHECK( m_cablingKeyAdditional.initialize(m_fillRawChan));
+  ATH_CHECK( m_eventInfoKey.initialize() );
 
   StatusCode sc=m_nt->addItem("latomeChannel",m_latomeChannel);
   if (sc.isFailure()) {
@@ -129,6 +134,34 @@ StatusCode LArSC2Ntuple::initialize() {
   }// end container key loop
   ATH_MSG_DEBUG("Finished container loop");
 
+  if(m_fillTType) {
+     sc = m_evt_nt->addItem("TType",  m_TType);
+     if (sc.isFailure()) {
+        ATH_MSG_ERROR( "addItem 'TType' failed" );
+        return sc;
+     }
+     sc = m_evt_nt->addItem("LArEventBits",  m_LArEventBits);
+     if (sc.isFailure()) {
+        ATH_MSG_ERROR( "addItem 'LArEventBits' failed" );
+        return sc;
+     }
+     sc = m_evt_nt->addItem("LArError",  m_LArInError);
+     if (sc.isFailure()) {
+        ATH_MSG_ERROR( "addItem 'LArError' failed" );
+        return sc;
+     }
+     //Adding trigger decision bit branches
+     CHECK( m_trigDec.retrieve() );
+     for ( const std::string &tn : m_trigNames ){
+       sc = m_evt_nt->addItem(tn,m_trigNameMap[tn]);
+       if (sc.isFailure()) {
+         ATH_MSG_ERROR( "addItem  '"+tn+"' failed" );
+         return sc;
+       }
+     }
+
+  }//m_fillTType
+
   return StatusCode::SUCCESS;
   
 }
@@ -141,15 +174,14 @@ StatusCode LArSC2Ntuple::execute()
   const EventContext& ctx = Gaudi::Hive::currentContext();
 
   ATH_MSG_DEBUG( "LArSC2Ntuple in execute" ); 
-  unsigned long long thisevent = 0;
-  unsigned long	thisbcid       = 0;
-  unsigned short thislb        = 0;
 
-  thisevent	   = ctx.eventID().event_number();
-  thislb       = ctx.eventID().lumi_block();
+  SG::ReadHandle<xAOD::EventInfo>evt (m_eventInfoKey, ctx);
+  unsigned long long thisevent	  = evt->eventNumber();
+  unsigned short thislb           = evt->lumiBlock();
 
   // This should be used for main readout later, once TDAQ fill event headers also in calib. runs properly
-  thisbcid	   = ctx.eventID().bunch_crossing_id();
+  unsigned long thisbcid	  = evt->bcid();
+  unsigned long  thisttype = evt->level1TriggerType();
   //
   /// set it here once and no need to set at each SC/cell
   bool hasDigitContainer=true;
@@ -284,6 +316,7 @@ StatusCode LArSC2Ntuple::execute()
   ATH_MSG_DEBUG("cellsno size: "<<cellsno);
   for( int c    = 0;c<cellsno;++c ){
     if(m_fillBCID) m_bcid	   = thisbcid; 
+
     m_IEvent	   = thisevent;
     if(m_overwriteEventNumber) m_IEvent   = ctx.evt();
     m_LB           = thislb;
@@ -322,7 +355,6 @@ StatusCode LArSC2Ntuple::execute()
 	    const LArLATOMEHeader*headmap   = LATOMEHeadMap[scdigi->SourceId()];
 	    if(headmap){
 	      m_bcidLATOMEHEAD   = headmap->BCId();
-	      m_l1idLATOMEHEAD   = headmap->L1Id();
 	    }
 	  }   
 	  m_latomeChannel	   = scdigi->Channel();
@@ -341,7 +373,6 @@ StatusCode LArSC2Ntuple::execute()
     }//hasDigitContainer
     
 
-
     // DigitContainer 1 -> SC_ADC_BAS
     if( DigitContainer_next ){
       
@@ -351,7 +382,7 @@ StatusCode LArSC2Ntuple::execute()
     
       if(trueMaxSample>m_Nsamples){
         if(!m_ipass){
-          ATH_MSG_WARNING( "The number of samples in data BAS is larger than the one specified by JO: " << trueMaxSample << " > " << m_Nsamples << " --> only " << m_Nsamples << " will be available in the ntuple " );
+          ATH_MSG_WARNING( "The number of samples in data is larger than the one specified by JO: " << trueMaxSample << " > " << m_Nsamples << " --> only " << m_Nsamples << " will be available in the ntuple " );
           m_ipass=1;
         }
         trueMaxSample = m_Nsamples;
@@ -386,6 +417,55 @@ StatusCode LArSC2Ntuple::execute()
     }
     
 
+    // DigitContainer 1 -> SC_ADC_BAS
+    if( DigitContainer_next ){
+      
+      const LArDigit* digi = DigitContainer_next->at(c);
+
+      unsigned int trueMaxSample = digi->nsamples();
+    
+      if(trueMaxSample>m_Nsamples){
+        if(!m_ipass){
+          ATH_MSG_WARNING( "The number of samples in data is larger than the one specified by JO: " << trueMaxSample << " > " << m_Nsamples << " --> only " << m_Nsamples << " will be available in the ntuple " );
+          m_ipass=1;
+        }
+        trueMaxSample = m_Nsamples;
+      }
+      m_ntNsamples = trueMaxSample;
+      ATH_MSG_DEBUG("m_ntNsamples: "<<m_ntNsamples);
+
+      if( !hasDigitContainer){ //// already filled in DigitContainer?
+        fillFromIdentifier(digi->hardwareID());
+        if( m_fillRawChan && RawChannelContainer ){
+	   fillRODEnergy(digi->hardwareID(), rawChannelMap, cabling, cablingROD);
+        }
+      }
+         
+     for(unsigned i =	0; i<trueMaxSample;++i) m_samples_ADC_BAS[i]   = digi->samples().at(i);
+
+     const LArSCDigit*	scdigi   = dynamic_cast<const LArSCDigit*>(digi);
+     if(!scdigi){ 
+        ATH_MSG_DEBUG(" Can't cast digi to LArSCDigit*");
+     }else{
+       if ( !hasDigitContainer){
+         if (headcontainer){
+           const LArLATOMEHeader*headmap   = LATOMEHeadMap[scdigi->SourceId()];
+           if(headmap){
+             m_bcidLATOMEHEAD	   = headmap->BCId();
+             //m_latomeidLATOMEHEAD   = headmap->LatomeId();
+             m_l1idLATOMEHEAD	   = headmap->L1Id();
+           }
+         }
+         m_latomeChannel	   = scdigi->Channel();
+         m_latomeSourceId	   = scdigi->SourceId();
+       }
+
+       for( unsigned i = 0; i<scdigi->BCId().size();++i){
+         m_bcidVec_ADC_BAS[i]	   = scdigi->BCId().at(i);
+       }
+     }
+    }//DigitContainer_next
+
     // etcontainer -> SC_ET
     if( etcontainer ){
       const LArRawSC*rawSC   = etcontainer->at(c);
@@ -397,7 +477,6 @@ StatusCode LArSC2Ntuple::execute()
 	  const LArLATOMEHeader*headmap   = LATOMEHeadMap[rawSC->SourceId()];
 	  if(headmap){
 	    m_bcidLATOMEHEAD	   = headmap->BCId();
-	    m_l1idLATOMEHEAD	   = headmap->L1Id();
 	  }
 	}
         if( m_fillRawChan && RawChannelContainer ){
@@ -432,7 +511,6 @@ StatusCode LArSC2Ntuple::execute()
 	  const LArLATOMEHeader*headmap   = LATOMEHeadMap[rawSC->SourceId()];
 	  if(headmap){
 	    m_bcidLATOMEHEAD	   = headmap->BCId();
-	    m_l1idLATOMEHEAD	   = headmap->L1Id();
 	  }
 	}
         if( m_fillRawChan && RawChannelContainer ){
@@ -457,6 +535,29 @@ StatusCode LArSC2Ntuple::execute()
     }
     cellCounter++;
   }// over cells 
+  if(m_fillTType) {
+     m_TType = thisttype;
+     m_IEventEvt   = thisevent;
+     if(m_overwriteEventNumber) m_IEventEvt   = m_event;
+     m_LB= evt->lumiBlock();
+
+     for (auto const & x : m_trigNames) {
+       if( ! m_trigDec->getListOfTriggers(x).empty() ){
+         m_trigNameMap[x] = m_trigDec->isPassedBits( x );
+       }
+     }
+     m_LArEventBits = evt->eventFlags(xAOD::EventInfo::LAr);
+     m_LArInError   = 0;
+     if(evt->errorState(xAOD::EventInfo::LAr)==xAOD::EventInfo::Error) m_LArInError = m_LArInError | 0x1; 
+     if(evt->errorState(xAOD::EventInfo::LAr)==xAOD::EventInfo::Warning) m_LArInError = m_LArInError | 0x2; 
+
+
+     sc   = ntupleSvc()->writeRecord(m_evt_nt);
+     if (sc != StatusCode::SUCCESS) {
+          ATH_MSG_ERROR( "writeRecord failed" );
+          return sc;
+     }
+  }
   ATH_MSG_DEBUG( "LArSC2Ntuple has finished, filled " << cellCounter << " cells");
   return StatusCode::SUCCESS;
 }// end finalize-method.

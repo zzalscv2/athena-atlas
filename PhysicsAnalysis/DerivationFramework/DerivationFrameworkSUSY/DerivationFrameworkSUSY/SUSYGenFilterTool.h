@@ -50,7 +50,6 @@ namespace DerivationFramework {
     float m_MaxJetEta; //!< Max eta for the truth jets
     float m_MinLepPt;  //!< Min pT for the truth leptons
     float m_MaxLepEta; //!< Max eta for the truth leptons
-    int m_SimBarcodeOffset; //!< G4 particle barcode offset value (Particles having a barcode greater than this value are defined to be G4 particles)
 
     ToolHandle<IMCTruthClassifier> m_classif;
 

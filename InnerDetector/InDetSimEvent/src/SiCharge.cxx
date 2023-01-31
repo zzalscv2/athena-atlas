@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,14 +13,6 @@
 
 #include "InDetSimEvent/SiCharge.h"
 
-// Copy constructor:
-SiCharge::SiCharge(const SiCharge &charge) :
-  m_charge(charge.m_charge),
-  m_time(charge.m_time),
-  m_processType(charge.m_processType),
-  m_partLink(charge.m_partLink),
-  m_trackDistance(charge.m_trackDistance)
-{}
 
 // Constructor with parameters:
 SiCharge::SiCharge(const double& charge,const double& time,
@@ -29,7 +21,7 @@ SiCharge::SiCharge(const double& charge,const double& time,
   m_time(time),
   m_processType(processType),
   m_partLink(PL),
-  m_trackDistance(SiTrackDistance())
+  m_trackDistance()
 {}
 
 SiCharge::SiCharge(const double& charge,const double& time,
@@ -37,8 +29,8 @@ SiCharge::SiCharge(const double& charge,const double& time,
   m_charge(charge),
   m_time(time),
   m_processType(processType),
-  m_partLink(HepMcParticleLink()),
-  m_trackDistance(SiTrackDistance())
+  m_partLink(),
+  m_trackDistance()
 {}
 
 // Constructor with parameters:
@@ -53,20 +45,6 @@ SiCharge::SiCharge(const double& charge,
   m_partLink(PL),
   m_trackDistance(trackDistance)
 {}
-
-
-// Assignment operator:
-SiCharge &SiCharge::operator=(const SiCharge &charge)
-{
-  if (this!=&charge) {
-    m_charge=charge.m_charge;
-    m_time=charge.m_time;
-    m_processType=charge.m_processType;
-    m_partLink=charge.m_partLink;
-    m_trackDistance=charge.m_trackDistance;
-  } else {}
-  return *this;
-}
 
 // add another charge, if the process and track are the same:
 bool SiCharge::add(const SiCharge &charge)

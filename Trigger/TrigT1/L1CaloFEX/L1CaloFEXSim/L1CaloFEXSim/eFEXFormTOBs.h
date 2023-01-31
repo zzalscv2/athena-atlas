@@ -49,6 +49,7 @@ namespace LVL1 {
     const unsigned int m_retaShift = 18;
     const unsigned int m_seedShift = 16;
     const unsigned int m_undShift = 15;
+    const unsigned int m_seedMaxShift = 14;
     const unsigned int m_shelfShift = 24;
     const unsigned int m_efexShift = 20;
     const unsigned int m_taurhadShift = 20;

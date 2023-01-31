@@ -31,7 +31,7 @@ class TGCTriggerLUTs {
   /// Mask for extracting the octant from the GLOBALADDR
   static constexpr uint8_t TYPE_MASK = 0x7;
   /// Bit position of the octant bits in the GLOBALADDR
-  static constexpr uint8_t TYPE_SHIFT = 26;
+  static constexpr uint8_t TYPE_SHIFT = 23;
   /// Mask for extracting the phi(F or B) from the GLOBALADDR
   static constexpr uint8_t PHIMOD2_MASK = 0x1;
   /// Bit position of the module number bits in the GLOBALADDR

@@ -18,14 +18,12 @@
 Trk::SubtractedCylinderLayer::SubtractedCylinderLayer(
     const Trk::SubtractedCylinderSurface* subCyl,
     const Trk::LayerMaterialProperties& laymatprop, double thickness,
-    Trk::OverlapDescriptor* olap, int laytyp)
+    std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
     : SubtractedCylinderSurface(*subCyl),
-      Layer(laymatprop, thickness, olap, laytyp) {}
+      Layer(laymatprop, thickness, std::move(olap), laytyp) {}
 
 Trk::SubtractedCylinderLayer::SubtractedCylinderLayer(
-    const Trk::SubtractedCylinderLayer& clay)
-
-    = default;
+    const Trk::SubtractedCylinderLayer& clay) = default;
 
 Trk::SubtractedCylinderLayer::SubtractedCylinderLayer(
     const Trk::SubtractedCylinderLayer& clay, const Amg::Transform3D& transf)
@@ -55,7 +53,7 @@ Trk::SubtractedCylinderLayer::surfaceRepresentation()
 
 double Trk::SubtractedCylinderLayer::preUpdateMaterialFactor(
     const Trk::TrackParameters& parm, Trk::PropDirection dir) const {
-  if (!Trk::Layer::m_layerMaterialProperties.get()) return 0.;
+  if (!Trk::Layer::m_layerMaterialProperties) return 0.;
   // calculate the direction to the normal
   const Amg::Vector3D& parmPos = parm.position();
   Amg::Vector3D pastStep(parmPos + dir * parm.momentum().normalized());
@@ -66,7 +64,7 @@ double Trk::SubtractedCylinderLayer::preUpdateMaterialFactor(
 
 double Trk::SubtractedCylinderLayer::postUpdateMaterialFactor(
     const Trk::TrackParameters& parm, Trk::PropDirection dir) const {
-  if (!Trk::Layer::m_layerMaterialProperties.get()) return 0;
+  if (!Trk::Layer::m_layerMaterialProperties) return 0;
   const Amg::Vector3D& parmPos = parm.position();
   Amg::Vector3D pastStep(parmPos + dir * parm.momentum().normalized());
   if (pastStep.perp() > parm.position().perp())

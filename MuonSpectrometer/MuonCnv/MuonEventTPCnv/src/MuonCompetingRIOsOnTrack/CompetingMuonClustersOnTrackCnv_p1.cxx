@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -33,16 +33,16 @@ CompetingMuonClustersOnTrackCnv_p1::persToTrans( const Muon::CompetingMuonCluste
   *transObj = Muon::CompetingMuonClustersOnTrack (Trk::LocalParameters(),
                                                   Amg::MatrixX(),
                                                   associatedSurface,
-                                                  containedChildRots.release(),
-                                                  nullptr // assgnProb
+                                                  std::move(*containedChildRots),
+                                                  {}// assgnProb
                                                   );
 
   fillTransFromPStore( &m_cRotCnv, persObj->m_competingROT, transObj, log );
 }
 
 void 
-CompetingMuonClustersOnTrackCnv_p1::transToPers( const Muon::CompetingMuonClustersOnTrack */*transObj*/,
-                                                 Muon::CompetingMuonClustersOnTrack_p1 */*persObj*/, 
+CompetingMuonClustersOnTrackCnv_p1::transToPers( const Muon::CompetingMuonClustersOnTrack* /*transObj*/,
+                                                 Muon::CompetingMuonClustersOnTrack_p1* /*persObj*/, 
                                                  MsgStream &/*log*/ ) 
 {
   throw std::runtime_error( "CompetingMuonClustersOnTrackCnv_p1::transToPers is deprecated!" );

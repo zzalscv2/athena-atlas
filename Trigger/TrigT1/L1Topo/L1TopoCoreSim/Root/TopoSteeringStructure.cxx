@@ -143,7 +143,8 @@ TCS::TopoSteeringStructure::setupFromMenu ATLAS_NOT_THREAD_SAFE (const TrigConf:
 				  "jLJetMultiplicity",
 				  "gJetMultiplicity",
 				  "gLJetMultiplicity",
-				  "EnergyThreshold" };
+				  "EnergyThreshold",
+                                  "LArSaturation" };
 
    for (const string & boardName : l1menu.boardNames() ){
      
@@ -240,15 +241,14 @@ TCS::TopoSteeringStructure::setupFromMenu ATLAS_NOT_THREAD_SAFE (const TrigConf:
               string algo_klass = algo.klass();
               if(algo_klass=="eEmVarMultiplicity") algo_klass="eEmMultiplicity"; // in sim, use the same multiplicity algo for fixed and variable thresholds
 
-	      string *foundAlgo = std::find(std::begin(AvailableMultAlgs), std::end(AvailableMultAlgs), algo_klass);
-	      if (foundAlgo == std::end(AvailableMultAlgs)) cout << "TopoSteeringStructure: No L1Topo algorithm matching the configured multiplicity algorithm in the menu! Algorithm: " << algo_klass  << endl;
- 
               //Temporarily remove the trigger items that rely on EnergyThreshold but are not yet implemented
               if ( (algo_klass == "EnergyThreshold") && 
                    (algo.inputs().at(0) != "jXE" && algo.inputs().at(0) != "gXEJWOJ" && algo.inputs().at(0) != "gMHT" &&
                     algo.inputs().at(0) != "gXENC" && algo.inputs().at(0) != "gXERHO" &&
                     algo.inputs().at(0) != "jTE" && algo.inputs().at(0) != "gTE") ) continue;
      
+              if ( algo_klass == "LArSaturation" ) continue;
+ 
               auto it = find(storedConn.begin(), storedConn.end(), algo.name());
 	      if (it == storedConn.end()) { // Algorithm/Connector does not exist: create and store it
 
@@ -385,6 +385,8 @@ TCS::TopoSteeringStructure::setupFromMenu ATLAS_NOT_THREAD_SAFE (const TrigConf:
             l1algo.inputs().at(0) != "gXENC" && l1algo.inputs().at(0) != "gXERHO" &&
             l1algo.inputs().at(0) != "jTE" && l1algo.inputs().at(0) != "gTE") ) continue;
 
+      if ( l1algo.klass() == "LArSaturation" ) continue;
+ 
       ConfigurableAlg * alg = AlgFactory::mutable_instance().algorithm(l1algo.name());
 
       // Get L1Threshold object and pass it to CountingAlg, from where it will be propagated to and decoded in each algorithm

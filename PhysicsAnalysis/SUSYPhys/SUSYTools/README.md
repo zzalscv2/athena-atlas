@@ -17,13 +17,11 @@ The recommended tags are on the [background forum TWiki page](https://twiki.cern
 ------------------------------------
 AnalysisBase / AthAnalysisBase Setup
 ------------------------------------
-
-Because these two releases are becoming more similar, most of the instructions are the same.  These instructions refer to 21.2.19 as an example, but you should pick the appropriate version when setting up.  Set up the latest recommended AnalysisBase release::
-
+Set up the latest recommended AnalysisBase release:
 ```bash
 setupATLAS
 lsetup git
-asetup "AnalysisBase,22.2.91"
+asetup "AnalysisBase,22.2.97"
 # or the nightly: asetup "AnalysisBase,22.2,latest"
 ```
 
@@ -31,7 +29,7 @@ Or the latest AthAnalysis release::
 
 ```bash
 setupATLAS
-asetup "AthAnalysis,22.2.91"
+asetup "AthAnalysis,22.2.97"
 # or the nightly: asetup "AthAnalysis,22.2,latest"
 ```
   
@@ -68,9 +66,9 @@ source x86_64-centos7-gcc11-opt/setup.sh
 
 and you are ready to go!
 
---------------
+------------------------------------
 Testing
---------------
+------------------------------------
 Unit tests now use [CTest](https://cmake.org/Wiki/CMake/Testing_With_CTest).  To run unit tests, simply **go to your build area** and type:
 
 ```bash
@@ -101,4 +99,36 @@ athena.py SUSYTools/minimalExampleJobOptions_mc.py
 
 which is the athena-friendly equivalent of the `SUSYToolsTester` code above for running on MC.  You can also change "mc" to "data" or "atlfast" to run on data or fast simulation if you would prefer.
 
-------------------------------------
+------------------------------------------------------------------------
+For expert only: Update the SUSYTools reference files for the CI unit test.
+------------------------------------------------------------------------
+
+1) Contact atlas-phys-susy-bgforum-conveners@cern.ch
+2) If they agree, proceed with:
+```bash
+cd src/athena
+git atlas addpkg SUSYTools (or any other additional packages)
+cd ../../build
+cmake ../athena/Projects/WorkDir
+make -j
+source x86_64-centos7-gcc11-opt/setup.sh
+ctest 
+```
+or
+```bash
+ctest -R SUSYTools_ut_SUSYToolsTester_data_ctest
+ctest -R SUSYTools_ut_SUSYToolsTester_data_Run3_ctest
+ctest -R SUSYTools_ut_SUSYToolsTester_mc_ctest
+ctest -R SUSYTools_ut_SUSYToolsTester_mc_Run3_ctest
+```
+3) Before copying the files, check that all the changes are expected.
+```bash
+cd $WorkDir_DIR/../PhysicsAnalysis/SUSYPhys/SUSYTools/CMakeFiles/unitTestRun/
+cp ut_SUSYToolsTester_data.log-todiff $WorkDir_DIR/../../src/athena/PhysicsAnalysis/SUSYPhys/SUSYTools/share/ut_SUSYToolsTester_data.ref
+cp ut_SUSYToolsTester_data_Run3.log-todiff $WorkDir_DIR/../../src/athena/PhysicsAnalysis/SUSYPhys/SUSYTools/share/ut_SUSYToolsTester_data_Run3.ref
+cp ut_SUSYToolsTester_mc.log-todiff $WorkDir_DIR/../../src/athena/PhysicsAnalysis/SUSYPhys/SUSYTools/share/ut_SUSYToolsTester_mc.ref
+cp ut_SUSYToolsTester_mc_Run3.log-todiff $WorkDir_DIR/../../src/athena/PhysicsAnalysis/SUSYPhys/SUSYTools/share/ut_SUSYToolsTester_mc_Run3.ref
+cd $WorkDir_DIR/../../src/athena/PhysicsAnalysis/SUSYPhys/SUSYTools/share/
+git add ut_SUSYToolsTester*
+```
+Please tag the SUSY bgforum conveners in the athena MR.

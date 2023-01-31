@@ -1,15 +1,18 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
-# Physics_pp_run4_v1.py menu for Phase-II development (to be kept empty for now)
+# Physics_pp_run4_v1.py menu for Phase-II development
+# contains some for the Run-3 (2022) primaries
+# as well as chain from the TDR studies
+# (https://gitlab.cern.ch/atlas/athena/-/blob/21.0/Trigger/TriggerCommon/TriggerMenu/python/menu/MC_PhaseII.py) 
 #------------------------------------------------------------------------#
 
 # This defines the input format of the chain and it's properties with the defaults set
 # always required are: name, stream and groups
 #['name', 'chainParts'=[], 'stream', 'groups', 'merging'=[], 'topoStartFrom'=False],
 
-###temporarily commented out only
-# from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
+## needs to be commented in once chains are moved to this menu
+#from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp # only temporarily commented!
 from .SignatureDicts import ChainStore
 
 PhysicsStream='Main'
@@ -93,13 +96,13 @@ def setupMenu():
 
     chains['Egamma'] = []
 
-    chains['MET'] = []
+    chains['Tau'] = []
 
     chains['Jet'] = []
 
     chains['Bjet'] = []
 
-    chains['Tau'] = []
+    chains['MET'] = []
 
     chains['Bphysics'] = []
 

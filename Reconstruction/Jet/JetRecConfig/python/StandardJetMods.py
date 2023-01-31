@@ -99,6 +99,9 @@ try:
                                       TimingCuts = [5,10],
                                       Calculations = ["LArQuality", "N90Constituents", "FracSamplingMax",  "NegativeE", "Timing", "HECQuality", "Centroid", "AverageLArQF", "BchCorrCell"],JetContainer = _jetname),
 
+        N90 =             JetModifier("JetCaloQualityTool", "n90",
+                                      Calculations = ["N90Constituents"],JetContainer = _jetname),
+
         ConstitFourMom =  JetModifier("JetConstitFourMomTool", "constitfourmom_basename",
                                       createfn=JetMomentToolsConfig.getConstitFourMomTool,),
         EMScaleMom =      JetModifier("JetEMScaleMomTool", "emscalemom_basename",

@@ -147,7 +147,7 @@ namespace InDet {
       ATH_MSG_DEBUG("Segment has no fit quality ! Discard...");
       return nullptr;
     }
-    const Trk::FitQuality* fq = tS.fitQuality()->clone();
+    auto fq = tS.fitQuality()->uniqueClone();
 
     //
     // Get the track segment information about the initial track parameters
@@ -169,8 +169,6 @@ namespace InDet {
     } else {
       ATH_MSG_DEBUG("Could not get initial TRT segment parameters! ");
       // clean up
-      delete fq;
-      fq = nullptr;
       return nullptr;
     }
 
@@ -202,8 +200,6 @@ namespace InDet {
         ntsos.clear();
         delete segPar;
         segPar = nullptr;
-        delete fq;
-        fq = nullptr;
         return nullptr;
       }
 
@@ -212,7 +208,7 @@ namespace InDet {
         typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
       par_tsos = new Trk::TrackStateOnSurface(
-        nullptr, std::move(perParm), nullptr, nullptr, typePattern);
+        nullptr, std::move(perParm), nullptr, typePattern);
       // push new TSOS into the list
       ntsos.push_back(par_tsos);
     }
@@ -337,7 +333,7 @@ namespace InDet {
 
     // create new track candidate
     if (!m_doRefit) {
-      return new Trk::Track(info, std::move(ntsos), fq);
+      return new Trk::Track(info, std::move(ntsos), std::move(fq));
     } else {
       //
       // ----------------------------- this is a horrible hack to make the
@@ -390,16 +386,16 @@ namespace InDet {
         float zmin = points.empty() ? 0 : points.begin()->first, zmax = 0;
         // loop over all points
 
-        for (unsigned int i = 0; i < points.size(); i++) {
-          sx += points[i].first;
-          sy += points[i].second;
-          sxy += points[i].first * points[i].second;
-          sxx += points[i].first * points[i].first;
-          if (fabs(points[i].first) > fabs(zmax)) {
-            zmax = points[i].first;
+        for (auto & point : points) {
+          sx += point.first;
+          sy += point.second;
+          sxy += point.first * point.second;
+          sxx += point.first * point.first;
+          if (std::abs(point.first) > std::abs(zmax)) {
+            zmax = point.first;
           }
-          if (fabs(points[i].first) < fabs(zmin)) {
-            zmin = points[i].first;
+          if (std::abs(point.first) < std::abs(zmin)) {
+            zmin = point.first;
           }
         }
 
@@ -639,17 +635,15 @@ namespace InDet {
         typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
       Trk::TrackStateOnSurface* seg_tsos = new Trk::TrackStateOnSurface(
-        nullptr, std::move(per), nullptr, nullptr, typePattern);
+        nullptr, std::move(per), nullptr, typePattern);
       ntsos.insert(ntsos.begin(), seg_tsos);
-
-      ATH_MSG_VERBOSE("Constructed perigee at input to fit : " << (*per));
 
       //
       // ------------------------------------------------------- now refit the
       // track
       //
 
-      Trk::Track newTrack (info, std::move(ntsos), fq);
+      Trk::Track newTrack (info, std::move(ntsos), std::move(fq));
       Trk::Track* fitTrack =
         m_fitterTool->fit(ctx,newTrack, true, Trk::nonInteracting).release();
 
@@ -855,7 +849,6 @@ namespace InDet {
     ATH_MSG_DEBUG ("Add track to the scoring multimap...");
     if (m_trackSummaryTool.isEnabled()) {
        m_trackSummaryTool->computeAndReplaceTrackSummary(*trk,
-                                                         nullptr,
                                                          m_suppressHoleSearch);
     }
 

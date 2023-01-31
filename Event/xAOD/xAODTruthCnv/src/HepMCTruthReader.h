@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HEPMCTRUTHREADER_H
@@ -32,9 +32,9 @@ private:
   /// The keys for the input xAOD truth containers
   std::string m_hepMCContainerName;
 
-  void printEvent(const HepMC::GenEvent*);
-  void printVertex(HepMC::ConstGenVertexPtr);
-  void printParticle(HepMC::ConstGenParticlePtr);
+  static void printEvent(const HepMC::GenEvent*);
+  static void printVertex(const HepMC::ConstGenVertexPtr&);
+  static void printParticle(const HepMC::ConstGenParticlePtr&);
 
 }; // class HepMCTruthReader
 

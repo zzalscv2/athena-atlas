@@ -71,10 +71,6 @@ StatusCode BPhysBGammaFinder::finalize() {
 
 StatusCode BPhysBGammaFinder::addBranches() const {
 
-  int nTrackPairs_Selected = 0;
-  int nConv_VertexFit = 0;
-  int nConv_Selected = 0;
-
   std::vector<const xAOD::Vertex*> BVertices;
   BVertices.clear();
   std::vector<const xAOD::TrackParticle*> BVertexTracks;
@@ -185,8 +181,6 @@ StatusCode BPhysBGammaFinder::addBranches() const {
           Amg::Vector3D startingPoint = m_vertexEstimator->getCirclesIntersectionPoint(&trackPerigee1, &trackPerigee2, sflag, errorcode);
           if (errorcode != 0) startingPoint = Amg::Vector3D::Zero(3);
 
-          nTrackPairs_Selected++;
-
           std::vector<float> RefTrackPx, RefTrackPy, RefTrackPz, RefTrackE;
           std::vector<float> OrigTrackPx, OrigTrackPy, OrigTrackPz, OrigTrackE;
 
@@ -217,10 +211,7 @@ StatusCode BPhysBGammaFinder::addBranches() const {
             convVertexCandidate->addTrackAtVertex(newLink1);
             convVertexCandidate->addTrackAtVertex(newLink2);
 
-            nConv_VertexFit++;
-
             std::vector<Amg::Vector3D> positionList;
-            nConv_Selected++;
 
             //Get photon momentum 3-vector
             Amg::Vector3D momentum = m_v0Tools->V0Momentum(convVertexCandidate);

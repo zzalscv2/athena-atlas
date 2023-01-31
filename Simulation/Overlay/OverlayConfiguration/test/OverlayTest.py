@@ -5,13 +5,13 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """
 import sys
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
 from Digitization.DigitizationSteering import DigitizationMessageSvcCfg
 from OverlayConfiguration.OverlaySteering import OverlayMainCfg
 from OverlayConfiguration.OverlayTestHelpers import \
     CommonTestArgumentParser, OverlayJobOptsDumperCfg, \
-    defaultTestFlags, postprocessAndLockFlags, printAndRun
+    overlayTestFlags, postprocessAndLockFlags, printAndRun
 
 # Argument parsing
 parser = CommonTestArgumentParser("OverlayTest.py")
@@ -39,37 +39,37 @@ if args.profile:
     print("Profiling...")
     print()
 
-ConfigFlags.Scheduler.AutoLoadUnmetDependencies = False
+flags = initConfigFlags()
+flags.Scheduler.AutoLoadUnmetDependencies = False
 if args.dependencies:
-    ConfigFlags.Input.FailOnUnknownCollections = True
+    flags.Input.FailOnUnknownCollections = True
+    flags.Scheduler.CheckOutputUsage = True
     print("Checking dependencies...")
     print()
 
 # Configure
-defaultTestFlags(ConfigFlags, args)
-postprocessAndLockFlags(ConfigFlags, args)
+overlayTestFlags(flags, args)
+postprocessAndLockFlags(flags, args)
 
 # Construct our accumulator to run
-acc = OverlayMainCfg(ConfigFlags)
+acc = OverlayMainCfg(flags)
 if args.profile:
     from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
-    acc.merge(VTuneProfilerServiceCfg(ConfigFlags))
+    acc.merge(VTuneProfilerServiceCfg(flags))
 if args.dump:
-    acc.merge(OverlayJobOptsDumperCfg(ConfigFlags))
-acc.merge(DigitizationMessageSvcCfg(ConfigFlags))
+    acc.merge(OverlayJobOptsDumperCfg(flags))
+acc.merge(DigitizationMessageSvcCfg(flags))
+if flags.Overlay.DataOverlay:
+    from OverlayConfiguration.DataOverlayConditions import PPTestCfg
+    acc.merge(PPTestCfg(flags))
 
 # Count algorithm misses
-if ConfigFlags.Concurrency.NumThreads > 0:
+if flags.Concurrency.NumThreads > 0:
     acc.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True
-
-# Dependency check
-if args.dependencies:
-    acc.getEventAlgo("OutputStreamRDO").ExtraInputs += [tuple(l.split('#')) for l in acc.getEventAlgo("OutputStreamRDO").ItemList if '*' not in l and 'Aux' not in l]
-    acc.getService("AthenaHiveEventLoopMgr").DependencyCheck = True
 
 # dump pickle
 with open("ConfigOverlay.pkl", "wb") as f:
     acc.store(f)
 
 # Print and run
-sys.exit(printAndRun(acc, ConfigFlags, args))
+sys.exit(printAndRun(acc, flags, args))

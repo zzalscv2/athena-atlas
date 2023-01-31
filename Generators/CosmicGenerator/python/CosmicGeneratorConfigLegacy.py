@@ -158,9 +158,6 @@ def getInput_GenericCosmicGenerator(name="GenericCosmicGenerator", **kwargs):
     from AthenaCommon.AppMgr import ServiceMgr
     from PartPropSvc.PartPropSvcConf import PartPropSvc
     ServiceMgr += PartPropSvc()
-    if not simFlags.RandomSeedList.checkForExistingSeed( "COSMICS"):
-        simFlags.RandomSeedList.addSeed( "COSMICS", 2040160768, 443921183 )
-    kwargs.setdefault('AtRndmGenSvc', simFlags.RandomSvc.get_Value())
 
     from CosmicGenerator.CosmicGeneratorConfigLegacy import CavernPropertyCalculator
     theCavern = CavernPropertyCalculator()
@@ -210,6 +207,10 @@ def getInput_GenericCosmicGenerator(name="GenericCosmicGenerator", **kwargs):
     if simFlags.CosmicPtSlice.statusOn and simFlags.CosmicPtSlice() != 'NONE':
         print ("Configuring cosmic pT slice: %s" % simFlags.CosmicPtSlice.get_Value())
         theCavern.reconfigureCavernGeometry()
+
+    # Random seeding
+    kwargs.setdefault("Dsid", simFlags.RunNumber.get_Value()) # Could (should?) set this independently of the RunNumber
+    #kwargs.setdefault("RandomSeed", simFlags.RandomSeedOffset.get_Value()) # leaving commented out to allow agreement with CA-based config
 
     from AthenaCommon import CfgMgr
     algorithm = CfgMgr.CosmicGenerator(**kwargs)

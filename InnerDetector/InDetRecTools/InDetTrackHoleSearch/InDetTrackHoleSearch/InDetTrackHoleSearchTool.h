@@ -12,6 +12,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/EventContext.h"
+#include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkToolInterfaces/ITrackHoleSearchTool.h"
 #include "TrkToolInterfaces/IBoundaryCheckTool.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
@@ -26,8 +27,7 @@ class AtlasID;
 namespace InDet {class IInDetTestPixelLayerTool; }
 class IGeoModelSvc;
 
-namespace Trk { class RIO_OnTrack; class TrackStateOnSurface; class Track;}
-namespace Trk { class IExtrapolator;}
+namespace Trk { class RIO_OnTrack; class TrackStateOnSurface; class Track; }
 
 namespace InDetDD { class SiDetectorElement; }
 

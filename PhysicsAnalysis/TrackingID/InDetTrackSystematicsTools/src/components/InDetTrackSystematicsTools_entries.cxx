@@ -6,6 +6,7 @@
 #include "InDetTrackSystematicsTools/InclusiveTrackFilterTool.h"
 
 #include "../InDetTrackSmearingToolTester.h"
+#include "../TrackSystematicsAlg.h"
 
 DECLARE_COMPONENT( InDet::InDetTrackSmearingTool )
 DECLARE_COMPONENT( InDet::InDetTrackTruthOriginTool )
@@ -14,4 +15,5 @@ DECLARE_COMPONENT( InDet::InDetTrackBiasingTool )
 DECLARE_COMPONENT( InDet::JetTrackFilterTool )
 DECLARE_COMPONENT( InDet::InclusiveTrackFilterTool )
 DECLARE_COMPONENT( InDet::InDetTrackSmearingToolTester )
+DECLARE_COMPONENT( InDet::TrackSystematicsAlg )
 

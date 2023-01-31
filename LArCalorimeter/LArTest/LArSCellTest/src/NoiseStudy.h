@@ -27,6 +27,8 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "StoreGate/ReadCondHandleKey.h"
+#include "CaloDetDescr/CaloDetDescrManager.h"
 class TFile;
 class TH1I;
 class TH1F;
@@ -85,6 +87,8 @@ private :
         { this, "TruthInfoKey", "TruthParticles",
                 "SG key for the input TruthParticles container"};
 
+       SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_caloSuperCellMgrKey{
+	 this,"CaloSuperCellDetDescrManager","CaloSuperCellDetDescrManager","SG key of the resulting CaloSuperCellDetDescrManager"};
 
         const CaloCell_SuperCell_ID*     m_schelper;
 

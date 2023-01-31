@@ -37,11 +37,13 @@ using namespace ST;
 #include "EgammaAnalysisInterfaces/IEGammaAmbiguityTool.h"
 #include "EgammaAnalysisInterfaces/IAsgPhotonEfficiencyCorrectionTool.h"
 #include "EgammaAnalysisInterfaces/IAsgPhotonIsEMSelector.h"
+#include "EgammaAnalysisInterfaces/IElectronLRTOverlapRemovalTool.h"
 
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
 #include "MuonAnalysisInterfaces/IMuonCalibrationAndSmearingTool.h"
 #include "MuonAnalysisInterfaces/IMuonEfficiencyScaleFactors.h"
 #include "MuonAnalysisInterfaces/IMuonTriggerScaleFactors.h"
+#include "MuonAnalysisInterfaces/IMuonLRTOverlapRemovalTool.h"
 
 #include "TauAnalysisTools/ITauSelectionTool.h"
 #include "TauAnalysisTools/ITauSmearingTool.h"
@@ -80,7 +82,7 @@ using namespace ST;
     std::vector< std::string > corrFileNameList = {CORRFILE}; \
     ATH_CHECK( TOOLHANDLE.setProperty("CorrectionFileNameList", corrFileNameList) ); \
     if(!isData())                                                        \
-      ATH_CHECK (TOOLHANDLE.setProperty("ForceDataType", (int) data_type) ); \
+      ATH_CHECK (TOOLHANDLE.setProperty("ForceDataType", static_cast<int>(data_type))); \
     ATH_CHECK( TOOLHANDLE.setProperty("CorrelationModel", m_EG_corrModel) ); \
     ATH_CHECK( TOOLHANDLE.setProperty("OutputLevel", this->msg().level()) ); \
     ATH_CHECK( TOOLHANDLE.initialize() );                                \
@@ -92,7 +94,7 @@ using namespace ST;
     ATH_MSG_INFO( "Will now set key \"" << KEYNAME << "\" to value \"" << KEY << "\" when configuring an AsgElectronEfficiencyCorrectionTool" ); \
     ATH_CHECK( TOOLHANDLE.setProperty(KEYNAME, KEY) );                  \
     if(!isData())                                                        \
-      ATH_CHECK (TOOLHANDLE.setProperty("ForceDataType", (int) data_type) ); \
+      ATH_CHECK (TOOLHANDLE.setProperty("ForceDataType", static_cast<int>(data_type))); \
     ATH_CHECK( TOOLHANDLE.setProperty("CorrelationModel", m_EG_corrModel) ); \
     ATH_CHECK( TOOLHANDLE.setProperty("OutputLevel", this->msg().level()) ); \
     ATH_CHECK( TOOLHANDLE.initialize() );                                \
@@ -213,19 +215,15 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   if (m_slices["fjet"]) {
     //same for fat groomed jets
     fatjetcoll = m_fatJets;
-    if (fatjetcoll.size()>3) fatjetcoll = fatjetcoll.substr(0,fatjetcoll.size()-4); //remove "Jets" suffix
+    if (fatjetcoll.size()>3)fatjetcoll.erase(fatjetcoll.size()-4,4); 
     if (!m_jetFatCalibTool.isUserConfigured() && !m_fatJets.empty()) {
       toolName = "JetFatCalibTool_" + m_fatJets;
       m_jetFatCalibTool.setTypeAndName("JetCalibrationTool/"+toolName);
   
       std::string jesConfigFat = m_jesConfigFat;
       std::string jesCalibSeqFat = m_jesCalibSeqFat;
-      // add Insitu if data
-      if (isData()) {
-        jesConfigFat = m_jesConfigFatData;
-        jesCalibSeqFat += "_Insitu_InsituCombinedMass";
-      }
-  
+      // add Insitu if data (currently missing)
+      
       // now instantiate the tool
       ATH_CHECK( m_jetFatCalibTool.setProperty("JetCollection", fatjetcoll) );
       ATH_CHECK( m_jetFatCalibTool.setProperty("ConfigFile", jesConfigFat) );
@@ -275,9 +273,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_TopTaggerTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_TopTaggerTool.retrieve() );
     } else if (m_TopTaggerTool.isUserConfigured()) ATH_CHECK(m_TopTaggerTool.retrieve());
-  }
 
-  if (m_slices["jet"] || m_slices["fjet"]) {
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise JetTruthLabelingTool: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2019LargeR#AnalysisBase_21_2_114_and_newer
     if(!isData()){
@@ -296,6 +292,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_jetTruthLabelingTool.retrieve() );
     } else if (m_jetTruthLabelingTool.isUserConfigured()) ATH_CHECK(m_jetTruthLabelingTool.retrieve());
 
+  }
+
+  if (m_slices["jet"] || m_slices["fjet"]) {
+    
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise jet uncertainty tool
@@ -357,9 +357,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   }
 
   if (m_slices["fjet"]) {
-    ATH_MSG_INFO("Set up FatJet Uncertainty tool if using...");
-    // Initialise jet uncertainty tool for fat jets
-    // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2019LargeR
+    ATH_MSG_INFO("Won't initialise jet uncertainty tool for fat jets until we get rec for UFO");
+    // Won't initialise jet uncertainty tool for fat jets until we get rec for UFO
+    /*
     if (!m_fatjetUncertaintiesTool.isUserConfigured() && !m_fatJets.empty() && !m_fatJetUncConfig.empty()) {
 
       toolName = "JetUncertaintiesTool_" + m_fatJets;
@@ -393,10 +393,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_fatjetUncertaintiesTool.retrieve() );
     } else if (m_fatjetUncertaintiesTool.isUserConfigured()) ATH_CHECK(m_fatjetUncertaintiesTool.retrieve());
-
-    ATH_MSG_INFO("Set up FatJet tagger Uncertainty tool if using...");
-    // Initialise jet uncertainty tool for fat jets
-    // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2019LargeR
+    */
+    ATH_MSG_INFO(" Won't initialise Wtagger uncertainty tool for fat jets until we get rec for UFO");
+    // Won't initialise Wtagger uncertainty tool for fat jets until we get rec for UFO
+    /*
     if (!m_WTagjetUncertaintiesTool.isUserConfigured() && !m_fatJets.empty() && !m_WtagConfig.empty() && !m_WTagUncConfig.empty()) {
       
       toolName = "WTagJetUncertaintiesTool_" + m_fatJets;
@@ -408,7 +408,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_WTagjetUncertaintiesTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_WTagjetUncertaintiesTool.retrieve() );
     } else if (m_WTagjetUncertaintiesTool.isUserConfigured()) ATH_CHECK(m_WTagjetUncertaintiesTool.retrieve());
-    
+    */
+    ATH_MSG_INFO(" Won't initialise Ztagger uncertainty tool for fat jets until we get rec for UFO");
+    // Won't initialise Ztagger uncertainty tool for fat jets until we get rec for UFO
+    /*
     if (!m_ZTagjetUncertaintiesTool.isUserConfigured() && !m_fatJets.empty() && !m_ZtagConfig.empty() && !m_ZTagUncConfig.empty()) {
       
       toolName = "ZTagJetUncertaintiesTool_" + m_fatJets;
@@ -420,7 +423,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_ZTagjetUncertaintiesTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_ZTagjetUncertaintiesTool.retrieve() );
     } else if (m_ZTagjetUncertaintiesTool.isUserConfigured()) ATH_CHECK(m_ZTagjetUncertaintiesTool.retrieve());
-  
+    */
+    ATH_MSG_INFO(" Won't initialise top-tagger uncertainty tool for fat jets until we get rec for UFO");
+    // Won't initialise top-tagger uncertainty tool for fat jets until we get rec for UFO
+    /*
     if (!m_TopTagjetUncertaintiesTool.isUserConfigured() && !m_fatJets.empty() && !m_ToptagConfig.empty() && !m_TopTagUncConfig.empty()) {
      
       toolName = "TopTagJetUncertaintiesTool_" + m_fatJets;
@@ -432,7 +438,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_TopTagjetUncertaintiesTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_TopTagjetUncertaintiesTool.retrieve() );
     } else if (m_TopTagjetUncertaintiesTool.isUserConfigured()) ATH_CHECK(m_TopTagjetUncertaintiesTool.retrieve());
-
+    */
   }
 
 
@@ -452,18 +458,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_jetCleaningTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_jetCleaningTool.retrieve() );
     } else if (m_jetCleaningTool.isUserConfigured()) ATH_CHECK( m_jetCleaningTool.retrieve() );
-
-
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    // Initialise JVT tool
-
-    if (!m_jetJvtUpdateTool.isUserConfigured()) {
-      toolName = "JetVertexTaggerTool";
-      m_jetJvtUpdateTool.setTypeAndName("JetVertexTaggerTool/"+toolName);
-      ATH_CHECK( m_jetJvtUpdateTool.setProperty("JetContainer", jetcoll ) );
-      ATH_CHECK( m_jetJvtUpdateTool.setProperty("OutputLevel", this->msg().level()) );
-      ATH_CHECK( m_jetJvtUpdateTool.retrieve() );
-    } else  ATH_CHECK( m_jetJvtUpdateTool.retrieve() );
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -489,27 +483,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("ScaleFactorDecorationName", "jvtscalefact") ); // set decoration name
       ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("SFFile", m_JvtConfig_SFFile) );
       ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("TruthJetContainerName", m_defaultTruthJets ) );
+      ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("TaggingAlg", CP::JvtTagger::NNJvt) );
       ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_jetJvtEfficiencyTool.retrieve() );
     } else if (m_jetJvtEfficiencyTool.isUserConfigured()) ATH_CHECK( m_jetJvtEfficiencyTool.retrieve() );
-
-
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    // Initialise FwdJVT tool
-
-    if (!m_jetFwdJvtTool.isUserConfigured()) {
-      toolName = m_doFwdJVT ? m_metJetSelection+"_fJVT" : m_metJetSelection+"_NOfJVT";
-      m_jetFwdJvtTool.setTypeAndName("JetForwardJvtTool/FJVTTool_"+toolName);
-
-      ATH_CHECK( m_jetFwdJvtTool.setProperty("OutputDec", "passFJvt") ); //Output decoration
-      ATH_CHECK( m_jetFwdJvtTool.setProperty("JetContainer", jetcoll ) );
-      ATH_CHECK( m_jetFwdJvtTool.setProperty("UseTightOP", (m_fJvtWP=="Tight")) );
-      ATH_CHECK( m_jetFwdJvtTool.setProperty("ForwardMaxPt", m_fJvtPtMax) ); // Max Pt to define fwdJets for JVT
-      ATH_CHECK( m_jetFwdJvtTool.setProperty("EtaThresh", m_fJvtEtaMin) );   // Eta dividing central from forward jets
-      ATH_CHECK( m_jetFwdJvtTool.setProperty("RecalculateFjvt", m_fJvtRecalculate) ); // athena!47481
-      ATH_CHECK( m_jetFwdJvtTool.setProperty("OutputLevel", this->msg().level()) );
-      ATH_CHECK( m_jetFwdJvtTool.retrieve() );
-    } else ATH_CHECK( m_jetFwdJvtTool.retrieve() );
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -528,13 +505,12 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         return StatusCode::FAILURE;
       }
 
-      ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("JetfJvtMomentName", "passFJvt") );
       ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("TruthJetContainerName", m_defaultTruthJets ) );
       ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("ScaleFactorDecorationName", "fJVTSF") ); // set decoration name
       ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("WorkingPoint", m_fJvtWP) );
       ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("MaxPtForJvt", m_fJvtPtMax) );
-      ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("UseMuSFFormat", true) );
       ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("SFFile", m_fJvtConfig_SFFile) );
+      ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("TaggingAlg", CP::JvtTagger::fJvt) );
       ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_jetFwdJvtEfficiencyTool.retrieve() );
     } else  ATH_CHECK( m_jetFwdJvtEfficiencyTool.retrieve() );
@@ -547,16 +523,16 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   
     std::string muQualBaseline = "";
     switch (m_muIdBaseline) {
-    case (int)xAOD::Muon::Quality(xAOD::Muon::VeryLoose):  muQualBaseline = "VeryLoose";
+    case xAOD::Muon::VeryLoose: muQualBaseline = "VeryLoose";
       ATH_MSG_WARNING("No muon scale factors are available for VeryLoose working point.");
       break;
-    case (int)xAOD::Muon::Quality(xAOD::Muon::Loose):  muQualBaseline = "Loose";  break;
-    case (int)xAOD::Muon::Quality(xAOD::Muon::Medium): muQualBaseline = "Medium"; break;
-    case (int)xAOD::Muon::Quality(xAOD::Muon::Tight):  muQualBaseline = "Tight";  break;
-    case 4:  muQualBaseline = "HighPt";  break;
-    case 5:  muQualBaseline = "LowPt";  break;
-    case 6:  muQualBaseline = "LowPtMVA"; break;
-    case 7:  muQualBaseline = "HighPt3Layers"; break;
+    case xAOD::Muon::Loose:     muQualBaseline = "Loose";  break;
+    case xAOD::Muon::Medium:    muQualBaseline = "Medium"; break;
+    case xAOD::Muon::Tight:     muQualBaseline = "Tight";  break;
+    case 4:                     muQualBaseline = "HighPt";  break;
+    case 5:                     muQualBaseline = "LowPt";  break;
+    case 6:                     muQualBaseline = "LowPtMVA"; break;
+    case 7:                     muQualBaseline = "HighPt3Layers"; break;
     default:
       ATH_MSG_ERROR("Invalid muon working point provided: " << m_muIdBaseline << ". Cannot initialise!");
       return StatusCode::FAILURE;
@@ -569,7 +545,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   
     if (!m_muonCalibTool.isUserConfigured()) {
       m_muonCalibTool.setTypeAndName("CP::MuonCalibTool/ST_MuonCalibrationTool");
-      if (m_isRun3) ATH_CHECK( m_muonSelectionTool.setProperty("IsRun3Geo", true ));
+      if (m_isRun3) ATH_CHECK( m_muonCalibTool.setProperty("IsRun3Geo", true ));
       ATH_CHECK( m_muonCalibTool.setProperty("calibMode", m_muCalibrationMode) );
       ATH_CHECK( m_muonCalibTool.setProperty("OutputLevel", this->msg().level()) );
       int IdBaselineInt = m_muIdBaseline;
@@ -609,16 +585,16 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   
     std::string muQual = "";
     switch (m_muId) {
-    case (int)xAOD::Muon::Quality(xAOD::Muon::VeryLoose):  muQual = "VeryLoose";
+    case xAOD::Muon::VeryLoose: muQual = "VeryLoose";
       ATH_MSG_WARNING("No muon scale factors are available for VeryLoose working point.");
       break;
-    case (int)xAOD::Muon::Quality(xAOD::Muon::Loose):  muQual = "Loose";  break;
-    case (int)xAOD::Muon::Quality(xAOD::Muon::Medium): muQual = "Medium"; break;
-    case (int)xAOD::Muon::Quality(xAOD::Muon::Tight):  muQual = "Tight";  break;
-    case 4:  muQual = "HighPt";  break;
-    case 5:  muQual = "LowPt";  break;
-    case 6:  muQual = "LowPtMVA"; break;
-    case 7:  muQual = "HighPt3Layers"; break;
+    case xAOD::Muon::Loose:     muQual = "Loose";  break;
+    case xAOD::Muon::Medium:    muQual = "Medium"; break;
+    case xAOD::Muon::Tight:     muQual = "Tight";  break;
+    case 4:                     muQual = "HighPt";  break;
+    case 5:                     muQual = "LowPt";  break;
+    case 6:                     muQual = "LowPtMVA"; break;
+    case 7:                     muQual = "HighPt3Layers"; break;
     default:
       ATH_MSG_ERROR("Invalid muon working point provided: " << m_muId << ". Cannot initialise!");
       return StatusCode::FAILURE;
@@ -653,6 +629,15 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_muonSelectionHighPtTool.retrieve() );
     } else  ATH_CHECK( m_muonSelectionHighPtTool.retrieve() );
     
+
+    //////////////
+    // Initialise prompt/LRT muon OR tool 
+    if (!m_muonLRTORTool.isUserConfigured()) {
+        toolName = "MuonLRTOverlapRemovalTool";
+        m_muonLRTORTool.setTypeAndName("CP::MuonLRTOverlapRemovalTool/"+toolName);
+        ATH_CHECK( m_muonLRTORTool.setProperty("overlapStrategy", CP::IMuonLRTOverlapRemovalTool::defaultStrategy) );
+        ATH_CHECK( m_muonLRTORTool.retrieve() );
+    } else ATH_CHECK( m_muonLRTORTool.retrieve() );
   
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise muon efficiency tools
@@ -660,7 +645,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       toolName = "MuonEfficiencyScaleFactors_" + muQual;
       m_muonEfficiencySFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("WorkingPoint", muQual) );
-      if (m_isRun3) ATH_CHECK( m_muonEfficiencySFTool.setProperty("CalibrationRelease", "220817_Preliminary_r22run3") );
+      if (m_isRun3) {
+        ATH_CHECK( m_muonEfficiencySFTool.setProperty("CalibrationRelease", "220817_Preliminary_r22run3") );
+        ATH_CHECK( m_muonEfficiencySFTool.setProperty("LowPtThreshold", 10) ); //very preliminary Run3 rec! to be updated
+      } 
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonEfficiencySFTool.retrieve() );
     } else  ATH_CHECK( m_muonEfficiencySFTool.retrieve() );
@@ -670,7 +658,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       toolName = "MuonEfficiencyScaleFactorsBMHighPt_" + muQual;
       m_muonEfficiencyBMHighPtSFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("WorkingPoint", "BadMuonVeto_HighPt") );
-      if (m_isRun3) ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("CalibrationRelease", "220817_Preliminary_r22run3") );
+      if (m_isRun3) {
+        ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("CalibrationRelease", "220817_Preliminary_r22run3") );
+        ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("LowPtThreshold", 10) ); //very preliminary Run3 rec! to be updated
+      } 
       ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.retrieve() );
     } else  ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.retrieve() );
@@ -717,7 +708,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   
       m_muonIsolationSFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonIsolationSFTool.setProperty("WorkingPoint", tmp_muIso_WP + "Iso") );
-      if (m_isRun3) ATH_CHECK( m_muonIsolationSFTool.setProperty("CalibrationRelease", "220817_Preliminary_r22run3") );
+      if (m_isRun3) {
+        ATH_CHECK( m_muonIsolationSFTool.setProperty("CalibrationRelease", "220817_Preliminary_r22run3") );
+        ATH_CHECK( m_muonIsolationSFTool.setProperty("LowPtThreshold", 10) ); //very preliminary Run3 rec! to be updated
+      } 
       ATH_CHECK( m_muonIsolationSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonIsolationSFTool.retrieve() );
   
@@ -827,6 +821,15 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     } else ATH_CHECK( m_elecSelLikelihoodBaseline.retrieve() );
   }
 
+    //////////////
+    // Initialise prompt/LRT electron OR tool 
+    if (!m_elecLRTORTool.isUserConfigured()) {
+        toolName = "ElectronLRTOverlapRemovalTool";
+        m_elecLRTORTool.setTypeAndName("CP::ElectronLRTOverlapRemovalTool/"+toolName);
+        ATH_MSG_DEBUG("Setting ElectronLRTOverlapRemovalTool strategy to "<<m_eleLRT_strat);
+        ATH_CHECK( m_elecLRTORTool.setProperty("overlapStrategy", m_eleLRT_strat) );
+        ATH_CHECK( m_elecLRTORTool.retrieve() );
+    } else ATH_CHECK( m_elecLRTORTool.retrieve() );
 
   if (m_slices["pho"]) {
     // /////////////////////////////////////////////////////////////////////////////////////////
@@ -888,7 +891,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     //-- get KEYS supported by egamma SF tools
     std::vector<std::string> eSF_keys = getElSFkeys(m_eleEffMapFilePath);
 
-    if (m_eleId == "VeryLooseLLH" || m_eleId == "LooseLLH" || m_eleId == "Loose" || m_eleId == "Medium" || m_eleId == "Tight") {
+    if (m_eleId.find("NoPix") != std::string::npos || m_eleId == "VeryLooseLLH" || m_eleId == "LooseLLH" || m_eleId == "Loose" || m_eleId == "Medium" || m_eleId == "Tight") {
       ATH_MSG_WARNING("Not configuring electron ID and trigger scale factors for " << m_eleId);
     }
     else {
@@ -957,10 +960,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
                             (EleIso.find("Tight_VarRad")!=std::string::npos)||
                             (EleIso.find("Loose_VarRad")!=std::string::npos))) {
             if (isAtlfast()) ATH_MSG_WARNING("(AsgElectronEfficiencyCorrectionTool/"+toolName+"). Your selected electron Iso WP (" + EleIso + ") don't have AFII SF. Falling back to FullSim");
-            ATH_CHECK( m_elecEfficiencySFTool_iso.setProperty("ForceDataType", (int) PATCore::ParticleDataType::Full) );
+            ATH_CHECK( m_elecEfficiencySFTool_iso.setProperty("ForceDataType", static_cast<int>(PATCore::ParticleDataType::Full)));
           }
           else if (!isData()){
-            ATH_CHECK( m_elecEfficiencySFTool_iso.setProperty("ForceDataType", (int) data_type) );
+            ATH_CHECK( m_elecEfficiencySFTool_iso.setProperty("ForceDataType", static_cast<int>(data_type)));
           }
           ATH_CHECK( m_elecEfficiencySFTool_iso.setProperty("CorrelationModel", m_EG_corrModel) );
           ATH_CHECK( m_elecEfficiencySFTool_iso.setProperty("OutputLevel", this->msg().level()) );
@@ -1307,6 +1310,11 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   
     if (!m_tauSmearingTool.isUserConfigured()) {
       m_tauSmearingTool.setTypeAndName("TauAnalysisTools::TauSmearingTool/TauSmearingTool");
+      ATH_CHECK( m_tauSmearingTool.setProperty("RecommendationTag", m_tauSmearingToolRecommendationTag) );
+      if (m_isRun3){ ATH_CHECK( m_tauSmearingTool.setProperty("Campaign", "mc21") );}
+      else         { ATH_CHECK( m_tauSmearingTool.setProperty("Campaign", "mc20") );}
+      ATH_CHECK( m_tauSmearingTool.setProperty("Generator", m_tauSmearingToolGenerator) );
+      ATH_CHECK( m_tauSmearingTool.setProperty("isAFII", isAtlfast()) );
       ATH_CHECK( m_tauSmearingTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_tauSmearingTool.retrieve() );
     } else ATH_CHECK( m_tauSmearingTool.retrieve() );
@@ -1496,9 +1504,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       if (m_metJetSelection.size()) {
         ATH_CHECK( m_metMaker.setProperty("JetSelection", m_metJetSelection) );
       }
-      if (m_doFwdJVT || m_metJetSelection == "Tenacious" || m_metJetSelection == "TenaciousJVT641") {
-        ATH_CHECK( m_metMaker.setProperty("JetRejectionDec", "passFJvt") );
-      }
       if (m_jetInputType == xAOD::JetInput::EMPFlow) {
         ATH_CHECK( m_metMaker.setProperty("DoPFlow", true) );
       }
@@ -1597,18 +1602,20 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   }
 
   if (!m_trigMatchingTool.isUserConfigured()) {
-    if (!m_upstreamTriggerMatching){
-      m_trigMatchingTool.setTypeAndName("Trig::MatchingTool/TrigMatchingTool");
-      ATH_CHECK( m_trigMatchingTool.setProperty("TrigDecisionTool", m_trigDecTool.getHandle()) );
-    } else {
-      if (m_isRun3) {
+    if (m_upstreamTriggerMatching){
+      m_trigMatchingTool.setTypeAndName("Trig::MatchFromCompositeTool/TrigMatchFromCompositeTool");
+      ATH_CHECK( m_trigMatchingTool.setProperty("InputPrefix", m_trigMatchingPrefix) );
+      ATH_CHECK( m_trigMatchingTool.setProperty("RemapBrokenLinks", true) );
+    } 
+    else {
+      if (m_isRun3){
         m_trigMatchingTool.setTypeAndName("Trig::R3MatchingTool/TrigR3MatchingTool");
         ATH_CHECK( m_trigMatchingTool.setProperty("ScoringTool", m_trigDRScoringTool.getHandle()) );
-      }
+        ATH_CHECK( m_trigMatchingTool.setProperty("TrigDecisionTool", m_trigDecTool.getHandle()) );
+      } 
       else {
-        m_trigMatchingTool.setTypeAndName("Trig::MatchFromCompositeTool/TrigMatchFromCompositeTool");
-        ATH_CHECK( m_trigMatchingTool.setProperty("InputPrefix", m_trigMatchingPrefix) );
-        ATH_CHECK( m_trigMatchingTool.setProperty("RemapBrokenLinks", true) );
+        m_trigMatchingTool.setTypeAndName("Trig::MatchingTool/TrigMatchingTool");
+        ATH_CHECK( m_trigMatchingTool.setProperty("TrigDecisionTool", m_trigDecTool.getHandle()) );
       }
     }
     ATH_CHECK( m_trigMatchingTool.setProperty("OutputLevel", this->msg().level()) );
@@ -1802,7 +1809,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     orFlags.boostedLeptons = (m_orDoBoostedElectron || m_orDoBoostedMuon);
     orFlags.outputPassValue = true;
     orFlags.linkOverlapObjects = m_orLinkOverlapObjects;
-    if (m_jetInputType == xAOD::JetInput::EMPFlow) orFlags.doMuPFJetOR = true;
     if (m_orDoElEl) {
       orFlags.doEleEleOR = true;
     } else orFlags.doEleEleOR = false;

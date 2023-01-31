@@ -41,6 +41,11 @@ def sTGC_DigitizationToolCfg(flags, name="sTgcDigitizationTool", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("CalibrationTool", result.popToolsAndMerge(NSWCalibToolCfg(flags)))
     kwargs.setdefault("SmearingTool", result.popToolsAndMerge(STgcCalibSmearingToolCfg(flags)))
+    # sTGC VMM configurables
+    kwargs.setdefault("deadtimeStrip", 250)
+    kwargs.setdefault("deadtimePad"  , 250)
+    kwargs.setdefault("deadtimeWire" , 250)
+    kwargs.setdefault("neighborOn", True)
     if flags.Digitization.PileUp:
         intervals = []
         if flags.Digitization.DoXingByXingPileUp:
@@ -54,6 +59,10 @@ def sTGC_DigitizationToolCfg(flags, name="sTgcDigitizationTool", **kwargs):
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
     kwargs.setdefault("doToFCorrection", True)
     kwargs.setdefault("doEfficiencyCorrection", False)
+    # Operating voltage in the sTGC in kV. Sets the gas gain from electron avalance
+    # Every 100V increase roughly doubles the total electric charge per hit
+    kwargs.setdefault("operatingHVinkV", 2.8)
+
     if 'sTGCSimHitCollection#sTGCSensitiveDetector' in flags.Input.TypedCollections:
         kwargs.setdefault("InputObjectName", "sTGCSensitiveDetector")
     else:
@@ -75,6 +84,10 @@ def sTGC_OverlayDigitizationToolCfg(flags, name="STGC_OverlayDigitizationTool", 
     acc = ComponentAccumulator()
     kwargs.setdefault("doToFCorrection", True)
     kwargs.setdefault("doEfficiencyCorrection", False)
+    # Operating voltage in the sTGC in kV. Sets the gas gain from electron avalance
+    # Every 100V increase roughly doubles the total electric charge per hit
+    kwargs.setdefault("operatingHVinkV", 2.8)
+
     kwargs.setdefault("OnlyUseContainerName", False)
     if 'sTGCSimHitCollection#sTGCSensitiveDetector' in flags.Input.SecondaryTypedCollections:
         kwargs.setdefault("InputObjectName", "sTGCSensitiveDetector")
@@ -131,8 +144,7 @@ def sTGC_OverlayDigitizationBasicCfg(flags, **kwargs):
     # Set common overlay extra inputs
     kwargs.setdefault("ExtraInputs", flags.Overlay.ExtraInputs)
 
-    TGCDigitizer = CompFactory.TGCDigitizer
-    acc.addEventAlgo(TGCDigitizer(name="STGC_OverlayDigitizer", **kwargs))
+    acc.addEventAlgo(CompFactory.sTGC_Digitizer(name="STGC_OverlayDigitizer", **kwargs))
     return acc
 
 

@@ -182,7 +182,6 @@ namespace Rec {
         return std::make_unique<Trk::TrackStateOnSurface>(
           nullptr,
           std::move(param_clone),
-          nullptr,
           std::move(materialEffects),
           pattern);
     }

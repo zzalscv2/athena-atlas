@@ -13,6 +13,7 @@
 #include "CxxUtils/procmaps.h"
 #include "boost/io/ios_state.hpp"
 #include <iomanip>
+#include <cstdint>
 #include <unistd.h>
 
 

@@ -232,12 +232,13 @@ StatusCode L1DataConsistencyChecker::consistencyCheck(const HLT::IDVec& l1Seeded
     size_t ctpCount = (ctpIt==ctpThresholdCounts.cend()) ? 0 : ctpIt->second;
     const auto tobIt = tobThresholdCounts.find(thrNameHash);
     size_t tobCount = (tobIt==tobThresholdCounts.cend()) ? 0 : tobIt->second;
+    int tobMinusCtpCount = static_cast<int>(ctpCount) - static_cast<int>(tobCount); // negative when TOBs are missing
     const std::string& thrName = m_thresholdNames.at(thrNameHash);
 
     Monitored::Scalar monThrName{"ThrName", thrName};
     Monitored::Scalar monCtpCount{"CtpCount", ctpCount};
     Monitored::Scalar monTobCount{"TobCount", tobCount};
-    Monitored::Scalar monTobMinusCtpCount{"TobMinusCtpCount", tobCount-ctpCount};
+    Monitored::Scalar monTobMinusCtpCount{"TobMinusCtpCount", tobMinusCtpCount};
     Monitored::Group{m_monTool, monThrName, monCtpCount, monTobCount, monTobMinusCtpCount};
   }
 

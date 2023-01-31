@@ -101,8 +101,6 @@ namespace Muon
   // Inline methods:
   // /////////////////////////////////////////////////////////////////
 
-
-
   inline IdentifierHash MuonCluster::collectionHash() const
   {
       return getHashAndIndex().collHash();

@@ -222,28 +222,30 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::calculate( const xAOD::Ega
   if (itr_pt!=m_pteta_bins.end() && et<itr_pt->first) {
     et=et*1.05;
   }
-  	
+
   // Check if photon in the range to get the SF
-  if(std::abs(eta2)>MAXETA) { 
+  if (std::abs(eta2) > MAXETA) {
     result.scaleFactor = 1;
     result.totalUncertainty = 1;
-    ATH_MSG_WARNING( "No correction factor provided for eta "<<eta2<<" Returning SF = 1 + / - 1");
+    ATH_MSG_DEBUG("No correction factor provided for eta "
+                  << eta2 << " Returning SF = 1 + / - 1");
     return CP::CorrectionCode::OutOfValidityRange;
   }
-  if(et<MIN_ET) { 
+  if (et < MIN_ET) {
     result.scaleFactor = 1;
     result.totalUncertainty = 1;
-    ATH_MSG_WARNING( "No correction factor provided for eT "<<et<<" Returning SF = 1 + / - 1");
+    ATH_MSG_DEBUG("No correction factor provided for eT "
+                  << et << " Returning SF = 1 + / - 1");
     return CP::CorrectionCode::OutOfValidityRange;
   }
-  if (itr_pt!=m_pteta_bins.end() && et<itr_pt->first) {
+  if (itr_pt != m_pteta_bins.end() && et < itr_pt->first) {
     result.scaleFactor = 1;
     result.totalUncertainty = 1;
-    ATH_MSG_WARNING( "No scale factor uncertainty provided for et "<<et/1e3<<"GeV Returning SF = 1 + / - 1");
+    ATH_MSG_DEBUG("No scale factor uncertainty provided for et "
+                  << et / 1e3 << "GeV Returning SF = 1 + / - 1");
     return CP::CorrectionCode::OutOfValidityRange;
   }
-  
-  
+
   // Get the run number
   const xAOD::EventInfo* eventInfo = evtStore()->retrieve< const xAOD::EventInfo> ("EventInfo");
   if(!eventInfo){
@@ -255,10 +257,12 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::calculate( const xAOD::Ega
   unsigned int runnumber = m_defaultRandomRunNumber;
   if (m_useRandomRunNumber) {
     static const SG::AuxElement::Accessor<unsigned int> randomrunnumber("RandomRunNumber");
-        if (!randomrunnumber.isAvailable(*eventInfo)) {
-          ATH_MSG_WARNING("Pileup tool not run before using PhotonEfficiencyTool! SFs do not reflect PU distribution in data");
-	  return CP::CorrectionCode::Error;
-        }
+    if (!randomrunnumber.isAvailable(*eventInfo)) {
+      ATH_MSG_WARNING(
+          "Pileup tool not run before using PhotonEfficiencyTool! SFs do not "
+          "reflect PU distribution in data");
+      return CP::CorrectionCode::Error;
+    }
         runnumber = randomrunnumber(*(eventInfo));
   }
     

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef __HIJETREC_HIUEMODULATORTOOL_H__
-#define __HIJETREC_HIUEMODULATORTOOL_H__
+#ifndef HIJETREC_HIUEMODULATORTOOL_H
+#define HIJETREC_HIUEMODULATORTOOL_H
 
 #include "HIJetRec/IHIUEModulatorTool.h"
 #include "AsgTools/AsgTool.h"
@@ -23,7 +23,6 @@ public:
   virtual float getModulation(float phi, const xAOD::HIEventShape* shape = nullptr) const override;
   virtual StatusCode setEventShapeForModulation(const xAOD::HIEventShape* shape) override;
   virtual void setHarmonics(const std::vector<unsigned int>& v) override;
-  virtual StatusCode retrieveShape() const override;
   virtual StatusCode initialize() override;
 
   virtual StatusCode getShape(const xAOD::HIEventShape* & shape) const override;

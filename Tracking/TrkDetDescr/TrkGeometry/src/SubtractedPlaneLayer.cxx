@@ -18,14 +18,12 @@
 Trk::SubtractedPlaneLayer::SubtractedPlaneLayer(
     const SubtractedPlaneSurface* subtrPlaneSurf,
     const Trk::LayerMaterialProperties& laymatprop, double thickness,
-    Trk::OverlapDescriptor* olap, int laytyp)
+    std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
     : SubtractedPlaneSurface(*subtrPlaneSurf),
-      Layer(laymatprop, thickness, olap, laytyp) {}
+      Layer(laymatprop, thickness, std::move(olap), laytyp) {}
 
 Trk::SubtractedPlaneLayer::SubtractedPlaneLayer(
-    const Trk::SubtractedPlaneLayer& play)
-
-    = default;
+    const Trk::SubtractedPlaneLayer& play) = default;
 
 Trk::SubtractedPlaneLayer::SubtractedPlaneLayer(
     const Trk::SubtractedPlaneLayer& play, const Amg::Transform3D& transf)
@@ -55,7 +53,7 @@ Trk::SubtractedPlaneLayer::surfaceRepresentation()
 
 double Trk::SubtractedPlaneLayer::preUpdateMaterialFactor(
     const Trk::TrackParameters& parm, Trk::PropDirection dir) const {
-  if (!Trk::Layer::m_layerMaterialProperties.get()) return 0.;
+  if (!Trk::Layer::m_layerMaterialProperties) return 0.;
   if (Trk::SubtractedPlaneSurface::normal().dot(
           dir * parm.momentum().normalized()) > 0.)
     return Trk::Layer::m_layerMaterialProperties->alongPreFactor();
@@ -64,7 +62,7 @@ double Trk::SubtractedPlaneLayer::preUpdateMaterialFactor(
 
 double Trk::SubtractedPlaneLayer::postUpdateMaterialFactor(
     const Trk::TrackParameters& parm, Trk::PropDirection dir) const {
-  if (!Trk::Layer::m_layerMaterialProperties.get()) return 0.;
+  if (!Trk::Layer::m_layerMaterialProperties) return 0.;
   if (Trk::SubtractedPlaneSurface::normal().dot(
           dir * parm.momentum().normalized()) > 0.)
     return Trk::Layer::m_layerMaterialProperties->alongPostFactor();

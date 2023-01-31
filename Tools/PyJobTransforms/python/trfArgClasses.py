@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfArgClasses
 # @brief Transform argument class definitions
@@ -55,6 +55,45 @@ class argFactory(object):
     
     def __str__(self):
         return 'argFactory for {0}, args {1}, kwargs {2}'.format(self._genclass, self._args, self._kwargs)
+
+
+## @class argAction
+class argAction(argparse.Action):
+    def __init__(self, factory, option_strings, dest, **kwargs):
+        self._factory = factory
+        super().__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        msg.debug('Called action for factory=%s; values=%s', self._factory, values)
+
+        # call the factory for each value
+        if isinstance(values, list):
+            if not values:
+                # in case of empty list, run factory on None to get the default
+                setattr(namespace, self.dest, [self._factory(None)])
+            else:
+                setattr(namespace, self.dest, [self._factory(v) for v in values])
+        else:
+            setattr(namespace, self.dest, self._factory(values))
+
+
+## @class argActionFactory
+#  @brief Factory class used to generate argparse actions, actions should be used
+#  when arguments are used without value, like boolean flags
+class argActionFactory(object):
+    def __init__(self, genclass, *args, **kwargs):
+        msg.debug('Initialised action class %s with args=%s; kwargs=%s', genclass, args, kwargs)
+        self._factory = argFactory(genclass, *args, **kwargs)
+
+    @property
+    def factory(self):
+        return self._factory
+
+    def __call__(self, option_strings, dest, **kwargs):
+        return argAction(self._factory, option_strings, dest, **kwargs)
+
+    def __str__(self):
+        return 'argActionFactory for {0}'.format(self._factory)
 
 
 ## @class argument
@@ -1219,7 +1258,7 @@ class argYODAFile(argFile):
                 for untar in tar.getmembers():
                     fileTXT = tar.extractfile(untar)
                     if fileTXT is not None :
-                        lines = fileTXT.read()
+                        lines = fileTXT.read().decode("utf-8")
                         lhecount = lines.count('/event')
 
                 self._fileMetadata[fname]['nentries'] = lhecount
@@ -1241,8 +1280,8 @@ class argYODAFile(argFile):
                     fileTXT = tar.extractfile(untar)
                     next = False
                     if fileTXT is not None :
-                        lines = fileTXT.readlines()
-                        for line in lines :
+                        for line in fileTXT :
+                            line = line.decode("utf-8")
                             if next :
                                 try :
                                     w = float(re.sub(' +',' ',line).split(" ")[2])
@@ -1888,7 +1927,7 @@ class argLHEFile(argFile):
                 for untar in tar.getmembers():
                     fileTXT = tar.extractfile(untar)
                     if fileTXT is not None :
-                        lines = fileTXT.read()
+                        lines = fileTXT.read().decode("utf-8")
                         lhecount = lines.count('/event')
 
                 self._fileMetadata[fname]['nentries'] = lhecount
@@ -2161,9 +2200,9 @@ class argSubstepBool(argSubstep):
     
     @value.setter
     def value(self, value):
-        msg.debug('Attempting to set argSubstep from {0!s} (type {1}'.format(value, type(value)))
+        msg.debug('Attempting to set argSubstep from {0!s} (type {1})'.format(value, type(value)))
         if value is None:
-            self._value = {}
+            self._value = {self._defaultSubstep: True}
         elif isinstance(value, bool):
             self._value = {self._defaultSubstep: value}
         elif isinstance(value, str):
@@ -2313,26 +2352,23 @@ class argSubstepSteering(argSubstep):
     # "doOverlay" - run event overlay on presampled RDOs instead of standard HITtoRDO digitization
     # "doFCwOverlay" - run FastChain with MC-overlay (EVNTtoRDOwOverlay) instead of standard PU digitization (EVNTtoRDO)
     # "afterburn" - run the B decay afterburner for event generation
-    # "doRAWtoALL" - produce all DESDs and AODs directly from bytestream
-    # "doTRIGtoALL" - produce AODs directly from trigger RDOs
+    # "doRAWtoESD" - run legacy split workflow (RAWtoESD + ESDtoAOD)
+    # "doRAWtoALL" - (deprecated) produce all DESDs and AODs directly from bytestream
+    # "doTRIGtoALL" - (deprecated) produce AODs directly from trigger RDOs
     steeringAlises = {
                       'no': {},
-                      'doRDO_TRIG': {'RAWtoESD': [('in', '-', 'RDO'), ('in', '-', 'RDO_FTK'), ('in', '+', 'RDO_TRIG'), ('in', '-', 'BS')]},
+                      'doRDO_TRIG': {'RAWtoALL': [('in', '-', 'RDO'), ('in', '+', 'RDO_TRIG'), ('in', '-', 'BS')]},
                       'doOverlay': {'HITtoRDO': [('in', '-', 'HITS'), ('out', '-', 'RDO'), ('out', '-', 'RDO_FILT')],
                                     'Overlay': [('in', '+', ('HITS', 'RDO_BKG')), ('out', '+', 'RDO')]},
                       'doFCwOverlay': {'EVNTtoRDO': [('in', '-', 'EVNT'), ('out', '-', 'RDO')],
                                        'EVNTtoRDOwOverlay': [('in', '+', ('EVNT', 'RDO_BKG')), ('out', '+', 'RDO'), ('out', '+', 'RDO_SGNL')]},
                       'afterburn': {'generate': [('out', '-', 'EVNT')]},
-                      'doRAWtoALL': {'RAWtoALL': [('in', '+', 'BS'), ('in', '+', 'RDO'), ('in', '+', 'RDO_FTK'),
-                                                  ('in', '+', 'DRAW_ZMUMU'), ('in', '+', 'DRAW_ZEE'), ('in', '+', 'DRAW_EMU'), ('in', '+', 'DRAW_RPVLL'), 
-                                                  ('out', '+', 'ESD'), ('out', '+', 'AOD'), ('out', '+', 'HIST_R2A')],
-                                     'RAWtoESD': [('in', '-', 'BS'), ('in', '-', 'RDO'), ('in', '-', 'RDO_FTK'),
-                                                  ('out', '-', 'ESD'),],
-                                     'ESDtoAOD': [('in', '-', 'ESD'), ('out', '-', 'AOD'),]},
-                      'doTRIGtoALL': {'RAWtoALL': [('in', '+', 'RDO_TRIG'),
-                                                   ('out', '+', 'ESD'), ('out', '+', 'AOD'), ('out', '+', 'HIST_R2A')],
-                                     'RAWtoESD': [('in', '-', 'RDO_TRIG'), ('out', '-', 'ESD'),],
-                                     'ESDtoAOD': [('in', '-', 'ESD'), ('out', '-', 'AOD'),]}
+                      'doRAWtoESD': {'RAWtoALL': [('in', '-', 'BS'), ('in', '-', 'RDO'),
+                                                  ('out', '-', 'ESD'), ('out', '-', 'AOD')],
+                                     'RAWtoESD': [('in', '+', 'BS'), ('in', '+', 'RDO'),
+                                                  ('out', '+', 'ESD'),]},
+                      'doRAWtoALL': {},
+                      'doTRIGtoALL': {}
                       }
     
     # Reset getter
@@ -2482,7 +2518,9 @@ class trfArgParser(argparse.ArgumentParser):
             self._helpString[argName] = kwargs['help'] # if the help option is present for the argument then put it into the helpString dict key = argument name, value = help 
         else:
             self._helpString[argName] = None
-        if 'type' in kwargs:
+        if 'action' in kwargs and 'factory' in dir(kwargs['action']):
+            self._argClass[argName] = kwargs['action'].factory
+        elif 'type' in kwargs:
             self._argClass[argName] = kwargs['type']
         else:
             self._argClass[argName] = None

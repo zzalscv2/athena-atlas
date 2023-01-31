@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ Analysis::addContainer(Analysis::CalibrationDataContainer* cnt, TFile* file, con
     std::string ref = cnt->getHadronisation();
     // make sure that the name is well defined
     const char* cntname = (name) ? name : cnt->GetName();
-    if (ref == "")
+    if (ref.empty())
       std::cerr << "addContainer(): container does not have a MC hadronisation reference!" << std::endl;
     else if (std::string(cntname).find("_Eff") == std::string::npos)
       std::cerr << "addContainer(): container is not a MC efficiency object!" << std::endl;

@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CxxUtils/src/ClassName.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -268,6 +266,25 @@ std::string ClassName::fullName() const
     name += '>';
   }
   return name;
+}
+
+
+/**
+ * @brief Return number of template arguments.
+ */
+size_t ClassName::ntargs() const
+{
+  return m_targs.size();
+}
+
+
+/**
+ * @brief Return one template argument.
+ * @param i Index of the argument to return.
+ */
+const ClassName& ClassName::targ (size_t i) const
+{
+  return m_targs.at (i);
 }
 
 

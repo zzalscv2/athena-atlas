@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # ********************************************************************
 # TriggerContent.py
@@ -504,18 +504,20 @@ noalgTriggers['Run3'] = [
 #====================================================================
 BkgElectronTriggers = {}
 BkgElectronTriggers['Run3'] = [
+        'HLT_e5_nopid_L1EM3',
+        'HLT_e5_etcut_L1EM3',
+        'HLT_e50_etcut_L1EM22VHI',
+        'HLT_e50_etcut_L1eEM26M',
+        'HLT_e120_etcut_L1EM22VHI',
+        'HLT_e120_etcut_L1eEM26M',
+        'HLT_e250_etcut_L1EM22VHI',
+        'HLT_e250_etcut_L1eEM26M',
         'HLT_e300_etcut_L1eEM26M',
         'HLT_e300_etcut_L1EM22VHI',
-        'HLT_e50_etcut_L1EM22VHI',
-        'HLT_e120_etcut_L1EM22VHI',
-        'HLT_e250_etcut_L1EM22VHI',
-        'HLT_e50_etcut_L1eEM26M',
-        'HLT_e120_etcut_L1eEM26M',
-        'HLT_e250_etcut_L1eEM26M',
-        'HLT_g300_etcut_L1EM22VHI',
-        'HLT_g300_etcut_L1eEM26M',
         'HLT_g250_etcut_L1EM22VHI',
         'HLT_g250_etcut_L1eEM26M',
+        'HLT_g300_etcut_L1EM22VHI',
+        'HLT_g300_etcut_L1eEM26M',
         ]
 
 BkgElectronTriggers['Run2'] = [
@@ -610,7 +612,47 @@ BkgElectronTriggers['Run2'] = [
 
 BootstrapPhotonTriggers = {}
 BootstrapPhotonTriggers['Run3'] = [
+        'HLT_g25_medium_L1EM20VH',
+        'HLT_g35_medium_L1EM20VH',
+        'HLT_g20_tight_icaloloose_L1EM15VHI',
+        'HLT_g15_tight_L1EM10VH',
+        'HLT_g20_tight_L1EM15VHI',
+        'HLT_g22_tight_L1EM15VHI',
+        'HLT_g25_medium_L1eEM24L',
+        'HLT_g35_medium_L1eEM24L',
+        'HLT_g20_tight_icaloloose_L1eEM18M',
+        'HLT_g15_tight_L1eEM12L',
+        'HLT_g20_tight_L1eEM18M',
+        'HLT_g22_tight_L1eEM18M',
+        'HLT_g250_etcut_L1EM22VHI',
+        'HLT_g10_loose_L1EM7',
+        'HLT_g15_loose_L1EM10VH',
+        'HLT_g20_loose_L1EM15VH',
+        'HLT_g25_loose_L1EM20VH',
+        'HLT_g30_loose_L1EM20VH',
+        'HLT_g40_loose_L1EM20VH',
+        'HLT_g50_loose_L1EM20VH',
+        'HLT_g60_loose_L1EM22VHI',
+        'HLT_g80_loose_L1EM22VHI',
+        'HLT_g100_loose_L1EM22VHI',
+        'HLT_g120_loose_L1EM22VHI',
+        'HLT_g250_etcut_L1eEM26M',
+        'HLT_g10_loose_L1eEM9',
+        'HLT_g15_loose_L1eEM12L',
+        'HLT_g20_loose_L1eEM18L',
+        'HLT_g25_loose_L1eEM24L',
+        'HLT_g30_loose_L1eEM24L',
+        'HLT_g40_loose_L1eEM24L',
+        'HLT_g50_loose_L1eEM24L',
+        'HLT_g60_loose_L1eEM26M',
+        'HLT_g80_loose_L1eEM26M',
+        'HLT_g100_loose_L1eEM26M',
+        'HLT_g120_loose_L1eEM26M',
+        'HLT_g25_tight_icaloloose_L1EM20VH',
+        'HLT_g25_tight_icalomedium_L1EM20VH',
+        'HLT_g25_tight_icalotight_L1EM20VH',
         ]
+
 BootstrapPhotonTriggers['Run2'] = [
         # pt_cut triggers
         'HLT_g20_etcut_L1EM12'
@@ -667,6 +709,8 @@ ExtraContainersPhotonTrigger['Run3']=[
         "HLT_FastCaloEMClustersAux.",
         "HLT_CaloEMClusters_Photon",
         "HLT_CaloEMClusters_PhotonAux.",
+        "HLT_FastPhotons",
+        "HLT_FastPhotonsAux.",
         ]
 
 ExtraContainersPhotonTrigger['Run2'] = [
@@ -693,11 +737,15 @@ ExtraContainersElectronTrigger['Run3'] = [
         "HLT_IDTrack_ElecLRT_FTF",
         "HLT_IDTrack_ElecLRT_FTFAux.",
         "HLT_FastElectrons",
-        "HLT_FastElectronsAux."
+        "HLT_FastElectronsAux.",
         "HLT_FastElectrons_LRT",
         "HLT_FastElectrons_LRTAux.",
         "HLT_CaloEMClusters_Electron",
         "HLT_CaloEMClusters_ElectronAux.",
+        "HLT_TrigEMClusters_Electrons",
+        "HLT_TrigEMClusters_ElectronsAux.",
+        "HLT_TrigEMClusters_Electrons_GSF",
+        "HLT_TrigEMClusters_Electrons_GSFAux.",
         "HLT_IDTrack_Electron_IDTrig",
         "HLT_IDTrack_Electron_IDTrigAux.",
         "HLT_IDTrack_Electron_GSF",
@@ -712,7 +760,7 @@ ExtraContainersElectronTrigger['Run2'] = [
         "HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFex",
         "HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFexAux.",
         "HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_IDTrig",
-        "HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_IDTrigAux."
+        "HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_IDTrigAux.",
         "HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_EFID",
         "HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_EFIDAux.",
         ]
@@ -750,9 +798,9 @@ ExtraContainersMuonTrigger['Run3'] = [
         'HLT_Muons_FS',
         'HLT_Muons_FSAux.',
         'HLT_MuonsCB_RoI',
-        'HLT_MuonsCB_RoIAux.'
+        'HLT_MuonsCB_RoIAux.',
         'HLT_MuonsCB_LRT',
-        'HLT_MuonsCB_LRTAux.'
+        'HLT_MuonsCB_LRTAux.',
         'HLT_MuonsCB_FS',
         'HLT_MuonsCB_FSAux.',
         ]

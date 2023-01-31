@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,6 +12,7 @@
 // GaudiKernel & Athena
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/IAtRndmGenSvc.h"
+#include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/RndmGenerators.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -38,7 +39,7 @@ namespace iFatras {
      @author sarka.todorova@cern.ch
   */
   
-  class SimHitCreatorID: public extends<AthAlgTool, ISimHitCreator>
+  class ATLAS_NOT_THREAD_SAFE SimHitCreatorID: public extends<AthAlgTool, ISimHitCreator>  // deprecated: ATLASSIM-6020
   {
   public:
     /**Constructor */

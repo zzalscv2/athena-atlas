@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import TeV
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
@@ -14,7 +14,7 @@ def _addFlagsCategory (acf, name, generator, modName = None):
     return None
 
 
-def _createCfgFlags():
+def initConfigFlags():
 
     acf=AthConfigFlags()
 
@@ -24,6 +24,14 @@ def _createCfgFlags():
     acf.addFlag('Exec.MaxEvents',-1)
     acf.addFlag('Exec.SkipEvents',0)
     acf.addFlag('Exec.DebugStage','')
+    acf.addFlag('Exec.FPE',0) #-2: No FPE check at all, -1: Abort with core-dump, 0: FPE Auditor w/o stack-tace (default) , >0: number of stack-trace printed by the job
+
+    #Custom messaging for components, see Utils.setupLoggingLevels
+    acf.addFlag('Exec.VerboseMessageComponents',[])
+    acf.addFlag('Exec.DebugMessageComponents',[])
+    acf.addFlag('Exec.InfoMessageComponents',[])
+    acf.addFlag('Exec.WarningMessageComponents',[])
+    acf.addFlag('Exec.ErrorMessageComponents',[])
 
     acf.addFlag('ExecutorSplitting.TotalSteps', 0)
     acf.addFlag('ExecutorSplitting.Step', -1)
@@ -82,6 +90,7 @@ def _createCfgFlags():
     acf.addFlag('Concurrency.DebugWorkers', False )
 
     acf.addFlag('Scheduler.CheckDependencies', True)
+    acf.addFlag('Scheduler.CheckOutputUsage', False)
     acf.addFlag('Scheduler.ShowDataDeps', True)
     acf.addFlag('Scheduler.ShowDataFlow', True)
     acf.addFlag('Scheduler.ShowControlFlow', True)
@@ -129,8 +138,7 @@ def _createCfgFlags():
         (25./prevFlags.Beam.BunchSpacing)) # former flobal.estimatedLuminosity
     acf.addFlag('Beam.BunchStructureSource', lambda prevFlags: BunchStructureSource.MC if prevFlags.Input.isMC else BunchStructureSource.TrigConf)
 
-
-
+    # output
     acf.addFlag('Output.EVNTFileName', '')
     acf.addFlag('Output.EVNT_TRFileName', '')
     acf.addFlag('Output.HITSFileName', '')
@@ -140,13 +148,14 @@ def _createCfgFlags():
     acf.addFlag('Output.AODFileName',  '')
     acf.addFlag('Output.HISTFileName', '')
 
-
     acf.addFlag('Output.doWriteRDO', lambda prevFlags: bool(prevFlags.Output.RDOFileName)) # write out RDO file
     acf.addFlag('Output.doWriteRDO_SGNL', lambda prevFlags: bool(prevFlags.Output.RDO_SGNLFileName)) # write out RDO_SGNL file
     acf.addFlag('Output.doWriteESD', lambda prevFlags: bool(prevFlags.Output.ESDFileName)) # write out ESD file
     acf.addFlag('Output.doWriteAOD', lambda prevFlags: bool(prevFlags.Output.AODFileName)) # write out AOD file
     acf.addFlag('Output.doWriteBS',  False) # write out RDO ByteStream file
     acf.addFlag('Output.doWriteDAOD',  False) # write out at least one DAOD file
+
+    acf.addFlag('Output.TreeAutoFlush', {})  # {} = automatic for all streams, otherwise {'STREAM': 123}
 
     # Might move this elsewhere in the future.
     # Some flags from https://gitlab.cern.ch/atlas/athena/blob/master/Tracking/TrkDetDescr/TrkDetDescrSvc/python/TrkDetDescrJobProperties.py
@@ -165,6 +174,12 @@ def _createCfgFlags():
         from SimulationConfig.SimConfigFlags import createSimConfigFlags
         return createSimConfigFlags()
     _addFlagsCategory (acf, "Sim", __simulation, 'SimulationConfig' )
+
+#Test Beam Simulation Flags:
+    def __testbeam():
+        from SimulationConfig.TestBeamConfigFlags import createTestBeamConfigFlags
+        return createTestBeamConfigFlags()
+    _addFlagsCategory (acf, "TestBeam", __testbeam, 'TestBeamConfig' )
 
 #Digitization Flags:
     def __digitization():
@@ -228,6 +243,7 @@ def _createCfgFlags():
 
 #Random engine Flags:
     acf.addFlag("Random.Engine", "dSFMT") # Random service used in {"dSFMT", "Ranlux64", "Ranecu"}
+    acf.addFlag("Random.SeedOffset", 0) # TODO replace usage of Digitization.RandomSeedOffset with this flag
 
     def __trigger():
         from TriggerJobOpts.TriggerConfigFlags import createTriggerFlags
@@ -345,7 +361,7 @@ def _createCfgFlags():
     return acf
 
 
-ConfigFlags=_createCfgFlags()
+ConfigFlags=initConfigFlags()
 
 if __name__=="__main__":
     import sys

@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    $Id: ConfAnalysis.h 800361 2017-03-12 14:33:19Z 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -52,9 +52,14 @@ public:
   
   ConfAnalysis( const std::string& name, const ChainString& config, TagNProbe* TnP_tool=0 ) : 
     TrackAnalysis( clean(name) ), 
-    mconfig(config),
-    Nreco(0), Nref(0), Nmatched(0), m_print(false), m_roi(0), 
-    m_initialised(false), m_initialiseFirstEvent(false) { // , m_lfirst(true)  {
+    m_config(config)
+    {
+    m_hphivsDd0res[0]=0;
+    m_hphivsDd0res[1]=0;
+    m_hphivsDd0res[2]=0;
+    m_hphivsDa0res[0]=0;
+    m_hphivsDa0res[1]=0;
+    m_hphivsDa0res[2]=0;
     std::cout << "ConfAnalysis::ConfAnalysis() " << TrackAnalysis::name() << " ..." << std::endl;
     setTnPtool( TnP_tool );
   }
@@ -63,11 +68,11 @@ public:
     // std::cout << "ConfAnalysis::~ConfAnalysis() " << name() << std::endl;
     std::map<std::string, TH1F*>::iterator hitr=m_histos.begin();
     std::map<std::string, TH1F*>::iterator hend=m_histos.end();
-    for ( ; hitr!=hend ; hitr++ ) delete hitr->second;     
+    for ( ; hitr!=hend ; ++hitr ) delete hitr->second;     
     //2D histograms
     std::map<std::string, TH2F*>::iterator hitr2D=m_histos2D.begin();                                                                                           
     std::map<std::string, TH2F*>::iterator hend2D=m_histos2D.end();
-    for ( ; hitr2D!=hend2D ; hitr2D++ ) delete hitr2D->second;     
+    for ( ; hitr2D!=hend2D ; ++hitr2D ) delete hitr2D->second;     
     // tag and probe object
     if ( m_TnP_tool ) delete m_TnP_tool;
   }  
@@ -109,7 +114,7 @@ public:
 
   void initialiseFirstEvent(bool b=true) { m_initialiseFirstEvent=b; }
 
-  const ChainString& config() const { return mconfig; }
+  const ChainString& config() const { return m_config; }
 
   // methods for tag and probe invariant mass plots
   
@@ -146,9 +151,9 @@ private:
 
 private:
 
-  ChainString  mconfig;
+  ChainString  m_config;
 
-  TIDDirectory* mdir;
+  TIDDirectory* m_dir = 0;
 
   std::map<std::string, TH1F*> m_histos;
   std::map<std::string, TH2F*> m_histos2D;
@@ -158,194 +163,194 @@ private:
   TH1F* m_invmassObj = 0;
 
   // tag and probe object
-  TagNProbe* m_TnP_tool;
+  TagNProbe* m_TnP_tool = 0;
 
-  Efficiency* eff_pt = 0;
-  Efficiency* eff_ptp = 0;
-  Efficiency* eff_ptm = 0;
+  Efficiency* m_eff_pt = 0;
+  Efficiency* m_eff_ptp = 0;
+  Efficiency* m_eff_ptm = 0;
 
-  Efficiency* eff_eta = 0;
-  Efficiency* eff_phi = 0;
-  Efficiency* eff_z0 = 0;
-  Efficiency* eff_d0 = 0;
-  Efficiency* eff_a0 = 0;
+  Efficiency* m_eff_eta = 0;
+  Efficiency* m_eff_phi = 0;
+  Efficiency* m_eff_z0 = 0;
+  Efficiency* m_eff_d0 = 0;
+  Efficiency* m_eff_a0 = 0;
 
-  Efficiency* eff_roi_deta = 0;
-  Efficiency* eff_roi_dphi = 0;
-  Efficiency* eff_roi_dR = 0;
+  Efficiency* m_eff_roi_deta = 0;
+  Efficiency* m_eff_roi_dphi = 0;
+  Efficiency* m_eff_roi_dR = 0;
 
-  Efficiency* purity_pt = 0;
-  Efficiency* purity_eta = 0;
-  Efficiency* purity_phi = 0;
-  Efficiency* purity_z0 = 0;
-  Efficiency* purity_d0 = 0;
-  Efficiency* purity_a0 = 0;
+  Efficiency* m_purity_pt = 0;
+  Efficiency* m_purity_eta = 0;
+  Efficiency* m_purity_phi = 0;
+  Efficiency* m_purity_z0 = 0;
+  Efficiency* m_purity_d0 = 0;
+  Efficiency* m_purity_a0 = 0;
 
 #if 0
-  TH2F* h2;
-  TH2F* h2m;
-  TH2F* h2r;
+  TH2F* m_h2;
+  TH2F* m_h2m;
+  TH2F* m_h2r;
 #endif
 
-  Resplot* h2 = 0;
-  Resplot* h2m = 0;
-  Resplot* h2r = 0;
+  Resplot* m_h2 = 0;
+  Resplot* m_h2m = 0;
+  Resplot* m_h2r = 0;
 
-  Resplot* h2a0 = 0;
-  Resplot* h2a0r = 0;
+  Resplot* m_h2a0 = 0;
+  Resplot* m_h2a0r = 0;
 
-  Resplot* rChi2prob = 0;
-  Resplot* rChi2 = 0;
-  Resplot* rChi2dof = 0;
+  Resplot* m_rChi2prob = 0;
+  Resplot* m_rChi2 = 0;
+  Resplot* m_rChi2dof = 0;
 
-  Resplot* rChi2prob_bad = 0;
-  Resplot* rChi2_bad = 0;
-  Resplot* rChi2dof_bad = 0;
+  Resplot* m_rChi2prob_bad = 0;
+  Resplot* m_rChi2_bad = 0;
+  Resplot* m_rChi2dof_bad = 0;
 
-  Resplot* rChi2prob_rec = 0;
-  Resplot* rChi2_rec = 0;
-  Resplot* rChi2dof_rec = 0;
+  Resplot* m_rChi2prob_rec = 0;
+  Resplot* m_rChi2_rec = 0;
+  Resplot* m_rChi2dof_rec = 0;
 
-  Resplot* rChi2d_vs_Chi2d = 0;
-  Resplot* rDChi2dof = 0;
+  Resplot* m_rChi2d_vs_Chi2d = 0;
+  Resplot* m_rDChi2dof = 0;
 
   //  TH2F* hnpix_v_sct;
   //  TH2F* hnpix_v_sct_rec;
   //  TH2F* hnpix_v_sct_match;
 
-  TH1F* hDeltaR;
+  TH1F* m_hDeltaR = 0;
 
   /// number of reconstructed tracks 
-  int Nreco;
-  int Nref;
-  int Nmatched;
+  int m_Nreco = 0;
+  int m_Nref = 0;
+  int m_Nmatched = 0;
 
-  Resplot* rnpix_eta = 0;
-  Resplot* rnsct_eta = 0;
-  Resplot* rntrt_eta = 0;
-  Resplot* rnsihit_eta = 0;
+  Resplot* m_rnpix_eta = 0;
+  Resplot* m_rnsct_eta = 0;
+  Resplot* m_rntrt_eta = 0;
+  Resplot* m_rnsihit_eta = 0;
 
-  Resplot* rnpix_lb = 0;
-  Resplot* rnsct_lb = 0;
+  Resplot* m_rnpix_lb = 0;
+  Resplot* m_rnsct_lb = 0;
 
-  Resplot* rnpix_lb_rec = 0;
-  Resplot* rnsct_lb_rec = 0;
+  Resplot* m_rnpix_lb_rec = 0;
+  Resplot* m_rnsct_lb_rec = 0;
 
-  Resplot* rnpix_phi = 0;
-  Resplot* rnsct_phi = 0;
-  Resplot* rntrt_phi = 0;
+  Resplot* m_rnpix_phi = 0;
+  Resplot* m_rnsct_phi = 0;
+  Resplot* m_rntrt_phi = 0;
 
-  Resplot* rnpix_pt = 0;
-  Resplot* rnsct_pt = 0;
-  Resplot* rntrt_pt = 0;
+  Resplot* m_rnpix_pt = 0;
+  Resplot* m_rnsct_pt = 0;
+  Resplot* m_rntrt_pt = 0;
 
-  Resplot* rnpix_d0 = 0; // new
-  Resplot* rnsct_d0 = 0; // new
-  Resplot* rntrt_d0 = 0; // new
+  Resplot* m_rnpix_d0 = 0; // new
+  Resplot* m_rnsct_d0 = 0; // new
+  Resplot* m_rntrt_d0 = 0; // new
 
-  Resplot* rnpix_d0_rec = 0; // new
-  Resplot* rnsct_d0_rec = 0; // new
-  Resplot* rntrt_d0_rec = 0; // new
+  Resplot* m_rnpix_d0_rec = 0; // new
+  Resplot* m_rnsct_d0_rec = 0; // new
+  Resplot* m_rntrt_d0_rec = 0; // new
 
-  Resplot* rnpixh_pt = 0;
-  Resplot* rnscth_pt = 0;
+  Resplot* m_rnpixh_pt = 0;
+  Resplot* m_rnscth_pt = 0;
 
-  Resplot* rnpixh_d0 = 0; // new
-  Resplot* rnscth_d0 = 0; // new
+  Resplot* m_rnpixh_d0 = 0; // new
+  Resplot* m_rnscth_d0 = 0; // new
 
-  Resplot* rnsi_pt = 0;  // new
-  Resplot* rnsih_pt = 0; // new
+  Resplot* m_rnsi_pt = 0;  // new
+  Resplot* m_rnsih_pt = 0; // new
 
-  Resplot* rnsi_eta = 0;  // new
-  Resplot* rnsih_eta = 0; // new
+  Resplot* m_rnsi_eta = 0;  // new
+  Resplot* m_rnsih_eta = 0; // new
 
-  Resplot* rnsi_d0 = 0;  // new
-  Resplot* rnsih_d0 = 0; // new
+  Resplot* m_rnsi_d0 = 0;  // new
+  Resplot* m_rnsih_d0 = 0; // new
 
-  Resplot* rnbl_d0 = 0;  // new
-  Resplot* rnblh_d0 = 0; // new
+  Resplot* m_rnbl_d0 = 0;  // new
+  Resplot* m_rnblh_d0 = 0; // new
 
-  Resplot* rnpix_pt_bad = 0;
-  Resplot* rnsct_pt_bad = 0;
-  Resplot* rntrt_pt_bad = 0;
+  Resplot* m_rnpix_pt_bad = 0;
+  Resplot* m_rnsct_pt_bad = 0;
+  Resplot* m_rntrt_pt_bad = 0;
 
-  Resplot* rnpix_eta_rec = 0;
-  Resplot* rnsct_eta_rec = 0;
-  Resplot* rntrt_eta_rec = 0;
-  Resplot* rnsihit_eta_rec = 0;
+  Resplot* m_rnpix_eta_rec = 0;
+  Resplot* m_rnsct_eta_rec = 0;
+  Resplot* m_rntrt_eta_rec = 0;
+  Resplot* m_rnsihit_eta_rec = 0;
 
-  Resplot* rnpix_phi_rec = 0;
-  Resplot* rnsct_phi_rec = 0;
-  Resplot* rntrt_phi_rec = 0;
+  Resplot* m_rnpix_phi_rec = 0;
+  Resplot* m_rnsct_phi_rec = 0;
+  Resplot* m_rntrt_phi_rec = 0;
 
-  Resplot* rnpix_pt_rec = 0;
-  Resplot* rnsct_pt_rec = 0;
-  Resplot* rntrt_pt_rec = 0;
+  Resplot* m_rnpix_pt_rec = 0;
+  Resplot* m_rnsct_pt_rec = 0;
+  Resplot* m_rntrt_pt_rec = 0;
 
-  Resplot* rnpixh_pt_rec = 0;
-  Resplot* rnscth_pt_rec = 0;
+  Resplot* m_rnpixh_pt_rec = 0;
+  Resplot* m_rnscth_pt_rec = 0;
 
-  std::vector<Resplot*> mres;
+  std::vector<Resplot*> m_res;
 
-  std::vector<Resplot*> retares;
-  std::vector<Resplot*> rphires;
-  std::vector<Resplot*> rzedres;
-  std::vector<Resplot*> rzedthetares;
-  std::vector<Resplot*> riptres;
-  std::vector<Resplot*> rptres;
-  std::vector<Resplot*> rd0res;
-  std::vector<Resplot*> rDd0res;
-  std::vector<Resplot*> rDa0res;
-  std::vector<Resplot*> rDz0res;
+  std::vector<Resplot*> m_retares;
+  std::vector<Resplot*> m_rphires;
+  std::vector<Resplot*> m_rzedres;
+  std::vector<Resplot*> m_rzedthetares;
+  std::vector<Resplot*> m_riptres;
+  std::vector<Resplot*> m_rptres;
+  std::vector<Resplot*> m_rd0res;
+  std::vector<Resplot*> m_rDd0res;
+  std::vector<Resplot*> m_rDa0res;
+  std::vector<Resplot*> m_rDz0res;
 
-  Resplot* rzedreslb;
+  Resplot* m_rzedreslb = 0;
 
-  Resplot* rzedlb;
-  Resplot* rzedlb_rec;
+  Resplot* m_rzedlb = 0;
+  Resplot* m_rzedlb_rec = 0;
 
   //  std::vector<Resplot*> rd0res_95;
   //  std::vector<Resplot*> rd0res_rms;
 
-  std::vector<Resplot*> retaresPull;
-  std::vector<Resplot*> rphiresPull;
-  std::vector<Resplot*> rzedresPull;
-  std::vector<Resplot*> riptresPull;
-  std::vector<Resplot*> rptresPull;
-  std::vector<Resplot*> rd0resPull;
+  std::vector<Resplot*> m_retaresPull;
+  std::vector<Resplot*> m_rphiresPull;
+  std::vector<Resplot*> m_rzedresPull;
+  std::vector<Resplot*> m_riptresPull;
+  std::vector<Resplot*> m_rptresPull;
+  std::vector<Resplot*> m_rd0resPull;
 
-  Resplot* mdeltaR_v_eta = 0;
-  Resplot* mdeltaR_v_pt = 0;
+  Resplot* m_deltaR_v_eta = 0;
+  Resplot* m_deltaR_v_pt = 0;
 
-  TH1F*  hphivsDd0res[3];
-  TH1F*  hphivsDa0res[3];
+  TH1F*  m_hphivsDd0res[3];
+  TH1F*  m_hphivsDa0res[3];
 
-  Efficiency* eff_vs_lb = 0;
+  Efficiency* m_eff_vs_lb = 0;
 
-  Resplot* z_vs_lb = 0;
+  Resplot* m_z_vs_lb = 0;
 
-  std::map<int, int> rmap;
+  std::map<int, int> m_rmap;
 
-  Efficiency* eff_vs_mult = 0;
+  Efficiency* m_eff_vs_mult = 0;
 
-  TH1F* n_vtx_tracks = 0;
-  Efficiency* eff_vs_ntracks = 0;
-  Efficiency* eff_vs_ntracks2 = 0;
+  TH1F* m_n_vtx_tracks = 0;
+  Efficiency* m_eff_vs_ntracks = 0;
+  Efficiency* m_eff_vs_ntracks2 = 0;
 
-  TH1F* n_vtx = 0;
-  Efficiency* eff_vs_nvtx = 0;
-  TH1F* mu = 0;
-  Efficiency* eff_vs_mu = 0;
+  TH1F* m_n_vtx = 0;
+  Efficiency* m_eff_vs_nvtx = 0;
+  TH1F* m_mu = 0;
+  Efficiency* m_eff_vs_mu = 0;
 
   /// beam spot dependent
 
-  Resplot* rd0_vs_phi = 0;
-  Resplot* rd0_vs_phi_rec = 0;
+  Resplot* m_rd0_vs_phi = 0;
+  Resplot* m_rd0_vs_phi_rec = 0;
 
   /// Residuals
 
-  Resplot* rRoi_deta_vs_eta = 0;
-  Resplot* rRoi_dphi_vs_eta = 0;
-  Resplot* rRoi_dzed_vs_eta = 0;
+  Resplot* m_rRoi_deta_vs_eta = 0;
+  Resplot* m_rRoi_dphi_vs_eta = 0;
+  Resplot* m_rRoi_dzed_vs_eta = 0;
 
   /// electron specific ET/PT related stuff
   TH1F* m_etovpt_raw = 0;
@@ -356,12 +361,12 @@ private:
   Efficiency* m_eff_vs_et = 0;
 
   /// flag to print out the matched tracks etc
-  bool m_print;
+  bool m_print = false;
 
   const TIDARoiDescriptor* m_roi = 0;
 
-  bool m_initialised;
-  bool m_initialiseFirstEvent;
+  bool m_initialised = false;
+  bool m_initialiseFirstEvent = false;
 
   Resplot* m_rnsct_vs_npix = 0;
   Resplot* m_rnsct_vs_npix_rec = 0;
@@ -369,8 +374,8 @@ private:
 
 
 
-inline std::ostream& operator<<( std::ostream& s, const ConfAnalysis& _s ) { 
-  return s << _s.name();
+inline std::ostream& operator<<( std::ostream& s, const ConfAnalysis& ca ) {
+  return s << ca.name();
 }
 
 

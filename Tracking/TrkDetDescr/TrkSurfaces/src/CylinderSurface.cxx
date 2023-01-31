@@ -121,6 +121,46 @@ Trk::CylinderSurface::operator=(const CylinderSurface& csf)
   return *this;
 }
 
+/** Use the Surface as a ParametersBase constructor, from local parameters -
+ * charged */
+Trk::Surface::ChargedTrackParametersUniquePtr
+Trk::CylinderSurface::createUniqueTrackParameters(
+    double l1, double l2, double phi, double theta, double qop,
+    std::optional<AmgSymMatrix(5)> cov) const {
+  return std::make_unique<ParametersT<5, Charged, CylinderSurface>>(
+      l1, l2, phi, theta, qop, *this, std::move(cov));
+}
+
+/** Use the Surface as a ParametersBase constructor, from global parameters -
+ * charged*/
+Trk::Surface::ChargedTrackParametersUniquePtr
+Trk::CylinderSurface::createUniqueTrackParameters(
+    const Amg::Vector3D& position, const Amg::Vector3D& momentum, double charge,
+    std::optional<AmgSymMatrix(5)> cov) const {
+  return std::make_unique<ParametersT<5, Charged, CylinderSurface>>(
+      position, momentum, charge, *this, std::move(cov));
+}
+
+/** Use the Surface as a ParametersBase constructor, from local parameters -
+ * neutral */
+Trk::Surface::NeutralTrackParametersUniquePtr
+Trk::CylinderSurface::createUniqueNeutralParameters(
+    double l1, double l2, double phi, double theta, double qop,
+    std::optional<AmgSymMatrix(5)> cov) const {
+  return std::make_unique<ParametersT<5, Neutral, CylinderSurface>>(
+      l1, l2, phi, theta, qop, *this, std::move(cov));
+}
+
+/** Use the Surface as a ParametersBase constructor, from global parameters -
+ * neutral */
+Trk::Surface::NeutralTrackParametersUniquePtr
+Trk::CylinderSurface::createUniqueNeutralParameters(
+    const Amg::Vector3D& position, const Amg::Vector3D& momentum, double charge,
+    std::optional<AmgSymMatrix(5)> cov) const {
+  return std::make_unique<ParametersT<5, Neutral, CylinderSurface>>(
+      position, momentum, charge, *this, std::move(cov));
+}
+
 const Amg::Vector3D&
 Trk::CylinderSurface::globalReferencePoint() const
 {
@@ -339,7 +379,7 @@ Trk::CylinderSurface::straightLineIntersection(const Amg::Vector3D& pos,
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-__attribute__((flatten))
+[[gnu::flatten]]
 #endif
 Trk::DistanceSolution
 Trk::CylinderSurface::straightLineDistanceEstimate(

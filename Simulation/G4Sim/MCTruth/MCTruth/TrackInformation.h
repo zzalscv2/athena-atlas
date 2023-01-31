@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrackInformation_H
@@ -14,20 +14,22 @@ namespace ISF {
 class TrackInformation: public VTrackInformation {
 public:
 	TrackInformation();
-	TrackInformation(HepMC::ConstGenParticlePtr,const ISF::ISFParticle* baseIsp=0);
-	HepMC::ConstGenParticlePtr GetHepMCParticle() const;
-	const ISF::ISFParticle *GetBaseISFParticle() const;
-	int GetParticleBarcode() const;
-	void SetParticle(HepMC::ConstGenParticlePtr);
-	void SetBaseISFParticle(const ISF::ISFParticle*);
-	void SetReturnedToISF(bool returned) {m_returnedToISF=returned;};
-	bool GetReturnedToISF() const {return m_returnedToISF;};
-	void SetRegenerationNr(int i) {m_regenerationNr=i;};
-	int GetRegenerationNr() const {return m_regenerationNr;};
+	TrackInformation(HepMC::GenParticlePtr p, ISF::ISFParticle* baseIsp=0);
+	virtual HepMC::ConstGenParticlePtr GetHepMCParticle() const override {return m_theParticle;}
+	virtual HepMC::GenParticlePtr GetHepMCParticle() override {return m_theParticle;}
+	virtual const ISF::ISFParticle *GetBaseISFParticle() const override {return m_theBaseISFParticle;}
+	virtual ISF::ISFParticle *GetBaseISFParticle() override {return m_theBaseISFParticle;}
+	virtual int GetParticleBarcode() const override;
+	virtual void SetParticle(HepMC::GenParticlePtr) override;
+	virtual void SetBaseISFParticle(ISF::ISFParticle*) override;
+	virtual void SetReturnedToISF(bool returned) override {m_returnedToISF=returned;}
+	virtual bool GetReturnedToISF() const override {return m_returnedToISF;}
+	void SetRegenerationNr(int i) {m_regenerationNr=i;}
+	int GetRegenerationNr() const {return m_regenerationNr;}
 private:
 	int m_regenerationNr;
-	HepMC::ConstGenParticlePtr m_theParticle;
-	const ISF::ISFParticle *m_theBaseISFParticle;
+	HepMC::GenParticlePtr m_theParticle;
+	ISF::ISFParticle *m_theBaseISFParticle;
 	bool m_returnedToISF;
 };
 

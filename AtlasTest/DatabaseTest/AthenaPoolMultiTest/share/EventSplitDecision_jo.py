@@ -5,7 +5,6 @@
 ## Second part of AthenaPoolMultiTest gmake check
 ##<br><br>
 ## @author JackCranshaw (Jack.Cranshaw@cern.ch)
-## $Id: EventNoSplit_jo.py,v 1.27 2009-05-20 13:34:21 cranshaw Exp $
 #====================================================================
 
 #--------------------------------------------------------------
@@ -75,8 +74,6 @@ topSequence+=Splitter3
 #     event qualifies gets it. Another exclusive model that has been 
 #     explored puts all multistream events in a single overlap stream.
 #--------------------------------------------------------------
-
-ToolSvc = Service( "ToolSvc" )
 
 from AthenaServices.AthenaServicesConf import DecisionAlg
 

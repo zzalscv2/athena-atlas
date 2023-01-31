@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONROADFINDERTOOL_H
@@ -45,7 +45,7 @@ namespace Muon {
             bool operator!() const {return !get();}
             operator bool() const {return get();}
                      
-            const Amg::Vector3D& dir() const {return *m_dir;}
+            const Amg::Vector3D& dir() const {return m_dir;}
             const Amg::Vector3D& pos() const {return m_cl->globalPosition();}
 
             double dirDot(const SeedMeasurement& other) const {return dirDot(other.dir());}
@@ -56,7 +56,7 @@ namespace Muon {
             
         private:
             const Muon::MuonClusterOnTrack* m_cl{nullptr};
-            std::shared_ptr<const Amg::Vector3D> m_dir {nullptr};
+            Amg::Vector3D m_dir {0, 0, 0};
             double m_distance{0.};           
         };
 
@@ -179,8 +179,7 @@ namespace Muon {
             "Trk::TrackSummaryTool/MuidTrackSummaryTool",
         };
 
-        ToolHandle<IMuonClusterOnTrackCreator> m_mmClusterCreator{this, "MMClusterCreator", ""};
-        ToolHandle<IMuonClusterOnTrackCreator> m_stgcClusterCreator{this, "MuonClusterCreator", ""};
+        ToolHandle<IMuonClusterOnTrackCreator> m_muonClusterCreator{this, "MuonClusterCreator", ""};
 
         Gaudi::Property<bool> m_ipConstraint{this, "IPConstraint", true};  // use a ip perigee(0,0) constraint in the segment fit
         Gaudi::Property<double> m_maxClustDist{this, "ClusterDistance", 5.};

@@ -14,6 +14,7 @@
 #include "AthenaKernel/IAtRndmGenSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "CxxUtils/checker_macros.h"
 
 // Fatras
 #include "ISF_FatrasInterfaces/IHadronicInteractionProcessor.h"
@@ -58,7 +59,7 @@ namespace iFatras {
       
    */
    
-  class HadIntProcessorParametric : public extends<AthAlgTool, iFatras::IHadronicInteractionProcessor> {
+  class ATLAS_NOT_THREAD_SAFE HadIntProcessorParametric : public extends<AthAlgTool, iFatras::IHadronicInteractionProcessor> {  // deprecated: ATLASSIM-6020
     public:      
       /**AlgTool constructor for HadIntProcessorParametric*/
       HadIntProcessorParametric(const std::string&,const std::string&,const IInterface*);

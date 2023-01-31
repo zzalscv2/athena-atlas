@@ -27,7 +27,7 @@
 
 /** Constructor **/
 Trk::TrackingGeometrySvc::TrackingGeometrySvc(const std::string& name, ISvcLocator* svc)
-  : AthService(name, svc)
+  : base_class(name, svc)
   , m_geometryProcessors(this)
 {
   // geometry processors to validation / distort the TrackingGeometry ------------
@@ -123,7 +123,7 @@ Trk::TrackingGeometrySvc::trackingGeometryInit(bool needsInit)
 #endif
 
     // build the TrackingGeometry from the builder
-    m_trackingGeometry = m_trackingGeometryBuilder->trackingGeometry();
+    m_trackingGeometry = m_trackingGeometryBuilder->trackingGeometry().release();
 
 #ifdef TRKDETDESCR_MEMUSAGE
     ATH_MSG_INFO("[ memory usage ] TrackingGeometry retrieved: ");
@@ -191,19 +191,5 @@ Trk::TrackingGeometrySvc::finalize()
   ATH_MSG_INFO("[ memory usage ] ---------------------------------------------------------");
 #endif
   ATH_MSG_INFO("finalize() successful.");
-  return StatusCode::SUCCESS;
-}
-
-/** Query the interfaces. */
-StatusCode
-Trk::TrackingGeometrySvc::queryInterface(const InterfaceID& riid, void** ppvInterface)
-{
-  if (IID_ITrackingGeometrySvc == riid)
-    *ppvInterface = dynamic_cast<ITrackingGeometrySvc*>(this);
-  else {
-    // Interface is not directly available: try out a base class
-    return Service::queryInterface(riid, ppvInterface);
-  }
-  addRef();
   return StatusCode::SUCCESS;
 }

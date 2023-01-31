@@ -11,17 +11,17 @@
 namespace TruthHelper {
 
 
-  /// @brief Returns true if the particle was produced by an event generator
-  /// @deprecated Use the functions in TruthUtils instead
-  class IsGenerator : public GenIMCselector {
-  public:
+/// @brief Returns true if the particle was produced by an event generator
+/// @deprecated Use the functions in TruthUtils instead
+class IsGenerator : public GenIMCselector {
+public:
 
     IsGenerator() {}
     GenIMCselector* create() const;
 
     bool operator()(HepMC::ConstGenParticlePtr  p ) const;
 
-  };
+};
 
 
 }

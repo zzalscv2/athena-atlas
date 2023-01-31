@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # EGAM10.py
@@ -136,6 +136,28 @@ def EGAM10KernelCfg(ConfigFlags, name='EGAM10Kernel', **kwargs):
     augmentationTools += [EGAM10_PhotonVertexSelectionWrapper]
 
 
+    # ====================================================================
+    # Gain and cluster energies per layer decoration tool
+    # ====================================================================
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
+        GainDecoratorCfg, ClusterEnergyPerLayerDecoratorCfg )
+    GainDecoratorTool = acc.popToolsAndMerge(GainDecoratorCfg(ConfigFlags))
+    acc.addPublicTool(GainDecoratorTool)
+    augmentationTools.append(GainDecoratorTool)
+
+    cluster_sizes = (3,7), (5,5), (7,11)
+    for neta, nphi in cluster_sizes:
+        cename = 'ClusterEnergyPerLayerDecorator_%sx%s' % (neta, nphi)
+        ClusterEnergyPerLayerDecorator = acc.popToolsAndMerge(
+            ClusterEnergyPerLayerDecoratorCfg(
+                ConfigFlags,
+                neta = neta,
+                nphi=nphi,
+                name=cename ))
+        acc.addPublicTool(ClusterEnergyPerLayerDecorator)
+        augmentationTools.append(ClusterEnergyPerLayerDecorator)
+
+
     # thinning tools
     thinningTools = []
 
@@ -196,7 +218,6 @@ def EGAM10KernelCfg(ConfigFlags, name='EGAM10Kernel', **kwargs):
     # skimming
     skimmingTool = acc.getPrimaryAndMerge(EGAM10SkimmingToolCfg(ConfigFlags))
 
-
     # setup the kernel
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name,
                                       SkimmingTools = [skimmingTool],
@@ -220,11 +241,7 @@ def EGAM10Cfg(ConfigFlags):
     # multiple times in a train.
     # TODO: restrict it to relevant triggers
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    EGAM10TriggerListsHelper = TriggerListsHelper()
-    #EGAM10TriggerListsHelper.Run3TriggerNames = EGAM10TriggerListsHelper.Run3TriggerNamesNoTau
-    #EGAM10TriggerListsHelper.Run3TriggerNamesTau = []
-    EGAM10TriggerListsHelper.Run2TriggerNames = EGAM10TriggerListsHelper.Run2TriggerNamesNoTau
-    EGAM10TriggerListsHelper.Run2TriggerNamesTau = []
+    EGAM10TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # configure skimming/thinning/augmentation tools
     acc.merge(EGAM10KernelCfg(ConfigFlags,
@@ -238,7 +255,8 @@ def EGAM10Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     EGAM10SlimmingHelper = SlimmingHelper(
         'EGAM10SlimmingHelper',
-        NamesAndTypes = ConfigFlags.Input.TypedCollections )
+        NamesAndTypes = ConfigFlags.Input.TypedCollections,
+        ConfigFlags = ConfigFlags )
 
 
     # ------------------------------------------
@@ -303,17 +321,18 @@ def EGAM10Cfg(ConfigFlags):
 
     # photons
     EGAM10SlimmingHelper.ExtraVariables += [
-        'Photons.core57cellsEnergyCorrection.topoetcone20.topoetcone30',
-        'Photons.topoetcone40.ptcone20.ptcone30.ptcone40.f3.f3core',
+        'Photons.ptcone30.ptcone40.f3.f3core',
         'Photons.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId',
         'Photons.maxEcell_x.maxEcell_y.maxEcell_z',
+        'Photons.ptcone40_Nonprompt_All_MaxWeightTTVA_pt1000',
+        'Photons.ptcone40_Nonprompt_All_MaxWeightTTVA_pt500',
         'Photons.ptcone20_Nonprompt_All_MaxWeightTTVA_pt500',
         'Photons.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000', 
         'Photons.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500']
 
     # electrons
     EGAM10SlimmingHelper.ExtraVariables += [
-        'Electrons.topoetcone20.topoetcone30.topoetcone40.ptcone20.ptcone30',
+        'Electrons.topoetcone30.topoetcone40.ptcone20.ptcone30',
         'Electrons.ptcone40.maxEcell_time.maxEcell_energy.maxEcell_gain',
         'Electrons.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z']
 
@@ -330,25 +349,15 @@ def EGAM10Cfg(ConfigFlags):
     EGAM10SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
     
     # photons: gain and cluster energy per layer
-    from DerivationFrameworkCalo.DerivationFrameworkCaloFactories import (
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
         getGainDecorations, getClusterEnergyPerLayerDecorations )
-    GainDecoratorTool = None
-    ClusterEnergyPerLayerDecorators = []  
-    for toolStr in acc.getEventAlgo('EGAM10Kernel').AugmentationTools:
-        toolStr  = f'{toolStr}'
-        splitStr = toolStr.split('/')
-        tool =  acc.getPublicTool(splitStr[1])
-        if splitStr[0] == 'DerivationFramework::GainDecorator':
-            GainDecoratorTool = tool
-        elif splitStr[0] == 'DerivationFramework::ClusterEnergyPerLayerDecorator':
-            ClusterEnergyPerLayerDecorators.append( tool )
-
-    if GainDecoratorTool : 
-        EGAM10SlimmingHelper.ExtraVariables.extend(
-            getGainDecorations(GainDecoratorTool) )
-    for tool in ClusterEnergyPerLayerDecorators:
-        EGAM10SlimmingHelper.ExtraVariables.extend(
-            getClusterEnergyPerLayerDecorations( tool ) )
+    gainDecorations = getGainDecorations(acc, 'EGAM10Kernel')
+    print('EGAM10 gain decorations: ', gainDecorations)
+    EGAM10SlimmingHelper.ExtraVariables.extend(gainDecorations)
+    clusterEnergyDecorations = getClusterEnergyPerLayerDecorations(
+        acc, 'EGAM10Kernel' )
+    print('EGAM10 cluster energy decorations: ', clusterEnergyDecorations)
+    EGAM10SlimmingHelper.ExtraVariables.extend(clusterEnergyDecorations)
 
     # energy density
     EGAM10SlimmingHelper.ExtraVariables += [ 
@@ -364,6 +373,12 @@ def EGAM10Cfg(ConfigFlags):
     EGAM10SlimmingHelper.ExtraVariables += \
         densityList + [f'Photons{pflowIsoVar}'] 
 
+    # To have ptcone40, needed for efficiency measurement with MM
+    from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg
+    acc.merge(DerivationTrackIsoCfg(ConfigFlags,
+                                    object_types = ('Photons',),
+                                    ptCuts = (500,1000),
+                                    postfix = 'Extra'))
 
     # truth
     if ConfigFlags.Input.isMC:
@@ -395,10 +410,6 @@ def EGAM10Cfg(ConfigFlags):
     if ConfigFlags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
             AddRun2TriggerMatchingToSlimmingHelper )
-        AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper = EGAM10SlimmingHelper,
-            OutputContainerPrefix = 'TrigMatch_', 
-            TriggerList = EGAM10TriggerListsHelper.Run2TriggerNamesTau)
         AddRun2TriggerMatchingToSlimmingHelper(
             SlimmingHelper = EGAM10SlimmingHelper, 
             OutputContainerPrefix = 'TrigMatch_',

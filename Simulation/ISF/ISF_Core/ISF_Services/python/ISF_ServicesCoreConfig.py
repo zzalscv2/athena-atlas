@@ -11,43 +11,43 @@ from SubDetectorEnvelopes.SubDetectorEnvelopesConfig import EnvelopeDefSvcCfg
 from ISF_Tools.ISF_ToolsConfig import ParticleKillerToolCfg
 
 
-def ISFEnvelopeDefSvcCfg(ConfigFlags, name="ISF_ISFEnvelopeDefSvc", **kwargs):
+def ISFEnvelopeDefSvcCfg(flags, name="ISF_ISFEnvelopeDefSvc", **kwargs):
     # ATLAS common envlope definitions
     result = ComponentAccumulator()
-    kwargs.setdefault("ATLASEnvelopeDefSvc", result.getPrimaryAndMerge(EnvelopeDefSvcCfg(ConfigFlags)).name)
+    kwargs.setdefault("ATLASEnvelopeDefSvc", result.getPrimaryAndMerge(EnvelopeDefSvcCfg(flags)).name)
     result.addService(CompFactory.ISF.ISFEnvelopeDefSvc(name, **kwargs), primary = True)
     return result
 
 
-def GeoIDSvcCfg(ConfigFlags, name="ISF_GeoIDSvc", **kwargs):
+def GeoIDSvcCfg(flags, name="ISF_GeoIDSvc", **kwargs):
     result = ComponentAccumulator()
     # with ISF volume definitions
-    kwargs.setdefault("EnvelopeDefSvc", result.getPrimaryAndMerge(ISFEnvelopeDefSvcCfg(ConfigFlags)).name)
+    kwargs.setdefault("EnvelopeDefSvc", result.getPrimaryAndMerge(ISFEnvelopeDefSvcCfg(flags)).name)
     result.addService(CompFactory.ISF.GeoIDSvc(name, **kwargs), primary = True)
     return result
 
 
-def AFIIEnvelopeDefSvcCfg(ConfigFlags, name="ISF_AFIIEnvelopeDefSvc", **kwargs):
+def AFIIEnvelopeDefSvcCfg(flags, name="ISF_AFIIEnvelopeDefSvc", **kwargs):
     result = ComponentAccumulator()
     # ATLAS common envlope definitions
-    kwargs.setdefault("ISFEnvelopeDefSvc", result.getPrimaryAndMerge(ISFEnvelopeDefSvcCfg(ConfigFlags)).name)
+    kwargs.setdefault("ISFEnvelopeDefSvc", result.getPrimaryAndMerge(ISFEnvelopeDefSvcCfg(flags)).name)
     kwargs.setdefault("InDetMaxExtentZ", 3549.5*mm)
     result.addService(CompFactory.ISF.AFIIEnvelopeDefSvc(name, **kwargs), primary = True)
     return result
 
 
-def AFIIGeoIDSvcCfg(ConfigFlags, name="ISF_AFIIGeoIDSvc", **kwargs):
+def AFIIGeoIDSvcCfg(flags, name="ISF_AFIIGeoIDSvc", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("EnvelopeDefSvc", result.getPrimaryAndMerge(AFIIEnvelopeDefSvcCfg(ConfigFlags)).name)
+    kwargs.setdefault("EnvelopeDefSvc", result.getPrimaryAndMerge(AFIIEnvelopeDefSvcCfg(flags)).name)
     result.addService(CompFactory.ISF.GeoIDSvc(name, **kwargs), primary = True)
     return result
 
 
 # previously in LegacySimServicesConfig
-def ParticleKillerSvcCfg(ConfigFlags, name="ISF_ParticleKillerSvc", **kwargs):
+def ParticleKillerSvcCfg(flags, name="ISF_ParticleKillerSvc", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("Identifier", "ParticleKiller")
-    tool = result.popToolsAndMerge(ParticleKillerToolCfg(ConfigFlags))
+    tool = result.popToolsAndMerge(ParticleKillerToolCfg(flags))
     kwargs.setdefault("SimulatorTool", tool)
     result.addService(CompFactory.ISF.LegacySimSvc(name, **kwargs), primary = True)
     return result

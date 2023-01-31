@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCS1DFunctionRegression_h
@@ -21,7 +21,7 @@ class TFCS1DFunctionRegression:public TFCS1DFunction
     using TFCS1DFunction::rnd_to_fct;
     virtual double rnd_to_fct(double rnd) const;
     double  regression_value(double uniform) const;
-    void    set_weights(std::vector<std::vector<double> > fWeightMatrix0to1, std::vector<std::vector<double> > fWeightMatrix1to2);
+    void    set_weights(const std::vector<std::vector<double> >& fWeightMatrix0to1, const std::vector<std::vector<double> >& fWeightMatrix1to2);
     double  sigmoid(double) const;
 
   private:

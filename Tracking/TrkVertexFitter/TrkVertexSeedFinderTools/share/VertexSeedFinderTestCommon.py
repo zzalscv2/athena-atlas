@@ -35,8 +35,6 @@ IOVDbSvc().GlobalTag = 'OFLCOND-RUN12-SDR-35'
 
 import MagFieldServices.SetupField
 
-from TrkDetDescrSvc.AtlasTrackingGeometrySvc import AtlasTrackingGeometrySvc
-
 from AthenaCommon.AlgSequence import AlgSequence
 topSequence = AlgSequence()
 

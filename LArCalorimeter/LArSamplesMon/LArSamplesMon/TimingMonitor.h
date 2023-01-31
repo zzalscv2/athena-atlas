@@ -14,10 +14,11 @@
 #include "TH2D.h"
 #include "LArSamplesMon/MonitorBase.h"
 #include "LArCafJobs/CaloId.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace LArSamples {
   
-  class TimingMonitor : public MonitorBase  
+  class ATLAS_NOT_THREAD_SAFE TimingMonitor : public MonitorBase  
   {
   
     public:

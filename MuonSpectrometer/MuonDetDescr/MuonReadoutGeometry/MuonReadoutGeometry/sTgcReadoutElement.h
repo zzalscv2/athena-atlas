@@ -73,8 +73,14 @@ namespace MuonGM {
         /** pad position */
         bool padPosition(const Identifier& id, Amg::Vector2D& pos) const;
 
+        /** pad global position */
+        bool padGlobalPosition(const Identifier& id, Amg::Vector3D& gpos) const;
+
         /** pad corners */
         bool padCorners(const Identifier& id, std::vector<Amg::Vector2D>& corners) const;
+
+        /** pad global corners */
+        bool padGlobalCorners(const Identifier& id, std::vector<Amg::Vector3D>& gcorners) const;
 
         /** is eta=0 of QL1 or QS1? */
         bool isEtaZero(const Identifier& id, double posY) const;
@@ -175,6 +181,7 @@ namespace MuonGM {
 
         /** read A-line parameters and include the chamber rotation/translation 
             in the local-to-global (ATLAS) reference frame transformaton */
+        const Amg::Transform3D& getDelta() const { return m_delta; }
         void setDelta(const ALinePar& aline);
         void setDelta(MuonDetectorManager* mgr);
 
@@ -228,14 +235,6 @@ namespace MuonGM {
         // transforms (RE->layer)
         Amg::Transform3D m_Xlg[4];
     };
-
-    inline void sTgcReadoutElement::clearALinePar() {
-        if (has_ALines()) {
-            m_ALinePar = nullptr; 
-            m_delta = Amg::Transform3D::Identity(); 
-            refreshCache();
-        }
-    }
 
     inline int sTgcReadoutElement::surfaceHash(const Identifier& id) const {
         return surfaceHash(manager()->stgcIdHelper()->gasGap(id), manager()->stgcIdHelper()->channelType(id));
@@ -322,6 +321,13 @@ namespace MuonGM {
         return design->channelPosition(std::pair<int, int>(padEta, padPhi), pos);
     }
 
+    inline bool sTgcReadoutElement::padGlobalPosition(const Identifier& id, Amg::Vector3D& gpos) const {
+        Amg::Vector2D lpos{Amg::Vector2D::Zero()};
+        if (!padPosition(id, lpos)) return false;
+        surface(id).localToGlobal(lpos, Amg::Vector3D::Zero(), gpos);
+        return true;
+    }
+
     inline bool sTgcReadoutElement::padCorners(const Identifier& id, std::vector<Amg::Vector2D>& corners) const {
         const MuonPadDesign* design = getPadDesign(id);
         if (!design) return false;
@@ -330,6 +336,21 @@ namespace MuonGM {
         int padPhi = manager()->stgcIdHelper()->padPhi(id);
 
         return design->channelCorners(std::pair<int, int>(padEta, padPhi), corners);
+    }
+
+    inline bool sTgcReadoutElement::padGlobalCorners(const Identifier& id, std::vector<Amg::Vector3D>& gcorners) const {
+        std::vector<Amg::Vector2D> lcorners;
+        if (!padCorners(id, lcorners)) {
+            return false;
+        }
+        std::transform(lcorners.cbegin(), lcorners.cend(),
+                       std::back_inserter(gcorners),
+                       [&](const auto& lpos) {
+                           Amg::Vector3D gpos;
+                           surface(id).localToGlobal(lpos, Amg::Vector3D::Zero(), gpos);
+                           return gpos;
+                       });
+        return true;
     }
 
     inline bool sTgcReadoutElement::isEtaZero(const Identifier& id, double posY) const {

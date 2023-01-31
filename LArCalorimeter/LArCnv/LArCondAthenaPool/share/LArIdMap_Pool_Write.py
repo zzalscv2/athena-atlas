@@ -30,7 +30,7 @@ theApp.Dlls += [ "LArTools" ]
 # Other LAr related
 include( "LArDetMgrDetDescrCnv/LArDetMgrDetDescrCnv_joboptions.py" )
 
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+include( "CaloConditions/CaloConditions_jobOptions.py" )
 
 include( "IdDictDetDescrCnv/IdDictDetDescrCnv_joboptions.py" )
 

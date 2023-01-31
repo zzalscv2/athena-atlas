@@ -14,7 +14,6 @@
 #include "GenInterfaces/IHepMCWeightSvc.h"
 #include "GenInterfaces/IHforTool.h"
 #include "GenInterfaces/IPDFReweightTool.h"
-#include "GenInterfaces/ITruthSelector.h"
 
 #include "AtlasHepMC/SimpleVector.h"
 #include <vector>

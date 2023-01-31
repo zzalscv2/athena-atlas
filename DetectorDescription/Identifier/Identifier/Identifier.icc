@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /// Constructor from Identifier32
@@ -25,9 +25,8 @@ inline Identifier::Identifier(Identifier32::value_type value)
   }
 }
 inline Identifier::Identifier(int value)
-  : m_id(max_value)
+  : m_id(static_cast<value_type>(value) << 32)
 {
-  m_id = (static_cast<value_type>(value) << 32);
 }
 
 //-----------------------------------------------

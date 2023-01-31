@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -17,6 +17,7 @@
 #include "LWHistRootUtils.h"
 #include "TH1F.h"
 #include <iostream>
+#include <utility>
 
 #define FLEXHIST() ((reinterpret_cast<Flex1DHisto<float>*>(m_flexHisto)))
 #define CALL(x,y) m_rootHisto ? m_rootHisto-> x : reinterpret_cast<Flex1DHisto<float>*>(m_flexHisto)-> y
@@ -132,7 +133,11 @@ TH1F_LW::~TH1F_LW()
 }
 
 //____________________________________________________________________
-TH1* TH1F_LW::getROOTHistBaseNoAlloc() const
+const TH1* TH1F_LW::getROOTHistBaseNoAlloc() const
+{
+  return m_rootHisto;
+}
+TH1* TH1F_LW::getROOTHistBaseNoAlloc()
 {
   return m_rootHisto;
 }
@@ -212,20 +217,29 @@ const float * TH1F_LW::getVarBins() const
     assert(false);
     return 0;
   }
+  return std::as_const(*FLEXHIST()).getVarBins();
+}
+
+float * TH1F_LW::getVarBins()
+{
+  if (m_rootHisto) {
+    assert(false);
+    return 0;
+  }
   return FLEXHIST()->getVarBins();
 }
 
 double TH1F_LW::getXMin() const
 {
   if (m_rootHisto)
-    return m_rootHisto->GetXaxis()->GetXmin();
+    return std::as_const(*m_rootHisto).GetXaxis()->GetXmin();
   return FLEXHIST()->getXMin();
 }
 
 double TH1F_LW::getXMax() const
 {
   if (m_rootHisto)
-    return m_rootHisto->GetXaxis()->GetXmax();
+    return std::as_const(*m_rootHisto).GetXaxis()->GetXmax();
   return FLEXHIST()->getXMax();
 }
 

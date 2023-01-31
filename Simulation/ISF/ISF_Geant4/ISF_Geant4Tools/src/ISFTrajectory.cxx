@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -89,7 +89,7 @@ void iGeant4::ISFTrajectory::AppendStep(const G4Step* aStep)
       return; //The G4Exception call above should abort the job, but Coverity does not seem to pick this up.
     }
 
-    ISF::ISFParticle* baseIsp = const_cast<ISF::ISFParticle*>( trackInfo->GetBaseISFParticle() );
+    ISF::ISFParticle* baseIsp = trackInfo->GetBaseISFParticle();
     if (!baseIsp) {
       G4ExceptionDescription description;
       description << G4String("AppendStep: ") + "NULL ISFParticle pointer for current G4Step (trackID "

@@ -11,10 +11,10 @@
 namespace TruthHelper {
 
 
-  /// @brief Identify if the particle is an interacting one, e.g. hadron, electron, photon or muon
-  /// @deprecated Use the functions in TruthUtils instead
-  class IsGenInteracting : public GenIMCselector {
-  public:
+/// @brief Identify if the particle is an interacting one, e.g. hadron, electron, photon or muon
+/// @deprecated Use the functions in TruthUtils instead
+class IsGenInteracting : public GenIMCselector {
+public:
 
     IsGenInteracting() {}
 
@@ -22,7 +22,7 @@ namespace TruthHelper {
 
     bool operator()(HepMC::ConstGenParticlePtr p ) const;
 
-  };
+};
 
 
 }

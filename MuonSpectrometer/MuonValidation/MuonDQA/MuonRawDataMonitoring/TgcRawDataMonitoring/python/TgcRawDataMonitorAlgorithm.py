@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -16,9 +16,7 @@ def TgcRawDataMonitoringConfig(inputFlags):
     result = ComponentAccumulator()
 
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    from AtlasGeoModel.AtlasGeoModelConfig import AtlasGeometryCfg
     result.merge(AtlasFieldCacheCondAlgCfg(inputFlags))
-    result.merge(AtlasGeometryCfg(inputFlags))
     
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags,'TgcRawDataMonitorCfg')
@@ -721,7 +719,31 @@ def TgcRawDataMonitoringConfig(inputFlags):
                                 type='TEfficiency',path=trigPath,xbins=100,xmin=-2.5,xmax=2.5)
         myGroup.defineHistogram('muon_l1passThr%d,muon_eta,muon_phi;MuonRoI_Eff_EtaVsPhi_Thr%02d' % (n,n),title='MuonRoI_Eff_EtaVsPhi_Thr%02d;Offline muon eta; Offline muon phi' % n,
                                 type='TEfficiency',path=trigPath,xbins=100,xmin=-2.5,xmax=2.5,ybins=48,ymin=-math.pi,ymax=math.pi)
-        
+
+        myGroup.defineHistogram('muon_l1passThr%d,muon_pt_tgc,muon_phi0gev_tgcA;MuonRoI_Eff_PtVsPhi_TGC_Endcap_sideA_Thr%02d' % (n,n),title='MuonRoI_Eff_PtVsPhi_TGC_Endcap_sideA_Thr%02d;Offline muon pT [GeV];Offline muon phi;Efficiency' % n,
+                                cutmask='muon_endcap',type='TEfficiency',path=trigPath,xbins=50,xmin=0,xmax=50,ybins=48,ymin=-math.pi,ymax=math.pi)
+        myGroup.defineHistogram('muon_l1passThr%d,muon_pt_tgc,muon_phi0gev_tgcA;MuonRoI_Eff_PtVsPhi_TGC_Forward_sideA_Thr%02d' % (n,n),title='MuonRoI_Eff_PtVsPhi_TGC_Forward_sideA_Thr%02d;Offline muon pT [GeV];Offline muon phi;Efficiency' % n,
+                                cutmask='muon_forward',type='TEfficiency',path=trigPath,xbins=50,xmin=0,xmax=50,ybins=24,ymin=-math.pi,ymax=math.pi)
+        myGroup.defineHistogram('muon_l1passThr%d,muon_pt_tgc,muon_phi0gev_tgcC;MuonRoI_Eff_PtVsPhi_TGC_Endcap_sideC_Thr%02d' % (n,n),title='MuonRoI_Eff_PtVsPhi_TGC_Endcap_sideC_Thr%02d;Offline muon pT [GeV];Offline muon phi;Efficiency' % n,
+                                cutmask='muon_endcap',type='TEfficiency',path=trigPath,xbins=50,xmin=0,xmax=50,ybins=48,ymin=-math.pi,ymax=math.pi)
+        myGroup.defineHistogram('muon_l1passThr%d,muon_pt_tgc,muon_phi0gev_tgcC;MuonRoI_Eff_PtVsPhi_TGC_Forward_sideC_Thr%02d' % (n,n),title='MuonRoI_Eff_PtVsPhi_TGC_Forward_sideC_Thr%02d;Offline muon pT [GeV];Offline muon phi;Efficiency' % n,
+                                cutmask='muon_forward',type='TEfficiency',path=trigPath,xbins=50,xmin=0,xmax=50,ybins=24,ymin=-math.pi,ymax=math.pi)
+
+        myGroup.defineHistogram('muon_l1passThr%d,muon_pt_tgc;MuonRoI_Eff_Pt_TGC_ChargePos_Thr%02d' % (n,n),title='MuonRoI_Eff_Pt_TGC_ChargePos_Thr%02d;Offline muon pT [GeV];Efficiency' % n,
+                                cutmask='muon_chargePos',type='TEfficiency',path=trigPath,xbins=50,xmin=0,xmax=50)
+        myGroup.defineHistogram('muon_l1passThr%d,muon_pt_tgc;MuonRoI_Eff_Pt_TGC_ChargeNeg_Thr%02d' % (n,n),title='MuonRoI_Eff_Pt_TGC_ChargeNeg_Thr%02d;Offline muon pT [GeV];Efficiency' % n,
+                                cutmask='muon_chargeNeg',type='TEfficiency',path=trigPath,xbins=50,xmin=0,xmax=50)
+
+        myGroup.defineHistogram('muon_l1passThr%d,muon_pt_tgc,muon_phi0gev_tgcA;MuonRoI_Eff_PtVsPhi_TGC_ChargePos_sideA_Thr%02d' % (n,n),title='MuonRoI_Eff_PtVsPhi_TGC_ChargePos_sideA_Thr%02d;Offline muon pT [GeV];Offline muon phi;Efficiency' % n,
+                                cutmask='muon_chargePos',type='TEfficiency',path=trigPath,xbins=50,xmin=0,xmax=50,ybins=48,ymin=-math.pi,ymax=math.pi)
+        myGroup.defineHistogram('muon_l1passThr%d,muon_pt_tgc,muon_phi0gev_tgcA;MuonRoI_Eff_PtVsPhi_TGC_ChargeNeg_sideA_Thr%02d' % (n,n),title='MuonRoI_Eff_PtVsPhi_TGC_ChargeNeg_sideA_Thr%02d;Offline muon pT [GeV];Offline muon phi;Efficiency' % n,
+                                cutmask='muon_chargeNeg',type='TEfficiency',path=trigPath,xbins=50,xmin=0,xmax=50,ybins=48,ymin=-math.pi,ymax=math.pi)
+
+        myGroup.defineHistogram('muon_l1passThr%d,muon_pt_tgc,muon_phi0gev_tgcC;MuonRoI_Eff_PtVsPhi_TGC_ChargePos_sideC_Thr%02d' % (n,n),title='MuonRoI_Eff_PtVsPhi_TGC_ChargePos_sideC_Thr%02d;Offline muon pT [GeV];Offline muon phi;Efficiency' % n,
+                                cutmask='muon_chargePos',type='TEfficiency',path=trigPath,xbins=50,xmin=0,xmax=50,ybins=48,ymin=-math.pi,ymax=math.pi)
+        myGroup.defineHistogram('muon_l1passThr%d,muon_pt_tgc,muon_phi0gev_tgcC;MuonRoI_Eff_PtVsPhi_TGC_ChargeNeg_sideC_Thr%02d' % (n,n),title='MuonRoI_Eff_PtVsPhi_TGC_ChargeNeg_sideC_Thr%02d;Offline muon pT [GeV];Offline muon phi;Efficiency' % n,
+                                cutmask='muon_chargeNeg',type='TEfficiency',path=trigPath,xbins=50,xmin=0,xmax=50,ybins=48,ymin=-math.pi,ymax=math.pi)
+
 
 
         
@@ -1111,12 +1133,22 @@ def TgcRawDataMonitoringConfig(inputFlags):
                                             ybins=nsectors*2+1,ymin=-nsectors-0.5,ymax=nsectors+0.5)
 
                     if coinType == 'SL':
-                        for coinflag in ['EI','Tile','RPC','NSW']:
-                            myGroupCoin.defineHistogram(suffix+'coin_lb,'+suffix+'coin_sector;'+suffix+'TgcCoin_Evt_SectorVsLB_CoinFlag'+coinflag,
-                                                        title=suffix+'TgcCoin_Evt_SectorVsLB_CoinFlag'+coinflag+';LumiBlock;Trigger Sector (>0 for A, <0 for C)',
+                        for coinflag in ['EI','Tile','RPC','NSW','F','C','H']:
+                            if region == 'Forward' :
+                                if coinflag == 'EI' :continue
+                                if coinflag == 'Tile' :continue
+                                if coinflag == 'RPC' :continue
+                            myGroupCoin.defineHistogram(suffix+'coin_roi,'+suffix+'coin_sector;'+suffix+'TgcCoin_Evt_SectorVsRoI_CoinFlag'+coinflag,
+                                                        title=suffix+'TgcCoin_Evt_SectorVsRoI_CoinFlag'+coinflag+';RoI;Trigger Sector (>0 for A, <0 for C)',
                                                         type='TH2F',path=coinPath,cutmask=suffix+'coin_CoinFlag'+coinflag,
-                                                        xbins=100,xmin=0.5,xmax=100.5,opt='kAddBinsDynamically', merge='merge',
+                                                        xbins=nrois+1,xmin=-0.5,xmax=nrois+0.5,
                                                         ybins=nsectors*2+1,ymin=-nsectors-0.5,ymax=nsectors+0.5)
+                            if coinflag != 'H' :
+                                myGroupCoin.defineHistogram(suffix+'coin_lb,'+suffix+'coin_sector;'+suffix+'TgcCoin_Evt_SectorVsLB_CoinFlag'+coinflag,
+                                                            title=suffix+'TgcCoin_Evt_SectorVsLB_CoinFlag'+coinflag+';LumiBlock;Trigger Sector (>0 for A, <0 for C)',
+                                                            type='TH2F',path=coinPath,cutmask=suffix+'coin_CoinFlag'+coinflag,
+                                                            xbins=100,xmin=0.5,xmax=100.5,opt='kAddBinsDynamically', merge='merge',
+                                                            ybins=nsectors*2+1,ymin=-nsectors-0.5,ymax=nsectors+0.5)
 
                         myGroupCoin.defineHistogram(suffix+'coin_roi,'+suffix+'coin_sector;'+suffix+'TgcCoin_Evt_SectorVsRoI',
                                                 title=suffix+'TgcCoin_Evt_SectorVsRoI;RoI;Trigger Sector (>0 for A, <0 for C)',
@@ -1137,7 +1169,7 @@ def TgcRawDataMonitoringConfig(inputFlags):
                                                 title=suffix+'TgcCoin_Evt_SectorVsisPositiveDeltaR;Trigger Sector (>0 for A, <0 for C);isPositiveDeltaR',
                                                 type='TH2F',path=coinPath,
                                                 xbins=nsectors*2+1,xmin=-nsectors-0.5,xmax=nsectors+0.5,
-                                                ybins=2,ymin=-0.5,ymax=1.5,ylabels=['Negative','Positive'])
+                                                ybins=2,ymin=-0.5,ymax=1.5)
 
 
 
@@ -1151,39 +1183,39 @@ if __name__=='__main__':
     from AthenaCommon.Constants import INFO
     log.setLevel(INFO)
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
-    ConfigFlags.Input.isMC = True
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.isMC = True
 
     import glob
     import sys
     if len(sys.argv) == 3:
         inputs = sys.argv[1].split(',')
-        ConfigFlags.Input.Files = inputs
-        ConfigFlags.Output.HISTFileName = sys.argv[2]
+        flags.Input.Files = inputs
+        flags.Output.HISTFileName = sys.argv[2]
     else:
         inputs = glob.glob('data/*')
-        ConfigFlags.Input.Files = inputs
-        ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput.root'
+        flags.Input.Files = inputs
+        flags.Output.HISTFileName = 'ExampleMonitorOutput.root'
 
-    ConfigFlags.Trigger.triggerConfig = "FILE"
-    ConfigFlags.Trigger.triggerMenuSetup = "Dev_pp_run3_v1"
+    flags.Trigger.triggerConfig = "FILE"
+    flags.Trigger.triggerMenuSetup = "Dev_pp_run3_v1"
 
-    if not ConfigFlags.Input.isMC:
-        ConfigFlags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2022-09"
+    if not flags.Input.isMC:
+        flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2022-10"
 
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.lock()
+    flags.dump()
 
     from AthenaCommon.AppMgr import ServiceMgr
     ServiceMgr.Dump = False
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    tgcRawDataMonitorAcc = TgcRawDataMonitoringConfig(ConfigFlags)
+    tgcRawDataMonitorAcc = TgcRawDataMonitoringConfig(flags)
     cfg.merge(tgcRawDataMonitorAcc)
     cfg.getEventAlgo('TgcRawDataMonAlg').OutputLevel = INFO
     cfg.getEventAlgo('TgcRawDataMonAlg').MonitorThresholdPatterns = True
@@ -1199,14 +1231,13 @@ if __name__=='__main__':
     cfg.getEventAlgo('TgcRawDataMonAlg').nHitsInOtherTGCWire = 3
     cfg.getEventAlgo('TgcRawDataMonAlg').nHitsInOtherTGCStrip = 2
     cfg.getEventAlgo('TgcRawDataMonAlg').MaskChannelFileName = 'tgc_mask_channels.txt'
+    cfg.getEventAlgo('TgcRawDataMonAlg').TagMuonInDifferentSystem = False
 
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    cfg.merge(AtlasFieldCacheCondAlgCfg(ConfigFlags))
-    from AtlasGeoModel.AtlasGeoModelConfig import AtlasGeometryCfg
-    cfg.merge(AtlasGeometryCfg(ConfigFlags))
+    cfg.merge(AtlasFieldCacheCondAlgCfg(flags))
     from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg,generateL1Menu
-    cfg.merge(L1ConfigSvcCfg(ConfigFlags))
-    generateL1Menu(ConfigFlags)
+    cfg.merge(L1ConfigSvcCfg(flags))
+    generateL1Menu(flags)
 
     cfg.printConfig(withDetails=False, summariseProps = False)
 

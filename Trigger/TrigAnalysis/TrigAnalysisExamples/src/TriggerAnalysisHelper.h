@@ -39,21 +39,21 @@ namespace Trig{
         public:
 
             template<class T>
-                bool ancestorPassed(const HLT::TriggerElement* te,const std::string key="");
+                bool ancestorPassed(const HLT::TriggerElement* te,const std::string& key="");
             template<class T>
                 const T*
-                getFeature(const HLT::TriggerElement* te,const std::string key="");
+                getFeature(const HLT::TriggerElement* te,const std::string& key="");
             template<class T>
                 void printFeatureAndTEInfo(const Trig::Feature<T> feature);
             template<class T>
-                void getFeatureAndTEInfo(const std::string chainName,unsigned int condition = TrigDefs::Physics,const std::string key="");
+                void getFeatureAndTEInfo(const std::string& chainName,unsigned int condition = TrigDefs::Physics,const std::string& key="");
             template<class T1, class T2>
-                void getCombinationAndTEInfo(const std::string chainName, 
+                void getCombinationAndTEInfo(const std::string& chainName, 
                         unsigned int condition = TrigDefs::Physics, 
-                        const std::string key1="", 
-                        const std::string key2="");
+                        const std::string& key1="", 
+                        const std::string& key2="");
             template<class T>
-                void getSelectedObjects(const std::string chainName,unsigned int condition=TrigDefs::Physics,const std::string key="");
+                void getSelectedObjects(const std::string& chainName,unsigned int condition=TrigDefs::Physics,const std::string& key="");
         private:
             ToolHandle< Trig::TrigDecisionTool > m_trigDecisionTool;
             ToolHandle<Trig::IMatchingTool> m_matchTool;
@@ -73,7 +73,7 @@ namespace Trig{
     //
 
     template<class T>
-        bool TriggerAnalysisHelper::ancestorPassed(const HLT::TriggerElement* te,const std::string key){
+        bool TriggerAnalysisHelper::ancestorPassed(const HLT::TriggerElement* te,const std::string& key){
             // Sanity check
             if ( te == nullptr ) return false;
             // Possible to get back a nullptr from the navigation
@@ -87,7 +87,7 @@ namespace Trig{
     // Return a container of objects from a particular trigger chain
     template<class T>
         const T*
-        TriggerAnalysisHelper::getFeature(const HLT::TriggerElement* te,const std::string key){
+        TriggerAnalysisHelper::getFeature(const HLT::TriggerElement* te,const std::string& key){
             if ( te == nullptr ) return nullptr;
             if ( (m_trigDecisionTool->ancestor<T>(te,key)).te() == nullptr )
                 return nullptr;
@@ -119,7 +119,7 @@ namespace Trig{
     // dumps the feature label and the TriggerElement label
     // gets a pointer to the container of type T and dumps the size of the container
     template<class T>
-        void TriggerAnalysisHelper::getFeatureAndTEInfo(const std::string chainName,unsigned int condition,const std::string key){
+        void TriggerAnalysisHelper::getFeatureAndTEInfo(const std::string& chainName,unsigned int condition,const std::string& key){
             FeatureContainer features = m_trigDecisionTool->features( chainName, condition);
             std::vector<Feature<T> > vectorOfFeatures = features.get<T>(key);
             ATH_MSG_INFO(chainName << " has " << features.get<T>().size() << " T features ");
@@ -130,7 +130,7 @@ namespace Trig{
         }
 
     template<class T1, class T2>
-        void TriggerAnalysisHelper::getCombinationAndTEInfo(const std::string chainName,unsigned int condition,const std::string key1,const std::string key2){
+        void TriggerAnalysisHelper::getCombinationAndTEInfo(const std::string& chainName,unsigned int condition,const std::string& key1,const std::string& key2){
             FeatureContainer features = m_trigDecisionTool->features( chainName,condition );
 
             ATH_MSG_INFO(chainName << " has " << features.getCombinations().size() << " combinations, " 
@@ -159,7 +159,7 @@ namespace Trig{
         }
 
     template<class T>
-        void TriggerAnalysisHelper::getSelectedObjects(const std::string chainName,unsigned int condition,const std::string key){
+        void TriggerAnalysisHelper::getSelectedObjects(const std::string& chainName,unsigned int condition,const std::string& key){
            
             
             FeatureContainer features = m_trigDecisionTool->features( chainName, condition);

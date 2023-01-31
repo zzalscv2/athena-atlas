@@ -49,7 +49,7 @@ namespace pool {
       /** Explicitly disconnects all the databases.
        *  If a transaction is active, then all the changes since the last commit are aborted.
        */
-      void disconnectAll();
+      bool disconnectAll();
 
       /// Returns the transaction object
       ITransaction& transaction();

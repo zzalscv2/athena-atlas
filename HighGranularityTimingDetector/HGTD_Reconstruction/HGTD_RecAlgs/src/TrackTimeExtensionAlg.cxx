@@ -197,8 +197,8 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
       has_cluster_vec.emplace_back(true);
 
       chi2_vec.emplace_back(
-          trk_state->fitQualityOnSurface()->chiSquared() /
-          trk_state->fitQualityOnSurface()->doubleNumberDoF());
+          trk_state->fitQualityOnSurface().chiSquared() /
+          trk_state->fitQualityOnSurface().doubleNumberDoF());
 
       const HGTD_ClusterOnTrack* cot =
           dynamic_cast<const HGTD_ClusterOnTrack*>(trk_state->measurementOnTrack());
@@ -215,7 +215,7 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
           acc_tpl("truthParticleLink");
       const xAOD::TruthParticle* truth_particle = nullptr;
       if (acc_tpl.isAvailable(*track_ptkl)) {
-        auto truth_match_link = acc_tpl(*track_ptkl);
+        const auto& truth_match_link = acc_tpl(*track_ptkl);
         if (truth_match_link.isValid()) {
           truth_particle = *truth_match_link;
         }

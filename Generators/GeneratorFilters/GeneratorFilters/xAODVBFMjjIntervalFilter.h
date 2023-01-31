@@ -5,15 +5,19 @@
 #ifndef GENERATORFILTERSXAODVBFMJJINTERVALFILTER_H
 #define GENERATORFILTERSXAODVBFMJJINTERVALFILTER_H
 
+#include "AthContainers/ConstDataVector.h"
 #include "GeneratorModules/GenFilter.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 #include "xAODJet/JetContainer.h"
 
 #include "xAODTruth/TruthEvent.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "xAODTruth/TruthParticle.h"
 
-class IAtRndmGenSvc;
-
+namespace CLHEP {
+  class HepRandomEngine;
+}
 
 class xAODVBFMjjIntervalFilter : public GenFilter {
 public:
@@ -24,12 +28,15 @@ public:
 
 private:
 
-  double m_olapPt;
+  CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName,
+                                          const EventContext& ctx) const;
+
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};// Random number generator
+
+   double m_olapPt;
   double m_yMax;                           // Rapidity acceptance
   double m_pTavgMin;                       // Required average dijet pT
   std::string m_TruthJetContainerName;     // Name of the truth jet container
-
-  ServiceHandle<IAtRndmGenSvc> m_rand;     // Random number generator
 
   //long m_total;                            // Total number of events tested
   //long m_passed;                           // Number of events passing all cuts
@@ -64,8 +71,8 @@ private:
 
 public:
 
-  bool ApplyMassDphi(xAOD::JetContainer *jets);
-  double getEventWeight(xAOD::JetContainer *jets);
+  bool ApplyMassDphi(ConstDataVector<xAOD::JetContainer> *jets);
+  double getEventWeight(ConstDataVector<xAOD::JetContainer> *jets);
 };
 
 #endif

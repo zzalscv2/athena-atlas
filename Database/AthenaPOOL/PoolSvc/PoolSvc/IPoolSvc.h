@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOLSVC_IPOOLSVC_H
@@ -14,7 +14,6 @@
 #include "CollectionBase/ICollection.h"
 #include "PersistencySvc/ITransaction.h"
 #include "DataModelRoot/RootType.h"
-#include "CxxUtils/checker_macros.h"
 
 #include <string>
 
@@ -99,8 +98,7 @@ public: // Non-static members
    /// @param connection [IN] string containing the connection.
    /// @param collectionName [IN] string containing the persistent name of the collection.
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
-   virtual pool::ICollection* createCollection ATLAS_NOT_THREAD_SAFE
-          (const std::string& collectionType,
+   virtual pool::ICollection* createCollection(const std::string& collectionType,
 	   const std::string& connection,
 	   const std::string& collectionName,
 	   unsigned int contextId = IPoolSvc::kInputStream) const = 0;

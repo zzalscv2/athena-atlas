@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """Set up to read and/or write bytestream files.
 
 This module configures the Athena components required to read from
@@ -13,7 +13,7 @@ file.
 
     Typical usage examples:
 
-        component_accumulator.merge(byteStreamReadCfg(ConfigFlags))
+        component_accumulator.merge(byteStreamReadCfg(flags))
 """
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -30,7 +30,7 @@ def ByteStreamReadCfg(flags, type_names=None):
     primary input file.
 
     Args:
-        flags:      Job configuration, usually derived from ConfigFlags
+        flags:      Job configuration flags
         type_names: (optional) specific type names for address provider to find
 
     Returns:
@@ -105,7 +105,7 @@ def ByteStreamWriteCfg(flags, type_names=None):
     determined from the given configuration flags.
 
     Args:
-        flags:      Job configuration, usually derived from ConfigFlags
+        flags:      Job configuration flags
         type_names: (optional) Specify item list for output stream to write
 
     Returns:
@@ -165,7 +165,7 @@ def TransientByteStreamCfg(flags, item_list=None, type_names=None, extra_inputs=
     The data can then be read downstream as if they were coming from a BS file.
 
     Args:
-        flags:        Job configuration, usually derived from ConfigFlags
+        flags:        Job configuration flags
         item_list:    (optional) List of objects to be written to transient ByteStream
         type_names:   (optional) List of types/names to register in BS conversion service
                       as available to be read from (transient) ByteStream
@@ -231,24 +231,25 @@ if __name__ == "__main__":
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Logging import logging
 
     log = logging.getLogger('ByteStreamConfig')
+    
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Output.doWriteBS = True
+    flags.lock()
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Output.doWriteBS = True
-    ConfigFlags.lock()
-
-    read = ByteStreamReadCfg(ConfigFlags)
+    read = ByteStreamReadCfg(flags)
     read.store(open("test.pkl", "wb"))
     print("All OK")
 
-    write = ByteStreamWriteCfg(ConfigFlags)
+    write = ByteStreamWriteCfg(flags)
     write.printConfig()
     log.info("Write setup OK")
 
-    acc = MainServicesCfg(ConfigFlags)
+    acc = MainServicesCfg(flags)
     acc.merge(read)
     acc.merge(write)
     acc.printConfig()

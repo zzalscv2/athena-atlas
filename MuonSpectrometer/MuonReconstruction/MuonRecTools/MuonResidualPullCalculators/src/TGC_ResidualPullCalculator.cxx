@@ -95,7 +95,7 @@ void Muon::TGC_ResidualPullCalculator::residuals(
 }
 
 //================ calculate residuals and pulls for TGC ==================================
-const Trk::ResidualPull* Muon::TGC_ResidualPullCalculator::residualPull(
+std::unique_ptr<Trk::ResidualPull> Muon::TGC_ResidualPullCalculator::residualPull(
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkPar,
     const Trk::ResidualPull::ResidualType resType,
@@ -209,7 +209,7 @@ const Trk::ResidualPull* Muon::TGC_ResidualPullCalculator::residualPull(
     // create the Trk::ResidualPull.
     ATH_MSG_VERBOSE ( "Calculating Pull for channel " << m_idHelperSvc->toString(ID) << " residual " << residual[Trk::loc1] << " pull " << pull[Trk::loc1] );
 
-    return new Trk::ResidualPull(std::move(residual), std::move(pull), pullIsValid, resType, 1, sinAlpha);
+    return std::make_unique<Trk::ResidualPull>(std::move(residual), std::move(pull), pullIsValid, resType, 1, sinAlpha);
 
   } else {
     ATH_MSG_DEBUG ( "Input problem measurement is not TGC." );

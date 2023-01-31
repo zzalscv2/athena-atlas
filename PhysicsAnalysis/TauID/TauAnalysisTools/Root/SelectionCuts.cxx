@@ -396,7 +396,12 @@ void SelectionCutRNNEleScore::setAcceptInfo(asg::AcceptInfo& info) const
 bool SelectionCutRNNEleScore::accept(const xAOD::TauJet& xTau,
                                      asg::AcceptData& acceptData)
 {
-  double fEleRNNScore = xTau.discriminant(xAOD::TauJetParameters::RNNEleScoreSigTrans);
+  double fEleRNNScore = 0.;
+  if(m_tTST->m_iEleIDVersion!=0){
+    fEleRNNScore = xTau.auxdata<float>("RNNEleScoreSigTrans_v"+std::to_string(m_tTST->m_iEleIDVersion));
+  }else{
+    fEleRNNScore = xTau.discriminant(xAOD::TauJetParameters::RNNEleScoreSigTrans);
+  }
   unsigned int iNumEleRNNRegion = m_tTST->m_vEleRNNRegion.size()/2;
   for( unsigned int iEleRNNRegion = 0; iEleRNNRegion < iNumEleRNNRegion; iEleRNNRegion++ )
   {
@@ -434,12 +439,19 @@ SelectionCutEleIDWP::SelectionCutEleIDWP(TauSelectionTool* tTST)
   m_hHistCut->GetXaxis()->SetBinLabel(6,"Tight");
 }
 
-//______________________________________________________________________________
+//___________________________________________________________________________
 void SelectionCutEleIDWP::fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const
 {
+  if (m_tTST->m_iEleIDVersion!=0){
+  hHist.Fill((xTau.auxdata<char>("EleRNNLoose_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1));
+  hHist.Fill((xTau.auxdata<char>("EleRNNMedium_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)+2);
+  hHist.Fill((xTau.auxdata<char>("EleRNNTight_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)+4);
+  }
+  else{
   hHist.Fill(xTau.isTau(xAOD::TauJetParameters::EleRNNLoose));
   hHist.Fill(xTau.isTau(xAOD::TauJetParameters::EleRNNMedium)+2);
   hHist.Fill(xTau.isTau(xAOD::TauJetParameters::EleRNNTight)+4);
+  }
 }
 
 //______________________________________________________________________________
@@ -463,13 +475,22 @@ bool SelectionCutEleIDWP::accept(const xAOD::TauJet& xTau,
     bPass = true;
     break;
   case ELEIDRNNLOOSE:
-    if (xTau.isTau(xAOD::TauJetParameters::EleRNNLoose)) bPass = true;
+    if (m_tTST->m_iEleIDVersion!=0){ 
+      if (xTau.auxdata<char>("EleRNNLoose_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)bPass = true;
+    }
+    else if (xTau.isTau(xAOD::TauJetParameters::EleRNNLoose)) bPass = true;
     break;
   case ELEIDRNNMEDIUM:
-    if (xTau.isTau(xAOD::TauJetParameters::EleRNNMedium)) bPass = true;
+    if (m_tTST->m_iEleIDVersion!=0){ 
+      if (xTau.auxdata<char>("EleRNNMedium_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)bPass = true;
+    }
+    else if (xTau.isTau(xAOD::TauJetParameters::EleRNNMedium)) bPass = true;
     break;
   case ELEIDRNNTIGHT:
-    if (xTau.isTau(xAOD::TauJetParameters::EleRNNTight)) bPass = true;
+    if (m_tTST->m_iEleIDVersion!=0){ 
+      if (xTau.auxdata<char>("EleRNNTight_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)bPass = true;
+    }
+    else if (xTau.isTau(xAOD::TauJetParameters::EleRNNTight)) bPass = true;
     break;
   default:
     m_tTST->msg() << MSG::WARNING << "The electron ID working point with the enum " << m_tTST->m_iEleIDWP << " is not available" << endmsg;

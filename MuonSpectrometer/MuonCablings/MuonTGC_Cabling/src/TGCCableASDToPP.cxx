@@ -123,7 +123,8 @@ StatusCode TGCCableASDToPP::updateDatabase()
 
   // Truncation saves initialization CPU time of about 30 ms.
   for (const std::string& s : *tmp_ASD2PP_DIFF_12) {
-    if(s.substr(0,1)=="/"||s.substr(0,1)=="*") continue; 
+    char letter = s.at(0);
+    if(letter=='/'||letter=='*') continue; 
     m_ASD2PP_DIFF_12->push_back(s);
   }
   delete tmp_ASD2PP_DIFF_12;
@@ -175,16 +176,15 @@ StatusCode TGCCableASDToPP::getUpdateInfo(const int side,
   
   std::vector<std::string>::const_iterator it   = m_ASD2PP_DIFF_12->begin();
   std::vector<std::string>::const_iterator it_e = m_ASD2PP_DIFF_12->end();
-  std::string buf;
   int size = 0;
 
   // search block name
   while(it!=it_e) {
-    buf = (*it);
+    const std::string &buf = (*it);
     ++it;
-
-    if(buf.substr(0,1)=="/"||buf.substr(0,1)=="*") continue;
-    if(buf.substr(0,blockname.size())==blockname) {
+    char firstl = buf.at(0);
+    if(firstl=='/'||firstl=='*') continue;
+    if(buf.compare(0,blockname.size(),blockname)==0) {
       std::istringstream line(buf);
       std::string temp;
       line >> temp >> size;
@@ -194,11 +194,11 @@ StatusCode TGCCableASDToPP::getUpdateInfo(const int side,
   
   // loop over entries of specified block
   while(it!=it_e) {
-    buf = (*it);
+    const std::string &buf = (*it);
     ++it;
-
-    if(buf.substr(0,1)=="/"||buf.substr(0,1)=="*") continue;
-    if(buf.substr(0,1)=="E"||buf.substr(0,1)=="F") break;
+    char firstl = buf.at(0);
+    if(firstl=='/'||firstl=='*') continue;
+    if(firstl=='E'||firstl=='F') break;
     std::istringstream line(buf);
     std::vector<int> entry;
     int  t_side, t_sector;

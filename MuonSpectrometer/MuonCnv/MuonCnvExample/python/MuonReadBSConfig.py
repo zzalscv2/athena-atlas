@@ -118,6 +118,18 @@ def sTgcRawDataProviderTool(name = "sTgcRawDataProviderTool",**kwargs):
             kwargs.setdefault("RdoLocation", overlayFlags.dataStore()+"+sTGCRDO")
     return CfgMgr.Muon__STGC_RawDataProviderToolMT(name,**kwargs)
 
+#================================================================================
+# sTGC Pad Trigger Bytestream reading setup
+#================================================================================
+
+def sTgcPadTriggerROD_Decoder(name = "sTgcPadTriggerROD_Decoder", **kwargs):
+    return CfgMgr.Muon__PadTrig_ROD_Decoder(name, **kwargs)
+
+def sTgcPadTriggerRawDataProviderTool(name = "sTgcPadTriggerRawDataProviderTool", **kwargs):
+    kwargs.setdefault("Decoder", "sTgcPadTriggerROD_Decoder")
+    return CfgMgr.Muon__PadTrig_RawDataProviderToolMT(name, **kwargs)
+
+
 #
 # For backwards compat - TO BE REMOVED as soon as all clients get these tools via AthenaCommon.CfgGetter
 #
@@ -149,5 +161,7 @@ else:
 
 if DetFlags.readRDOBS.sTGC_on():
     MuonsTgcRawDataProviderTool = getPublicTool("sTgcRawDataProviderTool")
+    MuonsTgcPadTriggerRawDataProviderTool = getPublicTool("sTgcPadTriggerRawDataProviderTool")
 else:
     MuonsTgcRawDataProviderTool = None
+    MuonsTgcPadTriggerRawDataProviderTool = None

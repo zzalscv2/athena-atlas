@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FtfRoadDefiner.h"
@@ -156,7 +156,10 @@ std::unique_ptr<const Trk::TrackParameters> TrigL2MuonSA::FtfRoadDefiner::extTra
 
   // Cylinder
   std::unique_ptr<const Trk::CylinderSurface> barrel = std::make_unique<const Trk::CylinderSurface>( R, Z );
-  std::unique_ptr<const Trk::TrackParameters> param1( m_extrapolator->extrapolate(ctx, *trk, *barrel, Trk::anyDirection, boundaryCheck, Trk::muon) );
+  std::unique_ptr<const Trk::TrackParameters> param1( m_extrapolator->extrapolate(ctx, 
+                                                                                  trk->perigeeParameters(), 
+                                                                                  *barrel, 
+                                                                                  Trk::anyDirection, boundaryCheck, Trk::muon) );
   if(param1){
     bCylinder = true;
     ATH_MSG_DEBUG("Cylinder -> eta: " << param1->eta() << ", phi: " << param1->position().phi() << ", Z: " << param1->position().z() << ", Rms: " << std::hypot(param1->position().x(), param1->position().y()));
@@ -168,7 +171,10 @@ std::unique_ptr<const Trk::TrackParameters> TrigL2MuonSA::FtfRoadDefiner::extTra
   Amg::Transform3D matrix = Amg::Transform3D( Amg::Vector3D( 0.,0.,Z ) );
 
   std::unique_ptr<const Trk::DiscSurface> disc = std::make_unique<const Trk::DiscSurface>( matrix, 0, R );
-  std::unique_ptr<const Trk::TrackParameters> param2( m_extrapolator->extrapolate(ctx, *trk, *disc, Trk::anyDirection, boundaryCheck, Trk::muon) );
+  std::unique_ptr<const Trk::TrackParameters> param2( m_extrapolator->extrapolate(ctx, 
+                                                                                  trk->perigeeParameters(), 
+                                                                                  *disc, 
+                                                                                  Trk::anyDirection, boundaryCheck, Trk::muon) );
   if(param2){
     bDisk = true;
     ATH_MSG_DEBUG("Disk     -> eta: " << param2->eta() << ", phi: " << param2->position().phi() << ", Z: " << param2->position().z() << ", Rms: " << std::hypot(param2->position().x(), param2->position().y()));

@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 '''
 @file TileRawChannelTimeMonitorAlgorithm.py
@@ -140,44 +140,44 @@ if __name__=='__main__':
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     inputDirectory = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TileByteStream/TileByteStream-02-00-00'
     inputFile = 'data18_tilecomm.00363899.calibration_tile.daq.RAW._lb0000._TileREB-ROS._0005-200ev.data'
-    ConfigFlags.Input.Files = [inputDirectory + '/' + inputFile]
-    ConfigFlags.Output.HISTFileName = 'TileRawChannelTimeMonitorOutput.root'
-    ConfigFlags.DQ.useTrigger = False
-    ConfigFlags.DQ.enableLumiAccess = False
+    flags.Input.Files = [inputDirectory + '/' + inputFile]
+    flags.Output.HISTFileName = 'TileRawChannelTimeMonitorOutput.root'
+    flags.DQ.useTrigger = False
+    flags.DQ.enableLumiAccess = False
 
-    ConfigFlags.Tile.RunType = 'LAS'
-    ConfigFlags.Tile.TimingType = 'GAP/LAS'
-    ConfigFlags.Tile.doFit = True
-    ConfigFlags.Tile.correctTime = True
-    ConfigFlags.Tile.doOverflowFit = False
-    ConfigFlags.Tile.BestPhaseFromCOOL = True
-    ConfigFlags.Tile.NoiseFilter = 1
-    ConfigFlags.Exec.MaxEvents = 3
-    ConfigFlags.fillFromArgs()
+    flags.Tile.RunType = 'LAS'
+    flags.Tile.TimingType = 'GAP/LAS'
+    flags.Tile.doFit = True
+    flags.Tile.correctTime = True
+    flags.Tile.doOverflowFit = False
+    flags.Tile.BestPhaseFromCOOL = True
+    flags.Tile.NoiseFilter = 1
+    flags.Exec.MaxEvents = 3
+    flags.fillFromArgs()
 
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     tileTypeNames = ['TileRawChannelContainer/TileRawChannelCnt',
                      'TileDigitsContainer/TileDigitsCnt',
                      'TileBeamElemContainer/TileBeamElemCnt']
-    cfg.merge( ByteStreamReadCfg(ConfigFlags, type_names = tileTypeNames) )
+    cfg.merge( ByteStreamReadCfg(flags, type_names = tileTypeNames) )
 
     from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
-    cfg.merge( TileRawChannelMakerCfg(ConfigFlags) )
+    cfg.merge( TileRawChannelMakerCfg(flags) )
 
-    cfg.merge( TileRawChannelTimeMonitoringConfig(ConfigFlags) )
+    cfg.merge( TileRawChannelTimeMonitoringConfig(flags) )
 
     cfg.printConfig(withDetails = True, summariseProps = True)
-    ConfigFlags.dump()
+    flags.dump()
 
     cfg.store( open('TileRawChannelTimeMonitorAlgorithm.pkl','wb') )
 

@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TAUXSTORE_H
 #define XAODROOTACCESS_TAUXSTORE_H
@@ -182,9 +182,9 @@ namespace xAOD {
       /// branches
       StatusCode initStats( ::TTree* tree );
       /// Connect a variable to the input tree
-      StatusCode setupInputData( auxid_t auxid ) const;
+      StatusCode setupInputData( auxid_t auxid );
       /// Connect a variable to the output tree
-      StatusCode setupOutputData( auxid_t auxid ) const;
+      StatusCode setupOutputData( auxid_t auxid );
       /// Scan the input TTree for auxiliary branches
       StatusCode scanInputTree();
       /// Register one input branch as an available auxiliary variable
@@ -208,7 +208,7 @@ namespace xAOD {
       ::Bool_t m_topStore;
 
       /// The "structural" mode of the object
-      mutable EStructMode m_structMode;
+      EStructMode m_structMode;
       /// The basket size for the output branches
       ::Int_t m_basketSize;
       /// The split level for the output branches
@@ -231,16 +231,16 @@ namespace xAOD {
       SG::AuxStoreInternal* m_transientStore;
 
       /// Internal list of variable IDs handled currently by the object
-      mutable auxid_set_t m_auxIDs;
+      auxid_set_t m_auxIDs;
       /// Variables handled currently by the object
-      mutable std::vector< SG::IAuxTypeVector* > m_vecs;
+      std::vector< SG::IAuxTypeVector* > m_vecs;
       /// The current size of the container being described
-      mutable std::size_t m_size;
+      std::size_t m_size;
 
       /// Is this container locked?
       ::Bool_t m_locked;
       /// Flags items as decorations
-      mutable std::vector< ::Bool_t > m_isDecoration;
+      std::vector< ::Bool_t > m_isDecoration;
 
       /// Mutex type for multithread synchronization
       typedef AthContainers_detail::mutex mutex_t;
@@ -298,12 +298,12 @@ namespace xAOD {
       }; // class TBranchHandle
 
       /// Branches reading the various auxiliary variables
-      mutable std::vector< TBranchHandle* > m_branches;
+      std::vector< TBranchHandle* > m_branches;
       /// "Write status" of the different variables
-      mutable std::vector< bool > m_branchesWritten;
+      std::vector< bool > m_branchesWritten;
       /// Mark branches we've found to be missing. (Because TTree::GetBranch
       /// is very expensive.)
-      mutable std::vector< bool > m_missingBranches;
+      std::vector< bool > m_missingBranches;
 
    }; // class TAuxStore
 

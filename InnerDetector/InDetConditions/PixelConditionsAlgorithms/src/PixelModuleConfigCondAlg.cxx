@@ -19,12 +19,7 @@ PixelModuleConfigCondAlg::PixelModuleConfigCondAlg(const std::string& name, ISvc
 StatusCode PixelModuleConfigCondAlg::initialize() {
   ATH_MSG_DEBUG("PixelModuleConfigCondAlg::initialize()");
 
-  ATH_CHECK(m_condSvc.retrieve());
   ATH_CHECK(m_writeKey.initialize());
-  if (m_condSvc->regHandle(this,m_writeKey).isFailure()) {
-    ATH_MSG_FATAL("unable to register WriteCondHandle " << m_writeKey.fullKey() << " with CondSvc");
-    return StatusCode::FAILURE;
-  }
 
   return StatusCode::SUCCESS;
 }

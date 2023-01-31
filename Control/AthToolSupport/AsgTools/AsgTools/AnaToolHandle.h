@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -546,7 +546,7 @@ namespace asg
 
   public:
     [[deprecated("please use setType() or setTypeAndName() instead")]]
-    StatusCode make (std::string val_type) noexcept {
+    StatusCode make (const std::string& val_type) noexcept {
       if (!val_type.empty()) {
 	if (val_type.find ('/') != std::string::npos)
 	  setTypeAndName (val_type);

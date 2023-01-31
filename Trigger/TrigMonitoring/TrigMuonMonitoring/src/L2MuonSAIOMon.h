@@ -45,7 +45,7 @@ class L2MuonSAIOMon : public TrigMuonMonitorAlgorithm{
   // these threshold is same as the L2OverlapRemover in TrigMufastHypoTool
   Gaudi::Property< std::vector<float> > m_etaBins {this, "EtaBins", {0, 0.9, 1.1, 1.9, 2.1, 9.9}, "eta bins of DR and mass thresholds"};
   Gaudi::Property< std::vector<float> > m_dRCBThres {this, "DRThres", {0.002, 0.001, 0.002, 0.002, 0.002}, "DR threshold of L2CB"};
-  Gaudi::Property< std::vector<float> > m_dRbySAThres {this, "dRbySAThres", {0}, "mufast DR threshold of L2CB"};
+  Gaudi::Property< std::vector<float> > m_dRbySAThres {this, "dRbySAThres", {0, 0, 0, 0, 0}, "mufast DR threshold of L2CB"};
   Gaudi::Property< std::vector<float> > m_massCBThres {this, "MassThres", {0.004, 0.002, 0.006, 0.006, 0.006}, "mass threshold of L2CB"};
 
   // config of L2OverlapRemover for L2Inside-Out

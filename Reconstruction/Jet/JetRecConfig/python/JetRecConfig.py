@@ -17,7 +17,7 @@ from ROOT import xAODType
 xAODType.ObjectType
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory, isRun3Cfg
+from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 
 
 from JetRecConfig.JetDefinition import JetDefinition, JetInputConstitSeq, JetInputConstit, JetInputExternal
@@ -754,7 +754,7 @@ def isComponentPassingConditions(component, configflags, prereqDic):
 
 def isAnalysisRelease():
     from AthenaConfiguration.Enums import Project
-    return Project.determine() is Project.AnalysisBase
+    return Project.determine() in( Project.AnalysisBase, Project.AthAnalysis)
 
 
 def reOrderAlgs(algs):
@@ -796,7 +796,7 @@ def registerAsInputConstit( jetdef ):
 
     # define a function to generate the CA for this jetdef
     def jetBuilder(largejetdef,spec):
-        if isRun3Cfg():
+        if isComponentAccumulatorCfg():
             return JetRecCfg(largejetdef._cflags, jetdef)
         else:
             # Compatibility with runII style : we can't use ComponentAccumulator and must return the list of algs.

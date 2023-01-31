@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from L1TopoSimulation.L1TopoSimulationConf import LVL1__L1TopoSimulation, LVL1__RoiB2TopoInputDataCnv
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, appendCAtoAthena
@@ -50,16 +50,17 @@ def L1TopoSimulationCfg(flags):
     acc = ComponentAccumulator()
 
     #Configure the MuonInputProvider
+    
     muProvider = CompFactory.LVL1.MuonInputProvider("MuonInputProvider",
                                                     ROIBResultLocation = "", #disable input from RoIBResult
                                                     MuonROILocation = "",
                                                     MuonEncoding = 1)
-
+                                                    
     #Configure the MuonRoiTools for the MIP
     from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg
     muProvider.RecRpcRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags))
     muProvider.RecTgcRoiTool = acc.popToolsAndMerge(TGCRecRoiToolCfg(flags))
-
+    
     emtauProvider = CompFactory.LVL1.eFexInputProvider("eFexInputProvider")
     jetProvider = CompFactory.LVL1.jFexInputProvider("jFexInputProvider")
     energyProvider = CompFactory.LVL1.gFexInputProvider("gFexInputProvider")
@@ -149,7 +150,7 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False):
         muProvider = CompFactory.LVL1.MuonInputProvider("MuonInputProvider",
                                                         ROIBResultLocation = "", #disable input from RoIBResult
                                                         MuonROILocation = "",
-                                                        MuonEncoding = 1)
+                                                        MuonL1RoIKey="") #"LVL1MuonRoIs" to enable reading from L1 RoI
 
         #Configure the MuonRoiTools for the MIP
         from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg
@@ -204,7 +205,7 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False):
 
 
 if __name__ == '__main__':
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
   from AthenaCommon.Logging import logging
   from AthenaCommon.Constants import VERBOSE,DEBUG,WARNING
   import argparse
@@ -240,7 +241,9 @@ if __name__ == '__main__':
   if args.log == 'warning': algLogLevel = WARNING
   if args.log == 'debug': algLogLevel = DEBUG
   if args.log == 'verbose': algLogLevel = VERBOSE
-  
+
+  flags = initConfigFlags()
+
   if "data22" in filename:
     flags.Trigger.triggerConfig='DB'
   flags.Exec.OutputLevel = WARNING
@@ -397,13 +400,14 @@ if __name__ == '__main__':
   if args.algoHdwMon:
       acc.getEventAlgo('L1LegacyTopoSimulation').FillHistoBasedOnHardware = True
       acc.getEventAlgo('L1LegacyTopoSimulation').PrescaleDAQROBAccess = 1
+  outputEDM += addEDM('xAOD::L1TopoSimResultsContainer','L1_LegacyTopoSimResults')
 
   acc.merge(L1TopoSimulationStandaloneCfg(flags,outputEDM,doMuons=('Muons' in subsystem)), sequenceName='AthAlgSeq')
   if args.algoHdwMon:
       acc.getEventAlgo('L1TopoSimulation').FillHistoBasedOnHardware = True
       acc.getEventAlgo('L1TopoSimulation').PrescaleDAQROBAccess = 1
-  outputEDM += ['xAOD::L1TopoSimResultsContainer#L1_TopoSimResults']
-
+  outputEDM += addEDM('xAOD::L1TopoSimResultsContainer','L1_TopoSimResults')
+  
   # phase1 mon
   from L1TopoOnlineMonitoring import L1TopoOnlineMonitoringConfig as TopoMonConfig
   acc.addEventAlgo(

@@ -9,7 +9,6 @@
 #include "LArIdentifier/LArOnlineID.h"
 #include "CaloEvent/CaloCell.h"
 #include "CaloEvent/CaloCellContainer.h"
-#include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "LArElecCalib/ILArfSampl.h"
 
@@ -43,8 +42,7 @@ LArSCHitFillerTool::LArSCHitFillerTool
 	m_caloPhiSelection( false ),
 	m_caloLayerSelection( false ),
 	m_caloSelection( false ),
-	m_scidtool ("CaloSuperCellIDTool"),
-	m_sc_dd_mgr(0)
+	m_scidtool ("CaloSuperCellIDTool")
      {
 
   declareProperty( "CaloEtaCut", m_etaCut );
@@ -65,7 +63,7 @@ StatusCode LArSCHitFillerTool::initialize()
   ServiceHandle<StoreGateSvc> detStore("DetectorStore", name());
   CHECK( detStore.retrieve() ) ;
   CHECK( m_scidtool.retrieve() );
-  CHECK( detStore->retrieve (m_sc_dd_mgr, "CaloSuperCellMgr") );
+  CHECK( m_caloSuperCellMgrKey.initialize() );
   CHECK( detStore->retrieve (m_sc_idHelper) );
     
   CHECK ( detStore->retrieve(m_emid)   );
@@ -202,6 +200,9 @@ StatusCode LArSCHitFillerTool::fill (const LArHitContainer& p) {
   std::map<int, double>::const_iterator it = sc_E.begin(); 
   std::map<int, double>::const_iterator it_e = sc_E.end(); 
 
+  SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloSuperCellMgrHandle{m_caloSuperCellMgrKey,Gaudi::Hive::currentContext()};
+  const CaloSuperCellDetDescrManager* sc_dd_mgr = *caloSuperCellMgrHandle;
+
   for ( ; it!=it_e ;  ++it  ) {
     int hashId = (*it).first; 
     Identifier offlId = m_sc_idHelper->cell_id(hashId) ;
@@ -214,8 +215,8 @@ StatusCode LArSCHitFillerTool::fill (const LArHitContainer& p) {
     unsigned int lay = m_sc_idHelper->sampling(offlId); 
     int ieta = m_sc_idHelper->eta(offlId); 
     int jphi = m_sc_idHelper->phi(offlId); 
-    float feta = m_sc_dd_mgr->get_element(offlId)->eta(); 
-    float fphi = m_sc_dd_mgr->get_element(offlId)->phi(); 
+    float feta = sc_dd_mgr->get_element(offlId)->eta(); 
+    float fphi = sc_dd_mgr->get_element(offlId)->phi(); 
     int lardet = calo; 
 
     if (m_caloSelection) {

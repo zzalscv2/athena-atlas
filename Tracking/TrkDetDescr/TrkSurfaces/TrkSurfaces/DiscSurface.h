@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -139,8 +139,6 @@ public:
   /** Virtual constructor*/
   virtual DiscSurface* clone() const override;
   
-  std::unique_ptr<DiscSurface>uniqueClone() const;
-
   /** Use the Surface as a ParametersBase constructor, from local parameters -
    * charged */
   virtual Surface::ChargedTrackParametersUniquePtr createUniqueTrackParameters(
@@ -195,24 +193,6 @@ public:
     double charge,
     std::optional<AmgSymMatrix(DIM)> cov = std::nullopt) const;
 
-  /** Use the Surface as a ParametersBase constructor, from local parameters */
-  template<int DIM, class T>
-  ParametersT<DIM, T, DiscSurface> createParameters(
-    double l1,
-    double l2,
-    double phi,
-    double theta,
-    double q,
-    std::optional<AmgSymMatrix(DIM)> cov = std::nullopt) const;
-
-  /** Use the Surface as a ParametersBase constructor, from global parameters */
-  template<int DIM, class T>
-  ParametersT<DIM, T, DiscSurface> createParameters(
-    const Amg::Vector3D& position,
-    const Amg::Vector3D& momentum,
-    double charge,
-    std::optional<AmgSymMatrix(DIM)> cov = std::nullopt) const;
-
   /** Return the surface type */
   virtual SurfaceType type() const override final;
 
@@ -257,32 +237,6 @@ public:
   virtual bool globalToLocal(const Amg::Vector3D& glob,
                              const Amg::Vector3D& mom,
                              Amg::Vector2D& loc) const override;
-
-  /**  Special method for DiscSurface : local<->local transformations polar <->
-   * cartesian */
-  Amg::Vector2D localPolarToCartesian(const Amg::Vector2D& locpol) const;
-
-  /**  Special method for Disc surface : local<->local transformations polar <->
-   * cartesian */
-  Amg::Vector2D localCartesianToPolar(const Amg::Vector2D& loccart) const;
-
-  /**  Special method for Disc surface : local<->local transformations polar <->
-   * cartesian by value*/
-  Amg::Vector2D localCartesianToPolarValue(const Amg::Vector2D& loccart) const;
-
-  /**  Special method for DiscSurface : local<->local transformations polar <->
-   * cartesian */
-  Amg::Vector2D localPolarToLocalCartesian(const Amg::Vector2D& locpol) const;
-
-  /** Special method for DiscSurface :  local<->global transformation when
-   * provided cartesian coordinates */
-  Amg::Vector3D localCartesianToGlobal(const Amg::Vector2D& locpos) const;
-
-  /** Special method for DiscSurface : global<->local from cartesian coordinates
-   */
-  std::optional<Amg::Vector2D> globalToLocalCartesian(
-    const Amg::Vector3D& glopos,
-    double tol = 0.) const;
 
   /** fast straight line intersection schema - standard: provides closest
      intersection and (signed) path length forceDir is to provide the closest

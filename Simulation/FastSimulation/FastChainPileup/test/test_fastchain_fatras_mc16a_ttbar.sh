@@ -1,10 +1,9 @@
 #!/bin/sh
 #
-# art-description: Run AFII simulation and full digitization of an MC16a ttbar sample with 2016a geometry and conditions, 25ns pile-up
+# art-description: Run AFIIF simulation and full digitization of an MC16a ttbar sample with 2016a geometry and conditions, 25ns pile-up
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
-# art-include: 22.0-mc20/Athena
 # art-output: *.root
 # art-output: config.txt
 # art-output: dcube*
@@ -68,7 +67,7 @@ then
                --skipEvents '0' --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-09' \
                --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
                --outputAODFile ${aodFile} \
-               --steering 'doRDO_TRIG' \
+               --steering 'doRDO_TRIG' 'doTRIGtoALL' \
                --athenaopts "all:--threads=1" \
                --imf False
      rc2=$?

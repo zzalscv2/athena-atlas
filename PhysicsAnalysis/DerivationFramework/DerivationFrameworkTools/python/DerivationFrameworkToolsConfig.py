@@ -25,3 +25,50 @@ def GenericObjectThinningCfg(ConfigFlags, name, **kwargs):
                       primary = True)
     return acc
 
+# Skimming via ExpressionEvaluation strings
+def xAODStringSkimmingToolCfg(ConfigFlags, name, **kwargs):
+    """Configure the generic skimming tool"""
+    acc = ComponentAccumulator()
+    xAODStringSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool
+    acc.addPublicTool(xAODStringSkimmingTool(name, **kwargs),
+                      primary = True)
+    return acc
+
+### Trigger skimming list
+def TriggerSkimmingToolCfg(ConfigFlags, name, **kwargs):
+    acc = ComponentAccumulator()
+    the_tool = CompFactory.DerivationFramework.TriggerSkimmingTool(name,**kwargs)
+    acc.addPublicTool(the_tool, primary = True)
+    return acc
+### Invariant mass tool config
+def InvariantMassToolCfg(ConfigFlags, name , **kwargs):
+    acc= ComponentAccumulator()
+    the_tool = CompFactory.DerivationFramework.InvariantMassTool(name,**kwargs)
+    acc.addPublicTool(the_tool, primary = True)
+    return acc
+# Prescale tool
+def PrescaleToolCfg(ConfigFlags, name, **kwargs):
+    """Configure the DAOD prescale tool"""
+    acc = ComponentAccumulator()
+    PrescaleTool = CompFactory.DerivationFramework.PrescaleTool
+    acc.addPublicTool(PrescaleTool(name, **kwargs),
+                      primary = True)
+    return acc 
+
+# Tool for combining several filter tools with AND logic
+def FilterCombinationANDCfg(ConfigFlags, name, **kwargs):
+    """Configure the FilterCombinationAND tool"""
+    acc = ComponentAccumulator()
+    FilterCombinationAND = CompFactory.DerivationFramework.FilterCombinationAND
+    acc.addPublicTool(FilterCombinationAND(name, **kwargs),
+                      primary = True)
+    return acc
+   
+# Tool for combining several filter tools with OR logic
+def FilterCombinationORCfg(ConfigFlags, name, **kwargs):
+    """Configure the FilterCombinationOR tool"""
+    acc = ComponentAccumulator()
+    FilterCombinationOR = CompFactory.DerivationFramework.FilterCombinationOR
+    acc.addPublicTool(FilterCombinationOR(name, **kwargs),
+                      primary = True)
+    return acc 

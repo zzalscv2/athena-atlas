@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # ------------------------------------------------------------
 # DerivationFrameworkMaster.py
@@ -6,6 +6,8 @@
 # ------------------------------------------------------------
 # Contains all basic includes for running the derivation framework
 #-------------------------------------------------------------
+
+# NOTE: this file is obsolete for almost all purposes. It is retained only to keep alive CI tests that are still using the legacy config 
 
 from AthenaCommon.AppMgr import theApp
 # Derivation names and locations of job options

@@ -127,20 +127,15 @@ ToolSvc.TrackRetriever.OtherTrackCollections = ["CombinedMuonTracks","MuonSpectr
 ##ToolSvc.xAODTrackParticleRetriever.OtherTrackCollections = []
 ## ======================================================================================= 
 
+## ================= Edit: Heavy Ion reduction flags (updated by lshi in 2022 HI tests) =======================
 if rec.doHeavyIon:
-  #topSequence.AlgoJiveXML.DataTypes.remove("JiveXML::V0CandidateRetriever/V0CandidateRetriever") 
-  #topSequence.AlgoJiveXML.DataTypes.remove("JiveXML::TruthTrackRetriever/TruthTrackRetriever") 
-  #topSequence.AlgoJiveXML.DataTypes.remove("JiveXML::TruthMuonTrackRetriever/TruthMuonTrackRetriever") 
-  topSequence.AlgoJiveXML.DataTypes.remove("JiveXML::SiSpacePointRetriever/SiSpacePointRetriever") 
   topSequence.AlgoJiveXML.DataTypes.remove("JiveXML::SiClusterRetriever/SiClusterRetriever") 
   topSequence.AlgoJiveXML.DataTypes.remove("JiveXML::PixelClusterRetriever/PixelClusterRetriever") 
-  topSequence.AlgoJiveXML.DataTypes.remove("JiveXML::TRTRetriever/TRTRetriever") 
   topSequence.AlgoJiveXML.DataTypes.remove("JiveXML::CaloClusterRetriever/CaloClusterRetriever") 
   topSequence.AlgoJiveXML.DataTypes.remove("JiveXML::PixelRDORetriever/PixelRDORetriever")
   topSequence.AlgoJiveXML.DataTypes.remove("JiveXML::SCTRDORetriever/SCTRDORetriever")
 
   ToolSvc.TrackRetriever.PriorityTrackCollection = "Tracks" 
-  ToolSvc.TrackRetriever.OtherTrackCollections = ["ConvertedStacoTracks","ConvertedMuIdCBTracks"] 
   
   ToolSvc.TrackRetriever.DoHitsDetails = False 
 

@@ -3,7 +3,6 @@
 #
 #  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
-
 from AthenaCommon.Logging import logging
 log = logging.getLogger('runHLT_standalone_newJO')
 
@@ -11,9 +10,6 @@ from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
 from AthenaConfiguration.ComponentAccumulator import CompFactory
 from AthenaConfiguration.Enums import Format
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-
-from AthenaCommon.Configurable import Configurable
-Configurable.configurableRun3Behavior = 1
 
 # Output configuration - currently testing offline workflow
 flags.Trigger.writeBS = False
@@ -58,6 +54,8 @@ flags.addFlag("Trigger.disableChains",[])
 
 
 flags.Trigger.enabledSignatures = ['Muon', 'Photon','Electron']
+#flags.Trigger.selectChains =  ['HLT_mu4_L1MU3V','HLT_mu8_L1MU5VF','HLT_2mu6_L12MU5VF', 'HLT_mu24_mu6_L1MU14FCH','HLT_mu24_mu6_probe_L1MU14FCH'] #, 'HLT_mu4_mu6_L12MU3V']
+
 #flags.Trigger.disableChains=["HLT_2mu4_l2io_invmDimu_L1BPH-2M9-0DR15-2MU3VF", "HLT_2mu4_l2io_invmDimu_L1BPH-2M9-0DR15-2MU3V", "HLT_2mu6_l2io_invmDimu_L1BPH-2M9-2DR15-2MU5VF"]
 # exclude jets for now, since their MenuSeuqnece Structure needs more work to migrate
 
@@ -96,10 +94,9 @@ flags.lock()
 flags.dump()
 # Enable when debugging deduplication issues
 # ComponentAccumulator.debugMode = "trackCA trackEventAlog ... and so on"
-
+log.setLevel(logging.DEBUG)
 
 acc = MainServicesCfg(flags)
-
 acc.getService('AvalancheSchedulerSvc').VerboseSubSlots = True
 
 # this delcares to the scheduler that EventInfo object comes from the input
@@ -155,17 +152,8 @@ if flags.Overlay.doTrackOverlay:
 if log.getEffectiveLevel() <= logging.DEBUG:
     acc.printConfig(withDetails=False, summariseProps=True, printDefaults=True)
 
-fName =  args.configOnly if args.configOnly else "runHLT_standalone_newJO.pkl" 
-log.info("Storing config in the file %s ", fName)
-with open(fName, "wb") as p:
-    acc.store(p)
-    p.close()
-
-if not args.configOnly:
-    log.info("Running ...")
-    status = acc.run()
-    if status.isFailure():
-        import sys
-        sys.exit(1)
-else:
-    log.info("The configOnly option used ... exiting.")
+log.info("Running ...")
+status = acc.run()
+if status.isFailure():
+  import sys
+  sys.exit(1)

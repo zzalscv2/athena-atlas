@@ -29,8 +29,6 @@ namespace TCS {
    private:
      
       parType_t      m_numberOfeEms = { 0 };
-      parType_t      m_minEta = { 0 };
-      parType_t      m_maxEta = { 0 };
       parType_t      m_minREta = { 0 };
       parType_t      m_minRHad = { 0 };
       parType_t      m_minWsTot = { 0 };

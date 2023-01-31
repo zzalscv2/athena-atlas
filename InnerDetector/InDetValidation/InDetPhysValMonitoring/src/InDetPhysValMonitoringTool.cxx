@@ -386,7 +386,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
   //
   //Counters for cutflow
   //
-  unsigned int nSelectedTruthTracks(0), nSelectedRecoTracks(0), nSelectedMatchedTracks(0), nAssociatedTruth(0), nMissingAssociatedTruth(0), nFakeTracks(0), nTruths(0);
+  unsigned int nSelectedTruthTracks(0), nSelectedRecoTracks(0), nSelectedMatchedTracks(0), nAssociatedTruth(0), nMissingAssociatedTruth(0), nTruths(0);
 
   CutFlow tmp_truth_cutflow( m_truthSelectionTool.get() ?  m_truthSelectionTool->nCuts() : 0 );
   
@@ -448,7 +448,6 @@ InDetPhysValMonitoringTool::fillHistograms() {
     const bool isAssociatedTruth = associatedTruth != nullptr;
     const bool isFake = not std::isnan(prob) ? (prob < m_lowProb) : true;
 
-    if(isFake) nFakeTracks++;
     if(!isAssociatedTruth) nMissingAssociatedTruth++;
     m_monPlots->fillFakeRate(*thisTrack, isFake, isAssociatedTruth, puEvents, nVertices, beamSpotWeight);
 
@@ -851,7 +850,7 @@ InDetPhysValMonitoringTool::getTruthVertices() const {
       SG::ReadHandle<xAOD::TruthEventContainer> truthEventContainer(m_truthEventName);
       if (truthEventContainer.isValid()) {
         for (const auto *const evt : *truthEventContainer) {
-          truthVtx = evt->truthVertex(0);
+          truthVtx = evt->nTruthVertices()>0 ? evt->truthVertex(0) : nullptr;
           if (truthVtx) {
             truthHSVertices.push_back(truthVtx);
           }
@@ -869,7 +868,7 @@ InDetPhysValMonitoringTool::getTruthVertices() const {
       SG::ReadHandle<xAOD::TruthPileupEventContainer> truthPileupEventContainer(m_truthPileUpEventName);
       if (truthPileupEventContainer.isValid()) {
         for (const auto *const evt : *truthPileupEventContainer) {
-          truthVtx = evt->truthVertex(0);
+          truthVtx = evt->nTruthVertices()>0 ? evt->truthVertex(0) : nullptr;
           if (truthVtx) {
             truthPUVertices.push_back(truthVtx);
           }

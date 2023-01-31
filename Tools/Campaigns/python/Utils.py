@@ -9,8 +9,10 @@ class Campaign(FlagEnum):
     MC20d = 'mc20d'
     MC20e = 'mc20e'
     MC21a = 'mc21a'
+    MC23a = 'mc23a'
+    MC23c = 'mc23c'
 
-# Campaign run numbers (only latest campaigns)
+# Campaign run numbers (only latest campaigns that do not have metadata present)
 campaign_runs = {
     284500: Campaign.MC20a,
     300000: Campaign.MC20d,

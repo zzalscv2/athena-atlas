@@ -28,14 +28,14 @@ TrigFTF_GNN_EdgeState(bool f) : m_initialized(f) {};
   void initialize(TrigFTF_GNN_Edge*);
   void clone(const struct TrigFTF_GNN_EdgeState&);
 
-  float m_J;
+  float m_J{};
 
   std::vector<TrigFTF_GNN_Edge*> m_vs;
 
-  float m_X[3], m_Y[2], m_Cx[3][3], m_Cy[2][2];
-  float m_refX, m_refY, m_c, m_s;
+  float m_X[3]{}, m_Y[2]{}, m_Cx[3][3]{}, m_Cy[2][2]{};
+  float m_refX{}, m_refY{}, m_c{}, m_s{};
   
-  bool m_initialized;
+  bool m_initialized{false};
 
 } TrigFTF_GNN_EDGE_STATE;
 
@@ -66,7 +66,7 @@ typedef class TrigFTF_GNN_TrackingFilter {
 
   TrigFTF_GNN_EDGE_STATE m_stateStore[MAX_EDGE_STATE];
 
-  int m_globalStateCounter;
+  int m_globalStateCounter{0};
 
 } TrigFTF_GNN_TRACKING_FILTER;
 

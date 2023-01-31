@@ -34,14 +34,19 @@ StatusCode PLRDetectorTool::create()
 
   m_commonItems = std::make_unique<InDetDD::SiCommonItems>(idHelper);
 
+  const GeoModelIO::ReadGeoModel* sqlreader = getSqliteReader();
+
+  std::string node{"InnerDetector"};
+  std::string table{"PLRXDD"};
+  
   //
   // Check the availability
   //
-  std::string node{"InnerDetector"};
-  std::string table{"PLRXDD"};
-  if (!isAvailable(node, table)) {
-    ATH_MSG_ERROR("No PLR geometry found. PLR can not be built.");
-    return StatusCode::FAILURE;
+  if(sqlreader){
+      if (!isAvailable(node, table)) {
+        ATH_MSG_ERROR("No PLR geometry found. PLR can not be built.");
+        return StatusCode::FAILURE;
+      }
   }
   //
   // Create the detector manager
@@ -51,39 +56,22 @@ StatusCode PLRDetectorTool::create()
   GeoPhysVol *world = &*theExpt->getPhysVol();
   auto *manager = new InDetDD::PixelDetectorManager(&*detStore(), m_detectorName, "PLR_ID");
   manager->addFolder(m_alignmentFolderName);
-
+  // Load the geometry, create the volume, 
+  // node,table are the location in the DB to look for the clob
+  // empty strings are the (optional) containing detector and envelope names
+  // allowed to pass a null sqlreader ptr - it will be used to steer the source of the geometry
   InDetDD::PLRGmxInterface gmxInterface(manager, m_commonItems.get(), &m_moduleTree);
 
-  if(m_containingDetectorName!=""){
-      const GeoVPhysVol * topVol = createTopVolume(world, gmxInterface, node, table, m_containingDetectorName, m_envelopeVolumeName); 
-      if(topVol){
-       manager->addTreeTop(topVol);
-       manager->initNeighbours();
-      }
-      else{
-       ATH_MSG_FATAL("Could not find the Top Volume!!!");
-       return StatusCode::FAILURE;
-      }
-  }
-  else {
-  // Load the geometry, create the volume,
-  // and then find the volume index within the world to allow it to be added
-  // last two arguments are the location in the DB to look for the clob
-  // (may want to make those configurables)
-  int childIndex = createTopVolume(world, gmxInterface, node, table);
-  if (childIndex != -1) { //-1 represents an error state from the above method
-    GeoPhysVol * worldVol = &*world;
-    const GeoVPhysVol * topVol = &*(worldVol->getChildVol(childIndex));
-    //manager->addTreeTop(&*world->getChildVol(childIndex));
+  const GeoVPhysVol * topVol = createTopVolume(world, gmxInterface, node, table, m_containingDetectorName, m_envelopeVolumeName,sqlreader); 
+  if(topVol){
     manager->addTreeTop(topVol);
-    // if it were implemented, we would do Numerology here
-    // doNumerology(manager);
     manager->initNeighbours();
-  } else {
-    ATH_MSG_FATAL("Could not find the Top Volume!!!");
-    return StatusCode::FAILURE;
-  }
-  }
+    }
+    else{
+        ATH_MSG_FATAL("Could not find the Top Volume!!!");
+        return StatusCode::FAILURE;
+   }
+
   // set the manager
   m_detManager = manager;
 

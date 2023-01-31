@@ -60,8 +60,6 @@ class BPHYV0FinderTools:
 
         from InDetTrackSummaryHelperTool.InDetTrackSummaryHelperToolConf import InDet__InDetTrackSummaryHelperTool
         self.V0TrackSummaryHelperTool = InDet__InDetTrackSummaryHelperTool(name         = derivation+"_InDetSummaryHelper",
-                                                                     AssoTool     = self.V0PrdAssociationTool,
-                                                                     DoSharedHits = False,
                                                                      HoleSearch   = self.V0HoleSearchTool,
                                                                      usePixel      = DetFlags.haveRIO.pixel_on(),
                                                                      useSCT        = DetFlags.haveRIO.SCT_on(),

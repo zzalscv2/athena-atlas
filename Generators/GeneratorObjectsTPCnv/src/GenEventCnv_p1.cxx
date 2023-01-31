@@ -40,7 +40,7 @@ void GenEventCnv_p1::persToTrans( const GenEvent_p1* persObj,
   msg << MSG::DEBUG << "Loading HepMC::GenEvent from persistent state..."
       << endmsg;
 
-  if ( 0 == m_pool ) {
+  if ( nullptr == m_pool ) {
     msg << MSG::ERROR
 	<< "This instance of GenEventCnv_p1 has a null pointer to "
 	<< "HepMC::DataPool !" << endmsg
@@ -122,7 +122,6 @@ void GenEventCnv_p1::persToTrans( const GenEvent_p1* persObj,
 
   msg << MSG::DEBUG << "Loaded HepMC::GenEvent from persistent state [OK]"
       << endmsg;
-  return;
 }
 
 void GenEventCnv_p1::transToPers( const HepMC::GenEvent*, 
@@ -139,7 +138,6 @@ void GenEventCnv_p1::transToPers( const HepMC::GenEvent*,
       << endmsg;
 
   throw std::runtime_error( "Retired GenEventCnv_p1::transToPers() !!" );
-  return;
 }
 
 /////////////////////////////////////////////////////////////////// 
@@ -150,7 +148,7 @@ HepMC::GenVertexPtr
 GenEventCnv_p1::createGenVertex( const GenEvent_p1& persEvt,
 				 const GenVertex_p1& persVtx,
 				 ParticlesMap_t& partToEndVtx,
-                                 HepMC::DataPool& datapools, HepMC::GenEvent* parent) const
+                                 HepMC::DataPool& datapools, HepMC::GenEvent* parent) 
 {
   HepMC::GenVertexPtr vtx = datapools.getGenVertex();
   if (parent) parent->add_vertex(vtx);
@@ -205,7 +203,7 @@ GenEventCnv_p1::createGenVertex( const GenEvent_p1& persEvt,
 HepMC::GenParticlePtr 
 GenEventCnv_p1::createGenParticle( const GenParticle_p1& persPart,
 				   ParticlesMap_t& partToEndVtx,
-                                   HepMC::DataPool& datapools, HepMC::GenVertexPtr parent) const
+                                   HepMC::DataPool& datapools, const HepMC::GenVertexPtr& parent) 
 {
   HepMC::GenParticlePtr p = datapools.getGenParticle();
   if (parent) parent->add_particle_out(p);

@@ -130,28 +130,28 @@ public:
   /** @brief estimator for FitQualityOnSurface from a full track state, i.e.
       a state which contains the current hit (expressed as Amg::Vector2D).
   */
-  virtual const FitQualityOnSurface* fullStateFitQuality(
+  virtual FitQualityOnSurface fullStateFitQuality(
     const TrackParameters&,
     const Amg::Vector2D&,
     const Amg::MatrixX&) const override final;
   /** @brief estimator for FitQualityOnSurface from a full track state, i.e.
       a state which contains the current hit (expressed as LocalParameters).
   */
-  virtual const FitQualityOnSurface* fullStateFitQuality(
+  virtual FitQualityOnSurface fullStateFitQuality(
     const TrackParameters&,
     const LocalParameters&,
     const Amg::MatrixX&) const override final;
   /** @brief estimator for FitQualityOnSurface from a predicted track state,
     i.e. a state which contains the current hit (expressed as Amg::Vector2D).
   */
-  virtual const FitQualityOnSurface* predictedStateFitQuality(
+  virtual FitQualityOnSurface predictedStateFitQuality(
     const TrackParameters&,
     const Amg::Vector2D&,
     const Amg::MatrixX&) const override final;
   /** @brief estimator for FitQualityOnSurface from a predicted track state,
   i.e. a state which contains the current hit (expressed as LocalParameters).
   */
-  virtual const FitQualityOnSurface* predictedStateFitQuality(
+  virtual FitQualityOnSurface predictedStateFitQuality(
     const TrackParameters&,
     const LocalParameters&,
     const Amg::MatrixX&) const override final;
@@ -159,7 +159,7 @@ public:
       track is fitted to the parameters of another trajectory part
       extrapolated to the common surface.
   */
-  virtual const FitQualityOnSurface* predictedStateFitQuality(
+  virtual FitQualityOnSurface predictedStateFitQuality(
     const TrackParameters&,
     const TrackParameters&) const override final;
   //! interface for update for reference-track KF, not implemented.
@@ -215,7 +215,7 @@ private:
      Physics, 2nd ed.) \f$ r = m - H p \f$ \f$ \chi^2 = r^T (V - H C H^T)^{-1} r
      \f$
       */
-  FitQualityOnSurface* makeChi2Object(Amg::VectorX&,
+  FitQualityOnSurface  makeChi2Object(Amg::VectorX&,
                                       const Amg::MatrixX&,
                                       const Amg::MatrixX&,
                                       const Amg::MatrixX&,
@@ -230,7 +230,7 @@ private:
       \f$ r_2 = p_{new} - p_{old} \f$
       \f$ \chi^2 = r_1^T V^{-1}.r_1 + r_2^T C_{old}^{-1}.r_2 \f$
       */
-  FitQualityOnSurface* makeChi2Object(Amg::VectorX& residual1,
+  FitQualityOnSurface  makeChi2Object(Amg::VectorX& residual1,
                                       const Amg::MatrixX& weight1,
                                       const int key1,
                                       Amg::VectorX& residual2,

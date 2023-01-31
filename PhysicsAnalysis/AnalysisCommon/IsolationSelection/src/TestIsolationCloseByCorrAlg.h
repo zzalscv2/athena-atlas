@@ -7,6 +7,7 @@
 
 // Gaudi/Athena include(s):
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
+#include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "MuonTesterTree/MuonTesterTreeDict.h"
 #include "StoreGate/ReadDecorHandleKey.h"
@@ -25,6 +26,7 @@
 #include "xAODEgamma/PhotonContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODMuon/MuonContainer.h"
+#include "xAODCore/ShallowCopy.h"
 
 /**
  * @brief Simple algorithm to check the performance of the IsolationCloseByCorrectionTool. The algorithm writes TTrees that can be analyzed
@@ -36,7 +38,7 @@
  */
 
 namespace CP {
-    class TestIsolationCloseByCorrAlg : public AthHistogramAlgorithm {
+    class ATLAS_NOT_THREAD_SAFE TestIsolationCloseByCorrAlg : public AthHistogramAlgorithm {
     public:
         TestIsolationCloseByCorrAlg(const std::string& name, ISvcLocator* svcLoc);
         virtual ~TestIsolationCloseByCorrAlg() = default;
@@ -47,8 +49,10 @@ namespace CP {
         unsigned int cardinality() const override { return 1; }
 
     private:
-        template <class CONT_TYPE>
-        StatusCode loadContainer(const EventContext& ctx, const SG::ReadHandleKey<CONT_TYPE>& key, const CONT_TYPE*& cont) const;
+        template <class TARGET_TYPE, class CONT_TYPE, class COPY_TYPE>
+        StatusCode loadContainer(const EventContext& ctx, const SG::ReadHandleKey<CONT_TYPE>& key, 
+                                 std::pair<std::unique_ptr<COPY_TYPE>,
+                                 std::unique_ptr<xAOD::ShallowAuxContainer>>& cont) const;
 
         bool passSelection(const EventContext& ctx, const xAOD::Muon* muon) const;
         bool passSelection(const EventContext& ctx, const xAOD::Egamma* egamm) const;

@@ -43,7 +43,11 @@
 #include "ISF_FastCaloSimEvent/TFCSPCAEnergyParametrization.h"
 #include "ISF_FastCaloSimEvent/TFCSEnergyBinParametrization.h"
 #ifndef __FastCaloSimNoLWTNN__
+#include "ISF_FastCaloSimEvent/TFCSGANXMLParameters.h"
+#include "ISF_FastCaloSimEvent/TFCSGANLWTNNHandler.h"
+#include "ISF_FastCaloSimEvent/TFCSGANEtaSlice.h"
 #include "ISF_FastCaloSimEvent/TFCSEnergyAndHitGAN.h"
+#include "ISF_FastCaloSimEvent/TFCSEnergyAndHitGANV2.h"
 #include "ISF_FastCaloSimEvent/TFCSPredictExtrapWeights.h"
 #endif
 
@@ -318,7 +322,11 @@
 #pragma link C++ class TFCSPCAEnergyParametrization-;
 #pragma link C++ class TFCSEnergyBinParametrization+;
 #ifndef __FastCaloSimNoLWTNN__
+#pragma link C++ class TFCSGANXMLParameters+;
+#pragma link C++ class TFCSGANLWTNNHandler-;
+#pragma link C++ class TFCSGANEtaSlice+;
 #pragma link C++ class TFCSEnergyAndHitGAN-;
+#pragma link C++ class TFCSEnergyAndHitGANV2+;
 #pragma link C++ class TFCSPredictExtrapWeights-;
 #endif
 

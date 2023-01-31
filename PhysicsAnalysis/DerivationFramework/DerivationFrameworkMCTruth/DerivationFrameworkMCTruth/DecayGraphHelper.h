@@ -17,6 +17,7 @@
 
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertexContainer.h"
+#include "MCTruthClassifier/MCTruthClassifier.h"
 #include "HepPID/ParticleIDMethods.hh"
 #include<unordered_set>
 
@@ -222,16 +223,15 @@ namespace DerivationFramework {
             return;
         }
         
-        void constructListOfFinalParticles(const xAOD::TruthParticleContainer* allParticles,
+        bool constructListOfFinalParticles(const xAOD::TruthParticleContainer* allParticles,
                                            std::vector<const xAOD::TruthParticle*> &selectedlist,
-                                           const std::vector<int> &pdgId, bool usePhotonsFromHadrons = false,
-                                           bool chargedOnly = false) const
-        {
+                                           const std::vector<int> &pdgId, bool allowFromHadron = false,
+                                           bool chargedOnly = false) const {
             //fill the vector selectedlist with only particles with abs(ID) in the list
             //pdgID that are 'good' for dressing: status==1, barcode < 2e5 (for the
             //photons), not from hadron decay,
             //skip pdgId check if pdgId is an empty vector,
-            //ignore photons coming from hadrons if usePhotonsFromHadrons=false,
+            //ignore particles coming from hadrons if allowFromHadron=false,
             //only use charged particles if chargedOnly=true
             
             bool skipPdgCheck = (pdgId.size()==0);
@@ -250,61 +250,20 @@ namespace DerivationFramework {
                 //check if we have a neutral particle (threeCharge returns int)
                 if (chargedOnly && HepPID::threeCharge(particle->pdgId()) == 0) continue;
                 
-                //if we have a photon from hadron decay, and usePhotonsFromHadrons=false, skip this particle
-                if (!usePhotonsFromHadrons && fromHadronDecay(particle) && particle->pdgId()==22) continue;
+                //if we have a particle from hadron decay, and allowFromHadron=false, skip this particle
+                if (!allowFromHadron) {
+                  if (!particle->isAvailable<unsigned int>("Classification"))  return false;
+                  unsigned int result = particle->auxdata<unsigned int>("Classification");
+                  const bool isPrompt = MCTruthClassifier::isPrompt(result, true);
+                  if (!isPrompt)  continue;
+                }
                 
                 //good particle, add to list
                 selectedlist.push_back(particle);
             }
+            return true;
         }
         
-        bool fromHadronDecay(const xAOD::TruthParticle* particle) const
-        {
-            //does this particle come from a hadron decay?
-            //copied and modified from
-            //MenuTruthDressingTool::isLeptonFromTau()
-            
-            const xAOD::TruthVertex* prod = particle->prodVtx();
-            if(!prod) return false; // no parent.
-            
-            // Simple loop catch
-            if (prod==particle->decayVtx()) return false;
-            
-            // Loop over the parents of this particle.
-            unsigned int nIncoming = prod->nIncomingParticles();
-            for(unsigned int itr = 0; itr<nIncoming; ++itr){
-                if (prod->incomingParticle(itr)==nullptr) continue;
-                int parentId = prod->incomingParticle(itr)->pdgId();
-                if(HepPID::isHadron(parentId)) {
-                    return true;
-                }
-                
-                //note from tancredi: should we search up the chain for leptons as
-                //well? B->l->photon should be rejected?
-                if(parentId == particle->pdgId()) {
-                    //continue searching up photon->photon chains
-                    if(fromHadronDecay(prod->incomingParticle(itr))) {
-                        return true;
-                    }
-                }
-            }
-            
-            return false;
-        }
-        
-        float calculateDeltaR(const xAOD::IParticle *p1, const xAOD::IParticle *p2) const
-        {
-            float phi1 = p1->phi();
-            float phi2 = p2->phi();
-            float eta1 = p1->eta();
-            float eta2 = p2->eta();
-            float deltaPhi = fabs(phi1-phi2);
-            if (deltaPhi>TMath::Pi()) deltaPhi = 2.0*TMath::Pi() - deltaPhi;
-            float deltaPhiSq = (phi1-phi2)*(phi1-phi2);
-            float deltaEtaSq = (eta1-eta2)*(eta1-eta2);
-            float deltaR = sqrt(deltaPhiSq+deltaEtaSq);
-            return deltaR;
-        }
     };
 }
 

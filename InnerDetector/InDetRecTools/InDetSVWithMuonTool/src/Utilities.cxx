@@ -134,9 +134,9 @@ namespace InDet{
   
   {
      TLorentzVector sum(0.,0.,0.,0.); 
-     for (int i = 0; i < (int)InpTrk.size(); ++i) {
-       if( InpTrk[i] == nullptr ) continue; 
-       sum += InpTrk[i]->p4();
+     for (const auto *i : InpTrk) {
+       if( i == nullptr ) continue; 
+       sum += i->p4();
      }
      return sum; 
    }

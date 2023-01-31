@@ -17,8 +17,11 @@
 #include "AtlasHepMC/GenEvent.h"
 #include <boost/algorithm/string.hpp>
 
-// Pointer On AtRndmGenSvc
-IAtRndmGenSvc*  Pythia8B_i::p_AtRndmGenSvc  = 0;
+// calls to fortran routines
+#include "AthenaKernel/RNGWrapper.h"
+
+// Pointer to random engine
+CLHEP::HepRandomEngine*  Pythia8B_i::p_rndmEngine = nullptr;
 
 ////////////////////////////////////////////////////////////////////////////////
 // User properties not defined by Pythia8_i
@@ -45,7 +48,7 @@ Pythia8B_i::Pythia8B_i
     declareProperty("SignalPDGCodes", m_sigCodes);
     declareProperty("SignalPtCuts", m_sigPtCuts);
     declareProperty("SignalEtaCuts", m_sigEtaCuts);
-    declareProperty("NumberOfSignalsRequiredPerEvent", m_nSignalRequired=1); 
+    declareProperty("NumberOfSignalsRequiredPerEvent", m_nSignalRequired=1);
     declareProperty("UserSelection", m_userString="NONE");
     declareProperty("UserSelectionVariables", m_userVar);
     declareProperty("SuppressSmallPT", m_doSuppressSmallPT=false);
@@ -83,25 +86,13 @@ Pythia8B_i::~Pythia8B_i(){
 ////////////////////////////////////////////////////////////////////////////////
 
 StatusCode Pythia8B_i::genInitialize() {
-    
+
     // Logic checks
     unsigned int trigPtCutsSize = m_trigPtCut.size();
     if (trigPtCutsSize!=m_cutCount.size()) {
         ATH_MSG_ERROR("You are requesting " << trigPtCutsSize << " trigger-like pt cuts but are providing required counts for " << m_cutCount.size() << " cuts. This doesn't make sense.");
         return StatusCode::FAILURE;
     }
-	
-    /// @todo Isn't this already integrated into GenModule?
-    static const bool CREATEIFNOTTHERE(true);
-    StatusCode RndmStatus = service("AtRndmGenSvc",
-                                    Pythia8B_i::p_AtRndmGenSvc,
-                                    CREATEIFNOTTHERE);
-    if (!RndmStatus.isSuccess() || 0 == Pythia8B_i::p_AtRndmGenSvc)
-    {
-        ATH_MSG_ERROR(" Could not initialize Random Number Service");
-        return RndmStatus;
-    }
-    
 
     // This over-rides the genInitialize in the base class Pythia8_i, but then calls it
     // Sets the built-in UserHook called SuppressLowPT
@@ -109,22 +100,29 @@ StatusCode Pythia8B_i::genInitialize() {
     ATH_MSG_INFO("genInitialize() from Pythia8B_i");
 
     bool canSetHook=true;
-    StatusCode returnCode = StatusCode::SUCCESS;
     if (m_doSuppressSmallPT) {
         m_SuppressSmallPT = new Pythia8::SuppressSmallPT(m_pt0timesMPI,m_numberAlphaS,m_sameAlphaSAsMPI);
         canSetHook=Pythia8_i::m_pythia->setUserHooksPtr(PYTHIA8_PTRWRAP(m_SuppressSmallPT));
     }
 
     if (!canSetHook) {
-       returnCode=StatusCode::FAILURE;
        ATH_MSG_ERROR(" *** Unable to initialise PythiaB !! ***");
+       return StatusCode::FAILURE;
     }
 
     if(m_userString == "NONE") m_userString.clear();
     // Call the base class genInitialize()
-    if (! Pythia8_i::genInitialize().isSuccess() ) returnCode=StatusCode::FAILURE;
-   
-    return returnCode;
+    CHECK(Pythia8_i::genInitialize());
+
+  ATH_MSG_DEBUG("... seeding Athena random number generator");
+    if (m_useRndmGenSvc){
+      p_rndmEngine = m_atlasRndmEngine->getEngine(); // NOT THREAD-SAFE
+      if (!p_rndmEngine) {
+        ATH_MSG_FATAL("Unable to retrieve HepRandomEngine. Bailing out.");
+        return StatusCode::FAILURE;
+      }
+    }
+    return StatusCode::SUCCESS;
 }
 
 
@@ -164,16 +162,18 @@ StatusCode Pythia8B_i::callGenerator(){
         ATH_MSG_DEBUG("BEventBuffer not empty; skipping callGenerator");
         return StatusCode::SUCCESS;
     }
-    
-    if(useRndmGenSvc() && Pythia8B_i::p_AtRndmGenSvc){
-        // Save the random number seeds in the event
-        CLHEP::HepRandomEngine*  engine  = Pythia8B_i::p_AtRndmGenSvc->GetEngine(Pythia8_i::pythia_stream());
-        const long* s =  engine->getSeeds();
-        m_seeds.clear();
-        m_seeds.push_back(s[0]);
-        m_seeds.push_back(s[1]);
-    }
-    
+
+   if(m_useRndmGenSvc && Pythia8B_i::p_rndmEngine){
+       //Re-seed the random number stream
+       long seeds[7];
+       const EventContext& ctx = Gaudi::Hive::currentContext();
+       ATHRNG::calculateSeedsMC21(seeds, "PYTHIA8B",  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+       m_atlasRndmEngine->getEngine()->setSeeds(seeds, 0); // NOT THREAD-SAFE
+       m_seeds.clear();
+       m_seeds.push_back(seeds[0]);
+       m_seeds.push_back(seeds[1]);
+  }   
+
     // Generator. Shorthand for event.
     Pythia8::Event& event = Pythia8_i::m_pythia->event;
     
@@ -390,7 +390,7 @@ StatusCode Pythia8B_i::fillEvt(HepMC::GenEvent *evt){
     
     
     // set the randomseeds
-    if(useRndmGenSvc() && Pythia8B_i::p_AtRndmGenSvc)
+    if(useRndmGenSvc() && Pythia8B_i::p_rndmEngine)
         HepMC::set_random_states(evt,m_seeds);
     
     // set the event weight

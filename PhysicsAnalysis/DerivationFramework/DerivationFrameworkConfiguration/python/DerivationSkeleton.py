@@ -26,7 +26,7 @@ def fromRunArgs(runArgs):
     # Switch on PerfMon
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
     setPerfmonFlagsFromRunArgs(ConfigFlags, runArgs)
-    
+
     # Input types
     allowedInputTypes = [ 'AOD', 'DAOD_PHYS', 'EVNT' ]
     availableInputTypes = [ hasattr(runArgs, f'input{inputType}File') for inputType in allowedInputTypes ]
@@ -34,6 +34,24 @@ def fromRunArgs(runArgs):
         raise ValueError('Input must be exactly one of the following types: inputAODFile, inputEVNTFile, inputDAOD_PHYSFile')
     idx = availableInputTypes.index(True)
     ConfigFlags.Input.Files = getattr(runArgs, f'input{allowedInputTypes[idx]}File')
+
+    # Augmentations
+    # For the time being one parent (primary stream) can have multiple children (augmentations)
+    # However, an augmentation cannot have multiple parents, which will be supported in the future
+    if hasattr(runArgs, 'augmentations'):
+        for val in getattr(runArgs, 'augmentations'):
+            if ':' not in val or len(val.split(':')) != 2:
+                logDerivation.error('Derivation job started, but with wrong augmentation syntax - aborting')
+                raise ValueError('Invalid augmentation argument: {0}'.format(val))
+            else:
+                child, parent = val.split(':')
+                ConfigFlags.addFlag(f'Output.DAOD_{child}ParentStream',f'DAOD_{parent}')
+                childStreamFlag = f'Output.DAOD_{parent}ChildStream'
+                if not ConfigFlags.hasFlag(childStreamFlag):
+                    ConfigFlags.addFlag(childStreamFlag, [f'DAOD_{child}'])
+                else:
+                    ConfigFlags._set(childStreamFlag, ConfigFlags._get(childStreamFlag) + [f'DAOD_{child}'])
+                logDerivation.info('Setting up event augmentation as {0} => {1}'.format(child, parent))
 
     # Output formats
     formats = []
@@ -90,6 +108,10 @@ def fromRunArgs(runArgs):
     if ConfigFlags.PerfMon.doFullMonMT or ConfigFlags.PerfMon.doFastMonMT:
        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
        cfg.merge(PerfMonMTSvcCfg(ConfigFlags))
+
+    # Write AMI tag into in-file metadata
+    from PyUtils.AMITagHelperConfig import AMITagCfg
+    cfg.merge(AMITagCfg(ConfigFlags, runArgs))
 
     # Set EventPrintoutInterval to 100 events
     cfg.getService(cfg.getAppProps()['EventLoop']).EventPrintoutInterval = 100

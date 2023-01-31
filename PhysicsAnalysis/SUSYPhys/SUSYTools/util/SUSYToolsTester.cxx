@@ -134,6 +134,7 @@ int main( int argc, char* argv[] ) {
   int isAtlfast = -1;
   int NoSyst = 1;
   int debug = 1;
+  bool isPHYSLite = false;
   Long64_t entries=-1;
 
   // Open the input file:
@@ -143,9 +144,12 @@ int main( int argc, char* argv[] ) {
   ANA_CHECK( ifile.get() );
 
   bool isRun3 = false;
-  if ((fileName.Contains("mc21a") || fileName.Contains("data22")) && fileName.Contains("13p6TeV")) isRun3 = true;
+  if ((fileName.Contains("mc21") || fileName.Contains("data22")) && fileName.Contains("13p6TeV")) isRun3 = true;
   std::string config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default.conf")).c_str();
-  if (isRun3) config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_Run3.conf")).c_str();
+  if (isRun3) {
+    config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_Run3.conf")).c_str();
+    ANA_MSG_INFO("Configuring for Run 3");
+  }
   std::string prw_file = "DUMMY";
   std::string ilumicalc_file = "DUMMY";
 
@@ -180,14 +184,17 @@ int main( int argc, char* argv[] ) {
   std::map<std::string, std::string> containers = getFileContainers(ifile);
   bool hasTrkJets(false), hasFatJets(false);
   for (auto& x : containers) {
-    if (x.first.find("AntiKtVR30Rmax4Rmin02TrackJets")!=std::string::npos) hasTrkJets = true;
-    if (x.first.find("AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets")!=std::string::npos) hasFatJets = true;
+    if (x.first.find("AntiKtVR30Rmax4Rmin02TrackJets")!=std::string::npos)           hasTrkJets = true;
+    if (x.first.find("AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets")!=std::string::npos) hasFatJets = true;
+    if (x.first.find("AnalysisElectrons")!=std::string::npos)                        isPHYSLite = true;
+
   }
   if (debug>0) {
     ANA_MSG_INFO("Checking file contents (containers):");
     for (auto& x : containers) ANA_MSG_INFO("  - found " << x.first.c_str() << " (" << x.second.c_str() << ")");
     ANA_MSG_INFO("hasTrkJets: " << (hasTrkJets?"true":"false"));
     ANA_MSG_INFO("hasFatJets: " << (hasFatJets?"true":"false"));
+    ANA_MSG_INFO("isPHYSLite: " << (isPHYSLite?"true":"false"));
   }
 
   // Create a TEvent object:
@@ -218,7 +225,7 @@ int main( int argc, char* argv[] ) {
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data16_13TeV/20180129/physics_25ns_21.0.19.xml"));
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.xml"));
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data18_13TeV/20190219/physics_25ns_Triggerno17e33prim.xml"));
-    myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data22_13p6TeV/20220922/physics_25ns_ignoreTRIGMUO.xml"));
+    myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data22_13p6TeV/20230116/data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns.xml"));
 
     ANA_CHECK( m_grl.setProperty("GoodRunsListVec", myGRLs) );
     ANA_CHECK( m_grl.setProperty("PassThrough", false) );
@@ -337,7 +344,7 @@ int main( int argc, char* argv[] ) {
   ANA_MSG_INFO( "Config file opened" );
 
   std::map<std::string,std::string> configDict = {};
-  configDict["Jet.LargeRcollection"] = rEnv.GetValue("Jet.LargeRcollection", "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets" );
+  configDict["Jet.LargeRcollection"] = rEnv.GetValue("Jet.LargeRcollection", "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets" );
   configDict["TrackJet.Collection"]  = rEnv.GetValue("TrackJet.Collection", "AntiKtVR30Rmax4Rmin02TrackJets" );
   configDict["Jet.WtaggerConfig"]    = rEnv.GetValue("Jet.WtaggerConfig", "None");
   configDict["Jet.ZtaggerConfig"]    = rEnv.GetValue("Jet.ZtaggerConfig", "None");
@@ -435,7 +442,6 @@ int main( int argc, char* argv[] ) {
 
   int period = (debug>0) ? 1 : 100;
   std::string cbkname, stream, ostream, kernel;
-  bool isPHYSLite = false;
 
   // Loop over the events:
   for ( Long64_t entry = 0; entry < entries; ++entry ) {
@@ -479,7 +485,6 @@ int main( int argc, char* argv[] ) {
            allEventsCBK = cbk;
         }
       }
-      if (stream.compare("PHYSLITE")==0) isPHYSLite=true;
 
       if (allEventsCBK) {
         uint64_t nEventsProcessed  = allEventsCBK->nAcceptedEvents();
@@ -673,6 +678,10 @@ int main( int argc, char* argv[] ) {
       ANA_MSG_DEBUG( taus_nominal->size() << " taus");
     }
     
+    // MET Trigger
+    bool passMETtrig = objTool.IsMETTrigPassed();
+    ANA_MSG_DEBUG( "Pass MET trigger " << passMETtrig);
+
     // MET
     metcst_nominal->setStore(metcst_nominal_aux);
     metcst_nominal->reserve(10);
@@ -1040,12 +1049,12 @@ int main( int argc, char* argv[] ) {
       TString muTrig2015 = "HLT_mu20_iloose_L1MU15_OR_HLT_mu50"; //"HLT_mu18_mu8noL1"; //"HLT_mu20_iloose_L1MU15_OR_HLT_mu50";
       TString muTrig2016 = "HLT_mu26_ivarmedium_OR_HLT_mu50";
       TString muTrig2017 = "HLT_mu26_ivarmedium_OR_HLT_mu50";
-      TString muTrig2022 = "HLT_mu24_ivarmedium_L1MU14FCH_OR_HLT_mu50_L1MU14FCH";
+      TString muTrig2022 = "HLT_mu24_ivarmedium_OR_HLT_mu50";
 
       std::vector<std::string> muTrigs2015 = {"HLT_mu20_iloose_L1MU15","HLT_mu50"}; //"HLT_mu18_mu8noL1"; //"HLT_mu20_iloose_L1MU15_OR_HLT_mu50";
       std::vector<std::string> muTrigs2016 = {"HLT_mu26_ivarmedium","HLT_mu50"};
       std::vector<std::string> muTrigs2017 = {"HLT_mu26_ivarmedium","HLT_mu50"};
-      std::vector<std::string> muTrigs2022 = {"HLT_mu24_ivarmedium_L1MU14FCH","HLT_mu50_L1MU14FCH"};
+      std::vector<std::string> muTrigs2022 = {"HLT_mu24_ivarmedium","HLT_mu50"};
 
       if (slices["mu"]) {
         ANA_MSG_DEBUG( "Muon step - selection" );
@@ -1143,7 +1152,7 @@ int main( int argc, char* argv[] ) {
           else if(objTool.treatAsYear()==2016)   muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2016.Data());
           else if(objTool.treatAsYear()==2017)   muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2017.Data());
           else if(objTool.treatAsYear()==2018)   muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2017.Data());
-          else                                   muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2022.Data());
+          else if(objTool.treatAsYear()==2022 && objTool.GetRandomRunNumber() < 435816)  muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2022.Data()); //temporary solution to avoid warning from missing SF in the latest periods (from H)
           ANA_MSG_DEBUG("MUON AFTER SF =  " << muonSF << "   " << objTool.treatAsYear() << "   "  << objTool.GetRandomRunNumber() << "    " <<  objTool.GetPileupWeight() );
         }
       }

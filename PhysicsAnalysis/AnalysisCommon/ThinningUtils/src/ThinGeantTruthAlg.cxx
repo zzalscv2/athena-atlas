@@ -382,20 +382,20 @@ ThinGeantTruthAlg::isStatus1BSMParticle(const xAOD::TruthParticle* part)
   bool status1 = (part->status() == 1);
   bool isBSM(false);
 
-  if ((31 < abs(pdg) && abs(pdg) < 38) || // BSM Higgs / W' / Z' / etc
-      abs(pdg) == 39 || abs(pdg) == 41 || abs(pdg) == 42 ||
-      abs(pdg) == 7 ||                      // 4th gen beauty
-      abs(pdg) == 8 ||                      // 4th gen top
-      (600 < abs(pdg) && abs(pdg) < 607) || // scalar leptoquarks
-      (1000000 < abs(pdg) &&
-       abs(pdg) < 2000000) || // left-handed SUSY (including R-Hadrons)
+  if ((31 < abs(pdg) && std::abs(pdg) < 38) || // BSM Higgs / W' / Z' / etc
+      std::abs(pdg) == 39 || std::abs(pdg) == 41 || std::abs(pdg) == 42 ||
+      std::abs(pdg) == 7 ||                      // 4th gen beauty
+      std::abs(pdg) == 8 ||                      // 4th gen top
+      (600 < abs(pdg) && std::abs(pdg) < 607) || // scalar leptoquarks
+      (1000000 < std::abs(pdg) &&
+       std::abs(pdg) < 2000000) || // left-handed SUSY (including R-Hadrons)
       (2000000 < abs(pdg) &&
-       abs(pdg) < 3000000) || // right-handed SUSY (including R-Hadrons)
-      abs(pdg) == 6000005 ||  // X5/3
-      abs(pdg) == 6000006 ||  // T2/3
-      abs(pdg) == 6000007 ||  // B-1/3
-      abs(pdg) == 6000008 ||  // Y-4/3
-      ((abs(pdg) >= 10000100) && (abs(pdg) <= 10001000)) // multi-charged
+       std::abs(pdg) < 3000000) || // right-handed SUSY (including R-Hadrons)
+      std::abs(pdg) == 6000005 ||  // X5/3
+      std::abs(pdg) == 6000006 ||  // T2/3
+      std::abs(pdg) == 6000007 ||  // B-1/3
+      std::abs(pdg) == 6000008 ||  // Y-4/3
+      ((std::abs(pdg) >= 10000100) && (std::abs(pdg) <= 10001000)) // multi-charged
   )
     isBSM = true;
 

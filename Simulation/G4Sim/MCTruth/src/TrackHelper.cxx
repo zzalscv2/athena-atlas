@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MCTruth/TrackHelper.h"
@@ -31,7 +31,7 @@ bool TrackHelper::IsSecondary() const
 }
 int TrackHelper::GetBarcode() const
 {
-  if (m_trackInfo==0 || m_trackInfo->GetHepMCParticle()==0) return 0;
+  if (m_trackInfo==0 || std::as_const(m_trackInfo)->GetHepMCParticle()==0) return 0;
   return m_trackInfo->GetParticleBarcode();
 }
 

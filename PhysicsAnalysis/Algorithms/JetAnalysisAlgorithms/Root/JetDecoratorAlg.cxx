@@ -43,7 +43,7 @@ namespace CP
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
-      xAOD::JetContainer *jets = nullptr;
+      const xAOD::JetContainer *jets = nullptr;
       ANA_CHECK (m_jetHandle.getCopy(jets, sys));
       ANA_CHECK (m_decorator->decorate(*jets));
     }

@@ -55,6 +55,7 @@ TauSelectionTool::TauSelectionTool( const std::string& name )
   declareProperty( "EleRNNMin",     m_dEleRNNMin     = NAN);
   declareProperty( "EleRNNMax",     m_dEleRNNMax     = NAN);
   declareProperty( "EleIDWP",       m_iEleIDWP       = 0);
+  declareProperty( "EleIDVersion",       m_iEleIDVersion  = 1);
   declareProperty( "MuonOLR",       m_bMuonOLR       = false);
 }
 
@@ -87,6 +88,7 @@ StatusCode TauSelectionTool::initialize()
   if (!bConfigViaProperties and m_dEleRNNMin == m_dEleRNNMin) bConfigViaProperties = true;
   if (!bConfigViaProperties and m_dEleRNNMax == m_dEleRNNMax) bConfigViaProperties = true;
   if (!bConfigViaProperties and m_iEleIDWP != 0)              bConfigViaProperties = true;
+  if (!bConfigViaProperties and m_iEleIDVersion != 1)         bConfigViaProperties = true;
   if (!bConfigViaProperties and m_bMuonOLR)                   bConfigViaProperties = true;
 
   if (bConfigViaConfigFile and bConfigViaProperties)
@@ -239,6 +241,12 @@ StatusCode TauSelectionTool::initialize()
         if (m_iEleIDWP == ELEIDNONEUNCONFIGURED)
           m_iEleIDWP = convertStrToEleIDWP(rEnv.GetValue("EleIDWP","ELEIDNONE"));
       }
+      else if (sCut == "EleIDVersion")
+      {
+	//EleIDVersion alone is not enough to switch on CutEleIDWP
+        if (m_iEleIDVersion == 1)
+          m_iEleIDVersion = rEnv.GetValue("EleIDVersion",m_iEleIDVersion);
+      }
       else if (sCut == "MuonOLR")
       {
         iSelectionCuts = iSelectionCuts | CutMuonOLR;
@@ -295,6 +303,7 @@ StatusCode TauSelectionTool::initialize()
   PrintConfigValue  ("JetIDWP ENUM",m_iJetIDWP);
   PrintConfigValue  ("EleIDWP",     m_sEleIDWP);
   PrintConfigValue  ("EleIDWP ENUM",m_iEleIDWP);
+  PrintConfigValue  ("EleIDVersion",m_iEleIDVersion);
   PrintConfigValue  ("MuonOLR",     m_bMuonOLR);
 
   std::string sCuts = "";

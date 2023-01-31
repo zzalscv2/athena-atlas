@@ -5,9 +5,7 @@
 #ifndef ISF_FASTCALOSIMEVENT_TFCS2DFunctionHistogram_h
 #define ISF_FASTCALOSIMEVENT_TFCS2DFunctionHistogram_h
 
-#ifndef __FastCaloSimStandAlone__ 
-  #include "CxxUtils/checker_macros.h"  
-#endif
+#include "CxxUtils/checker_macros.h"
 
 #include "ISF_FastCaloSimEvent/TFCS2DFunction.h"
 #include <vector>
@@ -20,7 +18,7 @@ class TFCS2DFunctionHistogram:public TFCS2DFunction
     TFCS2DFunctionHistogram(TH2* hist=nullptr) {if(hist) Initialize(hist);};
     ~TFCS2DFunctionHistogram() {};
 
-    virtual void Initialize(TH2* hist);
+    void Initialize(TH2* hist);
 
     using TFCS2DFunction::rnd_to_fct;
     virtual void rnd_to_fct(float& valuex,float& valuey,float rnd0,float rnd1) const;

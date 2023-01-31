@@ -239,29 +239,30 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
 if __name__=='__main__':
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    #ConfigFlags.Input.Files = ['/dsk1/AFPFiles/datasets/355754/user.ladamczy.23432842.EXT0._000001.xAOD.root']
-    ConfigFlags.Input.Files = ['/eos/atlas/atlascerngroupdisk/det-afp/nikola/afs/public/backup_raw_337176/user.ladamczy.21473705.EXT0._000002.xAOD.root',
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    #flags.Input.Files = ['/dsk1/AFPFiles/datasets/355754/user.ladamczy.23432842.EXT0._000001.xAOD.root']
+    flags.Input.Files = ['/eos/atlas/atlascerngroupdisk/det-afp/nikola/afs/public/backup_raw_337176/user.ladamczy.21473705.EXT0._000002.xAOD.root',
                                '/eos/atlas/atlascerngroupdisk/det-afp/nikola/afs/public/backup_raw_337176/user.ladamczy.21473705.EXT0._000003.xAOD.root',
                                '/eos/atlas/atlascerngroupdisk/det-afp/nikola/afs/public/backup_raw_337176/user.ladamczy.21473705.EXT0._000004.xAOD.root']
-    #ConfigFlags.Input.Files = ['/afs/cern.ch/user/p/pbalek/public/AFP/testxAOD.root']
-    ConfigFlags.Input.isMC = False
-    ConfigFlags.Output.HISTFileName = 'AFPTest-337176-10k-FMETrains-MU.root'
+    #flags.Input.Files = ['/afs/cern.ch/user/p/pbalek/public/AFP/testxAOD.root']
+    flags.Input.isMC = False
+    flags.Output.HISTFileName = 'AFPTest-337176-10k-FMETrains-MU.root'
     
 
-    ConfigFlags.Concurrency.NumThreads=10
-    ConfigFlags.Concurrency.NumConcurrentEvents=10
+    flags.Concurrency.NumThreads=10
+    flags.Concurrency.NumConcurrentEvents=10
     
     
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
     
-    exampleMonitorAcc = Run3AFPExampleMonitoringConfig(ConfigFlags)
+    exampleMonitorAcc = Run3AFPExampleMonitoringConfig(flags)
     cfg.merge(exampleMonitorAcc)
 
     cfg.run(10000)

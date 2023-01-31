@@ -31,6 +31,7 @@ private:
   std::string                  m_dbFolder;
   std::string                  m_dbFebFolder;
   int                          m_mode;
+  bool                         m_isSC;
 };
 
 #endif

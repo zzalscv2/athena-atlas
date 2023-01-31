@@ -113,9 +113,6 @@ if __name__=="__main__":
     cfg.merge(CaloNoiseCondAlgCfg(ConfigFlags,"totalNoise"))
     cfg.merge(CaloNoiseCondAlgCfg(ConfigFlags,"electronicNoise"))
 
-    from TrkConfig.AtlasTrackingGeometrySvcConfig import TrackingGeometrySvcCfg
-    cfg.merge(TrackingGeometrySvcCfg(ConfigFlags))
-
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     cfg.merge(MuonGeoModelCfg(ConfigFlags))
 

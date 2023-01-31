@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -73,7 +73,7 @@ namespace Analysis
 
   // experimental variable container access
 
-  double JetFitterGenericTagInfo::getDouble(std::string key) const { 
+  double JetFitterGenericTagInfo::getDouble(const std::string& key) const { 
     DoubleMap::const_iterator itr = m_experimental_doubles.find(key); 
     if (itr == m_experimental_doubles.end() ) { 
       return std::numeric_limits<double>::min(); 
@@ -81,7 +81,7 @@ namespace Analysis
     return itr->second; 
   }
 
-  double JetFitterGenericTagInfo::getDoubleOrThrow(std::string key) const { 
+  double JetFitterGenericTagInfo::getDoubleOrThrow(const std::string& key) const { 
     DoubleMap::const_iterator itr = m_experimental_doubles.find(key); 
     if (itr == m_experimental_doubles.end() ) { 
       throw std::range_error("no stored value for " + 
@@ -108,7 +108,7 @@ namespace Analysis
   }
 
 
-  int JetFitterGenericTagInfo::getInt(std::string key) const { 
+  int JetFitterGenericTagInfo::getInt(const std::string& key) const { 
     IntMap::const_iterator itr = m_experimental_ints.find(key); 
     if (itr == m_experimental_ints.end()) { 
       return std::numeric_limits<int>::min(); 
@@ -116,7 +116,7 @@ namespace Analysis
     return itr->second; 
   }
   
-  int JetFitterGenericTagInfo::getIntOrThrow(std::string key) const { 
+  int JetFitterGenericTagInfo::getIntOrThrow(const std::string& key) const { 
     IntMap::const_iterator itr = m_experimental_ints.find(key); 
     if (itr == m_experimental_ints.end()) { 
       throw std::range_error("no stored value for " + key + 

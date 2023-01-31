@@ -62,6 +62,9 @@ DsoRootLock::DsoRootLock()
  */
 int DsoRootLock::hook (const ath_dso_event* event, void* /*userdata*/)
 {
+  // Skip for Xrd libraries --- otherwise we can deadlock.
+  if (event->fname && strncmp (event->fname, "libXrd", 6) == 0) return 0;
+
   // If the core mutex has been created, acquire it before loading
   // a library and release it on completion.
   // Hope these are always properly nested!

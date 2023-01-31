@@ -50,7 +50,7 @@ G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPh
 
   if(m_getMatEther) getMatEther();
 
-  static const Geo2G4LVFactory LVFactory;
+  static Geo2G4LVFactory LVFactory;
 
   G4LogicalVolume* theG4LogVolume = LVFactory.Build(theGeoPhysVolume,descend);
 
@@ -103,12 +103,12 @@ G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPh
       Geo2G4STParameterisation* stParameterisation = new Geo2G4STParameterisation(serialTransformerChild->getFunction(),
                                                                                   serialTransformerChild->getNCopies());
 
-      G4VPhysicalVolume* pvParametrised __attribute__ ((unused)) = new G4PVParameterised(nameChild,
-                                                                                         theG4LogChild,
-                                                                                         theG4LogVolume,
-                                                                                         kUndefined,
-                                                                                         serialTransformerChild->getNCopies(),
-                                                                                         stParameterisation);
+      [[maybe_unused]] G4VPhysicalVolume* pvParametrised = new G4PVParameterised(nameChild,
+                                                                                 theG4LogChild,
+                                                                                 theG4LogVolume,
+                                                                                 kUndefined,
+                                                                                 serialTransformerChild->getNCopies(),
+                                                                                 stParameterisation);
     }
   else
     {

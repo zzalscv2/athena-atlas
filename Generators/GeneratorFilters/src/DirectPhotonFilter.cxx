@@ -75,7 +75,7 @@ StatusCode DirectPhotonFilter::filterEvent() {
           auto parent=*parent_it;
 #endif
           int pdgindex =  std::abs(parent->pdg_id()); 
-          ATH_MSG_DEBUG("Looping on Production (parents) vertex : " << parent->pdg_id() << "  " << HepMC::barcode(parent));
+          ATH_MSG_DEBUG("Looping on Production (parents) vertex : " << parent->pdg_id() << parent);
           if (pdgindex > 100) {
             fromHadron = true;
             if (m_AllowSUSYDecay && ( (pdgindex > 1000000 && pdgindex < 1000040) || (pdgindex > 2000000 && pdgindex < 2000016) ) ) fromHadron = false;

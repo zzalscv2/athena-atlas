@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,7 +19,6 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/AlgTool.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODEventInfo/EventAuxInfo.h"
 #include "InDetSimData/InDetSimDataCollection.h"
@@ -34,6 +33,7 @@
 
 #include "TrkTruthData/PRD_MultiTruthCollection.h"
 
+#include "AthenaKernel/IAthRNGSvc.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "EventPrimitives/EventPrimitives.h"
 
@@ -84,7 +84,8 @@ public:
   StatusCode mergeClusters(Pixel_detElement_RIO_map * cluster_map);
   StatusCode mergeClusters(SCT_detElement_RIO_map * cluster_map);
 
-  StatusCode digitize(const EventContext& ctx);
+  StatusCode digitize(const EventContext& ctx,
+                      TimedHitCollection<SiHit>& thpcsi);
   StatusCode createAndStoreRIOs(const EventContext& ctx);
   StatusCode retrieveTruth();
   StatusCode finalize();
@@ -103,8 +104,7 @@ public:
 
  private:
 
-  TimedHitCollection<SiHit>* m_thpcsi;
-  ServiceHandle <IAtRndmGenSvc> m_rndmSvc;             //!< Random number service
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};  //!< Random number service
 
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{this, "PixelDetEleCollKey", "PixelDetectorElementCollection", "Key of SiDetectorElementCollection for Pixel"};
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey{this, "SCTDetEleCollKey", "SCT_DetectorElementCollection", "Key of SiDetectorElementCollection for SCT"};
@@ -112,7 +112,6 @@ public:
   const PixelID* m_pixel_ID;                             //!< Handle to the ID helper
   const SCT_ID* m_sct_ID;                             //!< Handle to the ID helper
 
-  CLHEP::HepRandomEngine*           m_randomEngine;
   std::string                m_randomEngineName;         //!< Name of the random number stream
 
   float m_pitch_X;

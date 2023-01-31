@@ -134,6 +134,7 @@ ConfigFlags.Trigger.readBS = False
 ConfigFlags.Trigger.doID = False
 
 # FIXME: obsolete/broken trigger configuration has been removed
+# need to switch to CA config
 
 from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
 CaloNoiseCondAlg ('totalNoise')

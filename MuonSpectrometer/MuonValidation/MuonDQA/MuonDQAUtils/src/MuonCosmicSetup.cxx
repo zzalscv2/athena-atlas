@@ -27,7 +27,7 @@ bool chambersCosmicSetup(const std::string& f_hardware_name, int f_cosmicstation
     sector13.push_back("BOF1A14");    
     sector13.push_back("BOF3A12");
     sector13.push_back("BOF3A14");  
-    for (std::vector<std::string>::const_iterator iter=sector13.begin(); iter!=sector13.end(); iter++){
+    for (std::vector<std::string>::const_iterator iter=sector13.begin(); iter!=sector13.end(); ++iter){
       if (f_hardware_name==*iter){pass=true;}     
     }
   }

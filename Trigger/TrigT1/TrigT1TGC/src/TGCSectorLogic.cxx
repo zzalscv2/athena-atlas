@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCSectorLogic.h"
@@ -44,7 +44,7 @@ TGCSectorLogic::TGCSectorLogic(TGCArguments* tgcargs, const TGCDatabaseManager* 
    m_stripHighPtChipOut(0),
    m_tgcArgs(tgcargs)
 {
-  m_sideId = (idIn / NumberOfModule) / NumberOfOctant;
+  m_sideId = static_cast<LVL1TGC::TGCSide>((idIn / NumberOfModule) / NumberOfOctant);
   m_octantId = (idIn / NumberOfModule) % NumberOfOctant;
   m_moduleId = idIn % NumberOfModule;
 
@@ -56,8 +56,8 @@ TGCSectorLogic::TGCSectorLogic(TGCArguments* tgcargs, const TGCDatabaseManager* 
     m_sectorId += 3*m_octantId;
   }
 
-  m_nswSide   =   (tgcArgs()->NSWSideInfo().find('A')!=std::string::npos && m_sideId==0)
-               || (tgcArgs()->NSWSideInfo().find('C')!=std::string::npos && m_sideId==1);
+  m_nswSide   =   (tgcArgs()->NSWSideInfo().find('A')!=std::string::npos && m_sideId == LVL1TGC::TGCSide::ASIDE)
+               || (tgcArgs()->NSWSideInfo().find('C')!=std::string::npos && m_sideId == LVL1TGC::TGCSide::CSIDE);
 
   m_SSCController.setRegion(regionIn);
 
@@ -95,19 +95,19 @@ TGCSectorLogic::TGCSectorLogic(TGCArguments* tgcargs, const TGCDatabaseManager* 
 TGCSectorLogic::~TGCSectorLogic()
 {}
 
-void TGCSectorLogic::setTMDB(const TGCTMDB* tmdb)
+void TGCSectorLogic::setTMDB(std::shared_ptr<const LVL1TGC::TGCTMDB> tmdb)
 {
   m_pTMDB = tmdb;
   if (m_pTMDB==0) m_useTileMu = false;
 }
 
-void TGCSectorLogic::setNSW(std::shared_ptr<const TGCNSW> nsw)
+void TGCSectorLogic::setNSW(std::shared_ptr<const LVL1TGC::TGCNSW> nsw)
 {
   m_nsw = nsw;
   if(m_nsw == 0) tgcArgs()->set_USE_NSW(false);
 }
 
-void TGCSectorLogic::setBIS78(std::shared_ptr<const TGCBIS78> bis78)
+void TGCSectorLogic::setBIS78(std::shared_ptr<const LVL1TGC::TGCBIS78> bis78)
 {
   m_bis78 = bis78;
   if(m_bis78 == 0) tgcArgs()->set_USE_BIS78(false);
@@ -245,8 +245,9 @@ void TGCSectorLogic::showResult()
 
 TGCSectorLogic::TGCSectorLogic(const TGCSectorLogic& right)
  : m_bid(right.m_bid), m_id(right.m_id),
+   m_sideId(right.m_sideId),
    m_sectorId(right.m_sectorId), m_moduleId(right.m_moduleId),
-   m_sideId(right.m_sideId), m_octantId(right.m_octantId),
+   m_octantId(right.m_octantId),
    m_region(right.m_region),
    m_NumberOfWireHighPtBoard(right.m_NumberOfWireHighPtBoard),
    m_useEIFI(right.m_useEIFI), m_useTileMu(right.m_useTileMu),
@@ -281,9 +282,9 @@ TGCSectorLogic::operator=(const TGCSectorLogic& right)
   if ( this != &right ) {
     m_bid =right.m_bid;
     m_id  =right.m_id;
+    m_sideId = right.m_sideId;
     m_sectorId=right.m_sectorId;
     m_moduleId=right.m_moduleId;
-    m_sideId=right.m_sideId;
     m_octantId=right.m_octantId;
     m_region=right.m_region;
     m_NumberOfWireHighPtBoard=right.m_NumberOfWireHighPtBoard;
@@ -347,7 +348,7 @@ void TGCSectorLogic::doInnerCoincidence(int SSCId, TGCRPhiCoincidenceOut* coinci
       // check if TileMu is used for the roi 
       bool validTileMu = (m_tileMuLUT->getFlagROI(pos, coincidenceOut->getIdSSC(), m_sectorId, m_sideId) == 1);
       bool validBIS78 = false;
-      if(tgcArgs()->USE_BIS78() && m_sideId==0) validBIS78=(m_mapBIS78->getFlagROI(pos, coincidenceOut->getIdSSC(), m_sectorId, m_sideId) == 1); // A-side only
+      if(tgcArgs()->USE_BIS78()) validBIS78=(m_mapBIS78->getFlagROI(pos, coincidenceOut->getIdSSC(), m_sectorId, m_sideId) == 1);
 
       bool isEI=false;
       bool isTILE=false;
@@ -382,17 +383,17 @@ void TGCSectorLogic::doInnerCoincidence(int SSCId, TGCRPhiCoincidenceOut* coinci
 
 
 void TGCSectorLogic::doTGCNSWCoincidence(TGCRPhiCoincidenceOut* coincidenceOut){
-  std::shared_ptr<const NSWTrigOut> pNSWOut = m_nsw->getOutput(m_region,m_sideId,m_sectorId);
+  std::shared_ptr<const LVL1TGC::NSWTrigOut> pNSWOut = m_nsw->getOutput(m_region,m_sideId,m_sectorId);
 
-  // for now, if there is a hit at NSW, turn on the inner coin flag
-  coincidenceOut->setInnerCoincidenceFlag( pNSWOut->getNSWeta().size()>0 );
+  // for now, if there is a hit at NSW and the side is included in the detector mask, turn on the inner coin flag
+  coincidenceOut->setInnerCoincidenceFlag( pNSWOut->getNSWeta().size()>0 && m_nswSide);
   return;
 
   // will implement NSW pT calculation later
 }
 
 bool TGCSectorLogic::doTGCBIS78Coincidence(TGCRPhiCoincidenceOut* coincidenceOut){
-  std::shared_ptr<const BIS78TrigOut> pBIS78Out = m_bis78->getOutput(m_region,m_sectorId);
+  std::shared_ptr<const LVL1TGC::BIS78TrigOut> pBIS78Out = m_bis78->getOutput(m_sectorId);
   if ( pBIS78Out.get() == 0 ) return false;
   int pt=0;
     
@@ -412,7 +413,7 @@ bool TGCSectorLogic::doTILECoincidence(TGCRPhiCoincidenceOut* coincidenceOut)
   bool isHitTileMu=false;
   for(int mod=0; mod < LVL1TGC::TGCTileMuCoincidenceLUT::N_Input_TileMuModule; mod++) {
     uint8_t maskTM = (uint8_t)(m_tileMuLUT->getTrigMask(mod, coincidenceOut->getIdSSC(), m_sectorId, m_sideId));
-    const TGCTMDBOut* tm = m_pTMDB->getOutput(m_sideId, m_sectorId, mod); 
+    std::shared_ptr<const LVL1TGC::TGCTMDBOut> tm = m_pTMDB->getOutput(m_sideId, m_sectorId, mod); 
     isHitTileMu = isHitTileMu || this->hitTileMu(maskTM, tm->getHit6(), tm->getHit56());
   }
 
@@ -470,16 +471,16 @@ bool TGCSectorLogic::hitTileMu(const uint8_t& mask, const uint8_t& hit6, const u
    */
   switch(mask) {
     case LVL1TGC::TGCTileMuCoincidenceLUT::TM_D6_L:
-      return (hit6==TGCTMDBOut::TM_LOW || hit6==TGCTMDBOut::TM_HIGH);
+      return (hit6==LVL1TGC::TGCTMDBOut::TM_LOW || hit6==LVL1TGC::TGCTMDBOut::TM_HIGH);
       break;
     case LVL1TGC::TGCTileMuCoincidenceLUT::TM_D6_H:
-      return (hit6==TGCTMDBOut::TM_HIGH);
+      return (hit6==LVL1TGC::TGCTMDBOut::TM_HIGH);
       break;
     case LVL1TGC::TGCTileMuCoincidenceLUT::TM_D56_L:
-      return (hit56==TGCTMDBOut::TM_LOW || hit56==TGCTMDBOut::TM_HIGH);
+      return (hit56==LVL1TGC::TGCTMDBOut::TM_LOW || hit56==LVL1TGC::TGCTMDBOut::TM_HIGH);
       break;
     case LVL1TGC::TGCTileMuCoincidenceLUT::TM_D56_H:
-      return (hit56==TGCTMDBOut::TM_HIGH);
+      return (hit56==LVL1TGC::TGCTMDBOut::TM_HIGH);
       break;
     default:
       return false;

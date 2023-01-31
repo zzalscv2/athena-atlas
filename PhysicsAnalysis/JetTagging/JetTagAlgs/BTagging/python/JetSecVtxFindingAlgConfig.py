@@ -6,7 +6,7 @@ from BTagging.InDetImprovedJetFitterVxFinderConfig import InDetImprovedJetFitter
 from InDetConfig.InDetVKalVxInJetToolConfig import InDetVKalVxInJetToolCfg, MSV_InDetVKalVxInJetToolCfg
 
 
-def JetSecVtxFindingAlgCfg(ConfigFlags, BTagVxSecVertexInfoName, SVAlgName, JetCollection, PrimaryVertexCollectionName="", SVFinder="", TracksToTag="", **options):
+def JetSecVtxFindingAlgCfg(flags, BTagVxSecVertexInfoName, SVAlgName, JetCollection, PrimaryVertexCollectionName="", SVFinder="", TracksToTag="", **options):
     """Adds a SecVtxTool instance and registers it.
 
     input: name:               The tool's name.
@@ -18,15 +18,15 @@ def JetSecVtxFindingAlgCfg(ConfigFlags, BTagVxSecVertexInfoName, SVAlgName, JetC
     acc = ComponentAccumulator()
 
     if SVFinder == 'JetFitter':
-        secVtxFinder = acc.popToolsAndMerge(InDetImprovedJetFitterVxFinderCfg(ConfigFlags, 'JFVxFinder'))
+        secVtxFinder = acc.popToolsAndMerge(InDetImprovedJetFitterVxFinderCfg(flags, 'JFVxFinder'))
     elif SVFinder == 'JetFitterFlip': #Add the JetFitterFlip tagger (invert sign of signed track impact parameter)
-        secVtxFinder = acc.popToolsAndMerge(InDetImprovedJetFitterVxFinderCfg(ConfigFlags, 'JFVxFinderFlip', 'FLIP_SIGN'))
+        secVtxFinder = acc.popToolsAndMerge(InDetImprovedJetFitterVxFinderCfg(flags, 'JFVxFinderFlip', 'FLIP_SIGN'))
     elif SVFinder == 'SV1':
-        secVtxFinder = acc.popToolsAndMerge(InDetVKalVxInJetToolCfg(ConfigFlags, "IDVKalVxInJet"))
+        secVtxFinder = acc.popToolsAndMerge(InDetVKalVxInJetToolCfg(flags, "IDVKalVxInJet"))
     elif SVFinder == 'SV1Flip':
-        secVtxFinder = acc.popToolsAndMerge(InDetVKalVxInJetToolCfg(ConfigFlags, "IDVKalVxInJetFlip"))
+        secVtxFinder = acc.popToolsAndMerge(InDetVKalVxInJetToolCfg(flags, "IDVKalVxInJetFlip"))
     elif SVFinder == 'MSV':
-        secVtxFinder = acc.popToolsAndMerge(MSV_InDetVKalVxInJetToolCfg(ConfigFlags, "IDVKalMultiVxInJet"))
+        secVtxFinder = acc.popToolsAndMerge(MSV_InDetVKalVxInJetToolCfg(flags, "IDVKalMultiVxInJet"))
     else:
         return acc
 

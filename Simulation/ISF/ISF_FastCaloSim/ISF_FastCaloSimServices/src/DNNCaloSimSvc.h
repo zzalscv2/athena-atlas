@@ -34,6 +34,8 @@
 #include "CaloEvent/CaloCellContainer.h"
 #include "CLHEP/Units/PhysicalConstants.h"
 
+#include "CxxUtils/checker_macros.h"
+
 namespace CLHEP
 {
  class HepRandomEngine;
@@ -51,7 +53,7 @@ namespace ISF {
     @author Aishik.Ghosh -at- cern.ch, David Rousseau -at- cern.ch,
     */
   
-  class DNNCaloSimSvc final : public BaseSimulationSvc
+  class ATLAS_NOT_THREAD_SAFE DNNCaloSimSvc final : public BaseSimulationSvc
   {
     public:
       /** Constructor with parameters */
@@ -68,7 +70,7 @@ namespace ISF {
       StatusCode initializeNetwork();
 
       /** Simulation Call */
-    virtual StatusCode simulate(const ISFParticle& isp, McEventCollection*) override final;
+    virtual StatusCode simulate(ISFParticle& isp, McEventCollection*) override final;
       // type of input requested by lwtnn
       typedef std::map<std::string, std::map<std::string, double> >  NetworkInputs ;
       typedef std::map<std::string, double> NetworkOutputs;

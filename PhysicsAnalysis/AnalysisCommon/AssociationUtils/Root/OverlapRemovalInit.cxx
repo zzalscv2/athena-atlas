@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // System includes
@@ -14,7 +14,6 @@
 #include "AssociationUtils/EleMuSharedTrkOverlapTool.h"
 #include "AssociationUtils/EleJetOverlapTool.h"
 #include "AssociationUtils/MuJetOverlapTool.h"
-#include "AssociationUtils/MuPFJetOverlapTool.h"
 #include "AssociationUtils/TauLooseEleOverlapTool.h"
 #include "AssociationUtils/TauLooseMuOverlapTool.h"
 #include "AssociationUtils/OverlapRemovalTool.h"
@@ -53,13 +52,6 @@ namespace ORUtils
     // Master tool
     tbox.masterTool.setTypeAndName("ORUtils::OverlapRemovalTool/" +
                                    flags.masterName);
-
-    // Muon-PFlow fake-jet
-    if(flags.doMuPFJetOR && tbox.muPFJetORT.empty()) {
-      tbox.muPFJetORT.setTypeAndName("ORUtils::MuPFJetOverlapTool/" +
-                                   flags.masterName + ".MuPFJetORT");
-      ORT_CHECK( tbox.muPFJetORT.setProperty("BJetLabel", flags.bJetLabel) );
-    }
 
     // El-el
     if(flags.doElectrons && flags.doEleEleOR && tbox.eleEleORT.empty()) {

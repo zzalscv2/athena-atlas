@@ -52,13 +52,10 @@ public:
   /** Compute track summary and replace the summary in given track.
    * @param track the track whose track summary is replaced with a newly
    * computed one
-   * @param pPrdToTrackMap a PRD to track association map to compute shared
-   * hits or a nullptr
    * @param suppress_hole_search do not perform the hole search independent of
    * the settings of the ID and muon hole search properties. Will recompute the
    * track summary for the given track, delete the old track summary of the
-   * track if there is already one and set the new one. If a valid PRD to track
-   * map is given the number of shared hits is computed otherwise not. The hole
+   * track if there is already one and set the new one. The hole
    * search is performed according to the settings of the ID and muon hole
    * search properties unless the suppress_hole_search argument is true.
    */
@@ -70,13 +67,11 @@ public:
   virtual void computeAndReplaceTrackSummary(
     const EventContext& ctx,
     Track& track,
-    const Trk::PRDtoTrackMap* pPrdToTrackMap,
     bool suppress_hole_search = false) const override final;
 
   /** Same behavious as
    * IExtendedTrackSummaryTool:computeAndReplaceTrackSummary
    * but without the need to pass
-   * Trk::PRDtoTrackMap
    * Does hole search
    */
   virtual void updateTrack(const EventContext& ctx,
@@ -99,27 +94,8 @@ public:
     const EventContext& ctx,
     const Track& track) const override final;
 
-  /* Start from a copy of the existing input track summary if there,
-   * otherwise start from a new one. Fill it and return it.
-   * Does not modify the const track.
-   */
-  virtual std::unique_ptr<Trk::TrackSummary> summary(
-    const EventContext& ctx,
-    const Track& track,
-    const Trk::PRDtoTrackMap* pPrdToTrackMap) const override final;
-
-  /* Start from a copy of the existing input track summary if there,
-   * otherwise start from a new one. Fill it and return it.
-   * but without doing the hole search.
-   * Does not modify the const track.
-   */
-  virtual std::unique_ptr<Trk::TrackSummary> summaryNoHoleSearch(
-    const EventContext& ctx,
-    const Track& track,
-    const Trk::PRDtoTrackMap* pPrdToTrackMap) const override final;
-
   /** method which can be used to update the summary of a track
-   * it, without doing shared hit/ or hole search.
+   * it, without doing hole search.
    * If a summary is present it is  modified in place.
    * Otherwise a new one is created and filled.
    */
@@ -133,35 +109,9 @@ public:
   virtual void updateTrackSummary(
     const EventContext& ctx,
     Track& track,
-    const Trk::PRDtoTrackMap* pPrdToTrackMap,
     bool suppress_hole_search = false) const override final;
 
-  /** method to update the shared hit content only, this is optimised for track
-   * collection merging. */
-  virtual void updateSharedHitCount(
-    Track& track,
-    const Trk::PRDtoTrackMap* pPrdToTrackMap) const override final;
-
-  /** Update the shared hit count of the given track summary.
-   * @param summary the summary to be updated i.e. a copy of the track summary
-   * of the given track.
-   * @param track the track which corresponds to the given track summary and is
-   * used to compute the numbers of shared hits.
-   * @param pPrdToTrackMap an optional PRD-to-track map which is used to
-   * compute the shared hits otherwise the association tool will be used. The
-   * method will update the shared information in the given summary. The track
-   * will not be modified i.e. the shared hit count of the summary owned by the
-   * track will not be updated.
-   */
-  virtual void updateSharedHitCount(const Track& track,
-                                    const Trk::PRDtoTrackMap* pPrdToTrackMap,
-                                    TrackSummary& summary) const override final;
-
-  /** method to update the shared hit content only, this is optimised for track
-   * collection merging. */
-  virtual void updateSharedHitCount(Track& track) const override final;
-
-  /** method to update additional information (PID,shared hits, dEdX), this is
+  /** method to update additional information (PID, dEdX), this is
    * optimised for track collection merging.
    */
   virtual void updateAdditionalInfo(Track& track) const override;
@@ -172,7 +122,6 @@ private:
   void fillSummary(const EventContext& ctx,
                    Trk::TrackSummary& ts,
                    const Trk::Track& track,
-                   const Trk::PRDtoTrackMap* pPrdToTrackMap,
                    bool doHolesInDet,
                    bool doHolesMuon) const;
 
@@ -182,21 +131,11 @@ private:
    */
   void UpdateSummary(const EventContext& ctx,
                      Track& track,
-                     const Trk::PRDtoTrackMap* pPrdToTrackMap,
                      bool suppress_hole_search) const;
-
-  /** use this method to update a track. this means a tracksummary is created
-  for this track but not returned. the summary can then be obtained from the
-  track. Because it is taken from the track the ownership stays with the track
-  */
-  void updateTrack(const EventContext& ctx,
-                   Track& track,
-                   const Trk::PRDtoTrackMap* pPrdToTrackMap) const;
 
   std::unique_ptr<Trk::TrackSummary> createSummary(
     const EventContext& ctx,
     const Track& track,
-    const Trk::PRDtoTrackMap* pPrdToTrackMap,
     bool doHolesInDet,
     bool doHolesMuon) const;
 
@@ -216,15 +155,7 @@ private:
   Gaudi::Property<bool> m_doHolesMuon{ this, "doHolesMuon", false, "" };
   /** controls whether holes on track in ID are produced */
   Gaudi::Property<bool> m_doHolesInDet{ this, "doHolesInDet", false, "" };
-  /** controls whether shared hits in Pix+SCT are produced
-     Turning this on will increase processing time.*/
-  Gaudi::Property<bool> m_doSharedHits{ this, "doSharedHits", false, "" };
 
-  /** controls whether the expected Hits are added during summary creation*/
-  Gaudi::Property<bool> m_addExpectedHits{ this,
-                                           "AddExpectedHits",
-                                           false,
-                                           "" };
   /** controls whether the detailed summary is added for the muons */
   Gaudi::Property<bool> m_addMuonDetailedSummary{ this,
                                                   "AddDetailedMuonSummary",
@@ -245,7 +176,6 @@ private:
      information Fills 'information', 'eProbability', and 'hitPattern'*/
   void processTrackStates(const EventContext& ctx,
                           const Track& track,
-                          const Trk::PRDtoTrackMap* pPrdToTrackMap,
                           const DataVector<const TrackStateOnSurface>* tsos,
                           std::vector<int>& information,
                           std::bitset<numberOfDetectorTypes>& hitPattern,
@@ -254,7 +184,6 @@ private:
 
   void processMeasurement(const EventContext& ctx,
                           const Track& track,
-                          const Trk::PRDtoTrackMap* pPrdToTrackMap,
                           const Trk::MeasurementBase* meas,
                           const Trk::TrackStateOnSurface* tsos,
                           std::vector<int>& information,

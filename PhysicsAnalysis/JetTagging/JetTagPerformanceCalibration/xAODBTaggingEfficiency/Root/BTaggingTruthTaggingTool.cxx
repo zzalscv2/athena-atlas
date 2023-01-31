@@ -32,7 +32,6 @@ using Analysis::None;
 
 using xAOD::IParticle;
 
-
 BTaggingTruthTaggingTool::BTaggingTruthTaggingTool( const std::string & name)
   : asg::AsgTool( name ),
     m_effTool ("BTaggingEfficiencyTool/effTool", this),
@@ -40,7 +39,6 @@ BTaggingTruthTaggingTool::BTaggingTruthTaggingTool( const std::string & name)
   {
 
   m_initialised = false;
-
 
   // properties of BTaggingTruthTaggingTool
   declareProperty( "IgnoreScaleFactors", m_ignoreSF=true, "ignore scale factors in computation of TRF weight");
@@ -76,21 +74,17 @@ BTaggingTruthTaggingTool::BTaggingTruthTaggingTool( const std::string & name)
   declareProperty("SystematicsStrategy",             m_systStrategy = "SFEigen", "name of systematics model; presently choose between 'SFEigen' and 'Envelope'");
   declareProperty("ConeFlavourLabel",                m_coneFlavourLabel = true, "specify whether or not to use the cone-based flavour labelling instead of the default ghost association based labelling");
   declareProperty("OldConeFlavourLabel",             m_oldConeFlavourLabel = false, "when using cone-based flavour labelling, specify whether or not to use the (deprecated) Run-1 legacy labelling");
-  declareProperty("CutBenchmark",                    m_cutBenchmark = "FixedCutBEff_70", "if you want to run in continuous you need to fix a benchmark - it does something only if running in Continuous OP");
-  declareProperty("ExcludeSpecificEigens",            m_excludeEV = "" ,    "(semicolon-separated) names of Eigens you want to exclude. in case of continuous some eigenvectors can be ignored to make the computation faster");
-  declareProperty("StoreOnlyUpVariations",            m_doOnlyUpVariations = false ,    "If set to true it processes only the __1up b-tagging variations. It speeds up the computation in case of symmetric variations.");
-  declareProperty("doDirectTagging",                  m_doDirectTag = false ,    "If set to true it also computes and stores the direct tagging choice and the related SFs for each jet"); 
+  declareProperty("CutBenchmark",                    m_cutBenchmark = "1,2", "if you want to run in continuous you need to fix a benchmark - it does something only if running in Continuous OP");
+  declareProperty("ExcludeSpecificEigens",           m_excludeEV = "" ,    "(semicolon-separated) names of Eigens you want to exclude. in case of continuous some eigenvectors can be ignored to make the computation faster");
+  declareProperty("StoreOnlyUpVariations",           m_doOnlyUpVariations = false ,    "If set to true it processes only the __1up b-tagging variations. It speeds up the computation in case of symmetric variations.");
+  declareProperty("doDirectTagging",                 m_doDirectTag = false ,    "If set to true it also computes and stores the direct tagging choice and the related SFs for each jet");
+  // if it is empty, the onnx tool won't be initialised
+  declareProperty( "pathToONNX",                     m_pathToONNX = "",          "path to the onnx file that will be used for inference");
+  declareProperty( "TaggingStrategy",                m_taggingStrategy = "AllJets",     "tagging strategy in the Analysis (eg. 'leading2SignalJets' in boosted VHbb). Required to do TT with GNN");
 }
 
 StatusCode BTaggingTruthTaggingTool::setEffMapIndex(const std::string& flavour, unsigned int index){
-    ANA_CHECK_SET_TYPE (StatusCode);
-
     ANA_CHECK(m_effTool->setMapIndex(flavour, index));
-    if(m_useQuntile && !m_continuous){
-      for(unsigned int iop=0; iop<m_availableOP.size(); iop++){
-          ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)]->setMapIndex(flavour, index));
-      }
-    }
     return  StatusCode::SUCCESS;
 }
 
@@ -127,7 +121,6 @@ SystematicSet BTaggingTruthTaggingTool::recommendedSystematics() const {
 StatusCode BTaggingTruthTaggingTool::initialize() {
 
   ANA_CHECK_SET_TYPE (StatusCode);
-
   m_initialised = true;
 
   ANA_CHECK(m_selTool.setProperty("MaxEta",  m_maxEta));
@@ -160,42 +153,41 @@ StatusCode BTaggingTruthTaggingTool::initialize() {
   ANA_CHECK(m_effTool.setProperty("ExcludeFromEigenVectorTreatment", m_excludeFromEV ));
   ANA_CHECK(m_effTool.setProperty("SystematicsStrategy",             m_systStrategy ));
   ANA_CHECK(m_effTool.setProperty("ConeFlavourLabel",                m_coneFlavourLabel ));
-  ANA_CHECK(m_effTool.setProperty("OldConeFlavourLabel",          m_oldConeFlavourLabel ));
+  ANA_CHECK(m_effTool.setProperty("OldConeFlavourLabel",             m_oldConeFlavourLabel ));
+  ANA_CHECK(m_effTool.setProperty("pathToONNX",                      m_pathToONNX ));
 
   ANA_CHECK(m_effTool.initialize());
 
   m_continuous = false;
-
-  if(m_OP.find("FlatBEff") != std::string::npos){
-    m_availableOP.resize(m_availableOP_fixEff.size());
-    m_availableOP=m_availableOP_fixEff;
-  }
-  else if(m_OP.find("FixedCutBEff") != std::string::npos){
-    m_availableOP.resize(m_availableOP_fixCut.size());
-    m_availableOP=m_availableOP_fixCut;
-  }
-  else if(m_OP.find("Continuous") != std::string::npos){
-    ATH_MSG_INFO("You are running in Continuous and you choosed " << m_cutBenchmark <<" as benchmark" );
+  m_continuous2D = false;
+  if(m_OP.find("Continuous") != std::string::npos){
+    ATH_MSG_INFO("You are running in Continuous and you chose " << m_cutBenchmark <<" as benchmarks" );
     m_continuous = true;
-    m_availableOP.resize(m_availableOP_fixCut.size());
-    m_availableOP=m_availableOP_fixCut;
+    if(m_OP.find("Continuous2D") != std::string::npos)
+      m_continuous2D = true;
+    
+    //tokenize the quantiles that will be used as tagged bin indices.
+    std::vector<std::string> tag_benchmarks = split(m_cutBenchmark, ',');
+    for (const auto & tag_bin : tag_benchmarks ){
+      if(m_continuous2D)
+	m_OperatingBins.push_back(std::atoi(tag_bin.c_str()));
+      else //continuous
+	m_OperatingBins.push_back(std::atoi(tag_bin.c_str())-1); //different convention
+    }
   }
-  else if(m_useQuntile){
-    ATH_MSG_ERROR(m_OP << " not in the list of available OPs");
+  else{ //FixedCut working points
+    m_OperatingBins.clear();
+    m_OperatingBins.push_back(1); //first bin: untagged, second bin: tagged.
+}
+  
+  if(m_useQuntile && !m_continuous){
+    ATH_MSG_ERROR("UseQuantile is available only in Continuous WP. Please consider switching the Operating Point.");
     return StatusCode::FAILURE;
   }
-
-  if(m_continuous){
-    m_OperatingPoint_index = find(m_availableOP.begin(), m_availableOP.end(), m_cutBenchmark) - m_availableOP.begin();
-  }
-  else{
-    if(m_useQuntile){
-      m_OperatingPoint_index = find(m_availableOP.begin(), m_availableOP.end(), m_OP) - m_availableOP.begin();
-      if(m_OperatingPoint_index >= m_availableOP.size()) {
-	ATH_MSG_ERROR(m_OP << " not in the list of available OPs");
-	return StatusCode::FAILURE;
-      }
-    }
+  
+  if (m_pathToONNX != ""){
+    // 60% = 4, 70% = 3, 77% = 2, 85% = 1, 100% = 0
+    m_OP_index_for_GNN = find(m_availableOP_fixCut.begin(), m_availableOP_fixCut.end(), m_OP) - m_availableOP_fixCut.begin() + 1; // GNN predicts 5 bins    
   }
   
   m_eff_syst.clear();
@@ -203,7 +195,7 @@ StatusCode BTaggingTruthTaggingTool::initialize() {
   CP::SystematicSet def_set;
   m_eff_syst.push_back(def_set);
   m_sys_name.push_back("Nominal");
-
+  
   if(m_useSys){
     std::vector<std::string> excludeEV_vector;
     if(m_excludeEV != "")
@@ -214,77 +206,106 @@ StatusCode BTaggingTruthTaggingTool::initialize() {
       string s = syst.name();
       if(m_doOnlyUpVariations && s.find("__1down") !=string::npos) continue;
       if(std::any_of(excludeEV_vector.begin(), excludeEV_vector.end(), [&s](const std::string& str) { return str.find(s) != std::string::npos; })) continue;
-  
       myset.insert(syst);
       if(m_excludeEV != "")
-	ATH_MSG_INFO("Adding systematic " << syst.name() << "to the list ");
+        ATH_MSG_INFO("Adding systematic " << syst.name() << "to the list ");
       else
-	ATH_MSG_DEBUG("Adding systematic " << syst.name() << "to the list ");
+        ATH_MSG_DEBUG("Adding systematic " << syst.name() << "to the list ");
       m_eff_syst.push_back(myset);
       m_sys_name.push_back(syst.name());
     }
   }
-  if(m_useQuntile == true || m_continuous == true){
-    ATH_MSG_INFO("m_useQuntile true");
+  
+  ATH_MSG_INFO("end of systematics ");
 
-    //open the CDI file to get the cutvalues for all working points.
-    TString pathtofile =  PathResolverFindCalibFile(m_SFFile);
-    m_inf = TFile::Open(pathtofile, "read");
-    m_binEdges.clear();
+  //set the cuts
+  TString pathtofile =  PathResolverFindCalibFile(m_SFFile);
+  m_inf = TFile::Open(pathtofile, "read");
 
-    for(unsigned int iop=0; iop<m_availableOP.size(); iop++){
+  float min_cut_low = (m_taggerName == "MV2c10") ? -1 : -20;
+  float max_cut_hig = (m_taggerName == "MV2c10") ? +1 : +20;
+  
+  if(m_OP == "Continuous"){
+    std::vector<float> bin_edges;
+    bin_edges.push_back(min_cut_low);
+    for (auto bin_name : m_availableOP_fixCut){
+      TString cutname = m_taggerName+"/"+m_jetAuthor+"/"+bin_name+"/cutvalue";
+      float cutval = ((TVector*) m_inf->Get(cutname))[0](0);
+      bin_edges.push_back(cutval);
+    }
+    bin_edges.push_back(max_cut_hig); 
+    for (unsigned int be = 0 ; be < bin_edges.size()-1 ; be++){
+      //check if the bin is one of the bins used for btagging
+      //NB. i+1 is to follow the convention 1-5!
+      bool is_tagbin = std::count(m_OperatingBins.begin(), m_OperatingBins.end(), be);
+      TagBin one_cut = TagBin(is_tagbin, bin_edges.at(be), bin_edges.at(be+1));
+      m_cuts.push_back(one_cut);
+    }
+  } //== continuous
+  else if (m_OP.find("Continuous2D")  != std::string::npos){
+    ATH_MSG_INFO("TruthTagging initialization: Working with Continuous2D WP.");
+    TString cutname = m_taggerName+"/"+m_jetAuthor+"/Continuous2D/cutvalue";
+    TMatrixD* cuts2D = (TMatrixD*) m_inf->Get(cutname);
+    ATH_MSG_DEBUG("Counting "  <<cuts2D->GetNrows() <<" bins ");
 
-      if(!m_continuous){
-	std::string toolname = name()+"_eff_"+m_availableOP.at(iop);
-	
-	m_effTool_allOP[m_availableOP.at(iop)] = asg::AnaToolHandle<IBTaggingEfficiencyTool>("BTaggingEfficiencyTool/"+toolname,this);
-	
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("OperatingPoint", m_availableOP.at(iop)));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("TaggerName",                      m_taggerName));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("JetAuthor",                       m_jetAuthor));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("ScaleFactorFileName",             m_SFFile ));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("UseDevelopmentFile",              m_useDevFile ));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("EfficiencyFileName",              m_EffFile ));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("ScaleFactorBCalibration",         m_SFBName ));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("ScaleFactorCCalibration",         m_SFCName ));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("ScaleFactorTCalibration",         m_SFTName ));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("ScaleFactorLightCalibration",     m_SFLightName ));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("EigenvectorReductionB",           m_EVReductionB ));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("EigenvectorReductionC",           m_EVReductionC ));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("EigenvectorReductionLight",       m_EVReductionLight ));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("EfficiencyBCalibrations",         m_EffBName ));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("EfficiencyCCalibrations",         m_EffCName ));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("EfficiencyTCalibrations",         m_EffTName ));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("EfficiencyLightCalibrations",     m_EffLightName ));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("ExcludeFromEigenVectorTreatment", m_excludeFromEV ));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("SystematicsStrategy",             m_systStrategy ));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("ConeFlavourLabel",                m_coneFlavourLabel ));
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].setProperty("OldConeFlavourLabel",          m_oldConeFlavourLabel ));
-	
-	ANA_CHECK(m_effTool_allOP[m_availableOP.at(iop)].initialize());
-	
-	if(m_OP.find("FixedCutBEff")!= std::string::npos){
-	  TString cutname = m_taggerName+"/"+m_jetAuthor+"/"+m_availableOP.at(iop)+"/cutvalue";
-	  float cutval = ((TVector*) m_inf->Get(cutname))[0](0);
-	  m_binEdges.push_back(cutval);
-	} //FCBEff
-      } //!Continuous
+    for (int bin = 0; bin < cuts2D->GetNrows(); bin++){
+      ATH_MSG_DEBUG("INITIALIZATION c-cuts : " <<(*cuts2D)(bin,0) <<" "
+		    <<(*cuts2D)(bin,1) <<" b-cuts : "
+		    <<(*cuts2D)(bin,2) <<" "
+		    <<(*cuts2D)(bin,3));
+      
+      //check if the bin is one of the bins used for btagging
+      //NB. i follows the convention 0-4 of the continuous2D tagging
+      bool is_tagbin = std::count(m_OperatingBins.begin(), m_OperatingBins.end(), bin);
 
-      else{
-	if(m_cutBenchmark.find("FixedCutBEff")!= std::string::npos){
-          TString cutname = m_taggerName+"/"+m_jetAuthor+"/"+m_availableOP.at(iop)+"/cutvalue";
-          float cutval = ((TVector*) m_inf->Get(cutname))[0](0);
-          m_binEdges.push_back(cutval);
-	} //FCBEff
-      } //Continuous
-    } //loop
-  } //quantile
+      //set protection limits, so the final generated tagweight values have a meaning
+      float c_tagcut_low = ((*cuts2D)(bin,0) < min_cut_low) ? min_cut_low : (*cuts2D)(bin,0);
+      float c_tagcut_hig = ((*cuts2D)(bin,1) > max_cut_hig) ? max_cut_hig : (*cuts2D)(bin,1);
+      float b_tagcut_low = ((*cuts2D)(bin,2) < min_cut_low) ? min_cut_low : (*cuts2D)(bin,2);
+      float b_tagcut_hig = ((*cuts2D)(bin,3) > max_cut_hig) ? max_cut_hig : (*cuts2D)(bin,3);
+
+      TagBin one_cut = TagBin(is_tagbin, b_tagcut_low, b_tagcut_hig, c_tagcut_low, c_tagcut_hig);
+      m_cuts.push_back(one_cut);
+    }
+  }//continuous2D
+  else{ //fixed-cut
+    TString cutname = m_taggerName+"/"+m_jetAuthor+"/"+m_OP+"/cutvalue";
+    float cutval = ((TVector*) m_inf->Get(cutname))[0](0);
+
+    TagBin untag_bin = TagBin(false, min_cut_low, cutval); //bin 0
+    TagBin tag_bin   = TagBin(true, cutval, max_cut_hig); //bin 1
+
+    m_cuts.push_back(untag_bin);
+    m_cuts.push_back(tag_bin);
+  } //FixedCut
+
+  if(m_continuous)
+    for (auto c :  m_cuts){
+      ATH_MSG_INFO("b-tag low: " <<c.bcut_low <<" b-tag hig: " <<c.bcut_hig  <<" c-tag low: " <<c.ccut_low <<" c-tag hig: " <<c.ccut_hig <<" Added to tag bins: " <<c.is_tagbin);
+    }
+  
+  //total number of bins. helpful in loops
+  m_nbins = m_cuts.size(); //FixedCut
+  ATH_MSG_INFO("Total number of bins: " <<m_nbins);
+
+
+  // "AllJets" is the default strategy
+  if (m_taggingStrategy == "AllJets"){
+    m_njetsTagStrategy = AllJets;
+  } else if (m_taggingStrategy == "Leading2SignalJets"){
+    m_njetsTagStrategy = Leading2SignalJets;
+  } else if (m_taggingStrategy == "Leading3SignalJets"){
+    m_njetsTagStrategy = Leading3SignalJets;
+  } else {
+    ATH_MSG_ERROR("BTaggingTruthTaggingTool::tagging strategy " << m_taggingStrategy << " is not implemented in the TruthTagging Tool");
+    return StatusCode::FAILURE;    
+  }
 
   return StatusCode::SUCCESS;
-}
+  }
 
 
-StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf,std::vector<double>& pt, std::vector<double>& eta, std::vector<int>& flav, std::vector<double>& tagw){
+StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf,std::vector<float>& pt, std::vector<float>& eta, std::vector<int>& flav, std::vector<float>& tagw){
   ANA_CHECK_SET_TYPE (StatusCode);
   if(pt.size()!=eta.size() || pt.size()!=flav.size() || pt.size()!=tagw.size()){
     ATH_MSG_ERROR( "Vectors of pt, eta, flav and tagw should have same size" );
@@ -294,10 +315,7 @@ StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf,std::vector<double>
   std::vector<Analysis::CalibrationDataVariables>* vars = new std::vector<Analysis::CalibrationDataVariables>(0);
   for(unsigned int i =0; i<pt.size(); i++){
     Analysis::CalibrationDataVariables vars_appo;
-    if (!fillVariables(pt.at(i), eta.at(i), tagw.at(i), vars_appo)){
-      ATH_MSG_ERROR("unable to fill variables");
-      return StatusCode::FAILURE;
-    }
+    ANA_CHECK(fillVariables(pt.at(i), eta.at(i), tagw.at(i), vars_appo));
     vars->push_back(vars_appo);
   }
 
@@ -312,11 +330,7 @@ StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf,const xAOD::JetCont
   std::vector<Analysis::CalibrationDataVariables>* vars = new std::vector<Analysis::CalibrationDataVariables>(0);
   for(const auto jet : jets) {
     Analysis::CalibrationDataVariables vars_appo;
-    if (!fillVariables(*jet, vars_appo)){
-      ATH_MSG_ERROR("unable to fill variables");
-      return StatusCode::FAILURE;
-    }
-
+    ANA_CHECK(fillVariables(*jet, vars_appo));
     vars->push_back(vars_appo);
     flav.push_back(jetFlavourLabel(*jet));
   }
@@ -344,84 +358,116 @@ StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf,std::vector<int>& f
   return StatusCode::SUCCESS;
 }
 
+// sets node_feat which will be used by the onnx tool
+StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf, const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw){
+  ANA_CHECK_SET_TYPE (StatusCode);
+  if(node_feat.size()!=tagw.size()){
+    ATH_MSG_ERROR( "Vectors of node_feat (outer axis) and tagw should have same size" );
+    return StatusCode::FAILURE;
+  }
+
+  std::vector<int> flav;
+  std::vector<Analysis::CalibrationDataVariables>* vars = new std::vector<Analysis::CalibrationDataVariables>(0);
+  for(unsigned int i =0; i<tagw.size(); i++){
+    Analysis::CalibrationDataVariables vars_appo;
+      
+    // node_feat[i] is always {flav, pt, eta, ...}
+    float pt  = node_feat.at(i)[1];
+    float eta = node_feat.at(i)[2];
+
+    ANA_CHECK(fillVariables(pt, eta, tagw.at(i), vars_appo));
+    vars->push_back(vars_appo);    
+    flav.push_back(node_feat.at(i)[0]);
+  }
+
+  ANA_CHECK(setJets(trfinf, flav, vars, node_feat));
+  return StatusCode::SUCCESS;
+}
+
+// sets node_feat which will be used by the onnx tool
+StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf, const xAOD::JetContainer& jets, const std::vector<std::vector<float>>& node_feat){
+  ANA_CHECK_SET_TYPE (StatusCode);
+  std::vector<int> flav;
+  std::vector<Analysis::CalibrationDataVariables>* vars = new std::vector<Analysis::CalibrationDataVariables>(0);
+  for(const auto jet : jets) {
+    Analysis::CalibrationDataVariables vars_appo;
+    ANA_CHECK(fillVariables(*jet, vars_appo));
+    vars->push_back(vars_appo);
+    flav.push_back(jetFlavourLabel(*jet));
+  }
+
+  ANA_CHECK(setJets(trfinf, flav, vars, node_feat));
+  flav.clear();
+  return StatusCode::SUCCESS;
+}
+
+// sets node_feat which will be used by the onnx tool
+// node_feat contains feats for all the jets as it will be used by the GNN.
+// trfinf.jets contains only the jets we care about for TT. eg. the leading2 jets if taggingStrategy == Leading2SignalJets
+StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf,std::vector<int>& flav, const std::vector<Analysis::CalibrationDataVariables>* vars, const std::vector<std::vector<float>>& node_feat){
+  if(flav.size()!=vars->size()){
+    ATH_MSG_ERROR( "Vector of CalibrationDataVariables and flavour should have same size" );
+    return StatusCode::FAILURE;
+  }
+  trfinf.jets.clear();
+
+  if (m_njetsTagStrategy == -1){
+    trfinf.njets = vars->size();
+  } else {
+    trfinf.njets = std::min(static_cast<unsigned int>(m_njetsTagStrategy), static_cast<unsigned int>(vars->size()));
+  }
+
+  for(unsigned int i =0; i<trfinf.njets; i++){
+    jetVariable jetVar_appo;
+    jetVar_appo.flav=flav.at(i);
+    jetVar_appo.vars=vars->at(i);
+    trfinf.jets.push_back(jetVar_appo);
+  }
+  trfinf.node_feat = node_feat;
+  return StatusCode::SUCCESS;
+}
 
 
-bool BTaggingTruthTaggingTool::fillVariables( const xAOD::Jet& jet, CalibrationDataVariables& x){
+StatusCode BTaggingTruthTaggingTool::fillVariables( const xAOD::Jet& jet, CalibrationDataVariables& x){
   x.jetPt = jet.pt();
   x.jetEta = jet.eta();
-  x.jetTagWeight = 0.;
   x.jetAuthor = m_jetAuthor;
 
   const xAOD::BTagging* tagInfo = xAOD::BTaggingUtilities::getBTagging( jet );
-  if (!tagInfo) return false;
+  if (!tagInfo) return StatusCode::FAILURE;
 
-  return tagInfo->MVx_discriminant(m_taggerName, x.jetTagWeight);
-  delete tagInfo;
+  CorrectionCode code = m_selTool->getTaggerWeight(jet, x.jetTagWeight);
+  if(!(code==CorrectionCode::Ok || code==CorrectionCode::OutOfValidityRange)){
+    ATH_MSG_ERROR("BTaggingSelectionTool::getTaggerWeight returned CorrectionCode::Error");
+    return StatusCode::FAILURE;
+  }
 
+  return StatusCode::SUCCESS;
 }
 
-bool BTaggingTruthTaggingTool::fillVariables( const double jetPt, const double jetEta, const double jetTagWeight, CalibrationDataVariables& x){
+StatusCode BTaggingTruthTaggingTool::fillVariables( const float jetPt, const float jetEta, const float jetTagWeight, CalibrationDataVariables& x){
   x.jetPt = jetPt;
   x.jetEta = jetEta;
   x.jetTagWeight = jetTagWeight;
   x.jetAuthor = m_jetAuthor;
-  return true;
+  return StatusCode::SUCCESS;
 }
 
-double BTaggingTruthTaggingTool::getPermutationRW(TRFinfo &trfinf,bool isIncl, unsigned int nbtag, int sys){
-  double w = 1.;
-  if(nbtag < trfinf.njets && ((!isIncl && trfinf.permprob_ex.at(nbtag) == 0.) || (isIncl && trfinf.permprob_in.at(nbtag) == 0.)) )  {
-    ATH_MSG_ERROR("Permutations need to be chosen before computing reweighting");
-  }
-  if(nbtag > trfinf.njets) return 1.;
-  if(isIncl) {
-    w = trfWeight(trfinf,trfinf.perm_in.at(nbtag));
-    return w/trfinf.trfwsys_in[sys].at(nbtag)/trfinf.permprob_in.at(nbtag);
-  }
-  else {
-    w = trfWeight(trfinf,trfinf.perm_ex.at(nbtag));
-    return w/trfinf.trfwsys_ex[sys].at(nbtag)/trfinf.permprob_ex.at(nbtag);
-  }
-}
-
-
-
-StatusCode BTaggingTruthTaggingTool::GetTruthTagWeights(TRFinfo &trfinf, std::vector<double> &trf_weight_ex, std::vector<double> &trf_weight_in, int sys){
+StatusCode BTaggingTruthTaggingTool::GetTruthTagWeights(TRFinfo &trfinf, std::vector<float> &trf_weight_ex, std::vector<float> &trf_weight_in){
 
   ANA_CHECK_SET_TYPE (StatusCode);
+  //get MC efficiencies
+  ANA_CHECK(getAllEffMC(trfinf));
+  //compute truth tag weights
+  ANA_CHECK(getTRFweight(trfinf,m_nbtag, true));
+  // choice of the selected permutation
+  ANA_CHECK(chooseAllTagPermutation(trfinf,m_nbtag));
 
-  if(sys==0) ANA_CHECK(getAllEffMC(trfinf));
-  ANA_CHECK(check_syst_range(sys));
-  if(trfinf.trfwsys_ex.size()==0)  trfinf.trfwsys_ex.resize(m_eff_syst.size());
-  if(trfinf.trfwsys_in.size()==0) trfinf.trfwsys_in.resize(m_eff_syst.size());
+  // choice of the tagged bins
+  ANA_CHECK(chooseAllTagBins(trfinf));
 
-  ANA_CHECK(getAllEffSF(trfinf,sys));
-  ANA_CHECK(getTRFweight(trfinf,m_nbtag, true, sys));
-
-  if(sys==0){ // don't need permutation or tag bin reweighting
-    if(m_usePerm){
-      // choice of the selected permutation
-      ANA_CHECK(chooseAllTagPermutation(trfinf,m_nbtag));
-    }
-    if(m_useQuntile) {
-      // choice of the tagged bins
-      ANA_CHECK(chooseAllTagBins(trfinf));
-    }
-  }
-  else {
-    if(m_usePerm) {
-      for(unsigned int ib = 0; ib < trfinf.trfwsys_ex[sys].size(); ib++) {
-        trfinf.trfwsys_ex[sys].at(ib) *= getPermutationRW(trfinf,false, ib, sys);
-        trfinf.trfwsys_in[sys].at(ib) *= getPermutationRW(trfinf,true, ib, sys);
-        if(m_useQuntile) {
-	  trfinf.trfwsys_ex[sys].at(ib) *= getTagBinsRW(trfinf,false, ib);
-	  trfinf.trfwsys_in[sys].at(ib) *= getTagBinsRW(trfinf,true, ib);
-        }
-      }
-    }
-  }
-  trf_weight_ex = trfinf.trfwsys_ex[sys];
-  trf_weight_in = trfinf.trfwsys_in[sys];
+  trf_weight_ex = trfinf.trfw_ex;
+  trf_weight_in = trfinf.trfw_in;
   return StatusCode::SUCCESS;
 }
 
@@ -430,69 +476,84 @@ StatusCode BTaggingTruthTaggingTool::CalculateResults(TRFinfo &trfinf,Analysis::
   ANA_CHECK_SET_TYPE (StatusCode);
   results.clear();
 
-  results.tagweight_bin_edges = m_binEdges;
-
   if(rand_seed!=-1){
     trfinf.rand.SetSeed(rand_seed);
   }
 
-  unsigned int n_systs = m_eff_syst.size(); 
-  if(m_useSys){
-    trfinf.trfwsys_ex.resize(m_eff_syst.size());
-    trfinf.trfwsys_in.resize(m_eff_syst.size());
-  }
-  else{
-    n_systs = 1; //compute only the nominal
-    trfinf.trfwsys_ex.resize(1);
-    trfinf.trfwsys_in.resize(1);
-  }
-  std::vector<double> trf_weight_ex,  trf_weight_in;
+  std::vector<float> trf_weight_ex,  trf_weight_in;
 
-  for(unsigned int i =0; i< n_systs; i++){
-    trf_weight_ex.clear();
-    trf_weight_in.clear();
+  trf_weight_ex.clear();
+  trf_weight_in.clear();
 
-    ANA_CHECK(GetTruthTagWeights(trfinf, trf_weight_ex, trf_weight_in, i));
+  ANA_CHECK(GetTruthTagWeights(trfinf, trf_weight_ex, trf_weight_in));
 
-  }
+  ANA_CHECK(getTagPermutation(trfinf,results.trf_chosen_perm_ex,results.trf_chosen_perm_in));
 
+  //modify quantiles according to the different conventions
+  ANA_CHECK(getQuantiles(trfinf,results.trf_bin_ex, results.trf_bin_in));
+    
+  //new tagger scores
+  ANA_CHECK(generateRandomTaggerScores(results.trf_bin_ex, results.trf_bin_score_ex, results.trf_ctag_bin_score_ex));
+  ANA_CHECK(generateRandomTaggerScores(results.trf_bin_in, results.trf_bin_score_in, results.trf_ctag_bin_score_in));
+
+  //direct tag
+  if(m_doDirectTag)
+    ANA_CHECK( getDirectTaggedJets(trfinf, results.is_tagged) );
+
+  //handle systematics
+  unsigned int n_systs = (m_useSys) ? m_eff_syst.size() : 1;
   results.syst_names.clear();
 
-  for(unsigned int i=0; i<trfinf.trfwsys_ex.size(); i++){
-  //  for(unsigned int i=0; i<Nsysts; i++){
-
-    results.map_trf_weight_ex[m_sys_name.at(i)].resize(trfinf.trfwsys_ex.at(i).size());
-    results.map_trf_weight_in[m_sys_name.at(i)].resize(trfinf.trfwsys_in.at(i).size());
-
-    //direct tagged SF
-    if(m_doDirectTag)
-      results.map_SF[m_sys_name.at(i)]=getEvtSF(trfinf,i);
+  for(unsigned int sys = 0; sys < n_systs; ++sys){
+    if(sys!=0 && m_useSys) {
+      ANA_CHECK_THROW( m_effTool->applySystematicVariation(m_eff_syst[sys]) );
+    }
     
-    results.syst_names.push_back(m_sys_name.at(i));
+    results.syst_names.push_back(m_sys_name.at(sys));
     
-    for(unsigned int j=0; j< trfinf.trfwsys_ex.at(i).size(); j++){
-      results.map_trf_weight_ex[m_sys_name.at(i)].at(j) = trfinf.trfwsys_ex.at(i).at(j);
-      results.map_trf_weight_in[m_sys_name.at(i)].at(j) = trfinf.trfwsys_in.at(i).at(j);
+    results.map_trf_weight_ex[m_sys_name.at(sys)].resize(trfinf.trfw_ex.size());
+    results.map_trf_weight_in[m_sys_name.at(sys)].resize(trfinf.trfw_in.size());
 
+    results.map_SF_ex[m_sys_name.at(sys)].resize(trfinf.trfw_ex.size());
+    results.map_SF_in[m_sys_name.at(sys)].resize(trfinf.trfw_in.size());
+
+    //direct tagging
+    if(m_doDirectTag){
+      std::vector<int> is_tagged;
+      for(auto t : results.is_tagged){
+	is_tagged.push_back(static_cast<int>(t));
+      }
+      results.map_SF[m_sys_name.at(sys)]=getEvtSF(trfinf,is_tagged);
+    }
+
+    //go over the ntag combinations.
+    //ntj = number of tagged jets
+    for(unsigned int ntj=0; ntj< trfinf.trfw_ex.size(); ntj++){
+      if(ntj > trfinf.njets) {
+	results.map_SF_ex[m_sys_name.at(sys)].at(ntj) = 1.;
+	results.map_SF_in[m_sys_name.at(sys)].at(ntj) = 1.;
+	ATH_MSG_DEBUG("number of jets: " <<trfinf.njets <<" less than max btag: " <<m_nbtag <<". Return BTag SF = 1. Consider applying an event pre-selection if this happens too often.");
+      }
+      else{
+	results.map_SF_ex[m_sys_name.at(sys)].at(ntj) = getEvtSF(trfinf,results.trf_bin_ex.at(ntj));
+	results.map_SF_in[m_sys_name.at(sys)].at(ntj) = getEvtSF(trfinf,results.trf_bin_in.at(ntj));
+      }
+      
+      results.map_trf_weight_ex[m_sys_name.at(sys)].at(ntj) = trfinf.trfw_ex.at(ntj) * results.map_SF_ex[m_sys_name.at(sys)].at(ntj);
+      results.map_trf_weight_in[m_sys_name.at(sys)].at(ntj) = trfinf.trfw_in.at(ntj) * results.map_SF_in[m_sys_name.at(sys)].at(ntj);
     }
   }
 
-  if(m_usePerm){
-  ANA_CHECK(getTagPermutation(trfinf,results.trf_chosen_perm_ex,results.trf_chosen_perm_in));
+  if(m_useSys) {  // reset syst to nominal
+    CP::SystematicSet defaultSet;
+    ANA_CHECK_THROW( m_effTool->applySystematicVariation(defaultSet) );
   }
-  if(m_useQuntile){
-  ANA_CHECK(getQuantiles(trfinf,results.trf_bin_ex, results.trf_bin_in));
-  ANA_CHECK(generateRandomTaggerScores(results.trf_bin_ex, results.trf_bin_score_ex));
-  ANA_CHECK(generateRandomTaggerScores(results.trf_bin_in, results.trf_bin_score_in));
-  }
-  if(m_doDirectTag)
-    ANA_CHECK(getDirectTaggedJets(trfinf,results.is_tagged));
-  
+
   return StatusCode::SUCCESS;
 
 }
 
-StatusCode BTaggingTruthTaggingTool::CalculateResults(std::vector<double>& pt, std::vector<double>& eta, std::vector<int>& flav, std::vector<double>& tagw, Analysis::TruthTagResults& results,int rand_seed){
+StatusCode BTaggingTruthTaggingTool::CalculateResults(std::vector<float>& pt, std::vector<float>& eta, std::vector<int>& flav, std::vector<float>& tagw, Analysis::TruthTagResults& results,int rand_seed){
 
   ANA_CHECK_SET_TYPE (StatusCode);
 
@@ -514,214 +575,103 @@ StatusCode BTaggingTruthTaggingTool::CalculateResults(const xAOD::JetContainer& 
   return CalculateResults(trfinf,results,rand_seed);
 }
 
+// setting inputs that the onnx tool will use
+StatusCode BTaggingTruthTaggingTool::CalculateResultsONNX(const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw, Analysis::TruthTagResults& results, int rand_seed){
+
+  ANA_CHECK_SET_TYPE (StatusCode);
+
+  TRFinfo trfinf;
+    
+  ANA_CHECK(setJets(trfinf, node_feat, tagw));
+
+  return CalculateResults(trfinf, results, rand_seed);
+}
+
+// setting inputs that the onnx tool will use
+StatusCode BTaggingTruthTaggingTool::CalculateResultsONNX(const xAOD::JetContainer& jets, const std::vector<std::vector<float>>& node_feat, Analysis::TruthTagResults& results, int rand_seed){
+
+  ANA_CHECK_SET_TYPE (StatusCode);
+
+  TRFinfo trfinf;
+
+  ANA_CHECK(setJets(trfinf, jets, node_feat));
+
+  return CalculateResults(trfinf, results, rand_seed);
+}
 
 StatusCode BTaggingTruthTaggingTool::getAllEffMC(TRFinfo &trfinf){
-
-  float eff =1.;
-  float eff_all =1.;
-  trfinf.effMC.clear();
-  if(m_useQuntile == true || m_continuous == true){
-    for(auto op_appo: m_availableOP)
-      trfinf.effMC_allOP[op_appo].clear();
+  if (trfinf.node_feat.size() == 0){
+    return getAllEffMCCDI(trfinf);
+  } else {
+    return getAllEffMCGNN(trfinf);
   }
-  for(size_t i=0; i < trfinf.jets.size(); i++){
-    if(m_continuous){
-      eff=1.;
-      // loop on OP
-      int OP_index = 0;
-      for(const auto & op_appo: m_availableOP){
-	eff_all=1.;
-	//set a dumb value of the truth tag weight to get the different efficiency maps for each bin. to be improved..
-	if(OP_index+1 < (int) m_availableOP.size()){
-	  trfinf.jets.at(i).vars.jetTagWeight = (m_binEdges.at(OP_index)+m_binEdges.at(OP_index+1))/2.; //to-do: make it fancy? random distribution inside the bin probably?
-	}
-	else{
-	  trfinf.jets.at(i).vars.jetTagWeight = (m_binEdges.at(OP_index)+1)/2.; //only for 60% WP
-	}
+}
 
-	CorrectionCode code = m_effTool->getMCEfficiency(trfinf.jets.at(i).flav, trfinf.jets.at(i).vars, eff_all) ;
+// uses onnx tool
+StatusCode BTaggingTruthTaggingTool::getAllEffMCGNN(TRFinfo &trfinf){
 
+  for(int bin = 0; bin < m_nbins; bin++)
+    trfinf.effMC_allBins[bin].clear();
+    
+  //extract efficiency
+  std::vector<std::vector<float>> tmp_effMC_allBins; // shape:{num_jets, num_wp}
+  CorrectionCode code = m_effTool->getMCEfficiencyONNX(trfinf.node_feat, tmp_effMC_allBins);
+  
+  if(!(code==CorrectionCode::Ok || code==CorrectionCode::OutOfValidityRange)){
+    ATH_MSG_ERROR("BTaggingEfficiencyTool::getMCEfficiencyONNX returned CorrectionCode::Error");
+    return StatusCode::FAILURE;
+  }
+
+  if(m_continuous) {
+    for(int bin = 0; bin < m_nbins; bin++){
+      // need to transpose
+      std::vector<float> tmp_effMC_oneBin; // shape: {num_jet} = trfinf.njets
+      for (unsigned int jet_index=0; jet_index<trfinf.njets; jet_index++){
+        tmp_effMC_oneBin.push_back(tmp_effMC_allBins[jet_index][bin]);
+      }
+      trfinf.effMC_allBins[bin] = tmp_effMC_oneBin;
+    }
+  } // m_continuous
+  else{
+    for (unsigned int jet_index=0; jet_index<trfinf.njets; jet_index++){
+     float tmp_effMC = std::accumulate(tmp_effMC_allBins[jet_index].begin()+m_OP_index_for_GNN, tmp_effMC_allBins[jet_index].end(), 0.0);
+     trfinf.effMC_allBins[0].push_back(1-tmp_effMC);
+     trfinf.effMC_allBins[1].push_back(tmp_effMC);
+    }
+ } // !m_continuous
+         
+  return StatusCode::SUCCESS;
+}
+
+StatusCode BTaggingTruthTaggingTool::getAllEffMCCDI(TRFinfo &trfinf){
+
+  float eff_all =1.;
+  for(int bin = 0; bin < m_nbins; bin++)
+    trfinf.effMC_allBins[bin].clear();
+  
+  for(size_t jet=0; jet < trfinf.jets.size(); jet++){
+      for(int bin = 0; bin < m_nbins; bin++){   // loop on bins	
+        eff_all=1.;
+
+        //set a dumb value of the truth tag weight to get the different efficiency maps for each bin. to be improved..
+	if (m_continuous2D)
+	  trfinf.jets.at(jet).vars.jetTagWeight = bin+0.5;
+	else
+	  trfinf.jets.at(jet).vars.jetTagWeight = (m_cuts[bin].bcut_low + m_cuts[bin].bcut_hig)/2.;
+
+	ATH_MSG_DEBUG("effMC_allBins: tag bin: " <<bin <<" tagw: "  << trfinf.jets.at(jet).vars.jetTagWeight <<" "  <<m_cuts[bin].bcut_low <<" "  << m_cuts[bin].bcut_hig <<" " <<trfinf.jets.at(jet).vars.jetPt <<" " <<trfinf.jets.at(jet).vars.jetEta <<" " <<trfinf.jets.at(jet).flav);
+	//get the efficiency	
+        CorrectionCode code = m_effTool->getMCEfficiency(trfinf.jets.at(jet).flav, trfinf.jets.at(jet).vars, eff_all);
 	if(!(code==CorrectionCode::Ok || code==CorrectionCode::OutOfValidityRange)){
 	  ATH_MSG_ERROR("BTaggingEfficiencyTool::getMCEfficiency returned CorrectionCode::Error");
 	  return StatusCode::FAILURE;
 	}
-	trfinf.effMC_allOP[op_appo].push_back(eff_all);
-	OP_index++;
 
-      } // end loop on OP
-    } //inside Continuous
-    else{
-      eff=1.;
-      CorrectionCode code = m_effTool->getMCEfficiency(trfinf.jets.at(i).flav, trfinf.jets.at(i).vars, eff);
-      if(!(code==CorrectionCode::Ok || code==CorrectionCode::OutOfValidityRange)){
-	ATH_MSG_ERROR("BTaggingEfficiencyTool::getMCEfficiency returned CorrectionCode::Error");
-	return StatusCode::FAILURE;}
-      
-      trfinf.effMC.push_back(eff);
-      
-      if(m_useQuntile){
-	// loop on OP
-	for(const auto & op_appo: m_availableOP){
-	  
-	  if ( op_appo==m_OP) {
-	    trfinf.effMC_allOP[op_appo].push_back(eff);
-	    continue;
-	  }
-	  
-	  eff_all=1.;
-	  CorrectionCode code = m_effTool_allOP[op_appo]->getMCEfficiency(trfinf.jets.at(i).flav, trfinf.jets.at(i).vars, eff_all) ;
-	  
-	  if(!(code==CorrectionCode::Ok || code==CorrectionCode::OutOfValidityRange)){
-	    ATH_MSG_ERROR("BTaggingEfficiencyTool::getMCEfficiency returned CorrectionCode::Error");
-	    return StatusCode::FAILURE;
-	  }
-	  
-	  trfinf.effMC_allOP[op_appo].push_back(eff_all);
-	} // end loop on OP
-      } // if useQuantile
-    } //!useContinuous
+        trfinf.effMC_allBins[bin].push_back(eff_all);
+	ATH_MSG_DEBUG("effMC_allBins: tag bin: " <<bin <<" tagw: "  << trfinf.jets.at(jet).vars.jetTagWeight  <<" eff: " <<eff_all);
+      } // end loop on bins
   } // end loop on jets
-  return StatusCode::SUCCESS;
-}
 
-
-StatusCode BTaggingTruthTaggingTool::getAllEffSF(TRFinfo &trfinf,int sys){
-  ANA_CHECK_SET_TYPE ( StatusCode );
-
-  trfinf.eff.clear();
-  if(!m_continuous){
-    trfinf.eff.resize(trfinf.effMC.size());
-    if(m_useQuntile){
-      for(const auto & op_appo: m_availableOP){
-	trfinf.eff_allOP[op_appo].clear();
-	trfinf.eff_allOP[op_appo].resize(trfinf.effMC.size());
-      }
-    }
-  }
-  else{
-    trfinf.eff.resize(trfinf.effMC_allOP[m_cutBenchmark].size());
-    for(const auto & op_appo: m_availableOP){
-      trfinf.eff_allOP[op_appo].clear();
-      trfinf.eff_allOP[op_appo].resize(trfinf.effMC_allOP[op_appo].size());
-    }
-  }
-  
-  if(m_ignoreSF && sys==0){
-    if(m_continuous){
-      for(int iop = (int) m_availableOP.size()-1; iop >= 0; iop--) { // loop on the tighter OPs
-	string op_appo = m_availableOP.at(iop);
-	if(!m_useQuntile &&  iop < (int) m_OperatingPoint_index) continue;
-	for(size_t ieff =0; ieff< trfinf.eff_allOP[op_appo].size(); ieff++){ //jets
-	  trfinf.eff_allOP[op_appo].at(ieff)= 0;   
-	  for(unsigned int p = iop; p<m_availableOP.size(); p++){ //add all the eff above the WP	   
-	    trfinf.eff_allOP[op_appo].at(ieff)+=trfinf.effMC_allOP[m_availableOP.at(p)].at(ieff);
-	  }
-	  if( op_appo == m_cutBenchmark)
-	    trfinf.eff.at(ieff) = trfinf.eff_allOP[m_cutBenchmark].at(ieff);
-	} //jets
-      } //OP
-    } //continuous
-    else{
-      for(size_t i =0; i< trfinf.effMC.size(); i++){
-	trfinf.eff.at(i)=trfinf.effMC.at(i);
-	if(m_useQuntile){
-	  for(const auto & op_appo: m_availableOP){
-	    trfinf.eff_allOP[op_appo].at(i)=trfinf.effMC_allOP[op_appo].at(i);
-	  }
-	}
-      }
-    }
-    return StatusCode::SUCCESS;
-  }
-
-  if(m_ignoreSF && sys==0){
-    ATH_MSG_ERROR("Tryig to access SF systematics but ignoring SF");
-    return StatusCode::FAILURE;
-  }
-
-  float SF =1.;
-  float SF_all =1.;
-
-    if(sys!=0 && m_useSys){
-      ATH_MSG_DEBUG("applying the syst: " <<m_sys_name[sys]);
-      ANA_CHECK_THROW( m_effTool->applySystematicVariation(m_eff_syst[sys]) );
-    if(m_useQuntile && !m_continuous){
-      for(const auto & op_appo: m_availableOP){
-  if (op_appo==m_OP) continue;
-  ANA_CHECK( m_effTool_allOP[op_appo]->applySystematicVariation(m_eff_syst[sys]) );
-      }
-    }
-  }
-
-  if(m_continuous){
-    for(int iop = (int) m_availableOP.size()-1; iop >= 0; iop--) {
-      std::string op_appo = m_availableOP.at(iop);
-      if(!m_useQuntile &&  iop < (int) m_OperatingPoint_index) continue;
-      for(size_t i=0; i<trfinf.jets.size(); i++){
-	SF=1.;
-	//set a dumb value of the truth tag weight to get the different efficiency maps for each bin. to be improved..
-        if(iop+1 < (int) m_availableOP.size()){
-	trfinf.jets.at(i).vars.jetTagWeight = (m_binEdges.at(iop)+m_binEdges.at(iop+1))/2.; //to-do: make it fancy? random distribution for the tagger score
-	}
-	else{
-	  trfinf.jets.at(i).vars.jetTagWeight = (m_binEdges.at(iop)+1.)/2.;
-	}	  
-	
-	CorrectionCode code = m_effTool->getScaleFactor(trfinf.jets.at(i).flav, trfinf.jets.at(i).vars, SF) ;
-	if(!(code==CorrectionCode::Ok || code==CorrectionCode::OutOfValidityRange)){
-	  ATH_MSG_ERROR("BTaggingEfficiencyTool::getScaleFactor returned CorrectionCode::Error");
-	  return StatusCode::FAILURE;
-	}
-
-	trfinf.eff_allOP[op_appo].at(i)=trfinf.effMC_allOP[op_appo].at(i)*SF;
-
-      //now sum all the corrected MC Eff together
-	if(iop+1 < (int) m_availableOP.size()){
-	    trfinf.eff_allOP[op_appo].at(i)+=trfinf.eff_allOP[m_availableOP.at(iop+1)].at(i); //they are already corrected for SF
-	}
-	if( op_appo == m_cutBenchmark)
-	  trfinf.eff.at(i) = trfinf.eff_allOP[m_cutBenchmark].at(i);
-      } //jets
-    } //OP
-  } //continuous
-  
-  else{
-    for(unsigned int i=0; i<trfinf.jets.size(); i++){
-      SF=1.;
-      CorrectionCode code = m_effTool->getScaleFactor(trfinf.jets.at(i).flav, trfinf.jets.at(i).vars, SF) ;
-      if(!(code==CorrectionCode::Ok || code==CorrectionCode::OutOfValidityRange)){
-	ATH_MSG_ERROR("BTaggingEfficiencyTool::getScaleFactor returned CorrectionCode::Error");
-	return StatusCode::FAILURE;
-      }
-      trfinf.eff.at(i) = trfinf.effMC.at(i)*SF;
-      if(m_useQuntile){
-	// loop on OP
-	for(const auto & op_appo: m_availableOP){
-	  if (op_appo==m_OP) {
-	    trfinf.eff_allOP[op_appo].at(i)=trfinf.effMC.at(i)*SF;
-	    continue;
-	  }
-	  SF_all=1.;
-	  CorrectionCode code = m_effTool_allOP[op_appo]->getScaleFactor(trfinf.jets.at(i).flav, trfinf.jets.at(i).vars, SF_all) ;
-	  if(!(code==CorrectionCode::Ok || code==CorrectionCode::OutOfValidityRange)){
-	    ATH_MSG_ERROR("BTaggingEfficiencyTool::getScaleFactor returned CorrectionCode::Error");
-	    return StatusCode::FAILURE;
-	  }
-	  
-	  trfinf.eff_allOP[op_appo].at(i) = trfinf.effMC_allOP[op_appo].at(i)*SF_all;
-	} // end loop on OP
-      } // if useQuantile
-    } //!Continuous
-  } //jets
-  
-  CP::SystematicSet defaultSet;
-  ANA_CHECK( m_effTool->applySystematicVariation(defaultSet) );
-  if(m_useQuntile && !m_continuous){
-    for(const auto & op_appo: m_availableOP){
-      ANA_CHECK( m_effTool_allOP[op_appo]->applySystematicVariation(defaultSet) );
-    }
-  }
-  
   return StatusCode::SUCCESS;
 }
 
@@ -749,55 +699,61 @@ std::vector<std::vector<bool> > BTaggingTruthTaggingTool::generatePermutations(i
 }
 
 
-double BTaggingTruthTaggingTool::trfWeight(TRFinfo &trfinf,const std::vector<bool> &tags){
-  double weight = 1;
-  for (unsigned int j=0; j<tags.size();j++) {
-    double trf = 0.;
-    trf = trfinf.eff[j];
+float BTaggingTruthTaggingTool::trfWeight(TRFinfo &trfinf,const std::vector<bool> &tags){
+
+  float weight = 1;
+  for (unsigned int t=0; t<tags.size();t++) {
+    float trf = 0.;
+    
+    //sum of the efficiencies in the tagged bins
+    for (int bin : m_OperatingBins){
+
+      trf += trfinf.effMC_allBins[bin][t];
+      
+    }
     if(trf>1.) {
       ATH_MSG_WARNING("Truth Tagging weight > 1. --> setting it to 1. check maps!");
       trf = 1.;
     }
-    if(tags.at(j)) weight *= trf;
+    if(tags.at(t)) weight *= trf;
     else weight *= (1.-trf);
+    ATH_MSG_DEBUG("weight " <<weight);
   } // end loop over jets
   return weight;
 }
 
 
-StatusCode BTaggingTruthTaggingTool::getTRFweight(TRFinfo &trfinf,unsigned int nbtag, bool isInclusive, int sys){
+StatusCode BTaggingTruthTaggingTool::getTRFweight(TRFinfo &trfinf,unsigned int nbtag, bool isInclusive){
 
   unsigned int njets = trfinf.njets;
   // Consider permutations of njet jets with up to limit b-tags
   unsigned int limit = (njets > 7) ? 8 : njets+1;
 
   // Permutations: njets, ntags, permutations
-  // From .h: std::map<int, std::vector<std::vector<std::vector<bool> > > > trfinf.perms;
-
   if (trfinf.perms.find(njets)==trfinf.perms.end()){   // if I don't have already saved the possible permutations for njet
     trfinf.perms[njets] = std::vector<std::vector<std::vector<bool> > >(limit);
     for(unsigned int i=0;i<limit;i++)
       trfinf.perms[njets].at(i) = generatePermutations(njets,i);
   }
-
   trfinf.permsWeight.clear(), trfinf.permsWeight.resize(limit); // trfinf.permsWeight.at(i).at(j): TRF weight of the j-th perm with i b-tags
   trfinf.permsSumWeight.clear(), trfinf.permsSumWeight.resize(limit); // trfinf.permsSumWeight.at(i).at(j): partial sum of  TRF weight of the permutations with i b-tags up to j (0,1,..,j-th) perm. Used in the choice of the selected permutation
 
   // compute TRF weight
   unsigned int max = nbtag+1; // from 0 to nbtag b-tags --> nbtag+1 positions
-  trfinf.trfwsys_ex[sys].clear(), trfinf.trfwsys_in[sys].clear();
-  trfinf.trfwsys_ex[sys].resize(max), trfinf.trfwsys_in[sys].resize(max);
+  trfinf.trfw_ex.clear(), trfinf.trfw_in.clear();
+  trfinf.trfw_ex.resize(max), trfinf.trfw_in.resize(max);
 
-  if(sys == 0) { // nominal case --> clear and resize elements of trfinf
-    trfinf.perm_ex.clear(), trfinf.perm_in.clear(); // vector<vector<bool>> --> for each number of tags the chosen permutation
-    trfinf.perm_ex.resize(max),  trfinf.perm_in.resize(max);
-    trfinf.permprob_ex.clear(), trfinf.permprob_in.clear(); // probability of the perm in trfinf.perm_ex/in
-    trfinf.permprob_ex.resize(max),  trfinf.permprob_in.resize(max);
-  }
+  //clear and resize elements of trfinf
+  trfinf.perm_ex.clear(), trfinf.perm_in.clear(); // vector<vector<bool>> --> for each number of tags the chosen permutation
+  trfinf.perm_ex.resize(max),  trfinf.perm_in.resize(max);
+  trfinf.permprob_ex.clear(), trfinf.permprob_in.clear(); // probability of the perm in trfinf.perm_ex/in
+  trfinf.permprob_ex.resize(max),  trfinf.permprob_in.resize(max);
+
   if(isInclusive) {
     for(unsigned int i=0; i<limit; i++) { // note: I consider maximum limit tags. It's an approximation
-      std::vector<double> weights;
-      double sum = 0., w = 0.;
+      std::vector<float> weights;
+      float sum = 0.;
+      float w   = 0.; //weight
       trfinf.permsWeight.at(i).clear();
       trfinf.permsSumWeight.at(i).clear();
       trfinf.permsWeight.at(i).resize(trfinf.perms[njets].at(i).size());
@@ -805,45 +761,41 @@ StatusCode BTaggingTruthTaggingTool::getTRFweight(TRFinfo &trfinf,unsigned int n
 
       // loop on all the permutations with i tags
       for(unsigned int p=0; p<trfinf.perms[njets].at(i).size(); p++) {
-	w = trfWeight(trfinf,trfinf.perms[njets].at(i).at(p));
-	sum+=w;
-	//trfinf.permsWeight.at(i).push_back(w); //old way to do it without resizing, keep it for the moment
-	//trfinf.permsSumWeight.at(i).push_back(sum);
-	trfinf.permsWeight.at(i).at(p) = w;
+
+        w = trfWeight(trfinf,trfinf.perms[njets].at(i).at(p));
+        sum+=w;
+        trfinf.permsWeight.at(i).at(p) = w;
         trfinf.permsSumWeight.at(i).at(p) = sum;
 
-	ATH_MSG_DEBUG("nbtag = " << i << "  wei = " << w << "  sum = " << sum);
+	      ATH_MSG_DEBUG("nbtag = " << i << "  wei = " << w << "  sum = " << sum);
       }
       if(i<limit && i<max) {
-  // note: I need to already have the exclusive weights filled to compite the inclusive
-	trfinf.trfwsys_ex[sys].at(i) = sum; // sum of TRF weights for all perm with i b-tags
-	if(i == 0) trfinf.trfwsys_in[sys].at(0) = 1.;
-	else trfinf.trfwsys_in[sys].at(i) = trfinf.trfwsys_in[sys].at(i-1) - trfinf.trfwsys_ex[sys].at(i-1); // P(>=4) = P(>=3) - P(==3)
-	ATH_MSG_DEBUG("i = " << i << "  sum = " << sum << "  TRF in " << trfinf.trfwsys_in[0].at(i) << "  ex = " << trfinf.trfwsys_ex[0].at(i));
+      // note: I need to already have the exclusive weights filled to compite the inclusive
+        trfinf.trfw_ex.at(i) = sum; // sum of TRF weights for all perm with i b-tags
+        if(i == 0) trfinf.trfw_in.at(0) = 1.;
+        else trfinf.trfw_in.at(i) = trfinf.trfw_in.at(i-1) - trfinf.trfw_ex.at(i-1); // P(>=4) = P(>=3) - P(==3)
+        ATH_MSG_DEBUG("i = " << i << "  sum = " << sum << "  TRF in " << trfinf.trfw_in.at(i) << "  ex = " << trfinf.trfw_ex.at(i));
       }
     }
-    ATH_MSG_DEBUG("before return, nbtag = " << nbtag << "  size de trfinf.trfwsys_in[sys] = " << trfinf.trfwsys_in[sys].size());
+    ATH_MSG_DEBUG("before return, nbtag = " << nbtag << "  size de trfinf.trfw_in = " << trfinf.trfw_in.size());
     return StatusCode::SUCCESS;
   }
   else { // exclusive case, only one calculation needed
-    std::vector<double> weights;
-    double sum = 0., w = 0.;
-    size_t size = trfinf.perms[njets].at(nbtag).size(); 
+    std::vector<float> weights;
+    float sum = 0., w = 0.;
+    size_t size = trfinf.perms[njets].at(nbtag).size();
     trfinf.permsWeight.at(nbtag).clear();
-    trfinf.permsSumWeight.at(nbtag).clear();    
+    trfinf.permsSumWeight.at(nbtag).clear();
     trfinf.permsWeight.at(nbtag).resize(size);
     trfinf.permsSumWeight.at(nbtag).resize(size);
     // loop on all the permutations with i tags
     for(unsigned int p=0; p<trfinf.perms[njets].at(nbtag).size(); p++) {
-      
       w = trfWeight(trfinf,trfinf.perms[njets].at(nbtag).at(p));
       sum+=w;
-      //      trfinf.permsWeight.at(nbtag).push_back(w); //old way, before resizing: keep it for the moment
-      //      trfinf.permsSumWeight.at(nbtag).push_back(sum);
       trfinf.permsWeight.at(nbtag).at(p) = w;
       trfinf.permsSumWeight.at(nbtag).at(p) = sum;
     }
-    trfinf.trfwsys_ex[sys].at(nbtag) = sum;
+    trfinf.trfw_ex.at(nbtag) = sum;
     return StatusCode::SUCCESS;
   }
   return StatusCode::SUCCESS;
@@ -894,15 +846,15 @@ StatusCode BTaggingTruthTaggingTool::chooseAllTagPermutation(TRFinfo &trfinf,uns
 }
 
 StatusCode BTaggingTruthTaggingTool::chooseTagPermutation(TRFinfo &trfinf,unsigned int nbtag, bool isIncl){
-  std::vector<double> incl;
+  std::vector<float> incl;
   std::vector<std::pair<unsigned int, unsigned int> > trackPerm;
-  double sum = 0;
+  float sum = 0;
   if(isIncl) {
     for(unsigned int itag=nbtag; itag < trfinf.permsWeight.size(); itag++) {
       for(unsigned int ip = 0; ip < trfinf.permsWeight.at(itag).size(); ip++) {
-    sum += trfinf.permsWeight.at(itag).at(ip);
-    incl.push_back(sum);
-    trackPerm.push_back(std::make_pair(itag,ip));
+        sum += trfinf.permsWeight.at(itag).at(ip);
+        incl.push_back(sum);
+        trackPerm.push_back(std::make_pair(itag,ip));
       }
     }
   }
@@ -911,17 +863,17 @@ StatusCode BTaggingTruthTaggingTool::chooseTagPermutation(TRFinfo &trfinf,unsign
     incl = trfinf.permsSumWeight.at(nbtag);
     for(unsigned int ip = 0; ip < trfinf.permsSumWeight.at(nbtag).size(); ip++) trackPerm.push_back(std::make_pair(nbtag,ip));
   }
-  double theX = trfinf.rand.Uniform(sum);
+  float theX = trfinf.rand.Uniform(sum);
   for(unsigned int ip=0; ip < incl.size(); ip++) {
     ATH_MSG_DEBUG("incl.at(ip): " << incl.at(ip) << "  theX: " << theX);
     if(incl.at(ip) >= theX) {
       if(isIncl) {
-  trfinf.perm_in.at(nbtag) = trfinf.perms[trfinf.njets].at(trackPerm.at(ip).first).at(trackPerm.at(ip).second);
-  trfinf.permprob_in.at(nbtag) = trfinf.permsWeight.at(trackPerm.at(ip).first).at(trackPerm.at(ip).second) / trfinf.trfwsys_in[0].at(nbtag);
+        trfinf.perm_in.at(nbtag) = trfinf.perms[trfinf.njets].at(trackPerm.at(ip).first).at(trackPerm.at(ip).second);
+        trfinf.permprob_in.at(nbtag) = trfinf.permsWeight.at(trackPerm.at(ip).first).at(trackPerm.at(ip).second) / trfinf.trfw_in.at(nbtag);
       }
       else {
-	trfinf.perm_ex.at(nbtag) = trfinf.perms[trfinf.njets].at(trackPerm.at(ip).first).at(trackPerm.at(ip).second);
-	trfinf.permprob_ex.at(nbtag) = trfinf.permsWeight.at(trackPerm.at(ip).first).at(trackPerm.at(ip).second) / trfinf.trfwsys_ex[0].at(nbtag);
+        trfinf.perm_ex.at(nbtag) = trfinf.perms[trfinf.njets].at(trackPerm.at(ip).first).at(trackPerm.at(ip).second);
+        trfinf.permprob_ex.at(nbtag) = trfinf.permsWeight.at(trackPerm.at(ip).first).at(trackPerm.at(ip).second) / trfinf.trfw_ex.at(nbtag);
       }
       return StatusCode::SUCCESS;
     }
@@ -950,14 +902,14 @@ StatusCode BTaggingTruthTaggingTool::getQuantiles(TRFinfo &trfinf,std::vector<st
   trf_bin_in.resize(trfinf.tbins_in.size());
   for(unsigned int i =0; i<trfinf.tbins_in.size(); i++)
     trf_bin_in.at(i).resize(trfinf.tbins_in.at(i).size());
-  // increasing the value by 1 to match conventions in selectionTool
+  // increasing the value by 1 to match conventions in selectionTool (not continuous2D)
   for(unsigned int i =0; i<trfinf.tbins_ex.size(); i++)
     for(unsigned int j=0; j<trfinf.tbins_ex.at(i).size(); j++)
-      trf_bin_ex.at(i).at(j)=trfinf.tbins_ex.at(i).at(j) +1;
+      trf_bin_ex.at(i).at(j)= (m_continuous2D || !m_continuous) ? trfinf.tbins_ex.at(i).at(j) : trfinf.tbins_ex.at(i).at(j) +1;
 
   for(unsigned int i =0; i<trfinf.tbins_in.size(); i++)
     for(unsigned int j=0; j<trfinf.tbins_in.at(i).size(); j++)
-      trf_bin_in.at(i).at(j)=trfinf.tbins_in.at(i).at(j) +1;
+      trf_bin_in.at(i).at(j) = (m_continuous2D || !m_continuous) ? trfinf.tbins_in.at(i).at(j) : trfinf.tbins_in.at(i).at(j) +1;
 
   return StatusCode::SUCCESS;
 }
@@ -966,13 +918,13 @@ StatusCode BTaggingTruthTaggingTool::chooseAllTagBins(TRFinfo &trfinf){
   ANA_CHECK_SET_TYPE (StatusCode);
   trfinf.tbins_ex.clear();
   trfinf.tbins_in.clear();
-  trfinf.tbins_ex.resize( trfinf.trfwsys_ex[0].size());
-  trfinf.tbins_in.resize( trfinf.trfwsys_in[0].size());
+  trfinf.tbins_ex.resize( trfinf.trfw_ex.size());
+  trfinf.tbins_in.resize( trfinf.trfw_in.size());
 
   trfinf.binsprob_ex.clear();
   trfinf.binsprob_in.clear();
-  trfinf.binsprob_ex.resize( trfinf.trfwsys_ex[0].size());
-  trfinf.binsprob_in.resize( trfinf.trfwsys_in[0].size());
+  trfinf.binsprob_ex.resize( trfinf.trfw_ex.size());
+  trfinf.binsprob_in.resize( trfinf.trfw_in.size());
 
   if(trfinf.perm_ex.size() != trfinf.perm_in.size()) ATH_MSG_WARNING("Different sizes in exclusive and inclusive permutation choices");
 
@@ -984,55 +936,63 @@ StatusCode BTaggingTruthTaggingTool::chooseAllTagBins(TRFinfo &trfinf){
 }
 
 
-// chiara: non posso uniformare il codice con getTagBinsConfProb??
 StatusCode BTaggingTruthTaggingTool::chooseTagBins_cum(TRFinfo &trfinf,std::vector<bool> &tagconf, bool isIncl, unsigned int nbtag){
   std::vector<int> btagops;
 
-  std::vector<double> incl;
-  double prob = 1.;
+  ATH_MSG_DEBUG("chooseTagBins_cum ntag: " <<nbtag);
 
+  std::vector<float> incl;
+  std::vector<float> untagged_bins;
+  float prob = 1.;
+
+  //define the untagged bins
+  for (int bin=0; bin<m_nbins; bin++) {
+    if (std::count(m_OperatingBins.begin(), m_OperatingBins.end(), bin)) continue;
+    untagged_bins.push_back(bin); 
+  }
+
+  //How to calculate Probabilities:
+  //sum: [---- P(bin 0) -----][-- P(bin 1) ---][- P(bin 2) -]
+  //random X up to sum of the bins. pick one prob based on the efficiency
   for(unsigned int j=0; j<tagconf.size(); j++) {
+
+    ATH_MSG_DEBUG("tagconf.at(tc) " <<tagconf.at(j));
+
     if(tagconf.at(j)) { // tagged jet
-      double sum=0.;
+      float sum=0.;
       incl.clear();
-      for(int iop = (int)trfinf.eff_allOP.size()-1; iop >= (int)m_OperatingPoint_index; iop--) { // loop on the tighter OPs
-	sum = trfinf.eff_allOP[m_availableOP.at(iop)][j];
+      for (int tagged_bin : m_OperatingBins){
+	sum += trfinf.effMC_allBins[tagged_bin][j];
 	incl.push_back(sum);
       }
-      double theX = trfinf.rand.Uniform(sum);
 
-      for(unsigned int k=0; k<incl.size(); k++) {
-  double valm1 = 0.;
-  if(k!=0) valm1 = incl.at(k-1);
-    if(incl.at(k) >= theX) {
-      btagops.push_back(m_availableOP.size()-k);
-    prob *= (incl.at(k)-valm1) / sum;
-      break;
-    }
-      }
-    }
+      float theX = trfinf.rand.Uniform(sum);
+      auto tag_index = std::lower_bound(incl.begin(), incl.end(), theX) - incl.begin();
+      float tbin_choice = m_OperatingBins[tag_index];
+      btagops.push_back(tbin_choice);
+      prob *= (trfinf.effMC_allBins[tbin_choice][j]);
+      ATH_MSG_DEBUG("it " <<tag_index <<" theX " <<theX <<" effMC " <<trfinf.effMC_allBins[tbin_choice][j] <<" prob* "  <<prob);
+    } //tagged
     else { // untagged jet
-      double sum=0.;
+      float untag_sum  = 0. ;
       incl.clear();
-      incl.push_back(sum); // fill the "0_0" OP as no real value affected and start the loop at 1
-      for(unsigned int iop=0; iop<=m_OperatingPoint_index; iop++) { // need to include the chosen tag cut to have the last MV1 bin of untagged jets filled, start at 0 with cumulative as iop = 0 = first OP
-    // sum = 1 - trf here
-    sum = 1 - trfinf.eff_allOP[m_availableOP.at(iop)][j];
-    incl.push_back(sum);
+      //sum over untagged bins
+      for(auto bin : untagged_bins){
+	untag_sum += trfinf.effMC_allBins[bin][j];
+        incl.push_back(untag_sum);
       }
-
-      double theX = trfinf.rand.Uniform(sum);
-      for(unsigned int k=1; k<incl.size(); k++) {
-        if(incl.at(k) >= theX){
-    btagops.push_back(k-1);
-    prob *= (incl.at(k) - incl.at(k-1)) / sum;
-          break;
-        }
-      }
+      
+      float theX = trfinf.rand.Uniform(untag_sum);
+      auto untag_index = std::lower_bound(incl.begin(), incl.end(), theX) - incl.begin();
+      float utbin_choice = untagged_bins[untag_index]; 
+      	btagops.push_back(utbin_choice);
+	prob *= 1 - trfinf.effMC_allBins[utbin_choice][j];
+	ATH_MSG_DEBUG(" unt_bin " <<untag_index <<" theX " <<theX<<" 1-effMC " <<1-trfinf.effMC_allBins[utbin_choice][j] <<" prob* " <<prob);
     }
   }
+
   if(btagops.size() != tagconf.size()) {
-    ATH_MSG_ERROR("You should not be here -> wrong size of tag bins vector");
+    ATH_MSG_ERROR("You should not be here -> wrong size of tag bins vector. btagops: " <<btagops.size() <<" tagconf: " <<tagconf.size());
     return StatusCode::FAILURE;
   }
   if(isIncl) {
@@ -1048,51 +1008,21 @@ StatusCode BTaggingTruthTaggingTool::chooseTagBins_cum(TRFinfo &trfinf,std::vect
   return StatusCode::SUCCESS;
 }
 
-
-
-double BTaggingTruthTaggingTool::getTagBinsRW(TRFinfo &trfinf,bool isIncl, unsigned int nbtag){
-
-  if((!isIncl && trfinf.binsprob_ex.size() == 0) || (isIncl && trfinf.binsprob_in.size() == 0)) {
-    ATH_MSG_ERROR("Need to choose quantiles before computing the reweighting");
-    throw std::runtime_error("Error in BTaggingTruthTaggingTool::getTagBinsRW");
-  }
-
-  double tbw = 0.;
-  double prob_sys=1.;
-
-  if(isIncl) {
-    prob_sys=getTagBinsConfProb(trfinf,trfinf.tbins_in.at(nbtag));
-    tbw = prob_sys/trfinf.binsprob_in.at(nbtag);
-    return tbw;
-  }
-  else {
-    prob_sys=getTagBinsConfProb(trfinf,trfinf.tbins_ex.at(nbtag));
-    tbw = prob_sys/trfinf.binsprob_ex.at(nbtag);
-    return tbw;
-  }
-}
-
-
-double BTaggingTruthTaggingTool::getTagBinsConfProb(TRFinfo &trfinf,std::vector<int> &tagws){
-  double prob = 1.;
+float BTaggingTruthTaggingTool::getTagBinsConfProb(TRFinfo &trfinf,std::vector<int> &tagws){
+  float prob = 1.;
   for(unsigned int j=0; j<tagws.size(); j++) {
-    if((unsigned int)tagws.at(j) > m_OperatingPoint_index) { // tagged
-      double prevBinW = 0.;
-      int mOP = m_availableOP.size();
-      if(tagws.at(j) != mOP) { // not the last tag-bin
-  prevBinW =  trfinf.eff_allOP[m_availableOP.at(tagws.at(j))][j];
-      }
-      // prob *= (eff*SF-exactly-that-bin)/(ef*SF-all-tagged-bins)
-      // (eff*SF-exactly-that-bin): eff(==60) = eff(70) - eff(60) --> eff(==5) = eff(4)-eff(5)
-	prob *= (trfinf.eff_allOP[m_availableOP.at(tagws.at(j)-1)][j] - prevBinW) /  (trfinf.eff_allOP[m_availableOP.at(m_OperatingPoint_index)][j]);
+    
+    float sum_tag = 0.;
+    //calculate sum of all tagged bins
+    for (auto bin : m_OperatingBins)
+      sum_tag += trfinf.effMC_allBins[bin][j]; 
+      
+    if(std::count(m_OperatingBins.begin(), m_OperatingBins.end(), tagws.at(j) ) ) { // tagged
+      prob *= (trfinf.effMC_allBins[tagws.at(j)][j]) / sum_tag;
       ATH_MSG_DEBUG("prob " << prob);
     }
     else { // untagged
-      double prevBinW = 0.;
-      if(tagws.at(j) != 0) {
-  prevBinW = 1 - trfinf.eff_allOP[m_availableOP.at(tagws.at(j)-1)][j];
-      }
-      prob *= ((1 - trfinf.eff_allOP[m_availableOP.at(tagws.at(j))][j]) - prevBinW) / (1 - trfinf.eff_allOP[m_availableOP.at(m_OperatingPoint_index)][j]);
+      prob *= (1 - trfinf.effMC_allBins[tagws.at(j)][j]) / (1 - sum_tag);
       ATH_MSG_DEBUG("prob " << prob);
     }
   }
@@ -1100,24 +1030,15 @@ double BTaggingTruthTaggingTool::getTagBinsConfProb(TRFinfo &trfinf,std::vector<
 }
 
 StatusCode BTaggingTruthTaggingTool::getDirectTaggedJets(TRFinfo &trfinf,std::vector<bool> &is_tagged){
-  
   is_tagged.clear();
   std::vector<int> appo;
-  
-  for(const auto& jet : trfinf.jets) {
+  auto is_jettag = false;
+  for(const auto &jet : trfinf.jets) {
     ATH_MSG_DEBUG("pt " << jet.vars.jetPt << "   eta " << jet.vars.jetEta << "   wei " << jet.vars.jetTagWeight);
-    bool is_btagged = false;
-    if(!m_continuous)
-      is_btagged = static_cast<bool>(m_selTool->accept(jet.vars.jetPt, jet.vars.jetEta, jet.vars.jetTagWeight));
-    else{
-      int quantile = m_selTool->getQuantile(jet.vars.jetPt, jet.vars.jetEta, jet.vars.jetTagWeight);
-      is_btagged = quantile > (int) m_OperatingPoint_index ? true : false;
-      ATH_MSG_DEBUG("quantile " <<quantile <<" m_OperatingPoint_index " <<m_OperatingPoint_index <<" is_tagged? " <<is_btagged);
-
-    }
-
-    ATH_MSG_DEBUG("is tagged? " << is_btagged);
-    if(is_btagged) is_tagged.push_back(1);
+    is_jettag = static_cast<bool>(m_selTool->accept(jet.vars.jetPt, jet.vars.jetEta, jet.vars.jetTagWeight));
+  
+    ATH_MSG_DEBUG("is tagged? " << is_jettag);
+    if(is_jettag) is_tagged.push_back(1);
     else is_tagged.push_back(0);
   }
 
@@ -1125,48 +1046,45 @@ StatusCode BTaggingTruthTaggingTool::getDirectTaggedJets(TRFinfo &trfinf,std::ve
 }
 
 
-double BTaggingTruthTaggingTool::getEvtSF(TRFinfo &trfinf,int sys){
-  double SF = 1.;
-  std::vector<bool> is_tagged;
-  ANA_CHECK_THROW( getDirectTaggedJets(trfinf,is_tagged) );
+float BTaggingTruthTaggingTool::getEvtSF(TRFinfo &trfinf, std::vector<int>& quantiles){
 
-  if(sys!=0 && m_useSys) {
+  ANA_CHECK_SET_TYPE (StatusCode);
 
-    ANA_CHECK_THROW( m_effTool->applySystematicVariation(m_eff_syst[sys]) );
-  }
+  float SF = 1.;
 
-  for(unsigned int i =0; i< trfinf.jets.size(); i++) {
-    bool is_btagged = is_tagged.at(i);
-    float ineffSF =1;
-    float effSF=1;
+  if (m_ignoreSF) 
+    return SF;
 
-    if(is_btagged){    // tagged --> look at sf
-      // CorrectionCode code = m_effTool->getScaleFactor(trfinf.jets.at(i).flav, trfinf.jets.at(i).vars, ineffSF);
-      // if(!(code==CorrectionCode::Ok || code==CorrectionCode::OutOfValidityRange)){
-      //   ATH_MSG_ERROR("BTaggingEfficiencyTool::getMCEfficiency returned CorrectionCode::Error");
-      //   return -1.0;
-      // }
-      ANA_CHECK_THROW(m_effTool->getScaleFactor(trfinf.jets.at(i).flav, trfinf.jets.at(i).vars, ineffSF));
+  for(unsigned int i =0; i< trfinf.njets; i++) {
+    float jetSF = 1;
 
-      SF*=ineffSF;
+    if(!m_continuous){ //FixedCut
+
+      bool is_btagged = quantiles.at(i);
+      auto code = (is_btagged) ? m_effTool->getScaleFactor(trfinf.jets.at(i).flav, trfinf.jets.at(i).vars, jetSF) : m_effTool->getInefficiencyScaleFactor(trfinf.jets.at(i).flav, trfinf.jets.at(i).vars, jetSF);
+     
+      if(!(code==CorrectionCode::Ok || code==CorrectionCode::OutOfValidityRange)){
+        ATH_MSG_ERROR("BTaggingEfficiencyTool::getScaleFactor returned CorrectionCode::Error");
+        return -99.;
+      }
     }
-    else{    // not tagged --> loop at ineff SF
-      // CorrectionCode code = m_effTool->getInefficiencyScaleFactor(trfinf.jets.at(i).flav, trfinf.jets.at(i).vars, effSF);
-      // if(!(code==CorrectionCode::Ok || code==CorrectionCode::OutOfValidityRange)){
-      //   ATH_MSG_ERROR("BTaggingEfficiencyTool::getMCEfficiency returned CorrectionCode::Error");
-      //   return -1.0;
-      // }
-
-      ANA_CHECK_THROW(m_effTool->getInefficiencyScaleFactor(trfinf.jets.at(i).flav, trfinf.jets.at(i).vars, effSF));
-      SF *= effSF;
+    else{ //continuous & continuous2D      
+      int bin = quantiles.at(i);
+      //set new tagweight bin according to the final decision
+      //the quantile convention for continuous is: bin+1!  
+      trfinf.jets.at(i).vars.jetTagWeight = (m_continuous2D) ? bin+0.5 : (m_cuts[bin-1].bcut_low + m_cuts[bin-1].bcut_hig)/2.;
+      
+      auto code = m_effTool->getScaleFactor(trfinf.jets.at(i).flav, trfinf.jets.at(i).vars, jetSF);
+      if(!(code==CorrectionCode::Ok || code==CorrectionCode::OutOfValidityRange)){
+        ATH_MSG_ERROR("BTaggingEfficiencyTool::getScaleFactor returned CorrectionCode::Error");
+        return -99;
+      }
+      ATH_MSG_DEBUG("BIN " <<bin <<"SF: pt " <<trfinf.jets.at(i).vars.jetPt <<" " <<trfinf.jets.at(i).vars.jetEta <<" " <<trfinf.jets.at(i).vars.jetTagWeight <<" jetSF " <<jetSF);
     }
-  }
-
-  if(sys!=0 && m_useSys) {  // reset syst to nominal
-    CP::SystematicSet defaultSet;
-
-    ANA_CHECK_THROW( m_effTool->applySystematicVariation(defaultSet) );
-  }
+    SF*=jetSF;
+  } //loop over jets
+  
+  ATH_MSG_DEBUG(" FINAL SF : " <<SF);
   return SF;
 }
 
@@ -1230,15 +1148,15 @@ int BTaggingTruthTaggingTool::ExclusiveConeHadronFlavourLabel (const xAOD::Jet& 
 
 // local utility function: trim leading and trailing whitespace in the property strings
 std::string trim(const std::string& str,
-		 const std::string& whitespace = " \t") {
-  const auto strBegin = str.find_first_not_of(whitespace);
-  if (strBegin == std::string::npos)
+		const std::string& whitespace = " \t") {
+    const auto strBegin = str.find_first_not_of(whitespace);
+    if (strBegin == std::string::npos)
     return ""; // no content
 
-  const auto strEnd = str.find_last_not_of(whitespace);
-  const auto strRange = strEnd - strBegin + 1;
+    const auto strEnd = str.find_last_not_of(whitespace);
+    const auto strRange = strEnd - strBegin + 1;
 
-  return str.substr(strBegin, strRange);
+    return str.substr(strBegin, strRange);
 }
 
 
@@ -1257,51 +1175,40 @@ std::vector<std::string> BTaggingTruthTaggingTool::split(const std::string& str,
   return result;
 }
 
-StatusCode BTaggingTruthTaggingTool::generateRandomTaggerScores(std::vector< std::vector<int> > &quantiles, std::vector< std::vector<double> > &scores){
-
-  //quantiles:
-  // returns 5 if between 60% and 0%
-  // returns 4 if between 70% and 60%
-  // returns 3 if between 77% and 70%
-  // returns 2 if between 85% and 77%
-  // returns 1 if between 100% and 85%
-  //m_binEdges
-  // 3 60%
-  // 2 70%
-  // 1 77%
-  // 0 85%
-
-  scores.clear();
+StatusCode BTaggingTruthTaggingTool::generateRandomTaggerScores(std::vector< std::vector<int> > &quantiles, std::vector< std::vector<float> > &btag_scores, std::vector< std::vector<float> > &ctag_scores){
 
   TRandom3 random;
-
-  scores.resize(quantiles.size());
+  
+  btag_scores.clear();
+  btag_scores.resize(quantiles.size());
+  
+  if(m_continuous2D){
+    ctag_scores.clear();
+    ctag_scores.resize(quantiles.size());
+  }
+  
   for(unsigned int i=0; i <quantiles.size(); i++ ){
 
-    scores.at(i).resize(quantiles.at(i).size());
+    btag_scores.at(i).resize(quantiles.at(i).size());
+    if(m_continuous2D)
+      ctag_scores.at(i).resize(quantiles.at(i).size());
 
-    for(unsigned int j=0; j <quantiles.at(i).size(); j++ ){
+    unsigned int njets = quantiles.at(i).size();
+    for(unsigned int j=0; j < njets; j++ ){
 
-        int quantile = quantiles.at(i).at(j);
+      int temp_quantile = (m_continuous2D) ? quantiles.at(i).at(j) : quantiles.at(i).at(j) -1;
 
-        if(quantile == 1){
-          double lowTaggerScore = -1.0;
-          if(m_taggerName.find("MV2") != string::npos){ lowTaggerScore = -1.0; }
-          if(m_taggerName.find("DL1") != string::npos){ lowTaggerScore = -20.0;}
+      float btag_low =  m_cuts[temp_quantile].bcut_low;
+      float btag_hig =  m_cuts[temp_quantile].bcut_hig;
+			      
+      float ctag_low =  m_cuts[temp_quantile].ccut_low;
+      float ctag_hig =  m_cuts[temp_quantile].ccut_hig;
 
-          scores.at(i).at(j) = lowTaggerScore + random.Uniform()*( m_binEdges.at(0)-lowTaggerScore );
-        }else if(quantile == 5){
-          double highTaggerScore = +1.0;
-          if(m_taggerName.find("MV2") != string::npos){ highTaggerScore = 1.0; }
-          if(m_taggerName.find("DL1") != string::npos){ highTaggerScore = 20.0; }
-
-          scores.at(i).at(j) = m_binEdges.at(3) + random.Uniform()*( highTaggerScore-m_binEdges.at(3) );
-        }else{
-          scores.at(i).at(j) = m_binEdges.at(quantile-2) + random.Uniform()*( m_binEdges.at(quantile-1)-m_binEdges.at(quantile-2) );
-        }
+      btag_scores.at(i).at(j) = btag_low + random.Uniform()*(btag_hig - btag_low );
+      if(m_continuous2D)
+	ctag_scores.at(i).at(j) = ctag_low + random.Uniform()*(ctag_hig - ctag_low );
     }
   }
-
   return StatusCode::SUCCESS;
 
 }

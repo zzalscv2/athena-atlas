@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -87,7 +87,7 @@ Tile::TileVolumeBuilder::TileVolumeBuilder(const std::string& t, const std::stri
 
 // destructor
 Tile::TileVolumeBuilder::~ TileVolumeBuilder()
-{}
+= default;
 
 
 // Athena standard methods
@@ -257,7 +257,7 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) con
       ATH_MSG_VERBOSE( "  Child: " << childLogVol->getName() << " has shape  " << childShape->type() );
       
       const GeoTubs* currentTubs  = dynamic_cast<const GeoTubs*>(childShape);
-      Trk::CylinderVolumeBounds* childCylVolBounds = currentTubs ? geoShapeToVolumeBounds.convert(currentTubs) : nullptr;
+      Trk::CylinderVolumeBounds* childCylVolBounds = currentTubs ? Trk::GeoShapeConverter::convert(currentTubs) : nullptr;
       // get the transform
       GeoTrf::Transform3D childTransform = currentVPhysVolLink->getXToChildVol(ichild);
       double childZposition = childTransform.translation().z();
@@ -803,7 +803,7 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) con
   return tileTrackingVolumes;
 }
 
-void Tile::TileVolumeBuilder::printCheckResult(MsgStream& log, const Trk::TrackingVolume* vol) const
+void Tile::TileVolumeBuilder::printCheckResult(MsgStream& log, const Trk::TrackingVolume* vol) 
 {
   if (vol) log << "... ok" << endmsg;
   else     log << "... missing" << endmsg;

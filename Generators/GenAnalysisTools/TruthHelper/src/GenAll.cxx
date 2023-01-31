@@ -8,14 +8,14 @@
 namespace TruthHelper {
 
 
-  // bool GenAll::operator()(const HepMC::GenParticle* const) const {
-  //   return true;
-  // }
+// bool GenAll::operator()(const HepMC::GenParticle* const) const {
+//   return true;
+// }
 
 
-  // GenIMCselector* GenAll::create() const {
-  //   return new GenAll();
-  // }
+// GenIMCselector* GenAll::create() const {
+//   return new GenAll();
+// }
 
 
 }

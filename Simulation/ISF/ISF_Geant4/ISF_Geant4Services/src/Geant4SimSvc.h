@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_GEANT4SIMSVC_H
@@ -17,12 +17,14 @@
 #include "ISF_Interfaces/ISimulatorTool.h"
 #include "ISF_Event/ISFParticleContainer.h"
 
+#include "CxxUtils/checker_macros.h"
+
 namespace iGeant4 {
 
   /** @class Geant4SimSvc
 
   */
-  class Geant4SimSvc : public ISF::BaseSimulationSvc {
+  class ATLAS_NOT_THREAD_SAFE Geant4SimSvc : public ISF::BaseSimulationSvc {
 
   public:
     //** Constructor with parameters */
@@ -36,10 +38,10 @@ namespace iGeant4 {
     virtual StatusCode finalize() override;
 
     /** Simulation Call  */
-    virtual StatusCode simulate(const ISF::ISFParticle& isp, McEventCollection* mcEventCollection) override;
+    virtual StatusCode simulate(ISF::ISFParticle& isp, McEventCollection* mcEventCollection) override;
 
     /** Simulation Call for vector of ISF particles */
-    virtual StatusCode simulateVector(const ISF::ConstISFParticleVector& particles, McEventCollection* mcEventCollection) override;
+    virtual StatusCode simulateVector(const ISF::ISFParticleVector& particles, McEventCollection* mcEventCollection) override;
 
     /** Setup Event chain - in case of a begin-of event action is needed */
     virtual StatusCode setupEvent() override;

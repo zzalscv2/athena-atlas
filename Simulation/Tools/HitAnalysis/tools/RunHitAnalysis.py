@@ -6,8 +6,6 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 import sys
 from argparse import ArgumentParser
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
 # Argument parsing
 parser = ArgumentParser("HitAnalysis.py")
 parser.add_argument("detectors", metavar="detectors", type=str, nargs="*",
@@ -34,22 +32,24 @@ else:
 print()
 
 # Configure
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.Enums import ProductionStep
-ConfigFlags.Common.ProductionStep = ProductionStep.Simulation
-ConfigFlags.Input.Files = [args.input]
+flags = initConfigFlags()
+flags.Common.ProductionStep = ProductionStep.Simulation
+flags.Input.Files = [args.input]
 if args.localgeo:
-    ConfigFlags.ITk.Geometry.AllLocal = True
+    flags.ITk.Geometry.AllLocal = True
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-setupDetectorFlags(ConfigFlags, args.detectors, use_metadata=True, toggle_geometry=True)
-ConfigFlags.lock()
+setupDetectorFlags(flags, args.detectors, use_metadata=True, toggle_geometry=True)
+flags.lock()
 
 # Construct our accumulator to run
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-acc = MainServicesCfg(ConfigFlags)
+acc = MainServicesCfg(flags)
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-acc.merge(PoolReadCfg(ConfigFlags))
+acc.merge(PoolReadCfg(flags))
 from HitAnalysis.SiHitAnalysis import SiHitAnalysisCfg
-acc.merge(SiHitAnalysisCfg(ConfigFlags))
+acc.merge(SiHitAnalysisCfg(flags))
 
 # Execute and finish
 sc = acc.run(maxEvents=args.maxEvents)

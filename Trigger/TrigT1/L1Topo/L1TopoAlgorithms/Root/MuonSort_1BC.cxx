@@ -21,11 +21,11 @@ TCS::MuonSort_1BC::MuonSort_1BC(const std::string & name) : SortingAlg(name) {
    defineParameter( "InputWidth1stStage", 16 ); // for FW
    defineParameter( "OutputWidth", 6 );
    defineParameter( "MinEta", 0 );
-   defineParameter( "MaxEta", 7); 
+   defineParameter( "MaxEta", 196 ); 
    defineParameter( "InnerCoinCut", 0 );
    defineParameter( "FullStationCut", 0 );
    defineParameter( "GoodMFieldCut", 0 );
-   defineParameter( "nDelayedMuons", 1 );  
+   defineParameter( "nDelayedMuons", 1 );
 
 }
 
@@ -54,11 +54,9 @@ TCS::MuonSort_1BC::sort(const InputTOBArray & input, TOBArray & output) {
   const LateMuonTOBArray & muons = dynamic_cast<const LateMuonTOBArray&>(input);
 
   // fill output array with GenericTOB built from late muons
-  int ii=0;
   for(LateMuonTOBArray::const_iterator lm = muons.begin(); lm!= muons.end(); ++lm ) {
 
     const GenericTOB gtob(**lm);
-    ++ii;
 
     // eta cut
     if (parType_t(std::abs((*lm)-> eta())) < m_minEta) continue; 

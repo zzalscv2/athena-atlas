@@ -218,16 +218,14 @@ void HforTool::findHFQuarks() {
 
   // if we don't know yet which store gate key to use, find it here
   if ( !m_McEventCollectionKey.size() ) {
-    for ( std::vector<std::string>::const_iterator ikey = m_McEventCollectionKeys.begin();
-	  !m_McEventCollectionKey.size() && ikey != m_McEventCollectionKeys.end();
-	  ikey++ ) {
-      ATH_MSG_DEBUG("SG key " << (*ikey));
+    for (const std::string& key : m_McEventCollectionKeys) {
+      ATH_MSG_DEBUG("SG key " << key);
       const McEventCollection * mymcevent{nullptr};
-      if(evtStore()->retrieve(mymcevent, (*ikey)).isFailure()) {
-	ATH_MSG_DEBUG("no McEventCollection found with key " << (*ikey));
+      if(evtStore()->retrieve(mymcevent, key).isFailure()) {
+	ATH_MSG_DEBUG("no McEventCollection found with key " << key);
       }
       else {
-	m_McEventCollectionKey = (*ikey) ;
+	m_McEventCollectionKey = key ;
 	ATH_MSG_INFO("McEventCollection found with key " << m_McEventCollectionKey);
       }
     }
@@ -294,7 +292,7 @@ void HforTool::findHFQuarks() {
 #ifdef HEPMC3
 	for (auto pin: prodvtx->particles_in()){
 #else
-	for (auto pin_it = prodvtx->particles_begin(HepMC::parents); pin_it != prodvtx->particles_end(HepMC::parents); pin_it++) {
+	for (auto pin_it = prodvtx->particles_begin(HepMC::parents); pin_it != prodvtx->particles_end(HepMC::parents); ++pin_it) {
           auto pin=*pin_it;
 #endif
           if(hasbchadronparent) break;
@@ -346,7 +344,7 @@ void HforTool::findHFQuarks() {
 
 	// if no b/c-hadron parent and no b/c-quark daughter, keep it!
       if (!hasbchadronparent && !hasbcquarkdaughter) {
-	ATH_MSG_DEBUG("  final state b/c-quark, barcode = "<< HepMC::barcode(bcpart));
+	ATH_MSG_DEBUG("  final state b/c-quark = "<< bcpart);
 	finalstate_q[apdg].push_back(bcpart) ;
       }
 
@@ -377,11 +375,11 @@ void HforTool::findHFQuarks() {
       auto vtx5=HepMC::barcode_to_vertex(evt,-5) ;
       if (vtx5) {
 #ifdef HEPMC3
-	for ( auto pin = vtx5->particles_in().begin() ; pin != vtx5->particles_in().end(); pin++)      ATH_MSG_DEBUG("    incoming: " << (*pin));
-	for ( auto pout = vtx5->particles_out().begin() ; pout != vtx5->particles_out().end(); pout++) ATH_MSG_DEBUG("    outgoing: " << (*pout));
+	for ( auto pin = vtx5->particles_in().begin() ; pin != vtx5->particles_in().end(); ++pin)      ATH_MSG_DEBUG("    incoming: " << (*pin));
+	for ( auto pout = vtx5->particles_out().begin() ; pout != vtx5->particles_out().end(); ++pout) ATH_MSG_DEBUG("    outgoing: " << (*pout));
 #else
-	for ( auto pin = vtx5->particles_begin(HepMC::parents) ; pin != vtx5->particles_end(HepMC::parents); pin++)      ATH_MSG_DEBUG("    incoming: " << (*pin));
-	for ( auto pout = vtx5->particles_begin(HepMC::children) ; pout != vtx5->particles_end(HepMC::children); pout++) ATH_MSG_DEBUG("    outgoing: " << (*pout));
+	for ( auto pin = vtx5->particles_begin(HepMC::parents) ; pin != vtx5->particles_end(HepMC::parents); ++pin)      ATH_MSG_DEBUG("    incoming: " << (*pin));
+	for ( auto pout = vtx5->particles_begin(HepMC::children) ; pout != vtx5->particles_end(HepMC::children); ++pout) ATH_MSG_DEBUG("    outgoing: " << (*pout));
 #endif
       }
     } // print out vtx -5 if there are HF quarks and in DEBUG mode
@@ -436,7 +434,7 @@ void HforTool::findHFQuarksHerwig
 #else
 	HepMC::GenVertex::particle_iterator prodvtx_particles_begin = prodvtx->particles_begin(HepMC::ancestors) ;
 	HepMC::GenVertex::particle_iterator prodvtx_particles_end =    prodvtx->particles_end(HepMC::ancestors) ;
-	for (auto  pin_it=prodvtx_particles_begin;  pin_it!= prodvtx_particles_end ; pin_it++ ) {
+	for (auto  pin_it=prodvtx_particles_begin;  pin_it!= prodvtx_particles_end ; ++pin_it ) {
           auto pin=*pin_it;
 #endif
           if (iscquarkfromb || isPDF) break;
@@ -568,9 +566,9 @@ void HforTool::findHFQuarksPythia
 	  auto prodvtx=bcpart->production_vertex() ;
 	  if ( prodvtx ) {
 #ifdef HEPMC3
-	    for (auto pin=prodvtx->particles_in().begin(); pin != prodvtx->particles_in().end(); pin++)
+	    for (auto pin=prodvtx->particles_in().begin(); pin != prodvtx->particles_in().end(); ++pin)
 #else
-	    for (auto pin=prodvtx->particles_begin(HepMC::parents); pin != prodvtx->particles_end(HepMC::parents); pin++) 
+	    for (auto pin=prodvtx->particles_begin(HepMC::parents); pin != prodvtx->particles_end(HepMC::parents); ++pin) 
 #endif
             {
 	      ATH_MSG_DEBUG("    incoming: " << (*pin));
@@ -613,7 +611,7 @@ void HforTool::findHFQuarksPythia
 #ifdef HEPMC3
           for ( auto pin: prodvtx->particles_in()) {
 #else
-          for ( auto pin_it = prodvtx->particles_begin(HepMC::ancestors); pin_it != prodvtx->particles_end(HepMC::ancestors) ; pin_it++ ) {
+          for ( auto pin_it = prodvtx->particles_begin(HepMC::ancestors); pin_it != prodvtx->particles_end(HepMC::ancestors) ; ++pin_it ) {
             auto pin=*pin_it;
 #endif 
             if (iscquarkfromb ) break;
@@ -695,7 +693,7 @@ void HforTool::findHFQuarksPythia
 #ifdef HEPMC3
                 for (auto pin: HepMC::ancestor_particles(prodvtx) ) {
 #else
-                for (auto pin_it=prodvtx->particles_begin(HepMC::ancestors);pin_it!=prodvtx->particles_end(HepMC::ancestors); pin_it++ ) {
+                for (auto pin_it=prodvtx->particles_begin(HepMC::ancestors);pin_it!=prodvtx->particles_end(HepMC::ancestors); ++pin_it ) {
                  auto pin=*pin_it;
 #endif
                   if (bc34) break;
@@ -727,9 +725,9 @@ void HforTool::findHFQuarksPythia
 		  // check the prod.vertices of the parents
 		  if ( mepvtx ) {
 #ifdef HEPMC3
-                  for (auto  pin = mepvtx->particles_in().begin() ; pin != mepvtx->particles_in().end(); pin++) 
+                  for (auto  pin = mepvtx->particles_in().begin() ; pin != mepvtx->particles_in().end(); ++pin) 
 #else
-                  for (auto  pin = mepvtx->particles_begin(HepMC::parents) ; pin != mepvtx->particles_end(HepMC::parents); pin++) 
+                  for (auto  pin = mepvtx->particles_begin(HepMC::parents) ; pin != mepvtx->particles_end(HepMC::parents); ++pin) 
 #endif
                   {
 		      if ( (*pin)->production_vertex() == pvtx34 && ime->pdg_id() == pdg ) {
@@ -826,7 +824,7 @@ void HforTool::findHFQuarksUnknown
 #ifdef HEPMC3
 	for ( auto pin: prodvtx->particles_in()) {
 #else
-	for ( auto pin_it = prodvtx->particles_begin(HepMC::ancestors); pin_it != prodvtx->particles_end(HepMC::ancestors) ; pin_it++ ) {
+	for ( auto pin_it = prodvtx->particles_begin(HepMC::ancestors); pin_it != prodvtx->particles_end(HepMC::ancestors) ; ++pin_it ) {
         auto pin=*pin_it;
 #endif
         if (!!iscquarkfromb ) break;
@@ -919,10 +917,7 @@ void HforTool::jetBasedRemoval()
   ATH_MSG_DEBUG(" Size of Jet Collection " << aod_jets->size());
 
   ATH_MSG_DEBUG("There are " << m_jets->size()<<" jets in this event");
-  for ( JetCollection::const_iterator jetItr  = m_jets->begin(); jetItr != m_jets->end(); jetItr++ ) {
-
-
-    const Jet* thisjet = *jetItr;
+  for (const Jet* thisjet : *m_jets) {
     if (thisjet->pt() > m_minjetpt) {
 
       int match = 0;

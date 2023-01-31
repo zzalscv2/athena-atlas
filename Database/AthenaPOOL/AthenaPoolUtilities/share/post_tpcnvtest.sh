@@ -245,7 +245,7 @@ PP="$PP"'|WARNING: new xAOD variables '
 PP="$PP"'|Empty temporary A-line container'
 
 # Warnings from mini-projects, not holding all the EDM classes.
-PP="$PP"'|^RootAuxDynReader::init.*Could not find auxid for'
+PP="$PP"'|AuxDynReader::init.*Could not find auxid for'
 
 test=$1
 if [ -z "$ATLAS_CTEST_TESTSTATUS" ]; then

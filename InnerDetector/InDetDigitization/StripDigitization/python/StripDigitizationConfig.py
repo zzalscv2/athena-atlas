@@ -228,10 +228,10 @@ def ITkStripFrontEndCfg(flags, name="ITkStripFrontEnd", **kwargs):
     else:
         kwargs.setdefault("DataCompressionMode", 2)
     # DataReadOutMode: 0 is condensed mode and 1 is expanded mode
-    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
-        kwargs.setdefault("DataReadOutMode", 1)
-    else:
+    if flags.Common.isOverlay:
         kwargs.setdefault("DataReadOutMode", 0)
+    else:
+        kwargs.setdefault("DataReadOutMode", 1)
 
     kwargs.setdefault("SCT_Amp", acc.popToolsAndMerge(ITkStripAmpCfg(flags)))
 

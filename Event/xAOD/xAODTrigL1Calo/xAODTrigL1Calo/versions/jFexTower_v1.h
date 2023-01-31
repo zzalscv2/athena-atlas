@@ -86,6 +86,24 @@ namespace xAOD {
       //Returns the Et of the Tower
       uint16_t jTowerEt() const;
 
+      // Decorated variables
+      
+      /// Information about SCell Ets
+      const std::vector<float>& SCellEt() const; /// getter for Aux SCell Et
+      void setSCellEt(const std::vector<float>&); /// setter for the above
+      void setSCellEt(std::vector<float>&&); /// setter for the above  
+      
+      /// Information about SCell IDs
+      const std::vector<int>& SCellID() const; /// getter for Aux SCell IDs
+      void setSCellID(const std::vector<int>&); /// setter for the above
+      void setSCellID(std::vector<int>&&); /// setter for the above  
+      
+      /// Information about Tile Et
+      int TileEt() const; /// getter for Aux Tile Et
+      void setTileEt(int); /// setter for the above
+      
+
+
 
       void initialize(  const float Eta,const float Phi);
       void initialize(  const float Eta,const float Phi,const int globaleta,const unsigned int globalphi,

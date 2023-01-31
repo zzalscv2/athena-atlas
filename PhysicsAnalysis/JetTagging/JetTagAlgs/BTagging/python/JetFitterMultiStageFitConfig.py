@@ -36,9 +36,9 @@ def InDetJetFitterMultiStageFitCfg(flags, name, suffix="", useBTagFlagsDefaults 
 
     acc = ComponentAccumulator()
     if useBTagFlagsDefaults:
-        improvedJetFitterRoutines = acc.popToolsAndMerge(ImprovedJetFitterRoutinesCfg('ImprovedJFRoutines'+suffix))
+        improvedJetFitterRoutines = acc.popToolsAndMerge(ImprovedJetFitterRoutinesCfg(flags, 'ImprovedJFRoutines'+suffix))
         inDetJetFitterUtils = acc.popToolsAndMerge(InDetJetFitterUtilsCfg(flags,'InDetJFUtils'+suffix))
-        improvedJetFitterInitializationHelper = acc.popToolsAndMerge(ImprovedJetFitterInitializationHelperCfg('ImprovedJFInitHelper'+suffix))
+        improvedJetFitterInitializationHelper = acc.popToolsAndMerge(ImprovedJetFitterInitializationHelperCfg(flags, 'ImprovedJFInitHelper'+suffix))
         defaults = { 'MaxNumDeleteIterations' : 30 ,
                      'VertexProbCut' : 0.001 ,
                      'MaxClusteringIterations' : 30 ,

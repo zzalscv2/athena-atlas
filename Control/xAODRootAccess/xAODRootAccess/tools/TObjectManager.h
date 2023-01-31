@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TObjectManager.h 725531 2016-02-22 16:14:25Z krasznaa $
 #ifndef XAODROOTACCESS_TOOLS_TOBJECTMANAGER_H
 #define XAODROOTACCESS_TOOLS_TOBJECTMANAGER_H
 
@@ -27,9 +26,6 @@ namespace xAOD {
    ///
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
-   /// $Revision: 725531 $
-   /// $Date: 2016-02-22 17:14:25 +0100 (Mon, 22 Feb 2016) $
-   ///
    class TObjectManager : public TVirtualManager {
 
    public:
@@ -45,7 +41,7 @@ namespace xAOD {
       TObjectManager& operator=( const TObjectManager& parent );
 
       /// Accessor to the branch
-      ::TBranch* branch() const;
+      ::TBranch* branch();
       /// Pointer to the branch's pointer
       ::TBranch** branchPtr();
       /// Accessor to the Holder object
@@ -56,13 +52,17 @@ namespace xAOD {
       /// Function for updating the object in memory if needed
       virtual ::Int_t getEntry( ::Long64_t entry, ::Int_t getall = 0 );
 
+      /// Function getting a const pointer to the object being handled
+      virtual const void* object() const;
       /// Function getting a pointer to the object being handled
-      virtual void* object() const;
+      virtual void* object();
       /// Function replacing the object being handled
       virtual void setObject( void* obj );
 
+      /// Create the object for the current event
+      virtual ::Bool_t create();
       /// Check if the object was set for the current event
-      virtual ::Bool_t isSet( ::Bool_t forceSet = kTRUE ) const;
+      virtual ::Bool_t isSet() const;
       /// Reset the object at the end of processing of an event
       virtual void reset();
 

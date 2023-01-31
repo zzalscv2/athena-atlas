@@ -601,8 +601,8 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
       VrtCovMtx(1,0) = VrtCovMtx(0,1);
       VrtCovMtx(2,0) = VrtCovMtx(0,2);
       VrtCovMtx(2,1) = VrtCovMtx(1,2);
-      double Chi2=0; int NTrInV=0;
-      for(it=0; it<(int)vertexDefinition[iv].size(); it++) { Chi2 += particleChi2[vertexDefinition[iv][it]]; NTrInV++ ;};
+      double Chi2=0;
+      for(it=0; it<(int)vertexDefinition[iv].size(); it++) { Chi2 += particleChi2[vertexDefinition[iv][it]];};
       fullChi2+=Chi2;
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=-=  xAOD::Vertex creation

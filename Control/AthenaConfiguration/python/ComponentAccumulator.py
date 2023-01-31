@@ -1,3 +1,4 @@
+
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 import GaudiConfig2
@@ -140,6 +141,17 @@ class ComponentAccumulator:
         summary += "  Created by: " + self._creationCallStack
         return summary
 
+    def _cleanup(self): 
+        #Delete internal data structures, to be called after all properties are tranferred to the C++ application
+        #Purpose: Free memory
+        del self._sequence
+        del self._algorithms
+        del self._conditionsAlgs
+        del self._services
+        del self._publicTools
+        del self._auditors
+        import gc
+        gc.collect()
 
     def empty(self):
         return (len(self._sequence.Members)+len(self._conditionsAlgs)+len(self._services)+
@@ -643,6 +655,65 @@ class ComponentAccumulator:
         else:
             return self.__getOne( self._services, name, "Services")
 
+    def getAuditor(self,name):
+        """Retuns a single auditor, exception if not found"""
+        return self.__getOne(self._auditors,name,"Auditors")
+
+    def dropEventAlgo(self,name,sequence="AthAlgSeq"):
+        s=self.getSequence(sequence)
+        lenBefore=len(s.Members)
+        s.Members = [a for a in s.Members if not a.getName()==name]
+        lenAfter=len(s.Members)
+        if lenAfter == lenBefore:
+            self._msg.warning("Algorithm %s not found in sequence %s",name,sequence)
+        else:
+            self._msg.info("Removed algorithm %s from sequence %s",name,sequence)
+            try:
+                del self._algorithms[name]
+            except KeyError:
+                self._msg.warning("Algorithm %s not found in self._sequence ???",name)
+        return
+
+    def dropCondAlgo(self,name):
+        lenBefore=len(self._conditionsAlgs)
+        self._conditionsAlgs = [a for a in self._conditionsAlgs if a.getName()!=name]
+        lenAfter=len(self._conditionsAlgs)
+        if lenAfter == lenBefore:
+            self._msg.warning("Condition Algorithm %s not found",name)
+        else:
+            self._msg.info("Removed conditions Algorithm %s",name)
+        return
+
+    def dropService(self,name):
+        lenBefore=len(self._services)
+        self._services = [s for s in self._services if s.getName()!=name]
+        lenAfter=len(self._services)
+        if lenAfter == lenBefore:
+            self._msg.warning("Service %s not found",name)
+        else:
+            self._msg.info("Removed Service %s",name)
+        return
+    
+    def dropPublicTool(self,name):
+        lenBefore=len(self._publicTools)
+        self._publicTools = [p for p in self._publicTools if p.getName()!=name]
+        lenAfter=len(self._publicTools)
+        if lenAfter == lenBefore:
+            self._msg.warning("Public tool %s not found",name)
+        else:
+            self._msg.info("Removed public tool %s",name)
+        return
+
+    def dropAuditor(self,name):
+        lenBefore=len(self._auditors)
+        self._auditors = [a for a in self._auditors if a.getName()!=name]
+        lenAfter=len(self._auditors)
+        if lenAfter == lenBefore:
+            self._msg.warning("Auditor %s not found",name)
+        else:
+            self._msg.info("Removed auditor %s",name)
+        return
+            
     def getAppProps(self):
         return self._theAppProps
 
@@ -793,6 +864,11 @@ class ComponentAccumulator:
         for pt in other._publicTools:
             addContext = createContextForDeduplication("Merging incoming Public Tool", pt.name, other._componentsContext) # noqa : F841
             self.addPublicTool(pt) #Profit from deduplicaton here
+
+
+        for aud in other._auditors:
+            addContext = createContextForDeduplication("Merging incoming Auditor", aud.name, other._componentsContext) # noqa : F841
+            self.addAuditor(aud) #Profit from deduplicaton here
 
         #Merge AppMgr properties:
         for (k,v) in other._theAppProps.items():
@@ -980,9 +1056,9 @@ class ComponentAccumulator:
         for alg in self._conditionsAlgs:
             getCompsToBeAdded(alg)
             condalgseq.append(alg.getFullName())
-            bshPropsToSet.append(("AthCondSeq", "Members", str(condalgseq)))
             if isinstance(alg, PyAlg):
                 alg.setup2()
+        bshPropsToSet.append(("AthCondSeq", "Members", str(condalgseq)))
 
         for pt in self._publicTools:
             pt.name = "ToolSvc." + pt.name
@@ -1007,6 +1083,10 @@ class ComponentAccumulator:
         # Otherwise, observed output ordering may differ between py2/py3.
         sys.stdout.flush()
 
+
+        #Set TDAQ_ERS_NO_SIGNAL_HANDLERS to avoid interference with 
+        #TDAQ signal handling
+        environ['TDAQ_ERS_NO_SIGNAL_HANDLERS']='1'
         from AthenaCommon.Debugging import allowPtrace, hookDebugger
         allowPtrace()
 
@@ -1021,6 +1101,9 @@ class ComponentAccumulator:
                 maxEvents=self._theAppProps["EvtMax"]
             else:
                 maxEvents=-1
+
+        #At this point, we don't need the internal structures of this CA any more, clean them up
+        self._cleanup()
 
         if (self._debugStage.value == "init"):
             hookDebugger()

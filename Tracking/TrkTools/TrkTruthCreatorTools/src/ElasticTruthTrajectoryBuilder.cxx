@@ -69,7 +69,7 @@ buildTruthTrajectory(TruthTrajectory *result, HepMC::ConstGenParticlePtr input) 
 
 //================================================================
 ElasticTruthTrajectoryBuilder::MotherDaughter
-	ElasticTruthTrajectoryBuilder::truthTrajectoryCuts(HepMC::ConstGenVertexPtr vtx) 
+	ElasticTruthTrajectoryBuilder::truthTrajectoryCuts(const HepMC::ConstGenVertexPtr& vtx) 
 {
 	HepMC::ConstGenParticlePtr mother{nullptr};
 	HepMC::ConstGenParticlePtr daughter{nullptr};
@@ -100,7 +100,7 @@ ElasticTruthTrajectoryBuilder::MotherDaughter
 #endif
 				int num_passed_cuts = 0;
 				HepMC::ConstGenParticlePtr passed_cuts{nullptr};
-				for(auto candidate: *vtx) {
+				for(const auto& candidate: *vtx) {
 					if(candidate->pdg_id() == mother->pdg_id()) {
 
 						if(passed_cuts && (mother->pdg_id() == 11)) { // second negative electron is a special case

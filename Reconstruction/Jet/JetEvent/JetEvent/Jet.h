@@ -461,16 +461,16 @@ public:
   
   /** @brief Set association object */
   template <class T>
-  void setAssociation(const T* pAssoc,bool useLink = false ) const ;
+  void setAssociation(const T* pAssoc,bool useLink = false );
   
   /** @brief remove and DELETE association object. */
-  void removeAssociation( const mkey_t& key ) const ;
+  void removeAssociation( const mkey_t& key );
 //   /** @brief Fill a token with association objects */  
 //   void fillAssoToken(INavigationToken& token) const;
 
 private:
   /** @brief clear association at given index */
-  void removeAssociation(size_t index) const;
+  void removeAssociation(size_t index);
   
   /////////////
   // TagInfo //
@@ -735,7 +735,7 @@ protected:
 
 
   /** @brief Association store */
-  mutable assostore_t* m_assocStore;
+  assostore_t* m_assocStore;
 
   /** @brief Tag info store */
   tagstore_t*  m_tagInfoStore;

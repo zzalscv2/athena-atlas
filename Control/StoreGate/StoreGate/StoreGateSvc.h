@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_STOREGATESVC_H
@@ -392,22 +392,6 @@ public:
                       const TKEY& requestedKey) const;
 
   
-
-  /// EXPERTS ONLY: reads from disk your very own private copy of a StoreGate 
-  /// object of type T and given key, if available and locked.
-  /// readPrivateCopy does not look up the object in SG transient memory
-  /// so it will fail to return a newly recorded object.
-  /// You are responsible for managing the returned object and for keeping it
-  /// in sync with the "main" copy in transient memory, if any.
-  /// @param key The key to use for the lookup.
-  /// @return null unique_ptr if the object isn't found or if it is unlocked.
-  template <typename T>
-  std::unique_ptr<T> readUniquePrivateCopy (const std::string& key);
-
-  /// readPrivateCopy implementation (possibly useful from python hence public)
-  DataObject*
-  typeless_readPrivateCopy(const CLID& clid, const std::string& key);
-
 
   /// EXPERTS ONLY: like readPrivateCopy this method returns your own private
   /// copy of a data object of type T and given key, if available and locked.

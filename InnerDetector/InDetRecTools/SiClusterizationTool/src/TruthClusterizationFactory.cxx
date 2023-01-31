@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,8 +80,8 @@ namespace InDet {
     std::vector<double> probabilities(3,0.);
     const auto &rdos = pCluster.rdoList();
     unsigned int nPartContributing = 0;
-    //Initialize vector for a list of UNIQUE barcodes for the cluster
-    std::vector<int> barcodes;
+    //Initialize set for a list of UNIQUE barcodes for the cluster
+    std::set<int> barcodes;
     SG::ReadHandle<InDetSimDataCollection> pixSdoColl(m_simDataCollectionName);
     //Loop over all elements (pixels/strips) in the cluster
     if(pixSdoColl.isValid()){
@@ -90,28 +90,17 @@ namespace InDet {
         if (simDataIter != pixSdoColl->end()){
           // get the SimData and count the individual contributions
           auto simData = (simDataIter->second);
-          //auto simDataDeposits = simData.getdeposits();
           for( const auto& deposit : simData.getdeposits() ){
             //If deposit exists
-            if (deposit.first){
-              //Now iterate over all barcodes
-              std::vector<int>::iterator barcodeIterator;
-              //Look for the barcode of the specific particle depositing energy in the barcodes vector
-              barcodeIterator  = find(barcodes.begin(), barcodes.end(), HepMC::barcode(deposit.first));
-              //If this barcode is not found
-              if (!(barcodeIterator != barcodes.end())){
-                //Only count deposits from HS to ensure consistency between full truth and standard truth PU configurations
-                if(m_usePUHits || deposit.first.eventIndex()==0)
-                barcodes.push_back(HepMC::barcode(deposit.first));
-              }
-            }
-            else ATH_MSG_WARNING("No deposits found");
+            if (!deposit.first){ATH_MSG_WARNING("No deposits found"); continue;}
+             if(!(m_usePUHits || deposit.first.eventIndex()==0)) continue;
+              int bc = HepMC::barcode(deposit.first);
+              barcodes.insert(bc);
           }
-          //nPartContributing = simDataDeposits.size() > nPartContributing ? simDataDeposits.size() : nPartContributing;
         }
       }
     }
-    //Barcodes vector is then a list of the total number of UNIQUE
+    //Barcodes list of the total number of UNIQUE
     //barcodes in the cluster, each corresponding to a truth particle
     nPartContributing = barcodes.size();
     ATH_MSG_VERBOSE("n Part Contributing: " << nPartContributing);

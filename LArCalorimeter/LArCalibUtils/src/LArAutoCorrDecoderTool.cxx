@@ -1,32 +1,11 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArAutoCorrDecoderTool.h"
-
-#include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/errorcheck.h"
 
-#include "LArElecCalib/LArConditionsException.h"
-
-
-LArAutoCorrDecoderTool::LArAutoCorrDecoderTool(const std::string& type, 
-					       const std::string& name, 
-					       const IInterface* parent) 
-  : 
-  AthAlgTool(type, name, parent),
-  m_onlineID(0)
-{
-  declareInterface<ILArAutoCorrDecoderTool>(this);
-  declareProperty("KeyAutoCorr",m_keyAutoCorr="LArAutoCorr");
-  declareProperty("DecodeMode", m_decodemode=0);
-  declareProperty("UseAlwaysHighGain", m_alwaysHighGain=false);
-  declareProperty("isSC",       m_isSC=false);
-}
-
-
-LArAutoCorrDecoderTool::~LArAutoCorrDecoderTool() 
-{}
+LArAutoCorrDecoderTool::~LArAutoCorrDecoderTool() {};
 
 StatusCode LArAutoCorrDecoderTool::initialize() 
 {
@@ -43,14 +22,6 @@ StatusCode LArAutoCorrDecoderTool::initialize()
     ATH_CHECK( detStore()->retrieve(ll, "LArOnlineID") );
     m_onlineID = (const LArOnlineID_Base*)ll;
     ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
-  }
-
-  StatusCode sc=detStore()->regHandle(m_autoCorr,m_keyAutoCorr);
-  if (sc.isFailure()) {
-    ATH_MSG_ERROR( "Failed to register Datahandle<ILArAutoCorr> to SG key " << m_keyAutoCorr );
-    return sc;
-  } else {
-    ATH_MSG_INFO( "Registered Datahandle<ILArAutoCorr> to SG key " << m_keyAutoCorr );
   }
 
 
@@ -82,9 +53,13 @@ const Eigen::MatrixXd LArAutoCorrDecoderTool::ACDiagonal( const HWIdentifier&  C
 
   Eigen::MatrixXd AutoCorrMatrix=Eigen::MatrixXd::Zero(nSamples,nSamples);
 
-  if ( m_autoCorr ) { // LArAutoCorrComplete is loaded in DetStore
+  const ILArAutoCorr* autoCorr=nullptr;
+  detStore()->retrieve(autoCorr,m_keyAutoCorr).ignore();
+  
 
-    ILArAutoCorr::AutoCorrRef_t dbcorr = m_autoCorr->autoCorr(CellID,gain);
+  if ( autoCorr ) { // LArAutoCorrComplete is loaded in DetStore
+
+    ILArAutoCorr::AutoCorrRef_t dbcorr = autoCorr->autoCorr(CellID,gain);
 
     if ( dbcorr.size()== 0 ) { // empty AutoCorr for given channel
       ATH_MSG_WARNING( "Empty AutoCorr vector for channel " <<  m_onlineID->channel_name(CellID) << " in Gain = " << gain);
@@ -127,9 +102,12 @@ const Eigen::MatrixXd LArAutoCorrDecoderTool::ACPhysics( const HWIdentifier&  Ce
 
   Eigen::MatrixXd AutoCorrMatrix=Eigen::MatrixXd::Identity(nSamples,nSamples);
 
-  if ( m_autoCorr ) { // LArAutoCorrComplete is loaded in DetStore
+  const ILArAutoCorr* autoCorr=nullptr;
+  detStore()->retrieve(autoCorr,m_keyAutoCorr).ignore();
+  
+  if ( autoCorr ) { // LArAutoCorrComplete is loaded in DetStore
 
-    ILArAutoCorr::AutoCorrRef_t corrdb = m_autoCorr->autoCorr(CellID,gain);
+    ILArAutoCorr::AutoCorrRef_t corrdb = autoCorr->autoCorr(CellID,gain);
    
     if ( corrdb.size()== 0 ) { // empty AutoCorr for given channel
       ATH_MSG_WARNING( "Empty AutoCorr vector for channel " << m_onlineID->channel_name(CellID) << " in Gain = " << gain);

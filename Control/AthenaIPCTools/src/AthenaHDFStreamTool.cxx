@@ -150,7 +150,7 @@ StatusCode AthenaHDFStreamTool::lockEvent(long eventNumber) const {
 }
 
 //___________________________________________________________________________
-StatusCode AthenaHDFStreamTool::putObject(const void* source, std::size_t nbytes, int/* num*/) const {
+StatusCode AthenaHDFStreamTool::putObject(const void* source, std::size_t nbytes, int/* num*/) {
    if (nbytes == 0 || m_token.empty()) {
       return(StatusCode::SUCCESS);
    }
@@ -236,7 +236,7 @@ StatusCode AthenaHDFStreamTool::putObject(const void* source, std::size_t nbytes
       m_token.replace(m_token.find("[OID="), 39, text);
    }
 
-   std::string entry_name = ds_name.substr(ds_name.find("(") + 1);
+   std::string entry_name = ds_name.substr(ds_name.find('(') + 1);
    stringBefore(entry_name,')');
 // For DataHeader, store entry point
    if (entry_name == "DataHeader" || entry_name == "DataHeaderForm") {
@@ -288,14 +288,14 @@ StatusCode AthenaHDFStreamTool::putObject(const void* source, std::size_t nbytes
             const hsize_t mem_size[1] = {1};
             filespace.selectHyperslab(H5S_SELECT_SET, mem_size, offset);
             H5::DataSpace memspace(1, mem_size);
-            auto dh_form_entry_name = ds_name.substr(0, ds_name.find("(")) + "Form(DataHeaderForm)_entry";
+            auto dh_form_entry_name = ds_name.substr(0, ds_name.find('(')) + "Form(DataHeaderForm)_entry";
             H5::DataSet dh_form_dataset = m_group->openDataSet(dh_form_entry_name);
             long long unsigned int ds_data[1] = {dh_form_dataset.getInMemDataSize()/8 - 1};//FIXME
             dataset.write(ds_data, H5::PredType::NATIVE_ULLONG, memspace, filespace);
          }
       }
       if (entry_name == "DataHeaderForm") {
-         auto dh_entry_name = ds_name.substr(0, ds_name.find("(") - 4) + "(DataHeader)_form_entry";
+         auto dh_entry_name = ds_name.substr(0, ds_name.find('(') - 4) + "(DataHeader)_form_entry";
             H5::DataSet dataset = m_group->openDataSet(dh_entry_name);
             const hsize_t offset[1] = {dataset.getInMemDataSize()/8 - 1};//FIXME
             H5::DataSpace filespace = dataset.getSpace();
@@ -311,7 +311,7 @@ StatusCode AthenaHDFStreamTool::putObject(const void* source, std::size_t nbytes
 }
 
 //___________________________________________________________________________
-StatusCode AthenaHDFStreamTool::getObject(void** target, std::size_t& nbytes, int/* num*/) const {
+StatusCode AthenaHDFStreamTool::getObject(void** target, std::size_t& nbytes, int/* num*/) {
    if (m_token.empty()) {
       return(StatusCode::SUCCESS);
    }
@@ -324,10 +324,10 @@ StatusCode AthenaHDFStreamTool::getObject(void** target, std::size_t& nbytes, in
    if (ds_name.empty()) {
       return(StatusCode::SUCCESS);
    }
-   while (ds_name.find("/") != std::string::npos) { ds_name = ds_name.replace(ds_name.find("/"), 1, "_"); }
+   while (ds_name.find('/') != std::string::npos) { ds_name = ds_name.replace(ds_name.find('/'), 1, "_"); }
 
    std::string oid_name = m_token.substr(m_token.find("[OID="));
-   auto n = oid_name.find("]") + 1;
+   auto n = oid_name.find(']') + 1;
    oid_name.resize(n);
    std::size_t firstU, firstL;
    long long unsigned int second;
@@ -348,7 +348,7 @@ StatusCode AthenaHDFStreamTool::getObject(void** target, std::size_t& nbytes, in
       return(StatusCode::FAILURE);
    }
 
-   std::string entry_name = ds_name.substr(ds_name.find("(") + 1);
+   std::string entry_name = ds_name.substr(ds_name.find('(') + 1);
    stringBefore(entry_name,')');
 // For DataHeader, get stored size
    if (entry_name == "DataHeader") {
@@ -411,13 +411,13 @@ StatusCode AthenaHDFStreamTool::getObject(void** target, std::size_t& nbytes, in
 }
 
 //___________________________________________________________________________
-StatusCode AthenaHDFStreamTool::clearObject(const char** tokenString, int&/* num*/) const {
+StatusCode AthenaHDFStreamTool::clearObject(const char** tokenString, int&/* num*/) {
    std::size_t firstU, firstL;
    long long unsigned int second;
    ::sscanf(m_token.substr(m_token.find("[OID="), 40).c_str(), fmt_oid, &firstU, &firstL, &second);
    std::string ds_name = m_token.substr(m_token.find("[CNT=") + 5);
    stringBefore(ds_name, ']'); 
-   while (ds_name.find("/") != std::string::npos) { ds_name = ds_name.replace(ds_name.find("/"), 1, "_"); }
+   while (ds_name.find('/') != std::string::npos) { ds_name = ds_name.replace(ds_name.find('/'), 1, "_"); }
 
    if (firstU > 0 || ds_name.substr(ds_name.length() - 5, 4) == "Aux.") {
       if (firstU == 0) firstU = firstL;
@@ -440,7 +440,7 @@ StatusCode AthenaHDFStreamTool::clearObject(const char** tokenString, int&/* num
       m_token.replace(m_token.find("[OID="), 39, text);
    }
    // Return an empty token string for DataHeaderForm, to indicate HDF5 can't update DataHeader after it was written.
-   std::string entry_name = ds_name.substr(ds_name.find("(") + 1);
+   std::string entry_name = ds_name.substr(ds_name.find('(') + 1);
    stringBefore(entry_name, ')');
    if (entry_name == "DataHeaderForm") {
       m_token.clear();
@@ -450,7 +450,7 @@ StatusCode AthenaHDFStreamTool::clearObject(const char** tokenString, int&/* num
 }
 
 //___________________________________________________________________________
-StatusCode AthenaHDFStreamTool::lockObject(const char* tokenString, int/* num*/) const {
+StatusCode AthenaHDFStreamTool::lockObject(const char* tokenString, int/* num*/) {
    m_token = tokenString;
    delete [] m_read_data; m_read_data = nullptr;
    m_read_size = 0;

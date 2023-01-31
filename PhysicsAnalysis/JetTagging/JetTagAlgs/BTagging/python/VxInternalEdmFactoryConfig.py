@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from BTagging.JetFitterFullLinearizedTrackFactoryConfig import JetFitterFullLinearizedTrackFactoryCfg
 
 
-def VxInternalEdmFactoryCfg(name, useBTagFlagsDefaults = True, **options):
+def VxInternalEdmFactoryCfg(flags, name, useBTagFlagsDefaults = True, **options):
     """Sets up a VxInternalEdmFactory tool and returns it.
 
     The following options have BTaggingFlags defaults:
@@ -16,7 +16,7 @@ def VxInternalEdmFactoryCfg(name, useBTagFlagsDefaults = True, **options):
     output: The actual tool, which can then by added to ToolSvc via ToolSvc += output."""
     acc = ComponentAccumulator()
     if useBTagFlagsDefaults:
-        jetFitterFullLinearizedTrackFactory = acc.popToolsAndMerge(JetFitterFullLinearizedTrackFactoryCfg('JetFitterFullLinearizedTrkFactory'))
+        jetFitterFullLinearizedTrackFactory = acc.popToolsAndMerge(JetFitterFullLinearizedTrackFactoryCfg(flags, 'JetFitterFullLinearizedTrkFactory'))
         defaults = {
                      'LinearizedTrackFactory'  : jetFitterFullLinearizedTrackFactory, }
         for option in defaults:

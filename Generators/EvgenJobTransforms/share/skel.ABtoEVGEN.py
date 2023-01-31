@@ -54,9 +54,8 @@ perfmonjp.PerfMonFlags.doMonitoring = True
 perfmonjp.PerfMonFlags.doSemiDetailedMonitoring = True
 
 ## Random number services
-from RngComps.RngCompsConf import AtRndmGenSvc, AtRanluxGenSvc
-svcMgr += AtRndmGenSvc()
-svcMgr += AtRanluxGenSvc()
+from RngComps.RngCompsConf import AthRNGSvc
+svcMgr += AthRNGSvc()
 
 ## Jobs should stop if an include fails.
 jobproperties.AthenaCommonFlags.AllowIgnoreConfigError = False
@@ -432,8 +431,8 @@ AMITagHelper.SetAMITag(runArgs=runArgs)
 # TODO: Standardise energy setting in the GenModule interface
 include("EvgenJobTransforms/Generate_ecmenergies.py")
 
-## Process random seed arg and pass to generators
-include("EvgenJobTransforms/Generate_randomseeds.py")
+## Propagate DSID and seed to the generators
+include("EvgenJobTransforms/Generate_dsid_ranseed.py")
 
 ## Propagate debug output level requirement to generators
 if (hasattr( runArgs, "VERBOSE") and runArgs.VERBOSE ) or (hasattr( runArgs, "loglevel") and runArgs.loglevel == "DEBUG") or (hasattr( runArgs, "loglevel")and runArgs.loglevel == "VERBOSE"):

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CLHEP/Random/RandGaussZiggurat.h"
@@ -240,7 +240,7 @@ bool TFCSPCAEnergyParametrization::loadInputs(TFile* file)
   return loadInputs(file, "");
 }
 
-bool TFCSPCAEnergyParametrization::loadInputs(TFile* file, std::string folder)
+bool TFCSPCAEnergyParametrization::loadInputs(TFile* file, const std::string& folder)
 {
   
   bool load_ok=1;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRK_PRD_ASSOCIATIONTOOL_H
@@ -112,7 +112,7 @@ namespace Trk {
     SG::ReadHandleKey<Trk::PRDtoTrackMap> m_prdToTrackMap {this,"PRDtoTrackMap",""};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-    bool m_setupCorrect;
+
 };
 
 

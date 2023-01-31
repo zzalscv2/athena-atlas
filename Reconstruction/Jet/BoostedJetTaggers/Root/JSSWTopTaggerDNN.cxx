@@ -390,12 +390,10 @@ std::map<std::string,double> JSSWTopTaggerDNN::getJetProperties( const xAOD::Jet
     DNN_inputValues["Tau3_wta"] = readTau3WTA(jet);
     if(readTau4WTA.isAvailable()){
       DNN_inputValues["Tau4_wta"] = readTau4WTA(jet);
+      DNN_inputValues["Tau42_wta"] = readTau42WTA(jet);
     }
 
     DNN_inputValues["Tau32_wta"] = readTau32WTA(jet);
-    if(readTau42WTA.isAvailable()){
-      DNN_inputValues["Tau42_wta"] = readTau42WTA(jet);
-    }
 
     /// Qw observable for top tagging
     DNN_inputValues["Qw"] = readQw(jet);
@@ -409,7 +407,6 @@ std::map<std::string,double> JSSWTopTaggerDNN::getJetProperties( const xAOD::Jet
     if(readL3.isAvailable()){
       DNN_inputValues["L3"] = readL3(jet);
     }
-
   }
   
   else {

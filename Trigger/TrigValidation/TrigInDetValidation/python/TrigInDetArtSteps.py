@@ -34,7 +34,7 @@ class TrigInDetReco(ExecStep):
         self.perfmon = False
         self.timeout = 18*3600
         self.slices = []
-        self.preexec_trig = ' '
+        self.preexec_trig = ''
         self.postinclude_trig = postinclude_file
         self.preinclude_trig  = preinclude_file
         self.release = 'current'
@@ -44,11 +44,7 @@ class TrigInDetReco(ExecStep):
             'rec.doEgamma=True',
             'rec.doMuonCombined=True',
             'rec.doJetMissingETTag=False',
-            'rec.doTau=False'
-        ])
-
-        self.preexec_aod = ';'.join([
-            self.preexec_reco,
+            'rec.doTau=False',
             'from ParticleBuilderOptions.AODFlags import AODFlags',
             'AODFlags.ThinGeantTruth.set_Value_and_Lock(False)',
             'AODFlags.ThinNegativeEnergyCaloClusters.set_Value_and_Lock(False)',
@@ -61,10 +57,10 @@ class TrigInDetReco(ExecStep):
             'ConfigFlags.Trigger.AODEDMSet=\'AODFULL\'',
         ])
         self.postexec_trig = "from AthenaCommon.AppMgr import ServiceMgr; ServiceMgr.AthenaPoolCnvSvc.MaxFileSizes=['tmp.RDO_TRIG=100000000000']"
-
-
-        self.postexec_reco = "from AthenaCommon.AppMgr import ServiceMgr; ServiceMgr.AthenaPoolCnvSvc.MaxFileSizes=['tmp.ESD=100000000000']"
-        self.args = '--outputAODFile=AOD.pool.root --steering="doRDO_TRIG"'
+        # no longer needed if we don't write ESDs?
+        #self.postexec_reco = "from AthenaCommon.AppMgr import ServiceMgr; ServiceMgr.AthenaPoolCnvSvc.MaxFileSizes=['tmp.ESD=100000000000']"
+        self.postexec_reco = ''
+        self.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG" "doTRIGtoALL"'
        
         if ( self.postinclude_trig != '' ) : 
             print( "postinclude_trig: ", self.postinclude_trig )
@@ -173,20 +169,24 @@ class TrigInDetReco(ExecStep):
         # would use AVERSION is not None, but the return from a shell function with no printout 
         # gets set as an empty string rather than None        
         if AVERSION != "":
-            self.args += ' --asetup "RAWtoESD:Athena,'+AVERSION+'" "ESDtoAOD:Athena,'+AVERSION+'" '
+            self.args += ' --asetup "RAWtoALL:Athena,'+AVERSION+'" '
             print( "remapping athena base release version for offline Reco steps: ", DVERSION, " -> ", AVERSION )
         else:
             print( "Using current release for offline Reco steps  " )
 
 
-        self.args += ' --preExec "RDOtoRDOTrigger:{:s};" "all:{:s};" "RAWtoESD:{:s};" "ESDtoAOD:{:s};"'.format(
-            self.preexec_trig, self.preexec_all, self.preexec_reco, self.preexec_aod)
-        if (self.postexec_trig != ' '):
-            self.args += ' --postExec "RDOtoRDOTrigger:{:s};" "RAWtoESD:{:s};" '.format(self.postexec_trig, self.postexec_reco)
+        self.args += ' --preExec "RDOtoRDOTrigger:{:s};" "all:{:s};" "RAWtoALL:{:s};"'.format(
+            self.preexec_trig, self.preexec_all, self.preexec_reco)
+        if self.postexec_trig != '' or self.postexec_reco != '':
+            self.args += ' --postExec'
+            if self.postexec_trig != '':
+                self.args += ' "RDOtoRDOTrigger:{:s};"'.format(self.postexec_trig)
+            if self.postexec_reco != '':
+                self.args += ' "RAWtoALL:{:s};"'.format(self.postexec_reco)
         if (self.postinclude_trig != ''):
-            self.args += ' --postInclude "{:s}" '.format(self.postinclude_trig)
+            self.args += ' --postInclude "{:s}"'.format(self.postinclude_trig)
         if (self.preinclude_trig != ''):
-            self.args += ' --preInclude "{:s}" '.format(self.preinclude_trig)
+            self.args += ' --preInclude "{:s}"'.format(self.preinclude_trig)
         super(TrigInDetReco, self).configure(test)
 
 
@@ -260,7 +260,7 @@ class TrigBSExtr(ExecStep):
 
 
 ##################################################
-# Additional exec (athena) steps - Toer0 Reco (BS->ESD->AOD)
+# Additional exec (athena) steps - Tier0 Reco (BS->AOD)
 ##################################################
 
 class TrigTZReco(ExecStep):
@@ -278,11 +278,11 @@ class TrigTZReco(ExecStep):
         self.explicit_input = True
         self.max_events = -1
         self.args = '--inputBSFile=' + find_file('*.physics_Main*._athenaHLT*.data')  # output of the previous step
-        self.args += ' --outputESDFile=ESD.pool.root --outputAODFile=AOD.pool.root'
+        self.args += ' --outputAODFile=AOD.pool.root'
         self.args += ' --conditionsTag=\'CONDBR2-BLKPA-2022-08\' --geometryVersion=\'ATLAS-R3S-2021-03-00-00\''
         self.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
         self.args += ' --postInclude="TriggerTest/disableChronoStatSvcPrintout.py"'
-
+        self.args += ' --steering "doRAWtoALL"'
 
 
 

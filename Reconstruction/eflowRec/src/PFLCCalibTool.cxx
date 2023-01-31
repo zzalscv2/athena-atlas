@@ -9,7 +9,7 @@
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloClusterKineHelper.h"
-#include "CaloRec/CaloClusterProcessor.h"
+#include "CaloUtils/CaloClusterProcessor.h"
 
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloIdentifier/CaloCell_ID.h"
@@ -43,7 +43,7 @@ StatusCode PFLCCalibTool::initialize() {
 
 }
 
-StatusCode PFLCCalibTool::execute(const eflowCaloObjectContainer& theEflowCaloObjectContainer) {
+StatusCode PFLCCalibTool::execute(eflowCaloObjectContainer& theEflowCaloObjectContainer) {
 
   if (m_useLocalWeight) {
     std::unique_ptr<eflowRecClusterContainer> theEFRecClusterContainer = m_clusterCollectionTool->retrieve(theEflowCaloObjectContainer, true);
@@ -93,12 +93,11 @@ void PFLCCalibTool::applyLocalWeight(eflowRecCluster* theEFRecClusters, const Ca
   const CaloCell_ID* calo_id = calo_dd_man.getCaloCell_ID();
   xAOD::CaloCluster::cell_iterator cellIter = theCluster->cell_begin();
 
-  for (int cellIndex = 0; cellIter != theCluster->cell_end(); cellIter++) {
+  for (;cellIter != theCluster->cell_end(); ++cellIter) {
     const CaloCell* pCell = *cellIter;
     IdentifierHash myHashId = calo_id->calo_cell_hash(pCell->ID());
     double weight = weightMap.find(myHashId)->second;
     theCluster->reweightCell(cellIter, weight);
-    cellIndex++;
   }
 
   CaloClusterKineHelper::calculateKine(theCluster, true, false);

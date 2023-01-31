@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TCDVHolderT.icc 657733 2015-03-30 09:22:06Z krasznaa $
 #ifndef XAODROOTACCESS_TOOLS_TCDVHOLDERT_ICC
 #define XAODROOTACCESS_TOOLS_TCDVHOLDERT_ICC
 
@@ -17,10 +16,9 @@ namespace xAOD {
    TCDVHolderT< T >::TCDVHolderT( ConstDataVector< T >* object,
                                   const std::type_info& type,
                                   ::Bool_t owner )
-      : THolder( object, type, owner ),
+      : THolder( static_cast< const void* >( object ), type, owner ),
         m_cdvObject( object ),
-        m_holderHelper( const_cast< void* >( static_cast< const void* >(
-                                                     object->asDataVector() ) ),
+        m_holderHelper( object->asDataVector(),
                         ::TClass::GetClass( typeid( typename Object_t::base_data_vector ) ),
                         kFALSE ) {
 
@@ -28,11 +26,13 @@ namespace xAOD {
       // (which should only happen for some tests), let's give a type ID for the
       // helper object.
       if( ! m_holderHelper.getClass() ) {
-         m_holderHelper =
-            THolder( const_cast< void* >( static_cast< const void* >(
-                                                     object->asDataVector() ) ),
-                     typeid( typename Object_t::base_data_vector ), kFALSE );
+         m_holderHelper = THolder( object->asDataVector(),
+                                   typeid( typename Object_t::base_data_vector ), kFALSE );
       }
+
+      // Set our type to the underlying DataVector type
+      m_type = m_holderHelper.getClass();
+      m_typeInfo = m_holderHelper.getTypeInfo();
    }
 
    template< class T >
@@ -42,13 +42,33 @@ namespace xAOD {
       m_cdvObject = reinterpret_cast< ConstDataVector< T >* >( obj );
 
       // Update the helper object:
-      m_holderHelper.set( const_cast< void* >( static_cast< const void* >(
-                                              m_cdvObject->asDataVector() ) ) );
+      void* nc_dv ATLAS_THREAD_SAFE = // we hold non-const pointers but check on retrieve
+        const_cast< void* >( static_cast< const void* >( m_cdvObject->asDataVector() ) );
+
+      m_holderHelper.set( nc_dv );
 
       // Finally, update the base class:
       THolder::set( obj );
 
       return;
+   }
+
+   template< class T >
+   void* TCDVHolderT< T >::getAs( const std::type_info& tid,
+                                  ::Bool_t silent ) const {
+
+      // Non-const retrieval of ConstDataVector is never allowed:
+      if( ! silent ) {
+         const std::string heldType =
+            SG::normalizedTypeinfoName( typeid( Object_t ) );
+         const std::string reqType =
+            SG::normalizedTypeinfoName( tid );
+         ::Warning( "xAOD::TCDVHolder::getAs",
+                    "Trying to retrieve %s object with a non-const %s pointer",
+                    heldType.c_str(), reqType.c_str() );
+      }
+
+      return nullptr;
    }
 
    template< class T >
@@ -66,6 +86,10 @@ namespace xAOD {
       // user is just asking for the base type:
       if( tid == typeid( typename Object_t::base_data_vector ) ) {
          return m_cdvObject->asDataVector();
+      }
+      // or the original type:
+      else if( tid == typeid( Object_t ) ) {
+         return m_cdvObject;
       }
 
       // Otherwise rely on the base class to do its thing:

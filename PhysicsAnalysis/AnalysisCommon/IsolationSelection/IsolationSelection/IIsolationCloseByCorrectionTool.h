@@ -8,6 +8,7 @@
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgTools/IAsgTool.h>
 #include <AsgTools/CurrentContext.h>
+#include <CxxUtils/checker_macros.h>
 #include <IsolationSelection/Defs.h>
 #include <PATCore/AcceptData.h>
 #include <PATCore/AcceptInfo.h>
@@ -35,8 +36,8 @@ namespace CP {
                                                     const std::vector<xAOD::Iso::IsolationType>& types,
                                                     const xAOD::IParticleContainer& closePar) const = 0;
 
-        virtual CorrectionCode getCloseByIsoCorrection(const xAOD::ElectronContainer* Electrons = nullptr, const xAOD::MuonContainer* Muons = nullptr,
-                                                       const xAOD::PhotonContainer* Photons = nullptr) const = 0;
+        virtual CorrectionCode getCloseByIsoCorrection ATLAS_NOT_THREAD_SAFE (xAOD::ElectronContainer* Electrons = nullptr, xAOD::MuonContainer* Muons = nullptr,
+                                                       xAOD::PhotonContainer* Photons = nullptr) const = 0;
         virtual CorrectionCode subtractCloseByContribution(xAOD::IParticle& x, const xAOD::IParticleContainer& closebyPar) const = 0;
 
         virtual float getOriginalIsolation(const xAOD::IParticle& P, IsoType type) const = 0;

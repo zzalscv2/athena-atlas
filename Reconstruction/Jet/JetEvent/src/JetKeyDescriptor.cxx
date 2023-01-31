@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -15,7 +15,6 @@ const JetKeyConstants::key_t JetKeyConstants::AssoCat = "JetAssociations";
 const JetKeyConstants::key_t JetKeyConstants::TagCat = "JetTags";
 const JetKeyConstants::key_t JetKeyConstants::InfoCat = "JetInfo";
 
-JetKeyDescriptorInstance                              JetKeyDescriptorInstance::s_instance;
 const size_t                                          JetKeyDescriptorInstance::m_invalid  = size_t(-1);
 const std::string                                     JetKeyDescriptorInstance::m_notFound = "unknown";
 const std::vector<JetKeyDescriptorInstance::key_t>    JetKeyDescriptorInstance::m_invalidKeys;
@@ -71,6 +70,7 @@ size_t JetKeyDescriptorInstance::getIndex(const category_t& cat,
         // cppcheck-suppress nullPointerRedundantCheck; false positive
 	m_Stores->m_catStore.push_back(cat);
 	keystore_t kStore; kStore.push_back(key);
+        // cppcheck-suppress nullPointerRedundantCheck; false positive
 	m_Stores->m_keyStore.push_back(kStore);
 	return 0;
       }
@@ -94,6 +94,7 @@ size_t JetKeyDescriptorInstance::getIndex(const category_t& cat,
                 }
                 // cppcheck-suppress nullPointerRedundantCheck; false positive
 		(m_Stores->m_keyStore[iCat]).push_back(key);
+                // cppcheck-suppress nullPointerRedundantCheck; false positive
 		return (m_Stores->m_keyStore[iCat]).size()-1;
 	      }
 	    else

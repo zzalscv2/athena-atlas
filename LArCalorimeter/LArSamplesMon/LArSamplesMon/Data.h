@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -74,7 +74,7 @@ namespace LArSamples {
 #endif
 
 
-  class Data : public AbsShape {
+  class ATLAS_NOT_THREAD_SAFE Data : public AbsShape {
     
     public:
       
@@ -287,7 +287,7 @@ namespace LArSamples {
       const EventData* const m_eventData;
       mutable const History* m_history;
       mutable unsigned int m_index;
-      static double m_timeShift; // specify a global time shift between first sample time and reported ofc time
+      inline static std::atomic<double> m_timeShift{0}; // specify a global time shift between first sample time and reported ofc time
  };
 }
 #endif

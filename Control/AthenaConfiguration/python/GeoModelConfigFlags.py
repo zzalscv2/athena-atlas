@@ -33,4 +33,7 @@ def createGeoModelConfigFlags():
                 lambda prevFlags : DetDescrInfo(prevFlags.GeoModel.AtlasVersion)['Pixel']['IBLlayout'])
                 # IBL layer layout  in {"planar", "3D", "noIBL"}
 
+    gcf.addFlag('GeoModel.SQLiteDB','')
+                # Path to persistent GeoModel description file in SQLite format
+
     return gcf

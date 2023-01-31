@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -15,8 +15,9 @@ namespace xAOD{
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, float   , eta  , setEta )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, float   , phi  , setPhi )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, uint8_t , fpga , setFpga )
-  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, int , towerEt , setTowerEt )
-  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, char , isSaturated , setIsSaturated )
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, int     , towerEt     , setTowerEt )
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, char    , isSaturated , setIsSaturated )
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, uint32_t, gFEXtowerID , setgFEXtowerID )
   
   /// initialize
   void gFexTower_v1::initialize(const uint8_t IEta,const uint8_t IPhi)
@@ -31,7 +32,8 @@ namespace xAOD{
                                 const float Phi,                                
                                 const int TowerEt,
                                 const uint8_t Fpga,
-                                const char IsSaturated)
+                                const char IsSaturated,
+                                const uint32_t gFEXtowerID)
   {
     setiEta( IEta );
     setiPhi( IPhi );
@@ -39,6 +41,7 @@ namespace xAOD{
     setPhi( Phi );
     setFpga( Fpga );
     setIsSaturated( IsSaturated );
+    setgFEXtowerID( gFEXtowerID );
     setTowerEt( TowerEt );
 
   }

@@ -81,9 +81,7 @@ addDAODJets(jetList,DerivationFrameworkJob)
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
 from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
-#AOD do not have calorimeter cells for CaloCalTopoCluster, so we have to use
-#this special setting for the muon-FE links.
-CAtoGlobalWrapper(PFGlobalFlowElementLinkingCfg,ConfigFlags,useMuonTopoClusters=True)
+CAtoGlobalWrapper(PFGlobalFlowElementLinkingCfg,ConfigFlags)
 
 # Special rho definition for PFlow jets
 addSidebandEventShape(sequence=DerivationFrameworkJob)
@@ -116,6 +114,6 @@ addMuonRemovalTauReReco(Seq=DerivationFrameworkJob)
 #====================================================================
 # FLAVOUR TAGGING   
 #====================================================================
-from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollections
+from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollections
 FtagJetCollections(['AntiKt4EMPFlowJets','AntiKtVR30Rmax4Rmin02TrackJets'],DerivationFrameworkJob)
 

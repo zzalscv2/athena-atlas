@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -34,10 +34,7 @@ public:
   ///////////////////////////////////////////////////////////////////
 public:
 
-  // Copy constructor:
-  SiCharge(const SiCharge &charge);
-
-  // Constructor with parameters:
+ // Constructor with parameters:
   //   deposited charge
   //   time of deposition
   //   type of process which produced this charge
@@ -55,10 +52,19 @@ public:
            const SiTrackDistance& trackDistance);
 
   // Destructor:
-  ~SiCharge();
+  ~SiCharge() = default;
+
+  // Copy constructor:
+  SiCharge(const SiCharge& charge) = default;
 
   // Assignment operator:
-  SiCharge &operator=(const SiCharge &charge);
+  SiCharge& operator=(const SiCharge& charge) = default;
+
+  // Move constructor:
+  SiCharge(SiCharge&& charge) noexcept = default;
+
+  //Move assignment
+  SiCharge& operator=(SiCharge&& charge) noexcept = default;
 
   ///////////////////////////////////////////////////////////////////
   // Const methods:
@@ -112,9 +118,6 @@ private:
 ///////////////////////////////////////////////////////////////////
 // Inline methods:
 ///////////////////////////////////////////////////////////////////
-inline SiCharge::~SiCharge() 
-{}
-
 inline double SiCharge::charge() const 
 {
   return m_charge;

@@ -58,9 +58,7 @@ cell_desc = {
     (TILE, 1, 1, 11, 3, 1) : (50000,     TILEHIGHLOW,    49821.16),
     }
 
-def make_calo_cells (detStore, desc):
-    mgr = detStore['CaloMgr']
-    idhelper = detStore['CaloCell_ID']
+def make_calo_cells (mgr, idhelper, desc):
     ccc = ROOT.CaloCellContainer()
     for addr, (e, gain, exp) in desc.items():
         cellid = idhelper.cell_id (*addr)
@@ -146,23 +144,25 @@ class TestAlg (Alg):
     def execute (self):
         ctx = self.getContext()
         log = logging.getLogger ('TestAlg')
-        ccc = make_calo_cells (self.detStore, cell_desc)
+        mgr = self.condStore['CaloDetDescrManager'].find (ctx.eventID())
+        idhelper = self.detStore['CaloCell_ID']
+        ccc = make_calo_cells (mgr, idhelper, cell_desc)
         assert self.tool.process (ccc, ctx).isSuccess()
         compare_cells (self.detStore, ccc, cell_desc)
         log.info ('finished')
         return StatusCode.Success
 
 
-def testCfg (configFlags):
+def testCfg (flags):
     result = ComponentAccumulator()
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     from TileGeoModel.TileGMConfig import TileGMCfg
-    result.merge(LArGMCfg(configFlags))
-    result.merge(TileGMCfg(configFlags))
+    result.merge(LArGMCfg(flags))
+    result.merge(TileGMCfg(flags))
 
     from FastCaloSim.AddNoiseCellBuilderToolConfig import AddNoiseCellBuilderToolCfg
-    acc = AddNoiseCellBuilderToolCfg (configFlags)
+    acc = AddNoiseCellBuilderToolCfg (flags)
     acc.popPrivateTools()
     result.merge (acc)
 
@@ -170,23 +170,23 @@ def testCfg (configFlags):
     return result
 
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+flags = initConfigFlags()
 from AthenaConfiguration.TestDefaults import defaultTestFiles
 
-ConfigFlags.Input.Files = defaultTestFiles.HITS_RUN2
-ConfigFlags.Input.TimeStamp = 1000
-ConfigFlags.Detector.GeometryLAr = True
-ConfigFlags.Detector.GeometryTile = True
-ConfigFlags.needFlagsCategory('Tile')
-ConfigFlags.needFlagsCategory('LAr')
+flags.Input.Files = defaultTestFiles.HITS_RUN2
+flags.Input.TimeStamp = 1000
+flags.Detector.GeometryLAr = True
+flags.Detector.GeometryTile = True
+flags.needFlagsCategory('Tile')
+flags.needFlagsCategory('LAr')
 
-ConfigFlags.lock()
+flags.lock()
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
-acc=MainServicesCfg(ConfigFlags)
+acc = MainServicesCfg (flags)
 
 from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
-acc.merge (McEventSelectorCfg (ConfigFlags))
+acc.merge (McEventSelectorCfg (flags))
 
-acc.merge (testCfg (ConfigFlags))
+acc.merge (testCfg (flags))
 acc.run(1)
-

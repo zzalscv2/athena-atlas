@@ -71,7 +71,9 @@ def addLArCalibFlags(flags):
     flags.addFlag("LArCalib.OFC.Normalize",True)
     flags.addFlag("LArCalib.OFC.useDelta",False)
     flags.addFlag("LArCalib.OFC.Nsamples",4)
+    flags.addFlag("LArCalib.OFC.ShapeCorrection",False)
 
+    flags.addFlag("LArCalib.PhysACuseHG",False)
 
 def _getInputFiles(prevFlags):
     from LArCalibProcessing.GetInputFiles import GetInputFiles

@@ -4,11 +4,10 @@
 from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep, RecoFragmentsPool
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
-from AthenaConfiguration.ComponentFactory import isRun3Cfg
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from ..Jet.JetChainConfiguration import JetChainConfiguration
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 log = logging.getLogger(__name__)
-
 
 
 def addTLAStep(chain, chainDict):
@@ -26,7 +25,7 @@ def addTLAStep(chain, chainDict):
         # call the sequence from their respective signatures
         tlaSequencesList.append(getTLASignatureSequence(ConfigFlags, chainDict=chainDict, chainPart=cPart)), #signature=cPart['signature'])),
             
-    log.debug("addTLAStep: About to add a step with: %d, parallel sequences.", len(tlaSequencesList))            
+    log.debug("addTLAStep: About to add a step with: %d parallel sequences.", len(tlaSequencesList))            
     
     # we add one step per TLA chain, with sequences matching the list of signatures
     # and multiplicities matching those of the previous step of the chain (already merged if combined)
@@ -100,7 +99,7 @@ def alignTLASteps(chain_configs, chain_dicts):
         tlaStep = findTLAStep(chainConfig)
 
         try:
-            if isRun3Cfg() and tlaStep is None:
+            if isComponentAccumulatorCfg() and tlaStep is None:
                 raise NoCAmigration ("[alignTLASteps] Missing TLA sequence with CA configurables")
         except NoCAmigration:
             return 0

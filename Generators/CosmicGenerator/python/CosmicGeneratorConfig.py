@@ -150,9 +150,8 @@ def CosmicGeneratorCfg(flags, name="CosmicGenerator", **kwargs):
     result.addService(CompFactory.PartPropSvc(InputFile="PDGTABLE.MeV"))
 
     ## Set up random seeds FIXME
-    seed = 'COSMICS OFFSET 1234 2040160768 443921183'
-    from RngComps.RandomServices import dSFMT
-    kwargs.setdefault('AtRndmGenSvc', result.getPrimaryAndMerge(dSFMT(seed)).name)
+    from RngComps.RandomServices import AthRNGSvcCfg
+    kwargs.setdefault('RndmSvc', result.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
 
     from CosmicGenerator.CosmicGeneratorConfig import CavernPropertyCalculator
     theCavern = CavernPropertyCalculator()
@@ -198,6 +197,10 @@ def CosmicGeneratorCfg(flags, name="CosmicGenerator", **kwargs):
         kwargs.setdefault('pixelplane_maxz', 1650.)        # - require |y| < value in mm
         kwargs.setdefault('doReweighting', True)           # Whether to use reweighting for cosmic ray generation
         kwargs.setdefault('rvert_max', 300000.)            # - radius in mm for generating primary vertex
+
+    # Random seeding
+    kwargs.setdefault("Dsid", flags.Input.RunNumber[0]) # Could (should?) set this as Input.MCChannelNumber currently trying to match legacy config
+    #kwargs.setdefault("RandomSeed", flags.Sim.RandomSeedOffset) # No such flag in ConfigFlags. TODO Add?
 
     result.addEventAlgo(CompFactory.CosmicGenerator('CosmicGenerator', **kwargs))
     return result

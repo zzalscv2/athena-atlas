@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -56,7 +56,7 @@ namespace ExpressionParsing {
     methodName = varname.substr(dotPosition + 1);
   }
 
-   std::pair<std::unique_ptr<TMethodCall>, TVirtualCollectionProxy *>
+   std::pair<RootUtils::TSMethodCall, TVirtualCollectionProxy *>
    SGxAODProxyLoader::getMethodCallAccessor(const std::string &method_name, const std::type_info &info) const {
      if (m_verbose) {
         std::cout << "DEBUG SGxAODProxyLoader search for " << method_name << " in type " << info.name() << std::endl;
@@ -87,22 +87,24 @@ namespace ExpressionParsing {
            throw std::runtime_error(msg.str());
         }
      }
-     std::unique_ptr<TMethodCall> method_call = std::make_unique<TMethodCall>(elementClass, method_name.c_str(), "");
-     if (!method_call || !method_call->IsValid()) {
+     RootUtils::TSMethodCall method_call;
+     method_call.setProto (elementClass, method_name, "",
+                           ROOT::kConversionMatch);
+     if (!method_call.call() || !method_call.call()->IsValid()) {
         std::stringstream msg;
         msg << "No valid method " << method_name << " for " << info.name() << std::endl;
         throw std::runtime_error(msg.str());
      }
-     if (m_verbose && method_call->GetMethod()) {
+     if (m_verbose && method_call.call()->GetMethod()) {
         // @TODO check signature "() const
         std::cout << "DEBUG SGxAODProxyLoader got method " << " . " << method_name << " : "
-                  << method_call->GetMethod()->GetReturnTypeNormalizedName ()
-                  << " proto=" << method_call->GetProto()
-                  << " signature=" << method_call->GetMethod()->GetSignature ()
-                  << " proto=" << method_call->GetMethod()->GetPrototype()
+                  << method_call.call()->GetMethod()->GetReturnTypeNormalizedName ()
+                  << " proto=" << method_call.call()->GetProto()
+                  << " signature=" << method_call.call()->GetMethod()->GetSignature ()
+                  << " proto=" << method_call.call()->GetMethod()->GetPrototype()
                   << std::endl;
      }
-     return std::make_pair( std::move( method_call), collection_proxy);
+     return std::make_pair( method_call, collection_proxy);
   }
 
 
@@ -123,7 +125,7 @@ namespace ExpressionParsing {
          return std::unique_ptr<IAccessor>();
       }
       if (!isAvailable(*handle,method_id)) {
-         std::pair<std::unique_ptr<TMethodCall>,TVirtualCollectionProxy *> method = getMethodCallAccessor(method_name, typeid(*handle));
+         std::pair<RootUtils::TSMethodCall,TVirtualCollectionProxy *> method = getMethodCallAccessor(method_name, typeid(*handle));
          return MethodAccessorFactory::instance().create( key, std::move(method.first), method.second);
       }
       else {
@@ -188,7 +190,7 @@ namespace ExpressionParsing {
     return *(accessor_iter->second);
   }
 
-  IProxyLoader::VariableType SGxAODProxyLoader::variableTypeFromString(const std::string &varname) {
+  IProxyLoader::VariableType SGxAODProxyLoader::variableTypeFromString(const std::string &varname) const {
      const EventContext& ctx = Gaudi::Hive::currentContext();
      return getAccessor(ctx, varname).variableType();
   }
@@ -211,25 +213,25 @@ namespace ExpressionParsing {
       }
    }
 
-  int SGxAODProxyLoader::loadIntVariableFromString(const std::string &varname)
+  int SGxAODProxyLoader::loadIntVariableFromString(const std::string &varname) const
   {
     const EventContext& ctx = Gaudi::Hive::currentContext();
     return dump(varname,getAccessor(ctx, varname).loadInt(ctx));
   }
 
-  double SGxAODProxyLoader::loadDoubleVariableFromString(const std::string &varname)
+  double SGxAODProxyLoader::loadDoubleVariableFromString(const std::string &varname) const
   {
     const EventContext& ctx = Gaudi::Hive::currentContext();
     return dump(varname,getAccessor(ctx, varname).loadDouble(ctx));
   }
 
-  std::vector<int> SGxAODProxyLoader::loadVecIntVariableFromString(const std::string &varname)
+  std::vector<int> SGxAODProxyLoader::loadVecIntVariableFromString(const std::string &varname) const
   {
     const EventContext& ctx = Gaudi::Hive::currentContext();
     return dump(varname,getAccessor(ctx, varname).loadVecInt(ctx));
   }
 
-  std::vector<double> SGxAODProxyLoader::loadVecDoubleVariableFromString(const std::string &varname)
+  std::vector<double> SGxAODProxyLoader::loadVecDoubleVariableFromString(const std::string &varname) const
   {
     const EventContext& ctx = Gaudi::Hive::currentContext();
     return dump(varname,getAccessor(ctx, varname).loadVec(ctx));

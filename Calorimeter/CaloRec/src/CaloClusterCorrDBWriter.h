@@ -23,7 +23,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "CaloInterface/IToolWithConstants.h"
-#include "CaloRec/Blob2ToolConstants.h"
+#include "Blob2ToolConstants.h"
 #include <vector>
 #include <string>
 

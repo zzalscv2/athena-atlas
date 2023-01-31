@@ -69,7 +69,8 @@ argdict = {'runArgs'        : runArgs,
            'syst_mod'       : syst_mod,
            'param_card'     : param_card, # Only set if you *can't* modify the default param card to get your settings
            'add_lifetimes_lhe' : add_lifetimes_lhe,
-           'usePMGSettings' : usePMGSettings
+           'usePMGSettings' : usePMGSettings,
+           'plugin'         : plugin,
            }
 
 # First the standard case: No input LHE file
@@ -96,8 +97,9 @@ else:
             events_file = myTarball.extractfile( myEvents )
             update_lhe_file(lhe_file_old=myEvents,param_card_old=param_card_old,masses=masses)
             for aline in events_file:
-                if 'ktdurham' in aline and "=" in aline:
-                    ktdurham = float(aline.split('=')[0].strip())
+                # Note that because this was directly extracted, we have a binary file, not a text file!
+                if b'ktdurham' in aline and b'=' in aline:
+                    ktdurham = float(aline.split(b'=')[0].strip())
                     break
         myTarball.close()
     else:

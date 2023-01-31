@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # File: CaloRec/python/CaloThinCellsBySamplingAlgConfig.py
 # Created: Nov 2019, sss
@@ -12,7 +12,7 @@ def CaloThinCellsBySamplingAlgCfg (flags, streamName,
                                   samplings = [],
                                   cells = 'AllCalo'):
     result = ComponentAccumulator()
-    
+
     CaloThinCellsBySamplingAlg=CompFactory.CaloThinCellsBySamplingAlg
     alg = CaloThinCellsBySamplingAlg ('CaloThinCellsBySamplingAlg_' + '_'.join (samplings),
                                      StreamName = streamName,
@@ -30,12 +30,12 @@ def CaloThinCellsBySamplingAlgCfg (flags, streamName,
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
-    only = ['CaloThinCellsBySamplingAlg_TileGap3',
-            ]
-    flags1 = ConfigFlags.clone()
+    only = ['CaloThinCellsBySamplingAlg_TileGap3']
+
+    flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RAW
     flags1.lock()
     acc1 = CaloThinCellsBySamplingAlgCfg (flags1, 'StreamAOD',

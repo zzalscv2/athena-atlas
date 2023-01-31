@@ -12,46 +12,19 @@
 #include "InDetReadoutGeometry/SiNumerology.h"
 
 TrigL2LayerNumberToolITk::TrigL2LayerNumberToolITk(const std::string& t, 
-					     const std::string& n,
-					     const IInterface*  p ): AthAlgTool(t,n,p),
-								     m_useNewScheme(false),
-								     m_MaxSiliconLayerNum(-1),
-								     m_OffsetEndcapPixels(-1),
-								     m_OffsetBarrelSCT(-1),
-								     m_OffsetEndcapSCT(-1) {
+                                                   const std::string& n,
+                                                   const IInterface*  p ) :
+  AthAlgTool(t,n,p) {
+
   declareInterface< ITrigL2LayerNumberTool >( this );
-  declareProperty( "UseNewLayerScheme",      m_useNewScheme = false );
 }
 
 StatusCode TrigL2LayerNumberToolITk::initialize() {
 
-  StatusCode sc = AthAlgTool::initialize();
-
-  ATH_MSG_INFO("In initialize...");
-
-  sc = detStore()->retrieve(m_pixelId, "PixelID");
-  if (sc.isFailure()) {
-    ATH_MSG_FATAL("Could not get Pixel ID helper"); 
-    return sc;
-  } 
-
-  sc = detStore()->retrieve(m_sctId, "SCT_ID");
-  if (sc.isFailure()) {
-    ATH_MSG_FATAL("Could not get SCT ID helper"); 
-    return sc;
-  } 
- 
-  sc = detStore()->retrieve(m_pixelManager,"ITkPixel");  
-  if( sc.isFailure() ) {
-    ATH_MSG_ERROR("Could not retrieve Pixel DetectorManager from detStore."); 
-    return sc;
-  } 
-
-  sc = detStore()->retrieve(m_sctManager,"ITkStrip");
-  if( sc.isFailure() ) {
-    ATH_MSG_ERROR("Could not retrieve SCT DetectorManager from detStore.");
-    return sc;
-  } 
+  ATH_CHECK( detStore()->retrieve(m_pixelId, "PixelID") );
+  ATH_CHECK( detStore()->retrieve(m_sctId, "SCT_ID") );
+  ATH_CHECK( detStore()->retrieve(m_pixelManager, "ITkPixel") );
+  ATH_CHECK( detStore()->retrieve(m_sctManager, "ITkStrip") );
 
   //calculate the numbers
 
@@ -75,18 +48,9 @@ StatusCode TrigL2LayerNumberToolITk::initialize() {
     m_OffsetEndcapPixels = m_LastBarrelLayer;
   }
 
-  
-  ATH_MSG_INFO("TrigL2LayerNumberToolITk initialized ");
-
   report();
 
-  return sc;
-}
-
-StatusCode TrigL2LayerNumberToolITk::finalize()
-{
-  StatusCode sc = AthAlgTool::finalize(); 
-  return sc;
+  return StatusCode::SUCCESS;
 }
 
 void TrigL2LayerNumberToolITk::report() const {

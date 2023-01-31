@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // +======================================================================+
@@ -26,8 +26,6 @@
 #include "LArSimEvent/LArHitContainer.h"
 #include "LArDigitization/LArHitList.h"
 
-#include "CaloDetDescr/CaloDetDescrManager.h"
-
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/LArID.h"
 #include "CaloIdentifier/CaloID_Exception.h"
@@ -35,7 +33,6 @@
 #include "LArIdentifier/LArOnline_SuperCellID.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "CaloIdentifier/CaloCell_ID.h"
-#include "CaloDetDescr/ICaloSuperCellIDTool.h"
 #include "CaloEvent/CaloCellContainer.h"
 //
 // ........ Gaudi needed includes
@@ -67,7 +64,6 @@ LArSCL1Maker::LArSCL1Maker(const std::string& name, ISvcLocator* pSvcLocator) :
   , m_scHelper(0)
   , m_OnlSCHelper(0)
   , m_incSvc("IncidentSvc",name)
-  , m_sem_mgr(nullptr)
 {
 //
 // ........ default values of private data
@@ -215,8 +211,6 @@ StatusCode LArSCL1Maker::initialize()
 
   CHECK( m_atRndmGenSvc.retrieve() );
   
-  CHECK( detStore()->retrieve (m_sem_mgr, "CaloSuperCellMgr") );
-
   return StatusCode::SUCCESS;
 
 }
@@ -374,7 +368,6 @@ StatusCode LArSCL1Maker::execute(const EventContext& context) const
 
   it=0;
   it_end=nbSC;
-  int cc=0;int dd=0;
   short MAXADC=4096; // 12 bits ADC?
   std::vector<float> noise(m_nSamples);
   double Rndm[32];
@@ -387,11 +380,10 @@ StatusCode LArSCL1Maker::execute(const EventContext& context) const
   for( ; it != it_end; ++it){
       std::vector< float > *vecPtr = &zeroSamp; 
       if ( alreadyThere[it] ) vecPtr= &(scFloatContainerTmp.at(it)); 
-      else {  cc++;  }
       std::vector<float>& vec = *vecPtr;
 
       const HWIdentifier id = hwid[it];
-      if ( id == 0 ) { dd++; continue; } 
+      if ( id == 0 ) { continue; } 
 
       // Do I have Overlay
       size_t backGroundIdx = 999999;

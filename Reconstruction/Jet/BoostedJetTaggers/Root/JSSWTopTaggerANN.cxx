@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JSSWTopTaggerANN.h"
@@ -370,6 +370,24 @@ std::map<std::string, std::map<std::string, double>> JSSWTopTaggerANN::getJetPro
     ANN_inputValues["ZCut12"] = jet.getAttribute<float>("ZCut12");
     ANN_inputValues["KtDR"] = jet.getAttribute<float>("KtDR");
 
+    int pv_location = findPV();
+
+    if(pv_location != -1){
+      if( GetUnGroomTracks(jet, pv_location).isSuccess()){
+
+	SG::ReadDecorHandle<xAOD::JetContainer, int> readNtrk500(m_readNtrk500Key);
+
+        ANN_inputValues["Ntrk500"] = readNtrk500(jet);
+      }
+      else{
+	ATH_MSG_ERROR("Either the ungroomed parent jet doesn't have 'NumTrkPt500' as an attribute or the parent link is broken");
+	ANN_inputValues["Ntrk500"] = -999;
+      }
+    }
+    else {
+      ATH_MSG_ERROR("Could not find a primary vertex");
+      ANN_inputValues["Ntrk500"] = -999;
+    }
   }
 
   else if ( m_tagClass == TAGCLASS::TopQuark ) {

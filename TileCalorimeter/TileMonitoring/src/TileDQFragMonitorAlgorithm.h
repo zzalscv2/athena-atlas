@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILEDQFRAGMONITORALGORITHM_H
@@ -8,8 +8,9 @@
 #include "TileEvent/TileDQstatus.h"
 #include "TileEvent/TileDigitsContainer.h"
 #include "TileEvent/TileRawChannelContainer.h"
-#include "TileConditions/ITileBadChanTool.h"
+#include "TileConditions/TileBadChannels.h"
 #include "TileConditions/TileDCSState.h"
+#include "TileConditions/TileEMScale.h"
 #include "TileConditions/TileCablingSvc.h"
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
@@ -18,7 +19,7 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
-
+class TileID;
 class TileHWID;
 class TileCablingService;
 class TileInfo;
@@ -63,9 +64,22 @@ class TileDQFragMonitorAlgorithm : public AthMonitorAlgorithm {
     Gaudi::Property<float> m_qualityCut{this,
         "QualityCut", 254.0, "Monitor Tile channels reconstructed with quality below this cut"};
 
+    Gaudi::Property<float> m_timeMinThresh{this,
+        "TimeMinForAmpCorrection", -12.5, "Correct amplitude is time is above time minimum threshold"};
+    Gaudi::Property<float> m_timeMaxThresh{this,
+        "TimeMaxForAmpCorrection", 12.5, "Correct amplitude is time is below time maximum threshold"};
 
-    ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
-        "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};
+    Gaudi::Property<float> m_minChannelEnergy{this,
+        "MinEnergyChan", -5000.0F, "Normal channel energy threshold for masking"};
+
+    Gaudi::Property<float> m_minGapEnergy{this,
+        "MinEnergyGap", -10000.0F, "Gap channel energy threshold for masking"};
+
+    /**
+     * @brief Name of TileBadChannels in condition store
+     */
+    SG::ReadCondHandleKey<TileBadChannels> m_badChannelsKey{this,
+        "TileBadChannels", "TileBadChannels", "Input Tile bad channel status"};
 
     /**
      * @brief Name of Tile cabling service
@@ -81,6 +95,12 @@ class TileDQFragMonitorAlgorithm : public AthMonitorAlgorithm {
      */
     SG::ReadCondHandleKey<TileDCSState> m_DCSStateKey{this,
         "TileDCS", "TileDCS", "Input Tile DCS status"};
+
+    /**
+     * @brief Name of TileEMScale in condition store
+     */
+    SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
+         "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
     SG::ReadHandleKey<TileRawChannelContainer> m_rawChannelContainerKey{this,
         "TileRawChannelContainer", "TileRawChannelCnt", "Input Tile raw channel container key"};
@@ -102,12 +122,15 @@ class TileDQFragMonitorAlgorithm : public AthMonitorAlgorithm {
     std::vector<int> m_badChannelNegNotMaskGroups;
 
     std::vector<int> m_badPulseQualityGroups;
+    std::vector<int> m_negativeEnergyGroups;
 
+    const TileID* m_tileID{nullptr};
     const TileHWID* m_tileHWID{nullptr};
     const TileCablingService* m_cabling{nullptr};
 
     static const int MAX_DMU{16};
     static const int MAX_CORRUPTED_ERROR{13};
+    enum TileBadPulse{BAD_QUALITY = MAX_CORRUPTED_ERROR, BIG_NEGATIVE_AMPLITUDE};
 
     // TileInfo
     std::string m_infoName = "TileInfo";

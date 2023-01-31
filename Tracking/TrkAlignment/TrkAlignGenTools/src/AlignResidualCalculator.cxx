@@ -249,7 +249,7 @@ namespace Trk {
           const MeasurementBase* mesb = tsos->measurementOnTrack();
 
           const TrackParameters * trackPars = tsos->trackParameters();
-          const ResidualPull * resPull = nullptr;
+          std::unique_ptr<ResidualPull> resPull = nullptr;
 
           if ( trackPars ) {
 
@@ -290,7 +290,6 @@ namespace Trk {
               ATH_MSG_DEBUG("residual:"<<residual<<", errSq: "<<errSq<<", err="<<std::sqrt(errSq));
             }
           }
-          delete resPull;
         }
         else {
           ATH_MSG_WARNING("Expected measurement for atsos of type "

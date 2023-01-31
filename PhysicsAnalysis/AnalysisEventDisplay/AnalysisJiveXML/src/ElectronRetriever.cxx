@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/ElectronRetriever.h"
@@ -127,7 +127,7 @@ namespace JiveXML {
 //   https://uimon.cern.ch/twiki/bin/view/Atlas/RemoveOverlap
 
     double ep = 0., p=0., e=0.; // for eOverP calculation from track
-    int counter = 0;
+    //int counter = 0;
     std::string electronAuthor = "";
     std::string electronIsEMString = "none";
     std::string electronLabel = "";
@@ -264,7 +264,7 @@ namespace JiveXML {
 	  trackIndexVec.push_back(DataType( -1 ));
         }
 
-       counter++;
+       //counter++;
 
 // end of associations data    
 

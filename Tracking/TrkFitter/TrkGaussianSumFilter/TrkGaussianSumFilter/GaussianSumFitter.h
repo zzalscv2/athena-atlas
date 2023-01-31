@@ -12,7 +12,7 @@
 #include "TrkGaussianSumFilter/IMultiStateExtrapolator.h"
 #include "TrkGaussianSumFilterUtils/GsfMeasurementUpdator.h"
 //
-#include "TrkMultiComponentStateOnSurface/MultiComponentStateOnSurface.h"
+#include "TrkTrack/MultiComponentStateOnSurface.h"
 //
 #include "TrkCaloCluster_OnTrack/CaloCluster_OnTrack.h"
 #include "TrkDetElementBase/TrkDetElementBase.h"
@@ -197,29 +197,30 @@ private:
     "Combine with forwards state during Smoothing"
   };
 
+  Gaudi::Property<bool> m_useMode{
+    this,
+    "useMode",
+    true,
+    "Combine/Collapse the MultiComponent State using Mode rather than mean"
+  };
+
+  Gaudi::Property<double> m_cutChiSquaredPerNumberDOF{
+    this,
+    "StateChi2PerNDOFCut",
+    50.,
+    "Cut on Chi2 per NDOF"
+  };
+
   PropDirection m_directionToPerigee;
-
   TrkParametersComparisonFunction m_trkParametersComparisonFunction;
-
   std::unique_ptr<TrackFitInputPreparator> m_inputPreparator;
   std::vector<double> m_sortingReferencePoint;
-
-  // For the forward fit part
-  double m_cutChiSquaredPerNumberDOF = 0.0;
 
   // Counters for fit statistics
   // Number of Fit PrepRawData Calls
   mutable std::atomic<unsigned long int> m_FitPRD{};
   // Number of Fit MeasurementBase Calls
   mutable std::atomic<unsigned long int> m_FitMeasurementBase{};
-  // Number of Foward Fit Failures
-  mutable std::atomic<unsigned long int> m_ForwardFailure{};
-  // Number of Smoother Failures
-  mutable std::atomic<unsigned long int> m_SmootherFailure{};
-  // Number of MakePerigee Failures
-  mutable std::atomic<unsigned long int> m_PerigeeFailure{};
-  // Number of Tracks that fail fit Quailty test
-  mutable std::atomic<unsigned long int> m_fitQualityFailure{};
   // Number of Tracks that are successfull
   mutable std::atomic<unsigned long int> m_fitSuccess{};
 };

@@ -64,9 +64,6 @@ public:
   /** Destructor */
   virtual ~TrackingVolumeHelper();
 
-  /** AlgTool and IAlgTool interface methods */
-  static const InterfaceID& interfaceID() { return IID_ITrackingVolumeHelper; }
-
   /** AlgTool initialize method */
   StatusCode initialize() override;
 

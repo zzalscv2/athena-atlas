@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -33,7 +33,7 @@ SoftElectronInfo::SoftElectronInfo()
 }
 
 /** constructor with info type */
-SoftElectronInfo::SoftElectronInfo(TagInfoType tagJetInfoType) : BaseTagInfo(tagJetInfoType),
+SoftElectronInfo::SoftElectronInfo(const TagInfoType& tagJetInfoType) : BaseTagInfo(tagJetInfoType),
         m_vectorOfTrackProb(std::vector<double>()),
         m_nTrackProb(-1.), m_trackinfo()
 

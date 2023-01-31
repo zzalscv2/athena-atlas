@@ -21,9 +21,10 @@ def FTAG1KernelCfg(ConfigFlags, name='FTAG1Kernel', **kwargs):
     acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
 
-    # Finally the kernel itself
+    # thinning tools
     thinningTools = []
-    
+
+    # Finally the kernel itself
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name, ThinningTools = thinningTools))       
     return acc
@@ -38,7 +39,7 @@ def FTAG1Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    FTAG1TriggerListsHelper = TriggerListsHelper()
+    FTAG1TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Common augmentations
     acc.merge(FTAG1KernelCfg(ConfigFlags, name="FTAG1Kernel", StreamName = 'StreamDAOD_FTAG1', TriggerListsHelper = FTAG1TriggerListsHelper))
@@ -49,7 +50,7 @@ def FTAG1Cfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    FTAG1SlimmingHelper = SlimmingHelper("FTAG1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    FTAG1SlimmingHelper = SlimmingHelper("FTAG1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     
     FTAG1SlimmingHelper.SmartCollections = [
                                            "Electrons",
@@ -75,6 +76,10 @@ def FTAG1Cfg(ConfigFlags):
             "BTagging_AntiKt4EMPFlowSecVtx",
             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
             "UFOCSSK",
+            "GlobalChargedParticleFlowObjects",
+            "GlobalNeutralParticleFlowObjects",
+            "CHSGChargedParticleFlowObjects",
+            "CHSGNeutralParticleFlowObjects",
             "TruthParticles",
             "TruthVertices",
             "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",
@@ -89,10 +94,33 @@ def FTAG1Cfg(ConfigFlags):
                 "JetAssociatedSCTClusters",
                 ]
 
+    if ConfigFlags.BTagging.RunNewVrtSecInclusive:
+        FTAG1SlimmingHelper.AppendToDictionary.update({'NVSI_SecVrt_Tight' : 'xAOD::VertexContainer','NVSI_SecVrt_TightAux' : 'xAOD::VertexAuxContainer',
+                                                       'NVSI_SecVrt_Medium' : 'xAOD::VertexContainer','NVSI_SecVrt_MediumAux' : 'xAOD::VertexAuxContainer',
+                                                       'NVSI_SecVrt_Loose' : 'xAOD::VertexContainer','NVSI_SecVrt_LooseAux' : 'xAOD::VertexAuxContainer'})
+
+    # Append to dictionary
+    FTAG1SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjects'] ='xAOD::FlowElementContainer'
+    FTAG1SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjectsAux'] ='xAOD::FlowElementAuxContainer'
+    FTAG1SlimmingHelper.AppendToDictionary['GlobalNeutralParticleFlowObjects'] = 'xAOD::FlowElementContainer'
+    FTAG1SlimmingHelper.AppendToDictionary['GlobalNeutralParticleFlowObjectsAux'] = 'xAOD::FlowElementAuxContainer'
+    FTAG1SlimmingHelper.AppendToDictionary['CHSGChargedParticleFlowObjects'] = 'xAOD::FlowElementContainer'
+    FTAG1SlimmingHelper.AppendToDictionary['CHSGChargedParticleFlowObjectsAux'] = 'xAOD::ShallowAuxContainer'
+    FTAG1SlimmingHelper.AppendToDictionary['CHSGNeutralParticleFlowObjects'] = 'xAOD::FlowElementContainer'
+    FTAG1SlimmingHelper.AppendToDictionary['CHSGNeutralParticleFlowObjectsAux'] = 'xAOD::ShallowAuxContainer'
+
+
     from DerivationFrameworkFlavourTag import FtagBaseContent
 
     # Static content
     FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG1SlimmingHelper)
+
+    if ConfigFlags.BTagging.RunNewVrtSecInclusive:
+        excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
+        FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexContainer#NVSI_SecVrt_Loose", "xAOD::VertexContainer#NVSI_SecVrt_Medium", "xAOD::VertexContainer#NVSI_SecVrt_Tight"]
+        FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_LooseAux."+excludedVertexAuxData]
+        FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_MediumAux."+excludedVertexAuxData ]
+        FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_TightAux."+excludedVertexAuxData]
 
     # Add truth containers
     if ConfigFlags.Input.isMC:

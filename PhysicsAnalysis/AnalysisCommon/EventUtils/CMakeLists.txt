@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( EventUtils )
@@ -11,4 +11,4 @@ atlas_add_component( EventUtils
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${Boost_LIBRARIES} AsgTools AthAnalysisBaseCompsLib AthContainers AthContainersInterfaces AthLinks AthenaBaseComps AthenaKernel EventInfo xAODBase xAODCaloEvent xAODCore xAODCutFlow xAODEgamma xAODEventInfo xAODJet xAODMuon xAODPFlow xAODParticleEvent xAODTau xAODTracking xAODTruth GaudiKernel PATCoreLib ExpressionEvaluationLib TrigDecisionToolLib DerivationFrameworkInterfaces )
+                     LINK_LIBRARIES ${Boost_LIBRARIES} AsgDataHandlesLib AsgTools AthAnalysisBaseCompsLib AthContainers AthContainersInterfaces AthenaBaseComps AthenaKernel CxxUtils EventInfo xAODBase xAODCaloEvent xAODCore xAODCutFlow xAODEgamma xAODEventInfo xAODJet xAODMuon xAODPFlow xAODParticleEvent xAODTau xAODTracking xAODTruth GaudiKernel PATCoreLib ExpressionEvaluationLib TrigDecisionToolLib DerivationFrameworkInterfaces )

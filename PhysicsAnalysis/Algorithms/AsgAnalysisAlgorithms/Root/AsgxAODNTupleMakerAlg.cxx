@@ -8,6 +8,7 @@
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/AuxVectorBase.h"
 #include "AthContainers/normalizedTypeinfoName.h"
+#include "xAODRootAccess/tools/THolder.h"
 
 // ROOT include(s):
 #include <TClass.h>
@@ -33,12 +34,14 @@ namespace {
    /// @param evtStore The value of evtStore() from the algorithm
    /// @param allowMissing Set to @c true to print an error message in case
    ///                     of a failure
+   /// @param[out] cl type of container
    /// @param msg Reference to the caller's @c MsgStream object
    /// @return A pointer to the container if successful, @c nullptr if not
    ///
    const SG::AuxVectorBase* getVector( const std::string& key,
                                        asg::SgTEvent& evtStore,
                                        bool allowMissing,
+                                       const TClass*& cl,
                                        MsgStream& msg ) {
       if( allowMissing &&
           ( ! evtStore.contains< const SG::AuxVectorBase >( key ) ) ) {
@@ -50,6 +53,16 @@ namespace {
              << "\"" << endmsg;
          return nullptr;
       }
+      const xAOD::THolder* holder = evtStore.tds()->holder( key );
+      if( holder == nullptr) {
+         msg << MSG::ERROR << "Couldn't retrieve type for container with key \"" << key
+             << "\"" << endmsg;
+         return nullptr;
+      }
+
+      const std::type_info* ti = holder->getTypeInfo();
+      cl = TClass::GetClass( *ti );
+
       return c;
    }
 
@@ -106,12 +119,14 @@ namespace {
    /// @param evtStore The value of evtStore() from the algorithm
    /// @param allowMissing Set to @c true to print an error message in case
    ///                     of a failure
+   /// @param[out] cl type of container
    /// @param msg Reference to the caller's @c MsgStream object
    /// @return A pointer to the container if successful, @c nullptr if not
    ///
    const SG::AuxVectorBase* getVector ATLAS_NOT_CONST_THREAD_SAFE ( const std::string& key,
                                                                     IProxyDict& evtStore,
                                                                     bool allowMissing,
+                                                                    const TClass*& cl,
                                                                     MsgStream& msg ) {
 
       // Find all proxies with this key:
@@ -133,7 +148,7 @@ namespace {
             return nullptr;
          }
          // Get the dictionary for the type:
-         TClass* cl = TClass::GetClass( bucket->tinfo() );
+         cl = TClass::GetClass( bucket->tinfo() );
          if( ! cl ) {
             if( msg.level() <= MSG::VERBOSE ) {
                msg << MSG::VERBOSE << "No dictionary found for: "
@@ -367,16 +382,17 @@ namespace CP {
       for( auto& container_itr : m_containers ) {
          // Retrieve the container:
          static const bool ALLOW_MISSING = false;
+         const TClass* cl = nullptr;
          const SG::AuxVectorBase* vec = getVector( container_itr.first,
                                                    *( evtStore() ),
-                                                   ALLOW_MISSING, msg() );
+                                                   ALLOW_MISSING, cl, msg() );
          if( ! vec ) {
             ATH_MSG_ERROR( "Failed to retrieve container \""
                            << container_itr.first << "\"" );
             return StatusCode::FAILURE;
          }
          // Process it.
-         ATH_CHECK( container_itr.second.process( *vec ) );
+         ATH_CHECK( container_itr.second.process( *vec, *cl ) );
       }
 
       // Return gracefully.
@@ -541,7 +557,8 @@ namespace CP {
       // Decide whether the specified key belongs to a container or
       // a standalone object.
       static const bool ALLOW_MISSING = true;
-      if( getVector( key, *( evtStore() ), ALLOW_MISSING,
+      const TClass* cl = nullptr;
+      if( getVector( key, *( evtStore() ), ALLOW_MISSING, cl,
                      msg() ) ) {
          bool created = false;
          ATH_CHECK( m_containers[ key ].addBranch( *m_tree,
@@ -790,23 +807,16 @@ namespace CP {
    }
 
    StatusCode AsgxAODNTupleMakerAlg::ContainerProcessor::
-   process( const SG::AuxVectorBase& container ) {
+   process( const SG::AuxVectorBase& container, const TClass& cl ) {
 
       // Get the collection proxy for the type if it's not available yet.
       if( ! m_collProxy ) {
 
-         // Try to get the dictionary for the type.
-         TClass* cl = TClass::GetClass( typeid( container ) );
-         if( ! cl ) {
-            ATH_MSG_ERROR( "No dictionary found for container" );
-            return StatusCode::FAILURE;
-         }
-
          // Get the collection proxy from the dictionary.
-         m_collProxy = cl->GetCollectionProxy();
+         m_collProxy = cl.GetCollectionProxy();
          if( ! m_collProxy ) {
             ATH_MSG_ERROR( "No collection proxy provided by type: "
-                           << cl->GetName() );
+                           << cl.GetName() );
             return StatusCode::FAILURE;
          }
 

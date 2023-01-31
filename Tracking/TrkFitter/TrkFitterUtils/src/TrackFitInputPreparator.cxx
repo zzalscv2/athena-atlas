@@ -60,7 +60,6 @@ Trk::TrackFitInputPreparator::copyToTrack(const Trk::Track& inputTrk,
         ((*itStates)->trackParameters()
            ? (*itStates)->trackParameters()->uniqueClone()
            : nullptr),
-        nullptr,
         ((*itStates)->materialEffectsOnTrack()
            ? (*itStates)->materialEffectsOnTrack()->uniqueClone()
            : nullptr),
@@ -74,7 +73,7 @@ Trk::TrackFitInputPreparator::copyToTrack(const Trk::Track& inputTrk,
         typePattern(0);
       typePattern.set(TrackStateOnSurface::Measurement);
       newListOfStates.push_back(new TrackStateOnSurface(
-        (*itSet)->uniqueClone(), nullptr, nullptr, nullptr, typePattern));
+        (*itSet)->uniqueClone(), nullptr, nullptr, typePattern));
     }
 
   if (doSorting) {

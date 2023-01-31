@@ -8,6 +8,9 @@
  * @brief Tests for ISF::TruthSvc.
  */
 
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
+
 #undef NDEBUG
 
 // Tested service
@@ -90,9 +93,9 @@ namespace ISFTesting {
     virtual int                       parentPdgCode() const override {return 1;};
     /** Return the parent particle as a HepMC particle type
         (only called for particles that will enter the HepMC truth event) */
-    virtual HepMC::GenParticlePtr        parentParticle() const override {return nullptr;};
+    virtual HepMC::GenParticlePtr      parentParticle() override {return nullptr;};
     /** Return the barcode of the parent particle */
-    virtual Barcode::ParticleBarcode  parentBarcode() const override {return 1;};
+    virtual Barcode::ParticleBarcode  parentBarcode() override {return 1;};
     /** Return the extra barcode of the parent particle */
     virtual Barcode::ParticleBarcode  parentBCID() const override {return 1;};
     /** Return a boolean whether or not the parent particle survives the incident */
@@ -115,7 +118,7 @@ namespace ISFTesting {
         Barcode to the simulator particle (only called for particles that will
         enter the HepMC truth event) */
     virtual HepMC::GenParticlePtr        childParticle(unsigned short,
-                                                    Barcode::ParticleBarcode) const override {return nullptr;};
+                                                       Barcode::ParticleBarcode) override {return nullptr;};
     /** Update the properties of a child particle from a pre-defined
         interaction based on the properties of the ith child of the
         current TruthIncident (only used in quasi-stable particle
@@ -137,8 +140,9 @@ namespace ISFTesting {
     virtual ~MockTruthIncident() {};
     MOCK_METHOD0(geoID, AtlasDetDescr::AtlasRegion());
     MOCK_CONST_METHOD0(physicsProcessCode, Barcode::PhysicsProcessCode());
-    MOCK_CONST_METHOD0(parentParticle, HepMC::GenParticlePtr ());
-    MOCK_CONST_METHOD0(parentBarcode, Barcode::ParticleBarcode());
+    MOCK_CONST_METHOD0(parentParticle, HepMC::ConstGenParticlePtr ());
+    MOCK_METHOD0(parentParticle, HepMC::GenParticlePtr ());
+    MOCK_METHOD0(parentBarcode, Barcode::ParticleBarcode());
     MOCK_METHOD1(parentParticleAfterIncident, HepMC::GenParticlePtr (Barcode::ParticleBarcode));
     MOCK_METHOD1(setPassWholeVertices, void(bool));
     MOCK_CONST_METHOD0(numberOfChildren, unsigned short());

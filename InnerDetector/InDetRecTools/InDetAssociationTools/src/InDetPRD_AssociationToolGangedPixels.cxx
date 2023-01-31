@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetAssociationTools/InDetPRD_AssociationToolGangedPixels.h"
@@ -20,7 +20,6 @@ InDet::InDetPRD_AssociationToolGangedPixels::InDetPRD_AssociationToolGangedPixel
 {
   declareProperty( "PixelClusterAmbiguitiesMapName", m_pixelClusterAmbiguitiesMapName = "PixelClusterAmbiguitiesMap" );
   declareProperty( "addTRToutliers", m_addTRToutliers = false);
-  declareProperty( "SetupCorrect",  m_setupCorrect=false);
 }
 
 InDet::InDetPRD_AssociationToolGangedPixels::~InDetPRD_AssociationToolGangedPixels()
@@ -29,9 +28,6 @@ InDet::InDetPRD_AssociationToolGangedPixels::~InDetPRD_AssociationToolGangedPixe
 StatusCode InDet::InDetPRD_AssociationToolGangedPixels::initialize()
 {
   ATH_CHECK( m_pixelClusterAmbiguitiesMapName.initialize() );
-  if (!m_setupCorrect) {
-    ATH_MSG_WARNING("Tool " << name() << " not configured.");
-  }
   return StatusCode::SUCCESS;
 }
 
@@ -253,7 +249,7 @@ InDet::InDetPRD_AssociationToolGangedPixels::getPrdsOnTrack(const Maps& maps,
   DataVector<const Trk::MeasurementBase>::const_iterator it    = track.measurementsOnTrack()->begin();
   DataVector<const Trk::MeasurementBase>::const_iterator itEnd = track.measurementsOnTrack()->end();
   for (;it!=itEnd;++it){
-    const auto  pThisMeasurement(*it);
+    const auto *const   pThisMeasurement(*it);
     if (pThisMeasurement->type(Trk::MeasurementBaseType::RIO_OnTrack)){
       const Trk::RIO_OnTrack* rot = static_cast<const Trk::RIO_OnTrack*>(pThisMeasurement);
       vec.push_back(rot->prepRawData());

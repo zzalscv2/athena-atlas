@@ -48,8 +48,8 @@ namespace Muon {
     if (prds.empty()) return nullptr;
 
 // implement cluster formation
-    std::vector <const Muon::MuonClusterOnTrack* >* rios = new std::vector <const Muon::MuonClusterOnTrack* >() ;
-    std::vector < double >* assProbs = new std::vector < double >();
+    auto rios = std::vector <const Muon::MuonClusterOnTrack* >() ;
+    auto assocProbs = std::vector < double >();
     std::list< const Trk::PrepRawData* >::const_iterator  it = prds.begin();
     std::list< const Trk::PrepRawData* >::const_iterator  it_end = prds.end();
     const double prob = 1./(errorScaleFactor*errorScaleFactor);
@@ -58,9 +58,9 @@ namespace Muon {
       const Trk::TrkDetElementBase* detEl = (*it)->detectorElement();
       const Amg::Vector3D gHitPos = detEl->center(id);
       const Muon::MuonClusterOnTrack* cluster = m_clusterCreator->createRIO_OnTrack( **it, gHitPos ); 
-      rios->push_back( cluster );
-      assProbs->push_back( prob );
+      rios.push_back( cluster );
+      assocProbs.push_back( prob );
     }
-    return std::make_unique<const CompetingMuonClustersOnTrack>( rios, assProbs );
+    return std::make_unique<const CompetingMuonClustersOnTrack>( std::move(rios), std::move(assocProbs) );
   }
 }

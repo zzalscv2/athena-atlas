@@ -6,10 +6,6 @@ from pathlib import Path
 from typing import List
 
 
-def get_pwd() -> Path:
-    return Path.cwd()
-
-
 def get_release_setup(logger: Logger, no_setup=False) -> str:
     """Get release setup."""
     if no_setup:

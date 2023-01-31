@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/CaloCellGroup.h"
@@ -20,7 +20,7 @@ CaloCellGroup::CaloCellGroup() :
 }
 
 
-bool CaloCellGroup::setDefinition(const CaloCell_ID* caloCellId, const std::string& definition, MsgStream& logStr) {
+bool CaloCellGroup::setDefinition(const CaloCell_Base_ID* caloCellId, const std::string& definition, MsgStream& logStr) {
   m_caloCellId=caloCellId;
   m_fieldBoundaries.clear();
   m_values.clear();
@@ -215,15 +215,14 @@ bool CaloCellGroup::inGroup(const Identifier id) const {
 
 
 
-void CaloCellGroup::complain(MsgStream& logStr, const std::string& problem) const {
+void CaloCellGroup::complain(MsgStream& logStr, const std::string& problem) {
   logStr << MSG::ERROR << "Malformed definition string '"<<problem << "'" << endmsg;
-  return;
 }
 
 
 
 
-bool CaloCellGroupList::setDefinition(const CaloCell_ID* caloCellId, const std::vector<std::string>& definitions, 
+bool CaloCellGroupList::setDefinition(const CaloCell_Base_ID* caloCellId, const std::vector<std::string>& definitions, 
 				       MsgStream& logStr){
 
   m_groups.clear();
@@ -281,7 +280,7 @@ const std::vector<float>& CaloCellGroupList::valuesForCell(const Identifier id) 
   return *result;
 }
 
-void CaloCellGroupList::dump(const CaloCell_ID* caloCellId) {
+void CaloCellGroupList::dump(const CaloCell_Base_ID* caloCellId) {
 
   std::cout << "Definitions: " << std::endl;
   for (size_t i=0;i<m_groups.size();i++) {
@@ -297,8 +296,7 @@ void CaloCellGroupList::dump(const CaloCell_ID* caloCellId) {
       std::cout << x[i] << " ";
     std::cout << "]" << std::endl;
   }
-  return;
-}
+  }
 
 void CaloCellGroupList::printDef() const {
   std::cout << "Definitions: " << std::endl;

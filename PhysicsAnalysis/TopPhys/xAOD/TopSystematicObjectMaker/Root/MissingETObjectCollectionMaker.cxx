@@ -228,7 +228,9 @@ namespace top {
     if (m_config->useMuons()) {
       // Get calibrated muons
       top::check(evtStore()->retrieve(xaod_mu, m_config->sgKeyMuons(hash)), "Failed to retrieve Muons");
-
+      if (not xaod_mu){
+        return StatusCode::FAILURE;
+      }
       // Add those that pass pre-overlap removal to met_muons
       ConstDataVector<xAOD::MuonContainer> met_muons(SG::VIEW_ELEMENTS);
       for (const auto *mu: *xaod_mu)
@@ -245,7 +247,7 @@ namespace top {
 
       // Muon-jet ghost association
       // performed after muon handing to METUtility, but before jets
-      if (xaod_mu && xaod_jet) {
+      if (xaod_jet) {
         met::addGhostMuonsToJets(*xaod_mu, *xaod_jet);
       }
     } else {
@@ -273,7 +275,7 @@ namespace top {
 
 
 
-    for (auto systematic : m_specifiedSystematics) {
+    for (const auto & systematic : m_specifiedSystematics) {
       if (systematic.hash() == event->hashValue() && systematic.hash() != m_config->nominalHashValue()) {
         ///-- Tell tool which systematic to use --///
         top::check(m_met_systematics->applySystematicVariation(systematic), "Failed to applySystematicVariation");

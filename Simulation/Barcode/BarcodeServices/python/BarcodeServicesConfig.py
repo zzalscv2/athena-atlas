@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def BarcodeSvcCfg(ConfigFlags, **kwargs):
+def BarcodeSvcCfg(flags, **kwargs):
     """Return the MCxBarcodeSvcCfg config flagged by Sim.TruthStrategy"""
     from SimulationConfig.SimEnums import TruthStrategy
     stratmap = {
@@ -26,11 +26,11 @@ def BarcodeSvcCfg(ConfigFlags, **kwargs):
         TruthStrategy.Validation: ValidationBarcodeSvcCfg,
         # TruthStrategy.Cosmic: CosmicBarcodeSvcCfg,
     }
-    MCxCfg = stratmap[ConfigFlags.Sim.TruthStrategy]
-    return MCxCfg(ConfigFlags, **kwargs)
+    MCxCfg = stratmap[flags.Sim.TruthStrategy]
+    return MCxCfg(flags, **kwargs)
 
 
-def MC15BarcodeSvcCfg(ConfigFlags, name="Barcode_MC15BarcodeSvc", **kwargs):
+def MC15BarcodeSvcCfg(flags, name="Barcode_MC15BarcodeSvc", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FirstSecondaryVertexBarcode"   ,  -1000001 )
     kwargs.setdefault("VertexIncrement"               ,        -1 )
@@ -44,7 +44,7 @@ def MC15BarcodeSvcCfg(ConfigFlags, name="Barcode_MC15BarcodeSvc", **kwargs):
     return result
 
 
-def MC12BarcodeSvcCfg(ConfigFlags, name="Barcode_MC12BarcodeSvc", **kwargs):
+def MC12BarcodeSvcCfg(flags, name="Barcode_MC12BarcodeSvc", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FirstSecondaryVertexBarcode" , -200001)
     kwargs.setdefault("VertexIncrement"             , -1)
@@ -56,56 +56,56 @@ def MC12BarcodeSvcCfg(ConfigFlags, name="Barcode_MC12BarcodeSvc", **kwargs):
     return result
 
 
-def MC12LLPBarcodeSvcCfg(ConfigFlags, name="Barcode_MC12LLPBarcodeSvc", **kwargs):
-    return MC12BarcodeSvcCfg(ConfigFlags, name, **kwargs)
+def MC12LLPBarcodeSvcCfg(flags, name="Barcode_MC12LLPBarcodeSvc", **kwargs):
+    return MC12BarcodeSvcCfg(flags, name, **kwargs)
 
 
-def MC12PlusBarcodeSvcCfg(ConfigFlags, name="Barcode_MC12PlusBarcodeSvc", **kwargs):
-    return MC12BarcodeSvcCfg(ConfigFlags, name, **kwargs)
+def MC12PlusBarcodeSvcCfg(flags, name="Barcode_MC12PlusBarcodeSvc", **kwargs):
+    return MC12BarcodeSvcCfg(flags, name, **kwargs)
 
 
-def MC15aPlusBarcodeSvcCfg(ConfigFlags, name="Barcode_MC15aPlusBarcodeSvc", **kwargs):
-    return MC12BarcodeSvcCfg(ConfigFlags, name, **kwargs)
+def MC15aPlusBarcodeSvcCfg(flags, name="Barcode_MC15aPlusBarcodeSvc", **kwargs):
+    return MC12BarcodeSvcCfg(flags, name, **kwargs)
 
 
-def MC15aPlusLLPBarcodeSvcCfg(ConfigFlags, name="Barcode_MC15aPlusLLPBarcodeSvc", **kwargs):
-    return MC12BarcodeSvcCfg(ConfigFlags, name, **kwargs)
+def MC15aPlusLLPBarcodeSvcCfg(flags, name="Barcode_MC15aPlusLLPBarcodeSvc", **kwargs):
+    return MC12BarcodeSvcCfg(flags, name, **kwargs)
 
 
-def MC15aBarcodeSvcCfg(ConfigFlags, name="Barcode_MC15aBarcodeSvc", **kwargs):
-    return MC12BarcodeSvcCfg(ConfigFlags, name, **kwargs)
+def MC15aBarcodeSvcCfg(flags, name="Barcode_MC15aBarcodeSvc", **kwargs):
+    return MC12BarcodeSvcCfg(flags, name, **kwargs)
 
 
-def MC16BarcodeSvcCfg(ConfigFlags, name="Barcode_MC16BarcodeSvc", **kwargs):
-    return MC12BarcodeSvcCfg(ConfigFlags, name, **kwargs)
+def MC16BarcodeSvcCfg(flags, name="Barcode_MC16BarcodeSvc", **kwargs):
+    return MC12BarcodeSvcCfg(flags, name, **kwargs)
 
 
-def MC16LLPBarcodeSvcCfg(ConfigFlags, name="Barcode_MC16LLPBarcodeSvc", **kwargs):
-    return MC12BarcodeSvcCfg(ConfigFlags, name, **kwargs)
+def MC16LLPBarcodeSvcCfg(flags, name="Barcode_MC16LLPBarcodeSvc", **kwargs):
+    return MC12BarcodeSvcCfg(flags, name, **kwargs)
 
 
-def MC18BarcodeSvcCfg(ConfigFlags, name="Barcode_MC18BarcodeSvc", **kwargs):
+def MC18BarcodeSvcCfg(flags, name="Barcode_MC18BarcodeSvc", **kwargs):
     kwargs.setdefault("FirstSecondaryVertexBarcode" ,  -1000001 )
     kwargs.setdefault("FirstSecondaryBarcode"       ,   1000001 )
     kwargs.setdefault("ParticleGenerationIncrement" ,  10000000 )
-    return MC12BarcodeSvcCfg(ConfigFlags, name, **kwargs)
+    return MC12BarcodeSvcCfg(flags, name, **kwargs)
 
 
-def MC18LLPBarcodeSvcCfg(ConfigFlags, name="Barcode_MC18LLPBarcodeSvc", **kwargs):
-    return MC18BarcodeSvcCfg(ConfigFlags, name, **kwargs)
+def MC18LLPBarcodeSvcCfg(flags, name="Barcode_MC18LLPBarcodeSvc", **kwargs):
+    return MC18BarcodeSvcCfg(flags, name, **kwargs)
 
 
-def PhysicsProcessBarcodeSvcCfg(ConfigFlags, name="Barcode_PhysicsProcessBarcodeSvc", **kwargs):
+def PhysicsProcessBarcodeSvcCfg(flags, name="Barcode_PhysicsProcessBarcodeSvc", **kwargs):
     kwargs.setdefault("EncodePhysicsProcessInVertexBC",  False  )
     kwargs.setdefault("FirstSecondaryVertexBarcode"   , -200000 )
     kwargs.setdefault("VertexIncrement"               , -1000000)
     kwargs.setdefault("FirstSecondaryBarcode"         ,  200001 )
     kwargs.setdefault("SecondaryIncrement"            ,  1      )
     kwargs.setdefault("EncodePhysicsProcessInVertexBC",  True   )
-    return MC15BarcodeSvcCfg(ConfigFlags, name, **kwargs)
+    return MC15BarcodeSvcCfg(flags, name, **kwargs)
 
 
-def GlobalBarcodeSvcCfg(ConfigFlags, name="Barcode_GlobalBarcodeSvc", **kwargs):
+def GlobalBarcodeSvcCfg(flags, name="Barcode_GlobalBarcodeSvc", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FirstSecondaryVertexBarcode"   ,  -200000  )
     kwargs.setdefault("VertexIncrement"               ,  -1000000 )
@@ -118,7 +118,7 @@ def GlobalBarcodeSvcCfg(ConfigFlags, name="Barcode_GlobalBarcodeSvc", **kwargs):
     return result
 
 
-def ValidationBarcodeSvcCfg(ConfigFlags, name="Barcode_ValidationBarcodeSvc", **kwargs):
+def ValidationBarcodeSvcCfg(flags, name="Barcode_ValidationBarcodeSvc", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FirstSecondaryVertexBarcode" , -200001)
     kwargs.setdefault("VertexIncrement"             , -1)

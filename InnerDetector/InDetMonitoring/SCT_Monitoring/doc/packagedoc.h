@@ -32,7 +32,7 @@ InnerDetector/InDetMonitoring/SCT_Monitoring/python/SCTMonitoringConfig.py is th
 
 When the Reco_tf.py command is used, the chain is the following:
 - Reconstruction/RecJobTransforms/scripts/Reco_tf.py
-- Reconstruction/RecJobTransforms/share/skeleton.RAWtoESD_tf.py / Reconstruction/RecJobTransforms/share/skeleton.RAWtoALL_tf.py
+- Reconstruction/RecJobTransforms/share/skeleton.RAWtoALL_tf.py
 - Reconstruction/RecExample/RecExCommon/share/RecExCommon_topOptions.py
 - Control/AthenaMonitoring/share/DataQualitySteering_jobOptions.py
 - Control/AthenaMonitoring/python/AthenaMonitoringCfg.py

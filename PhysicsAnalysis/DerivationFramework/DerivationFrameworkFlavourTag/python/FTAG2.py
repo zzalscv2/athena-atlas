@@ -83,7 +83,7 @@ def FTAG2Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    FTAG2TriggerListsHelper = TriggerListsHelper()
+    FTAG2TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Common augmentations
     acc.merge(FTAG2KernelCfg(ConfigFlags, name="FTAG2Kernel", StreamName = 'StreamDAOD_FTAG2', TriggerListsHelper = FTAG2TriggerListsHelper))
@@ -94,7 +94,7 @@ def FTAG2Cfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    FTAG2SlimmingHelper = SlimmingHelper("FTAG2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    FTAG2SlimmingHelper = SlimmingHelper("FTAG2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
     FTAG2SlimmingHelper.SmartCollections = [
             "Electrons",

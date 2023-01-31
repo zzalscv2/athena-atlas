@@ -150,33 +150,6 @@ HepGeom::Transform3D TRT_BarrelElement::calculateLocalStrawTransform(int straw) 
   return rc ;
 }
 
-
-HepGeom::Transform3D TRT_BarrelElement::defStrawTransform(int straw) const
-{
-  // Same as calculateStrawTransform, except we use getDefAbsoluteTransform()
-  // rather than  getAbsoluteTransform()
-
-  // NB The tranformation to a straw is reconstructed here precisely as
-  // it was ... hopefully... in the factory.  One could eliminate this
-  // requirement and make the code a little more robust in this regard but
-  // at the cost of doubling the descriptors.  (One descriptor now suffices
-  // for both positive and negative endcaps).
-
-  const GeoXF::Function *f= m_descriptor->getStrawTransform();
-  if (f) {
-    size_t offsetInto = m_descriptor->getStrawTransformOffset();
-    double zPos = -m_descriptor->strawZPos();
-    double zAng =  m_code.isPosZ() ? M_PI : 0;
-    return Amg::EigenTransformToCLHEP(getMaterialGeom()->getDefAbsoluteTransform()*((*f)(straw+offsetInto)))
-      * HepGeom::RotateY3D(zAng)*HepGeom::TranslateZ3D(zPos);
-  } else {
-    std::cout << "calculateStrawTransform:  f is 0 !!!!" << std::endl;
-    return {};
-  }
-
-}
-
-
 const Trk::SurfaceBounds& TRT_BarrelElement::strawBounds() const
 {
   return m_descriptor->strawBounds();

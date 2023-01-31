@@ -29,7 +29,7 @@ StatusCode MistimedStreamMonitorAlgorithm::initialize() {
   ATH_CHECK( m_trigDec.retrieve() );
   ATH_CHECK( m_ttTool.retrieve());
   ATH_CHECK( m_runParametersContainer.initialize() );
-  ATH_CHECK( m_readoutConfigContainer.initialize() );
+  ATH_CHECK( m_readoutConfigContainerJSON.initialize() );
   return StatusCode::SUCCESS;
 }
 
@@ -47,9 +47,9 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
   unsigned int readoutConfigID   = runParameters->runParameters(1)->readoutConfigID(); 
   ATH_MSG_DEBUG("RunParameters:: readoutConfigID " <<  readoutConfigID);
   
-  SG::ReadCondHandle<L1CaloReadoutConfigContainer> readoutConfig(m_readoutConfigContainer,  ctx);
-  
+  SG::ReadCondHandle<L1CaloReadoutConfigContainerJSON> readoutConfigJSON(m_readoutConfigContainerJSON,  ctx);
     
+
   unsigned int channelID = 0;
   unsigned int numFadcSlices = 0; 
   unsigned int l1aFadcSlice = 0; 
@@ -57,17 +57,16 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
 
 
   //the readout config ID tells you, which readoutConfig is loaded. now you can retrieve the l1aFadcSlice from this DB entry
-  if (  readoutConfig->readoutConfig(readoutConfigID)->channelId() == readoutConfigID){
+  if (  readoutConfigJSON->readoutConfigJSON(readoutConfigID)->channelId() == readoutConfigID){
     ATH_MSG_DEBUG("readoutConfigID " <<  readoutConfigID);
-    channelID =  readoutConfig->readoutConfig(readoutConfigID)->channelId();
-    numFadcSlices = readoutConfig->readoutConfig(readoutConfigID)->numFadcSlices();
-    l1aFadcSlice = readoutConfig->readoutConfig(readoutConfigID)->l1aFadcSlice();
-    readout80ModePpm =  readoutConfig->readoutConfig(readoutConfigID)->readout80ModePpm();
+    channelID =  readoutConfigJSON->readoutConfigJSON(readoutConfigID)->channelId();
+    numFadcSlices = readoutConfigJSON->readoutConfigJSON(readoutConfigID)->numFadcSlices();
+    l1aFadcSlice = readoutConfigJSON->readoutConfigJSON(readoutConfigID)->l1aFadcSlice();
+    readout80ModePpm =  readoutConfigJSON->readoutConfigJSON(readoutConfigID)->readout80ModePpm();
     ATH_MSG_DEBUG("channelID :: " << channelID);
     ATH_MSG_DEBUG("numFadcSlices :: " <<  numFadcSlices);
     ATH_MSG_DEBUG("l1aFadcSlice :: " <<  l1aFadcSlice);
     ATH_MSG_DEBUG("readout80ModePpm :: " <<  readout80ModePpm);
-    
   }
   
   // Retrieve jetElementfrom SG
@@ -93,14 +92,14 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
   }
 
 
-  
+
   // Retrieve EventInfo from SG and save lumi block number, global event number and run number
   unsigned int lumiNo = GetEventInfo(ctx)->lumiBlock();
   unsigned int currentRunNo = ctx.eventID().run_number();  
   unsigned int currentEventNo =  ctx.eventID().event_number();
 
 
-  
+
   ATH_MSG_DEBUG("Lumi Block :: " << lumiNo);
   ATH_MSG_DEBUG("Run Number :: " << currentRunNo);
   ATH_MSG_DEBUG("Event Number :: " << currentEventNo);
@@ -109,13 +108,12 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
 
   Monitored::Scalar<int> cutFlowX = Monitored::Scalar<int>("cutFlowX", 0);
   Monitored::Scalar<int> cutFlowY = Monitored::Scalar<int>("cutFlowY", 0);
-  
 
-  
+
+
   cutFlowX=All;
   fill(m_packageName,cutFlowX);
   
-
   //for the algorithm to run, we need the 2 adc slices before and after the l1a-slice
   //add some readout compatibility checks of the algo here
   if(readout80ModePpm){
@@ -170,7 +168,6 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
 
   
    // now classify the tower signals by looking at their FADC counts, if it exceeds 70
-  int satCounter = 0; // saturated TT
   int badCounter = 0; // category 2 really bad
   int bad2Counter = 0; // category 4 bad peak 2 
   int bad3Counter = 0; // category 6 bad peak 3 
@@ -218,7 +215,6 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     if(maxADCval < 70){
       ttPulseCategory = 0.1;
     }else if(maxADCval == 1023) {
-      satCounter++;
       ttPulseCategory = 1;
       if(! (tt)->layer()) emActivityCounter++;
     }else{
@@ -506,6 +502,7 @@ StatusCode  MistimedStreamMonitorAlgorithm::makeTowerPPM( const xAOD::TriggerTow
   MonitorTT monTT;
   monTT.tower = tt;
   monTT.phiScaled = phiMod;
+  monTT.phi1d = 0;
   vecMonTT.push_back(monTT);
    
   return StatusCode::SUCCESS; 
@@ -675,7 +672,7 @@ StatusCode  MistimedStreamMonitorAlgorithm::fillPPMEtaPhi( MonitorTT &monTT,
 
 
 
-bool MistimedStreamMonitorAlgorithm::pulseQuality(const std::vector<uint16_t> ttPulse, int peakSlice) const {
+bool MistimedStreamMonitorAlgorithm::pulseQuality(const std::vector<uint16_t>& ttPulse, int peakSlice) const {
      
     bool goodPulse = true;
     int size = ttPulse.size();

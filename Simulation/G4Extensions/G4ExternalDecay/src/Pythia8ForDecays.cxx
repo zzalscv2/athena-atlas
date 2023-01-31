@@ -31,11 +31,6 @@
 #include <fstream>
 
 
-Pythia8ForDecays* Pythia8ForDecays::Instance ATLAS_NOT_THREAD_SAFE () {
-  static Pythia8ForDecays instance;
-  return &instance;
-}
-
 Pythia8ForDecays::Pythia8ForDecays()
   {
   // Pythia instance where RHadrons can decay

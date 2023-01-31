@@ -538,7 +538,6 @@ StatusCode SCTCalib::getNoisyStrip ATLAS_NOT_THREAD_SAFE () { // Thread unsafe w
    //--- Loop over wafers
    SCT_ID::const_id_iterator waferItr{m_pSCTHelper->wafer_begin()};
    SCT_ID::const_id_iterator waferItrE{m_pSCTHelper->wafer_end()};
-   int numNoisyWafers{0};
    for (; waferItr not_eq waferItrE; ++waferItr) {
       //--- Identifier/SN
       Identifier waferId{*waferItr};
@@ -553,7 +552,7 @@ StatusCode SCTCalib::getNoisyStrip ATLAS_NOT_THREAD_SAFE () { // Thread unsafe w
       const bool isNoisyWafer{noisy.second};
       if (numNoisyStripsInWafer!=0 || m_noisyWriteAllModules) {
          if (m_noisyWaferFinder and isNoisyWafer) { //in noisy wafer
-            ++numNoisyWafers;
+            
             if (not m_noisyWaferWrite) break;
             if (m_noisyWaferAllStrips) { //write out all strips
                if (addStripsToList(waferId, stripIdLists[ALL], false, false).isFailure() or  addStripsToList(waferId, stripIdLists[NEW], false, true).isFailure()) {
@@ -1019,7 +1018,6 @@ StatusCode SCTCalib::getDeadStrip ATLAS_NOT_THREAD_SAFE () { // Thread unsafe SC
       } //end DeadLink
 
       if (n_noHitsStrip>0 || !m_deadNotQuiet) {
-         int n_deadStripInWafer{0};
          int n_deadChipInWafer{0};
 
          double n_effectiveEvents{0.};
@@ -1071,7 +1069,6 @@ StatusCode SCTCalib::getDeadStrip ATLAS_NOT_THREAD_SAFE () { // Thread unsafe SC
                      ATH_MSG_INFO("DEADSTRIP : " << moduleId << ", side=" << side << ", strip(offline)=" << j);
                      isDead=true;
                      n_deadStrip++;
-                     n_deadStripInWafer++;
                      endDead = side==0 ? j : j+n_stripPerChip*n_chipPerSide;
                      if (!beforeIsDead) beginDead = side==0 ? j : j+n_stripPerChip*n_chipPerSide;
                   }
@@ -2921,7 +2918,7 @@ StatusCode SCTCalib::noisyStripsToSummaryXml(const std::map<Identifier, std::set
 
    //--- Initialization
    int numLinksAll{0}, numChipsAll{0};
-   int numModulesAll{0}, numModulesNew{0}, numModulesRef{0};
+   int numModulesAll{0},  numModulesRef{0};
    int numStripsAll{0}, numStripsNew{0}, numStripsRef{0};
    int numModulesDiff{0};
 
@@ -2985,7 +2982,7 @@ StatusCode SCTCalib::noisyStripsToSummaryXml(const std::map<Identifier, std::set
                defectStripsNew = getStripList( listNEW );
                numStripsNew += listNEW.size();
             } else {
-               ++numModulesNew;
+               
                defectStripsNew = getStripList( (*moduleAllItr).second );
             }
          }

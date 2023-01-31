@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CoolLumiUtilities/FillParamsUtil.h"
@@ -8,6 +8,7 @@
 #include "CoralBase/Attribute.h"
 #include <sstream>
 #include <iostream>
+#include <cstdint>
 
 FillParamsUtil::FillParamsUtil() {
   // Clear vectors

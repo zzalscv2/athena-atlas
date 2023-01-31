@@ -332,7 +332,8 @@ CMAword SectorLogic::output(ubit16 i) {
     fmtout = fmtout | ((m_OutFromSectorLogic[i].r2 & 0x01) << 26);          // >1 candidate in ROI2
     fmtout = fmtout | ((bc & 0x07) << 27);                                  // BCID
     fmtout = fmtout | ((m_OutFromSectorLogic[i].sign1 & 0x01) << 30);       // Candidate1 sign
-    fmtout = fmtout | ((m_OutFromSectorLogic[i].sign2 & 0x01) << 31);       // Candidate2 sign
+    // explicit cast to suppress cppcheck warning about bit shift overflow
+    fmtout = fmtout | (static_cast<CMAword>(m_OutFromSectorLogic[i].sign2 & 0x01) << 31);       // Candidate2 sign
 
     return fmtout;
 }

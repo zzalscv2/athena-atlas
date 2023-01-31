@@ -141,18 +141,16 @@ StatusCode Trk::TrackInformationNtupleTool::fillTrackData (
   m_nHits = 0;
   if (trackStates != nullptr) {
 
-    for (DataVector<const Trk::TrackStateOnSurface>::const_iterator it=trackStates->begin();
-         it!=trackStates->end();
-         ++it) {
+    for (const auto *trackState : *trackStates) {
 
-      if (!(*it)) {
+      if (!trackState) {
         msg(MSG::WARNING) << "TrackStateOnSurface == Null" << endmsg;
         continue;
       }
-      if ((*it)->type(Trk::TrackStateOnSurface::Measurement) ||
-          (*it)->type(Trk::TrackStateOnSurface::Outlier)     ) {
+      if (trackState->type(Trk::TrackStateOnSurface::Measurement) ||
+          trackState->type(Trk::TrackStateOnSurface::Outlier)     ) {
 
-        const Trk::MeasurementBase *measurement = (*it)->measurementOnTrack();
+        const Trk::MeasurementBase *measurement = trackState->measurementOnTrack();
         if (!measurement) {
           msg(MSG::WARNING) << "measurementOnTrack == Null for a TrackStateOnSurface "
                             << "of type Measurement or Outlier" << endmsg;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FORWARDTRACKER_IPARTICLE_H
@@ -41,6 +41,9 @@ namespace ForwardTracker {
     virtual void addMsg                        (const std::string&)     = 0;
     
     virtual std::string str() const = 0;
+
+    // Helper to work around cppcheck false positive.
+    Point&          direction_nc() { return direction(); }
   };
   
   std::ostream& operator<<(std::ostream&, const IParticle&);

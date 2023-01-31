@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: xAODPrimitives.h 576255 2013-12-19 12:54:41Z emoyse $
@@ -233,16 +233,28 @@ namespace xAOD {
     numberOfBLayerSharedHits        =16,  //!< number of Pixel b-layer hits shared by several tracks [unit8_t].
     numberOfBLayerSplitHits         =43,  //!< number of Pixel b-layer hits split by cluster splitting [unit8_t].
     expectBLayerHit                 =42,  //!< Do we expect a b-layer hit for this track? [unit8_t] (should be [bool])
-    expectInnermostPixelLayerHit                 =52,  //!< Do we expect a 0th-layer hit for this track?
-    numberOfInnermostPixelLayerHits              =53,  //!< these are the hits in the 0th pixel layer?
-    numberOfInnermostPixelLayerOutliers          =54,  //!< number of 0th layer outliers  
-    numberOfInnermostPixelLayerSharedHits        =55,  //!< number of Pixel 0th layer hits shared by several tracks.
-    numberOfInnermostPixelLayerSplitHits         =56,  //!< number of Pixel 0th layer hits split by cluster splitting 
-    expectNextToInnermostPixelLayerHit                 =57,  //!< Do we expect a 1st-layer hit for this track?
-    numberOfNextToInnermostPixelLayerHits              = 58,  //!< these are the hits in the 1st pixel layer
-    numberOfNextToInnermostPixelLayerOutliers          =59,  //!< number of 1st pixel layer outliers  
-    numberOfNextToInnermostPixelLayerSharedHits        =60,  //!< number of Pixel 1st layer hits shared by several tracks.
-    numberOfNextToInnermostPixelLayerSplitHits         =61,  //!< number of Pixel 1st layer hits split by cluster splitting 
+    expectInnermostPixelLayerHit                 =52,  //!< Do we expect a 0th-layer barrel hit for this track?
+    numberOfInnermostPixelLayerHits              =53,  //!< these are the hits in the 0th pixel barrel layer
+    numberOfInnermostPixelLayerOutliers          =54,  //!< number of 0th layer barrel outliers  
+    numberOfInnermostPixelLayerSharedHits        =55,  //!< number of Pixel 0th layer barrel hits shared by several tracks.
+    numberOfInnermostPixelLayerSplitHits         =56,  //!< number of Pixel 0th layer barrel hits split by cluster splitting
+
+    numberOfInnermostPixelLayerEndcapHits        =77,  //!< these are the hits in the 0th pixel layer endcap [unit8_t].
+    numberOfInnermostPixelLayerEndcapOutliers    =80,  //!< number of 0th layer endcap outliers
+    numberOfInnermostPixelLayerSharedEndcapHits  =81,  //!< number of Pixel 0th layer endcap hits shared by several tracks.
+    numberOfInnermostPixelLayerSplitEndcapHits   =82,  //!< number of Pixel 0th layer endcap hits shared by several tracks.
+
+    expectNextToInnermostPixelLayerHit                 =57,  //!< Do we expect a 1st-layer barrel hit for this track?
+    numberOfNextToInnermostPixelLayerHits              =58,  //!< these are the hits in the 1st pixel barrel layer
+    numberOfNextToInnermostPixelLayerOutliers          =59,  //!< number of 1st pixel layer barrel outliers  
+    numberOfNextToInnermostPixelLayerSharedHits        =60,  //!< number of Pixel 1st layer barrel hits shared by several tracks.
+    numberOfNextToInnermostPixelLayerSplitHits         =61,  //!< number of Pixel 1st layer barrel hits split by cluster splitting
+
+    numberOfNextToInnermostPixelLayerEndcapHits        =78,  //!< these are the hits in the 0.5th and 1st pixel layer endcap rings [unit8_t].
+    numberOfNextToInnermostPixelLayerEndcapOutliers    =83,  //!< number of 1st layer endcap disk outliers
+    numberOfNextToInnermostPixelLayerSharedEndcapHits  =84,  //!< number of Pixel 1st layer endcap hits shared by several tracks.
+    numberOfNextToInnermostPixelLayerSplitEndcapHits   =85,  //!< number of Pixel 1st layer endcap hits split by cluster splitting
+
     numberOfDBMHits                 = 63, //!< these are the number of DBM hits [unit8_t].
     numberOfPixelHits               = 2,  //!< these are the pixel hits, including the b-layer [unit8_t].
     numberOfPixelOutliers           =41,  //!< these are the pixel outliers, including the b-layer [unit8_t].
@@ -302,14 +314,12 @@ namespace xAOD {
     numberOfPixelBarrelFlatHoles             = 74,  //!< number of pixel barrel flat layers on track with absence of hits [unit8_t].
     numberOfPixelBarrelInclinedHoles         = 75,  //!< number of pixel barrel flat inclined on track with absence of hits [unit8_t].
     numberOfPixelEndcapHoles                 = 76,  //!< number of pixel endcap layers on track with absence of hits [unit8_t].
-    numberOfInnermostPixelLayerEndcapHits    = 77,  //!< these are the hits in the 0th pixel layer endcap rings [unit8_t].
-    numberOfNextToInnermostPixelLayerEndcapHits = 78,  //!< these are the hits in the 0.5th and 1st pixel layer endcap rings [unit8_t].
 
     // HGTD SummaryTypes
     hasValidTime = 79,
 
     // -- numbers...
-    numberOfTrackSummaryTypes       = 80
+    numberOfTrackSummaryTypes       = 86
   };
 
   /// Enumerates the different types of information stored in Summary. 

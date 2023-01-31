@@ -9,7 +9,7 @@ def getxAODConfigSvc(ConfigFlags):
     acc = ComponentAccumulator()
 
     cfgsvc = CompFactory.TrigConf.xAODConfigSvc('xAODConfigSvc')
-    # We serve in-file metadata where possible. If it does not exist (e.g. RAWtoESD, RAWtoALL), then it is obtained from the Conditions and Detector stores
+    # We serve in-file metadata where possible. If it does not exist (e.g. RAWtoALL), then it is obtained from the Conditions and Detector stores
     cfgsvc.UseInFileMetadata = ConfigFlags.Trigger.InputContainsConfigMetadata
     acc.addService(cfgsvc, primary=True)
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetAmbiTrackSelectionTool package
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -17,7 +17,7 @@ def InDetAmbiTrackSelectionToolCfg(flags, name = "InDetAmbiTrackSelectionTool", 
     #
     # --- load InnerDetector TrackSelectionTool
     #
-    if flags.InDet.Tracking.ActivePass.useTIDE_Ambi:
+    if flags.InDet.Tracking.ActiveConfig.useTIDE_Ambi:
         AmbiTrackSelectionTool = CompFactory.InDet.InDetDenseEnvAmbiTrackSelectionTool
     else:
         AmbiTrackSelectionTool = CompFactory.InDet.InDetAmbiTrackSelectionTool
@@ -30,15 +30,15 @@ def InDetAmbiTrackSelectionToolCfg(flags, name = "InDetAmbiTrackSelectionTool", 
     InDetPRDtoTrackMapToolGangedPixels = acc.popToolsAndMerge(InDetPRDtoTrackMapToolGangedPixelsCfg(flags))
 
     kwargs.setdefault("AssociationTool" , InDetPRDtoTrackMapToolGangedPixels)
-    kwargs.setdefault("minHits"         , flags.InDet.Tracking.ActivePass.minClusters)
-    kwargs.setdefault("minNotShared"    , flags.InDet.Tracking.ActivePass.minSiNotShared)
-    kwargs.setdefault("maxShared"       , flags.InDet.Tracking.ActivePass.maxShared)
+    kwargs.setdefault("minHits"         , flags.InDet.Tracking.ActiveConfig.minClusters)
+    kwargs.setdefault("minNotShared"    , flags.InDet.Tracking.ActiveConfig.minSiNotShared)
+    kwargs.setdefault("maxShared"       , flags.InDet.Tracking.ActiveConfig.maxShared)
     kwargs.setdefault("minTRTHits"      , 0) # used for Si only tracking !!!
     kwargs.setdefault("UseParameterization" , False)
     kwargs.setdefault("Cosmics"             , flags.Beam.Type is BeamType.Cosmics)
     kwargs.setdefault("doPixelSplitting"    , flags.InDet.Tracking.doPixelClusterSplitting)
 
-    if flags.InDet.Tracking.ActivePass.useTIDE_Ambi:
+    if flags.InDet.Tracking.ActiveConfig.useTIDE_Ambi:
         kwargs.setdefault("sharedProbCut"             , flags.InDet.Tracking.pixelClusterSplitProb1)
         kwargs.setdefault("sharedProbCut2"            , flags.InDet.Tracking.pixelClusterSplitProb2)
         kwargs.setdefault("minSiHitsToAllowSplitting" , 8 if flags.GeoModel.Run is LHCPeriod.Run1 else 9)
@@ -64,11 +64,16 @@ def InDetAmbiTrackSelectionToolCfg(flags, name = "InDetAmbiTrackSelectionTool", 
         kwargs.setdefault("minPtBjetROI"              , 10000)
         kwargs.setdefault("phiWidthEM"                , 0.05)     #Split cluster ROI size
         kwargs.setdefault("etaWidthEM"                , 0.05)     #Split cluster ROI size
+        if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring and flags.InDet.Tracking.ActiveConfig.extension == "":
+            from TrkConfig.TrkValToolsConfig import TrkObserverToolCfg
+            TrkObserverTool = acc.popToolsAndMerge(TrkObserverToolCfg(flags))
+            acc.addPublicTool(TrkObserverTool)
+            kwargs.setdefault("ObserverTool", TrkObserverTool)
 
     else:
         kwargs.setdefault("sharedProbCut", 0.10)
 
-    InDetAmbiTrackSelectionTool = AmbiTrackSelectionTool(name = name+flags.InDet.Tracking.ActivePass.extension, **kwargs)
+    InDetAmbiTrackSelectionTool = AmbiTrackSelectionTool(name = name+flags.InDet.Tracking.ActiveConfig.extension, **kwargs)
     acc.setPrivateTools(InDetAmbiTrackSelectionTool)
     return acc
 
@@ -84,11 +89,11 @@ def InDetTRTAmbiTrackSelectionToolCfg(flags, name = 'InDetTRT_SeededAmbiTrackSel
         kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(InDetPRDtoTrackMapToolGangedPixelsCfg(flags)))
 
     kwargs.setdefault("minScoreShareTracks", -1.) # off !
-    kwargs.setdefault("minHits", flags.InDet.Tracking.ActivePass.minSecondaryClusters)
-    kwargs.setdefault("minNotShared", flags.InDet.Tracking.ActivePass.minSecondarySiNotShared)
-    kwargs.setdefault("maxShared", flags.InDet.Tracking.ActivePass.maxSecondaryShared)
-    kwargs.setdefault("minTRTHits", flags.InDet.Tracking.ActivePass.minSecondaryTRTonTrk)
-    kwargs.setdefault("UseParameterization", flags.InDet.Tracking.ActivePass.useParameterizedTRTCuts)
+    kwargs.setdefault("minHits", flags.InDet.Tracking.ActiveConfig.minSecondaryClusters)
+    kwargs.setdefault("minNotShared", flags.InDet.Tracking.ActiveConfig.minSecondarySiNotShared)
+    kwargs.setdefault("maxShared", flags.InDet.Tracking.ActiveConfig.maxSecondaryShared)
+    kwargs.setdefault("minTRTHits", flags.InDet.Tracking.ActiveConfig.minSecondaryTRTonTrk)
+    kwargs.setdefault("UseParameterization", flags.InDet.Tracking.ActiveConfig.useParameterizedTRTCuts)
     kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
     kwargs.setdefault("doPixelSplitting", flags.InDet.Tracking.doPixelClusterSplitting)
 
@@ -102,9 +107,9 @@ def InDetTrigTrackSelectionToolCfg(flags, name = 'InDetTrigAmbiTrackSelectionToo
   from InDetConfig.InDetAssociationToolsConfig import TrigPRDtoTrackMapToolGangedPixelsCfg
   kwargs.setdefault("DriftCircleCutTool", None)
   kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(TrigPRDtoTrackMapToolGangedPixelsCfg(flags)))
-  kwargs.setdefault("minHits", flags.InDet.Tracking.ActivePass.minClusters)
-  kwargs.setdefault("minNotShared", flags.InDet.Tracking.ActivePass.minSiNotShared)
-  kwargs.setdefault("maxShared", flags.InDet.Tracking.ActivePass.maxShared)
+  kwargs.setdefault("minHits", flags.InDet.Tracking.ActiveConfig.minClusters)
+  kwargs.setdefault("minNotShared", flags.InDet.Tracking.ActiveConfig.minSiNotShared)
+  kwargs.setdefault("maxShared", flags.InDet.Tracking.ActiveConfig.maxShared)
   kwargs.setdefault("minTRTHits", 0) # used for Si only tracking !!!
   kwargs.setdefault("Cosmics", False) #there is a different instance
   kwargs.setdefault("UseParameterization", False)
@@ -165,8 +170,8 @@ def ITkAmbiTrackSelectionToolCfg(flags, name = "ITkAmbiTrackSelectionTool", **kw
     if 'InDetEtaDependentCutsSvc' not in kwargs :
         from InDetConfig.InDetEtaDependentCutsConfig import ITkEtaDependentCutsSvcCfg
         acc.merge(ITkEtaDependentCutsSvcCfg(flags))
-        kwargs.setdefault("InDetEtaDependentCutsSvc", acc.getService("ITkEtaDependentCutsSvc"+flags.ITk.Tracking.ActivePass.extension))
+        kwargs.setdefault("InDetEtaDependentCutsSvc", acc.getService("ITkEtaDependentCutsSvc"+flags.ITk.Tracking.ActiveConfig.extension))
 
-    ITkAmbiTrackSelectionTool = CompFactory.InDet.InDetDenseEnvAmbiTrackSelectionTool(name = name+flags.ITk.Tracking.ActivePass.extension, **kwargs)
+    ITkAmbiTrackSelectionTool = CompFactory.InDet.InDetDenseEnvAmbiTrackSelectionTool(name = name+flags.ITk.Tracking.ActiveConfig.extension, **kwargs)
     acc.setPrivateTools(ITkAmbiTrackSelectionTool)
     return acc

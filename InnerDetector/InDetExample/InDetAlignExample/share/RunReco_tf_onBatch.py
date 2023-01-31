@@ -48,7 +48,7 @@ def main():
     inputType=""
     outputType=""
     debug=config.debug
-    triggerFlags="from TrigHLTMonitoring.HLTMonFlags import HLTMonFlags;HLTMonFlags.doBphys=False;"
+    triggerFlags=""
 
     
     if sampleType=="mc":
@@ -146,7 +146,7 @@ def main():
             print (InputFiles)
         
         #Setting Up and running the command
-        #cmd = "Reco_tf.py --conditionsTag='CONDBR2-ES1PA-2014-01' --beamType='cosmics' --ignoreErrors=True --autoConfiguration='everything' --maxEvents=-1  --postExec='ServiceMgr.InDetSCT_ConditionsSummarySvc.ConditionsServices=[\"InDetSCT_ConfigurationConditionsSvc\",\"InDetSCT_FlaggedConditionSvc\",\"InDetSCT_ByteStreamErrorsSvc\",\"InDetSCT_ReadCalibDataSvc\"]' --preExec='rec.doJetMissingETTag=False;rec.doTau=False;from CaloRec.CaloCellFlags import jobproperties;jobproperties.CaloCellFlags.doLArHVCorr=False;jobproperties.CaloCellFlags.doPileupOffsetBCIDCorr.set_Value_and_Lock(False);from InDetRecExample.InDetJobProperties import InDetFlags;InDetFlags.doPixelClusterSplitting.set_Value_and_Lock(False);from TrigHLTMonitoring.HLTMonFlags import HLTMonFlags;HLTMonFlags.doBphys=False;DQMonFlags.doJetMon=False;DQMonFlags.doMissingEtMon=False;DQMonFlags.enableLumiAccess=False;InDetFlags.doInnerDetectorCommissioning.set_Value_and_Lock(True);InDetFlags.useBroadClusterErrors.set_Value_and_Lock(False);DQMonFlags.doStreamAwareMon=False;from JetRec.JetRecFlags import jetFlags;jetFlags.useTracks=False;larCondFlags.OFCShapeFolder.set_Value_and_Lock(\"\")' --geometryVersion='ATLAS-R2-2015-01-01-00' --inputBSFile="+InputFiles+" --outputESDFile=myESD.pool.root --postInclude='"+PWD+"InDetMonitoringAlignment.py'"
+        #cmd = "Reco_tf.py --conditionsTag='CONDBR2-ES1PA-2014-01' --beamType='cosmics' --ignoreErrors=True --autoConfiguration='everything' --maxEvents=-1  --postExec='ServiceMgr.InDetSCT_ConditionsSummarySvc.ConditionsServices=[\"InDetSCT_ConfigurationConditionsSvc\",\"InDetSCT_FlaggedConditionSvc\",\"InDetSCT_ByteStreamErrorsSvc\",\"InDetSCT_ReadCalibDataSvc\"]' --preExec='rec.doJetMissingETTag=False;rec.doTau=False;from CaloRec.CaloCellFlags import jobproperties;jobproperties.CaloCellFlags.doLArHVCorr=False;jobproperties.CaloCellFlags.doPileupOffsetBCIDCorr.set_Value_and_Lock(False);from InDetRecExample.InDetJobProperties import InDetFlags;InDetFlags.doPixelClusterSplitting.set_Value_and_Lock(False);DQMonFlags.doJetMon=False;DQMonFlags.doMissingEtMon=False;DQMonFlags.enableLumiAccess=False;InDetFlags.doInnerDetectorCommissioning.set_Value_and_Lock(True);InDetFlags.useBroadClusterErrors.set_Value_and_Lock(False);DQMonFlags.doStreamAwareMon=False;from JetRec.JetRecFlags import jetFlags;jetFlags.useTracks=False;larCondFlags.OFCShapeFolder.set_Value_and_Lock(\"\")' --geometryVersion='ATLAS-R2-2015-01-01-00' --inputBSFile="+InputFiles+" --outputESDFile=myESD.pool.root --postInclude='"+PWD+"InDetMonitoringAlignment.py'"
         #
 
         
@@ -155,7 +155,7 @@ def main():
 
         #19.3 Command
         
-        cmd = "Reco_tf.py --beamType='cosmics' --ignoreErrors=True --autoConfiguration='everything' --maxEvents=-1 --conditionsTag='"+conditionsTag+"' --geometryVersion=ATLAS-R2-2015-02-00-00 --preExec='rec.doJetMissingETTag=False;from CaloRec.CaloCellFlags import jobproperties;jobproperties.CaloCellFlags.doLArHVCorr=False;jobproperties.CaloCellFlags.doPileupOffsetBCIDCorr.set_Value_and_Lock(False);from InDetRecExample.InDetJobProperties import InDetFlags;from TrigHLTMonitoring.HLTMonFlags import HLTMonFlags;HLTMonFlags.doBphys=False;DQMonFlags.enableLumiAccess=False;InDetFlags.doInnerDetectorCommissioning.set_Value_and_Lock(True);InDetFlags.useBroadClusterErrors.set_Value_and_Lock(False);DQMonFlags.doStreamAwareMon=False;from JetRec.JetRecFlags import jetFlags;jetFlags.useTracks=False;larCondFlags.OFCShapeFolder.set_Value_and_Lock(\"\");InDetFlags.ForceCoraCool=True;' --postExec='from IOVDbSvc.CondDB import conddb;conddb.addOverride(\"/GLOBAL/TrackingGeo/LayerMaterialV2\",\"AtlasLayerMat_v18_ATLAS-R2-2015\");' "+inputType+InputFiles+" "+outputType+"my"+outType+".pool.root --postInclude='"+PWD+"ErrorScaling.py','"+PWD+"InDetMonitoringAlignment.py'"
+        cmd = "Reco_tf.py --beamType='cosmics' --ignoreErrors=True --autoConfiguration='everything' --maxEvents=-1 --conditionsTag='"+conditionsTag+"' --geometryVersion=ATLAS-R2-2015-02-00-00 --preExec='rec.doJetMissingETTag=False;from CaloRec.CaloCellFlags import jobproperties;jobproperties.CaloCellFlags.doLArHVCorr=False;jobproperties.CaloCellFlags.doPileupOffsetBCIDCorr.set_Value_and_Lock(False);from InDetRecExample.InDetJobProperties import InDetFlags;DQMonFlags.enableLumiAccess=False;InDetFlags.doInnerDetectorCommissioning.set_Value_and_Lock(True);InDetFlags.useBroadClusterErrors.set_Value_and_Lock(False);DQMonFlags.doStreamAwareMon=False;from JetRec.JetRecFlags import jetFlags;jetFlags.useTracks=False;larCondFlags.OFCShapeFolder.set_Value_and_Lock(\"\");InDetFlags.ForceCoraCool=True;' --postExec='from IOVDbSvc.CondDB import conddb;conddb.addOverride(\"/GLOBAL/TrackingGeo/LayerMaterialV2\",\"AtlasLayerMat_v18_ATLAS-R2-2015\");' "+inputType+InputFiles+" "+outputType+"my"+outType+".pool.root --postInclude='"+PWD+"ErrorScaling.py','"+PWD+"InDetMonitoringAlignment.py'"
 
         script.write(cmd+"\n")
         #script.write("rm *ESD*root\n")

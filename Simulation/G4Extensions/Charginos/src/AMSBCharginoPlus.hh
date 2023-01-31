@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CHARGINOS_AMSBCharginoPlus_H
@@ -9,11 +9,13 @@
 #include "G4ios.hh"
 #include "G4ParticleDefinition.hh"
 
+#include "CxxUtils/checker_macros.h"
+
 class AMSBCharginoPlus: public G4ParticleDefinition
 {
 private:
 
-  static AMSBCharginoPlus* s_theInstance;
+  static AMSBCharginoPlus* s_theInstance ATLAS_THREAD_SAFE; // used in single-threaded Geant4 initialization
   AMSBCharginoPlus(){}
   ~AMSBCharginoPlus(){}
 

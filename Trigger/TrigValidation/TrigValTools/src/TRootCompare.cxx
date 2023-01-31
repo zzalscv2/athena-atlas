@@ -83,7 +83,7 @@ void TRootCompare::endJob()
     cout << "List of different histograms:" << endl;
     vector<string>::iterator iter;
     int i = 0;
-    for (iter=m_noMatch.begin(); iter!=m_noMatch.end(); iter++) {
+    for (iter=m_noMatch.begin(); iter!=m_noMatch.end(); ++iter) {
       i++;
       cout << setw(2) << i << ") " << *iter << endl;
     }
@@ -93,7 +93,7 @@ void TRootCompare::endJob()
     cout << endl << "List of ignored histograms:" << endl;
     vector<string>::iterator iter;
     int i = 0;
-    for (iter=m_skippedObjects.begin(); iter!=m_skippedObjects.end(); iter++) {
+    for (iter=m_skippedObjects.begin(); iter!=m_skippedObjects.end(); ++iter) {
       i++;
       cout << setw(2) << i << ") " << *iter << endl;
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************************
@@ -112,6 +112,7 @@ StatusCode TilePulseForTileMuonReceiver::initialize() {
   ATH_CHECK( m_muRcvRawChannelContainerKey.initialize(m_runPeriod != 0) );
   ATH_CHECK( m_inputDigitContainerKey.initialize(!m_onlyUseContainerName && m_rndmEvtOverlay && m_runPeriod != 0) );
   ATH_CHECK( m_samplingFractionKey.initialize(m_runPeriod != 0) );
+  ATH_CHECK( m_emScaleKey.initialize() );
 
   if ( m_runPeriod == 0) {
     ATH_MSG_INFO("TilePulseForTileMuonReceiver should not be used for RUN1 simulations");
@@ -124,8 +125,6 @@ StatusCode TilePulseForTileMuonReceiver::initialize() {
   CHECK(detStore()->retrieve(m_tileID));
   CHECK(detStore()->retrieve(m_tileHWID));
   CHECK(detStore()->retrieve(m_tileInfo, m_infoName));
-  //=== get TileCondToolEmscale
-  CHECK(m_tileToolEmscale.retrieve());
   //=== get TileCondToolNoiseSample
   CHECK(m_tileToolNoiseSample.retrieve());
 
@@ -253,6 +252,9 @@ StatusCode TilePulseForTileMuonReceiver::execute() {
   double muRcv_Ped;
   double muRcv_Calib;
   double muRcv_Max;
+
+  SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+  ATH_CHECK( emScale.isValid() );
 
   // Get hit container from TES
   //
@@ -627,17 +629,17 @@ StatusCode TilePulseForTileMuonReceiver::execute() {
       //
       muRcv_Max   = m_tileInfo->MuRcvMax(adc_id);             // [adc]
       muRcv_Calib = m_tileInfo->MuRcvCalib(adc_id);           // pCb->[adc]
-      double mev2ADC_factor = muRcv_Calib / m_tileToolEmscale->channelCalib(drawerIdx,TILEchan,TileID::LOWGAIN, 1.
+      double mev2ADC_factor = muRcv_Calib / emScale->calibrateChannel(drawerIdx,TILEchan,TileID::LOWGAIN, 1.
                                                                       , TileRawChannelUnit::PicoCoulombs
                                                                       , TileRawChannelUnit::MegaElectronVolts);
       ATH_MSG_VERBOSE( "(D.01)   Channel: "<<ros<<'/'<<drawer<<'/'<< TMDBchan
                 << " adc/pCb: "<< muRcv_Calib
-                << " Mev/pCb: "<< m_tileToolEmscale->channelCalib( drawerIdx,
-                                                                   TILEchan,
-                                                                   TileID::LOWGAIN,
-                                                                   1.,
-                                                                   TileRawChannelUnit::PicoCoulombs,
-                                                                   TileRawChannelUnit::MegaElectronVolts)
+                << " Mev/pCb: "<< emScale->calibrateChannel( drawerIdx,
+                                                             TILEchan,
+                                                             TileID::LOWGAIN,
+                                                             1.,
+                                                             TileRawChannelUnit::PicoCoulombs,
+                                                             TileRawChannelUnit::MegaElectronVolts)
                 << " final calibration factor adc/MeV: "<< mev2ADC_factor);
 
       ATH_MSG_VERBOSE( "(D.02)      Pulse digits [MeV]:"

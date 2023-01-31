@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArAccumulatedDigits2Ntuple.h"
@@ -121,7 +121,6 @@ StatusCode LArAccumulatedDigits2Ntuple::execute()
      ATH_MSG_DEBUG( "LArAccumulatedDigitContainer with key=" << m_contKey << " has " <<accuDigitContainer->size() << " entries" );
    }
 
-   unsigned cellCounter=0;
    for (const LArAccumulatedDigit* digit : *accuDigitContainer) {
 
      m_IEvent=m_event;
@@ -159,7 +158,6 @@ StatusCode LArAccumulatedDigits2Ntuple::execute()
        ATH_MSG_ERROR( "writeRecord failed" );
        return sc;
      }
-     cellCounter++;
    } 
  } 
  ATH_MSG_DEBUG( "LArAccumulatedDigits2Ntuple has finished." );

@@ -138,7 +138,7 @@ class InducedChargeModel : public AthMessaging {
   void getEField(const SCT_InducedChargeModelData& data,
                  const double x, const double y, double& Ex, double& Ey) const;
 
-  size_t getFEMIndex(SCT_InducedChargeModelData& data) const;
+  static size_t getFEMIndex(SCT_InducedChargeModelData& data) ;
 
   //-------- parameters for e, h transport --------------------------------
   static const double s_kB; // [m^2*kg/s^2/K]

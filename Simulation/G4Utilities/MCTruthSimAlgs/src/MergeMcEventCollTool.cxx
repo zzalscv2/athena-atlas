@@ -12,11 +12,12 @@
 #include "GaudiKernel/PhysicalConstants.h"
 using namespace Gaudi::Units;
 
+
 #include <vector>
-using std::vector;
 #include <string>
-using std::string;
 #include <cmath>
+#include <stdexcept>
+
 typedef std::pair<int, int> IndexKey;
 namespace {
   double charge( const int id ) {
@@ -90,9 +91,13 @@ namespace {
       const IndexKey key2(makekey(signal_process_id2, event_number2,separator_hack2));
       const PileUpBackgroundMap::const_iterator event1=m_backgroundClassificationMap.find(key1);
       const PileUpBackgroundMap::const_iterator event2=m_backgroundClassificationMap.find(key2);
-      if(event1==m_backgroundClassificationMap.end()) {throw 421;}
-      if(event2==m_backgroundClassificationMap.end()) {throw 422;}
-      //if(event1==event2) {throw 423;}
+      if(event1==m_backgroundClassificationMap.end())  {
+        throw std::runtime_error("GenEventSorter::operator() : IndexKey 1 not found in backgroundClassificationMap");
+      }
+      if(event2==m_backgroundClassificationMap.end())  {
+        throw std::runtime_error("GenEventSorter::operator() : IndexKey 2 not found in backgroundClassificationMap");
+      }
+      
       //Both events have the same 'type'
       if(event1->second==event2->second) {
         if (is_separator(signal_process_id1, event_number1)) {return true;} //separator GenEvents should go at the start of each classification
@@ -208,13 +213,7 @@ StatusCode MergeMcEventCollTool::processAllSubEvents(const EventContext& /*ctx*/
   if(m_compressOutputCollection) CHECK( compressOutputMcEventCollection() );
 
   //Sort the GenEvents in the output McEventCollection according to background classification
-  try {
-    std::sort(m_pOvrlMcEvColl->begin(), m_pOvrlMcEvColl->end(), GenEventSorter(m_backgroundClassificationMap));
-  }
-  catch (int e) {
-    ATH_MSG_ERROR("An exception occurred. Exception Nr. " << e);
-    throw;
-  }
+  std::sort(m_pOvrlMcEvColl->begin(), m_pOvrlMcEvColl->end(), GenEventSorter(m_backgroundClassificationMap));
 
   m_newevent=true;
 
@@ -272,13 +271,8 @@ StatusCode MergeMcEventCollTool::mergeEvent(const EventContext& /*ctx*/) {
     ATH_MSG_WARNING( "There are " << m_pOvrlMcEvColl->size() << " GenEvents in the McEventCollection, but " << m_backgroundClassificationMap.size() << " entries in the classification map." );
   }
   //Sort the GenEvents in the output McEventCollection according to background classification
-  try {
-    std::sort(m_pOvrlMcEvColl->begin(), m_pOvrlMcEvColl->end(), GenEventSorter(m_backgroundClassificationMap));
-  }
-  catch (int e) {
-    ATH_MSG_ERROR("An exception occurred. Exception Nr. " << e);
-    throw;
-  }
+
+  std::sort(m_pOvrlMcEvColl->begin(), m_pOvrlMcEvColl->end(), GenEventSorter(m_backgroundClassificationMap));
   ATH_MSG_DEBUG("Sorted McEventCollection OK.");
   if(msgLvl(MSG::DEBUG)) { printDetailsOfMergedMcEventCollection(); }
 
@@ -431,6 +425,7 @@ StatusCode MergeMcEventCollTool::processTruthFilteredEvent(const McEventCollecti
   ATH_CHECK(this->saveHeavyIonInfo(pMcEvtColl));
   m_pOvrlMcEvColl->at(m_startingIndexForBackground+m_nBkgEventsReadSoFar)=new HepMC::GenEvent(**(pMcEvtColl->begin()));
   HepMC::GenEvent& currentBackgroundEvent(*(m_pOvrlMcEvColl->at(m_startingIndexForBackground+m_nBkgEventsReadSoFar)));
+  HepMC::fillBarcodesAttribute(&currentBackgroundEvent);
   currentBackgroundEvent.set_event_number(currentBkgEventIndex);
   puType currentGenEventClassification(RESTOFMB);
   if ( std::abs(currentEventTime)<51.0 ) {
@@ -448,6 +443,7 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
   const HepMC::GenEvent& currentBackgroundEvent(**(pMcEvtColl->begin()));         //background event
   //handle the slimming case
   HepMC::GenVertexPtr  pCopyOfGenVertex{nullptr};
+  int  spi = HepMC::signal_process_id(currentBackgroundEvent);
 #ifdef HEPMC3
   if ( HepMC::signal_process_vertex(&currentBackgroundEvent) ) pCopyOfGenVertex = std::make_shared<HepMC3::GenVertex> ( HepMC::signal_process_vertex(&currentBackgroundEvent)->data() );
   //insert the GenEvent into the overlay McEventCollection.
@@ -456,9 +452,9 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
   evt->set_event_number(currentBkgEventIndex);
   evt->add_vertex(pCopyOfGenVertex);
   HepMC::set_signal_process_vertex(evt,pCopyOfGenVertex);
-  HepMC::set_signal_process_id(evt,HepMC::signal_process_id(currentBackgroundEvent));
+  HepMC::set_signal_process_id(evt,spi);
   m_pOvrlMcEvColl->at(m_startingIndexForBackground+m_nBkgEventsReadSoFar) =  evt;
-  updateClassificationMap(HepMC::signal_process_id(currentBackgroundEvent), currentBkgEventIndex, 0, RESTOFMB, true);
+  updateClassificationMap(spi, currentBkgEventIndex, 0, RESTOFMB, true);
 
   unsigned int nCollisionVerticesFound(0);
   //loop over vertices in Background GenEvent
@@ -468,8 +464,8 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
 #else
   if ( HepMC::signal_process_vertex(&currentBackgroundEvent) ) pCopyOfGenVertex = new HepMC::GenVertex ( *currentBackgroundEvent.signal_process_vertex() );
   //insert the GenEvent into the overlay McEventCollection.
-  m_pOvrlMcEvColl->at(m_startingIndexForBackground+m_nBkgEventsReadSoFar) = new HepMC::GenEvent(currentBackgroundEvent.signal_process_id(), currentBkgEventIndex, pCopyOfGenVertex );
-  updateClassificationMap(HepMC::signal_process_id(currentBackgroundEvent), currentBkgEventIndex, 0, RESTOFMB, true);
+  m_pOvrlMcEvColl->at(m_startingIndexForBackground+m_nBkgEventsReadSoFar) = new HepMC::GenEvent(spi, currentBkgEventIndex, pCopyOfGenVertex );
+  updateClassificationMap(spi, currentBkgEventIndex, 0, RESTOFMB, true);
 
   unsigned int nCollisionVerticesFound(0);
   //loop over vertices in Background GenEvent
@@ -478,7 +474,7 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
   auto endOfCurrentListOfVertices = currentBackgroundEvent.vertices_end();
 #endif
   for (; currentVertexIter != endOfCurrentListOfVertices; ++currentVertexIter) {
-    auto  pCurrentVertex=*currentVertexIter;
+    const auto&  pCurrentVertex=*currentVertexIter;
     HepMC::GenVertexPtr  pCopyOfVertexForClassification[NOPUTYPE];
     for (int type(INTIME); type<NOPUTYPE; ++type) pCopyOfVertexForClassification[type]=(HepMC::GenVertexPtr )nullptr;
 
@@ -491,7 +487,7 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
 
     //loop over outgoing particles in the current GenVertex keeping those not classified as NOPUTYPE
     ATH_MSG_VERBOSE( "Starting an outgoing particle loop ... " );
-    for (HepMC::ConstGenParticlePtr currentVertexParticle: *pCurrentVertex){
+    for (const HepMC::ConstGenParticlePtr& currentVertexParticle: *pCurrentVertex){
       ATH_MSG_VERBOSE( "Found a particle at location " << std::hex << currentVertexParticle << std::dec  << " with PDG ID = " << currentVertexParticle->pdg_id() );
       HepMC::ConstGenVertexPtr  pCurrentParticleProductionVertex = currentVertexParticle->production_vertex();
       puType particleClassification(classifyVertex(currentVertexParticle, pCurrentParticleProductionVertex,currentEventTime));
@@ -503,24 +499,20 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
       if (particleClassification<NOPUTYPE && m_saveType[particleClassification]) {
         if (!pCopyOfVertexForClassification[particleClassification]) {
           pCopyOfVertexForClassification[particleClassification] =HepMC::newGenVertexPtr(pCurrentVertex->position());
-          ATH_MSG_VERBOSE( "Added bkg vertex " << pCopyOfVertexForClassification[particleClassification]
-                           << " at position " <<  pCopyOfVertexForClassification[particleClassification]
-                           << " for pu type = " << particleClassification );
+          ATH_MSG_VERBOSE( "Added bkg vertex " << pCopyOfVertexForClassification[particleClassification] << " at position " <<  pCopyOfVertexForClassification[particleClassification] << " for pu type = " << particleClassification );
         }
 #ifdef HEPMC3
         pCopyOfVertexForClassification[particleClassification]->add_particle_out(std::make_shared<HepMC3::GenParticle>(currentVertexParticle->data()));
 #else
         pCopyOfVertexForClassification[particleClassification]->add_particle_out( new HepMC::GenParticle(*currentVertexParticle) );
 #endif
-        ATH_MSG_VERBOSE( "Added bkg particle at location " << std::hex
-                         << currentVertexParticle << std::dec
-                         << " with PDG ID = " << currentVertexParticle->pdg_id() );
+        ATH_MSG_VERBOSE( "Added bkg particle at location " << std::hex << currentVertexParticle << std::dec << " with PDG ID = " << currentVertexParticle->pdg_id() );
       }
     } //particle loop
     /** add the in-coming particles to the in-time minbias vertex only */
     if (m_saveType[INTIME] && pCopyOfVertexForClassification[INTIME]) {
 #ifdef HEPMC3
- for (auto currentVertexParticle:  pCurrentVertex->particles_in()) {
+ for (const auto& currentVertexParticle:  pCurrentVertex->particles_in()) {
         pCopyOfVertexForClassification[INTIME]->add_particle_in (std::make_shared<HepMC3::GenParticle>(currentVertexParticle->data()));
       }
 #else
@@ -541,7 +533,7 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
 #endif
       if (m_saveType[type] && (n_particles_out > 0) ) {
         m_pOvrlMcEvColl->at(m_startingIndexForBackground+m_nBkgEventsReadSoFar)->add_vertex( pCopyOfVertexForClassification[type]);
-        updateClassificationMap(HepMC::signal_process_id(currentBackgroundEvent), currentBkgEventIndex, 0, type, false);
+        updateClassificationMap(spi, currentBkgEventIndex, 0, type, false);
       }
     }
   } //vertex loop
@@ -549,16 +541,13 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
   return StatusCode::SUCCESS;
 }
 
-bool MergeMcEventCollTool::isInitialCollisionVertex(HepMC::ConstGenVertexPtr  pCurrentVertex) const {
+bool MergeMcEventCollTool::isInitialCollisionVertex(const HepMC::ConstGenVertexPtr&  pCurrentVertex) const {
 //AV: The claims below about this code corectness for the Pythia (which one?) minbias 
 //    event could be outdated as of 2021, e.g. the comparison of barcodes could be incorrect 
 #ifdef HEPMC3
-for (auto pCurrentVertexParticle: pCurrentVertex->particles_in())
+for (const auto& pCurrentVertexParticle: pCurrentVertex->particles_in())
       {  
-         if ( (4==pCurrentVertexParticle->status()) ||  (2212==pCurrentVertexParticle->pdg_id()
-           && (1==HepMC::barcode(pCurrentVertexParticle) || 2==HepMC::barcode(pCurrentVertexParticle)) ) ) {
-           return true;
-         }
+         if (4==pCurrentVertexParticle->status()) return true;
       }
 #else
   HepMC::GenVertex::particles_in_const_iterator currentVertexParticleIter(pCurrentVertex->particles_in_const_begin());
@@ -579,7 +568,7 @@ for (auto pCurrentVertexParticle: pCurrentVertex->particles_in())
   return false;
 }
 
-MergeMcEventCollTool::puType MergeMcEventCollTool::classifyVertex(HepMC::ConstGenParticlePtr  pCurrentVertexParticle, HepMC::ConstGenVertexPtr  pCurrentParticleProductionVertex, double currentEventTime) {
+MergeMcEventCollTool::puType MergeMcEventCollTool::classifyVertex(const HepMC::ConstGenParticlePtr&  pCurrentVertexParticle, const HepMC::ConstGenVertexPtr&  pCurrentParticleProductionVertex, double currentEventTime) {
   //=======================================================================
   //handle the slimming case
   //=======================================================================
@@ -662,14 +651,10 @@ void MergeMcEventCollTool::updateClassificationMap(int signal_process_id, int ev
     ATH_MSG_ERROR( "updateClassidificationMap: GenEvent #" << event_number << ", signal_process_id(" << signal_process_id << "), category = " << classification );
     ATH_MSG_ERROR ("Failed to clear background classification map! Size = "<< m_backgroundClassificationMap.size());
     m_backgroundClassificationMap.clear();
-    if (!m_backgroundClassificationMap.empty()) {
-      throw 43;
-    }
   }
   if(-1==classification && !m_newevent) {
     ATH_MSG_ERROR( "updateClassidificationMap: GenEvent #" << event_number << ", signal_process_id(" << signal_process_id << "), category = " << classification );
     ATH_MSG_FATAL ("Should only ever be one signal event in the background classification map! Bailing out.");
-    throw 44;
   }
   // Check for separators
   IndexKey key(makekey(signal_process_id,event_number));
@@ -684,7 +669,7 @@ void MergeMcEventCollTool::updateClassificationMap(int signal_process_id, int ev
       ATH_MSG_ERROR( "updateClassidificationMap: Repeated KEY! "<< key <<". Previous category = " << event->second );
     }
     else {
-      ATH_MSG_DEBUG( "updateClassidificationMap: Updating categorty for existing key "<< key <<". Previous category = " << event->second << ", new catagory = " << classification );
+      ATH_MSG_DEBUG( "updateClassidificationMap: Updating category for existing key "<< key <<". Previous category = " << event->second << ", new category = " << classification );
     }
     if(int(RESTOFMB)!=event->second) {
       if(event->second<=classification) return;

@@ -289,7 +289,7 @@ std::string ExpressionEvaluator::trim (const std::string& s)
         i = temp.find_last_not_of (' ');
         if (i < temp.size ())
         {
-                temp = temp.substr (0, i + 1);
+                temp.resize (i + 1);
         }
         return (temp);
 }

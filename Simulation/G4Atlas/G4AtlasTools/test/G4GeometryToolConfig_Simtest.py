@@ -13,31 +13,32 @@ if __name__ == '__main__':
   log.setLevel(DEBUG)
 
   #import config flags
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
   from AthenaConfiguration.Enums import ProductionStep, Project
-  ConfigFlags.Common.ProductionStep = ProductionStep.Simulation
+  flags = initConfigFlags()
+  flags.Common.ProductionStep = ProductionStep.Simulation
 
   from AthenaConfiguration.TestDefaults import defaultTestFiles
   inputDir = defaultTestFiles.d
-  ConfigFlags.Input.Files = defaultTestFiles.EVNT
+  flags.Input.Files = defaultTestFiles.EVNT
 
-  if ConfigFlags.Common.Project is Project.AthSimulation:
+  if flags.Common.Project is Project.AthSimulation:
     detectors =['Bpipe', 'BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'MBTS', 'CSC', 'MDT', 'RPC', 'TGC'] # FwdRegion geometry not currently included in AthSimulation
   else:
     detectors =['Bpipe', 'BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'MBTS', 'CSC', 'MDT', 'RPC', 'TGC', 'FwdRegion']
 
   # Setup detector flags
   from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-  setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
+  setupDetectorFlags(flags, detectors, toggle_geometry=True)
 
   #turn the forward region off
-  ConfigFlags.Sim.WorldRRange = 15000
-  ConfigFlags.Sim.WorldZRange = 27000
+  flags.Sim.WorldRRange = 15000
+  flags.Sim.WorldZRange = 27000
 
-  ConfigFlags.Sim.TwissFileNomReal = "nominal" #so it doesn't crash
+  flags.Sim.TwissFileNomReal = "nominal" #so it doesn't crash
 
   # Finalize
-  ConfigFlags.lock()
+  flags.lock()
 
   from G4AtlasTools.G4GeometryToolConfig import BeamPipeGeoDetectorToolCfg
   from G4AtlasTools.G4GeometryToolConfig import PixelGeoDetectorToolCfg
@@ -49,40 +50,39 @@ if __name__ == '__main__':
   ## Initialize a new component accumulator
   cfg = ComponentAccumulator()
 
-  acc  = BeamPipeGeoDetectorToolCfg(ConfigFlags)
+  acc  = BeamPipeGeoDetectorToolCfg(flags)
   tool = cfg.popToolsAndMerge(acc)
   cfg.addPublicTool(tool)
 
-  acc  = PixelGeoDetectorToolCfg(ConfigFlags)
-  tool = cfg.popToolsAndMerge(acc)
-  cfg.addPublicTool(tool)
-  
-  acc  = SCTGeoDetectorToolCfg(ConfigFlags)
-  tool = cfg.popToolsAndMerge(acc)
-  cfg.addPublicTool(tool)
-  
-  acc  = SCTGeoDetectorToolCfg(ConfigFlags)
-  tool = cfg.popToolsAndMerge(acc)
-  cfg.addPublicTool(tool)
-  
-  acc  = IDETEnvelopeCfg(ConfigFlags)
-  tool = cfg.popToolsAndMerge(acc)
-  cfg.addPublicTool(tool)
-  
-  acc  = CALOEnvelopeCfg(ConfigFlags)
+  acc  = PixelGeoDetectorToolCfg(flags)
   tool = cfg.popToolsAndMerge(acc)
   cfg.addPublicTool(tool)
 
-  acc  = ATLASEnvelopeCfg(ConfigFlags)
+  acc  = SCTGeoDetectorToolCfg(flags)
+  tool = cfg.popToolsAndMerge(acc)
+  cfg.addPublicTool(tool)
+
+  acc  = SCTGeoDetectorToolCfg(flags)
+  tool = cfg.popToolsAndMerge(acc)
+  cfg.addPublicTool(tool)
+
+  acc  = IDETEnvelopeCfg(flags)
+  tool = cfg.popToolsAndMerge(acc)
+  cfg.addPublicTool(tool)
+
+  acc  = CALOEnvelopeCfg(flags)
+  tool = cfg.popToolsAndMerge(acc)
+  cfg.addPublicTool(tool)
+
+  acc  = ATLASEnvelopeCfg(flags)
   tool = cfg.popToolsAndMerge(acc)
   cfg.addPublicTool(tool)
 
   cfg.printConfig(withDetails=True, summariseProps = True)
-  ConfigFlags.dump()
+  flags.dump()
 
-  f=open("test.pkl","wb")
-  cfg.store(f) 
-  f.close()
+  with open("test.pkl", "wb") as f:
+    cfg.store(f)
 
   print(cfg._publicTools)
 

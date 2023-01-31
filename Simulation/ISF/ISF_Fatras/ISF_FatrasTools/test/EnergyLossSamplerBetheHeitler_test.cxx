@@ -1,5 +1,8 @@
 #undef NDEBUG
 
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
+
 #include "ISF_FatrasInterfaces/IEnergyLossSampler.h"
 #include "AthenaKernel/IAtRndmGenSvc.h"
 #include "TrkGeometry/MaterialProperties.h"

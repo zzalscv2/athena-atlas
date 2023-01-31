@@ -72,8 +72,8 @@ void HTTSectorMap::CreateFile(const char *fname4,const char *fname8, const char 
 }
 
 void HTTSectorMap::Dump() {
-  for (mapint2::iterator i = m_data.begin(); i != m_data.end();i++) {
-    for (mapint::iterator j = (*i).second.begin(); j != (*i).second.end();j++) {
+  for (mapint2::iterator i = m_data.begin(); i != m_data.end();++i) {
+    for (mapint::iterator j = (*i).second.begin(); j != (*i).second.end();++j) {
       ANA_MSG_DEBUG((*i).first << " " << (*j).first << " " << (*j).second);
     }
   }

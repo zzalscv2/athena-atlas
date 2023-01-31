@@ -25,13 +25,14 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaKernel/ICutFlowSvc.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "CxxUtils/checker_macros.h"
 
 #include <string>
 #include <map>
 
 namespace DerivationFramework {
   
-  class CfAthAlgTool : public AthAlgTool {
+  class ATLAS_NOT_THREAD_SAFE CfAthAlgTool : public AthAlgTool {
   public:
     // constructor with parameters
     CfAthAlgTool(const std::string& t, const std::string& n,

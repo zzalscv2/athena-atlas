@@ -34,6 +34,8 @@
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloIdentifier/CaloIdManager.h"
+#include "CaloDetDescrUtils/CaloDetDescrBuilder.h"
+#include "AthenaKernel/getMessageSvc.h"
 #include "LArReadoutGeometry/FCALDetectorManager.h"
 
 #include "PathResolver/PathResolver.h"
@@ -87,7 +89,14 @@ StatusCode ISF::DNNCaloSimSvc::initialize()
       return StatusCode::FAILURE;
     }
   
-  m_caloDetDescrManager  = CaloDetDescrManager::instance();
+  m_caloDetDescrManager = detStore()->tryConstRetrieve<CaloDetDescrManager>(caloMgrStaticKey);
+  if(!m_caloDetDescrManager) {
+    std::unique_ptr<CaloDetDescrManager> caloMgrPtr = buildCaloDetDescrNoAlign(serviceLocator()
+									       , Athena::getMessageSvc());
+    ATH_CHECK(detStore()->record(std::move(caloMgrPtr), caloMgrStaticKey));
+    ATH_CHECK(detStore()->retrieve(m_caloDetDescrManager, caloMgrStaticKey));
+  }
+
   const FCALDetectorManager * fcalManager=nullptr;
   ATH_CHECK(detStore()->retrieve(fcalManager));
 
@@ -317,7 +326,7 @@ return CaloPhiRange::diff(aPhiRaw, bPhiRaw) <= 0;
 }
 
 /** Simulation Call */
-StatusCode ISF::DNNCaloSimSvc::simulate(const ISF::ISFParticle& isfp, McEventCollection*)
+StatusCode ISF::DNNCaloSimSvc::simulate(ISF::ISFParticle& isfp, McEventCollection*)
 {
 
   ATH_MSG_VERBOSE("NEW PARTICLE! DNNCaloSimSvc called with ISFParticle: " << isfp);

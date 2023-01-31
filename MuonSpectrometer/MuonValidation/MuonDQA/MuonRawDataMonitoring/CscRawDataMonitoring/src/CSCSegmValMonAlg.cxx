@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "AthenaMonitoring/AthenaMonManager.h"
 
@@ -96,7 +96,6 @@ StatusCode CSCSegmValMonAlg::fillHistograms(const EventContext& ctx) const{
       ATH_MSG_DEBUG(  "Processing only the first segm in the segm collection"                         );
     }
 
-    int segnum = 0; 
     int layerindex = 0; 
 
         //Loop over segms
@@ -125,8 +124,6 @@ StatusCode CSCSegmValMonAlg::fillHistograms(const EventContext& ctx) const{
 
           // Analyze segment if it is a csc segment
           if ( !isCscSegment(segm) ) continue;
-            
-            segnum++;
             
             // Initialize cluster counter
             for(int sect = 0; sect < 33; sect++) {

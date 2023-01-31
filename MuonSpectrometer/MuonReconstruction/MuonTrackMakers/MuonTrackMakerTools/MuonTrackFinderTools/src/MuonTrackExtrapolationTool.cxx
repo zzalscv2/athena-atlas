@@ -612,7 +612,7 @@ namespace Muon {
 
         // create new track
         return std::make_unique<Trk::Track>(track.info(), std::move(trackStateOnSurfaces),
-                                            track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+                                            track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
     }
 
     std::unique_ptr<TrackCollection> MuonTrackExtrapolationTool::extrapolate(const TrackCollection &tracks, const EventContext &ctx) const {

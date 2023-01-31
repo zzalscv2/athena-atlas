@@ -39,7 +39,6 @@ namespace Trk
    *
    */ 
 
-  //Not THREAD_SAFE due to const_cast 
   class DummyVertexSmoother : public AthAlgTool, virtual public IVertexSmoother
   {
   public:

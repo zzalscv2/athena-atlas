@@ -12,6 +12,7 @@
 #define LArSamples_ShapeDrawer_H
 
 #include <vector>
+#include "CxxUtils/checker_macros.h"
 
 class TGraphErrors;
 class TLegend;
@@ -22,7 +23,7 @@ namespace LArSamples {
   
   class AbsShape;
   
-  class ShapeDrawer  {
+  class ATLAS_NOT_THREAD_SAFE ShapeDrawer  {
   
     public:
    

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #define DiscLayerMaterial_cxx
@@ -240,7 +240,7 @@ void DiscLayerMaterial::Init(TTree *tree)
    fChain->SetBranchAddress("LayerReferenceBinsTotal", &LayerReferenceBinsTotal, &b_discRefBinsTotal);
    fChain->SetBranchAddress("LayerReferenceX0", LayerReferenceX0, &b_LayerReferenceX0);
    fChain->SetBranchAddress("LayerReferenceZARho", LayerReferenceZARho, &b_LayerReferenceZARho);
-   Notify();
+   DiscLayerMaterial::Notify();
 }
 
 Bool_t DiscLayerMaterial::Notify()

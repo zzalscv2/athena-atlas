@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Sun  2 Nov 2014 11:10:06 CET 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -190,7 +190,7 @@ void TrigTrackSelector::selectTracks( const TrigInDetTrackCollection* trigtracks
     TrigInDetTrackCollection::const_iterator  trackend = trigtracks->end();
     while ( trackitr!=trackend ) { 
       selectTrack( *trackitr, truthMap );
-      trackitr++;
+      ++trackitr;
     }
 }
 
@@ -347,7 +347,7 @@ void TrigTrackSelector::selectTracks( const Rec::TrackParticleContainer* trigtra
     
       selectTrack( *trackitr );
       
-      trackitr++;
+      ++trackitr;
 
     } // loop over tracks
     
@@ -366,7 +366,7 @@ void TrigTrackSelector::selectTracks( const TruthParticleContainer* truthtracks 
     
       selectTrack( *trackitr );
       
-      trackitr++;
+      ++trackitr;
 
     } // loop over tracks
     
@@ -406,7 +406,7 @@ void TrigTrackSelector::truthBeamline( const xAOD::TruthParticleContainer* truth
   xAOD::TruthParticleContainer::const_iterator  trackitr = truthtracks->begin();
   xAOD::TruthParticleContainer::const_iterator  trackend = truthtracks->end();
     
-  for ( ; trackitr!=trackend ; trackitr++ ) { 
+  for ( ; trackitr!=trackend ; ++trackitr ) { 
     
     const xAOD::TruthParticle* track = (*trackitr);
     
@@ -463,7 +463,7 @@ void TrigTrackSelector::selectTracks( const xAOD::TruthParticleContainer* trutht
   truthBeamline( truthtracks, x0, y0 );
 
 
-  for ( ; trackitr!=trackend; trackitr++) {
+  for ( ; trackitr!=trackend; ++trackitr) {
 
 
     // Only select charged final state particles
@@ -1074,7 +1074,7 @@ void  TrigTrackSelector::selectTracks( const TrackCollection* trigtracks ) {
    
     while ( trackitr!=trackend ) { 
       selectTrack( *trackitr );
-      trackitr++;
+      ++trackitr;
     } // loop over tracks
     
 }
@@ -1205,10 +1205,10 @@ bool TrigTrackSelector::selectTrack( const xAOD::TrackParticle* track, void* ) {
       int fitter = track->trackFitter();
       std::bitset<xAOD::NumberOfTrackRecoInfo>  patternrec = track->patternRecoInfo();
 
-      int icount = 0;
+      //int icount = 0;<- never used if section below is commented
       for ( unsigned ipr=patternrec.size() ; ipr-- ; ) { 
 	if ( patternrec[ipr] ) {
-	  icount++;
+	  //icount++; <- never used if section below is commented
 	  trackAuthor |= (ipr >> 16);
 	  // static bool first = true;
 	  // if ( first && icount>1 ) { 
@@ -1272,7 +1272,7 @@ void TrigTrackSelector::selectTracks( const xAOD::TrackParticleContainer* tracks
     xAOD::TrackParticleContainer::const_iterator  trackend = tracks->end();
     while ( trackitr!=trackend ) { 
       selectTrack( *trackitr );
-      trackitr++;
+      ++trackitr;
     } // loop over tracks     
 }
 
@@ -1285,7 +1285,7 @@ void TrigTrackSelector::selectTracks( xAOD::TrackParticleContainer::const_iterat
     //    std::cout << "\t\t\tSUTT \tTrackContainer->size() = " << trigtracks->size() << std::endl;
     while ( trackitr!=trackend ) { 
       selectTrack( *trackitr );
-      trackitr++;
+      ++trackitr;
     } // loop over tracks     
 }
 

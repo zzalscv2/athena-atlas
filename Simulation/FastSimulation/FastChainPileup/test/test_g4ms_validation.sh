@@ -106,7 +106,9 @@ case $ArtProcess in
                   --preExec "all:rec.Commissioning.set_Value_and_Lock(True);from AthenaCommon.BeamFlags import jobproperties;jobproperties.Beam.numberOfCollisions.set_Value_and_Lock(20.0);from LArROD.LArRODFlags import larRODFlags;larRODFlags.NumberOfCollisions.set_Value_and_Lock(20);larRODFlags.nSamples.set_Value_and_Lock(4);larRODFlags.doOFCPileupOptimization.set_Value_and_Lock(True);larRODFlags.firstSample.set_Value_and_Lock(0);larRODFlags.useHighestGainAutoCorr.set_Value_and_Lock(True); from LArDigitization.LArDigitizationFlags import jobproperties;jobproperties.LArDigitizationFlags.useEmecIwHighGain.set_Value_and_Lock(False)" 'HITtoRDO:userRunLumiOverride={"run":310000,"lb":61,"starttstamp":1550003600,"mu":60.500};' "from InDetPhysValMonitoring.InDetPhysValJobProperties import InDetPhysValFlags; InDetPhysValFlags.doValidateTightPrimaryTracks.set_Value_and_Lock(True);rec.doCalo=True;rec.doForwardDet=False; rec.doInDet=True;" \
                   --outputAODFile=${aod_file} \
                   --ignoreErrors True \
-                  --valid=True --validationFlags 'doInDet,doMET,doMuon,doZee,doJet' \
+                  --steering 'doRDO_TRIG' 'doTRIGtoALL' \
+                  --athenaopts "all:--threads=1" \
+                  --valid=True --validationFlags 'doInDet,doMuon,doZee' \
                   --outputNTUP_PHYSVALFile=${ntup_file} \
                   --maxEvents -1 --skipEvents 0 --imf False
             rc2=$?

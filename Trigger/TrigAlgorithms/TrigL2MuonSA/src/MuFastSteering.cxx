@@ -806,7 +806,7 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
                         trackPatterns, outputTracks, outputID, outputMS, ctx);
 
 
-    p_roids++;
+    ++p_roids;
     if (p_roids==roids.end()) break;
   }
 
@@ -1122,7 +1122,7 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
     
     
     
-    p_roids++;
+    ++p_roids;
     if (p_roids==roids.end()) break;
   }
 
@@ -1434,7 +1434,7 @@ StatusCode MuFastSteering::findMuonSignatureIO(const xAOD::TrackParticleContaine
       }
     }
 
-    p_roids++;
+    ++p_roids;
     if (p_roids==roids.end()) break;
   }
 
@@ -1744,7 +1744,7 @@ StatusCode MuFastSteering::findMuonSignatureIO(const xAOD::TrackParticleContaine
       ATH_MSG_DEBUG("outputCB pt/eta/phi: " << outputCB->pt() << "/" << outputCB->eta() << "/" << outputCB->phi());
     }
 
-    p_roids++;
+    ++p_roids;
     if (p_roids==roids.end()) break;
   }
 
@@ -2064,7 +2064,7 @@ StatusCode MuFastSteering::findMultiTrackSignature(const std::vector<const TrigR
       ATH_MSG_WARNING("Failed to update monitoring variables");
     }
 
-    p_roids++;
+    ++p_roids;
     if (p_roids==roids.end()) break;
   }
 
@@ -2384,7 +2384,7 @@ StatusCode MuFastSteering::findMultiTrackSignature(const std::vector<const TrigR
       ATH_MSG_WARNING("Failed to update monitoring variables");
     }
 
-    p_roids++;
+    ++p_roids;
     if (p_roids==roids.end()) break;
   }
 

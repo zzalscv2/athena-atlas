@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -165,7 +165,7 @@ StatusCode TileGeoG4SDCalc::initialize() {
     G4cout << "Using deltaTHit = ";
     unsigned int i = 0;
     double delta = m_options.deltaTHit[i++];
-    while (i < m_options.deltaTHit.size()) {
+    while (i < m_options.deltaTHit.size()-2) {
       G4cout << delta / CLHEP::ns << " ns for window [";
       G4cout << m_options.deltaTHit[i++] / CLHEP::ns << ",";
       G4cout << m_options.deltaTHit[i++] / CLHEP::ns << "] ";

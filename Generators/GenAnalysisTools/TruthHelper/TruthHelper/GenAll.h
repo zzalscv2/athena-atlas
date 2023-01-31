@@ -11,19 +11,19 @@
 namespace TruthHelper {
 
 
-  /// @deprecated Use the functions in TruthUtils instead
-  class GenAll : public GenIMCselector {
-  public:
+/// @deprecated Use the functions in TruthUtils instead
+class GenAll : public GenIMCselector {
+public:
 
     GenIMCselector* create() const {
-      return new GenAll();
+        return new GenAll();
     }
 
     bool operator()(HepMC::ConstGenParticlePtr) const {
-      return true;
+        return true;
     }
 
-  };
+};
 
 
 }

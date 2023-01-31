@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 """Run tests for old EventInfo to xAOD::EventInfo conversion
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 import sys
 
 from AthenaCommon.Logging import log
 from AthenaCommon.Constants import DEBUG
 from AthenaCommon.Debugging import DbgStage
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaConfiguration.TestDefaults import defaultTestFiles
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
@@ -32,49 +32,50 @@ parser.add_argument("-d", "--debug", default='', type=str,
 args = parser.parse_args()
 
 # Configure
-ConfigFlags.Input.Files = defaultTestFiles.HITS_RUN2
-ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-16"
-ConfigFlags.Output.HITSFileName = "myHITS.pool.root"
+flags = initConfigFlags()
+flags.Input.Files = defaultTestFiles.HITS_RUN2
+flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-16"
+flags.Output.HITSFileName = "myHITS.pool.root"
 
 # Flags relating to multithreaded execution
-ConfigFlags.Concurrency.NumThreads = args.threads
+flags.Concurrency.NumThreads = args.threads
 if args.threads > 0:
-    ConfigFlags.Scheduler.ShowDataDeps = True
-    ConfigFlags.Scheduler.ShowDataFlow = True
-    ConfigFlags.Scheduler.ShowControlFlow = True
-    ConfigFlags.Concurrency.NumConcurrentEvents = args.threads
+    flags.Scheduler.ShowDataDeps = True
+    flags.Scheduler.ShowDataFlow = True
+    flags.Scheduler.ShowControlFlow = True
+    flags.Concurrency.NumConcurrentEvents = args.threads
 
-ConfigFlags.lock()
+flags.lock()
 
 # Function tests
-accAlg = EventInfoCnvAlgCfg(ConfigFlags, disableBeamSpot=args.noBeamSpot)
+accAlg = EventInfoCnvAlgCfg(flags, disableBeamSpot=args.noBeamSpot)
 # reset to prevent errors on deletion
 accAlg.__init__()
 
 # Construct our accumulator to run
-acc = MainServicesCfg(ConfigFlags)
-acc.merge(PoolReadCfg(ConfigFlags))
+acc = MainServicesCfg(flags)
+acc.merge(PoolReadCfg(flags))
 
 # Add event info overlay
-acc.merge(EventInfoCnvAlgCfg(ConfigFlags, disableBeamSpot=args.noBeamSpot))
+acc.merge(EventInfoCnvAlgCfg(flags, disableBeamSpot=args.noBeamSpot))
 
 # Add output
-acc.merge(OutputStreamCfg(ConfigFlags, "HITS"))
+acc.merge(OutputStreamCfg(flags, "HITS"))
 
 # Dump config
 if args.verboseAccumulators:
     acc.printConfig(withDetails=True)
 acc.getService("StoreGateSvc").Dump = True
-ConfigFlags.dump()
+flags.dump()
 
 if args.debug:
     acc.setDebugStage (args.debug)
 
-# Execute and finish
-sc = acc.run(maxEvents=args.maxEvents)
-
 # Dump config summary
 acc.printConfig(withDetails=False)
+
+# Execute and finish
+sc = acc.run(maxEvents=args.maxEvents)
 
 # Success should be 0
 sys.exit(not sc.isSuccess())

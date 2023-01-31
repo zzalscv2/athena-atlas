@@ -26,7 +26,7 @@ TIDA::Event::~Event() { }
 
 std::vector<std::string> TIDA::Event::chainnames() const { 
   std::vector<std::string> names;
-  for ( std::vector<TIDA::Chain>::const_iterator citr=begin() ; citr!=end() ; citr++ ) names.push_back( citr->name() );
+  for ( std::vector<TIDA::Chain>::const_iterator citr=begin() ; citr!=end() ; ++citr ) names.push_back( citr->name() );
   return names; 
 }
 
@@ -45,7 +45,7 @@ void TIDA::Event::erase( const std::string& name ) {
 
   while ( _itr!=_chains.end() ) { 
     if ( _itr->name()!=name ) m_chains.push_back( *_itr );
-    _itr++;
+    ++_itr;
   }
 
 } 

@@ -10,6 +10,7 @@
 //Gaudi
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"  // for ToolHandleArray
+#include "CxxUtils/checker_macros.h"
 
 // ISF
 #include "ISF_Interfaces/BaseSimulatorTool.h"
@@ -18,7 +19,7 @@
 
 namespace ISF {
 
-  class FatrasSimTool : public BaseSimulatorTool  {
+  class ATLAS_NOT_THREAD_SAFE FatrasSimTool : public BaseSimulatorTool  {  // deprecated: ATLASSIM-6020
   public:
     FatrasSimTool( const std::string& type, const std::string& name,  const IInterface* parent);
 
@@ -26,7 +27,7 @@ namespace ISF {
 
     virtual StatusCode initialize() override;
 
-    virtual StatusCode simulate( const ISFParticle& isp, ISFParticleContainer&, McEventCollection* ) override;
+    virtual StatusCode simulate( ISFParticle& isp, ISFParticleContainer&, McEventCollection* ) override;
 
     virtual StatusCode setupEvent(const EventContext&) override { return StatusCode::SUCCESS; };
 

@@ -12,7 +12,6 @@
 
 // ISF includes
 #include "ISF_Event/ISFParticle.h"
-#include "ISF_Event/ParticleClipboard.h"
 
 #include "ISF_Interfaces/IParticleHelper.h"
 
@@ -217,11 +216,6 @@ namespace G4UA{
       G4StepPoint *preStep=aStep->GetPreStepPoint();
       G4StepPoint *postStep=aStep->GetPostStepPoint();
       
-      // parent
-      //const ISF::ISFParticle* parent= ISF::ParticleClipboard::getInstance().getParticle();
-      // something is seriously wrong if there is no parent particle
-      //assert(parent);
-      
       G4ThreeVector mom = preStep->GetMomentum();
       const G4ThreeVector& pos = preStep->GetPosition();
       
@@ -239,11 +233,7 @@ namespace G4UA{
 	m_scIn = creation? creation->GetProcessSubType() : -1;
 	
 	VTrackInformation * trackInfo= static_cast<VTrackInformation*>(track->GetUserInformation());
-#ifdef HEPMC3
-	HepMC::GenParticlePtr  genpart=trackInfo ? std::const_pointer_cast<HepMC3::GenParticle>(trackInfo->GetHepMCParticle()):nullptr;
-#else 
-	HepMC::GenParticlePtr genpart= trackInfo ? const_cast<HepMC::GenParticlePtr>(trackInfo->GetHepMCParticle()):0;
-#endif
+	HepMC::GenParticlePtr genpart= trackInfo ? trackInfo->GetHepMCParticle() : nullptr;
 	HepMC::GenVertexPtr vtx = genpart ? genpart->production_vertex() : 0;
 	m_gen = genpart? 0 : -1;
 	
@@ -331,8 +321,7 @@ namespace G4UA{
 	
 	AtlasG4EventUserInfo* atlasG4EvtUserInfo = static_cast<AtlasG4EventUserInfo*> (G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetUserInformation());
 	VTrackInformation * trackInfo = static_cast<VTrackInformation*>(track->GetUserInformation());
-	const auto baseISP = const_cast<ISF::ISFParticle*>( trackInfo->GetBaseISFParticle() );
-	::iGeant4::Geant4TruthIncident truth( aStep, *baseISP, geoID, atlasG4EvtUserInfo);
+	::iGeant4::Geant4TruthIncident truth( aStep, *trackInfo->GetBaseISFParticle(), geoID, atlasG4EvtUserInfo);
 	unsigned int nSec = truth.numberOfChildren();
 	if (nSec>0 || track->GetTrackStatus()!=fAlive ) {      // save interaction info
 	  //std::cout <<"interaction:"<< process->GetProcessSubType() <<":"<<nSec<< std::endl;

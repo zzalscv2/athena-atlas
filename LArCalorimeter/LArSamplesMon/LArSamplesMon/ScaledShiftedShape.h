@@ -14,7 +14,7 @@
 
 namespace LArSamples {
   
-  class ScaledShiftedShape : public AbsShape {
+  class ATLAS_NOT_THREAD_SAFE ScaledShiftedShape : public AbsShape {
   
    public:
    

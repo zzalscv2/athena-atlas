@@ -1,8 +1,9 @@
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 // ROOT include(s):
 #include <TClass.h>
 #include <TError.h>
+#include <TMethodCall.h>
 #include <TString.h>
 #include <TVirtualCollectionProxy.h>
 #include <TInterpreter.h>
@@ -11,6 +12,8 @@
 #include "xAODRootAccess/tools/TAuxVectorFactory.h"
 #include "xAODRootAccess/tools/TAuxVector.h"
 #include "xAODRootAccess/tools/Message.h"
+#include "AthContainers/normalizedTypeinfoName.h"
+#include "CxxUtils/ClassName.h"
 
 namespace xAOD {
 
@@ -24,23 +27,23 @@ namespace xAOD {
                   XAOD_MESSAGE( "No collection proxy found for type %s" ),
                   cl->GetName() );
       }
-
-      // Check if the elements of the vector are objects:
-      ::TClass* eltClass = m_proxy->GetValueClass();
-      if( eltClass ) {
-         // Initialise the assignment operator's method call:
-         ::TString proto = "const ";
-         proto += eltClass->GetName();
-         proto += "&";
-         m_assign = new TMethodCall;
-         m_assign->InitWithPrototype( eltClass, "operator=", proto );
-         if( ! m_assign->IsValid() ) {
-            ::Warning( "xAOD::TAuxVectorFactory::TAuxVectorFactory",
-                       XAOD_MESSAGE( "Can't get assignment operator for "
-                                     "class %s" ),
-                       eltClass->GetName() );
-         }
-         m_defElt = eltClass->New();
+      else {
+         // Check if the elements of the vector are objects:
+        ::TClass* eltClass = m_proxy->GetValueClass();
+        if( eltClass ) {
+           // Initialise the assignment operator's method call:
+          std::string proto = "const ";
+          proto += eltClass->GetName();
+          proto += "&";
+          m_assign.setProto( eltClass, "operator=", proto );
+          if( m_assign.call() == nullptr ) {
+             ::Warning( "xAOD::TAuxVectorFactory::TAuxVectorFactory",
+                        XAOD_MESSAGE( "Can't get assignment operator for "
+                                      "class %s" ),
+                        eltClass->GetName() );
+          }
+          m_defElt = eltClass->New();
+        }
       }
    }
 
@@ -49,12 +52,6 @@ namespace xAOD {
       // Remove the default element from memory if it exists:
       if( m_defElt ) {
          m_proxy->GetValueClass()->Destructor( m_defElt );
-      }
-
-      // The TMethodCall destructor will fail if TCling has already
-      // been destroyed...
-      if( gCling ) {
-        delete m_assign;
       }
    }
 
@@ -86,10 +83,11 @@ namespace xAOD {
 
       // Do the copy either using the assignment operator of the type, or using
       // simple memory copying:
-      if( m_assign && m_assign->IsValid() ) {
-         m_assign->ResetParam();
-         m_assign->SetParam( ( Long_t ) src );
-         m_assign->Execute( dst );
+      TMethodCall* mc = m_assign.call();
+      if( mc ) {
+         mc->ResetParam();
+         mc->SetParam( ( Long_t ) src );
+         mc->Execute( dst );
       } else {
          memcpy( dst, src, eltsz );
       }
@@ -121,24 +119,25 @@ namespace xAOD {
       b = reinterpret_cast< void* >( reinterpret_cast< unsigned long >( b ) +
                                      eltsz * bindex );
 
-      if( m_assign && m_assign->IsValid() ) {
+      TMethodCall* mc = m_assign.call();
+      if( mc ) {
 
          // Create a temporary object in memory:
          TClass* eltClass = m_proxy->GetValueClass();
          void* tmp = eltClass->New();
 
          // tmp = a
-         m_assign->ResetParam();
-         m_assign->SetParam( ( Long_t ) a );
-         m_assign->Execute( tmp );
+         mc->ResetParam();
+         mc->SetParam( ( Long_t ) a );
+         mc->Execute( tmp );
          // a = b
-         m_assign->ResetParam();
-         m_assign->SetParam( ( Long_t ) b );
-         m_assign->Execute( a );
+         mc->ResetParam();
+         mc->SetParam( ( Long_t ) b );
+         mc->Execute( a );
          // b = tmp
-         m_assign->ResetParam();
-         m_assign->SetParam( ( Long_t ) tmp );
-         m_assign->Execute( b );
+         mc->ResetParam();
+         mc->SetParam( ( Long_t ) tmp );
+         mc->Execute( b );
 
          // Delete the temporary object:
          eltClass->Destructor( tmp );
@@ -167,11 +166,12 @@ namespace xAOD {
       dst = reinterpret_cast< void* >( reinterpret_cast< unsigned long >( dst ) +
                                        eltsz * dst_index );
 
-      if( m_assign && m_assign->IsValid() ) {
+      TMethodCall* mc = m_assign.call();
+      if( mc ) {
          // Assign the default element's contents to this object:
-         m_assign->ResetParam();
-         m_assign->SetParam( ( Long_t ) m_defElt );
-         m_assign->Execute( dst );
+         mc->ResetParam();
+         mc->SetParam( ( Long_t ) m_defElt );
+         mc->Execute( dst );
       } else {
          // Set the memory to zero:
          memset( dst, 0, eltsz );
@@ -188,6 +188,27 @@ namespace xAOD {
    const std::type_info* TAuxVectorFactory::tiVec() const {
 
       return m_class->GetTypeInfo();
+   }
+
+   const std::type_info* TAuxVectorFactory::tiAlloc() const {
+
+      return nullptr;
+   }
+
+   std::string TAuxVectorFactory::tiAllocName() const {
+
+     std::string name = SG::normalizedTypeinfoName (*m_class->GetTypeInfo());
+     CxxUtils::ClassName cn (name);
+     std::string alloc_name;
+     if (cn.ntargs() >= 2) {
+       alloc_name = cn.targ(1).fullName();
+     }
+     else if (cn.ntargs() == 1) {
+       alloc_name = "std::allocator<" + cn.targ(0).fullName();
+       if (alloc_name[alloc_name.size()-1] == '>') alloc_name += " ";
+       alloc_name += ">";
+     }
+     return alloc_name;
    }
 
 } // namespace xAOD

@@ -20,6 +20,7 @@
 #ifndef EVT_I_EXTERNALGENLIST_HH
 #define EVT_I_EXTERNALGENLIST_HH
 
+#include "CxxUtils/checker_macros.h"
 #include "EvtGenBase/EvtAbsRadCorr.hh"
 #include "EvtGenBase/EvtDecayBase.hh"
 
@@ -33,7 +34,7 @@ class EvtExternalGenList {
     EvtExternalGenList( bool convertPythiaCodes = false,
                         std::string pythiaXmlDir = "",
                         std::string photonType = "gamma",
-                        bool useEvtGenRandom = true );
+                        bool useEvtGenRandom = true ) ATLAS_NOT_THREAD_SAFE;
 
     virtual ~EvtExternalGenList();
 

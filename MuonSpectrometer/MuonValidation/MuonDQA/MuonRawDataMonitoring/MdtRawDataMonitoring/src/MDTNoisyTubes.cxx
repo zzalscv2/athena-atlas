@@ -14,7 +14,7 @@ using std::map;
 using std::set;
 using std::string;
 
-MDTNoisyTubes::~MDTNoisyTubes() {}
+MDTNoisyTubes::~MDTNoisyTubes() = default;
 
 bool MDTNoisyTubes::isNoisy(const Muon::MdtPrepData* mdtCollection) const {
     set<Identifier> noisyTubes;
@@ -24,10 +24,7 @@ bool MDTNoisyTubes::isNoisy(const Muon::MdtPrepData* mdtCollection) const {
     else
         noisyTubes = itr->second;
 
-    if (noisyTubes.find(mdtCollection->identify()) != noisyTubes.end())
-        return true;
-    else
-        return false;
+    return noisyTubes.find(mdtCollection->identify()) != noisyTubes.end();
 }
 
 set<Identifier> MDTNoisyTubes::getNoiseList(IdentifierHash idHash) {

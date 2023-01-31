@@ -22,6 +22,12 @@ def PHYSVALKernelCfg(ConfigFlags, name='PHYSVALKernel', **kwargs):
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
+    # LLP-specific configs
+    if (ConfigFlags.Detector.GeometryID and ConfigFlags.InDet.Tracking.doR3LargeD0) \
+       or (ConfigFlags.Detector.GeometryITk and ConfigFlags.ITk.Tracking.doLargeD0):
+        from DerivationFrameworkLLP.PhysValLLPConfig import PhysValLLPCfg
+        acc.merge(PhysValLLPCfg(ConfigFlags))
+
     # Kernel algorithm
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name))
@@ -37,7 +43,7 @@ def PHYSVALCfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    PHYSVALTriggerListsHelper = TriggerListsHelper()
+    PHYSVALTriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Common augmentations
     acc.merge(PHYSVALKernelCfg(ConfigFlags, name="PHYSVALKernel", StreamName = 'StreamDAOD_PHYSVAL', TriggerListsHelper = PHYSVALTriggerListsHelper))
@@ -48,7 +54,7 @@ def PHYSVALCfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
-    PHYSVALSlimmingHelper = SlimmingHelper("PHYSVALSlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    PHYSVALSlimmingHelper = SlimmingHelper("PHYSVALSlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     PHYSVALSlimmingHelper.SmartCollections = ["EventInfo",
                                               "Electrons",
                                               "Photons",
@@ -130,6 +136,10 @@ def PHYSVALCfg(ConfigFlags):
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Loose_Vertices"]
     StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]
     StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMPFlowSecVtxAux.-vxTrackAtVertex"]
+    for wp in ["","_LeptonsMod_LRTR3_1p0"]:
+        StaticContent += ["xAOD::VertexContainer#VrtSecInclusive_SecondaryVertices" + wp]
+        StaticContent += ["xAOD::VertexAuxContainer#VrtSecInclusive_SecondaryVertices" + wp + "Aux."]
+
     if ConfigFlags.BTagging.RunFlipTaggers is True:
         StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMPFlowSecVtxFlipAux.-vxTrackAtVertex"]
 
@@ -137,6 +147,7 @@ def PHYSVALCfg(ConfigFlags):
         StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMTopoSecVtxAux.-vxTrackAtVertex"]
         if ConfigFlags.BTagging.RunFlipTaggers is True:
             StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMTopoSecVtxFlipAux.-vxTrackAtVertex"]
+
  
     PHYSVALSlimmingHelper.StaticContent = StaticContent
 
@@ -202,6 +213,19 @@ def PHYSVALCfg(ConfigFlags):
                                              "TauChargedParticleFlowObjects.pt.eta.phi.m.bdtPi0Score",
                                              "MET_Track.sumet"]
     PHYSVALSlimmingHelper.ExtraVariables += GSFTracksCPDetailedContent
+
+    VSITrackAuxVars = [
+        "is_selected", "is_associated", "is_svtrk_final", "pt_wrtSV", "eta_wrtSV",
+        "phi_wrtSV", "d0_wrtSV", "z0_wrtSV", "errP_wrtSV", "errd0_wrtSV",
+        "errz0_wrtSV", "chi2_toSV"
+    ]
+
+    for suffix in ["","_LeptonsMod_LRTR3_1p0"]:
+        PHYSVALSlimmingHelper.ExtraVariables += [ "InDetTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
+        PHYSVALSlimmingHelper.ExtraVariables += [ "InDetLargeD0TrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
+        PHYSVALSlimmingHelper.ExtraVariables += [ "GSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
+        PHYSVALSlimmingHelper.ExtraVariables += [ "LRTGSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
+
 
     # Trigger content
     PHYSVALSlimmingHelper.IncludeTriggerNavigation          = True

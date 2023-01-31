@@ -31,7 +31,7 @@ StatusCode HIJetClusterIndexAssociationTool::modify(xAOD::JetContainer& jets) co
     SG::ReadHandle<xAOD::IParticleContainer>  readHandlePcontainer ( m_containerKey );
     ppars = readHandlePcontainer.get();
 
-  for (xAOD::JetContainer::iterator ijet=jets.begin(); ijet!=jets.end(); ijet++)
+  for (xAOD::JetContainer::iterator ijet=jets.begin(); ijet!=jets.end(); ++ijet)
   {
     std::vector<const xAOD::IParticle*> ParticleVector;
     xAOD::Jet* theJet=(*ijet);

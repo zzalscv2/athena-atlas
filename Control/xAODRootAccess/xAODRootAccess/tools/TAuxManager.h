@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TAuxManager.h 607344 2014-07-18 13:27:49Z krasznaa $
 #ifndef XAODROOTACCESS_TOOLS_TAUXMANAGER_H
 #define XAODROOTACCESS_TOOLS_TAUXMANAGER_H
 
@@ -31,9 +30,6 @@ namespace xAOD {
    ///
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
-   /// $Revision: 607344 $
-   /// $Date: 2014-07-18 15:27:49 +0200 (Fri, 18 Jul 2014) $
-   ///
    class TAuxManager : public TVirtualManager {
 
    public:
@@ -48,18 +44,22 @@ namespace xAOD {
       /// Function for updating the object in memory if needed
       virtual ::Int_t getEntry( ::Long64_t entry, ::Int_t getall = 0 );
 
+      /// Function getting a const pointer to the object being handled
+      virtual const void* object() const;
       /// Function getting a pointer to the object being handled
-      virtual void* object() const;
+      virtual void* object();
       /// Function replacing the object being handled
       virtual void setObject( void* obj );
 
+      /// Create the object for the current event
+      virtual ::Bool_t create();
       /// Check if the object was set for the current event
-      virtual ::Bool_t isSet( ::Bool_t forceSet = kTRUE ) const;
+      virtual ::Bool_t isSet() const;
       /// Reset the object at the end of processing of an event
       virtual void reset();
 
       /// Get a type-specific pointer to the managed object
-      TAuxStore* getStore() const;
+      TAuxStore* getStore();
       /// Get a convenience pointer to the managed object
       const SG::IConstAuxStore* getConstStore() const;
 

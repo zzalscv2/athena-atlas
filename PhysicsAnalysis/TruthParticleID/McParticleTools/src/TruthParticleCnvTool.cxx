@@ -56,7 +56,7 @@ TruthParticleCnvTool::TruthParticleCnvTool( const std::string& type,
   AthAlgTool( type, name, parent ),
   m_dataType         ( ParticleDataType::True ),
   m_vxCandidatesName ( ),
-  m_pdt              ( 0 ),
+  m_pdt              ( nullptr ),
   m_selectSignalTypeProp ( 0 )
 {
   //
@@ -114,7 +114,7 @@ StatusCode TruthParticleCnvTool::initialize()
   }      
 
   m_pdt = partPropSvc->PDT();
-  if ( 0 == m_pdt ) {
+  if ( nullptr == m_pdt ) {
     ATH_MSG_ERROR("Could not retrieve HepPDT::ParticleDataTable from "\
 		  "ParticleProperties Service !!");
     return StatusCode::FAILURE;
@@ -184,7 +184,7 @@ StatusCode TruthParticleCnvTool::execute (const EventContext& ctx) const
   //  selection for particles from minbias copied from the JetsFromTruthTool
 
   std::size_t genEventIndex = 0;
-  const ITruthParticleVisitor* dummyVisitor = 0;
+  const ITruthParticleVisitor* dummyVisitor = nullptr;
   bool all_good = true;
 
   McEventCollection::const_iterator fEvt = mcEventsReadHandle->begin();
@@ -193,11 +193,11 @@ StatusCode TruthParticleCnvTool::execute (const EventContext& ctx) const
 
   ATH_MSG_DEBUG(" Found McEventCollection iterators : "<< (fEvt-mcEventsReadHandle->begin()) << " to "<< (lEvt-mcEventsReadHandle->begin()) );
 
-  for(McEventCollection::const_iterator it=fEvt ; it != lEvt; it++){
+  for(McEventCollection::const_iterator it=fEvt ; it != lEvt; ++it){
     const HepMC::GenEvent* evt = *it;
     // there are holes in a McEventCollection when pile-up is enabled
     // so deal with it
-    if (0 == evt) {
+    if (nullptr == evt) {
       continue;
     }
     genEventIndex = (it - mcEventsReadHandle->begin());
@@ -233,14 +233,14 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
 {
   ATH_MSG_DEBUG("Converting McEventCollection to TruthParticleContainer");
 
-  if ( 0 == m_pdt ) {
+  if ( nullptr == m_pdt ) {
     ATH_MSG_ERROR("Could not convert McEventCollection into "\
 		  "TruthParticleContainer if NO ParticleDataTable is "\
 		  "available !!");
     return StatusCode::FAILURE;
   }
   
-  if ( 0 == mcCollection ) {
+  if ( nullptr == mcCollection ) {
     ATH_MSG_WARNING("Null pointer to McEventCollection !");
     return StatusCode::RECOVERABLE;
   }
@@ -272,22 +272,13 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
   
 #ifdef HEPMC3
   // Process particles in barcode order.
-  // Accessing the barcode is expensive with HepMC3, so construct a
-  // temporary (barcode,index) vector and sort that.  In that way,
-  // we only need to fetch the barcode once for each particle.
-  const std::vector<HepMC::ConstGenParticlePtr>& parts = evt->particles();
-  std::vector<std::pair<int, int> > partOrder;
-  partOrder.reserve (parts.size());
-  for (const HepMC::ConstGenParticlePtr& p : parts) {
-    partOrder.emplace_back (HepMC::barcode(p), partOrder.size());
-  }
-  std::sort (partOrder.begin(), partOrder.end());
-  for (const std::pair<int,int>& p: partOrder)
-  {
-    HepMC::ConstGenParticlePtr hepMcPart = parts[p.second];
+  auto bcmapatt = evt->attribute<HepMC::GenEventBarcodes>("barcodes");
+  if (!bcmapatt) ATH_MSG_ERROR("TruthParticleCnvTool.cxx: Event does not contain barcodes attribute"); 
+  std::map<int, HepMC3::ConstGenParticlePtr> bcmap = bcmapatt->barcode_to_particle_map();
+  for (const auto &[bc,hepMcPart]: bcmap) {
 #else
-  for (auto hepMcPart: *evt)
-  {
+  for (auto hepMcPart: *evt) {
+    int bc = HepMC::barcode(hepMcPart);
 #endif
 
     TruthParticle * mcPart = new TruthParticle( hepMcPart, container );
@@ -302,9 +293,9 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
 
     if ( hepMcPart != mcPart->genParticle() ) {
       ATH_MSG_ERROR("TruthParticle is not wrapping the GenParticle : " 
-		    << HepMC::barcode(hepMcPart) << " !!");
+		    << hepMcPart << " !!");
     }
-    HepMcParticleLink mcLink( HepMC::barcode(hepMcPart), genEventIndex, EBC_MAINEVCOLL, HepMcParticleLink::IS_POSITION, sg ); // FIXME assuming that we are using the hard-scatter McEventCollection - would need to pass this info as an argument to the convert function.
+    HepMcParticleLink mcLink( bc, genEventIndex, EBC_MAINEVCOLL, HepMcParticleLink::IS_POSITION, sg ); // FIXME assuming that we are using the hard-scatter McEventCollection - would need to pass this info as an argument to the convert function.
     bcToMcPart[ mcLink.compress() ] = mcPart;
 
   }//> end loop over particles
@@ -325,7 +316,7 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
       return StatusCode::RECOVERABLE;
     }
 
-    const TruthEtIsolationsContainer* etIsols = 0;
+    const TruthEtIsolationsContainer* etIsols = nullptr;
     if ( !evtStore()->retrieve( etIsols, etIsolName ).isSuccess() ) {
       ATH_MSG_WARNING("Could not retrieve the TruthEtIsolations container at ["
 		      << etIsolName << "] !!");

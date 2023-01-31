@@ -328,9 +328,6 @@ Trk::TrackingGeometry::dumpLayer(MsgStream& out,
   }
   out << head << layer->layerIndex().value() << " [t=" << layer->layerType()
       << "] d=" << layer->thickness();
-  if (layer->representingVolume()) {
-    out << " vol=" << layer->representingVolume()->volumeBounds();
-  }
   out << layer->surfaceRepresentation();
   out << std::endl;
 }

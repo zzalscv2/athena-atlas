@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,7 +12,6 @@
 #include "TrkEventUtils/TrkParametersComparisonFunction.h"
 #include "TrkExUtils/IntersectionSolution.h"
 #include "TrkExUtils/RungeKuttaUtils.h"
-#include "TrkDetDescrInterfaces/ITrackingGeometrySvc.h"
 #include "TrkDetDescrInterfaces/IGeometryBuilder.h"
 #include "TrkDetDescrUtils/ObjectAccessor.h"
 #include "TrkGeometry/MagneticFieldProperties.h"
@@ -33,6 +32,7 @@
 #include "EventPrimitives/EventPrimitives.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 
+#include <exception>
 namespace{
 const Trk::MagneticFieldProperties s_zeroMagneticField(Trk::NoField);
 }
@@ -40,27 +40,15 @@ const Trk::MagneticFieldProperties s_zeroMagneticField(Trk::NoField);
 // constructor
 Trk::Navigator::Navigator(const std::string &t, const std::string &n, const IInterface *p) :
   AthAlgTool(t, n, p),
-  m_trackingGeometrySvc("AtlasTrackingGeometrySvc", n),
   m_trackingGeometryName("AtlasTrackingGeometry"),
   m_insideVolumeTolerance(1. * Gaudi::Units::mm),
   m_isOnSurfaceTolerance(0.005 * Gaudi::Units::mm),
   m_useStraightLineApproximation(false),
   m_searchWithDistance(true),
-  m_fastField(false),
-  m_forwardCalls{},
-  m_forwardFirstBoundSwitch{},
-  m_forwardSecondBoundSwitch{},
-  m_forwardThirdBoundSwitch{},
-  m_backwardCalls{},
-  m_backwardFirstBoundSwitch{},
-  m_backwardSecondBoundSwitch{},
-  m_backwardThirdBoundSwitch{},
-  m_outsideVolumeCase{},
-  m_sucessfulBackPropagation{}
+  m_fastField(false)
   {
   declareInterface<INavigator>(this); 
   // steering of algorithms
-  declareProperty("TrackingGeometrySvc", m_trackingGeometrySvc);
   declareProperty("InsideVolumeTolerance", m_insideVolumeTolerance);
   declareProperty("IsOnSurfaceTolerance", m_isOnSurfaceTolerance);
   declareProperty("UseStraightLineApproximation", m_useStraightLineApproximation);
@@ -70,19 +58,13 @@ Trk::Navigator::Navigator(const std::string &t, const std::string &n, const IInt
   declareProperty("MagneticFieldProperties", m_fastField);
   }
 
-// destructor
-Trk::Navigator::~Navigator() = default;
 
-// Athena standard methods
 // initialize
 StatusCode
 Trk::Navigator::initialize() {
-
-
   //We can use conditions when the key is not empty
   m_useConditions=!m_trackingGeometryReadKey.key().empty();
-
-  // get the TrackingGeometrySvc
+  // get the TrackingGeometry
   if (!m_useConditions) {
     if (m_trackingGeometrySvc.retrieve().isSuccess()) {
       ATH_MSG_DEBUG("Successfully retrieved " << m_trackingGeometrySvc);
@@ -122,7 +104,6 @@ Trk::Navigator::nextBoundarySurface(const EventContext& ctx,
                                     Trk::PropDirection dir) const
 {
   const Trk::TrackingVolume* trackingVolume = volume(ctx,parms.position());
-
   if (trackingVolume) {
     return (nextBoundarySurface(ctx,prop, parms, dir, *trackingVolume));
   }
@@ -185,12 +166,6 @@ Trk::Navigator::nextBoundarySurface(const EventContext& ctx,
     }
   }
 
-  // check the insideStatus
-  bool insideVolume = vol.inside(parms.position());
-  if (!insideVolume) {
-    ++m_outsideVolumeCase;
-  }
-
   return nullptr;
 }
 
@@ -201,13 +176,6 @@ Trk::Navigator::nextTrackingVolume(const EventContext& ctx,
                                    Trk::PropDirection dir,
                                    const Trk::TrackingVolume& vol) const
 {
-
-  // ---------------------------------------------------
-  if (dir == Trk::alongMomentum) {
-    ++m_forwardCalls;
-  } else {
-    ++m_backwardCalls;
-  }
 
   bool first = false;
   bool second = false;
@@ -240,13 +208,6 @@ Trk::Navigator::nextTrackingVolume(const EventContext& ctx,
   // loop over boundary surfaces
   int tryBoundary = 0;
 
-  /* local counted to increment in the loop*/
-  auto forwardFirstBoundSwitch = m_forwardFirstBoundSwitch.buffer();
-  auto forwardSecondBoundSwitch = m_forwardSecondBoundSwitch.buffer();
-  auto forwardThirdBoundSwitch = m_forwardThirdBoundSwitch.buffer();
-  auto backwardFirstBoundSwitch = m_backwardFirstBoundSwitch.buffer();
-  auto backwardSecondBoundSwitch = m_backwardSecondBoundSwitch.buffer();
-  auto backwardThirdBoundSwitch = m_backwardThirdBoundSwitch.buffer();
 
   for (const Trk::ObjectAccessor::value_type& surface_id : surfAcc) {
     ++tryBoundary;
@@ -307,21 +268,15 @@ Trk::Navigator::nextTrackingVolume(const EventContext& ctx,
 
     // ---------------------------------------------------
     if (!first && searchDir == Trk::alongMomentum) {
-      ++forwardFirstBoundSwitch;
       first = true;
     } else if (!second && searchDir == Trk::alongMomentum) {
-      ++forwardSecondBoundSwitch;
       second = true;
     } else if (searchDir == Trk::alongMomentum) {
-      ++forwardThirdBoundSwitch;
     } else if (!first && searchDir == Trk::oppositeMomentum) {
-      ++backwardFirstBoundSwitch;
       first = true;
     } else if (!second && searchDir == Trk::oppositeMomentum) {
-      ++backwardSecondBoundSwitch;
       second = true;
     } else if (searchDir == Trk::oppositeMomentum) {
-      ++backwardThirdBoundSwitch;
     }
     // ---------------------------------------------------
   }
@@ -489,8 +444,6 @@ Trk::Navigator::closestParameters(const EventContext& ctx,
     return currentClosestParameters;
   }
 
-
-
   const Trk::CylinderSurface *ccsf = dynamic_cast<const Trk::CylinderSurface *>(&sf);
   if (ccsf) {
     Trk::TrkParametersComparisonFunction tParFinderCylinder(ccsf->bounds().r());
@@ -519,37 +472,15 @@ Trk::Navigator::closestParameters(const EventContext& ctx,
   return closestTrackParameters;
 }
 
-// finalize
-StatusCode
-Trk::Navigator::finalize() {
-
-  if (msgLvl(MSG::DEBUG)) {
-    ATH_MSG_DEBUG("[N] " << name() << " Perfomance Statistics : --------------------------------");
-    ATH_MSG_DEBUG("     -> Number of forward calls        : " << m_forwardCalls);
-    ATH_MSG_DEBUG("        - 1st forward bound switch     : " << m_forwardFirstBoundSwitch);
-    ATH_MSG_DEBUG("        - 2nd forward bound switch     : " << m_forwardSecondBoundSwitch);
-    ATH_MSG_DEBUG("        - 3rd forward bound switch     : " << m_forwardThirdBoundSwitch);
-    ATH_MSG_DEBUG("     -> Number of backward calls       : " << m_backwardCalls);
-    ATH_MSG_DEBUG("        - 1st backward bound switch    : " << m_backwardFirstBoundSwitch);
-    ATH_MSG_DEBUG("        - 2nd backward bound switch    : " << m_backwardSecondBoundSwitch);
-    ATH_MSG_DEBUG("        - 3rd backward bound switch    : " << m_backwardThirdBoundSwitch);
-    ATH_MSG_DEBUG("     -> Number of outsideVolume cases  : " << m_outsideVolumeCase);
-    ATH_MSG_DEBUG("        - successfully recovered       : " << m_sucessfulBackPropagation);
-    ATH_MSG_DEBUG(" ---------------------------------------------------------------------");
-  }
-
-  return StatusCode::SUCCESS;
-}
-
 const Trk::TrackingGeometry*
 Trk::Navigator::trackingGeometry(const EventContext& ctx) const
 {
   if (m_useConditions) {
     SG::ReadCondHandle<TrackingGeometry> handle(m_trackingGeometryReadKey, ctx);
     if (!handle.isValid()) {
-      ATH_MSG_FATAL(
-        "Could not retrieve TrackingGeometry from Conditions Store.");
-      throw Trk::NavigatorException();
+      throw std::runtime_error{
+        "Could not retrieve TrackingGeometry from Conditions Store."
+      };
     }
     return handle.cptr();
   } else {
@@ -557,8 +488,9 @@ Trk::Navigator::trackingGeometry(const EventContext& ctx) const
     if (detStore()
           ->retrieve(trackingGeometry, m_trackingGeometryName)
           .isFailure()) {
-      ATH_MSG_FATAL("Could not retrieve TrackingGeometry from DetectorStore.");
-      throw Trk::NavigatorException();
+      throw std::runtime_error{
+        "Could not retrieve TrackingGeometry from Detector Store."
+      };
     }
     return trackingGeometry;
   }

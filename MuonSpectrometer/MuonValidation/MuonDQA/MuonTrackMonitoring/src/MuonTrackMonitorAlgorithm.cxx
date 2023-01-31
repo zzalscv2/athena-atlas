@@ -37,9 +37,11 @@ StatusCode MuonTrackMonitorAlgorithm::initialize()
 //========================================================================================================
 StatusCode MuonTrackMonitorAlgorithm::FillTrackInformation(const std::string& sIdentifier, const xAOD::Muon* muon, const xAOD::Vertex *pvtx, const std::string& sTrack, const xAOD::EventInfo &evt) const
 {
-    double beamPosSigmaX = evt.beamPosSigmaX();
-    double beamPosSigmaY = evt.beamPosSigmaY();
-    double beamPosSigmaXY = evt.beamPosSigmaXY();
+    
+    
+    const double beamPosSigmaX  = m_useBeamSpot ? evt.beamPosSigmaX() : -1.;
+    const double beamPosSigmaY  = m_useBeamSpot ? evt.beamPosSigmaY() : -1.;
+    const double beamPosSigmaXY = m_useBeamSpot ? evt.beamPosSigmaXY() : -1.;
 
     ///Declaring all track variables
     using namespace Monitored;

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODTRIGL1CALO_VERSIONS_GFEXTOWER_V1_H
 #define XAODTRIGL1CALO_VERSIONS_GFEXTOWER_V1_H
@@ -57,11 +57,19 @@ namespace xAOD {
       /// set saturation flag of gTower
       void setIsSaturated(char); ///setter for the above
 
+      /// get the Simulation ID
+      uint32_t gFEXtowerID() const; /// getter for the jtower simulation ID
+      /// set the simulation ID
+      void setgFEXtowerID(uint32_t); ///setter for the above      
+      
+      
+
       void initialize(const uint8_t IEta,const uint8_t IPhi);
       void initialize(const uint8_t IEta,const uint8_t IPhi,
                       const float Eta,const float Phi,
                       const int TowerEt,const uint8_t Fpga,
-				              const char IsSaturated);
+                      const char IsSaturated,
+                      const uint32_t gFEXtowerID);
 
     
     private:

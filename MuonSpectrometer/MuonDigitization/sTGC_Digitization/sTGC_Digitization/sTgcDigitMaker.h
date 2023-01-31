@@ -40,12 +40,12 @@ class sTgcDigitMaker : public AthMessaging {
   //------ for public
  public:
 
-  sTgcDigitMaker(const sTgcHitIdHelper* hitIdHelper, const MuonGM::MuonDetectorManager * mdManager, bool doEfficiencyCorrection);
+  sTgcDigitMaker(const sTgcHitIdHelper* hitIdHelper, const MuonGM::MuonDetectorManager * mdManager, bool doEfficiencyCorrection, double meanGasGain);
 
   virtual ~sTgcDigitMaker();
 
   /**
-     Initializes sTgcHitIdHelper and sTgcIdHelper, 
+     Initializes sTgcHitIdHelper and sTgcIdHelper,
      and call the functions to read files containing digitization parameters.
   */
   StatusCode initialize(const int channelTypes);
@@ -58,7 +58,7 @@ class sTgcDigitMaker : public AthMessaging {
   //====== for private
  private:
 
-  /** Parameters of a gamma probability distribution function, required for 
+  /** Parameters of a gamma probability distribution function, required for
    *  estimating wire digit's time of arrival.
    *  More detail in the dat file.
    */
@@ -68,12 +68,12 @@ class sTgcDigitMaker : public AthMessaging {
     double thetaParameter{0.};
   };
 
-  /** Ionization object with distance, position on the hit segment and 
+  /** Ionization object with distance, position on the hit segment and
    *  position on the wire.
    */
   struct Ionization {
     double distance{-9.99}; //smallest distance bet the wire and particle trajectory
-    Amg::Vector3D posOnSegment{0.,0.,0.}; // Point of closest approach 
+    Amg::Vector3D posOnSegment{0.,0.,0.}; // Point of closest approach
     Amg::Vector3D posOnWire{0.,0.,0.}; // Position on the wire
   };
 
@@ -92,7 +92,7 @@ class sTgcDigitMaker : public AthMessaging {
   /** Get stationName integer from stationName string */
   int getIStationName(const std::string& staionName) const;
 
-  /** Compute the distance between a track segment and a wire. 
+  /** Compute the distance between a track segment and a wire.
    *  Expected distance is between zero and half of wire pitch (i.e. 0.9 mm),
    *  but can be greater if particle passes through the edge of a chamber.
    *  Assumig the hit is near wire k, the sign of the distance returned is:
@@ -103,17 +103,17 @@ class sTgcDigitMaker : public AthMessaging {
   double distanceToWire(Amg::Vector3D& position, Amg::Vector3D& direction, Identifier id, int wire_number) const;
 
   /** Determine the points where the distance between two segments is smallest.
-   *  Given two segments, e.g. a particle trajectory and a sTGC wire, solve for the 
-   *  two points, the point on the trajectory and the point on the wire, where the 
+   *  Given two segments, e.g. a particle trajectory and a sTGC wire, solve for the
+   *  two points, the point on the trajectory and the point on the wire, where the
    *  distance between the two segments is the smallest.
    *
    *  Positions returned are in the local coordinate frame of the wire plane.
    *  Returns an object with distance of -9.99 in case of error.
    */
-  Ionization pointClosestApproach(const Identifier& id, int wireNumber, Amg::Vector3D& preStepPos, 
+  Ionization pointClosestApproach(const Identifier& id, int wireNumber, Amg::Vector3D& preStepPos,
                                   Amg::Vector3D& postStepPos) const;
 
-  /** Get digit time offset of a strip depending on its relative position to 
+  /** Get digit time offset of a strip depending on its relative position to
    *  the strip at the centre of the cluster.
    *  It returns 0 ns by default, as well as when it fails or container is empty.
    */
@@ -139,24 +139,24 @@ class sTgcDigitMaker : public AthMessaging {
   const MuonGM::MuonDetectorManager* m_mdManager{}; // not owned here
   const sTgcIdHelper* m_idHelper{}; // not owned here
   bool m_doEfficiencyCorrection{false};
- 
+
   /**
      define offsets and widths of time windows for signals from
      wiregangs and strips. The offsets are defined as relative time
      diffference with respect to the time after TOF and cable
      length corrections. Bunch crossing time is specified.
   */
- 
+
   int m_channelTypes{3}; // 1 -> strips, 2 -> strips+wires, 3 -> strips/wires/pads
   double m_theta{0.8}; // theta=0.8 value best matches the PDF
-  double m_mean{2.e5};  // mean gain estimated from ATLAS note "ATL-MUON-PUB-2014-001" 
- 
+  double m_meanGasGain{5.e4};  // mean gain estimated from ATLAS note "ATL-MUON-PUB-2014-001"
 
-  // Flag to enable strip time offset 
+
+  // Flag to enable strip time offset
   bool m_doTimeOffsetStrip{false};
   double m_GausMean{2.27};  //mm; VMM response from Oct/Nov 2013 test beam
   double m_GausSigma{0.1885}; //mm; VMM response from Oct/Nov 2013 test beam
-  double m_StripResolution{0.0949}; // Angular strip resolution parameter 
+  double m_StripResolution{0.0949}; // Angular strip resolution parameter
   double m_posResIncident{1.};
   double m_posResAngular{0.305/m_StripResolution};
 };

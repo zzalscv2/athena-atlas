@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////
@@ -15,7 +15,7 @@
 #include "TileConditions/TileCondToolNoiseSample.h"
 #include "TileConditions/TileCondToolOfc.h"
 #include "TileConditions/TileCondToolTiming.h"
-#include "TileConditions/TileCondToolEmscale.h"
+#include "TileConditions/TileEMScale.h"
 
 // Atlas includes
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -67,8 +67,11 @@ class TileRawChannelOF1Corrector: public extends<AthAlgTool, ITileRawChannelTool
     ToolHandle<TileCondToolTiming> m_tileToolTiming{this,
         "TileCondToolTiming", "TileCondToolOnlineTiming", "Tile timing tool"};
 
-    ToolHandle<TileCondToolEmscale> m_tileToolEms{this,
-        "TileCondToolEmscale", "TileCondToolEmscale", "Tile EM scale calibration tool"};
+   /**
+    * @brief Name of TileEMScale in condition store
+    */
+    SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
+        "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
     ToolHandle<ITileCondToolDspThreshold> m_tileDspThreshold{this,
         "TileCondToolDspThreshold", "TileCondToolDspThreshold", "Tile DSP thresholds tool"};

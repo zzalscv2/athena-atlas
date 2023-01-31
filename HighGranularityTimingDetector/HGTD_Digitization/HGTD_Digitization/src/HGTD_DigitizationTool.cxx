@@ -268,7 +268,7 @@ StatusCode HGTD_DigitizationTool::digitizeHitsPerDetectorElement(const EventCont
     ///////////////// LOOP TO FILL A COLLECTION /////////////////
     // Loop over the hits on the selected detector element and created charged
     // diodes
-    for (; coll_itr != coll_itr_end; coll_itr++) {
+    for (; coll_itr != coll_itr_end; ++coll_itr) {
 
       const TimedHitPtr<SiHit> &current_hit = *coll_itr;
 
@@ -423,7 +423,7 @@ void HGTD_DigitizationTool::createAndStoreSDO(
       const HepMcParticleLink &trkLink = charge_list_itr->particleLink();
       const int barcode = trkLink.barcode();
 
-      if ((barcode == 0) or (barcode == crazyParticleBarcode)) { // crazyParticleBarcode now defined in PileUpToolBase.h
+      if ((barcode == 0) or (barcode == m_vetoThisBarcode)) {
         continue;
       }
       if (!real_particle_hit) {

@@ -34,3 +34,10 @@ atlas_install_joboptions( share/*.py
 atlas_add_test( CaloConstIteratorAdaptor_test
   SOURCES test/CaloConstIteratorAdaptor_test.cxx
   LINK_LIBRARIES CaloDetDescrLib )
+
+if( NOT GENERATIONBASE AND NOT SIMULATIONBASE)
+atlas_add_test( CaloDetDescrManager_test
+                SCRIPT python -m CaloDetDescr.CaloDetDescrManager_test
+		PROPERTIES TIMEOUT 120
+		LOG_SELECT_PATTERN "CaloDD|^----|^Sampling" )
+endif()

@@ -8,7 +8,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODCaloEvent/CaloCluster.h"
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "eflowRec/IPFBaseTool.h"
 #include "eflowRec/IPFClusterCollectionTool.h"
 
@@ -26,7 +26,7 @@ class PFMomentCalculatorTool : public extends<AthAlgTool, IPFBaseTool> {
   ~PFMomentCalculatorTool() {}
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute(const eflowCaloObjectContainer& theEflowCaloObjectContainer) override;
+  virtual StatusCode execute(eflowCaloObjectContainer& theEflowCaloObjectContainer) override;
   virtual StatusCode finalize() override;
 
  private:

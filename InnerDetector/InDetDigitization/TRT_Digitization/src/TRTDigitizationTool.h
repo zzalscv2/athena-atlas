@@ -120,7 +120,7 @@ private:
                            CLHEP::HepRandomEngine *paiRndmEngine);
   StatusCode createAndStoreRDOs();
 
-  double getCosmicEventPhase(CLHEP::HepRandomEngine *rndmEngine);
+  static double getCosmicEventPhase(CLHEP::HepRandomEngine *rndmEngine);
 
   /// Configurable properties
   ToolHandle<ITRT_PAITool> m_TRTpaiToolXe{this, "PAI_Tool_Xe", "TRT_PAI_Process_Xe", "The PAI model for ionisation in the TRT Xe gas"};
@@ -168,8 +168,7 @@ private:
   // const  ComTime* m_ComTime{};
   double m_cosmicEventPhase{0.0};     // local replacement for the comTime service
   const HepPDT::ParticleDataTable* m_particleTable{};
-  SG::ReadCondHandleKey<AthenaAttributeList> m_digverscontainerkey
-  { this, "DigVersContainerKey", "/TRT/Cond/DigVers", "" };
+  SG::ReadCondHandleKey<AthenaAttributeList> m_digverscontainerkey{ this, "DigVersContainerKey", "", "" };
   bool m_first_event{true};
 
   bool m_HardScatterSplittingSkipper{false};

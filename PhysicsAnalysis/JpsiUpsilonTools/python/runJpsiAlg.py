@@ -2,9 +2,6 @@
 
 
 if __name__ == "__main__":
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior = 1
-
     # import the flags and set them
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
 

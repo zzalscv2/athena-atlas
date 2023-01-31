@@ -17,8 +17,6 @@
 #include "Pythia8_i/Pythia8_i.h"
 // For unique_ptr
 #include <memory>
-// For ATLAS THREAD macros
-#include "CxxUtils/checker_macros.h"
 
 class G4DynamicParticle;
 class G4ParticleDefinition;
@@ -26,19 +24,13 @@ class G4ParticleDefinition;
 class Pythia8ForDecays
 {
   public:
-
+   Pythia8ForDecays();
    virtual ~Pythia8ForDecays() = default;
-
-   static Pythia8ForDecays *Instance ATLAS_NOT_THREAD_SAFE ();
 
    /// Function that decays the RHadron; returns products in G4 format
    void Py1ent(const G4Track&, std::vector<G4DynamicParticle*> &);
 
   private:
-
-   /// Private constructor for singleton pattern
-   Pythia8ForDecays();
-
    /// Helper for getting G4ParticleDefinition from PDG ID
    G4ParticleDefinition* GetParticleDefinition(const int) const;
 

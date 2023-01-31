@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -10,7 +10,6 @@ from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorI
 from AthenaCommon.CFElements import seqAND, parOR
 from TrigGenericAlgs.TrigGenericAlgsConfig import TimeBurnerCfg, TimeBurnerHypoToolGen, L1CorrelationAlgCfg
 from L1TopoOnlineMonitoring import L1TopoOnlineMonitoringConfig as TopoMonConfig
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.Enums import Format
 from TrigHypoCommonTools.TrigHypoCommonToolsConf import TrigGenericHypoAlg
 from TrigHypoCommonTools.TrigHypoCommonTools import TrigGenericHypoToolFromDict
@@ -37,10 +36,7 @@ def TimeBurnerSequenceCfg(flags):
             Hypo        = hypoAlg,
             HypoToolGen = TimeBurnerHypoToolGen)
 
-def L1TopoOnlineMonitorSequenceCfg(dummyFlags, isLegacy):
-        # The menu framework actually passes None as argument to this function,
-        # so use the imported ConfigFlags instead
-        flags = ConfigFlags
+def L1TopoOnlineMonitorSequenceCfg(flags, isLegacy):
 
         recoAlgCfg = TopoMonConfig.getL1TopoLegacyOnlineMonitor if isLegacy else TopoMonConfig.getL1TopoPhase1OnlineMonitor
         recoAlg = RecoFragmentsPool.retrieve(recoAlgCfg, flags)
@@ -77,7 +73,7 @@ def MistimeMonSequenceCfg(flags):
         inputMaker.RoIs="MistimeMonInputRoIs"
 
         outputName = recordable("HLT_TrigCompositeMistimeJ400")
-        recoAlg = L1CorrelationAlgCfg("MistimeMonj400", ItemList=['L1_J400'], 
+        recoAlg = L1CorrelationAlgCfg(flags, "MistimeMonj400", ItemList=['L1_J400'],
                                       TrigCompositeWrieHandleKey=outputName, trigCompPassKey=outputName+".pass",
                                       l1AKey=outputName+".l1a_type", otherTypeKey=outputName+".other_type",
                                       beforeAfterKey=outputName+".beforeafterflag")
@@ -110,7 +106,7 @@ class MonitorChainConfiguration(ChainConfigurationBase):
     # ----------------------
     # Assemble the chain depending on information from chainName
     # ----------------------
-    def assembleChainImpl(self):                            
+    def assembleChainImpl(self, flags):                            
         chainSteps = []
         log.debug("Assembling chain for %s", self.chainName)
 
@@ -122,11 +118,11 @@ class MonitorChainConfiguration(ChainConfigurationBase):
         monType = monTypeList[0]
 
         if monType == 'timeburner':
-            chainSteps.append(self.getTimeBurnerStep())
+            chainSteps.append(self.getTimeBurnerStep(flags))
         elif monType == 'l1topodebug':
-            chainSteps.append(self.getL1TopoOnlineMonitorStep())
+            chainSteps.append(self.getL1TopoOnlineMonitorStep(flags))
         elif monType == 'mistimemonj400':
-            chainSteps.append(self.getMistimeMonStep())
+            chainSteps.append(self.getMistimeMonStep(flags))
         else:
             raise RuntimeError('Unexpected monType '+monType+' in MonitorChainConfiguration')
 
@@ -135,19 +131,19 @@ class MonitorChainConfiguration(ChainConfigurationBase):
     # --------------------
     # TimeBurner configuration
     # --------------------
-    def getTimeBurnerStep(self):      
-        return self.getStep(1,'TimeBurner',[TimeBurnerSequenceCfg])
+    def getTimeBurnerStep(self, flags):
+        return self.getStep(flags,1,'TimeBurner',[TimeBurnerSequenceCfg])
 
     # --------------------
     # L1TopoOnlineMonitor configuration
     # --------------------
-    def getL1TopoOnlineMonitorStep(self):
+    def getL1TopoOnlineMonitorStep(self, flags):
         isLegacy = 'isLegacyL1' in self.chainPart and 'legacy' in self.chainPart['isLegacyL1']
         sequenceCfg = L1TopoLegacyOnlineMonitorSequenceCfg if isLegacy else L1TopoPhase1OnlineMonitorSequenceCfg
-        return self.getStep(1,'L1TopoOnlineMonitor',[sequenceCfg])
+        return self.getStep(flags,1,'L1TopoOnlineMonitor',[sequenceCfg])
 
     # --------------------
     # MistTimeMon configuration
     # --------------------
-    def getMistimeMonStep(self):      
-        return self.getStep(1,'MistimeMon',[MistimeMonSequenceCfg])
+    def getMistimeMonStep(self, flags):
+        return self.getStep(flags,1,'MistimeMon',[MistimeMonSequenceCfg])

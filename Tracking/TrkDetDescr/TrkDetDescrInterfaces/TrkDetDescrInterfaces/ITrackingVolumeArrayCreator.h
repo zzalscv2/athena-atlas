@@ -27,9 +27,6 @@ namespace Trk {
       simply for the eye */
   typedef BinnedArray<TrackingVolume> TrackingVolumeArray;
   
-  /** Interface ID for ITrackingVolumeArrayCreator*/  
-  static const InterfaceID IID_ITrackingVolumeArrayCreator("ITrackingVolumeArrayCreator", 1, 0);
-  
   /** @class ITrackingVolumeArrayCreator
     
     Interface class ITrackingVolumeArrayCreators
@@ -46,11 +43,11 @@ namespace Trk {
   class ITrackingVolumeArrayCreator : virtual public IAlgTool {
     
     public:
+    /// Creates the InterfaceID and interfaceID() method
+    DeclareInterfaceID(ITrackingVolumeArrayCreator, 1, 0);
+
       /**Virtual destructor*/
       virtual ~ITrackingVolumeArrayCreator(){}
-      
-      /** AlgTool and IAlgTool interface methods */
-      static const InterfaceID& interfaceID() { return IID_ITrackingVolumeArrayCreator; }
 
       /** TrackingVolumeArrayCreator interface method -
           create a R-binned cylindrical volume array*/

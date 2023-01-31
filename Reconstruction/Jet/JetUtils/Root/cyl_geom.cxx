@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #define CY_GEOM_CPP
@@ -8,8 +8,8 @@
 namespace JetGeom {
 void testHullLine(point_list_t &hull, point_t p){
   // helper function for findConvexHull
-  point_list_t::iterator it_prev = hull.end();it_prev--;
-  point_list_t::iterator it_pprev = it_prev; it_pprev--;
+  point_list_t::iterator it_prev = hull.end();--it_prev;
+  point_list_t::iterator it_pprev = it_prev; --it_pprev;
   line_t l(*it_pprev, *it_prev);
   //   std::cout << " hull : "<< hull.size()<< "  p.phi ="<<p.second  <<std::endl;
   //   std::cout << "      "<< (*it_prev).first<< " " << (*it_prev).second << std::endl;

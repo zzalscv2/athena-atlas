@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TSTORE_ICC
 #define XAODROOTACCESS_TSTORE_ICC
@@ -70,11 +70,14 @@ namespace xAOD {
    }
 
    template< typename T >
-   StatusCode TStore::record( T* obj, const std::string& key ) {
+   StatusCode TStore::record_impl( T* obj, const std::string& key,
+                                   ::Bool_t isOwner, ::Bool_t isConst ) {
 
       // Check if it's possible to record the object with a dictionary:
       StatusCode result = record( obj, key,
-                                   SG::normalizedTypeinfoName( typeid( T ) ) );
+                                  SG::normalizedTypeinfoName( typeid( T ) ),
+                                  isOwner, isConst );
+
       // If it's a success or a failure, let's stop here. Only go on for a
       // recoverable error:
       if( ! result.isRecoverable() ) {
@@ -88,50 +91,60 @@ namespace xAOD {
       TDestructorRegistry::instance().add< T >();
 
       // Leave it to the non-template function to record the object:
-      return record( obj, key, typeid( T ) );
+      return record( obj, key, typeid( T ), isOwner, isConst );
    }
+
+   template< typename T >
+   StatusCode TStore::record( T* obj, const std::string& key ) {
+
+      return record_impl( obj, key, /*isOwner*/kTRUE, /*isConst*/kFALSE );
+   }
+
 
    template< typename T >
    StatusCode TStore::record( std::unique_ptr< T > obj,
                                const std::string& key ) {
 
-      // Check if it's possible to record the object with a dictionary:
-      StatusCode result = record( obj.get(), key,
-                                   SG::normalizedTypeinfoName( typeid( T ) ) );
-      // If it's a success or a failure, let's stop here. Only go on for a
-      // recoverable error:
-      if( ! result.isRecoverable() ) {
-         // In case of success, make the smart pointer give up ownership of
-         // the object:
-         if( result.isSuccess() ) {
-            obj.release();
-         }
-         return result;
+      StatusCode result = record_impl( obj.get(), key,
+                                       /*isOwner*/kTRUE, /*isConst*/kFALSE );
+
+      // In case of success, give up ownership of the object:
+      if( result.isSuccess() ) {
+         obj.release();
       }
+      return result;
+   }
 
-      // Apparently we don't have a dictionary for this type. Let's fall back
-      // to a slightly dumber implementation then...
+   template< typename T >
+   StatusCode TStore::record( const T* obj, const std::string& key ) {
 
-      // Make sure that we'll be able to destruct this type later on:
-      TDestructorRegistry::instance().add< T >();
+      // We hold object as non-const pointers, but check on retrieval:
+      T* nc_obj ATLAS_THREAD_SAFE = const_cast<T*>(obj);
+      return record_impl( nc_obj, key, /*isOwner*/kTRUE, /*isConst*/kTRUE );
+   }
 
-      // Leave it to the non-template function to record the object:
-      result = record( obj.get(), key, typeid( T ) );
-      if( ! result.isSuccess() ) {
-         return result;
+   template< typename T >
+   StatusCode TStore::record( std::unique_ptr< const T > obj,
+                              const std::string& key ) {
+
+      // We hold object as non-const pointers, but check on retrieval:
+      T* nc_obj ATLAS_THREAD_SAFE = const_cast<T*>(obj.get());
+      StatusCode result = record_impl( nc_obj, key,
+                                       /*isOwner*/kTRUE, /*isConst*/kTRUE );
+
+      // In case of success, give up ownership of the object:
+      if( result.isSuccess() ) {
+         obj.release();
       }
-
-      // In case of success, make the smart pointer give up ownership of
-      // the object:
-      obj.release();
-      return StatusCode::SUCCESS;
+      return result;
    }
 
    template< class T >
-   StatusCode TStore::record( ConstDataVector< T >* obj,
-                               const std::string& key,
-                               const std::type_info& ti ) {
+   StatusCode TStore::record( ConstDataVector< T >* obj, const std::string& key,
+                              const std::type_info& ti,
+                              ::Bool_t /*isOwner*/, ::Bool_t /*isConst*/ ) {
 
+      // We always store non-const pointers but check on retrieval:
       THolder* hldr = new TCDVHolderT< T >( obj, ti );
       return record( hldr, key );
    }

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -8,6 +8,10 @@ def LArRampCfg(flags):
     #Get basic services and cond-algos
     from LArCalibProcessing.LArCalibBaseConfig import LArCalibBaseCfg,chanSelStr
     result=LArCalibBaseCfg(flags)
+
+    #Add ByteStream reading
+    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+    result.merge(ByteStreamReadCfg(flags))
 
     #Calibration runs are taken in fixed gain. 
     #The SG key of the digit-container is name of the gain
@@ -95,29 +99,8 @@ def LArRampCfg(flags):
         theLArRampPatcher.PatchMethod="PhiAverage"
    
         theLArRampPatcher.ProblemsToPatch=["deadCalib","deadReadout","deadPhys","almostDead","short"]
-        theLArRampPatcher.UseCorrChannels=False      
+        theLArRampPatcher.UseCorrChannels=True
         result.addEventAlgo(theLArRampPatcher)
-
-
-
-
-    #ROOT ntuple writing:
-    rootfile=flags.LArCalib.Output.ROOTFile
-    if rootfile != "":
-        result.addEventAlgo(CompFactory.LArRamps2Ntuple(ContainerKey = ["LArRamp"+digKey], #for RawRamp
-                                                        AddFEBTempInfo = False,
-                                                        RawRamp = True,
-                                                        SaveAllSamples =  True,
-                                                    ))
-
-        import os
-        if os.path.exists(rootfile):
-            os.remove(rootfile)
-        result.addService(CompFactory.NTupleSvc(Output = [ "FILE1 DATAFILE='"+rootfile+"' OPT='NEW'" ]))
-        result.setAppProperty("HistogramPersistency","ROOT")
-        pass # end if ROOT ntuple writing
-
-
 
 
     #Output (POOL + sqlite) file writing:
@@ -130,36 +113,53 @@ def LArRampCfg(flags):
 
     #RegistrationSvc    
     result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = False))
-
-
     result.getService("IOVDbSvc").DBInstance=""
+
+
+    #ROOT ntuple writing:
+    rootfile=flags.LArCalib.Output.ROOTFile
+    if rootfile != "":
+        result.addEventAlgo(CompFactory.LArRamps2Ntuple(ContainerKey = ["LArRamp"+digKey], #for RawRamp
+                                                        AddFEBTempInfo = False,
+                                                        RawRamp = True,
+                                                        SaveAllSamples =  True,
+                                                        ApplyCorr=True,
+                                                    ))
+
+        import os
+        if os.path.exists(rootfile):
+            os.remove(rootfile)
+        result.addService(CompFactory.NTupleSvc(Output = [ "FILE1 DATAFILE='"+rootfile+"' OPT='NEW'" ]))
+        result.setAppProperty("HistogramPersistency","ROOT")
+        pass # end if ROOT ntuple writing
+
+
+    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+    result.merge(PerfMonMTSvcCfg(flags))
 
     return result
 
 
 if __name__ == "__main__":
-
-
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
+    ConfigFlags=initConfigFlags()
     addLArCalibFlags(ConfigFlags)
 
-
-    ConfigFlags.LArCalib.Input.Dir = "/scratch/wlampl/calib21/Sept10"
+    ConfigFlags.LArCalib.Input.Dir = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/LArCalibProcessing"
     ConfigFlags.LArCalib.Input.Type="calibration_LArElec-Ramp"
-    ConfigFlags.LArCalib.Input.RunNumbers=[401351,]
-    ConfigFlags.LArCalib.Input.Database="db.sqlite"
+    ConfigFlags.LArCalib.Input.RunNumbers=[441252,]
     ConfigFlags.LArCalib.Input.SubDet="EM"
     ConfigFlags.Input.Files=ConfigFlags.LArCalib.Input.Files
-    ConfigFlags.LArCalib.Preselection.BEC=[1]
-    ConfigFlags.LArCalib.Preselection.Side=[0]
-    ConfigFlags.LArCalib.BadChannelDB="/afs/cern.ch/user/l/larcalib/w0/data/WorkingDirectory/00401338_00401349_00401351_EndCap-EMB-EMEC_HIGH_40_21.0.20_1/poolFiles/SnapshotBadChannel_00401338_00401349_00401351_EB-EMECA.db"
-    ConfigFlags.LArCalib.BadChannelTag="-RUN2-UPD3-00"
+    ConfigFlags.LArCalib.Input.Database="output.sqlite"
+    ConfigFlags.LArCalib.Output.POOLFile="larramp.pool.root"
     ConfigFlags.LArCalib.Output.ROOTFile="larramp.root"
 
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema=output.sqlite;dbname=CONDBR2"
     ConfigFlags.IOVDb.GlobalTag="LARCALIB-RUN2-02"
     #ConfigFlags.Exec.OutputLevel=1
+    ConfigFlags.fillFromArgs()
+
     print ("Input files to be processed:")
     for f in ConfigFlags.Input.Files:
         print (f)

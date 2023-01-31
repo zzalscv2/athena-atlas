@@ -298,7 +298,7 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
   /// fil the number of offline tracks
   m_hchain->Fill(4.5, testTracks.size() );
 
-  for( ; reference!=referenceEnd ; reference++ ) {
+  for( ; reference!=referenceEnd ; ++reference ) {
     
     // Get reference parameters
     double referenceEta = (*reference)->eta();
@@ -372,7 +372,7 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
 
 
     for ( size_t ilayer=0 ; ilayer<32 ; ilayer++ ) { 
-      if ( (*reference)->hitPattern()&(1<<ilayer) ) m_hlayer->Fill( ilayer );
+      if ( (*reference)->hitPattern()&(1U<<ilayer) ) m_hlayer->Fill( ilayer );
     } 
     
     if (test) {
@@ -407,7 +407,7 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
       m_htrkvtx_z_lb->Fill( tevt->lumi_block(), beamline[2] );
 
       for ( size_t ilayer=0 ; ilayer<32 ; ilayer++ ) { 
-	if ( test->hitPattern()&(1<<ilayer) ) m_hlayer_rec->Fill( ilayer );
+	if ( test->hitPattern()&(1U<<ilayer) ) m_hlayer_rec->Fill( ilayer );
       } 
 
       //      std::cout << "SUTT beam x " << beamTestx() << " " << "\tx " << beamTesty() << " " <<  "\ty " << beamTestz() << std::endl;

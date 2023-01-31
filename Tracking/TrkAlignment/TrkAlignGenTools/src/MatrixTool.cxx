@@ -170,6 +170,9 @@ namespace Trk {
     declareProperty("AlignIBLbutNotPixel",    m_AlignIBLbutNotPixel = false);
     declareProperty("AlignPixelbutNotIBL",    m_AlignPixelbutNotIBL = false);
 
+    //To Skip Solving of SCT ECA Last Disk
+    declareProperty("DeactivateSCT_ECA_LastDisk",    m_DeactivateSCT_ECA_LastDisk = false);
+    
     //By Pixel DoF
     declareProperty("Remove_Pixel_Tx",    m_Remove_Pixel_Tx = false);
     declareProperty("Remove_Pixel_Ty",    m_Remove_Pixel_Ty = false);
@@ -209,8 +212,8 @@ namespace Trk {
     }
 
     ATH_MSG_INFO("Retrieving data from the following files: ");
-    for (int i=0;i<(int)m_inputVectorFiles.size();i++) {
-      ATH_MSG_INFO(m_pathbin+m_inputVectorFiles[i]);
+    for (auto & inputVectorFile : m_inputVectorFiles) {
+      ATH_MSG_INFO(m_pathbin+inputVectorFile);
     }    
 
     return StatusCode::SUCCESS;
@@ -664,8 +667,8 @@ namespace Trk {
         }
       }
 
-//      ATH_MSG_INFO("First derivatives:" << dChi2);
-//      ATH_MSG_INFO("Second derivatives:" << d2Chi2);
+      ATH_MSG_DEBUG("First derivatives:" << dChi2);
+      ATH_MSG_DEBUG("Second derivatives:" << d2Chi2);
 
       if(module->nHits() < m_minNumHits || module->nTracks() < m_minNumTrks) {
         ATH_MSG_INFO("Not enough hits in module \'"<<module->name()<<"\':  "
@@ -769,7 +772,7 @@ namespace Trk {
     double totalscale=0.;
     for (int ivec=0;ivec<(int)m_inputVectorFiles.size();ivec++) {
 
-      ATH_MSG_INFO("Reading vector "<<ivec<<" from file "<<m_inputVectorFiles[ivec]);
+      ATH_MSG_DEBUG("Reading vector "<<ivec<<" from file "<<m_inputVectorFiles[ivec]);
 
       AlVec newVector(nDoF);
       std::map<int,unsigned long long> newModIndexMap;
@@ -808,7 +811,7 @@ namespace Trk {
 
 
     for (int imat=0;imat<(int)m_inputMatrixFiles.size();imat++) {
-      ATH_MSG_INFO("Reading matrix "<<imat<<" from file "<<m_inputMatrixFiles[imat]);
+      ATH_MSG_DEBUG("Reading matrix "<<imat<<" from file "<<m_inputMatrixFiles[imat]);
 
       // create new matrix to read data from current file
       int nDoF=modIndexMap.size();
@@ -861,14 +864,14 @@ namespace Trk {
     //Store reults in a single TFile....
     //Including Matrix Vector Hitmap.. Soluton EVs etc.
     
-    ATH_MSG_INFO("Writing Results to a TFile");
+    ATH_MSG_DEBUG("Writing Results to a TFile");
     
     DataVector<AlignPar> * alignParList = m_alignModuleTool->alignParList1D();
     int nDoF = alignParList->size();
   
     TMatrixDSparse* myTMatrix = m_bigmatrix->makeTMatrix();
 
-    ATH_MSG_INFO( "Created TMatrixDSparse" );
+    ATH_MSG_DEBUG( "Created TMatrixDSparse" );
 
   
     double *val = new double[nDoF];
@@ -879,7 +882,7 @@ namespace Trk {
     TVectorD myTVector(nDoF, val);
     delete [] val;
   
-    ATH_MSG_INFO( "Created TVectorD" );
+    ATH_MSG_DEBUG( "Created TVectorD" );
 
   
     const AlignModuleList * moduleList = m_alignModuleTool->alignModules1D();
@@ -946,7 +949,7 @@ namespace Trk {
     myFile.Close();
     
     delete myTMatrix;
-    ATH_MSG_INFO("Finshed writing TFILE");
+    ATH_MSG_DEBUG("Finshed writing TFILE");
 
   }
 
@@ -955,7 +958,7 @@ namespace Trk {
   {
     DataVector<AlignPar>* alignParList = m_alignModuleTool->alignParList1D();
     int nDoF=alignParList->size();
-    ATH_MSG_INFO("OPENING TFILES");
+    ATH_MSG_DEBUG("OPENING TFILES");
 
     std::map<int,unsigned long long> modIndexMap;
     std::map<int,unsigned long long> DoFMap;
@@ -979,7 +982,7 @@ namespace Trk {
     if(itworked)//note: rusage returns zero if it succeeds!
 		  ATH_MSG_DEBUG("ItWorked");
 
-		long intialMemUse = myusage.ru_maxrss;
+    long intialMemUse = myusage.ru_maxrss;
 
     for (int ifile = 0; ifile < (int)m_inputTFiles.size(); ifile++) {
       if (numberOfReadErrors > m_maxReadErrors){
@@ -987,10 +990,10 @@ namespace Trk {
         return false;
       }
    
-      ATH_MSG_INFO("Reading File number " << ifile << ",  " << m_inputTFiles[ifile]);
+      ATH_MSG_DEBUG("Reading File number " << ifile << ",  " << m_inputTFiles[ifile]);
       
       itworked =  getrusage(RUSAGE_SELF,&myusage);
-      ATH_MSG_INFO("Memory usage [MB], total " << myusage.ru_maxrss/1024 << ", increase  " << (myusage.ru_maxrss-intialMemUse)/1024);
+      ATH_MSG_DEBUG("Memory usage [MB], total " << myusage.ru_maxrss/1024 << ", increase  " << (myusage.ru_maxrss-intialMemUse)/1024);
        
       TFile* myFile = TFile::Open(m_inputTFiles[ifile].c_str()); 
       
@@ -1054,7 +1057,7 @@ namespace Trk {
       delete Scale;
       
             
-      ATH_MSG_INFO("Reading Vector");
+      ATH_MSG_DEBUG("Reading Vector");
       TVectorD* vector = (TVectorD*)myFile->Get("Vector");
       if( !vector ){
         ++numberOfReadErrors;
@@ -1112,7 +1115,7 @@ namespace Trk {
       }
       
       
-      ATH_MSG_INFO("Reading matrix ");
+      ATH_MSG_DEBUG("Reading matrix ");
       TMatrixDSparse* matrix = (TMatrixDSparse*)myFile->Get("Matrix");
       
       if( !matrix ){
@@ -1125,7 +1128,7 @@ namespace Trk {
       if (ifile == 0 ){ 
       
         accumMatrix = new AlSpaMat(nDoF);
-        ATH_MSG_INFO("Matrix size b4 "<< accumMatrix->ptrMap()->size()  );
+        ATH_MSG_DEBUG("Matrix size b4 "<< accumMatrix->ptrMap()->size()  );
         
         //This method is ok for large matrix files... really only access the non zero elements
         for (int ii=0;ii<nDoF;ii++) {
@@ -1135,17 +1138,17 @@ namespace Trk {
             int j = (myRow.GetColPtr())[jj];
             const double  myElement= (myRow.GetDataPtr())[jj];
             if (i<j){
-              ATH_MSG_INFO("i < j " );
+              ATH_MSG_DEBUG("i < j " );
               j = i;
               i = (myRow.GetColPtr())[jj];
             }
             (*accumMatrix)[i][j] = myElement;
           }
         }         
-        ATH_MSG_INFO("Matrix size AF "<< accumMatrix->ptrMap()->size()  );
+        ATH_MSG_DEBUG("Matrix size AF "<< accumMatrix->ptrMap()->size()  );
   
       } else if ( accumMatrix) {        
-        ATH_MSG_INFO("Matrix size b4 "<< accumMatrix->ptrMap()->size()  );
+        ATH_MSG_DEBUG("Matrix size b4 "<< accumMatrix->ptrMap()->size()  );
   
         for (int ii=0;ii<nDoF;ii++) {
           const TMatrixTSparseRow_const<double> myRow = (*matrix)[ii];
@@ -1154,14 +1157,14 @@ namespace Trk {
             int j = (myRow.GetColPtr())[jj];
             const double  myElement= (myRow.GetDataPtr())[jj];
             if (i<j){
-              ATH_MSG_INFO("i < j " );
+              ATH_MSG_DEBUG("i < j " );
               j = i;
               i = (myRow.GetColPtr())[jj];
             }
             (*accumMatrix)[i][j] += myElement;
           }
         }
-        ATH_MSG_INFO("Matrix size AF "<< accumMatrix->ptrMap()->size()  );
+        ATH_MSG_DEBUG("Matrix size AF "<< accumMatrix->ptrMap()->size()  );
  
       } else {
         delete matrix;
@@ -1175,7 +1178,7 @@ namespace Trk {
       TVectorD* hits;
       TVectorD* tracks;
       
-      ATH_MSG_INFO("Reading hitmap ");
+      ATH_MSG_DEBUG("Reading hitmap ");
       hits = (TVectorD*)myFile->Get("Hits");
       if( !hits ){
         ++numberOfReadErrors;
@@ -1209,7 +1212,7 @@ namespace Trk {
       delete myFile;
 
       itworked =  getrusage(RUSAGE_SELF,&myusage);
-      ATH_MSG_INFO("Memory usage [MB], total " << myusage.ru_maxrss/1024 << ", increase  " << (myusage.ru_maxrss-intialMemUse)/1024);
+      ATH_MSG_DEBUG("Memory usage [MB], total " << myusage.ru_maxrss/1024 << ", increase  " << (myusage.ru_maxrss-intialMemUse)/1024);
 
     }
 
@@ -1229,14 +1232,14 @@ namespace Trk {
         *symBigMatrix += newMatrix;
         delete accumMatrix;
       } else if (spaBigMatrix) { 
-        ATH_MSG_INFO( "should reassign matrix "<< spaBigMatrix->ptrMap()->size() );        
+        ATH_MSG_DEBUG( "should reassign matrix "<< spaBigMatrix->ptrMap()->size() );        
         *spaBigMatrix  += *accumMatrix;     
-        ATH_MSG_INFO( "??????  "<< spaBigMatrix->ptrMap()->size() );
+        ATH_MSG_DEBUG( "??????  "<< spaBigMatrix->ptrMap()->size() );
         delete accumMatrix;
       }
     }
 
-        ATH_MSG_INFO( "??????  "<< m_bigmatrix->ptrMap()->size() );
+    ATH_MSG_DEBUG( "??????  "<< m_bigmatrix->ptrMap()->size() );
 
     AlignModuleList::const_iterator imod     = moduleList->begin();
     AlignModuleList::const_iterator imod_end = moduleList->end();
@@ -1325,7 +1328,7 @@ namespace Trk {
 
 
     if(!m_runLocal && m_solveOption==0) {
-      ATH_MSG_INFO("No solving requested.");
+      ATH_MSG_DEBUG("No solving requested.");
       return 1;
     }
 
@@ -1333,7 +1336,7 @@ namespace Trk {
     // rescale the vector and the matrix according to sigmas
     // and apply soft mode cut
 
-    ATH_MSG_INFO("rescaling the matrix/vector and applying the soft-mode-cut");
+    ATH_MSG_DEBUG("rescaling the matrix/vector and applying the soft-mode-cut");
 
     DataVector<AlignPar>* alignParList = m_alignModuleTool->alignParList1D();
     int nDoF = alignParList->size();
@@ -1390,7 +1393,7 @@ namespace Trk {
         if (m_softEigenmodeCut >0. ){
           double softCut = 2 * pow( (*alignParList)[i]->softCut() , -2 );
           (*m_bigmatrix)[i][i] += m_softEigenmodeCut * softCut;
-          ATH_MSG_INFO( "DOF "<< i <<" Nhits "<< (*alignParList)[i]->alignModule()->nHits() << " soft-mode-cut "<< (*alignParList)[i]->softCut() <<" -> " << m_softEigenmodeCut * softCut  << " sigma_i "<< sigma_i << " Matrix: " << (*m_bigmatrix)[i][i] << " Vector: " << (*m_bigvector)[i]);
+          ATH_MSG_DEBUG( "DOF "<< i <<" Nhits "<< (*alignParList)[i]->alignModule()->nHits() << " soft-mode-cut "<< (*alignParList)[i]->softCut() <<" -> " << m_softEigenmodeCut * softCut  << " sigma_i "<< sigma_i << " Matrix: " << (*m_bigmatrix)[i][i] << " Vector: " << (*m_bigvector)[i]);
         }
         (*alignParList)[i]->setFirstDeriv((*m_bigvector)[i]/sigma_i);
         (*alignParList)[i]->setSecndDeriv((*m_bigmatrix)[i][i]/sigma_i/sigma_i);
@@ -1400,6 +1403,8 @@ namespace Trk {
     unsigned long long OldPixelIdentifier = 37769216; //Identifier for the Pixel Detector
     unsigned long long IBLIdentifier      = 33574912; //Identifier for the Pixel Detector
     
+    unsigned long long SCT_ECA_8_Identifier = 218116096; //Identifier for the SCT ECA Last Disk
+    std::string SCT_ECA_8_Name = "SCT/EndcapA/Disk_8";
 
     
 
@@ -1409,19 +1414,30 @@ namespace Trk {
     // select modules with non-zero tracks
     for(int i=0;i<nDoF;i++)
       {
-        /*ATH_MSG_INFO(i);
-        ATH_MSG_INFO((*alignParList)[i]->alignModule()->identify32());
-        ATH_MSG_INFO((*alignParList)[i]->alignModule());
-        ATH_MSG_INFO((*alignParList)[i]->alignModule()->name());
-        ATH_MSG_INFO((*alignParList)[i]->paramType());*/
+        ATH_MSG_DEBUG(i);
+        ATH_MSG_DEBUG((*alignParList)[i]->alignModule()->identify32());
+        ATH_MSG_DEBUG((*alignParList)[i]->alignModule());
+        ATH_MSG_DEBUG((*alignParList)[i]->alignModule()->name());
+        ATH_MSG_DEBUG((*alignParList)[i]->paramType());
 
         //Skip solving for Pixel or IBL:
-  const auto & theParameterList = *alignParList;      
-  const auto & thisIdentifier = theParameterList[i]->alignModule()->identify32();
-  const auto & thisParameterType = theParameterList[i]->paramType();
-  const bool oldPixel = (thisIdentifier == OldPixelIdentifier);
-  const bool ibl = (thisIdentifier == IBLIdentifier);
-  //
+	const auto & theParameterList = *alignParList;      
+	const auto & thisIdentifier = theParameterList[i]->alignModule()->identify32();
+	const auto & thisName       = theParameterList[i]->alignModule()->name();
+	const auto & thisParameterType = theParameterList[i]->paramType();
+	const bool oldPixel = (thisIdentifier == OldPixelIdentifier);
+	const bool ibl = (thisIdentifier == IBLIdentifier);
+	const bool SCTECA8   = (thisIdentifier == SCT_ECA_8_Identifier);
+	const bool SCTECA8_n = (thisName.find(SCT_ECA_8_Name)!= std::string::npos);
+
+	if (m_DeactivateSCT_ECA_LastDisk) 
+	  if (SCTECA8)
+	    {ATH_MSG_INFO( "SCT ECA Last Disk DoF have been skipped in the solving because DeactivateSCT_ECA_LastDisk is set to True");
+	      continue;}
+	if (SCTECA8_n)
+	  {ATH_MSG_INFO( "SCT ECA Last Disk DoF have been skipped in the solving because DeactivateSCT_ECA_LastDisk is set to True");
+	    continue;}
+
 	if (m_AlignIBLbutNotPixel) //If m_AlignIBLbutNotPixel is set to True, Pixel will be skipped in the solving.
 	  if  (oldPixel)  
 	    {ATH_MSG_INFO( "Pixel DoF have been skipped in the solving because AlignIBLbutNotPixel is set to True");
@@ -1535,7 +1551,7 @@ namespace Trk {
     switch(m_solveOption) {
 
       case NONE:
-        ATH_MSG_INFO("No global solving requested.");
+        ATH_MSG_DEBUG("No global solving requested.");
         break;
 
       case SOLVE_ROOT:
@@ -1777,10 +1793,6 @@ namespace Trk {
         (*aBetterMat) *= 1./m_scale;
       }
     }
-
-    // Print() method is not yet implemented for AlVec and AlSymMat
-//    ATH_MSG_DEBUG("First derivatives: "<<aBetterVec->Print());
-//    ATH_MSG_DEBUG("Second derivatives: "<<aBetterMat->Print());
 
     ATH_MSG_DEBUG("Now Solving alignment using lapack diagonalization routine dspev...");
 

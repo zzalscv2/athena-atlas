@@ -32,15 +32,16 @@ void sTGCDetectorDescription::SetDetectorAddress(AGDDDetectorPositioner* p)
 		p->ID.detectorType="sTGC";
 		p->theDetector=this;
 		std::stringstream stringone;
-		std::string side="A";
-		if (p->ID.sideIndex<0) side="C";
+		char side='A';
+		if (p->ID.sideIndex<0) side='C';
 		int ctype=0;
 		int ml=1;
-		if (subType().substr(1,1)=="S" && subType().substr(3,1)=="P") ml=2;
-		else if (subType().substr(1,1)=="L" && subType().substr(3,1)=="C") ml=2;
-		if (subType().substr(1,1)=="S") ctype=3;
-		else if (subType().substr(1,1)=="L") ctype=1;
-		stringone<<"sTG"<<ctype<<"-"<<subType().substr(2,1)<<"-"<<ml<<"-phi"<<p->ID.phiIndex+1<<side<<std::endl;
+		std::string_view subt = subType();
+		if (subt[1]=='S' && subt[3]=='P') ml=2;
+		else if (subt[1]=='L' && subt[3]=='C') ml=2;
+		if (subt[1]=='S') ctype=3;
+		else if (subt[1]=='L') ctype=1;
+		stringone<<"sTG"<<ctype<<'-'<<subt.substr(2,1)<<'-'<<ml<<"-phi"<<p->ID.phiIndex+1<<side<<std::endl;
 		//std::cout<<" stringone "<<stringone.str()<<std::endl;
 		p->ID.detectorAddress=stringone.str();
 }

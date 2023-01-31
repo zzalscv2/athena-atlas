@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -49,6 +49,7 @@ public:
   void fill(const double& x, const double& w);
   unsigned getNBins() const { return m_nbinsPlus1-1; }
   const float * getVarBins() const { return m_varBins; }
+  float * getVarBins() { return m_varBins; }
 
   //Bin numbers in the next methods are in 0..m_nbins+1 (i.e. with
   //over/underflow bins):

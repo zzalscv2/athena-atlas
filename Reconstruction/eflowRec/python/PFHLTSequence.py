@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from eflowRec import eflowRecConf
 from InDetTrackSelectionTool import InDetTrackSelectionToolConf
-from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigExtrapolator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthenaCommon.Logging import logging
@@ -23,6 +22,7 @@ def getExtrapolator():
     # FIXME: reconfigure for lower tolerance to speed up
     # from TrkExTools.AtlasExtrapolator import AtlasExtrapolator
     from TrackToCalo.TrackToCaloConf import Trk__ParticleCaloExtensionTool
+    from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigExtrapolator
 
     return Trk__ParticleCaloExtensionTool(
         "HLTPF_ParticleCaloExtension", Extrapolator=InDetTrigExtrapolator
@@ -62,6 +62,7 @@ def PFTrackExtension(tracktype):
 
 def muonCaloTagSeq(flags, tracktype, tracksin, extcache, cellsin):
     from eflowRec.eflowRecConf import PFTrackMuonCaloTaggingAlg
+    from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigExtrapolator
     from TrackToCalo.TrackToCaloConf import Rec__ParticleCaloCellAssociationTool
     from CaloTrkMuIdTools.CaloTrkMuIdToolsConf import (
         CaloMuonScoreTool,
@@ -174,14 +175,8 @@ def getPFAlg(flags, clustersin, tracktype):
     assert (flags is not None), "Impossible to create PFlow HLT algorithm with empty flags"
 
     # The tool to handle cell-level subtraction, default parameters
-    if flags.Trigger.Jet.doMC20_EOverP:
-        from eflowRec.eflowRecConf import eflowCellEOverPTool_Run2_mc20_JetETMiss
-        CellEOverPTool= eflowCellEOverPTool_Run2_mc20_JetETMiss()
-    else:
-        from eflowRec.eflowRecConf import eflowCellEOverPTool_mc12_JetETMiss
-        CellEOverPTool = eflowCellEOverPTool_mc12_JetETMiss()
-
-
+    from eflowRec.eflowRecConf import eflowCellEOverPTool_Run2_mc20_JetETMiss
+    CellEOverPTool= eflowCellEOverPTool_Run2_mc20_JetETMiss()
 
     # Need a few instances of PFTrackClusterMatchingTool with different distance cuts
     def getPFMatchingTool(name, matchcut):

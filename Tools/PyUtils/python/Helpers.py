@@ -1,14 +1,18 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # @author: Sebastien Binet <binet@cern.ch>
 # @date:   March 2007
 #
 #
 
-import sys
+import re
 import os
+import sys
+from functools import cache
 
 from AthenaCommon.Logging import log
+from tempfile import NamedTemporaryFile
+
 
 def ROOT6Setup(batch=False):
    log.info('executing ROOT6Setup')
@@ -53,8 +57,6 @@ def ROOT6Setup(batch=False):
    builtin_mod.__import__ = root6_importhook
 
 
-import re
-from tempfile import NamedTemporaryFile
 class ShutUp(object):
     """
     A little helper class to keep ROOT silent...
@@ -132,4 +134,38 @@ class ShutUp(object):
         return self.mute()
     def __exit__(self,exc_type, exc_val, exc_tb):
         return self.unMute()
-    
+
+
+@cache
+def release_metadata():
+   """Returns information about the current release based on ReleaseData"""
+
+   import configparser
+   d = {
+      'project name': '?',
+      'release': '?',
+      'base release': '?',
+      'nightly release': '?',
+      'nightly name': '?',
+      'date': '?',
+      'platform': '?',
+      }
+
+   for cmake_path in os.environ['CMAKE_PREFIX_PATH'].split(os.pathsep):
+      release_data = os.path.join(cmake_path, 'ReleaseData')
+      if os.path.exists(release_data):
+         d1=d
+         cfg = configparser.ConfigParser()
+         try:
+            cfg.read( release_data )
+            if cfg.has_section( 'release_metadata' ):
+               d1.update( dict( cfg.items( 'release_metadata' ) ) )
+               d1['platform'] = os.getenv( '%s_PLATFORM' % d1['project name'],
+                                           '?' )
+               release = d1['release'].split('.')
+               base_release = d1['base release'].split('.')
+               if len(release)>=3 or len(base_release)>=3:
+                  return d1
+         except Exception:
+            pass
+   return d

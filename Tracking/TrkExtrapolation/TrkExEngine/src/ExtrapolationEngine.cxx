@@ -36,11 +36,6 @@ StatusCode Trk::ExtrapolationEngine::initialize()
             
     EX_MSG_DEBUG( "", "initialize", "", "starting initialize()" );
     // get the TrackingGeometrySvc
-#ifdef LEGACY_TRKGEOM
-    if (!m_trackingGeometrySvc.empty()) {
-       ATH_CHECK( m_trackingGeometrySvc.retrieve());
-    }
-#endif
     ATH_CHECK( m_trackingGeometryReadKey.initialize(!m_trackingGeometryReadKey.key().empty()) );
 
     // retrieve the ExtrapolationEngines

@@ -1,7 +1,9 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkEventPrimitives )
+
+find_package( Boost )
 
 # Component(s) in the package:
 atlas_add_library( TrkEventPrimitives
@@ -13,3 +15,11 @@ atlas_add_dictionary( TrkEventPrimitivesDict
                       TrkEventPrimitives/TrkEventPrimitivesDict.h
                       TrkEventPrimitives/selection.xml
                       LINK_LIBRARIES TrkEventPrimitives )
+
+atlas_add_test( 
+  SurfaceConsistencyCheck_test
+  SOURCES test/SurfaceConsistencyCheck_test.cxx
+  INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils TrkEventPrimitives
+  POST_EXEC_SCRIPT nopost.sh
+  )

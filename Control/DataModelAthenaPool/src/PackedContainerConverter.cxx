@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file DataModelAthenaPool/src/PackedContainerConverter.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -33,22 +31,22 @@ namespace DataModelAthenaPool {
  * If the types of @c src and @c dst are the same, then just do a move.
  * Otherwise, copy.
  */
-template <class T>
-void vectorMove (std::vector<T>& src, std::vector<T>& dst)
+template <class T, class ALLOC>
+void vectorMove (std::vector<T, ALLOC>& src, std::vector<T, ALLOC>& dst)
 {
   dst.swap (src);
 }
-template <class T, class U>
-void vectorMove (std::vector<T>& src, std::vector<U>& dst)
+template <class T, class U, class ALLOC>
+void vectorMove (std::vector<T, ALLOC>& src, std::vector<U, ALLOC>& dst)
 {
   dst.assign (src.begin(), src.end());
 }
 
 
 /**
- * @brief Converter from @c std::vector<T> to @c SG::PackedContainer<U>.
+ * @brief Converter from @c std::vector<T,ALLOC> to @c SG::PackedContainer<U,ALLOC>.
  */
-template <class T, class U=T>
+template <class T, class U=T, class ALLOC=std::allocator<T> >
 class PackedContainerConverter
   : public TMemberStreamer
 {
@@ -56,8 +54,11 @@ public:
   /**
    * @brief Constructor.
    * @param tname The name of the vector element type T.
+   * @param allocName The name of the allocator class, or null
+   *                  to assume std::allocator.
    */
-  PackedContainerConverter (const char* tname);
+  PackedContainerConverter (const char* tname,
+                            const char* allocName = nullptr);
 
 
   /**
@@ -78,12 +79,19 @@ private:
 /**
  * @brief Constructor.
  * @param tname The name of the vector element type T.
+ * @param allocName The name of the allocator class, or null
+ *                  to assume std::allocator.
  */
-template <class T, class U>
-PackedContainerConverter<T, U>::PackedContainerConverter (const char* tname)
+template <class T, class U, class ALLOC>
+PackedContainerConverter<T, U, ALLOC>::PackedContainerConverter (const char* tname,
+                                                                 const char* allocName /* = nullptr*/)
 {
   std::string vname = "vector<";
   vname += tname;
+  if (allocName != nullptr) {
+    vname += ",";
+    vname += allocName;
+  }
   if (vname[vname.size()-1] == '>')
     vname += ' ';
   vname += '>';
@@ -97,20 +105,20 @@ PackedContainerConverter<T, U>::PackedContainerConverter (const char* tname)
  * @param pmember Pointer to the object into which to read.
  * @param size Number of instances to read.
  */
-template <class T, class U>
-void PackedContainerConverter<T, U>::operator() (TBuffer& b,
-                                                 void* pmember, 
-                                                 Int_t size /*=0*/)
+template <class T, class U, class ALLOC>
+void PackedContainerConverter<T, U, ALLOC>::operator() (TBuffer& b,
+                                                        void* pmember, 
+                                                        Int_t size /*=0*/)
 {
   // This only works for reading!
   assert (b.IsReading());
 
   // The transient object.
-  SG::PackedContainer<U>* obj =
-    reinterpret_cast<SG::PackedContainer<U>*> (pmember);
+  SG::PackedContainer<U, ALLOC>* obj =
+    reinterpret_cast<SG::PackedContainer<U, ALLOC>*> (pmember);
 
   // We'll read into this object.
-  std::vector<T> tmp;
+  std::vector<T, ALLOC> tmp;
 
   while (size-- > 0) {
     // Read into tmp and move data to *obj.
@@ -130,12 +138,22 @@ void installPackedContainerConverters()
 #define CONVERTER(SRC, DST)                                     \
   do {                                                          \
     TConverterRegistry::Instance()->AddStreamerConverter        \
-      ("vector<" #SRC ">", "SG::PackedContainer<" #DST ">",     \
+      ("vector<" #SRC ">", \
+       "SG::PackedContainer<" #DST ",allocator<" #DST "> >",       \
        new PackedContainerConverter<SRC, DST> ( #SRC));         \
   } while (0)
 
 #define CONVERTER1(T) CONVERTER(T,T)
 
+#define CONVERTER2(T, ALLOC)                                    \
+  do {                                                          \
+    TConverterRegistry::Instance()->AddStreamerConverter        \
+      ("vector<" #T "," #ALLOC "<" #T "> >",                    \
+       "SG::PackedContainer<" #T "," #ALLOC "<" #T "> >",       \
+       new PackedContainerConverter<T, T, ALLOC<T> > ( #T, #ALLOC "<" #T ">" )); \
+  } while (0)
+
+  
   CONVERTER1(char);
   CONVERTER1(unsigned char);
   CONVERTER1(short);

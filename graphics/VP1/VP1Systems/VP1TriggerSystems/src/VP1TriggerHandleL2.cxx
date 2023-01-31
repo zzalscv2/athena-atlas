@@ -57,7 +57,7 @@ bool VP1Trig::VP1TriggerHandleL2::processitem()
   //Muon feature iterator
   std::vector<const MuonFeatureDetails*>::const_iterator itMfd;
   //bool off_match = false; never used, code commented out below
-  for(itMfd=m_containerL2.begin(); itMfd!=m_containerL2.end(); itMfd++) {
+  for(itMfd=m_containerL2.begin(); itMfd!=m_containerL2.end(); ++itMfd) {
     //Check ID
     int id = (*itMfd)->id();
     if(id!=1) continue; //muFast_Muon

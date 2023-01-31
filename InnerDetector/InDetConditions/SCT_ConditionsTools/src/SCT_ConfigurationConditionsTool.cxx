@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_ConfigurationConditionsTool.h"
@@ -366,7 +366,8 @@ SCT_ConfigurationConditionsTool::badStrips(std::set<Identifier>& strips, const E
   }
 
   if (!ignoreBadModules and !ignoreBadChips) {
-    std::copy(condData->getBadStripIds()->begin(), condData->getBadStripIds()->end(), std::inserter(strips,strips.begin()));
+    const std::set<Identifier>& bad_strips = *condData->getBadStripIds();
+    std::copy(bad_strips.begin(), bad_strips.end(), std::inserter(strips,strips.begin()));
     return;
   }
   for (const Identifier& badStripId: *(condData->getBadStripIds())) {

@@ -236,7 +236,7 @@ namespace InDet {
   {
 
     // fitQuality from track
-    const Trk::FitQuality* fq = track->fitQuality()->clone();
+    auto fq = track->fitQuality()->uniqueClone();
     if(!fq) return nullptr;
 
     // output datavector of TSOS
@@ -250,14 +250,14 @@ namespace InDet {
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
       const Trk::TrackStateOnSurface* per_tsos =
         ((*its)->type(Trk::TrackStateOnSurface::Perigee))
-          ? new Trk::TrackStateOnSurface(nullptr, mp->uniqueClone(), nullptr, nullptr, typePattern)
+          ? new Trk::TrackStateOnSurface(nullptr, mp->uniqueClone(), nullptr, typePattern)
           : (*its)->clone();
       ntsos.push_back(per_tsos);
     }
 
     //Construct the new track
     Trk::TrackInfo info;
-    Trk::Track* newTrk = new Trk::Track(info, std::move(ntsos), fq);
+    Trk::Track* newTrk = new Trk::Track(info, std::move(ntsos), std::move(fq));
     return newTrk;
   }
 

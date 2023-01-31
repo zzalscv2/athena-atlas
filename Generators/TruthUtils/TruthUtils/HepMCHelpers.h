@@ -9,11 +9,11 @@
 /// ATLAS-specific HepMC functions not suitable for MCUtils.
 
 #include "TruthUtils/PIDHelpers.h"
-#include "TruthUtils/TruthParticleHelpers.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/Relatives.h"
+#include "AtlasHepMC/MagicNumbers.h"
 namespace MC
 {
 using namespace MCUtils::PID;
@@ -138,15 +138,11 @@ namespace MC {
   //@{
 
   /// @brief Determine if the particle is stable at the generator (not det-sim) level,
-  ///
-  /// The receipe for this is barcode < 200k and status = 1. Gen-stable particles decayed by
-  /// G4 are not set to have status = 2 in ATLAS, but simply have more status = 1 children,
-  /// with barcodes > 200k.
   inline bool isGenStable(HepMC::ConstGenParticlePtr p) {
     // Retrieving the barcode is relatively expensive with HepMC3,
     // so test status first.
     if (p->status() != 1) return false;
-    return HepMC::barcode(p) < SIM_BARCODE_THRESHOLD;
+    return !HepMC::is_simulation_particle(p);
   }
 
 

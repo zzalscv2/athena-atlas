@@ -117,7 +117,14 @@ namespace LVL1 {
 
   // Return global eta index.
   int gTower::iEta() const {
-    const int index = (m_eta * m_posneg);
+    int index = (m_eta * m_posneg);
+    if (m_posneg < 0){
+      index = index + 19;
+    }
+    else if ((m_posneg > 0)){
+      index = index + 20;
+    }
+    
     return index;
   }
 

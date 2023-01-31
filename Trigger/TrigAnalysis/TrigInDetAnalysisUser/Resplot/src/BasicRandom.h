@@ -17,7 +17,7 @@
  **     @author  mark sutton
  **     @date    Fri 27 Jan 2012 11:39:47 GMT 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -43,7 +43,9 @@ public:
       m_random = new TRandom3(seed);
     } 
   }
-
+  BasicRandom(const BasicRandom &) = delete; //forbid copying
+  BasicRandom operator =(const BasicRandom &) = delete; //forbid assignment
+  
   //  virtual ~Random() { delete m_rand; } 
   virtual ~BasicRandom() {  if ( !m_shared ) delete m_random; } 
   

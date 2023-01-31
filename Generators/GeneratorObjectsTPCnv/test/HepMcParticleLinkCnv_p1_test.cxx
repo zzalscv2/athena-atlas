@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,6 +14,7 @@
 #include <iostream>
 // HepMC includes
 #include "AtlasHepMC/GenEvent.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 // CLHEP includes
 #include "CLHEP/Units/SystemOfUnits.h"
@@ -64,7 +65,7 @@ void populateFilteredGenEvent(HepMC::GenEvent & ge, std::vector<HepMC::GenPartic
   HepMC::GenParticlePtr genPart=HepMC::newGenParticlePtr();
   genPart->set_pdg_id(999); //Geantino
   genPart->set_status(1); //!< set decay status
-  HepMC::suggest_barcode(genPart, std::numeric_limits<int32_t>::max() );
+  HepMC::suggest_barcode(genPart, HepMC::crazyParticleBarcode);
 
   HepMC::GenVertexPtr genVertex=HepMC::newGenVertexPtr();
   genVertex->add_particle_out(genPart);
@@ -107,7 +108,7 @@ void populateFilteredGenEvent(HepMC::GenEvent & ge, std::vector<HepMC::GenPartic
 #ifdef HEPMC3
   if(!ge.vertices().empty()){
     std::vector<HepMC::GenVertexPtr> vtxvec;
-    for (auto vtx: ge.vertices()) {
+    for (const auto& vtx: ge.vertices()) {
       vtxvec.push_back(vtx);
       ge.remove_vertex(vtx);
       
@@ -173,12 +174,11 @@ void createMcEventCollectionInStoreGate(std::vector<HepMC::GenParticlePtr>& genP
   HepMC::GenEvent& ge4 = *(inputTestDataHandle->at(3));
   ge4.set_event_number(event_number4);
   populateFilteredGenEvent(ge4,genPartList);
-  return;
 }
 
 void testit (const HepMcParticleLink& trans1)
 {
-  MsgStream log (0, "test");
+  MsgStream log (nullptr, "test");
   HepMcParticleLinkCnv_p1 cnv;
   HepMcParticleLink_p1 pers;
   cnv.transToPers (&trans1, &pers, log);

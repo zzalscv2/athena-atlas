@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 namespace Trk {
@@ -15,63 +15,6 @@ PerigeeSurface::type() const
 {
   return PerigeeSurface::staticType;
 }
-
-
-/** Use the Surface as a ParametersBase constructor, from local parameters -
- * charged */
-inline Surface::ChargedTrackParametersUniquePtr
-PerigeeSurface::createUniqueTrackParameters(
-  double l1,
-  double l2,
-  double phi,
-  double theta,
-  double qop,
-  std::optional<AmgSymMatrix(5)> cov) const
-{
-  return std::make_unique<ParametersT<5, Charged, PerigeeSurface>>(
-    l1, l2, phi, theta, qop, *this, std::move(cov));
-}
-/** Use the Surface as a ParametersBase constructor, from global parameters -
- * charged*/
-inline Surface::ChargedTrackParametersUniquePtr
-PerigeeSurface::createUniqueTrackParameters(
-  const Amg::Vector3D& position,
-  const Amg::Vector3D& momentum,
-  double charge,
-  std::optional<AmgSymMatrix(5)> cov) const
-{
-  return std::make_unique<ParametersT<5, Charged, PerigeeSurface>>(
-    position, momentum, charge, *this, std::move(cov));
-}
-
-/** Use the Surface as a ParametersBase constructor, from local parameters -
- * neutral */
-inline Surface::NeutralTrackParametersUniquePtr
-PerigeeSurface::createUniqueNeutralParameters(
-  double l1,
-  double l2,
-  double phi,
-  double theta,
-  double qop,
-  std::optional<AmgSymMatrix(5)> cov) const
-{
-  return std::make_unique<ParametersT<5, Neutral, PerigeeSurface>>(
-    l1, l2, phi, theta, qop, *this, std::move(cov));
-}
-
-/** Use the Surface as a ParametersBase constructor, from global parameters -
- * neutral */
-inline Surface::NeutralTrackParametersUniquePtr
-PerigeeSurface::createUniqueNeutralParameters(
-  const Amg::Vector3D& position,
-  const Amg::Vector3D& momentum,
-  double charge,
-  std::optional<AmgSymMatrix(5)> cov) const
-{
-  return std::make_unique<ParametersT<5, Neutral, PerigeeSurface>>(
-    position, momentum, charge, *this, std::move(cov));
-}
-
 template<int DIM, class T>
 std::unique_ptr<ParametersT<DIM, T, PerigeeSurface>>
 PerigeeSurface::createUniqueParameters(
@@ -96,32 +39,6 @@ PerigeeSurface::createUniqueParameters(
   std::optional<AmgSymMatrix(DIM)> cov) const
 {
   return std::make_unique<ParametersT<DIM, T, PerigeeSurface>>(
-    position, momentum, charge, *this, std::move(cov));
-}
-
-/** Use the Surface as a ParametersBase constructor, from local parameters */
-template<int DIM, class T>
-ParametersT<DIM, T, PerigeeSurface>
-PerigeeSurface::createParameters(double l1,
-                                 double l2,
-                                 double phi,
-                                 double theta,
-                                 double qop,
-                                 std::optional<AmgSymMatrix(DIM)> cov) const
-{
-  return ParametersT<DIM, T, PerigeeSurface>(
-    l1, l2, phi, theta, qop, *this, std::move(cov));
-}
-
-/** Use the Surface as a ParametersBase constructor, from global parameters */
-template<int DIM, class T>
-ParametersT<DIM, T, PerigeeSurface>
-PerigeeSurface::createParameters(const Amg::Vector3D& position,
-                                 const Amg::Vector3D& momentum,
-                                 double charge,
-                                 std::optional<AmgSymMatrix(DIM)> cov) const
-{
-  return ParametersT<DIM, T, PerigeeSurface>(
     position, momentum, charge, *this, std::move(cov));
 }
 
@@ -129,11 +46,6 @@ inline PerigeeSurface*
 PerigeeSurface::clone() const
 {
   return new PerigeeSurface(*this);
-}
-
-inline std::unique_ptr<PerigeeSurface> 
-PerigeeSurface::uniqueClone() const{
-  return std::unique_ptr<PerigeeSurface>(clone());
 }
 
 inline const Amg::Vector3D&
@@ -176,32 +88,6 @@ PerigeeSurface::bounds() const
   return s_perigeeBounds;
 }
 
-inline Intersection
-PerigeeSurface::straightLineIntersection(const Amg::Vector3D& pos,
-                                         const Amg::Vector3D& dir,
-                                         bool forceDir,
-                                         Trk::BoundaryCheck) const
-{
-  // following nominclature found in header file and doxygen documentation
-  // line one is the straight track
-  const Amg::Vector3D& ma = pos;
-  const Amg::Vector3D& ea = dir;
-  // line two is the line surface
-  const Amg::Vector3D& mb = center();
-  const Amg::Vector3D& eb = lineDirection();
-  // now go ahead
-  Amg::Vector3D mab(mb - ma);
-  double eaTeb = ea.dot(eb);
-  double denom = 1 - eaTeb * eaTeb;
-  if (fabs(denom) > 10e-7) {
-    double lambda0 = (mab.dot(ea) - mab.dot(eb) * eaTeb) / denom;
-    // evaluate the direction, bounds are always true for Perigee
-    bool isValid = forceDir ? (lambda0 > 0.) : true;
-    return Trk::Intersection((ma + lambda0 * ea), lambda0, isValid);
-  }
-  return Trk::Intersection(pos, 0., false);
-}
-
 inline const Amg::Vector3D&
 PerigeeSurface::lineDirection() const
 {
@@ -217,6 +103,7 @@ PerigeeSurface::lineDirection() const
   }
   return Trk::s_zAxis;
 }
+
 /** the pathCorrection for derived classes with thickness */
 inline double
 PerigeeSurface::pathCorrection(const Amg::Vector3D&, const Amg::Vector3D&) const

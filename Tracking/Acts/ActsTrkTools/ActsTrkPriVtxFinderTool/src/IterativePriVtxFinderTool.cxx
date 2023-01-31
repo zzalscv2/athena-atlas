@@ -130,7 +130,7 @@ ActsTrk::IterativePriVtxFinderTool::findVertex(const EventContext& ctx,
   typedef DataVector<Trk::Track>::const_iterator TrackDataVecIter;
 
   bool selectionPassed;
-  for (TrackDataVecIter itr = (*trackTES).begin(); itr != (*trackTES).end(); itr++) {
+  for (TrackDataVecIter itr = (*trackTES).begin(); itr != (*trackTES).end(); ++itr) {
     if (m_useBeamConstraint) {
       selectionPassed = static_cast<bool>(m_trkFilter->accept(**itr, &beamposition));
     } else {
@@ -139,7 +139,7 @@ ActsTrk::IterativePriVtxFinderTool::findVertex(const EventContext& ctx,
     }
     if (selectionPassed) {
         ElementLink<TrackCollection> link;
-        link.setElement(const_cast<Trk::Track*>(*itr));
+        link.setElement(*itr);
         auto trkPtr = std::make_unique<Trk::LinkToTrack>(link);
         trkPtr->setStorableObject(*trackTES);
         selectedTracks.push_back(std::move(trkPtr));
@@ -166,7 +166,7 @@ ActsTrk::IterativePriVtxFinderTool::findVertex(const EventContext& ctx,
   typedef DataVector<xAOD::TrackParticle>::const_iterator TrackParticleDataVecIter;
 
   bool selectionPassed;
-  for (TrackParticleDataVecIter itr = (*trackParticles).begin(); itr != (*trackParticles).end(); itr++) {
+  for (TrackParticleDataVecIter itr = (*trackParticles).begin(); itr != (*trackParticles).end(); ++itr) {
     if (m_useBeamConstraint) {
       selectionPassed = static_cast<bool>(m_trkFilter->accept(**itr, &beamposition));
     } else {
@@ -181,7 +181,7 @@ ActsTrk::IterativePriVtxFinderTool::findVertex(const EventContext& ctx,
 
     if (selectionPassed) {
         ElementLink<xAOD::TrackParticleContainer> link;
-        link.setElement(const_cast<xAOD::TrackParticle*>(*itr));
+        link.setElement(*itr);
         auto trkPtr = std::make_unique<Trk::LinkToXAODTrackParticle>(link);
         trkPtr->setStorableObject(*trackParticles);
         selectedTracks.push_back(std::move(trkPtr));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -59,7 +59,7 @@ NoopFilterTool::~NoopFilterTool()
 StatusCode NoopFilterTool::buildMcAod( const McEventCollection* in,
 				       McEventCollection* out )
 {
-  if ( 0 == in || 0 == out ) {
+  if ( nullptr == in || nullptr == out ) {
     ATH_MSG_ERROR("Invalid pointer to McEventCollection !" << endmsg
 		  << "  in: " << in << endmsg
 		  << " out: " << out);
@@ -72,7 +72,7 @@ StatusCode NoopFilterTool::buildMcAod( const McEventCollection* in,
 
   for ( unsigned int iEvt = 0; iEvt != out->size(); ++iEvt ) {
     const HepMC::GenEvent * outEvt = (*out)[iEvt];
-    if ( 0 == outEvt ) {
+    if ( nullptr == outEvt ) {
       ATH_MSG_WARNING
 	("Could not launch filtering procedure for GenEvent number ["
 	 << iEvt << "] from McEventCollection ["

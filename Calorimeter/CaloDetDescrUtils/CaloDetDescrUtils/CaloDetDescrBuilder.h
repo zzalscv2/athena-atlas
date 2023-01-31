@@ -20,4 +20,7 @@ std::unique_ptr<CaloDetDescrManager> buildCaloDetDescr(ISvcLocator* svcLocator
 						       , const GeoAlignmentStore* geoAlignStore
 						       , const CaloRec::CaloCellPositionShift* cellPosShift);
 
+std::unique_ptr<CaloDetDescrManager> buildCaloDetDescrNoAlign(ISvcLocator* svcLocator
+							      , IMessageSvc* msgSvc);
+
 #endif

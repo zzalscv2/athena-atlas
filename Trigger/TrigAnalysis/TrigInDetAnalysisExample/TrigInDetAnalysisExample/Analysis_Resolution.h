@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:06:38 CET 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -48,32 +48,32 @@ class Analysis_Resolution : public TrackAnalysis {
  private:
   
   // Resolution Histograms
-  TH1* h_res_eta;
-  TH1* h_res_phi;
-  TH1* h_res_d0;
-  TH1* h_res_z0;
-  TH1* h_res_invpT;
+  TH1* m_h_res_eta;
+  TH1* m_h_res_phi;
+  TH1* m_h_res_d0;
+  TH1* m_h_res_z0;
+  TH1* m_h_res_invpT;
   
   // Pull Histograms
-  TH1* h_pull_eta;
-  TH1* h_pull_phi;
-  TH1* h_pull_d0;
-  TH1* h_pull_z0;
-  TH1* h_pull_invpT;
+  TH1* m_h_pull_eta;
+  TH1* m_h_pull_phi;
+  TH1* m_h_pull_d0;
+  TH1* m_h_pull_z0;
+  TH1* m_h_pull_invpT;
 
   // 2D histograms
-  TH2* h_res_d0VsPt; 
-  TH2* h_res_z0VsPt;
-  TH2* h_res_d0VsD0;
-  TH2* h_res_z0VsEta;
-  TH2* h_res_d0VsPixelHits_withBLayer;
-  TH2* h_res_d0VsPixelHits_withoutBLayer;
-  TH2* h_pull_d0VsEta;
-  TH2* h_pull_z0VsEta;
-  TH2* h_pull_d0VsPixelHits_withoutBLayer;
-  TH2* h_pull_z0VsPixelHits_withoutBLayer;
-  TH2* h_pull_d0VsPixelHits_withBLayer;
-  TH2* h_pull_z0VsPixelHits_withBLayer;
+  TH2* m_h_res_d0VsPt;
+  TH2* m_h_res_z0VsPt;
+  TH2* m_h_res_d0VsD0;
+  TH2* m_h_res_z0VsEta;
+  TH2* m_h_res_d0VsPixelHits_withBLayer;
+  TH2* m_h_res_d0VsPixelHits_withoutBLayer;
+  TH2* m_h_pull_d0VsEta;
+  TH2* m_h_pull_z0VsEta;
+  TH2* m_h_pull_d0VsPixelHits_withoutBLayer;
+  TH2* m_h_pull_z0VsPixelHits_withoutBLayer;
+  TH2* m_h_pull_d0VsPixelHits_withBLayer;
+  TH2* m_h_pull_z0VsPixelHits_withBLayer;
 
   // Efficiency platau cuts
   double m_pTCut;

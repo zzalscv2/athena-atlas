@@ -56,8 +56,8 @@ class CaloClusterROIPhiRZContainerMaker : public AthReentrantAlgorithm
       }
    }
 
-   Trk::LocalParameters getClusterLocalParameters(const xAOD::CaloCluster &cluster,
-                                                  const Trk::Surface &surf) const;
+   static Trk::LocalParameters getClusterLocalParameters(const xAOD::CaloCluster &cluster,
+                                                  const Trk::Surface &surf) ;
 
    void addROI( const xAOD::CaloCluster &cluster,
                 const CaloDetDescrManager &caloDDMgr,
@@ -100,7 +100,7 @@ class CaloClusterROIPhiRZContainerMaker : public AthReentrantAlgorithm
    std::vector<unsigned int> m_outputSorted;
    std::vector<unsigned int> m_outputUnsorted;
    std::vector<float>        m_sortedMinPtEm;
-   float                     m_maxPhiWidth;
+   float                     m_maxPhiWidth = 0.0F;
 
    mutable std::atomic_uint m_allClusters{0};
    mutable std::atomic_uint m_selectedClusters{0};

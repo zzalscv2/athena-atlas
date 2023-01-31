@@ -442,9 +442,9 @@ StatusCode LArMasterWaveBuilder::stop()
 
       LArCaliWaveContainer::LArCaliWaves& dacWaves = mwContainer->get(chID, gain_it);
       LArCaliWave masterWave( fitWave[1].getWave(),
-                              dt, -1, LArWave::mwf );
+                              dt, -1, 0x1, LArWave::mwf );
       LArCaliWave dac0Wave  ( fitWave[0].getWave(),
-                              dt, -2, LArWave::dac0 );
+                              dt, -2, 0x1, LArWave::dac0 );
       dacWaves.push_back( masterWave );
       dacWaves.push_back( dac0Wave );
       nMasterWaves ++ ;
@@ -487,7 +487,7 @@ StatusCode LArMasterWaveBuilder::stop()
           int channel = onlineHelper->channel(chId) ;
           int slot    = onlineHelper->slot(chId) ;
           int FT      = onlineHelper->feedthrough(chId) ;
-          static char gainName[3][3] = { "HG" , "MG" , "LG" } ;
+          const char gainName[3][3] = { "HG" , "MG" , "LG" } ;
           char formOut[200] ;
           int ich = chId.get_identifier32().get_compact() ;
           sprintf( formOut, "%2s 0x%8x [%1d;%1d;%3d;%2d] [%2d;%3d;%3d;%3d]",

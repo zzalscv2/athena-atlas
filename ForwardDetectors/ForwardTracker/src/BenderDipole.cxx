@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardTracker/BenderDipole.h"
@@ -42,7 +42,7 @@ namespace ForwardTracker {
     // -----------------------------------------------------------------------------------------
 
     double          aside        = ForwardTrackerConstants::aside[m_side];
-    Point&          direction    = particle.direction();
+    Point&          direction    = particle.direction_nc();
     TransversePoint displacement = particle.displacement();
 
     displacement += m_length*aside/direction[2]*direction.transverse(); // Linear drift

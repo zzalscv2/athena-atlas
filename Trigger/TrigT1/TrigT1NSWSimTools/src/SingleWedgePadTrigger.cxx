@@ -155,7 +155,7 @@ namespace NSWL1{
     }
     //eof S.I
 
-    bool SingleWedgePadTrigger::areInnerOuterConsistent(const EtaPhiHalf &inner, const EtaPhiHalf &outer, bool verbose) {
+  bool SingleWedgePadTrigger::areInnerOuterConsistent(const EtaPhiHalf &inner, const EtaPhiHalf &outer) {
         // ASM-2016-10-4 : Figure out the logic behind this, the staggering changed now relaxing this a bit
         //S.I : Relaxing?  what is "this"?
         //  bool mismatchEta(outer.ieta < inner.ieta || outer.ieta > inner.ieta + 1);
@@ -163,8 +163,6 @@ namespace NSWL1{
         bool mismatchEta(outer.ieta < inner.ieta - 4 || outer.ieta > inner.ieta + 4);
         bool mismatchPhi(outer.iphi < inner.iphi - 4 || outer.iphi > inner.iphi + 4);
         bool mismatch(mismatchEta || mismatchPhi);
-        //S.I a remnant of verbose plague... will cleanup later
-        (void) verbose;
         return !mismatch;
     }
 

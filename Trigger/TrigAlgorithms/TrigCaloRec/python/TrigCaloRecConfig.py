@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
+
 from TrigCaloRec.TrigCaloRecConf import (TrigCaloClusterMaker,
                                          TrigCaloTowerMaker,
                                          TrigCaloClusterCalibrator)
@@ -74,17 +75,18 @@ class TrigCaloClusterMaker_topo (TrigCaloClusterMakerBase):
     __slots__ = []
     def __init__ (self, name='TrigCaloClusterMaker_topo', cells="cells",doMoments=True, doLC=True ):
         super(TrigCaloClusterMaker_topo, self).__init__(name)
-
+        
         self.Cells=cells
 
-        from CaloUtils.CaloUtilsConf import CaloLCWeightTool, CaloLCClassificationTool, CaloLCOutOfClusterTool, CaloLCDeadMaterialTool
+        from CaloClusterCorrection.CaloClusterCorrectionConf import CaloLCWeightTool, CaloLCClassificationTool, CaloLCOutOfClusterTool, CaloLCDeadMaterialTool
         from CaloClusterCorrection.CaloClusterCorrectionConf import CaloClusterLocalCalib
         from CaloRec.CaloRecConf import CaloTopoClusterMaker, CaloTopoClusterSplitter, CaloClusterMomentsMaker
         from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
         from CaloRec.CaloTopoClusterFlags import jobproperties
         from AthenaCommon.SystemOfUnits import deg
         from AthenaCommon.GlobalFlags import globalflags
-
+        from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+        
         # tools used by tools
 
         if doLC:
@@ -245,6 +247,12 @@ class TrigCaloClusterMaker_topo (TrigCaloClusterMakerBase):
         # use 2-gaussian or single gaussian noise for TileCal
         TrigTopoMaker.TwoGaussianNoise = jobproperties.CaloTopoClusterFlags.doTwoGaussianNoise()
 
+        #timing
+        TrigTopoMaker.SeedCutsInT = flags.Trigger.Calo.TopoCluster.doTimeCut
+        TrigTopoMaker.CutOOTseed = flags.Trigger.Calo.TopoCluster.extendTimeCut and flags.Trigger.Calo.TopoCluster.doTimeCut
+        TrigTopoMaker.UseTimeCutUpperLimit = flags.Trigger.Calo.TopoCluster.useUpperLimitForTimeCut
+        TrigTopoMaker.TimeCutUpperLimit = flags.Trigger.Calo.TopoCluster.timeCutUpperLimit
+
         TrigTopoSplitter = CaloTopoClusterSplitter("TrigTopoSplitter")        
         # cells from the following samplings will be able to form local
         # maxima. The excluded samplings are PreSamplerB, EMB1,
@@ -362,7 +370,7 @@ class TrigCaloClusterCalibrator_LC(TrigCaloClusterCalibrator):
         super(TrigCaloClusterCalibrator_LC, self).__init__(name, **kwargs)
 
         from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
-        from CaloUtils.CaloUtilsConf import CaloLCClassificationTool, CaloLCWeightTool, CaloLCOutOfClusterTool, CaloLCDeadMaterialTool
+        from CaloClusterCorrection.CaloClusterCorrectionConf import CaloLCClassificationTool, CaloLCWeightTool, CaloLCOutOfClusterTool, CaloLCDeadMaterialTool
         from CaloClusterCorrection.CaloClusterCorrectionConf import CaloClusterLocalCalib
         from AthenaCommon.GlobalFlags import globalflags
 
@@ -480,6 +488,13 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey, cellsKey="CaloCells"):
     )
 
     topoMaker = acc.popToolsAndMerge(CaloTopoClusterToolCfg(flags, cellsname=cellsKey))
+
+    #timing
+    topoMaker.SeedCutsInT = flags.Trigger.Calo.TopoCluster.doTimeCut
+    topoMaker.CutOOTseed = flags.Trigger.Calo.TopoCluster.extendTimeCut and flags.Trigger.Calo.TopoCluster.doTimeCut
+    topoMaker.UseTimeCutUpperLimit = flags.Trigger.Calo.TopoCluster.useUpperLimitForTimeCut
+    topoMaker.TimeCutUpperLimit = flags.Trigger.Calo.TopoCluster.timeCutUpperLimit
+    
     topoSplitter = acc.popToolsAndMerge(CaloTopoClusterSplitterToolCfg(flags))
 
     topoMoments = CompFactory.CaloClusterMomentsMaker ('TrigTopoMoments')

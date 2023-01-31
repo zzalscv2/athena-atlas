@@ -335,7 +335,7 @@ namespace CP {
         return cc;
     }
 
-    CorrectionCode EfficiencyScaleFactor::GetContentFromHist(HistHandler* Hist, const xAOD::Muon& mu, float & Eff, bool add_kine_syst) const {
+    CorrectionCode EfficiencyScaleFactor::GetContentFromHist(const HistHandler* Hist, const xAOD::Muon& mu, float & Eff, bool add_kine_syst) const {
         Eff = m_default_eff;
         if (!Hist) {
             if (m_warnsPrinted < m_warningLimit){

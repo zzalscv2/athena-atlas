@@ -29,7 +29,6 @@
 #include "CaloEvent/CaloCell2ClusterMap.h"
 #include <string>
 #include <vector>
-#include <map>
 
 class CaloTopoTowerContainer;
 class ICaloTopoTowerBuilderToolBase;

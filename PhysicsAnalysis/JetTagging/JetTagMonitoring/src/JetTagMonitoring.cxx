@@ -773,7 +773,7 @@ StatusCode JetTagMonitoring::fillHistograms() {
   uint8_t nBLayerHits = 0; // IBL hits in Run-2, old b-layer in Run-1
   uint8_t nTRTHits    = 0;
 
-  for ( ; trackParticleItr != trackParticleEnd; trackParticleItr++) { 
+  for ( ; trackParticleItr != trackParticleEnd; ++trackParticleItr) { 
       
     if ((*trackParticleItr)->summaryValue(nBLayerHits, xAOD::numberOfBLayerHits)) { m_global_BLayerHits->Fill((float) nBLayerHits); } // IBL hits in Run-2, old b-layer in Run-1
     if ((*trackParticleItr)->summaryValue(nPixHits, xAOD::numberOfPixelHits))     { m_global_PixelHits->Fill((float) nPixHits); }
@@ -844,7 +844,7 @@ JetTagMonitoring::Jet_t JetTagMonitoring::getTaggabilityLabel(const xAOD::Jet *j
 
   std::vector<const xAOD::IParticle*>::const_iterator trkItr;
 
-  for ( trkItr = trackVector.begin(); trkItr != trackVector.end() ; trkItr++ ) {
+  for ( trkItr = trackVector.begin(); trkItr != trackVector.end() ; ++trkItr ) {
 
     const xAOD::TrackParticle* trackPart = dynamic_cast<const xAOD::TrackParticle*>(*trkItr);
     if ( ! trackPart ) continue;
@@ -916,7 +916,7 @@ bool JetTagMonitoring::isTopEvent() { // added by SARA for 2017 data taking
 
   // loop over electron container
   int n_isoElectrons = 0;
-  for ( ; electronItr != electronEnd; electronItr++) {
+  for ( ; electronItr != electronEnd; ++electronItr) {
     //select electrons which passed author and pT cut
     if (!(*electronItr)->author(xAOD::EgammaParameters::AuthorElectron)) continue; 
     if ((*electronItr) -> pt() / Gaudi::Units::GeV < m_ElectronPtCut) continue;
@@ -943,7 +943,7 @@ bool JetTagMonitoring::isTopEvent() { // added by SARA for 2017 data taking
 
   // loop over muon container  
   int n_isoMuons = 0;
-  for ( ; muonItr != muonEnd; muonItr++) {
+  for ( ; muonItr != muonEnd; ++muonItr) {
     //select muons which passed pT cut
     if ((*muonItr) -> pt() / Gaudi::Units::GeV < m_MuonPtCut) continue;
     bool inAcceptance = TMath::Abs((*muonItr) -> eta()) < m_MuonEtaCut;
@@ -1105,7 +1105,7 @@ void JetTagMonitoring::fillJetHistograms() {
   xAOD::JetContainer::const_iterator firstKinematicjetItr = jets->end(); // added by SARA
   
   // Loop over jets
-  for ( ; jetItr != jetEnd; jetItr++) {
+  for ( ; jetItr != jetEnd; ++jetItr) {
     
     // All jets
     
@@ -1220,7 +1220,7 @@ void JetTagMonitoring::fillTrackInJetHistograms(const xAOD::Jet *jet) {
   ATH_MSG_DEBUG("examining " << nTrkInJet << " tracks.");
 
   // loop over tracks in a jet // 
-  for ( trkItr = trackVector.begin(); trkItr != trackVector.end() ; trkItr++ ) {
+  for ( trkItr = trackVector.begin(); trkItr != trackVector.end() ; ++trkItr ) {
 
     const xAOD::TrackParticle* trackPart = dynamic_cast<const xAOD::TrackParticle*>(*trkItr);
     if ( ! trackPart ) continue;
@@ -1393,7 +1393,7 @@ void JetTagMonitoring::fillDetailedHistograms(const xAOD::Jet *jet, Jet_t taggab
 }
 
 
-void JetTagMonitoring::fillBadTrackBits(const std::bitset<17> failedCuts, double eta, double phi) {
+void JetTagMonitoring::fillBadTrackBits(const std::bitset<17>& failedCuts, double eta, double phi) {
 
   if ( failedCuts[pTMin]           == 0 ) m_tracks_pTMin_2D->Fill(eta, phi, 1.);
   if ( failedCuts[d0Max]           == 0 ) m_tracks_d0Max_2D->Fill(eta, phi, 1.);

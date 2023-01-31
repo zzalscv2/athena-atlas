@@ -1,9 +1,8 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon.AppMgr import ServiceMgr as svcMgr
 from GeneratorModules.EvgenAlg import EvgenAlg
 from AthenaPython.PyAthena import StatusCode
-import glob,subprocess,os,time,shutil
+import os
 import xml.dom.minidom
 import filecmp
 
@@ -45,9 +44,9 @@ class Pythia8Util(EvgenAlg):
         if ( filecmp.cmp("Settings_before.log","Settings_after.log") ):
           self.msg.info("Settings match before and after initialisation of Pythia8.")
         else:
-          if requestedsettings.has_key("PartonShowers:model"):
+          if "PartonShowers:model" in requestedsettings:
              if (requestedsettings["PartonShowers:model"] !="1"):
-               self.msg.info("Settings before and after initialisation of Pythia8 don't match, because you asked PartonShowers:model = %s" % requestedsettings["PartonShowers:model"])
+               self.msg.info("Settings before and after initialisation of Pythia8 don't match, because you asked PartonShowers:model = %s", requestedsettings["PartonShowers:model"])
           else:
              self.msg.warning("Settings before and after initialisation of Pythia8 don't match.")
           with open("Settings_before.log") as f1:
@@ -58,10 +57,10 @@ class Pythia8Util(EvgenAlg):
           if (len(f1_lines) == len(f2_lines)):
             for iline in range(len(f1_lines)):
                 if  (f1_lines[iline]!=f2_lines[iline]):
-                  if ( requestedsettings.has_key(f2_lines[iline].split("=")[0]) ):
-                    self.msg.warning("  >>      %s != %s. You requested %s." % (f1_lines[iline],f2_lines[iline].split("=")[1],requestedsettings[f2_lines[iline].split("=")[0]]) )
+                  if f2_lines[iline].split("=")[0] in requestedsettings:
+                    self.msg.warning("  >>      %s != %s. You requested %s.", f1_lines[iline], f2_lines[iline].split("=")[1], requestedsettings[f2_lines[iline].split("=")[0]])
                   else:
-                    self.msg.info("  >>      %s != %s" % (f1_lines[iline],f2_lines[iline].split("=")[1]) )
+                    self.msg.info("  >>      %s != %s", f1_lines[iline], f2_lines[iline].split("=")[1])
           else:
             self.msg.warning("Not even the -number- of settings before and after initialisation of Pythia8 matches, check yourself what's going wrong.")
 
@@ -73,35 +72,35 @@ class Pythia8Util(EvgenAlg):
           f1 = f1[:-3]
         f1 += "orig.xml"
         try:
-          doc1 = xml.dom.minidom.parse(f1);
-        except:
+          doc1 = xml.dom.minidom.parse(f1)
+        except Exception:
           # not yet a problem, particledata files needs to be decorated to be xml compliant
           self.ensure_toplevel(f1)
           try:
-            doc1 = xml.dom.minidom.parse(f1);
-          except:
+            doc1 = xml.dom.minidom.parse(f1)
+          except Exception:
             self.msg.error("Bad file, exiting")
-            return;
+            return
 
         # open particledata after initialisation
         try:
-          doc2 = xml.dom.minidom.parse(f2);
-        except:
+          doc2 = xml.dom.minidom.parse(f2)
+        except Exception:
           # not yet a problem, particledata files needs to be decorated to be xml compliant
           self.ensure_toplevel(f2)
           try:
-            doc2 = xml.dom.minidom.parse(f2);
-          except:
+            doc2 = xml.dom.minidom.parse(f2)
+          except Exception:
             self.msg.error("Bad file, exiting")
-            return;
+            return
     
   
         particles1 = doc1.getElementsByTagName("particle")
         particles2 = doc2.getElementsByTagName("particle")
         if (particles1.length == particles2.length):
-           self.msg.info("Number of particles before and after Pythia8 initialisation matches ( %d )" % particles1.length)
+           self.msg.info("Number of particles before and after Pythia8 initialisation matches ( %d )", particles1.length)
         else:
-           self.msg.warning("Mismatch in number of particles before and after Pythia8 initialisation. Before: %d , after: %d" % (particles1.length,particles2.length) )
+           self.msg.warning("Mismatch in number of particles before and after Pythia8 initialisation. Before: %d , after: %d", particles1.length, particles2.length)
         for  part1 in particles1:
           if ( part1.getAttribute("id") in pids):
             for  part2 in particles2:
@@ -112,10 +111,10 @@ class Pythia8Util(EvgenAlg):
                   if ( trypartprop in rpd ):
                     requested = rpd[trypartprop]
                   if ( not ( attrk2 in part1.attributes.keys() ) ):
-                    self.msg.info("You asked Pythia8 to modify properties for particle %s (%s). Attribute \"%s\" added after initialisation, check it. Requested: %s. After init:  %s."  % (part2.getAttribute("name"), part2.getAttribute("id"), attrk2, requested, attrv2) )
+                    self.msg.info("You asked Pythia8 to modify properties for particle %s (%s). Attribute \"%s\" added after initialisation, check it. Requested: %s. After init:  %s.", part2.getAttribute("name"), part2.getAttribute("id"), attrk2, requested, attrv2)
                   for attrk1, attrv1 in part1.attributes.items():
                     if (attrk1 == attrk2 and attrv1 != attrv2):
-                      self.msg.warning("You asked Pythia8 to modify properties for particle %s (%s). Attribute \"%s\" modified after initialisation. Requested: %s. Before init: %s. After init:  %s." % (part1.getAttribute("name"), part1.getAttribute("id"), attrk1, requested, attrv1, attrv2) )
+                      self.msg.warning("You asked Pythia8 to modify properties for particle %s (%s). Attribute \"%s\" modified after initialisation. Requested: %s. Before init: %s. After init:  %s.", part1.getAttribute("name"), part1.getAttribute("id"), attrk1, requested, attrv1, attrv2)
 
 
 

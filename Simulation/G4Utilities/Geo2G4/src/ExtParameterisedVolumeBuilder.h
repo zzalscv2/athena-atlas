@@ -9,12 +9,13 @@
 #include "Geo2G4AssemblyFactory.h"
 
 #include "AthenaBaseComps/AthMessaging.h"
+#include "CxxUtils/checker_macros.h"
 #include <string>
 
 class Geo2G4AssemblyVolume;
 class GeoMaterial;
 
-class ExtParameterisedVolumeBuilder: public VolumeBuilder, public AthMessaging
+class ATLAS_NOT_THREAD_SAFE ExtParameterisedVolumeBuilder: public VolumeBuilder, public AthMessaging
 {
 public:
   ExtParameterisedVolumeBuilder(const std::string& n, Geo2G4AssemblyFactory* G4AssemblyFactory);

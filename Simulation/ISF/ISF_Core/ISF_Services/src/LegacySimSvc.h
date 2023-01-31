@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_SERVICES_ISF_LEGACYSIMSVC_H
@@ -15,11 +15,13 @@
 #include "ISF_Interfaces/BaseSimulationSvc.h"
 #include "ISF_Interfaces/ISimulatorTool.h"
 
+#include "CxxUtils/checker_macros.h"
+
 namespace ISF {
 
   /** @class LegacySimSvc
   */
-  class LegacySimSvc : public BaseSimulationSvc {
+  class ATLAS_NOT_THREAD_SAFE LegacySimSvc : public BaseSimulationSvc {
   public:
 
     //** Constructor with parameters */
@@ -32,7 +34,7 @@ namespace ISF {
     virtual StatusCode  initialize() override;
 
     /** Simulation Call */
-    virtual StatusCode simulate(const ISFParticle& isp, McEventCollection* mcEventCollection) override;
+    virtual StatusCode simulate(ISFParticle& isp, McEventCollection* mcEventCollection) override;
 
     /** Setup Event chain - in case of a begin-of event action is needed */
     virtual StatusCode setupEvent() override;

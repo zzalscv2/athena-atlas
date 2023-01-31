@@ -1,4 +1,7 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+
+# NOTE: this file is obsolete for almost all purposes. It is retained only to keep alive CI tests that are still using the legacy config 
+
 
 from AthenaCommon.JobProperties import JobProperty, JobPropertyContainer
 from AthenaCommon.JobProperties import jobproperties
@@ -2733,7 +2736,7 @@ jobproperties.DerivationFrameworkProdFlags.add_JobProperty(WriteDAOD_TRIG6Stream
 listAODtoDPD.append(WriteDAOD_TRIG6Stream.StreamName)
 
 class WriteDAOD_TRIG7Stream (JobProperty):
-     """TRIG6 derivation"""
+     """TRIG7 derivation"""
      statusOn = True
      allowedTypes = ['bool']
      StoredValue = False
@@ -2744,6 +2747,7 @@ class WriteDAOD_TRIG7Stream (JobProperty):
      pass
 jobproperties.DerivationFrameworkProdFlags.add_JobProperty(WriteDAOD_TRIG7Stream)
 listAODtoDPD.append(WriteDAOD_TRIG7Stream.StreamName)
+
 
 from RecExConfig.RecoFunctions import AddValidItemToList
 AddValidItemToList(listAODtoDPD,listAllKnownDPD)

@@ -223,6 +223,7 @@ namespace InDet {
 
       bool     m_useVertexCleaningPix{};
       bool     m_useVertexCleaningFMP{};
+      bool     m_rejectBadVertices{};
       bool     m_multiVertex{};
       bool     m_multiWithPrimary{};
       bool     m_getNegativeTail{};

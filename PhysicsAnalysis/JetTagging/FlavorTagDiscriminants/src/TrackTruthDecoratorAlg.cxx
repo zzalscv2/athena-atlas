@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "FlavorTagDiscriminants/TrackTruthDecoratorAlg.h"
+#include "FlavorTagDiscriminants/TruthDecoratorHelpers.h"
 
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
@@ -36,6 +37,7 @@ namespace FlavorTagDiscriminants {
 
     // Prepare decorators
     m_dec_origin_label = m_TrackContainerKey.key() + "." + m_dec_origin_label.key();
+    m_dec_type_label = m_TrackContainerKey.key() + "." + m_dec_type_label.key();    
     m_dec_vertex_index = m_TrackContainerKey.key() + "." + m_dec_vertex_index.key();
     m_dec_barcode = m_TrackContainerKey.key() + "." + m_dec_barcode.key();
     m_dec_parent_barcode = m_TrackContainerKey.key() + "." + m_dec_parent_barcode.key();
@@ -43,11 +45,13 @@ namespace FlavorTagDiscriminants {
     // Initialize decorators
     ATH_MSG_DEBUG( "Inizializing decorators:"  );
     ATH_MSG_DEBUG( "    ** " << m_dec_origin_label );
+    ATH_MSG_DEBUG( "    ** " << m_dec_type_label );
     ATH_MSG_DEBUG( "    ** " << m_dec_vertex_index );
     ATH_MSG_DEBUG( "    ** " << m_dec_barcode );
     ATH_MSG_DEBUG( "    ** " << m_dec_parent_barcode );
 
     CHECK( m_dec_origin_label.initialize() );
+    CHECK( m_dec_type_label.initialize() );
     CHECK( m_dec_vertex_index.initialize() );
     CHECK( m_dec_barcode.initialize() );
     CHECK( m_dec_parent_barcode.initialize() );
@@ -73,6 +77,7 @@ namespace FlavorTagDiscriminants {
     
     // instantiate decorators
     SG::WriteDecorHandle<TPC, int> dec_origin_label(m_dec_origin_label, ctx);
+    SG::WriteDecorHandle<TPC, int> dec_type_label(m_dec_type_label, ctx);
     SG::WriteDecorHandle<TPC, int> dec_vertex_index(m_dec_vertex_index, ctx);
     SG::WriteDecorHandle<TPC, int> dec_barcode(m_dec_barcode, ctx);
     SG::WriteDecorHandle<TPC, int> dec_parent_barcode(m_dec_parent_barcode, ctx);
@@ -83,7 +88,7 @@ namespace FlavorTagDiscriminants {
     // sort the tracks by pt to ensure the vertex clustering is deterministic
     std::vector<const xAOD::TrackParticle*> sorted_tracks;
     for (const auto track : *tracks) { sorted_tracks.push_back(track); }
-    std::sort(sorted_tracks.begin(), sorted_tracks.end(), sort_tracks);
+    std::sort(sorted_tracks.begin(), sorted_tracks.end(), TruthDecoratorHelpers::sort_particles);
 
     // first loop - decorate origin label, just store truth vertex for now
     auto trk_truth_vertex = std::vector<const xAOD::TruthVertex*>();
@@ -94,7 +99,7 @@ namespace FlavorTagDiscriminants {
       dec_barcode(*track) = truth ? truth->barcode() : -2;
 
       // get parent hadron and decorate barcode 
-      auto truth_parent = get_parent_hadron(truth);
+      auto truth_parent = TruthDecoratorHelpers::get_parent_hadron(truth);
       dec_parent_barcode(*track) = truth_parent ? truth_parent->barcode() : -2;
 
       // store the truth origin of the track
@@ -105,8 +110,11 @@ namespace FlavorTagDiscriminants {
       dec_origin_label(*track) = trackTruthLabel;
       
       // get the truth vertex of the track and store for now
-      auto truth_vertex = get_truth_vertex(track);
+      auto truth_vertex = TruthDecoratorHelpers::get_truth_vertex(truth);
       trk_truth_vertex.push_back(truth_vertex);
+
+      // decorate truth type
+      dec_type_label(*track) = TruthDecoratorHelpers::get_truth_type(truth);
     }
 
     // decorate tracks with truth vertex info
@@ -114,109 +122,10 @@ namespace FlavorTagDiscriminants {
     for ( size_t i = 0; i != trk_truth_vertex.size(); i++) {
       auto this_vert  = trk_truth_vertex.at(i);
       auto this_track = sorted_tracks.at(i);
-
-      // do we have a vertex for this track?
-      if ( !this_vert ) {
-        dec_vertex_index(*this_track) = -2;
-        continue;
-      }    
-
-      // track from PV
-      if ( get_distance(this_vert, truth_PV) < m_truthVertexMergeDistance ) {
-        dec_vertex_index(*this_track) = 0;
-        continue;
-      }
-
-      // have we already seen this vertex?
-      bool new_vertex = true;
-      for ( size_t j = 0; j != seen_vertices.size(); j++) {
-        float dr = get_distance(seen_vertices.at(j), this_vert);
-        if ( dr < m_truthVertexMergeDistance ) {
-          // a vertex is nearby, reuse it
-          new_vertex = false;
-          dec_vertex_index(*this_track) = j+1;
-          break;
-        }
-      }
-
-      // this vertex is far enough away from others to be considered unique
-      if ( new_vertex ) {
-        dec_vertex_index(*this_track) = seen_vertices.size()+1;
-        seen_vertices.push_back(this_vert);
-      }
+      dec_vertex_index(*this_track) = TruthDecoratorHelpers::get_vertex_index(this_vert, truth_PV, seen_vertices, m_truthVertexMergeDistance);
     }
     return StatusCode::SUCCESS;
   }
-
-  bool TrackTruthDecoratorAlg::sort_tracks(const xAOD::TrackParticle* track_A, 
-                                           const xAOD::TrackParticle* track_B) {
-    return track_A->pt() < track_B->pt();
-  }
-
-  const xAOD::TruthVertex* TrackTruthDecoratorAlg::get_truth_vertex(
-    const xAOD::TrackParticle* track) const {
-    
-    const xAOD::TruthParticle* truth = m_trackTruthOriginTool->getTruth(track);
-    if ( not truth ) { return nullptr; }
-
-    // no vertex
-    const xAOD::TruthVertex* truth_vertex = truth->prodVtx();
-    if ( not truth_vertex or truth_vertex->perp() > 440.0 ) { 
-      return nullptr;
-    }
-
-    return truth_vertex;
-  }
-
-  const xAOD::TruthVertex* TrackTruthDecoratorAlg::get_nearest_vertex(
-    const xAOD::TruthVertex* search_vertex,
-    std::vector<const xAOD::TruthVertex*> vertices) const {
-
-    if ( !search_vertex ) { return nullptr; }
-
-    float min_dr = 1e5;
-    int min_dr_idx = -1;
-    int index = -1;
-
-    // find closest vertex
-    for ( auto vertex : vertices ) {
-      index++;
-      if ( !vertex or search_vertex == vertex ) { continue; }
-      float dr = get_distance(vertex, search_vertex);
-      if ( dr < min_dr ) {
-        min_dr = dr;
-        min_dr_idx = index;
-      }
-    }
-
-    // return closest vertex
-    if ( min_dr_idx < 0 ) { return nullptr; }
-    else { return vertices.at(min_dr_idx); }
-  }
-
-  float TrackTruthDecoratorAlg::get_distance(const xAOD::TruthVertex* vertex_A, 
-                                             const xAOD::TruthVertex* vertex_B) const {
-    if ( !vertex_A or !vertex_B ) { return 999.0; }
-    return (vertex_A->v4().Vect() - vertex_B->v4().Vect()).Mag();
-  }
-
-  const xAOD::TruthParticle* TrackTruthDecoratorAlg::get_parent_hadron(
-    const xAOD::TruthParticle* truth_particle) const {
-    
-    if ( truth_particle == nullptr ) { return nullptr; }
-    if ( truth_particle->isBottomHadron() or truth_particle->isCharmHadron() ) {
-      return truth_particle;
-    }
-    for(unsigned int p = 0; p < truth_particle->nParents(); p++) {
-      const xAOD::TruthParticle* parent = truth_particle->parent(p);
-      auto parent_hadron = get_parent_hadron(parent);
-      if ( parent_hadron != nullptr ) {
-        return parent_hadron;
-      }
-    }
-    return nullptr;
-  }
-
 }
 
 

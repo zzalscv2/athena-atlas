@@ -13,12 +13,12 @@
 #ifndef TrkElectronCombinedMaterialEffects_H
 #define TrkElectronCombinedMaterialEffects_H
 
-#include "TrkGaussianSumFilterUtils/ComponentParameters.h"
 #include "TrkGaussianSumFilterUtils/GsfConstants.h"
 #include "TrkGaussianSumFilterUtils/GsfMaterial.h"
 //
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkGeometry/MaterialProperties.h"
+#include "TrkParameters/ComponentParameters.h"
 
 namespace Trk {
 
@@ -35,20 +35,7 @@ public:
   using MixtureParameters =
     std::array<ComponentValues, GSFConstants::maxNumberofMatComponents>;
 
-  /** Helper struct for construction and evaluation of polynomial */
-  struct Polynomial
-  {
-    // Evaluation of the polynomial for given material thickness (t)
-    double operator()(const double& t) const
-    {
-      double sum(0.);
-      for (size_t i = 0; i < GSFConstants::polynomialCoefficients; ++i) {
-        sum = t * sum + coefficients[i];
-      }
-      return sum;
-    }
-    std::array<double, GSFConstants::polynomialCoefficients> coefficients;
-  };
+  using Polynomial = std::array<double, GSFConstants::polynomialCoefficients>;
 
   // ctor with arguments
   ElectronCombinedMaterialEffects(
@@ -74,12 +61,11 @@ public:
 
 private:
   // Electron enrrgy loss due to Bremsstrahlung
-  void BetheHeitler(
-    GsfMaterial::EnergyLoss& cache,
-    const ComponentParameters& componentParameters,
-    const MaterialProperties& materialProperties,
-    double pathLenght,
-    PropDirection direction = anyDirection) const;
+  void BetheHeitler(GsfMaterial::EnergyLoss& cache,
+                    const ComponentParameters& componentParameters,
+                    const MaterialProperties& materialProperties,
+                    double pathLenght,
+                    PropDirection direction = anyDirection) const;
 
   int m_BHnumberOfComponents{};
   int m_BHtransformationCode{};

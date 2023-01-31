@@ -5,7 +5,6 @@
 /** @file EventSelectorAthenaPool.cxx
  *  @brief This file contains the implementation for the EventSelectorAthenaPool class.
  *  @author Peter van Gemmeren <gemmeren@anl.gov>
- *  $Id: EventSelectorAthenaPool.cxx,v 1.226 2009-05-20 18:04:13 gemmeren Exp $
  **/
 
 #include "EventSelectorAthenaPool.h"
@@ -42,6 +41,18 @@
 #include <algorithm>
 #include <sstream>
 #include <vector>
+
+
+namespace {
+   /// Helper to suppress thread-checker warnings for single-threaded execution
+   StatusCode putEvent_ST(const IAthenaIPCTool& tool,
+                          long eventNumber, const void* source,
+                          size_t nbytes, unsigned int status) {
+      StatusCode sc ATLAS_THREAD_SAFE = tool.putEvent(eventNumber, source, nbytes, status);
+      return sc;
+   }
+}
+
 
 //________________________________________________________________________________
 EventSelectorAthenaPool::EventSelectorAthenaPool(const std::string& name, ISvcLocator* pSvcLocator) :
@@ -548,13 +559,14 @@ StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
       {
          if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isServer()) {
             std::string token = m_headerIterator->eventRef().toString();
-            StatusCode sc = m_eventStreamingTool->putEvent(m_evtCount - 1, token.c_str(), token.length() + 1, 0);
-            while (sc.isRecoverable()) {
+            StatusCode sc;
+            while ( (sc = putEvent_ST(*m_eventStreamingTool,
+                                      m_evtCount - 1, token.c_str(),
+                                      token.length() + 1, 0)).isRecoverable() ) {
                while (m_athenaPoolCnvSvc->readData().isSuccess()) {
                   ATH_MSG_VERBOSE("Called last readData, while putting next event in next()");
                }
                // Nothing to do right now, trigger alternative (e.g. caching) here? Currently just fast loop.
-               sc = m_eventStreamingTool->putEvent(m_evtCount - 1, token.c_str(), token.length() + 1, 0);
             }
             if (!sc.isSuccess()) {
                ATH_MSG_ERROR("Cannot put Event " << m_evtCount - 1 << " to AthenaSharedMemoryTool");
@@ -993,13 +1005,12 @@ StatusCode EventSelectorAthenaPool::readEvent(int maxevt) {
    }
    delete ctxt; ctxt = nullptr;
    // End of file, wait for last event to be taken
-   StatusCode sc = m_eventStreamingTool->putEvent(0, 0, 0, 0);
-   while (sc.isRecoverable()) {
+   StatusCode sc;
+   while ( (sc = putEvent_ST(*m_eventStreamingTool, 0, 0, 0, 0)).isRecoverable() ) {
       while (m_athenaPoolCnvSvc->readData().isSuccess()) {
          ATH_MSG_VERBOSE("Called last readData, while marking last event in readEvent()");
       }
       usleep(1000);
-      sc = m_eventStreamingTool->putEvent(0, 0, 0, 0);
    }
    if (!sc.isSuccess()) {
       ATH_MSG_ERROR("Cannot put last Event marker to AthenaSharedMemoryTool");

@@ -98,7 +98,7 @@ bool TrigL2MuonSA::ClusterPatFinder::patfinder(std::vector<TrigL2MuonSA::Cluster
     size_t index[8] = {};
     for(int i=0; i<8; i++) index[i]=-1;
     // Loop on hits of start layer, for each hit try a new pattern
-    for (std::list<double>::iterator i_start=rpc_x->at(l_start).begin(); i_start!=rpc_x->at(l_start).end(); i_start++){
+    for (std::list<double>::iterator i_start=rpc_x->at(l_start).begin(); i_start!=rpc_x->at(l_start).end(); ++i_start){
       TrigL2MuonSA::ClusterPattern crPat;
       crPat.Clear();
       int n_hits=1;
@@ -124,7 +124,7 @@ bool TrigL2MuonSA::ClusterPatFinder::patfinder(std::vector<TrigL2MuonSA::Cluster
           double delta_layer=999; //minimum d(Z/R) 
           int layerID = 0;
           for(int ilayer = 0; ilayer < 2; ilayer++){
-            for (std::list<double>::iterator i_test=rpc_x->at(l_test + ilayer).begin(); i_test!=rpc_x->at(l_test + ilayer).end(); i_test++){ 
+            for (std::list<double>::iterator i_test=rpc_x->at(l_test + ilayer).begin(); i_test!=rpc_x->at(l_test + ilayer).end(); ++i_test){
               double delta=-1;
               // check if within the road
               if (!deltaOK( l_current,l_test + ilayer,current_x,*i_test,iphi,delta)) continue;
@@ -173,7 +173,7 @@ bool TrigL2MuonSA::ClusterPatFinder::patfinder(std::vector<TrigL2MuonSA::Cluster
           double x_layer=0; // position of the best cluster at test layer
           double delta_layer=999; //minimum d(Z/R) 
           //  loop on hits of test layer and picks the one with smaller distance from current_x
-          for (std::list<double>::iterator i_test=rpc_x->at(l_test).begin(); i_test!=rpc_x->at(l_test).end(); i_test++){ 
+          for (std::list<double>::iterator i_test=rpc_x->at(l_test).begin(); i_test!=rpc_x->at(l_test).end(); ++i_test){
             double delta=-1;
             // check if within the road
             if (!deltaOK( l_current,l_test,current_x,*i_test,iphi,delta)) continue;
@@ -271,7 +271,7 @@ bool TrigL2MuonSA::ClusterPatFinder::patfinder_forEta(std::vector<TrigL2MuonSA::
     crPat.Clear();
 
     // Loop on hits of start layer, for each hit try a new pattern
-    for (std::list<double>::iterator i_start=rpc_x->at(l_start).begin(); i_start!=rpc_x->at(l_start).end(); i_start++){
+    for (std::list<double>::iterator i_start=rpc_x->at(l_start).begin(); i_start!=rpc_x->at(l_start).end(); ++i_start){
       int n_hits=1;
       unsigned int pat=(1<<l_start); // bit pattern of hit layers
       double dMO=9999; // disstance middle-outer station
@@ -297,7 +297,7 @@ bool TrigL2MuonSA::ClusterPatFinder::patfinder_forEta(std::vector<TrigL2MuonSA::
           double delta_layer=999; //minimum d(Z/R) 
           int layerID = 0;
           for(int ilayer = 0; ilayer < 2; ilayer++){
-            for (std::list<double>::iterator i_test=rpc_x->at(l_test + ilayer).begin(); i_test!=rpc_x->at(l_test + ilayer).end(); i_test++){ 
+            for (std::list<double>::iterator i_test=rpc_x->at(l_test + ilayer).begin(); i_test!=rpc_x->at(l_test + ilayer).end(); ++i_test){
               double delta=-1;
               // check if within the road
               if (!deltaOK( l_current,l_test + ilayer,current_x,*i_test,iphi,delta)) continue;
@@ -346,7 +346,7 @@ bool TrigL2MuonSA::ClusterPatFinder::patfinder_forEta(std::vector<TrigL2MuonSA::
           double x_layer=0; // position of the best cluster at test layer
           double delta_layer=999; //minimum d(Z/R) 
           //  loop on hits of test layer and picks the one with smaller distance from current_x
-          for (std::list<double>::iterator i_test=rpc_x->at(l_test).begin(); i_test!=rpc_x->at(l_test).end(); i_test++){ 
+          for (std::list<double>::iterator i_test=rpc_x->at(l_test).begin(); i_test!=rpc_x->at(l_test).end(); ++i_test){
             double delta=-1;
             // check if within the road
             if (!deltaOK( l_current,l_test,current_x,*i_test,iphi,delta)) continue;
@@ -518,7 +518,6 @@ void TrigL2MuonSA::ClusterPatFinder::abcal(unsigned int result_pat, size_t index
   int hot_min[3]={999,999,999};
   int hot_max[3]={-999,-999,-999};
   
-  int inn_counter=0;
   int out_counter=0;
 
   for(int i=0; i<8; i++){
@@ -537,7 +536,6 @@ void TrigL2MuonSA::ClusterPatFinder::abcal(unsigned int result_pat, size_t index
     }
     if(hot_max[2] < i )         hot_max[2] = i;
 
-    inn_counter++;
     if(1 < i) out_counter++;
   }//for i 
   //

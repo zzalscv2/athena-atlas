@@ -17,55 +17,15 @@
 #include <string>
 #include <typeinfo>
 
-std::atomic<unsigned int> Trk::RIO_OnTrack::s_numberOfInstantiations{0};
 
 // Constructor with parameters:
-Trk::RIO_OnTrack::RIO_OnTrack(  const Trk::LocalParameters& locpars,
-                                const Amg::MatrixX& loccov,
-                                const Identifier& id) 
-  : MeasurementBase(locpars,loccov),
-    m_identifier(id)
+Trk::RIO_OnTrack::RIO_OnTrack(const Trk::LocalParameters& locpars,
+                              const Amg::MatrixX& loccov,
+                              const Identifier& id)
+  : MeasurementBase(locpars, loccov)
+  , Trk::ObjectCounter<Trk::RIO_OnTrack>()
+  , m_identifier(id)
 {
-#ifndef NDEBUG
-   s_numberOfInstantiations++; // new RIO_OnTrack, so increment total count
-#endif
-}
-
-// Destructor:
-Trk::RIO_OnTrack::~RIO_OnTrack()
-{
-#ifndef NDEBUG
-    s_numberOfInstantiations--; // delete RIO_OnTrack, so decrement total count
-#endif
-}
-
-// default constructor:
-Trk::RIO_OnTrack::RIO_OnTrack() :
-    m_identifier()
-{
-#ifndef NDEBUG
-   s_numberOfInstantiations++; // new RIO_OnTrack, so increment total count
-#endif
-}  
-
-// copy constructor:
-Trk::RIO_OnTrack::RIO_OnTrack( const Trk::RIO_OnTrack& rot) :
-    Trk::MeasurementBase(rot),
-    m_identifier( rot.m_identifier )
-{
-#ifndef NDEBUG
-   s_numberOfInstantiations++; // new RIO_OnTrack, so increment total count
-#endif
-}
-
-// assignment operator:
-Trk::RIO_OnTrack& Trk::RIO_OnTrack::operator=(const RIO_OnTrack& rot)
-{
-    if ( &rot != this) {
-      Trk::MeasurementBase::operator=(rot);
-      m_identifier         = rot.m_identifier; 
-    }
-    return *this;
 }
 
 MsgStream& Trk::RIO_OnTrack::dump( MsgStream& sl ) const
@@ -103,12 +63,4 @@ std::ostream& Trk::RIO_OnTrack::dump( std::ostream& sl ) const
     }    
     return sl;
 }
-
-unsigned int Trk::RIO_OnTrack::numberOfInstantiations()
-{
-  return s_numberOfInstantiations;
-}
-
-
-
 

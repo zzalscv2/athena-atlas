@@ -50,7 +50,7 @@ StatusCode TileTrackFilterAlg::execute(){
     CHECK( evtStore()->record( outputCont, m_outputTracksName ) );
     
     // NUMBER OF TRACKPARTICLECANDIDATES
-    int counter = 0;
+
     //bool debug = false;
 
     // GET HANDLE ON TRACKPARTICLE CONTAINER AND RETRIEVE FROM STOREGATE
@@ -78,7 +78,6 @@ StatusCode TileTrackFilterAlg::execute(){
             if(accept(trackPointer)){
                 if(std::find(outputCont->begin(),outputCont->end(),trackPointer) == outputCont->end()){
                     outputCont->push_back(trackPointer);
-                    ++counter;
                 } // IF
             } // IF
         } // FOR (TRACKS)

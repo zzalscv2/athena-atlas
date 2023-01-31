@@ -9,7 +9,7 @@
 #include <vector>
 #include "TrkGeometry/MagneticFieldProperties.h"
 
-#include "TrkExUtils/TransportJacobian.h"
+#include "TrkEventPrimitives/TransportJacobian.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"

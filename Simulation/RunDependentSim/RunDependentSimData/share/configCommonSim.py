@@ -37,6 +37,12 @@ if 'runArgs' in dir():
         trfTotalEvents = runArgs.maxEvents
         trfSkipEvents = runArgs.skipEvents if hasattr(runArgs, "skipEvents") else 0
 
+        # for testing
+        if 'overrideMaxEvents' in dir():
+            simlog.warning('Overriding maxEvents to %d', overrideMaxEvents)
+            trfMaxEvents = overrideMaxEvents
+            trfTotalEvents = overrideMaxEvents
+
         # do executor step filtering
         if hasattr(runArgs, "totalExecutorSteps") and runArgs.totalExecutorSteps > 1:
             JobMaker = list(filter(lambda lb: 'step' not in lb or lb['step'] == runArgs.executorStep, JobMaker))

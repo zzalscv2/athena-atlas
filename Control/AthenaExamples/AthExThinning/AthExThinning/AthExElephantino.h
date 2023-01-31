@@ -92,9 +92,5 @@ class AthExElephantino
   ElementLinkVector<AthExIParticles> m_ears;
 }; 
 
-/////////////////////////////////////////////////////////////////// 
-/// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-
 CLASS_DEF( AthExElephantino, 107042295, 1 )
 #endif //> ATHEXTHINNING_ATHEXELEPHANTINO_H 

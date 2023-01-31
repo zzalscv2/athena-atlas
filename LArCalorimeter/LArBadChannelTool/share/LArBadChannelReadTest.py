@@ -34,7 +34,7 @@ include( "LArConditionsCommon/LArIdMap_comm_jobOptions.py" )
 include( "LArIdCnv/LArIdCnv_joboptions.py" )
 
 include( "IdDictDetDescrCnv/IdDictDetDescrCnv_joboptions.py" )
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+include( "CaloConditions/CaloConditions_jobOptions.py" )
 
 #include( "ByteStreamCnvSvc/BSEventStorageEventSelector_jobOptions.py" )
 

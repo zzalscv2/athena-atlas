@@ -167,10 +167,8 @@ namespace Trk {
       if(atrack.m_alignTSOSCollection!=nullptr) {
         AlignTSOSCollection * aTSOScoll = new AlignTSOSCollection;
         aTSOScoll->reserve(atrack.m_alignTSOSCollection->size());
-        int count(0);
         AlignTSOSIt itAtsos_end = atrack.m_alignTSOSCollection->end();
         for(AlignTSOSIt itAtsos = atrack.m_alignTSOSCollection->begin(); itAtsos!=itAtsos_end; ++itAtsos) {
-          ++count;
           assert(*itAtsos!=0); // check that is defined.
           AlignTSOS * atsos = new AlignTSOS(**itAtsos);
           aTSOScoll->push_back(atsos);
@@ -290,10 +288,7 @@ namespace Trk {
 
       else if ( !tsos->type(TrackStateOnSurface::Scatterer) &&
                 !tsos->type(TrackStateOnSurface::InertMaterial)) {
-        if ( tsos->fitQualityOnSurface()!=nullptr) 
-          msg << "," << *( tsos->fitQualityOnSurface() )<<endmsg;
-        else
-          msg << ", no FitQuality!"<<endmsg;
+          msg << "," << ( tsos->fitQualityOnSurface() )<<endmsg;
       }
 
       else {
@@ -443,7 +438,7 @@ namespace Trk {
       for (; tsit!=tsit_end ; ++tsit) {
         auto newMeas  = (*tsit)->measurementOnTrack() ? (*tsit)->measurementOnTrack()->uniqueClone() : nullptr;
         auto newPars  = (*tsit)->trackParameters() ? (*tsit)->trackParameters()->uniqueClone() : nullptr;
-        auto newFitQoS= (*tsit)->fitQualityOnSurface() ? std::make_unique<Trk::FitQualityOnSurface>(*((*tsit)->fitQualityOnSurface())) : nullptr;
+        auto newFitQoS= (*tsit)->fitQualityOnSurface();
         auto meb      = (*tsit)->materialEffectsOnTrack() ? (*tsit)->materialEffectsOnTrack()->uniqueClone() : nullptr;
   
         if (meb) {
@@ -469,13 +464,18 @@ namespace Trk {
           if ((*tsit)->type(Trk::TrackStateOnSurface::TrackStateOnSurfaceType(i)))
             typePattern.set(i);
         }
-        const Trk::TrackStateOnSurface* newTsos= new Trk::TrackStateOnSurface( std::move(newMeas), std::move(newPars), std::move(newFitQoS), std::move(meb), typePattern);
+        const Trk::TrackStateOnSurface* newTsos =
+          new Trk::TrackStateOnSurface(newFitQoS,
+                                       std::move(newMeas),
+                                       std::move(newPars),
+                                       std::move(meb),
+                                       typePattern);
         newTrackStateOnSurfaces.push_back(newTsos);
       }
       
       m_trackWithoutScattering.set(std::make_unique<Trk::Track>( this->info(), std::move(newTrackStateOnSurfaces), 
                                                                  this->fitQuality() ? 
-                                                                 this->fitQuality()->clone() : nullptr ));
+                                                                 this->fitQuality()->uniqueClone() : nullptr ));
     }
     return m_trackWithoutScattering.get();
   }

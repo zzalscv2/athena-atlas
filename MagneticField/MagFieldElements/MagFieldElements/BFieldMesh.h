@@ -136,8 +136,8 @@ private:
 
   // look-up table and related variables
   std::array<std::vector<int>, 3> m_LUT;
-  std::array<double, 3> m_invUnit; // inverse unit size in the LUT
-  int m_roff, m_zoff;
+  std::array<double, 3> m_invUnit= {0, 0, 0}; // inverse unit size in the LUT
+  int m_roff = 0, m_zoff = 0;
 };
 #include "MagFieldElements/BFieldMesh.icc"
 #endif

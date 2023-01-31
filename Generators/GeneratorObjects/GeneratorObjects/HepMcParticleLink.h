@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATOROBJECTS_HEPMCPARTICLELINK_H
@@ -148,10 +148,20 @@ public:
 
 
     /**
+     * @brief Move constructor.  (Can't be defaulted due to the atomic member.)
+     */
+    ExtendedBarCode(ExtendedBarCode&& rhs) noexcept;
+
+
+    /**
      * @brief Assignment.  (Can't be defaulted due to the atomic member.)
      */
     ExtendedBarCode& operator= (const ExtendedBarCode& rhs);
 
+    /**
+     * @brief Move Assignment.  (Can't be defaulted due to the atomic member.)
+     */
+    ExtendedBarCode& operator= (ExtendedBarCode&& rhs) noexcept;
 
     /**
      * @brief Barcode of target variable (0 for a null link).
@@ -382,7 +392,7 @@ public:
    * @param positionFlag: See @c eventIndex.
    * @param sg Optional specification of a specific store to reference.
    */
-  HepMcParticleLink (HepMC::ConstGenParticlePtr p,
+  HepMcParticleLink (const HepMC::ConstGenParticlePtr& p,
                      uint32_t eventIndex = 0,
                      EBC_EVCOLL evColl=EBC_MAINEVCOLL,
                      PositionFlag positionFlag = IS_INDEX,
@@ -401,7 +411,7 @@ public:
    * @param positionFlag: See @c eventIndex.
    * @param sg Optional specification of a specific store to reference.
    */
-  HepMcParticleLink (HepMC::ConstGenParticlePtr part,
+  HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                      uint32_t eventIndex,
                      const std::string& evCollName,
                      PositionFlag positionFlag = IS_INDEX,
@@ -420,7 +430,7 @@ public:
    * @param positionFlag: See @c eventIndex.
    * @param ctx Context of the store to reference.
    */
-  HepMcParticleLink (HepMC::ConstGenParticlePtr part,
+  HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                      uint32_t eventIndex,
                      EBC_EVCOLL evColl,
                      PositionFlag positionFlag,
@@ -430,13 +440,23 @@ public:
   /**
    * @brief Copy constructor.
    */
-  HepMcParticleLink(const HepMcParticleLink& rhs);
+  HepMcParticleLink(const HepMcParticleLink& rhs) = default;
 
+
+  /**
+   * @brief Move constructor.
+   */
+  HepMcParticleLink(HepMcParticleLink&& rhs) noexcept = default;
 
   /**
    * @brief Assignment.
    */
-  HepMcParticleLink& operator= (const HepMcParticleLink& rhs);
+  HepMcParticleLink& operator=(const HepMcParticleLink& rhs) = default;
+
+  /**
+   * @brief Move Assignment.
+   */
+  HepMcParticleLink& operator=(HepMcParticleLink&& rhs) = default;
 
 
   /// \name pointer interface

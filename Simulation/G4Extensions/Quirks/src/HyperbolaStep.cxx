@@ -89,7 +89,7 @@ void HyperbolaStep::Step(G4double length) {
     // Advance string pointer
     m_fracLeft *= (1 - fracTaken);
     if (m_fracLeft <= 0.0) {
-        if (m_stringPtr != m_stringEnd) m_stringPtr++;
+        if (m_stringPtr != m_stringEnd) ++m_stringPtr;
         m_fracLeft = 1.0;
     }
 

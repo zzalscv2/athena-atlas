@@ -395,14 +395,15 @@ TopoSteering::executeDecisionAlgorithm(TCS::DecisionAlg *alg,
    std::vector<TCS::TOBArray const *> input;  // needs to be optimized
    for(const Connector* inConn: inputConnectors)
    {
+      if (inConn == nullptr) continue;
       const SortingConnector * sc = dynamic_cast<const SortingConnector *>(inConn);
-      if (sc==nullptr && inConn!=nullptr) {
+      if (sc==nullptr) {
 	 TCS_EXCEPTION("L1Topo Steering: Decision algorithm " << alg->name() << " could not cast as SortingConnector* the input connector " << inConn->name());
       }
       else {
         const TOBArray * tobA = dynamic_cast<const TOBArray *>( sc->outputData());
         if(tobA==nullptr) {
-          TCS_EXCEPTION("L1Topo Steering: Decision algorithm " << alg->name() << " expects TOBArray(s) as input, but did not get it from connector " << inConn->name());
+          TCS_EXCEPTION("L1Topo Steering: Decision algorithm " << alg->name() << " expects TOBArray(s) as input, but did not get it from connector " << (inConn ? inConn->name() : ""));
         }
         input.push_back( tobA );
       }

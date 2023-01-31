@@ -684,6 +684,7 @@ StatusCode ISF_HitAnalysis::execute()
  m_MuonEntryLayer_px->clear();
  m_MuonEntryLayer_py->clear();
  m_MuonEntryLayer_pz->clear();
+ m_MuonEntryLayer_pdg->clear();
 
  //##########################
 
@@ -817,7 +818,7 @@ StatusCode ISF_HitAnalysis::execute()
 
          //does it hit the barrel or the EC?
 
-         if(abs(direction.Z())/m_CaloBoundaryZ < direction.Perp()/m_CaloBoundaryR) {
+         if(std::abs(direction.Z())/m_CaloBoundaryZ < direction.Perp()/m_CaloBoundaryR) {
            //BARREL
            direction*=m_CaloBoundaryR/direction.Perp();
          } else {
@@ -832,7 +833,7 @@ StatusCode ISF_HitAnalysis::execute()
            ATH_MSG_WARNING("No particle production vetext, use VERTEX from direction: x "<<direction.X()<<" y "<<direction.Y()<<" z "<<direction.Z());
          }  
          
-         if( fabs(direction.X()-truth.vertex().X())>0.1 || fabs(direction.Y()-truth.vertex().Y())>0.1 || fabs(direction.Z()-truth.vertex().Z())>0.1 ) {
+         if( std::abs(direction.X()-truth.vertex().X())>0.1 || std::abs(direction.Y()-truth.vertex().Y())>0.1 || std::abs(direction.Z()-truth.vertex().Z())>0.1 ) {
            ATH_MSG_WARNING("VERTEX from direction: x "<<direction.X()<<" y "<<direction.Y()<<" z "<<direction.Z());
            ATH_MSG_WARNING("but VERTEX from hepmc: x "<<truth.vertex().X()<<" y "<<truth.vertex().Y()<<" z "<<truth.vertex().Z());
          }  
@@ -1245,11 +1246,8 @@ StatusCode ISF_HitAnalysis::execute()
   }
 
   //Start matching:
-  Int_t iindex = 0;
   for (std::map<Long64_t, FCS_cell>::iterator it = cells.begin(); it != cells.end(); )
   {
-    iindex++;
-    // std::cout <<iindex<<std::endl;
     one_matchedcell.clear(); //maybe not completely necessery, as we're not pushing_back into vectors
     //set the cell part
     one_matchedcell.cell = it->second;

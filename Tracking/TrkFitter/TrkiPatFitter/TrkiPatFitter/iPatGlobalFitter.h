@@ -19,45 +19,39 @@
 
 //<<<<<< CLASS DECLARATIONS                                             >>>>>>
 
-namespace Trk
-{
+namespace Trk {
 
 /**  GlobalTrackFitter tool providing methods used during alignment */
 
-class iPatGlobalFitter: public iPatFitter,
-			virtual public IGlobalTrackFitter
-{
-public:
-    iPatGlobalFitter		(const std::string& type,
-				 const std::string& name,
-				 const IInterface* parent);
-    ~iPatGlobalFitter		(void); 	// destructor
+class iPatGlobalFitter : public iPatFitter, virtual public IGlobalTrackFitter {
+ public:
+  iPatGlobalFitter(const std::string& type, const std::string& name,
+                   const IInterface* parent);
+  ~iPatGlobalFitter(void);  // destructor
 
-   Track* alignmentFit ( AlignmentCache&,
-                const Track&,
-                const RunOutlierRemoval  runOutlier=false,
-                const ParticleHypothesis matEffects=Trk::nonInteracting) const;
+  Track* alignmentFit(
+      AlignmentCache&, const Track&, const RunOutlierRemoval runOutlier = false,
+      const ParticleHypothesis matEffects = Trk::nonInteracting) const;
 
+ private:
+  /**  GlobalTrackFitter methods:
+       access to the matrix of derivatives used during the latest track fit */
+  std::unique_ptr<Amg::MatrixX> derivMatrix(const FitState& fitState) const;
 
-private:
-    /**  GlobalTrackFitter methods:
-  	 access to the matrix of derivatives used during the latest track fit */
-    std::unique_ptr<Amg::MatrixX>	derivMatrix(const FitState& fitState) const;
+  /**  access to the global fitter's full covariance matrix */
+  std::unique_ptr<Amg::MatrixX> fullCovarianceMatrix(
+      const FitState& fitState) const;
 
-    /**  access to the global fitter's full covariance matrix */
-    std::unique_ptr<Amg::MatrixX> fullCovarianceMatrix(const FitState& fitState) const;
+  /**  access to the number of iterations taken by the latest track fit */
+  static int iterationsOfLastFit(const FitState& fitState);
 
-    /**  access to the number of iterations taken by the latest track fit */
-    static int				iterationsOfLastFit(const FitState& fitState) ;
+  /**  set method for the minimum number of iterations for (alignment) friend */
+  void setMinIterations(int minIterations);
 
-
-    /**  set method for the minimum number of iterations for (alignment) friend */
-    void			setMinIterations (int minIterations);
-
-    // configurables (tools and options)
-    bool			m_allParameters;	// all or 5 parameters for above matrix methods
+  // configurables (tools and options)
+  bool m_allParameters;  // all or 5 parameters for above matrix methods
 };
 
-} // end of namespace
+}  // namespace Trk
 
-#endif // TRKIPATFITTER_IPATGLOBALFITTER_H
+#endif  // TRKIPATFITTER_IPATGLOBALFITTER_H

@@ -193,7 +193,7 @@ G4VParticleChange* FullModelHadronicProcess::PostStepDoIt(const G4Track& aTrack,
 
   for(ReactionProduct::iterator it  = rp.begin();
       it != rp.end();
-      it++)
+      ++it)
     {
       G4ParticleDefinition* tempDef = theParticleTable->FindParticle(*it);
       CustomParticle* tempCust = dynamic_cast<CustomParticle*>(tempDef);

@@ -1,27 +1,22 @@
-################################################################################
-# Package: MuonCondSvc
-################################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonCondSvc )
 
 # External dependencies:
-find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( Boost )
 
 # Component(s) in the package:
 atlas_add_library( MuonCondSvcLib
                    src/*.cxx
                    PUBLIC_HEADERS MuonCondSvc
-                   INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
-                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel AthenaPoolUtilities Identifier GaudiKernel MuonCondData MuonCondInterface StoreGateLib MuonIdHelpersLib
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} )
+                   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+                   LINK_LIBRARIES AthenaBaseComps AthenaKernel AthenaPoolUtilities GaudiKernel MuonAlignmentData MuonCondInterface MuonIdHelpersLib StoreGateLib
+                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} Identifier )
 
 atlas_add_component( MuonCondSvc
                      src/components/*.cxx
-                     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel StoreGateLib AthenaPoolUtilities Identifier GaudiKernel MuonCondData MuonCondInterface MuonIdHelpersLib MuonCondSvcLib )
+                     LINK_LIBRARIES MuonCondSvcLib )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

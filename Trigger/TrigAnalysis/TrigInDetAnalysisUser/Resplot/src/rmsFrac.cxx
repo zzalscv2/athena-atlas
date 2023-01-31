@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:41:27 CET 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -48,12 +48,12 @@ void getRange(TH1D* s, int imax, double frac,
     int i=1;
     while ( true ) { 
       
-      int _upperbin = imax+i;
-      int _lowerbin = imax-i;
+      const int upperbin_i = imax+i;
+      const int lowerbin_i = imax-i;
       
-      if ( _upperbin>s->GetNbinsX() || _lowerbin<1 ) break; 
+      if ( upperbin_i>s->GetNbinsX() || lowerbin_i<1 ) break;
       
-      tsum += s->GetBinContent(_upperbin) + s->GetBinContent(_lowerbin);
+      tsum += s->GetBinContent(upperbin_i) + s->GetBinContent(lowerbin_i);
       
       //      std::cout << i << " frac: " << lowersum 
       //		<< "\tx " << s->GetBinCenter(lowerbin) 
@@ -68,8 +68,8 @@ void getRange(TH1D* s, int imax, double frac,
 
       lowerfrac = sumn/entries;
             
-      upperbin = _upperbin;
-      lowerbin = _lowerbin;
+      upperbin = upperbin_i;
+      lowerbin = lowerbin_i;
 
       i++;
     }
@@ -109,9 +109,10 @@ double findMean(TH1D* s, double frac=0.95) {
   int imax = 0;
  
   int it=0;
-
+  constexpr int it_max=20;
+  constexpr int it_max_report=20;
   /// maximum 20 iterations, calculating the mean of 95% until stable
-  for ( ; it<20 ; it++ ) { 
+  for ( ; it<it_max ; it++ ) { 
 
 
     //    std::cout << it << "\tmean " << mean << " +- " << meane << std::endl; 
@@ -141,8 +142,8 @@ double findMean(TH1D* s, double frac=0.95) {
 	break; 
       }
     }
-    
-    if ( it>=20 ) { 
+    //cppcheck-suppress oppositeInnerCondition
+    if ( it>=it_max_report ) {
       std::cerr << s->GetName() << "\tMax iterations " << it << " reached" << std::endl;
     }
     

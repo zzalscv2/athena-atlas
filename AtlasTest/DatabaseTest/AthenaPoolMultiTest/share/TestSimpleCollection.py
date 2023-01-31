@@ -1,7 +1,6 @@
 ## @file MakeSimpleCollection.py
 ## @brief Creates a ROOT collection of dummy run and event number metadata
 ## @author J. Cranshaw (Jack.Cranshaw@cern.ch)
-## $Id: TestSimpleCollection.py,v 1.9 2009-02-19 22:04:48 cranshaw Exp $
 
 ###############################################################
 #
@@ -44,7 +43,6 @@ svcMgr.PoolSvc.ReadCatalog = [ "XMLFileCatalog_file:SplittableData.xml" ]
 #--------------------------------------------------------------
 # Set the following when reading back to adjust the run/event numbers
 #   (don't forget ApplicationMgr.EvtMax)
-#svcMgr.EventSelector = Service( "EventSelector" )
 svcMgr.EventSelector.InputCollections =  ["PFN:SplittableCollection.root","PFN:NullableCollection.root"];
 svcMgr.EventSelector.CollectionType = 'ExplicitROOT'
 svcMgr.EventSelector.Query = "RunNumber != 1000000 && EventNumber > 0"

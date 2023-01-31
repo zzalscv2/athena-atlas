@@ -13,8 +13,8 @@
 #define TrkIMaterialMixtureConvolution_H
 
 //
-#include "TrkGaussianSumFilterUtils/MultiComponentState.h"
 #include "TrkGaussianSumFilterUtils/GsfMaterial.h"
+#include "TrkParameters/ComponentParameters.h"
 //
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "TrkEventPrimitives/PropDirection.h"
@@ -62,7 +62,6 @@ public:
     const Layer&,
     PropDirection direction,
     ParticleHypothesis particleHypothesis) const = 0;
-
 };
 
 } // end Trk namespace

@@ -547,7 +547,7 @@ StatusCode AthenaMtesEventLoopMgr::executeEvent( EventContext &&ctx )
     return StatusCode::FAILURE;
   }
 
-  EventID::number_type evtNumber = ctx.eventID().event_number();
+  EventID::event_number_t evtNumber = ctx.eventID().event_number();
   unsigned int conditionsRun = ctx.eventID().run_number();
   const AthenaAttributeList* attr = nullptr;
   if (eventStore()->contains<AthenaAttributeList> ("Input") &&
@@ -1266,7 +1266,7 @@ AthenaMtesEventLoopMgr::drainScheduler(int& finishedEvts,bool report){
     }
     
     EventID::number_type n_run(0);
-    EventID::number_type n_evt(0);
+    EventID::event_number_t n_evt(0);
 
     if (m_whiteboard->selectStore(thisFinishedEvtContext->slot()).isSuccess()) {
       n_run = thisFinishedEvtContext->eventID().run_number();

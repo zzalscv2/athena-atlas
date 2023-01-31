@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackSelectorTool.h"
@@ -14,41 +14,11 @@
 #include "TrkTrack/Track.h"
 #include "TrkTrackSummary/MuonTrackSummary.h"
 #include "TrkTrackSummary/TrackSummary.h"
-
+#include "EventPrimitives/EventPrimitivesHelpers.h"
 namespace Muon {
 
     MuonTrackSelectorTool::MuonTrackSelectorTool(const std::string& ty, const std::string& na, const IInterface* pa) :
-        AthAlgTool(ty, na, pa),
-        m_ntotalTracks(0),
-        m_failedChi2NDofCut(0),
-        m_failedSingleStationCut(0),
-        m_failedRPCAveMinTimeCut(0),
-        m_failedRPCAveMaxTimeCut(0),
-        m_failedRPCSpreadTimeCut(0),
-        m_failedTwoStationsCut(0),
-        m_failedTwoStationsMaxMDTHoleCut(0),
-        m_failedTwoStationsMaxHoleCut(0),
-        m_failedTwoStationsGoodStationCut(0),
-        m_failedTriggerStationCut(0),
-        m_failedMaxMDTHoleCut(0),
-        m_failedMaxHoleCut(0) {
-        declareProperty("Chi2NDofCut", m_chi2NDofCut = 20.);
-        declareProperty("RemoveSingleStationTracks", m_removeSingleStationTracks = false);
-        declareProperty("MinimumNumberOfMdtHitsPerStation", m_minMdtHitsPerStation = 3);
-        declareProperty("MinimumNumberOfCscHitsPerStation", m_minCscHitsPerStation = 3);
-        declareProperty("HolesToHitsRatioCutPerStation", m_holeHitRatioCutPerStation = 1.1);
-        declareProperty("MaxMdtHolesOnTwoStationTrack", m_maxMdtHolesPerTwoStationTrack = 5);
-        declareProperty("MaxMdtHolesOnTrack", m_maxMdtHolesPerTrack = 5);
-        declareProperty("UseRPCHoles", m_useRPCHoles = true);
-        declareProperty("UseTGCHoles", m_useTGCHoles = true);
-        declareProperty("UseCSCHoles", m_useCSCHoles = true);
-        declareProperty("UseMDTHoles", m_useMDTHoles = true);
-        declareProperty("IgnoreTriggerHolesInChamberWithHits", m_ignoreTriggerHolesInLayersWithHits = true);
-        declareProperty("ApplyRPCTimeWindow", m_useRPCTimeWindow = false);
-        declareProperty("RemoveTwoStationTrackWithoutTriggerHits", m_removeTwoStationTrackWithoutTriggerHits = false);
-        declareProperty("CountMDTOutlierAsHoles", m_countMdtOutliersAsHoles = false);
-        declareProperty("TightSingleStationCuts", m_tightSingleStationCuts = false);
-    }
+        AthAlgTool(ty, na, pa) {}
 
     StatusCode MuonTrackSelectorTool::initialize() {
         ATH_CHECK(m_edmHelperSvc.retrieve());
@@ -94,10 +64,13 @@ namespace Muon {
 
     bool MuonTrackSelectorTool::decision(Trk::Track& track) const {
         // loop over track and calculate residuals
-        const DataVector<const Trk::TrackStateOnSurface>* states = track.trackStateOnSurfaces();
+        const Trk::TrackStates* states = track.trackStateOnSurfaces();
         if (!states) {
             ATH_MSG_DEBUG(" track without states, discarding track ");
             return false;
+        }
+        if (m_requireSanePerigee) {
+            if (!track.perigeeParameters() || !Amg::saneCovarianceDiagonal(*track.perigeeParameters()->covariance())) return false;
         }
 
         ++m_ntotalTracks;

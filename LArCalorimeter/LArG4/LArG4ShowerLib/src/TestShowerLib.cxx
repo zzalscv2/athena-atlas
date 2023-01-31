@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -36,11 +36,6 @@ namespace ShowerLib {
 
   TestShowerLib::~TestShowerLib()
   {
-	  library::const_iterator libit;
-	  for (libit = m_libData.begin(); libit != m_libData.end(); libit ++) {
-		  delete (*libit).first.vertex;
-		  delete (*libit).first.momentum;
-	  }
   }
 
   IShowerLib* TestShowerLib::readFromROOTFile(TFile* source)
@@ -161,14 +156,10 @@ bool TestShowerLib::storeShower(HepMC::ConstGenParticlePtr genParticle, const Sh
 	  }
 
 	  genInfo theinfo{};
-	  theinfo.vertex = new HepMC::FourVector(genParticle->production_vertex()->position());
-	  theinfo.momentum = new HepMC::FourVector(genParticle->momentum());
+	  theinfo.vertex = std::make_unique<HepMC::FourVector>(genParticle->production_vertex()->position());
+	  theinfo.momentum = std::make_unique<HepMC::FourVector>(genParticle->momentum());
 
-	  storedShower storedshower;
-	  storedshower.first = theinfo;
-	  storedshower.second = *shower;
-
-	  m_libData.push_back(storedshower);
+	  m_libData.emplace_back(std::move(theinfo), *shower);
 
 	  return true;
   }
@@ -224,15 +215,15 @@ bool TestShowerLib::storeShower(HepMC::ConstGenParticlePtr genParticle, const Sh
 		  Shower shower;
 		  shower.setZSize(time);
 		  genInfo theinfo{};
-		  theinfo.vertex = new HepMC::FourVector(x,y,z,0);
+		  theinfo.vertex = std::make_unique<HepMC::FourVector>(x,y,z,0);
 		  source->GetEntry(entr++);
 		  shower.setRSize(time);
-		  theinfo.momentum = new HepMC::FourVector(x,y,z,e);
+		  theinfo.momentum = std::make_unique<HepMC::FourVector>(x,y,z,e);
 		  for(int i = 0; i < nhits; i++) {
 			  source->GetEntry(entr++); //variables mean what the name suggests
 			  shower.push_back(new ShowerEnergySpot(G4ThreeVector(x,y,z),e,time));
 		  }
-		  m_libData.push_back(storedShower(theinfo,shower));
+		  m_libData.emplace_back(std::move(theinfo),shower);
 	  } while (entr < nentr);
 
 	  m_filled = true;
@@ -259,29 +250,27 @@ bool TestShowerLib::storeShower(HepMC::ConstGenParticlePtr genParticle, const Sh
 	  dest->Branch("z",&z);
 	  dest->Branch("e",&e);
 	  dest->Branch("time",&time);
-	  library::const_iterator libit;
-	  for (libit = m_libData.begin(); libit != m_libData.end(); libit ++) {
-		  HepMC::FourVector vertex = *((*libit).first.vertex);
-		  HepMC::FourVector momentum = *((*libit).first.momentum);
+          for (const storedShower& lib : m_libData) {
+		  HepMC::FourVector vertex = *lib.first.vertex;
+		  HepMC::FourVector momentum = *lib.first.momentum;
 		  x = vertex.x();
 		  y = vertex.y();
 		  z = vertex.z();
-		  e = (*libit).second.size();
-		  time = (*libit).second.getZSize();
+		  e = lib.second.size();
+		  time = lib.second.getZSize();
 		  dest->Fill(); //eta bin header
 		  x = momentum.px();
 		  y = momentum.py();
 		  z = momentum.pz();
 		  e = momentum.e();
-		  time = (*libit).second.getRSize();
+		  time = lib.second.getRSize();
 		  dest->Fill(); //eta bin header
-		  Shower::const_iterator iter;
-		  for (iter = (*libit).second.begin(); iter != (*libit).second.end(); iter++) {
-			  x = (*iter)->GetPosition().x();
-			  y = (*iter)->GetPosition().y();
-			  z = (*iter)->GetPosition().z();
-			  e = (*iter)->GetEnergy();
-			  time = (*iter)->GetTime();
+                  for (const ShowerEnergySpot* spot : lib.second) {
+			  x = spot->GetPosition().x();
+			  y = spot->GetPosition().y();
+			  z = spot->GetPosition().z();
+			  e = spot->GetEnergy();
+			  time = spot->GetTime();
 			  dest->Fill();
 		  }
 	  }

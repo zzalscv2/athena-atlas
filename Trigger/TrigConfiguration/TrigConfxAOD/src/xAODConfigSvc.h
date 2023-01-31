@@ -227,7 +227,7 @@ namespace TrigConf {
         "StoreGate key for the xAOD::TriggerMenuJson BunchGroup configuration object"};
       /// @}
 
-      /// @name Names for reading the R3 payload directly (RAWtoESD, RAWtoALL)
+      /// @name Names for reading the R3 payload directly (RAWtoALL)
       /// @{
 
       Gaudi::Property< std::string > m_hltMenuName{this, "HLTTriggerMenu", "DetectorStore+HLTTriggerMenu",
@@ -246,7 +246,7 @@ namespace TrigConf {
       /// @}
 
       Gaudi::Property<bool> m_useInFileMetadata{this, "UseInFileMetadata", true, "Flag for reading all configuration from the input POOL file(s). "
-        "This mode should be used everywhere except for: RAWtoALL from bytestream, RAWtoESD from bytestream. "
+        "This mode should be used everywhere except for: RAWtoALL from bytestream. "
         "If set to false, only the R3 configuration is supported."};
 
       Gaudi::Property<bool> m_stopOnFailure{this, "StopOnFailure", true, "Flag for stopping the job in case of a failure"};

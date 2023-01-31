@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # The earliest bunch crossing time for which interactions will be sent
 # to the FastTRT Digitization code.
@@ -30,13 +30,8 @@ def BasicTRTFastDigitizationTool(name, **kwargs):
         conddb.addFolder( "TRT_OFL", "/TRT/Calib/ToT/ToTVectors") 
     if not conddb.folderRequested( "/TRT/Calib/ToT/ToTValue"):
         conddb.addFolder( "TRT_OFL", "/TRT/Calib/ToT/ToTValue")
-    #choose random number service
-    from Digitization.DigitizationFlags import digitizationFlags
-    kwargs.setdefault("RndmSvc", digitizationFlags.rndmSvc() )
-    streamName = kwargs.setdefault("RandomStreamName", "FastTRTDigitization")
-    # set rndm seeds
-    if not digitizationFlags.rndmSeedList.checkForExistingSeed(streamName):
-        digitizationFlags.rndmSeedList.addSeed(streamName, 45123, 94345 )
+
+    kwargs.setdefault("RandomStreamName", "FastTRTDigitization")
 
     from Digitization.DigitizationFlags import digitizationFlags
     if digitizationFlags.doXingByXingPileUp():

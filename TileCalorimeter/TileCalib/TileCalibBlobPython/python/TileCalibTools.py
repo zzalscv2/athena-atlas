@@ -16,7 +16,7 @@ from __future__ import print_function
 
 import cx_Oracle # noqa: F401
 from PyCool import cool
-import datetime, time, re, sys, os
+import datetime, time, re, os
 try:
     # For Python 3.0 and later
     from urllib.request import urlopen
@@ -25,14 +25,10 @@ except ImportError:
     from urllib2 import urlopen
 import cppyy
 import six
-#sys.path.append('/afs/cern.ch/user/a/atlcond/utils/python/')
-sys.path.append('/afs/cern.ch/user/t/tilebeam/offline/utils/python/')
 
 from TileCalibBlobObjs.Classes import TileCalibUtils, TileCalibDrawerCmt, \
      TileCalibDrawerInt, TileCalibDrawerOfc, TileCalibDrawerBch, \
      TileCalibDrawerFlt, TileCalibType
-
-from AtlCoolBKLib import resolveAlias
 
 #=== get a logger
 from TileCalibBlobPython.TileCalibLogger import TileCalibLogger, getLogger
@@ -65,8 +61,8 @@ def getLastRunNumber():
     """
 
     urls = ["http://atlas-service-db-runlist.web.cern.ch/atlas-service-db-runlist/cgi-bin/latestRun.py",
-            "http://pcata007.cern.ch/commissioning/getLastRunNumber.py",
-            "http://pcata007.cern.ch/commissioning/RunStat/latestRun"]
+            "http://pcata007.cern.ch/cgi-bin/getLastRunNumber.py",
+            "http://pcata007.cern.ch/latestRun"]
 
     run=0
     for url in urls:
@@ -92,20 +88,66 @@ def getPromptCalibRunNumber():
 
     promptCalibRuns = []
 
-    fin = open("/afs/cern.ch/user/a/atlcond/scratch0/nemo/prod/web/calibruns.txt","r").read().split()
+    try:
+        fin = open("/afs/cern.ch/user/a/atlcond/scratch0/nemo/prod/web/calibruns.txt","r").read().split()
+        for line in fin:
+            try:
+                if line:
+                    promptCalibRuns.append( int(line) )
+            except ValueError:
+                pass
+    except Exception:
+        promptCalibRuns=[]
 
-    for line in fin:
-        try:
-            if line:
-                promptCalibRuns.append( int(line) )
-        except ValueError:
-            pass
+    if len(promptCalibRuns)==0:
+
+        urls = ["http://pcata007.cern.ch/cgi-bin/getBulkRunNumber.py",
+                "http://pcata007.cern.ch/latestRun"]
+
+        run=0
+        for url in urls:
+            try:
+                for line in urlopen(url).readlines():
+                    r=line.strip()
+                    if r.isdigit():
+                        run=int(r)
+                        break
+                if run>0:
+                    promptCalibRuns=[run]
+                    break
+            except Exception:
+                continue
 
     if len(promptCalibRuns) >= 1:
         promptCalibRuns.sort()
         return promptCalibRuns[0]
     else:
         return getLastRunNumber()
+
+#
+#______________________________________________________________________
+def getAliasFromFile(aliastype='Current'):
+    """
+    Return name of top-level tag for 'Current' or 'CurrentES' or 'Next' or 'NextES' aliases
+    """
+
+    aliasfolder = '/afs/cern.ch/atlas/conditions/poolcond/buffer/BestKnowledge'
+    try:
+        falias = open('%s/%s' % (aliasfolder, aliastype))
+        alias = falias.readline()
+        falias.close()
+        return alias.replace('\n','').replace('*','')
+    except Exception:
+        import os
+        aliasfolder = os.getcwd()+'/BestKnowledge'
+        print("Looking for %s in %s" % (aliastype,aliasfolder))
+        try:
+            falias = open('%s/%s' % (aliasfolder, aliastype))
+            alias = falias.readline()
+            falias.close()
+            return alias.replace('\n','').replace('*','')
+        except Exception:
+            return aliastype.upper()
 
 #
 #______________________________________________________________________
@@ -349,16 +391,16 @@ def getFolderTag(db, folderPath, globalTag):
                     log.info("Using RUN1 global tag \'%s\'", globalTag)
         if schema == 'COOLOFL_TILE/CONDBR2':
             if globalTag=='CURRENT' or globalTag=='UPD4' or globalTag=='':
-                globalTag=resolveAlias.getCurrent()
+                globalTag=getAliasFromFile('Current')
                 log.info("Resolved CURRENT globalTag to \'%s\'", globalTag)
             elif globalTag=='CURRENTES' or globalTag=='UPD1':
-                globalTag=resolveAlias.getCurrentES()
+                globalTag=getAliasFromFile('CurrentES')
                 log.info("Resolved CURRENT ES globalTag to \'%s\'", globalTag)
             elif globalTag=='NEXT':
-                globalTag=resolveAlias.getNext()
+                globalTag=getAliasFromFile('Next')
                 log.info("Resolved NEXT globalTag to \'%s\'", globalTag)
             elif globalTag=='NEXTES':
-                globalTag=resolveAlias.getNextES()
+                globalTag=getAliasFromFile('NextES')
                 log.info("Resolved NEXT ES globalTag to \'%s\'", globalTag)
         globalTag=globalTag.replace('*','')
         if 'UPD1' in globalTag or 'UPD4' in globalTag or 'COND' not in globalTag:

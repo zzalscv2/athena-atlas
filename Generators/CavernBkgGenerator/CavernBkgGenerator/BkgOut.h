@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BkgOut_h
@@ -54,15 +54,15 @@ private:
   int  m_dummy;
   float  m_realdummy;
 
-  static BKGOUT* s_bkgout;
+  static BKGOUT* bkgout();
 };
 
-// set pointer to zero at start
-BkgOut::BKGOUT* BkgOut::s_bkgout =0;
-
-inline void
-BkgOut::init(void)
-{ if (!s_bkgout) s_bkgout = static_cast<BKGOUT*>(bkgout_address_()); }
+inline
+BkgOut::BKGOUT* BkgOut::bkgout()
+{
+  static BKGOUT* ptr = static_cast<BKGOUT*>(bkgout_address_());
+  return ptr;
+}
 
 // Constructor
 inline
@@ -78,77 +78,66 @@ BkgOut::~BkgOut()
 
 inline int&
 BkgOut::ievent   (void) {
-  init();
-  return s_bkgout->ievent;
+  return bkgout()->ievent;
 }
 
 inline int&
 BkgOut::npv   (void) {
-  init();
-  return s_bkgout->npv;
+  return bkgout()->npv;
 }
 
 inline float&
 BkgOut::vx	(int i) {
-  init(); // check COMMON is initialized
   if( i < 1 || i > lenI()  ) return m_realdummy;
-  return s_bkgout->vx[i-1];
+  return bkgout()->vx[i-1];
 }
 
 inline float&
 BkgOut::vy	(int i) {
-  init(); // check COMMON is initialized
   if( i < 1 || i > lenI()  ) return m_realdummy;
-  return s_bkgout->vy[i-1];
+  return bkgout()->vy[i-1];
 }
 
 inline float&
 BkgOut::vz	(int i) {
-  init(); // check COMMON is initialized
   if( i < 1 || i > lenI()  ) return m_realdummy;
-  return s_bkgout->vz[i-1];
+  return bkgout()->vz[i-1];
 }
 
 inline float&
 BkgOut::px	(int i) {
-  init(); // check COMMON is initialized
   if( i < 1 || i > lenI()  ) return m_realdummy;
-  return s_bkgout->px[i-1];
+  return bkgout()->px[i-1];
 }
 
 inline float&
 BkgOut::py	(int i) {
-  init(); // check COMMON is initialized
   if( i < 1 || i > lenI()  ) return m_realdummy;
-  return s_bkgout->py[i-1];
+  return bkgout()->py[i-1];
 }
 
 inline float&
 BkgOut::pz	(int i) {
-  init(); // check COMMON is initialized
   if( i < 1 || i > lenI()  ) return m_realdummy;
-  return s_bkgout->pz[i-1];
+  return bkgout()->pz[i-1];
 }
 
 inline float&
 BkgOut::ptof	(int i) {
-  init(); // check COMMON is initialized
   if( i < 1 || i > lenI()  ) return m_realdummy;
-  return s_bkgout->ptof[i-1];
+  return bkgout()->ptof[i-1];
 }
 
 inline int&
 BkgOut::irp	(int i) {
-  init(); // check COMMON is initialized
   if( i < 1 || i > lenI()  ) return m_dummy;
-  return s_bkgout->irp[i-1];
+  return bkgout()->irp[i-1];
 }
 
 inline int&
 BkgOut::ityp	(int i) {
-  init(); // check COMMON is initialized
   if( i < 1 || i > lenI()  ) return m_dummy;
-  return s_bkgout->ityp[i-1];
+  return bkgout()->ityp[i-1];
 }
 
 #endif

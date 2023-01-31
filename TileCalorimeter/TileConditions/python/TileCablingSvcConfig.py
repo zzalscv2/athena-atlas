@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile cabling service"""
 
@@ -12,7 +12,7 @@ def TileCablingSvcCfg(flags):
     """Return component accumulator with configured Tile cabling service
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     from AthenaCommon.Logging import logging
@@ -75,7 +75,7 @@ def TileCablingSvcCfg(flags):
 if __name__ == "__main__":
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -83,11 +83,12 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.lock()
 
     acc = ComponentAccumulator()
-    acc.merge( TileCablingSvcCfg(ConfigFlags) )
+    acc.merge( TileCablingSvcCfg(flags) )
 
     acc.printConfig(withDetails = True, summariseProps = True)
     print(acc.getService('TileCablingSvc'))

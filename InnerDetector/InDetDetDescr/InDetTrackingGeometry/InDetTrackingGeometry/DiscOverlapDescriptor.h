@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -23,34 +23,34 @@
 #ifndef INDETTRACKINGGEOMETRY_DISCDETADDNEXTPHIETA
 #define INDETTRACKINGGEOMETRY_DISCDETADDNEXTPHIETA
 
-#define addSurfaceDO(cur, surfaces)                                            \
-  surfaces.emplace_back(Trk::SurfaceIntersection(                              \
-    Trk::Intersection(Amg::Vector3D(0., 0., 0.), 0., true),                    \
-    &(cur->surface(cur->identify()))))
+#define addSurfaceDO(cur, surfaces)                           \
+  surfaces.emplace_back(                                      \
+      Trk::Intersection(Amg::Vector3D(0., 0., 0.), 0., true), \
+      &(cur->surface(cur->identify())))
 
-#define addOtherSideDO(cur, surfaces)                                          \
-  if (cur->otherSide())                                                        \
-  surfaces.emplace_back(Trk::SurfaceIntersection(                              \
-    Trk::Intersection(Amg::Vector3D(0., 0., 0.), 0., true),                    \
-    &(cur->otherSide()->surface(cur->otherSide()->identify()))))
+#define addOtherSideDO(cur, surfaces)                         \
+  if (cur->otherSide())                                       \
+  surfaces.emplace_back(                                      \
+      Trk::Intersection(Amg::Vector3D(0., 0., 0.), 0., true), \
+      &(cur->otherSide()->surface(cur->otherSide()->identify())))
 
-#define addNextInPhiDO(cur, surfaces)                                          \
-  addSurfaceDO(cur->nextInPhi(), surfaces);                                    \
+#define addNextInPhiDO(cur, surfaces)       \
+  addSurfaceDO(cur->nextInPhi(), surfaces); \
   addOtherSideDO(cur->nextInPhi(), surfaces)
 
-#define addPrevInPhiDO(cur, surfaces)                                          \
-  addSurfaceDO(cur->prevInPhi(), surfaces);                                    \
+#define addPrevInPhiDO(cur, surfaces)       \
+  addSurfaceDO(cur->prevInPhi(), surfaces); \
   addOtherSideDO(cur->prevInPhi(), surfaces)
 
-#define addNextInEtaDO(cur, surfaces)                                          \
-  addSurfaceDO(cur->nextInEta(), surfaces);                                    \
+#define addNextInEtaDO(cur, surfaces)       \
+  addSurfaceDO(cur->nextInEta(), surfaces); \
   addOtherSideDO(cur->nextInEta(), surfaces)
 
-#define addPrevInEtaDO(cur, surfaces)                                          \
-  addSurfaceDO(cur->prevInEta(), surfaces);                                    \
+#define addPrevInEtaDO(cur, surfaces)       \
+  addSurfaceDO(cur->prevInEta(), surfaces); \
   addOtherSideDO(cur->prevInEta(), surfaces)
 
-#endif // INDETTRACKINGGEOMETRY_DISCDETADDNEXTPHIETA
+#endif  // INDETTRACKINGGEOMETRY_DISCDETADDNEXTPHIETA
 
 class SCT_ID;
 class PixelID;

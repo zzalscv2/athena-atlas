@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// InputConverter.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_INPUTCONVERTER_H
 #define ISF_INPUTCONVERTER_H 1
@@ -67,7 +63,7 @@ namespace ISF {
 
     /** Convert selected particles from the given McEventCollection into ISFParticles
         and push them into the given ISFParticleContainer */
-    virtual StatusCode convert(const McEventCollection& inputGenEvents,
+    virtual StatusCode convert(McEventCollection& inputGenEvents,
                                ISF::ISFParticleContainer& simParticles,
                                EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const override final;
 
@@ -77,21 +73,21 @@ namespace ISF {
                                              EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const override final;
 
     /** Converts vector of ISF::ISFParticles to G4Event */
-    G4Event* ISF_to_G4Event(const std::vector<const ISF::ISFParticle*>& isp, HepMC::GenEvent *genEvent, bool useHepMC=false) const override final;
+    G4Event* ISF_to_G4Event(const std::vector<ISF::ISFParticle*>& isp, HepMC::GenEvent *genEvent, bool useHepMC=false) const override final;
 
   private:
 
     const G4ParticleDefinition* getG4ParticleDefinition(int pdgcode) const;
 
 #ifdef HEPMC3
-    G4PrimaryParticle* getG4PrimaryParticle(HepMC::ConstGenParticlePtr gp) const;
+    G4PrimaryParticle* getG4PrimaryParticle(HepMC::GenParticlePtr gp) const;
 #else
-    G4PrimaryParticle* getG4PrimaryParticle(const HepMC::GenParticle& gp) const;
+    G4PrimaryParticle* getG4PrimaryParticle(HepMC::GenParticle& gp) const;
 #endif
 
-    G4PrimaryParticle* getG4PrimaryParticle(const ISF::ISFParticle& isp, bool useHepMC) const;
+    G4PrimaryParticle* getG4PrimaryParticle(ISF::ISFParticle& isp, bool useHepMC) const;
 
-    void addG4PrimaryVertex(G4Event* g4evt, const ISF::ISFParticle& isp, bool useHepMC) const;
+    void addG4PrimaryVertex(G4Event* g4evt, ISF::ISFParticle& isp, bool useHepMC) const;
 
     /** Tests whether the given ISFParticle is within the Geant4 world volume */
     bool isInsideG4WorldVolume(const ISF::ISFParticle& isp, const G4VSolid* worldSolid) const;
@@ -105,9 +101,9 @@ namespace ISF {
 
     /** get all generator particles which pass filters */
 #ifdef HEPMC3
-    std::vector<HepMC::ConstGenParticlePtr > getSelectedParticles(const HepMC::GenEvent& evnt, bool legacyOrdering=false) const;
+    std::vector<HepMC::GenParticlePtr > getSelectedParticles(HepMC::GenEvent& evnt, bool legacyOrdering=false) const;
 #else
-    std::vector<HepMC::GenParticlePtr > getSelectedParticles(const HepMC::GenEvent& evnt, bool legacyOrdering=false) const;
+    std::vector<HepMC::GenParticlePtr > getSelectedParticles(HepMC::GenEvent& evnt, bool legacyOrdering=false) const;
 #endif
 
     /** check if the given particle passes all filters */
@@ -118,11 +114,7 @@ namespace ISF {
 #endif
 
     /** convert GenParticle to ISFParticle */
-#ifdef HEPMC3
-    ISF::ISFParticle* convertParticle(HepMC::ConstGenParticlePtr genPartPtr, EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const;
-#else
     ISF::ISFParticle* convertParticle(HepMC::GenParticlePtr genPartPtr, EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const;
-#endif
 
     /** ParticlePropertyService and ParticleDataTable */
     ServiceHandle<IPartPropSvc>           m_particlePropSvc;          //!< particle properties svc to retrieve PDT

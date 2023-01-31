@@ -54,7 +54,7 @@ namespace Belle2 {
          getDaug(2) != EvtPDL::getId("K-"))) {
       std::cout << "ERROR: Invalid decay" << std::endl;
       std::cout << "USAGE: K_S0 K+ K-" << std::endl;
-      exit(1);
+      std::abort();
     }
 
     m_a_f0ks_ =
@@ -144,8 +144,8 @@ namespace Belle2 {
   void EvtB0toKsKK::decay(EvtParticle* p)
   {
     // Btag
-    static EvtId B0  = EvtPDL::getId("B0");
-    static EvtId B0B = EvtPDL::getId("anti-B0");
+    static const EvtId B0  = EvtPDL::getId("B0");
+    static const EvtId B0B = EvtPDL::getId("anti-B0");
 
     double t;
     EvtId other_b;
@@ -489,7 +489,7 @@ namespace Belle2 {
       bwbf = sqrt(13.0 * z * z / (((z - 3.0) * (z - 3.0)) + (9.0 * z)));
     if (L > 2) {
       std::cout << "ERROR: BWBF not implemented for L>2" << std::endl;
-      exit(1);
+      std::abort();
     }
     return bwbf;
   }
@@ -511,7 +511,7 @@ namespace Belle2 {
       bwbf = sqrt((((z0 - 3.0) * (z0 - 3.0)) + (9.0 * z0)) / (((z - 3.0) * (z - 3.0)) + (9.0 * z)));
     if (L > 2) {
       std::cout << "ERROR: BWBF not implemented for L>2" << std::endl;
-      exit(1);
+      std::abort();
     }
     return bwbf;
   }
@@ -617,8 +617,8 @@ namespace Belle2 {
     const double g_pipi = 0.165;
     const double g_kk = 4.21 * g_pipi;
 
-    static EvtId pip = EvtPDL::getId("pi+");
-    static EvtId kp  = EvtPDL::getId("K+");
+    static const EvtId pip = EvtPDL::getId("pi+");
+    static const EvtId kp  = EvtPDL::getId("K+");
 
     const double s = m * m;
     const double s0 = m0 * m0;
@@ -638,7 +638,7 @@ namespace Belle2 {
                                  const EvtVector4R& p4kp,
                                  const EvtVector4R& p4km)
   {
-    static EvtId f0 = EvtPDL::getId("f_0");
+    static const EvtId f0 = EvtPDL::getId("f_0");
 
     const double f0_m = EvtPDL::getMeanMass(f0);
 
@@ -694,7 +694,7 @@ namespace Belle2 {
                                   const EvtVector4R& p4kp,
                                   const EvtVector4R& p4km)
   {
-    static EvtId phi = EvtPDL::getId("phi");
+    static const EvtId phi = EvtPDL::getId("phi");
 
     const double phi_m = EvtPDL::getMeanMass(phi);
     const double phi_w = EvtPDL::getWidth(phi);
@@ -769,7 +769,7 @@ namespace Belle2 {
                                  const EvtVector4R& p4kp,
                                  const EvtVector4R& p4km)
   {
-    static EvtId fx = EvtPDL::getId("f_0(1500)");
+    static const EvtId fx = EvtPDL::getId("f_0(1500)");
 
     const double fx_m = EvtPDL::getMeanMass(fx);
     const double fx_w = EvtPDL::getWidth(fx);
@@ -799,7 +799,7 @@ namespace Belle2 {
                                     const EvtVector4R& p4kp,
                                     const EvtVector4R& p4km)
   {
-    static EvtId chic0 = EvtPDL::getId("chi_c0");
+    static const EvtId chic0 = EvtPDL::getId("chi_c0");
 
     const double chic0_m = EvtPDL::getMeanMass(chic0);
     const double chic0_w = EvtPDL::getWidth(chic0);

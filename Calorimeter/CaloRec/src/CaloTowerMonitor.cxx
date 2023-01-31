@@ -240,8 +240,6 @@ StatusCode CaloTowerMonitor::initialize()
 StatusCode CaloTowerMonitor::execute()
 {
   const EventContext& ctx = getContext();
-  // constant
-  //  double mathPi = 2. * asin(1.);
   // retrieve data container
   for (const SG::ReadHandleKey<CaloTowerContainer>& k : m_collectionNames) {
     // pointer to tower container

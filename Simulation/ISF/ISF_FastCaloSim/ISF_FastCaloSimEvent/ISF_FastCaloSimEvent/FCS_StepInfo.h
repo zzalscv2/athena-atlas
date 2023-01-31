@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_ISF_FCS_STEPINFO_H
@@ -45,7 +45,12 @@ namespace ISF_FCS_Parametrization {
     //! empty default constructor
     FCS_StepInfo(): m_pos(), m_valid(false), m_detector(-1) {}
 
-    FCS_StepInfo(CLHEP::Hep3Vector l_vec, Identifier l_cell, double l_energy, double l_time, bool l_valid, int l_detector): TileHit(l_cell,l_energy, l_time) { m_pos = l_vec; m_valid = l_valid, m_detector = l_detector; }
+    FCS_StepInfo(CLHEP::Hep3Vector l_vec, Identifier l_cell, double l_energy, double l_time, bool l_valid, int l_detector):
+      TileHit(l_cell,l_energy, l_time),
+      m_pos (l_vec),
+      m_valid (l_valid),
+      m_detector (l_detector)
+    { }
 
     //FCS_StepInfo(const FCS_StepInfo& first, const FCS_StepInfo& second);
 

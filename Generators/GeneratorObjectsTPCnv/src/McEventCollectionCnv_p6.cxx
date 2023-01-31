@@ -51,8 +51,7 @@ McEventCollectionCnv_p6::operator=( const McEventCollectionCnv_p6& rhs )
 ///////////////////////////////////////////////////////////////////
 
 McEventCollectionCnv_p6::~McEventCollectionCnv_p6()
-{
-}
+= default;
 
 
 void McEventCollectionCnv_p6::persToTrans( const McEventCollection_p6* persObj,
@@ -89,7 +88,7 @@ void McEventCollectionCnv_p6::persToTrans( const McEventCollection_p6* persObj,
         itr != itrEnd;
         ++itr ) {
     const GenEvent_p6& persEvt = *itr;
-    HepMC::GenEvent * genEvt(0);
+    HepMC::GenEvent * genEvt(nullptr);
     if(m_isPileup) {
       genEvt = new HepMC::GenEvent();
     } else {
@@ -197,10 +196,10 @@ void McEventCollectionCnv_p6::persToTrans( const McEventCollection_p6* persObj,
     }
 
     // connect particles to their end vertices
-    for ( ParticlesMap_t::iterator p = partToEndVtx.begin(), endItr = partToEndVtx.end(); p != endItr; ++p ) {
-      if ( brc_to_vertex.count(p->second) ) {
-        auto decayVtx = brc_to_vertex[p->second];
-        decayVtx->add_particle_in( p->first );
+    for (auto & p : partToEndVtx) {
+      if ( brc_to_vertex.count(p.second) ) {
+        auto decayVtx = brc_to_vertex[p.second];
+        decayVtx->add_particle_in( p.first );
       } else {
         msg << MSG::ERROR << "GenParticle points to null end vertex !!" << endmsg;
       }
@@ -345,8 +344,6 @@ void McEventCollectionCnv_p6::persToTrans( const McEventCollection_p6* persObj,
 
   msg << MSG::DEBUG << "Loaded McEventCollection from persistent state [OK]"
       << endmsg;
-
-  return;
 }
 
 void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
@@ -392,7 +389,7 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
       auto A_random_states=genEvt->attribute<HepMC3::VectorLongIntAttribute>("random_states");
       auto beams=genEvt->beams();
       persObj->m_genEvents.
-      push_back( GenEvent_p6(A_signal_process_id?(A_signal_process_id->value()):-1,
+      emplace_back(A_signal_process_id?(A_signal_process_id->value()):-1,
                               genEvt->event_number(),
                               A_mpi?(A_mpi->value()):-1,
                               A_event_scale?(A_event_scale->value()):0.0,
@@ -400,7 +397,7 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
                               A_alphaQED?(A_alphaQED->value()):0.0,
                               A_filterWeight?(A_filterWeight->value()):1.0,
                               signal_process_vertex?HepMC::barcode(signal_process_vertex):0,
-                              beams.size()>0?HepMC::barcode(beams[0]):0,
+                              !beams.empty()?HepMC::barcode(beams[0]):0,
                               beams.size()>1?HepMC::barcode(beams[1]):0,
                               genEvt->weights(),
                               A_random_states?(A_random_states->value()):std::vector<long>(),
@@ -412,7 +409,7 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
                               nPersVtx,
                               nPersVtx + genEvt->vertices().size(),
                               nPersParts,
-                              nPersParts + genEvt->particles().size() ) );
+                              nPersParts + genEvt->particles().size() );
     {
      GenEvent_p6& persEvt = persObj->m_genEvents.back();
      std::map< std::string, std::map<int, std::shared_ptr<HepMC3::Attribute> > > e_atts = genEvt->attributes();
@@ -502,7 +499,7 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
     }
 
     // create vertices
-    for (auto v: genEvt->vertices()) {
+    for (const auto& v: genEvt->vertices()) {
       writeGenVertex( v, *persObj );
     }
 #else
@@ -600,7 +597,6 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
   } //> end loop over GenEvents
 
   msg << MSG::DEBUG << "Created persistent state of HepMC::GenEvent [OK]" << endmsg;
-  return;
 }
 
 
@@ -622,7 +618,9 @@ McEventCollectionCnv_p6::createGenVertex( const McEventCollection_p6& persEvt,
   vtx->set_position(HepMC::FourVector( persVtx.m_x , persVtx.m_y , persVtx.m_z ,persVtx.m_t ));
   //AV ID cannot be assigned in HepMC3. And its meaning in HepMC2 is not clear.
   vtx->set_status(persVtx.m_id);
-  vtx->add_attribute("weights",std::make_shared<HepMC3::VectorFloatAttribute>(persVtx.m_weights));
+  // cast from std::vector<float> to std::vector<double>
+  std::vector<double> weights( persVtx.m_weights.begin(), persVtx.m_weights.end() );
+  vtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
   HepMC::suggest_barcode (vtx, persVtx.m_barcode);
   // handle the in-going (orphans) particles
   const unsigned int nPartsIn = persVtx.m_particlesIn.size();
@@ -671,7 +669,7 @@ McEventCollectionCnv_p6::createGenVertex( const McEventCollection_p6& persEvt,
 
 HepMC::GenParticlePtr
 McEventCollectionCnv_p6::createGenParticle( const GenParticle_p6& persPart,
-                                            ParticlesMap_t& partToEndVtx, HepMC::DataPool& datapools ,HepMC::GenVertexPtr parent, bool add_to_output ) const
+                                            ParticlesMap_t& partToEndVtx, HepMC::DataPool& datapools ,const HepMC::GenVertexPtr& parent, bool add_to_output ) const
 {
   HepMC::GenParticlePtr p(nullptr);
     if (m_isPileup) {
@@ -777,42 +775,41 @@ McEventCollectionCnv_p6::createGenParticle( const GenParticle_p6& persPart,
 }
 
 #ifdef HEPMC3
-void McEventCollectionCnv_p6::writeGenVertex( HepMC::ConstGenVertexPtr vtx,
-                                              McEventCollection_p6& persEvt ) const
+void McEventCollectionCnv_p6::writeGenVertex( const HepMC::ConstGenVertexPtr& vtx,
+                                              McEventCollection_p6& persEvt ) 
 {
   const HepMC::FourVector& position = vtx->position();
-  auto A_weights=vtx->attribute<HepMC3::VectorFloatAttribute>("weights");
+  auto A_weights=vtx->attribute<HepMC3::VectorDoubleAttribute>("weights");
   auto A_barcode=vtx->attribute<HepMC3::IntAttribute>("barcode");
   std::vector<float> weights;
   if (A_weights) {
-    weights = A_weights->value();
+    auto weights_d = A_weights->value();
+    for (auto& w: weights_d) weights.push_back(w); 
   }
-  persEvt.m_genVertices.push_back(
-                                  GenVertex_p6( position.x(),
+  persEvt.m_genVertices.emplace_back( position.x(),
                                                 position.y(),
                                                 position.z(),
                                                 position.t(),
                                                 vtx->status(),
                                                 weights.begin(),
                                                 weights.end(),
-                                                A_barcode?(A_barcode->value()):vtx->id()) );
+                                                A_barcode?(A_barcode->value()):vtx->id() );
   GenVertex_p6& persVtx = persEvt.m_genVertices.back();
 
   // we write only the orphans in-coming particles and beams
   persVtx.m_particlesIn.reserve(vtx->particles_in().size());
-  for (auto p: vtx->particles_in()) {
+  for (const auto& p: vtx->particles_in()) {
     if ( !p->production_vertex() || p->production_vertex()->id() == 0 ) {
       persVtx.m_particlesIn.push_back( writeGenParticle( p, persEvt ) );
     }
   }
 
   persVtx.m_particlesOut.reserve(vtx->particles_out().size());
-  for (auto p: vtx->particles_out()) {
+  for (const auto& p: vtx->particles_out()) {
     persVtx.m_particlesOut.push_back( writeGenParticle( p, persEvt ) );
   }
 
-  return;
-}
+  }
 #else
 void McEventCollectionCnv_p6::writeGenVertex( const HepMC::GenVertex& vtx,
                                               McEventCollection_p6& persEvt ) const
@@ -853,8 +850,8 @@ void McEventCollectionCnv_p6::writeGenVertex( const HepMC::GenVertex& vtx,
 #endif
 
 #ifdef HEPMC3
-int McEventCollectionCnv_p6::writeGenParticle( HepMC::ConstGenParticlePtr p,
-                                               McEventCollection_p6& persEvt ) const
+int McEventCollectionCnv_p6::writeGenParticle( const HepMC::ConstGenParticlePtr& p,
+                                               McEventCollection_p6& persEvt ) 
 {
   const HepMC::FourVector mom = p->momentum();
   const double ene = mom.e();
@@ -870,7 +867,7 @@ int McEventCollectionCnv_p6::writeGenParticle( HepMC::ConstGenParticlePtr p,
 
   const short recoMethod = ( !useP2M2 ? 0: ( ene >= 0.? 1: 2 ) );
   persEvt.m_genParticles.
-    push_back( GenParticle_p6( mom.px(),
+    emplace_back( mom.px(),
                                mom.py(),
                                mom.pz(),
                                mom.m(),
@@ -883,7 +880,7 @@ int McEventCollectionCnv_p6::writeGenParticle( HepMC::ConstGenParticlePtr p,
                                p->end_vertex()? HepMC::barcode(p->end_vertex()):0,
                                HepMC::barcode(p),
                                p->generated_mass(),
-                               recoMethod ) );
+                               recoMethod );
 
   std::vector< std::pair<int,int> > flow_hepmc2;
   if(A_flows) flow_hepmc2=vector_to_vector_int_int(A_flows->value());

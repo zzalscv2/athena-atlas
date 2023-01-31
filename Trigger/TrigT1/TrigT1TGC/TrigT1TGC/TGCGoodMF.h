@@ -5,35 +5,38 @@
 #ifndef TGCGoodMF_h
 #define TGCGoodMF_h
 
+#include "AthenaBaseComps/AthMessaging.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
 #include <map>
 
 namespace LVL1TGCTrigger {
-
 class TGCArguments;
+}
 
-class TGCGoodMF {
-public:
-  TGCGoodMF(TGCArguments*,const std::string& version);
-  ~TGCGoodMF() = default;
+namespace LVL1TGC {
 
-  TGCGoodMF(const TGCGoodMF& right);
+class TGCGoodMF : public AthMessaging {
+ public:
+  TGCGoodMF(LVL1TGCTrigger::TGCArguments*,const std::string& version);
+  virtual ~TGCGoodMF() = default;
+
+  TGCGoodMF(const TGCGoodMF& right) = delete;
   const TGCGoodMF& operator=(const TGCGoodMF& right);
 
   bool test_GoodMF(int moduleId, int sscId, int subsector) const;
   bool readBadMFList();
 
-  const TGCArguments* tgcArgs() const { return m_tgcArgs; }
+  const LVL1TGCTrigger::TGCArguments* tgcArgs() const { return m_tgcArgs; }
 
-private:
+ private:
   std::map<int, std::map<int,int> > m_mapisgoodMF; //Number of moduleId
-  TGCArguments* m_tgcArgs;
+  LVL1TGCTrigger::TGCArguments* m_tgcArgs;
   std::string m_verName;
 
 };
 
-} //end of namespace bracket
+}  // end of namespace
 
 #endif // TGCGoodMF_h

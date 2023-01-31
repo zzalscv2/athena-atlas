@@ -4,8 +4,6 @@
 #include <algorithm>
 #include <regex>
 
-#include<boost/algorithm/string.hpp>
-
 #include "GaudiKernel/IIncidentSvc.h"
 #include "Gaudi/Property.h"
 #include "AthenaInterprocess/Incidents.h"
@@ -98,7 +96,7 @@ StatusCode TrigSignatureMoni::start() {
   if ( x > 0 ){
     std::string outputRateName ("Rate" + std::to_string(m_duration) + "s");
     m_rateHistogram.init(outputRateName, "Rate of positive decisions;chain;step",
-                         x, yr, m_bookingPath + "/" + name() + '/' + outputRateName.c_str(), m_histSvc).ignore();
+                         x, yr, m_bookingPath + "/" + name() + '/' + outputRateName, m_histSvc).ignore();
     ATH_CHECK(initHist(m_rateHistogram.getHistogram(), hltMenuHandle, false));
     ATH_CHECK(initHist(m_rateHistogram.getBuffer(), hltMenuHandle, false));
   }
@@ -114,7 +112,7 @@ StatusCode TrigSignatureMoni::start() {
   if (xc > 0){
     std::string outputSequenceName ("SequencesExecutionRate" + std::to_string(m_duration) + "s");
     m_sequenceHistogram.init(outputSequenceName, "Rate of sequences execution;sequence;rate",
-                             xc, yc, m_bookingPath + "/" + name() + '/' + outputSequenceName.c_str(), m_histSvc).ignore();
+                             xc, yc, m_bookingPath + "/" + name() + '/' + outputSequenceName, m_histSvc).ignore();
     ATH_CHECK(initSeqHist(m_sequenceHistogram.getHistogram(), sequencesSet));
     ATH_CHECK(initSeqHist(m_sequenceHistogram.getBuffer(), sequencesSet));
   }
@@ -532,7 +530,7 @@ void TrigSignatureMoni::RateHistogram::fill(const double x, const double y) cons
 void TrigSignatureMoni::RateHistogram::startTimer(unsigned int duration, unsigned int intervals) {
   m_duration = duration;
   m_timeDivider = std::make_unique<TimeDivider>(intervals, duration, TimeDivider::seconds);
-  m_timer = std::make_unique<Athena::AlgorithmTimer>(duration*50, boost::bind(&RateHistogram::callback, this), Athena::AlgorithmTimer::DELIVERYBYTHREAD);
+  m_timer = std::make_unique<Athena::AlgorithmTimer>(duration*50, std::bind(&RateHistogram::callback, this));
 }
 
 void TrigSignatureMoni::RateHistogram::stopTimer() {

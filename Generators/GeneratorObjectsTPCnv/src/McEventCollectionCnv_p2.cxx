@@ -26,9 +26,9 @@ McEventCollectionCnv_p2::McEventCollectionCnv_p2() :
   Base_t( )
 {}
 
-McEventCollectionCnv_p2::McEventCollectionCnv_p2( const McEventCollectionCnv_p2& rhs ) :
-  Base_t( rhs )
-{}
+McEventCollectionCnv_p2::McEventCollectionCnv_p2( const McEventCollectionCnv_p2& rhs ) 
+  
+= default;
 
 McEventCollectionCnv_p2&
 McEventCollectionCnv_p2::operator=( const McEventCollectionCnv_p2& rhs )
@@ -44,8 +44,7 @@ McEventCollectionCnv_p2::operator=( const McEventCollectionCnv_p2& rhs )
 ///////////////////////////////////////////////////////////////////
 
 McEventCollectionCnv_p2::~McEventCollectionCnv_p2()
-{
-}
+= default;
 
 
 void McEventCollectionCnv_p2::persToTrans( const McEventCollection_p2* persObj,
@@ -106,7 +105,7 @@ void McEventCollectionCnv_p2::persToTrans( const McEventCollection_p2* persObj,
     if ( sigProcVtx ) HepMC::set_signal_process_vertex(genEvt, HepMC::barcode_to_vertex(genEvt, sigProcVtx ) );
 
     // connect particles to their end vertices
-    for ( auto p:  partToEndVtx) {
+    for ( const auto& p:  partToEndVtx) {
       auto decayVtx = HepMC::barcode_to_vertex(genEvt, p.second );
       if ( decayVtx ) {
         decayVtx->add_particle_in( p.first );
@@ -170,8 +169,6 @@ void McEventCollectionCnv_p2::persToTrans( const McEventCollection_p2* persObj,
 
   msg << MSG::DEBUG << "Loaded McEventCollection from persistent state [OK]"
       << endmsg;
-
-  return;
 }
 
 void McEventCollectionCnv_p2::transToPers( const McEventCollection*,
@@ -188,21 +185,22 @@ void McEventCollectionCnv_p2::transToPers( const McEventCollection*,
       << endmsg;
 
   throw std::runtime_error( "Retired McEventCollectionCnv_p2::transToPers() !!" );
-  return;
 }
 
 
 HepMC::GenVertexPtr
 McEventCollectionCnv_p2::createGenVertex( const McEventCollection_p2& persEvt,
                                           const GenVertex_p2& persVtx,
-                                          ParticlesMap_t& partToEndVtx, HepMC::DataPool& datapools, HepMC::GenEvent* parent ) const
+                                          ParticlesMap_t& partToEndVtx, HepMC::DataPool& datapools, HepMC::GenEvent* parent ) 
 {
   HepMC::GenVertexPtr vtx = datapools.getGenVertex();
   if (parent) parent->add_vertex(vtx);
 #ifdef HEPMC3
   vtx->set_position( HepMC::FourVector(persVtx.m_x,persVtx.m_y, persVtx.m_z, persVtx.m_t) );
   vtx->set_status(persVtx.m_id);
-  vtx->add_attribute("weights",std::make_shared<HepMC3::VectorFloatAttribute>(persVtx.m_weights));
+  // cast from std::vector<float> to std::vector<double>
+  std::vector<double> weights( persVtx.m_weights.begin(), persVtx.m_weights.end() );
+  vtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
   HepMC::suggest_barcode(vtx,persVtx.m_barcode);
 
   // handle the in-going (orphans) particles
@@ -252,7 +250,7 @@ McEventCollectionCnv_p2::createGenVertex( const McEventCollection_p2& persEvt,
 
 HepMC::GenParticlePtr
 McEventCollectionCnv_p2::createGenParticle( const GenParticle_p2& persPart,
-                                            ParticlesMap_t& partToEndVtx, HepMC::DataPool& datapools, HepMC::GenVertexPtr parent ) const
+                                            ParticlesMap_t& partToEndVtx, HepMC::DataPool& datapools, const HepMC::GenVertexPtr& parent ) 
 {
   HepMC::GenParticlePtr p    = datapools.getGenParticle();
 

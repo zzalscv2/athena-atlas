@@ -246,69 +246,25 @@ StatusCode SmoothedWZTagger::tag( const xAOD::Jet& jet ) const {
     /// Decorate values
     decCutNtrk(jet) = cut_ntrk;
 
-    /// Get the primary vertex
-    bool validVtx = false;
-    const xAOD::Vertex* primaryVertex = 0;
-
-    const xAOD::VertexContainer* vxCont = 0;
-    if ( evtStore()->retrieve( vxCont, "PrimaryVertices" ).isFailure() ) {
-      ATH_MSG_WARNING( "Unable to retrieve primary vertex container PrimaryVertices" );
-      validVtx = false;
-    }
-    else {
-      for ( const auto *vx : *vxCont ) {
-        if ( vx->vertexType()==xAOD::VxType::PriVtx ) {
-          primaryVertex = vx;
-          break;
-        }
-      }
-
-      if ( primaryVertex ) validVtx = true;
+    int pv_location = findPV();
     
-    }
+    if(pv_location != -1){
 
-    if ( validVtx ) {
-      static const SG::AuxElement::Accessor<ElementLink<xAOD::JetContainer> > ungroomedLink("Parent");
-      const xAOD::Jet * ungroomedJet = 0;
+      if( GetUnGroomTracks(jet, pv_location).isSuccess()){
+	
+	SG::ReadDecorHandle<xAOD::JetContainer, int> readNtrk500(m_readNtrk500Key);
+	
+	int jet_ntrk = readNtrk500(jet);
 
-      if ( ungroomedLink.isAvailable(jet) ) {
-        ElementLink<xAOD::JetContainer> linkToUngroomed = ungroomedLink(jet);
-        if ( linkToUngroomed.isValid() ) {
-          ungroomedJet = *linkToUngroomed;
-
-          static const SG::AuxElement::ConstAccessor< std::vector<int> >acc_Ntrk("NumTrkPt500");
-
-          if ( acc_Ntrk.isAvailable(*ungroomedJet) ) {
-
-            const std::vector<int> NTrkPt500 = acc_Ntrk(*ungroomedJet);
-
-            int jet_ntrk = NTrkPt500.at(primaryVertex->index());
-            jet.auxdecor<int>("ParentJetNTrkPt500") = jet_ntrk;
-
-            if ( jet_ntrk < cut_ntrk ) acceptData.setCutResult( "PassNtrk", true );
-            decPassNtrk(jet) = acceptData.getCutResult( "PassNtrk" );
-            passCuts = passCuts && acceptData.getCutResult( "PassNtrk" );
+	if ( jet_ntrk < cut_ntrk ) acceptData.setCutResult( "PassNtrk", true );
+	decPassNtrk(jet) = acceptData.getCutResult( "PassNtrk" );
+	passCuts = passCuts && acceptData.getCutResult( "PassNtrk" );
           
-          }
-          else {
-            acceptData.setCutResult( "ValidJetContent", false );
-            decValidJetContent(jet) = false;
-            ATH_MSG_ERROR( "Unable to retrieve Ntrk of the ungroomed parent jet. Please make sure this variable is in your derivations!!!" );
-            return StatusCode::FAILURE;
-          }
-        }
-        else {
-          acceptData.setCutResult( "ValidJetContent", false );
-          decValidJetContent(jet) = false;
-          ATH_MSG_ERROR( "Unable to retrieve the parent ungroomed jet. Please make sure this variable is in your derivations!!!" );
-          return StatusCode::FAILURE;
-        }
       }
-      else {
-        acceptData.setCutResult( "ValidJetContent", false );
-        decValidJetContent(jet) = false;
-        ATH_MSG_ERROR( "Unable to retrieve the link to the parent ungroomed jet. Please make sure this variable is in your derivations!!!" );
-        return StatusCode::FAILURE;
+      else{
+	acceptData.setCutResult( "ValidJetContent", false );
+	decValidJetContent(jet) = false;
+	return StatusCode::FAILURE;
       }
     }
     else {

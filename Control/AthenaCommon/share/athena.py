@@ -21,22 +21,23 @@ fi
 for a in ${@}
 do
     case "$a" in
-	--leak-check*)   USETCMALLOC=0;;
-	--delete-check*) USETCMALLOC=0;;
-	--stdcmalloc)    USETCMALLOC=0;;
-	--tcmalloc)      USETCMALLOC=1;;
-	--stdcmath)      USEIMF=0;;
-	--imf)           USEIMF=1;;
+        --leak-check*)   USETCMALLOC=0;;
+        --delete-check*) USETCMALLOC=0;;
+        --stdcmalloc)    USETCMALLOC=0;;
+        --tcmalloc)      USETCMALLOC=1;;
+        --stdcmath)      USEIMF=0;;
+        --imf)           USEIMF=1;;
         --exctrace)      USEEXCTRACE=1;;
-	--preloadlib*)     export ATHENA_ADD_PRELOAD=${a#*=};;
-	--drop-and-reload) ATHENA_DROP_RELOAD=1;;
-	--CA)              USECA=1;;
-	*)               otherargs="$otherargs $a";;
+        --preloadlib*)     export ATHENA_ADD_PRELOAD=${a#*=};;
+        --drop-and-reload) ATHENA_DROP_RELOAD=1;;
+        --CA)              USECA=1;;
+        *)               otherargs="$otherargs $a";;
     esac
 done
 
 
-# Do the actual preloading via LD_PRELOAD
+# Do the actual preloading via LD_PRELOAD and save the original value
+export LD_PRELOAD_ORIG=${LD_PRELOAD}
 source `which athena_preload.sh `
 
 if [ $USECA -eq 1 ] 
@@ -55,8 +56,7 @@ python_path=`which python`
 # File: athena.py
 # Author: Wim Lavrijsen (WLavrijsen@lbl.gov)
 # "
-# This script allows you to run Athena from python. It is developed against
-# the cppyy based GaudiPython and python 2.6/7.x.
+# This script allows you to run Athena from python.
 #
 # Debugging is supported with the '-d' option (hook debugger after running
 # all user scripts, and just before calling initialize) and the --debug
@@ -82,51 +82,21 @@ python_path=`which python`
 # ignored, as valgrind is wrong (see the file Misc/README.valgrind in the
 # python installation).
 #
-# Additional details on debugging are available on the Wiki:
-#
-#   https://uimon.cern.ch/twiki/bin/view/Atlas/StartingDebuggerWithAthenaPy
-#
 
 __version__ = '3.3.0'
 __author__  = 'Wim Lavrijsen (WLavrijsen@lbl.gov)'
 __doc__     = 'For details about athena.py, run "less `which athena.py`"'
 
 import sys, os
-import getopt
-
-ldpreload = os.getenv( 'LD_PRELOAD' ) or ''
 
 ### parse the command line arguments -----------------------------------------
 import AthenaCommon.AthOptionsParser as aop
 opts = aop.parse()
-_help_and_exit = aop._help_and_exit
 
-### remove preload hack for proper execution of child-processes --------------
-if ldpreload:
-   if 'TCMALLOCDIR' in os.environ:
-       tcmlib = os.getenv( 'TCMALLOCDIR' ) +  "/libtcmalloc.so"
-       ldpreload = ldpreload.replace(tcmlib, '' )
-       tcmlib = os.getenv( 'TCMALLOCDIR' ) +  "/libtcmalloc_minimal.so"
-       ldpreload = ldpreload.replace(tcmlib, '' )
-       del tcmlib
-   pos = ldpreload.find ('/libexctrace_collector.so')
-   if pos >= 0:
-      pos0 = ldpreload.rfind (':', 0, pos)
-      pos1 = ldpreload.find (':', pos)
-      if pos1 < 0:
-         pos1 = len(ldpreload)
-      ldpreload = ldpreload[0:pos0+1] + ldpreload[pos1:]
-   if os.getenv( 'ATHENA_ADD_PRELOAD' ):
-      ldpreload = ldpreload.replace(os.getenv( 'ATHENA_ADD_PRELOAD' ), '' )
-      os.unsetenv( 'ATHENA_ADD_PRELOAD' )
-   ldpreload = ldpreload.replace( '::', ':')
-   ldpreload = ldpreload.strip(':')
-
-   if not ldpreload:
-      del os.environ[ 'LD_PRELOAD' ]
-   else:
-      os.environ[ 'LD_PRELOAD' ] = ldpreload
-del ldpreload
+### remove preload libs for proper execution of child-processes --------------
+if 'LD_PRELOAD_ORIG' in os.environ:
+   os.environ['LD_PRELOAD'] = os.getenv('LD_PRELOAD_ORIG')
+   os.unsetenv('LD_PRELOAD_ORIG')
 
 ### start profiler, if requested
 if opts.profile_python:
@@ -145,7 +115,7 @@ DbgStage.value = opts.dbg_stage
 if not os.getcwd() in sys.path:
    sys.path = [ os.getcwd() ] + sys.path
 
-if not '' in sys.path:
+if '' not in sys.path:
    sys.path = [ '' ] + sys.path
 
 
@@ -174,10 +144,10 @@ else:
    # Make sure ROOT gets initialized early, so that it shuts down last.
    # Otherwise, ROOT can get shut down before Gaudi, leading to crashes
    # when Athena components dereference ROOT objects that have been deleted.
-   import ROOT
+   import ROOT  # noqa: F401
 
  # readline support
-   import rlcompleter, readline
+   import rlcompleter, readline  # noqa: F401 (needed for completion)
 
    readline.parse_and_bind( 'tab: complete' )
    readline.parse_and_bind( 'set show-all-if-ambiguous On' )
@@ -197,32 +167,25 @@ if not opts.run_batch:
 
 
 ### logging and messages -----------------------------------------------------
-from AthenaCommon.Logging import *
-_msg = log # from above import...
+from AthenaCommon.Logging import logging, log
+_msg = log
 
 ## test and set log level
 try:
    _msg.setLevel (getattr(logging, opts.msg_lvl))
-except:
-   _help_and_exit()
+except Exception:
+   aop._help_and_exit()
 
-
-### default file name for ease of use ----------------------------------------
-if not opts.scripts and os.path.exists(opts.default_jobopt):
-   _msg.info("using default file %s", opts.default_jobopt)
-   opts.scripts.append(opts.default_jobopt)
 
 if not (opts.scripts or opts.fromdb) and opts.run_batch:
    _msg.error( "batch mode requires at least one script" )
    from AthenaCommon.ExitCodes import INCLUDE_ERROR
-   _help_and_exit( INCLUDE_ERROR )
-del _help_and_exit
+   aop._help_and_exit( INCLUDE_ERROR )
 
 
 ### file inclusion and tracing -----------------------------------------------
-from AthenaCommon.Include import IncludeError, include
+from AthenaCommon.Include import include
 include.setShowIncludes(opts.showincludes)
-include.setClean(opts.drop_cfg)
 
 
 ### pre-execution step -------------------------------------------------------

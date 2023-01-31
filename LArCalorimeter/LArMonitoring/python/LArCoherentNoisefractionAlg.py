@@ -70,7 +70,7 @@ def LArCoherentNoisefractionConfigCore(helper, algoinstance, inputFlags, febsToM
 
 
     # adding BadChan masker private tool
-    from AthenaConfiguration.ComponentFactory import isRun3Cfg
+    from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
 
     larCoherentNoisefractionMonAlg.TriggerChain = "HLT_noalg_zb_L1ZB, HLT_noalg_cosmiccalo_L1RD1_EMPTY" #turn off for calibration run 
@@ -170,7 +170,7 @@ def LArCoherentNoisefractionConfigCore(helper, algoinstance, inputFlags, febsToM
 
     print(cnfArray.toolList())
 
-    if isRun3Cfg():
+    if isComponentAccumulatorCfg():
         cfg.merge(helper.result())
         return cfg
     else:    

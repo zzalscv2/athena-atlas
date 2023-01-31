@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 import AthenaCommon.SystemOfUnits as Units
 from InDetConfig.TrackingPassFlags import createTrackingPassFlags
 
@@ -56,18 +56,18 @@ class FlagsCopiedTest(unittest.TestCase):
         flags.Trigger.doID
         flags.Trigger.InDetTracking.Muon
         flags.Trigger.InDetTracking.Electron.minPT = 2.0 * Units.GeV
-        self.newflags = flags.cloneAndReplace('InDet.Tracking.ActivePass', 'Trigger.InDetTracking.Electron')
+        self.newflags = flags.cloneAndReplace('InDet.Tracking.ActiveConfig', 'Trigger.InDetTracking.Electron')
 
         self.newflags.dump(".*InDet")
 
     def runTest(self):
-        self.assertEqual(self.newflags.InDet.Tracking.ActivePass.minPT, 2.0 * Units.GeV, msg="Flags are not copied")
+        self.assertEqual(self.newflags.InDet.Tracking.ActiveConfig.minPT, 2.0 * Units.GeV, msg="Flags are not copied")
 
 
 
 class UnsetFlagsTest(FlagsCopiedTest):
     def runTest(self):
-        self.assertEqual(self.newflags.InDet.Tracking.ActivePass.vertex_jet, None)
+        self.assertEqual(self.newflags.InDet.Tracking.ActiveConfig.vertex_jet, None)
 
 
 if __name__ == "__main__":

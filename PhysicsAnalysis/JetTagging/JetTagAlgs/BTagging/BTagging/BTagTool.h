@@ -83,8 +83,8 @@ namespace Analysis
 
     private:
 
-      mutable std::atomic<unsigned int> m_nBeamSpotPvx;
-      mutable std::atomic<unsigned int> m_nAllJets ATLAS_THREAD_SAFE;
+      mutable std::atomic<unsigned int> m_nBeamSpotPvx{};
+      mutable std::atomic<unsigned int> m_nAllJets{};
 
       ToolHandleArray< ITagTool > m_bTagToolHandleArray;
       std::map<std::string, ITagTool*> m_bTagTool; //!< map to the btag tools

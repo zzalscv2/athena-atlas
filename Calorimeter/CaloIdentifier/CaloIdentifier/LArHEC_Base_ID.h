@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -221,11 +221,11 @@ private:
 
   int         init_hashes(void) ;
 
-  int   get_prevInPhi(const LArHEC_region* hecRegion, const unsigned int& index, const short int& nPhi, const unsigned int& minHash, 
-		      int& neighbourIndex, IdentifierHash* neighbList) const;
+  static int   get_prevInPhi(const LArHEC_region* hecRegion, const unsigned int& index, const short int& nPhi, const unsigned int& minHash, 
+		      int& neighbourIndex, IdentifierHash* neighbList) ;
   
-  int   get_nextInPhi(const LArHEC_region* hecRegion, const unsigned int& index, const short int& nPhi, const unsigned int& minHash, 
-		      int& neighbourIndex, IdentifierHash* neighbList) const;
+  static int   get_nextInPhi(const LArHEC_region* hecRegion, const unsigned int& index, const short int& nPhi, const unsigned int& minHash, 
+		      int& neighbourIndex, IdentifierHash* neighbList) ;
 
   int   get_prevInEta(const LArHEC_region* hecRegion, const unsigned int& index, const short int& nPhi, const float& gPhi, const unsigned int& minHash, 
 		      int& neighbourIndex, IdentifierHash* neighbList, unsigned int& nBiggerCell) const;

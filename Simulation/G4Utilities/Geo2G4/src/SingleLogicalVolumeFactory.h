@@ -6,6 +6,7 @@
 #define GEO2G4_SingleLogicalVolumeFactory_h
 
 #include "AthenaBaseComps/AthMessaging.h"
+#include "CxxUtils/checker_macros.h"
 
 class G4LogicalVolume;
 class GeoLogVol;
@@ -16,7 +17,7 @@ class GeoLogVol;
 class SingleLogicalVolumeFactory : public AthMessaging {
 public:
   SingleLogicalVolumeFactory();
-  G4LogicalVolume* Build(const GeoLogVol*) const;
+  G4LogicalVolume* Build ATLAS_NOT_THREAD_SAFE (const GeoLogVol*);
 };
 
 #endif

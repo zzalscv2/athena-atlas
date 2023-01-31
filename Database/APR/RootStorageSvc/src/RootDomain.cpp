@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -15,10 +15,8 @@
 #include "RootDatabase.h"
 
 #include "TSystem.h"
-#include "TError.h"
 #include "TFile.h"
 #include "TROOT.h"
-#include "TEnv.h"
 #include "TTree.h"
 #include "TVirtualStreamerInfo.h"
 
@@ -48,21 +46,6 @@ bool RootDomain::existsDbase(const std::string& nam)  {
 DbStatus RootDomain::setOption(const DbOption& opt)  {
   const char* n = opt.name().c_str();
   switch( ::toupper(n[0]) )  {
-    case 'A':
-      if ( !strcasecmp(n, "ABORT_LEVEL") )  {
-        int lvl = gErrorAbortLevel;
-        DbStatus sc = opt._getValue(lvl);
-        if ( sc.isSuccess() )  {
-          gErrorAbortLevel = lvl;
-        }
-        return sc;
-      }
-      else if ( !strcasecmp(n, "ASYNC_PREFETCHING") )  {
-        gEnv->SetValue("TFile.AsyncPrefetching", 1);
-        int asyncPrefetching = gEnv->GetValue("TFile.AsyncPrefetching", 0);
-        return opt._getValue(asyncPrefetching);
-      }
-      break;
     case 'D':
       if ( !strcasecmp(n, "DEFAULT_COMPRESSION") )  {
         return opt._getValue(m_defCompression);
@@ -81,15 +64,7 @@ DbStatus RootDomain::setOption(const DbOption& opt)  {
       }
       break;
     case 'E':
-      if ( !strcasecmp(n, "ERROR_LEVEL") )  {
-        int lvl = gErrorIgnoreLevel;
-        DbStatus sc = opt._getValue(lvl);
-        if ( sc.isSuccess() )  {
-          gErrorIgnoreLevel = lvl;
-        }
-        return sc;
-      }
-      else if ( !strcasecmp(n, "ENABLE_THREADSAFETY") )  {
+      if ( !strcasecmp(n, "ENABLE_THREADSAFETY") )  {
         bool multithreaded = false;
         DbStatus sc = opt._getValue(multithreaded);
         if ( sc.isSuccess() && multithreaded )  {
@@ -152,14 +127,6 @@ DbStatus RootDomain::setOption(const DbOption& opt)  {
 DbStatus RootDomain::getOption(DbOption& opt) const   {
   const char* n = opt.name().c_str();
   switch( ::toupper(n[0]) )  {
-    case 'A':
-      if ( !strcasecmp(n, "ABORT_LEVEL") )  {
-        return opt._setValue(int(gErrorAbortLevel));
-      }
-      else if ( !strcasecmp(n, "ASYNC_PREFETCHING") )  {
-        return opt._setValue((int)gEnv->GetValue("TFile.AsyncPrefetching", 0));
-      }
-      break;
     case 'C':
       if ( !strcasecmp(n, "CLASS") )  {
         return opt._setValue((void*)ROOT::GetROOT()->GetClass(opt.option().c_str(), kTRUE));
@@ -185,9 +152,6 @@ DbStatus RootDomain::getOption(DbOption& opt) const   {
     case 'E':
       if ( !strcasecmp(n, "ERRNO") )  {
         return opt._setValue(int(gSystem->GetErrno()));
-      }
-      else if ( !strcasecmp(n, "ERROR_LEVEL") )  {
-        return opt._setValue(int(gErrorIgnoreLevel));
       }
       break;
     case 'N':

@@ -42,6 +42,7 @@ public:
     m_LRTmode=false;
     m_layerGeometry.clear();
     m_useTrigSeedML = 0;
+    m_useEtaBinning = false;
     m_maxEC_len = 1.5;
     m_vLUT.clear();
   }
@@ -67,6 +68,7 @@ public:
 
   float m_zvError;
   bool m_LRTmode;
+  bool m_useEtaBinning;
 
   const FASTRACK_CONNECTOR* m_conn;
   const TrigFTF_GNN_Geometry*       m_geo;

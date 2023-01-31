@@ -9,11 +9,8 @@
 
 
 GenBase::GenBase(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator),
-    m_ppSvc("PartPropSvc", name)
+  : AthAlgorithm(name, pSvcLocator)
 {
-  declareProperty("MakeMcEvent", m_mkMcEvent=false, "Create a new MC event collection if it doesn't exist");
-  declareProperty("PartPropSvc", m_ppSvc);
 }
 
 

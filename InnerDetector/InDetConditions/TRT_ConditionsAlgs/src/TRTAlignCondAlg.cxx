@@ -65,8 +65,6 @@ StatusCode TRTAlignCondAlg::execute()
   // ____________ Construct new Write Cond Object and its range ____________
   std::unique_ptr<GeoAlignmentStore> writeCdoAlignStore{std::make_unique<GeoAlignmentStore>()};
 
-  EventIDRange rangeW;
-
   // ____________ Get Read Cond Objects ____________
   // Container for passing read CDO-s over to the Detector Manager
   InDetDD::RawAlignmentObjects readCdoContainer;
@@ -89,12 +87,9 @@ StatusCode TRTAlignCondAlg::execute()
       return StatusCode::FAILURE;
     }
     readCdoContainer.emplace(m_readKeyDynamicGlobal.key(),readCdoDynamicGlobal);
-    // Get range
-    EventIDRange rangeDynamicGlobal;
-    if(!readHandleDynamicGlobal.range(rangeDynamicGlobal)) {
-      ATH_MSG_ERROR("Failed to retrieve validity range for " << readHandleDynamicGlobal.key());
-      return StatusCode::FAILURE;
-    }
+    // Add depdency for IOV-intersection
+    if (writeHandleAlignStore) writeHandleAlignStore->addDependency(readHandleDynamicGlobal);
+    writeHandleDetElCont.addDependency(readHandleDynamicGlobal);
 
     // ** Regular
     SG::ReadCondHandle<AlignableTransformContainer> readHandleDynamicRegular{m_readKeyDynamicRegular,ctx};
@@ -105,15 +100,9 @@ StatusCode TRTAlignCondAlg::execute()
       return StatusCode::FAILURE;
     }
     readCdoContainer.emplace(m_readKeyDynamicRegular.key(),readCdoDynamicRegular);
-    // Get range
-    EventIDRange rangeDynamicRegular;
-    if(!readHandleDynamicRegular.range(rangeDynamicRegular)) {
-      ATH_MSG_ERROR("Failed to retrieve validity range for " << readHandleDynamicRegular.key());
-      return StatusCode::FAILURE;
-    }
-
-    // Create an intersection of input ranges
-    rangeW = EventIDRange::intersect(rangeDynamicGlobal,rangeDynamicRegular);
+    // Add depdency for IOV-intersection
+    if (writeHandleAlignStore) writeHandleAlignStore->addDependency(readHandleDynamicRegular);
+    writeHandleDetElCont.addDependency(readHandleDynamicRegular);
   }
   else {
     // 2. Regular folder
@@ -125,11 +114,9 @@ StatusCode TRTAlignCondAlg::execute()
       return StatusCode::FAILURE;
     }
     readCdoContainer.emplace(m_readKeyRegular.key(),readCdoRegular);
-    // Get range
-    if(!readHandleRegular.range(rangeW)) {
-      ATH_MSG_ERROR("Failed to retrieve validity range for " << readHandleRegular.key());
-      return StatusCode::FAILURE;
-    }
+    //Add dependency for IOV-intersection
+    if (writeHandleAlignStore) writeHandleAlignStore->addDependency(readHandleRegular);
+    writeHandleDetElCont.addDependency(readHandleRegular);
   }
 
   // ____________ Apply alignments to TRT GeoModel ____________
@@ -202,22 +189,24 @@ StatusCode TRTAlignCondAlg::execute()
 
   // Record the resulting CDO
   if (writeHandleAlignStore != nullptr) {
-    if(writeHandleAlignStore->record(rangeW, std::move(writeCdoAlignStore)).isFailure()) {
+    if(writeHandleAlignStore->record(std::move(writeCdoAlignStore)).isFailure()) {
       ATH_MSG_ERROR("Could not record GeoAlignmentStore " << writeHandleAlignStore->key()
-        << " with EventRange " << rangeW
+        << " with EventRange " << writeHandleAlignStore->getRange()
         << " into Conditions Store");
       return StatusCode::FAILURE;
     }
-    ATH_MSG_INFO("recorded new CDO " << writeHandleAlignStore->key() << " with range " << rangeW << " into Conditions Store");
+    ATH_MSG_INFO("recorded new CDO " << writeHandleAlignStore->key() << " with range " 
+        << writeHandleAlignStore->getRange() << " into Conditions Store");
   }
 
-  if (writeHandleDetElCont.record(rangeW, std::move(writeCdoDetElCont)).isFailure()) {
+  if (writeHandleDetElCont.record(std::move(writeCdoDetElCont)).isFailure()) {
     ATH_MSG_FATAL("Could not record " << writeHandleDetElCont.key()
-                  << " with EventRange " << rangeW
+                  << " with EventRange " << writeHandleDetElCont.getRange()
                   << " into Conditions Store");
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO("recorded new CDO " << writeHandleDetElCont.key() << " with range " << rangeW << " with size of " << writeHandleDetElContSize << " into Conditions Store");
+  ATH_MSG_INFO("recorded new CDO " << writeHandleDetElCont.key() << " with range " 
+        << writeHandleDetElCont.getRange() << " with size of " << writeHandleDetElContSize << " into Conditions Store");
 
   return StatusCode::SUCCESS;
 }

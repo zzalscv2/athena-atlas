@@ -21,6 +21,7 @@
 #include "TrkSurfaces/Surface.h"
 #include "TrkTrack/AlignmentEffectsOnTrack.h"
 #include "TrkTrack/Track.h"
+#include "TrkTrack/TrackStateOnSurface.h"
 #include "TrkTrack/TrackCollection.h"
 #include "TrkTrackSummary/TrackSummary.h"
 
@@ -431,7 +432,6 @@ namespace Muon {
                         nullptr,
                         tsit->trackParameters()->uniqueClone(),
                         nullptr,
-                        nullptr,
                         typePattern,
                         std::move(aEOT));
                     indexAEOTs.push_back(index);
@@ -472,7 +472,7 @@ namespace Muon {
         if (indexAEOTs.empty() && stationIds.size() > 1) ATH_MSG_WARNING(" Track without AEOT ");
 
         std::unique_ptr<Trk::Track> newTrack = std::make_unique<Trk::Track>(track.info(), std::move(trackStateOnSurfaces),
-                                                                            track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+                                                                            track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
 
         ATH_MSG_DEBUG(m_printer->print(*newTrack));
         ATH_MSG_DEBUG(m_printer->printMeasurements(*newTrack));
@@ -557,7 +557,7 @@ namespace Muon {
 
         if (indicesOfAffectedTSOS.empty() && indicesOfAffectedTSOSInner.empty()) {
             std::unique_ptr<Trk::Track> newTrack = std::make_unique<Trk::Track>(track.info(), std::move(trackStateOnSurfaces),
-                                                                                track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+                                                                                track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
             return newTrack;
         }
 
@@ -583,7 +583,6 @@ namespace Muon {
               nullptr,
               tsos->trackParameters()->uniqueClone(),
               nullptr,
-              nullptr,
               typePattern,
               std::move(aEOT));
         }
@@ -602,7 +601,6 @@ namespace Muon {
             tsosAEOTInner = std::make_unique<Trk::TrackStateOnSurface>(
               nullptr,
               tsosInner->trackParameters()->uniqueClone(),
-              nullptr,
               nullptr,
               typePattern,
               std::move(aEOTInner));
@@ -626,7 +624,7 @@ namespace Muon {
             trackStateOnSurfacesAEOT.push_back(tsit);
         }
         std::unique_ptr<Trk::Track> newTrack = std::make_unique<Trk::Track>(track.info(), std::move(trackStateOnSurfacesAEOT),
-                                                                            track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+                                                                            track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
         ATH_MSG_DEBUG(m_printer->print(*newTrack));
         ATH_MSG_DEBUG(m_printer->printMeasurements(*newTrack));
 
@@ -977,7 +975,7 @@ namespace Muon {
             trackStateOnSurfaces.push_back(std::move(new_state));
         }
         std::unique_ptr<Trk::Track> newTrack = std::make_unique<Trk::Track>(track.info(), std::move(trackStateOnSurfaces),
-                                                                            track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+                                                                            track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
         ATH_MSG_DEBUG("new track measurements: " << m_printer->printMeasurements(*newTrack));
 
         return newTrack;
@@ -1202,7 +1200,7 @@ namespace Muon {
             trackStateOnSurfaces.push_back(std::move(state));
         }
         std::unique_ptr<Trk::Track> newTrack = std::make_unique<Trk::Track>(track.info(), std::move(trackStateOnSurfaces),
-                                                                            track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+                                                                            track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
         return newTrack;
     }
 
@@ -1310,7 +1308,7 @@ namespace Muon {
         }
 
         std::unique_ptr<Trk::Track> newTrack = std::make_unique<Trk::Track>(track.info(), std::move(trackStateOnSurfaces),
-                                                                            track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+                                                                            track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
         return newTrack;
     }
 

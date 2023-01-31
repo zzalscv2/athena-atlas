@@ -1,4 +1,4 @@
-#Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 #
 # set up extrapolator
@@ -55,8 +55,6 @@ ToolSvc += InDetHoleSearchTool
 
 from InDetTrackSummaryHelperTool.InDetTrackSummaryHelperToolConf import InDet__InDetTrackSummaryHelperTool
 InDetTrackSummaryHelperTool = InDet__InDetTrackSummaryHelperTool(name         = "InDetSummaryHelper",
-                                                                 AssoTool     = InDetPrdAssociationTool,
-                                                                 DoSharedHits = False,
                                                                  HoleSearch   = InDetHoleSearchTool,
                                                                  usePixel      = DetFlags.haveRIO.pixel_on(),
                                                                  useSCT        = DetFlags.haveRIO.SCT_on(),
@@ -66,7 +64,6 @@ ToolSvc += InDetTrackSummaryHelperTool
 from TrkTrackSummaryTool.TrkTrackSummaryToolConf import Trk__TrackSummaryTool
 InDetTrackSummaryTool = Trk__TrackSummaryTool(name = "InDetTrackSummaryTool",
                                               InDetSummaryHelperTool = InDetTrackSummaryHelperTool,
-                                              doSharedHits           = False,
                                               doHolesInDet           = True)
 ToolSvc += InDetTrackSummaryTool
 

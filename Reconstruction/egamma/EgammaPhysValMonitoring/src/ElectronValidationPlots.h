@@ -28,6 +28,8 @@ class ElectronValidationPlots:public PlotBase {
       Egamma::KinematicsPlots         m_oTruthAllPlots;
       Egamma::KinematicsPlots         m_oTruthAllIsoPlots;
       Egamma::KinematicsPlots         m_oTruthIsoPlots;
+      Egamma::KinematicsPlots         m_oTruthAllPromptPlots;
+      Egamma::KinematicsPlots         m_oTruthPromptElecPlots;
        
       TH1* author;
       TH1* mu_average;
@@ -36,6 +38,8 @@ class ElectronValidationPlots:public PlotBase {
       TProfile* res_eta;
       TProfile* res_et_cut;
       TProfile* res_eta_cut;
+      TProfile* res_et_cut_pt_20;
+      TProfile* res_eta_cut_pt_20;
       TH2* matrix;
 
  private:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
 */
 
 #include "TauThinningAlg.h"
@@ -104,8 +104,7 @@ StatusCode TauThinningAlg::execute (const EventContext& ctx) const
     TLorentzVector tauAxis = tauRecTools::getTauAxis(*tau, m_doVertexCorrection);
     const xAOD::Vertex* tauVertex = tau->vertex();
 
-    auto clusterList = tau->clusters();
-    for (const xAOD::IParticle* particle : clusterList) {
+    for (const xAOD::IParticle* particle : tau->clusters()) {
       const xAOD::CaloCluster* cluster = static_cast<const xAOD::CaloCluster*>(particle);
       TLorentzVector clusterP4 = cluster->p4();
 
@@ -228,8 +227,7 @@ StatusCode TauThinningAlg::execute (const EventContext& ctx) const
     }
     
     // keep secondary vertex when present
-    static const SG::AuxElement::ConstAccessor< ElementLink< xAOD::VertexContainer > > secondaryVertexAcc( "secondaryVertexLink" );
-    if(secondaryVertexAcc(*tau)) {
+    if (tau->secondaryVertex() != nullptr) {
       secondaryVertices.keep(tau->secondaryVertex()->index());
     }        
   }

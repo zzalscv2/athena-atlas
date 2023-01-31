@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -27,7 +27,7 @@ class CaloLVL1_ID;
 *  @brief This class is used to build the CaloTTDescriptors and CaloTTDetDescrRegions
 *  carrying the geometry information of the Calorimeter Trigger Towers. 
 *
-*  It is initialized by the CaloTTMgrDetDescrCnv converter from package CaloCnv/CaloDetMgrDetDescrCnv
+*  It is initialized by the CaloTTMgrDetDescrCnv converter from package Calorimeter/CaloCnv/CaloTTDetDescrCnv
 *  
 *  @warning The hadronic part of the FCAL calorimeter calorimeter is constructed
 *   with 4 channels in eta. These 4 channels actually correspond to 2 channels in eta
@@ -106,7 +106,7 @@ class CaloTTDescrManager
     
     /** dummy. only sets is_initialized. actual initialization performed in CaloTTMgrDetDescrCnv */
     void                                initialize              (void);
-    bool                                is_initialized          (void);
+    bool                                is_initialized          (void) const;
 
     /**  Insertion in the vector of Det Descr regions (== Trigger Towers) */
     void				add        	        (CaloTTDescrRegion*    region);

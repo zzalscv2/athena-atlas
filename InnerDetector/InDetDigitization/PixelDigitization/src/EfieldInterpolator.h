@@ -55,7 +55,7 @@ public:
   TH1D* getEfield(double aimFluence, double aimVoltage);
   TH1D* loadEfieldFromDat(const std::string& fname, bool fillEdges = true);
   static void scaleIntegralTo(TH1* hin, double aimInt, int first = 1, int last = -1);
-  void reliabilityCheck(double aimFluence, std::vector<double> fluences, double aimVoltage,
+  void reliabilityCheck(double aimFluence, const std::vector<double>& fluences, double aimVoltage,
                         const std::vector<double>& voltages);
 private:
   // Member variables

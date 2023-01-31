@@ -14,7 +14,6 @@
 #define PYTHIA8_PTRWRAP(A) A
 #define PYTHIA8_INITUSERHOOK_WRAP(A) A->initPtr(infoPtr, settingsPtr, particleDataPtr, rndmPtr, beamAPtr, beamBPtr, beamPomAPtr, beamPomBPtr, coupSMPtr, partonSystemsPtr, sigmaTotPtr)
 #ifdef PYTHIA_VERSION_INTEGER
-  #if PYTHIA_VERSION_INTEGER > 8299
     #define PYTHIA8_3SERIES
     #if PYTHIA_VERSION_INTEGER > 8303
       #define PYTHIA8_304SERIES
@@ -24,9 +23,6 @@
     #define PYTHIA8_PTRWRAP(A) std::shared_ptr<Pythia8::UserHooks>(A)
     #undef PYTHIA8_INITUSERHOOK_WRAP
     #define PYTHIA8_INITUSERHOOK_WRAP(A) registerSubObject(*A)
-  #else
-    typedef Pythia8::UserHooks* UserHooksPtrType;
-  #endif
 #else
   typedef Pythia8::UserHooks* UserHooksPtrType;
 #endif

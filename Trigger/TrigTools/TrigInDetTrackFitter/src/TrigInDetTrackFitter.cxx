@@ -737,7 +737,7 @@ std::pair<Trk::Track*,Trk::Track*> TrigInDetTrackFitter::fitTrack(const Trk::Tra
       auto pParVecwTP = DataVector<const Trk::TrackStateOnSurface>();
       if (m_correctClusterPos) {
         pParVec.reserve(vpTrkNodes.size()+1);
-        pParVec.push_back(new Trk::TrackStateOnSurface(nullptr, std::move(perigee),nullptr,nullptr, typePattern));
+        pParVec.push_back(new Trk::TrackStateOnSurface(nullptr, std::move(perigee),nullptr, typePattern));
         if (addTPtoTSoS) {
           std::bitset<
             Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>
@@ -745,13 +745,13 @@ std::pair<Trk::Track*,Trk::Track*> TrigInDetTrackFitter::fitTrack(const Trk::Tra
           typePatternwTP.set(Trk::TrackStateOnSurface::Perigee);
           pParVecwTP.reserve(vpTrkNodes.size() + 1);
           pParVecwTP.push_back(
-            new Trk::TrackStateOnSurface(nullptr, std::move(perigeewTP), nullptr, nullptr, typePatternwTP));
+            new Trk::TrackStateOnSurface(nullptr, std::move(perigeewTP), nullptr, typePatternwTP));
         }
         for (auto pnIt = vpTrkNodes.begin(); pnIt != vpTrkNodes.end(); ++pnIt) {
           if((*pnIt)->isValidated()) {
-	    Trk::TrackStateOnSurface* pTSS    = createTrackStateOnSurface(*pnIt,false);
-	    Trk::TrackStateOnSurface* pTSSwTP = nullptr;
-	    if( addTPtoTSoS ) pTSSwTP = createTrackStateOnSurface(*pnIt,true);
+            Trk::TrackStateOnSurface* pTSS    = createTrackStateOnSurface(*pnIt,false);
+            Trk::TrackStateOnSurface* pTSSwTP = nullptr;
+            if( addTPtoTSoS ) pTSSwTP = createTrackStateOnSurface(*pnIt,true);
             if(pTSS!=nullptr) {
               pParVec.push_back(pTSS);
             }
@@ -763,7 +763,7 @@ std::pair<Trk::Track*,Trk::Track*> TrigInDetTrackFitter::fitTrack(const Trk::Tra
       }
       else {
         pParVec.reserve(recoTrack.trackStateOnSurfaces()->size());
-        pParVec.push_back(new Trk::TrackStateOnSurface(nullptr, std::move(perigee),nullptr,nullptr, typePattern));
+        pParVec.push_back(new Trk::TrackStateOnSurface(nullptr, std::move(perigee),nullptr, typePattern));
 
         for (auto tSOS = recoTrack.trackStateOnSurfaces()->begin(); tSOS != recoTrack.trackStateOnSurfaces()->end(); ++tSOS) {
           //Don't store perigee - new perigee created above
@@ -778,15 +778,15 @@ std::pair<Trk::Track*,Trk::Track*> TrigInDetTrackFitter::fitTrack(const Trk::Tra
       ATH_MSG_VERBOSE("Fitted parameters: d0="<<d0<<" phi0="<<phi0<<" z0="<<z0
           <<" eta0="<<eta<<" pt="<<pt);
       }
-      Trk::FitQuality* pFQ=new Trk::FitQuality(chi2tot,ndoftot);
+      auto pFQ= std::make_unique<Trk::FitQuality>(chi2tot,ndoftot);
       Trk::TrackInfo info(recoTrack.info());
       info.setParticleHypothesis(matEffects);
-      fittedTrack = new Trk::Track(info, std::move(pParVec), pFQ);//fittedTrack now owns pParVec and pFQ
+      fittedTrack = new Trk::Track(info, std::move(pParVec), std::move(pFQ));//fittedTrack now owns pParVec and pFQ
       if( addTPtoTSoS ) {
-        Trk::FitQuality* pFQwTP=new Trk::FitQuality(chi2tot,ndoftot);
+        auto pFQwTP=std::make_unique<Trk::FitQuality>(chi2tot,ndoftot);
         Trk::TrackInfo infowTP(recoTrack.info());
         infowTP.setParticleHypothesis(matEffects);
-        fittedTrackwTP = new Trk::Track(infowTP, std::move(pParVecwTP), pFQwTP);//fittedTrack now owns pParVecwTP and pFQwTP
+        fittedTrackwTP = new Trk::Track(infowTP, std::move(pParVecwTP), std::move(pFQwTP));//fittedTrack now owns pParVecwTP and pFQwTP
       }
     }
 	}
@@ -865,16 +865,16 @@ Trk::TrackStateOnSurface* TrigInDetTrackFitter::createTrackStateOnSurface(Trk::T
   std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
   typePattern.set(Trk::TrackStateOnSurface::Measurement);
   typePattern.set(Trk::TrackStateOnSurface::Scatterer);
-  auto pFQ=std::make_unique<const Trk::FitQualityOnSurface>(pN->getChi2(),pN->getNdof());
+  auto pFQ=Trk::FitQualityOnSurface(pN->getChi2(),pN->getNdof());
   if( addTPtoTSoS ) {
      std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePatternwTP;
      typePatternwTP.set(Trk::TrackStateOnSurface::Measurement);
      typePatternwTP.set(Trk::TrackStateOnSurface::Scatterer);
-     auto pFQwTP=std::make_unique<const Trk::FitQualityOnSurface>(pN->getChi2(),pN->getNdof());
-     pTSS = new Trk::TrackStateOnSurface(pRIO->uniqueClone(), std::move(pTP), std::move(pFQwTP), nullptr, typePatternwTP);
+     auto pFQwTP=Trk::FitQualityOnSurface(pN->getChi2(),pN->getNdof());
+     pTSS = new Trk::TrackStateOnSurface(pFQwTP, pRIO->uniqueClone(), std::move(pTP), nullptr, typePatternwTP);
   }
   else {
-     pTSS = new Trk::TrackStateOnSurface(std::move(pRIO), nullptr, std::move(pFQ), nullptr, typePattern);
+     pTSS = new Trk::TrackStateOnSurface(pFQ, std::move(pRIO), nullptr, nullptr, typePattern);
   }
   return pTSS;
 }
@@ -918,14 +918,12 @@ StatusCode TrigInDetTrackFitter::getUnbiasedResiduals(const Trk::Track& pT,
     return StatusCode::FAILURE;
   }
 
-  int nNodeIndex=-1;
   bool OK=true;
   std::vector<Trk::TrkBaseNode*>::iterator pnIt,pnEnd(vpTrkNodes.end());
 
   for(std::vector<Trk::TrkBaseNode*>::iterator pNodeIt=vpTrkNodes.begin();pNodeIt!=vpTrkNodes.end();
       ++pNodeIt)
   {
-    nNodeIndex++;
     Trk::TrkBaseNode* pMaskedNode=(*pNodeIt);
     Trk::TrkTrackState* pMaskedState=nullptr;
 

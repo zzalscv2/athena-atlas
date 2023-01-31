@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// HepMCHelper.icc, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // STL includes
 #include <set>
@@ -33,7 +29,7 @@ HepMC::IteratorRange ISF::HepMCHelper::convertIteratorRange( int intItRange ) {
 }
 
 #ifdef HEPMC3
-HepMC::ConstGenParticlePtr ISF::HepMCHelper::findRealtiveWithPDG( HepMC::ConstGenParticlePtr genParticle,
+HepMC::ConstGenParticlePtr ISF::HepMCHelper::findRealtiveWithPDG( HepMC::ConstGenParticlePtr& genParticle,
         const HepMC::IteratorRange &relation,
         const std::set<int> &relativesPDG     ) {
     // get range of relative particles
@@ -73,7 +69,7 @@ HepMC::ConstGenParticlePtr ISF::HepMCHelper::findRealtiveWithPDG( HepMC::ConstGe
     return nullptr;
 }
 #else
-HepMC::ConstGenParticlePtr ISF::HepMCHelper::findRealtiveWithPDG( HepMC::ConstGenParticlePtr genParticle,
+HepMC::ConstGenParticlePtr ISF::HepMCHelper::findRealtiveWithPDG( HepMC::ConstGenParticlePtr& genParticle,
                                                                   const HepMC::IteratorRange &relation,
                                                                   const std::set<int> &relativesPDG     ) {
 

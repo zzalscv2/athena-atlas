@@ -114,16 +114,14 @@ int iGeant4::Geant4TruthIncident::parentPdgCode() const {
   return  m_step->GetTrack()->GetDefinition()->GetPDGEncoding();
 }
 
-Barcode::ParticleBarcode iGeant4::Geant4TruthIncident::parentBarcode() const {
+Barcode::ParticleBarcode iGeant4::Geant4TruthIncident::parentBarcode() {
   auto parent = parentParticle();
 
   return (parent) ? HepMC::barcode(parent) : Barcode::fUndefinedBarcode;
 }
 
-HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticle() const {
-  HepMC::GenParticlePtr hepParticle = std::as_const(m_atlasG4EvtUserInfo)->GetCurrentlyTraced();
-
-  return hepParticle;
+HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticle() {
+  return m_atlasG4EvtUserInfo->GetCurrentlyTraced();
 }
 
 int iGeant4::Geant4TruthIncident::parentBCID() const { 
@@ -228,7 +226,7 @@ void iGeant4::Geant4TruthIncident::setAllChildrenBarcodes(Barcode::ParticleBarco
 }
 
 HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::childParticle(unsigned short i,
-                                                                  Barcode::ParticleBarcode newBarcode) const {
+                                                                  Barcode::ParticleBarcode newBarcode) {
   // the G4Track instance for the current child particle
   const G4Track* thisChildTrack = m_children[i];
 

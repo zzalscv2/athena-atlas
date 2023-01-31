@@ -23,9 +23,9 @@
 #include "TruthHelper/GenAll.h"
 
 namespace TruthHelperDict {
-  struct tmp {
+struct tmp {
     std::vector<TruthHelper::GenIMCselector*> m_selectors;
-  };
+};
 }
 
 #endif

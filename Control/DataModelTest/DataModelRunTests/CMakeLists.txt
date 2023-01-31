@@ -99,6 +99,52 @@ datamodel_run_test (xAODTestWriteThinned)
 datamodel_run_test (xAODTestReadThinned DEPENDS xAODTestWriteThinned)
 
 
+##############################################################################
+# AllocTest
+#
+
+datamodel_run_test (AllocTestWriteWithoutAlloc)
+datamodel_run_test (AllocTestWriteWithAlloc)
+
+datamodel_run_test (AllocTestReadNoAllocWithoutAlloc
+                    COMMAND "athena.py --filesInput=alloctestWithoutAlloc.root"
+                    ARG DataModelRunTests/AllocTestReadWithoutAlloc_jo.py
+                    DEPENDS AllocTestWriteWithoutAlloc)
+datamodel_run_test (AllocTestReadAllocWithAlloc
+                    COMMAND "athena.py --filesInput=alloctestWithAlloc.root"
+                    ARG DataModelRunTests/AllocTestReadWithAlloc_jo.py
+                    DEPENDS AllocTestWriteWithAlloc)
+
+datamodel_run_test (AllocTestReadNoAllocWithAlloc
+                    COMMAND "athena.py --filesInput=alloctestWithoutAlloc.root"
+                    ARG DataModelRunTests/AllocTestReadWithAlloc_jo.py
+                    DEPENDS AllocTestWriteWithoutAlloc)
+datamodel_run_test (AllocTestReadAllocWithoutAlloc
+                    COMMAND "athena.py --filesInput=alloctestWithAlloc.root"
+                    ARG DataModelRunTests/AllocTestReadWithoutAlloc_jo.py
+                    DEPENDS AllocTestWriteWithAlloc)
+
+datamodel_run_test (RootAllocTestReadNoAllocWithoutAlloc
+                    COMMAND python
+                    ARG ${CMAKE_CURRENT_SOURCE_DIR}/share/RootAllocTestReadNoAllocWithoutAlloc_t.py
+                    DEPENDS AllocTestWriteWithoutAlloc)
+datamodel_run_test (RootAllocTestReadAllocWithAlloc
+                    COMMAND python
+                    ARG ${CMAKE_CURRENT_SOURCE_DIR}/share/RootAllocTestReadAllocWithAlloc_t.py
+                    DEPENDS AllocTestWriteWithAlloc)
+
+datamodel_run_test (RootAllocTestReadNoAllocWithAlloc
+                    COMMAND python
+                    ARG ${CMAKE_CURRENT_SOURCE_DIR}/share/RootAllocTestReadNoAllocWithAlloc_t.py
+                    DEPENDS AllocTestWriteWithoutAlloc)
+datamodel_run_test (RootAllocTestReadAllocWithoutAlloc
+                    COMMAND python
+                    ARG ${CMAKE_CURRENT_SOURCE_DIR}/share/RootAllocTestReadAllocWithoutAlloc_t.py
+                    DEPENDS AllocTestWriteWithAlloc)
+
+
+##############################################################################
+
 
 # xAODTestWrite:
 # writes xaoddata.root (cvec, cvecWD, cview, gvec, ctrig, cinfo, hvec, hview, S2)

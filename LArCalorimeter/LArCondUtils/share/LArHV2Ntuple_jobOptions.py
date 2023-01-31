@@ -67,7 +67,7 @@ from AtlasGeoModel import SetupRecoGeometry
 
 svcMgr.IOVDbSvc.GlobalTag = GlobalTag
 
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py")
+include( "CaloConditions/CaloConditions_jobOptions.py")
 include( "CaloIdCnv/CaloIdCnv_joboptions.py" )
 #include( "TileIdCnv/TileIdCnv_jobOptions.py" )
 include( "LArDetDescr/LArDetDescr_joboptions.py" )

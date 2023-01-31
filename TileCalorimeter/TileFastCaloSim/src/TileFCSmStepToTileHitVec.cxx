@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -49,6 +49,9 @@
 TileFCSmStepToTileHitVec::TileFCSmStepToTileHitVec(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
   , m_geoModSvc("GeoModelSvc",name)
+  , m_FCS_StepInfo ("MergedEventSteps")
+  , m_hitVec ("TileHitVec_FCS")
+  , m_infoName ("TileInfo")
   , m_tileID(nullptr)
   , m_tileInfo(nullptr)
   , m_tileMgr(nullptr)
@@ -57,10 +60,6 @@ TileFCSmStepToTileHitVec::TileFCSmStepToTileHitVec(const std::string& name, ISvc
   , m_allHits(0)
   , m_uShape(-1)
 {
-  m_FCS_StepInfo  = "MergedEventSteps";
-  m_hitVec        = "TileHitVec_FCS";
-  m_infoName      = "TileInfo";
-
   declareProperty( "GeoModelSvc", m_geoModSvc );
   declareProperty( "TileCalculator", m_calc);
   declareProperty("StepInfoCollection",   m_FCS_StepInfo, "Name of input container (default=TileHitCnt)");

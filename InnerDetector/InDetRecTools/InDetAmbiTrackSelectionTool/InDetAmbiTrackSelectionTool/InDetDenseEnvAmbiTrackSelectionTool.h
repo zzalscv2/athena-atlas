@@ -385,7 +385,7 @@ namespace InDet
     bool isEmCaloCompatible(const Trk::TrackParameters& Tp) const;
       
     /** Fill hadronic & EM cluster map*/
-    void newEvent(CacheEntry* ent) const;
+    static void newEvent(CacheEntry* ent) ;
       
     /** Returns true if accepted tracks remain about thresholds, false otherwise
         maxiShared  = max number of shared modules on an accepted shared track
@@ -439,7 +439,7 @@ namespace InDet
          {this, "AssociationTool", "InDet::InDetPRDtoTrackMapToolGangedPixels" };
 
     /**Observer tool      This tool is used to observe the tracks and their 'score' */
-    PublicToolHandle<Trk::ITrkObserverTool> m_observerTool{this, "TrackObserverTool", "", "track observer within ambiguity solver"};
+    PublicToolHandle<Trk::ITrkObserverTool> m_observerTool{this, "ObserverTool", "", "track observer within ambiguity solver"};
 
     /** some cut values */
     IntegerProperty m_minHits{this, "minHits", 5, "Min Number of hits on track"};

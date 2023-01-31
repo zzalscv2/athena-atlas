@@ -9,9 +9,9 @@
 #include<map>
 #include<algorithm>
 
-#define MAX_SEG_PER_NODE 30 //was 30
+#define MAX_SEG_PER_NODE 1000 //was 30
 #define N_SEG_CONNS  6 //was 6
-#define N_PHI_BINS 60
+
 
 #include "TrigInDetEvent/TrigSiSpacePointBase.h"
 
@@ -82,10 +82,10 @@ public:
 
 class TrigFTF_GNN_DataStorage {
 public:
-  TrigFTF_GNN_DataStorage(const TrigFTF_GNN_Geometry&, float);
+  TrigFTF_GNN_DataStorage(const TrigFTF_GNN_Geometry&);
   ~TrigFTF_GNN_DataStorage();
 
-  int addSpacePoint(const TrigSiSpacePointBase&);
+  int addSpacePoint(const TrigSiSpacePointBase&, bool);
   unsigned int numberOfNodes() const;
   void getConnectingNodes(std::vector<const TrigFTF_GNN_Node*>&);
   void sortByPhi();
@@ -100,7 +100,6 @@ public:
 protected:
 
   const TrigFTF_GNN_Geometry& m_geo;
-  float m_phiBinWidth;
 
   std::vector<TrigFTF_GNN_EtaBin> m_etaBins; 
 
@@ -116,7 +115,9 @@ public:
     }
   };
 
-  TrigFTF_GNN_Edge() : m_n1(nullptr), m_n2(nullptr), m_level(-1), m_next(-1), m_nNei(0) {};
+ TrigFTF_GNN_Edge() : m_n1(nullptr), m_n2(nullptr), m_level(-1), m_next(-1), m_nNei(0) {};
+
+ TrigFTF_GNN_Edge(const TrigFTF_GNN_Edge& e) : m_n1(e.m_n1), m_n2(e.m_n2) {};
 
   inline void initialize(TrigFTF_GNN_Node* n1, TrigFTF_GNN_Node* n2) {
     m_n1 = n1; 
@@ -127,15 +128,15 @@ public:
   }
 
 
-  TrigFTF_GNN_Node* m_n1;
-  TrigFTF_GNN_Node* m_n2;
+  TrigFTF_GNN_Node* m_n1{nullptr};
+  TrigFTF_GNN_Node* m_n2{nullptr};
   
-  signed char m_level, m_next;
+  signed char m_level{-1}, m_next{-1};
 
-  unsigned char m_nNei;
-  float m_p[4];
+  unsigned char m_nNei{0};
+  float m_p[4]{};
   
-  unsigned int m_vNei[N_SEG_CONNS];//global indices of the connected edges
+  unsigned int m_vNei[N_SEG_CONNS]{};//global indices of the connected edges
 
 };
 

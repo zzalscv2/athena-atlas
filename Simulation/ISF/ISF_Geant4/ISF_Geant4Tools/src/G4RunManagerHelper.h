@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_GEANT4TOOLS_G4RUNMANAGERHELPER_H
@@ -20,16 +20,15 @@ namespace iGeant4 {
                        const IInterface* parent);
     virtual ~G4RunManagerHelper();
 
-    StatusCode initialize();
-    StatusCode finalize();
+    virtual StatusCode initialize() override;
 
-    G4AtlasRunManager* g4RunManager() const;
-    G4RunManager*      fastG4RunManager() const;
+    virtual G4AtlasRunManager* g4RunManager ATLAS_NOT_THREAD_SAFE () override;
+    virtual G4RunManager*      fastG4RunManager ATLAS_NOT_THREAD_SAFE () override;
 
   private:
 
-    mutable G4AtlasRunManager* m_g4RunManager;
-    mutable G4RunManager*      m_fastG4RunManager;
+    G4AtlasRunManager* m_g4RunManager;
+    G4RunManager*      m_fastG4RunManager;
 
   };
 

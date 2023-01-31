@@ -17,14 +17,13 @@
 #include "xAODJet/JetContainer.h"
 #include "CxxUtils/BasicTypes.h"
 #include "TLorentzVector.h"
+#include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
-#include "AthenaKernel/IAtRndmGenSvc.h" // For random numbers...
 
 #include <fstream>
 
 MultiBjetFilter::MultiBjetFilter(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenFilter(name,pSvcLocator),  
-    m_rand("AtRndmGenSvc",name) {
+  : GenFilter(name,pSvcLocator) {
 
   // Local Member Data:-
   declareProperty("NJetsMin", m_nJetsMin = 0);
@@ -51,6 +50,7 @@ MultiBjetFilter::~MultiBjetFilter(){}
 
 StatusCode MultiBjetFilter::filterInitialize() {
 
+  CHECK(m_rndmSvc.retrieve());
   m_Nevt = 0;
   m_NPass = 0;
   m_SumOfWeights_Pass = 0;
@@ -68,7 +68,24 @@ StatusCode MultiBjetFilter::filterFinalize() {
 }
 
 
+CLHEP::HepRandomEngine* MultiBjetFilter::getRandomEngine(const std::string& streamName,
+                                                             const EventContext& ctx) const
+{
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, streamName);
+  std::string rngName = name()+streamName;
+  rngWrapper->setSeed( rngName, ctx );
+  return rngWrapper->getEngine(ctx);
+}
+
+
 StatusCode MultiBjetFilter::filterEvent() {
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  CLHEP::HepRandomEngine* rndm = this->getRandomEngine("MultiBjetFilter", ctx);
+  if (!rndm) {
+    ATH_MSG_WARNING("Failed to retrieve random number engine " << "MultiBjetFilter");
+    setFilterPassed(false);
+    return StatusCode::FAILURE;
+  }
 
   bool pass = true;
   m_Nevt++;
@@ -143,7 +160,6 @@ StatusCode MultiBjetFilter::filterEvent() {
 
   } else if (m_inclusiveEff > 0.) { 
 
-    CLHEP::HepRandomEngine* rndm = m_rand->GetEngine("MultiBjetFilter");   
     if (rndm) {
       double rnd = rndm->flat();
       if (m_inclusiveEff > rnd) {

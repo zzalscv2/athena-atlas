@@ -65,7 +65,7 @@ void TFCSHitCellMappingWiggle::initialize(TH1* histogram,float xscale)
   initialize(func);
 }
 
-void TFCSHitCellMappingWiggle::initialize(const std::vector< const TH1* > histograms, std::vector< float > bin_low_edges, float xscale)
+void TFCSHitCellMappingWiggle::initialize(const std::vector< const TH1* >& histograms, const std::vector< float >& bin_low_edges, float xscale)
 {
   if(histograms.size()+1!=bin_low_edges.size()) {
     ATH_MSG_ERROR("Using "<<histograms.size()<<" histograms needs "<<histograms.size()+1<<" bins, but got "<<bin_low_edges.size()<<"bins");

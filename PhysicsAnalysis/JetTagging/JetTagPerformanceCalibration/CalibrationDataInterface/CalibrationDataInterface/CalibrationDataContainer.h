@@ -79,7 +79,7 @@ namespace Analysis {
        Individual sources of systematic uncertainty can be added by the user.
      */
     CalibrationStatus getUncertainties(const CalibrationDataVariables& x,
-				       std::map<std::string, Analysis::UncertaintyResult>& all) const;
+				       std::map<std::string, Analysis::UncertaintyResult>& all);
 
     /** @brief retrieve the comments entered for this calibration, if any */
     std::string getComment() const;
@@ -100,7 +100,7 @@ namespace Analysis {
     */
     virtual CalibrationStatus getResult(const CalibrationDataVariables& x,
 					double& result,
-					TObject* obj = 0, bool extrapolate = false) const = 0;
+					TObject* obj = 0, bool extrapolate = false) = 0;
 
     /**
        retrieve the calibration statistical uncertainty.
@@ -112,7 +112,7 @@ namespace Analysis {
        object, and only in case of the function interface also the covariance matrix
     */
     virtual CalibrationStatus getStatUncertainty(const CalibrationDataVariables& x,
-						 double& result) const = 0;
+						 double& result) = 0;
 
     /**
        retrieve the calibration total systematic uncertainty
@@ -120,7 +120,7 @@ namespace Analysis {
     */
     CalibrationStatus         getSystUncertainty(const CalibrationDataVariables& x,
 						 UncertaintyResult& result,
-						 TObject* obj = 0) const;
+						 TObject* obj = 0);
 
     /**
        retrieve the calibration uncertainty due to the given source.
@@ -132,7 +132,7 @@ namespace Analysis {
     */
     virtual CalibrationStatus getUncertainty(const std::string& unc,
 					     const CalibrationDataVariables& x,
-					     UncertaintyResult& result, TObject* obj = 0) const = 0;
+					     UncertaintyResult& result, TObject* obj = 0) = 0;
     
     /** @brief insert the main object for this calibration */
     void setResult(TObject* obj);
@@ -174,10 +174,10 @@ namespace Analysis {
     double getUpperBound(unsigned int vartype, bool extrapolate = false) const;
 
     /** @brief allow the user to inspect the bounds of validity */
-    std::vector<std::pair<double, double> > getBounds() const;
+    std::vector<std::pair<double, double> > getBounds();
 
     /** utility to retrieve variable types  */
-    std::vector<unsigned int> getVariableTypes() const;
+    std::vector<unsigned int> getVariableTypes();
 
     /** utility for comparison of doubles */
     static bool isNearlyEqual (double a, double b);
@@ -202,10 +202,10 @@ namespace Analysis {
 	@param  extrapolate set to "true" for the evaluation of extrapolation uncertainties
 	@return kSuccess, kRange, or kExtrapolatedRange, depending on the kinematic variables
     */
-    CalibrationStatus computeVariables(const CalibrationDataVariables& x, bool extrapolate = false) const;
+    CalibrationStatus computeVariables(const CalibrationDataVariables& x, bool extrapolate = false);
 
     /** @brief decode the 'uncertainty' objects' names to determine the relevant variable types */
-    virtual void computeVariableTypes() const = 0;
+    virtual void computeVariableTypes() = 0;
 
     std::vector<double> m_lowerBounds;   // lower validity bounds
     std::vector<double> m_upperBounds;   // upper validity bounds
@@ -214,13 +214,13 @@ namespace Analysis {
     std::vector<double> m_upperBoundsExtrapolated;   //! (possibly looser) upper validity bounds for extrapolation
 
     /** cached variables for code speed-up */
-    mutable TObject* m_objResult;                //! don't persistify
-    mutable TObject* m_objSystematics;           //! don't persistify
+    TObject* m_objResult;                //! don't persistify
+    TObject* m_objSystematics;           //! don't persistify
 
-    mutable double m_vars[MaxCalibrationVars];   //! don't persistify
+    double m_vars[MaxCalibrationVars];   //! don't persistify
 
     /** @brief specification of variable type per object (result / uncertainty) */
-    mutable std::vector<unsigned int> m_variables;  //! persistency not needed for this variable
+    std::vector<unsigned int> m_variables;  //! persistency not needed for this variable
     // mutable std::map<std::string, std::vector<unsigned int> > m_variables; //! persistency not needed for this variable
     // mutable std::vector<unsigned int>* m_variablesResult;                  //! persistency not needed for this variable
 
@@ -249,10 +249,10 @@ namespace Analysis {
     CalibrationDataHistogramContainer(const char* name = "default"); // default ctor needed for persistence
     virtual ~CalibrationDataHistogramContainer();    // virtual dtor needed for persistence
     virtual CalibrationStatus getResult(const CalibrationDataVariables& x, double& result,
-					TObject* obj = 0, bool extrapolate = false) const;
-    virtual CalibrationStatus getStatUncertainty(const CalibrationDataVariables& x, double& result) const;
+					TObject* obj = 0, bool extrapolate = false);
+    virtual CalibrationStatus getStatUncertainty(const CalibrationDataVariables& x, double& result);
     virtual CalibrationStatus getUncertainty(const std::string& unc, const CalibrationDataVariables& x,
-					     UncertaintyResult& result, TObject* obj = 0) const;
+					     UncertaintyResult& result, TObject* obj = 0);
 
     /** Indicate whether the given uncertainty is correlated from bin to bin or not
 	(note that this function is to be used only for _systematic_ uncertainties) */
@@ -273,11 +273,11 @@ namespace Analysis {
 	(this has some subtle consequences for the treatment of bin-to-bin correlations).
 	The return value will be -1 in case this is not a "continuous" calibration object,
 	and the axis number (0 for X, 1 for Y, 2 for Z) otherwise. */
-    virtual int getTagWeightAxis() const;
+    virtual int getTagWeightAxis();
 
     /** Retrieve the bin boundaries for the specified variable type (which should be a CalibrationParametrization enum).
 	An empty vector will be returned if the specified variable is not actually used. */
-    virtual std::vector<double> getBinBoundaries(unsigned int vartype) const;
+    virtual std::vector<double> getBinBoundaries(unsigned int vartype);
 
     /** Retrieve the number of eigenvectors to be retained for the purpose of eigenvector variation reduction strategies.
 	@param  choice  specification of the reduction option (integer corresponding to the CalibrationDataInterfaceROOT::EVReductionStrategy enum)
@@ -288,7 +288,7 @@ namespace Analysis {
   protected:
 
     /** Cache for bin boundary information */
-    mutable std::map<unsigned int, std::vector<double> > m_binBoundaries; //! no need to persistify
+    std::map<unsigned int, std::vector<double> > m_binBoundaries; //! no need to persistify
 
   private:
 
@@ -314,7 +314,7 @@ namespace Analysis {
     // Int_t findBin(const TH1* hist, bool doExtrapolate) const;
 
     /** decode the 'uncertainty' objects' names to determine the relevant variable types */
-    virtual void computeVariableTypes() const;
+    virtual void computeVariableTypes();
 
     ClassDef(CalibrationDataHistogramContainer, 2);  // histogram based calibration data object
   };
@@ -337,10 +337,10 @@ namespace Analysis {
     CalibrationDataMappedHistogramContainer(const char* name = "default"); // default ctor needed for persistence
     virtual ~CalibrationDataMappedHistogramContainer();    // virtual dtor needed for persistence
     virtual CalibrationStatus getResult(const CalibrationDataVariables& x, double& result,
-					TObject* obj = 0, bool extrapolate = false) const;
-    virtual CalibrationStatus getStatUncertainty(const CalibrationDataVariables& x, double& result) const;
+					TObject* obj = 0, bool extrapolate = false);
+    virtual CalibrationStatus getStatUncertainty(const CalibrationDataVariables& x, double& result);
     virtual CalibrationStatus getUncertainty(const std::string& unc, const CalibrationDataVariables& x,
-					     UncertaintyResult& result, TObject* obj = 0) const;
+					     UncertaintyResult& result, TObject* obj = 0);
 
     /** Indicate whether histogram interpolation is used or not. Not applicable here. */
     virtual bool isInterpolated() const { return false; }
@@ -349,7 +349,7 @@ namespace Analysis {
 	(this has some subtle consequences for the treatment of bin-to-bin correlations).
 	The return value will be -1 in case this is not a "continuous" calibration object,
 	and the axis number (0 for X, 1 for Y, 2 for Z) otherwise. */
-    virtual int getTagWeightAxis() const;
+    virtual int getTagWeightAxis();
 
     /** Set (by hand) the variables that will be mapped onto a single histogram axis */
     void setMappedVariables(const std::vector<std::string>& variables);
@@ -359,7 +359,7 @@ namespace Analysis {
 
     /** Retrieve the bin boundaries for the specified variable type (which should be a CalibrationParametrization enum).
 	An empty vector will be returned if the specified variable is not actually used. */
-    virtual std::vector<double> getBinBoundaries(unsigned int vartype) const;
+    virtual std::vector<double> getBinBoundaries(unsigned int vartype);
 
     /** Helper class for the specification of custom binning.
 	This is a very simple class, containing only the bin specification and associated access methods.
@@ -367,13 +367,13 @@ namespace Analysis {
     class Bin {
     public:
       Bin();                                                 // default constructor (for persistency)
-      Bin(unsigned int dimension, double* low, double* up);
+      Bin(unsigned int dimension, const double* low, const double* up);
       Bin(const Bin& other);
       Bin& operator=(const Bin& other);
       ~Bin();
       // return the number of dimensions
       unsigned int getDimension() const { return m_dimension; }
-      bool   contains(double* x) const;
+      bool   contains(const double* x) const;
       double getUpperBound(unsigned int dim) const;
       double getLowerBound(unsigned int dim) const;
     private:
@@ -396,22 +396,22 @@ namespace Analysis {
     std::vector<std::string>  m_mapped;
 
     /** starting position of mapped variables */
-    mutable unsigned int m_beginMapped;                   //! don't persistify
+    unsigned int m_beginMapped;                   //! don't persistify
 
     /** calibration bins */
     std::vector<Bin> m_bins;
     // cache index to the last used bin
-    mutable unsigned int m_lastBin;                       //! don't persistify
+    unsigned int m_lastBin;                       //! don't persistify
 
     /** find the bin number corresponding to the input variables */
-    Int_t findBin() const;
-    Int_t findMappedBin(double* x) const;
+    Int_t findBin();
+    Int_t findMappedBin(const double* x);
 
     /** check the bounds of validity for this calibration object */
     void checkBounds();
 
     /** @brief decode the 'uncertainty' objects' names to determine the relevant variable types */
-    virtual void computeVariableTypes() const;
+    virtual void computeVariableTypes();
 
     ClassDef(CalibrationDataMappedHistogramContainer, 1);  // 'mapped' histogram based calibration data object
   };
@@ -429,10 +429,10 @@ namespace Analysis {
     CalibrationDataFunctionContainer(const char* name = "default"); // default ctor needed for persistence
     virtual ~CalibrationDataFunctionContainer();   // virtual dtor needed for persistence
     virtual CalibrationStatus getResult(const CalibrationDataVariables& x, double& result,
-					TObject* obj = 0, bool /* extrapolate */ = false) const;
-    virtual CalibrationStatus getStatUncertainty(const CalibrationDataVariables& x, double& result) const;
+					TObject* obj = 0, bool /* extrapolate */ = false);
+    virtual CalibrationStatus getStatUncertainty(const CalibrationDataVariables& x, double& result);
     virtual CalibrationStatus getUncertainty(const std::string& unc, const CalibrationDataVariables& x,
-					     UncertaintyResult& result,  TObject* obj = 0) const;
+					     UncertaintyResult& result,  TObject* obj = 0);
 
     /** Set the lower bound of validity for the given variable */
     inline void setLowerBound(int vartype, double bound) {m_lowerBounds[vartype] = bound; }
@@ -442,10 +442,10 @@ namespace Analysis {
     
   private:
 
-    mutable TObject* m_objStatistics;      //! cached
+    TObject* m_objStatistics;      //! cached
 
     /** @brief decode the 'uncertainty' objects' names to determine the relevant variable types */
-    virtual void computeVariableTypes() const;
+    virtual void computeVariableTypes();
 
     ClassDef(CalibrationDataFunctionContainer, 1); // function based calibration data object
   };

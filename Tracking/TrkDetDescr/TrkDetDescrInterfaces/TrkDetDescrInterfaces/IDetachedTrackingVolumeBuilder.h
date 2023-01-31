@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,9 +18,6 @@ namespace Trk {
 
   class DetachedTrackingVolume;
  
-  /** Interface ID for IDetachedTrackingVolumeBuilders*/  
-  static const InterfaceID IID_IDetachedTrackingVolumeBuilder("IDetachedTrackingVolumeBuilder", 1, 0);
-  
   /** @class IDetachedTrackingVolumeBuilder
     
     Interface class IDetachedTrackingVolumeBuilder,
@@ -31,14 +28,14 @@ namespace Trk {
   class IDetachedTrackingVolumeBuilder : virtual public IAlgTool {
     
     public:
+    /// Creates the InterfaceID and interfaceID() method
+    DeclareInterfaceID(IDetachedTrackingVolumeBuilder, 1, 0);
+
       /**Virtual destructor*/
       virtual ~IDetachedTrackingVolumeBuilder(){}
-      
-      /** AlgTool and IAlgTool interface methods */
-      static const InterfaceID& interfaceID() { return IID_IDetachedTrackingVolumeBuilder; }
 
-      virtual std::vector<DetachedTrackingVolume*>* buildDetachedTrackingVolumes(bool blend=false) = 0 ;
-    
+      virtual std::unique_ptr<std::vector<std::unique_ptr<DetachedTrackingVolume> > >
+      buildDetachedTrackingVolumes(bool blend = false) const = 0;
   };
 
 } // end of namespace

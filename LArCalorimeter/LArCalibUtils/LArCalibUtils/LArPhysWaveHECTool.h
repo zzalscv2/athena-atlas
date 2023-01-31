@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -14,6 +14,8 @@
 #include "LArRawConditions/LArCaliWave.h"
 #include "LArRawConditions/LArPhysWave.h"
 #include "LArRawConditions/LArWaveHelper.h"
+
+#include "CxxUtils/checker_macros.h"
 
 // includes from calib2physHEC.h:
 #include <stdio.h>
@@ -33,7 +35,7 @@
 
 static const InterfaceID IID_LArPhysWaveHECTool("LArPhysWaveHECTool", 1 , 0); 
 
-class LArPhysWaveHECTool : public AthAlgTool
+class ATLAS_NOT_THREAD_SAFE LArPhysWaveHECTool : public AthAlgTool
 {
  public: 
 

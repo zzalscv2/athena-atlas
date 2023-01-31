@@ -192,7 +192,6 @@ StatusCode HoleSearchValidation::execute(const EventContext& ctx) const {
     DataVector<const Trk::TrackStateOnSurface>::const_iterator iTsosEnd = tsos->end();
 
     unsigned int nRemoved = 0;
-    unsigned int counter  = 0;
 
     std::vector< unsigned int > pixelHitsPerLayer = std::vector< unsigned int>(3);
     std::vector< unsigned int > sctHitsPerLayer = std::vector< unsigned int>(9);
@@ -243,7 +242,6 @@ StatusCode HoleSearchValidation::execute(const EventContext& ctx) const {
     
     for ( ; iTsos != iTsosEnd ; ++iTsos) {
       if ((*iTsos)->type(Trk::TrackStateOnSurface::Measurement)) {
-	counter++;
 	
 	Identifier surfaceID;
 	const Trk::MeasurementBase* mesb = (*iTsos)->measurementOnTrack();

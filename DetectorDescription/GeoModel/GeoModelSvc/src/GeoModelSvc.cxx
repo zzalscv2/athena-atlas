@@ -2,32 +2,31 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "GeoModelSvc.h"
+#include "RDBMaterialManager.h"
+#include "GeoDbTagSvc.h"
+
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoLogVol.h"
 #include "GeoModelKernel/GeoPhysVol.h"
 #include "GeoModelKernel/GeoMaterial.h" 
 #include "GeoModelKernel/GeoVolumeCursor.h"
+#include "GeoModelKernel/GeoPerfUtils.h"
 #include "GeoModelUtilities/GeoModelExperiment.h"
-#include "GeoModelSvc.h"
-#include "RDBMaterialManager.h"
-#include "GeoDbTagSvc.h"
-#include "GeoModelInterfaces/IGeoAlignTool.h"
+#include "GeoModelDBManager/GMDBManager.h"
+#include "GeoModelRead/ReadGeoModel.h"
+
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IConversionSvc.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "AthenaKernel/ClassID_traits.h"
+#include "SGTools/DataProxy.h"
 
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBRecord.h"
 
-#include "GeoModelKernel/GeoPerfUtils.h"
 #include <fstream>
-
-#include "AthenaKernel/ClassID_traits.h"
-#include "SGTools/DataProxy.h"
-
-#include "GeoModelDBManager/GMDBManager.h"
-#include "GeoModelRead/ReadGeoModel.h"
 
 GeoModelSvc::GeoModelSvc(const std::string& name,ISvcLocator* svc)
   : AthService(name,svc),
@@ -41,7 +40,6 @@ GeoModelSvc::GeoModelSvc(const std::string& name,ISvcLocator* svc)
     m_callBackON(true),
     m_ignoreTagDifference(false),
     m_useTagInfo(true),
-    m_useCaloAlign(false),
     m_statisticsToFile(false),
     m_supportedGeometry(0),
     m_ignoreTagSupport(false)
@@ -137,23 +135,6 @@ StatusCode GeoModelSvc::initialize ATLAS_NOT_THREAD_SAFE()
 	
       if(StatusCode::SUCCESS != theTool->registerCallback()) {
 	ATH_MSG_DEBUG("IGeoModelTool::align() was not registerred on CondDB object for the tool " << theTool->name());
-      }
-      else {
-         // Set useCaloAlign flag if the successful tool is LAr
-         if((*itPriv).typeAndName().find("LAr")!=std::string::npos) {
-            m_useCaloAlign = true;
-         }
-      }
-    }
-
-    // Retrieve a tool for Calo Alignments
-    if(m_useCaloAlign) {
-      IGeoAlignTool* calo_align{nullptr};
-      if(m_toolSvc->retrieveTool("CaloAlignTool",calo_align)!=StatusCode::SUCCESS) {
-	ATH_MSG_INFO("Unable to retrieve CaloAlignTool. No Calo alignments in this job");
-      }
-      else {
-	ATH_MSG_DEBUG("CaloAligntTool retrieved successfully");
       }
     }
 

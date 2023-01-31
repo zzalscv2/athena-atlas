@@ -18,6 +18,7 @@ namespace xAOD {
     AUX_VARIABLE( et_count );
     AUX_VARIABLE( em_status );
     AUX_VARIABLE( had_status );
+    AUX_VARIABLE( eFEXtowerID );
     }
 
 } // namespace xAOD

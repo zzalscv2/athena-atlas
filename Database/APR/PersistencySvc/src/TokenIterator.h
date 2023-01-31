@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERSISTENCYSVC_TOKENITERATOR_H
@@ -39,6 +39,9 @@ namespace pool {
 		       const std::string& selection );
 	/// Destructor
 	~TokenIterator();
+
+        TokenIterator( const TokenIterator& ) = delete;
+        TokenIterator& operator=( const TokenIterator& ) = delete;
 
 	/** Returns the pointer to next token.
 	 *  Token ownership is passed to the user.

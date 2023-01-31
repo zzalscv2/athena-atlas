@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GAUGINOS_GauginosPhysicsTool_H
@@ -38,8 +38,6 @@ public:
 
 
 protected:
-
-  static GauginosPhysicsTool* m_physList;
 
   G4double m_GravitinoMass, m_GravitinoWidth, m_GravitinoLifetime, m_GravitinoCharge, m_NeutralinoPDGCode;
   G4double m_NeutralinoMass, m_NeutralinoWidth,  m_NeutralinoLifetime, m_NeutralinoCharge, m_GravitinoPDGCode;

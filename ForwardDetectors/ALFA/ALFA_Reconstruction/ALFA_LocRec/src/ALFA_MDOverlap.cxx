@@ -142,7 +142,7 @@ StatusCode ALFA_MDOverlap::SelectHitInLayer()
 	mapLayers.clear();
 
 	std::list<MDHIT>::const_iterator iter;
-	for (iter=m_ListMDHits.begin(); iter!=m_ListMDHits.end(); iter++)
+	for (iter=m_ListMDHits.begin(); iter!=m_ListMDHits.end(); ++iter)
 	{
 		if (m_iRPot == (*iter).iRPot)
 		{
@@ -162,7 +162,7 @@ StatusCode ALFA_MDOverlap::SelectHitInLayer()
 
 	for (Int_t iLayer = 0; iLayer < ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
 	{
-		for (iterFiber=mapLayers[iLayer].ListFibers.begin(); iterFiber!=mapLayers[iLayer].ListFibers.end(); iterFiber++)
+		for (iterFiber=mapLayers[iLayer].ListFibers.begin(); iterFiber!=mapLayers[iLayer].ListFibers.end(); ++iterFiber)
 		{
 			iHitFiber = *iterFiber;
 
@@ -232,7 +232,7 @@ StatusCode ALFA_MDOverlap::SelectHitInLayer()
 		fRMinV = 2.0;
 		m_iFHits[iLayer] = -9999;
 
-		for (iterFiber=mapLayers[iLayer].ListFibers.begin(); iterFiber!=mapLayers[iLayer].ListFibers.end(); iterFiber++)
+		for (iterFiber=mapLayers[iLayer].ListFibers.begin(); iterFiber!=mapLayers[iLayer].ListFibers.end(); ++iterFiber)
 		{
 			iHitFiber = *iterFiber;
 

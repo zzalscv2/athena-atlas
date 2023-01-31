@@ -191,8 +191,7 @@ StatusCode TestHepMC::initialize() {
 
   // open the files and read G4particle_whitelist.txt
 
-  static const char* fileName = "G4particle_whitelist.txt";
-  const std::string fileLocation = PathResolverFindDataFile ( fileName);
+  const std::string& fileLocation = PathResolverFindDataFile ( "G4particle_whitelist.txt" );
   std::ifstream G4file;
   G4file.open(fileLocation);
   std::string line;
@@ -298,7 +297,8 @@ StatusCode TestHepMC::execute() {
     }
 
     // Check beams and work out per-event beam energy
-    auto beams_t = evt->beams();
+    std::vector<std::shared_ptr<const HepMC3::GenParticle>> beams_t;
+    for (auto p : evt->beams()) { if (p->status() == 4)  beams_t.push_back(p); }
     std::pair<std::shared_ptr<const HepMC3::GenParticle>,std::shared_ptr<const HepMC3::GenParticle>> beams;
     if (beams_t.size() == 2) {
       beams.first=beams_t.at(0);

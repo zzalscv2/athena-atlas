@@ -30,8 +30,14 @@ for plot in wildcardplots:
   wildcards[plot]["HEC"] = { "0":"Sampling0","1":"Sampling1","2":"Sampling2","3":"Sampling3"}
   wildcards[plot]["FCAL"] = { "1":"Sampling1","2":"Sampling2","3":"Sampling3"}
 
+# Tile/Cell/AnyPhysTrig/TileCellEneEtaPhi_SampB_AnyPhysTrig
+# Tile/Cell/AnyPhysTrig/TileCellEtaPhiOvThr_SampB_AnyPhysTrig
+wildcards["TileCellEneEtaPhi"] = [ "A", "B", "D", "E" ]
+wildcards["TileCellEtaPhiOvThr"] = [ "A", "B", "D", "E" ]
+
 def expandWildCard(histlist):
   newhistlist = []
+  grouped = {}  # document the grouped plots, so we can show in one canvas
   for hist in histlist:
     if "*" in hist:      
       foundwc = False
@@ -39,26 +45,34 @@ def expandWildCard(histlist):
         if wc in hist:
           foundwc = True
           newpaths = []
-          for part in wildcards[wc].keys():
-            tmp_path = hist
-            if part+"*" in tmp_path:
-              for samp in wildcards[wc][part].keys():
-                new_path = tmp_path.replace(part+"*", part+samp)
-                if "*" in new_path:
-                  new_path = new_path.replace("*", wildcards[wc][part][samp])
-                  newpaths.append(new_path)
+          if "Tile" in wc:
+            for samp in wildcards[wc]:
+              tmp_path = hist
+              new_path = tmp_path.replace("*",samp)
+              newpaths.append(new_path)
+          else:
+            for part in wildcards[wc].keys():
+              tmp_path = hist
+              if part+"*" in tmp_path:
+                for samp in wildcards[wc][part].keys():
+                  new_path = tmp_path.replace(part+"*", part+samp)
+                  if "*" in new_path:
+                    new_path = new_path.replace("*", wildcards[wc][part][samp])
+                    newpaths.append(new_path)
+
           if len(newpaths) == 0: 
             print("Failed to get the full paths from the wildcard...")
             sys.exit()
           #histlist.remove(hist)
           print("Expanded",wc,"wildcard to give",len(newpaths),"histograms")
-          newhistlist.extend(newpaths)
+          newhistlist.extend(newpaths)      
       if foundwc is False:
         print("A wildcard has been used, but the requested histogram is not yet defined in this script. See the wildcards dictionary:",wildcards.keys())
         sys.exit()
+      grouped[hist] = newpaths
     else:
       newhistlist.append(hist)
-  return newhistlist
+  return newhistlist, grouped
 
 
 def convHname(hname):
@@ -72,10 +86,13 @@ def convHname(hname):
         if det+sam+ac in hname:
           return DET[det], AC[ac], SAM[sam]
   return None, None, None
+
 def LIDProposal(hname, eta, phi, delta=0.15):
   """ Print a proposed LArID translator (https://atlas-larmon.cern.ch/LArIdtranslator/) SQL query """
   det, ac, sam = convHname(hname)
   if det is None: return
+  if int(det) == 0 and abs(eta) > 1.4 and int(sam)>1:
+    sam = str(int(sam)-1)
   proposal = "DET="+det+" and AC="+ac+" and SAM="+sam+" and ETA between "+str(eta-delta)+" and "+str(eta+delta)+" and PHI between "+str(phi-delta)+" and "+str(phi+delta)
   print("*"*30)
   print("Proposal query for LArID translator for plot",hname,"is as follows:")
@@ -246,10 +263,11 @@ def getSummary(histos, correls, fractionNonZero):
         already.append(corr)
 
 
-def topNBins(h,n,bins):
+def topNBins(h,topn,bins,h_fracQth=None):
   content = []
   binx = []
   biny = []
+  fracQthContent = []
   for nb in bins:
     x, y, z = ctypes.c_int(1), ctypes.c_int(1), ctypes.c_int(1)
     h.GetBinXYZ(nb, x, y, z)
@@ -261,22 +279,35 @@ def topNBins(h,n,bins):
     ylow = h.GetYaxis().GetBinLowEdge(y.value)
     yhi = h.GetYaxis().GetBinUpEdge(y.value)
     content.append(c)
+    if h_fracQth is not None:
+      fracQthContent.append(h_fracQth.GetBinContent(nb))
     binx.append( [xlow,xcent,xhi] )
     biny.append( [ylow,ycent,yhi] )
   # hottest bins
-  topn=4
   top = sorted(range(len(content)), key=lambda i: content[i], reverse=True)[:topn]
   top = [ t for t in top if content[t] != 0 ]
   if len(top) == 0: return
   print("*"*30)
   print("**",len(top),"hottest bins in",h.GetName(),"**")
   det, ac, sam = convHname(h.GetName())
+
   if det is not None:
     proposal = "DET="+det+" and AC="+ac+" and SAM="+sam+" and" 
   else:
     proposal = ""
   for ind in top:
-    print(proposal,"ETA between",format(binx[ind][0],".4f"),"and",format(binx[ind][2],".4f"),"and PHI between",format(biny[ind][0],".4f"),"and",format(biny[ind][2],".4f"), "(content =",str(content[ind])+")")
+    # Special treatment for barrel
+    thisprop = proposal
+    if det is not None and int(det) == 0:
+      if (abs(binx[ind][0]) > 1.4 or abs(binx[ind][2]) > 1.4) and int(sam)>1:
+        thissam = str(int(sam)-1)
+        thisprop = thisprop.replace("SAM="+sam, "SAM="+thissam)
+    printstr = thisprop+" ETA between "+str(format(binx[ind][0],".4f"))+" and "+str(format(binx[ind][2],".4f"))+" and PHI between "+str(format(biny[ind][0],".4f"))+" and "+str(format(biny[ind][2],".4f"))+" (content = "+str(content[ind])
+    if h_fracQth is not None:
+      printstr += " & /Qth = "+str(format(fracQthContent[ind],".3f"))
+    printstr += ")"
+
+    print(printstr)
 
 
 if __name__ == "__main__":
@@ -295,6 +326,7 @@ if __name__ == "__main__":
   parser.add_argument('--histoWD',dest='histoWD',default='',help='Webdisplay path of histograms - As many as you want with : [type("1d" or "2d")] [root path] [x] [y if 2d] [delta] (if not provided use global)',action='store',nargs="*")
   parser.add_argument('--onlyBoxes', dest='onlyBoxes', default=False, action='store_true', help="Only show the histograms with the box around the target area - don't do the correlation analysis")
   parser.add_argument('--draw1D', dest='draw1D', default=False, action='store_true', help="Also draw the 1D correlation plots")
+  parser.add_argument('-n','--topN', dest='topN', type=int, default=4, help="Report the N bins with the highest content")
   args = parser.parse_args()
   
   # Info for the DQM APIs... if we are using them
@@ -321,7 +353,7 @@ if __name__ == "__main__":
         sys.exit()
   elif len(args.histoWD) > 0: # The histograms paths are provided as webdisplay paths
     print("Web display paths provided: I will have to retrieve the ROOT file path of histograms")    
-    args.histoWD = expandWildCard(args.histoWD)
+    args.histoWD, grouped = expandWildCard(args.histoWD)
 
     if dqmAPI is None:
       dqmAPI = setupDqmAPI()
@@ -336,6 +368,10 @@ if __name__ == "__main__":
         sys.exit()
       histpath = dqmf_config['%d'%args.runNumber]['annotations']['inputname']
       hArgs.append(histpath)
+      if hist in [ val for k,v in grouped.items() for val in v ]:
+        gk = [ k for k,b in grouped.items() if hist in grouped[k] ][0]
+        gi = grouped[gk].index(hist)
+        grouped[gk][gi] = histpath
   else:
     print("You need to define at least 1 histogram...")
     sys.exit()
@@ -344,12 +380,12 @@ if __name__ == "__main__":
   print("Requested histograms are",hArgs)
   
   histos = {}
-
+  canvs = {}
   for h in hArgs:
     # Print a proposed LArID translator SQL query
-    LIDProposal(h, args.globalX, args.globalY, args.globalDelta)
+    # LIDProposal(h, args.globalX, args.globalY, args.globalDelta)
     histos[h] = {}
-
+    canvs[h] = {}
   print("Finding the path to the merged hist file")
   mergedFilePath = pathExtract.returnEosHistPath( args.runNumber,
                                                   args.stream, args.amiTag, 
@@ -361,27 +397,49 @@ if __name__ == "__main__":
   print("I have found the merged HIST file %s"%(runFilePath))
 
 
+  drawngroup = {}
   print("Opening the merged hist file and getting some information")
   f = R.TFile.Open(runFilePath)
+  print("File is",runFilePath)
   for hist in histos.keys():
     hpath = "run_%d/%s"%(args.runNumber,hist)
     histos[hist]["merged"] = f.Get(hpath)
     histos[hist]["type"] = hType(histos[hist]["merged"])
     histos[hist]["min"] = histos[hist]["merged"].GetMinimum()*0.8
-    histos[hist]["max"] = histos[hist]["merged"].GetMaximum()*1.2
-    histos[hist]["canv"] = R.TCanvas(hist, hist)
+    histos[hist]["max"] = histos[hist]["merged"].GetMaximum()*1.2    
     histos[hist]["merged"].SetMinimum(histos[hist]["min"])
     histos[hist]["merged"].SetMaximum(histos[hist]["max"])
     
     histos[hist]["nbHitInHot"] = [0.] * nLB
     histos[hist]["regionBins"] = []
+
     # oioi here, find another way to define x y delta
     tmp_x = args.globalX
     tmp_delta = args.globalDelta
     # steps for iterating over bins in the scan
     nSteps = 1000
     subStep = 2*tmp_delta/nSteps
-    
+
+    groupname = None
+    if hist in [ val for k,v in grouped.items() for val in v ]:
+      groupname = [ k for k,b in grouped.items() if hist in grouped[k] ][0]
+      if groupname not in canvs.keys():
+        canvs[groupname] = R.TCanvas(groupname.replace("*","x"), groupname.replace("*","x"), 400*len(grouped[groupname]), 400)
+        drawngroup[groupname] = 1
+        if len(grouped[groupname]) <6:
+          canvs[groupname].Divide(len(grouped[groupname]),1)
+          print("dividing canvas", len(grouped[groupname]))
+        else:
+          print("Too many plots in the wildcard", groupname, len(grouped[groupname]))
+          groupname = None
+
+    if groupname is None:
+      canvs[hist]["canv"] = R.TCanvas(hist, hist)
+      thiscanv = canvs[hist]["canv"]
+    else:
+      thiscanv = canvs[groupname]        
+      thiscanv.cd(drawngroup[groupname])
+
     if histos[hist]["type"] == "1d":
       histos[hist]["merged"].Draw()
       histos[hist]["box"] = R.TBox( tmp_x-tmp_delta,
@@ -398,7 +456,7 @@ if __name__ == "__main__":
           histos[hist]["regionBins"].append(tmp_bin)
     else: # 2D hist
       tmp_y = args.globalY
-      histos[hist]["canv"].SetLogz(1)
+      R.gPad.SetLogz(1)
       R.gStyle.SetPalette(1)
       R.gStyle.SetOptStat("")
       print("Draw",hist)
@@ -407,6 +465,12 @@ if __name__ == "__main__":
                                  tmp_y-tmp_delta,
                                  tmp_x+tmp_delta,
                                  tmp_y+tmp_delta )
+      # find the >Qth plot equivalent if this is the occupancy vs eta phi plot
+      QthHist = None
+      if "CellOccupancyVsEtaPhi" in hist:
+        QthHistPath= hist.replace("2d_Occupancy/CellOccupancyVsEtaPhi", "2d_PoorQualityFraction/fractionOverQthVsEtaPhi").replace("_5Sigma_CSCveto", "_hiEth_noVeto")
+        QthHist = f.Get("run_%d/%s"%(args.runNumber,QthHistPath))
+
       # Extract the list of bins where to count.
       # Scans the window to find all bins that fall in the window
       # The regionBins is defined for each histogram allowing different binning
@@ -417,16 +481,19 @@ if __name__ == "__main__":
           tmp_bin = histos[hist]["merged"].FindBin(iX,iY)
           if (tmp_bin not in histos[hist]["regionBins"]):
             histos[hist]["regionBins"].append(tmp_bin)
-      topNBins(histos[hist]["merged"],5,histos[hist]["regionBins"])
+      topNBins(histos[hist]["merged"],args.topN,histos[hist]["regionBins"], QthHist)
     # Draw a box on each of the plots, highlighting the region that we will compare
     histos[hist]["box"].SetLineColor(R.kRed+1)
     histos[hist]["box"].SetLineWidth(3)
     histos[hist]["box"].SetFillStyle(0)    
     histos[hist]["box"].Draw()
     
-    histos[hist]["canv"].objs = []
-    histos[hist]["canv"].objs.append(histos[hist]["box"])
-    histos[hist]["canv"].Update()
+    thiscanv.objs = []
+    thiscanv.objs.append(histos[hist]["box"])
+    thiscanv.Update()
+    if groupname is not None:
+      drawngroup[groupname] += 1
+      thiscanv.cd()
 
   if args.onlyBoxes is True:
     input("I am done...")

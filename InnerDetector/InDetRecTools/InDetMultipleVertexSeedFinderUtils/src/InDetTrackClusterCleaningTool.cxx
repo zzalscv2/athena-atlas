@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetMultipleVertexSeedFinderUtils/InDetTrackClusterCleaningTool.h"
@@ -58,10 +58,10 @@ namespace InDet
   {
    const Trk::TrackParameters * perigee(nullptr);
    if(!reference) perigee = (*i)->perigeeParameters();
-   else perigee = m_extrapolator->extrapolate(ctx,
-                                              **i,perigeeSurface,
-                                              Trk::anyDirection,true, 
-                                              Trk::pion).release(); 
+   else perigee = m_extrapolator->extrapolateTrack(ctx,
+                                                   **i,perigeeSurface,
+                                                   Trk::anyDirection,true, 
+                                                   Trk::pion).release(); 
    
    if(perigee)
    { 
@@ -86,7 +86,7 @@ namespace InDet
    else{
      
      //here we want to make an extrapolation
-     measPerigee = m_extrapolator->extrapolate(
+     measPerigee = m_extrapolator->extrapolateTrack(
        ctx, **i, perigeeSurface, Trk::anyDirection, true, Trk::pion).release();
    }
 
@@ -223,8 +223,11 @@ namespace InDet
 	       {
            const Trk::TrackParameters * perigee(nullptr);
 		 
-		 perigee = m_extrapolator->extrapolate(ctx,
-                                           **i,perigeeSurface,Trk::anyDirection,true, Trk::pion).release();
+           perigee = m_extrapolator->extrapolate(ctx,
+                                                 (*i)->perigeeParameters(),
+                                                 perigeeSurface,
+                                                 Trk::anyDirection,
+                                                 true, Trk::pion).release();
 		 
 		 if(perigee)
 		   { 
@@ -247,7 +250,7 @@ namespace InDet
 	       {
 		 const Trk::TrackParameters * measPerigee(nullptr);
 		 measPerigee = m_extrapolator->extrapolate(ctx,
-                                               **i,
+                                               (*i)->perigeeParameters(),
                                                perigeeSurface,
                                                Trk::anyDirection,
                                                true, 

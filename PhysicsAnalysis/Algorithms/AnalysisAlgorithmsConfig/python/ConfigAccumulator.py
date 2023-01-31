@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 import AnaAlgorithm.DualUseConfig as DualUseConfig
+import re
 
 
 def mapUserName (name) :
@@ -26,22 +27,40 @@ class SelectionConfig :
 
 
 
+class OutputConfig :
+    """all the data for a given variables in the output that has been registered"""
+
+    def __init__ (self, origContainerName, variableName,
+                  *, noSys, enabled) :
+        self.origContainerName = origContainerName
+        self.outputContainerName = None
+        self.variableName = variableName
+        self.noSys = noSys
+        self.enabled = enabled
+
+
+
 class ContainerConfig :
     """all the auto-generated meta-configuration data for a single container
 
     This tracks the naming of all temporary containers, as well as all the
     selection decorations."""
 
-    def __init__ (self, name, sourceName) :
+    def __init__ (self, name, sourceName, *, originalName = None) :
         self.name = name
         self.sourceName = sourceName
+        self.originalName = originalName
         self.index = 0
         self.maxIndex = None
         self.viewIndex = 1
+        self.isMet = False
         self.selections = []
+        self.outputs = {}
 
     def currentName (self) :
         if self.index == 0 :
+            if self.sourceName is None :
+                raise Exception ("should not get here, reading container name before created: " + self.name)
             return self.sourceName
         if self.maxIndex and self.index == self.maxIndex :
             return mapUserName(self.name)
@@ -53,6 +72,7 @@ class ContainerConfig :
         self.index = 0
         self.viewIndex = 1
         self.selections = []
+        self.outputs = {}
 
 
 
@@ -81,9 +101,12 @@ class ConfigAccumulator :
         self._isPhyslite = isPhyslite
         self._algSeq = algSeq
         self._containerConfig = {}
+        self._outputContainers = {}
         self._pass = 0
         self._algorithms = {}
         self._currentAlg = None
+        self._selectionNameExpr = re.compile ('[A-Za-z_][A-Za-z_0-9]+')
+        self._eventLevelOutputs = {}
 
 
     def dataType (self) :
@@ -141,16 +164,38 @@ class ConfigAccumulator :
             DualUseConfig.addPrivateTool (self._currentAlg, type, name)
 
 
-    def setSourceName (self, containerName, sourceName) :
-        """set the (default) name of the original container
+    def setSourceName (self, containerName, sourceName,
+                       *, originalName = None) :
+        """set the (default) name of the source/original container
 
         This is essentially meant to allow using e.g. the muon
         configuration and the user not having to manually specify that
         they want to use the Muons/AnalysisMuons container from the
         input file.
+
+        In addition it allows to set the original name of the
+        container (which may be different from the source name), which
+        is mostly/exclusively used for jet containers, so that
+        subsequent configurations know which jet container they
+        operate on.
         """
         if containerName not in self._containerConfig :
-            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName)
+            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName, originalName = originalName)
+
+
+    def writeName (self, containerName, *, isMet=None) :
+        """register that the given container will be made and return
+        its name"""
+        if containerName not in self._containerConfig :
+            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName = None)
+        if self._containerConfig[containerName].sourceName is not None :
+            raise Exception ("trying to write container configured for input: " + containerName)
+        if self._containerConfig[containerName].index != 0 :
+            raise Exception ("trying to write container twice: " + containerName)
+        self._containerConfig[containerName].index += 1
+        if isMet is not None :
+            self._containerConfig[containerName].isMet = isMet
+        return self._containerConfig[containerName].currentName()
 
 
     def readName (self, containerName) :
@@ -185,6 +230,52 @@ class ConfigAccumulator :
         return self._containerConfig[containerName].index == 0
 
 
+    def originalName (self, containerName) :
+        """get the "original" name of the given container
+
+        This is mostly/exclusively used for jet containers, so that
+        subsequent configurations know which jet container they
+        operate on.
+        """
+        if containerName not in self._containerConfig :
+            raise Exception ("container unknown: " + containerName)
+        result = self._containerConfig[containerName].originalName
+        if result is None :
+            raise Exception ("no original name for: " + containerName)
+        return result
+
+
+    def isMetContainer (self, containerName) :
+        """whether the given container is registered as a MET container
+
+        This is mostly/exclusively used for determining whether to
+        write out the whole container or just a single MET term.
+        """
+        if containerName not in self._containerConfig :
+            raise Exception ("container unknown: " + containerName)
+        return self._containerConfig[containerName].isMet
+
+
+    def readNameAndSelection (self, containerName) :
+        """get the name of the "current copy" of the given container, and the
+        selection string
+
+        This is mostly meant for MET and OR for whom the actual object
+        selection is relevant, and which as such allow to pass in the
+        working point as "ObjectName.WorkingPoint".
+        """
+        split = containerName.split (".")
+        if len(split) == 1 :
+            objectName = split[0]
+            selectionName = ''
+        elif len(split) == 2 :
+            objectName = split[0]
+            selectionName = split[1]
+        else :
+            raise Exception ('invalid object selection name: ' + containerName)
+        return self.readName (objectName), self.getFullSelection (objectName, selectionName)
+
+
     def nextPass (self) :
         """switch to the next configuration pass
 
@@ -197,6 +288,8 @@ class ConfigAccumulator :
             self._containerConfig[name].nextPass ()
         self._pass = 1
         self._currentAlg = None
+        self._outputContainers = {}
+        self._eventLevelOutputs = {}
 
 
     def getPreselection (self, containerName, selectionName) :
@@ -204,6 +297,8 @@ class ConfigAccumulator :
         """get the preselection string for the given selection on the given
         container
         """
+        if selectionName != '' and not self._selectionNameExpr.fullmatch (selectionName) :
+            raise ValueError ('invalid selection name: ' + selectionName)
         if containerName not in self._containerConfig :
             return ""
         config = self._containerConfig[containerName]
@@ -215,17 +310,58 @@ class ConfigAccumulator :
         return '&&'.join (decorations)
 
 
-    def getFullSelection (self, containerName, selectionName) :
+    def getFullSelection (self, containerName, selectionName,
+                          *, skipBase = False) :
 
         """get the preselection string for the given selection on the given
         container
+
+        This can handle both individual selections or selection
+        expressions (e.g. `loose||tight`) with the later being
+        properly expanded.  Either way the base selection (i.e. the
+        selection without a name) will always be applied on top.
+
+        containerName --- the container the selection is defined on
+        selectionName --- the name of the selection, or a selection
+                          expression based on multiple named selections
+        skipBase --- will avoid the base selection, and should normally
+                     not be used by the end-user.
+
         """
         if containerName not in self._containerConfig :
             return ""
+
+        # Check if this is actually a selection expression,
+        # e.g. `A||B` and if so translate it into a complex expression
+        # for the user.  I'm not trying to do any complex syntax
+        # recognition, but instead just produce an expression that the
+        # C++ parser ought to be able to read.
+        if selectionName != '' and \
+           not self._selectionNameExpr.fullmatch (selectionName) :
+            result = ''
+            while selectionName != '' :
+                match = self._selectionNameExpr.match (selectionName)
+                if not match :
+                    result += selectionName[0]
+                    selectionName = selectionName[1:]
+                else :
+                    subname = match.group(0)
+                    subresult = self.getFullSelection (containerName, subname, skipBase = True)
+                    if subresult != '' :
+                        result += '(' + subresult + ')'
+                    else :
+                        result += 'true'
+                    selectionName = selectionName[len(subname):]
+            subresult = self.getFullSelection (containerName, '')
+            if subresult != '' :
+                result = subresult + '&&(' + result + ')'
+            return result
+
         config = self._containerConfig[containerName]
         decorations = []
         for selection in config.selections :
-            if (selection.name == '' or selection.name == selectionName) :
+            if ((selection.name == '' and not skipBase) or
+                selection.name == selectionName) :
                 decorations += [selection.decoration]
         return '&&'.join (decorations)
 
@@ -237,8 +373,47 @@ class ConfigAccumulator :
 
         This also takes the number of bits in the selection decoration,
         which is needed to make object cut flows."""
+        if selectionName != '' and not self._selectionNameExpr.fullmatch (selectionName) :
+            raise ValueError ('invalid selection name: ' + selectionName)
         if containerName not in self._containerConfig :
             self._containerConfig[containerName] = ContainerConfig (containerName, containerName)
         config = self._containerConfig[containerName]
         selection = SelectionConfig (selectionName, decoration, **kwargs)
         config.selections.append (selection)
+
+
+    def addOutputContainer (self, containerName, outputContainerName) :
+        """register a copy of a container used in outputs"""
+        if containerName not in self._containerConfig :
+            raise KeyError ("container unknown: " + containerName)
+        if outputContainerName in self._outputContainers :
+            raise KeyError ("duplicate output container name: " + outputContainerName)
+        self._outputContainers[outputContainerName] = containerName
+
+
+    def addOutputVar (self, containerName, variableName, outputName,
+                      *, noSys=False, enabled=True, isEventLevel=False) :
+        """add an output variable for the given container to the output
+        """
+
+        if not isEventLevel :
+            if containerName not in self._containerConfig :
+                raise KeyError ("container unknown: " + containerName)
+            baseConfig = self._containerConfig[containerName].outputs
+        else :
+            baseConfig = self._eventLevelOutputs
+        if outputName in baseConfig :
+            raise KeyError ("duplicate output variable name: " + outputName)
+        config = OutputConfig (containerName, variableName, noSys=noSys, enabled=enabled)
+        baseConfig[outputName] = config
+
+
+    def getOutputVars (self, containerName) :
+        """get the output variables for the given container"""
+        if containerName == '' :
+            return self._eventLevelOutputs
+        if containerName in self._outputContainers :
+            containerName = self._outputContainers[containerName]
+        if containerName not in self._containerConfig :
+            raise KeyError ("unknown container for output: " + containerName)
+        return self._containerConfig[containerName].outputs

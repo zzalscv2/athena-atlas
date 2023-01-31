@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,6 +18,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/IIncidentListener.h"
+#include "CxxUtils/checker_macros.h"
 // Trk
 #include "TrkParameters/TrackParameters.h"
 // CLHEP
@@ -45,7 +46,7 @@ namespace iFatras {
    @author Andreas.Salzburger -at- cern.ch 
    */
       
-  class HitCreatorTRT : public extends<AthAlgTool, IHitCreator, IIncidentListener>
+  class ATLAS_NOT_THREAD_SAFE HitCreatorTRT : public extends<AthAlgTool, IHitCreator, IIncidentListener>  // deprecated: ATLASSIM-6020
   {
     public:
 

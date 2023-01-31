@@ -10,6 +10,8 @@
 
 namespace xAOD {
 
+
+// SETTER and GETTERs in the AuxContainer
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, float        , eta         , setEta         )
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, float        , phi         , setPhi         )
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, int          , globalEta   , setglobalEta   )
@@ -26,6 +28,13 @@ AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<uint16_t> , et_c
 
 AUXSTORE_OBJECT_SETTER_AND_GETTER   ( jFexTower_v1, std::vector<char> , isjTowerSat , setIsjTowerSat )
 AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<char> , isjTowerSat , setIsjTowerSat )
+
+// SETTER and GETTERs for the decorations
+AUXSTORE_OBJECT_SETTER_AND_GETTER   ( jFexTower_v1, std::vector<float> , SCellEt , setSCellEt )
+AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<float> , SCellEt , setSCellEt )
+AUXSTORE_OBJECT_SETTER_AND_GETTER   ( jFexTower_v1, std::vector<int>   , SCellID , setSCellID )
+AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<int>   , SCellID , setSCellID )
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, int                , TileEt  , setTileEt  )
 
 
 /// initialize

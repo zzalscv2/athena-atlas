@@ -128,8 +128,7 @@ def MM_OverlayDigitizationBasicCfg(flags, **kwargs):
     # Set common overlay extra inputs
     kwargs.setdefault("ExtraInputs", flags.Overlay.ExtraInputs)
 
-    TGCDigitizer = CompFactory.TGCDigitizer
-    acc.addEventAlgo(TGCDigitizer(name="MM_OverlayDigitizer", **kwargs))
+    acc.addEventAlgo(CompFactory.MM_Digitizer(name="MM_OverlayDigitizer", **kwargs))
     return acc
 
 

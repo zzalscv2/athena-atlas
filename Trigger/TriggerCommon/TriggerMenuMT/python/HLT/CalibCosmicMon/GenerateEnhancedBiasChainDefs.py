@@ -9,13 +9,13 @@ log = logging.getLogger(__name__)
 log.info("Importing %s",__name__)
 
 
-def generateChainConfigs( chainDict ):
+def generateChainConfigs(flags,  chainDict ):
     log.debug("Generate EnhancedBias...")
     listOfChainDicts = splitChainDict(chainDict)
     listOfChainDefs = []
 
     for subChainDict in listOfChainDicts:
-        EnhancedBiasChain = EnhancedBiasChainConfiguration(subChainDict).assembleChain()
+        EnhancedBiasChain = EnhancedBiasChainConfiguration(subChainDict).assembleChain(flags)
         listOfChainDefs += [EnhancedBiasChain]
 
     if len(listOfChainDefs)>1:

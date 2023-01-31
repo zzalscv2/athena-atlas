@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BeamHaloGenerator/BeamHaloGeneratorAlg.h"
@@ -15,39 +15,11 @@
 //--------------------------------------------------------------------------
 
 BeamHaloGeneratorAlg::BeamHaloGeneratorAlg(const std::string& name, ISvcLocator* svcLocator)
-  : GenModule(name,svcLocator),
-    m_inputTypeStr("MARS-NM"),  
-    m_inputFile("bgi-b2l1.1"),
-    m_interfacePlane(20850.0),
-    m_enableFlip(false),
-    m_flipProbability(0.),
-    m_enableSampling(false),
-    m_bufferFileName("buffer.bin"),
-    m_generatorSettings(),
-    m_doMonitoringPlots(false),
-    m_tHistSvc(0),
-    m_randomStream("BeamHalo"),
-    m_beamHaloGenerator(0),
-    m_evt() {
-  declareProperty("inputType", m_inputTypeStr = "MARS-NM");
-  declareProperty("inputFile",  m_inputFile = "bgi-b2l1.1");
-  declareProperty("interfacePlane", m_interfacePlane = 20850.0); // (mm)
-  declareProperty("enableFlip", m_enableFlip = false);
-  declareProperty("flipProbability", m_flipProbability = 0.0);
-  declareProperty("enableSampling", m_enableSampling = false);
-  declareProperty("bufferFileName", m_bufferFileName = "BinaryBuffer.bin");
-  declareProperty("generatorSettings", m_generatorSettings, "A set of cuts to be applied to generated particles.");
-  declareProperty("doMonitoringPlots", m_doMonitoringPlots = false);
-  declareProperty("randomStream", m_randomStream = "BeamHalo");
-
-  for(int i=0;i<NPLOTS;i++) 
-    m_validationPlots[i] = 0;
-
-}
-
-//--------------------------------------------------------------------------
-
-BeamHaloGeneratorAlg::~BeamHaloGeneratorAlg() {
+  : GenModule(name,svcLocator)
+{
+  for (int i=0;i<NPLOTS;i++) {
+    m_validationPlots[i] = nullptr;
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -142,19 +114,16 @@ StatusCode BeamHaloGeneratorAlg::genInitialize() {
   // Check the input type string
   if (m_inputTypeStr == "MARS-NM") {
     m_beamHaloGenerator = new MarsHaloGenerator(&particleTable(),
-						&randomEngine(), 
-						m_inputFile,
-						m_generatorSettings);
+                                                m_inputFile,
+                                                m_generatorSettings);
   }
   else if (m_inputTypeStr == "FLUKA-VT") {
     m_beamHaloGenerator = new FlukaHaloGenerator(1, &particleTable(),
-						 &randomEngine(), 
-						 m_inputFile,
-						 m_generatorSettings);
+                                                 m_inputFile,
+                                                 m_generatorSettings);
   }
   else if (m_inputTypeStr == "FLUKA-RB") {
     m_beamHaloGenerator = new FlukaHaloGenerator(0, &particleTable(),
-                                                 &randomEngine(),
                                                  m_inputFile,
                                                  m_generatorSettings);
   }
@@ -182,13 +151,17 @@ StatusCode BeamHaloGeneratorAlg::genInitialize() {
 
 StatusCode BeamHaloGeneratorAlg::callGenerator() {
 
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  CLHEP::HepRandomEngine* rndmEngine = this->getRandomEngine(m_randomStream, ctx);
+
+
   // Clear the event ready for it to be filled with the next beam halo event.
   m_evt.clear();
 
   // Fill an event with particles from the converted ASCII input file.
   // (If the end of file has already been reached this will return a
   // non-zero value.)
-  if(m_beamHaloGenerator->fillEvt(&m_evt) != 0) return StatusCode::FAILURE;
+  if(m_beamHaloGenerator->fillEvt(&m_evt, rndmEngine) != 0) return StatusCode::FAILURE;
 
   // Fill monitoring plots if requested
   if(m_doMonitoringPlots) {

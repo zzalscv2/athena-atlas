@@ -82,15 +82,14 @@ namespace{
     specialFlag.first = -1.;
     specialFlag.second = -1.;
     rawHitRecord.push_back(specialFlag);
-    return;
-  }
+ }
 }
 
 // Constructor with parameters:
 EnergyDepositionTool::EnergyDepositionTool(const std::string& type, const std::string& name, const IInterface* parent) :
   AthAlgTool(type, name, parent) {}
 
-EnergyDepositionTool::~EnergyDepositionTool() {}
+EnergyDepositionTool::~EnergyDepositionTool() = default;
 
 //=======================================
 // I N I T I A L I Z E

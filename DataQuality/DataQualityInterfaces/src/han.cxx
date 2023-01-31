@@ -11,6 +11,7 @@
 #include <string>
 #include <cstdlib>
 
+#include "CxxUtils/checker_macros.h"
 #include "DataQualityInterfaces/HanApp.h"
 #include "DataQualityInterfaces/ConditionsSingleton.h"
 
@@ -32,7 +33,7 @@ struct CmdLineArgs {
 } // unnamed namespace
 
 
-int main( int argc, char *argv[] )
+int main ATLAS_NOT_THREAD_SAFE ( int argc, char *argv[] )
 {
   CmdLineArgs arg;
   int rc = arg.parse( argc, argv );

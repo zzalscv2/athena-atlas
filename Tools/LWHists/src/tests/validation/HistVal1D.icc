@@ -1,12 +1,14 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <vector>
+#include <utility>
 
 //____________________________________________________________________
 template <class TH_1D, class THLW_1D>
-HistVal1D<TH_1D,THLW_1D>::HistVal1D( const std::string& name,
+HistVal1D<TH_1D,THLW_1D>::HistVal1D( bool trigger_conversion_all,
+                                     const std::string& name,
                                      const std::string& title,
                                      int nbins,
                                      const double& xmin,
@@ -15,16 +17,17 @@ HistVal1D<TH_1D,THLW_1D>::HistVal1D( const std::string& name,
 {
   m_h1 = new TH_1D(name.c_str(),title.c_str(),nbins,xmin,xmax);
   m_h2 = THLW_1D::create(name.c_str(),title.c_str(),nbins,xmin,xmax);
-  compareMetaData();
+  HistVal1D::compareMetaData();
 
-  if (HistVal_trigger_conversion_all)
+  if (trigger_conversion_all)
     triggerConversionToROOTHist();
 }
 
 //____________________________________________________________________
 template <class TH_1D, class THLW_1D>
 template <class TFloat>
-HistVal1D<TH_1D,THLW_1D>::HistVal1D( const std::string& name,
+HistVal1D<TH_1D,THLW_1D>::HistVal1D( bool trigger_conversion_all,
+                                     const std::string& name,
                                      const std::string& title,
                                      int nbins,
                                      const TFloat* xbins )
@@ -32,7 +35,7 @@ HistVal1D<TH_1D,THLW_1D>::HistVal1D( const std::string& name,
   m_h1 = new TH_1D(name.c_str(),title.c_str(),nbins,xbins);
   m_h2 = THLW_1D::create(name.c_str(),title.c_str(),nbins,xbins);
   compareMetaData();
-  if (HistVal_trigger_conversion_all)
+  if (trigger_conversion_all)
     triggerConversionToROOTHist();
 }
 
@@ -49,14 +52,14 @@ HistVal1D<TH_1D,THLW_1D>::~HistVal1D()
 template <class TH_1D, class THLW_1D>
 unsigned HistVal1D<TH_1D,THLW_1D>::getXAxis_NBins() const
 {
-  return m_h1->GetXaxis()->GetNbins();
+  return std::as_const(*m_h1).GetXaxis()->GetNbins();
 }
 
 //____________________________________________________________________
 template <class TH_1D, class THLW_1D>
 unsigned HistVal1D<TH_1D,THLW_1D>::getYAxis_NBins() const
 {
-  return m_h1->GetYaxis()->GetNbins();
+  return std::as_const(*m_h1).GetYaxis()->GetNbins();
 }
 
 //____________________________________________________________________
@@ -295,14 +298,14 @@ void HistVal1D<TH_1D,THLW_1D>::compareBinContents() const
 
 //____________________________________________________________________
 template <class TH_1D, class THLW_1D>
-void HistVal1D<TH_1D,THLW_1D>::compareMetaData() const
+void HistVal1D<TH_1D,THLW_1D>::compareMetaData()
 {
   HistValFunctions::compareMetaData(m_h1, m_h2);
 }
 
 //____________________________________________________________________
 template <class TH_1D, class THLW_1D>
-void HistVal1D<TH_1D,THLW_1D>::compareTH1s() const
+void HistVal1D<TH_1D,THLW_1D>::compareTH1s()
 {
   assert(m_h1->GetMarkerStyle()==m_h2->GetMarkerStyle());
   std::string name1(m_h1->GetName());
@@ -368,7 +371,7 @@ void HistVal1D<TH_1D,THLW_1D>::compareTH1s() const
 
 //____________________________________________________________________
 template <class TH_1D, class THLW_1D>
-void HistVal1D<TH_1D,THLW_1D>::compareFastLoop() const
+void HistVal1D<TH_1D,THLW_1D>::compareFastLoop()
 {
   const unsigned nbins = m_h2->GetNbinsX();
   std::vector<std::pair<unsigned,std::pair<double,double> > > active_bins_direct, active_bins_fastloop;

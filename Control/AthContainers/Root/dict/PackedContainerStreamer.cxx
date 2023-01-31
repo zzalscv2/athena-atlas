@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/Root/PackedContainerStreamer.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -71,7 +69,7 @@ SG::PackedParameters readPackedParameters( TBuffer& b ) {
 /**
  * @brief Streamer for reading/writing SG::PackedContainer instances.
  */
-template <class T>
+template <class T, class ALLOC>
 class PackedContainerStreamer
   : public TClassStreamer
 {
@@ -105,9 +103,9 @@ private:
 /**
  * @brief constructor.
  */
-template <class T>
-PackedContainerStreamer<T>::PackedContainerStreamer()
-  : m_className( ClassName< SG::PackedContainer< T > >::name() )
+template <class T, class ALLOC>
+PackedContainerStreamer<T, ALLOC>::PackedContainerStreamer()
+  : m_className( ClassName< SG::PackedContainer< T, ALLOC > >::name() )
 {
 }
 
@@ -117,10 +115,10 @@ PackedContainerStreamer<T>::PackedContainerStreamer()
  * @param b Buffer from/to which to read/write.
  * @param objp Object instance.
  */
-template <class T>
-void PackedContainerStreamer<T>::operator() ( TBuffer& b, void* objp ) {
-   SG::PackedContainer<T>* cont =
-     reinterpret_cast<SG::PackedContainer<T>*> (objp);
+template <class T, class ALLOC>
+void PackedContainerStreamer<T, ALLOC>::operator() ( TBuffer& b, void* objp ) {
+   SG::PackedContainer<T, ALLOC>* cont =
+     reinterpret_cast<SG::PackedContainer<T, ALLOC>*> (objp);
 
    if (b.IsReading()) {
       UInt_t R__s, R__c;
@@ -161,29 +159,31 @@ void PackedContainerStreamer<T>::operator() ( TBuffer& b, void* objp ) {
 /**
  * @brief Clone operation, required for MT.
  */
-template <class T>
-TClassStreamer* PackedContainerStreamer<T>::Generate() const
+template <class T, class ALLOC>
+TClassStreamer* PackedContainerStreamer<T, ALLOC>::Generate() const
 {
-  return new PackedContainerStreamer<T> (*this);
+  return new PackedContainerStreamer<T, ALLOC> (*this);
 }
 
 
-template <class T>
+template <class T, class ALLOC>
 struct InstallPackedContainerStreamer;
 
 
 } // namespace SG
 
 
-#define STREAMER(TYPE)                                                  \
-  namespace ROOT { TGenericClassInfo* GenerateInitInstance(const SG::PackedContainer<TYPE>*);} \
+#define STREAMER1(TYPE, ALLOC)                                          \
+  namespace ROOT { TGenericClassInfo* GenerateInitInstance(const SG::PackedContainer<TYPE, ALLOC>*);} \
   namespace SG {                                                        \
-  template <> struct InstallPackedContainerStreamer<TYPE> {             \
-  InstallPackedContainerStreamer() {                                    \
-    ROOT::GenerateInitInstance((SG::PackedContainer<TYPE>*)nullptr)->AdoptStreamer (new PackedContainerStreamer<TYPE>) ; \
-  } };                                                                  \
-  InstallPackedContainerStreamer<TYPE> _R__UNIQUE_(streamerInstance);   \
+  template <> struct InstallPackedContainerStreamer<TYPE, ALLOC> {      \
+    InstallPackedContainerStreamer() {                                  \
+      ROOT::GenerateInitInstance((SG::PackedContainer<TYPE, ALLOC>*)nullptr)->AdoptStreamer (new PackedContainerStreamer<TYPE, ALLOC>) ; \
+    } };                                                                \
+  InstallPackedContainerStreamer<TYPE, ALLOC> _R__UNIQUE_(streamerInstance); \
   } class swallowSemicolon
+
+#define STREAMER(TYPE) STREAMER1(TYPE, std::allocator<TYPE>)
 
 
 STREAMER(char);

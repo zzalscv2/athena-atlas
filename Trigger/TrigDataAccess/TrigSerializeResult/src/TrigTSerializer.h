@@ -43,18 +43,11 @@ public:
   StatusCode initialize();
   StatusCode finalize();
 
-  /*
-  StatusCode serialize(uint32_t *serialized, void *instance,
-		       const std::string nameOfClass, int &veclen, const int maxsize);
-  */
   std::vector<uint32_t> serialize(const std::string &nameOfClass, const void* instance);
 
   void serialize(const std::string &nameOfClass, const void* instance, std::vector<uint32_t> &v);
 
   void* deserialize(const std::string &nameOfClass, const std::vector<uint32_t>& v);
-  /*
-    StatusCode deserialize(const uint32_t *serialized,  const std::string nameOfClass);
-  */
 
   StatusCode initClass(const std::string &nameOfClass) const;
 
@@ -79,14 +72,12 @@ private:
   void prepareForTBuffer(const std::string &nameOfClass);
   void restoreAfterTBuffer(const std::string &nameOfClass);
 
-  //  StatusCode persistifyEL(const TClass *cl, void* instance);
   bool      m_onlineMode;
   uint32_t  m_guid[4];  
 
   // for error handling
   static   bool       s_decodingError;
-  //static   bool       m_reportError;
-  uint32_t  m_IgnoreErrLvl;
+  uint32_t  m_IgnoreErrLvl{};
   std::map<std::string, uint32_t>   m_errCount;
 
   /// IgnoreMissingDicts

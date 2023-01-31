@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 #           Setup of precision tracking
 
@@ -6,6 +6,9 @@ from __future__ import print_function
 
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("InDetTrigPrecisionTracking")
+
+from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolDecorator
+
 
 def makeInDetTrigPrecisionTracking( config=None, verifier=False, rois='EMViewRoIs', prefix="InDetTrigMT" ) :      
     
@@ -17,6 +20,12 @@ def makeInDetTrigPrecisionTracking( config=None, verifier=False, rois='EMViewRoI
     if config is None:
         raise ValueError('PrecisionTracking No configuration provided!')
 
+    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from InDetTrigRecExample import InDetTrigCA
+    InDetTrigCA.InDetTrigConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
+    
+    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
+    summaryTool = CAtoLegacyPublicToolDecorator(InDetTrigTrackSummaryToolCfg)
 
     doTRT = config.doTRT
 
@@ -38,9 +47,6 @@ def makeInDetTrigPrecisionTracking( config=None, verifier=False, rois='EMViewRoI
                                  ( 'TrackCollection' , 'StoreGateSvc+' + config.trkTracks_FTF() )]
 
     
-    from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTrackSummaryTool
-    summaryTool = InDetTrigTrackSummaryTool
-    
     if config.newConfig:
         log.info( "ID Trigger: NEW precision tracking configuration {} {}".format(config.input_name, signature) )
         ambiSolvingAlgs = ambiguitySolver_builder( signature, config, summaryTool, outputTrackName=ambiTrackCollection, prefix=prefix+"Trk" )
@@ -59,6 +65,15 @@ def makeInDetTrigPrecisionTracking( config=None, verifier=False, rois='EMViewRoI
         trtAlgs = trtExtension_builder( signature, config, rois, summaryTool, inputTracks=ambiTrackCollection, outputTracks=outTrkTracks, prefix=prefix ) 
         ptAlgs.extend( trtAlgs )
   
+    #
+    #  Track PRD association algorithm, can be enabled to restore shared hit computation in TrackParticleCreatorTool
+    #
+    # from .InDetTrigCommon import trackPRD_Association_builder
+    # trackPRD_AssociationAlg = trackPRD_Association_builder(name = prefix+'trackPRD_AssociationAlg'+config.input_name+'_IDTrig',
+    #                                                        inTrackCollections = [finalTrackCollection],
+    #                                                        associationMapName = "TrigInDetPRDtoTrackMap")
+
+    # ptAlgs.append( trackPRD_AssociationAlg )
 
     #
     #  Track particle conversion algorithm
@@ -298,20 +313,7 @@ def scoringTool_builder( signature, config, summaryTool, prefix=None, SiOnly=Tru
     kwargs = setDefaults(kwargs, minTRTonTrk = config.minTRTonTrk)
 
   from InDetConfig.InDetTrackScoringToolsConfig import InDetAmbiScoringToolCfg
-  from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
-  from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
-  flags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActivePass", "Trigger.InDetTracking."+config.name)
-
-  ca = CAtoGlobalWrapper(InDetAmbiScoringToolCfg, flags, **kwargs)
-  sct = ca.popPrivateTools()
-
-  scoringTool = conf2toConfigurable(sct)
-  from AthenaCommon.AppMgr import ToolSvc
-  log.info(scoringTool)
-  ToolSvc += scoringTool
-
+  scoringTool = CAtoLegacyPublicToolDecorator(InDetAmbiScoringToolCfg, **kwargs)
   return scoringTool
 
 

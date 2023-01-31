@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+4# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM11.py
@@ -68,7 +68,7 @@ def JETM11Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    JETM11TriggerListsHelper = TriggerListsHelper()
+    JETM11TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Skimming, thinning, augmentation
     acc.merge(JETM11KernelCfg(ConfigFlags, name="JETM11Kernel", StreamName = 'StreamDAOD_JETM11', TriggerListsHelper = JETM11TriggerListsHelper))
@@ -79,7 +79,7 @@ def JETM11Cfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    JETM11SlimmingHelper = SlimmingHelper("JETM11SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    JETM11SlimmingHelper = SlimmingHelper("JETM11SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
     from DerivationFrameworkJetEtMiss.METTriggerDerivationContentConfig import addMETTriggerDerivationContent
     addMETTriggerDerivationContent(JETM11SlimmingHelper, isLoose=False)

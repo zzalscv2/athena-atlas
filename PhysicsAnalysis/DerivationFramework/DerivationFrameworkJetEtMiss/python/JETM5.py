@@ -94,6 +94,10 @@ def JETM5KernelCfg(ConfigFlags, name='JETM5Kernel', **kwargs):
                                       ThinningTools = thinningTools,
                                       SkimmingTools = [skimmingTool] if not ConfigFlags.Input.isMC else []))       
 
+
+    # PFlow augmentation tool
+    from DerivationFrameworkJetEtMiss.PFlowCommonConfig import PFlowCommonCfg
+    acc.merge(PFlowCommonCfg(ConfigFlags))
     
     return acc
 
@@ -107,7 +111,7 @@ def JETM5Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    JETM5TriggerListsHelper = TriggerListsHelper()
+    JETM5TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Skimming, thinning, augmentation, extra content
     acc.merge(JETM5KernelCfg(ConfigFlags, name="JETM5Kernel", StreamName = 'StreamDAOD_JETM5', TriggerListsHelper = JETM5TriggerListsHelper))
@@ -118,22 +122,20 @@ def JETM5Cfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    JETM5SlimmingHelper = SlimmingHelper("JETM5SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    JETM5SlimmingHelper = SlimmingHelper("JETM5SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
-    JETM5SlimmingHelper.SmartCollections = ["EventInfo",
+    JETM5SlimmingHelper.SmartCollections = ["EventInfo", "InDetTrackParticles", "PrimaryVertices",
                                             "Electrons", "Photons", "Muons", "TauJets",
-                                            "InDetTrackParticles", "PrimaryVertices",
-                                            "MET_Baseline_AntiKt4EMTopo",
-                                            "MET_Baseline_AntiKt4EMPFlow",
+                                            "MET_Baseline_AntiKt4EMTopo","MET_Baseline_AntiKt4EMPFlow",
                                             "AntiKt4EMTopoJets","AntiKt4EMPFlowJets",
                                             "BTagging_AntiKt4EMPFlow"]
 
     JETM5SlimmingHelper.AllVariables = ["CaloCalTopoClusters",
-                                        "MuonTruthParticles", "egammaTruthParticles",
-                                        "TruthParticles", "TruthEvents", "TruthVertices",
                                         "MuonSegments",
                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape",
-                                        "GlobalNeutralParticleFlowObjects", "GlobalChargedParticleFlowObjects", "UFOCSSK"]
+                                        "GlobalNeutralParticleFlowObjects", "GlobalChargedParticleFlowObjects", 
+                                        "CHSGChargedParticleFlowObjects", "CHSGNeutralParticleFlowObjects",
+                                        "UFOCSSK"]
 
 
     JETM5SlimmingHelper.ExtraVariables  += ["AntiKt4EMPFlowJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1"]
@@ -143,6 +145,9 @@ def JETM5Cfg(ConfigFlags):
                                                        'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer',
                                                        'TruthVertices': 'xAOD::TruthVertexContainer',
                                                        'TruthVerticesAux': 'xAOD::TruthVertexAuxContainer'})
+
+        JETM5SlimmingHelper.AllVariables += ["MuonTruthParticles", "egammaTruthParticles",
+                                             "TruthParticles", "TruthEvents", "TruthVertices"]
 
     # Trigger content
     JETM5SlimmingHelper.IncludeTriggerNavigation = False

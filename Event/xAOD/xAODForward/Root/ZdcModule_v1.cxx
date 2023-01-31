@@ -25,13 +25,13 @@ namespace xAOD {
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(ZdcModule_v1,int,zdcType,setZdcType)
 
     
-  const std::vector<uint16_t>& ZdcModule_v1::getWaveform(const std::string s) const 
+  const std::vector<uint16_t>& ZdcModule_v1::getWaveform(const std::string& s) const 
   {
     const Accessor< std::vector<uint16_t> > acc(s);
     return acc( *this );
   }
 
-  void ZdcModule_v1::setWaveform(const std::string s, const std::vector<uint16_t>& waveform)
+  void ZdcModule_v1::setWaveform(const std::string& s, const std::vector<uint16_t>& waveform)
   {
     const Accessor< std::vector<uint16_t> > acc(s);
     acc( *this ) = waveform;

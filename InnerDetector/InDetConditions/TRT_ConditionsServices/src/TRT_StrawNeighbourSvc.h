@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_STRAWNEIGHBOURSVC_H
@@ -19,7 +19,7 @@
 class TRT_ID;
 class StoreGateSvc;
 
-class ATLAS_CHECK_THREAD_SAFETY TRT_StrawNeighbourSvc: public AthService,
+class TRT_StrawNeighbourSvc: public AthService,
   virtual public ITRT_StrawNeighbourSvc
 {
  public:

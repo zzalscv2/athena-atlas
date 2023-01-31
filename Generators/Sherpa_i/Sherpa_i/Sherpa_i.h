@@ -30,42 +30,45 @@ public:
 
 protected:
   
-  SHERPA::Sherpa * p_sherpa;
+  SHERPA::Sherpa * p_sherpa{};
 
   #ifdef IS_SHERPA_3
   /// Sherpa base settings (read from base fragment file) and run card snippet (from JO file)
   std::map<std::string,std::string> m_inputfiles;
   #else
   /// Sherpa base settings (read from base fragment file)
-  std::string m_basefragment;
+  std::string m_basefragment; /// FIXME unused?
 
   /// Sherpa run card snippet (from JO file)
-  std::string m_runcard;
+  StringProperty m_runcard{this, "RunCard", ""};
 
   /// List of additional Sherpa parameters beyond run card snippet (from JO file)
-  std::vector<std::string> m_params;
+  StringArrayProperty m_params{this, "Parameters", {} };
   #endif
 
   /// List of needed OpenLoops process libraries (from JO file)
-  std::vector<std::string> m_openloopslibs;
+  StringArrayProperty m_openloopslibs{this, "OpenLoopsLibs", {} };
 
   /// List of any additional needed files, e.g. custom libraries, PDF sets (from JO file)
-  std::vector<std::string> m_extrafiles;
+  StringArrayProperty m_extrafiles{this, "ExtraFiles", {} };
 
   /// Number of cores recommended for multi-core integration file
-  int m_ncores;
+  IntegerProperty m_ncores{this, "NCores", 1};
 
   /// Memory required for integration/evgen
-  double m_memorymb;
+  DoubleProperty m_memorymb{this, "MemoryMB", 2500.};
 
   /// Optional code for plugin library to compile and load at run time
-  std::string m_plugincode;
+  StringProperty m_plugincode{this, "PluginCode", ""};
 
   /// Variation weight cap factor
-  double m_variation_weight_cap;
+  DoubleProperty m_variation_weight_cap{this, "VariationWeightCap", 10.0};
 
-  double m_xsscale;
-  bool m_cleanup;
+  DoubleProperty m_xsscale{this, "CrossSectionScaleFactor", 1.0};
+  BooleanProperty m_cleanup{this, "CleanupGeneratedFiles", true};
+
+  //Gen_tf run args.
+  IntegerProperty m_dsid{this, "Dsid", 999999, "Dataset ID number"};
 };
 
 

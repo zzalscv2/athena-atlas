@@ -80,11 +80,9 @@ namespace Crest {
     inline static const std::string s_TAG_PATH = "/tags";
     inline static const std::string s_ADMIN_PATH = "/admin";
     inline static const std::string s_IOV_PATH = "/iovs";
-    inline static const std::string s_IOV_SIZE_PATH = "/getSize";
-    inline static const std::string s_IOV_SIZE_PATH_FOR_TAG = "/getSizeByTag";
-    inline static const std::string s_IOV_SELECT_PATH = "/selectIovs";
-    inline static const std::string s_IOV_GROUP_PATH = "/selectGroups";
-    inline static const std::string s_IOV_SNAPSHOT_PATH = "/selectSnapshot";
+
+    inline static const std::string s_IOV_SIZE_PATH = "/size";
+
     inline static const std::string s_GLOBALTAG_PATH = "/globaltags";
     inline static const std::string s_GLOBALTAG_MAP_PATH = "/globaltagmaps";
     inline static const std::string s_PAYLOAD_PATH = "/payloads";
@@ -92,9 +90,16 @@ namespace Crest {
     inline static const std::string s_META_PATH = "/meta";
     inline static const std::string s_DATA_PATH = "/data";
     inline static const std::string s_STOREBATCH_PATH = "/storebatch";
+    inline static const std::string s_BATCH_PATH = "/batch";
+    inline static const std::string s_STORE_PATH = "/store";
     inline static const std::string s_FOLDER_PATH = "/folders";
     inline static const std::string s_RUNINFO_PATH = "/runinfo";
     inline static const std::string s_RUNINFO_LIST_PATH = "/list";
+
+    inline static const std::string s_METHOD_IOVS = "IOVS";
+    inline static const std::string s_METHOD_GROUPS = "GROUPS";
+    inline static const std::string s_METHOD_MONITOR = "MONITOR";
+
 
     // parameters for CREST file storage:
 
@@ -113,6 +118,8 @@ namespace Crest {
     inline static const std::string s_FS_MAP_FILE = "/maps.json";
 
     inline static const std::string s_FS_PATH = "";
+
+    inline static const int s_FS_PREFIX_LENGTH = 3;
 
     enum CrestMode {
       SERVER_MODE = 1, FILESYSTEM_MODE = 2
@@ -428,6 +435,8 @@ namespace Crest {
  */
     void createGlobalTagMap(nlohmann::json& gt);
 
+
+
 /**
  * Method to create a global tag map.
  * (This method is an analogue of the create_global_tag_map method in Python)
@@ -600,15 +609,6 @@ namespace Crest {
     int getSize(const std::string& tagname);
 
 
-/**
- * This method gets the number of iovs for tags matching pattern. This method allows to select the count of iovs in a
- * tag.
- * (This method is an analogue of the get_size_by_tag method in Python)
- * The result is a JSON object.
- * @param tagname - tag name.
- */
-    nlohmann::json getSizeByTag(const std::string& tagname);
-
 
 /**
  * Select groups for a given tagname. This method allows to select a list of groups. The result is a JSON object.
@@ -649,19 +649,12 @@ namespace Crest {
 
 
 /**
- * This method allows to select a list of all iovs in a tag.
- * (This method is an analogue of the select_snapshot method in Python)
- * @param tagname - tag name.
+ * This method stores an IOV set on the CREST server.
+ * The IOVs are send as a JSON array.
+ * @param js - IOV set.
  */
-    nlohmann::json selectSnapshot(const std::string& tagname);
+    void storeBatchIOVs(nlohmann::json& js);
 
-/**
- * This method allows to select a list of all iovs in a tag, using a given snapshot time.
- * (This method is an analogue of the select_snapshot method in Python)
- * @param tagname - tag name.
- * @param snapshot - snapshot.
- */
-    nlohmann::json selectSnapshot(const std::string& tagname, long snapshot);
 
 
 //=======================================================
@@ -1557,6 +1550,14 @@ namespace Crest {
  * @param tagname - tag name.
  */
     void getTagDataInfo(const std::string& tagname);
+
+/**
+ * This is an auxillary method extract first letters from the string (hash).
+ * The letter number is in the s_FS_PREFIX_LENGTH variable.
+ * This method is used to create a catalogue sub directory in the file storage.
+ * @param str - string to extract first letters.
+ */
+    std::string getFirstLetters(const std::string& str);
   };
 } // namespace
 

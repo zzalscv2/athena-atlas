@@ -1029,7 +1029,6 @@ bool MuonTrackPerformanceAlg::insertChamber(const Identifier& chId, const std::s
     if (missingHits.first >= minEtaHits) passesThreshold = true;
     if (missingHits.second >= minPhiHits) passesThreshold = true;
 
-    int nhits = 0;
 
     // if inside cuts, copy the hits into summary
     if (passesThreshold) {
@@ -1040,7 +1039,6 @@ bool MuonTrackPerformanceAlg::insertChamber(const Identifier& chId, const std::s
             Identifier ch = m_idHelperSvc->chamberId(*it);
             if (ch == chId) {
                 chamberData.hits.insert(*it);
-                ++nhits;
             }
         }
     }

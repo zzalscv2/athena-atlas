@@ -11,7 +11,7 @@ def OverlapRemovalToolCfg(ConfigFlags,
                           linkOverlapObjects=False,
                           doEleEleOR=False,
                           doElectrons=True, doMuons=True, doJets=True,
-                          doTaus=True, doPhotons=True, doFatJets=False, doMuPFJetOR=False,
+                          doTaus=True, doPhotons=True, doFatJets=False,
                           **kwargs):
 
     """
@@ -35,7 +35,6 @@ def OverlapRemovalToolCfg(ConfigFlags,
                            marked with true or false.
       linkOverlapObjects - enable ElementLinks to overlap objects.
       doEleEleOR         - enable electron-electron overlap removal.
-      doMuPFJetOR        - enable the pflow jet removal for muons
       doXXXX             - these flags enable/disable object types to
                            configure tools for: doElectrons, doMuons,
                            doJets, doTaus, doPhotons, doFatJets.
@@ -57,10 +56,6 @@ def OverlapRemovalToolCfg(ConfigFlags,
 
     # Overlap tools share an additional common property for object linking
     common_args['LinkOverlapObjects'] = linkOverlapObjects
-
-    # Muon-PFlow fake-jet
-    if doMuPFJetOR:
-        orTool.MuPFJetORT = CompFactory.ORUtils.MuPFJetOverlapTool('MuPFJetORT', BJetLabel=bJetLabel, **common_args)
 
     # Electron-electron
     if doElectrons and doEleEleOR:

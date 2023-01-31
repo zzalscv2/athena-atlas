@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#Copyright(C) 2002 - 2021 CERN for the benefit of the ATLAS collaboration
 
-# Declare the package name:
+#Declare the package name:
 atlas_subdir( TrkGaussianSumFilterUtils )
 
 #Component(s) in the package:
@@ -9,7 +9,7 @@ atlas_add_library( TrkGaussianSumFilterUtilsLib
 		   PUBLIC_HEADERS TrkGaussianSumFilterUtils
 		   LINK_LIBRARIES EventPrimitives TrkParameters 
 		                  TrkEventPrimitives TrkMeasurementBase
-                      TrkGeometry
+                      TrkGeometry PathResolver
        PRIVATE_LINK_LIBRARIES CxxUtils PathResolver TrkExUtils)
 
 #Executables for tests
@@ -25,6 +25,11 @@ atlas_add_executable( GSF_testFindMode
 	test/testFindMode.cxx 
         LINK_LIBRARIES CxxUtils TrkGaussianSumFilterUtilsLib)
 
+atlas_add_executable( GSF_testHorner
+  test/testHorner.cxx 
+  LINK_LIBRARIES CxxUtils TrkGaussianSumFilterUtilsLib PathResolver TrkExUtils)
+
+
 
 #Tests
 atlas_add_test(ut_GSF_testAlignedDynArray
@@ -35,4 +40,7 @@ atlas_add_test(ut_GSF_testMergeComponents
 
 atlas_add_test(ut_GSF_testFindMode
 	SCRIPT GSF_testFindMode)
+
+atlas_add_test(ut_GSF_testHorner
+	SCRIPT GSF_testHorner)
 

@@ -73,7 +73,7 @@ athenaCommonFlags.SkipEvents.set_Off()
 ## Use single particle generator
 import AthenaCommon.AtlasUnixGeneratorJob
 import ParticleGun as PG
-pg = PG.ParticleGun(randomSvcName=simFlags.RandomSvc.get_Value(), randomStream="SINGLE")
+pg = PG.ParticleGun(randomStream = "SINGLE", randomSeed = simFlags.RandomSeedOffset.get_Value())
 pg.sampler.pid = 999 #Geantino
 pg.sampler.mom = PG.EEtaMPhiSampler(energy=50000, eta=[-3,3])
 topSeq += pg

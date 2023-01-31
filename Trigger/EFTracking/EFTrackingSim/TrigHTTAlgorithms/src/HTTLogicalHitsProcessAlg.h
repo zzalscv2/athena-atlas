@@ -25,6 +25,8 @@
 #include "TrigHTTLRT/HTTLLPRoadFilterTool.h"
 #include "TrigHTTObjects/HTTEventInputHeader.h"
 
+#include "AthenaMonitoringKernel/Monitored.h"
+
 #include <fstream>
 
 class HTTDataFlowTool;
@@ -128,6 +130,8 @@ class HTTLogicalHitsProcessAlg : public AthAlgorithm
                                    HTTDataFlowInfo const * dataFlowInfo);
 
         void printHitSubregions(std::vector<HTTHit> const & hits);
+
+        ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
 };
 
 #endif // HTTLOGICALHITSTOALGORITHMS_h

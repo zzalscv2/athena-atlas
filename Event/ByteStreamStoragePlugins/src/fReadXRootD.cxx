@@ -39,6 +39,7 @@ bool fReadXRootD::isEoF()
   return false;
 }
 
+// cppcheck-suppress passedByValue; interface defined in EventStorage.
 bool fReadXRootD::fileExists(std::string fName) const
 {
   int pfd = XrdPosixXrootd::Open(fName.c_str(), O_RDONLY);
@@ -47,6 +48,7 @@ bool fReadXRootD::fileExists(std::string fName) const
   return true;
 }
 
+// cppcheck-suppress passedByValue; interface defined in EventStorage.
 void fReadXRootD::openFile(std::string fName)
 {
   if(this->isOpen()) this->closeFile();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -32,8 +32,8 @@ CompetingMuonClustersOnTrackCnv_p2::persToTrans( const Muon::CompetingMuonCluste
   *transObj = Muon::CompetingMuonClustersOnTrack (Trk::LocalParameters(),
                                                   Amg::MatrixX(),
                                                   associatedSurface,
-                                                  containedChildRots.release(),
-                                                  nullptr // assgnProb
+                                                  std::move(*containedChildRots),
+                                                  {} // assgnProb
                                                   );
 
    fillTransFromPStore( &m_cRotCnv, persObj->m_competingROT, transObj, log );

@@ -90,7 +90,7 @@ StatusCode jSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<jTowe
                     ATH_MSG_WARNING("\n==== jSuperCellTowerMapper ============ Hadronic layer energy filled more than once - it will be ignored. (Needs investigation).  Please report this!");
                 }
                 
-                targetTower->set_TileCal_Et(1, int(eachTower->jepET()) * 1000.); // cf 1000.0
+                targetTower->set_TileCal_Et(1, int(eachTower->cpET()) * 500.); // cf 500.0
             } else {
                 ATH_MSG_WARNING("\n==== jSuperCellTowerMapper ============ Tower ID is officially unknown - it will be ignored. (Needs investigation).  Please report this!");
             }
@@ -300,8 +300,7 @@ void jSuperCellTowerMapper::reset(){
     for(auto tmpTower : *my_jTowerContainerRaw){
         tmpTower->Do_LAr_encoding();
     }
-
-     
+    
     return StatusCode::SUCCESS;
 
 }
@@ -1089,6 +1088,12 @@ int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> 
 
     if(validcell) {
         iJTower = FindTowerIDForSuperCell(towereta, towerphi) + towerID_Modifier;
+        
+        //Applying the SCell masking!
+        if( (prov >> 7 & 1) and m_apply_masking ){
+            //if masked then Et = 0
+            et = 0.0;
+        }
         if(doPrint) {
             PrintCellSpec(sample, layer, region, eta_index, phi_index, pos_neg, iJTower, iCell, prov, ID, doenergysplit, eta_min, eta_max, eta0, phi_min, phi_max, phi0);
         }
@@ -1198,20 +1203,43 @@ StatusCode jSuperCellTowerMapper::AssignPileupAndNoiseValues(std::unique_ptr<jTo
     for(int i=1; i<jTowerArea_hist->GetNbinsX()+1; i++) {
         float TTowerArea = jTowerArea_hist->GetBinContent(i);
         int TTid = Firmware2BitwiseID->GetBinContent(i);
+        
+        // layer has values of (EM:0 HAD():1 FCAL0:2 FCAL1:3 FCAL2:4)
         int layer = BinLayer->GetBinContent(i);
         float eta = EtaCoords->GetBinContent(i);
         float phi = PhiCoords->GetBinContent(i);
-        int noise = TTowerArea*100; // the noise cut depends on the TT Area weight, allows to increase the threshold for bigger TT
-        //int noise = 2000; // This noise cut value was used in Run2, keep to remember for now, will be changed when COOL database is built
-        
-        if(TTid == 0) continue; //avoid repeated TTID in jTowerArea_hist, which are set to 0 in Firmware2BitwiseID
 
+  
+        if(TTid == 0) continue; //avoid repeated TTID in jTowerArea_hist, which are set to 0 in Firmware2BitwiseID
+        
+        
+        //Expected noise cut from the performance group
+        int noise = 0;  
+        
+        //COMMENTED FOR NOW, currently applied in the firmware at P1  
+        //setting noise for EMB, EMEC and HEC (all LAr)   
+        
+        //int noise = 0; // the noise cut depends on different regions for LAr and Tile
+        //if(layer == 0 or (layer == 1 and TTid > 300000) ){
+            //noise = 40*25;
+        //}
+        //else if(layer == 1 ){ // 500 MEV cut for Tile
+            //noise = 1*500;
+        //}
+        //else{
+            //noise = 0;
+        //}      
+        
+        
         LVL1::jTower * targetTower = my_jTowerContainerRaw->findTower(TTid);
         int CalorimeterLayer = 1; // it is = 1 for Hadronic calorimeters Tile=1, FCAL1=3 and FCAL2=4
         
         if(layer == 0 || layer==2){
             CalorimeterLayer = 0;  // it is = 0 for EM calorimeters LAr=0 and FCAL0=2
         }
+        
+
+        
         targetTower->setTTowerArea(TTowerArea,CalorimeterLayer);
 
         targetTower->setNoiseForMet(noise,CalorimeterLayer);

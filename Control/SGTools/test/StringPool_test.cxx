@@ -15,6 +15,7 @@
 #include "SGTools/exceptions.h"
 #include "CxxUtils/crc64.h"
 #include "TestTools/expect_exception.h"
+#include "TestTools/random.h"
 #include <vector>
 #include <string>
 #include <cstdlib>
@@ -32,16 +33,16 @@ const char* const teststrings[] = {
 };
 
 
-std::string randstring (unsigned int maxlen = 255)
+std::string randstring (uint32_t& seed, unsigned int maxlen = 255)
 {
   static const std::string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   const unsigned int nchars = chars.size();
 
   char buf[256];
   if (maxlen > 255) maxlen = 255;
-  int len = std::rand() % (maxlen+1);
+  int len = Athena_test::randi_seed (seed, maxlen);
   for (int i = 0; i < len; i++)
-    buf[i] = chars[std::rand() % nchars];
+    buf[i] = chars[Athena_test::randi_seed (seed, nchars)];
   return std::string (buf, len);
 }
 
@@ -92,9 +93,10 @@ void test1()
   std::cout << "pool dump\n";
   sp.dump();
 
+  uint32_t seed = 1234;
   for (int i=0; i < 1000; i++) {
-    SG::StringPool::sgaux_t auxkey = std::rand();
-    std::string str = randstring();
+    SG::StringPool::sgaux_t auxkey = Athena_test::rng_seed (seed);
+    std::string str = randstring(seed);
     SG::StringPool::sgkey_t key = sp.stringToKey (str, auxkey);
     assert (key <= SG::StringPool::sgkey_t_max);
     strings.push_back (str);

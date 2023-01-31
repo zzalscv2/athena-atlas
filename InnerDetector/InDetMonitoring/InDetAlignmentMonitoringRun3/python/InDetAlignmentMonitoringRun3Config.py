@@ -17,7 +17,9 @@ def InDetAlignmentMonitoringRun3Config(flags):
         
     from AthenaConfiguration.ComponentFactory import CompFactory
     from InDetConfig.InDetTrackSelectionToolConfig import IDAlignMonTrackSelectionToolCfg
-
+    from AthenaMonitoring.FilledBunchFilterToolConfig import FilledBunchFilterToolCfg
+    from AthenaConfiguration.Enums import BeamType
+    
     if flags.DQ.Environment in ('online', 'tier0', 'tier0Raw'):
 
         ########### here begins InDetAlignMonGenericTracksAlg ###########
@@ -28,7 +30,8 @@ def InDetAlignmentMonitoringRun3Config(flags):
         }
 
         from InDetAlignmentMonitoringRun3.IDAlignMonGenericTracksAlgCfg import IDAlignMonGenericTracksAlgCfg
-        inDetAlignMonGenericTracksAlg = helper.addAlgorithm(CompFactory.IDAlignMonGenericTracksAlg, 'IDAlignMonGenericTracksAlg')
+        inDetAlignMonGenericTracksAlg = helper.addAlgorithm(CompFactory.IDAlignMonGenericTracksAlg, 'IDAlignMonGenericTracksAlg',
+                                                            addFilterTools = [FilledBunchFilterToolCfg(flags)])
         for k, v in kwargsIDAlignMonGenericTracksAlg.items():
             setattr(inDetAlignMonGenericTracksAlg, k, v)
 
@@ -39,7 +42,7 @@ def InDetAlignmentMonitoringRun3Config(flags):
         ########### here ends InDetAlignMonGenericTracksAlg ###########
    
 
-        ########### here starts InDetAlignMonResidualAlgs ###########
+        ########### here starts InDetAlignMonResidualsAlgs ###########
      
         kwargsIDAlignMonResidualsAlg = { 
             'TrackName'  : 'CombinedInDetTracks',  #Until new config ready
@@ -47,7 +50,8 @@ def InDetAlignmentMonitoringRun3Config(flags):
         }
 
         from InDetAlignmentMonitoringRun3.IDAlignMonResidualsAlgCfg import IDAlignMonResidualsAlgCfg
-        inDetAlignMonResidualsAlg = helper.addAlgorithm(CompFactory.IDAlignMonResidualsAlg, 'IDAlignMonResidualsAlg')
+        inDetAlignMonResidualsAlg = helper.addAlgorithm(CompFactory.IDAlignMonResidualsAlg, 'IDAlignMonResidualsAlg',
+                                                        addFilterTools = [FilledBunchFilterToolCfg(flags)])
         
         for k, v in kwargsIDAlignMonResidualsAlg.items():
             setattr(inDetAlignMonResidualsAlg, k, v)
@@ -57,6 +61,31 @@ def InDetAlignmentMonitoringRun3Config(flags):
         IDAlignMonResidualsAlgCfg(helper, inDetAlignMonResidualsAlg, **kwargsIDAlignMonResidualsAlg)
         
         ########### here ends InDetAlignMonResidualsAlg ###########
+
+
+        ########### here starts InDetAlignPVBiasesAlg ###########
+
+        if flags.Beam.Type is not BeamType.Cosmics:
+            kwargsIDAlignMonPVBiasesAlg = { 
+                'vxContainerName' : 'PrimaryVertices', 
+            }
+        
+            from InDetAlignmentMonitoringRun3.IDAlignMonPVBiasesAlgCfg import IDAlignMonPVBiasesAlgCfg
+            inDetAlignMonPVBiasesAlg = helper.addAlgorithm(CompFactory.IDAlignMonPVBiasesAlg, 'IDAlignMonPVBiasesAlg',
+                                                           addFilterTools = [FilledBunchFilterToolCfg(flags)])
+            
+            for k, v in kwargsIDAlignMonPVBiasesAlg.items():
+                setattr(inDetAlignMonPVBiasesAlg, k, v)
+                
+            from TrkConfig.TrkVertexFitterUtilsConfig import TrackToVertexIPEstimatorCfg
+            TrackToVertexIPEstimator = acc.popToolsAndMerge(
+                TrackToVertexIPEstimatorCfg(flags, name='TrackToVertexIPEstimator'))
+
+            inDetAlignMonPVBiasesAlg.TrackToVertexIPEstimator = TrackToVertexIPEstimator
+
+            IDAlignMonPVBiasesAlgCfg(helper, inDetAlignMonPVBiasesAlg, **kwargsIDAlignMonPVBiasesAlg)
+        
+        ########### here ends InDetAlignPVBiasesAlg ###########
 
     acc.merge(helper.result())
     return acc

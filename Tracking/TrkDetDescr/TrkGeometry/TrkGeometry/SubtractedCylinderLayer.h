@@ -43,7 +43,7 @@ public:
   SubtractedCylinderLayer(const SubtractedCylinderSurface* subCyl,
                           const LayerMaterialProperties& laymatprop,
                           double thickness = 0.,
-                          OverlapDescriptor* od = nullptr,
+                          std::unique_ptr<OverlapDescriptor> od = nullptr,
                           int laytyp = int(Trk::active));
 
   /**Copy constructor*/
@@ -80,7 +80,6 @@ public:
   /** move the Layer */
   virtual void moveLayer(Amg::Transform3D& shift) override final;
 
- private:
   /** Resize the layer to the tracking volume - not implemented*/
   virtual void resizeLayer(const VolumeBounds&, double) override final {}
 

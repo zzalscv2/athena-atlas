@@ -249,9 +249,10 @@ namespace CP {
          /// output variables set up using @c ContainerProcessor::addBranch.
          ///
          /// @param container The xAOD (interface) container to process
+         /// @param cl type of container
          /// @return The usual @c StatusCode values
          ///
-         StatusCode process( const SG::AuxVectorBase& container );
+         StatusCode process( const SG::AuxVectorBase& container, const TClass& cl);
 
          /// Add one branch to the output tree
          ///

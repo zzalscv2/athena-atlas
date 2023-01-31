@@ -5,16 +5,16 @@
 #ifndef dqiHanOutput_h
 #define dqiHanOutput_h
 
-#include <map>
-#include <memory>
-#include <set>
-#include <string>
-
 #include <TFile.h>
 #include <TTree.h>
 
-#include "dqm_core/Output.h"
+#include <map>
+#include <memory>
 #include <nlohmann/json.hpp>
+#include <set>
+#include <string>
+
+#include "dqm_core/Output.h"
 
 class TDirectory;
 
@@ -37,11 +37,7 @@ namespace dqi
   class HanOutput : public dqm_core::Output
   {
   public:
-    enum Version
-    {
-      V1 = 1,
-      V2 = 2
-    };
+    enum Version { V1 = 1, V2 = 2 };
 
     Version HanOutput_FileVersion = V1;
 
@@ -117,6 +113,6 @@ namespace dqi
     HanOutput();
   };
 
-} // namespace dqi
+}  // namespace dqi
 
 #endif

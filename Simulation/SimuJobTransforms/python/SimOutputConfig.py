@@ -1,20 +1,20 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-def getStreamEVNT_TR_ItemList(ConfigFlags):
+def getStreamEVNT_TR_ItemList(flags):
     #Add to item list
     ItemList = [
         "IOVMetaDataContainer#*",
         "EventInfo#*"
     ]
     from SimulationConfig.SimEnums import CavernBackground
-    if ConfigFlags.Sim.CavernBackground in [CavernBackground.Write, CavernBackground.WriteWorld]:
+    if flags.Sim.CavernBackground in [CavernBackground.Write, CavernBackground.WriteWorld]:
         ItemList += ["TrackRecordCollection#NeutronBG"]
     else:
         ItemList += ["TrackRecordCollection#CosmicRecord"]
     return ItemList
 
 
-def getStreamHITS_ItemList(ConfigFlags):
+def getStreamHITS_ItemList(flags):
     #Add to item list
     #TODO - make a separate function (combine with G4AtlasAlg one?)
     ItemList = ["McEventCollection#TruthEvent",
@@ -25,7 +25,7 @@ def getStreamHITS_ItemList(ConfigFlags):
                "xAOD::EventInfoContainer#*",
                "xAOD::EventInfoAuxContainer#*"]
 
-    if ConfigFlags.Sim.IncludeParentsInG4Event:
+    if flags.Sim.IncludeParentsInG4Event:
         ItemList += ["McEventCollection#GEN_EVENT"]
 
     ItemList += ["xAOD::JetContainer#AntiKt4TruthJets",
@@ -37,24 +37,24 @@ def getStreamHITS_ItemList(ConfigFlags):
     ItemList += ["xAOD::TruthParticleContainer#TruthPileupParticles",
                  "xAOD::TruthParticleAuxContainer#TruthPileupParticlesAux."]
 
-    if 'Hijing_event_params' in ConfigFlags.Input.Collections:
+    if 'Hijing_event_params' in flags.Input.Collections:
         ItemList += ["HijingEventParams#Hijing_event_params"]
 
-    if ConfigFlags.Detector.EnablePixel or  ConfigFlags.Detector.EnableSCT or \
-       ConfigFlags.Detector.EnableITkPixel or  ConfigFlags.Detector.EnableITkStrip or ConfigFlags.Detector.EnablePLR or \
-       ConfigFlags.Detector.EnableHGTD:
+    if flags.Detector.EnablePixel or  flags.Detector.EnableSCT or \
+       flags.Detector.EnableITkPixel or  flags.Detector.EnableITkStrip or flags.Detector.EnablePLR or \
+       flags.Detector.EnableHGTD:
         ItemList += ["SiHitCollection#*"]
 
-    if ConfigFlags.Detector.EnableTRT:
+    if flags.Detector.EnableTRT:
         ItemList += ["TRTUncompressedHitCollection#*"]
 
-    if ConfigFlags.Detector.EnableID or ConfigFlags.Detector.EnableITk:
+    if flags.Detector.EnableID or flags.Detector.EnableITk:
        ItemList += ["TrackRecordCollection#CaloEntryLayer"]
 
-    if ConfigFlags.Detector.EnableCalo:
+    if flags.Detector.EnableCalo:
         ItemList += ["TrackRecordCollection#MuonEntryLayer"]
         from SimulationConfig.SimEnums import CalibrationRun
-        if ConfigFlags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile]:
+        if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile]:
             ItemList += ["CaloCalibrationHitContainer#LArCalibrationHitActive",
                          "CaloCalibrationHitContainer#LArCalibrationHitDeadMaterial",
                          "CaloCalibrationHitContainer#LArCalibrationHitInactive",
@@ -64,12 +64,12 @@ def getStreamHITS_ItemList(ConfigFlags):
         else:
             ItemList += ["CaloCalibrationHitContainer#*"] #TODO be more precise about this case
 
-    if ConfigFlags.Detector.EnableLAr:
+    if flags.Detector.EnableLAr:
         ItemList += ["LArHitContainer#LArHitEMB",
                      "LArHitContainer#LArHitEMEC",
                      "LArHitContainer#LArHitHEC",
                      "LArHitContainer#LArHitFCAL"]
-        if ConfigFlags.Sim.ISF.HITSMergingRequired.get('CALO', False):
+        if flags.Sim.ISF.HITSMergingRequired.get('CALO', False):
             ItemList += ["LArHitContainer#LArHitEMB_G4",
                          "LArHitContainer#LArHitEMEC_G4",
                          "LArHitContainer#LArHitHEC_G4",
@@ -79,55 +79,55 @@ def getStreamHITS_ItemList(ConfigFlags):
                          "LArHitContainer#LArHitHEC_FastCaloSim",
                          "LArHitContainer#LArHitFCAL_FastCaloSim"]
 
-    if ConfigFlags.Detector.EnableTile:
+    if flags.Detector.EnableTile:
         ItemList += ["TileHitVector#TileHitVec",
                      "TileHitVector#MBTSHits"]
-        if ConfigFlags.Sim.ISF.HITSMergingRequired.get('CALO', False):
+        if flags.Sim.ISF.HITSMergingRequired.get('CALO', False):
             ItemList += ["TileHitVector#MBTSHits_G4",
                          "TileHitVector#TileHitVec_G4",
                          "TileHitVector#TileHitVec_FastCaloSim"]
 
-    if ConfigFlags.Detector.EnableRPC:
+    if flags.Detector.EnableRPC:
         ItemList += ["RPCSimHitCollection#*"]
 
-    if ConfigFlags.Detector.EnableTGC:
+    if flags.Detector.EnableTGC:
         ItemList += ["TGCSimHitCollection#*"]
 
-    if ConfigFlags.Detector.EnableMDT:
+    if flags.Detector.EnableMDT:
         ItemList += ["MDTSimHitCollection#*"]
 
-    if ConfigFlags.Detector.EnableCSC:
+    if flags.Detector.EnableCSC:
         ItemList += ["CSCSimHitCollection#*"]
 
-    if ConfigFlags.Detector.EnablesTGC:
+    if flags.Detector.EnablesTGC:
         ItemList += ["sTGCSimHitCollection#*"]
 
-    if ConfigFlags.Detector.EnableMM:
+    if flags.Detector.EnableMM:
         ItemList += ["MMSimHitCollection#*"]
 
-    if ConfigFlags.Detector.EnableMuon:
+    if flags.Detector.EnableMuon:
         ItemList += ["TrackRecordCollection#MuonExitLayer"]
 
-    if ConfigFlags.Detector.EnableLucid:
+    if flags.Detector.EnableLucid:
         ItemList += ["LUCID_SimHitCollection#*"]
 
-    if ConfigFlags.Detector.EnableFwdRegion:
+    if flags.Detector.EnableFwdRegion:
         ItemList += ["SimulationHitCollection#*"]
 
-    if ConfigFlags.Detector.EnableZDC:
+    if flags.Detector.EnableZDC:
         ItemList += ["ZDC_SimPixelHit_Collection#*",
                      "ZDC_SimStripHit_Collection#*"]
 
-    if ConfigFlags.Detector.EnableALFA:
+    if flags.Detector.EnableALFA:
         ItemList += ["ALFA_HitCollection#*",
                      "ALFA_ODHitCollection#*"]
 
-    if ConfigFlags.Detector.EnableAFP:
+    if flags.Detector.EnableAFP:
         ItemList += ["AFP_TDSimHitCollection#*",
                      "AFP_SIDSimHitCollection#*"]
 
     from AthenaConfiguration.Enums import BeamType
-    if ConfigFlags.Beam.Type is BeamType.Cosmics:
+    if flags.Beam.Type is BeamType.Cosmics:
         ItemList += ["TrackRecordCollection#CosmicRecord",
                      "TrackRecordCollection#CosmicPerigee"]
 

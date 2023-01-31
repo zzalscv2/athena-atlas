@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 '''
 @author Riley Xu - rixu@cern.ch
 @date Feb 6th 2020
@@ -241,3 +241,15 @@ def addLRTDoubletHTTool(algo_tag):
     from AthenaCommon.AppMgr import ToolSvc
     ToolSvc += tool
     return tool
+
+
+def HTTLogicalHitsProcessAlgMonitoringCfg(flags):
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    result = ComponentAccumulator()
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    monTool = GenericMonitoringTool(flags, 'MonTool')
+    monTool.defineHistogram('regionID', path='EXPERT', type='TH1I', title='regionID', xbins=200, xmin=0, xmax=200)
+    result.setPrivateTools(monTool)
+
+    return result
+

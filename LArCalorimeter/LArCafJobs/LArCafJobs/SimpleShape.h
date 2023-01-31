@@ -13,6 +13,7 @@
 
 #include "LArCafJobs/AbsShape.h"
 #include <vector>
+#include "CxxUtils/checker_macros.h"
 
 class TH1D;
 class TGraph;
@@ -21,7 +22,7 @@ namespace LArSamples {
 
   class ShapeInfo;
   
-  class SimpleShape : public AbsShape {
+  class  ATLAS_NOT_THREAD_SAFE SimpleShape : public AbsShape {
   
    public:
    

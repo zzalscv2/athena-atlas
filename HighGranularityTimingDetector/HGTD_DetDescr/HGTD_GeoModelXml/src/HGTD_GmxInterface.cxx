@@ -49,19 +49,19 @@ int HGTD_GmxInterface::sensorId(std::map<std::string, int> &index) const
                   << " moduleInLayer = " << SiHitIdHelper::GetHelper()->getPhiModule(hitIdOfWafer));
     } else {
         hitIdOfWafer = SiHitIdHelper::GetHelper()->buildHitId(HGTD_HitIndex,
-                                                                  index["hgtd_endcap"],
-                                                                  index["hgtd_layer"],
-                                                                  index["hgtd_eta_module"],
-                                                                  index["hgtd_phi_module"],
+                                                                  index["endcap"],
+                                                                  index["layer"],
+                                                                  index["moduleNumberInRow"],
+                                                                  index["rowNumber"],
                                                                   0); // side is just 0 for HGTD
 
-    ATH_MSG_DEBUG("Index list: " << index["hgtd_endcap"] << " " << index["hgtd_layer"] << " "
-                                 << index["hgtd_phi_module"] << " " << index["hgtd_eta_module"]);
+    ATH_MSG_DEBUG("Index list: " << index["endcap"] << " " << index["layer"] << " "
+                                 << index["moduleNumberInRow"] << " " << index["rowNumber"]);
     ATH_MSG_DEBUG("hitIdOfWafer = " << std::hex << hitIdOfWafer << std::dec);
     ATH_MSG_DEBUG(" endcap = " << SiHitIdHelper::GetHelper()->getBarrelEndcap(hitIdOfWafer)
-                  << " lay = " << SiHitIdHelper::GetHelper()->getLayerDisk(hitIdOfWafer)
-                  << " eta = " << SiHitIdHelper::GetHelper()->getEtaModule(hitIdOfWafer)
-                  << " phi = " << SiHitIdHelper::GetHelper()->getPhiModule(hitIdOfWafer));
+                  << " layer = " << SiHitIdHelper::GetHelper()->getLayerDisk(hitIdOfWafer)
+                  << " moduleNumberInRow = " << SiHitIdHelper::GetHelper()->getEtaModule(hitIdOfWafer)
+                  << " rowNumber = " << SiHitIdHelper::GetHelper()->getPhiModule(hitIdOfWafer));
 
     }
     return hitIdOfWafer;
@@ -147,10 +147,10 @@ void HGTD_GmxInterface::addSensor(const std::string &typeName,
                                     0);
         ATH_MSG_DEBUG("HGTD New ID scheme");    
     } else {
-        id = hgtdIdHelper->wafer_id(index["hgtd_endcap"],
-                                    index["hgtd_layer"],
-                                    index["hgtd_phi_module"],
-                                    index["hgtd_eta_module"]);
+        id = hgtdIdHelper->wafer_id(index["endcap"],
+                                    index["layer"],
+                                    index["rowNumber"],
+                                    index["moduleNumberInRow"]);
         ATH_MSG_DEBUG("HGTD Old ID scheme");
     }               
     IdentifierHash hashId = hgtdIdHelper->wafer_hash(id);

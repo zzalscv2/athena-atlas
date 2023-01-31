@@ -281,8 +281,8 @@ StatusCode InDet::TRT_TrackSegmentsMakerCondAlg_ATLxk::execute(const EventContex
   for(int b=0; b!=4; ++b) {
     for(unsigned int i=0; i!=writeCdo->m_nlayers[b]; ++i) {
       writeCdo->m_begin[b][i] = n;
-      for(int r=0; r!=26; ++r) {
-	if( writeCdo->m_dzdr[r] >= Tmin[b][i] && writeCdo->m_dzdr[r] <= Tmax[b][i] ) {
+      for(float r : writeCdo->m_dzdr) {
+	if( r >= Tmin[b][i] && r <= Tmax[b][i] ) {
 	  writeCdo->m_end[b][i] = n++;
 	}
       }

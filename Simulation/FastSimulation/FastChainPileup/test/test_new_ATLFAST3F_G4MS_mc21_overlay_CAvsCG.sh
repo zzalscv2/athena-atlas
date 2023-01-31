@@ -4,7 +4,6 @@
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
-# art-include: 22.0-mc20/Athena
 # art-output: run_*
 # art-output: pkldiff.log
 # art-architecture: '#x86_64-intel'
@@ -16,6 +15,7 @@ RDO_File="MC_plus_MC.RDO.pool.root"
 
 mkdir ./run_cg_pkl; cd run_cg_pkl
 FastChain_tf.py \
+  --runNumber 601229 \
   --simulator ATLFAST3F_G4MS \
   --steering doFCwOverlay \
   --physicsList FTFP_BERT_ATL \
@@ -46,6 +46,7 @@ echo "art-result: $cgpkl EVNTtoRDO_CG_PKL"
 
 cd ..; mkdir ./run_cg; cd run_cg
 FastChain_tf.py \
+  --runNumber 601229 \
   --simulator ATLFAST3F_G4MS \
   --steering doFCwOverlay \
   --physicsList FTFP_BERT_ATL \
@@ -72,6 +73,7 @@ echo "art-result: $cg EVNTtoRDO_CG"
 cd ../; mkdir run_ca; cd run_ca
 FastChain_tf.py \
   --CA \
+  --runNumber 601229 \
   --simulator ATLFAST3F_G4MS \
   --physicsList FTFP_BERT_ATL \
   --useISF True \
@@ -89,6 +91,7 @@ FastChain_tf.py \
   --inputRDO_BKGFile ${RDO_BKG_File} \
   --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07'  \
   --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
+  --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
   --imf False
 ca=$?
 echo  "art-result: $ca EVNTtoRDO_CA"
@@ -101,7 +104,7 @@ then
    confTool.py --diff --ignoreIrrelevant --shortenDefaultComponents --ignoreDefaults run_cg_pkl/ConfigCG.pkl run_ca/ConfigCA.pkl > pkldiff.log
    pkldiff=$(grep -o 'differ' pkldiff.log | wc -l)
 
-   art.py compare ref run_ca/RDO_CA.pool.root run_cg/RDO_CG.pool.root --mode=semi-detailed --entries 10
+   art.py compare ref run_ca/${RDO_File} run_cg/${RDO_File} --mode=semi-detailed --entries 10
    diff=$?
 fi
 echo  "art-result: ${pkldiff} pklDiff"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -25,11 +25,10 @@ namespace Trk
   //forward Declarations
   class Surface;
 
-  static const InterfaceID IID_IAlignableSurfaceProvider("Trk::IAlignableSurfaceProvider", 1, 0);
-
   class IAlignableSurfaceProvider : virtual public IAlgTool {
   public:
-    static const InterfaceID& interfaceID( ) ;
+   /// Creates the InterfaceID and interfaceID() method
+   DeclareInterfaceID(IAlignableSurfaceProvider, 1, 0);
 
   //creating map with alignable plane surfaces
   virtual void addEntryToMap(const Trk::Surface& )=0;

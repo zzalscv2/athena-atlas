@@ -63,13 +63,13 @@ namespace ISFTesting {
     virtual ~MockInputConverter() { };
 
     MOCK_METHOD0(finalize, StatusCode());
-    MOCK_CONST_METHOD3(convert, StatusCode(const McEventCollection&,
+    MOCK_CONST_METHOD3(convert, StatusCode(McEventCollection&,
                                            ISF::ISFParticleContainer&,
                                            EBC_EVCOLL kindOfCollection));
     MOCK_CONST_METHOD3(convertHepMCToG4Event, StatusCode(McEventCollection&,
                                                          G4Event*&,
                                                          EBC_EVCOLL kindOfCollection));
-    MOCK_CONST_METHOD3(ISF_to_G4Event, G4Event*(const std::vector<const ISF::ISFParticle*>&,
+    MOCK_CONST_METHOD3(ISF_to_G4Event, G4Event*(const std::vector<ISF::ISFParticle*>&,
                                                 HepMC::GenEvent*,bool));
 
   }; // MockInputConverter class
@@ -173,8 +173,8 @@ public:
 
   MOCK_METHOD0(finalize, StatusCode());
   MOCK_METHOD1(setupEvent, StatusCode(const EventContext&));
-  MOCK_METHOD3(simulate, StatusCode(const ISF::ISFParticle&, ISF::ISFParticleContainer&, McEventCollection*));
-  MOCK_METHOD3(simulateVector, StatusCode(const ISF::ConstISFParticleVector&, ISF::ISFParticleContainer&, McEventCollection*));
+  MOCK_METHOD3(simulate, StatusCode(ISF::ISFParticle&, ISF::ISFParticleContainer&, McEventCollection*));
+  MOCK_METHOD3(simulateVector, StatusCode(const ISF::ISFParticleVector&, ISF::ISFParticleContainer&, McEventCollection*));
   MOCK_METHOD1(releaseEvent, StatusCode(const EventContext&));
   MOCK_CONST_METHOD1(bid, int(const ISF::ISFParticle&));
 
@@ -528,7 +528,7 @@ protected:
 
     auto inputEvgen = std::make_unique<McEventCollection>();
     auto* genEvent = new HepMC::GenEvent{};
-
+    HepMC::fillBarcodesAttribute(genEvent);
     inputEvgen->push_back(genEvent);
     SG::WriteHandleKey<McEventCollection> testInputEvgenKey{"testInputEvgenCollection"};
     ASSERT_TRUE(testInputEvgenKey.initialize().isSuccess());
@@ -561,7 +561,7 @@ protected:
     genVertex->add_particle_out(genPart);
     genVertex->add_particle_out(genPart2);
     genEvent->add_vertex(genVertex);
-
+    HepMC::fillBarcodesAttribute(genEvent);
     auto inputEvgen = std::make_unique<McEventCollection>();
     inputEvgen->push_back(genEvent);
     SG::WriteHandleKey<McEventCollection> testInputEvgenKey{"testInputEvgenCollection"};
@@ -783,7 +783,7 @@ protected:
     auto genVertex = HepMC::newGenVertexPtr(pos);
     genVertex->add_particle_out(genPart);
     genEvent->add_vertex(genVertex);
-
+    HepMC::fillBarcodesAttribute(genEvent);
     auto inputEvgen = std::make_unique<McEventCollection>();
     inputEvgen->push_back(genEvent);
     SG::WriteHandleKey<McEventCollection> testInputEvgenKey{"testInputEvgenCollection"};

@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainersRoot/RootAuxVectorFactory.h
  * @author scott snyder <snyder@bnl.gov>
@@ -380,6 +377,20 @@ public:
    *        if the std::vector code is used directly.
    */
   virtual bool isDynamic() const override;
+
+
+  /**
+   * @brief Return the @c type_info of the vector allocator.
+   *
+   * May be nullptr for a dynamic vector.
+   */
+  virtual const std::type_info* tiAlloc() const override;
+
+
+  /**
+   * @brief Return the (demangled) name of the vector allocator.
+   */
+  virtual std::string tiAllocName() const override;
 
 
 private:

@@ -24,7 +24,6 @@
 // ********************************************************************
 //
 //
-// $Id: QuirkTransportation.cxx 717143 2016-01-11 14:18:11Z jchapman $
 // GEANT4 tag $Name: geant4-09-04-patch-01 $
 // 
 // ------------------------------------------------------------
@@ -69,6 +68,8 @@
 #include "HyperbolaStepper.h"
 #include "QuirkTransportation.h"
 
+#include "CxxUtils/checker_macros.h"
+
 class G4VSensitiveDetector;
 
 //////////////////////////////////////////////////////////////////////////
@@ -78,6 +79,7 @@ class G4VSensitiveDetector;
 QuirkTransportation::QuirkTransportation( G4int verboseLevel )
   : G4VProcess( G4String("QuirkTransportation"), fTransportation ),
     m_particleIsLooping( false ),
+    m_currentTouchableHandle(),  // Points to (G4VTouchable*) 0
     m_previousSftOrigin (0.,0.,0.),
     m_previousSafety    ( 0.0 ),
     m_threshold_Warning_Energy( 100 * CLHEP::MeV ),  
@@ -104,9 +106,6 @@ QuirkTransportation::QuirkTransportation( G4int verboseLevel )
   //  depend on the relative order of creating the detector's 
   //  field and this process. That order is not guaranted.
   // Instead later the method DoesGlobalFieldExist() is called
-
-  static G4TouchableHandle nullTouchableHandle;  // Points to (G4VTouchable*) 0
-  m_currentTouchableHandle = nullTouchableHandle; 
 
   m_candidateEndGlobalTime = 0;
 }
@@ -153,7 +152,7 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
   // Get initial Energy/Momentum of the track
   //
   const G4DynamicParticle*    pParticle  = track.GetDynamicParticle() ;
-  const G4ParticleDefinition* pParticleDef   = pParticle->GetDefinition() ;
+  G4ParticleDefinition* pParticleDef   = pParticle->GetDefinition() ;
   G4ThreeVector startPosition          = track.GetPosition() ;
 
   // G4double   theTime        = track.GetGlobalTime() ;
@@ -191,7 +190,7 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
   }
 
   // Set up stepper to calculate quirk trajectory
-  const Quirk* quirkDef = dynamic_cast<const Quirk*>(pParticleDef);
+  Quirk* quirkDef = dynamic_cast<Quirk*>(pParticleDef);
   if (quirkDef == 0) {
      G4Exception("QuirkTransportation::AlongStepGetPhysicalInteractionLength", "NonQuirk", FatalErrorInArgument, "QuirkTransportation run on non-quirk particle");
   }
@@ -349,9 +348,10 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
 G4VParticleChange* QuirkTransportation::AlongStepDoIt( const G4Track& track,
                                                        const G4Step&  /*stepData*/ )
 {
-  static G4int noCalls=0;
-
+#ifdef G4VERBOSE
+  static std::atomic<G4int> noCalls=0;
   noCalls++;
+#endif
 
   m_particleChange.Initialize(track) ;
 
@@ -535,8 +535,8 @@ G4VParticleChange* QuirkTransportation::PostStepDoIt( const G4Track& track,
   m_particleChange.ProposeLastStepInVolume(isLastStep);    
 
   const G4VPhysicalVolume* pNewVol = retCurrentTouchable->GetVolume() ;
-  const G4Material* pNewMaterial   = 0 ;
-  const G4VSensitiveDetector* pNewSensitiveDetector   = 0 ;
+  G4Material* pNewMaterial   = 0 ;
+  G4VSensitiveDetector* pNewSensitiveDetector   = 0 ;
                                                                                        
   if( pNewVol != 0 )
   {
@@ -547,8 +547,8 @@ G4VParticleChange* QuirkTransportation::PostStepDoIt( const G4Track& track,
   // ( <const_cast> pNewMaterial ) ;
   // ( <const_cast> pNewSensitiveDetector) ;
 
-  m_particleChange.SetMaterialInTouchable( (G4Material *) pNewMaterial ) ;
-  m_particleChange.SetSensitiveDetectorInTouchable( (G4VSensitiveDetector *) pNewSensitiveDetector ) ;
+  m_particleChange.SetMaterialInTouchable( pNewMaterial ) ;
+  m_particleChange.SetSensitiveDetectorInTouchable( pNewSensitiveDetector ) ;
 
   const G4MaterialCutsCouple* pNewMaterialCutsCouple = 0;
   if( pNewVol != 0 )
@@ -610,15 +610,16 @@ QuirkTransportation::StartTracking(G4Track* aTrack)
   // if( chordF ) chordF->ResetStepEstimate();
 
   // Make sure to clear the chord finders of all fields (ie managers)
-  static G4FieldManagerStore* fieldMgrStore= G4FieldManagerStore::GetInstance();
-  fieldMgrStore->ClearAllChordFindersState(); 
+  G4FieldManagerStore::GetInstance()->ClearAllChordFindersState();
 
   // Update the current touchable handle  (from the track's)
   //
   m_currentTouchableHandle = aTrack->GetTouchableHandle();
 
   // Initialize infracolor string
-  const Quirk* quirkDef = dynamic_cast<const Quirk*>(aTrack->GetParticleDefinition());
+  auto part_nc ATLAS_THREAD_SAFE =  // aTrack is non-const but GetParticleDefinition only returns const
+    const_cast<G4ParticleDefinition*>(aTrack->GetParticleDefinition());
+  Quirk* quirkDef = dynamic_cast<Quirk*>(part_nc);
   if (quirkDef == 0) {
      G4Exception("QuirkTransportation::StartTracking", "NonQuirk", FatalErrorInArgument, "QuirkTransportation run on non-quirk particle");
   }

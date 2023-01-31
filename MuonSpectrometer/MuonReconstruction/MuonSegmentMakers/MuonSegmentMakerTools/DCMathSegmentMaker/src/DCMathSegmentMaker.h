@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DCMATHSEGMENTMAKER_H
@@ -29,7 +29,6 @@
 #include "MuonSegment/MuonSegment.h"
 #include "MuonSegmentMakerInterfaces/IDCSLFitProvider.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonSegmentSelectionTool.h"
-#include "MuonSegmentMakerToolInterfaces/IMuonSegmentTriggerHitAssociator.h"
 #include "TrkDriftCircleMath/Cluster.h"
 #include "TrkDriftCircleMath/DCSLFitter.h"
 #include "TrkDriftCircleMath/DCSLHitSelector.h"
@@ -100,17 +99,14 @@ namespace Muon {
 
         For more details look at the mainpage of this package.
     */
-    class DCMathSegmentMaker : virtual public IMuonSegmentMaker, public IMuonSegmentTriggerHitAssociator, public AthAlgTool {
+    class DCMathSegmentMaker : virtual public IMuonSegmentMaker, public AthAlgTool {
     public:
         // pair of eta-phi hits in the same gasgap
-        typedef std::pair<std::vector<const MuonClusterOnTrack*>, std::vector<const MuonClusterOnTrack*> > EtaPhiHitsPair;
+        using EtaPhiHitsPair = std::pair<std::vector<const MuonClusterOnTrack*>, std::vector<const MuonClusterOnTrack*> >;
         // map to sort hit per gasgap
-        typedef std::map<Identifier, EtaPhiHitsPair> IdHitMap;
-        typedef IdHitMap::iterator IdHitMapIt;
-        typedef std::map<Identifier, IdHitMap> ChIdHitMap;
-        typedef ChIdHitMap::iterator ChIdHitMapIt;
-
-        typedef std::vector<const MuonClusterOnTrack*>::const_iterator ROTCit;
+        using IdHitMap = std::map<Identifier, EtaPhiHitsPair>;
+        using ChIdHitMap = std::map<Identifier, IdHitMap>;
+     
 
         struct HitInXZ {
             HitInXZ(Identifier i, bool isM, bool measP, double lx, double lz, double lxmin, double lxmax, double phmin, double phmax) :
@@ -165,17 +161,15 @@ namespace Muon {
             bool is2D() const { return etaHit && phiHit; }
             bool corrupt() const { return (!etaHit && !phiHit) || error < 0.01; }
         };
-        typedef std::vector<Cluster2D> ClusterVec;
-        typedef ClusterVec::iterator ClusterIt;
-        typedef ClusterVec::const_iterator ClusterCit;
-        typedef std::pair<ClusterVec, ClusterVec> ClusterVecPair;
+        using ClusterVec = std::vector<Cluster2D>;
+        using ClusterVecPair = std::pair<ClusterVec, ClusterVec>;
 
         struct TubeEnds {
             TubeEnds() = default;
             double lxmin{0};
             double lxmax{0};
             double phimin{0};
-            double phimax{};
+            double phimax{0};
         };
 
         struct segmentCreationInfo {  // miscellaneous objects needed for segment creation
@@ -272,22 +266,7 @@ namespace Muon {
                   const std::vector<std::vector<const MuonClusterOnTrack*> >& clusters, Trk::SegmentCollection* segColl,
                   bool hasPhiMeasurements = false, double momentum = 1e9) const;
 
-        /** associate trigger hits to an existing segment
-            - a segment
-            - a list of MuonClusterOnTrack objects
-            - a flag indicating whether the eta hits should be added
-
-            returns the new segment, owner ship passed to the caller.
-
-            Implementation of IMuonSegmentTriggerHitAssociator interface routine
-        */
-       MuonSegment* associateTriggerHits(const MuonSegment& seg, const std::vector<const MuonClusterOnTrack*>& clus,
-                                                bool includeEtaHits) const;
-
     private:
-        /** helper routine to print Identifers */
-        std::string printSP(std::pair<double, double> resPull, const Cluster2D& spacePoint) const;
-
         /** apply error scaling for low mometum tracks */
         bool errorScalingRegion(const Identifier& id) const;
 
@@ -305,9 +284,8 @@ namespace Muon {
         ClusterVecPair create1DClusters(const std::vector<const MuonClusterOnTrack*>& clusters) const;
         ClusterVecPair create2DClusters(const std::vector<const MuonClusterOnTrack*>& clusters) const;
 
-        void handleChamber(IdHitMap& gasGapHitMap) const;
-        ClusterVecPair createSpacePoints(ChIdHitMap& chIdHitMap) const;
-        ClusterVecPair createSpacePoints(IdHitMap& gasGapHitMap) const;
+        ClusterVecPair createSpacePoints(const ChIdHitMap& chIdHitMap) const;
+        ClusterVecPair createSpacePoints(const IdHitMap& gasGapHitMap) const;
         Cluster2D createSpacePoint(const Identifier& gasGapId, const MuonClusterOnTrack* etaHit, const MuonClusterOnTrack* phiHit) const;
         Cluster2D createRpcSpacePoint(const Identifier& gasGapId, const MuonClusterOnTrack* etaHit,
                                       const std::vector<const MuonClusterOnTrack*>& phiHits) const;
@@ -323,7 +301,7 @@ namespace Muon {
             const TrkDriftCircleMath::Segment& segment, const Identifier& chid, const Amg::Transform3D& gToStation, ClusterVecPair& spVecs,
             double phimin, double phimax, std::vector<std::pair<double, std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec) const;
         
-        std::unique_ptr<DataVector<const Trk::MeasurementBase>> createROTVec(
+        DataVector<const Trk::MeasurementBase> createROTVec(
             std::vector<std::pair<double,  std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec) const;
 
         double distanceToSegment(const TrkDriftCircleMath::Segment& segment, const Amg::Vector3D& hitPos,
@@ -339,13 +317,8 @@ namespace Muon {
                               Trk::LocalDirection& segLocDir, Trk::PlaneSurface& surf, const std::vector<const Trk::MeasurementBase*>& rots,
                               double phimin, double phimax) const;
 
-        /** rotate the angle XZ until all hits are in bounds.
-            returns a pair of bool, double, the bool is false if the code did not update the dXdZ. the double is the updated
-           dXdZ */
-        std::pair<bool, double> rotateLocalAngleXZIntoBounds(double xline, double zline, double dXdZ, std::vector<HitInXZ>& hits) const;
-
         /** check whether all hits are in bounds in the XZ plane */
-        bool checkBoundsInXZ(double xline, double zline, double dXdZ, std::vector<HitInXZ>& hits) const;
+        bool checkBoundsInXZ(double xline, double zline, double dXdZ, const std::vector<HitInXZ>& hits) const;
 
         /** calculate positions of tube ends */
         TubeEnds localTubeEnds(const MdtDriftCircleOnTrack& mdt, const Amg::Transform3D& gToSegment,
@@ -361,14 +334,11 @@ namespace Muon {
         Amg::Vector3D updateDirection(double linephi, const Trk::PlaneSurface& surf, const Amg::Vector3D& roaddir,
                                       bool isCurvedSegment) const;
 
-        void addEtaHits(std::vector<const MuonClusterOnTrack*>& clusters,
-                        std::vector<std::unique_ptr<const Trk::MeasurementBase> >& tash_bin, bool isEndcap) const;
-
         std::unique_ptr<MuonSegment> createSegment(const EventContext& ctx, TrkDriftCircleMath::Segment& segment, const Identifier& chid, const Amg::Vector3D& roadpos,
                                    const Amg::Vector3D& roaddir2, const std::vector<const MdtDriftCircleOnTrack*>& mdts,
                                    bool hasPhiMeasurements, segmentCreationInfo& sInfo) const;
 
-        const MdtPrepData* findMdt(const Identifier& id) const;
+        const MdtPrepData* findMdt(const EventContext& ctx, const Identifier& id) const;
 
         /** pointers to IdHelpers */
         SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_DetectorManagerKey{

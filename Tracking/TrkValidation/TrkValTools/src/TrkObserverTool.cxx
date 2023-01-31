@@ -61,6 +61,7 @@
 Trk::TrkObserverTool::TrkObserverTool(const std::string& type, const std::string& name, const IInterface* parent)
 	: AthAlgTool(type, name, parent){
 			declareInterface< ITrkObserverTool >(this);
+		    declareProperty("Fitter", m_fitterTool );
 			declareProperty("ObsTrackCollection", m_savedTracksWriteKey);
 			declareProperty("ObsTrackCollectionMap", m_savedTracksMapWriteKey);
 }
@@ -78,6 +79,7 @@ StatusCode Trk::TrkObserverTool::initialize() {
 	ATH_CHECK(AthAlgTool::initialize());
 	ATH_CHECK(m_savedTracksWriteKey.initialize(!m_savedTracksWriteKey.key().empty()));
 	ATH_CHECK(m_savedTracksMapWriteKey.initialize(!m_savedTracksMapWriteKey.key().empty()));
+	ATH_CHECK(m_fitterTool.retrieve());
 	ATH_MSG_INFO("Initialized TrkObserverTool");
 	return StatusCode::SUCCESS;
 }
@@ -133,7 +135,7 @@ void Trk::TrkObserverTool::updateScore(int uid, double score) const {
 	// find track and update score
 	if ( trk_map->find(uid) == trk_map->end() ) {
 		// not found
-		ATH_MSG_WARNING("updateScore: track << " << uid << " not found in observedTrkMap");
+		ATH_MSG_WARNING("updateScore: track " << uid << " not found in observedTrkMap");
 	}
 	else {
 		// found
@@ -178,10 +180,22 @@ void Trk::TrkObserverTool::addInputTrack(int uid, const Trk::Track& track) const
 		ent->m_evt = ctx.evt();
 	}
 	// add input track to cache map
-	Trk::Track* copiedTrack = new Trk::Track(track);
+	std::unique_ptr<Trk::Track> copiedTrack;
+	if (!track.perigeeParameters()) {
+		ATH_MSG_DEBUG("addInputTrack: fitting input track due to lack of perigee");
+		copiedTrack = m_fitterTool->fit(ctx, track);
+		if (!copiedTrack){
+			ATH_MSG_WARNING("addInputTrack: track fit failed!");
+			return;
+		}
+	}
+	else {
+		ATH_MSG_DEBUG("addInputTrack: simply copying input track");
+		copiedTrack = std::make_unique<Trk::Track>(track);
+	}
 	std::vector<xAOD::RejectionStep> v_rejectStep = {xAOD::RejectionStep::solveTracks};
 	std::vector<xAOD::RejectionReason> v_rejectReason = {xAOD::RejectionReason::acceptedTrack};
-	ent->m_observedTrkMap->insert( std::make_pair(uid, std::make_tuple(copiedTrack, // Id, track
+	ent->m_observedTrkMap->insert( std::make_pair(uid, std::make_tuple(copiedTrack.release(), // Id, track
 											 -1, // score
 											 xAOD::RejectionStep::solveTracks, // rejection step
 											 xAOD::RejectionReason::acceptedTrack, // rejection reason
@@ -200,7 +214,19 @@ void Trk::TrkObserverTool::addSubTrack(int track_uid, int parent_uid, const Trk:
 	ObservedTrackMap* trk_map = getTrackMap(ctx);
 
 	// deep copy of the track (because some subtracks get deleted), information has to be available later
-	Trk::Track* copiedTrack = new Trk::Track(track);
+	std::unique_ptr<Trk::Track> copiedTrack;
+	if (!track.perigeeParameters()) {
+		ATH_MSG_DEBUG("addSubTrack: fitting subtrack due to lack of perigee");
+		copiedTrack = m_fitterTool->fit(ctx, track);
+		if (!copiedTrack){
+			ATH_MSG_WARNING("addSubTrack: track fit failed!");
+			return;
+		}
+	}
+	else {
+		ATH_MSG_DEBUG("addSubTrack: simply copying subtrack");
+		copiedTrack = std::make_unique<Trk::Track>(track);
+	}
 	// get score and rejection step from parent element
 	double score = -1;
 	xAOD::RejectionStep rejectStep = xAOD::RejectionStep::solveTracks;
@@ -217,7 +243,7 @@ void Trk::TrkObserverTool::addSubTrack(int track_uid, int parent_uid, const Trk:
 	// add subtrack to cache map
 	std::vector<xAOD::RejectionStep> v_rejectStep = {rejectStep};
 	std::vector<xAOD::RejectionReason> v_rejectReason = {xAOD::RejectionReason::acceptedTrack};
-	trk_map->insert( std::make_pair(track_uid, std::make_tuple(copiedTrack, // Id, track
+	trk_map->insert( std::make_pair(track_uid, std::make_tuple(copiedTrack.release(), // Id, track
 											 score, // score
 											 rejectStep, // rejection step
 											 xAOD::RejectionReason::acceptedTrack, // rejection reason
@@ -281,7 +307,7 @@ int Trk::TrkObserverTool::saveTracksToStore(const EventContext& ctx, const Obser
 	}
 
 	for (auto& itrMap : *trk_map) {
-		ATH_MSG_DEBUG("saveTracksToStore: Writing track with id "<<itrMap.first<<" and rejection reason "<<std::get<xAOD::ObserverToolIndex::rejectReason>(itrMap.second));
+		ATH_MSG_DEBUG("saveTracksToStore: Writing track with id "<<itrMap.first<<", rejection step "<<std::get<xAOD::ObserverToolIndex::rejectStep>(itrMap.second)<<", rejection reason "<<std::get<xAOD::ObserverToolIndex::rejectReason>(itrMap.second));
 		wh_tracks->push_back(std::get<xAOD::ObserverToolIndex::track>(itrMap.second));
 		wh_tracksMap->insert(std::make_pair(itrMap.first, itrMap.second));
 	}
@@ -348,7 +374,7 @@ void Trk::TrkObserverTool::dumpTrackMap(const ObservedTrackMap* trk_map) const {
 	std::lock_guard<std::mutex> lock{m_mutex};
 
 	ATH_MSG_INFO ("Dump observedTrkMap (size = " << getNObservedTracks(trk_map) << ")");
-	for (auto& itrMap : *trk_map) {
+	for (const auto& itrMap : *trk_map) {
 		ATH_MSG_DEBUG("Id: " << itrMap.first);
 		ATH_MSG_DEBUG("\tscore:                  " << std::get<xAOD::ObserverToolIndex::score>(itrMap.second));
 		ATH_MSG_DEBUG("\trejectStep:             " << std::get<xAOD::ObserverToolIndex::rejectStep>(itrMap.second));
@@ -413,7 +439,7 @@ std::string Trk::TrkObserverTool::dumpRejection(xAOD::RejectionStep rejectStep, 
 int Trk::TrkObserverTool::getNFinalTracks(const ObservedTrackMap* trk_map) {
 	// counts the tracks which did not get rejected (this number should equal finalTracks)
 	int nFinalTracks = 0;
-	for (auto& itrMap : *trk_map) {
+	for (const auto& itrMap : *trk_map) {
 		if (std::get<xAOD::ObserverToolIndex::rejectReason>(itrMap.second) == xAOD::RejectionReason::acceptedTrack) nFinalTracks++;
 	}
 	return nFinalTracks;

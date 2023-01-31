@@ -307,8 +307,8 @@ HGTD_IterativeExtensionTool::updateStateWithBestFittingCluster(
     }
     ATH_MSG_DEBUG("[updateStateWithBestFittingCluster] tsos found");
 
-    double chi2 = best_tsos->fitQualityOnSurface()->chiSquared() /
-                  best_tsos->fitQualityOnSurface()->doubleNumberDoF();
+    double chi2 = best_tsos->fitQualityOnSurface().chiSquared() /
+                  best_tsos->fitQualityOnSurface().doubleNumberDoF();
     ATH_MSG_DEBUG(
         "[updateStateWithBestFittingCluster] found state with chi2 of "
         << chi2);
@@ -354,8 +354,8 @@ HGTD_IterativeExtensionTool::findBestCompatibleCluster(
           not candidate->fitQualityOnSurface()) {
         continue;
       }
-      double chi2 = candidate->fitQualityOnSurface()->chiSquared() /
-                    candidate->fitQualityOnSurface()->doubleNumberDoF();
+      double chi2 = candidate->fitQualityOnSurface().chiSquared() /
+                    candidate->fitQualityOnSurface().doubleNumberDoF();
       ATH_MSG_DEBUG("found cluster with chi2 of " << chi2);
       // apply cut on the chi2
       if (chi2 > m_chi2_cut) {
@@ -400,10 +400,12 @@ HGTD_IterativeExtensionTool::updateState(const Trk::Track* track, const Trk::Tra
 
   std::unique_ptr<const Trk::TrackParameters> pars = m_updator->addToState(
       *param, cot->localParameters(), cot->localCovariance(), quality);
-
-  return std::make_unique<const Trk::TrackStateOnSurface>(
-      std::move(cot), std::move(pars),
-      std::unique_ptr<Trk::FitQualityOnSurface>(quality));
+  //Here one could  fix the addToState intefaces to 
+  //avoid them allocating memory for  Fit Quality On Surface
+  auto uniqueQuality= std::unique_ptr<Trk::FitQualityOnSurface>(quality);
+  auto QoS = uniqueQuality? *uniqueQuality : Trk::FitQualityOnSurface{};
+  return std::make_unique<const Trk::TrackStateOnSurface>(QoS, std::move(cot),
+                                                          std::move(pars));
 }
 
 std::pair<const HGTD_Cluster*, HGTD::ClusterTruthInfo>

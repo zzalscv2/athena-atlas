@@ -3,7 +3,7 @@
 */
 
 /**
- * @file SCT_ClusterigTool.cxx
+ * @file SCT_ClusteringTool.cxx
  * Implementation file for the SCT_ClusteringTool
  * @ author Paul J. Bell, 2004; Shaun Roe, 2007; Carl Gwilliam, 2008
  **/
@@ -443,7 +443,6 @@ namespace InDet {
     clusterCollection->setIdentifier(elementID);
     clusterCollection->reserve(idGroups.size());
 
-    int clusterNumber(0);
     // All strips are assumed to be the same width.
     std::vector<uint16_t>::iterator tbinIter(tbinGroups.begin());
     
@@ -471,7 +470,6 @@ namespace InDet {
       const double stripLength(std::abs(ends.first.xEta()-ends.second.xEta()));
       //
       // Now make a SiCluster
-      clusterNumber++;
       const SiWidth siWidth(Amg::Vector2D(nStrips, 1), Amg::Vector2D(clusterDim.width, stripLength));
       
       SCT_Cluster* cluster = (m_clusterMaker) ? (m_clusterMaker->sctCluster(clusterId, localPos, stripGroup, siWidth, element, m_errorStrategy))

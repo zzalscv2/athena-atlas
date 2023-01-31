@@ -222,7 +222,7 @@ namespace Muon {
 
         // create new track
         std::unique_ptr<Trk::Track> cleanedTrack =
-            std::make_unique<Trk::Track>(track->info(), std::move(tsos), track->fitQuality() ? track->fitQuality()->clone() : nullptr);
+            std::make_unique<Trk::Track>(track->info(), std::move(tsos), track->fitQuality() ? track->fitQuality()->uniqueClone() : nullptr);
         printStates(cleanedTrack.get());
 
         // fit new track
@@ -283,7 +283,7 @@ namespace Muon {
 
         // create new track
         std::unique_ptr<Trk::Track> cleanedTrack =
-            std::make_unique<Trk::Track>(track->info(), std::move(tsos), track->fitQuality() ? track->fitQuality()->clone() : nullptr);
+            std::make_unique<Trk::Track>(track->info(), std::move(tsos), track->fitQuality() ? track->fitQuality()->uniqueClone() : nullptr);
         printStates(cleanedTrack.get());
 
         // fit new track
@@ -434,7 +434,7 @@ namespace Muon {
 
             // create new track
             std::unique_ptr<Trk::Track> cleanedTrack =
-                std::make_unique<Trk::Track>(track->info(), std::move(tsos), track->fitQuality() ? track->fitQuality()->clone() : nullptr);
+                std::make_unique<Trk::Track>(track->info(), std::move(tsos), track->fitQuality() ? track->fitQuality()->uniqueClone() : nullptr);
 
             // fit new track
             printStates(cleanedTrack.get());
@@ -639,7 +639,7 @@ namespace Muon {
 
         // create new track
         std::unique_ptr<Trk::Track> cleanedTrack =
-            std::make_unique<Trk::Track>(track->info(), std::move(tsos), track->fitQuality() ? track->fitQuality()->clone() : nullptr);
+            std::make_unique<Trk::Track>(track->info(), std::move(tsos), track->fitQuality() ? track->fitQuality()->uniqueClone() : nullptr);
 
         // fit new track
         printStates(cleanedTrack.get());
@@ -770,7 +770,7 @@ namespace Muon {
 
         // create new track
         std::unique_ptr<Trk::Track> cleanedTrack =
-            std::make_unique<Trk::Track>(track->info(), std::move(tsos), track->fitQuality() ? track->fitQuality()->clone() : nullptr);
+            std::make_unique<Trk::Track>(track->info(), std::move(tsos), track->fitQuality() ? track->fitQuality()->uniqueClone() : nullptr);
 
         if (!addedHits) {
             ATH_MSG_DEBUG(" only removed out of bound hits, returning track without new fit ");

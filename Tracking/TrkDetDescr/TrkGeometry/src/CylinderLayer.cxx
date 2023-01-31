@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -24,10 +24,10 @@ Trk::CylinderLayer::CylinderLayer(
   Trk::CylinderBounds* cbounds,
   const Trk::LayerMaterialProperties& laymatprop,
   double thickness,
-  Trk::OverlapDescriptor* olap,
+  std::unique_ptr<Trk::OverlapDescriptor> olap,
   int laytyp)
   : CylinderSurface(transform, cbounds)
-  , Layer(laymatprop, thickness, olap, laytyp)
+  , Layer(laymatprop, thickness, std::move(olap), laytyp)
   , m_approachDescriptor(nullptr)
 {
   CylinderSurface::associateLayer(*this);
@@ -37,10 +37,10 @@ Trk::CylinderLayer::CylinderLayer(
   Trk::CylinderSurface* cyl,
   const Trk::LayerMaterialProperties& laymatprop,
   double thickness,
-  Trk::OverlapDescriptor* olap,
+  std::unique_ptr<Trk::OverlapDescriptor> olap,
   int laytyp)
   : CylinderSurface(*cyl)
-  , Layer(laymatprop, thickness, olap, laytyp)
+  , Layer(laymatprop, thickness, std::move(olap), laytyp)
   , m_approachDescriptor(nullptr)
 {
   CylinderSurface::associateLayer(*this);
@@ -48,13 +48,13 @@ Trk::CylinderLayer::CylinderLayer(
 
 Trk::CylinderLayer::CylinderLayer(const Amg::Transform3D& transform,
                                   Trk::CylinderBounds* cbounds,
-                                  Trk::SurfaceArray* surfaceArray,
+                                  std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                                   double thickness,
-                                  Trk::OverlapDescriptor* olap,
+                                  std::unique_ptr<Trk::OverlapDescriptor> olap,
                                   Trk::IApproachDescriptor* ades,
                                   int laytyp)
   : CylinderSurface(transform, cbounds)
-  , Layer(surfaceArray, thickness, olap, laytyp)
+  , Layer(std::move(surfaceArray), thickness, std::move(olap), laytyp)
   , m_approachDescriptor(ades)
 {
   CylinderSurface::associateLayer(*this);
@@ -68,14 +68,14 @@ Trk::CylinderLayer::CylinderLayer(const Amg::Transform3D& transform,
 Trk::CylinderLayer::CylinderLayer(
   const Amg::Transform3D& transform,
   Trk::CylinderBounds* cbounds,
-  Trk::SurfaceArray* surfaceArray,
+  std::unique_ptr<Trk::SurfaceArray> surfaceArray,
   const Trk::LayerMaterialProperties& laymatprop,
   double thickness,
-  Trk::OverlapDescriptor* olap,
+  std::unique_ptr<Trk::OverlapDescriptor> olap,
   Trk::IApproachDescriptor* ades,
   int laytyp)
   : CylinderSurface(transform, cbounds)
-  , Layer(surfaceArray, laymatprop, thickness, olap, laytyp)
+  , Layer(std::move(surfaceArray), laymatprop, thickness, std::move(olap), laytyp)
   , m_approachDescriptor(ades)
 {
   CylinderSurface::associateLayer(*this);
@@ -89,20 +89,20 @@ Trk::CylinderLayer::CylinderLayer(
 Trk::CylinderLayer::CylinderLayer(
     Trk::CylinderBounds* cbounds,
     const Trk::LayerMaterialProperties& laymatprop, double thickness,
-    Trk::OverlapDescriptor* olap, int laytyp)
+    std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
     : CylinderSurface(cbounds),
-      Layer(laymatprop, thickness, olap, laytyp),
+      Layer(laymatprop, thickness, std::move(olap), laytyp),
       m_approachDescriptor(nullptr) {
   CylinderSurface::associateLayer(*this);
 }
 
 Trk::CylinderLayer::CylinderLayer(Trk::CylinderBounds* cbounds,
-                                  Trk::SurfaceArray* surfaceArray,
+                                  std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                                   double thickness,
-                                  Trk::OverlapDescriptor* olap,
+                                  std::unique_ptr<Trk::OverlapDescriptor> olap,
                                   Trk::IApproachDescriptor* ades, int laytyp)
     : CylinderSurface(cbounds),
-      Layer(surfaceArray, thickness, olap, laytyp),
+      Layer(std::move(surfaceArray), thickness, std::move(olap), laytyp),
       m_approachDescriptor(ades) {
   CylinderSurface::associateLayer(*this);
   if (!ades && surfaceArray) buildApproachDescriptor();
@@ -111,11 +111,11 @@ Trk::CylinderLayer::CylinderLayer(Trk::CylinderBounds* cbounds,
 }
 
 Trk::CylinderLayer::CylinderLayer(
-    Trk::CylinderBounds* cbounds, Trk::SurfaceArray* surfaceArray,
+    Trk::CylinderBounds* cbounds, std::unique_ptr<Trk::SurfaceArray> surfaceArray,
     const Trk::LayerMaterialProperties& laymatprop, double thickness,
-    Trk::OverlapDescriptor* olap, Trk::IApproachDescriptor* ades, int laytyp)
+    std::unique_ptr<Trk::OverlapDescriptor> olap, Trk::IApproachDescriptor* ades, int laytyp)
     : CylinderSurface(cbounds),
-      Layer(surfaceArray, laymatprop, thickness, olap, laytyp),
+      Layer(std::move(surfaceArray), laymatprop, thickness, std::move(olap), laytyp),
       m_approachDescriptor(ades) {
   CylinderSurface::associateLayer(*this);
   if (!ades && surfaceArray) buildApproachDescriptor();
@@ -164,7 +164,7 @@ Trk::CylinderLayer::surfaceRepresentation()
 
 double Trk::CylinderLayer::preUpdateMaterialFactor(
     const Trk::TrackParameters& parm, Trk::PropDirection dir) const {
-  if (!Trk::Layer::m_layerMaterialProperties.get()) return 0.;
+  if (!Trk::Layer::m_layerMaterialProperties) return 0.;
   // calculate the direction to the normal
   const Amg::Vector3D& parmPos = parm.position();
   Amg::Vector3D pastStep(parmPos + dir * parm.momentum().normalized());
@@ -175,7 +175,7 @@ double Trk::CylinderLayer::preUpdateMaterialFactor(
 
 double Trk::CylinderLayer::postUpdateMaterialFactor(
     const Trk::TrackParameters& parm, Trk::PropDirection dir) const {
-  if (!Trk::Layer::m_layerMaterialProperties.get()) return 0;
+  if (!Trk::Layer::m_layerMaterialProperties) return 0;
   const Amg::Vector3D& parmPos = parm.position();
   Amg::Vector3D pastStep(parmPos + dir * parm.momentum().normalized());
   if (pastStep.perp() > parm.position().perp())
@@ -209,7 +209,7 @@ void Trk::CylinderLayer::resizeLayer(const VolumeBounds& bounds,
         Trk::SharedObject<const Trk::CylinderBounds>(rCylinderBounds);
     // (1) resize the material properties by updating the BinUtility, assuming
     // rphi/z binning
-    if (Trk::Layer::m_layerMaterialProperties.get()) {
+    if (Trk::Layer::m_layerMaterialProperties) {
       const BinUtility* layerMaterialBU =
           Trk::Layer::m_layerMaterialProperties->binUtility();
       if (layerMaterialBU && layerMaterialBU->dimensions() > 1) {

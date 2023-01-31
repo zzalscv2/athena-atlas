@@ -737,9 +737,8 @@ InDet::TRT_SeededSpacePointFinder_ATL::production2Spb(const EventContext& ctx,
   std::list<std::pair<const Trk::SpacePoint*,int> >::iterator r0,r0e,r,re, rb;
   const Trk::SpacePoint* SpToPair = nullptr;
 
-  int nri = 0;
 
-  ///Set up the azinuthal width to look for SPs
+  ///Set up the azimuthal width to look for SPs
   //
   int fmin=phi; int fmax=phi;
   if(m_search){fmin = phi-1; fmax = phi+1;}
@@ -751,14 +750,13 @@ InDet::TRT_SeededSpacePointFinder_ATL::production2Spb(const EventContext& ctx,
     r0 = event_data.m_rf_Sorted[j].begin();
     r0e = event_data.m_rf_Sorted[j].end();
 
-    ///Fill a list with the SP in the azimouthal region indicated by the TRT track segment
+    ///Fill a list with the SP in the azimuthal region indicated by the TRT track segment
     for(; r0!=r0e; ++r0){
       if((((*r0).first)->r() > m_r1max) ||
 	 (((*r0).first)->r() < m_r2min)) {
 	continue; //Fill only the SCT SPs
       }
       event_data.m_newRfi_Sorted.push_back(*r0);
-      nri++;
     }
   }
 
@@ -773,13 +771,12 @@ InDet::TRT_SeededSpacePointFinder_ATL::production2Spb(const EventContext& ctx,
       r0 = event_data.m_rf_Sorted[j].begin();
       r0e = event_data.m_rf_Sorted[j].end();
 
-      ///Fill a list with the SP in the azimouthal region indicated by the TRT track segment
+      ///Fill a list with the SP in the azimuthal region indicated by the TRT track segment
       for(; r0!=r0e; ++r0){
 	if((((*r0).first)->r()>m_r1max) || (((*r0).first)->r()<m_r2min)) {
 	  continue; //Fill only the SCT SPs
 	}
 	event_data.m_newRfi_Sorted.push_back(*r0);
-	nri++;
       }
     }
   }

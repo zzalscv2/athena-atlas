@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -74,7 +74,7 @@ std::unique_ptr<RegSelSiLUT> RPC_RegSelCondAlg::createTable( const EventContext&
  
  
   //loop over modules (PrepRawData collections)
-  for ( std::vector<Identifier>::const_iterator itr=idfirst  ;  itr!=idlast  ;  itr++  )  {
+  for ( std::vector<Identifier>::const_iterator itr=idfirst  ;  itr!=idlast  ;  ++itr  )  {
 
     Identifier prdId = *itr;
     IdentifierHash prdHashId;
@@ -121,7 +121,6 @@ std::unique_ptr<RegSelSiLUT> RPC_RegSelCondAlg::createTable( const EventContext&
     double phimax = -999999;
     Amg::Vector3D Pzmin;
     Amg::Vector3D Pzmax;
-    unsigned nmodules = 0;
 
     for (int dbz=1; dbz<=ndbz; dbz++) {
         
@@ -135,7 +134,6 @@ std::unique_ptr<RegSelSiLUT> RPC_RegSelCondAlg::createTable( const EventContext&
         if ( rpc != rpcold ) {
           
           // here a new module
-          nmodules ++;
           rpcold = rpc;
 
 	  Amg::Vector3D rpcPos = rpc->center();
@@ -176,7 +174,7 @@ std::unique_ptr<RegSelSiLUT> RPC_RegSelCondAlg::createTable( const EventContext&
 
     double phiMinFirst  = phimin;
     double phiMaxFirst  = 0.5*(phimin+phimax);
-    double phiMinSecond = 0.5*(phimin+phimax);
+    double phiMinSecond = phiMaxFirst;
     double phiMaxSecond = phimax;
 
     if (phiMinFirst < 0)  phiMinFirst  += 2*M_PI;

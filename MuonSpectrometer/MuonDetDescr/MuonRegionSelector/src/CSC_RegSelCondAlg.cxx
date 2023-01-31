@@ -98,7 +98,7 @@ std::unique_ptr<RegSelSiLUT> CSC_RegSelCondAlg::createTable( const EventContext&
 
 
 
-  for ( std::vector<Identifier>::const_iterator itr=idfirst ; itr!=idlast ; itr++ )  {
+  for ( std::vector<Identifier>::const_iterator itr=idfirst ; itr!=idlast ; ++itr )  {
     Identifier Id = *itr;
     IdentifierHash Idhash;
 

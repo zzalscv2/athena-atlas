@@ -429,8 +429,6 @@ void TrigTSerializer::serialize(const std::string &nameOfClass, const void* inst
     //inefficient - to be compatible with Serializer for the moment can be avoided later
     uint32_t pbytes;
     char *pp = (char *)&pbytes;
-    size_t nints = bufsiz/4 + 1;
-    if (bufsiz%4) nints++;
 
     for (size_t i=0; i<bufsiz/4; i++){
       pbytes = 0;
@@ -640,22 +638,6 @@ void TrigTSerializer::setCLID(const uint32_t *guid){
   for (size_t i=0; i<4; i++)
     m_guid[i] = guid[i];
 }
-
-
-/*
-StatusCode persistifyEL(const TClass *cl, void* instance){
-  if (cl){
-    TMethodCall method(cl, "toPersistent", "");
-    meth.Execute(instance);
-    return StatusCode::SUCCESS;
-  }
-  else
-    return StatusCode::FAILURE;
-}
-
-*/
-
-
 
 
 #include <boost/current_function.hpp>

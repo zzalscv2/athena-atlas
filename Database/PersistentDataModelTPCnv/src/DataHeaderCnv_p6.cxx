@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeaderCnv_p6.cxx
@@ -15,34 +15,35 @@
 using FullElement  = DataHeader_p6::FullElement;
 
 //______________________________________________________________________________
-void DataHeaderCnv_p6::persToElem( const DataHeader_p6* pers, unsigned p_idx,
+bool DataHeaderCnv_p6::persToElem( const DataHeader_p6* pers, unsigned p_idx,
                                     DataHeaderElement* trans, const DataHeaderForm_p6& form )
 {
    delete trans->m_token;  trans->m_token = nullptr;
    int obj_idx = pers->m_shortElements[p_idx];
-   if( obj_idx != INT32_MIN ) {
-      Token* token = new Token;
-      trans->m_token = token;
-      trans->m_ownToken = true;
-      unsigned db_idx = 0;
-      unsigned long long oid2 = 0;
-      if( obj_idx >= 0 ) {
-         db_idx = pers->m_commonDbIndex;
-         oid2   = pers->m_commonOID2;
-      } else {
-         const FullElement &full_el = pers->m_fullElements[ -1 - obj_idx ];
-         db_idx = full_el.dbIdx;
-         obj_idx = full_el.objIdx;
-         oid2 = full_el.oid2;
-      }
+   if( obj_idx == INT32_MIN ) return true;
 
-      if( form.sizeDb() <= db_idx || form.sizeObj() <= (size_t)obj_idx ) {
-         throw std::runtime_error("DataHeader/DataHeaderForm indices out of range. DataHeader can NOT be read!");
-      }
+   Token* token = new Token;
+   trans->m_token = token;
+   trans->m_ownToken = true;
+   unsigned db_idx = 0;
+   unsigned long long oid2 = 0;
+   if( obj_idx >= 0 ) {
+      db_idx = pers->m_commonDbIndex;
+      oid2   = pers->m_commonOID2;
+   } else {
+      const FullElement &full_el = pers->m_fullElements[ -1 - obj_idx ];
+      db_idx = full_el.dbIdx;
+      obj_idx = full_el.objIdx;
+      oid2 = full_el.oid2;
+   }
+
+   if( form.sizeDb() > db_idx ) {
       // Append DbGuid
       token->setDb(         form.getDbGuid( db_idx ) );
-      token->setCont(       form.getObjContainer( obj_idx ) );
       token->setTechnology( form.getDbTech( db_idx ) );
+   }
+   if( form.sizeObj() > (size_t)obj_idx ) {
+      token->setCont(       form.getObjContainer( obj_idx ) );
       // Append ClassId
       token->setClassID(    form.getObjClassId(obj_idx) );
       token->setOid( Token::OID_t( form.getObjOid1(obj_idx), oid2) );
@@ -53,6 +54,7 @@ void DataHeaderCnv_p6::persToElem( const DataHeader_p6* pers, unsigned p_idx,
       trans->m_clids = form.getObjSymLinks( obj_idx );
       trans->m_hashes = form.getObjHashes( obj_idx );
    }
+   return form.sizeDb() > db_idx and form.sizeObj() > (size_t)obj_idx;
 }
 
 //______________________________________________________________________________
@@ -72,6 +74,10 @@ DataHeader* DataHeaderCnv_p6::createTransient(const DataHeader_p6* pers, const D
    trans->m_dataHeader.resize(pers->m_shortElements.size() - provSize); // Add self reference, which was appended to end
    auto& elem = trans->m_dataHeader.back();
    persToElem( pers, i++, &elem, form );
+   if( elem.getToken()->contID().find("DataHeader") == std::string::npos ) {
+      // discard wrong element
+      trans->m_dataHeader.pop_back();
+   }
    trans->setStatus(DataHeader::Input);
    return trans;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -23,6 +23,9 @@
 
 // std::abs
 #include <cmath> 
+
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // unit test
 
 namespace test {
 
@@ -102,6 +105,17 @@ void testConstructors() {
 
 }
 
+void testPhysicsProcessCategory() {
+  //ISF_TruthIncident has a dummy implementation
+  int dummy = -1;
+  assert(dummy==test::truthIncident.physicsProcessCategory());
+}
+
+void testPhysicsProcessCode() {
+  // the process barcode is only set through constructor;
+  // => test against the value used when constructing the incident
+  assert(test::truthIncident.physicsProcessCode()==test::procBC);
+}
 
 void testChildP2() {
   assert(test::truthIncident.childP2(0)==test::isp2.momentum().mag2());
@@ -150,7 +164,6 @@ void testChildParticle() {
 
   //--------------------------------------------------------------------
   // get gP:
-  std::cout << "LM test::truthIncident.childBarcode(0) pre childParticle  " << test::truthIncident.childBarcode(0) << std::endl;
   std::unique_ptr<HepMC::GenEvent> event(HepMC::newGenEvent(1,1));
   HepMC::GenVertexPtr vertex = HepMC::newGenVertexPtr();
   event->add_vertex(vertex);
@@ -159,7 +172,6 @@ void testChildParticle() {
 #ifdef HEPMC3
   HepMC::suggest_barcode( gPP, childBarcode);
 #endif
- std::cout << "LM test::truthIncident.childBarcode(0) post childParticle" << test::truthIncident.childBarcode(0) << std::endl;
   //--------------------------------------------------------------------
   // run tests:
   // do gP properties match original child, apart from barcode?
@@ -174,12 +186,24 @@ void testChildParticle() {
 
 }
 
+void testSetAllChildrenBarcodes() {
+
+  Barcode::ParticleBarcode newBarcode = 42;
+  unsigned short numSec = test::truthIncident.numberOfChildren();
+  test::truthIncident.setAllChildrenBarcodes(newBarcode);
+  for (unsigned short index=0; index<numSec; index++) {
+    assert(test::truthIncident.childBarcode(index) == newBarcode);
+  }
+
+}
 
 int main() {
 
   testConstructors();
 
-  // const getters 
+  // const getters
+  testPhysicsProcessCategory();
+  testPhysicsProcessCode();
   testChildP2();
   testChildPt2();
   testChildEkin();
@@ -188,6 +212,9 @@ int main() {
 
   // not const getter; returns genParticle, changes TruthIncident child barcode 
   testChildParticle();
+
+  // other functions 
+  testSetAllChildrenBarcodes();
 
   return 0;
   

@@ -1,6 +1,4 @@
-################################################################################
-# Package: TruthRivetTools
-################################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the name of the package:
 atlas_subdir( TruthRivetTools )
@@ -24,7 +22,7 @@ atlas_add_library( TruthRivetToolsLib
    ${FASTJET_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS}
 	LINK_LIBRARIES ${RIVET_LIBRARIES} ${YODA_LIBRARIES}
    ${FASTJET_LIBRARIES} ${ROOT_LIBRARIES} ${GSL_LIBRARIES} AsgTools AtlasHepMCLib AtlasHepMCsearchLib
-   GenInterfacesLib )
+   CxxUtils GenInterfacesLib )
 
 atlas_add_component( TruthRivetTools
    src/components/*.cxx

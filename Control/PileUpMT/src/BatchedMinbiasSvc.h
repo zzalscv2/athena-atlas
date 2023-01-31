@@ -48,6 +48,7 @@ class BatchedMinbiasSvc : public extends<AthService, IMinbiasSvc> {
                                                   "Max number of batches to load simultaneously"};
     Gaudi::Property<int> m_HSBatchSize{
           this, "HSBatchSize", 1, "Number of HS events per batch (aka max reuse factor)"};
+    Gaudi::Property<int> m_skippedHSEvents{this, "SkippedHSEvents", 0, "Number of skipped HS events"};
     Gaudi::Property<std::vector<int>> m_actualNHSEventsPerBatch{
           this,
           "actualNHSEventsPerBatch",

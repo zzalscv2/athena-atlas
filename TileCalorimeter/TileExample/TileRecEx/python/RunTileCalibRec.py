@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 '''@file RunTileCalibRec.py
 @brief Script to run Tile Reconstrcution/Monitoring for calibration runs
@@ -39,7 +39,7 @@ At least one should provide the following arguments or Athena configuration flag
 def getArgumentParser():
     """ Function to return command line arguments parser for reconstuction of Tile calibration runs """
 
-    parserParents = [ConfigFlags.getArgumentParser(), TileInputFiles.getArgumentParser(add_help=False)]
+    parserParents = [flags.getArgumentParser(), TileInputFiles.getArgumentParser(add_help=False)]
 
     import argparse
     parser= argparse.ArgumentParser(parents=parserParents, add_help=False, fromfile_prefix_chars='@', epilog=epiLog, formatter_class=argparse.RawTextHelpFormatter)
@@ -52,7 +52,6 @@ def getArgumentParser():
     parser.add_argument('--outputDirectory', default='.', help='Output directory for produced files')
 
     parser.add_argument('--perfmon', action='store_true', help='Run perfmon')
-    parser.add_argument('--fpe', action='store_true', help='Run FPE auditor')
 
     parser.add_argument('-v', '--version', type=str, default='0', help='Version to be used in output files for ntuple and monitoring')
 
@@ -125,7 +124,7 @@ def useSqliteAndTagFor(sqliteFile, tag, folder):
 if __name__=='__main__':
     import sys,os
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
     # Setup logs
     from AthenaCommon.Logging import log
@@ -136,69 +135,70 @@ if __name__=='__main__':
     args, _ = parser.parse_known_args()
 
     # Initially the following flags are not set up (they must be provided)
-    ConfigFlags.Input.Files = []
-    ConfigFlags.Tile.RunType = 'UNDEFINED'
+    flags = initConfigFlags()
+    flags.Input.Files = []
+    flags.Tile.RunType = 'UNDEFINED'
 
     # Initial configuration flags from command line arguments (to be used to set up defaults)
-    ConfigFlags.fillFromArgs(parser=parser)
+    flags.fillFromArgs(parser=parser)
 
     # =======>>> Set up the Athena configuration flags to defaults (can be overriden via comand line)
 
     # Set up the Tile input files
-    if not ConfigFlags.Input.Files and args.run:
-        ConfigFlags.Input.Files = TileInputFiles.findFilesFromAgruments(args)
-    if not ConfigFlags.Input.Files:
+    if not flags.Input.Files and args.run:
+        flags.Input.Files = TileInputFiles.findFilesFromAgruments(args)
+    if not flags.Input.Files:
         log.error('Input files must be provided! For example: --filesInput=file1,file2,... or --run RUNNUMBER')
         sys.exit(-1)
 
     # Set up the Tile run type using arguments if it was not set up via configuration flags
-    if ConfigFlags.Tile.RunType == 'UNDEFINED':
+    if flags.Tile.RunType == 'UNDEFINED':
         if args.cis:
-            ConfigFlags.Tile.RunType = 'CIS'
+            flags.Tile.RunType = 'CIS'
         elif args.laser:
-            ConfigFlags.Tile.RunType = 'LAS'
+            flags.Tile.RunType = 'LAS'
         elif args.pedestals:
-            ConfigFlags.Tile.RunType = 'PED'
+            flags.Tile.RunType = 'PED'
         elif args.physics:
-            ConfigFlags.Tile.RunType = 'PHY'
+            flags.Tile.RunType = 'PHY'
         else:
             log.error('The Tile Run Type must be provided! For example: --laser or --cis, ..., or Tile.RunType="PED"')
             sys.exit(-1)
 
-    if ConfigFlags.Tile.RunType not in ('PHY', 'CIS'):
-        ConfigFlags.Exec.SkipEvents = 1
-    elif ConfigFlags.Tile.RunType == 'CIS':
-        ConfigFlags.Exec.SkipEvents = 192 # skip all events when just one channel is fired (4*48)
+    if flags.Tile.RunType not in ('PHY', 'CIS'):
+        flags.Exec.SkipEvents = 1
+    elif flags.Tile.RunType == 'CIS':
+        flags.Exec.SkipEvents = 192 # skip all events when just one channel is fired (4*48)
 
     # Set up Tile reconstuction method
-    ConfigFlags.Tile.doOpt2 = args.opt2
-    ConfigFlags.Tile.doOptATLAS = args.opt_atlas
-    ConfigFlags.Tile.doFit = args.fit
-    ConfigFlags.Tile.doOF1 = args.of1
-    ConfigFlags.Tile.doMF = args.mf
+    flags.Tile.doOpt2 = args.opt2
+    flags.Tile.doOptATLAS = args.opt_atlas
+    flags.Tile.doFit = args.fit
+    flags.Tile.doOF1 = args.of1
+    flags.Tile.doMF = args.mf
 
-    ConfigFlags.Tile.BestPhaseFromCOOL = True
-    ConfigFlags.Tile.NoiseFilter = 0 # disable noise filter by default
-    ConfigFlags.Tile.doOverflowFit = False
-    ConfigFlags.Tile.correctAmplitude = False
-    ConfigFlags.Tile.correctTime = args.phys_timing or ConfigFlags.Tile.RunType == 'PHY'
-    ConfigFlags.Tile.OfcFromCOOL = ConfigFlags.Tile.RunType in ('PHY', 'PED')
+    flags.Tile.BestPhaseFromCOOL = True
+    flags.Tile.NoiseFilter = 0 # disable noise filter by default
+    flags.Tile.doOverflowFit = False
+    flags.Tile.correctAmplitude = False
+    flags.Tile.correctTime = args.phys_timing or flags.Tile.RunType == 'PHY'
+    flags.Tile.OfcFromCOOL = flags.Tile.RunType in ('PHY', 'PED')
 
-    if args.phys_timing and ConfigFlags.Tile.RunType == 'LAS':
-        ConfigFlags.Tile.TimingType = 'GAP/LAS'
+    if args.phys_timing and flags.Tile.RunType == 'LAS':
+        flags.Tile.TimingType = 'GAP/LAS'
 
-    runNumber = ConfigFlags.Input.RunNumber[0]
+    runNumber = flags.Input.RunNumber[0]
 
     # Set up LHC Run period
     if not any([args.run2, args.run3]):
-        if not ConfigFlags.Input.isMC:
+        if not flags.Input.isMC:
             if runNumber >= 411938:
                 args.run3 = True
-            elif any([args.year and args.year > 2014, runNumber > 232000, ConfigFlags.Input.ProjectName.startswith("data15_")]):
+            elif any([args.year and args.year > 2014, runNumber > 232000, flags.Input.ProjectName.startswith("data15_")]):
                 args.run2 = True
 
     # Set up the DB global conditions tag
-    if ConfigFlags.Input.Format is Format.BS:
+    if flags.Input.Format is Format.BS:
         if args.run3:
             condDbTag = 'CONDBR2-BLKPA-RUN2-09' if args.upd4 else 'CONDBR2-ES1PA-2022-01'
             detDescrVersion = 'ATLAS-R3S-2021-02-00-00'
@@ -209,23 +209,23 @@ if __name__=='__main__':
             condDbTag = 'COMCOND-BLKPA-RUN1-06' if (args.upd4 and runNumber > 141066) else 'COMCOND-ES1PA-006-05'
             detDescrVersion = 'ATLAS-R1-2012-02-00-00'
 
-        ConfigFlags.IOVDb.GlobalTag = condDbTag
-        ConfigFlags.GeoModel.AtlasVersion = detDescrVersion
+        flags.IOVDb.GlobalTag = condDbTag
+        flags.GeoModel.AtlasVersion = detDescrVersion
 
     if args.mon:
-        ConfigFlags.DQ.useTrigger = False
-        ConfigFlags.DQ.enableLumiAccess = False
-        if not ConfigFlags.Output.HISTFileName:
-            ConfigFlags.Output.HISTFileName = f'{args.outputDirectory}/tilemon_{runNumber}_{args.version}.root'
+        flags.DQ.useTrigger = False
+        flags.DQ.enableLumiAccess = False
+        if not flags.Output.HISTFileName:
+            flags.Output.HISTFileName = f'{args.outputDirectory}/tilemon_{runNumber}_{args.version}.root'
 
     if args.tmdb is None:
-        args.tmdb = not ConfigFlags.Input.isMC
+        args.tmdb = not flags.Input.isMC
 
     if args.channel_time_mon is None:
-        args.channel_time_mon = ConfigFlags.Tile.RunType in ('PHY', 'LAS') and ConfigFlags.Tile.doFit
+        args.channel_time_mon = flags.Tile.RunType in ('PHY', 'LAS') and flags.Tile.doFit
 
     # Override default configuration flags from command line arguments
-    ConfigFlags.fillFromArgs(parser=parser)
+    flags.fillFromArgs(parser=parser)
 
     if args.dumpArguments:
         log.info('=====>>> FINAL ARGUMENTS FOLLOW:')
@@ -234,11 +234,11 @@ if __name__=='__main__':
             print(f'{a:40} : {v}')
         sys.exit(0)
 
-    ConfigFlags.needFlagsCategory('Tile')
+    flags.needFlagsCategory('Tile')
 
     # Set up perfmon
     if args.perfmon:
-        ConfigFlags.PerfMon.doFullMonMT=True
+        flags.PerfMon.doFullMonMT=True
 
     if args.preExec:
         log.info('Executing preExec: %s', args.preExec)
@@ -247,28 +247,24 @@ if __name__=='__main__':
     if args.interactive:
         os.environ['PYTHONINSPECT'] = '1'
 
-    ConfigFlags.lock()
+    flags.lock()
 
     log.info('=====>>> FINAL CONFIG FLAGS SETTINGS FOLLOW:')
-    ConfigFlags.dump(pattern='Tile.*|Input.*|Exec.*|IOVDb.[D|G].*', evaluate=True)
+    flags.dump(pattern='Tile.*|Input.*|Exec.*|IOVDb.[D|G].*', evaluate=True)
 
-    biGainRun = True if ConfigFlags.Tile.RunType in ['CIS', 'PED'] else False
+    biGainRun = True if flags.Tile.RunType in ['CIS', 'PED'] else False
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
-
-    # Add FPE auditor
-    if args.fpe:
-        cfg.addAuditor(CompFactory.FPEAuditor())
+    cfg = MainServicesCfg(flags)
 
     # Add perfmon
     if args.perfmon:
         from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-        cfg.merge(PerfMonMTSvcCfg(ConfigFlags))
+        cfg.merge(PerfMonMTSvcCfg(flags))
 
     # =======>>> Set up the File (BS | POOL) reading
-    if ConfigFlags.Input.Format is Format.BS:
+    if flags.Input.Format is Format.BS:
         # Configure reading the Tile BS files
         typeNames = ['TileRawChannelContainer/TileRawChannelCnt', 'TileDigitsContainer/TileDigitsCnt']
 
@@ -278,25 +274,25 @@ if __name__=='__main__':
             typeNames += ['TileRawChannelContainer/MuRcvRawChCnt']
         if any([args.ntuple]):
             typeNames += ['TileMuonReceiverContainer/TileMuRcvCnt', 'SG::AuxVectorBase/TileMuRcvCnt']
-        if ConfigFlags.Tile.RunType == 'LAS':
+        if flags.Tile.RunType == 'LAS':
             typeNames += ['TileLaserObject/TileLaserObj']
-        if ConfigFlags.Tile.RunType != 'PHY':
+        if flags.Tile.RunType != 'PHY':
             typeNames += ['TileBeamElemContainer/TileBeamElemCnt']
 
         from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-        cfg.merge( ByteStreamReadCfg(ConfigFlags, type_names=typeNames) )
+        cfg.merge( ByteStreamReadCfg(flags, type_names=typeNames) )
         cfg.getService("ByteStreamCnvSvc").ROD2ROBmap=["-1"]
         cfg.addPublicTool( CompFactory.TileROD_Decoder(fullTileMode=runNumber) )
 
     else:
         # Configure reading POOL files
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-        cfg.merge(PoolReadCfg(ConfigFlags))
+        cfg.merge(PoolReadCfg(flags))
 
     # =======>>> Set up the Tile raw channel maker only if readDigits is set
-    if ConfigFlags.Tile.readDigits:
+    if flags.Tile.readDigits:
         from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
-        cfg.merge( TileRawChannelMakerCfg(ConfigFlags) )
+        cfg.merge( TileRawChannelMakerCfg(flags) )
         rawChMaker = cfg.getEventAlgo('TileRChMaker')
         if args.threads > 1:
             rawChMaker.Cardinality = args.threads
@@ -307,17 +303,17 @@ if __name__=='__main__':
     if args.ntuple:
         ntupleFile = f'{args.outputDirectory}/tile_{runNumber}_{args.version}.aan.root'
         from TileRec.TileAANtupleConfig import TileAANtupleCfg
-        cfg.merge( TileAANtupleCfg(ConfigFlags, outputFile=ntupleFile) )
+        cfg.merge( TileAANtupleCfg(flags, outputFile=ntupleFile) )
         tileNtuple = cfg.getEventAlgo('TileNtuple')
         # CompressionSettings: algorithm * 100 + level
         tileNtuple.CompressionSettings = 204
-        tileNtuple.SkipEvents = 4 if ConfigFlags.Tile.RunType == 'LAS' else 0
-        tileNtuple.TileRawChannelContainerOpt = "TileRawChannelOpt2" if ConfigFlags.Tile.doOpt2 else ""
+        tileNtuple.SkipEvents = 4 if flags.Tile.RunType == 'LAS' else 0
+        tileNtuple.TileRawChannelContainerOpt = "TileRawChannelOpt2" if flags.Tile.doOpt2 else ""
         tileNtuple.TileRawChannelContainerDsp = "" if biGainRun else "TileRawChannelCnt"
         if args.reduced_ntuple:
             tileNtuple.Reduced = True
             tileNtuple.TileRawChannelContainer = ""
-        if ConfigFlags.Tile.RunType in ('LAS'):
+        if flags.Tile.RunType in ('LAS'):
             tileNtuple.OfflineUnits = 1 # use pCb units for ntuple
         if args.phys_timing:
             tileNtuple.TileDigitsContainerFlt = "TileDigitsCnt"
@@ -332,32 +328,32 @@ if __name__=='__main__':
 
         if args.digits_mon:
             from TileMonitoring.TileDigitsMonitorAlgorithm import TileDigitsMonitoringConfig
-            cfg.merge(TileDigitsMonitoringConfig(ConfigFlags))
+            cfg.merge(TileDigitsMonitoringConfig(flags))
             setOnlineEnvironment(cfg.getEventAlgo('TileDigitsMonAlg'))
 
         if args.channel_mon:
             from TileMonitoring.TileRawChannelMonitorAlgorithm import TileRawChannelMonitoringConfig
-            cfg.merge(TileRawChannelMonitoringConfig(ConfigFlags))
+            cfg.merge(TileRawChannelMonitoringConfig(flags))
             setOnlineEnvironment(cfg.getEventAlgo('TileRawChannelMonAlg'))
 
         if args.channel_time_mon:
             from TileMonitoring.TileRawChannelTimeMonitorAlgorithm import TileRawChannelTimeMonitoringConfig
-            cfg.merge(TileRawChannelTimeMonitoringConfig(ConfigFlags))
+            cfg.merge(TileRawChannelTimeMonitoringConfig(flags))
             setOnlineEnvironment(cfg.getEventAlgo('TileRawChanTimeMonAlg'))
 
         if args.tmdb_digits_mon:
             from TileMonitoring.TileTMDBDigitsMonitorAlgorithm import TileTMDBDigitsMonitoringConfig
-            cfg.merge(TileTMDBDigitsMonitoringConfig(ConfigFlags))
+            cfg.merge(TileTMDBDigitsMonitoringConfig(flags))
             setOnlineEnvironment(cfg.getEventAlgo('TileTMDBDigitsMonAlg'))
 
         if args.tmdb_channel_mon:
             from TileMonitoring.TileTMDBRawChannelMonitorAlgorithm import TileTMDBRawChannelMonitoringConfig
-            cfg.merge(TileTMDBRawChannelMonitoringConfig(ConfigFlags))
+            cfg.merge(TileTMDBRawChannelMonitoringConfig(flags))
             setOnlineEnvironment(cfg.getEventAlgo('TileTMDBRawChanDspMonAlg'))
 
         if args.tmdb_mon:
             from TileMonitoring.TileTMDBMonitorAlgorithm import TileTMDBMonitoringConfig
-            cfg.merge(TileTMDBMonitoringConfig(ConfigFlags))
+            cfg.merge(TileTMDBMonitoringConfig(flags))
             setOnlineEnvironment(cfg.getEventAlgo('TileTMDBMonAlg'))
 
         if any([args.tmdb_digits_mon, args.tmdb_mon]) and args.postprocessing:
@@ -369,11 +365,11 @@ if __name__=='__main__':
             if args.digits_mon:
                 configurations += [os.path.join(dataPath, 'TileDigitsPostProc.yaml')]
             if args.channel_mon:
-                if 'CIS' in ConfigFlags.Tile.RunType:
+                if 'CIS' in flags.Tile.RunType:
                     configurations += [os.path.join(dataPath, 'TileRawChanCisPostProc.yaml')]
                 else:
                     configurations += [os.path.join(dataPath, 'TileRawChanPostProc.yaml')]
-                    if ConfigFlags.Tile.RunType == 'LAS':
+                    if flags.Tile.RunType == 'LAS':
                         configurations += [os.path.join(dataPath, 'TileRawChanLasPostProc.yaml')]
                     if not biGainRun:
                         configurations += [os.path.join(dataPath, 'TileRawChanDspPostProc.yaml')]
@@ -386,53 +382,53 @@ if __name__=='__main__':
                     return super(TileMonPostProcessingAlg, self).initialize()
 
             ppa = TileMonPostProcessingAlg("TileMonPostProcessingAlg")
-            ppa.OutputLevel = ConfigFlags.Exec.OutputLevel
+            ppa.OutputLevel = flags.Exec.OutputLevel
             ppa.ExtraInputs = [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]
             ppa.Interval = 1000000 # Big number (>evtMax) to do postprocessing during finalization
             ppa.ConfigFiles = configurations
             ppa._ctr = 1 # Start postprocessing only after specified number of events (not during the first one)
-            ppa.FileKey = f'/{ConfigFlags.DQ.FileKey}/'
+            ppa.FileKey = f'/{flags.DQ.FileKey}/'
 
             cfg.addEventAlgo(ppa, sequenceName='AthEndSeq')
 
 
     # =======>>> Set up the Tile calibration
     if args.calib:
-        if ConfigFlags.Tile.RunType == 'LAS':
+        if flags.Tile.RunType == 'LAS':
             laserCalibFile = f'tileCalibLAS_{runNumber}_{args.version}.root'
             from TileCalibAlgs.TileLaserCalibAlgConfig import TileLaserCalibAlgCfg
-            cfg.merge( TileLaserCalibAlgCfg(ConfigFlags, FileName=laserCalibFile) )
+            cfg.merge( TileLaserCalibAlgCfg(flags, FileName=laserCalibFile) )
 
-        elif ConfigFlags.Tile.RunType == 'CIS':
+        elif flags.Tile.RunType == 'CIS':
             cisCalibFile = f'tileCalibCIS_{runNumber}_{args.version}.root'
             from TileCalibAlgs.TileCisCalibAlgConfig import TileCisCalibAlgCfg
-            cfg.merge( TileCisCalibAlgCfg(ConfigFlags, FileName=cisCalibFile) )
+            cfg.merge( TileCisCalibAlgCfg(flags, FileName=cisCalibFile) )
 
-        elif ConfigFlags.Tile.RunType in ['PHY', 'PED']:
+        elif flags.Tile.RunType in ['PHY', 'PED']:
             defaultVersions = ['0', 'Ped.0', 'Ped']
 
-            fileVersion = f'_{ConfigFlags.Tile.NoiseFilter}' if ConfigFlags.Tile.NoiseFilter > 0 else ""
+            fileVersion = f'_{flags.Tile.NoiseFilter}' if flags.Tile.NoiseFilter > 0 else ""
             if args.version not in defaultVersions:
-                fileVersion = f'_{args.version}_tnf{ConfigFlags.Tile.NoiseFilter}'
+                fileVersion = f'_{args.version}_tnf{flags.Tile.NoiseFilter}'
 
             from TileCalibAlgs.TileRawChNoiseCalibAlgConfig import TileRawChNoiseCalibAlgCfg
-            cfg.merge( TileRawChNoiseCalibAlgCfg(ConfigFlags) )
+            cfg.merge( TileRawChNoiseCalibAlgCfg(flags) )
             rawChanNoiseCalibAlg = cfg.getEventAlgo('TileRawChNoiseCalibAlg')
             rawChanNoiseCalibAlg.FileNamePrefix = f'{args.outputDirectory}/RawCh_NoiseCalib{fileVersion}'
-            if ConfigFlags.Input.isMC:
+            if flags.Input.isMC:
                 rawChanNoiseCalibAlg.doFit = False
                 rawChanNoiseCalibAlg.doFixed = False
                 rawChanNoiseCalibAlg.doOpt = False
                 rawChanNoiseCalibAlg.doDsp = True
                 rawChanNoiseCalibAlg.UseforCells = 3 # i.e. from TileRawChannelCnt (like DSP)
             else:
-                rawChanNoiseCalibAlg.doDsp = (ConfigFlags.Tile.RunType == 'PHY')
+                rawChanNoiseCalibAlg.doDsp = (flags.Tile.RunType == 'PHY')
                 rawChanNoiseCalibAlg.UseforCells = 1 # 1= Fixed , 2= Opt2
 
             # Produce digi noise ntuple only for default version
             if args.version in defaultVersions:
                 from TileCalibAlgs.TileDigiNoiseCalibAlgConfig import TileDigiNoiseCalibAlgCfg
-                cfg.merge( TileDigiNoiseCalibAlgCfg(ConfigFlags) )
+                cfg.merge( TileDigiNoiseCalibAlgCfg(flags) )
                 digiNoiseCalibAlg = cfg.getEventAlgo('TileDigiNoiseCalibAlg')
                 digiNoiseCalibAlg.DoAvgCorr = False # False=> Full AutoCorr matrix calculation
                 rawChanNoiseCalibAlg.FileNamePrefix = f'{args.outputDirectory}/Digi_NoiseCalib{fileVersion}'

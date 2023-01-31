@@ -12,8 +12,8 @@ def retrieveAODList(enableOutputOverride = False):
     jetPileUpTruthList = []
     if rec.doTruth():
       jetPileUpTruthList += [
-        'xAOD::JetContainer#InTimeAntiKt4TruthJets',            'xAOD::AuxContainerBase!#InTimeAntiKt4TruthJetsAux.-constituentLinks.-constituentWeights',
-        'xAOD::JetContainer#OutOfTimeAntiKt4TruthJets',         'xAOD::AuxContainerBase!#OutOfTimeAntiKt4TruthJetsAux.-constituentLinks.-constituentWeights',
+        'xAOD::JetContainer#InTimeAntiKt4TruthJets',            'xAOD::AuxContainerBase!#InTimeAntiKt4TruthJetsAux.-PseudoJet.-constituentLinks.-constituentWeights',
+        'xAOD::JetContainer#OutOfTimeAntiKt4TruthJets',         'xAOD::AuxContainerBase!#OutOfTimeAntiKt4TruthJetsAux.-PseudoJet.-constituentLinks.-constituentWeights',
       ]
 
     #If we don't want to write jets to AOD then we just return the above list of pileup truth jets
@@ -44,9 +44,9 @@ def retrieveAODList(enableOutputOverride = False):
         'xAOD::EventShape#TopoClusterIsoCentralEventShape',         'xAOD::EventShapeAuxInfo#TopoClusterIsoCentralEventShapeAux.',
         'xAOD::EventShape#TopoClusterIsoForwardEventShape',         'xAOD::EventShapeAuxInfo#TopoClusterIsoForwardEventShapeAux.',
 
-        'xAOD::JetContainer#AntiKt4EMPFlowJets',                    'xAOD::JetAuxContainer#AntiKt4EMPFlowJetsAux.',
-        'xAOD::JetContainer#AntiKt4EMTopoJets',                     'xAOD::JetAuxContainer#AntiKt4EMTopoJetsAux.',
-        'xAOD::JetContainer#AntiKt4LCTopoJets',                     'xAOD::JetAuxContainer#AntiKt4LCTopoJetsAux.',
+        'xAOD::JetContainer#AntiKt4EMPFlowJets',                    'xAOD::JetAuxContainer#AntiKt4EMPFlowJetsAux.-PseudoJet',
+        'xAOD::JetContainer#AntiKt4EMTopoJets',                     'xAOD::JetAuxContainer#AntiKt4EMTopoJetsAux.-PseudoJet',
+        'xAOD::JetContainer#AntiKt4LCTopoJets',                     'xAOD::JetAuxContainer#AntiKt4LCTopoJetsAux.-PseudoJet',
         ]
 
     if rec.doTruth():
@@ -54,7 +54,7 @@ def retrieveAODList(enableOutputOverride = False):
 
     if jetFlags.detailLevel()==JetContentDetail.Full:
         l += [
-            'xAOD::JetContainer#AntiKt10LCTopoJets',                    'xAOD::JetAuxContainer#AntiKt10LCTopoJetsAux.',
+            'xAOD::JetContainer#AntiKt10LCTopoJets',                    'xAOD::JetAuxContainer#AntiKt10LCTopoJetsAux.-PseudoJet',
 
             'xAOD::CaloClusterContainer#EMOriginTopoClusters',          'xAOD::ShallowAuxContainer#EMOriginTopoClustersAux.',
             'xAOD::CaloClusterContainer#LCOriginTopoClusters' ,         'xAOD::ShallowAuxContainer#LCOriginTopoClustersAux.',
@@ -62,11 +62,11 @@ def retrieveAODList(enableOutputOverride = False):
 
         if rec.doTruth():
             l += [
-                'xAOD::JetContainer#AntiKt4TruthJets',                  'xAOD::JetAuxContainer#AntiKt4TruthJetsAux.',
+                'xAOD::JetContainer#AntiKt4TruthJets',                  'xAOD::JetAuxContainer#AntiKt4TruthJetsAux.-PseudoJet',
                 ]
     elif jetFlags.detailLevel()==JetContentDetail.Trigger:
-        l += ['xAOD::JetContainer#AntiKt10LCTopoJets',                       'xAOD::JetAuxContainer#AntiKt10LCTopoJetsAux.']
-        l += ['xAOD::JetContainer#AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets', 'xAOD::JetAuxContainer#AntiKt10LCTopoTrimmedPtFrac5SmallR20JetsAux.']
+        l += ['xAOD::JetContainer#AntiKt10LCTopoJets',                       'xAOD::JetAuxContainer#AntiKt10LCTopoJetsAux.-PseudoJet']
+        l += ['xAOD::JetContainer#AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets', 'xAOD::JetAuxContainer#AntiKt10LCTopoTrimmedPtFrac5SmallR20JetsAux.-PseudoJet']
 
     return l
 

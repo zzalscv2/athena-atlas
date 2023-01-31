@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================
 # Job options file for the AFP_LocReco package
@@ -114,12 +114,12 @@ def AFP_LocReco_SiD_HLT(flags):
 
         from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-        monTool_AFP_SIDLocRecoTool = GenericMonitoringTool("MonTool_AFP_SIDLocRecoTool")
+        monTool_AFP_SIDLocRecoTool = GenericMonitoringTool(flags, "MonTool_AFP_SIDLocRecoTool")
         monTool_AFP_SIDLocRecoTool.defineHistogram( 'TrkSize', path='EXPERT', type='TH1F', title='AFP tracks size',xbins=50, xmin=0, xmax=50 )
         AFP_SID.recoTool.MonTool = monTool_AFP_SIDLocRecoTool
                 
         for i, kalmanTool in enumerate(AFP_SID.recoTool.RecoToolsList):
-               monTool_AFP_BasicKalman = GenericMonitoringTool("MonTool_AFP_"+kalmanTool.getName())
+               monTool_AFP_BasicKalman = GenericMonitoringTool(flags, "MonTool_AFP_"+kalmanTool.getName())
 
                monTool_AFP_BasicKalman.defineHistogram( 'TrkStationID', path='EXPERT', type='TH1F', title='Track station ID',xbins=4, xmin=0, xmax=4, cutmask='TrkMask' )
                monTool_AFP_BasicKalman.defineHistogram( 'TrkXLocal', path='EXPERT', type='TH1F', title='Track xLocal',xbins=100, xmin=-200, xmax=200, cutmask='TrkMask' )

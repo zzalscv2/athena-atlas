@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // NAME:     TileCalCellMonTool.cxx
@@ -42,9 +42,7 @@ TileCalCellMonTool::TileCalCellMonTool(const std::string& type, const std::strin
 
 
 
-TileCalCellMonTool::~TileCalCellMonTool() {
-
-}
+TileCalCellMonTool::~TileCalCellMonTool() = default;
 
 ////////////////////////////////////////////
 StatusCode TileCalCellMonTool::initialize() {
@@ -60,7 +58,7 @@ StatusCode TileCalCellMonTool::initialize() {
   //Initialize read handle key
   ATH_CHECK( m_cellContainerName.initialize() );
 
-  ATH_CHECK( ManagedMonitorToolBase::initialize() );
+  ATH_CHECK( CaloMonToolBase::initialize() );
   ATH_CHECK( CaloMonToolBase::initialize() );
 
   ATH_MSG_DEBUG("TileCalCellMonTool::initialize() is done!");
@@ -316,17 +314,17 @@ StatusCode TileCalCellMonTool::fillHistograms(){
     float cellnoisedb = 0.;
 
 
-    if (m_useTwoGaus==false)
+    if (!m_useTwoGaus)
       cellnoisedb = noise->getNoise(id, cell->gain());
     else
       cellnoisedb = noise->getEffectiveSigma(id, cell->gain(), cell->energy());
 
     double rs=999;
-    if (std::isfinite(cellnoisedb) && cellnoisedb > 0 &&  cellen != 0 && badc == false) rs= cellen / cellnoisedb;
+    if (std::isfinite(cellnoisedb) && cellnoisedb > 0 &&  cellen != 0 && !badc) rs= cellen / cellnoisedb;
 
     if (sample < 3) { // Sample E not relevant for topoclusters
-      if (badc == false && rs != 999 ) m_h_CellsNoiseE->Fill( rs );
-      if (fabs(rs)>4.0 && badc == false && rs != 999 ) {
+      if (!badc && rs != 999 ) m_h_CellsNoiseE->Fill( rs );
+      if (fabs(rs)>4.0 && !badc && rs != 999 ) {
 	m_h_CellsNoiseEtaPhi->Fill( eta, phi);
 	m_h_CellsNoiseHash->Fill(hash);
 	if (sample ==0 ) m_h_CellsNoiseEtaPhiA->Fill(  eta, phi  );
@@ -338,7 +336,7 @@ StatusCode TileCalCellMonTool::fillHistograms(){
 		       << " tower=" << side*tower );
       }// end of if (fabs(rs)>4.0 && badc == false && rs != 999 )
 
-      if ( badc == false) {
+      if ( !badc) {
 	m_h_CellsNoiseEta->Fill(  eta, cellnoisedb, 1.0  );
 	m_h_CellsNoisePhi->Fill(  phi, cellnoisedb, 1.0  );
 	m_h_CellsRMSEta->Fill(  eta, cellenGeV, 1.0  );

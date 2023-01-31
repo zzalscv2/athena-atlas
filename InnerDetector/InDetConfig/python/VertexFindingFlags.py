@@ -1,7 +1,18 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 import AthenaCommon.SystemOfUnits as Units
-from AthenaConfiguration.Enums import LHCPeriod
+from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum
+
+class VertexSortingSetup(FlagEnum):
+    SumPt2Sorting = 'SumPt2Sorting'
+    SumPtSorting = 'SumPtSorting'
+
+class VertexSetup(FlagEnum):
+    GaussAMVF = 'GaussAdaptiveMultiFinding'
+    AMVF = 'AdaptiveMultiFinding'
+    GaussIVF = 'GaussIterativeFinding'
+    IVF = 'IterativeFinding'
+    ActsGaussAMVF = 'ActsGaussAdaptiveMultiFinding'
 
 
 def createSecVertexingFlags():
@@ -160,14 +171,14 @@ def createPriVertexingFlags():
     flags = AthConfigFlags()
 
     # Turn on the primary vertex reconstruction
-    flags.addFlag("doVertexFinding", True)
+    flags.addFlag("doVertexFinding", lambda prevFlags: prevFlags.Beam.Type is not BeamType.Cosmics)
     flags.addFlag("maxAbsEta", 9999.0)
     flags.addFlag("maxD0", 4.0 * Units.mm)
     flags.addFlag("maxNPixelHoles", 1)
-    flags.addFlag("maxSigmaD0", 5.0)
-    flags.addFlag("maxSigmaZ0SinTheta", 10.0)
+    flags.addFlag("maxSigmaD0", 5.0 * Units.mm)
+    flags.addFlag("maxSigmaZ0SinTheta", 10.0 * Units.mm)
     flags.addFlag("maxZ0", 1000.0 * Units.mm)
-    flags.addFlag("maxZ0SinTheta", 1000.0)
+    flags.addFlag("maxZ0SinTheta", 1000.0 * Units.mm)
     flags.addFlag("minNInnermostLayerHits", 0)
     flags.addFlag("minNPixelHits", 1)
     flags.addFlag("minNSctHits", 4)
@@ -175,17 +186,13 @@ def createPriVertexingFlags():
     flags.addFlag("minNTrtHits", 0)
     flags.addFlag("minPt", 500.0 * Units.MeV)
     flags.addFlag("maxZinterval", 3)
+    # MaxTracks cuts are specific to the IterativeFinding config
     flags.addFlag("doMaxTracksCut", True)
     flags.addFlag("MaxTracks", 3000)
     # string to store the setup for primary vertexing.
-    #  Possible types:
-    # 'ActsGaussAdaptiveMultiFinding', 'GaussAdaptiveMultiFinding',
-    # 'GaussIterativeFinding', 'AdaptiveMultiFinding', 'IterativeFinding'
-    flags.addFlag("setup", "ActsGaussAdaptiveMultiFinding")
+    flags.addFlag("setup", VertexSetup.ActsGaussAMVF, enum=VertexSetup)
     # string to store the type of sorting algorithm to separate signal and pile-up vertices.
-    # Possible types:
-    # 'SumPt2Sorting','SumPtSorting'
-    flags.addFlag("sortingSetup", "SumPt2Sorting")
+    flags.addFlag("sortingSetup", VertexSortingSetup.SumPt2Sorting, enum=VertexSortingSetup)
     flags.addFlag("useBeamConstraint", True)
 
     return flags
@@ -195,5 +202,13 @@ def createITkPriVertexingFlags():
     flags = createPriVertexingFlags()
 
     flags.minNTrtHits = 0
+    flags.minPt = 900.0 * Units.MeV
+    flags.maxD0 = 1.0 * Units.mm
+    flags.maxSigmaD0 = 0.35 * Units.mm
+    flags.maxSigmaZ0SinTheta = 2.5 * Units.mm
+    flags.minNPixelHits = 3
+    flags.minNSctHits = 0
+    flags.minNSiHits = 7
+    flags.maxZinterval = 0.5
 
     return flags

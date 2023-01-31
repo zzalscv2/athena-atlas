@@ -3,7 +3,6 @@
 from __future__ import print_function
 
 from ROOT import gDirectory, gPad, gStyle, kYellow, TCanvas, TFile, TPaveLabel
-import os
 from optparse import OptionParser
 
 def passesSelection(gain,offset):
@@ -48,21 +47,16 @@ def PlotRamps(input_file_name=None):
   nPlot = 0
   nPage = 0
 
-  c1.Print("rampPlots.ps[")
+  c1.Print("rampPlots.pdf(")
 
   list_of_histos=[]
 
   for iii in key_list:
-    iii_str = str(iii)
-    line = iii_str.split(" ")
-    histo= line[2]
-    my_name = histo[2:-2]
-    list_of_histos.append(my_name)
-#    print (my_name)
-
+    list_of_histos.append(iii.GetName())
+    
 #  list_of_histos.sort()
 
-  list_of_histos_dec=[int(iii,16) for iii in list_of_histos]
+  list_of_histos_dec=[int(iii,base = 16) for iii in list_of_histos]
   list_of_histos_dec.sort()
   list_of_histos = [hex(iii) for iii in list_of_histos_dec]
 
@@ -94,7 +88,7 @@ def PlotRamps(input_file_name=None):
         ltit.Draw()
 
 #        print (title, "  ", ppm_crate, " ", ppm_number )
-        c1.Print("rampPlots.ps")
+        c1.Print("rampPlots.pdf")
         c1.Clear()
         c1.Divide(8,9)
         nPage = nPage+1
@@ -145,10 +139,9 @@ def PlotRamps(input_file_name=None):
   ltit.SetBorderSize(0)
   ltit.Draw()
 
-  c1.Print("rampPlots.ps")
+  c1.Print("rampPlots.pdf")
 
-  c1.Print("rampPlots.ps]")
-  os.system("ps2pdf rampPlots.ps")
+  c1.Print("rampPlots.pdf)")
   print ("Finished!")
 
 if __name__ == "__main__":

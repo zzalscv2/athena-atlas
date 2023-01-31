@@ -6,7 +6,7 @@ import subprocess
 from .Helpers import warnings_count
 from .Inputs import references_CVMFS_path
 from .References import references_map
-from .Test import TestSetup, WorkflowCheck, WorkflowTest, WorkflowType
+from .Test import TestSetup, WorkflowCheck, WorkflowRun, WorkflowTest, WorkflowType
 
 
 class FailedOrPassedCheck(WorkflowCheck):
@@ -117,7 +117,7 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
             reference_path = cvmfs_path / self.setup.release_ID / test.ID / reference_revision
             diff_rules_path = cvmfs_path / self.setup.release_ID / test.ID
             if not reference_path.exists():
-                self.logger.error("CVMFS reference location does not exist!")
+                self.logger.error(f"CVMFS reference location {reference_path} does not exist!")
                 return False
 
         self.logger.info(f"Reading the reference file from location {reference_path}")
@@ -156,10 +156,10 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
 
         # TODO: temporary due to issues with some tests
         extra_args = ""
-        if test.type == WorkflowType.MCReco or test.type == WorkflowType.DataReco or test.type == WorkflowType.Derivation:
+        if test.type != WorkflowType.AF3:
             extra_args = "--order-trees"
 
-        comparison_command = f"acmd.py diff-root {reference_file} {validation_file} {extra_args} --nan-equal --mode semi-detailed --error-mode resilient --ignore-leaves {exclusion_list} --entries {self.max_events} > {log_file} 2>&1"
+        comparison_command = f"acmd.py diff-root {reference_file} {validation_file} {extra_args} --nan-equal --exact-branches --mode semi-detailed --error-mode resilient --ignore-leaves {exclusion_list} --entries {self.max_events} > {log_file} 2>&1"
         output, error = subprocess.Popen(["/bin/bash", "-c", comparison_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
         output, error = output.decode("utf-8"), error.decode("utf-8")
 
@@ -210,6 +210,79 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
 
         return result
 
+
+class MetadataCheck(WorkflowCheck):
+    """Run metadata check."""
+
+    def __init__(self, setup: TestSetup, input_format: str) -> None:
+        super().__init__(setup)
+        self.format = input_format
+
+    def run(self, test: WorkflowTest) -> bool:
+        self.logger.info("---------------------------------------------------------------------------------------")
+        self.logger.info(f"Running {test.ID} metadata check on {self.format}")
+
+        reference_path: Path = test.reference_path
+        # Read references from CVMFS
+        if self.setup.validation_only:
+            # Resolve the subfolder first. Results are stored like: main_folder/branch/test/version/.
+            reference_revision = references_map[f"{test.ID}"]
+            cvmfs_path = Path(references_CVMFS_path)
+            reference_path = cvmfs_path / self.setup.release_ID / test.ID / reference_revision
+            if not reference_path.exists():
+                self.logger.error(f"CVMFS reference location {reference_path} does not exist!")
+                return False
+
+        self.logger.info(f"Reading the reference file from location {reference_path}")
+
+        exclusion_list = " ".join(["file_guid", "file_size", "/TagInfo/AtlasRelease", "FileMetaData/productionRelease"])
+
+        file_name = f"my{self.format}.pool.root"
+        if test.type == WorkflowType.Derivation:
+            file_name = f"{self.format}.myOutput.pool.root"
+        reference_file = reference_path / file_name
+        validation_file = test.validation_path / file_name
+        log_file = test.validation_path / f"meta-diff-{test.ID}.{self.format}.log"
+
+        comparison_command = f"meta-diff --ordered -m full -x diff {reference_file} {validation_file} --drop {exclusion_list} > {log_file} 2>&1"
+        output, error = subprocess.Popen(["/bin/bash", "-c", comparison_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        output, error = output.decode("utf-8"), error.decode("utf-8")
+
+        result = True
+        with log_file.open() as file:
+            for line in file:
+                if line.strip():
+                    result = False
+
+        if result:
+            self.logger.info("Passed!\n")
+        else:
+            # print CI helper directly to avoid logger decorations
+            if self.setup.disable_release_setup:
+                self.logger.print(f"ATLAS-CI-ADD-LABEL: {test.run.value}-{test.type.value}-output-changed")
+                self.logger.print("")
+
+            self.logger.error(f"Your change breaks the frozen tier0 policy in test {test.ID}.")
+            self.logger.error("Please make sure this has been discussed in the correct meeting (RIG or Simulation) meeting and approved by the relevant experts.")
+
+            # copy the artifacts
+            if self.setup.disable_release_setup:
+                comparison_command = f"CopyCIArtifact.sh {validation_file}"
+                output, error = subprocess.Popen(["/bin/bash", "-c", comparison_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+                output, error = output.decode("utf-8"), error.decode("utf-8")
+
+                if error or not output:
+                    self.logger.error(f"Tried copying '{validation_file}' to the CI artifacts area but it failed.")
+                    self.logger.error(f"  {error.strip()}")
+                else:
+                    self.logger.error(output)
+
+            with log_file.open() as file:
+                for line in file:
+                    self.logger.info(f"  {line.strip()}")
+                self.logger.info("-----------------------------------------------------\n")
+
+        return result
 
 class AODContentCheck(WorkflowCheck):
     """Run AOD Content Check."""
@@ -492,7 +565,8 @@ class FPECheck(WorkflowCheck):
     """Run FPE check."""
 
     # Ignore FPEs for these tests:
-    ignoreTests = [WorkflowType.FullSim, WorkflowType.DataOverlay, WorkflowType.MCOverlay]
+    ignoreTestRuns = [WorkflowRun.Run4]
+    ignoreTestTypes = [WorkflowType.FullSim, WorkflowType.DataOverlay, WorkflowType.MCOverlay]
 
     def run(self, test: WorkflowTest):
         self.logger.info("-----------------------------------------------------")
@@ -525,7 +599,7 @@ class FPECheck(WorkflowCheck):
                         last_stack_trace.append(line.strip()[9:])
 
             if fpes.keys():
-                msgLvl = logging.WARNING if test.type in self.ignoreTests else logging.ERROR
+                msgLvl = logging.WARNING if test.run in self.ignoreTestRuns or test.type in self.ignoreTestTypes else logging.ERROR
                 result = False
                 self.logger.log(msgLvl, f" {step} validation test step FPEs")
                 for fpe, count in sorted(fpes.items(), key=lambda item: item[1]):
@@ -539,7 +613,7 @@ class FPECheck(WorkflowCheck):
 
         if result:
             self.logger.info("Passed!\n")
-        elif test.type in self.ignoreTests:
+        elif test.run in self.ignoreTestRuns or test.type in self.ignoreTestTypes:
             self.logger.warning("Failed!")
             self.logger.warning("Check disabled due to irreproducibilities!\n")
             result = True

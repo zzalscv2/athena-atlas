@@ -1,26 +1,26 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigTRTHighTHitCounter.TrigTRTHighTHitCounterConf import TrigTRTHTHhypoTool
-from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool, defineHistogram
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 def _IncTool(name):
     
-    monTool = GenericMonitoringTool("MonTool_"+name)
-    monTool.Histograms = [ defineHistogram('HTRatioRoad', type='TH1F', path='EXPERT', title="TrigTRTHTH Hypo HTRatioRoad", xbins=10, xmin=0.0, xmax=1.0),
-                           defineHistogram('HTRatioWedge', type='TH1F', path='EXPERT', title="TrigTRTHTH Hypo HTRatioWedge", xbins=10, xmin=0.0, xmax=1.0),
-                           defineHistogram('TRTHTHitsRoad', type='TH1F', path='EXPERT', title="TrigTRTHTH Hypo TRTHTHitsRoad", xbins=100, xmin=0, xmax=100),
-                           defineHistogram('TRTHTHitsWedge', type='TH1F', path='EXPERT', title="TrigTRTHTH Hypo TRTHTHitsWedge", xbins=100, xmin=0, xmax=100),]
+    monTool = GenericMonitoringTool("MonTool_"+name,
+                                    HistPath = 'TrigTRTHTHhypo/'+name)
+    monTool.defineHistogram('HTRatioRoad', type='TH1F', path='EXPERT', title="TrigTRTHTH Hypo HTRatioRoad", xbins=10, xmin=0.0, xmax=1.0)
+    monTool.defineHistogram('HTRatioWedge', type='TH1F', path='EXPERT', title="TrigTRTHTH Hypo HTRatioWedge", xbins=10, xmin=0.0, xmax=1.0)
+    monTool.defineHistogram('TRTHTHitsRoad', type='TH1F', path='EXPERT', title="TrigTRTHTH Hypo TRTHTHitsRoad", xbins=100, xmin=0, xmax=100)
+    monTool.defineHistogram('TRTHTHitsWedge', type='TH1F', path='EXPERT', title="TrigTRTHTH Hypo TRTHTHitsWedge", xbins=100, xmin=0, xmax=100)
 
-    tool = TrigTRTHTHhypoTool( name ) 
-    tool.AcceptAll = False
-    tool.MinTRTHTHitsRoad = 20
-    tool.MinHTRatioRoad = 0.4
-    tool.MinTRTHTHitsWedge = 30
-    tool.MinHTRatioWedge = 0.4
-    tool.DoWedge = True
-    tool.DoRoad = False
-    monTool.HistPath = 'TrigTRTHTHhypo/'+tool.getName()
-    tool.MonTool = monTool 
+    tool = TrigTRTHTHhypoTool( name,
+                               AcceptAll = False,
+                               MinTRTHTHitsRoad = 20,
+                               MinHTRatioRoad = 0.4,
+                               MinTRTHTHitsWedge = 30,
+                               MinHTRatioWedge = 0.4,
+                               DoWedge = True,
+                               DoRoad = False,
+                               MonTool = monTool )
     return tool
 
 def TrigTRTHTHhypoToolFromDict( d ):

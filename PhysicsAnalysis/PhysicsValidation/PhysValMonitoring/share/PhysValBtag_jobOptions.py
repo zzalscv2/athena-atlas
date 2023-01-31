@@ -15,11 +15,10 @@ tool1.JVTCutAntiKt4EMTopoJets = 0.59
 tool1.JVTCutLargerEtaAntiKt4EMTopoJets = 0.11
 tool1.JVTCutAntiKt4EMPFlowJets = 0.2
 tool1.truthMatchProbabilityCut = 0.75
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-tool1.hasJetFitterNN = ConfigFlags.BTagging.RunJetFitterNN
 
 path = ROOT.PathResolver.find_file( 'JetTagDQA/PhysValBtag_VariablesMenu.json', 'DATAPATH' )
-tool1.HistogramDefinitions = getHistogramDefinitions(path, 'PHYSVAL', 'ALL')
+path_Run = ROOT.PathResolver.find_file( 'JetTagDQA/PhysValBtag_VariablesMenu_Run3.json', 'DATAPATH' )
+tool1.HistogramDefinitions = getHistogramDefinitions(path, 'PHYSVAL', 'ALL') + getHistogramDefinitions(path_Run, 'PHYSVAL', 'ALL') 
 
 monMan = CfgMgr.AthenaMonManager("PhysValMonManager")
 monMan.AthenaMonTools += [ tool1 ]

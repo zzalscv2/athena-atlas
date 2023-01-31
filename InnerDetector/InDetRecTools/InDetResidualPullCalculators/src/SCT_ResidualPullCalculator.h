@@ -49,7 +49,7 @@ public:
      * The enum ResidualType must be set according to this, otherwise the pulls will be wrong.
      * Residuals differ in all three cases; please be aware of this!
      */
-    virtual const Trk::ResidualPull* residualPull(
+    virtual std::unique_ptr<Trk::ResidualPull> residualPull(
         const Trk::MeasurementBase* measurement,
         const Trk::TrackParameters* trkPar,
         const Trk::ResidualPull::ResidualType resType,

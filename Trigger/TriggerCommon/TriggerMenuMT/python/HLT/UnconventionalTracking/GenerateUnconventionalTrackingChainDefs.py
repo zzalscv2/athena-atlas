@@ -11,14 +11,14 @@ log.info("Importing %s",__name__)
 
 
 
-def generateChainConfigs( chainDict ):
+def generateChainConfigs(flags,  chainDict ):
     log.debug('dictionary is: %s\n', pprint.pformat(chainDict))
 
     listOfChainDicts = splitChainDict(chainDict)
 
     listOfChainDefs=[]
     for subChainDict in listOfChainDicts:
-        subChain = UnconventionalTrackingChainConfiguration(subChainDict).assembleChain()
+        subChain = UnconventionalTrackingChainConfiguration(subChainDict).assembleChain(flags)
         listOfChainDefs += [subChain]
 
     log.debug('length of chaindefs %s', len(listOfChainDefs))

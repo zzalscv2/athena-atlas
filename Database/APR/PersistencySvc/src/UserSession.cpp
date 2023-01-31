@@ -56,10 +56,10 @@ pool::PersistencySvc::UserSession::defaultConnectionPolicy() const
   return *m_policy;
 }
 
-void
+bool
 pool::PersistencySvc::UserSession::disconnectAll()
 {
-  m_technologyDispatcher->disconnectAll();
+  return m_technologyDispatcher->disconnectAll();
 }
       
 pool::ITransaction&

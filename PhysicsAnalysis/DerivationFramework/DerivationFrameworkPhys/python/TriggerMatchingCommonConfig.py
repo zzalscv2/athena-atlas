@@ -52,28 +52,13 @@ def AddRun2TriggerMatchingToSlimmingHelper(**kwargs):
 def TriggerMatchingCommonRun2Cfg(ConfigFlags, name, **kwargs):
     """Configure the common trigger matching for run 2 DAODs"""
 
-    triggerList = kwargs['TriggerList']
-    outputContainerPrefix = kwargs['OutputContainerPrefix']
-    kwargs.setdefault('DRThreshold', None) 
-
     acc = ComponentAccumulator()
-
+ 
     # Create trigger matching decorations
     from DerivationFrameworkTrigger.TriggerMatchingToolConfig import TriggerMatchingToolCfg
-    if kwargs['DRThreshold'] is None:
-        PhysCommonTriggerMatchingTool = acc.getPrimaryAndMerge(TriggerMatchingToolCfg(
-            ConfigFlags,
-            name=name,
-            ChainNames = triggerList,
-            OutputContainerPrefix = outputContainerPrefix)) 
-    else:
-        PhysCommonTriggerMatchingTool = acc.getPrimaryAndMerge(TriggerMatchingToolCfg(
-            ConfigFlags,
-            name=name,
-            ChainNames = triggerList,
-            OutputContainerPrefix = outputContainerPrefix,  
-            DRThreshold = kwargs['DRThreshold']))
+    PhysCommonTriggerMatchingTool = acc.getPrimaryAndMerge(TriggerMatchingToolCfg(ConfigFlags, name=name, **kwargs))
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
+    outputContainerPrefix = kwargs['OutputContainerPrefix']
     acc.addEventAlgo(CommonAugmentation(f"{outputContainerPrefix}TriggerMatchingKernel",
                                         AugmentationTools=[PhysCommonTriggerMatchingTool]))
     return(acc)

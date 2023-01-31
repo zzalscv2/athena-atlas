@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -15,6 +15,8 @@
 #include <TH1F.h>
 #include <TClass.h>
 
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // standalone application
 
 //Get rid of Root macros that confuse Doxygen
 ///\cond CLASSIMP
@@ -31,16 +33,13 @@ namespace dqi {
 
 HanConfigAssessor::
 HanConfigAssessor()
-{
-  m_algPars = newTObjArray("algPars");
-  m_algLimits = newTObjArray("algLimits");
-  m_annotations = newTObjArray("annotations");
-  //m_algPars = 0;
-  //m_algLimits = 0;
-  //m_annotations = 0;
-  m_weight = 1;
-  m_isRegex = false;
-}
+  : m_algPars( newTObjArray( "algPars" ) )
+  , m_algStrPars( newTObjArray( "algStrPars" ) )
+  , m_algLimits( newTObjArray( "algLimits" ) )
+  , m_annotations( newTObjArray( "annotations" ) )
+  , m_weight( 1 )
+  , m_isRegex( false )
+{ }
 
 
 HanConfigAssessor::
@@ -50,17 +49,25 @@ HanConfigAssessor( const HanConfigAssessor& other )
   , m_algName(other.m_algName)
   , m_algLibName(other.m_algLibName)
   , m_algRefName(other.m_algRefName)
+  , m_algPars( newTObjArray( "algPars", 0, other.m_algPars->GetEntries() ) )
+  , m_algStrPars( newTObjArray( "algStrPars", 0, other.m_algStrPars->GetEntries() ) )
+  , m_algLimits( newTObjArray( "algLimits", 0, other.m_algLimits->GetEntries() ) )
+  , m_annotations( newTObjArray( "annotations", 0, other.m_annotations->GetEntries() ) )
   , m_weight(other.m_weight)
   , m_isRegex(other.m_isRegex)
 {
-  m_algPars = newTObjArray("algPars", 0, other.m_algPars->GetEntries());
-  m_algLimits = newTObjArray("algLimits", 0, other.m_algLimits->GetEntries());
-  m_annotations = newTObjArray("annotations", 0, other.m_annotations->GetEntries());
   TIter nextPar( other.m_algPars );
   HanConfigAlgPar* otherPar;
   while( (otherPar = dynamic_cast<HanConfigAlgPar*>( nextPar() )) != 0 ) {
     HanConfigAlgPar* par = new HanConfigAlgPar( *otherPar );
     m_algPars->Add( par );
+  }
+
+  TIter nextStrPar( other.m_algStrPars );
+  HanConfigParMap* otherStrPar;
+  while( (otherStrPar = dynamic_cast<HanConfigParMap*>( nextStrPar() )) != 0 ) {
+    HanConfigParMap* strPar = new HanConfigParMap( *otherStrPar );
+    m_algStrPars->Add( strPar );
   }
   
   TIter nextLim( other.m_algLimits );
@@ -100,6 +107,14 @@ operator=( const HanConfigAssessor& other )
     m_algPars->Add( par );
   }
   
+  m_algStrPars->Delete();
+  TIter nextStrPar( other.m_algStrPars );
+  HanConfigParMap* otherStrPar;
+  while( (otherStrPar = dynamic_cast<HanConfigParMap*>( nextStrPar() )) != 0 ) {
+    HanConfigParMap* strPar = new HanConfigParMap( *otherStrPar );
+    m_algStrPars->Add( strPar );
+  }
+  
   m_algLimits->Delete();
   TIter nextLim( other.m_algLimits );
   HanConfigAlgLimit* otherLim;
@@ -124,9 +139,11 @@ HanConfigAssessor::
 ~HanConfigAssessor()
 {
   m_algPars->Delete();
+  m_algStrPars->Delete();
   m_algLimits->Delete();
   m_annotations->Delete();
   delete m_algPars;
+  delete m_algStrPars;
   delete m_algLimits;
   delete m_annotations;
 }
@@ -256,6 +273,36 @@ GetAllAlgPars() const
 
 void
 HanConfigAssessor::
+AddAlgStrPar( const HanConfigParMap& algStrPar_ )
+{
+  HanConfigParMap* strPar = new HanConfigParMap( algStrPar_ );
+  m_algStrPars->Add( strPar );
+}
+
+
+HanConfigParMap
+HanConfigAssessor::
+GetAlgStrPar( std::string name_ ) const
+{
+  HanConfigParMap* strPar = dynamic_cast<HanConfigParMap*>( m_algStrPars->FindObject(name_.c_str()) );
+  if( strPar == 0 ) {
+    return HanConfigParMap();
+  }
+  
+  return *strPar;
+}
+
+
+TIter
+HanConfigAssessor::
+GetAllAlgStrPars() const
+{
+  return TIter( m_algStrPars );
+}
+
+
+void
+HanConfigAssessor::
 AddAlgLimit( const HanConfigAlgLimit& algLim_ )
 {
   HanConfigAlgLimit* lim = new HanConfigAlgLimit( algLim_ );
@@ -368,6 +415,21 @@ GetList( TDirectory* basedir, std::map<std::string,TSeqCollection*>& mp )
       delete algParList;
     else
       configList->Add(algParList);
+  }
+
+  if (m_algStrPars == 0)
+    std::cerr << "HanConfigAssessor::GetList(): Warning: m_algStrPars == 0\n";
+  else {
+    TIter nextAlgStrPar( m_algStrPars );
+    HanConfigParMap *strPar;
+    TSeqCollection *algStrParList = newTObjArray("algStrPars", 0, m_algStrPars->GetEntries());
+    while( (strPar = dynamic_cast<HanConfigParMap*>( nextAlgStrPar() )) != 0 )
+      algStrParList->Add(strPar->GetList());
+    
+    if (algStrParList->IsEmpty())
+      delete algStrParList;
+    else
+      configList->Add(algStrParList);
   }
 
   if (m_algLimits == 0)
@@ -485,6 +547,11 @@ PrintIOStream( std::ostream& o ) const
     while( (par = dynamic_cast<HanConfigAlgPar*>( nextPar() )) != 0 ) {
       o << "    " << par;
     }
+    TIter nextStrPar( m_algStrPars );
+    HanConfigParMap* strPar;
+    while( (strPar = dynamic_cast<HanConfigParMap*>( nextStrPar() )) != 0 ) {
+      o << "    " << strPar;
+    }
     o << "  }\n";
   }
   
@@ -524,8 +591,13 @@ void HanConfigAssessor::Streamer(TBuffer &R__b)
      m_algName.Streamer(R__b);
      m_algLibName.Streamer(R__b);
      m_algRefName.Streamer(R__b);
-     delete m_algPars; delete m_algLimits;
+     delete m_algPars;
      R__b >> m_algPars;
+     if (R__v >= 6) {
+       delete m_algStrPars;
+       R__b >> m_algStrPars;
+     }
+     delete m_algLimits;
      R__b >> m_algLimits;
      if (R__v >= 2) {
        delete m_annotations;

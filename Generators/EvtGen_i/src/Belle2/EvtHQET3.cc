@@ -80,12 +80,12 @@ void EvtHQET3::initProbMax()
                                           lnum, nunum, m_hqetffmodel);
 
   // Leptons
-  static EvtId EM = EvtPDL::getId("e-");
-  static EvtId EP = EvtPDL::getId("e+");
-  static EvtId MUM = EvtPDL::getId("mu-");
-  static EvtId MUP = EvtPDL::getId("mu+");
-  static EvtId TAUM = EvtPDL::getId("tau-");
-  static EvtId TAUP = EvtPDL::getId("tau+");
+  static const EvtId EM = EvtPDL::getId("e-");
+  static const EvtId EP = EvtPDL::getId("e+");
+  static const EvtId MUM = EvtPDL::getId("mu-");
+  static const EvtId MUP = EvtPDL::getId("mu+");
+  static const EvtId TAUM = EvtPDL::getId("tau-");
+  static const EvtId TAUP = EvtPDL::getId("tau+");
 
   if (lnum == EP || lnum == EM || lnum == MUP || lnum == MUM) {
     setProbMax(mymaxprob);

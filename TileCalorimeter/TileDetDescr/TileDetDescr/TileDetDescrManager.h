@@ -9,6 +9,7 @@
 #include "Identifier/IdentifierHash.h"
 #include "TileDetDescr/TileDetDescrRegion.h"
 #include "CaloIdentifier/CaloCell_ID.h"
+#include "AthenaBaseComps/AthMessaging.h"
 
 #include <vector>
 #include <map>
@@ -28,7 +29,7 @@ class MsgStream;
 
 typedef std::shared_ptr<TileDddbManager> TileDddbManager_ptr;
 
-class TileDetDescrManager : public GeoVDetectorManager
+class TileDetDescrManager : public GeoVDetectorManager, public AthMessaging
 {
 public:
   // Temporary solution for cell volumes
@@ -228,10 +229,6 @@ private:
   calo_element_map  m_tile_cell_map;
 
   cell_dim_map      m_cell_dim_map;
-
-  bool              m_verbose;
-
-  MsgStream * m_log;
 
   //  z-shift operator-function definitions:
   inline double shiftEta(double eta, double Rcen, double zshift) {

@@ -17,7 +17,7 @@ Sim_tf.py \
 --postInclude 'default:PyJobTransforms.UseFrontier' \
 --preExec 'ConfigFlags.HGTD.Geometry.useGeoModelXml = True;' \
 --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
---geometryVersion 'default:ATLAS-P2-RUN4-01-00-00' \
+--geometryVersion 'default:ATLAS-P2-RUN4-01-00-02' \
 --inputEVNTFile "$Input" \
 --outputHITSFile "$Output" \
 --maxEvents 1 \

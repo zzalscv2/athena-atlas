@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NAVIGATION_NAVIGABLEVECTORITERATOR_H
@@ -76,22 +76,22 @@ class NavigableVectorIterator
   // iterator stepping
   NavigableVectorIterator operator++()
     { 
-      m_actualIter++;
+      ++m_actualIter;
       return *this;
     }
   NavigableVectorIterator operator++(int)
     {
-      m_actualIter++;
+      ++m_actualIter;
       return *this;
     }
   NavigableVectorIterator operator--()
     {
-      m_actualIter--;
+      --m_actualIter;
       return *this;
     }
   NavigableVectorIterator& operator--(int)
     {
-      m_actualIter--;
+      --m_actualIter;
       return *this--;
     }
 
@@ -130,7 +130,7 @@ class NavigableVectorIterator
       while ( ( ! found ) && m_actualIter != m_storePtr->end() )
 	{
 	  found        = *(*m_actualIter) == anObject;
-	  if ( !found ) m_actualIter++;
+	  if ( !found ) ++m_actualIter;
 	}
       return *this;
     }

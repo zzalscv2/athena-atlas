@@ -214,6 +214,7 @@ GeoSysController::GeoSysController(IVP1System * sys)
   m_d->subSysCheckBoxMap[VP1GeoFlags::LUCID] = m_d->ui.checkBox_LUCID;
   m_d->subSysCheckBoxMap[VP1GeoFlags::ZDC] = m_d->ui.checkBox_ZDC;
   m_d->subSysCheckBoxMap[VP1GeoFlags::ALFA] = m_d->ui.checkBox_ALFA;
+  m_d->subSysCheckBoxMap[VP1GeoFlags::AFP] = m_d->ui.checkBox_AFP;
   m_d->subSysCheckBoxMap[VP1GeoFlags::ForwardRegion] = m_d->ui.checkBox_ForwardRegion;
   // OTHER
   m_d->subSysCheckBoxMap[VP1GeoFlags::AllUnrecognisedVolumes] = m_d->ui.checkBox_other;

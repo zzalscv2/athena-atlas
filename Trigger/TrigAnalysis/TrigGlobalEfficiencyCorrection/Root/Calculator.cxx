@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -409,11 +409,9 @@ auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber,
 	if(!trig) return true;
 	Efficiencies singleInefficiencies(1.);
 	bool success = true;
-	int nt = 0;
 	for(auto& lepton : leptons)
 	{
 		if(trig.irrelevantFor(lepton) || !aboveThreshold(lepton, trig())) continue;
-		++nt;
 		auto efficiencies = getCachedTriggerLegEfficiencies(lepton, runNumber, trig(), success);
 		globalEfficiencies = ~efficiencies*globalEfficiencies + efficiencies*~singleInefficiencies;
 		singleInefficiencies *= ~efficiencies;

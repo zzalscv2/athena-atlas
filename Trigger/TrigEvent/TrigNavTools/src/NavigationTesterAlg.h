@@ -29,5 +29,16 @@ namespace Trig {
         Gaudi::Property<bool> m_failOnDifference{
             this, "FailOnDifference", false,
             "Return FAILURE if the navigation does not compare equal"};
+        Gaudi::Property<bool> m_verifyCombinationsSize{
+            this, "VerifyCombinationsSize", true,
+            "Check if combinations have matching size (that is Run2 >= Run3)"};
+        Gaudi::Property<bool> m_verifyCombinations{
+            this, "VerifyCombinationsContent", true,
+            "Check if combinations are compatible (point to same objects)"};
+
+        using CombinationsVector=std::vector<std::vector<const xAOD::IParticle *>>;
+        StatusCode verifyCombinationsSize(const CombinationsVector& run2, const CombinationsVector& run3, const std::string& chain) const;
+        StatusCode verifyCombinationsContent(const CombinationsVector& run2, const CombinationsVector& run3, const std::string& chain) const;
+
     }; //> end class AthAlgorithm
 }

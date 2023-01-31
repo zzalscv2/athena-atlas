@@ -79,4 +79,9 @@ if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
     atlas_add_test( AtlasSemantics
                     SCRIPT test/testAtlasSemantics.py
                     POST_EXEC_SCRIPT nopost.sh )
+
+
+   atlas_add_test( FPEAndCoreDump
+                   SCRIPT test/testFPEHandling.py
+                 )
 endif()

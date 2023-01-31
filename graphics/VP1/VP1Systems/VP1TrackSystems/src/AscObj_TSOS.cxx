@@ -1111,8 +1111,8 @@ QStringList AscObj_TSOS::clicked()
  
   if (m_tsos->fitQualityOnSurface())
   {
-    l << "----> "+TrkObjToString::name(*(m_tsos->fitQualityOnSurface()));
-    QStringList list = TrkObjToString::fullInfo( *(m_tsos->fitQualityOnSurface()) );
+    l << "----> "+TrkObjToString::name((m_tsos->fitQualityOnSurface()));
+    QStringList list = TrkObjToString::fullInfo( (m_tsos->fitQualityOnSurface()) );
     for (int i = 0; i < (list.size()-1); ){
       l<< (list.at(i)+QString(" = ")+list.at(i+1) ); 
       i+=2;   

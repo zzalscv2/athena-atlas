@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -38,8 +38,7 @@ CaloClusterContainer::CaloClusterContainer(const CaloTowerSeg& towerSeg, const s
   : DataVector<CaloCluster>(), m_towerSeg(towerSeg), m_ROIauthor(RoiAuthor)
 { }
 
-CaloClusterContainer::~CaloClusterContainer()
-{ }
+CaloClusterContainer::~CaloClusterContainer() = default;
 
 void CaloClusterContainer::print()
 {

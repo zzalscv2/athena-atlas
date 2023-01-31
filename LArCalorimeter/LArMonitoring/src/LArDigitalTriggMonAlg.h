@@ -16,6 +16,7 @@
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "CaloDetDescr/CaloDetDescrManager.h"
 
 //Events infos:
 #include "xAODEventInfo/EventInfo.h"
@@ -90,6 +91,12 @@ private:
   
   /** Handle to pedestal */
   SG::ReadCondHandleKey<ILArPedestal>    m_keyPedestalSC{this,"LArPedestalKeySC","LArPedestalSC","SG key of LArPedestal CDO"};
+
+  /** Handle to Super Cell DD Manager */
+  SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_caloSuperCellMgrKey{this
+      ,"CaloSuperCellDetDescrManager"
+      ,"CaloSuperCellDetDescrManager"
+      ,"SG key of the resulting CaloSuperCellDetDescrManager"};
 
   // SC_ET_ID cuts on taus selection, SC_ET just takes everything
 

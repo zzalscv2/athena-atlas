@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 # ------------------------------------------------------------
@@ -15,10 +15,10 @@ def TrackingSiPatternCfg(flags,
     #
     # --- get list of already associated hits (always do this, even if no other tracking ran before)
     #
-    if flags.InDet.Tracking.ActivePass.usePrdAssociationTool:
+    if flags.InDet.Tracking.ActiveConfig.usePrdAssociationTool:
         from InDetConfig.InDetTrackPRD_AssociationConfig import InDetTrackPRD_AssociationCfg
         acc.merge(InDetTrackPRD_AssociationCfg(flags,
-                                               name = 'InDetTrackPRD_Association' + flags.InDet.Tracking.ActivePass.extension,
+                                               name = 'InDetTrackPRD_Association' + flags.InDet.Tracking.ActiveConfig.extension,
                                                TracksName = list(InputCollections)))
 
     # ------------------------------------------------------------

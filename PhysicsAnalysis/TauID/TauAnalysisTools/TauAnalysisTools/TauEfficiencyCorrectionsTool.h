@@ -74,6 +74,7 @@ public:
   };
 
 private:
+  StatusCode firstEvent();
   StatusCode beginEvent();
 
   std::string ConvertJetIDToString(const int iLevel) const;
@@ -88,6 +89,8 @@ private:
 
   StatusCode initializeTools_2019_summer();
 
+  StatusCode initializeTools_2022_prerec();
+  
   StatusCode readRandomRunNumber();
 
 private:
@@ -122,7 +125,7 @@ private:
   int m_iTriggerPeriodBinning;
   std::string m_sMCCampaign;
   bool m_sAFII;
-
+  bool m_firstEvent = false;
   unsigned int m_iRunNumber;
   unsigned int m_iMu;
 

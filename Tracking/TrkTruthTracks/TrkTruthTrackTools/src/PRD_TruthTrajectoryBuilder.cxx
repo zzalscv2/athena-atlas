@@ -31,7 +31,6 @@ Trk::PRD_TruthTrajectoryBuilder::PRD_TruthTrajectoryBuilder(const std::string& t
 // Athena algtool's Hooks - initialize
 StatusCode  Trk::PRD_TruthTrajectoryBuilder::initialize()
 {
-    std::cout << "Nora: min pT " << m_minPt << "\n";
     
     ATH_MSG_INFO("Initializing ...");
     // Set up ATLAS ID helper to be able to identify the PRD's det-subsystem
@@ -105,7 +104,6 @@ std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory > Trk::PRD_TruthTr
     std::vector<const PRD_MultiTruthCollection*>::const_iterator pmtCollIterE = m_prdMultiTruthCollections.end();
     for ( ; pmtCollIter != pmtCollIterE; ++pmtCollIter ){
         // loop over the map and get the identifier, GenParticle relation
-        std::cout << "Nora: size of collection: " << (*pmtCollIter)->size() << "\n";
         PRD_MultiTruthCollection::const_iterator prdMtCIter  = (*pmtCollIter)->begin();
         PRD_MultiTruthCollection::const_iterator prdMtCIterE = (*pmtCollIter)->end();
         for ( ; prdMtCIter != prdMtCIterE; ++ prdMtCIter ){
@@ -118,14 +116,11 @@ std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory > Trk::PRD_TruthTr
             HepMC::ConstGenParticlePtr curGenP       = (*prdMtCIter).second;
 #endif
             Identifier                curIdentifier = (*prdMtCIter).first;
-            if(m_idHelper->is_trt(curIdentifier)) std::cout << "I'm a trt thingy hi\n";
             // apply the min pT cut 
-            std::cout << "Nora: pt " << curGenP->momentum().perp() << " pgid " << std::abs(curGenP->pdg_id()) << " geantino " << m_geantinos << "\n";
             if ( curGenP->momentum().perp() < m_minPt ) continue;
             // skip geantinos if required
             if (!m_geantinos && std::abs(curGenP->pdg_id())==999) continue;
             // get the associated PRD from the provider
-            std::cout << "Is id? " << m_idHelper->is_indet(curIdentifier) << "\n";
             const Trk::PrepRawData* prd = m_idHelper->is_indet(curIdentifier) ?
                 m_idPrdProvider->prdFromIdentifier(curIdentifier,ndof) : m_msPrdProvider->prdFromIdentifier(curIdentifier,ndof);
             // stuff it into the trajectory if you found a PRD
@@ -158,7 +153,6 @@ std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory > Trk::PRD_TruthTr
             }
         }        
     }
-    std::cout << "Nora found " << gpPrdTruthTrajectories.size() << " tracks\n";
     // PART 2 --------------------------------------------------------------------------------------------------------
     // loop through the provided list of manipulators ( sorter is included )
     auto prdTruthTrajIter  = gpPrdTruthTrajectories.begin();

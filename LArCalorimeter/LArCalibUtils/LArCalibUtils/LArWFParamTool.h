@@ -90,10 +90,6 @@ private:
     double Amplitude;
   };
 
-
-  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
-  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKeySC{this,"ScCablingKey","LArOnOffIdMapSC","SG Key of SC LArOnOffIdMapping object"};
-
   const LArEM_Base_ID* m_emId = nullptr;
   const LArOnlineID_Base* m_onlineHelper = nullptr;
 

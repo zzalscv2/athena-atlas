@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TSTORE_H
 #define XAODROOTACCESS_TSTORE_H
@@ -81,13 +81,23 @@ namespace xAOD {
       /// Add an object to the store
       template< typename T >
       StatusCode record( T* obj, const std::string& key );
-      /// Add an object othe store, explicitly taking ownership of it
+      /// Add an object to the store, explicitly taking ownership of it
       template< typename T >
       StatusCode record( std::unique_ptr< T > obj, const std::string& key );
 
-      /// prodive a list of keys associated with a type
+      /// Add a const object to the store
+      template< typename T >
+      StatusCode record( const T* obj, const std::string& key );
+      /// Add a const object to the store, explicitly taking ownership of it
+      template< typename T >
+      StatusCode record( std::unique_ptr< const T > obj, const std::string& key );
+
+      /// provide a list of keys associated with a type
       template< typename T >
       void keys( std::vector< std::string >& vkeys ) const;
+
+      /// return holder for key
+      const THolder* holder( const std::string& key ) const;
 
       /// Remove an object from the store by name
       StatusCode remove( const std::string& key );
@@ -116,15 +126,18 @@ namespace xAOD {
                                   const std::type_info& ti ) const;
       /// Function recording an object that has a dictionary available
       StatusCode record( void* obj, const std::string& key,
-                          const std::string& classname,
-                          ::Bool_t isOwner = kTRUE );
+                         const std::string& classname,
+                         ::Bool_t isOwner, ::Bool_t isConst );
       /// Function recording an object that has no dictionary
       StatusCode record( void* obj, const std::string& key,
-                          const std::type_info& ti );
+                         const std::type_info& ti,
+                         ::Bool_t isOwner, ::Bool_t isConst );
+
       /// Function doing the first step of recording a ConstDataVector object
       template< class T >
       StatusCode record( ConstDataVector< T >* obj, const std::string& key,
-                          const std::type_info& ti );
+                         const std::type_info& ti,
+                         ::Bool_t isOwner, ::Bool_t isConst );
       /// Function doing the second step of recording a ConstDataVector object
       StatusCode record( THolder* hldr, const std::string& key );
 
@@ -154,6 +167,12 @@ namespace xAOD {
       Objects_t m_objects;
       /// The key map
       HashedKeys_t m_keys;
+
+   private:
+      /// Internal implementation of the templated record method
+      template< typename T >
+      StatusCode record_impl( T* obj, const std::string& key,
+                              ::Bool_t isOwner, ::Bool_t isConst );
 
    }; // class TStore
 

@@ -39,7 +39,7 @@ SensorSimPlanarTool::SensorSimPlanarTool(const std::string& type, const std::str
   m_centrePixelNNEtaPhi.resize(9);
 }
 
-SensorSimPlanarTool::~SensorSimPlanarTool() { }
+SensorSimPlanarTool::~SensorSimPlanarTool() = default;
 
 //===============================================
 //    I N I T I A L I Z E
@@ -504,9 +504,7 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
 
   }
   else if (m_doRadDamage && m_doRadDamageTemplate && !(Module.isDBM()) && Module.isBarrel()){ // will run radiation damage but with the template method
-    for (size_t i = 0; i < trfHitRecord.size(); i++) {
-      std::pair<double, double> const& iHitRecord = trfHitRecord[i];
-
+    for (auto & iHitRecord : trfHitRecord) {
       double eta_i = eta_0;
       double phi_i = phi_0;
       double depth_i = depth_0;
@@ -571,9 +569,7 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
       }//end cycle for charge
     }//trfHitRecord.size()
   } else { // run without radiation damage
-    for (size_t i = 0; i < trfHitRecord.size(); i++) {
-      std::pair<double, double> const& iHitRecord = trfHitRecord[i];
-
+    for (auto & iHitRecord : trfHitRecord) {
       double eta_i = eta_0;
       double phi_i = phi_0;
       double depth_i = depth_0;

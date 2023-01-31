@@ -79,7 +79,6 @@ void HTTClusteringTool::SortedClustering(const std::vector<std::vector<HTTHit> >
 
 void HTTClusteringTool::Clustering(std::vector<HTTHit> moduleHits, std::vector<HTTCluster> &moduleClusters) const {
   //To hold the current cluster vars for comparison
-  int count = 0;
   //loop over the hits that we have been passed for this module
   for( auto& hit: moduleHits){
     int is_clustered_hit =0;
@@ -105,7 +104,6 @@ void HTTClusteringTool::Clustering(std::vector<HTTHit> moduleHits, std::vector<H
       //Put this cluster into the output hits. Will update it in place.
       moduleClusters.push_back(cluster);
     }
-    count++;
   }
 }
 

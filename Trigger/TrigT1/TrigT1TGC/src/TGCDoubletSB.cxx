@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCDoubletSB.h"
@@ -101,14 +101,14 @@ TGCHitPattern** TGCDoubletSB::doLocalCoincidence(const TGCPatchPanelOut* PPOut)
     LCOut[3] = new TGCHitPattern (pLength); // pivot 2 hit
     /*
       Wire Strip         bi[1] 0  bi[3] 1        bi[iLength-1]
-      C L4  L3 „¡„Ÿ„Ÿ„¢„¡„Ÿ„Ÿ„¢„¡„Ÿ„Ÿ„¢           „¡„Ÿ„Ÿ„¢          ->eta
-      „¤false „¤„Ÿ„Ÿ„£„¤„Ÿ„Ÿ„£           „¤„Ÿ„Ÿ„£   
-      D L3  L4     „¡„Ÿ„Ÿ„¢„¡„Ÿ„Ÿ„¢           „¡„Ÿ„Ÿ„¢„¡false          [inner]
-      „¤„Ÿ„Ÿ„£„¤„Ÿ„Ÿ„£           „¤„Ÿ„Ÿ„£„¤„Ÿ„Ÿ„£
+      C L4  L3 â”Œâ”€â”€â”â”Œâ”€â”€â”â”Œâ”€â”€â”           â”Œâ”€â”€â”          ->eta
+            â””false â””â”€â”€â”˜â””â”€â”€â”˜           â””â”€â”€â”˜   
+      D L3  L4     â”Œâ”€â”€â”â”Œâ”€â”€â”           â”Œâ”€â”€â”â”Œfalse          [inner]
+                   â””â”€â”€â”˜â””â”€â”€â”˜           â””â”€â”€â”˜â””â”€â”€â”˜
       bi[0] 0  bi[2] 1        bi[iLength-2]
       ^
-      „¡„¢„¡„¢„¡„¢„¡„¢       „¡„¢„¡„¢„¡„¢„¡„¢           |
-      „¤„£„¤„£„¤„£„¤„£       „¤„£„¤„£„¤„£„¤„£
+      â”Œâ”â”Œâ”â”Œâ”â”Œâ”       â”Œâ”â”Œâ”â”Œâ”â”Œâ”           |
+      â””â”˜â””â”˜â””â”˜â””â”˜       â””â”˜â””â”˜â””â”˜â””â”˜
       0   1   2   3                      iLength-1
     */
     i=0;
@@ -142,28 +142,28 @@ TGCHitPattern** TGCDoubletSB::doLocalCoincidence(const TGCPatchPanelOut* PPOut)
 #endif    
 
     /*
-      L5  B   A L6  ©„Ÿ„Ÿ„Ÿ  Wire  [pivot]
-      L6  B   A L5  © Strip  „ 
-      „¡„¢        „    „ 
-      „ false     «   «
-      „¡„¢„ „        „¡„¢0
-      bp[0]„ „ „¤„£       „¤„£
-      0 „ „ „¡„¢       „¡„¢1„¡„¢0
-      „¤„£„ „ bp[1]  „¤„£ „¤„£
-      „¡„¢„ „    0   „¡„¢2„¡„¢1
-      bp[2]„ „ „¤„£       „¤„£ „¤„£
-      1 „ „ „¡„¢       „¡„¢3„¡„¢2
-      „¤„£„ „ bp[4]  „¤„£ „¤„£
-      „ „    1
-      „¤„£
-      „¡„¢
-      „ „ 
-      „ „ „¡„¢       „¡„¢ pLength-2
-      „¤„£„ „        „¤„£
-      „¡„¢„ „        „¡„¢ pLength-1      
-      false„ „¤„£       „¤„£
-      „ „  ª 
-      „¤„£ „¤„Ÿ  bp[pLength-1]  
+      L5  B   A L6  â† â”€â”€â”€  Wire  [pivot]
+      L6  B   A L5  â†  Strip  â”‚
+               â”Œâ”         â”‚   â”‚
+               â”‚false     â†“   â†“
+             â”Œâ”â”‚â”‚       â”Œâ”0
+        bp[0]â”‚â”‚â””â”˜       â””â”˜
+           0 â”‚â”‚â”Œâ”       â”Œâ”1â”Œâ”0
+             â””â”˜â”‚â”‚bp[1]  â””â”˜ â””â”˜
+             â”Œâ”â”‚â”‚   0   â”Œâ”2â”Œâ”1
+        bp[2]â”‚â”‚â””â”˜       â””â”˜ â””â”˜
+           1 â”‚â”‚â”Œâ”       â”Œâ”3â”Œâ”2
+             â””â”˜â”‚â”‚bp[4]  â””â”˜ â””â”˜
+               â”‚â”‚   1
+               â””â”˜
+             â”Œâ”
+             â”‚â”‚
+             â”‚â”‚â”Œâ”       â”Œâ” pLength-2
+             â””â”˜â”‚â”‚       â””â”˜
+             â”Œâ”â”‚â”‚       â”Œâ” pLength-1      
+         falseâ”‚â””â”˜       â””â”˜
+             â”‚â”‚ â†‘ 
+             â””â”˜ â””â”€  bp[pLength-1]  
        
     */
     LCOut[2]->setChannel(0, bp[0] & !bp[1]);

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 //
 
 // System include(s):
@@ -117,7 +117,7 @@ namespace {
          TTransObject( std::unique_ptr< T >&& obj )
             : m_obj( std::move( obj ) ) {}
          /// Destructor
-         ~TTransObject() {
+         ~TTransObject() ATLAS_NOT_THREAD_SAFE {
             // If ROOT is already deleted, then at least some of the objects
             // are probably also deleted by now.
             if( ! ROOT::Internal::gROOTLocal ) {
@@ -160,10 +160,9 @@ namespace {
       std::vector< std::unique_ptr< TVirtualTransObject > > m_objects;
 
       /// Are we cleaning up global objects at the end of the job?
-      static bool s_inCleanup;
+      inline static std::atomic<bool> s_inCleanup{false};
    }; // class TTransObjectHolder
 
-   bool TTransObjectHolder::s_inCleanup = false;
 
 } // private namespace
 
@@ -177,10 +176,10 @@ namespace xAOD {
    //
    // Forward declare the private functions:
    //
-   ::TTree* MakeTransientTree( TEvent& event, const char* treeName );
-   ::TTree* MakeTransientMetaTree( TEvent& event, ::TTree* persMetaTree );
+   ::TTree* MakeTransientTree ATLAS_NOT_THREAD_SAFE ( TEvent& event, const char* treeName );
+   ::TTree* MakeTransientMetaTree ATLAS_NOT_THREAD_SAFE ( TEvent& event, ::TTree* persMetaTree );
 
-   TTransTrees MakeTransientTrees( ::TFile* ifile,
+   TTransTrees MakeTransientTrees ATLAS_NOT_THREAD_SAFE ( ::TFile* ifile,
                                    const char* treeName,
                                    TEvent::EAuxMode mode ) {
 
@@ -215,13 +214,13 @@ namespace xAOD {
       return TTransTrees( ev, meta );
    }
 
-   void ClearTransientTrees() {
+   void ClearTransientTrees ATLAS_NOT_THREAD_SAFE () {
 
       s_objectHolder.clear();
       return;
    }
 
-   ::TTree* MakeTransientTree( TEvent& event, const char* treeName ) {
+   ::TTree* MakeTransientTree ATLAS_NOT_THREAD_SAFE ( TEvent& event, const char* treeName ) {
 
       // Get the input file's format:
       const EventFormat* ef = event.inputEventFormat();
@@ -316,7 +315,7 @@ namespace xAOD {
       return result;
    }
 
-   ::TTree* MakeTransientTree( ::TFile* ifile, const char* treeName,
+   ::TTree* MakeTransientTree ATLAS_NOT_THREAD_SAFE ( ::TFile* ifile, const char* treeName,
                                TEvent::EAuxMode mode ) {
 
       // Create a TEvent object that will take care of retrieving objects
@@ -339,7 +338,7 @@ namespace xAOD {
       return result;
    }
 
-   ::TTree* MakeTransientTree( ::TChain* itree, TEvent::EAuxMode mode ) {
+   ::TTree* MakeTransientTree ATLAS_NOT_THREAD_SAFE ( ::TChain* itree, TEvent::EAuxMode mode ) {
 
       // Create the objects used by the function:
       std::unique_ptr< TEvent > event( new TEvent( mode ) );
@@ -377,7 +376,7 @@ namespace xAOD {
       return result;
    }
 
-   ::TTree* MakeTransientMetaTree( TEvent& event, ::TTree* persMetaTree ) {
+   ::TTree* MakeTransientMetaTree ATLAS_NOT_THREAD_SAFE ( TEvent& event, ::TTree* persMetaTree ) {
 
       // Remember which directory we are in now:
       ::TDirectory* dir = gDirectory;
@@ -438,7 +437,7 @@ namespace xAOD {
       return result;
    }
 
-   ::TTree* MakeTransientMetaTree( ::TFile* ifile,
+   ::TTree* MakeTransientMetaTree ATLAS_NOT_THREAD_SAFE ( ::TFile* ifile,
                                    const char* eventTreeName,
                                    TEvent::EAuxMode mode ) {
 
@@ -471,7 +470,7 @@ namespace xAOD {
       return result;
    }
 
-   ::TTree* MakeTransientMetaTree( ::TChain* ichain,
+   ::TTree* MakeTransientMetaTree ATLAS_NOT_THREAD_SAFE ( ::TChain* ichain,
                                    const char* eventTreeName,
                                    TEvent::EAuxMode mode ) {
 

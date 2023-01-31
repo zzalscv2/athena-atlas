@@ -31,6 +31,11 @@
 #include "GeneratorFilters/xAODVBFForwardJetsFilter.h"
 #include "GeneratorFilters/xAODVBFMjjIntervalFilter.h"
 #include "GeneratorFilters/xAODXtoVVDecayFilterExtended.h"
+#include "GeneratorFilters/xAODHTFilter.h"
+#include "GeneratorFilters/xAODFourLeptonMassFilter.h"
+#include "GeneratorFilters/xAODJetFilter.h"
+
+
 
 
 
@@ -53,7 +58,9 @@
 #include "GeneratorFilters/DirectPhotonFilter.h"
 #include "GeneratorFilters/ElectronFilter.h"
 #include "GeneratorFilters/ForwardProtonFilter.h"
+#include "GeneratorFilters/FourLeptonMassFilter.h"  
 #include "GeneratorFilters/HeavyFlavorHadronFilter.h"
+#include "GeneratorFilters/JetFilter.h"
 #include "GeneratorFilters/LeptonFilter.h" 
 #include "GeneratorFilters/LeptonPairFilter.h"
 #include "GeneratorFilters/M4MuIntervalFilter.h"
@@ -79,7 +86,6 @@
 #include "GeneratorFilters/BoostedHadTopAndTopPair.h"
 #include "GeneratorFilters/DiBjetFilter.h"
 #include "GeneratorFilters/DiPhotonFilter.h"
-#include "GeneratorFilters/FourLeptonMassFilter.h"
 #include "GeneratorFilters/FourLeptonInvMassFilter.h"
 #include "GeneratorFilters/HiggsFilter.h" 
 #include "GeneratorFilters/HTFilter.h"
@@ -95,6 +101,7 @@
 #include "GeneratorFilters/TruthJetFilter.h"
 #include "GeneratorFilters/VBFHbbEtaSortingFilter.h"  
 #include "GeneratorFilters/ZtoLeptonFilter.h"
+
 
 //filters accepted for 22.6 (xAOD format)
 DECLARE_COMPONENT( QCDTruthJetFilter )
@@ -129,6 +136,11 @@ DECLARE_COMPONENT( xAODTTbarWToLeptonFilter )
 DECLARE_COMPONENT( xAODVBFForwardJetsFilter )
 DECLARE_COMPONENT( xAODVBFMjjIntervalFilter )
 DECLARE_COMPONENT( xAODXtoVVDecayFilterExtended )
+DECLARE_COMPONENT( xAODHTFilter )
+DECLARE_COMPONENT( xAODFourLeptonMassFilter)
+DECLARE_COMPONENT( xAODJetFilter)
+
+
 
 
 //slimmers accepted for 22.6
@@ -150,7 +162,9 @@ DECLARE_COMPONENT( DiLeptonMassFilter )
 DECLARE_COMPONENT( DirectPhotonFilter )
 DECLARE_COMPONENT( ElectronFilter ) 
 DECLARE_COMPONENT( ForwardProtonFilter )
+DECLARE_COMPONENT( FourLeptonMassFilter )
 DECLARE_COMPONENT( HeavyFlavorHadronFilter )
+DECLARE_COMPONENT( JetFilter )
 DECLARE_COMPONENT( LeptonFilter )
 DECLARE_COMPONENT( LeptonPairFilter )
 DECLARE_COMPONENT( M4MuIntervalFilter )
@@ -177,7 +191,6 @@ DECLARE_COMPONENT( BoostedHadTopAndTopPair )
 DECLARE_COMPONENT( DiBjetFilter )
 DECLARE_COMPONENT( DiPhotonFilter )
 DECLARE_COMPONENT( FourLeptonInvMassFilter )
-DECLARE_COMPONENT( FourLeptonMassFilter )
 DECLARE_COMPONENT( HiggsFilter ) 
 DECLARE_COMPONENT( HTFilter )
 DECLARE_COMPONENT( MassRangeFilter )

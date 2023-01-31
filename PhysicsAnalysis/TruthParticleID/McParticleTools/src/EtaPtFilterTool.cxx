@@ -183,7 +183,7 @@ StatusCode EtaPtFilterTool::buildGenEvent( const HepMC::GenEvent* in, HepMC::Gen
     
     if ( addVertex( vtx, out, vmap, pmap, isSignalVertex ).isFailure() )
     {
-      ATH_MSG_WARNING("Could not add vertex [" << HepMC::barcode(vtx) << "]");
+      ATH_MSG_WARNING("Could not add vertex " << vtx );
     }
 
   } //> end loop over vertices
@@ -320,7 +320,7 @@ StatusCode EtaPtFilterTool::addVertex( HepMC::ConstGenVertexPtr srcVtx, HepMC::G
     vtx->set_position( srcVtx->position() );
     vtx->set_status( srcVtx->status() );
     HepMC::suggest_barcode(vtx, HepMC::barcode(srcVtx));
-    vtx->add_attribute("weights",srcVtx->attribute<HepMC3::VectorFloatAttribute> ("weights"));
+    vtx->add_attribute("weights",srcVtx->attribute<HepMC3::VectorDoubleAttribute> ("weights"));
     if (isSignalVertex) HepMC::set_signal_process_vertex(evt,vtx);
   }
   ////////////////////////////

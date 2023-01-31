@@ -17,15 +17,24 @@ from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
 from InDetTrigRecExample.ConfiguredNewTrackingTrigCuts import EFIDTrackingCuts
 InDetTrigCutValues = EFIDTrackingCuts
 
-from InDetTrigRecExample.InDetTrigConfigRecLoadTools import \
-    InDetTrigFastTrackSummaryTool, InDetTrigTrackSummaryToolSharedHits, InDetTrigTestPixelLayerToolInner
+from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolDecorator
 
+from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTestPixelLayerToolInner
+from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
+InDetTrigTrackSummaryTool = CAtoLegacyPublicToolDecorator(InDetTrigTrackSummaryToolCfg)
+
+
+# Shared hit computation in the TrackParticleCreatorTool is disabled for consistency with the previous 2022 config
+# This can be enabled with
+# DoSharedSiHits = InDetTrigFlags.doSharedHits(),
+# AssociationMapName = "TrigInDetPRDtoTrackMap"
 
 from TrkParticleCreator.TrkParticleCreatorConf import Trk__TrackParticleCreatorTool
 InDetTrigParticleCreatorTool = \
     Trk__TrackParticleCreatorTool( name = "InDetTrigParticleCreatorTool",
-                                   TrackSummaryTool = InDetTrigTrackSummaryToolSharedHits,
+                                   TrackSummaryTool = InDetTrigTrackSummaryTool,
                                    KeepParameters = False,
+                                   DoSharedSiHits = False
                                    #ForceTrackSummaryUpdate = False,
                                    )
 
@@ -35,10 +44,11 @@ if (InDetTrigFlags.doPrintConfigurables()):
 
 InDetTrigParticleCreatorToolWithSummary = \
     Trk__TrackParticleCreatorTool( name = "InDetTrigParticleCreatorToolWithSummary",
-                                   TrackSummaryTool = InDetTrigTrackSummaryToolSharedHits,
+                                   TrackSummaryTool = InDetTrigTrackSummaryTool,
                                    TestPixelLayerTool = InDetTrigTestPixelLayerToolInner,
                                    KeepParameters = True,
                                    ComputeAdditionalInfo = True,
+                                   DoSharedSiHits = False
                                    #ForceTrackSummaryUpdate = True,
                                    )
 
@@ -79,11 +89,12 @@ if DetFlags.haveRIO.TRT_on() :
 
 InDetTrigParticleCreatorToolWithSummaryTRTPid = \
     Trk__TrackParticleCreatorTool( name = "InDetTrigParticleCreatorToolWithSummaryTRTPid",
-                                   TrackSummaryTool = InDetTrigTrackSummaryToolSharedHits,
+                                   TrackSummaryTool = InDetTrigTrackSummaryTool,
                                    TestPixelLayerTool = InDetTrigTestPixelLayerToolInner,
                                    KeepParameters = True,
                                    ComputeAdditionalInfo = True,
-                                   TRT_ElectronPidTool   = InDetTrigTRT_ElectronPidTool
+                                   TRT_ElectronPidTool   = InDetTrigTRT_ElectronPidTool,
+                                   DoSharedSiHits = False
                                    #ForceTrackSummaryUpdate = True,
                                    )
 
@@ -94,30 +105,15 @@ if (InDetTrigFlags.doPrintConfigurables()):
 
 InDetTrigParticleCreatorToolParams = \
     Trk__TrackParticleCreatorTool( name = "InDetTrigParticleCreatorToolParams",
-                                   TrackSummaryTool = InDetTrigTrackSummaryToolSharedHits,
+                                   TrackSummaryTool = InDetTrigTrackSummaryTool,
                                    KeepParameters = True,
+                                   DoSharedSiHits = False
                                    #ForceTrackSummaryUpdate = False,
                                    )
 
 ToolSvc += InDetTrigParticleCreatorToolParams
 if (InDetTrigFlags.doPrintConfigurables()):
     print (InDetTrigParticleCreatorToolParams)
-
-InDetTrigParticleCreatorToolFTF = \
-    Trk__TrackParticleCreatorTool( name = "InDetTrigParticleCreatorToolFTF",
-                                   TrackSummaryTool = InDetTrigFastTrackSummaryTool,
-                                   TestPixelLayerTool = None,
-                                   KeepParameters = True,
-                                   ComputeAdditionalInfo = True,
-                                   #ForceTrackSummaryUpdate = False,
-                                   )
-
-ToolSvc += InDetTrigParticleCreatorToolFTF
-if (InDetTrigFlags.doPrintConfigurables()):
-    print (InDetTrigParticleCreatorToolFTF)
-
-
-
 
 
 from InDetRecExample.TrackingCommon import makePublicTool,makeName

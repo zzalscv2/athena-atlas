@@ -22,9 +22,9 @@ namespace Muon {
             typePattern.set(type);
 
             return std::make_unique<Trk::TrackStateOnSurface>(
+              tsos.fitQualityOnSurface(),
               tsos.measurementOnTrack() ? tsos.measurementOnTrack()->uniqueClone() : nullptr,
               tsos.trackParameters() ? tsos.trackParameters()->uniqueClone() : nullptr,
-              tsos.fitQualityOnSurface() ? std::make_unique<Trk::FitQualityOnSurface>(*(tsos.fitQualityOnSurface())) : nullptr,
               tsos.materialEffectsOnTrack() ? tsos.materialEffectsOnTrack()->uniqueClone() : nullptr,
               typePattern);
         }
@@ -42,9 +42,9 @@ namespace Muon {
             typePattern.set(type);
 
             return std::make_unique<Trk::TrackStateOnSurface>(
+              tsos.fitQualityOnSurface(),
               meas.uniqueClone(),
               pars.uniqueClone(),
-              tsos.fitQualityOnSurface() ? std::make_unique<Trk::FitQualityOnSurface>(*(tsos.fitQualityOnSurface())) : nullptr,
               tsos.materialEffectsOnTrack() ? tsos.materialEffectsOnTrack()->uniqueClone() : 0,
               typePattern);
         }
@@ -54,7 +54,7 @@ namespace Muon {
         createPerigeeTSOS(std::unique_ptr<const Trk::TrackParameters> perigee) {
             std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
             typePattern.set(Trk::TrackStateOnSurface::Perigee);
-            return  std::make_unique<Trk::TrackStateOnSurface>(nullptr, std::move(perigee), nullptr, nullptr, typePattern);
+            return  std::make_unique<Trk::TrackStateOnSurface>(nullptr, std::move(perigee),  nullptr, typePattern);
         }
        
         /** create a TSOS with a measurement, takes ownership of the pointers */
@@ -65,7 +65,7 @@ namespace Muon {
             std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
             if (type == Trk::TrackStateOnSurface::Outlier) typePattern.set(Trk::TrackStateOnSurface::Measurement);
             typePattern.set(type);
-            return std::make_unique<Trk::TrackStateOnSurface>(std::move(meas), std::move(pars), nullptr, nullptr, typePattern);
+            return std::make_unique<Trk::TrackStateOnSurface>(std::move(meas), std::move(pars), nullptr, typePattern);
         }
         
       
@@ -81,9 +81,9 @@ namespace Muon {
                 typePattern.set(Trk::TrackStateOnSurface::Outlier, false);
             typePattern.set(type);
             return std::make_unique<Trk::TrackStateOnSurface>(
+              tsos.fitQualityOnSurface(),
               std::move(meas),
               std::move(pars),
-              tsos.fitQualityOnSurface() ? std::make_unique<Trk::FitQualityOnSurface>(*(tsos.fitQualityOnSurface())) : nullptr,
               tsos.materialEffectsOnTrack() ? tsos.materialEffectsOnTrack()->uniqueClone() : 0,
               typePattern);
         }
@@ -92,7 +92,7 @@ namespace Muon {
         static std::unique_ptr<Trk::TrackStateOnSurface> createHoleTSOS(std::unique_ptr<const Trk::TrackParameters> pars) {
             std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
             typePattern.set(Trk::TrackStateOnSurface::Hole);
-            return std::make_unique<Trk::TrackStateOnSurface>(nullptr, std::move(pars), nullptr, nullptr, typePattern);
+            return std::make_unique<Trk::TrackStateOnSurface>(nullptr, std::move(pars), nullptr, typePattern);
         }
     };
 }  // namespace Muon

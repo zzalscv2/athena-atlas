@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "validatefunctions.h"
@@ -7,15 +7,10 @@
 
 namespace HistValFunctions {
 
-  static bool cfg_verbose=false;
-  bool verbose() { return cfg_verbose; }
-  void setVerbose(bool b) { cfg_verbose=b; }
-
   void testfailed(const std::string& testname)
   {
     std::cout<<"ERROR: HistValidator test failed: "<<testname<<std::endl;
-    assert(false);//gives a stack-trace
-    exit(1);
+    std::abort();//gives a stack-trace
   }
 
   void testTypes() {
@@ -38,6 +33,9 @@ namespace HistValFunctions {
   //string comparisons done right:
   void test(const std::string& testname, const char* val1, const char* val2)
   {
+    if ((val1 == nullptr) or (val2==nullptr)){
+      testfailed(testname);
+    }
     if (std::string(val1)!=std::string(val2))
       testfailed(testname,val1,val2);
   }

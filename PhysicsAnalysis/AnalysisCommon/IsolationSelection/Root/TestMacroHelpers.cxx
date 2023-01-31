@@ -18,12 +18,12 @@ namespace CP {
     static const FloatAccessor acc_assocClustEta{IsolationCloseByCorrectionTool::caloDecors()[0]};
     static const FloatAccessor acc_assocClustPhi{IsolationCloseByCorrectionTool::caloDecors()[1]};
     static const FloatAccessor acc_assocClustEne{IsolationCloseByCorrectionTool::caloDecors()[2]};
-    static const BoolAccessor acc_assocCaloIsDec{IsolationCloseByCorrectionTool::caloDecors()[3]};
+    static const CharAccessor acc_assocCaloIsDec{IsolationCloseByCorrectionTool::caloDecors()[3]};
 
     static const FloatAccessor acc_assocPflowEta{IsolationCloseByCorrectionTool::pflowDecors()[0]};
     static const FloatAccessor acc_assocPflowPhi{IsolationCloseByCorrectionTool::pflowDecors()[1]};
     static const FloatAccessor acc_assocPflowEne{IsolationCloseByCorrectionTool::pflowDecors()[2]};
-    static const BoolAccessor acc_assocPflowIsDec{IsolationCloseByCorrectionTool::pflowDecors()[3]};
+    static const CharAccessor acc_assocPflowIsDec{IsolationCloseByCorrectionTool::pflowDecors()[3]};
 
     //############################################################################
     //                      IsoCorrectionTestHelper

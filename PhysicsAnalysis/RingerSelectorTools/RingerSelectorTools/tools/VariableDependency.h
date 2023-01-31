@@ -240,4 +240,3 @@ class VariableDependency /*: virtual public IVariableDependency*/
 #ifndef INCLUDE_HEADER_ONLY // Use to avoid circular includes
 #include "VariableDependency.icc"
 #endif // INCLUDE_HEADER_ONLY
-

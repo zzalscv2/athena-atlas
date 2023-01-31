@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigRpcDataRetriever.h"
@@ -92,9 +92,7 @@ namespace JiveXML {
         // For each CM, loop on the fired channels
         RpcCoinMatrix::const_iterator itD   = (*itCM)->begin();
         RpcCoinMatrix::const_iterator itD_e = (*itCM)->end();
-        int idata = 0;
         for (; itD != itD_e ; ++itD) {
-          idata++;
           const RpcFiredChannel * rpcChan = (*itD);
           if (msgLvl(MSG::DEBUG)) ATH_MSG_DEBUG("RpcFiredChannel: " <<
                                     " sectorId " <<  sectorId           <<

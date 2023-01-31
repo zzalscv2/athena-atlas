@@ -1,7 +1,7 @@
 // emacs: this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -187,12 +187,14 @@ IDScanZFinderInternal<SpacePoint>::IDScanZFinderInternal( const std::string& typ
   m_numberOfPeaks    = 1     ;
   m_chargeAware      = true  ;
   m_zHistoPerPhi     = true  ;
+  m_NMax             = 0     ;
   m_nFirstLayers     = 3     ;
   m_vrtxDistCut      = 0.    ;
   m_vrtxMixing       = 0.    ;
   m_nvrtxSeparation  = 0     ;
   m_preferCentralZ   = false ;
   m_trustSPprovider  = true  ;
+  m_returnval        = 0     ;
   m_fullScanMode     = false ;
   m_tripletMode      = 0     ;
   m_tripletDZ        = 25.   ;
@@ -206,9 +208,10 @@ IDScanZFinderInternal<SpacePoint>::IDScanZFinderInternal( const std::string& typ
   /// to allow valiable size layers
   m_IdScan_MaxNumLayers     = 20; // dphiEC depends on this value !!! 19 without IBL, 20 with IBL!!
   m_IdScan_LastBrlLayer     = 7;  // dphiBrl depends on this value
-  
-  //  std::cout << "m_nFirstLayers  " << m_nFirstLayers  << std::endl;
-  
+
+  m_invPhiSliceSize = 0;
+  m_NumPhiSlices    = 0;
+
   /// why is this called from the constructor ???? it is called again during initialise?
   /// do not call that here
   ///  initializeInternal( m_IdScan_MaxNumLayers, m_IdScan_LastBrlLayer );
@@ -707,7 +710,7 @@ std::vector<typename IDScanZFinderInternal<SpacePoint>::vertex>* IDScanZFinderIn
   
     
   
-  for(long b = 0; (int)zoutput.size() < m_numberOfPeaks; ++b) {
+  while((int)zoutput.size() < m_numberOfPeaks) {
     
     long maxh=0;  // was 1 before triplets were introduced
     long binMax=0;
@@ -781,7 +784,7 @@ std::vector<typename IDScanZFinderInternal<SpacePoint>::vertex>* IDScanZFinderIn
       woutput.push_back( maxh );
     }
   
-  } // end of "b" loop, the loop over m_numberOfPeaks
+  }
   
   
     /// at this point we have the histogram with the highest N vertices removed

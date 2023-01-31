@@ -12,7 +12,7 @@ from G4AtlasTests.G4AtlasTestsConfig import (
 )
 
 
-def g4TestAlgCfg(toolList, configFlags, name="g4TestAlg", **kwargs):
+def G4TestAlgCfg(toolList, flags, name="g4TestAlg", **kwargs):
     mlog = logging.getLogger(name)
     mlog.debug('Start configuration')
     result = ComponentAccumulator()
@@ -23,9 +23,9 @@ def g4TestAlgCfg(toolList, configFlags, name="g4TestAlg", **kwargs):
     return result
 
 
-def FCpileupCfg(configFlags, name='FCpileup',  **kwargs):
+def FCPileUpCfg(flags, name='FCPilUup',  **kwargs):
 
-    mlog = logging.getLogger('FCpileupCfg')
+    mlog = logging.getLogger('FCPileUpCfg')
     mlog.debug('Start configuration')
     result = ComponentAccumulator()
 
@@ -40,25 +40,25 @@ def FCpileupCfg(configFlags, name='FCpileup',  **kwargs):
     toolList.append(PileupTruthTestTool)
     PileupEvgenTruthTestTool = result.popToolsAndMerge(TruthTestToolCfg("GEN_EVENT_PU", name="PileupEvgenTruthTestTool", **kwargs))
     toolList.append(PileupEvgenTruthTestTool)
-    if configFlags.Detector.EnablePixel:
+    if flags.Detector.EnablePixel:
         PixelHitsTestTool = result.popToolsAndMerge(SiHitsTestToolCfg("PixelHits", name, **kwargs))
         toolList.append(PixelHitsTestTool)
         PileupPixelHitsTestTool = result.popToolsAndMerge(SiHitsTestToolCfg("PileupPixelHits", name, **kwargs))
         toolList.append(PileupPixelHitsTestTool)
-    if configFlags.Detector.EnableSCT:
+    if flags.Detector.EnableSCT:
         SCT_HitsTestTool = result.popToolsAndMerge(SiHitsTestToolCfg("SCT_Hits", name, **kwargs))
         toolList.append(SCT_HitsTestTool)
         PileupSCT_HitsTestTool = result.popToolsAndMerge(SiHitsTestToolCfg("PileupSCT_HitsTestTool", name, **kwargs))
         toolList.append(PileupSCT_HitsTestTool)
-    if configFlags.Detector.EnableTRT:
+    if flags.Detector.EnableTRT:
         TrtHitsTestTool = result.popToolsAndMerge(TrtHitsTestToolCfg("TRTUncompressedHits", name, **kwargs))
         toolList.append(TrtHitsTestTool)
         PileupTrtHitsTestTool = result.popToolsAndMerge(TrtHitsTestToolCfg("PileupTRTUncompressedHits", name, **kwargs))
         toolList.append(PileupTrtHitsTestTool)
-    if configFlags.Detector.EnableTile:
-        TileHitsTestTool = result.popToolsAndMerge(TileHitsTestToolCfg(configFlags.Sim.UsingGeant4, name, **kwargs))
+    if flags.Detector.EnableTile:
+        TileHitsTestTool = result.popToolsAndMerge(TileHitsTestToolCfg(flags.Sim.UsingGeant4, name, **kwargs))
         toolList.append(TileHitsTestTool)
-    if configFlags.Detector.EnableLAr:
+    if flags.Detector.EnableLAr:
         LArHitsTestToolEMB = result.popToolsAndMerge(LArHitsTestToolCfg("EMB", name, **kwargs))
         toolList.append(LArHitsTestToolEMB)
         LArHitsTestToolEMEC = result.popToolsAndMerge(LArHitsTestToolCfg("EMEC", name, **kwargs))
@@ -67,7 +67,7 @@ def FCpileupCfg(configFlags, name='FCpileup',  **kwargs):
         toolList.append(LArHitsTestToolHEC)
         LArHitsTestToolFCAL = result.popToolsAndMerge(LArHitsTestToolCfg("FCAL", name, **kwargs))
         toolList.append(LArHitsTestToolFCAL)
-        if configFlags.Detector.EnableTile:
+        if flags.Detector.EnableTile:
             CaloCalibHitsTestTool_LArAct = result.popToolsAndMerge(CaloCalibrationHitsTestToolCfg("LArActiveCaloCalibHitsTestTool", name, **kwargs))
             toolList.append(CaloCalibHitsTestTool_LArAct)
             CaloCalibHitsTestTool_LArInac = result.popToolsAndMerge(CaloCalibrationHitsTestToolCfg("LArInactiveCaloCalibHitsTestTool", name, **kwargs))
@@ -83,7 +83,7 @@ def FCpileupCfg(configFlags, name='FCpileup',  **kwargs):
         CaloEntryLayerTestTool = result.popToolsAndMerge(LayerTestToolCfg("CaloEntry", name="CaloEntry", **kwargs))
         toolList.append(CaloEntryLayerTestTool)
 
-    if configFlags.Detector.EnableMuon:
+    if flags.Detector.EnableMuon:
         MDTHitsTestTool = result.popToolsAndMerge(MDTHitsTestToolCfg("MDT", name, **kwargs))
         toolList.append(MDTHitsTestTool)
         RPCHitsTestTool = result.popToolsAndMerge(RPCHitsTestToolCfg("RPC", name, **kwargs))
@@ -96,42 +96,43 @@ def FCpileupCfg(configFlags, name='FCpileup',  **kwargs):
         toolList.append(MuonEntryLayerTestTool)
         MuonExitLayerTestTool = result.popToolsAndMerge(LayerTestToolCfg("MuonExit", name="MuonExit", **kwargs))
         toolList.append(MuonExitLayerTestTool)
-    if configFlags.Detector.EnableLucid:
+    if flags.Detector.EnableLucid:
         LucidHitsTestTool = result.popToolsAndMerge(LucidHitsTestToolCfg(name, **kwargs))
         toolList.append(LucidHitsTestTool)
-    if configFlags.Detector.EnableALFA:
+    if flags.Detector.EnableALFA:
         ALFASimHitsTestTool = result.popToolsAndMerge(ALFASimHitsTestToolCfg(name, **kwargs))
         toolList.append(ALFASimHitsTestTool)
-    if configFlags.Detector.EnableZDC:
+    if flags.Detector.EnableZDC:
         ZDCHitsTestTool = result.popToolsAndMerge(ZDCHitsTestToolCfg(name, **kwargs))
         toolList.append(ZDCHitsTestTool)
 
-    result.merge(g4TestAlgCfg(toolList, configFlags, name, **kwargs))
+    result.merge(G4TestAlgCfg(toolList, flags, name, **kwargs))
     result.addService(histSvc)
     return result
 
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.isMC = True
-    ConfigFlags.Input.Files = defaultTestFiles.HITS_RUN2
-    ConfigFlags.Exec.MaxEvents = 3
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.isMC = True
+    flags.Input.Files = defaultTestFiles.HITS_RUN2
+    flags.Exec.MaxEvents = 3
+    flags.fillFromArgs()
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
-    acc.popToolsAndMerge(FCpileupCfg(ConfigFlags))
+    acc = MainServicesCfg(flags)
+    acc.popToolsAndMerge(FCPileUpCfg(flags))
 
-    print("INFO_FCpileupCfg: Dumping config flags")
-    ConfigFlags.dump()
-    print("INFO_FCpileupCfg: Print config details")
+    print("INFO_FCPileUpCfg: Dumping config flags")
+    flags.dump()
+    print("INFO_FCPileUpCfg: Print config details")
     acc.printConfig(withDetails=True, summariseProps=True)
     acc.store(open('fcpileup.pkl', 'wb'))

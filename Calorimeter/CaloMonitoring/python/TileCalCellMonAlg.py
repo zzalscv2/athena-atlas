@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -9,7 +9,7 @@
 
 from __future__ import print_function
 
-def TileCalCellMonAlgConfig(inputFlags, **kwargs):
+def TileCalCellMonAlgConfig(flags, **kwargs):
     ''' Function to configure TileCalCellMonAlg algorithm in the monitoring system.'''
 
     kwargs.setdefault('MonGroupName', 'TileEventFiter')
@@ -17,7 +17,7 @@ def TileCalCellMonAlgConfig(inputFlags, **kwargs):
     kwargs.setdefault('useLArNoisyAlg', False)
     kwargs.setdefault('useLArCollisionFilterTool', False)
 
-    if not (inputFlags.Common.isOnline == 'online' or inputFlags.Input.isMC):
+    if not (flags.Common.isOnline == 'online' or flags.Input.isMC):
         kwargs.setdefault('useReadyFilterTool', True)
         kwargs.setdefault('useBadLBTool', False) # FIXME: when new LArBadLBFilterTool config is ready
     else:
@@ -26,37 +26,37 @@ def TileCalCellMonAlgConfig(inputFlags, **kwargs):
 
     from AthenaCommon.SystemOfUnits import MeV
     kwargs.setdefault('EnergyThreshold', 300.0 * MeV)
-        
+
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'TileCalMonCfg')
+    helper = AthMonitorCfgHelper(flags,'TileCalMonCfg')
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    cfg = LArGMCfg(inputFlags)
+    cfg = LArGMCfg(flags)
 
     from TileGeoModel.TileGMConfig import TileGMCfg
-    cfg.merge(TileGMCfg(inputFlags))
+    cfg.merge(TileGMCfg(flags))
 
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
-    cfg.merge(CaloNoiseCondAlgCfg(inputFlags))
+    cfg.merge(CaloNoiseCondAlgCfg(flags))
 
     if kwargs['useLArCollisionFilterTool']:
         from LArCellRec.LArCollisionTimeConfig import LArCollisionTimeCfg
-        cfg.merge(LArCollisionTimeCfg(inputFlags))
+        cfg.merge(LArCollisionTimeCfg(flags))
 
     if kwargs['useReadyFilterTool'] and 'ReadyFilterTool' not in kwargs:
         from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
-        readyFilterTool = cfg.popToolsAndMerge(AtlasReadyFilterCfg(inputFlags))
+        readyFilterTool = cfg.popToolsAndMerge(AtlasReadyFilterCfg(flags))
         kwargs['ReadyFilterTool'] = readyFilterTool
-        
+
     from AthenaConfiguration.ComponentFactory import CompFactory
     tileCalCellMonAlg = helper.addAlgorithm(CompFactory.TileCalCellMonAlg, 'TileCalCellMonAlg')
-    
+
     for k, v in kwargs.items():
         setattr(tileCalCellMonAlg, k, v)
 
     binLabels = ["TotalEvents", "ATLAS Ready", "with Good LAr LB", "with No LAr Collision",
-                 "with No Beam Background", "with No Trigger Filter","with No LArError"] 
-        
+                 "with No Beam Background", "with No Trigger Filter","with No LArError"]
+
     if not tileCalCellMonAlg.useReadyFilterTool:
        binLabels[1] = "ATLAS Ready-OFF"
     if not tileCalCellMonAlg.useBadLBTool:
@@ -66,13 +66,13 @@ def TileCalCellMonAlgConfig(inputFlags, **kwargs):
     if not tileCalCellMonAlg.useBeamBackgroundRemoval:
        binLabels[4] = "Beam backgr.-OFF"
     if not tileCalCellMonAlg.useLArNoisyAlg:
-       binLabels[5] = "LAr Error Veto-OFF"   
+       binLabels[5] = "LAr Error Veto-OFF"
 
     topPath = '/CaloMonitoring/TileCellMon_NoTrigSel/General/'
     tileFilterGroup = helper.addGroup(tileCalCellMonAlg, tileCalCellMonAlg.MonGroupName, topPath)
 
     from CaloMonitoring.CaloMonAlgBase import CaloBaseHistConfig
-    CaloBaseHistConfig(tileFilterGroup, 'Summary/', binLabels)  
+    CaloBaseHistConfig(tileFilterGroup, 'Summary/', binLabels)
 
     # 1) Configure histogram with TileCalCellMonAlg algorithm execution time
     executeTimeGroup = helper.addGroup(tileCalCellMonAlg, 'TileCalCellMonExecuteTime', topPath)
@@ -162,37 +162,38 @@ def TileCalCellMonAlgConfig(inputFlags, **kwargs):
         tool.defineHistogram(name, title = title, type = 'TProfile',
                              xbins = 64, xmin = 1, xmax = 65)
 
-    
+
     accumalator = helper.result()
     cfg.merge(accumalator)
     return cfg
-    
+
 
 if __name__=='__main__':
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.ESD
-    ConfigFlags.Output.HISTFileName = 'TileCalCellMonOutput.root'
-    ConfigFlags.DQ.enableLumiAccess = False
-    ConfigFlags.DQ.useTrigger = False
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.ESD
+    flags.Output.HISTFileName = 'TileCalCellMonOutput.root'
+    flags.DQ.enableLumiAccess = False
+    flags.DQ.useTrigger = False
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
-    from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
-    cfg = MainServicesCfg(ConfigFlags)
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    cfg = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg.merge(PoolReadCfg(ConfigFlags))
-    
-    cfg.merge( TileCalCellMonAlgConfig(ConfigFlags) ) 
+    cfg.merge(PoolReadCfg(flags))
 
-    ConfigFlags.dump()
+    cfg.merge(TileCalCellMonAlgConfig(flags))
+
+    flags.dump()
     cfg.printConfig(withDetails = True, summariseProps = True)
-    
+
     cfg.store( open('TileCalCellMonAlg.pkl','wb') )
-    
+
     sc = cfg.run(3)
 
     import sys

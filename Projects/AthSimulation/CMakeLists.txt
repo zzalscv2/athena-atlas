@@ -7,6 +7,9 @@ string( STRIP ${_version} _version )
 project( AthSimulation VERSION ${_version} LANGUAGES C CXX Fortran )
 unset( _version )
 
+# HepMC3
+set( HEPMC3_USE TRUE CACHE BOOL "Build with HepMC3" )
+
 # Configure flake8:
 set( ATLAS_FLAKE8 flake8_atlas --select ATL,ATL902,F,E101,E7,E9,W6
                                --ignore ATL9,E701,E702,E704,E741
@@ -26,6 +29,7 @@ find_package( Frontier_Client )
 find_package( PNG )
 find_package( VDT )
 find_package( TIFF )
+find_package( libffi )
 
 # Set the project into "SIMULATIONBASE mode".
 set( SIMULATIONBASE TRUE CACHE BOOL

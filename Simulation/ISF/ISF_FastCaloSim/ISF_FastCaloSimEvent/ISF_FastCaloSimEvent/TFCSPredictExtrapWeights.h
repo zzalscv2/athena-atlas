@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCSPREDICTEXTRAPWEIGHTS_h
@@ -38,10 +38,10 @@ public:
   void set_freemem() {SetBit(kfreemem);};
 
   // Initialize Neural Network
-  bool initializeNetwork(int pid, std::string etaBin, std::string FastCaloNNInputFolderName);
+  bool initializeNetwork(int pid, const std::string& etaBin, const std::string& FastCaloNNInputFolderName);
 
   // Get inputs needed to normalize data
-  bool getNormInputs(std::string etaBin, std::string FastCaloTXTInputFolderName);
+  bool getNormInputs(const std::string& etaBin, const std::string& FastCaloTXTInputFolderName);
  
   // Test function 
   static void unit_test(TFCSSimulationState* simulstate=nullptr,const TFCSTruthState* truth=nullptr, const TFCSExtrapolationState* extrapol=nullptr);
@@ -51,6 +51,15 @@ public:
 
   // Print()
   void Print(Option_t *option = "") const override;
+
+  // Use extrapWeight=0.5 or r and z when constructing a hit?
+  enum TFCSPredictExtrapWeightsStatusBits {
+     kUseHardcodedWeight = BIT(15)
+  };
+  bool UseHardcodedWeight() const {return TestBit(kUseHardcodedWeight);};
+  void set_UseHardcodedWeight() {SetBit(kUseHardcodedWeight);};
+  void reset_UseHardcodedWeight() {ResetBit(kUseHardcodedWeight);};
+
 
 private:
   

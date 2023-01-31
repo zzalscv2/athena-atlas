@@ -87,7 +87,7 @@ StatusCode TileDigitsContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, Da
 
   const std::string containerName(*(pRE_Addr->par()));
   bool isTMDB(containerName == std::string("MuRcvDigitsCnt"));
-
+  bool isFELIX(containerName == std::string("TileDigitsFlxCnt"));
   uint32_t newrob = 0x0;
 
 
@@ -122,6 +122,9 @@ StatusCode TileDigitsContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, Da
       if (isTMDB) {// reid for TMDB 0x5x010x
         ATH_MSG_DEBUG(" Decoding TMDB digits in ROD fragment ");
         m_decoder->fillCollection_TileMuRcv_Digi(robf[0], *digitsCollection);
+      }else if (isFELIX) {
+        ATH_MSG_DEBUG(" Decoding FELIX digits in ROD fragment ");
+        m_decoder->fillCollection_FELIX_Digi(robf[0], *digitsCollection);
       } else {
         m_decoder->fillCollection(robf[0], *digitsCollection);
       }

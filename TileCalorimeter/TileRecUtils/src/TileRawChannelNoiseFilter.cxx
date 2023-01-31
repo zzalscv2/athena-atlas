@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -56,8 +56,7 @@ StatusCode TileRawChannelNoiseFilter::initialize() {
 
   ATH_CHECK( detStore()->retrieve(m_tileHWID) );
 
-  //=== get TileCondToolEmscale
-  ATH_CHECK( m_tileToolEmscale.retrieve() );
+  ATH_CHECK( m_emScaleKey.initialize() );
 
   //=== get TileCondToolNoiseSample
   ATH_CHECK( m_tileToolNoiseSample.retrieve() );
@@ -100,6 +99,9 @@ TileRawChannelNoiseFilter::process (TileMutableRawChannelContainer& rchCont, con
 
   // Now retrieve the TileDQStatus
   const TileDQstatus* DQstatus = SG::makeHandle (m_DQstatusKey, ctx).get();
+
+  SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+  ATH_CHECK( emScale.isValid() );
 
   for (IdentifierHash hash : rchCont.GetAllCurrentHashes()) {
     TileRawChannelCollection* coll = rchCont.indexFindPtr (hash);
@@ -162,7 +164,7 @@ TileRawChannelNoiseFilter::process (TileMutableRawChannelContainer& rchCont, con
 
       float amp = rch->amplitude();
       if (undoOnlCalib) {
-        calib[chan] = m_tileToolEmscale->undoOnlCalib(drawerIdx, chan, gain, 1.0, rChUnit);
+        calib[chan] = emScale->undoOnlineChannelCalibration(drawerIdx, chan, gain, 1.0, rChUnit);
         amp *= calib[chan];
       } else {
         calib[chan] = 1.0;

@@ -442,3 +442,50 @@ class L1Menu(object):
             else:
                  raise RuntimeError("checkPtMinToTopo: for threshold type %s the minimum threshold is %i and no ptMinToTopo value is found" % (thr, thresholdMin[thr]))  
 
+    def checkL1TopoParams(self):
+        from ..Menu.L1TopoParams import L1TopoParams as params
+
+        algo_param_mismatch = []
+        # No need to check multiplicity algs
+        for algtype in [AlgType.SORT, AlgType.DEC]:
+            # Only check Phase-I Topo algs
+            for algname,algo in self.topoAlgos.topoAlgos[AlgCategory.TOPO][algtype].items():
+                log.info(f'Checking variable parameter ordering for {algname} ({algo.classtype})')
+                pars_for_algo = params[algo.classtype]
+                generics_map = {g.name:g.value for g in algo.generics}
+                # No conditional parameters
+                ordered_params = None
+                if 'parameters' in pars_for_algo:
+                    ordered_params = pars_for_algo['parameters']
+                else: # Check value of conditional
+                    for cond in pars_for_algo.keys():
+                        condname, condval = cond.split(' = ')
+                        if condname in generics_map and int(condval) == generics_map[condname]:
+                            ordered_params = pars_for_algo[cond]['parameters']
+                        elif int(condval)==0:
+                            # If the generic is not defined, assume false
+                            ordered_params = pars_for_algo[cond]['parameters']
+                if ordered_params is None:
+                    raise RuntimeError(f'checkL1TopoParams: Did not find ordered parameter list for L1Topo algorithm type {algo.classtype}')
+                menu_params = [p.name for p in algo.variables]
+                log.info(f'Menu contains parameter list {menu_params}')
+                log.info(f'Expected parameter list {ordered_params}')
+                # Handle case where parameters are supplied repeatedly to
+                # configure multiple instances
+                if len(menu_params) > len(ordered_params):
+                    if len(menu_params) % len(ordered_params) == 0:
+                        ordered_params = int(len(menu_params)/len(ordered_params)) * ordered_params
+                    else:
+                        log.error("Mismatch in number of parameters")
+                if menu_params!=ordered_params:
+                    log.error(f'checkL1TopoParams: Parameter list for {algo.name}/{algo.classtype} does not match specification')
+                    log.error(f'    Menu contains parameter list {menu_params}')
+                    log.error(f'    Expected parameter list {ordered_params}')
+                    algo_param_mismatch.append(algo)
+                
+        if algo_param_mismatch:
+            log.error('checkL1TopoParams: Following L1Topo algorithms have incorrect parameter ordering in L1Menu:')
+            for algo in algo_param_mismatch:
+                log.error(f'    {algo.name} ({algo.classtype})')
+            raise RuntimeError('checkL1TopoParams: L1Topo algorithm parameters do not match specification')
+                

@@ -101,11 +101,11 @@ namespace DerivationFramework {
     for (const auto tp : *truthP) {
 
       //check ifSUSY particle
-      if ((abs(tp->pdgId()) > 1000000 && abs(tp->pdgId()) < 1000007) || // squarkL
-          (abs(tp->pdgId()) > 1000010 && abs(tp->pdgId()) < 1000017) || // sleptonL
-          (abs(tp->pdgId()) > 2000000 && abs(tp->pdgId()) < 2000007) || // squarkR
-          (abs(tp->pdgId()) > 2000010 && abs(tp->pdgId()) < 2000017) || // sleptonR
-          (abs(tp->pdgId()) > 1000020 && abs(tp->pdgId()) < 1000040)) { // gauginos
+      if ((std::abs(tp->pdgId()) > 1000000 && std::abs(tp->pdgId()) < 1000007) || // squarkL
+          (std::abs(tp->pdgId()) > 1000010 && std::abs(tp->pdgId()) < 1000017) || // sleptonL
+          (std::abs(tp->pdgId()) > 2000000 && std::abs(tp->pdgId()) < 2000007) || // squarkR
+          (std::abs(tp->pdgId()) > 2000010 && std::abs(tp->pdgId()) < 2000017) || // sleptonR
+          (std::abs(tp->pdgId()) > 1000020 && std::abs(tp->pdgId()) < 1000040)) { // gauginos
 
         if (tp->nParents() != 0) {
           if ( tp->parent(0)->absPdgId()  < 1000000) {
@@ -208,8 +208,6 @@ namespace DerivationFramework {
     int nsmunuL=0;
     int nstaunuL=0;
 
-    int nother=0;
-
     //Classification of the event follows (gg, sq...):
 
     if      (fabs(SUSY_Spart1_pdgId)== 1000022) nchi01++;
@@ -248,7 +246,6 @@ namespace DerivationFramework {
     else if (SUSY_Spart1_pdgId==2000015) nstau2minus++;
     else if (SUSY_Spart1_pdgId==-2000015) nstau2plus++;
     else if (fabs(SUSY_Spart1_pdgId)==1000016) nstaunuL++;
-    else nother++;
 
 
 
@@ -263,7 +260,7 @@ namespace DerivationFramework {
     else if (SUSY_Spart2_pdgId==-1000037) nch2minus++;
 
     else if (SUSY_Spart2_pdgId==1000021) ngluino++;
-    else if ((fabs(SUSY_Spart2_pdgId)>1000000 && fabs(SUSY_Spart2_pdgId)<=1000004) || (fabs(SUSY_Spart2_pdgId)>2000000 && fabs(SUSY_Spart2_pdgId)<=2000004)) {
+    else if ((std::abs(SUSY_Spart2_pdgId)>1000000 && std::abs(SUSY_Spart2_pdgId)<=1000004) || (std::abs(SUSY_Spart2_pdgId)>2000000 && std::abs(SUSY_Spart2_pdgId)<=2000004)) {
       if (SUSY_Spart2_pdgId>0) nsquark++;
       else nantisquark++;
     }
@@ -291,7 +288,6 @@ namespace DerivationFramework {
     else if (SUSY_Spart2_pdgId==2000015) nstau2minus++;
     else if (SUSY_Spart2_pdgId==-2000015) nstau2plus++;
     else if (fabs(SUSY_Spart2_pdgId)==1000016) nstaunuL++;
-    else nother++;
 
 
     ///Final classification

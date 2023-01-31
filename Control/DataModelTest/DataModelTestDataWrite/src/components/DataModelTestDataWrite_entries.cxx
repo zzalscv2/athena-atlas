@@ -15,6 +15,8 @@
 #include "../xAODTestWriteSymlinks.h"
 #include "../HLTResultWriter.h"
 #include "../xAODTestWriteCInfoTool.h"
+#include "../AllocTestReadWithoutAlloc.h"
+#include "../AllocTestWriteWithoutAlloc.h"
 
 DECLARE_COMPONENT( DMTest::DMTestWrite )
 DECLARE_COMPONENT( DMTest::AuxDataTestWrite )
@@ -26,4 +28,5 @@ DECLARE_COMPONENT( DMTest::xAODTestWriteSymlinks )
 DECLARE_COMPONENT( DMTest::HLTResultWriter )
 
 DECLARE_COMPONENT( DMTest::xAODTestWriteCInfoTool )
-
+DECLARE_COMPONENT( DMTest::AllocTestReadWithoutAlloc )
+DECLARE_COMPONENT( DMTest::AllocTestWriteWithoutAlloc )

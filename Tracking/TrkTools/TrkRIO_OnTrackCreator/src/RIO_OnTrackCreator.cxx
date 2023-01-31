@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -48,8 +48,7 @@ StatusCode Trk::RIO_OnTrackCreator::initialize()
      << "     SCT        : " << m_sctClusCor << std::endl
      << "     TRT        : " << m_trt_Cor       << std::endl
      << "     MDT        : " << m_muonDriftCircleCor << std::endl
-     << "     CSC/RPC/TGC/sTGC: " << m_muonClusterCor << std::endl
-     << "     MM: " << m_mmClusterCor);
+     << "     CSC/RPC/TGC/MM/sTGC: " << m_muonClusterCor);
 
   // Get the correction tool to create Pixel/SCT/TRT RIO_onTrack
 
@@ -87,15 +86,9 @@ StatusCode Trk::RIO_OnTrackCreator::initialize()
 
     ATH_CHECK(m_muonClusterCor.retrieve());
     ATH_MSG_INFO("Retrieved tool " << m_muonClusterCor);
-
-    if (!m_mmClusterCor.empty()){
-      ATH_CHECK(m_mmClusterCor.retrieve());
-      ATH_MSG_INFO("Retrieved tool " << m_mmClusterCor);  
-    }
   } else{
     m_muonClusterCor.disable();
     m_muonDriftCircleCor.disable();
-    m_mmClusterCor.disable();
   }
 
   // Set up ATLAS ID helper to be able to identify the RIO's det-subsystem.
@@ -161,22 +154,14 @@ Trk::RIO_OnTrackCreator::correct(const Trk::PrepRawData& rio,
     ATH_MSG_DEBUG("RIO identified as MuonDriftCircle.");
     return m_muonDriftCircleCor->correct(rio, trk);
   }
-  if ( (m_idHelper->is_csc(id)) || (m_idHelper->is_rpc(id))
-       || (m_idHelper->is_tgc(id)) || (m_idHelper->is_stgc(id)) ) {
+
+  if ( (m_idHelper->is_csc(id)) || (m_idHelper->is_rpc(id)) || (m_idHelper->is_tgc(id)) || (m_idHelper->is_mm(id)) || (m_idHelper->is_stgc(id)) ) {
     if (m_mode == "indet") {
-      ATH_MSG_WARNING("I have no tool to correct a CSC/RPC/TGC/sTGC hit! - Giving back nil.");
+      ATH_MSG_WARNING("I have no tool to correct a CSC/RPC/TGC/MM/sTGC hit! - Giving back nil.");
       return nullptr;
     }
-      ATH_MSG_DEBUG("RIO identified as MuonCluster.");
-      return m_muonClusterCor->correct(rio, trk);
-  }
-  if (m_idHelper->is_mm(id)) {
-    if (m_mode == "indet") {
-      ATH_MSG_WARNING("I have no tool to correct a MM hit! - Giving back nil.");
-      return nullptr;
-    }
-      ATH_MSG_DEBUG("RIO identified as MMCluster.");
-      return m_mmClusterCor->correct(rio, trk);
+    ATH_MSG_DEBUG("RIO identified as MuonCluster.");
+    return m_muonClusterCor->correct(rio, trk);
   }
 
   ATH_MSG_WARNING( "idHelper could not identify sub-detector for: "<<m_idHelper->print_to_string(id)<<". Return nil RIO_OnTrack");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_IMUONCLUSTERONTRACKCREATOR_H
@@ -47,8 +47,7 @@ namespace Muon {
             @return Fully calibrated Muon::MuonClusterOnTrack.
                     The memory management of the new Muon::MuonClusterOnTrack is passed to the person calling the function.
         */
-        virtual const MuonClusterOnTrack* createRIO_OnTrack(const Trk::PrepRawData& DC, const Amg::Vector3D& GP,
-                                                            const Amg::Vector3D& GD) const = 0;
+        virtual const MuonClusterOnTrack* createRIO_OnTrack(const Trk::PrepRawData& DC, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const = 0;
 
         /** @brief Calibrate a NSW PrepRawData object. The result is stored in a new Muon::MuonClusterOnTrack object
             @param DC Trk::PrepRawData object
@@ -56,16 +55,12 @@ namespace Muon {
             @return Fully calibrated Muon::MuonClusterOnTrack.
                     The memory management of the new Muon::MuonClusterOnTrack is passed to the person calling the function.
         */
-        virtual const MuonClusterOnTrack* calibratedCluster(const Trk::PrepRawData& DC, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const;
+        virtual const MuonClusterOnTrack* correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP) const override = 0;
+
+        virtual const MuonClusterOnTrack* correct(const Trk::PrepRawData& DC, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const = 0;
     };
-
+    
     inline const InterfaceID& IMuonClusterOnTrackCreator::interfaceID() { return IID_IMuonClusterOnTrackCreator; }
-
-    inline const MuonClusterOnTrack* IMuonClusterOnTrackCreator::calibratedCluster(const Trk::PrepRawData& DC,
-                                                                                   const Amg::Vector3D& GP,
-                                                                                   const Amg::Vector3D& GD) const {
-        return createRIO_OnTrack(DC, GP, GD);
-    }
 
 }  // namespace Muon
 

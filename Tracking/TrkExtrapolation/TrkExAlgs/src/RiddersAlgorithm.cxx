@@ -13,7 +13,7 @@
 #include "TrkExAlgs/RiddersAlgorithm.h"
 // Trk stuff
 #include "TrkExInterfaces/IPropagator.h"
-#include "TrkExUtils/TransportJacobian.h"
+#include "TrkEventPrimitives/TransportJacobian.h"
 #include "TrkGeometry/MagneticFieldProperties.h"
 #include "TrkSurfaces/PlaneSurface.h"
 #include "TrkSurfaces/CylinderSurface.h"

@@ -608,11 +608,7 @@ class CaloRecGPUConfigurator:
         
         args = parser.parse_args()
         
-        from AthenaCommon.Configurable import Configurable
-        Configurable.configurableRun3Behavior=1
-
         from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        #from AthenaConfiguration.TestDefaults import defaultTestFiles
 
         if args.files is None:
             ConfigFlags.Input.Files = default_files
@@ -657,8 +653,3 @@ class CaloRecGPUConfigurator:
             cfg.addEventAlgo(CompFactory.xAODMaker.EventInfoCnvAlg(),sequenceName="AthAlgSeq")
         
         return (cfg, int(args.numevents))
-
-        
-
-
-        

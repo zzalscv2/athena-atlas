@@ -37,7 +37,7 @@ public:
     for ( unsigned i=0 ; i<refz.size() ; i++ ) if ( refz[i].first<_min ) _min = refz[i].first;
   
     double minz = refz.back().second;
-    double maxz = refz.back().second;
+    double maxz = minz;
 
     for ( unsigned i=refz.size() ; i-- ; ) { 
       if ( refz[i].second<minz )  minz = refz[i].second;

@@ -237,8 +237,8 @@ namespace ST {
     virtual StatusCode GetJetsSyst(const xAOD::JetContainer& calibjets,xAOD::JetContainer*& copy,xAOD::ShallowAuxContainer*& copyaux, const bool recordSG=true, const std::string& jetkey="") = 0;
     virtual StatusCode GetFatJets(xAOD::JetContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, const bool recordSG = false, const std::string& jetkey = "", const bool doLargeRdecorations = false, const xAOD::JetContainer* containerToBeCopied = nullptr) = 0;
     virtual StatusCode GetTaus(xAOD::TauJetContainer*& copy,xAOD::ShallowAuxContainer*& copyaux,const bool recordSG=true, const std::string& taukey="TauJets", const xAOD::TauJetContainer* containerToBeCopied = nullptr) = 0;
-    virtual StatusCode GetMuons(xAOD::MuonContainer*& copy,xAOD::ShallowAuxContainer*& copyaux,const bool recordSG=true, const std::string& muonkey="Muons", const xAOD::MuonContainer* containerToBeCopied = nullptr) = 0;
-    virtual StatusCode GetElectrons(xAOD::ElectronContainer*& copy,xAOD::ShallowAuxContainer*& copyaux,const bool recordSG=true,const std::string& elekey="Electrons", const xAOD::ElectronContainer* containerToBeCopied = nullptr) = 0;
+    virtual StatusCode GetMuons(xAOD::MuonContainer*& copy,xAOD::ShallowAuxContainer*& copyaux,const bool recordSG=true, const std::string& muonkey="Muons", const std::string& lrtmuonkey = "MuonsLRT", const xAOD::MuonContainer* containerToBeCopied = nullptr) = 0;
+    virtual StatusCode GetElectrons(xAOD::ElectronContainer*& copy,xAOD::ShallowAuxContainer*& copyaux,const bool recordSG=true,const std::string& elekey="Electrons", const std::string& lrtelekey = "LRTElectrons", const xAOD::ElectronContainer* containerToBeCopied = nullptr) = 0;
     virtual StatusCode GetPhotons(xAOD::PhotonContainer*& copy,xAOD::ShallowAuxContainer*& copyaux,const bool recordSG=true,const std::string& photonkey="Photons", const xAOD::PhotonContainer* containerToBeCopied = nullptr) = 0;
     virtual StatusCode GetMET(xAOD::MissingETContainer& met,
 			      const xAOD::JetContainer* jet,
@@ -260,6 +260,10 @@ namespace ST {
                       	         bool doTST = true, bool doJVTCut = true
 				 ) = 0;
 
+    virtual StatusCode MergeMuons(const  xAOD::MuonContainer & muons, const std::vector<bool> &writeMuon, xAOD::MuonContainer* outputCol) const = 0;
+
+    virtual StatusCode MergeElectrons(const  xAOD::ElectronContainer & electrons, xAOD::ElectronContainer* outputCol, const std::set<const xAOD::Electron *> &ElectronsToRemove) const = 0;
+
     virtual bool IsPFlowCrackVetoCleaning(const xAOD::ElectronContainer* elec = nullptr, const xAOD::PhotonContainer* gamma = nullptr) const = 0;
 
     virtual bool IsSignalJet(const xAOD::Jet& input,  const float ptcut, const float etacut) const = 0;
@@ -267,7 +271,7 @@ namespace ST {
     virtual bool IsBadJet(const xAOD::Jet& input) const = 0;
 
     virtual bool IsBJetLoose(const xAOD::Jet& input) const = 0;
-    virtual bool JetPassJVT(xAOD::Jet& input, bool update_jvt) = 0;
+    virtual bool JetPassJVT(xAOD::Jet& input) = 0;
 
     virtual bool IsHighPtMuon(const xAOD::Muon& input) const = 0;
 
@@ -301,11 +305,11 @@ namespace ST {
 
     virtual double FJVT_SFsys(const xAOD::JetContainer* jets, const CP::SystematicSet& systConfig) = 0;
 
-    virtual float BtagSF(const xAOD::JetContainer* jets) const = 0;
+    virtual float BtagSF(const xAOD::JetContainer* jets) = 0;
 
     virtual float BtagSFsys(const xAOD::JetContainer* jets, const CP::SystematicSet& systConfig) = 0;
 
-    virtual float BtagSF_trkJet(const xAOD::JetContainer* trkjets) const = 0;
+    virtual float BtagSF_trkJet(const xAOD::JetContainer* trkjets) = 0;
 
     virtual float BtagSFsys_trkJet(const xAOD::JetContainer* trkjets, const CP::SystematicSet& systConfig) = 0;
 

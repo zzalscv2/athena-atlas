@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPTACKER_MAGNET_H
@@ -50,21 +50,16 @@ namespace FPTracker{
     bool   isEndElement() const;
     std::string str()     const;
 
-    static void set_y0IP(double);
-    static void set_ay0IP(double);
-    static void set_x0IP(double);
-    static void set_ax0IP(double);
-    
     std::string label()              const;
 
     void track(IParticle&)           const;
-    void calibrate(IParticle&)       const;
+    void calibrate(IParticle&);
 
     IBeamElement::ConstPtr_t clone() const;
 
 
-    typedef boost::shared_ptr< const Magnet >     ConstPtr_t;
-    typedef std::vector< ConstPtr_t >             Container_t;
+    typedef boost::shared_ptr< Magnet >     Ptr_t;
+    typedef std::vector< Ptr_t >            Container_t;
     
     enum Type {hbDipole, hfQuadrupole, vfQuadrupole, vbDipole, notAMagnet};
 
@@ -72,13 +67,7 @@ namespace FPTracker{
 
 
   private:
-    static double s_y0IP;
-    static double s_ay0IP;
-    
-    static double s_x0IP ;
-    static double s_ax0IP;
 
-    
     Point               m_center;
     double              m_frontFace;
     double              m_rearFace;

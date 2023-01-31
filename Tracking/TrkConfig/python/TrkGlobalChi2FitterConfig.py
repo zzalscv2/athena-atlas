@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of TrkGlobalChi2Fitter package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -99,7 +99,7 @@ def InDetGlobalChi2FitterCfg(flags,
 
     # PHF cut during fit iterations to save CPU time
     kwargs.setdefault(
-        'MinPHFCut', flags.InDet.Tracking.ActivePass.minTRTPrecFrac)
+        'MinPHFCut', flags.InDet.Tracking.ActiveConfig.minTRTPrecFrac)
 
     if ((flags.InDet.Tracking.useBroadPixClusterErrors or
         flags.InDet.Tracking.useBroadSCTClusterErrors)):

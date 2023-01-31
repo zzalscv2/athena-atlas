@@ -49,7 +49,7 @@ const T* MuonMatchingTool :: matchReadHandle(const OFFL* offl, float reqdR,
 
 template<class T, class OFFL>
 const T* MuonMatchingTool :: match(const OFFL* offl, std::string trig, float reqdR, bool &pass,
-                                   const std::string containerSGKey,
+                                   const std::string& containerSGKey,
                                    std::tuple<bool,double,double> (*trigPosForMatchFunc)(const T*)) const {
 
   ATH_MSG_DEBUG("MuonMonitoring::match<T>");
@@ -70,7 +70,7 @@ const T* MuonMatchingTool :: match(const OFFL* offl, std::string trig, float req
 
 template<class T, class OFFL>
 const TrigCompositeUtils::LinkInfo<DataVector<T> > MuonMatchingTool :: matchLinkInfo(const OFFL* offl, std::string trig, float reqdR, bool &pass,
-                                                                                     const std::string containerSGKey,
+                                                                                     const std::string& containerSGKey,
                                                                                      std::tuple<bool,double,double> (*trigPosForMatchFunc)(const T*)) const {
 
   ATH_MSG_DEBUG("MuonMonitoring::matchLinkInfo<T>");

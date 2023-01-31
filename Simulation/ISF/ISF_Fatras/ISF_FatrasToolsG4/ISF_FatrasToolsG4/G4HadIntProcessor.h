@@ -11,6 +11,7 @@
 // GaudiKernel & Athena
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/IAtRndmGenSvc.h"
+#include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 
@@ -68,7 +69,7 @@ namespace iFatras {
     @author Andreas.Salzburger@cern.ch
     */
 
-  class G4HadIntProcessor : public extends<AthAlgTool, iFatras::IHadronicInteractionProcessor> {
+  class ATLAS_NOT_THREAD_SAFE G4HadIntProcessor : public extends<AthAlgTool, iFatras::IHadronicInteractionProcessor> {  // deprecated: ATLASSIM-6020
     public:      
       /** AlgTool constructor for G4HadIntProcessor*/
       G4HadIntProcessor(const std::string&,const std::string&,const IInterface*);
@@ -99,7 +100,7 @@ namespace iFatras {
 
     private:
       /** initialize G4RunManager on first call if not done by then */
-      StatusCode initG4RunManager();
+      StatusCode initG4RunManager ATLAS_NOT_THREAD_SAFE ();
 
       /** collect secondaries for layer material update */                           
       ISF::ISFParticleVector getHadState(const ISF::ISFParticle* parent,

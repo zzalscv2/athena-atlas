@@ -39,7 +39,8 @@ class LWHistInt {
   //Trick to avoid exposing methods we don't really want to support in
   //the public interface:
   public:
-  template<class TLW> static const float* getVarBins(TLW*h) { return h->getVarBins(); }
+  template<class TLW> static const float* getVarBins(const TLW*h) { return h->getVarBins(); }
+  template<class TLW> static       float* getVarBins(TLW*h) { return h->getVarBins(); }
   template<class TLW> static const float* getVarBinsX(TLW*h) { return h->getVarBinsX(); }
   template<class TLW> static const float* getVarBinsY(TLW*h) { return h->getVarBinsY(); }
 };

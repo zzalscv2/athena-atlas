@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ScoringPlane.h"
@@ -17,7 +17,6 @@ namespace G4UA
   //----------------------------------------------------------------------------
   ScoringPlane::ScoringPlane(const Config& config)
     : m_config(config),
-      m_tree0(0), m_tree1(0),
       m_evt(0), m_ntr(0), m_pdg(0), m_cha(0), m_ene(0),
       m_vx(0), m_vy(0), m_vz(0),
       m_x0(0), m_y0(0), m_z0(0), m_t0(0),
@@ -28,15 +27,19 @@ namespace G4UA
   {
   }
 
+  ScoringPlane::~ScoringPlane()
+  {
+  }
+
   void ScoringPlane::BeginOfRunAction(const G4Run*)
   {
 
-    m_tree0 = new TTree("t0", "ATHENA event tree");
+    m_tree0 = std::make_unique<TTree>("t0", "ATHENA event tree");
 
     m_tree0->Branch("evt", &m_evt, "evt/I");
     m_tree0->Branch("ntr", &m_ntr, "ntr/I");
 
-    m_tree1 = new TTree("t1", "ATHENA particle tree");
+    m_tree1 = std::make_unique<TTree>("t1", "ATHENA particle tree");
 
     m_tree1->Branch("evt", &m_evt, "evt/I");
     m_tree1->Branch("ntr", &m_ntr, "ntr/I");

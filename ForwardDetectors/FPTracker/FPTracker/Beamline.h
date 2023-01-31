@@ -15,12 +15,12 @@ namespace FPTracker{
   class Beamline{
   public:
     Beamline();
-    Beamline(IBeamElement::ConstListIter_t, IBeamElement::ConstListIter_t);
+    Beamline(IBeamElement::ListIter_t, IBeamElement::ListIter_t);
     Beamline(const Beamline&);
     Beamline& operator = (Beamline);
 
     void track(IParticle&) const;
-    void calibrate(IParticle&) const;
+    void calibrate(IParticle&);
     std::string str() const;
 
   private:

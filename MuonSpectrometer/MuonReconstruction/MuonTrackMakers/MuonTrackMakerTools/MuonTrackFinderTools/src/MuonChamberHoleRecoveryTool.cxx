@@ -64,7 +64,6 @@ namespace Muon {
         }
 
         ATH_CHECK(m_clusRotCreator.retrieve());
-        if (m_idHelperSvc->recoMM() || m_idHelperSvc->recosTgc()) ATH_CHECK(m_mmClusRotCreator.retrieve());
         ATH_CHECK(m_pullCalculator.retrieve());
       
         ATH_CHECK(m_key_mdt.initialize());
@@ -177,7 +176,7 @@ namespace Muon {
 
         for (std::unique_ptr<const Trk::TrackStateOnSurface>& nit : newStates) { trackStateOnSurfaces.push_back(nit.release()); }
         std::unique_ptr<Trk::Track> newTrack = std::make_unique<Trk::Track>(track.info(), std::move(trackStateOnSurfaces),
-                                                                            track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+                                                                            track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
         return newTrack;
     }
 
@@ -721,10 +720,8 @@ namespace Muon {
                                      << " measured parameters, error " << Amg::error(*exPars->covariance(), Trk::locX));
 
             std::unique_ptr<const MuonClusterOnTrack> clusterOnTrack;
-            if (m_idHelperSvc->isTrigger(clus->identify()) || m_idHelperSvc->issTgc(clus->identify())) {
+            if (m_idHelperSvc->isTrigger(clus->identify()) || m_idHelperSvc->issTgc(clus->identify()) || m_idHelperSvc->isMM(clus->identify())) {
                 clusterOnTrack.reset(m_clusRotCreator->createRIO_OnTrack(*clus, exPars->position(), exPars->momentum().unit()));
-            } else if (m_idHelperSvc->isMM(clus->identify())) {
-                clusterOnTrack.reset(m_mmClusRotCreator->createRIO_OnTrack(*clus, exPars->position(), exPars->momentum().unit()));
             } else if (!m_cscRotCreator.empty()) {
                 clusterOnTrack.reset(m_cscRotCreator->createRIO_OnTrack(*clus, exPars->position(), exPars->momentum().unit()));
             }

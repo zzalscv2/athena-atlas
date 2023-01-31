@@ -484,10 +484,6 @@ StatusCode TrigBjetBtagHypoAlg::monitor_btagging( const ElementLinkVector< xAOD:
   );
 
 
-  CHECK( monitor_flavor_bb_probabilities(bTaggingEL, "DL1bb20220331") );
-
-
-
   auto monitor_group_for_btagging = Monitored::Group( m_monTool,
     monitor_for_JetFitter_isDefaults,
     monitor_for_SV1_isDefaults,

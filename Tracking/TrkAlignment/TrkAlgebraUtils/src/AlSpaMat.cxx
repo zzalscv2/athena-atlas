@@ -421,13 +421,11 @@ int AlSpaMat::SolveWithEigen(AlVec& RHS){
   std::vector<Triplet> tripletList;
   tripletList.reserve(m_nele);
   long int      i, j;
-  long int counter(0);
   mapiterator pos;
   for (pos = m_ptr_map.begin(); pos!=m_ptr_map.end(); pos++){
     elem(pos->first, i, j);
     tripletList.emplace_back(i,j,pos->second);
     if(i!=j) tripletList.emplace_back(j,i,pos->second);
-    counter++;
   }
   eigenBigMatrix.setFromTriplets(tripletList.begin(), tripletList.end());
 

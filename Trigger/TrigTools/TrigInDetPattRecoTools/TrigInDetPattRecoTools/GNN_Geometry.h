@@ -21,6 +21,8 @@ public:
   int getEtaBin(float, float) const;
 
   float getBinRadius(int) const;
+  float getMinBinRadius(int) const;
+  float getMaxBinRadius(int) const;
 
   int num_bins() const {return m_bins.size();} 
 
@@ -29,6 +31,8 @@ public:
   const TrigInDetSiLayer& m_layer;
   std::vector<int> m_bins;//eta-bin indices
   std::vector<float> m_radii;
+  std::vector<float> m_minRadius;
+  std::vector<float> m_maxRadius;
   std::vector<float> m_minBinCoord;
   std::vector<float> m_maxBinCoord;
 

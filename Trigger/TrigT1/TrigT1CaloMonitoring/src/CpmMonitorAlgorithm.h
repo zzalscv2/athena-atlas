@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1CALOMONITORING_CPMMONITORALGORITHM_H
 #define TRIGT1CALOMONITORING_CPMMONITORALGORITHM_H
@@ -40,14 +40,15 @@ class CpmMonitorAlgorithm : public AthMonitorAlgorithm {
   };
 
   struct MonitorTobRoI{
-    const xAOD::CPMTobRoI_v1* tobroi;
+    const xAOD::CPMTobRoI_v1* tobroi{};
     // some modified/derived information 
     double etaMod{}; 
     double phiMod{}; 
   };
 
   struct MonitorCmxCpTob{
-    const xAOD::CMXCPTob_v1* tob;
+    MonitorCmxCpTob() = default;  // suppresses a cppcheck false positive
+    const xAOD::CMXCPTob_v1* tob{};
     // some modified/derived information 
     uint8_t x{}; // crate * m_modules + cpm - 1
     uint8_t y{}; // chip * 4 + location

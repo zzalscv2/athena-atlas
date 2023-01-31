@@ -54,7 +54,7 @@ namespace Simulation {
     /** calculate the transformations that we want to apply to the particles in the current GenEvent */
     StatusCode initializeGenEvent(CLHEP::HepLorentzRotation& transform, const EventContext& ctx) const;
     /** apply boost to individual GenParticles */
-    void boostParticle(HepMC::GenParticlePtr p, const CLHEP::HepLorentzRotation& transform) const;
+    void boostParticle(HepMC::GenParticlePtr& p, const CLHEP::HepLorentzRotation& transform) const;
 
     ServiceHandle<IAthRNGSvc>       m_rndGenSvc{this, "RandomSvc", "AthRNGSvc"};
     ATHRNG::RNGWrapper*             m_randomEngine ATLAS_THREAD_SAFE{};  //!< Slot-local RNG

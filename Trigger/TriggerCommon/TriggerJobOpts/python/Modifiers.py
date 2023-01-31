@@ -52,6 +52,14 @@ class BunchSpacing25ns(_modifier):
         from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
         InDetTrigFlags.InDet25nsec.set_Value_and_Lock(True)
 
+class disableInDetDCS(_modifier):
+    """
+    disable access to DCS state info which is in general not available 
+    """
+
+    def preSetup(self, flags):
+        flags.InDet.useDCS = False
+
 class BunchSpacing50ns(_modifier):
     """
     ID (and other settings) related to 50ns bunch spacing
@@ -307,7 +315,9 @@ class rewriteLVL1(_modifier):
     def preSetup(self, flags):
         from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
         from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamEncoderCfg
-        CAtoGlobalWrapper(L1TriggerByteStreamEncoderCfg, flags)
+        flags1=flags.clone()
+        flags1.lock()
+        CAtoGlobalWrapper(L1TriggerByteStreamEncoderCfg, flags1)
 
     def postSetup(self, flags):
         if not flags.Output.doWriteBS:
@@ -449,7 +459,9 @@ class enableSchedulerMon(_modifier):
 
         from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
         from TrigSteerMonitor.TrigSteerMonitorConfig import SchedulerMonSvcCfg
-        CAtoGlobalWrapper(SchedulerMonSvcCfg, flags)
+        flags1=flags.clone()
+        flags1.lock()
+        CAtoGlobalWrapper(SchedulerMonSvcCfg, flags1)
     
     def postSetup(self, flags):
         if flags.Trigger.Online.isPartition:

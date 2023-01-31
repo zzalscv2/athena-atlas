@@ -1,22 +1,17 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
 
-def isRun3Cfg():
-    """
-    Returns true if the python fragment is run-3 style 
-    (ComponentAccumulator, GaudiConfig2)
-    Returns false if the python fragments is run 1/2 style
-    (PackageConf.py, RecExCommon)
-    """
+def isComponentAccumulatorCfg():
+    """Returns true if the python fragment is ComponentAccumulator-based"""
+
     from AthenaCommon.Configurable import Configurable
-    if "AthenaCommon.Include" not in sys.modules\
-        or Configurable.configurableRun3Behavior:
+    if ("AthenaCommon.Include" not in sys.modules
+        or not Configurable._useGlobalInstances):
         return True
     else:
         return False
-
 
 #This version of CompFactory provides the RecExCommon-style configurables 
 # used by athena.py. Internally works like CfgMgr
@@ -55,7 +50,7 @@ import AthenaConfiguration.AtlasSemantics # noqa: F401
 class _compFactory():
     def _getFactory(self):
 
-        if isRun3Cfg():
+        if isComponentAccumulatorCfg():
             return _compFactory2()
         else:
             return _compFactory1()

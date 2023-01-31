@@ -47,7 +47,7 @@ namespace JiveXML {
     }
 
     //Loop over segment collections
-    for (; CollectionItr!=CollectionsEnd; CollectionItr++) {
+    for (; CollectionItr!=CollectionsEnd; ++CollectionItr) {
 
       //Get number of segments in this collection
       Trk::SegmentCollection::size_type NSegs=(*CollectionItr).size();
@@ -63,7 +63,7 @@ namespace JiveXML {
       
       //Loop over the segments
       Trk::SegmentCollection::const_iterator SegmentItr;
-      for (SegmentItr=(*CollectionItr).begin(); SegmentItr!=(*CollectionItr).end(); SegmentItr++) {
+      for (SegmentItr=(*CollectionItr).begin(); SegmentItr!=(*CollectionItr).end(); ++SegmentItr) {
         
         //Retrive primite variabels
         x.push_back(DataType((*SegmentItr)->globalPosition().x()/10.));

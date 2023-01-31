@@ -11,8 +11,6 @@
 #ifndef PATCORE_IATHHISTOGRAMTOOL_H
 #define PATCORE_IATHHISTOGRAMTOOL_H 1
 
-// STL includes
-
 // FrameWork includes
 #include "GaudiKernel/IAlgTool.h"
 
@@ -56,9 +54,6 @@ class IAthHistogramTool
  protected: 
 
 }; 
-
-/// I/O operators
-//////////////////////
 
 /////////////////////////////////////////////////////////////////// 
 /// Inline methods: 

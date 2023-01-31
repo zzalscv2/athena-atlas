@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CLIDCOMPS_CLASSIDSVC_H
@@ -115,7 +115,8 @@ private:
   /// @name Properties
   //@{
   Gaudi::Property<std::vector<std::string>> m_DBFiles{this, "CLIDDBFiles", {"clid.db"},
-    "List of db files with (CLID, class_name) entries. Loaded at init in svc maps. Files are looked up in DATAPATH"};
+    "List of db files with (CLID, class_name) entries. Loaded at init in svc maps. Files are looked up in DATAPATH",
+    "OrderedSet<std::string>"};
 
   Gaudi::Property<std::string> m_outputFileName{this, "OutputFileName", "NULL",
     "Path to clid.db file for writing. By default ('NULL') to not create the file."};

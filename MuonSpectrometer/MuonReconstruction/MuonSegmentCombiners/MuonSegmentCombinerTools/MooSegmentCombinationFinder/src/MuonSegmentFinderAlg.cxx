@@ -31,10 +31,9 @@ StatusCode MuonSegmentFinderAlg::initialize() {
     ATH_CHECK(m_segmentMaker.retrieve());
     ATH_CHECK(m_clusterSegMaker.retrieve());
 
-    ATH_CHECK(m_clusterCreator.retrieve());
     const bool doNSW = m_idHelperSvc->recoMM() || m_idHelperSvc->recosTgc();
     if (doNSW){
-        ATH_CHECK(m_mmClusterCreator.retrieve());
+        ATH_CHECK(m_clusterCreator.retrieve());
         ATH_CHECK(m_clusterSegMakerNSW.retrieve());
     }
 
@@ -202,12 +201,7 @@ void MuonSegmentFinderAlg::createSegmentsFromClusters(const EventContext& ctx, c
             if (!cl) continue;
             int sector = m_idHelperSvc->sector(id);
             std::vector<const Muon::MuonClusterOnTrack*>& clusters = clustersPerSector[sector];
-
-            if (m_idHelperSvc->isMM(pit->identify())) {
-                clusters.push_back(m_mmClusterCreator->createRIO_OnTrack(*cl, cl->globalPosition()));
-            } else {  //  must be an sTGC prd
-                clusters.push_back(m_clusterCreator->createRIO_OnTrack(*cl, cl->globalPosition()));
-            }
+            clusters.push_back(m_clusterCreator->createRIO_OnTrack(*cl, cl->globalPosition()));
             garbage.emplace_back(clusters.back());
         }
     }

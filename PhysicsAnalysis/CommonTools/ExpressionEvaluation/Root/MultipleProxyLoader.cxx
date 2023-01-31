@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -16,6 +16,11 @@
 #include <iostream>
 
 namespace ExpressionParsing {
+  MultipleProxyLoader::MultipleProxyLoader() :
+    m_varnameToProxyLoader(proxyCache_t::Updater_t())
+  {
+  }
+
   MultipleProxyLoader::~MultipleProxyLoader()
   {
   }
@@ -33,14 +38,14 @@ namespace ExpressionParsing {
     }
   }
 
-  IProxyLoader::VariableType MultipleProxyLoader::variableTypeFromString(const std::string &varname)
+  IProxyLoader::VariableType MultipleProxyLoader::variableTypeFromString(const std::string &varname) const
   {
-    if (m_varnameToProxyLoader.find(varname) != m_varnameToProxyLoader.end()) {
-      return m_varnameToProxyLoader[varname]->variableTypeFromString(varname);
+    auto itr = m_varnameToProxyLoader.find(varname);
+    if (itr != m_varnameToProxyLoader.end()) {
+      return itr->second->variableTypeFromString(varname);
     }
 
     IProxyLoader::VariableType result;
-    bool foundProxyLoader(false);
     for (const auto &proxyLoader : m_proxyLoaders) {
       try {
         result = proxyLoader->variableTypeFromString(varname);
@@ -48,33 +53,30 @@ namespace ExpressionParsing {
       } catch (const std::runtime_error &) {
         continue;
       }
-      foundProxyLoader = true;
-      m_varnameToProxyLoader[varname] = proxyLoader;
-      break;
+      m_varnameToProxyLoader.emplace(varname, proxyLoader);
+      return result;
     }
-    if (!foundProxyLoader) {
-      throw std::runtime_error("MultipleProxyLoader: unable to find valid proxy loader for "+varname);
-    }
-    return result;
+
+    throw std::runtime_error("MultipleProxyLoader: unable to find valid proxy loader for "+varname);
   }
 
-  int MultipleProxyLoader::loadIntVariableFromString(const std::string &varname)
+  int MultipleProxyLoader::loadIntVariableFromString(const std::string &varname) const
   {
-    return m_varnameToProxyLoader[varname]->loadIntVariableFromString(varname);
+    return m_varnameToProxyLoader.at(varname)->loadIntVariableFromString(varname);
   }
 
-  double MultipleProxyLoader::loadDoubleVariableFromString(const std::string &varname)
+  double MultipleProxyLoader::loadDoubleVariableFromString(const std::string &varname) const
   {
-    return m_varnameToProxyLoader[varname]->loadDoubleVariableFromString(varname);
+    return m_varnameToProxyLoader.at(varname)->loadDoubleVariableFromString(varname);
   }
 
-  std::vector<int> MultipleProxyLoader::loadVecIntVariableFromString(const std::string &varname)
+  std::vector<int> MultipleProxyLoader::loadVecIntVariableFromString(const std::string &varname) const
   {
-    return m_varnameToProxyLoader[varname]->loadVecIntVariableFromString(varname);
+    return m_varnameToProxyLoader.at(varname)->loadVecIntVariableFromString(varname);
   }
 
-  std::vector<double> MultipleProxyLoader::loadVecDoubleVariableFromString(const std::string &varname)
+  std::vector<double> MultipleProxyLoader::loadVecDoubleVariableFromString(const std::string &varname) const
   {
-    return m_varnameToProxyLoader[varname]->loadVecDoubleVariableFromString(varname);
+    return m_varnameToProxyLoader.at(varname)->loadVecDoubleVariableFromString(varname);
   }
 }

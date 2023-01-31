@@ -146,7 +146,9 @@ StatusCode SimpleMergeMcEventCollTool::processEvent(const McEventCollection *pMc
 
   const HepMC::GenEvent& currentBackgroundEvent(**(pMcEvtColl->begin()));
   // FIXME no protection against multiple GenEvents having the same event number
-  outputMcEventCollection->push_back(new HepMC::GenEvent(currentBackgroundEvent));
+  HepMC::GenEvent* copiedEvent = new HepMC::GenEvent(currentBackgroundEvent);
+  HepMC::fillBarcodesAttribute(copiedEvent);
+  outputMcEventCollection->push_back(copiedEvent);
   ++m_nBkgEventsReadSoFar;
   return StatusCode::SUCCESS;
 }

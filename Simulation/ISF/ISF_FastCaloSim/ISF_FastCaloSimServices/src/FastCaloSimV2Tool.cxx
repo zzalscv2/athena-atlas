@@ -81,10 +81,10 @@ StatusCode ISF::FastCaloSimV2Tool::setupEventST()
 {
   ATH_MSG_DEBUG ("setupEventST");
 
-  m_theContainer = new CaloCellContainer(SG::VIEW_ELEMENTS);
-
-  ATH_CHECK(evtStore()->record(m_theContainer, m_caloCellsOutputName));
-
+  m_theContainer = std::make_unique<CaloCellContainer>(SG::VIEW_ELEMENTS);
+  m_theContainerPtr = m_theContainer.get();
+  ATH_CHECK(evtStore()->record(std::move(m_theContainer), m_caloCellsOutputName));
+  // NB: m_theContainer is now nullptr
   const EventContext& ctx = Gaudi::Hive::currentContext();
   return this->commonSetup(ctx);
 }
@@ -93,8 +93,8 @@ StatusCode ISF::FastCaloSimV2Tool::setupEvent(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ("setupEvent");
 
-  m_theContainer = new CaloCellContainer(SG::VIEW_ELEMENTS);
-
+  m_theContainer = std::make_unique<CaloCellContainer>(SG::VIEW_ELEMENTS);
+  m_theContainerPtr = m_theContainer.get();
   return this->commonSetup(ctx);
 }
 
@@ -109,7 +109,7 @@ StatusCode ISF::FastCaloSimV2Tool::commonSetup(const EventContext& ctx)
     {
       std::string chronoName=this->name()+"_"+ tool.name();
       if (m_chrono) m_chrono->chronoStart(chronoName);
-      StatusCode sc = tool->process(m_theContainer, ctx);
+      StatusCode sc = tool->process(m_theContainerPtr, ctx);
       if (m_chrono) {
         m_chrono->chronoStop(chronoName);
         ATH_MSG_DEBUG( "Chrono stop : delta " << m_chrono->chronoDelta (chronoName,IChronoStatSvc::USER) * CLHEP::microsecond / CLHEP::second << " second " );
@@ -135,7 +135,7 @@ StatusCode ISF::FastCaloSimV2Tool::releaseEvent(const EventContext& ctx)
 
     // Record with WriteHandle
     SG::WriteHandle< CaloCellContainer > caloCellHandle( m_caloCellKey, ctx );
-    ATH_CHECK( caloCellHandle.record( std::make_unique< CaloCellContainer >( *m_theContainer ) ) );
+    ATH_CHECK( caloCellHandle.record( std::move( m_theContainer ) ) );
     return StatusCode::SUCCESS;
   }
   return StatusCode::FAILURE;
@@ -151,7 +151,7 @@ StatusCode ISF::FastCaloSimV2Tool::releaseEventST()
     {
       ATH_MSG_VERBOSE( "Calling tool " << tool.name() );
 
-      ATH_CHECK(tool->process(m_theContainer, ctx));
+      ATH_CHECK(tool->process(m_theContainerPtr, ctx));
     }
 
   return StatusCode::SUCCESS;
@@ -159,7 +159,7 @@ StatusCode ISF::FastCaloSimV2Tool::releaseEventST()
 }
 
 /** Simulation Call */
-StatusCode ISF::FastCaloSimV2Tool::simulate(const ISF::ISFParticle& isfp, ISFParticleContainer& secondaries, McEventCollection*)
+StatusCode ISF::FastCaloSimV2Tool::simulate(ISF::ISFParticle& isfp, ISFParticleContainer& secondaries, McEventCollection*)
 {
 
   ATH_MSG_VERBOSE("NEW PARTICLE! FastCaloSimV2Tool called with ISFParticle: " << isfp);
@@ -168,32 +168,6 @@ StatusCode ISF::FastCaloSimV2Tool::simulate(const ISF::ISFParticle& isfp, ISFPar
   Amg::Vector3D particle_direction(isfp.momentum().x(),isfp.momentum().y(),isfp.momentum().z());
 
   ATHRNG::RNGWrapper* rngWrapper = m_rndmGenSvc->getEngine(this, m_randomEngineName); // TODO ideally would pass the event context to this method
-
-  if (m_doPunchThrough) {
-    Barcode::PhysicsProcessCode process = 201;
-    // call punch-through simulation
-    const ISF::ISFParticleVector *someSecondaries = m_punchThroughTool->computePunchThroughParticles(isfp, *rngWrapper);
-    if (someSecondaries && !someSecondaries->empty()) {
-      //Record truth incident for created punch through particles
-      ISF::ISFTruthIncident truth( const_cast<ISF::ISFParticle&>(isfp),
-                                   *someSecondaries,
-                                   process,
-                                   isfp.nextGeoID(),  // inherits from the parent
-                                   ISF::fKillsPrimary);
-      m_truthRecordSvc->registerTruthIncident( truth, true );
-      for (auto *secondary : *someSecondaries) {
-        if (secondary->getTruthBinding()) {
-          secondaries.push_back(secondary);
-        }
-        else {
-          ATH_MSG_WARNING("Secondary particle created by PunchThroughTool not written out to truth.\n Parent (" << isfp << ")\n Secondary (" << *secondary <<")");
-          delete secondary;
-        }
-      }
-      delete someSecondaries;
-    }
-  }
-
 
   //Don't simulate particles with total energy below 10 MeV
   if(isfp.ekin() < 10) {
@@ -216,7 +190,7 @@ StatusCode ISF::FastCaloSimV2Tool::simulate(const ISF::ISFParticle& isfp, ISFPar
 
   TFCSExtrapolationState extrapol;
   m_FastCaloSimCaloExtrapolation->extrapolate(extrapol, &truth);
-  
+
   ATH_MSG_DEBUG(" particle: " << isfp.pdgCode() << " Ekin: " << isfp.ekin() << " position eta: " << particle_position.eta() << " direction eta: " << particle_direction.eta() << " position phi: " << particle_position.phi() << " direction phi: " << particle_direction.phi());
 
   //only simulate if extrapolation to calo surface succeeded
@@ -233,8 +207,37 @@ StatusCode ISF::FastCaloSimV2Tool::simulate(const ISF::ISFParticle& isfp, ISFPar
 
     //Now deposit all cell energies into the CaloCellContainer
     for(const auto& iter : simulstate.cells()) {
-      CaloCell* theCell = (CaloCell*)m_theContainer->findCell(iter.first->calo_hash());
+      CaloCell* theCell = (CaloCell*)m_theContainerPtr->findCell(iter.first->calo_hash());
       theCell->addEnergy(iter.second);
+    }
+
+    //now perform punch through
+    if (m_doPunchThrough) {
+      Barcode::PhysicsProcessCode process = 201;
+      // call punch-through simulation
+      const ISF::ISFParticleVector *someSecondaries = m_punchThroughTool->computePunchThroughParticles(isfp, simulstate, *rngWrapper);
+
+      if (someSecondaries && !someSecondaries->empty()) {
+        //Record truth incident for created punch through particles
+        ISF::ISFTruthIncident truth( const_cast<ISF::ISFParticle&>(isfp),
+                                     *someSecondaries,
+                                     process,
+                                     isfp.nextGeoID(),  // inherits from the parent
+                                     ISF::fKillsPrimary);
+
+        m_truthRecordSvc->registerTruthIncident( truth, true );
+
+        for (auto *secondary : *someSecondaries) {
+          if (secondary->getTruthBinding()) {
+            secondaries.push_back(secondary);
+          }
+          else {
+            ATH_MSG_WARNING("Secondary particle created by PunchThroughTool not written out to truth.\n Parent (" << isfp << ")\n Secondary (" << *secondary <<")");
+            delete secondary;
+          }
+        }
+        delete someSecondaries;
+      }
     }
     simulstate.DoAuxInfoCleanup();
   }

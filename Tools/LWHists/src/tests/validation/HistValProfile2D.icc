@@ -1,10 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
+
+#include <utility>
 
 
 //____________________________________________________________________
-HistValProfile2D::HistValProfile2D( const std::string& name, const std::string& title,
+HistValProfile2D::HistValProfile2D( bool trigger_conversion_all,
+                                    const std::string& name, const std::string& title,
                                     int nbinsx, const double& xmin, const double& xmax,
                                     int nbinsy, const double& ymin, const double& ymax,
                                     const double& profparmin, const double& profparmax)
@@ -12,23 +15,24 @@ HistValProfile2D::HistValProfile2D( const std::string& name, const std::string& 
 {
   m_h1 = new TProfile2D(name.c_str(),title.c_str(),nbinsx,xmin,xmax,nbinsy,ymin,ymax,profparmin, profparmax,profile_test_erroroption());
   m_h2 = TProfile2D_LW::create(name.c_str(),title.c_str(),nbinsx,xmin,xmax,nbinsy,ymin,ymax,profparmin, profparmax,profile_test_erroroption());
-  compareMetaData();
+  HistValProfile2D::compareMetaData();
 
-  if (HistVal_trigger_conversion_all)
+  if (trigger_conversion_all)
     triggerConversionToROOTHist();
 }
 
 //____________________________________________________________________
-HistValProfile2D::HistValProfile2D( const std::string& name, const std::string& title,
+HistValProfile2D::HistValProfile2D( bool trigger_conversion_all,
+                                    const std::string& name, const std::string& title,
                                     int nbinsx, const double* xbins,
                                     int nbinsy, const double* ybins)
   : HistValBase()
 {
   m_h1 = new TProfile2D(name.c_str(),title.c_str(),nbinsx,xbins,nbinsy,ybins,profile_test_erroroption());
   m_h2 = TProfile2D_LW::create(name.c_str(),title.c_str(),nbinsx,xbins,nbinsy,ybins,profile_test_erroroption());
-  compareMetaData();
+  HistValProfile2D::compareMetaData();
 
-  if (HistVal_trigger_conversion_all)
+  if (trigger_conversion_all)
     triggerConversionToROOTHist();
 }
 
@@ -43,13 +47,13 @@ HistValProfile2D::~HistValProfile2D()
 //____________________________________________________________________
 unsigned HistValProfile2D::getXAxis_NBins() const
 {
-  return m_h1->GetXaxis()->GetNbins();
+  return std::as_const(*m_h1).GetXaxis()->GetNbins();
 }
 
 //____________________________________________________________________
 unsigned HistValProfile2D::getYAxis_NBins() const
 {
-  return m_h1->GetYaxis()->GetNbins();
+  return std::as_const(*m_h1).GetYaxis()->GetNbins();
 }
 
 //____________________________________________________________________
@@ -157,13 +161,13 @@ void HistValProfile2D::compareBinContents() const
 }
 
 //____________________________________________________________________
-void HistValProfile2D::compareMetaData() const
+void HistValProfile2D::compareMetaData()
 {
   HistValFunctions::compareMetaData(m_h1, m_h2);
 }
 
 //____________________________________________________________________
-void HistValProfile2D::compareTH1s() const
+void HistValProfile2D::compareTH1s()
 {
   std::string name1(m_h1->GetName());
   TH1 * th1_gen(0);
@@ -230,7 +234,7 @@ void HistValProfile2D::compareTH1s() const
 }
 
 //____________________________________________________________________
-void HistValProfile2D::compareFastLoop() const
+void HistValProfile2D::compareFastLoop()
 {
 }
 

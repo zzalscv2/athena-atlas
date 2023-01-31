@@ -224,7 +224,7 @@ namespace {
          result = prefix;
          // Remove a possible trailing underscore from the name:
          if( result[ result.size() - 1 ] == '_' ) {
-            result = result.substr( 0, prefix.size() - 1 );
+            result.resize( prefix.size() - 1 );
          }
          // Return this variable name if it's not been used yet:
          if( varnames.find( result ) == varnames.end() ) {
@@ -244,7 +244,7 @@ namespace {
       result = objectName;
       // Remove a posible "D3PDObject" from the name:
       if( result.find( "D3PDObject" ) == result.size() - 10 ) {
-         result = result.substr( 0, result.size() - 10 );
+         result.resize( result.size() - 10 );
       }
       // Turn the string into all lower case:
       boost::algorithm::to_lower( result );

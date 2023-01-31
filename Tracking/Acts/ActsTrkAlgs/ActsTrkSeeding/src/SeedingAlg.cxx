@@ -11,7 +11,7 @@
 #include "Acts/Seeding/BinFinder.hpp"
 #include "Acts/Seeding/BinnedSPGroup.hpp"
 #include "Acts/Seeding/SeedFilter.hpp"
-#include "Acts/Seeding/Seedfinder.hpp"
+#include "Acts/Seeding/SeedFinder.hpp"
 
 #include "TrkSpacePoint/SpacePointCollection.h"
 #include "AthenaMonitoringKernel/Monitored.h"

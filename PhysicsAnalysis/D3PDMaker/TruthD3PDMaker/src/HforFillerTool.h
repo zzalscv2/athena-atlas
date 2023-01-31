@@ -1,7 +1,7 @@
 // -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -24,11 +24,11 @@ namespace D3PD {
 
     HforFillerTool (const std::string& type, const std::string& name, const IInterface* parent);
 
-    StatusCode initialize();
+    virtual StatusCode initialize() override;
 
-    virtual StatusCode book();
+    virtual StatusCode book() final;
 
-    virtual StatusCode fill();
+    virtual StatusCode fill() override;
 
 
   private:

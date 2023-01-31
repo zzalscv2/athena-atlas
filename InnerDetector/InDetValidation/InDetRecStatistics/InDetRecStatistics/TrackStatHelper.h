@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -20,7 +20,6 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
-#include "TrkToolInterfaces/IPRDtoTrackMapTool.h"
 #include "TrkTruthData/TrackTruthCollection.h"
 
 #include <vector>
@@ -140,7 +139,6 @@ namespace InDet {
     /** Adds hit, track and matching information for each event.  Called at each event*/
     void     addEvent   (const TrackCollection *, 
 			       std::vector<const Trk::Track *> &, 
-                               Trk::PRDtoTrackMap *prd_to_track_map,
 			       const std::vector <std::pair<HepMC::ConstGenParticlePtr,int> > &,   
 			       const TrackTruthCollection *, 
 			       const AtlasDetectorID * const, 
@@ -275,14 +273,10 @@ namespace InDet {
     // kNumberOfPixelHits, which is used to get counts for some denominators.
     enum ETrackSummaryTypes {
         kNumberOfInnermostPixelLayerHits,
-        kNumberOfInnermostPixelLayerSharedHits,
-        kNumberOfInnermostPixelLayerOutliers,
         kNumberOfPixelHits,
-        kNumberOfPixelSharedHits,
         kNumberOfPixelHoles,
         kNumberOfGangedPixels,
         kNumberOfSCTHits,
-        kNumberOfSCTSharedHits,
         kNumberOfSCTHoles,
         kNumberOfSCTDoubleHoles,
         kNumberOfTRTHits,

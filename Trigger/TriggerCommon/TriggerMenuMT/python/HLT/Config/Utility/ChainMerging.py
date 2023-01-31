@@ -1,11 +1,11 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.Utility.MenuAlignmentTools import get_alignment_group_ordering as getAlignmentGroupOrdering
-from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuSequence, RecoFragmentsPool
+from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuSequence, RecoFragmentsPool, EmptyMenuSequenceCA
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
-from AthenaConfiguration.ComponentFactory import isRun3Cfg
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 from TrigCompositeUtils.TrigCompositeUtils import legName
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
@@ -21,7 +21,7 @@ def mergeChainDefs(listOfChainDefs, chainDict):
     #one for each part in the chain
     
     # protect against serial merging in the signature code
-    if isRun3Cfg():
+    if isComponentAccumulatorCfg():
         try:           
             for chainPartConfig in listOfChainDefs:
                 if any ([ "_MissingCA" in step.name for step in chainPartConfig.steps]):
@@ -155,10 +155,15 @@ def getEmptySeqName(stepName, chain_index, step_number, alignGroup):
     return seqName
 
 def EmptyMenuSequenceCfg(flags, name):
-    return EmptyMenuSequence(name)
+    # to clean up
+    if isComponentAccumulatorCfg():
+        return EmptyMenuSequenceCA(name)
+    else:
+        return EmptyMenuSequence(name)
+    
 
 def getEmptyMenuSequence(flags, name):
-    if isRun3Cfg():
+    if isComponentAccumulatorCfg():
         return EmptyMenuSequenceCfg(flags, name)
     else:
         return RecoFragmentsPool.retrieve(EmptyMenuSequenceCfg, flags=flags, name=name)                

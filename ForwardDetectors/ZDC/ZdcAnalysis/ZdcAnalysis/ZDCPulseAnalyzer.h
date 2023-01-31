@@ -89,6 +89,11 @@ private:
   float m_peak2ndDerivMinRepassLG;
   float m_peak2ndDerivMinRepassHG;
 
+  // Gain factors for low gain and high gain
+  //
+  float m_gainFactorHG;
+  float m_gainFactorLG;
+
   // Uncertainties on the ADC values due to noise
   //
   float m_noiseSigHG;
@@ -356,6 +361,8 @@ public:
     m_noiseSigHG = noiseSigHG;
     m_noiseSigLG = noiseSigLG;
   }
+
+  void SetGainFactorsHGLG(float gainFactorHG, float gainFactorLG); 
 
   void SetFitMinMaxAmp(float minAmpHG, float minAmpLG, float maxAmpHG, float maxAmpLG);
 

@@ -55,7 +55,7 @@ PFNeutralFlowElementCreatorAlgorithm::createNeutralFlowElement(
 {
 
   for (unsigned int iCluster = 0; iCluster < energyFlowCaloObject.nClusters(); ++iCluster){
-    eflowRecCluster* thisEfRecCluster = energyFlowCaloObject.efRecCluster(iCluster);
+    const eflowRecCluster* thisEfRecCluster = energyFlowCaloObject.efRecCluster(iCluster);
     
     /* Skip empty clusters (presumably subtraction remnants) */
     const CaloClusterCellLink* theCellLink = energyFlowCaloObject.efRecCluster(iCluster)->getCluster()->getCellLinks();
@@ -83,10 +83,10 @@ PFNeutralFlowElementCreatorAlgorithm::createNeutralFlowElement(
 
     std::vector<ElementLink<xAOD::IParticleContainer>> theClusters;
     if (theSisterClusterLink.isValid()){
-      theClusters.emplace_back(ElementLink<xAOD::IParticleContainer>(theSisterClusterLink));
+      theClusters.emplace_back(theSisterClusterLink);
     }
     else{
-      theClusters.emplace_back(ElementLink<xAOD::IParticleContainer>(theOriginalClusterLink));
+      theClusters.emplace_back(theOriginalClusterLink);
     }
     thisFE->setOtherObjectLinks(theClusters);
 

@@ -30,7 +30,7 @@ if( NOT XAOD_STANDALONE )
     atlas_add_component( InDetSecVertexValidation
                          src/*.cxx src/*.h
                          src/components/*.cxx
-                         LINK_LIBRARIES ${extra_libs} GaudiKernel xAODTracking AthenaBaseComps AsgTools InDetSecVertexValidationLib )
+                         LINK_LIBRARIES ${extra_libs} GaudiKernel xAODTracking AthenaBaseComps AsgTools InDetSecVertexValidationLib AthenaMonitoringLib TrkValHistUtils )
 endif()
 
 # Install files from the package:
@@ -40,6 +40,7 @@ if( XAOD_STANDALONE )
     atlas_add_executable( SecVertexTruthMatchTest
                       util/SecVertexTruthMatchTest.cxx
                       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                      LINK_LIBRARIES InDetSecVertexValidationLib xAODTracking xAODEventInfo xAODRootAccess ${ROOT_LIBRARIES} ${extra_libs} )
+                      LINK_LIBRARIES InDetSecVertexValidationLib xAODTracking xAODEventInfo xAODRootAccess AthenaMonitoringLib TrkValHistUtils ${ROOT_LIBRARIES} ${extra_libs} )
 endif()
 
+atlas_install_python_modules(python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8})

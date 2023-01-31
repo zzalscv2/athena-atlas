@@ -1,33 +1,37 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
+
+#include <utility>
 
 
 //____________________________________________________________________
-HistValProfile::HistValProfile( const std::string& name, const std::string& title,
+HistValProfile::HistValProfile( bool trigger_conversion_all,
+                                const std::string& name, const std::string& title,
                                 int nbins, const double& xmin, const double& xmax,
                                 const double& profparmin, const double& profparmax )
   : HistValBase()
 {
   m_h1 = new TProfile(name.c_str(),title.c_str(),nbins,xmin,xmax,profparmin,profparmax,profile_test_erroroption());
   m_h2 = TProfile_LW::create(name.c_str(),title.c_str(),nbins,xmin,xmax,profparmin,profparmax,profile_test_erroroption());
-  compareMetaData();
+  HistValProfile::compareMetaData();
 
-  if (HistVal_trigger_conversion_all)
+  if (trigger_conversion_all)
     triggerConversionToROOTHist();
 }
 
 
 //____________________________________________________________________
 template <class TFloat>
-HistValProfile::HistValProfile( const std::string& name, const std::string& title,
+HistValProfile::HistValProfile( bool trigger_conversion_all,
+                                const std::string& name, const std::string& title,
                                 int nbins, const TFloat* xbins )
   : HistValBase()
 {
   m_h1 = new TProfile(name.c_str(),title.c_str(),nbins,xbins,profile_test_erroroption());
   m_h2 = TProfile_LW::create(name.c_str(),title.c_str(),nbins,xbins,profile_test_erroroption());
-  compareMetaData();
-  if (HistVal_trigger_conversion_all)
+  HistValProfile::compareMetaData();
+  if (trigger_conversion_all)
     triggerConversionToROOTHist();
 }
 
@@ -42,13 +46,13 @@ HistValProfile::~HistValProfile()
 //____________________________________________________________________
 unsigned HistValProfile::getXAxis_NBins() const
 {
-  return m_h1->GetXaxis()->GetNbins();
+  return std::as_const(*m_h1).GetXaxis()->GetNbins();
 }
 
 //____________________________________________________________________
 unsigned HistValProfile::getYAxis_NBins() const
 {
-  return m_h1->GetYaxis()->GetNbins();
+  return std::as_const(*m_h1).GetYaxis()->GetNbins();
 }
 
 //____________________________________________________________________
@@ -155,13 +159,13 @@ void HistValProfile::compareBinContents() const
 }
 
 //____________________________________________________________________
-void HistValProfile::compareMetaData() const
+void HistValProfile::compareMetaData()
 {
   HistValFunctions::compareMetaData(m_h1, m_h2);
 }
 
 //____________________________________________________________________
-void HistValProfile::compareTH1s() const
+void HistValProfile::compareTH1s()
 {
   if (converted())
     {
@@ -235,7 +239,7 @@ void HistValProfile::compareTH1s() const
 }
 
 //____________________________________________________________________
-void HistValProfile::compareFastLoop() const
+void HistValProfile::compareFastLoop()
 {
 }
 

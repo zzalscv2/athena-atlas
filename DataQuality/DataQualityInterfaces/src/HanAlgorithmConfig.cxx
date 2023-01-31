@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -16,6 +16,7 @@
 #include "DataQualityInterfaces/HanConfigAlgLimit.h"
 #include "DataQualityInterfaces/HanConfigAlgPar.h"
 #include "DataQualityInterfaces/HanConfigAssessor.h"
+#include "DataQualityInterfaces/HanConfigParMap.h"
 #include "DataQualityInterfaces/HanUtils.h"
 
 
@@ -35,17 +36,19 @@ HanAlgorithmConfig( const HanConfigAssessor& hca, TFile* config )
 
 HanAlgorithmConfig::
 HanAlgorithmConfig( TObject* reference, 
-		    const std::map< std::string, double >& parameters,
-		    const std::map< std::string, double >& greenThresholds,
-		    const std::map< std::string, double >& redThresholds,
-		    const HanConfigAssessor* hca)
+                    const std::map< std::string, double >& parameters,
+                    const std::map< std::string, std::string>& stringParameters,
+                    const std::map< std::string, double >& greenThresholds,
+                    const std::map< std::string, double >& redThresholds,
+                    const HanConfigAssessor* hca)
     : m_file(0)
     , m_ref(reference)
-    , m_pars(parameters)
-    , m_grthr(greenThresholds)
-    , m_rdthr(redThresholds)
     , m_hca(hca)
 {
+  m_parameters = parameters;
+  m_generic_parameters = stringParameters;
+  m_green_thresholds = greenThresholds;
+  m_red_thresholds = redThresholds;
 }
 
 HanAlgorithmConfig::
@@ -75,30 +78,6 @@ getReference() const
 }
 
 
-const std::map< std::string, double >&
-HanAlgorithmConfig::
-getParameters() const
-{
-  return m_pars;
-}
-
-
-const std::map< std::string, double >&
-HanAlgorithmConfig::
-getGreenThresholds() const
-{
-  return m_grthr;
-}
-
-
-const std::map< std::string, double >&
-HanAlgorithmConfig::
-getRedThresholds() const
-{
-  return m_rdthr;
-}
-
-
 // *********************************************************************
 // Protected Methods
 // *********************************************************************
@@ -118,7 +97,12 @@ CopyAlgConfig( const HanConfigAssessor& hca )
   while( (par = dynamic_cast<HanConfigAlgPar*>( nextPar() )) != 0 ) {
     parName = std::string( par->GetName() );
     ParsVal_t parMapVal( parName, par->GetValue() );
-    m_pars.insert( parMapVal );
+    m_parameters.insert( parMapVal );
+  }
+  TIter nextStrPar( hca.GetAllAlgStrPars() );
+  HanConfigParMap* strPar;
+  while( (strPar = dynamic_cast<HanConfigParMap*>( nextStrPar() )) != 0 ) {
+    m_generic_parameters.emplace( strPar->GetName(), strPar->GetValue() );
   }
   
   std::string limName;
@@ -127,9 +111,9 @@ CopyAlgConfig( const HanConfigAssessor& hca )
   while( (lim = dynamic_cast<HanConfigAlgLimit*>( nextLim() )) != 0 ) {
     limName = std::string( lim->GetName() );
     ThrVal_t greenMapVal( limName, lim->GetGreen() );
-    m_grthr.insert( greenMapVal );
+    m_green_thresholds.insert( greenMapVal );
     ThrVal_t redMapVal( limName, lim->GetRed() );
-    m_rdthr.insert( redMapVal );
+    m_red_thresholds.insert( redMapVal );
   }
   
   std::string refName( hca.GetAlgRefName() );

@@ -44,10 +44,10 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,inputFlags):
 
 
     # adding BadChan masker private tool
-    from AthenaConfiguration.ComponentFactory import isRun3Cfg
+    from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
 
-    if isRun3Cfg():
+    if isComponentAccumulatorCfg():
        if inputFlags.DQ.Environment == 'online':
           isOnline=True
     else:
@@ -56,7 +56,7 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,inputFlags):
           isOnline=True
 
     isOnline=False #needed later
-    if isRun3Cfg() :
+    if isComponentAccumulatorCfg() :
         if inputFlags.DQ.Environment == 'online':
             isOnline=True
     else :
@@ -187,7 +187,7 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,inputFlags):
 
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    if isRun3Cfg():
+    if isComponentAccumulatorCfg():
         cfg=ComponentAccumulator()
         cfg.merge(helper.result())
         return cfg

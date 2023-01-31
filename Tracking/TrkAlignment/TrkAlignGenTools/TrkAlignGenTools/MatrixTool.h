@@ -213,6 +213,7 @@ namespace Trk {
 
     bool m_AlignIBLbutNotPixel;
     bool m_AlignPixelbutNotIBL;
+    bool m_DeactivateSCT_ECA_LastDisk;
 
     bool m_Remove_Pixel_Tx;
     bool m_Remove_Pixel_Ty;

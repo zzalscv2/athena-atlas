@@ -8,10 +8,10 @@ from AthenaKernel.EventIdOverrideConfig import getMinMaxRunNumbers
 folderName = "/Digitization/Parameters"
 
 
-def writeDigitizationMetadata(ConfigFlags):
+def writeDigitizationMetadata(flags):
     from IOVDbMetaDataTools import ParameterDbFiller
     dbFiller = ParameterDbFiller.ParameterDbFiller()
-    myRunNumber, myEndRunNumber = getMinMaxRunNumbers(ConfigFlags)
+    myRunNumber, myEndRunNumber = getMinMaxRunNumbers(flags)
     logDigitizationWriteMetadata = logging.getLogger( 'DigitizationParametersConfig' )
     logDigitizationWriteMetadata.debug('ParameterDbFiller BeginRun = %s', str(myRunNumber) )
     dbFiller.setBeginRun(myRunNumber)
@@ -35,8 +35,8 @@ def writeDigitizationMetadata(ConfigFlags):
                       }
     logDigitizationWriteMetadata.info('Filling Digitization MetaData')
     for testKey, testFlag in digitMetaDataKeys.items():
-        if ConfigFlags.hasFlag(testFlag):
-            testValue = ConfigFlags._get(testFlag)
+        if flags.hasFlag(testFlag):
+            testValue = flags._get(testFlag)
             if isinstance(testValue, FlagEnum):
                 testValue = testValue.value
             if not isinstance(testValue, str):
@@ -44,19 +44,19 @@ def writeDigitizationMetadata(ConfigFlags):
             dbFiller.addDigitParam(testKey, testValue)
             logDigitizationWriteMetadata.info('DigitizationMetaData: setting "%s" to be %s', testKey, testValue)
         else :
-            logDigitizationWriteMetadata.debug('DigitizationMetaData:  ConfigFlags.%s is not available.', testFlag)
+            logDigitizationWriteMetadata.debug('DigitizationMetaData: ConfigFlags.%s is not available.', testFlag)
     del digitMetaDataKeys
 
     # doMuonNoise no actual flag in new-style
     testKey = "doMuonNoise"
-    testValue = str(not ConfigFlags.Common.isOverlay) # Hardcoded for now
+    testValue = str(not flags.Common.isOverlay) # Hardcoded for now
     dbFiller.addDigitParam(testKey, testValue)
     logDigitizationWriteMetadata.info('DigitizationMetaData: setting "%s" to be %s', testKey, testValue)
 
     # Bunch Structure - hardcoded for now
     testKey = "BeamIntensityPattern"
-    if ConfigFlags.Digitization.PileUp:
-        testValue = str(ConfigFlags.Digitization.PU.BeamIntensityPattern)
+    if flags.Digitization.PileUp:
+        testValue = str(flags.Digitization.PU.BeamIntensityPattern)
     else:
         testValue = "None"
     logDigitizationWriteMetadata.info('DigitizationMetaData: setting "%s" to be %s', testKey, testValue)
@@ -64,13 +64,13 @@ def writeDigitizationMetadata(ConfigFlags):
 
     # intraTrainBunchSpacing - hardcoded for now
     testKey = "intraTrainBunchSpacing"
-    testValue = str(25) # This should be either be determined from the BeamIntensityPattern or set as ConfigFlags.Beam.BunchSpacing
+    testValue = str(25) # This should be either be determined from the BeamIntensityPattern or set as flags.Beam.BunchSpacing
     dbFiller.addDigitParam(testKey, testValue)
     logDigitizationWriteMetadata.info('DigitizationMetaData: setting "%s" to be %s', testKey, testValue)
 
     ## Digitized detector flags: add each enabled detector to the DigitizedDetectors list - might be better to determine this from the OutputStream or CA-itself? Possibly redundant info though?
     from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors
-    digiDets = getEnabledDetectors(ConfigFlags)
+    digiDets = ['Truth'] + getEnabledDetectors(flags)
     logDigitizationWriteMetadata.info("Setting 'DigitizedDetectors' = %s" , repr(digiDets))
     dbFiller.addDigitParam('DigitizedDetectors', repr(digiDets))
 
@@ -79,27 +79,27 @@ def writeDigitizationMetadata(ConfigFlags):
     #-------------------------------------------------
     dbFiller.genDigitDb()
 
-    return writeDigitizationParameters(ConfigFlags)
+    return writeDigitizationParameters(flags)
 
 
-def readDigitizationParameters(ConfigFlags):
+def readDigitizationParameters(flags):
     """Read digitization parameters metadata"""
     from IOVDbSvc.IOVDbSvcConfig import addFolders
-    if ConfigFlags.Common.ProductionStep not in [ProductionStep.Digitization, ProductionStep.PileUpPresampling, ProductionStep.Overlay, ProductionStep.FastChain]:
-        return addFolders(ConfigFlags, folderName, className="AthenaAttributeList", tag="HEAD")
+    if flags.Common.ProductionStep not in [ProductionStep.Digitization, ProductionStep.PileUpPresampling, ProductionStep.Overlay, ProductionStep.FastChain]:
+        return addFolders(flags, folderName, className="AthenaAttributeList", tag="HEAD")
 
     # Here we are in a job which runs digitization, so the
     # /Digitization/Parameters metadata is not present in the
     # input file and will be created during the job
-    return addFolders(ConfigFlags, folderName, detDb="DigitParams.db", db="DIGPARAM", className="AthenaAttributeList")
+    return addFolders(flags, folderName, detDb="DigitParams.db", db="DIGPARAM", className="AthenaAttributeList")
 
 
-def writeDigitizationParameters(ConfigFlags):
+def writeDigitizationParameters(flags):
     """Write digitization parameters metadata"""
-    if ConfigFlags.Overlay.DataOverlay:
+    if flags.Overlay.DataOverlay:
         return ComponentAccumulator()
 
     from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg, addFolders
-    acc = IOVDbSvcCfg(ConfigFlags, FoldersToMetaData=[folderName])
-    acc.merge(addFolders(ConfigFlags, folderName, detDb="DigitParams.db", db="DIGPARAM"))
+    acc = IOVDbSvcCfg(flags, FoldersToMetaData=[folderName])
+    acc.merge(addFolders(flags, folderName, detDb="DigitParams.db", db="DIGPARAM"))
     return acc

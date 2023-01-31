@@ -16,7 +16,7 @@ from AtlasGeoModel import GeoModelInit
 # Identifier 
 ToolSvc = Service("ToolSvc") 
 include( "LArIdCnv/LArIdCnv_joboptions.py" )
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+include( "CaloConditions/CaloConditions_jobOptions.py" )
 include( "IdDictDetDescrCnv/IdDictDetDescrCnv_joboptions.py" )
 #include( "LArRawConditions/LArIdMap_ATLAS_jobOptions.py" )
 

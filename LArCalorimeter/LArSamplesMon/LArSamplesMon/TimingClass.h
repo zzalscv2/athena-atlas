@@ -19,13 +19,14 @@
 #include "TLatex.h"
 
 #include "LArCafJobs/CaloId.h"
-
+#include "CxxUtils/checker_macros.h"
 
 namespace LArSamples {
  
   class Interface;
   class AbsShapeErrorGetter;
-  class TimingClass  
+
+  class ATLAS_NOT_THREAD_SAFE TimingClass  
   { 
   public:
     

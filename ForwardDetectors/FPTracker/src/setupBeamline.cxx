@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPTracker/setupBeamline.h"
@@ -33,7 +33,7 @@ namespace FPTracker{
   {
     
     Magnet::Container_t   magnets    = magnetSet(configData, side, magver, magfile);
-    Plane::ConstPtr_t     endPlane( new Plane(configData.endMarker, side) );
+    Plane::Ptr_t          endPlane( new Plane(configData.endMarker, side) );
     CollimatorData  collimatorData(configData);
     Collimator::Container_t collimators = collSet(collimatorData, side);
 
@@ -51,7 +51,7 @@ namespace FPTracker{
 
     elements.push_front
       (
-       EmptySpaceElement::ConstPtr_t(
+       EmptySpaceElement::Ptr_t(
 				     new EmptySpaceElement( 
 							   0., 
 							   (*current)->frontFace(),
@@ -66,7 +66,7 @@ namespace FPTracker{
       IBeamElement::ListIter_t previous = current;
       --previous;
       elements.insert(current, 
-		      EmptySpaceElement::ConstPtr_t(
+		      EmptySpaceElement::Ptr_t(
 						    new  EmptySpaceElement(
 									   *previous, 
 									   *current

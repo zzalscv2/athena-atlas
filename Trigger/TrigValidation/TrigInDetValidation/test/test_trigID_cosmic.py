@@ -40,7 +40,6 @@ preexec_reco = [
   "InDetFlags.doR3LargeD0.set_Value_and_Lock(False)",
   "InDetFlags.doForwardTracks.set_Value_and_Lock(False)",
 ]
-preexec_aod = preexec_reco
 Input   = 'mc_cosmics'    # defined in TrigValTools/share/TrigValInputs.json  
 
 Jobs = [ ( "Offline",     " TIDAdata-run3-offline-cosmic.dat      -r Offline -o data-hists-offline.root" ) ]

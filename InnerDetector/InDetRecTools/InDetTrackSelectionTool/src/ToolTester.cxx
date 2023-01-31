@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes:
@@ -63,7 +63,6 @@ StatusCode InDet::ToolTester::execute(const EventContext &ctx) const {
     return StatusCode::FAILURE;
   }
 
-  Int_t numberOfGoodTracks = 0;
 
   // Loop over them:
   for ( const xAOD::TrackParticle* track : *tracks ) {
@@ -82,7 +81,6 @@ StatusCode InDet::ToolTester::execute(const EventContext &ctx) const {
     }
     // Select "good" tracks:
     if( ! m_selTool->accept( *track , foundVertex ) ) continue;
-    numberOfGoodTracks++;
     asg::AcceptData acceptxAOD = m_selTool->accept( *track, foundVertex );
     ATH_MSG_VERBOSE( " TrackParticle AcceptData to bool " << static_cast<bool>(acceptxAOD));
 

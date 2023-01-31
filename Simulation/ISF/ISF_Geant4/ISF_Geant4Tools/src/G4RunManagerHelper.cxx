@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////
@@ -36,13 +36,8 @@ StatusCode iGeant4::G4RunManagerHelper::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode iGeant4::G4RunManagerHelper::finalize()
-{
-  return StatusCode::SUCCESS;
-}
 
-
-G4AtlasRunManager* iGeant4::G4RunManagerHelper::g4RunManager() const
+G4AtlasRunManager* iGeant4::G4RunManagerHelper::g4RunManager ATLAS_NOT_THREAD_SAFE ()
 
 {
   if (m_g4RunManager) return m_g4RunManager;
@@ -56,7 +51,7 @@ G4AtlasRunManager* iGeant4::G4RunManagerHelper::g4RunManager() const
 }
 
 
-G4RunManager* iGeant4::G4RunManagerHelper::fastG4RunManager() const
+G4RunManager* iGeant4::G4RunManagerHelper::fastG4RunManager ATLAS_NOT_THREAD_SAFE ()
 
 {
   if (m_g4RunManager) return m_g4RunManager;

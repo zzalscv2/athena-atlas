@@ -18,6 +18,7 @@
 #include "CoolKernel/IObject.h"
 
 #include "TrigConfData/L1Menu.h"
+#include "TrigConfData/L1BunchGroupSet.h"
 #include "TrigT1Interfaces/ITrigT1MuonRecRoiTool.h"
 #include "TrigT1Result/MuCTPI_RDO.h"
 #include "TrigT1Result/MuCTPI_Phase1_RDO.h"
@@ -82,6 +83,7 @@ namespace TrigT1CTMonitoring {
           const EventContext& ctx ) const;
 
     void doMuctpi(const MuCTPI_Phase1_RDO* theMuCTPI_Phase1_RDO,
+                  const std::vector<uint>& bcidFirstInTrain,
                   //const RpcSectorLogicContainer* theRPCContainer,    //will be used later
                   //const Muon::TgcCoinDataContainer* theTGCContainer, //will be used later
           const EventContext& ctx ) const;
@@ -106,6 +108,8 @@ namespace TrigT1CTMonitoring {
 
     //ToolHandle< LVL1::ITrigT1MuonRecRoiTool > m_rpcRoiTool{ this, "RPCRecRoiTool", "LVL1::TrigT1RPCRecRoiTool/TrigT1RPCRecRoiTool", "RPC Rec Roi Tool"};
     //ToolHandle< LVL1::ITrigT1MuonRecRoiTool > m_tgcRoiTool{ this, "TGCRecRoiTool", "LVL1::TrigT1TGCRecRoiTool/TrigT1TGCRecRoiTool", "TGC Rec Roi Tool"};
+
+    SG::ReadCondHandleKey<TrigConf::L1BunchGroupSet> m_bgKey{this, "L1BunchGroup", "L1BunchGroup", "L1BunchGroupSet key name"};
 
     SG::ReadCondHandleKey<AthenaAttributeList> m_LBLBFolderInputKey{ this, "LBLBFolderInputKey", "/TRIGGER/LUMI/LBLB" };
     SG::ReadCondHandleKey<CondAttrListCollection> m_FILLSTATEFolderInputKey{ this, "FILLSTATEFolderInputKey", "/LHC/DCS/FILLSTATE" };

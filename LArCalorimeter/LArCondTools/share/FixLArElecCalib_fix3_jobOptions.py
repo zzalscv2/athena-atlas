@@ -66,7 +66,7 @@ include ("AtlasGeoModel/GeoModelInit.py")
 
 # Other LAr related
 include( "LArIdCnv/LArIdCnv_joboptions.py" )
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+include( "CaloConditions/CaloConditions_jobOptions.py" )
 include( "IdDictDetDescrCnv/IdDictDetDescrCnv_joboptions.py" )
 
 include( "LArConditionsCommon/LArConditionsCommon_MC_jobOptions.py" )

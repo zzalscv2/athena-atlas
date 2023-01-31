@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #file: TileCondToolConf.py
 #author: nils.gollub@cern.ch
@@ -33,6 +33,16 @@ def bookTileCalibCondAlg(calibData, proxy):
         condSequence += TileCalibFltCondAlg( name = calibCondAlg,
                                              ConditionsProxy = proxy,
                                              TileCalibData = calibData)
+
+def bookTileCondAlg(CondAlg, calibData, proxy):
+    from AthenaCommon.AlgSequence import AthSequencer
+    condSequence = AthSequencer("AthCondSeq")
+
+    condAlgName = calibData + 'CondAlg'
+    if not hasattr(condSequence, condAlgName):
+        condSequence += CondAlg( name = condAlgName,
+                                 ConditionsProxy = proxy,
+                                 TileCondData = calibData)
 
 #
 #____________________________________________________________________________
@@ -392,7 +402,8 @@ def getTileCondToolPulseShape(source = 'FILE', runType = 'PHY', name = 'TileCond
         else:
             raise(Exception("Invalid source: %s" %source ))
 
-    bookTileCalibCondAlg(pulseShape, pulseShapeProxy)
+    from TileConditions.TileConditionsConf import TileCondAlg_TilePulse_TileCalibDrawerFlt_ as TilePulseShapeCondAlg
+    bookTileCondAlg(TilePulseShapeCondAlg, pulseShape, pulseShapeProxy)
     tool = TileCondToolPulseShape(name, TilePulseShape = pulseShape)
 
     #=== set the arguments passed and return tool
@@ -430,7 +441,8 @@ def getTileCondToolMuRcvPulseShape(source = 'FILE', name = 'TileCondToolMuRcvPul
         else:
             raise(Exception("Invalid source: %s" %source ))
 
-    bookTileCalibCondAlg(muRcvPulseShape, muRcvPulseShapeProxy)
+    from TileConditions.TileConditionsConf import TileCondAlg_TilePulse_TileCalibDrawerFlt_ as TilePulseShapeCondAlg
+    bookTileCondAlg(TilePulseShapeCondAlg, muRcvPulseShape, muRcvPulseShapeProxy)
     tool = TileCondToolPulseShape(name, TilePulseShape = muRcvPulseShape)
 
     #=== set the arguments passed and return tool

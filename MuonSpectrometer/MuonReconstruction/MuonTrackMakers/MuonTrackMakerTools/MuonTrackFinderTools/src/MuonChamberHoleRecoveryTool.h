@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONCHAMBERHOLERECOVERYTOOL_H
@@ -147,10 +147,7 @@ namespace Muon {
             this, "CscRotCreator", "", "IMuonClusterOnTrackCreator for cscs"};
         ToolHandle<Muon::IMuonClusterOnTrackCreator> m_clusRotCreator{this, "ClusterRotCreator",
                                                                       "Muon::MuonClusterOnTrackCreator/MuonClusterOnTrackCreator",
-                                                                      "IMuonClusterOnTrackCreator for trigger hits"};
-        ToolHandle<Muon::IMuonClusterOnTrackCreator> m_mmClusRotCreator{this, "MmClusterRotCreator",
-                                                                        "",
-                                                                        "MMClusterOnTrackCreator for Micromegas hits"};
+                                                                      "IMuonClusterOnTrackCreator for RPC, TGC, NSW hits"};
         ToolHandle<Trk::IResidualPullCalculator> m_pullCalculator{this, "PullCalculator",
                                                                   "Trk::ResidualPullCalculator/ResidualPullCalculator"};
 

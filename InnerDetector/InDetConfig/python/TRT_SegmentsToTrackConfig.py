@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of TRT_SegmentsToTrack package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def TRT_SegmentsToTrackCfg(flags, name ='InDetTRT_SegmentsToTrack_Barrel', **kwargs):
+def TRT_Cosmics_SegmentsToTrackCfg(flags, name ='InDetTRT_Cosmics_SegmentsToTrack', **kwargs):
     acc = ComponentAccumulator()
 
     if "ExtrapolationTool" not in kwargs:
@@ -17,9 +17,9 @@ def TRT_SegmentsToTrackCfg(flags, name ='InDetTRT_SegmentsToTrack_Barrel', **kwa
             InDetTrackFitterCfg(flags)))
 
     if "SummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolSharedHitsCfg
+        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
         kwargs.setdefault("SummaryTool", acc.popToolsAndMerge(
-            InDetTrackSummaryToolSharedHitsCfg(flags)))
+            InDetTrackSummaryToolCfg(flags)))
 
     if "AssociationTool" not in kwargs \
        and "InputAssociationMapName" in kwargs \
@@ -27,7 +27,7 @@ def TRT_SegmentsToTrackCfg(flags, name ='InDetTRT_SegmentsToTrack_Barrel', **kwa
         from InDetConfig.InDetAssociationToolsConfig import InDetPRDtoTrackMapToolGangedPixelsCfg
         kwargs.setdefault("AssociationTool", acc.popToolsAndMerge( InDetPRDtoTrackMapToolGangedPixelsCfg(flags) ))
 
-    kwargs.setdefault("MinNHit", flags.InDet.Tracking.ActivePass.minTRTonly)
+    kwargs.setdefault("MinNHit", flags.InDet.Tracking.ActiveConfig.minTRTonly)
     kwargs.setdefault("OutlierRemoval", True)
     kwargs.setdefault("MaterialEffects", False)
 

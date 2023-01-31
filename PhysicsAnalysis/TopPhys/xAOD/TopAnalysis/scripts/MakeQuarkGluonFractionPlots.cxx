@@ -1,11 +1,11 @@
-//  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+//  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 //  ===============================================================================
 //   Macro to compute the gluon initiated jets fraction in your sample/selection
 //   To run the macro: .x MakeQuarkGluonFractionPlots.cxx+("config.txt")
 //  ===============================================================================
 #include "MakeQuarkGluonFractionPlots.h"
 
-MakeQuarkGluonFractionPlots::MakeQuarkGluonFractionPlots(std::string filename): 
+MakeQuarkGluonFractionPlots::MakeQuarkGluonFractionPlots(const std::string& filename): 
   m_doGluVsFlavour("lightC"),
   m_channel({}),
   m_detailedConfig(false),
@@ -165,7 +165,7 @@ MakeQuarkGluonFractionPlots::MakeQuarkGluonFractionPlots(std::string filename):
  * Drawing methods
  * *******************************************/
 // Draw histograms from a map
-void MakeQuarkGluonFractionPlots::drawhistos(std::map<std::string, TH2D*> histos, std::string psfilename){
+void MakeQuarkGluonFractionPlots::drawhistos(std::map<std::string, TH2D*> histos, const std::string& psfilename){
   TCanvas c1;
   c1.SetLogx();
   for (std::map<std::string, TH2D*>::iterator it = histos.begin() ; it != histos.end(); ++it){
@@ -177,7 +177,7 @@ void MakeQuarkGluonFractionPlots::drawhistos(std::map<std::string, TH2D*> histos
   }
 }
 // Draw histograms from a vector
-void MakeQuarkGluonFractionPlots::drawhistos(std::vector<TH2D*> histos, std::string psfilename){
+void MakeQuarkGluonFractionPlots::drawhistos(std::vector<TH2D*> histos, const std::string& psfilename){
   TCanvas c1;
   c1.SetLogx();
   for (std::vector<TH2D*>::iterator it = histos.begin() ; it != histos.end(); ++it){
@@ -189,7 +189,7 @@ void MakeQuarkGluonFractionPlots::drawhistos(std::vector<TH2D*> histos, std::str
   }
 }
 //Write histograms to file (nominal and uncertainties, if presents)
-void MakeQuarkGluonFractionPlots::createOutputFile(std::string filename, std::vector<TH2D*> histos, std::vector<TH2D*> histosUnc){
+void MakeQuarkGluonFractionPlots::createOutputFile(const std::string& filename, std::vector<TH2D*> histos, std::vector<TH2D*> histosUnc){
   TFile *fout   = new TFile(filename.c_str(),"recreate");
   fout->cd();
   for (std::vector<TH2D*>::iterator it = histos.begin() ; it != histos.end(); ++it) (*it)->Write();
@@ -200,7 +200,7 @@ void MakeQuarkGluonFractionPlots::createOutputFile(std::string filename, std::ve
 /**************************************************************
  * QGF Evaluation - related methods
  * ************************************************************/
-void MakeQuarkGluonFractionPlots::DumpToMap(std::map<std::string, TH2D*> &h_map, std::string filename, std::string channel, std::string folder, std::string keyname, bool createMap){
+void MakeQuarkGluonFractionPlots::DumpToMap(std::map<std::string, TH2D*> &h_map, std::string filename, const std::string& channel, const std::string& folder, const std::string& keyname, bool createMap){
   bool newMap = createMap;
   bool istxt = ( (filename.find(".txt") + 4 ) == filename.length());
   if(istxt){
@@ -218,7 +218,11 @@ void MakeQuarkGluonFractionPlots::DumpToMap(std::map<std::string, TH2D*> &h_map,
   else
     DumpFileToMap(h_map, filename, channel, folder, keyname, newMap);
 }
-void MakeQuarkGluonFractionPlots::DumpFileToMap(std::map<std::string, TH2D*> &h_map, std::string filename, std::string channel, std::string folder, std::string keyname, bool createMap){
+void MakeQuarkGluonFractionPlots::DumpFileToMap(std::map<std::string, TH2D*> &h_map, 
+                                                const std::string& filename, 
+                                                const std::string& channel, 
+                                                const std::string& folder, 
+                                                const std::string& keyname, bool createMap){
   TFile *f_in=TFile::Open(filename.c_str());
   std::string dirname = channel + "/"+folder;
   TDirectory* dir = f_in->GetDirectory(dirname.c_str());
@@ -251,7 +255,13 @@ void MakeQuarkGluonFractionPlots::DumpFileToMap(std::map<std::string, TH2D*> &h_
   }
 }
 //QGF File creation
-void MakeQuarkGluonFractionPlots::CreateQGFFile(std::string prename, std::map<std::string, TH2D*> h_input,std::vector< std::map<std::string, TH2D*> > h_input_1P,std::vector< std::map<std::string, TH2D*> > h_input_1PVar,std::vector< std::map<std::string, TH2D*> > h_input_2P,std::vector< std::map<std::string, TH2D*> > h_input_2PUp,std::vector< std::map<std::string, TH2D*> > h_input_2PDown){
+void MakeQuarkGluonFractionPlots::CreateQGFFile(const std::string& prename, 
+                                                const std::map<std::string, TH2D*>& h_input,
+                                                std::vector< std::map<std::string, TH2D*> > h_input_1P,
+                                                std::vector< std::map<std::string, TH2D*> > h_input_1PVar,
+                                                std::vector< std::map<std::string, TH2D*> > h_input_2P,
+                                                std::vector< std::map<std::string, TH2D*> > h_input_2PUp,
+                                                std::vector< std::map<std::string, TH2D*> > h_input_2PDown){
   //Since I am here, all histograms have already been retrieved!
   printf("\n %s\n Computing the gluon fraction in %s channel\n %s\n",std::string(75,'%').c_str(),prename.c_str(),std::string(75,'%').c_str());
   std::string outputName = prename + "_" + m_OutputFile;  
@@ -317,7 +327,7 @@ void MakeQuarkGluonFractionPlots::CreateQGFFile(std::string prename, std::map<st
   c1.Print((psfilename+"]").c_str());
 }
 // Evaluate Delta
-std::vector<TH2D*> MakeQuarkGluonFractionPlots::getDelta (std::vector<TH2D*> h_nom, std::vector<TH2D*> h_var, double scale, std::string prehistname){
+std::vector<TH2D*> MakeQuarkGluonFractionPlots::getDelta (std::vector<TH2D*> h_nom, std::vector<TH2D*> h_var, double scale, const std::string& prehistname){
   std::vector<TH2D*> QuarkGluonDiffFractionhistos;
   if(h_nom.size() != h_var.size()) std::cout<<"ERROR: Systematic variation don't have the same number of histograms!\n";
   std::string JetCollection = extractJetCollectionName((h_nom.at(0))->GetName());
@@ -337,7 +347,7 @@ std::vector<TH2D*> MakeQuarkGluonFractionPlots::getDelta (std::vector<TH2D*> h_n
 }
 
 //Evaluate uncertainty
-std::vector<TH2D*>  MakeQuarkGluonFractionPlots::evaluateQGFUncertaity(std::vector<std::vector<TH2D*> > f_1P, std::vector<std::vector<TH2D*> > f_2PUp, std::vector<std::vector<TH2D*> > f_2PDown, std::string channel){
+std::vector<TH2D*>  MakeQuarkGluonFractionPlots::evaluateQGFUncertaity(std::vector<std::vector<TH2D*> > f_1P, std::vector<std::vector<TH2D*> > f_2PUp, std::vector<std::vector<TH2D*> > f_2PDown, const std::string& channel){
   std::vector<TH2D*> histUnc;
   TH2D *h_tmp;
   std::string h_tmp_name;
@@ -479,7 +489,7 @@ std::vector<TH2D*>  MakeQuarkGluonFractionPlots::evaluateQGFUncertaity(std::vect
   return final_histos;
 }
 // Compute quark-gluon composition
-std::vector<TH2D*> MakeQuarkGluonFractionPlots::computeQuarkGluonFraction (std::map< std::string, TH2D* > inputhistos, std::string quarkflavour, std::string prename){
+std::vector<TH2D*> MakeQuarkGluonFractionPlots::computeQuarkGluonFraction (std::map< std::string, TH2D* > inputhistos, const std::string& quarkflavour, const std::string& prename){
   std::vector<TH2D*> QuarkGluonFractionhistos;
   std::string jetCollection = extractJetCollectionName(inputhistos.begin()->first);
   int njets =  (inputhistos.size()-6)/5; //FIXME this can be potentially wrong
@@ -552,7 +562,7 @@ std::vector<TH2D*> MakeQuarkGluonFractionPlots::computeQuarkGluonFraction (std::
   return QuarkGluonFractionhistos;
 }
 // Extract jet collection name
-std::string MakeQuarkGluonFractionPlots::extractJetCollectionName(std::string histoname){
+std::string MakeQuarkGluonFractionPlots::extractJetCollectionName(const std::string& histoname){
   if(histoname.find("EMPFlow")!=std::string::npos) return "AntiKt4EMPFlow";
   else if(histoname.find("EMTopo")!=std::string::npos) return "AntiKt4EMTopo";
   else if(histoname.find("LCTopo")!=std::string::npos) return "AntiKt4LCTopo";
@@ -615,24 +625,24 @@ void MakeQuarkGluonFractionPlots::printXMLConfigFile(){
   printf("\n %s\n Configuration Extracted\n %s\n",std::string(75,'=').c_str(),std::string(75,'=').c_str());
 }
 
-void MakeQuarkGluonFractionPlots::AbortXMLDecode(std::string value){
+void MakeQuarkGluonFractionPlots::AbortXMLDecode(const std::string& value){
   std::cout<<"ERROR! Unknown attribute: "<<value<<". Aborting!\n";
   abort();
 }
 
-bool MakeQuarkGluonFractionPlots::decodeFloat(TXMLEngine xml, XMLAttrPointer_t attr, std::string match, float &value){
+bool MakeQuarkGluonFractionPlots::decodeFloat(TXMLEngine xml, XMLAttrPointer_t attr, const std::string& match, float &value){
   if(strncmp(xml.GetAttrName(attr),match.c_str(),100)!=0) return false;
   value=std::stof(xml.GetAttrValue(attr));
   return true;
 }
 
-bool MakeQuarkGluonFractionPlots::decodeString(TXMLEngine xml, XMLAttrPointer_t attr, std::string match, std::string &value){
+bool MakeQuarkGluonFractionPlots::decodeString(TXMLEngine xml, XMLAttrPointer_t attr, const std::string& match, std::string &value){
   if(strncmp(xml.GetAttrName(attr),match.c_str(),100)!=0) return false;
   value=xml.GetAttrValue(attr);
   return true;
 }
 
-bool MakeQuarkGluonFractionPlots::decodeBool(TXMLEngine xml, XMLAttrPointer_t attr, std::string match, bool &value){
+bool MakeQuarkGluonFractionPlots::decodeBool(TXMLEngine xml, XMLAttrPointer_t attr, const std::string& match, bool &value){
   if(strncmp(xml.GetAttrName(attr),match.c_str(),100)!=0) return false;
   if(strncmp(xml.GetAttrValue(attr),"true",100)==0)
     value=true;
@@ -645,7 +655,7 @@ bool MakeQuarkGluonFractionPlots::decodeBool(TXMLEngine xml, XMLAttrPointer_t at
   return true;
 }
 
-void MakeQuarkGluonFractionPlots::readXMLConfigFile(std::string configfile){
+void MakeQuarkGluonFractionPlots::readXMLConfigFile(const std::string& configfile){
   TXMLEngine xml;
   // Now try to parse xml file
   XMLDocPointer_t xmldoc = xml.ParseFile(configfile.c_str());

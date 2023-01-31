@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODParentTwoChildrenFilter.h"
@@ -31,7 +31,6 @@ StatusCode xAODParentTwoChildrenFilter::filterEvent() {
     ATH_MSG_DEBUG(" ParentTwoChildrenFilter filtering for: "
                 << "Parent (" << m_PDGParent[0] << ") --> Child (" << m_PDGChild[0] << ") + antiparticle and "
                 << "Parent (" << m_PDGParent[0] << ") --> Child (" << m_PDGChild[1] << ") + antiparticle." );
-  int n_parents = 0;
   int N_Child[2][2];
   for (int i = 0; i < 2; i++) {
     N_Child[i][0] = 0;
@@ -51,7 +50,6 @@ StatusCode xAODParentTwoChildrenFilter::filterEvent() {
             int id = pitr->pdgId();
 	  if (std::abs(id) != m_PDGParent[0]) continue;
     	  if (pitr->pt() < m_PtMinParent) continue;
-   	   n_parents++;
 
 
      // Verify if we got a valid pointer and retrieve the number of daughters

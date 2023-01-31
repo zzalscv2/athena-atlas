@@ -456,7 +456,7 @@ namespace Rec{
           if(nth>1){                                    //-- Common case with full refit
              tmpVertex=m_fitSvc->fit(xAODwrk->tmpListTracks,curVrt.vertex,*state);
           } else if(nth==1){                            //-- Special case for 1-track vertex
-             xAOD::Vertex * tmpVertex=new (std::nothrow) xAOD::Vertex();
+             tmpVertex=new (std::nothrow) xAOD::Vertex();
              if(!tmpVertex)continue;
              tmpVertex->makePrivateStore();
              tmpVertex->setPosition(curVrt.vertex);

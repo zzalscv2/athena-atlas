@@ -21,7 +21,7 @@ ElectronCollectionName Electrons
 MuonCollectionName Muons
 JetCollectionName AntiKt4EMPFlowJets
 LargeJetCollectionName AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets 
-TauCollectionName TauJets
+TauCollectionName None #TauJets
 PhotonCollectionName Photons
 TrackJetCollectionName AntiKtVR30Rmax4Rmin02PV0TrackJets
 
@@ -101,9 +101,7 @@ DoLoose Data
 #IsAFII False
 
 ### B-tagging configuration
-BTaggingCaloJetWP DL1r:FixedCutBEff_77 DL1r:Continuous
-BTaggingCaloJetUncalibWP DL1dv00:FixedCutBEff_77
-BTaggingTrackJetWP DL1r:FixedCutBEff_77 DL1r:Continuous
+BTaggingCaloJetWP DL1dv01:FixedCutBEff_77 DL1dv01:Continuous
 # Example of how to remove systematics from b-tag EV
 
 # Saving bootstrapping weights
@@ -174,7 +172,7 @@ JET_N 25000 >= 3
 JET_N 25000 >= 4
 MET > 30000
 MWT > 30000
-RECO::KLFITTERRUN kElectron KLFitterBTaggingWP:DL1r:FixedCutBEff_77
+RECO::KLFITTERRUN kElectron KLFitterBTaggingWP:DL1dv01:FixedCutBEff_77
 #KLFITTER > -50.0
 EXAMPLEPLOTS
 #PRINT
@@ -185,10 +183,10 @@ SELECTION ejets_2022
 . ejets_basic
 SAVE
 
-SELECTION ejets_DL1r_2022
+SELECTION ejets_DL1dv01_2022
 . EL_2022
 . ejets_basic
-JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
+JET_N_BTAG DL1dv01:FixedCutBEff_77 >= 1
 SAVE
 
 SELECTION ejets_particle
@@ -213,7 +211,7 @@ JET_N 25000 >= 2
 JET_N 25000 >= 3
 JET_N 25000 >= 4
 MET+MWT > 60000
-RECO::KLFITTERRUN kMuon KLFitterBTaggingWP:DL1r:FixedCutBEff_77
+RECO::KLFITTERRUN kMuon KLFitterBTaggingWP:DL1dv01:FixedCutBEff_77
 #KLFITTER > -50.0
 EXAMPLEPLOTS
 #PRINT
@@ -224,10 +222,10 @@ SELECTION mujets_2022
 . mujets_basic
 SAVE
 
-SELECTION mujets_DL1r_2022
+SELECTION mujets_DL1dv01_2022
 . MU_2022
 . mujets_basic
-JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
+JET_N_BTAG DL1dv01:FixedCutBEff_77 >= 1
 SAVE
 
 SELECTION mujets_particle

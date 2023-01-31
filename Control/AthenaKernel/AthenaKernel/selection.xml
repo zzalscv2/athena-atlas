@@ -33,4 +33,5 @@
    <class name="MsgStream" />
    <function name="Athena::getMessageSvc"/>
 
+   <function name="ATHRNG::calculateSeedsPython"/>
 </lcgdict>

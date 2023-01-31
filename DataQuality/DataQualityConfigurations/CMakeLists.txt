@@ -71,7 +71,7 @@ foreach( hanfile collisions_run collisions_minutes10
    atlas_add_test( ${hanfile}_nocrash
       SOURCES test/check_valid_config.cxx
       INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
-      LINK_LIBRARIES DataQualityInterfaces
+      LINK_LIBRARIES CxxUtils DataQualityInterfaces
       ENVIRONMENT "HANCONFIGFILE=${outputFile};HISTFILE=${CMAKE_CURRENT_SOURCE_DIR}/../DataQualityInterfaces/share/Data.root;HISTFILEPATH=;OUTFILE=/dev/null"
       POST_EXEC_SCRIPT nopost.sh
       PROPERTIES TIMEOUT 300

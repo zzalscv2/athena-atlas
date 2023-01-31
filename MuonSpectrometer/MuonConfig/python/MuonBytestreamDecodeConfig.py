@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -255,6 +255,37 @@ def sTgcBytestreamDecodeCfg(flags, name="MuonsTgcRawDataProvider"):
 
     return acc
 
+def sTgcPadTriggerBytestreamDecodeCfg(flags, name="MuonsTgcPadTriggerRawDataProvider"):
+
+    acc = ComponentAccumulator()
+
+    # Make sure muon geometry is configured
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    acc.merge(MuonGeoModelCfg(flags))
+
+    # Setup the sTGC ROD decoder
+    Muon__PadTrig_ROD_Decoder = CompFactory.Muon.PadTrig_ROD_Decoder
+    STGCPadTriggerRodDecoder = Muon__PadTrig_ROD_Decoder(name = "sTgcPadTriggerROD_Decoder")
+
+
+    # Setup the RAW data provider tool
+    keyName = flags.Overlay.BkgPrefix + "sTGCPadTriggerRDO" if flags.Common.isOverlay else "sTGCPadTriggerRDO"
+    Muon__PadTrig_RawDataProviderToolMT = CompFactory.Muon.PadTrig_RawDataProviderToolMT
+    MuonsTgcPadTriggerRawDataProviderTool = Muon__PadTrig_RawDataProviderToolMT(name = "sTgcPadTriggerRawDataProviderTool",
+                                                                                Decoder = STGCPadTriggerRodDecoder,
+                                                                                RdoLocation = keyName)
+
+    acc.addPublicTool( MuonsTgcPadTriggerRawDataProviderTool ) # This should be removed, but now defined as PublicTool at MuFastSteering
+
+    # Setup the RAW data provider algorithm
+    Muon__sTgcPadTriggerRawDataProvider = CompFactory.Muon.sTgcPadTriggerRawDataProvider
+    sTgcPadTriggerRawDataProvider = Muon__sTgcPadTriggerRawDataProvider(name = name,
+                                                                        ProviderTool = MuonsTgcPadTriggerRawDataProviderTool )
+
+    acc.addEventAlgo(sTgcPadTriggerRawDataProvider, primary = True)
+
+    return acc
+
 def MmBytestreamDecodeCfg(flags, name="MmRawDataProvider"):
     acc = ComponentAccumulator()
 
@@ -332,6 +363,10 @@ def MuonByteStreamDecodersCfg(flags):
         stgcdecodingAcc = sTgcBytestreamDecodeCfg( flags ) 
         cfg.merge( stgcdecodingAcc )
 
+        # Schedule sTGC Pad Trigger data decoding
+        stgcpadtriggerdecodingAcc = sTgcPadTriggerBytestreamDecodeCfg( flags )
+        cfg.merge( stgcpadtriggerdecodingAcc )
+
     return cfg
 
 
@@ -339,22 +374,23 @@ if __name__=="__main__":
     # To run this, do e.g. 
     # python ../athena/MuonSpectrometer/MuonConfig/python/MuonBytestreamDecode.py
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
     # Set global tag by hand for now
-    ConfigFlags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2018-13"#"CONDBR2-BLKPA-2015-17"
-    ConfigFlags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"#"ATLAS-R2-2015-03-01-00"
+    flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2018-13"#"CONDBR2-BLKPA-2015-17"
+    flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"#"ATLAS-R2-2015-03-01-00"
 
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.lock()
+    flags.dump()
 
     from AthenaCommon.Logging import log 
 
     log.setLevel(DEBUG)
     log.info('About to setup Rpc Raw data decoding')
 
-    cfg = MuonByteStreamDecodersCfg(ConfigFlags)
+    cfg = MuonByteStreamDecodersCfg(flags)
 
     # Need to add POOL converter  - may be a better way of doing this?
     from AthenaCommon import CfgMgr

@@ -263,7 +263,6 @@ if InDetFlags.loadAssoTool():
     from InDetAssociationTools.InDetAssociationToolsConf import InDet__InDetPRD_AssociationToolGangedPixels
     InDetPrdAssociationTool_setup = InDet__InDetPRD_AssociationToolGangedPixels(name                           = "InDetPrdAssociationTool",
                                                                                 PixelClusterAmbiguitiesMapName = InDetKeys.GangedPixelMap(),
-                                                                                SetupCorrect                   = True,
                                                                                 addTRToutliers                 = True)
     # InDetPrdAssociationTool.OutputLevel = VERBOSE
     ToolSvc += InDetPrdAssociationTool
@@ -288,10 +287,9 @@ if InDetFlags.loadSummaryTool():
     InDetHoleSearchTool     = TrackingCommon.getInDetHoleSearchTool()
 
     #
-    # Configurable version of TrkTrackSummaryTool: no TRT_PID tool needed here (no shared hits)
+    # Configurable version of TrkTrackSummaryTool: no TRT_PID tool needed here
     #
     InDetTrackSummaryTool           = TrackingCommon.getInDetTrackSummaryTool()
-    InDetTrackSummaryToolSharedHits = TrackingCommon.getInDetTrackSummaryToolSharedHits()
 
 # ------------------------------------------------------------
 #

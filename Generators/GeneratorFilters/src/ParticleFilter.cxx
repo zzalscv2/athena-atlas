@@ -37,7 +37,7 @@ StatusCode ParticleFilter::filterEvent() {
             bool notSelfDecay = true;
             if (pitr->end_vertex()) {
               for (auto  child: *(pitr->end_vertex())) {
-                if ( child->pdg_id() == pitr->pdg_id() && HepMC::barcode(child)!=HepMC::barcode(pitr) && HepMC::barcode(child) < m_simBarcodeOffset) {
+                if ( child->pdg_id() == pitr->pdg_id() && HepMC::barcode(child)!=HepMC::barcode(pitr) && !HepMC::is_simulation_particle(child)) {
                   notSelfDecay = false;
                   break;
                 }

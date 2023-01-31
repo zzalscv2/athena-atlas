@@ -29,9 +29,6 @@ namespace Trk {
       simply for the eye */
   typedef BinnedArray< Layer> LayerArray;
   
-  /** Interface ID for ILayerArrayCreators*/  
-  static const InterfaceID IID_ILayerArrayCreator("ILayerArrayCreator", 1, 0);
-  
   /** @class ILayerArrayCreator
     Interface class ILayerArrayCreators
     It inherits from IAlgTool. The actual implementation of the AlgTool
@@ -45,11 +42,11 @@ namespace Trk {
   class ILayerArrayCreator : virtual public IAlgTool {
     
     public:
+    /// Creates the InterfaceID and interfaceID() method
+    DeclareInterfaceID(ILayerArrayCreator, 1, 0);
+
       /**Virtual destructor*/
       virtual ~ILayerArrayCreator(){}
-      
-      /** AlgTool and IAlgTool interface methods */
-      static const InterfaceID& interfaceID() { return IID_ILayerArrayCreator; }
 
       /** LayerArrayCreator interface method - for Barrel-like layers */
       virtual LayerArray* cylinderLayerArray(const std::vector< CylinderLayer* >& layers,

@@ -21,7 +21,9 @@ InDetPerfPlot_Hits::initializePlots() {
   ATH_MSG_WARNING("book histos");
 
   book(m_nInnerMostPixelHits, "nInnerMostPixelHits");
+  book(m_nInnerMostPixelEndcapHits, "nInnerMostPixelEndcapHits");
   book(m_nNextToInnerMostPixelHits, "nNextToInnerMostPixelHits");
+  book(m_nNextToInnerMostPixelEndcapHits, "nNextToInnerMostPixelEndcapHits");
   book(m_nPixelHits, "nPixelHits");
   book(m_nSCTHits, "nSCTHits");
   book(m_nTRTHits, "nTRTHits");
@@ -33,7 +35,9 @@ InDetPerfPlot_Hits::initializePlots() {
   book(m_nTRTHighThresholdHitsXe, "nTRTHighThresholdHitsXe");
   book(m_nTRTHighThresholdHitsAr, "nTRTHighThresholdHitsAr");
   book(m_nInnerMostPixelHits_vs_eta, "nInnerMostPixelHits_vs_eta");
+  book(m_nInnerMostPixelEndcapHits_vs_eta, "nInnerMostPixelEndcapHits_vs_eta");
   book(m_nNextToInnerMostPixelHits_vs_eta, "nNextToInnerMostPixelHits_vs_eta");
+  book(m_nNextToInnerMostPixelEndcapHits_vs_eta, "nNextToInnerMostPixelEndcapHits_vs_eta");
   book(m_nPixelHits_vs_eta, "nPixelHits_vs_eta");
   book(m_nSCTHits_vs_eta, "nSCTHits_vs_eta");
   book(m_nTRTHits_vs_eta, "nTRTHits_vs_eta");
@@ -45,7 +49,9 @@ InDetPerfPlot_Hits::initializePlots() {
   book(m_nTRTHighThresholdHitsXe_vs_eta, "nTRTHighThresholdHitsXe_vs_eta");
   book(m_nTRTHighThresholdHitsAr_vs_eta, "nTRTHighThresholdHitsAr_vs_eta");
   book(m_nInnerMostPixelHits_vs_phi, "nInnerMostPixelHits_vs_phi");
+  book(m_nInnerMostPixelEndcapHits_vs_phi, "nInnerMostPixelEndcapHits_vs_phi");
   book(m_nNextToInnerMostPixelHits_vs_phi, "nNextToInnerMostPixelHits_vs_phi");
+  book(m_nNextToInnerMostPixelEndcapHits_vs_phi, "nNextToInnerMostPixelEndcapHits_vs_phi");
   book(m_nPixelHits_vs_phi, "nPixelHits_vs_phi");
   book(m_nSCTHits_vs_phi, "nSCTHits_vs_phi");
   book(m_nTRTHits_vs_phi, "nTRTHits_vs_phi");
@@ -54,17 +60,22 @@ InDetPerfPlot_Hits::initializePlots() {
   book(m_nTRTHighThresholdHits_vs_phi, "nTRTHighThresholdHits_vs_phi");
 
   book(m_nInnerMostPixelSharedHits, "nInnerMostPixelSharedHits");
+  book(m_nInnerMostPixelSharedEndcapHits, "nInnerMostPixelSharedEndcapHits");
   book(m_nPixelSharedHits, "nPixelSharedHits");
   book(m_nSCTSharedHits, "nSCTSharedHits");
   book(m_nInnerMostPixelSharedHits_vs_eta, "nInnerMostPixelSharedHits_vs_eta");
+  book(m_nInnerMostPixelSharedEndcapHits_vs_eta, "nInnerMostPixelSharedEndcapHits_vs_eta");
   book(m_nPixelSharedHits_vs_eta, "nPixelSharedHits_vs_eta");
   book(m_nSCTSharedHits_vs_eta, "nSCTSharedHits_vs_eta");
   book(m_nInnerMostPixelSharedHits_vs_phi, "nInnerMostPixelSharedHits_vs_phi");
+  book(m_nInnerMostPixelSharedEndcapHits_vs_phi, "nInnerMostPixelSharedHits_vs_phi");
   book(m_nPixelSharedHits_vs_phi, "nPixelSharedHits_vs_phi");
   book(m_nSCTSharedHits_vs_phi, "nSCTSharedHits_vs_phi");
 
   book(m_nInnerMostPixelHits_vs_etaphi, "nInnerMostPixelHits_vs_etaphi");
+  book(m_nInnerMostPixelEndcapHits_vs_etaphi, "nInnerMostPixelEndcapHits_vs_etaphi");
   book(m_nNextToInnerMostPixelHits_vs_etaphi, "nNextToInnerMostPixelHits_vs_etaphi");
+  book(m_nNextToInnerMostPixelEndcapHits_vs_etaphi, "nNextToInnerMostPixelEndcapHits_vs_etaphi");
   book(m_nPixelHits_vs_etaphi, "nPixelHits_vs_etaphi");
   book(m_nPixelHoles_vs_etaphi, "nPixelHoles_vs_etaphi");
   book(m_nSCTHits_vs_etaphi, "nSCTHits_vs_etaphi");
@@ -74,7 +85,9 @@ InDetPerfPlot_Hits::initializePlots() {
 
   if (m_iDetailLevel >= 100){
     book(m_nInnerMostPixelOutliers, "nInnerMostPixelOutliers");
+    book(m_nInnerMostPixelEndcapOutliers, "nInnerMostPixelEndcapOutliers");
     book(m_nInnerMostPixelSplitHits, "nInnerMostPixelSplitHits");
+    book(m_nInnerMostPixelSplitEndcapHits, "nInnerMostPixelSplitEndcapHits");
     book(m_nExpectedInnerMostPixelHits, "nExpectedInnerMostPixelHits");
     book(m_nExpectedNextToInnerMostPixelHits, "nExpectedNextToInnerMostPixelHits");
     book(m_nPixelOutliers, "nPixelOutliers");
@@ -90,7 +103,9 @@ InDetPerfPlot_Hits::initializePlots() {
     book(m_nSCTDeadSensors, "nSCTDeadSensors");
   
     book(m_nInnerMostPixelOutliers_vs_eta, "nInnerMostPixelOutliers_vs_eta");
+    book(m_nInnerMostPixelEndcapOutliers_vs_eta, "nInnerMostPixelEndcapOutliers_vs_eta");
     book(m_nInnerMostPixelSplitHits_vs_eta, "nInnerMostPixelSplitHits_vs_eta");
+    book(m_nInnerMostPixelSplitEndcapHits_vs_eta, "nInnerMostPixelSplitEndcapHits_vs_eta");
     book(m_nExpectedInnerMostPixelHits_vs_eta, "nExpectedInnerMostPixelHits_vs_eta");
     book(m_nExpectedNextToInnerMostPixelHits_vs_eta, "nExpectedNextToInnerMostPixelHits_vs_eta");
     book(m_nPixelOutliers_vs_eta, "nPixelOutliers_vs_eta");
@@ -106,7 +121,9 @@ InDetPerfPlot_Hits::initializePlots() {
     book(m_nSCTDeadSensors_vs_eta, "nSCTDeadSensors_vs_eta");
 
     book(m_nInnerMostPixelOutliers_vs_phi, "nInnerMostPixelOutliers_vs_phi");
+    book(m_nInnerMostPixelEndcapOutliers_vs_phi, "nInnerMostPixelEndcapOutliers_vs_phi");
     book(m_nInnerMostPixelSplitHits_vs_phi, "nInnerMostPixelSplitHits_vs_phi");
+    book(m_nInnerMostPixelSplitEndcapHits_vs_phi, "nInnerMostPixelSplitEndcapHits_vs_phi");
     book(m_nExpectedInnerMostPixelHits_vs_phi, "nExpectedInnerMostPixelHits_vs_phi");
     book(m_nExpectedNextToInnerMostPixelHits_vs_phi, "nExpectedNextToInnerMostPixelHits_vs_phi");
     book(m_nPixelOutliers_vs_phi, "nPixelOutliers_vs_phi");
@@ -128,7 +145,9 @@ InDetPerfPlot_Hits::initializePlots() {
     book(m_nSCTDoubleHoles_vs_etaphi, "nSCTDoubleHoles_vs_etaphi");
 
     book(m_nInnerMostPixelHits_vs_mu, "nInnerMostPixelHits_vs_mu");
+    book(m_nInnerMostPixelEndcapHits_vs_mu, "nInnerMostPixelEndcapHits_vs_mu");
     book(m_nNextToInnerMostPixelHits_vs_mu, "nNextToInnerMostPixelHits_vs_mu");
+    book(m_nNextToInnerMostPixelEndcapHits_vs_mu, "nNextToInnerMostPixelEndcapHits_vs_mu");
     book(m_nPixelHits_vs_mu, "nPixelHits_vs_mu");
     book(m_nSCTHits_vs_mu, "nSCTHits_vs_mu");
     book(m_nTRTHits_vs_mu, "nTRTHits_vs_mu");
@@ -148,10 +167,13 @@ InDetPerfPlot_Hits::initializePlots() {
     book(m_nTRTHighThresholdHitsAr_vs_mu_ECsideA, "nTRTHighThresholdHitsAr_vs_mu_ECsideA");
     book(m_nTRTHighThresholdHitsAr_vs_mu_ECsideC, "nTRTHighThresholdHitsAr_vs_mu_ECsideC");
     book(m_nInnerMostPixelSharedHits_vs_mu, "nInnerMostPixelSharedHits_vs_mu");
+    book(m_nInnerMostPixelSharedEndcapHits_vs_mu, "nInnerMostPixelSharedEndcapHits_vs_mu");
     book(m_nPixelSharedHits_vs_mu, "nPixelSharedHits_vs_mu");
     book(m_nSCTSharedHits_vs_mu, "nSCTSharedHits_vs_mu");
     book(m_nInnerMostPixelOutliers_vs_mu, "nInnerMostPixelOutliers_vs_mu");
+    book(m_nInnerMostPixelEndcapOutliers_vs_mu, "nInnerMostPixelOutliers_vs_mu");
     book(m_nInnerMostPixelSplitHits_vs_mu, "nInnerMostPixelSplitHits_vs_mu");
+    book(m_nInnerMostPixelSplitEndcapHits_vs_mu, "nInnerMostPixelSplitEndcapHits_vs_mu");
     book(m_nExpectedInnerMostPixelHits_vs_mu, "nExpectedInnerMostPixelHits_vs_mu");
     book(m_nExpectedNextToInnerMostPixelHits_vs_mu, "nExpectedNextToInnerMostPixelHits_vs_mu");
     book(m_nPixelOutliers_vs_mu, "nPixelOutliers_vs_mu");
@@ -177,9 +199,10 @@ InDetPerfPlot_Hits::fill(const xAOD::TrackParticle& track, float mu, float weigh
   float phi = track.phi();
   float pixeldEdx = 0;
 
-  uint8_t iInnerMostPixelHits(0), iNextToInnerMostPixelHits(0), iPixHits(0), iSctHits(0), iTrtHits(0), iTrtXeHits(0);
+  uint8_t iInnerMostPixelHits(0), iInnerMostPixelEndcapHits(0), iNextToInnerMostPixelHits(0), 
+          iNextToInnerMostPixelEndcapHits(0), iPixHits(0), iSctHits(0), iTrtHits(0), iTrtXeHits(0);
   uint8_t iPixHoles(0), iSCTHoles(0), iTrtHTHits(0), iTrtHTXeHits(0); 
-  uint8_t iInnerMostPixelShared(0), iPixelShared(0), iSCTShared(0); 
+  uint8_t iInnerMostPixelShared(0), iInnerMostPixelEndcapShared(0), iPixelShared(0), iSCTShared(0); 
 
   if (track.summaryValue(iInnerMostPixelHits, xAOD::numberOfInnermostPixelLayerHits)) {
     fillHisto(m_nInnerMostPixelHits, iInnerMostPixelHits, weight);
@@ -188,12 +211,26 @@ InDetPerfPlot_Hits::fill(const xAOD::TrackParticle& track, float mu, float weigh
     fillHisto(m_nInnerMostPixelHits_vs_etaphi, eta,phi, iInnerMostPixelHits, weight);
     if (m_iDetailLevel >= 100) fillHisto(m_nInnerMostPixelHits_vs_mu, mu, iInnerMostPixelHits, weight);
   }
+  if (track.summaryValue(iInnerMostPixelEndcapHits, xAOD::numberOfInnermostPixelLayerEndcapHits)) {
+    fillHisto(m_nInnerMostPixelEndcapHits, iInnerMostPixelEndcapHits, weight);
+    fillHisto(m_nInnerMostPixelEndcapHits_vs_eta, eta, iInnerMostPixelEndcapHits, weight);
+    fillHisto(m_nInnerMostPixelEndcapHits_vs_phi, phi, iInnerMostPixelEndcapHits, weight);
+    fillHisto(m_nInnerMostPixelEndcapHits_vs_etaphi, eta,phi, iInnerMostPixelEndcapHits, weight);
+    if (m_iDetailLevel >= 100) fillHisto(m_nInnerMostPixelEndcapHits_vs_mu, mu, iInnerMostPixelEndcapHits, weight);
+  }
   if (track.summaryValue(iNextToInnerMostPixelHits, xAOD::numberOfNextToInnermostPixelLayerHits)) {
     fillHisto(m_nNextToInnerMostPixelHits, iNextToInnerMostPixelHits, weight);
     fillHisto(m_nNextToInnerMostPixelHits_vs_eta, eta, iNextToInnerMostPixelHits, weight);
     fillHisto(m_nNextToInnerMostPixelHits_vs_phi, phi, iNextToInnerMostPixelHits, weight);
     fillHisto(m_nNextToInnerMostPixelHits_vs_etaphi, eta,phi, iNextToInnerMostPixelHits, weight);
     if (m_iDetailLevel >= 100) fillHisto(m_nNextToInnerMostPixelHits_vs_mu, mu, iNextToInnerMostPixelHits, weight);
+  }
+  if (track.summaryValue(iNextToInnerMostPixelEndcapHits, xAOD::numberOfNextToInnermostPixelLayerEndcapHits)) {
+    fillHisto(m_nNextToInnerMostPixelEndcapHits, iNextToInnerMostPixelEndcapHits, weight);
+    fillHisto(m_nNextToInnerMostPixelEndcapHits_vs_eta, eta, iNextToInnerMostPixelEndcapHits, weight);
+    fillHisto(m_nNextToInnerMostPixelEndcapHits_vs_phi, phi, iNextToInnerMostPixelEndcapHits, weight);
+    fillHisto(m_nNextToInnerMostPixelEndcapHits_vs_etaphi, eta,phi, iNextToInnerMostPixelEndcapHits, weight);
+    if (m_iDetailLevel >= 100) fillHisto(m_nNextToInnerMostPixelEndcapHits_vs_mu, mu, iNextToInnerMostPixelEndcapHits, weight);
   }
   if (track.summaryValue(iPixHits, xAOD::numberOfPixelHits)) {
     fillHisto(m_nPixelHits, iPixHits, weight);
@@ -281,6 +318,12 @@ InDetPerfPlot_Hits::fill(const xAOD::TrackParticle& track, float mu, float weigh
     fillHisto(m_nInnerMostPixelSharedHits_vs_phi, phi, iInnerMostPixelShared, weight);
     if (m_iDetailLevel >= 100) fillHisto(m_nInnerMostPixelSharedHits_vs_mu, mu, iInnerMostPixelShared, weight);
   }
+  if (track.summaryValue(iInnerMostPixelEndcapShared, xAOD::numberOfInnermostPixelLayerSharedEndcapHits)) {
+    fillHisto(m_nInnerMostPixelSharedEndcapHits, iInnerMostPixelEndcapShared, weight);
+    fillHisto(m_nInnerMostPixelSharedEndcapHits_vs_eta, eta, iInnerMostPixelEndcapShared, weight);
+    fillHisto(m_nInnerMostPixelSharedEndcapHits_vs_phi, phi, iInnerMostPixelEndcapShared, weight);
+    if (m_iDetailLevel >= 100) fillHisto(m_nInnerMostPixelSharedEndcapHits_vs_mu, mu, iInnerMostPixelEndcapShared, weight);
+  }
   if (track.summaryValue(iPixelShared, xAOD::numberOfPixelSharedHits)) {
     fillHisto(m_nPixelSharedHits, iPixelShared, weight);
     fillHisto(m_nPixelSharedHits_vs_eta, eta, iPixelShared, weight);
@@ -299,7 +342,7 @@ InDetPerfPlot_Hits::fill(const xAOD::TrackParticle& track, float mu, float weigh
 
   // expert plots
   if (m_iDetailLevel >= 100) {
-    uint8_t iInnerMostPixelOutliers(0), iInnerMostPixelSplit(0);
+    uint8_t iInnerMostPixelOutliers(0), iInnerMostPixelEndcapOutliers(0), iInnerMostPixelSplit(0), iInnerMostPixelEndcapSplit(0);
     uint8_t iExpectedInnerMostPixelHits(0), iExpectedNextToInnerMostPixelHits(0);
     uint8_t iPixelOutliers(0), iPixelContribLayers(0), iPixelSplit(0), iPixelGanged(0), iPixelGangedFakes(0);
     uint8_t iSCTOutliers(0), iSCTDoubleHoles(0); 
@@ -312,11 +355,23 @@ InDetPerfPlot_Hits::fill(const xAOD::TrackParticle& track, float mu, float weigh
       fillHisto(m_nInnerMostPixelOutliers_vs_phi, phi, iInnerMostPixelOutliers, weight);
       fillHisto(m_nInnerMostPixelOutliers_vs_mu, mu, iInnerMostPixelOutliers, weight);
     }
+    if (track.summaryValue(iInnerMostPixelEndcapOutliers, xAOD::numberOfInnermostPixelLayerEndcapOutliers)) {
+      fillHisto(m_nInnerMostPixelEndcapOutliers, iInnerMostPixelEndcapOutliers, weight);
+      fillHisto(m_nInnerMostPixelEndcapOutliers_vs_eta, eta, iInnerMostPixelEndcapOutliers, weight);
+      fillHisto(m_nInnerMostPixelEndcapOutliers_vs_phi, phi, iInnerMostPixelEndcapOutliers, weight);
+      fillHisto(m_nInnerMostPixelEndcapOutliers_vs_mu, mu, iInnerMostPixelEndcapOutliers, weight);
+    }
     if (track.summaryValue(iInnerMostPixelSplit, xAOD::numberOfInnermostPixelLayerSplitHits)) {
       fillHisto(m_nInnerMostPixelSplitHits, iInnerMostPixelSplit, weight);
       fillHisto(m_nInnerMostPixelSplitHits_vs_eta, eta, iInnerMostPixelSplit, weight);
       fillHisto(m_nInnerMostPixelSplitHits_vs_phi, phi, iInnerMostPixelSplit, weight);
       fillHisto(m_nInnerMostPixelSplitHits_vs_mu, mu, iInnerMostPixelSplit, weight);
+    }
+    if (track.summaryValue(iInnerMostPixelEndcapSplit, xAOD::numberOfInnermostPixelLayerSplitEndcapHits)) {
+      fillHisto(m_nInnerMostPixelSplitEndcapHits, iInnerMostPixelEndcapSplit, weight);
+      fillHisto(m_nInnerMostPixelSplitEndcapHits_vs_eta, eta, iInnerMostPixelEndcapSplit, weight);
+      fillHisto(m_nInnerMostPixelSplitEndcapHits_vs_phi, phi, iInnerMostPixelEndcapSplit, weight);
+      fillHisto(m_nInnerMostPixelSplitEndcapHits_vs_mu, mu, iInnerMostPixelEndcapSplit, weight);
     }
     if (track.summaryValue(iExpectedInnerMostPixelHits, xAOD::expectInnermostPixelLayerHit)) {
       fillHisto(m_nExpectedInnerMostPixelHits, iExpectedInnerMostPixelHits, weight);

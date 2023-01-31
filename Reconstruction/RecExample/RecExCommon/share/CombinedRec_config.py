@@ -83,7 +83,18 @@ if rec.doESD() and recAlgs.doTrackParticleCellAssociation() and DetFlags.ID_on()
     caloCellAssociationTool = Rec__ParticleCaloCellAssociationTool(ParticleCaloExtensionTool = pcExtensionTool)
 
     topSequence += CfgMgr.TrackParticleCellAssociationAlg("TrackParticleCellAssociationAlg",
+                                                          PtCut=10000,
                                                           ParticleCaloCellAssociationTool=caloCellAssociationTool)
+
+    from InDetRecExample.InDetJobProperties import InDetFlags
+    if InDetFlags.doR3LargeD0() and InDetFlags.storeSeparateLargeD0Container():
+        topSequence += CfgMgr.TrackParticleCellAssociationAlg("LargeD0TrackParticleCellAssociationAlg",
+                                                              PtCut=10000,
+                                                              TrackParticleContainerName="InDetLargeD0TrackParticles",
+                                                              ClusterContainerName="InDetLargeD0TrackParticlesAssociatedClusters",
+                                                              CaloClusterCellLinkName="InDetLargeD0TrackParticlesAssociatedClusters_links",
+                                                              AssociationContainerName="InDetLargeD0TrackParticlesClusterAssociations",
+                                                              ParticleCaloCellAssociationTool=caloCellAssociationTool)
     if DetFlags.Muon_on():
         from AthenaCommon.CfgGetter import getPublicTool
         getPublicTool("MuonCombinedInDetDetailedTrackSelectorTool")
@@ -147,16 +158,8 @@ if rec.readESD():
     rec.doBTagging=False
 if (jetOK or rec.readESD()) and rec.doBTagging() and  DetFlags.ID_on() and DetFlags.Muon_on():
     # Configure BTagging algorithm
-    from BTagging.BTagRun3Config import BTagRecoSplitCfg
+    from BTagging.BTagConfig import BTagRecoSplitCfg
     CAtoGlobalWrapper(BTagRecoSplitCfg, ConfigFlags)
-
-# Hits associated with high-pt jets for trackless b-tagging
-from BTagging.BTaggingFlags import BTaggingFlags
-if (jetOK or rec.readESD()) and DetFlags.ID_on() and rec.doWriteAOD() and BTaggingFlags.DoJetHitAssociation:
-    try:
-        include("JetHitAssociation/jetHitAssociation_config.py")
-    except Exception:
-        treatException("Could not set up jet hit association")
 
 #
 # functionality : tau reconstruction

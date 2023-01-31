@@ -1,12 +1,12 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-def LArCellMonConfigOld(inputFlags):
+def LArCellMonConfigOld(flags):
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
     from CaloMonitoring.CaloMonitoringConf import  LArCellMonAlg
 
-    helper = AthMonitorCfgHelperOld(inputFlags, 'LArCellMonAlgOldCfg')
+    helper = AthMonitorCfgHelperOld(flags, 'LArCellMonAlgOldCfg')
     from AthenaCommon.BeamFlags import jobproperties
     if jobproperties.Beam.beamType() == 'cosmics':
        isCosmics=True
@@ -37,7 +37,7 @@ def LArCellMonConfigOld(inputFlags):
     CaloNoiseCondAlg()
 
     from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-    algo = LArCellMonConfigCore(helper, LArCellMonAlg,inputFlags,isCosmics, 
+    algo = LArCellMonConfigCore(helper, LArCellMonAlg,flags,isCosmics, 
                                 TriggerStream, isMC, athenaCommonFlags.isOnline)
 
     from AthenaMonitoring.AtlasReadyFilterTool import GetAtlasReadyFilterTool
@@ -47,28 +47,28 @@ def LArCellMonConfigOld(inputFlags):
 
     return helper.result()
 
-def LArCellMonConfig(inputFlags):
+def LArCellMonConfig(flags):
 
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'LArCellMonAlgCfg')
+    helper = AthMonitorCfgHelper(flags,'LArCellMonAlgCfg')
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     cfg=ComponentAccumulator()
 
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    cfg.merge(LArGMCfg(inputFlags))
+    cfg.merge(LArGMCfg(flags))
     from TileGeoModel.TileGMConfig import TileGMCfg
-    cfg.merge(TileGMCfg(inputFlags))
+    cfg.merge(TileGMCfg(flags))
 
     from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
-    cfg.merge(DetDescrCnvSvcCfg(inputFlags))
+    cfg.merge(DetDescrCnvSvcCfg(flags))
 
     from LArCellRec.LArCollisionTimeConfig import LArCollisionTimeCfg
-    cfg.merge(LArCollisionTimeCfg(inputFlags))
+    cfg.merge(LArCollisionTimeCfg(flags))
 
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
-    cfg.merge(CaloNoiseCondAlgCfg(inputFlags))
+    cfg.merge(CaloNoiseCondAlgCfg(flags))
 
 
     from AthenaConfiguration.ComponentFactory import CompFactory
@@ -76,15 +76,15 @@ def LArCellMonConfig(inputFlags):
 
     algname='LArCellMonAlg'
     from AthenaConfiguration.Enums import BeamType
-    if inputFlags.Beam.Type is BeamType.Cosmics:
+    if flags.Beam.Type is BeamType.Cosmics:
         algname=algname+'Cosmics'
 
-    algo = LArCellMonConfigCore(helper, lArCellMonAlg, inputFlags,
-                                inputFlags.Beam.Type is BeamType.Cosmics,
-                                inputFlags.Input.TriggerStream,
-                                inputFlags.Input.isMC, inputFlags.Common.isOnline,
+    algo = LArCellMonConfigCore(helper, lArCellMonAlg, flags,
+                                flags.Beam.Type is BeamType.Cosmics,
+                                flags.Input.TriggerStream,
+                                flags.Input.isMC, flags.Common.isOnline,
                                 algname)
-    algo.useTrigger = inputFlags.DQ.useTrigger
+    algo.useTrigger = flags.DQ.useTrigger
 
     #copied from LArCellMonTool
     algo.rndmTriggerNames    = "L1_RD0, L1_RD0_FILLED, L1_RD0_EMPTY, L1_RD1, L1_RD1_NOISE, L1_RD1_HIST, L1_RD1_BGRP4, L1_RD1_BGRP5"
@@ -94,21 +94,21 @@ def LArCellMonConfig(inputFlags):
     algo.miscTriggerNames    = ""
 
     from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
-    algo.ReadyFilterTool = cfg.popToolsAndMerge(AtlasReadyFilterCfg(inputFlags))
+    algo.ReadyFilterTool = cfg.popToolsAndMerge(AtlasReadyFilterCfg(flags))
 
-    if not inputFlags.Input.isMC:
+    if not flags.Input.isMC:
        from AthenaMonitoring.BadLBFilterToolConfig import LArBadLBFilterToolCfg
-       algo.BadLBTool=cfg.popToolsAndMerge(LArBadLBFilterToolCfg(inputFlags))
+       algo.BadLBTool=cfg.popToolsAndMerge(LArBadLBFilterToolCfg(flags))
 
     from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
-    cfg.merge(LArBadChannelCfg(inputFlags))
+    cfg.merge(LArBadChannelCfg(flags))
 
     cfg.merge(helper.result())
 
     return cfg
 
 
-def LArCellMonConfigCore(helper, algclass, inputFlags, isCosmics=False, TriggerStream='CosmicCalo', isMC=False, isOnline=False, algname='LArCellMonAlg'):
+def LArCellMonConfigCore(helper, algclass, flags, isCosmics=False, TriggerStream='CosmicCalo', isMC=False, isOnline=False, algname='LArCellMonAlg'):
 
 
     LArCellMonAlg = helper.addAlgorithm(algclass, algname)
@@ -502,31 +502,32 @@ def LArCellMonConfigCore(helper, algclass, inputFlags, isCosmics=False, TriggerS
 if __name__=='__main__':
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files = ['/eos/atlas/atlastier0/rucio//data18_13TeV/physics_Main/00357750/data18_13TeV.00357750.physics_Main.daq.RAW/data18_13TeV.00357750.physics_Main.daq.RAW._lb0123._SFO-3._0004.data']
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = ['/eos/atlas/atlastier0/rucio//data18_13TeV/physics_Main/00357750/data18_13TeV.00357750.physics_Main.daq.RAW/data18_13TeV.00357750.physics_Main.daq.RAW._lb0123._SFO-3._0004.data']
     # to test tier0 workflow:
-    #ConfigFlags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/data15_13TeV.00278748.physics_ZeroBias.merge.RAW._lb0384._SFO-ALL._0001.1']
-    #ConfigFlags.Calo.Cell.doPileupOffsetBCIDCorr=True
-    ConfigFlags.Output.HISTFileName = 'LArCellMonOutput.root'
-    ConfigFlags.DQ.enableLumiAccess = True
-    ConfigFlags.DQ.useTrigger = True
-    ConfigFlags.DQ.Environment = 'tier0'
-    ConfigFlags.lock()
+    #flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/data15_13TeV.00278748.physics_ZeroBias.merge.RAW._lb0384._SFO-ALL._0001.1']
+    #flags.Calo.Cell.doPileupOffsetBCIDCorr=True
+    flags.Output.HISTFileName = 'LArCellMonOutput.root'
+    flags.DQ.enableLumiAccess = True
+    flags.DQ.useTrigger = True
+    flags.DQ.Environment = 'tier0'
+    flags.lock()
 
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     # in case of tier0 workflow:
     from CaloRec.CaloRecoConfig import CaloRecoCfg
-    cfg.merge(CaloRecoCfg(ConfigFlags))
+    cfg.merge(CaloRecoCfg(flags))
 
     #for reading an ESD
 #    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-#    cfg.merge(PoolReadCfg(ConfigFlags))
+#    cfg.merge(PoolReadCfg(flags))
 
-    cfg.merge(LArCellMonConfig(ConfigFlags)) 
+    cfg.merge(LArCellMonConfig(flags)) 
 
     f=open("LArCellMon.pkl","wb")
     cfg.store(f)

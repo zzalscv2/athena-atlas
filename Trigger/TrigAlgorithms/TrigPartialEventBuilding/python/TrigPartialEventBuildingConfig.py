@@ -2,7 +2,7 @@
 #  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
-from AthenaCommon.Configurable import ConfigurableRun3Behavior
+from AthenaCommon.Configurable import ConfigurableCABehavior
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, appendCAtoAthena, conf2toConfigurable
 from TrigEDMConfig.DataScoutingInfo import getFullHLTResultID
@@ -80,7 +80,7 @@ def getRegSelTools(flags, detNames):
         func = getattr(RegSelToolConfig, funcName)
         if not callable(func):
             raise RuntimeError('Cannot add detector "' + det + '", RegSelToolConfig.' + funcName + ' is not callable')
-        with ConfigurableRun3Behavior():
+        with ConfigurableCABehavior():
             regSelTools += [acc.popToolsAndMerge(func(flags))]
     acc.setPrivateTools(regSelTools)
     return acc

@@ -565,6 +565,7 @@ std::shared_ptr<AthenaInterprocess::FdsRegistry> AthMpEvtLoopMgr::extractFds()
       ,"/var/tmp/"
       ,"/var/lock/"
       ,"/var/lib/"
+      ,"/bin/python/"
       ,"/include/c++/"
       ,".confdb2"
       };

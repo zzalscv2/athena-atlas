@@ -68,7 +68,6 @@ class RunOnGPU(JobProperty):
     allowedTypes = ['bool']
     StoredValue  = False
 
-
 class DoPunchThroughSimulation(JobProperty):
     """ Determines whether to run the punch through simulation"""
     statusOn     = True
@@ -79,8 +78,37 @@ class PunchThroughParamsInputFilename(JobProperty):
     """ Filename of the muon punch through input parametrizations file. """
     statusOn     = True
     allowedTypes = ['str']
-    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_v01.root'
+    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_v05.root'
 
+class PunchThroughParamsInverseCdfFilename(JobProperty):
+    """ Filename of the muon punch through param inverse cdf config. """
+    statusOn     = True
+    allowedTypes = ['str']
+    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_inverseCdf_v02.xml'
+
+class PunchThroughParamsInversePcaFilename(JobProperty):
+    """ Filename of the muon punch through param inverse pca config. """
+    statusOn     = True
+    allowedTypes = ['str']
+    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_inversePca_v02.xml'
+
+class PunchThroughClassifierScalerFilename(JobProperty):
+    """ Filename of the muon punch through classifier input variable MinMaxScaler. """
+    statusOn     = True
+    allowedTypes = ['str']
+    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_classScaler_v02.xml'
+
+class PunchThroughClassifierNetworkFilename(JobProperty):
+    """ Filename of the muon punch through classifier neural network. """
+    statusOn     = True
+    allowedTypes = ['str']
+    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_classNet_v02.json'
+
+class PunchThroughClassifierCalibratorFilename(JobProperty):
+    """ Filename of the muon punch through classifier calibrator. """
+    statusOn     = True
+    allowedTypes = ['str']
+    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_classCalib_v02.xml'
 ##-----------------------------------------------------------------------------
 ## 2nd step
 ## Definition of the InDet flag container
@@ -104,9 +132,14 @@ jobproperties.ISF_FastCaloSimJobProperties.add_JobProperty( CaloCellsName       
 jobproperties.ISF_FastCaloSimJobProperties.add_JobProperty( FastShowerInputCollection  )
 jobproperties.ISF_FastCaloSimJobProperties.add_JobProperty( DoRandomFluctuations       )
 jobproperties.ISF_FastCaloSimJobProperties.add_JobProperty( ParamsInputFilename        )
-jobproperties.ISF_FastCaloSimJobProperties.add_JobProperty( RunOnGPU)
+jobproperties.ISF_FastCaloSimJobProperties.add_JobProperty( RunOnGPU )
 jobproperties.ISF_FastCaloSimJobProperties.add_JobProperty( DoPunchThroughSimulation   )
-jobproperties.ISF_FastCaloSimJobProperties.add_JobProperty( PunchThroughParamsInputFilename)
+jobproperties.ISF_FastCaloSimJobProperties.add_JobProperty( PunchThroughParamsInputFilename )
+jobproperties.ISF_FastCaloSimJobProperties.add_JobProperty( PunchThroughParamsInverseCdfFilename )
+jobproperties.ISF_FastCaloSimJobProperties.add_JobProperty( PunchThroughParamsInversePcaFilename )
+jobproperties.ISF_FastCaloSimJobProperties.add_JobProperty( PunchThroughClassifierScalerFilename )
+jobproperties.ISF_FastCaloSimJobProperties.add_JobProperty( PunchThroughClassifierNetworkFilename )
+jobproperties.ISF_FastCaloSimJobProperties.add_JobProperty( PunchThroughClassifierCalibratorFilename )
 
 ##-----------------------------------------------------------------------------
 ## 5th step

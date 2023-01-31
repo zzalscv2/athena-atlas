@@ -479,7 +479,7 @@ from JetCalibTools import JetCalibToolsConfig
 def getJetCalibToolFromStringCustomVtx(jetdef, modspec):
     calibcontext, data_type, calibseq, rhoname, pvname, gscdepth = JetCalibToolsConfig.getCalibSpecsFromString(modspec)
     rhoname = "Kt4EMPFlowCustomVtxEventShape"
-    return JetCalibToolsConfig.getJetCalibTool(jetdef.basename,calibcontext,data_type,calibseq,rhoname,pvname,gscdepth)
+    return JetCalibToolsConfig.getJetCalibTool(jetdef,calibcontext,data_type,calibseq,rhoname,pvname,gscdepth)
 
 
 stdJetModifiers.update(
@@ -544,7 +544,7 @@ METCommon.scheduleCustomVtxMETContent(vxColl="Hgg", jetColl="AntiKt4EMPFlowCusto
 # FLAVOUR TAGGING   ol90
 #====================================================;;p================
 
-from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollections
+from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollections
 #FtagJetCollections(["AntiKt4EMPFlowCustomVtxJets","AntiKt4EMPFlowJets"], SeqHIGG1D1, pvCols=[HggVertexContainerName,"PrimaryVertices"])
 
 

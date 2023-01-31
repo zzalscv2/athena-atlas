@@ -17,7 +17,7 @@ Geo2G4LogicalVolumeFactory::Geo2G4LogicalVolumeFactory()
 {
 }
 
-G4LogicalVolume *Geo2G4LogicalVolumeFactory::Build (const GeoLogVol* theLog) const
+G4LogicalVolume *Geo2G4LogicalVolumeFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoLogVol* theLog)
 {
   static Geo2G4SolidFactory theSolidFactory;
   static Geo2G4MaterialFactory theMaterialFactory;

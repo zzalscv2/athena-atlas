@@ -26,13 +26,13 @@ MdtCalibInputSvc::MdtCalibInputSvc(const std::string &name, ISvcLocator *svc_loc
 
 MdtCalibInputSvc::~MdtCalibInputSvc() {
     std::map<MuonCalib::NtupleStationId, MuonCalib::MdtStationT0Container *>::iterator it1;
-    for (it1 = m_t0.begin(); it1 != m_t0.end(); it1++) delete it1->second;
+    for (it1 = m_t0.begin(); it1 != m_t0.end(); ++it1) delete it1->second;
     std::map<MuonCalib::NtupleStationId, MuonCalib::IRtRelation *>::iterator it2;
-    for (it2 = m_rt_relation.begin(); it2 != m_rt_relation.end(); it2++) delete it2->second;
+    for (it2 = m_rt_relation.begin(); it2 != m_rt_relation.end(); ++it2) delete it2->second;
     std::map<MuonCalib::NtupleStationId, MuonCalib::BFieldCorFunc *>::iterator it3;
-    for (it3 = m_B_corr.begin(); it3 != m_B_corr.end(); it3++) delete it3->second;
+    for (it3 = m_B_corr.begin(); it3 != m_B_corr.end(); ++it3) delete it3->second;
     std::map<MuonCalib::NtupleStationId, MuonCalib::IRtResolution *>::iterator it4;
-    for (it4 = m_spat_res.begin(); it4 != m_spat_res.end(); it4++) delete it4->second;
+    for (it4 = m_spat_res.begin(); it4 != m_spat_res.end(); ++it4) delete it4->second;
 }
 
 StatusCode MdtCalibInputSvc::initialize() {
@@ -130,7 +130,7 @@ void MdtCalibInputSvc::create_mean_rts() {
     std::list<MuonCalib::NtupleStationId> matching_ids;
     // loop over all rts
     for (std::map<MuonCalib::NtupleStationId, MuonCalib::IRtRelation *>::const_iterator it = m_rt_relation.begin();
-         it != m_rt_relation.end(); it++) {
+         it != m_rt_relation.end(); ++it) {
         MuonCalib::MuonFixedId id;
         // if the rt relation is stored per chamber, check both multilayers
         if (it->first.GetMl() == 0) {

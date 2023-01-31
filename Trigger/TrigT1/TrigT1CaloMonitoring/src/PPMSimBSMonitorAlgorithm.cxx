@@ -387,6 +387,8 @@ StatusCode PPMSimBSMonitorAlgorithm::makePPMTower( const xAOD::TriggerTower* tt,
   monTT.tower = tt;
   monTT.phiScaled = phiMod;
   monTT.jepET = jepET;
+  monTT.phi1d = 0;
+  monTT.maxADC = 0;
   vecMonTT.push_back(monTT);
    
   return StatusCode::SUCCESS; 

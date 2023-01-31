@@ -28,10 +28,12 @@ class FastCaloSim: public G4VFastSimulationModel
  public:
 
   FastCaloSim(const std::string& name, 
-  ServiceHandle<IAthRNGSvc> rndmGenSvc, Gaudi::Property<std::string> randomEngineName,
-  PublicToolHandle<IFastCaloSimCaloExtrapolation> FastCaloSimCaloExtrapolation, ServiceHandle<ISF::IFastCaloSimParamSvc> FastCaloSimSvc,
-  Gaudi::Property<std::string> m_CaloCellContainerSDName,
-  FastCaloSimTool * FastCaloSimTool);
+              const ServiceHandle<IAthRNGSvc>& rndmGenSvc,
+              const Gaudi::Property<std::string>& randomEngineName,
+              const PublicToolHandle<IFastCaloSimCaloExtrapolation>& FastCaloSimCaloExtrapolation,
+              const ServiceHandle<ISF::IFastCaloSimParamSvc>& FastCaloSimSvc,
+              const Gaudi::Property<std::string>& CaloCellContainerSDName,
+              FastCaloSimTool * FastCaloSimTool);
   ~FastCaloSim() {}
 
   G4bool IsApplicable(const G4ParticleDefinition&) override final;

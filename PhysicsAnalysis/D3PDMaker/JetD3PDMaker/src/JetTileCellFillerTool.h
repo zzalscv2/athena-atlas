@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: JetTileCellFillerTool.h 541743 2013-03-20 17:46:41Z ssnyder $
 /**
  * @file JetD3PDMaker/src/JetTileCellFillerTool.h
  * @author Stephen Cole < scole@cern.ch >
@@ -43,10 +40,10 @@ namespace D3PD {
 
 
         /// Standard Gaudi initialize method.
-        virtual StatusCode initialize();
+        virtual StatusCode initialize() override;
 
         /// Book variables for this block.
-        virtual StatusCode book();
+        virtual StatusCode book() final;
 
 
         /**
@@ -57,7 +54,7 @@ namespace D3PD {
          * is responsible for arranging that all the pointers for booked variables
          * are set appropriately upon entry.
          */
-        virtual StatusCode fill (const Jet& p);
+        virtual StatusCode fill (const Jet& p) override;
     
     private:
         float* m_jetTime;

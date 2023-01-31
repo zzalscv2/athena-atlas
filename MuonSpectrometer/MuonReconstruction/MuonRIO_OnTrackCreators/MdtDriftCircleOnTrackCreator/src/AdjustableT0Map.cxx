@@ -36,7 +36,7 @@ void AdjustableT0Map::DumpT0Shift(){
   std::cout << "m_DefaultTShift " << m_DefaultTShift <<  std::endl;
 
   std::map<int,double>::const_iterator it = m_IdentStaTimeShiftMap.begin();
-  for(; it!=m_IdentStaTimeShiftMap.end(); it++) {
+  for(; it!=m_IdentStaTimeShiftMap.end(); ++it) {
     std::cout << "DumpT0Shift "  ;
     DumpT0Shift( it->first );
   }
@@ -112,7 +112,7 @@ void AdjustableT0Map::GetData(int Irank, int& stationName, int& stationEta, int&
   
   int Kounter = -1 ;
   std::map<int,double>::const_iterator it = m_IdentStaTimeShiftMap.begin();
-  for(; it!=m_IdentStaTimeShiftMap.end(); it++) {
+  for(; it!=m_IdentStaTimeShiftMap.end(); ++it) {
     Kounter = Kounter + 1 ;
     if ( Kounter == Irank ){
       int IdentSta = it->first ;

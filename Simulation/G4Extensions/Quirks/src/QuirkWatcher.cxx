@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "G4TrackStatus.hh"
@@ -8,6 +8,8 @@
 #include "Quirk.h"
 #include "InfracolorForce.h"
 #include "QuirkWatcher.h"
+
+#include "CxxUtils/checker_macros.h"
 
 QuirkWatcher::QuirkWatcher() : G4VProcess(G4String("QuirkWatcher")) {
     enableAtRestDoIt = false;
@@ -30,7 +32,9 @@ G4VParticleChange* QuirkWatcher::PostStepDoIt(
     const G4Step& //stepData
 ) {
     // Get infracolor string
-    const Quirk* quirkDef = dynamic_cast<const Quirk*>(track.GetParticleDefinition());
+    auto part_nc ATLAS_THREAD_SAFE = // track should really be non-const in Geant4 interface
+      const_cast<G4ParticleDefinition*>(track.GetParticleDefinition());
+    Quirk* quirkDef = dynamic_cast<Quirk*>(part_nc);
     if (quirkDef == 0) {
         G4Exception("QuirkWatcher::PostStepDoIt", "NonQuirk", FatalErrorInArgument, "QuirkWatcher run on non-quirk particle");
     }

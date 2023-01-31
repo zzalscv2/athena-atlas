@@ -50,8 +50,16 @@ from AthenaMonitoring.AthenaMonitoringConf import AthenaMonManager
 
 #-----------ONLINE CODE---------------------
 if athenaCommonFlags.isOnline():
-    # fwinkl 09/2021: removed online-specific code as it was certainly broken and likely unused
-    ctpmonlog.error("Setting up CTP/MUCTPI BS monitoring for online currently not supported")
+    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
+    from TrigT1CTMonitoring.BSMonitoringAlgorithm import BSMonitoringConfig
+    CAtoGlobalWrapper(BSMonitoringConfig, ConfigFlags)
+
+    #used for debugging
+    printfunc (topSequence)
+    printfunc (svcMgr)
+
+
 
 #-----------OFFLINE CODE---------------------
 else:

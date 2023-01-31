@@ -84,8 +84,8 @@ public:
 
 
   //Crosstalk noise
-  bool crossTalkNoise( CLHEP::HepRandomEngine* );
-  bool crossTalkNoiseOtherEnd( CLHEP::HepRandomEngine* );
+  bool crossTalkNoise( CLHEP::HepRandomEngine* ) const;
+  bool crossTalkNoiseOtherEnd( CLHEP::HepRandomEngine* ) const;
 
   //--- For looping over all straws (only to be used at initialization):
 

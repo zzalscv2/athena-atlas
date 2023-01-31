@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAlignGenTools/BeamspotVertexPreProcessor.h"
@@ -31,6 +31,7 @@
 #include "TrkTrackSummary/TrackSummary.h"
 #include "TrkTrack/LinkToTrack.h"
 #include "TrkParticleBase/LinkToTrackParticleBase.h"
+#include "TrkTrackSummary/TrackSummary.h"
 #include "TrkParticleBase/TrackParticleBase.h"
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "TrkParameters/TrackParameters.h"
@@ -87,6 +88,7 @@ BeamspotVertexPreProcessor::BeamspotVertexPreProcessor(const std::string & type,
   declareProperty("SLTrackFitter",             m_SLTrackFitter      );
   declareProperty("UseSingleFitter",           m_useSingleFitter    );
   declareProperty("Extrapolator",              m_extrapolator             );
+  declareProperty("TrackToVertexIPEstimatorTool", m_trackToVertexIPEstimatorTool);
   declareProperty("RunOutlierRemoval",         m_runOutlierRemoval        );
   declareProperty("AlignModuleTool",           m_alignModuleTool          );
   declareProperty("ParticleNumber",            m_particleNumber           );
@@ -149,14 +151,14 @@ StatusCode BeamspotVertexPreProcessor::initialize()
       ATH_MSG_INFO("Retrieved " << m_SLTrackFitter);
     }
 
-     // TrackToVertexIPEstimator
-    if (m_ITrackToVertexIPEstimator.retrieve().isFailure()) {
-      if(msgLvl(MSG::FATAL)) msg(MSG::FATAL) << "Can not retrieve TrackToVertexIPEstimator of type " << m_ITrackToVertexIPEstimator.typeAndName() << endmsg;
-        return StatusCode::FAILURE;
+    // TrackToVertexIPEstimator
+    if (m_trackToVertexIPEstimatorTool.retrieve().isFailure()) {
+      if(msgLvl(MSG::FATAL)) msg(MSG::FATAL) << "Can not retrieve TrackToVertexIPEstimator of type " << m_trackToVertexIPEstimatorTool.typeAndName() << endmsg;
+      return StatusCode::FAILURE;
     } else {
-      ATH_MSG_INFO ( "Retrieved TrackToVertexIPEstimator Tool " << m_ITrackToVertexIPEstimator.typeAndName() );
+      ATH_MSG_INFO ( "Retrieved TrackToVertexIPEstimator Tool " << m_trackToVertexIPEstimatorTool.typeAndName() );
     }
-
+   
     // configure Atlas extrapolator
     if (m_extrapolator.retrieve().isFailure()) {
       msg(MSG::FATAL) << "Failed to retrieve tool "<<m_extrapolator<<endmsg;
@@ -235,12 +237,12 @@ bool CompareTwoTracks::operator()(VxTrackAtVertex vtxTrk){ // MD: took away dere
     const Trk::Perigee * measPer2 = originalTrk->perigeeParameters();
     if(! (measPer1 && measPer2 )) equal = false;
     else{
-      float diff = fabs(std::numeric_limits<float>::epsilon());
-      if( ! (( fabs(measPer1->parameters()[Trk::d0]     - measPer2->parameters()[Trk::d0])     <= diff)
-         && ( fabs(measPer1->parameters()[Trk::z0]     - measPer2->parameters()[Trk::z0])     <= diff)
-         && ( fabs(measPer1->parameters()[Trk::phi]    - measPer2->parameters()[Trk::phi])    <= diff)
-         && ( fabs(measPer1->parameters()[Trk::theta]  - measPer2->parameters()[Trk::theta])  <= diff)
-         && ( fabs(measPer1->parameters()[Trk::qOverP] - measPer2->parameters()[Trk::qOverP]) <= diff)))
+      float diff = std::abs(std::numeric_limits<float>::epsilon());
+      if( ( std::abs(measPer1->parameters()[Trk::d0]     - measPer2->parameters()[Trk::d0])     > diff)
+         || ( std::abs(measPer1->parameters()[Trk::z0]     - measPer2->parameters()[Trk::z0])     > diff)
+         || ( std::abs(measPer1->parameters()[Trk::phi]    - measPer2->parameters()[Trk::phi])    > diff)
+         || ( std::abs(measPer1->parameters()[Trk::theta]  - measPer2->parameters()[Trk::theta])  > diff)
+         || ( std::abs(measPer1->parameters()[Trk::qOverP] - measPer2->parameters()[Trk::qOverP]) > diff))
               equal = false;
     }
      //std::cout << " comparing two Tracks' perigee parameter, the perigee of the comparing track is: "<< *measPer1 <<" the perigee of the compared track is: "<< *measPer2 << " compare result is: " << equal << std::endl;
@@ -420,7 +422,7 @@ const VertexOnTrack* BeamspotVertexPreProcessor::provideVotFromVertex(const Trac
     } else {
       tmpVtx = new xAOD::Vertex(*vtx);
       //tmpVtx = vtx->clone();  // no clone option for xAODvertex
-      updatedVtx = m_ITrackToVertexIPEstimator->getUnbiasedVertex(track->perigeeParameters(), vtx ); // MD: new function call
+      updatedVtx = m_trackToVertexIPEstimatorTool->getUnbiasedVertex(track->perigeeParameters(), vtx ); // MD: new function call
     }
 
 
@@ -438,7 +440,7 @@ const VertexOnTrack* BeamspotVertexPreProcessor::provideVotFromVertex(const Trac
       const PerigeeSurface surface(globPos);
       const Perigee* perigee = nullptr;
       std::unique_ptr<const Trk::TrackParameters> tmp =
-        m_extrapolator->extrapolate(ctx, *track, surface);
+        m_extrapolator->extrapolateTrack(ctx, *track, surface);
       //pass ownership only if of correct type
       if (tmp && tmp->associatedSurface().type() == Trk::SurfaceType::Perigee) {
          perigee = static_cast<const Perigee*> (tmp.release()); 
@@ -559,7 +561,7 @@ const VertexOnTrack* BeamspotVertexPreProcessor::provideVotFromBeamspot(const Tr
     // calculate perigee parameters wrt. beam-spot
     const Perigee* perigee = nullptr;
     std::unique_ptr<const Trk::TrackParameters> tmp =
-      m_extrapolator->extrapolate(ctx, *track, *surface);
+      m_extrapolator->extrapolateTrack(ctx, *track, *surface);
     // pass ownership only if of correct type
     if (tmp && tmp->associatedSurface().type() == Trk::SurfaceType::Perigee) {
       perigee = static_cast<const Perigee*>(tmp.release());
@@ -653,7 +655,7 @@ BeamspotVertexPreProcessor::doConstraintRefit(
       // get track parameters at the vertex:
       const PerigeeSurface&         surface=vot->associatedSurface();
       ATH_MSG_DEBUG(" Track reference surface will be:  " << surface);
-      const TrackParameters* parsATvertex=m_extrapolator->extrapolate(ctx, *track, surface).release();
+      const TrackParameters* parsATvertex=m_extrapolator->extrapolateTrack(ctx, *track, surface).release();
 
       ATH_MSG_DEBUG(" Track will be refitted at this surface  ");
       newTrack = (fitter->fit(ctx, measurementCollection, 
@@ -712,7 +714,7 @@ bool BeamspotVertexPreProcessor::doBeamspotConstraintTrackSelection(const Track*
 	const double qoverP = perigee->parameters()[Trk::qOverP] * 1000.;
 	double pt = 0.;
 	if (qoverP != 0 )
-	  pt = fabs(1.0/qoverP)*sin(perigee->parameters()[Trk::theta]);
+	  pt = std::abs(1.0/qoverP)*sin(perigee->parameters()[Trk::theta]);
 	ATH_MSG_DEBUG( " pt  : "<< pt );
 	if (pt > m_maxPt)
 	  return false;
@@ -838,7 +840,6 @@ AlignTrack* BeamspotVertexPreProcessor::doTrackRefit(const Track* track) {
       for (AlignVertex* ivtx : m_AlignVertices) {
         if( (ivtx->originalVertex())==vtx ) {
           ifound = true;
-          ivtx->addAlignTrack(alignTrack);
         }
       }
       if( !ifound ) {
@@ -855,7 +856,6 @@ AlignTrack* BeamspotVertexPreProcessor::doTrackRefit(const Track* track) {
           avtx->setConstraint( &qtemp, &vtemp);
         }
 
-        avtx->addAlignTrack(alignTrack);
         m_AlignVertices.push_back(avtx);
       }
     }
@@ -1045,17 +1045,20 @@ void BeamspotVertexPreProcessor::accumulateVTX(AlignTrack* alignTrack) {
     if( module ) {
       std::vector<Amg::VectorX>& deriv_vec = derivIt->second;
       std::vector<Amg::VectorX> drdaWF;
-      ATH_MSG_DEBUG( "accumulateVTX: The deriv_vec size is  " << deriv_vec.size() );
+      ATH_MSG_DEBUG("accumulateVTX: The deriv_vec size is  "
+                    << deriv_vec.size());
       DataVector<AlignPar>* alignPars = m_alignModuleTool->getAlignPars(module);
       int nModPars = alignPars->size();
-      if ((nModPars+3) != (int)deriv_vec.size() ) {
-        ATH_MSG_ERROR("accumulateVTX: Derivatives w.r.t. the vertex seem to be missing");
+      if ((nModPars + 3) != (int)deriv_vec.size()) {
+        ATH_MSG_ERROR(
+            "accumulateVTX: Derivatives w.r.t. the vertex seem to be missing");
         return;
       }
-      for (int i=0;i<nModPars;i++) {
-        drdaWF.push_back(2.0 * (WF) * deriv_vec[i]);
+      drdaWF.reserve(nModPars);
+      for (int i = 0; i < nModPars; i++) {
+        drdaWF.emplace_back(2.0 * (WF)*deriv_vec[i]);
       }
-      ATH_MSG_DEBUG("accumulateVTX: derivX incremented by:  " << drdaWF );
+      ATH_MSG_DEBUG("accumulateVTX: derivX incremented by:  " << drdaWF);
       // now add contribution from this track to the X object:
       derivX.emplace_back(module,std::move(drdaWF));
 

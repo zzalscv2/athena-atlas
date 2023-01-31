@@ -3,7 +3,7 @@
 */
 
 // --------------------------------------------------
-// 
+//
 // File:  Generators/Starlight_i.h
 // Description:
 //    This code is used to get a Starlight Monte Carlo event.
@@ -27,77 +27,71 @@
 #include "upcevent.h"
 #include "inputParameters.h"
 
-typedef std::vector<std::string> CommandVector;
-
-class StoreGateSvc;
-// ---------------------
-
 class Starlight_i:public GenModule {
 public:
     Starlight_i(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~Starlight_i();
-    
-    virtual StatusCode	genInitialize	();
-    virtual StatusCode 	callGenerator	();
-    virtual StatusCode 	genFinalize	();
-    virtual StatusCode 	fillEvt		(HepMC::GenEvent* evt);
+
+    virtual StatusCode genInitialize();
+    virtual StatusCode callGenerator();
+    virtual StatusCode genFinalize();
+    virtual StatusCode fillEvt(HepMC::GenEvent* evt);
 
 protected:
-    // event counter
-    int              m_events;
-    starlight*       m_starlight;         // pointer to starlight instance
-    std::shared_ptr<randomGenerator> m_randomGenerator;
-    bool             m_lheOutput;
-    unsigned int     m_maxevents;
-    bool             m_doTauolappLheFormat;
-    inputParameters  m_inputParameters;   // parameter instance
-    double           m_axionMass;
-    upcEvent        *m_event;
+  IntegerProperty m_dsid{this, "Dsid", 999999, "Dataset ID number"};
+  StringProperty  m_configFileName{this, "ConfigFileName", ""};
+  BooleanProperty  m_lheOutput{this, "lheOutput", false};
+  UnsignedIntegerProperty m_maxevents{this, "maxevents", 5500};
+  BooleanProperty m_doTauolappLheFormat{this, "doTauolappLheFormat", false};
+  // Commands to setup starlight
+  StringArrayProperty m_InitializeVector{this, "Initialize", {} };
 
-    std::string  m_configFileName;
-    unsigned int m_beam1Z;
-    unsigned int m_beam1A;
-    unsigned int m_beam2Z;
-    unsigned int m_beam2A;
-    double       m_beam1Gamma; 
-    double       m_beam2Gamma; 
-    double       m_maxW; 
-    double       m_minW;
-    unsigned int m_nmbWBins;
-    double       m_maxRapidity;
-    unsigned int m_nmbRapidityBins;
-    bool         m_accCutPt;
-    double       m_minPt;
-    double       m_maxPt;
-    bool         m_accCutEta;
-    double       m_minEta;
-    double       m_maxEta;
-    int          m_productionMode;
-    unsigned int m_nmbEventsTot;
-    int          m_prodParticleId;
-    int          m_randomSeed;
-    int          m_outputFormat;
-    int          m_beamBreakupMode;
-    bool         m_interferenceEnabled;
-    double       m_interferenceStrength;
-    bool         m_coherentProduction;
-    double       m_incoherentFactor;
-    double       m_bford;
-    double       m_maxPtInterference;
-    int          m_nmbPtBinsInterference;
-    double       m_ptBinWidthInterference; 
-    bool         m_xsecMethod;
-    int          m_nThreads;
-    bool         m_pythFullRec;
+  int              m_events{0}; // event counter
+  starlight*       m_starlight{};         // pointer to starlight instance // TODO convert to unique_ptr
+  std::shared_ptr<randomGenerator> m_randomGenerator{};
+  inputParameters  m_inputParameters;   // parameter instance
+  double           m_axionMass{1.};
+  upcEvent        *m_event{}; // TODO convert to unique_ptr
 
-    bool starlight2lhef();
+  unsigned int m_beam1Z{0};
+  unsigned int m_beam1A{0};
+  unsigned int m_beam2Z{0};
+  unsigned int m_beam2A{0};
+  double       m_beam1Gamma{0.};
+  double       m_beam2Gamma{0.};
+  double       m_maxW{0.};
+  double       m_minW{0.};
+  unsigned int m_nmbWBins{0};
+  double       m_maxRapidity{0.};
+  unsigned int m_nmbRapidityBins{0};
+  bool         m_accCutPt{false};
+  double       m_minPt{0.};
+  double       m_maxPt{0.};
+  bool         m_accCutEta{false};
+  double       m_minEta{0.};
+  double       m_maxEta{0.};
+  int          m_productionMode{0};
+  unsigned int m_nmbEventsTot{0};
+  int          m_prodParticleId{0};
+  int          m_randomSeed{0}; // FIXME Repeated?
+  int          m_outputFormat; // ???
+  int          m_beamBreakupMode{0};
+  bool         m_interferenceEnabled{false};
+  double       m_interferenceStrength{0.};
+  bool         m_coherentProduction{false};
+  double       m_incoherentFactor{0.};
+  double       m_bford; // ???
+  double       m_maxPtInterference{0.};
+  int          m_nmbPtBinsInterference{0};
+  double       m_ptBinWidthInterference{0.};
+  bool         m_xsecMethod{false};
+  int          m_nThreads{1};
+  bool         m_pythFullRec{false};
 
-    // Commands to setup starlight
-    CommandVector m_InitializeVector;
+  bool starlight2lhef();
 
-    bool set_user_params();
-    bool prepare_params_file();
+  bool set_user_params();
+  bool prepare_params_file();
 };
 
 #endif
-

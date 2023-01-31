@@ -229,8 +229,8 @@ except:
 #--------------------------------------------------------------
 # LarHit filter algorithm
 #--------------------------------------------------------------
-from LArDigitization.LArDigitizationConf import LArHitFilter
-LArHitFilter = LArHitFilter("LArHitFilter")
+from AthenaCommon.CfgGetter import getAlgorithm
+LArHitFilter = getAlgorithm("LArHitFilter")
 topSequence += LArHitFilter
 try:
     from SGComps import AddressRemappingSvc

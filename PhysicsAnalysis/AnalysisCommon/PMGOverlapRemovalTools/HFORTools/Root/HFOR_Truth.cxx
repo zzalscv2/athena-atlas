@@ -109,10 +109,9 @@ HFORType HFOR_Truth::findOverlap(const xAOD::TruthEventContainer& truthEvent,
 		                         const xAOD::JetContainer* jets) {
 
   unsigned int nPart = 0 ;
-  unsigned int tEvent = 0 ;
 
-  unsigned int quarks_4 = 0 ;
-  unsigned int quarks_5 = 0 ;
+  //unsigned int quarks_4 = 0 ;
+  //unsigned int quarks_5 = 0 ;
 
   HFORType action = HFORType::noType;
 
@@ -138,13 +137,13 @@ HFORType HFOR_Truth::findOverlap(const xAOD::TruthEventContainer& truthEvent,
         if (truthParticle != nullptr) {
           int pdgId = truthParticle->pdgId() ;
           if (fabs(pdgId) == 4) {
-            quarks_4 ++ ;
+            //quarks_4 ++ ;
             if (is_FinalState(truthParticle) ) {
               fsQuarksMap[4].push_back(truthParticle) ;
             }
           }
           if (fabs(pdgId) == 5) {
-            quarks_5 ++ ;
+            //quarks_5 ++ ;
             if ( is_FinalState(truthParticle) ) {
               fsQuarksMap[5].push_back(truthParticle) ;
             }
@@ -152,7 +151,6 @@ HFORType HFOR_Truth::findOverlap(const xAOD::TruthEventContainer& truthEvent,
         }
       }
     }
-    tEvent++ ;
   }
 
   //Book keeping

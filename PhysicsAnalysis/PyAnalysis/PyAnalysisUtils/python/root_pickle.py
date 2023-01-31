@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: root_pickle.py
@@ -433,6 +433,10 @@ FILE should be a Root TFile.
 
 
     def find_class (self, module, name):
+        if module == 'copy_reg':
+            module = 'copyreg'
+        elif module == '__builtin__':
+            module = 'builtins'
         try:
             try:
                 __import__(module)

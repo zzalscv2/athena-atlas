@@ -7,7 +7,7 @@ inline void
 TrackSummaryTool::updateTrack(const EventContext& ctx, Track& track) const
 {
   computeAndReplaceTrackSummary(
-    ctx, track, nullptr, false /*DO NOT suppress hole search*/);
+    ctx, track, false /*DO NOT suppress hole search*/);
 }
 
 inline void
@@ -15,40 +15,15 @@ TrackSummaryTool::updateTrackSummary(const EventContext& ctx,
                                      Track& track) const
 {
   /*suppress hole search*/
-  UpdateSummary(ctx, track, nullptr, true);
+  UpdateSummary(ctx, track, true);
 }
 
 inline void
 TrackSummaryTool::updateTrackSummary(const EventContext& ctx,
                                      Track& track,
-                                     const Trk::PRDtoTrackMap* pPrdToTrackMap,
                                      bool suppress_hole_search) const
 {
-  UpdateSummary(ctx, track, pPrdToTrackMap, suppress_hole_search);
-}
-
-inline void
-TrackSummaryTool::updateSharedHitCount(
-  Track& track,
-  const Trk::PRDtoTrackMap* pPrdToTrackMap) const
-{
-  if (!track.trackSummary()) {
-    computeAndReplaceTrackSummary(
-      track, pPrdToTrackMap, false /*DO NOT suppress hole search*/);
-  } else {
-    updateSharedHitCount(track, pPrdToTrackMap, *track.trackSummary());
-  }
-}
-
-inline void
-TrackSummaryTool::updateSharedHitCount(Track& track) const
-{
-  if (!track.trackSummary()) {
-    computeAndReplaceTrackSummary(
-      track, nullptr, false /*DO NOT suppress hole search*/);
-  } else {
-    updateSharedHitCount(track, nullptr, *track.trackSummary());
-  }
+  UpdateSummary(ctx, track, suppress_hole_search);
 }
 
 inline void
@@ -56,13 +31,12 @@ TrackSummaryTool::updateAdditionalInfo(Track& track) const
 {
   if (!track.trackSummary()) {
     computeAndReplaceTrackSummary(
-      track, nullptr, false /*DO NOT suppress hole search*/);
+      track, false /*DO NOT suppress hole search*/);
   }
 }
 inline void
 TrackSummaryTool::UpdateSummary(const EventContext& ctx,
                                 Track& track,
-                                const Trk::PRDtoTrackMap* pPrdToTrackMap,
                                 bool suppress_hole_search) const
 {
   if (!track.trackSummary()) {
@@ -71,7 +45,6 @@ TrackSummaryTool::UpdateSummary(const EventContext& ctx,
   fillSummary(ctx,
               *(track.trackSummary()),
               track,
-              pPrdToTrackMap,
               m_doHolesInDet && !suppress_hole_search,
               m_doHolesMuon && !suppress_hole_search);
 }

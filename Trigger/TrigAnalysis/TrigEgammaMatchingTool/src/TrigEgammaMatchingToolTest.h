@@ -56,7 +56,7 @@ namespace Trig{
             std::map<std::string,int> m_counterMatch3Bits;
             std::map<std::string,int> m_counterMatch4Bits;
 
-            void match(const std::string, const xAOD::Egamma *);
+            void match(const std::string&, const xAOD::Egamma *);
     }; 
 }
 #endif

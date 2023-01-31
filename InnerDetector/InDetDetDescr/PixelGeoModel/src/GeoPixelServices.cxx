@@ -95,7 +95,7 @@
 //   WIDTH (Gaudi::Units::mm) = width of trapezoid at center
 //   REPEAT: Repeat this many times in phi with equal distance between them.
 //
-//   **IMPORTANT NOTE** WIDTH can be in degrees or Gaudi::Units::mm. See OraclePixGeoManager
+//   **IMPORTANT NOTE** WIDTH can be in degrees or Gaudi::Units::mm. See DBPixelGeoManager
 
 
 #include "GeoPixelServices.h"

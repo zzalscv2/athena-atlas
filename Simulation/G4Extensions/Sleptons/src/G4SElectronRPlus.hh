@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SLEPTONS_G4SElectronRPlus_H
@@ -9,13 +9,15 @@
 #include "G4ios.hh"
 #include "G4ParticleDefinition.hh"
 
+#include "CxxUtils/checker_macros.h"
+
 class G4SElectronRPlus: public G4ParticleDefinition
 {
   // singleton implementation
 
 private:
 
-  static G4SElectronRPlus* theInstance;
+  static G4SElectronRPlus* theInstance ATLAS_THREAD_SAFE; // used in single-threaded Geant4 initialization
   G4SElectronRPlus(){}
   ~G4SElectronRPlus(){}
 

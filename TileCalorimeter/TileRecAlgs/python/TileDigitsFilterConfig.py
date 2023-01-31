@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile digits filter algorithm"""
 
@@ -9,7 +9,7 @@ def TileDigitsFilterCfg(flags, **kwargs):
     """Return component accumulator with configured Tile digits filter algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     acc = ComponentAccumulator()
@@ -60,7 +60,7 @@ def TileDigitsFilterOutputCfg(flags, streamName = 'ESD', **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -68,21 +68,22 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Output.ESDFileName = "myESD.pool.root"
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Output.ESDFileName = "myESD.pool.root"
+    flags.Tile.RunType = 'PHY'
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
+    acc = MainServicesCfg(flags)
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     tileTypeNames = ['TileRawChannelContainer/TileRawChannelCnt', 'TileDigitsContainer/TileDigitsCnt']
-    acc.merge( ByteStreamReadCfg(ConfigFlags, type_names = tileTypeNames) )
+    acc.merge( ByteStreamReadCfg(flags, type_names = tileTypeNames) )
 
-    acc.merge( TileDigitsFilterOutputCfg(ConfigFlags) )
+    acc.merge( TileDigitsFilterOutputCfg(flags) )
 
-    ConfigFlags.dump()
+    flags.dump()
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.store( open('TileDigitsFilter.pkl','wb') )
 

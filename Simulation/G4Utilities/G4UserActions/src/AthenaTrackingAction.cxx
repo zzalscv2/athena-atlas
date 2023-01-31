@@ -43,17 +43,8 @@ namespace G4UA
     // Condition for storing the GenParticle in the AtlasG4EventUserInfo for later.
     if (trackHelper.IsPrimary() || trackHelper.IsRegisteredSecondary())
     {
-      // Why a const_cast???
-      // This is an ugly way to communicate the GenParticle...
-#ifdef HEPMC3
-      HepMC::GenParticlePtr part =
-        std::const_pointer_cast<HepMC3::GenParticle>( trackHelper.GetTrackInformation()->
-                                         GetHepMCParticle() );
-#else
-      HepMC::GenParticlePtr part =
-        const_cast<HepMC::GenParticlePtr>( trackHelper.GetTrackInformation()->
-                                         GetHepMCParticle() );
-#endif
+      HepMC::GenParticlePtr part = trackHelper.GetTrackInformation()->GetHepMCParticle();
+
       // Assign the GenParticle to the AtlasG4EventUserInfo.
       AtlasG4EventUserInfo* atlasG4EvtUserInfo = static_cast<AtlasG4EventUserInfo*>
         (G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetUserInformation());

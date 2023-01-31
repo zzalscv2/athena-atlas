@@ -161,7 +161,7 @@ bool VP1Trig::VP1TriggerSystem::loadTriggerHandles(StoreGateSvc* m_storeGate, QS
       for(; mfdContainer!=lastmfdContainer; mfdContainer++) {
 	MuonFeatureDetailsContainer::const_iterator mfd     = mfdContainer->begin();
 	MuonFeatureDetailsContainer::const_iterator lastmfd = mfdContainer->end();
-        for(; mfd != lastmfd; mfd++) {
+        for(; mfd != lastmfd; ++mfd) {
           if((*mfd)==0) continue;
           vec_muonFeatureDetails.push_back(*mfd);
         }

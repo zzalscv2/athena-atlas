@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAssociationTools/PRD_AssociationTool.h"
@@ -19,7 +19,6 @@ Trk::PRD_AssociationTool::PRD_AssociationTool(const std::string& t,
   :
   base_class(t,n,p)
 {
-  declareProperty( "SetupCorrect",  m_setupCorrect=false);
 }
 
 StatusCode Trk::PRD_AssociationTool::initialize()
@@ -28,10 +27,6 @@ StatusCode Trk::PRD_AssociationTool::initialize()
   if (sc.isFailure()) return sc;
   ATH_CHECK( m_prdToTrackMap.initialize( !m_prdToTrackMap.key().empty() ) );
   ATH_CHECK( m_idHelperSvc.retrieve());
-  if (!m_setupCorrect) {
-    ATH_MSG_INFO("initialize: Tool " << name() << " not configured for PRD usage.");
-  }
-
   return StatusCode::SUCCESS;
 }
 
@@ -193,7 +188,7 @@ Trk::PRD_AssociationTool::getPrdsOnTrack(const Maps& maps,
     if (rot){
       if(m_idHelperSvc->isMuon(rot->identify())){
         //only use precision hits for muon track overlap
-        if(!m_idHelperSvc->isMdt(rot->identify()) && !(m_idHelperSvc->isCsc(rot->identify()) && !m_idHelperSvc->measuresPhi(rot->identify()))) continue;
+        if(!m_idHelperSvc->isMdt(rot->identify()) && (!m_idHelperSvc->isCsc(rot->identify()) || m_idHelperSvc->measuresPhi(rot->identify()))) continue;
       }
       vec.push_back(rot->prepRawData());
     }
@@ -205,7 +200,7 @@ Trk::PRD_AssociationTool::getPrdsOnTrack(const Maps& maps,
           const Trk::RIO_OnTrack* rot = &competingROT->rioOnTrack(i);
           if( !rot || !rot->prepRawData() || !m_idHelperSvc->isMuon(rot->identify()) ) continue;
           //only use precision hits for muon track overlap
-          if(!m_idHelperSvc->isMdt(rot->identify()) && !(m_idHelperSvc->isCsc(rot->identify()) && !m_idHelperSvc->measuresPhi(rot->identify()))) continue;
+          if(!m_idHelperSvc->isMdt(rot->identify()) && (!m_idHelperSvc->isCsc(rot->identify()) || m_idHelperSvc->measuresPhi(rot->identify()))) continue;
           vec.push_back(rot->prepRawData());
         }
       }

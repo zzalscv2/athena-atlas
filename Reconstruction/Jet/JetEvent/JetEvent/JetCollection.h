@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETEVENT_JETCOLLECTION_H
@@ -93,7 +93,7 @@ class JetCollection : public DataVector<Jet>
   /// link to the JetKeyDescriptor is mandatory for persistency. Access done through the JetKeyDescriptorInstance
   DataLink<JetKeyDescriptor>  m_keyStore;
 
-  void setAuthor(std::string author);
+  void setAuthor(const std::string& author);
   std::string author() const;
 
   const JetMomentMap * getMomentMap() const;

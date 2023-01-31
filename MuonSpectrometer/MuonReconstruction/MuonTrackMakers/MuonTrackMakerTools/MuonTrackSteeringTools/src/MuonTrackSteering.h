@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKSTEERING_H
@@ -27,7 +27,6 @@
 #include "MuonRecToolInterfaces/IMuonTrackBuilder.h"
 #include "MuonRecToolInterfaces/IMuonTrackFinder.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonSegmentInOverlapResolvingTool.h"
-#include "MuonSegmentMakerToolInterfaces/IMuonSegmentMerger.h"
 #include "MuonStationIndex/MuonStationIndex.h"
 #include "MuonTrackSelectorTool.h"
 #include "MuonTrackSteeringStrategy.h"
@@ -138,7 +137,6 @@ namespace Muon {
         ToolHandle<IMuonTrackRefiner> m_trackRefineTool{this, "TrackRefinementTool", "Muon::MooTrackBuilder/MooMuonTrackBuilder"};
         ToolHandle<IMuonSegmentFittingTool> m_segmentFitter{this, "MuonSegmentFittingTool",
                                                             "Muon::MuonSegmentFittingTool/MuonSegmentFittingTool"};
-        ToolHandle<IMuonSegmentMerger> m_segmentMerger{this, "MuonSegmentMerger", ""};
         ToolHandle<Muon::MuonTrackSelectorTool> m_trackSelector{this, "MuonTrackSelector",
                                                                 "Muon::MuonTrackSelectorTool/MuonTrackSelectorTool"};
         ToolHandle<IMuonHoleRecoveryTool> m_muonHoleRecoverTool{this, "HoleRecoveryTool",

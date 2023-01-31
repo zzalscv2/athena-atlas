@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -88,9 +88,6 @@ class TrigT2Jet : public P4EEtaPhiMBase,  public NavigableTerminalNode ,
   /** set RoI Word */
   void set_RoIword( unsigned int word ) {m_roiWord=word;};
 
-  /** Clear Trig3Momentum grid */
-  void clearGrid();
-  
   // Cleaning:
   /** Set nLeadingCells (e.g. n90) */
   void setNLeadingCells(int nLeadingCells)		{ m_nLeadingCells = nLeadingCells;}

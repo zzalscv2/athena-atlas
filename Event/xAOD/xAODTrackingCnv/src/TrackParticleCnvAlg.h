@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TrackParticleCnvAlg.h 297747 2013-10-28 15:14:24Z krasznaa $
@@ -23,6 +23,7 @@
 #include "Particle/TrackParticleContainer.h"
 #include "TrkTrack/TrackCollection.h"
 #include "xAODTracking/TrackParticle.h"
+#include "xAODTracking/VertexContainer.h"
 #include "TrkValInterfaces/ITrkObserverTool.h"
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "StoreGate/WriteDecorHandleKey.h"
@@ -90,8 +91,10 @@ namespace xAODMaker {
 
     SG::ReadHandleKey<TrackCollection> m_tracks{this, "TrackContainerName", "Tracks"};
 
+    SG::ReadHandleKey<xAOD::VertexContainer> m_primaryVertexContainer{ this, "PrimaryVerticesName", "", "Name of primary vertex container is case the parameters should be calculated with respect to the primary vertex"};
+
     SG::WriteHandleKey<xAOD::TrackParticleContainer> m_xaodout{this, "xAODTrackParticlesFromTracksContainerName", "InDetTrackParticles"};
-    
+
 
     SG::WriteHandleKey<xAOD::TrackParticleContainer> m_xaodTrackParticlesout{this, "xAODContainerName", "ConvertedTrackParticleCandidate" };
     SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_xaodTruthOriginKey{this,"truthOriginKey", "" , "Key to declare that the alg will write truthOrigin. Will be overwritten during init"};
@@ -128,6 +131,7 @@ namespace xAODMaker {
                 CONVTOOL& tool,
                 SG::WriteHandle<xAOD::TrackParticleContainer>&,
                 const xAODTruthParticleLinkVector*,
+                const xAOD::Vertex* primaryVertex = nullptr,
                 const ObservedTrackMap* obs_track_map = 0) const;
 
     inline xAOD::TrackParticle* createParticle(

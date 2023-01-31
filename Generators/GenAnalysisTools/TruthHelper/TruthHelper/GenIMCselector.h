@@ -11,10 +11,10 @@
 namespace TruthHelper {
 
 
-  // Interface/base class for HepMC::GenParticle selectors
-  /// @deprecated Use the functions in TruthUtils instead
-  class GenIMCselector {
-  public:
+// Interface/base class for HepMC::GenParticle selectors
+/// @deprecated Use the functions in TruthUtils instead
+class GenIMCselector {
+public:
 
     // Virtual destructor to allow inheritance
     virtual ~GenIMCselector() = default;
@@ -31,11 +31,11 @@ namespace TruthHelper {
 #else
     // Selection function on GenParticle reference.
     bool operator()(HepMC::GenParticle& p) const {
-      return this->operator()(&p);
+        return this->operator()(&p);
     }
 #endif
 
-  };
+};
 
 
 }

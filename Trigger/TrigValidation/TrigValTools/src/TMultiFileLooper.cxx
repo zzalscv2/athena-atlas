@@ -51,7 +51,7 @@ Int_t TMultiFileLooper::run()
   beginJob();
   
   vector<TString>::iterator iter;
-  for (iter=m_fileList.begin(); iter!=m_fileList.end(); iter++) {
+  for (iter=m_fileList.begin(); iter!=m_fileList.end(); ++iter) {
     processFile(*iter);
   }
 

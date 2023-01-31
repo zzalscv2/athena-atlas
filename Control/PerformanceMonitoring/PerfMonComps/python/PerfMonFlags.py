@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # @file: PerfMonFlags.py
 # @purpose: a container of flags for Performance Monitoring
@@ -359,11 +359,13 @@ for i in list_jobproperties:
 del list_jobproperties
 
 ## -- helper function to decode athena-command-line options
-def _decode_pmon_opts(opts):
+def _decode_pmon_opts(opts, dry_run=False):
     """helper function to decode athena-command-line options.
 
     @param opts is a list of options which can enable or disable a few
            jobproperties.PerfMonFlags fields
+
+    @param dry_run to only decode but not set the options
 
     one activates a perfmon flag by prepending '+' in front of the option name
     (or nothing prepended, '+' being the implied default)
@@ -408,10 +410,8 @@ def _decode_pmon_opts(opts):
         if flag_name not in dispatch:
             raise ValueError(
                 '[%s] is not a valid PerfMonFlag (allowed: %r)' %
-                (flag_name, dispatch.keys())
+                (flag_name, list(dispatch.keys()))
                 )
                 
-        dispatch[flag_name].set_Value(val)
-        
-    
-        
+        if not dry_run:
+            dispatch[flag_name].set_Value(val)

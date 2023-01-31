@@ -99,7 +99,7 @@ void RegSelSubDetector::addModules(std::vector<RegSelModule>& modules)
 
   std::vector<RegSelModule>::iterator mptr(modules.begin()); 
   
-  for ( ; mptr!=modules.end() ; mptr++ ) { 
+  for ( ; mptr!=modules.end() ; ++mptr ) { 
     int layer    = mptr->layer();
     int detector = mptr->detector();
     
@@ -122,7 +122,7 @@ void RegSelSubDetector::addModules(std::vector<RegSelModule>& modules)
   std::set<unsigned>::iterator lend = layerset.end();
 
   m_mapped = false;
-  for ( unsigned i=0 ; litr!=lend ; litr++, i++ ) { 
+  for ( unsigned i=0 ; litr!=lend ; ++litr, i++ ) { 
     //    std::cout << "\t\tRegSelSubDetector::addModules() layer " << *litr << " -> " << i << std::endl;
     if ( *litr!=i ) m_mapped = true; 
     m_layermap.insert( std::map<unsigned, unsigned>::value_type( *litr, i ) );
@@ -134,7 +134,7 @@ void RegSelSubDetector::addModules(std::vector<RegSelModule>& modules)
 
   m_layer.resize(m_Nlayers);
 
-  for ( mptr=modules.begin() ; mptr!=modules.end() ; mptr++ ) { 
+  for ( mptr=modules.begin() ; mptr!=modules.end() ; ++mptr ) { 
     
     int detector = mptr->detector();
     

@@ -43,7 +43,7 @@ namespace pool {
       const MicroSessionManager& microSessionManager( const std::string& technology ) const;
 
       /// Disconnects from all the databases
-      void disconnectAll();
+      bool disconnectAll();
 
     private:
       DatabaseRegistry&                             m_registry;

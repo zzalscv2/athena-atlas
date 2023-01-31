@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetTagInfo/MultiSVInfoPlus.h"
@@ -14,7 +14,7 @@ namespace Analysis
 				       m_normdist(-1.),
 				       m_vtxInfo(std::vector<MSVVtxInfo*>()){}
 
-  MultiSVInfoPlus::MultiSVInfoPlus(TagInfoType tagJetInfoType) : BaseTagInfo(tagJetInfoType),
+  MultiSVInfoPlus::MultiSVInfoPlus(const TagInfoType& tagJetInfoType) : BaseTagInfo(tagJetInfoType),
 								 m_NGTinJet(-1),
 								 m_NGTinSvx(-1), 
 								 m_N2Tpair(-1),

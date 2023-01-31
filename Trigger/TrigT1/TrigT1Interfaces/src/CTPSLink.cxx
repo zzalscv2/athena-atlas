@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1Interfaces/CTPSLink.h"
@@ -22,7 +22,8 @@ namespace LVL1CTP {
       m_wordsPerHeader(0), m_wordsPerDataElement(0), m_wordsPerTrailer(0)
   {
     m_ctpVersion = new CTPdataformatVersion(m_ctpVersionNumber);
-    m_wordsPerCTPSLink = m_ctpVersion->getNumberTimeWords() + m_ctpVersion->getDAQwordsPerBunch();
+    const uint32_t numExtraWords = (m_CTPSLinkVector[2] >> m_ctpVersion->getProgrammableExtraWordsShift()) & m_ctpVersion->getProgrammableExtraWordsMask();
+    m_wordsPerCTPSLink = m_ctpVersion->getNumberTimeWords() + m_ctpVersion->getDAQwordsPerBunch() + numExtraWords;
     
     m_wordsPerHeader = m_CTPSLinkVector.empty() ? 0 : m_CTPSLinkVector[1];
     if (m_CTPSLinkVector.size() > (m_wordsPerHeader+3)) {

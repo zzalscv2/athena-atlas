@@ -312,7 +312,7 @@ namespace CP {
             if(isRun3())
             {
                 
-                if(m_quality!=0 && m_quality!=1 && m_quality!=4) ATH_MSG_WARNING("muonSelectionTool currently only supports loose, medium and highpt (in the barrel) WPs for run 3 data/MC, all other WPs can currently only be used for tests using Expert mode");
+                if(m_quality!=1 && m_quality!=2 && m_quality!=4) ATH_MSG_WARNING("muonSelectionTool currently only supports loose, medium and highpt (in the barrel) WPs for run 3 data/MC, all other WPs can currently only be used for tests using Expert mode");
             }
             isFirstRun3Check=false;
         }
@@ -320,7 +320,7 @@ namespace CP {
         asg::AcceptData acceptData(&m_acceptInfo);
 
         // Do the eta cut:
-        if (std::abs(mu.eta()) > m_maxEta) {
+        if (std::abs(mu.eta()) >= m_maxEta) {
             ATH_MSG_VERBOSE("Failed eta cut");
             return acceptData;
         }

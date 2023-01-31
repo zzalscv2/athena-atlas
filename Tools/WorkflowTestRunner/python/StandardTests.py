@@ -1,11 +1,13 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from typing import List
 
-from .Checks import AODContentCheck, AODDigestCheck, FrozenTier0PolicyCheck
+from .Checks import AODContentCheck, AODDigestCheck, FrozenTier0PolicyCheck, MetadataCheck
 from .Inputs import input_EVNT, input_EVNT_AF3, input_HITS, \
+    input_HITS_unfiltered, \
     input_HITS_MC_overlay, input_RDO_BKG, \
     input_HITS_data_overlay, input_BS_SKIM, \
-    input_HITS_minbias_low, input_HITS_minbias_high, input_HITS_neutrino
+    input_HITS_minbias_low, input_HITS_minbias_high, input_HITS_neutrino, \
+    input_AOD
 from .Test import TestSetup, WorkflowRun, WorkflowTest, WorkflowType
 
 
@@ -29,8 +31,8 @@ class QTest(WorkflowTest):
         threads_argument = '--multithreaded'
         if setup.custom_threads is not None:
             threads = setup.custom_threads
-            if threads <= 0:
-                threads_argument = ''
+        if threads <= 0:
+            threads_argument = ''
 
         self.command = \
             (f"ATHENA_CORE_NUMBER={threads} Reco_tf.py {threads_argument} --AMIConfig {ID}"
@@ -40,8 +42,8 @@ class QTest(WorkflowTest):
         # TODO: disable RDO comparison for now
         # if type == WorkflowType.MCReco:
         #     self.output_checks.append(FrozenTier0PolicyCheck(setup, "RDO", 10))
-        self.output_checks.append(FrozenTier0PolicyCheck(setup, "ESD", 20))
         self.output_checks.append(FrozenTier0PolicyCheck(setup, "AOD", 60))
+        self.output_checks.append(FrozenTier0PolicyCheck(setup, "ESD", 20))
 
         self.digest_checks = []
         if "--CA" not in extra_args:
@@ -58,21 +60,48 @@ class SimulationTest(WorkflowTest):
         if "maxEvents" not in extra_args:
             extra_args += " --maxEvents 20"
 
-        if type == WorkflowType.AF3:
-            input_file = input_EVNT_AF3[run]
+        if "jobNumber" not in extra_args and run is WorkflowRun.Run3 and type is WorkflowType.FullSim:
+            extra_args += " --jobNumber 5"
+
+        input_argument = ""
+        if "inputEVNTFile" not in extra_args and "inputHITSFile" not in extra_args:
+            if type is WorkflowType.HitsFilter:
+                input_argument = f"--inputHITSFile {input_HITS_unfiltered[run]}"
+            elif type is WorkflowType.HitsMerge:
+                input_argument = f"--inputHITSFile {input_HITS[run]}"
+            elif type is WorkflowType.AF3:
+                input_argument = f"--inputEVNTFile {input_EVNT_AF3[run]}"
+            else:
+                input_argument = f"--inputEVNTFile {input_EVNT[run]}"
+
+        threads = 0
+        threads_argument = '--multithreaded'
+        if setup.custom_threads is not None:
+            threads = setup.custom_threads
+        if threads <= 0:
+            threads_argument = ''
+
+        if type is WorkflowType.HitsMerge:
+            self.command = \
+                (f"ATHENA_CORE_NUMBER={threads} HITSMerge_tf.py {threads_argument} --AMIConfig {ID}"
+                f" {input_argument} --outputHITS_MRGFile myHITS.pool.root"
+                f" --imf False {extra_args}")
+        elif type is WorkflowType.HitsFilter:
+            self.command = \
+                (f"ATHENA_CORE_NUMBER={threads} FilterHit_tf.py {threads_argument} --AMIConfig {ID}"
+                f" {input_argument} --outputHITS_FILTFile myHITS.pool.root"
+                f" --imf False {extra_args}")
         else:
-            input_file = input_EVNT[run]
-
-        self.command = \
-            (f"Sim_tf.py --AMIConfig {ID}"
-             f" --inputEVNTFile {input_file} --outputHITSFile myHITS.pool.root"
-             f" --imf False {extra_args}")
-
-            #  " --postExec 'ServiceMgr.AuditorSvc.FPEAuditor.NStacktracesOnFPE=500'"
+            self.command = \
+                (f"ATHENA_CORE_NUMBER={threads} Sim_tf.py {threads_argument} --AMIConfig {ID}"
+                f" {input_argument} --outputHITSFile myHITS.pool.root"
+                f" --imf False {extra_args}")
 
         self.output_checks = [
             FrozenTier0PolicyCheck(setup, "HITS", 10)
         ]
+        if "CA" not in extra_args:
+            self.output_checks.append(MetadataCheck(setup, "HITS"))
 
         super().__init__(ID, run, type, steps, setup)
 
@@ -95,6 +124,8 @@ class OverlayTest(WorkflowTest):
         self.output_checks = [
             FrozenTier0PolicyCheck(setup, "RDO", 10)
         ]
+        if "CA" not in extra_args:
+            self.output_checks.append(MetadataCheck(setup, "RDO"))
 
         super().__init__(ID, run, type, steps, setup)
 
@@ -115,6 +146,8 @@ class DataOverlayTest(WorkflowTest):
         self.output_checks = [
             FrozenTier0PolicyCheck(setup, "RDO", 10)
         ]
+        if "CA" not in extra_args:
+            self.output_checks.append(MetadataCheck(setup, "RDO"))
 
         super().__init__(ID, run, type, steps, setup)
 
@@ -135,6 +168,8 @@ class PileUpTest(WorkflowTest):
         self.output_checks = [
             FrozenTier0PolicyCheck(setup, "RDO", 5)
         ]
+        if "CA" not in extra_args:
+            self.output_checks.append(MetadataCheck(setup, "RDO"))
 
         super().__init__(ID, run, type, steps, setup)
 
@@ -143,26 +178,67 @@ class DerivationTest(WorkflowTest):
     """Derivations test."""
 
     def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
-        if "maxEvents" not in extra_args:
-            extra_args += " --maxEvents 10"
+        test_def = ID.split("_")
+        data_type = test_def[0].lower()
+        format = test_def[-1].upper()
 
         threads = 0
         if setup.custom_threads is not None:
             threads = setup.custom_threads
 
+        if "maxEvents" not in extra_args:
+            base_events = 100
+            events = threads * base_events + 1
+            flush = 80
+
+            extra_args += f" --maxEvents {events}"
+            extra_args += f" --preExec 'ConfigFlags.Output.TreeAutoFlush={{\"DAOD_{format}\": {flush}}}'"
+        if "inputAODFile" not in extra_args:
+            extra_args += f" --inputAODFile {input_AOD[run][data_type]}"
+
+        # could also use p5503
         self.command = \
-            (f"ATHENA_CORE_NUMBER={threads} Derivation_tf.py --AMIConfig {ID}"
+            (f"ATHENA_CORE_NUMBER={threads} Derivation_tf.py --CA"
+             f" --formats {format}"
+             " --multiprocess --multithreadedFileValidation True"
+             " --athenaMPMergeTargetSize 'DAOD_*:0'"
+             " --sharedWriter True"
              " --outputDAODFile myOutput.pool.root"
-             " --formats PHYS"
              f" --imf False {extra_args}")
 
         # skip performance checks for now due to CA
         self.skip_performance_checks = True
 
-        if threads == 0:
-            # does not work with shared writer
+        enable_checks = False
+        if enable_checks:
             self.output_checks = [
-                FrozenTier0PolicyCheck(setup, "DAOD_PHYS", 10)
+                FrozenTier0PolicyCheck(setup, f"DAOD_{format}", 10),
+                MetadataCheck(setup, f"DAOD_{format}"),
             ]
+
+        super().__init__(ID, run, type, steps, setup)
+
+
+class GenerationTest(WorkflowTest):
+    """Generation test."""
+
+    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
+        if "maxEvents" not in extra_args:
+            extra_args += " --maxEvents 10"
+
+        if "ecmEnergy" not in extra_args:
+            if run is WorkflowRun.Run2:
+                extra_args += " --ecmEnergy 13000"
+            elif run is WorkflowRun.Run3:
+                extra_args += " --ecmEnergy 13600"
+            else:
+                extra_args += " --ecmEnergy 14000"
+
+        dsid = ID.replace("gen", "")
+
+        self.command = \
+            (f"Gen_tf.py --jobConfig {dsid}"
+             " --outputEVNTFile myEVNT.pool.root"
+             f" --imf False {extra_args}")
 
         super().__init__(ID, run, type, steps, setup)

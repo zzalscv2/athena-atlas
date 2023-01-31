@@ -1,6 +1,5 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
 from AthenaConfiguration.Enums import Format
@@ -91,7 +90,7 @@ def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=Tru
                                           doComp = doComp,
                                           forceCTPasHdw=forceCtp)
     if logLevel : alg.OutputLevel=logLevel
-    alg.MonTool = GenericMonitoringTool('MonTool')
+    alg.MonTool = GenericMonitoringTool(flags, 'MonTool')
     alg.MonTool.HistPath = name
     configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp)
 
@@ -110,15 +109,42 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp):
                                     title=title, xbins=64, xlabels=labels,
                                     xmin=0, xmax=64)
 
-    #TODO: add labels
     for cable in range(4):
         topoName = 'Topo1Opt'+str(cable)
-        name = 'CableOpti_'+str(cable+4)
+        name = 'CableOpti_'+str(cable)
+        weight = name+'_weight'
         name += f';{topoName}'
         title = f'Topo Optical Cable {cable}'
+        labels = getMultiplicityLabels(flags=flags,topoModule=topoName)
+        xlabels = [x for x in labels if x]
         alg.MonTool.defineHistogram(name, path='EXPERT', type='TH1I',
-                                    title=title, xbins=128, xlabels=getMultiplicityLabels(flags=flags,topoModule=topoName),
-                                    xmin=0, xmax=128)
+                                    title=title, xbins=len(xlabels), xlabels=xlabels,
+                                    weight=weight,
+                                    xmin=0, xmax=len(xlabels))
+    for cable in range(4):
+        topoName = 'Topo1Opt'+str(cable)
+        name = 'HdwTopo1Opt'+str(cable)
+        weight = name+'_weight'
+        name += f';{topoName}_data'
+        title = f'Topo Optical Cable {cable} (Data)'
+        labels = getMultiplicityLabels(flags=flags,topoModule=topoName)
+        xlabels = [x for x in labels if x]
+        alg.MonTool.defineHistogram(name, path='EXPERT', type='TH1I',
+                                    title=title, xbins=len(xlabels), xlabels=xlabels,
+                                    weight=weight,
+                                    xmin=0, xmax=len(xlabels))
+
+    for cable in range(4):
+        topoName = 'Topo1Opt'+str(cable)
+        labels = getMultiplicityLabels(flags=flags,topoModule=topoName)
+        labels = [x for x in labels if x]
+        for i,label in enumerate(labels):
+            name = f'Topo1Opt{cable}_{i}_Sim,Topo1Opt{cable}_{i}_Hdw;Topo1Opt{cable}_{label}'
+            title = f'Topo1Opt{cable}_{label};Simulation Counts;Hardware Counts'
+            alg.MonTool.defineHistogram(name, path='EXPERT', type='TH2F',
+                                        title=title,xbins=10,ybins=10,
+                                        xmin=0, xmax=10,
+                                        ymin=0, ymax=10)
 
     alg.MonTool.defineHistogram('TopoSim', path='EXPERT', type='TH1I',
                                     title='Simulation Results for L1Topo', xbins=128, xlabels=label_topo_all,
@@ -157,6 +183,18 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp):
         alg.MonTool.defineHistogram('OverflowResults', path='EXPERT', type='TH1I',
                                     title='Overflow Results for L1Topo', xbins=128, xlabels=label_topo_all,
                                     xmin=0, xmax=128)
+        rod_errors_labels = ["CT", "pc", "hc", "pe", "lm", "hm", "pt"]
+        alg.MonTool.defineHistogram('ROD_Errors', path='EXPERT', type='TH1I', 
+                                    title='Counts of ROD errors', xbins=len(rod_errors_labels), xlabels=rod_errors_labels, 
+                                    xmin=0, xmax=len(rod_errors_labels))
+        fpga_errors_labels = ["CT", "sm", "pe", "lm", "hm", "pt"]
+        fpga_indexes = ["topo1fpga1", "topo1fpga0", "topo2fpga1", "topo2fpga0", "topo3fpga1", "topo3fpga0"]
+        alg.MonTool.defineHistogram('FPGA_Errors, FPGA_Labels; FPGA_Errors', path='EXPERT', type='TH2I',
+                                        title='Counts of FPGA errors',xbins=len(fpga_errors_labels),ybins=len(fpga_indexes),
+                                        xlabels=fpga_errors_labels,
+                                        ylabels=fpga_indexes,
+                                        xmin=0, xmax=len(fpga_errors_labels),
+                                        ymin=0, ymax=len(fpga_indexes))
         
 
     mon_failure_labels = ['doHwMon', 'doSimMon', 'doHwMonCTP', 'doComp']
@@ -170,7 +208,7 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp):
 def getL1TopoLegacyOnlineMonitor(flags, name='L1TopoLegacyOnlineMonitor', configBS = True, logLevel = None):
     alg = CompFactory.L1TopoLegacyOnlineMonitor()
     if logLevel : alg.OutputLevel=logLevel
-    alg.MonTool = GenericMonitoringTool('MonTool')
+    alg.MonTool = GenericMonitoringTool(flags, 'MonTool')
     alg.MonTool.HistPath = name
     configureLegacyHistograms(alg, flags)
 
@@ -189,11 +227,11 @@ def getL1TopoLegacyOnlineMonitor(flags, name='L1TopoLegacyOnlineMonitor', config
     if getAlgProp('PrescaleDAQROBAccess') >= 1 and flags.Input.Format is Format.BS and configBS:
         # Add BS converter for DAQ L1Topo RDO collection
         from L1TopoByteStream.L1TopoByteStreamConfig import L1TopoRDOCollectionBSCnvCfg
-        CAtoGlobalWrapper(L1TopoRDOCollectionBSCnvCfg, ConfigFlags)
+        CAtoGlobalWrapper(L1TopoRDOCollectionBSCnvCfg, flags)
         if getAlgProp('doSimMon') and not flags.Trigger.doLVL1:
             # Add BS converter for CTP_RDO
             from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
-            CAtoGlobalWrapper(ByteStreamReadCfg, ConfigFlags, type_names=['CTP_RDO/CTP_RDO'])
+            CAtoGlobalWrapper(ByteStreamReadCfg, flags, type_names=['CTP_RDO/CTP_RDO'])
 
     return alg
 

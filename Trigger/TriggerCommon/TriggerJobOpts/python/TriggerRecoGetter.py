@@ -1,14 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
 from AthenaCommon.Logging import logging
 _log = logging.getLogger( "TriggerRecoGetter.py" )
 
-def TriggerRecoGetter(flags=None):
-    if flags is None:
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        flags = ConfigFlags
-
+def TriggerRecoGetter(flags):
     # setup configuration services
     from TriggerJobOpts.TriggerConfigGetter import TriggerConfigGetter
     cfg = TriggerConfigGetter(flags)  # noqa: F841

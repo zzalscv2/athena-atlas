@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -58,10 +58,8 @@ namespace G4UA{
     }
 
     void MCTruthUserAction::PreUserTrackingAction(const G4Track* inTrack){
-      //ATH_MSG_DEBUG("Starting to track a new particle");
 
-      G4Track* inT = const_cast<G4Track*> (inTrack);
-      TrackHelper trackHelper(inT);
+      TrackHelper trackHelper(inTrack);
 
       if (trackHelper.IsPrimary() ||
           (trackHelper.IsRegisteredSecondary()&&m_config.ilevel>1) ||
@@ -72,14 +70,13 @@ namespace G4UA{
         trkMgr->SetStoreTrajectory(true);
         trkMgr->SetTrajectory(temp);
 
-        // TODO: check that the 'temp' obeject is actually deleted by the G4TrackingManager
+        // TODO: check that the 'temp' object is actually deleted by the G4TrackingManager
         //       after FADS::FadsTrackingAction::GetTrackingAction()->ResetTraj() is executed
       }
 
     }
 
     void MCTruthUserAction::PostUserTrackingAction(const G4Track*){
-      //ATH_MSG_DEBUG("Finished tracking a particle");
       G4EventManager::GetEventManager()->GetTrackingManager()->SetStoreTrajectory(false);
     }
   } // namespace iGeant4

@@ -97,10 +97,7 @@ class TrigEgammaBremCollectionBuilder (egammaAlgsConf.EMBremCollectionBuilder):
         #
         GSFBuildTrackSummaryHelperTool = TrackingCommon.getInDetSummaryHelper(
             name="GSFBuildTrackSummaryHelperTool",
-            AssoTool=None,
             HoleSearch=None,
-            isHLT = True,
-            DoSharedHits=False,
             private=True)
 
         #
@@ -110,9 +107,7 @@ class TrigEgammaBremCollectionBuilder (egammaAlgsConf.EMBremCollectionBuilder):
             TrackingCommon.getInDetTrackSummaryTool(
                 name="GSFBuildInDetTrigTrackSummaryTool",
                 InDetSummaryHelperTool=GSFBuildTrackSummaryHelperTool,
-                doSharedHits=False,
-                doHolesInDet=False,
-                AddExpectedHits=True)
+                doHolesInDet=False)
         )
         #
         #  Track Particle Creator tool (private not in ToolSvc)

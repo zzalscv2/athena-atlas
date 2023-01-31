@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TextFileDBReader.h"
@@ -168,7 +168,7 @@ TextFileDBReader::getRowNumber(std::string & key, std::string & rowNumber) const
   std::string::size_type pos = key.find('#');
   if (pos != std::string::npos) {
     rowNumber = key.substr(pos+1);
-    key = key.substr(0,pos);
+    key.resize(pos);
     return true;
   } 
   return false;

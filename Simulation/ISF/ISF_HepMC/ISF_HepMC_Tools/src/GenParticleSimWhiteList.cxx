@@ -87,10 +87,11 @@ bool ISF::GenParticleSimWhiteList::pass(HepMC::ConstGenParticlePtr particle) con
   bool so_far_so_good = pass( particle , vertices );
 
   // Test all parent particles
+  const int id_of_particle = particle->id();
   if (so_far_so_good && particle->production_vertex() && m_qs){
     for (auto pit: particle->production_vertex()->particles_in()){
       // Loop breaker
-      if ( HepMC::barcode(pit) == HepMC::barcode(particle) ) continue;
+      if ( pit->id() == id_of_particle ) continue;
       // Check this particle
       vertices.clear();
       bool parent_all_clear = pass( pit , vertices );
@@ -147,8 +148,8 @@ bool ISF::GenParticleSimWhiteList::pass(HepMC::ConstGenParticlePtr particle , st
     passFilter = passFilter && ( (m_minDecayRadiusQS < particle->end_vertex()->position().perp()) || (m_minDecayRadiusQS < particle->production_vertex()->position().perp()) );
     if (passFilter) {
       // Break loops
-      if ( std::find( used_vertices.begin() , used_vertices.end() , HepMC::barcode(particle->end_vertex()) )==used_vertices.end() ){
-        used_vertices.push_back( HepMC::barcode(particle->end_vertex()) );
+      if ( std::find( used_vertices.begin() , used_vertices.end() , particle->end_vertex()->id() )==used_vertices.end() ){
+        used_vertices.push_back( particle->end_vertex()->id() );
         for (auto pit: particle->end_vertex()->particles_out()){
           passFilter = passFilter && pass( pit , used_vertices );
           if (!passFilter) {
@@ -162,7 +163,7 @@ bool ISF::GenParticleSimWhiteList::pass(HepMC::ConstGenParticlePtr particle , st
       ATH_MSG_VERBOSE( "Particle " << particle << " was produced and decayed within a radius of " << m_minDecayRadiusQS << " mm.");
     }
   } // particle had daughters
-  else if (!particle->end_vertex() && !passFilter && particle->status()<3) { // no daughters... No end vertex... Check if this isn't trouble
+  if (!particle->end_vertex() && particle->status()==2) { // no daughters... No end vertex... Check if this isn't trouble
     ATH_MSG_ERROR( "Found a particle with no end vertex that does not appear in the white list." );
     ATH_MSG_ERROR( "This is VERY likely pointing to a problem with either the configuration you ");
     ATH_MSG_ERROR( "are using, or a bug in the generator.  Either way it should be fixed.  The");

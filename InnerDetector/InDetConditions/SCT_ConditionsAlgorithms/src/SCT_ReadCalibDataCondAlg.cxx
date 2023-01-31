@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_ReadCalibDataCondAlg.h"
@@ -45,9 +45,11 @@ SCT_ReadCalibDataCondAlg::SCT_ReadCalibDataCondAlg(const std::string& name, ISvc
   m_ignoreDefectParameters.value().push_back(1.);
   // 1. means 100%. Only NO_HI defects with >100% are considered, i.e., all NO_HI defects are ignored.
 
-  m_ignoreDefects.value().push_back("LO_GAIN_ABSOLUTE");
+  m_ignoreDefects.value().push_back("LO_GAIN");
   m_ignoreDefectParameters.value().push_back(-1000.);
-  // New defect added for Run 3, but for now we ignore it.
+
+  m_ignoreDefects.value().push_back("HI_GAIN");
+  m_ignoreDefectParameters.value().push_back(-1000.);
 }
 
 StatusCode SCT_ReadCalibDataCondAlg::initialize() {
@@ -253,7 +255,7 @@ StatusCode SCT_ReadCalibDataCondAlg::execute(const EventContext& ctx) const {
           }
           if (not ignoreDefect) {
             //set the isGoodBool value for all strips for this defect
-            for (unsigned int strip{theseDefects.begDefects[i]}; strip <= theseDefects.endDefects[i]; ++strip) { 
+            for (unsigned int strip = theseDefects.begDefects[i]; strip <= theseDefects.endDefects[i]; ++strip) { 
               // Check for phiSwap and which wafer side before filling isGood vector
               if (strip < STRIPS_PER_WAFER) { //side 0 0->767
                 const unsigned int waferId0{hashId0};

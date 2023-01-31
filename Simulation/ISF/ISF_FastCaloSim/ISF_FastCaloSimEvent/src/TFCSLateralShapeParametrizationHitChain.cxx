@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSLateralShapeParametrizationHitChain.h"
@@ -147,7 +147,8 @@ float TFCSLateralShapeParametrizationHitChain::get_E_hit(TFCSSimulationState& si
 {  
   const int nhits = get_number_of_hits(simulstate,truth,extrapol);
   const int sample = calosample();
-  if(nhits<=0 || sample<0) return simulstate.E(sample);
+  if (sample < 0) return 0;
+  if(nhits<=0) return simulstate.E(sample);
   const float maxWeight = getMaxWeight();// maxWeight = -1 if  shapeWeight class is not in m_chain  
   
   if(maxWeight>0) return simulstate.E(sample)/(maxWeight*nhits); // maxWeight is used only if shapeWeight class is in m_chain

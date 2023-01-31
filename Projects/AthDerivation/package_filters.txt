@@ -20,7 +20,6 @@
 + Calorimeter/CaloClusterCorrection
 + Calorimeter/CaloCnv/CaloAthenaPool
 + Calorimeter/CaloCnv/CaloCondAthenaPool
-+ Calorimeter/CaloCnv/CaloDetMgrDetDescrCnv
 + Calorimeter/CaloCnv/CaloIdCnv
 + Calorimeter/CaloCnv/CaloTPCnv
 + Calorimeter/CaloCondBlobObjs

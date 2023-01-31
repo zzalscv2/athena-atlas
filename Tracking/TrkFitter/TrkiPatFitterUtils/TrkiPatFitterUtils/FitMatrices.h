@@ -26,20 +26,20 @@
 #ifndef TRKIPATFITTERUTILS_FITMATRICES_H
 #define TRKIPATFITTERUTILS_FITMATRICES_H
 
+#include <cmath>
+#include <list>
+
 #include "EventPrimitives/EventPrimitives.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "TrkiPatFitterUtils/FitMatrix.h"
-#include <cmath>
-#include <list>
 
 namespace Trk {
 class FitMeasurement;
 class FitParameters;
 
-class FitMatrices
-{
-public:
+class FitMatrices {
+ public:
   FitMatrices(bool constrainedAlignmentEffects);
 
   ~FitMatrices(void);
@@ -51,7 +51,7 @@ public:
   void checkPointers(MsgStream& log) const;
 
   // change to chiSquared
-  static double chiSquaredChange(void) ;
+  static double chiSquaredChange(void);
 
   // accessor to DerivativeMatrix (eigen)
   Amg::MatrixX* derivativeMatrix(void);
@@ -102,7 +102,7 @@ public:
   // tell fit to use measured perigee parameters
   void usePerigee(const FitMeasurement& measurement);
 
-private:
+ private:
   // copy, assignment: no semantics, no implementation
   FitMatrices(const FitMatrices&) = delete;
   FitMatrices& operator=(const FitMatrices&) = delete;
@@ -110,7 +110,7 @@ private:
   // add perigee measurement
   void addPerigeeMeasurement(void);
   // fix for momentum singularity
-  void avoidMomentumSingularity(void); // using Eigen
+  void avoidMomentumSingularity(void);  // using Eigen
 
   fitMatrix m_fitMatrix;
   int m_columnsDM;
@@ -139,30 +139,22 @@ private:
 
 //<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
 
-inline Amg::MatrixX*
-FitMatrices::derivativeMatrix(void) 
-{
+inline Amg::MatrixX* FitMatrices::derivativeMatrix(void) {
   return m_derivativeMatrix;
 }
 
-inline Amg::MatrixX*
-FitMatrices::finalCovariance(void) 
-{
+inline Amg::MatrixX* FitMatrices::finalCovariance(void) {
   return m_finalCovariance;
 }
 
-inline int
-FitMatrices::numberDoF(void) const
-{
+inline int FitMatrices::numberDoF(void) const {
   return m_numberDoF;
 }
 
-inline int
-FitMatrices::numberDriftCircles(void) const
-{
+inline int FitMatrices::numberDriftCircles(void) const {
   return m_numberDriftCircles;
 }
 
-} // end of namespace
+}  // namespace Trk
 
-#endif // TRKIPATFITTERUTILS_FITMATRICES_H
+#endif  // TRKIPATFITTERUTILS_FITMATRICES_H

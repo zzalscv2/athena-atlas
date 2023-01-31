@@ -271,7 +271,7 @@ def JETM1ExtraContentCfg(ConfigFlags):
 
     if ConfigFlags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTopQuarkAndDownstreamParticlesCfg
-        acc.merge(AddTopQuarkAndDownstreamParticlesCfg(generations=4,rejectHadronChildren=True))
+        acc.merge(AddTopQuarkAndDownstreamParticlesCfg(ConfigFlags, generations=4,rejectHadronChildren=True))
 
     #=======================================
     # Add Run-2 jet trigger collections
@@ -299,7 +299,7 @@ def JETM1Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    JETM1TriggerListsHelper = TriggerListsHelper()
+    JETM1TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Skimming, thinning, augmentation, extra content
     acc.merge(JETM1KernelCfg(ConfigFlags, name="JETM1Kernel", StreamName = 'StreamDAOD_JETM1', TriggerListsHelper = JETM1TriggerListsHelper))
@@ -310,7 +310,7 @@ def JETM1Cfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    JETM1SlimmingHelper = SlimmingHelper("JETM1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    JETM1SlimmingHelper = SlimmingHelper("JETM1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
     JETM1SlimmingHelper.SmartCollections = ["Electrons", "Photons", "Muons", "PrimaryVertices",
                                             "InDetTrackParticles",
@@ -322,18 +322,14 @@ def JETM1Cfg(ConfigFlags):
 
     JETM1SlimmingHelper.ExtraVariables  = ["AntiKt4EMTopoJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1",
                                            "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1",
-                                           "AntiKt4EMPFlowJets.GhostTower",
-                                           "AntiKt4EMPFlowJets.passOnlyBJVT","AntiKt4EMPFlowJets.DFCommonJets_bJvt",
+                                           "AntiKt4EMPFlowJets.passOnlyBJVT.DFCommonJets_bJvt",
                                            "InDetTrackParticles.truthMatchProbability",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.zg.rg.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.EnergyPerSampling.GhostTrack",
                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets.zg.rg",
-                                           "AntiKt10UFOCSSKJets.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.EnergyPerSampling.GhostTrack",
-                                           "TruthVertices.barcode.z",
-                                           "HLT_xAOD__JetContainer_GSCJet.pt.eta.phi.m"]
+                                           "AntiKt10UFOCSSKJets.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.EnergyPerSampling.GhostTrack"]
 
     JETM1SlimmingHelper.AllVariables = [ "MuonSegments", "EventInfo",
-                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape",
-                                         "CaloCalFwdTopoTowers"]
+                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape"]
     
     # Truth containers
     if ConfigFlags.Input.isMC:
@@ -344,9 +340,10 @@ def JETM1Cfg(ConfigFlags):
         JETM1SlimmingHelper.AppendToDictionary.update({'TruthParticles': 'xAOD::TruthParticleContainer',
                                                        'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer'})
 
-        JETM1SlimmingHelper.AllVariables += ["TruthTopQuarkWithDecayParticles","TruthTopQuarkWithDecayVertices"]
-        JETM1SlimmingHelper.AllVariables += ["AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets", "TruthParticles"]
         JETM1SlimmingHelper.SmartCollections += ["AntiKt4TruthWZJets"]
+        JETM1SlimmingHelper.AllVariables += ["TruthTopQuarkWithDecayParticles","TruthTopQuarkWithDecayVertices",
+                                             "AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets", "TruthParticles"]
+        JETM1SlimmingHelper.ExtraVariables += ["TruthVertices.barcode.z"]
 
     JETM1SlimmingHelper.AppendToDictionary.update({'Kt4UFOCSSKEventShape':'xAOD::EventShape',
                                                    'Kt4UFOCSSKEventShapeAux':'xAOD::EventShapeAuxInfo',

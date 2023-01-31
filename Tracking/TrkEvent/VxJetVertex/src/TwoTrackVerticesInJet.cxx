@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -160,18 +160,9 @@ namespace Trk
   
   void TwoTrackVerticesInJet::deleteAll(std::vector<const TrackParticleBase*> & neutralTrackOfVertex) noexcept
   {
-
-    std::vector<const TrackParticleBase*>::iterator mapBegin=neutralTrackOfVertex.begin();
-    std::vector<const TrackParticleBase*>::iterator mapEnd=neutralTrackOfVertex.end();
-
-    for (std::vector<const TrackParticleBase*>::iterator mapIter=mapBegin;
-         mapIter!=mapEnd;
-         mapIter++)
+    for (const TrackParticleBase* p : neutralTrackOfVertex)
     {
-      if (*mapIter!=0)
-      {
-        delete *mapIter;
-      }
+      delete p;
     }
     neutralTrackOfVertex.clear();
   }

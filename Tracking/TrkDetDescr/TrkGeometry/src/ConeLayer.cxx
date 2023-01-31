@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -20,40 +20,40 @@ Trk::ConeLayer::ConeLayer(const Amg::Transform3D& transform,
                           Trk::ConeBounds* cbounds,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
-                          Trk::OverlapDescriptor* olap,
+                          std::unique_ptr<Trk::OverlapDescriptor> olap,
                           int laytyp)
   : ConeSurface(transform, cbounds)
-  , Layer(laymatprop, thickness, olap, laytyp)
+  , Layer(laymatprop, thickness, std::move(olap), laytyp)
 {}
 
 Trk::ConeLayer::ConeLayer(Trk::ConeSurface* cyl,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
-                          Trk::OverlapDescriptor* olap,
+                          std::unique_ptr<Trk::OverlapDescriptor> olap,
                           int laytyp)
   : ConeSurface(*cyl)
-  , Layer(laymatprop, thickness, olap, laytyp)
+  , Layer(laymatprop, thickness, std::move(olap), laytyp)
 {}
 
 Trk::ConeLayer::ConeLayer(const Amg::Transform3D& transform,
                           Trk::ConeBounds* cbounds,
-                          Trk::SurfaceArray* surfaceArray,
+                          std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                           double thickness,
-                          Trk::OverlapDescriptor* olap,
+                          std::unique_ptr<Trk::OverlapDescriptor> olap,
                           int laytyp)
   : ConeSurface(transform, cbounds)
-  , Layer(surfaceArray, thickness, olap, laytyp)
+  , Layer(std::move(surfaceArray), thickness, std::move(olap), laytyp)
 {}
 
 Trk::ConeLayer::ConeLayer(const Amg::Transform3D& transform,
                           Trk::ConeBounds* cbounds,
-                          Trk::SurfaceArray* surfaceArray,
+                          std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
-                          Trk::OverlapDescriptor* olap,
+                          std::unique_ptr<Trk::OverlapDescriptor> olap,
                           int laytyp)
   : ConeSurface(transform, cbounds)
-  , Layer(surfaceArray, laymatprop, thickness, olap, laytyp)
+  , Layer(std::move(surfaceArray), laymatprop, thickness, std::move(olap), laytyp)
 {}
 
 Trk::ConeLayer::ConeLayer(const Trk::ConeLayer& clay) = default;
@@ -92,7 +92,7 @@ double
 Trk::ConeLayer::preUpdateMaterialFactor(const Trk::TrackParameters& parm,
                                         Trk::PropDirection dir) const
 {
-  if (!Trk::Layer::m_layerMaterialProperties.get())
+  if (!Trk::Layer::m_layerMaterialProperties)
     return 0.;
   // calculate the direction to the normal
   const Amg::Vector3D& parmPos = parm.position();
@@ -106,7 +106,7 @@ double
 Trk::ConeLayer::postUpdateMaterialFactor(const Trk::TrackParameters& parm,
                                          Trk::PropDirection dir) const
 {
-  if (!Trk::Layer::m_layerMaterialProperties.get())
+  if (!Trk::Layer::m_layerMaterialProperties)
     return 0;
   const Amg::Vector3D& parmPos = parm.position();
   Amg::Vector3D pastStep(parmPos + dir * parm.momentum().normalized());

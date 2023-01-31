@@ -10,8 +10,8 @@ set -u
 
 dataType=$1
 shift
-athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py --evtMax=500 - --data-type $dataType --for-compare "$@"
 athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py --evtMax=500 - --data-type $dataType --for-compare --block-config "$@"
+athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py --evtMax=500 - --data-type $dataType --for-compare "$@"
 
 
-acmd.py diff-root --error-mode resilient --enforce-leaves -t analysis FullCPAlgorithmsTest.$dataType.hist.root FullCPAlgorithmsConfigTest.$dataType.hist.root
+acmd.py diff-root --error-mode resilient -t analysis FullCPAlgorithmsTest.$dataType.hist.root FullCPAlgorithmsConfigTest.$dataType.hist.root

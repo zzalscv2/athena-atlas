@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileRawChannelNoiseMonitorAlgorithm.h"
@@ -25,7 +25,7 @@ StatusCode TileRawChannelNoiseMonitorAlgorithm::initialize() {
   ATH_CHECK( m_DQstatusKey.initialize() );
   ATH_CHECK( m_badChannelsKey.initialize() );
   ATH_CHECK( m_DCSStateKey.initialize(m_checkDCS) );
-  ATH_CHECK( m_tileCondToolEmscale.retrieve() );
+  ATH_CHECK( m_emScaleKey.initialize() );
 
   using Tile = TileCalibUtils;
   using namespace Monitored;
@@ -73,6 +73,9 @@ StatusCode TileRawChannelNoiseMonitorAlgorithm::fillHistograms( const EventConte
     const TileDCSState* dcsState = m_checkDCS ? SG::ReadCondHandle(m_DCSStateKey, ctx).cptr() : nullptr;
 
     SG::ReadCondHandle<TileBadChannels> badChannels(m_badChannelsKey, ctx);
+
+    SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+    ATH_CHECK( emScale.isValid() );
 
     SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_rawChannelContainerKey, ctx);
     ATH_CHECK( rawChannelContainer.isValid() );
@@ -147,8 +150,8 @@ StatusCode TileRawChannelNoiseMonitorAlgorithm::fillHistograms( const EventConte
 
         float amplitude = rawChannel->amplitude();
         if (recalibrate) {
-           amplitude = m_tileCondToolEmscale->channelCalib(drawerIdx, channel, adc, amplitude,
-                                                           rawChannelUnit, TileRawChannelUnit::ADCcounts);
+          amplitude = emScale->calibrateChannel(drawerIdx, channel, adc, amplitude,
+                                                rawChannelUnit, TileRawChannelUnit::ADCcounts);
         }
 
         auto monAmplitude = Monitored::Scalar<float>("amplitude", amplitude);

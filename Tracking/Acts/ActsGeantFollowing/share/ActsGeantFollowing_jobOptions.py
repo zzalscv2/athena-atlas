@@ -112,24 +112,15 @@ myPDG = 13  # Muon
 # myPDG = 998 # Charged Geantino
 # myPDG = 999 # neutral Geantino
 
+simFlags.RandomSeedOffset = myRandomOffset
+
 # sept 2014 run ParticleGun
 import ParticleGun as PG
-pg = PG.ParticleGun(randomSvcName=simFlags.RandomSvc.get_Value(), randomStream="SINGLE")
+pg = PG.ParticleGun(randomStream = "SINGLE", randomSeed = simFlags.RandomSeedOffset.get_Value())
 pg.sampler.pid = myPDG
 # pg.sampler.mom = PG.EEtaMPhiSampler(energy=myMomentum, eta=[myMinEta,myMaxEta])
 pg.sampler.mom = PG.PtEtaMPhiSampler(pt=myMomentum, eta=[myMinEta,myMaxEta])
 topSeq += pg
-
-simFlags.RandomSeedOffset = myRandomOffset
-
-simFlags.RandomSeedList.addSeed( "SINGLE", myRandomSeed1, myRandomSeed2 )
-
-from RngComps.RngCompsConf import AtRndmGenSvc
-myAtRndmGenSvc = AtRndmGenSvc()
-myAtRndmGenSvc.Seeds = ["SINGLE "+str(myRandomSeed1)+" "+str(myRandomSeed2) ]
-myAtRndmGenSvc.OutputLevel = VERBOSE
-myAtRndmGenSvc.EventReseeding   = False
-ServiceMgr += myAtRndmGenSvc
 
 # ToolSvc setup
 from AthenaCommon.AppMgr import ToolSvc

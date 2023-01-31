@@ -54,7 +54,7 @@ inline std::string Tools::getChamberName(MuonCalib::MuonFixedId* mid) {
     return chambername.str();
 }
 
-inline double* Tools::getPosition(std::string filename, MuonCalib::MuonFixedId* mid) {
+inline double* Tools::getPosition(const std::string& filename, MuonCalib::MuonFixedId* mid) {
     double* pos = new double[6];
     for (int i = 0; i < 6; i++) { pos[i] = 0.; }
 

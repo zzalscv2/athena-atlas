@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -99,19 +99,19 @@ if __name__=="__main__":
         print("WARNING: Failed to convert time",TimeStamp_ns,"into a run/lumi number. Using 'infinite' run-number",rlb[0])
 
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    
-    ConfigFlags.Input.RunNumber=rlb[0]
-    ConfigFlags.Input.TimeStamp=TimeStamp
-    ConfigFlags.Input.Files=[]
-    ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.RunNumber=rlb[0]
+    flags.Input.TimeStamp=TimeStamp
+    flags.Input.Files=[]
+    flags.IOVDb.DatabaseInstance="CONDBR2"
   
     if args.globaltag:
-        ConfigFlags.IOVDb.GlobalTag=args.globaltag
+        flags.IOVDb.GlobalTag=args.globaltag
 
-    ConfigFlags.lock()
-    cfg=MainEvgenServicesCfg(ConfigFlags)
-    cfg.merge(CaloScaleNoiseCfg(ConfigFlags,absolute=args.absolute,output=args.output))
+    flags.lock()
+    cfg=MainEvgenServicesCfg(flags)
+    cfg.merge(CaloScaleNoiseCfg(flags,absolute=args.absolute,output=args.output))
 
     print("Start running...")
     cfg.run(1)

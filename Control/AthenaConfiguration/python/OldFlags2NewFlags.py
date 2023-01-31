@@ -164,7 +164,7 @@ def getNewConfigFlags():
             ConfigFlags.BTagging.RunFlipTaggers = True
             pass
     except ImportError:
-        log.info('RecExConfig not available, "ConfigFlags.BTagging.SaveSV1Probabilities", "ConfigFlags.BTagging.RunJetFitterNN" and "ConfigFlags.BTagging.RunFlipTaggers" not set')
+        log.info('RecExConfig not available, "ConfigFlags.BTagging.SaveSV1Probabilities" and "ConfigFlags.BTagging.RunFlipTaggers" not set')
         pass
 
     return ConfigFlags

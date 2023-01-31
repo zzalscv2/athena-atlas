@@ -446,37 +446,37 @@ int PileupReweightingTool::fill( const xAOD::EventInfo& eventInfo, Double_t x, D
 }
 
 StatusCode PileupReweightingTool::apply(const xAOD::EventInfo& eventInfo, bool mu_dependent) {
-   if (eventInfo.isAvailable<unsigned int>(m_prefix+"RandomRunNumber")){
-     ATH_MSG_WARNING("Attempting to run pileup reweighting, but it has already been run with prefix \"" << m_prefix << "\" - returning");
-     return StatusCode::SUCCESS;
-   }
 
    if(m_inConfigMode)  {
       fill( eventInfo );
       return StatusCode::SUCCESS;
    }
 
-   if(!eventInfo.eventType(xAOD::EventInfo::IS_SIMULATION)) {
-      eventInfo.auxdecor<float>(m_prefix+"corrected_averageInteractionsPerCrossing") = getCorrectedAverageInteractionsPerCrossing(eventInfo,false);
+   if(!eventInfo.eventType(xAOD::EventInfo::IS_SIMULATION)){
+      if(!eventInfo.isAvailable<float>(m_prefix+"corrected_averageInteractionsPerCrossing"))
+         eventInfo.auxdecor<float>(m_prefix+"corrected_averageInteractionsPerCrossing") = getCorrectedAverageInteractionsPerCrossing(eventInfo,false);
       return StatusCode::SUCCESS;
    }
 
    //just copy the value over for MC
-   eventInfo.auxdecor<float>(m_prefix+"corrected_averageInteractionsPerCrossing") = eventInfo.averageInteractionsPerCrossing();
+   if(!eventInfo.isAvailable<float>(m_prefix+"corrected_averageInteractionsPerCrossing"))
+      eventInfo.auxdecor<float>(m_prefix+"corrected_averageInteractionsPerCrossing") = eventInfo.averageInteractionsPerCrossing();
+
+   //decorate with random run number etc
+   if(!eventInfo.isAvailable<unsigned int>(m_prefix+"RandomRunNumber")){
+      unsigned int rrn = getRandomRunNumber( eventInfo, mu_dependent );
+      eventInfo.auxdecor<unsigned int>(m_prefix+"RandomRunNumber") = (rrn==0) ? getRandomRunNumber(eventInfo, false) : rrn;
+   }
+   if(!eventInfo.isAvailable<unsigned int>(m_prefix+"RandomLumiBlockNumber"))
+      eventInfo.auxdecor<unsigned int>(m_prefix+"RandomLumiBlockNumber") = (eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomRunNumber")==0) ? 0 : /*m_tool->*/GetRandomLumiBlockNumber(  eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomRunNumber")  );
+   if(!eventInfo.isAvailable<ULong64_t>(m_prefix+"PRWHash"))
+      eventInfo.auxdecor<ULong64_t>(m_prefix+"PRWHash") = getPRWHash( eventInfo );
 
    //decorate with standard PileupWeight 
-
-   if(!m_noWeightsMode)
+   if(!m_noWeightsMode && !eventInfo.isAvailable<float>(m_prefix+"PileupWeight"))
       eventInfo.auxdecor<float>(m_prefix+"PileupWeight") = getCombinedWeight(eventInfo, true);
       
-   //decorate with random run number etc
-   unsigned int rrn = getRandomRunNumber( eventInfo, mu_dependent );
-   eventInfo.auxdecor<unsigned int>(m_prefix+"RandomRunNumber") = (rrn==0) ? getRandomRunNumber(eventInfo, false) : rrn;
-   eventInfo.auxdecor<unsigned int>(m_prefix+"RandomLumiBlockNumber") = (eventInfo.auxdecor<unsigned int>(m_prefix+"RandomRunNumber")==0) ? 0 : /*m_tool->*/GetRandomLumiBlockNumber(  eventInfo.auxdecor<unsigned int>(m_prefix+"RandomRunNumber")  );
-
-   eventInfo.auxdecor<ULong64_t>(m_prefix+"PRWHash") = getPRWHash( eventInfo );
-
-   ATH_MSG_VERBOSE("PileupWeight = " << eventInfo.auxdecor<float>(m_prefix+"PileupWeight") << " RandomRunNumber = " << eventInfo.auxdecor<unsigned int>(m_prefix+"RandomRunNumber") << " RandomLumiBlockNumber = " << eventInfo.auxdecor<unsigned int>(m_prefix+"RandomLumiBlockNumber"));
+   ATH_MSG_VERBOSE("PileupWeight = " << eventInfo.auxdataConst<float>(m_prefix+"PileupWeight") << " RandomRunNumber = " << eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomRunNumber") << " RandomLumiBlockNumber = " << eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomLumiBlockNumber"));
 
    return StatusCode::SUCCESS;
 }

@@ -222,8 +222,9 @@ StatusCode PDFReweightTool::execute() {
 			McEventCollection::const_iterator iter 		= mceventTES->begin();
 			McEventCollection::const_iterator iterEnd 	= mceventTES->end();
 		
-			for (; iter!=iterEnd; iter++) {
-		    	HepMC::GenEvent* evt = new HepMC::GenEvent(**iter);
+			for (; iter!=iterEnd; ++iter) {
+                          HepMC::GenEvent* evt = new HepMC::GenEvent(**iter);
+                          HepMC::fillBarcodesAttribute(evt);
 				sc = this->Reweight(evt);
 				if( sc.isFailure() ) {
 					msg(MSG::WARNING)

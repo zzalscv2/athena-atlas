@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
@@ -61,15 +61,16 @@ def L1CaloCondAlgCfg(flags, readTest=False, Physics=True, Calib1=True, Calib2=Tr
 
 if __name__=="__main__":
         
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    
+
+    flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW 
     flags.Exec.MaxEvents = 1
     flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2022-02'
     flags.GeoModel.AtlasVersion="ATLAS-R2-2015-03-01-00"
     flags.Trigger.enableL1CaloLegacy = True 
-    
+    flags.fillFromArgs()    
     flags.lock() 
     
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg

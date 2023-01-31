@@ -16,6 +16,7 @@
 #include "TrkTrack/Track.h"
 
 #include "AtlasHepMC/GenParticle.h"
+#include "AtlasHepMC/MagicNumbers.h"
 #include "TrkValEvent/GenParticleJet.h"
 #include "TrkToolInterfaces/ITruthToTrack.h"
 
@@ -377,7 +378,7 @@ StatusCode Trk::TrackValidationNtupleWriter::execute() {
                 if ( genParticle->production_vertex() )
                   {
                     generatedTrackPerigee = m_truthToTrack->makePerigeeParameters( genParticle );
-                    if (generatedTrackPerigee == nullptr && HepMC::barcode(genParticle) > 1000000 ) {
+                    if (generatedTrackPerigee == nullptr && HepMC::barcode(genParticle) > HepMC::SIM_REGENERATION_INCREMENT ) {
                       ATH_MSG_DEBUG ("No perigee available for interacting truth particle."
                                      <<" -> This is OK for particles from the TrackRecord, but probably"
                                      <<" a bug for production vertex particles.");

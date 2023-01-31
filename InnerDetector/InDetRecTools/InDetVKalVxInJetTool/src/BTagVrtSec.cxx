@@ -505,7 +505,7 @@ namespace InDet{
 			       errorMatrix, Chi2PerTrk, TrkAtVrt, Chi2,
 			       *state, true);
 	   if(sc.isFailure()) continue;
-	   if(projSV_PV(tmpVertex,primVrt,jetDir)<0.) continue; // Drop negative direction
+	   if((projSV_PV(tmpVertex,primVrt,jetDir)<0. &&(!m_getNegativeTag)) || (projSV_PV(tmpVertex,primVrt,jetDir)>0. &&(m_getNegativeTag))) continue; // Drop negative direction
 
 	   if(m_useTrackClassificator) Chi2 += trkRank[it];     // Remove preferably non-HF-tracks
 
@@ -626,7 +626,7 @@ namespace InDet{
 	  h.m_curTup->pTvsJet[i] = TLV.Perp(jetDir.Vect());
 	  TLorentzVector normJ;
 	  normJ.SetPtEtaPhiM(1.,jetDir.Eta(),jetDir.Phi(),0.);
-	  h.m_curTup->prodTJ[i] = std::sqrt(TLV.Dot(normJ));
+	  h.m_curTup->prodTJ[i] = std::sqrt(TMath::Abs(TLV.Dot(normJ)));
 	  h.m_curTup->nVrtT[i] = 0;
 	}
       }
@@ -712,12 +712,13 @@ namespace InDet{
 	TVector3 SVmPV(tmpVrt.fitVertex.x()-primVrt.x(),
 		       tmpVrt.fitVertex.y()-primVrt.y(),
 		       tmpVrt.fitVertex.z()-primVrt.z());
-	tmpVrt.dRSVPV = jetDir.DeltaR(TLorentzVector(SVmPV, 1.)); //DeltaR SV-PV vs jet
-	if(tmpVrt.dRSVPV > m_coneForTag ) continue;  // SV is outside of the jet cone
-
 	double jetVrtDir = SVmPV.Dot(jetDir.Vect());
+	if(jetVrtDir > 0) {tmpVrt.dRSVPV = jetDir.DeltaR(TLorentzVector(SVmPV, 1.));} //DeltaR SV-PV vs jet
+	else{tmpVrt.dRSVPV = jetDir.DeltaR(TLorentzVector(-SVmPV, 1.));}
+	if(tmpVrt.dRSVPV > m_coneForTag ) continue;  // SV is outside of the jet cone
+	
 	double vPos = SVmPV.Dot(tmpVrt.momentum.Vect())/tmpVrt.momentum.Rho();
-	if((!m_multiWithPrimary) &&(!m_getNegativeTail) && (!m_getNegativeTag) &&  jetVrtDir<0. )  continue; // secondary vertex behind primary
+	if((!m_multiWithPrimary) &&(!m_getNegativeTail) &&( ((!m_getNegativeTag) &&  jetVrtDir<0.) || (m_getNegativeTag && jetVrtDir > 0.) ))  continue; // secondary vertex behind primary
 	if(vPos<-100.) continue;  // Secondary vertex is too far behind primary
 
 	// Check track pixel hit patterns vs vertex position.
@@ -878,6 +879,10 @@ namespace InDet{
     listSecondTracks.clear();
     std::map<int,int> trkHF; // use map with track index as key + value to get list of tracks in 2-track vertices without duplicates
     for(auto &vv : all2TrVrt){
+      if(vv.badVrt){
+        if(m_useITkMaterialRejection)continue;
+        if(!m_multiVertex && m_rejectBadVertices)continue;
+      }
       if(m_multiWithPrimary || m_multiVertex) add_edge(vv.i,vv.j,compatibilityGraph);
       trkHF[vv.i] = vv.i;
       trkHF[vv.j] = vv.j;

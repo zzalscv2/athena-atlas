@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -122,15 +122,15 @@ CaloDetDescrManager_Base::element_end() const
 CaloDetDescrManager_Base::calo_element_range
 CaloDetDescrManager_Base::element_range() const
 {
-  return calo_element_range (m_element_vec.begin(), 
-                             m_element_vec.end());
+  return {m_element_vec.begin(), 
+                             m_element_vec.end()};
 }
     
 CaloDetDescrManager_Base::calo_nonconst_element_range
 CaloDetDescrManager_Base::element_range_nonconst()
 {
-  return calo_nonconst_element_range (m_element_vec.begin(), 
-                                      m_element_vec.end());
+  return {m_element_vec.begin(), 
+                                      m_element_vec.end()};
 }
     
 CaloDetDescrManager_Base::calo_element_const_iterator
@@ -151,8 +151,8 @@ CaloDetDescrManager_Base::calo_element_range
 CaloDetDescrManager_Base::element_range(CaloCell_ID::SUBCALO subCalo) const 
 {
   int sCal = (int) subCalo;
-  return calo_element_range (m_subCalo_begin[sCal],
-                             m_subCalo_end[sCal]);
+  return {m_subCalo_begin[sCal],
+                             m_subCalo_end[sCal]};
 }
 
 const CaloDetDescrElement*
@@ -534,13 +534,13 @@ CaloDetDescrManager_Base::calo_descriptors_size() const
 CaloDetDescrManager_Base::calo_descr_range
 CaloDetDescrManager_Base::calo_descriptors_range() const
 {
-  return calo_descr_range (m_descr_vec.begin(), m_descr_vec.end());
+  return {m_descr_vec.begin(), m_descr_vec.end()};
 }
 
 CaloDetDescrManager_Base::calo_nonconst_descr_range
 CaloDetDescrManager_Base::calo_descriptors_range_nonconst()
 {
-  return calo_nonconst_descr_range (m_descr_vec.begin(), m_descr_vec.end());
+  return {m_descr_vec.begin(), m_descr_vec.end()};
 }
 
 CaloDetDescrManager_Base::calo_descr_const_iterator
@@ -564,15 +564,15 @@ CaloDetDescrManager_Base::tile_descriptors_size() const
 CaloDetDescrManager_Base::calo_descr_range
 CaloDetDescrManager_Base::tile_descriptors_range() const
 {
-  return calo_descr_range (m_tile_descr_vec.begin(),
-                           m_tile_descr_vec.end());
+  return {m_tile_descr_vec.begin(),
+                           m_tile_descr_vec.end()};
 }
  
 CaloDetDescrManager_Base::calo_nonconst_descr_range
 CaloDetDescrManager_Base::tile_descriptors_range_nonconst()
 {
-  return calo_nonconst_descr_range (m_tile_descr_vec.begin(),
-                                    m_tile_descr_vec.end());
+  return {m_tile_descr_vec.begin(),
+                                    m_tile_descr_vec.end()};
 }
  
 const CaloDetDescriptor*
@@ -1585,73 +1585,6 @@ void CaloDetDescrManager_Base::decode_sample (CaloCell_ID::SUBCALO& subCalo,
     sampling_or_module = 0;
   }
 
-}
-
-const CaloDetDescrManager* CaloDetDescrManager::instance()
-{
-  // The following code can be removed once all usage  has
-  // been removed and replaced by accessing this object via the transient
-  // detector store. Use the instance that's in the transient detector
-  // store if it exists. Otherwise create a new instance, register it in
-  // the store and return that. First, locate the StoreGate instance that's
-  // managing the transient detector store.
-  StoreGateSvc* detStore = nullptr;
-  IMessageSvc* msgSvc;
-  const CaloDetDescrManager* theMgr =nullptr;
-
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StatusCode status = svcLoc->service("MessageSvc", msgSvc);
-  if (status.isSuccess()) {
-    MsgStream log(msgSvc, "CaloDetDescrManager");
-    status = svcLoc->service("DetectorStore", detStore);
-    if (status.isSuccess()) {
-      // Test whether the instance already exists in the transient
-      // detector store
-      if (detStore->contains<CaloDetDescrManager>("CaloMgr")) {
-        // The instance already exists - retrieve it and save it locally.
-        status = detStore->retrieve(theMgr);
-      }
-    } else {
-      log << MSG::ERROR << "Could not locate DetectorStore" << endmsg;
-    }
-  } else {
-    std::cerr << "CaloDetDescrManager: Could not locate the MessageSvc!!!\n";
-  }
-  return theMgr;
-}
-
-const CaloSuperCellDetDescrManager* CaloSuperCellDetDescrManager::instance()
-{
-  // The following code can be removed once all usage has
-  // been removed and replaced by accessing this object via the transient
-  // detector store. Use the instance that's in the transient detector
-  // store if it exists. Otherwise create a new instance, register it in
-  // the store and return that. First, locate the StoreGate instance that's
-  // managing the transient detector store.
-  StoreGateSvc* detStore = nullptr;
-  IMessageSvc* msgSvc;
-  const CaloSuperCellDetDescrManager* theMgr = nullptr;
-
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StatusCode status = svcLoc->service("MessageSvc", msgSvc);
-  if (status.isSuccess()) {
-    MsgStream log(msgSvc, "CaloSuperCellDetDescrManager");
-    status = svcLoc->service("DetectorStore", detStore);
-
-    if (status.isSuccess()) {
-      // Test whether the instance already exists in the transient
-      // detector store
-      if (detStore->contains<CaloSuperCellDetDescrManager>("CaloSuperCellMgr")) {
-        // The instance already exists - retrieve it and save it locally.
-        status = detStore->retrieve(theMgr);
-      }
-    } else {
-      log << MSG::ERROR << "Could not locate DetectorStore" << endmsg;
-    }
-  } else {
-    std::cerr << "CaloSuperCellDetDescrManager: Could not locate the MessageSvc!!!\n";
-  }
-  return theMgr;
 }
 
 const CaloCell_ID* CaloDetDescrManager::getCaloCell_ID() const

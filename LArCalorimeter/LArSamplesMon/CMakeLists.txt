@@ -22,12 +22,12 @@ atlas_add_dictionary( LArSamplesMonDict
                       LArSamplesMon/LArSamplesMonDict.h
                       LArSamplesMon/selection.xml
                       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${ROOT_LIBRARIES} LArCafJobsLib LArSamplesMonLib )
+                      LINK_LIBRARIES ${ROOT_LIBRARIES} CaloIdentifier LArSamplesMonLib )
 
 atlas_add_executable( LCE_CellList
                       src/LCE_CellList.cxx
                       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${ROOT_LIBRARIES} LArCafJobsLib LArRawEvent LArSamplesMonLib )
+                      LINK_LIBRARIES ${ROOT_LIBRARIES} LArCafJobsLib LArSamplesMonLib )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

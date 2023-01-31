@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 
@@ -7,6 +7,11 @@ def LArPedestalAutoCorrCfg(flags):
     #Get basic services and cond-algos
     from LArCalibProcessing.LArCalibBaseConfig import LArCalibBaseCfg
     result=LArCalibBaseCfg(flags)
+
+    #Add ByteStream reading
+    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+    result.merge(ByteStreamReadCfg(flags))
+
 
     #Calibration runs are taken in fixed gain. 
     #The SG key of the digit-container is name of the gain
@@ -193,27 +198,35 @@ def LArPedestalAutoCorrCfg(flags):
 
         result.getService("IOVDbSvc").DBInstance=""
 
+    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+    result.merge(PerfMonMTSvcCfg(flags))
+
+
     return result
 
 
 if __name__ == "__main__":
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
+    ConfigFlags=initConfigFlags()
     addLArCalibFlags(ConfigFlags)
 
     ConfigFlags.LArCalib.Input.Dir = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/LArCalibProcessing"
+    
     ConfigFlags.LArCalib.Input.Type="calibration_LArElec-Pedestal"
-    ConfigFlags.LArCalib.Input.RunNumbers=[174585,]
-
+    ConfigFlags.LArCalib.Input.RunNumbers=[441236,]
+    
     ConfigFlags.Input.Files=ConfigFlags.LArCalib.Input.Files
     
-    ConfigFlags.LArCalib.Output.ROOTFile="ped.root"
-
+    ConfigFlags.LArCalib.Output.ROOTFile="larpededest.root"
+    ConfigFlags.LArCalib.Output.POOLFile="larpedestal.pool.root"
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema=output.sqlite;dbname=CONDBR2"
-    ConfigFlags.IOVDb.GlobalTag="LARCALIB-000-02"
+    ConfigFlags.IOVDb.GlobalTag="LARCALIB-RUN2-00"
+    ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
 
+    ConfigFlags.fillFromArgs()
     ConfigFlags.lock()
 
     from AthenaCommon import Logging

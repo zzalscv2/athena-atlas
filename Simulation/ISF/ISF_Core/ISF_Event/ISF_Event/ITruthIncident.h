@@ -74,9 +74,9 @@ namespace ISF {
     virtual int                       parentPdgCode() const = 0;
     /** Return the parent particle as a HepMC particle type
         (only called for particles that will enter the HepMC truth event) */
-    virtual HepMC::GenParticlePtr     parentParticle() const = 0;
+    virtual HepMC::GenParticlePtr      parentParticle() = 0;
     /** Return the barcode of the parent particle */
-    virtual Barcode::ParticleBarcode  parentBarcode() const = 0;
+    virtual Barcode::ParticleBarcode  parentBarcode() = 0;
     /** Return the bunch-crossing identifier of the parent particle */
     virtual int                       parentBCID() const { return 0; }
     /** Return a boolean whether or not the parent particle survives the incident */
@@ -110,7 +110,7 @@ namespace ISF {
         Barcode to the simulator particle (only called for particles that will
         enter the HepMC truth event) */
     virtual HepMC::GenParticlePtr     childParticle(unsigned short index,
-                                                    Barcode::ParticleBarcode bc = Barcode::fUndefinedBarcode) const = 0;
+                                                    Barcode::ParticleBarcode bc = Barcode::fUndefinedBarcode) = 0;
     /** Update the properties of a child particle from a pre-defined
         interaction based on the properties of the ith child of the
         current TruthIncident (only used in quasi-stable particle

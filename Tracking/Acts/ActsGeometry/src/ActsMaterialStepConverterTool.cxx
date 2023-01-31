@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsMaterialStepConverterTool.h"
@@ -44,39 +44,25 @@ ActsMaterialStepConverterTool::convertToMaterialTrack(const Trk::MaterialStepCol
   double sum_X0 = 0;
   double sum_L0 = 0;
 
-  double x_lengh = colStep.back()->hitX() - colStep.front()->hitX();
-  double y_lengh = colStep.back()->hitY() - colStep.front()->hitY();
-  double z_lengh = colStep.back()->hitZ() - colStep.front()->hitZ();
-  double r_lengh = colStep.back()->hitR() - colStep.front()->hitR();
+  // check you are working with the correct dataset, otherwise write out a warning
+  // for mapping geantinos must be produced from (0, 0, 0), hence expecting z being very small!
+  double deltaZ = colStep.back()->hitZ() - colStep.front()->hitZ();
+  double deltaR = colStep.back()->hitR() - colStep.front()->hitR();
+  double vertexZ = colStep.front()->hitZ() - (deltaZ/deltaR)*colStep.front()->hitR();
+  if (std::abs(vertexZ)>s_tolerance)
+    ATH_MSG_WARNING("z-vertex position larger than expected for material mapping. Check the beamspot config used for production of material steps!");
 
-  double norm = 1/(std::sqrt(x_lengh*x_lengh +
-                                 y_lengh*y_lengh +
-                                 z_lengh*z_lengh));
-
-
-  Acts::Vector3 v_pos{0, 0, colStep.front()->hitZ() - (z_lengh/r_lengh)*colStep.front()->hitR() };
-  Acts::Vector3 v_imp{x_lengh*norm, y_lengh*norm, z_lengh*norm};
-  Acts::Vector3 prev_pos = v_pos;
+  Acts::Vector3 v_pos{0, 0, 0};
+  Acts::Vector3 v_imp{colStep.back()->hitX(), colStep.back()->hitY(), colStep.back()->hitZ()};
+  v_imp = v_imp.normalized();
 
   for(auto const step: colStep) {
-
-    Acts::MaterialInteraction interaction;
-
     Acts::Vector3 pos{step->hitX(), step->hitY(), step->hitZ()};
     Acts::MaterialSlab matProp(Acts::Material::fromMassDensity(step->x0(), step->l0(), step->A(), step->Z(), (step->rho() * Acts::UnitConstants::g) ),step->steplength());
+    Acts::MaterialInteraction interaction;
     interaction.position = pos;
-
-    double x_dir = pos.x() - prev_pos.x();
-    double y_dir = pos.y() - prev_pos.y();
-    double z_dir = pos.z() - prev_pos.z();
-    double norm_dir = 1/(std::sqrt(x_dir*x_dir +
-                                 y_dir*y_dir +
-                                 z_dir*z_dir));
-
-    Acts::Vector3 dir{x_dir * norm_dir, y_dir * norm_dir, z_dir * norm_dir};
-    interaction.direction = dir;
-    prev_pos = pos;
-
+    interaction.direction = Acts::Vector3(pos.x(), pos.y(), pos.z());
+    interaction.direction = interaction.direction.normalized();
     interaction.materialSlab = matProp;
     sum_X0 += step->steplengthInX0();
     sum_L0 += step->steplengthInL0();
@@ -89,6 +75,6 @@ ActsMaterialStepConverterTool::convertToMaterialTrack(const Trk::MaterialStepCol
 
   mTrack = std::make_pair(std::make_pair(v_pos, v_imp), recorded);
 
-return mTrack;
+  return mTrack;
 
 }

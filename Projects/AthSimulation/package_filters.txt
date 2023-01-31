@@ -4,12 +4,11 @@
 
 + AsgExternal/Asg_Test
 + AtlasGeometryCommon/BeamPipeGeoModel
++ AtlasGeometryCommon/CrackRegionGeoModel
 + AtlasGeometryCommon/GeoModelEnvelopes
 + AtlasGeometryCommon/SubDetectorEnvelopes
 + AtlasTest/CITest
 + AtlasTest/TestTools
-+ Calorimeter/CaloAlignment/CaloAlignmentTools
-+ Calorimeter/CaloCnv/CaloDetMgrDetDescrCnv
 + Calorimeter/CaloCnv/CaloIdCnv
 + Calorimeter/CaloCnv/CaloSimEventAthenaPool
 + Calorimeter/CaloCnv/CaloSimEventTPCnv
@@ -239,6 +238,7 @@
 + LArCalorimeter/LArG4/LArG4SD
 + LArCalorimeter/LArG4/LArG4ShowerLib
 + LArCalorimeter/LArG4/LArG4ShowerLibSvc
++ LArCalorimeter/LArG4/LArHitAlgs
 + LArCalorimeter/LArGeoModel/LArGeoAlgsNV
 + LArCalorimeter/LArGeoModel/LArGeoBarrel
 + LArCalorimeter/LArGeoModel/LArGeoCode
@@ -350,7 +350,6 @@
 + TileCalorimeter/TileDetDescr
 + TileCalorimeter/TileG4/TileAncillary/DeadMaterial
 + TileCalorimeter/TileG4/TileAncillary/MinBiasScintillator
-+ TileCalorimeter/TileG4/TileAncillary/TileG4DetDescr
 + TileCalorimeter/TileG4/TileG4Interfaces
 + TileCalorimeter/TileG4/TileGeoG4Calib
 + TileCalorimeter/TileG4/TileGeoG4SD

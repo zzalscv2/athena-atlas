@@ -486,7 +486,7 @@ T_CONCURRENTRANGEMAP
 void
 CONCURRENTRANGEMAP::updateRanges (std::function<void (RANGE&)> rangeUpdater,
                                   const typename Updater_t::Context_t& ctx
-                                   /*= Updater_t::defaultContext()*/)
+                                  /*= Updater_t::defaultContext()*/)
 {
   lock_t lock (m_mutex);
 
@@ -606,6 +606,38 @@ CONCURRENTRANGEMAP::trim (const std::vector<key_query_type>& keys)
   }
 
   return ndel;
+}
+
+
+/**
+ * @brief Remove all entries in the container.
+ *        Mostly for testing --- should not normally be used.
+ */
+T_CONCURRENTRANGEMAP
+void CONCURRENTRANGEMAP::clear()
+{
+  lock_t lock (m_mutex);
+
+  // Don't do anything if the container's already empty.
+  value_type* last = m_last;
+  if (last == nullptr) return;
+
+  value_type* begin = m_begin; 
+
+  while (begin != last) {
+    mapped_type todel = begin->second;
+    ++begin;
+    m_begin = begin;
+    m_payloadDeleter->discard (todel);
+  }
+
+  // Now have one element left.  Be sure to clean m_begin first.
+  mapped_type todel = begin->second;
+  ++begin;
+  m_begin = nullptr;
+  m_last = nullptr;
+  m_begin = begin;
+  m_payloadDeleter->discard (todel);
 }
 
 

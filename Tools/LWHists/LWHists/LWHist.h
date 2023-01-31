@@ -45,9 +45,9 @@ public:
   //We even support some of the most popular decoration-style things,
   //for easier migration from ROOT classes:
   class LWHistAxis;
-  LWHistAxis * GetXaxis() const;
-  LWHistAxis * GetYaxis() const;
-  LWHistAxis * GetZaxis() const;
+  LWHistAxis * GetXaxis();
+  LWHistAxis * GetYaxis();
+  LWHistAxis * GetZaxis();
   short GetMarkerColor() const;
   short GetMarkerStyle() const;
   float GetMarkerSize() const;
@@ -78,7 +78,8 @@ protected:
   virtual ~LWHist();
   virtual bool apply(TH1*) const;
   virtual void clearKeptROOTHist() = 0;
-  virtual TH1* getROOTHistBaseNoAlloc() const = 0;
+  virtual const TH1* getROOTHistBaseNoAlloc() const = 0;
+  virtual TH1* getROOTHistBaseNoAlloc() = 0;
 
   virtual void clear();//releases all held memory, apart from any held ROOT histograms.
   virtual double actualGetBinCenterX(int bin) const = 0;
@@ -121,12 +122,13 @@ private:
   LWHistAxis & operator= ( const LWHistAxis & );
   friend class LWHist;
   friend class LWPools;
-  LWHistAxis(const LWHist *);
+  LWHistAxis(LWHist *);
   ~LWHistAxis();
-  TAxis * rootAxis() const;
+  const TAxis * rootAxis() const;
+  TAxis * rootAxis();
   bool isXAxis() const;
   bool isYAxis() const;
-  const LWHist * m_hist;
+  LWHist * m_hist;
   float m_labelSize;
   char * m_title;
   LWBinLabels * m_binLabels;

@@ -182,8 +182,8 @@ class TestAtlasG4Cosmics(unittest.TestCase):
 
 
     def test___CosmicGenerator_AtRndmGenSvc_setCorrectly(self):
-        expected_property_value = 'AtDSFMTGenSvc'
-        self._assert_Algorithm_property_equal('CosmicGenerator', 'AtRndmGenSvc', expected_property_value)
+        expected_property_value = 'AthRNGSvc'
+        self._assert_Algorithm_property_equal('CosmicGenerator', 'RndmSvc', expected_property_value)
 
 
     def test___CosmicGenerator_OptimizeForCavern_setCorrectly(self):

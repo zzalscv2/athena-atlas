@@ -12,12 +12,15 @@ from __future__ import print_function
 # common
 from AthenaCommon.AppMgr import ToolSvc
 from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
+
 from InDetTrigRecExample.ConfiguredNewTrackingTrigCuts import EFIDTrackingCuts
 InDetTrigCutValues = EFIDTrackingCuts
 
 from AthenaCommon.DetFlags import DetFlags
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("InDetTrigConfigRecLoadTools.py")
+
+from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolDecorator
 
 from InDetTrigRecExample.InDetTrigConditionsAccess import PixelConditionsSetup, SCT_ConditionsSetup
 from AthenaCommon.CfgGetter import getPublicTool,getPrivateTool
@@ -273,39 +276,13 @@ if InDetTrigFlags.loadExtrapolator():
   if (InDetTrigFlags.doPrintConfigurables()):
     print (     InDetTrigMaterialUpdator)
 
-  #
-  # Set up extrapolator
-  #
-
-  InDetTrigSubPropagators = []
-  InDetTrigSubUpdators = []
   
-  # -------------------- set it depending on the geometry --------------
-  # default for ID is (Rk,Mat)
-  InDetTrigSubPropagators += [ InDetTrigPropagator.name() ]
-  InDetTrigSubUpdators    += [ InDetTrigMaterialUpdator.name() ]
+  from TrkConfig.TrkExRungeKuttaPropagatorConfig import InDetPropagatorCfg
+  InDetTrigPropagator = CAtoLegacyPublicToolDecorator(InDetPropagatorCfg, name = "InDetTrigPropagator")
   
-  # default for Calo is (Rk,MatLandau)
-  InDetTrigSubPropagators += [ InDetTrigPropagator.name() ]
-  InDetTrigSubUpdators    += [ InDetTrigMaterialUpdator.name() ]
+  from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+  InDetTrigExtrapolator = CAtoLegacyPublicToolDecorator(InDetExtrapolatorCfg, name="InDetTrigExtrapolator")
   
-  # default for MS is (STEP,Mat)
-  InDetTrigSubPropagators += [ InDetTrigStepPropagator.name() ]
-  InDetTrigSubUpdators    += [ InDetTrigMaterialUpdator.name() ]
-
-  from TrkExTools.TrkExToolsConf import Trk__Extrapolator
-  InDetTrigExtrapolator = Trk__Extrapolator(name        = 'InDetTrigLegacyExtrapolator',
-                                            Propagators             = [ InDetTrigRKPropagator, InDetTrigStepPropagator],
-                                            MaterialEffectsUpdators = [ InDetTrigMaterialUpdator ],
-                                            Navigator               = InDetTrigNavigator,
-                                            SubPropagators          = InDetTrigSubPropagators,
-                                            SubMEUpdators           = InDetTrigSubUpdators,
-                                            #DoCaloDynamic          = False
-                                            )
-
-  ToolSvc += InDetTrigExtrapolator
-
-
 #
 # ----------- control loading of fitters
 #
@@ -507,19 +484,10 @@ if InDetTrigFlags.loadSummaryTool():
   #
   # Loading Configurable HoleSearchTool
   #
-  from InDetTrackHoleSearch.InDetTrackHoleSearchConf import InDet__InDetTrackHoleSearchTool
 
-  InDetTrigHoleSearchTool = InDet__InDetTrackHoleSearchTool(name = "InDetTrigHoleSearchTool",
-                                                            Extrapolator = InDetTrigExtrapolator,
-                                                            BoundaryCheckTool=InDetTrigBoundaryCheckTool
-                                                            )
-                                                            #Commissioning = InDetTrigFlags.doCommissioning()) #renamed
-  InDetTrigHoleSearchTool.CountDeadModulesAfterLastHit = True  
-
-  ToolSvc += InDetTrigHoleSearchTool
-  if (InDetTrigFlags.doPrintConfigurables()):
-    print (     InDetTrigHoleSearchTool)
-
+  from InDetConfig.InDetTrackHoleSearchConfig import TrigHoleSearchToolCfg
+  InDetTrigHoleSearchTool = CAtoLegacyPublicToolDecorator(TrigHoleSearchToolCfg)
+  
   #Load inner Pixel layer tool
   from InDetRecExample import TrackingCommon
   InDetTrigTestPixelLayerToolInner = TrackingCommon.getInDetTrigTestPixelLayerToolInner()
@@ -542,8 +510,6 @@ if InDetTrigFlags.loadSummaryTool():
   from InDetTrigRecExample.InDetTrigCommonTools import InDetTrigTRTStrawStatusSummaryTool
   InDetTrigTrackSummaryHelperTool = InDet__InDetTrackSummaryHelperTool(name          = "InDetTrigSummaryHelper",
                                                                        HoleSearch    = InDetTrigHoleSearchTool,
-                                                                       AssoTool      = InDetTrigPrdAssociationTool,
-                                                                       DoSharedHits  = False,
                                                                        TRTStrawSummarySvc=InDetTrigTRTStrawStatusSummaryTool,
                                                                        usePixel      = DetFlags.haveRIO.pixel_on(),
                                                                        useSCT        = DetFlags.haveRIO.SCT_on(),
@@ -555,8 +521,6 @@ if InDetTrigFlags.loadSummaryTool():
 
   InDetTrigTrackSummaryHelperToolSi = InDet__InDetTrackSummaryHelperTool(name          = "InDetTrigSummaryHelperSi",
                                                                          HoleSearch    = InDetTrigHoleSearchTool,
-                                                                         AssoTool      = InDetTrigPrdAssociationTool,
-                                                                         DoSharedHits  = False,
                                                                          TRTStrawSummarySvc=None,
                                                                          usePixel      = DetFlags.haveRIO.pixel_on(),
                                                                          useSCT        = DetFlags.haveRIO.SCT_on(),
@@ -598,44 +562,12 @@ if InDetTrigFlags.loadSummaryTool():
   from TrkTrackSummaryTool.TrkTrackSummaryToolConf import Trk__TrackSummaryTool
   InDetTrigTrackSummaryTool = Trk__TrackSummaryTool(name = "InDetTrigTrackSummaryTool",
                                                     InDetSummaryHelperTool = InDetTrigTrackSummaryHelperTool,
-                                                    doSharedHits           = False,
                                                     doHolesInDet           = True,
                                                     #this may be temporary #61512 (and used within egamma later)
                                                     )
   ToolSvc += InDetTrigTrackSummaryTool
   if (InDetTrigFlags.doPrintConfigurables()):
      print (     InDetTrigTrackSummaryTool)
-
-  if InDetTrigFlags.doSharedHits():
-    #
-    # Configrable version of loading the InDetTrackSummaryHelperTool
-    #
-    from InDetTrackSummaryHelperTool.InDetTrackSummaryHelperToolConf import InDet__InDetTrackSummaryHelperTool
-    InDetTrigTrackSummaryHelperToolSharedHits = InDet__InDetTrackSummaryHelperTool(name         = "InDetTrigSummaryHelperSharedHits",
-                                                                                   AssoTool     = InDetTrigPrdAssociationTool,
-                                                                                   DoSharedHits = InDetTrigFlags.doSharedHits(),
-                                                                                   HoleSearch   = InDetTrigHoleSearchTool,
-                                                                                   TRTStrawSummarySvc = InDetTrigTRTStrawStatusSummaryTool)
-
-    ToolSvc += InDetTrigTrackSummaryHelperToolSharedHits
-    if (InDetTrigFlags.doPrintConfigurables()):
-      print (     InDetTrigTrackSummaryHelperToolSharedHits)
-    #
-    # Configurable version of TrkTrackSummaryTool
-    #
-    from TrkTrackSummaryTool.TrkTrackSummaryToolConf import Trk__TrackSummaryTool
-    InDetTrigTrackSummaryToolSharedHits = Trk__TrackSummaryTool(name = "InDetTrigTrackSummaryToolSharedHits",
-                                                                InDetSummaryHelperTool = InDetTrigTrackSummaryHelperToolSharedHits,
-                                                                doSharedHits           = InDetTrigFlags.doSharedHits(),
-                                                                doHolesInDet           = True)
-
-    ToolSvc += InDetTrigTrackSummaryToolSharedHits
-    if (InDetTrigFlags.doPrintConfigurables()):
-      print (     InDetTrigTrackSummaryToolSharedHits)
-
-
-  else:   
-    InDetTrigTrackSummaryToolSharedHits        = InDetTrigTrackSummaryTool   
 
 #
 # ----------- control loading of tools which are needed by new tracking and backtracking
@@ -915,29 +847,13 @@ InDetTrigTRTRodDecoder = TRT_RodDecoder(name = "InDetTrigTRTRodDecoder",
 ToolSvc += InDetTrigTRTRodDecoder
 
 
-from TrkTrackSummaryTool.TrkTrackSummaryToolConf import Trk__TrackSummaryTool
-InDetTrigFastTrackSummaryTool = Trk__TrackSummaryTool(name = "InDetTrigFastTrackSummaryTool",
-                                                      InDetSummaryHelperTool = InDetTrigTrackSummaryHelperToolSi,
-                                                      doHolesInDet           = False,
-                                                      doSharedHits           = False
-                                                      )
-ToolSvc += InDetTrigFastTrackSummaryTool
-if (InDetTrigFlags.doPrintConfigurables()):
-    print      (InDetTrigFastTrackSummaryTool)
-
-
 from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigHoleSearchTool
 InDetTrigTrackSummaryToolWithHoleSearch = Trk__TrackSummaryTool(name = "InDetTrigTrackSummaryToolWithHoleSearch",
                                                                 InDetSummaryHelperTool = InDetTrigTrackSummaryHelperToolSi,
-                                                                doHolesInDet           = True,
-                                                                doSharedHits           = False
+                                                                doHolesInDet           = True
                                                       )
 ToolSvc += InDetTrigTrackSummaryToolWithHoleSearch
 if (InDetTrigFlags.doPrintConfigurables()):
     print      (InDetTrigTrackSummaryToolWithHoleSearch)
 
 
-# HACK to emulate run2 behaviour
-from TrkAssociationTools.TrkAssociationToolsConf import Trk__PRDtoTrackMapExchangeTool
-InDetTrigPRDtoTrackMapExchangeTool = Trk__PRDtoTrackMapExchangeTool("InDetTrigPRDtoTrackMapExchangeTool")
-ToolSvc += InDetTrigPRDtoTrackMapExchangeTool

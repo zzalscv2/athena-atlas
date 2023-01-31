@@ -54,7 +54,7 @@ TFCSVoxelHistoLateralCovarianceFluctuations::~TFCSVoxelHistoLateralCovarianceFlu
 {
 }
 
-bool TFCSVoxelHistoLateralCovarianceFluctuations::initialize(TFile* inputfile, std::string folder)
+bool TFCSVoxelHistoLateralCovarianceFluctuations::initialize(TFile* inputfile, const std::string& folder)
 {
   //load m_eigenvariances and m_parMeans from input file
   //load histograms for each cell from input file
@@ -161,6 +161,7 @@ void TFCSVoxelHistoLateralCovarianceFluctuations::MultiGaus(TFCSSimulationState&
     // check for positive-definiteness of covMatrix
     if(variance < 0) {
       ATH_MSG_ERROR("Got a negative eigenvariance ("<<variance<<") on iPar = "<<iPar);
+      variance = 0;
     }
     genPars[iPar] = CLHEP::RandGauss::shoot(simulstate.randomEngine(), rotParMeans[iPar], sqrt(variance));
     ATH_MSG_DEBUG("genPars["<<iPar<<"]="<<genPars[iPar]<<" rotParMeans[iPar]="<<rotParMeans[iPar]<<" sqrt(variance)="<<sqrt(variance));

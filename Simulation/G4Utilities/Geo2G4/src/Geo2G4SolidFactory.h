@@ -11,6 +11,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 #include "AthenaBaseComps/AthMessaging.h"
+#include "CxxUtils/checker_macros.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "LArWheelSolid_type.h"
 
@@ -26,11 +27,11 @@ public:
   	typedef std::map<std::string,  LArWheelSolidDef_t> LArWheelSolid_typemap;
 
   Geo2G4SolidFactory();
-  G4VSolid* Build (const GeoShape*, std::string name=std::string(""));
+  G4VSolid* Build ATLAS_NOT_THREAD_SAFE (const GeoShape*, std::string name=std::string(""));
 
 private:
-   G4VSolid* createLArWheelSolid(const std::string& name, const LArWheelSolidDef_t & lwsdef, const EMECData &emecData) const;
-   G4VSolid* createLArWheelSliceSolid(const GeoUnidentifiedShape* ,const EMECData &emecData) const;
+   G4VSolid* createLArWheelSolid ATLAS_NOT_THREAD_SAFE (const std::string& name, const LArWheelSolidDef_t & lwsdef, const EMECData &emecData) const;
+   G4VSolid* createLArWheelSliceSolid ATLAS_NOT_THREAD_SAFE (const GeoUnidentifiedShape* ,const EMECData &emecData) const;
 
    static const LArWheelSolid_typemap s_lwsTypes;
    /// Pointer to StoreGate (detector store by default)

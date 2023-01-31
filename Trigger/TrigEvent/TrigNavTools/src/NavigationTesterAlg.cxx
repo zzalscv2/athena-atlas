@@ -12,7 +12,7 @@
 // anonymous namespace for convenience functions
 namespace {
     std::set<std::set<const xAOD::IParticle *>> vectorToSet(
-            const std::vector<std::vector<const xAOD::IParticle *>> &vec)
+            const std::vector<std::vector<const xAOD::IParticle *>>& vec)
     {
         std::set<std::set<const xAOD::IParticle *>> ret;
         for (const std::vector<const xAOD::IParticle *> &combination : vec)
@@ -79,7 +79,7 @@ namespace Trig {
             // We don't care about the order of the combinations, or the order within the
             // combinations, we just care that they are the same. Therefore, we can convert the
             // vectors to sets and just look at the differences between them
-            std::vector<std::vector<const xAOD::IParticle *>> vecCombinationsRun2;
+            CombinationsVector vecCombinationsRun2;
             ATH_MSG_DEBUG("###### checking features of CHAIN " << chain);
             ATH_CHECK(m_toolRun2->retrieveParticles(vecCombinationsRun2, chain));
             auto combsRun2 = vectorToSet(vecCombinationsRun2);
@@ -87,7 +87,7 @@ namespace Trig {
             for (auto& c : combsRun2 ) {
                 ATH_MSG_DEBUG(c);
             }
-            std::vector<std::vector<const xAOD::IParticle *>> vecCombinationsRun3;
+            CombinationsVector vecCombinationsRun3;
             ATH_CHECK(m_toolRun3->retrieveParticles(vecCombinationsRun3, chain));
             auto combsRun3 = vectorToSet(vecCombinationsRun3);
             ATH_MSG_DEBUG("Run 3 size " << combsRun3.size());
@@ -95,58 +95,58 @@ namespace Trig {
             for (auto& c : combsRun3 ) {
                 ATH_MSG_DEBUG(c);
             }
-            if ( combsRun2.size() != combsRun3.size()) {
-                if ( m_failOnDifference ) {
-                    ATH_MSG_ERROR("Different count of feature accessed from chain " << chain  
-                                << " using Run 2 navigation " << combsRun2.size() 
-                                << " Run 3 navigation " << combsRun3.size() );
-                    return StatusCode::FAILURE;
-                }
-
+             
+            if ( m_verifyCombinationsSize ) {
+                ATH_CHECK(verifyCombinationsSize(vecCombinationsRun2, vecCombinationsRun3, chain));
+            } 
+            if ( m_verifyCombinations ) {
+                ATH_CHECK(verifyCombinationsContent(vecCombinationsRun2, vecCombinationsRun3, chain));
             }
+            ATH_MSG_DEBUG("Verified chain " << chain);
         }
-
-	    /*** TODO ***/
-        //     ATH_CHECK(m_toolRun3->retrieveParticles(vecCombinationsRun3, chain));
-        //     std::set<std::set<const xAOD::IParticle *>> combos1 = vectorToSet(vecCombinationsRun2);
-        //     std::set<std::set<const xAOD::IParticle *>> combos2 = vectorToSet(vecCombinationsRun3);
-        //     ATH_MSG_DEBUG("Tool 1 retrieved " << combos1.size() << " combinations, tool 2 retrieved " << combos2.size());
-        //     std::vector<std::set<const xAOD::IParticle *>> onlyIn1;
-        //     std::vector<std::set<const xAOD::IParticle *>> onlyIn2;
-        //     std::set_difference(
-        //             combos1.begin(), combos1.end(),
-        //             combos2.begin(), combos2.end(),
-        //             std::back_inserter(onlyIn1));
-        //     std::set_difference(
-        //             combos2.begin(), combos2.end(),
-        //             combos1.begin(), combos1.end(),
-        //             std::back_inserter(onlyIn2));
-        //     if (onlyIn1.size() || onlyIn2.size())
-        //     {
-        //         good = false;
-        //         ATH_MSG_WARNING("Difference found for chain " << chain);
-        //         if (onlyIn1.size())
-        //         {
-        //             ATH_MSG_WARNING("Only from tool 1:");
-        //             for (const auto &combo : onlyIn1)
-        //                 ATH_MSG_WARNING("\t" << combo);
-        //         }
-        //         if (onlyIn2.size())
-        //         {
-        //             ATH_MSG_WARNING("Only from tool 2:");
-        //             for (const auto &combo : onlyIn2)
-        //                 ATH_MSG_WARNING("\t" << combo);
-        //         }
-        //     }
-        //     else
-        //         ATH_MSG_DEBUG("Found particles match for chain " << chain);
-        // }
-        // if (m_failOnDifference.value() and !good)
-        // {
-        //     ATH_MSG_ERROR("Differences found!");
-        //     return StatusCode::FAILURE;
-        // }
         return StatusCode::SUCCESS;
     }
+    StatusCode NavigationTesterAlg::verifyCombinationsSize(const CombinationsVector& run2, const CombinationsVector& run3, const std::string& chain) const {
+        if (run2.size() > run3.size()) {
+            ATH_MSG_WARNING("Issue in combination sizes for chain " << chain  
+                        << " using Run 2 navigation " << run2.size() 
+                        << " Run 3 navigation " << run3.size());
+            if ( m_failOnDifference ) {
+                ATH_MSG_ERROR("Mismatched sizes of combinations for chain " << chain << " (enable WARNING messages for more details)");    
+                return StatusCode::FAILURE;
+            }
+        }
+        return StatusCode::SUCCESS;
+    }
+
+    StatusCode NavigationTesterAlg::verifyCombinationsContent(const CombinationsVector& run2, const CombinationsVector& run3, const std::string& chain) const {
+        // compare combinations
+        for ( auto& combRun2: run2 ) {
+            bool foundMatching = false;
+            for ( auto& combRun3 : run3 ) {                
+                if ( combRun2 == combRun3 ) {
+                    ATH_MSG_DEBUG("Found matching combinations, run2 " << combRun2 
+                                << " run3 " << combRun3 );
+                    foundMatching = true;
+                    break;
+                } 
+            }
+            if ( not foundMatching ) {
+                ATH_MSG_WARNING("Specific combination for chain " << chain << " can not be found in Run 3");
+                ATH_MSG_WARNING("Run 2 combination: " << combRun2 );
+                ATH_MSG_WARNING("Available Run 3 combinations: " );
+                for ( auto& c: run3 ){
+                    ATH_MSG_WARNING("  " << c );
+                }
+                if ( m_failOnDifference ) {
+                    ATH_MSG_ERROR("When checking combinations in details found differences, (enable WARNING message for more details)");
+                    return StatusCode::FAILURE;
+                }
+            }
+        }
+        return StatusCode::SUCCESS;
+    }
+
 } //> end namespace Trig
+
 

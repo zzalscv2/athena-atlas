@@ -24,8 +24,8 @@
 //
 #include "CLHEP/Geometry/Point3D.h"
 #include "GeoPrimitives/GeoPrimitives.h"
-#include <climits>
 
+#include "AtlasHepMC/MagicNumbers.h" // for crazyParticleBarcode
 
 McEventCollectionFilter::McEventCollectionFilter(const std::string &name, ISvcLocator *pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)
@@ -75,8 +75,9 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
   HepMC::GenParticlePtr genPart=HepMC::newGenParticlePtr();
   genPart->set_pdg_id(m_pileUpParticlePDGID); //Geantino
   genPart->set_status(1); //!< set decay status
-  HepMC::suggest_barcode(genPart, std::numeric_limits<int32_t>::max() );
-
+#ifndef HEPMC3
+  HepMC::suggest_barcode(genPart, HepMC::crazyParticleBarcode );
+#endif
   HepMC::GenVertexPtr genVertex = HepMC::newGenVertexPtr();
   genVertex->add_particle_out(genPart);
 
@@ -84,8 +85,14 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
   //......copy GenEvent to the new one and remove all vertex
   HepMC::GenEvent* evt = HepMC::copyemptyGenEvent(genEvt);
 #ifdef HEPMC3
-  for (const auto &bp : evt->beams()) {
+  for (const auto &oldbp : genEvt->beams()) {
+    // Would be good to have a helper function here like:
+    // GenParticlePtr copyGenParticleToNewGenEvent(ConstGenParticlePtr particleToBeCopied, GenEvent* newGenEvent);
+    // This would copy GenParticle Attributes as well
+    HepMC::GenParticlePtr bp=std::make_shared<HepMC::GenParticle>(oldbp->data());
     evt->add_beam_particle(bp);
+    HepMC::suggest_barcode(bp, HepMC::barcode(oldbp) );
+    // Possibly also add a call to genVertex->add_particle_in(bp); ?
   }
   if (genEvt->cross_section()) {
     auto cs = std::make_shared<HepMC3::GenCrossSection>(*genEvt->cross_section().get());
@@ -125,58 +132,42 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
 
   // electrons from TRT hits
   if (m_keepElectronsLinkedToTRTHits) {
-    std::vector<int> barcodes;
-    ATH_CHECK(findElectronsLinkedToTRTHits(ctx, &barcodes));
+    SG::ReadHandle<TRTUncompressedHitCollection> inputCollectionH(m_inputTRTHitsKey, ctx);
+    if (!inputCollectionH.isValid()) {
+      ATH_MSG_ERROR("Could not get input hits collection " << inputCollectionH.name() << " from store " << inputCollectionH.store());
+      return StatusCode::FAILURE;
+    }
+    ATH_MSG_DEBUG("Found input hits collection " << inputCollectionH.name() << " in store " << inputCollectionH.store());
 
-    for (int barcode : barcodes) {
-      HepMC::ConstGenParticlePtr particle = HepMC::barcode_to_particle(genEvt, barcode);
-      if (particle == nullptr) {
-        ATH_MSG_DEBUG("Could not find particle for barcode " << barcode);
-        continue;
-      }
+    for (const TRTUncompressedHit &hit : *inputCollectionH) {
+      HepMcParticleLink link = hit.particleLink();
+      int pdgID = hit.GetParticleEncoding();
+      if (std::abs(pdgID) != 11 || link.barcode() == 0) continue;
+      HepMC::ConstGenParticlePtr particle = link.cptr();
       HepMC::ConstGenVertexPtr vx = particle->production_vertex();
-      HepMC::GenParticlePtr newParticle = HepMC::newGenParticlePtr(particle->momentum(),
-                                                                   particle->pdg_id(),
-                                                                   particle->status());
-      HepMC::suggest_barcode(newParticle, barcode);
-
+      HepMC::GenParticlePtr newParticle = HepMC::newGenParticlePtr(particle->momentum(), particle->pdg_id(), particle->status());
+#ifndef HEPMC3
+      HepMC::suggest_barcode(newParticle, link.barcode());
+#endif
       const HepMC::FourVector &position = vx->position();
       HepMC::GenVertexPtr newVertex = HepMC::newGenVertexPtr(position);
       newVertex->add_particle_out(newParticle);
       evt->add_vertex(newVertex);
+#ifdef HEPMC3
+      HepMC::suggest_barcode(newParticle, link.barcode());
+#endif
     }
   }
 
   //.....add new vertex with geantino
   evt->add_vertex(genVertex);
-  
+#ifdef HEPMC3
+  HepMC::suggest_barcode(genPart, HepMC::crazyParticleBarcode );
+#endif
   int referenceBarcode = HepMC::barcode(genPart);
   ATH_MSG_DEBUG("Reference barcode: " << referenceBarcode);
 
   outputCollection->push_back(evt);
-
-  return StatusCode::SUCCESS;
-}
-
-
-StatusCode McEventCollectionFilter::findElectronsLinkedToTRTHits(const EventContext &ctx, std::vector<int> *barcodes) const
-{
-  SG::ReadHandle<TRTUncompressedHitCollection> inputCollection(m_inputTRTHitsKey, ctx);
-  if (!inputCollection.isValid()) {
-    ATH_MSG_ERROR("Could not get input hits collection " << inputCollection.name() << " from store " << inputCollection.store());
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_DEBUG("Found input hits collection " << inputCollection.name() << " in store " << inputCollection.store());
-
-  std::set<int> barcodeSet;
-  for (const TRTUncompressedHit &hit : *inputCollection) {
-    const HepMcParticleLink link = hit.particleLink();
-    int pdgID = hit.GetParticleEncoding();
-    if (std::abs(pdgID) == 11 && link.barcode() != 0) {
-      barcodeSet.insert(link.barcode());
-    }
-  }
-  barcodes->assign(barcodeSet.begin(), barcodeSet.end());
 
   return StatusCode::SUCCESS;
 }

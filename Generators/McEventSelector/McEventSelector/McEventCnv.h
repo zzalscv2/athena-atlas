@@ -13,22 +13,22 @@ class StatusCode;
 // Abstract factory to create the converter
 template <class TYPE> class CnvFactory;
 
-// Externals 
+// Externals
 
 class McEventCnv: public Converter {
 
- public:
-  McEventCnv(ISvcLocator* svcloc);
+public:
+    McEventCnv(ISvcLocator* svcloc);
 
-  StatusCode createObj(IOpaqueAddress* pAddr, DataObject*& pObj); 
+    StatusCode createObj(IOpaqueAddress* pAddr, DataObject*& pObj);
 
-  /// Storage type and class ID
-  static long storageType();    
-  static const CLID& classID();                 
+    /// Storage type and class ID
+    static long storageType();
+    static const CLID& classID();
 
-  virtual long repSvcType() const  {
-    return i_repSvcType();
-  }
-  
+    virtual long repSvcType() const  {
+        return i_repSvcType();
+    }
+
 };
 #endif

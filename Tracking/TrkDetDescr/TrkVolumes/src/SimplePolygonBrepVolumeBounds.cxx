@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -53,9 +53,9 @@ Trk::SimplePolygonBrepVolumeBounds::SimplePolygonBrepVolumeBounds(
 {
   m_xyVtx.resize(xyVtx.size());
   double xmin = xyVtx[0].first;
-  double xmax = xyVtx[0].first;
+  double xmax = xmin;
   double ymin = xyVtx[0].second;
-  double ymax = xyVtx[0].second;
+  double ymax = ymin;
   for (unsigned int i = 0; i < xyVtx.size(); i++) {
     m_xyVtx[i] = xyVtx[i];
     if (xyVtx[i].first < xmin)
@@ -95,9 +95,9 @@ Trk::SimplePolygonBrepVolumeBounds::SimplePolygonBrepVolumeBounds(
 {
   m_xyVtx.resize(xyVtx.size());
   double xmin = xyVtx[0].first;
-  double xmax = xyVtx[0].first;
+  double xmax = xmin;
   double ymin = xyVtx[0].second;
-  double ymax = xyVtx[0].second;
+  double ymax = ymin;
   for (unsigned int i = 0; i < xyVtx.size(); i++) {
     m_xyVtx[i] = xyVtx[i];
     if (xyVtx[i].first < xmin)
@@ -401,7 +401,7 @@ Trk::SimplePolygonBrepVolumeBounds::Diagonalie(
     int kPlus1 = (k + 1) % inputVertices.size();
 
     /* Skip edges incident to i or j */
-    if (!((k == i) || (kPlus1 == i) || (k == j) || (kPlus1 == j)))
+    if ((k != i) && (kPlus1 != i) && (k != j) && (kPlus1 != j))
       if (Intersect(
             inputVertices[i],
             inputVertices[j],

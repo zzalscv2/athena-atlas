@@ -1,15 +1,15 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 namespace Trk {
 
 inline const SurfaceArray *Layer::surfaceArray() const {
-  return m_surfaceArray;
+  return m_surfaceArray.get();
 }
 
 inline SurfaceArray *Layer::surfaceArray(){
-  return m_surfaceArray;
+  return m_surfaceArray.get();
 }
 
 inline double Layer::thickness() const { return m_layerThickness; }
@@ -148,7 +148,7 @@ inline const LayerMaterialProperties *Layer::layerMaterialProperties() const {
 }
 
 inline const OverlapDescriptor *Layer::overlapDescriptor() const {
-  return m_overlapDescriptor;
+  return m_overlapDescriptor.get();
 }
 /** set the previous Layer*/
 inline void Layer::setPreviousLayer(const Layer *in) { m_previousLayer = in; }
@@ -181,14 +181,6 @@ inline const LayerIndex &Layer::layerIndex() const { return m_index; }
 
 inline int Layer::layerType() const { return m_layerType; }
 inline void Layer::setLayerType(int id) { m_layerType = id; }
-
-
-inline const Volume *Layer::representingVolume() const {
-  return m_representingVolume;
-}
-inline void Layer::registerRepresentingVolume(const Volume *theVol) {
-  m_representingVolume = theVol;
-}
 
 inline void Layer::registerLayerIndex(const LayerIndex &lIdx) {
   m_index = lIdx;

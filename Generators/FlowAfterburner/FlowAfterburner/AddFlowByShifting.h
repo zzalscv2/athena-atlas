@@ -1,16 +1,16 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // File:  Generators/FlowAfterburnber/AddFlowByShifting.h
 // Description:
-//    This code is used to introduce particle flow 
+//    This code is used to introduce particle flow
 //    to particles from generated events
 //    It works by modifying phi angles of particles
 //    according to requested flow type and magnitude
 //
-//    It takes from SG a container of tracks as input 
-//    and registers in SG a new container with modified tracks on output 
+//    It takes from SG a container of tracks as input
+//    and registers in SG a new container with modified tracks on output
 //
 //    It currently uses Hijing generator specific class HijingEventParams
 //    with truth event parameters information
@@ -25,9 +25,10 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 #include <CLHEP/Random/RandomEngine.h>
-#include "AthenaKernel/IAtRndmGenSvc.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "AtlasHepMC/Relatives.h"
+#include "GeneratorObjects/HijingEventParams.h"
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
@@ -37,15 +38,13 @@
 
 
 class TGraph;
-class StoreGateSvc;
-class HijingEventParams;
 
 class AddFlowByShifting:public AthAlgorithm {
 public:
-        AddFlowByShifting(const std::string& name, ISvcLocator* pSvcLocator);
-        StatusCode initialize();
-        StatusCode execute();
-        StatusCode finalize();
+  AddFlowByShifting(const std::string& name, ISvcLocator* pSvcLocator);
+  StatusCode initialize();
+  StatusCode execute();
+  StatusCode finalize();
 
   //functions used for root finding when using the "exact"(and not the "approximate")  method
   static double vn_func           (double x, void *params);
@@ -53,9 +52,11 @@ public:
 
 
 private:
-  double SetParentToRanPhi(HepMC::GenParticlePtr parent);
-  double AddFlowToParent(HepMC::GenParticlePtr parent, 
-			 const HijingEventParams *hijing_pars);
+  CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName, const EventContext& ctx) const;
+
+  double SetParentToRanPhi(HepMC::GenParticlePtr parent, CLHEP::HepRandomEngine *rndmEngine);
+  double AddFlowToParent(HepMC::GenParticlePtr parent,
+                         const HijingEventParams *hijing_pars);
   void   MoveDescendantsToParent(HepMC::GenParticlePtr parent, double phishift);
 
 
@@ -70,35 +71,40 @@ private:
   void custom_vn              (double b, double eta, double pt);
   void p_Pb_cent_eta_indep    (double b, double eta, double pt); //for p_Pb
 
-  TGraph *m_graph_fluc;//TGraph storing the v2_RP/delta Vs b_imp
-  void Set_EbE_Fluctuation_Multipliers(HepMC::GenVertexPtr mainvtx, float b);
+  TGraph *m_graph_fluc{};//TGraph storing the v2_RP/delta Vs b_imp
+  void Set_EbE_Fluctuation_Multipliers(HepMC::GenVertexPtr mainvtx, float b, CLHEP::HepRandomEngine *rndmEngine);
 
-
-
-  StoreGateSvc*    m_sgSvc;
-  IAtRndmGenSvc*   p_AtRndmGenSvc;
-  CLHEP::HepRandomEngine* p_engine;
+  // Random number service
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};
 
   // Setable Properties:-
-  std::string m_inkey, m_outkey;
+  StringProperty m_inkey{this, "McTruthKey", "GEN_EVENT"}; //FIXME use Read/WriteHandles
+  StringProperty m_outkey{this, "McFlowKey", "FLOW_EVENT"}; //FIXME use Read/WriteHandles
 
-  int   m_ranphi_sw;
+  IntegerProperty   m_ranphi_sw{this, "RandomizePhi", 0};
 
-  std::string m_flow_function_name;
-  std::string m_flow_implementation;
-  int   m_flow_implementation_type;
-  bool  m_flow_fluctuations;
+  StringProperty m_flow_function_name{this, "FlowFunctionName", "jjia_minbias_new"};
+  StringProperty m_flow_implementation{this, "FlowImplementation", "exact"};
+  int   m_flow_implementation_type{0};
+  BooleanProperty  m_flow_fluctuations{this, "FlowFluctuations", false};
 
-  int   m_floweta_sw;
-  float m_flow_maxeta, m_flow_mineta;
+  IntegerProperty   m_floweta_sw{this, "FlowEtaSwitch", 0 };
+  FloatProperty m_flow_maxeta{this, "FlowMaxEtaCut", 10.0};
+  FloatProperty m_flow_mineta{this, "FlowMinEtaCut", 0.f};
 
-  int   m_flowpt_sw;
-  float m_flow_maxpt , m_flow_minpt;
+  IntegerProperty   m_flowpt_sw{this, "FlowPtSwitch", 0};
+  FloatProperty m_flow_maxpt{this, "FlowMaxPtCut", 1000000.f};
+  FloatProperty m_flow_minpt{this, "FlowMinPtCut", 0.f};
 
-  int   m_flowb_sw;//currently not used 
-  float m_custom_v1, m_custom_v2,m_custom_v3, m_custom_v4,m_custom_v5, m_custom_v6;
+  IntegerProperty   m_flowb_sw{this, "FlowBSwitch", 0};//currently not used
+  FloatProperty m_custom_v1{this, "custom_v1", 0.f};
+  FloatProperty m_custom_v2{this, "custom_v2", 0.f};
+  FloatProperty m_custom_v3{this, "custom_v3", 0.f};
+  FloatProperty m_custom_v4{this, "custom_v4", 0.f};
+  FloatProperty m_custom_v5{this, "custom_v5", 0.f};
+  FloatProperty m_custom_v6{this, "custom_v6", 0.f};
 
-  int   m_particles_processed;
+  int   m_particles_processed{0};
 
   //float psi_n[6],v1,v2,v3,v4,v5,v6;
   float m_psi_n[6],m_v_n[6];
@@ -107,5 +113,3 @@ private:
 };
 
 #endif
-
-

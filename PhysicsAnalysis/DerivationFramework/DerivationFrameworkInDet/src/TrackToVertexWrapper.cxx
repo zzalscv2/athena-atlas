@@ -90,8 +90,8 @@ namespace DerivationFramework {
       track_decorators = createDecorators<xAOD::TrackParticleContainer,float>(m_trackFloatDecorKeys,ctx);
     // Run tool for each element and calculate the impact parameters/errors 
     for (const auto *trItr : *tracks) {
-      std::unique_ptr<const Trk::ImpactParametersAndSigma> iPandSigma;
-      std::unique_ptr<const Trk::ImpactParametersAndSigma> iPandSigmaBiased;
+      std::unique_ptr<Trk::ImpactParametersAndSigma> iPandSigma;
+      std::unique_ptr<Trk::ImpactParametersAndSigma> iPandSigmaBiased;
       const xAOD::Vertex* foundVertex { nullptr };
       for (const auto *const vx : *vertices) {
         for (const auto& tpLink : vx->trackParticleLinks()) {
@@ -103,8 +103,8 @@ namespace DerivationFramework {
         if (foundVertex) break;
       }
       if ( foundVertex ) {
-        iPandSigma.reset(m_tool->estimate(trItr,foundVertex,true));
-        iPandSigmaBiased.reset(m_tool->estimate(trItr,foundVertex,false));
+        iPandSigma= m_tool->estimate(trItr,foundVertex,true);
+        iPandSigmaBiased = m_tool->estimate(trItr,foundVertex,false);
         if( !iPandSigma )       ATH_MSG_WARNING ("trackToVertexIPEstimator failed !");
         if( !iPandSigmaBiased ) ATH_MSG_WARNING ("trackToVertexIPEstimator biased IP failed !");
       }

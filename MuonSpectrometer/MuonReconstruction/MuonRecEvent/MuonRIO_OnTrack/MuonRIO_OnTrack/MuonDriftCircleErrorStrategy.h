@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONRIOONTRACK_MUONDRIFTCIRCLEERRORSTRATEGY_H
@@ -35,7 +35,7 @@ public:
                         };
   static const std::size_t nCalibWindowBits = 4; //!< Allows up to 16 configurations to be recorded
 
-  MuonDriftCircleErrorStrategy(MuonDriftCircleErrorStrategyInput bits):m_bits(bits){} //!< first 3 bits are Strategy, then come CreationParameter, last four are calib window bits
+  MuonDriftCircleErrorStrategy(const MuonDriftCircleErrorStrategyInput& bits):m_bits(bits){} //!< first 3 bits are Strategy, then come CreationParameter, last four are calib window bits
   void setStrategy(Strategy); //!< Select the strategy to be used - only one can be set at a time
   void setParameter(CreationParameter, bool value);
   void setCalibWindow(unsigned long); //!< Only the first nCalibWindowBits bits will be stored!

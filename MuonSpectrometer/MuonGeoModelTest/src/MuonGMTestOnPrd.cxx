@@ -96,12 +96,8 @@ StatusCode MuonGMTestOnPrd::execute() {
         ATH_CHECK(evtStore()->retrieve(rpcContainer, key));
 
         ATH_MSG_INFO("Retrieved RPC PRD Container with size = " << rpcContainer->size());
-
+        int iccphi = 0;
         int ict = 0;
-        int ictphi = 0;
-        int icteta = 0;
-        int icttrg = 0;
-        int ictamb = 0;
         for (const Muon::RpcPrepDataCollection* rpcColl : *rpcContainer) {
             int ncoll = 0;
             if (!rpcColl->empty()) {
@@ -111,7 +107,6 @@ StatusCode MuonGMTestOnPrd::execute() {
                                                << " found with size " << rpcColl->size());
                 Muon::RpcPrepDataCollection::const_iterator it_rpcPrepData;
                 int icc = 0;
-                int iccphi = 0;
                 int icceta = 0;
                 int icctrg = 0;
                 for (it_rpcPrepData = rpcColl->begin(); it_rpcPrepData != rpcColl->end(); ++it_rpcPrepData) {
@@ -119,15 +114,11 @@ StatusCode MuonGMTestOnPrd::execute() {
                     ict++;
                     if ((*it_rpcPrepData)->triggerInfo() > 0) {
                         icctrg++;
-                        icttrg++;
                     } else {
                         if (m_RpcIdHelper->measuresPhi((*it_rpcPrepData)->identify())) {
                             iccphi++;
-                            ictphi++;
-                            if ((*it_rpcPrepData)->ambiguityFlag() > 1) ictamb++;
                         } else {
                             icceta++;
-                            icteta++;
                         }
                     }
                     ATH_MSG_INFO(ict << " in this coll. " << icc

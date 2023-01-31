@@ -200,11 +200,29 @@ const ToolHandle<Trig::TrigDecisionTool>& AthMonitorAlgorithm::getTrigDecisionTo
 
 bool AthMonitorAlgorithm::trigChainsArePassed( const std::vector<std::string>& vTrigNames ) const {
 
-    // If no triggers were given, return true.
-    if (vTrigNames.empty()) return true;
+  
+  // If no triggers were given, return true.
+  if (vTrigNames.empty()) return true;
+  
+  
+  // Trigger: Check if this Algorithm is being run as an Express Stream job.
+  // Events are entering the express stream are chosen randomly, and by chain,
+  // Hence an additional check should be aplied to see if the chain(s)
+  // monitored here are responsible for the event being selected for
+  // the express stream.
 
-    // Check whether ANY of the triggers in the list are passed
-    return m_trigDecTool->getChainGroup(vTrigNames)->isPassed();
+  const auto group =  m_trigDecTool->getChainGroup(m_vTrigChainNames);
+  if (m_isExpressStreamJob){  
+    const auto passedBits = m_trigDecTool->isPassedBits(group);
+    bool expressPass = passedBits & TrigDefs::Express_passed; //bitwise AND
+    if(!expressPass) {
+      return false;
+    }
+  }
+  
+  // monitor the event if any of the chains in the chain group passes the event.
+  return group->isPassed();
+  
 }
 
 

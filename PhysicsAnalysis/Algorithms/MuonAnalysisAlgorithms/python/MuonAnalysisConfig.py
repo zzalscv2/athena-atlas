@@ -8,11 +8,11 @@ import ROOT
 class MuonCalibrationConfig (ConfigBlock):
     """the ConfigBlock for the muon four-momentum correction"""
 
-    def __init__ (self, containerName, postfix) :
-        super (MuonCalibrationConfig, self).__init__ ()
+    def __init__ (self, containerName) :
+        super (MuonCalibrationConfig, self).__init__ (containerName)
         self.containerName = containerName
-        self.postfix = postfix
-        self.ptSelectionOutput = False
+        self.addOption ('postfix', "", type=str)
+        self.addOption ('ptSelectionOutput', False, type=bool)
 
     def makeAlgs (self, config) :
 
@@ -69,6 +69,10 @@ class MuonCalibrationConfig (ConfigBlock):
         config.addSelection (self.containerName, '', alg.selectionDecoration,
                              bits=2, preselection = self.ptSelectionOutput)
 
+        config.addOutputVar (self.containerName, 'pt', 'pt')
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
 
 
 class MuonWorkingPointConfig (ConfigBlock) :
@@ -76,15 +80,16 @@ class MuonWorkingPointConfig (ConfigBlock) :
 
     This may at some point be split into multiple blocks (10 Mar 22)."""
 
-    def __init__ (self, containerName, postfix, quality, isolation, isRun3Geo) :
-        super (MuonWorkingPointConfig, self).__init__ ()
+    def __init__ (self, containerName, postfix) :
+        super (MuonWorkingPointConfig, self).__init__ (containerName + '.' + postfix)
         self.containerName = containerName
         self.selectionName = postfix
-        self.postfix = postfix
-        self.quality = quality
-        self.isRun3Geo = isRun3Geo
-        self.isolation = isolation
-        self.qualitySelectionOutput = False
+        self.addOption ('postfix', postfix, type=str)
+        self.addOption ('quality', None, type=str)
+        self.addOption ('isolation', None, type=str)
+        self.addOption ('isRun3Geo', False, type=bool,
+                        info='use run 3 geometry for the muon selection tool')
+        self.addOption ('qualitySelectionOutput', True, type=bool)
 
     def makeAlgs (self, config) :
 
@@ -149,8 +154,11 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'bad_eff' + postfix
             alg.efficiencyScaleFactorTool.WorkingPoint = self.quality
+            if self.isRun3Geo:
+                alg.efficiencyScaleFactorTool.CalibrationRelease = '220817_Preliminary_r22run3'
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'effSF' + postfix)
 
         # Set up an algorithm used for decorating baseline muon selection:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
@@ -158,11 +166,12 @@ class MuonWorkingPointConfig (ConfigBlock) :
         alg.selectionDecoration = 'baselineSelection' + postfix + ',as_char'
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getFullSelection (self.containerName, self.selectionName)
+        config.addOutputVar (self.containerName, 'baselineSelection' + postfix, 'select' + postfix)
 
 
 
 def makeMuonCalibrationConfig( seq, containerName,
-                               postfix = '', ptSelectionOutput = False):
+                               postfix = None, ptSelectionOutput = None):
     """Create muon calibration analysis algorithms
 
     This makes all the algorithms that need to be run first befor
@@ -179,8 +188,9 @@ def makeMuonCalibrationConfig( seq, containerName,
                            output containers.
     """
 
-    config = MuonCalibrationConfig (containerName, postfix)
-    config.ptSelectionOutput = ptSelectionOutput
+    config = MuonCalibrationConfig (containerName)
+    config.setOptionValue ('postfix', postfix, noneAction='ignore')
+    config.setOptionValue ('ptSelectionOutput', ptSelectionOutput, noneAction='ignore')
     seq.append (config)
 
 
@@ -188,8 +198,8 @@ def makeMuonCalibrationConfig( seq, containerName,
 
 
 def makeMuonWorkingPointConfig( seq, containerName, workingPoint, postfix,
-                                qualitySelectionOutput = True,
-                                isRun3Geo = False):
+                                qualitySelectionOutput = None,
+                                isRun3Geo = None):
     """Create muon analysis algorithms for a single working point
 
     Keyword arguments:
@@ -203,10 +213,14 @@ def makeMuonWorkingPointConfig( seq, containerName, workingPoint, postfix,
       isRun3Geo -- switches the muon selection tool to run 3 geometry
     """
 
-    splitWP = workingPoint.split ('.')
-    if len (splitWP) != 2 :
-        raise ValueError ('working point should be of format "quality.isolation", not ' + workingPoint)
 
-    config = MuonWorkingPointConfig (containerName, postfix, splitWP[0], splitWP[1], isRun3Geo)
-    config.qualitySelectionOutput = qualitySelectionOutput
+    config = MuonWorkingPointConfig (containerName, postfix)
+    if workingPoint is not None :
+        splitWP = workingPoint.split ('.')
+        if len (splitWP) != 2 :
+            raise ValueError ('working point should be of format "quality.isolation", not ' + workingPoint)
+        config.setOptionValue ('quality', splitWP[0])
+        config.setOptionValue ('isolation', splitWP[1])
+    config.setOptionValue ('isRun3Geo', isRun3Geo, noneAction='ignore')
+    config.setOptionValue ('qualitySelectionOutput', qualitySelectionOutput, noneAction='ignore')
     seq.append (config)

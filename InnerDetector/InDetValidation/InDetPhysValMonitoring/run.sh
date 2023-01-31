@@ -58,8 +58,4 @@ Reco_tf.py   --checkEventCount  False --ignoreErrors True --maxEvents 5 --valid 
 # --outputAODFile ... :                   [NOT NECESSARY] request an AOD which includes the decorations by the decrorator of the InDetPhysValMonitoring 
 # --preInclude r2e:switch_off_non_id.py,slimming.py,indet_std_plots.py e2a:switch_off_non_id.py :
 #     run these python scripts before processing the normal job options of a certain processing staage 
-#     r2e: after this label the python scripts which are to be run at the very beginning of the RAWtoESD stage (or RDO to ESD)
-#     a2e: after this label the python scripts which are to be run at the very beginning of the ESDtoAOD stage.
-
-
-
+#     r2a: after this label the python scripts which are to be run at the very beginning of the RAWtoALL stage (or RDO to ESD)

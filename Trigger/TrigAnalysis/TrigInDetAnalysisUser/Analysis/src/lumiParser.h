@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Tue 12 Jul 2016 13:47:00 CEST 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -174,9 +174,9 @@ private:
 
 
 
-inline std::ostream& operator<<( std::ostream& s, const lumiParser& _l ) { 
+inline std::ostream& operator<<( std::ostream& s, const lumiParser& lp ) {
   // return s << *dynamic_cast<const lumiList*>(&_l);
-  return s << (const lumiList&)_l;
+  return s << (const lumiList&)lp;
 }
 
 

@@ -28,11 +28,13 @@ else()
                               share/runbatch.py
                               test/*.py )
     
-    atlas_install_scripts( share/athena.py
-                           share/athena_preload.sh
-                           share/chappy.py
-                           share/test_cfg_pickling.py
+    atlas_install_scripts( share/athena_preload.sh
                            share/ThinCAWrapper.sh )
+
+    # Python scripts checked by flake8:
+    atlas_install_scripts( share/athena.py
+                           share/chappy.py
+                           POST_BUILD_CMD ${ATLAS_FLAKE8} )
     
     # Aliases:
     atlas_add_alias( athena "athena.py" )

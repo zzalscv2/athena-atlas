@@ -5,7 +5,7 @@
 #ifndef BTAGGING_TRACK_AUGMENTER_ALG_HH
 #define BTAGGING_TRACK_AUGMENTER_ALG_HH
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "AthContainers/AuxElement.h"
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -20,13 +20,13 @@
 namespace Analysis {
 
 
-  class BTagTrackAugmenterAlg: public AthAlgorithm {
+  class BTagTrackAugmenterAlg: public AthReentrantAlgorithm {
   public:
     BTagTrackAugmenterAlg(const std::string& name,
                           ISvcLocator* pSvcLocator );
 
     StatusCode initialize() override final;
-    StatusCode execute() override final;
+    StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     const xAOD::Vertex* getPrimaryVertex( const xAOD::VertexContainer& ) const;

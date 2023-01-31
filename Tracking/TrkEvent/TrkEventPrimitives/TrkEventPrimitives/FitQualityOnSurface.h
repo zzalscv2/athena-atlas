@@ -36,7 +36,12 @@ public:
     : FitQualityImpl(fq.chiSquared(), fq.doubleNumberDoF())
   {
   }
-};
 
+  explicit operator bool() const
+  {
+    // we need to have set something
+    return (m_chiSquared != 0 || m_numberDoF != 0);
+  }
+};
 }
 #endif // TRKEVENTPRIMITIVES_FITQUALITYONSURFACE_H

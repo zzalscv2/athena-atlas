@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -41,11 +41,9 @@ StatusCode CaloBaselineMonAlg::initialize() {
   }
   */
 
-  if (m_pedestalMon_BCIDmin > 0) m_bool_pedestalMon = true;
-  else m_bool_pedestalMon = false;
+  m_bool_pedestalMon = m_pedestalMon_BCIDmin > 0;
 
-  if (m_bcidtoolMon_BCIDmax > 0) m_bool_bcidtoolMon = true;
-  else m_bool_bcidtoolMon = false;
+  m_bool_bcidtoolMon = m_bcidtoolMon_BCIDmax > 0;
 
   m_etaBinWidth.resize(m_partNames.size());
   m_inv_etaBinWidth.resize(m_partNames.size());

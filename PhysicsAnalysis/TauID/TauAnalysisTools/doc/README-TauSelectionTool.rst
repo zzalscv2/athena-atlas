@@ -168,11 +168,11 @@ setup:
      - accepting taus with a electron RNN score below an upper bound
      - if ``EleRNNMax`` is configured, ``EleRNNRegion`` configuration wont be considered
 
-   * - ``CutEleIDWP``
-     - ``EleIDWP``
+   * - 
+     - ``EleIDVersion``
      - ``int``
-     - accepting taus passing the given working point
-     - 
+     - EleRNN version number for variable to use
+     - Default is 1
 
    * - ``CutMuonOLR``
      - ``MuonOLR``

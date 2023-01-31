@@ -5,11 +5,10 @@
 #ifndef XAODROOTACCESS_TOOLS_TAUXVECTORFACTORY_H
 #define XAODROOTACCESS_TOOLS_TAUXVECTORFACTORY_H
 
-// ROOT include(s):
-#include <TMethodCall.h>
-
-// EDM include(s):
+// Athena include(s):
 #include "AthContainersInterfaces/IAuxTypeVectorFactory.h"
+#include "CxxUtils/checker_macros.h"
+#include "RootUtils/TSMethodCall.h"
 
 // Forward declaration(s):
 class TClass;
@@ -76,6 +75,20 @@ namespace xAOD {
       /// Type of the factory
       virtual bool isDynamic() const override { return true; }
 
+      /**
+       * @brief Return the @c type_info of the vector allocator.
+       *
+       * May be nullptr for a dynamic vector.
+       */
+      virtual const std::type_info* tiAlloc() const override;
+
+
+      /**
+       * @brief Return the (demangled) name of the vector allocator.
+       */
+      virtual std::string tiAllocName() const override;
+
+
       /// @}
 
    private:
@@ -84,7 +97,7 @@ namespace xAOD {
       /// ROOT's description of the vector type
       ::TVirtualCollectionProxy* m_proxy;
       /// Assignment operator
-      mutable ::TMethodCall* m_assign = nullptr;
+      mutable RootUtils::TSMethodCall m_assign ATLAS_THREAD_SAFE;
       /// Pointer to a default element object in memory
       void* m_defElt;
 

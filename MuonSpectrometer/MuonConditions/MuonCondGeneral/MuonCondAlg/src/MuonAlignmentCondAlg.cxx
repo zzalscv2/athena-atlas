@@ -1011,7 +1011,7 @@ StatusCode MuonAlignmentCondAlg::loadNswAlignAsBuilt(const std::string& mmFolder
     // =======================
     // Retrieve the collection of strings read out from the DB
     // =======================
-	unsigned int nLines = 0;
+    unsigned int nLines = 0;
     CondAttrListCollection::const_iterator itr;
     for(itr = readMmAsBuiltCdo->begin(); itr != readMmAsBuiltCdo->end(); ++itr) {
         const coral::AttributeList& atr = itr->second;
@@ -1021,8 +1021,10 @@ StatusCode MuonAlignmentCondAlg::loadNswAlignAsBuilt(const std::string& mmFolder
         writeCdo->setMmData(data);
         nLines++;
     }
+    
     if(nLines>1) ATH_MSG_WARNING(nLines << " data objects were loaded for MM/ASBUILTPARAMS! Expected only one for this validity range!");
-	nLines = 0;
+    
+    nLines = 0;
     for(itr = readSTgcAsBuiltCdo->begin(); itr != readSTgcAsBuiltCdo->end(); ++itr) {
         const coral::AttributeList& atr = itr->second;
         std::string data;
@@ -1032,6 +1034,13 @@ StatusCode MuonAlignmentCondAlg::loadNswAlignAsBuilt(const std::string& mmFolder
         nLines++;
     }
     if(nLines>1) ATH_MSG_WARNING(nLines << " data objects were loaded for STGC/ASBUILTPARAMS! Expected only one for this validity range!");
+
+    EventIDRange rangeIntersection{EventIDRange::intersect(rangeMmAsBuiltW, rangeSTgcAsBuiltW)};
+    if (writeHandle.record(rangeIntersection, std::move(writeCdo)).isFailure()) {
+        ATH_MSG_FATAL("Could not record NswAsBuiltMapContainer " << writeHandle.key() << " with EventRange " << rangeMmAsBuiltW << " into Conditions Store");
+        return StatusCode::FAILURE;
+    }
+
     return StatusCode::SUCCESS;
 }
 

@@ -53,5 +53,3 @@ for icut in CustomCuts:
     CustomConfgurationName = CustomType,
     OutputLevel            = 3)
   topSequence.insert(index,isoBuilderCustom)
-
-##  --postInclude 'PyJobTransforms/UseFrontier.py' RAWtoESD:'IsolationAlgs/CustomTrackIsoGetter.py'

@@ -17,8 +17,6 @@ class Identifier;
 
 namespace Trk {
 
-  class PRDtoTrackMap;
-
   static const InterfaceID IID_IExtendedTrackSummaryHelperTool("Trk::IExtendedTrackSummaryHelperTool", 1, 0);
 
 /** @class ITrackSummaryHelperTool
@@ -41,7 +39,6 @@ namespace Trk {
     using ITrackSummaryHelperTool::analyse;
 
     /* Expand/Extend the interface , with methods  using the EventContext
-     * and Trk::PRDtoTrackMap.
      */
 
      /*
@@ -53,28 +50,24 @@ namespace Trk {
     virtual void analyse(
       const EventContext& ctx,
       const Trk::Track& track,
-      const Trk::PRDtoTrackMap* prd_to_track_map,
       const RIO_OnTrack* rot,
       const TrackStateOnSurface* tsos,
       std::vector<int>& information,
       std::bitset<Trk::numberOfDetectorTypes>& hitPattern) const
     {
       (void)ctx;
-      (void) prd_to_track_map;
       analyse(track, rot, tsos, information, hitPattern);
     };
 
     virtual void analyse(
       const EventContext& ctx,
       const Trk::Track& track,
-      const Trk::PRDtoTrackMap* prd_to_track_map,
       const CompetingRIOsOnTrack* crot,
       const TrackStateOnSurface* tsos,
       std::vector<int>& information,
       std::bitset<Trk::numberOfDetectorTypes>& hitPattern) const
     {
       (void)ctx;
-      (void)prd_to_track_map;
       analyse(track, crot, tsos, information, hitPattern);
     }
 
@@ -85,11 +78,6 @@ namespace Trk {
       (void)ctx;
       addDetailedTrackSummary(track,summary);
     };
- 
-    virtual void updateSharedHitCount(
-      const Trk::Track&,
-      const Trk::PRDtoTrackMap*,
-      Trk::TrackSummary&) const {};
 
     /*
      * Implement the ITrackSummaryHelperTool part
@@ -105,7 +93,6 @@ namespace Trk {
     {
       analyse(Gaudi::Hive::currentContext(),
               track,
-              nullptr,
               rot,
               tsos,
               information,
@@ -121,7 +108,6 @@ namespace Trk {
     {
       analyse(Gaudi::Hive::currentContext(),
               track,
-              nullptr,
               crot,
               tsos,
               information,

@@ -155,7 +155,7 @@ int MDTSensitiveDetector::GetIdentifier(const G4TouchableHistory* touchHist)
     // station: name, eta and phi (-> chamber!)
     if ((npos = volName.find("station")) != std::string::npos && (!isAssembly)) {
 
-      volName       = volName.substr(0,npos-2);
+      volName.resize(npos-2);
       int volCopyNo = touchHist->GetVolume(i)->GetCopyNo();
       volCopyNo=volCopyNo%1000;
       stationName   = volName;

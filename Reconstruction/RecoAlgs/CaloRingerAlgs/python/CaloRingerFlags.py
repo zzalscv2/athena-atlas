@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 #=======================================================================
 # File:  CaloRingerAlgs/python/CaloRingerFlags.py
@@ -75,7 +75,7 @@ class doElectronIdentification(CaloRingerFlagsJobProperty):
     """ switch for electron particle identification (PID), that is, whether to
     run or not Ringer selector for Electrons.
     """
-    statusOn        = True
+    statusOn        = False
     allowedTypes    = ['bool']
     StoredValue     = False
 jobproperties.CaloRingerFlags.add_JobProperty(doElectronIdentification)
@@ -117,14 +117,6 @@ class minPhotonEnergy(CaloRingerFlagsJobProperty):
     StoredValue     = None
 jobproperties.CaloRingerFlags.add_JobProperty(minPhotonEnergy)
 
-#=======================================================================
-from RingerSelectorTools.ElectronRingerSelectorMapping import electronRingerPIDmenu
-class electronMenuToUse(CaloRingerFlagsJobProperty):
-    """ which menu should be used for electron identification  """
-    statusOn     = True
-    allowedTypes = ['int']
-    StoredValue  = electronRingerPIDmenu.testMenu
-jobproperties.CaloRingerFlags.add_JobProperty(electronMenuToUse)
 
 #=======================================================================
 class ignoreRingerExistingDataObject(CaloRingerFlagsJobProperty):

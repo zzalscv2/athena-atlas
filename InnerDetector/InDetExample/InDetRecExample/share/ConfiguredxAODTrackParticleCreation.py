@@ -9,7 +9,7 @@ include.block ('InDetRecExample/ConfiguredxAODTrackParticleCreation.py')
 
 class ConfiguredxAODTrackParticleCreation:
 
-     def __init__(self, InputTrackCollection = None, InputTrackTruthCollection = None, OutputTrackParticleContainer = None):
+     def __init__(self, InputTrackCollection = None, InputTrackTruthCollection = None, OutputTrackParticleContainer = None, ClusterSplitProbabilityName = "", AssociationMapName = ""):
 
 
          from InDetRecExample.InDetJobProperties import InDetFlags
@@ -22,26 +22,9 @@ class ConfiguredxAODTrackParticleCreation:
          from InDetRecExample                    import TrackingCommon
          topSequence = AlgSequence()
 
-         _perigee_expression=InDetFlags.perigeeExpression()
-         # need to treat Vertex specifically because at the time of
-         # the track particle creation the primary vertex does not yet exist.
-         # The problem is solved by first creating track particles wrt. the beam line
-         # and correcting the parameters after the vertex finding.
-         if _perigee_expression == 'Vertex' :
-              _perigee_expression = 'BeamLine'
-
          #Always the same (so far) so can in principle go in InDetRecLoadTools
-         # @TODO shoueld use InDetxAODParticleCreator.getInDetxAODParticleCreatorTool
-         from TrkParticleCreator.TrkParticleCreatorConf import Trk__TrackParticleCreatorTool
-         InDetxAODParticleCreatorTool = Trk__TrackParticleCreatorTool(name = "InDetxAODParticleCreatorTool"+InputTrackCollection,
-                                                                      TrackToVertex           = TrackingCommon.getInDetTrackToVertexTool(),
-                                                                      TrackSummaryTool        = TrackingCommon.getInDetTrackSummaryToolSharedHits(),
-                                                                      TestPixelLayerTool      = TrackingCommon.getInDetTestPixelLayerToolInner(),
-                                                                      ComputeAdditionalInfo   = True,
-                                                                      BadClusterID            = InDetFlags.pixelClusterBadClusterID(),
-                                                                      KeepParameters          = True,
-                                                                      KeepFirstParameters     = InDetFlags.KeepFirstParameters(),
-                                                                      PerigeeExpression       = _perigee_expression)
+         from InDetRecExample.TrackingCommon import getInDetxAODParticleCreatorTool
+         InDetxAODParticleCreatorTool = getInDetxAODParticleCreatorTool(suffix=InputTrackCollection)
 
          ToolSvc += InDetxAODParticleCreatorTool
          if (InDetFlags.doPrintConfigurables()):

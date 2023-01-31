@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Mon 30 Jan 2012 18:43:21 CET 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -37,9 +37,9 @@ void remove_duplicates(std::vector<T>& vec) {
 }
 
 std::string time_str() { 
-  time_t _t;
-  time(&_t);
-  std::string s(ctime(&_t));
+  time_t t;
+  time(&t);
+  std::string s(ctime(&t));
   return s.substr(0,s.find('\n'));
 }
 
@@ -59,12 +59,12 @@ int usage(int e=0) {
 }
 
 template<class T>
-std::ostream& operator<<( std::ostream& s, const std::set<T>& _s ) { 
-  typename std::set<T>::const_iterator sitr = _s.begin();
-  s << "[  ";
-  while ( sitr!=_s.end() ) s << (*sitr++) << "\t"; 
-  s << " ]";
-  return s;
+std::ostream& operator<<( std::ostream& os, const std::set<T>& s ) {
+  typename std::set<T>::const_iterator sitr = s.begin();
+  os << "[  ";
+  while ( sitr!=s.end() ) os << (*sitr++) << "\t";
+  os << " ]";
+  return os;
 }
 
 
@@ -278,7 +278,7 @@ int main(int argc, char** argv) {
 	
 	double eventsps = 1000*i/t;
 
-	std::printf( "\r%c    %6.2lf %%     time: %6.2lf s    remaining %6.2lf s   (%d at %5.2lf ps) ", 
+	std::printf( "\r%c    %6.2lf %%     time: %6.2lf s    remaining %6.2lf s   (%u at %5.2lf ps) ", 
 		     cck[ii%4], ((1000*(i+1)/entries)*0.1), t*0.001, est*0.001, i, eventsps );   
 
 	std::fflush(stdout);
@@ -312,7 +312,7 @@ int main(int argc, char** argv) {
       bool skip = true;
 
       std::vector<TIDA::Chain>::iterator citr = chains.begin();
-      for ( ; citr!=chains.end() ; citr++ ) {
+      for ( ; citr!=chains.end() ; ++citr ) {
 
 	if ( citr->name().find("HLT")==std::string::npos ) continue;
 
@@ -343,7 +343,7 @@ int main(int argc, char** argv) {
 	for ( size_t ic=0 ; ic<chainnames.size() ; ic++ ) {
 	  
 	  bool matched = false;
-	  for ( std::set<std::string>::iterator it=require_chains.begin() ; it!=require_chains.end() ; it++ ) { 
+	  for ( std::set<std::string>::iterator it=require_chains.begin() ; it!=require_chains.end() ; ++it ) { 
 
 	    matched |= std::regex_match( chainnames[ic], std::regex(*it+".*") );
 
@@ -380,7 +380,7 @@ int main(int argc, char** argv) {
 	    
 	    std::vector<std::pair<double,double> > philims;
 	    
-	    for ( ; citr!=chains.end() ; citr++ ) {
+	    for ( ; citr!=chains.end() ; ++citr ) {
 	      if ( citr->name().find("HLT_")!=std::string::npos ) { 
 		for ( size_t ir=0 ; ir<citr->size() ; ir++ ) {
 		  TIDARoiDescriptor& roi = citr->rois()[ir].roi();
@@ -424,7 +424,7 @@ int main(int argc, char** argv) {
 		  }
 		  if ( remove_track ) { inc=false; tracks.erase( it ); }
 		}
-		if ( inc ) it++;
+		if ( inc ) ++it;
 	      }
 
 	    }

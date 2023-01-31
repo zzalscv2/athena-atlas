@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 // $Id: TopObjectSelection.h 810745 2017-09-29 14:03:01Z iconnell $
@@ -332,7 +332,6 @@ namespace top {
     bool m_executeNominal;
     
     //helper OR tool for soft muons
-    asg::AnaToolHandle<ORUtils::IOverlapRemovalTool> m_overlapRemovalTool_softMuons_PFjets;
     asg::AnaToolHandle<ORUtils::IOverlapRemovalTool> m_overlapRemovalTool_softMuons_Alljets;
 
     // Function to decorate event info

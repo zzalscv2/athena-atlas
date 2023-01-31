@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
  
 
@@ -21,15 +21,13 @@ def createTrigEgammaForwardPrecisionElectronHypoAlg(name, sequenceOut):
     #thePrecisionElectronHypo.FwdElectronLHSelectorTools = createTrigEgammaPrecisionElectronLHSelectors()
     #thePrecisionElectronHypo.LHNames = ["lhtight", "lhmedium", "lhloose"] # just like the pidnames
 
-    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool, defineHistogram
-    MonTool = GenericMonitoringTool("MonTool_"+name)
-    MonTool.Histograms = [ 
-          defineHistogram('TIME_exec', type='TH1F', path='EXPERT', title="Precision Electron Hypo Algtime; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=8000.0),
-          defineHistogram('TIME_LH_exec', type='TH1F', path='EXPERT', title="Precision Electron Hypo LH Algtime; time [ us ] ; Nruns", xbins=30, xmin=0.0, xmax=3000.0),
-    ]
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    monTool = GenericMonitoringTool("MonTool_"+name,
+                                    HistPath = 'PrecisionElectronHypo_FWD/'+name)
+    monTool.defineHistogram('TIME_exec', type='TH1F', path='EXPERT', title="Precision Electron Hypo Algtime; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=8000.0)
+    monTool.defineHistogram('TIME_LH_exec', type='TH1F', path='EXPERT', title="Precision Electron Hypo LH Algtime; time [ us ] ; Nruns", xbins=30, xmin=0.0, xmax=3000.0)
 
-    MonTool.HistPath = 'PrecisionElectronHypo_FWD/'+name
-    thePrecisionElectronHypo.MonTool=MonTool
+    thePrecisionElectronHypo.MonTool=monTool
 
     return thePrecisionElectronHypo
 

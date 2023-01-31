@@ -82,28 +82,21 @@ void createTrackTruthMap(const std::vector<const xAOD::TruthEventBaseContainer *
   static const xAOD::TruthParticle::Decorator<ElementLink<xAOD::TruthEventBaseContainer> > backLinkDecor("TruthEventLink");
   static const xAOD::TrackParticle::Decorator<ElementLink<xAOD::TruthEventBaseContainer> > trackLinkDecor("TrackEventLink");
 
-  int nGood = 0;
-  int nMatch = 0;
-  int nLink = 0;
+ 
   for (auto trk : trackParticleContainer)
   {
     {
-      nGood++;
       if (trk_truthPartAcc.isAvailable(*trk) && trk_truthProbAcc.isAvailable(*trk)
           && trk_truthPartAcc(*trk).isValid() && trk_truthProbAcc(*trk) >= matchCut)
       {
-        nMatch++;
         const auto& truthParticle = trk_truthPartAcc(*trk);
         if (backLinkDecor.isAvailable(**truthParticle) && backLinkDecor(**truthParticle).isValid())
         {
-          nLink++;
           trackLinkDecor(*trk) = backLinkDecor(**truthParticle);
         }
       }
     }
   }
-  // won't compile, no idea why
-  //ATH_MSG_DEBUG("Linked/Matched/Good/All: " << nLink << " / " << nMatch << " / " << nGood << " / " << trackParticleContainer.size());
 }
 
 //In the vector of match info, find the element corresponding to link and return its index; create a new one if necessary

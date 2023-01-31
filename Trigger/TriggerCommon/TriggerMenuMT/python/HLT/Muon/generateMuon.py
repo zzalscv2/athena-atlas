@@ -158,11 +158,11 @@ def efMuIsoHypoConf(flags, name="UNSPECIFIED", inputMuons="UNSPECIFIED"):
     return efHypo
 
 @AccumulatorCache
-def _muFastStepSeq(flags):
+def _muFastStepSeq(flags, is_probe_leg=False):
     # Step 1 (L2MuonSA)
-    selAcc = SelectionCA("L2MuFastReco")
+    selAcc = SelectionCA("L2MuFastReco",  is_probe_leg)
     # Set EventViews for L2MuonSA step
-    reco = InViewRecoCA("L2MuFastReco")
+    reco = InViewRecoCA("L2MuFastReco", isProbe=is_probe_leg)
 
     #external data loading to view
     reco.mergeReco( MuFastViewDataVerifier(flags) )
@@ -183,13 +183,13 @@ def _muFastStepSeq(flags):
     selAcc.addHypoAlgo(l2muFastHypo)
 
     l2muFastSequence = MenuSequenceCA(selAcc, 
-                                      HypoToolGen = TrigMufastHypoToolFromDict )
+                                      HypoToolGen = TrigMufastHypoToolFromDict, isProbe=is_probe_leg )
 
     return (selAcc , l2muFastSequence)
 
 def muFastSequence(flags, is_probe_leg=False): 
     muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
-    selAcc , l2muFastSequence =  _muFastStepSeq(muonflags)
+    selAcc , l2muFastSequence =  _muFastStepSeq(muonflags, is_probe_leg)
     return l2muFastSequence
 
 
@@ -198,6 +198,11 @@ def muFastStep(flags, chainDict):
     selAcc , l2muFastSequence = _muFastStepSeq(flags)
 
     return ChainStep( name=selAcc.name, Sequences=[l2muFastSequence], chainDicts=[chainDict] )
+
+## FP fake, just to test run
+def muFastOvlpRmSequence (flags, is_probe_leg=False):
+    log.warning("FAKE muFastOvlpRmSequence replaced by single muFast")
+    return muFastSequence(flags, is_probe_leg)
 
 @AccumulatorCache
 def _muCombStepSeq(flags):
@@ -235,6 +240,11 @@ def muCombStep(flags, chainDict):
     selAccL2CB , l2muCombSequence = _muCombStepSeq(flags)
 
     return ChainStep( name=selAccL2CB.name, Sequences=[l2muCombSequence], chainDicts=[chainDict] )
+
+def muCombOvlpRmSequence(flags, is_probe_leg=False):
+    log.warning("FAKE muCombOvlpRmSequence replaced by single muCombSequence")
+    return muCombSequence(flags)
+
 
 @AccumulatorCache
 def _muEFSAStepSeq(flags, name='RoI'):

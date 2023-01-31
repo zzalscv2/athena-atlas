@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Geo2G4LVFactory.h"
@@ -24,8 +24,8 @@ Geo2G4LVFactory::Geo2G4LVFactory()
 {
 }
 
-G4LogicalVolume* Geo2G4LVFactory::Build(const PVConstLink& thePhys,
-                                        bool& descend) const
+G4LogicalVolume* Geo2G4LVFactory::Build ATLAS_NOT_THREAD_SAFE (const PVConstLink& thePhys,
+                                                               bool& descend)
 {
   static Geo2G4SolidFactory theSolidFactory;
   static Geo2G4MaterialFactory theMaterialFactory;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 namespace Trk {
@@ -13,61 +13,6 @@ inline SurfaceType
 PlaneSurface::type() const
 {
   return PlaneSurface::staticType;
-}
-
-/** Use the Surface as a ParametersBase constructor, from local parameters -
- * charged */
-inline Surface::ChargedTrackParametersUniquePtr
-PlaneSurface::createUniqueTrackParameters(
-  double l1,
-  double l2,
-  double phi,
-  double theta,
-  double qop,
-  std::optional<AmgSymMatrix(5)> cov) const
-{
-  return std::make_unique<ParametersT<5, Charged, PlaneSurface>>(
-    l1, l2, phi, theta, qop, *this, std::move(cov));
-}
-/** Use the Surface as a ParametersBase constructor, from global parameters -
- * charged*/
-inline Surface::ChargedTrackParametersUniquePtr
-PlaneSurface::createUniqueTrackParameters(
-  const Amg::Vector3D& position,
-  const Amg::Vector3D& momentum,
-  double charge,
-  std::optional<AmgSymMatrix(5)> cov) const
-{
-  return std::make_unique<ParametersT<5, Charged, PlaneSurface>>(
-    position, momentum, charge, *this, std::move(cov));
-}
-
-/** Use the Surface as a ParametersBase constructor, from local parameters -
- * neutral */
-inline Surface::NeutralTrackParametersUniquePtr
-PlaneSurface::createUniqueNeutralParameters(
-  double l1,
-  double l2,
-  double phi,
-  double theta,
-  double oop,
-  std::optional<AmgSymMatrix(5)> cov) const
-{
-  return std::make_unique<ParametersT<5, Neutral, PlaneSurface>>(
-    l1, l2, phi, theta, oop, *this, std::move(cov));
-}
-
-/** Use the Surface as a ParametersBase constructor, from global parameters -
- * neutral */
-inline Surface::NeutralTrackParametersUniquePtr
-PlaneSurface::createUniqueNeutralParameters(
-  const Amg::Vector3D& position,
-  const Amg::Vector3D& momentum,
-  double charge,
-  std::optional<AmgSymMatrix(5)> cov) const
-{
-  return std::make_unique<ParametersT<5, Neutral, PlaneSurface>>(
-    position, momentum, charge, *this, std::move(cov));
 }
 
 /** Use the Surface as a ParametersBase constructor, from local parameters */
@@ -96,31 +41,6 @@ PlaneSurface::createUniqueParameters(const Amg::Vector3D& position,
     position, momentum, charge, *this, std::move(cov));
 }
 
-/** Use the Surface as a ParametersBase constructor, from local parameters */
-template<int DIM, class T>
-ParametersT<DIM, T, PlaneSurface>
-PlaneSurface::createParameters(double l1,
-                               double l2,
-                               double phi,
-                               double theta,
-                               double qop,
-                               std::optional<AmgSymMatrix(DIM)> cov) const
-{
-  return ParametersT<DIM, T, PlaneSurface>(l1, l2, phi, theta, qop, *this, std::move(cov));
-}
-
-/** Use the Surface as a ParametersBase constructor, from global parameters */
-template<int DIM, class T>
-ParametersT<DIM, T, PlaneSurface>
-PlaneSurface::createParameters(const Amg::Vector3D& position,
-                               const Amg::Vector3D& momentum,
-                               double charge,
-                               std::optional<AmgSymMatrix(DIM)> cov) const
-{
-  return ParametersT<DIM, T, PlaneSurface>(
-    position, momentum, charge, *this, std::move(cov));
-}
-
 /** Return properly formatted class name for screen output */
 inline std::string
 PlaneSurface::name() const
@@ -132,11 +52,6 @@ inline PlaneSurface*
 PlaneSurface::clone() const
 {
   return new PlaneSurface(*this);
-}
-
-inline std::unique_ptr<PlaneSurface>
-PlaneSurface::uniqueClone() const{
-  return std::unique_ptr<PlaneSurface>(clone());
 }
 
 inline bool
@@ -166,25 +81,5 @@ PlaneSurface::bounds() const
   if (Surface::m_associatedDetElement)
     return m_associatedDetElement->bounds();
   return s_boundless;
-}
-
-inline Intersection
-PlaneSurface::straightLineIntersection(const Amg::Vector3D& pos,
-                                       const Amg::Vector3D& dir,
-                                       bool forceDir,
-                                       Trk::BoundaryCheck bchk) const
-{
-  double denom = dir.dot(normal());
-  if (denom) {
-    double u = (normal().dot((center() - pos))) / (denom);
-    Amg::Vector3D intersectPoint(pos + u * dir);
-    // evaluate the intersection in terms of direction
-    bool isValid = forceDir ? (u > 0.) : true;
-    // evaluate (if necessary in terms of boundaries)
-    isValid = bchk ? (isValid && isOnSurface(intersectPoint)) : isValid;
-    // return the result
-    return Trk::Intersection(intersectPoint, u, isValid);
-  }
-  return Trk::Intersection(pos, 0., false);
 }
 }

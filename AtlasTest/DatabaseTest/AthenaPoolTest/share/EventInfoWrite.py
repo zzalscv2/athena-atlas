@@ -121,8 +121,6 @@ Stream1.ItemList   += fullItemList
 #--------------------------------------------------------------
 svcMgr.MessageSvc.OutputLevel = INFO
 svcMgr.MessageSvc.debugLimit  = 100000
-#rds svcMgr.ClassIDSvc = Service( "ClassIDSvc" )
-#rds svcMgr.ClassIDSvc.OutputLevel = 3
 
 from AthenaServices import AthenaServicesConf
 AthenaEventLoopMgr = AthenaServicesConf.AthenaEventLoopMgr()

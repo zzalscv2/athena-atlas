@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigCaloEvent/TrigT2Jet.h"
@@ -8,21 +8,6 @@
 TrigT2Jet::TrigT2Jet():
   m_e(), m_ehad0(), m_eem0(), m_eta(), m_phi(), m_grid(0), m_roiWord(), m_nLeadingCells(), m_hecf(), m_jetQuality(), m_emf(), m_jetTimeCells() 
 {}
-// initialise cleaining variables?
-
-void TrigT2Jet::clearGrid(){
-  std::vector<Trig3Momentum>::iterator i_begin;
-  std::vector<Trig3Momentum>::iterator i_end;
-  std::vector<Trig3Momentum>::iterator i_it;
-  m_grid->begin() = i_begin;
-  m_grid->end() = i_end;
-  for( i_it = i_begin; i_it!=i_end; ++i_it){
-     m_grid->erase(i_it);
-  }
-//  m_grid->clear();
-  delete m_grid;
-  m_grid = 0;
-}
 
 TrigT2Jet::~TrigT2Jet(){
   delete m_grid;
@@ -63,14 +48,6 @@ std::string str (const TrigT2Jet& a){
   if(a.grid()) {
     std::sprintf(buff,"Grid Members = %4d\n", (int)a.grid()->size());  s += buff;
   }
-  // Cleaning:
-  // propose to not implement this at the moment.
-/*  std::sprintf(buff,"L2 Jet nLeadingCells = %4d\n", a.nLeadingCells()) s+=buff;
-  std::sprintf(buff,"L2 Jet hecf  = %10.2f \n",    a.hecf());  s+= buff;
-  std::sprintf(buff,"L2 Jet jet Quality  = %10.2f \n",    a.jetQuality());  s+= buff;
-  std::sprintf(buff,"L2 Jet emf  = %10.2f \n",    a.emf());  s+= buff;
-  std::sprintf(buff,"L2 Jet jetTime  = %10.2f \n",    a.jetTimeCells());  s+= buff;
-*/
 
   return s;
 

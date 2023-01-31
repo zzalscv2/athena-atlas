@@ -1,8 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
  */
-// $Id$
 /**
  * @file StoreGate/WriteDecorHandleKey.h
  * @author scott snyder <snyder@bnl.gov>
@@ -28,7 +27,7 @@ class AthAlgTool;
 namespace SG {
 
 
-/*
+/**
  * @brief Property holding a SG store/key/clid/attr name from which a
  *        WriteDecorHandle is made.
  *
@@ -44,15 +43,8 @@ namespace SG {
  *@code
  *  class MyAlgorithm : public AthReentrantAlgorithm {
  *    ...
- *    SG::WriteDecorHandleKey<MyCont> m_key;
+ *    SG::WriteDecorHandleKey<MyCont> m_key{this, "Key",  "container.decor"};
  *  };
- *  ...
- *  MyAlgorithm::MyAlgorithm (const std::string& name, ISvcLocator* svcloc)
- *    : AthReentrantAlgorithm (name, svcloc), ...
- *  {
- *    declareProperty ("Key", m_key = "container.decor");
- *    ...
- *  }
  *
  *  StatusCode MyAlgorithm::initialize()
  *  {
@@ -66,7 +58,23 @@ namespace SG {
  *    for (const MyObj& o : *h) {  // Access the container.
  *      h (o) = calculate (o);  // Add the decoration.
  *      ...
- @endcode
+ *@endcode
+ *
+ * Alternatively, one can construct the key with an additional WriteHandleKey
+ * that represents the container and the key then only holds the decoration
+ * name. This is useful to avoid hard-coding the container name twice in case
+ * the algorithm also needs a @c WriteHandleKey for the container:
+ *
+ * Example:
+ *
+ *@code
+ *  class MyAlgorithm : public AthReentrantAlgorithm {
+ *    ...
+ *    SG::WriteHandleKey<MyCont> m_whkey{this, "WHKey", "container"};
+ *    SG::WriteDecorHandleKey<MyCont> m_wdhkey{this, "Key", m_whkey, "decor"};
+ *  };
+ *  ...
+ *@endcode
  *
  * Implementation note: We want to make two dependencies from this key: a read
  * dependency on the container itself, and a write dependency on the decoration.
@@ -97,23 +105,55 @@ public:
 
 
   /**
+   * @brief Constructor with associated container.
+   * @param contKey WriteHandleKey of the associated container
+   * @param decorKey The decoration name.
+   * @param storeName Name to use for the store.
+   *
+   * The decoration @decorKey will be applied on the container referenced
+   * by @contKey.
+   */
+  WriteDecorHandleKey (const WriteHandleKey<T>& contKey,
+                       const std::string& decorKey = "",
+                       const std::string& storeName = StoreID::storeName(StoreID::EVENT_STORE));
+
+
+  /**
    * @brief auto-declaring Property Constructor.
    * @param owner Owning component.
    * @param name name of the Property
    * @param key  default StoreGate key for the object.
    * @param doc Documentation string.
    *
-   * will associate the named Property with this RHK via declareProperty
+   * will associate the named Property with this WDHK via declareProperty
    *
    * The provided key may actually start with the name of the store,
    * separated by a "+":  "MyStore+Obj".  If no "+" is present
    * the store named by @c storeName is used.
    */
-  template <class OWNER, class K,
+  template <class OWNER,
             typename = typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type>
   WriteDecorHandleKey( OWNER* owner,
                       const std::string& name,
-                      const K& key = {},
+                      const std::string& key = {},
+                      const std::string& doc = "");
+
+  /**
+   * @brief auto-declaring Property Constructor.
+   * @param owner Owning component.
+   * @param name name of the Property
+   * @param contKey WriteHandleKey of the associated container
+   * @param decorKey name The decoration name.
+   * @param doc Documentation string.
+   *
+   * will associate the named Property with this WDHK via declareProperty
+   */
+  template <class OWNER,
+            typename = typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type>
+  WriteDecorHandleKey( OWNER* owner,
+                      const std::string& name,
+                      const WriteHandleKey<T>& contKey,
+                      const std::string& decorKey = {},
                       const std::string& doc = "");
 
 
@@ -164,15 +204,22 @@ private:
   friend class ::AthAlgTool;
 
   /**
+   * @brief Python representation of Handle.
+   */
+  virtual std::string pythonRepr() const override;
+
+  /**
    * @brief Return the handle key for the container.
    *
    * Should be used only by AthAlgorithm/AthAlgTool.
    */
   ReadHandleKey<T>& contHandleKey_nc();
 
-
   /// The container handle.
   ReadHandleKey<T> m_contHandleKey;
+
+  /// Optional container on which decorations are applied
+  const WriteHandleKey<T>* m_contKey{nullptr};
 };
 
 

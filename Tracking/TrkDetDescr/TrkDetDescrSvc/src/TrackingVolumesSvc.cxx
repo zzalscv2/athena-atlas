@@ -23,7 +23,7 @@
 
 /** Constructor **/
 Trk::TrackingVolumesSvc::TrackingVolumesSvc(const std::string& a_name,ISvcLocator* svc) : 
-    AthService(a_name,svc),
+    base_class(a_name,svc),
     m_pDetStore("DetectorStore",name())
 { 
     m_volumes.reserve(Trk::ITrackingVolumesSvc::NumIdentifiers);
@@ -87,20 +87,3 @@ StatusCode Trk::TrackingVolumesSvc::finalize()
   ATH_MSG_INFO ( "finalize() successful."  );
   return StatusCode::SUCCESS;
 }
-
-/** Query the interfaces. */
-StatusCode Trk::TrackingVolumesSvc::queryInterface(const InterfaceID& riid, void** ppvInterface)
-{
-  if ( IID_ITrackingVolumesSvc == riid )
-    *ppvInterface = (ITrackingVolumesSvc*)this;
-  else  {
-    // Interface is not directly available: try out a base class
-    return Service::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
-}
-
-
-
-

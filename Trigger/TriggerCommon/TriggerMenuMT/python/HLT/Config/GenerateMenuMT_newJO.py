@@ -2,7 +2,10 @@
 import itertools
 
 from TriggerMenuMT.HLT.Config.Utility.DictFromChainName import dictFromChainName
-from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig_newJO import generateDecisionTree
+from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig import decisionTreeFromChains, sequenceScanner
+
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaCommon.CFElements import seqAND
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
 from TriggerMenuMT.HLT.Config.Utility.ChainDictTools import splitInterSignatureChainDict
@@ -179,18 +182,16 @@ class FilterChainsToGenerate(object):
 def generateMenuMT(flags): 
     """
     Interface between CA and MenuMT using ChainConfigurationBase
-    """
-        
-    
+    """     
 
     # Generate the menu, stolen from HLT_standalone
     from TriggerMenuMT.HLT.Config.GenerateMenuMT import GenerateMenuMT
     menu = GenerateMenuMT() 
-        
-    chainsToGenerate = FilterChainsToGenerate(flags)          
+    
+    chainsToGenerate = FilterChainsToGenerate(flags)  
+    log.debug("Filtering chains ")        
     menu.setChainFilter(chainsToGenerate)        
     finalListOfChainConfigs = menu.generateAllChainConfigs(flags)
-    
     log.info("Length of FinalListofChainConfigs %s", len(finalListOfChainConfigs))
  
     # make sure that we didn't generate any steps that are fully empty in all chains
@@ -198,9 +199,8 @@ def generateMenuMT(flags):
     finalListOfChainConfigs = menu.resolveEmptySteps(finalListOfChainConfigs)
 
     log.info("finalListOfChainConfig %s", finalListOfChainConfigs)
-
     log.info("Making the HLT configuration tree")
-    menuAcc=generateMenuAcc(flags)
+    menuAcc=makeHLTTree(flags)
 
     # generate L1 menu
     # This probably will go to TriggerConfig.triggerRunCfg
@@ -214,7 +214,7 @@ def LoadAndGenerateMenu(flags):
     Load and generate Chain configurations, without ChainConfigurationBase
     """
     loadChains(flags)
-    menuAcc= generateMenuAcc(flags)
+    menuAcc= makeHLTTree(flags)
     # The L1 presacles do not get created in the menu setup
     from TrigConfigSvc.TrigConfigSvcCfg import generateL1Menu, createL1PrescalesFileFromMenu
     generateL1Menu(flags)
@@ -222,18 +222,29 @@ def LoadAndGenerateMenu(flags):
     return menuAcc
     
 
-def generateMenuAcc(flags):
+def makeHLTTree(flags):
     """
     Generate appropriate Control Flow Graph wiht all HLT algorithms
     """
-
-    menuAcc = generateDecisionTree(flags, HLTMenuConfig.configsList())
+    log.info("newJO version of makeHLTTree")
+    acc = ComponentAccumulator()
+    
+    steps = seqAND('HLTAllSteps')
+    finalDecisions, menuAcc = decisionTreeFromChains(flags, steps, HLTMenuConfig.configsList(), HLTMenuConfig.dictsList(), newJO=False)        
     menuAcc.wasMerged()
     if log.getEffectiveLevel() <= logging.DEBUG:
         menuAcc.printConfig()
 
-    log.info('CF is built')
+    acc.merge(menuAcc)
+    successful_scan = sequenceScanner( steps )
+    if not successful_scan:
+        raise Exception("[makeHLTTree] At least one sequence is expected in more than one step. Check error messages and fix!")    
 
+    flatDecisions=[]
+    for step in finalDecisions:
+        flatDecisions.extend (step)
+    
+    
     # # generate JOSON representation of the config
     from TriggerMenuMT.HLT.Config.JSON.HLTMenuJSON import generateJSON_newJO
     generateJSON_newJO(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList(), menuAcc.getSequence("HLTAllSteps"))
@@ -241,6 +252,8 @@ def generateMenuAcc(flags):
     from TriggerMenuMT.HLT.Config.JSON.HLTPrescaleJSON import generateJSON_newJO as generatePrescaleJSON_newJO
     generatePrescaleJSON_newJO(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList())
 
+    from AthenaCommon.CFElements import checkSequenceConsistency 
+    checkSequenceConsistency(steps)
     return menuAcc
 
 
@@ -263,3 +276,5 @@ if __name__ == "__main__":
     ca.printConfig()
     ca.wasMerged()
     log.info("All ok")
+
+  

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 ///////////////////////////////////////////////////////////////////
@@ -462,33 +462,6 @@ Trk::Extrapolator::finalize()
 }
 
 std::unique_ptr<Trk::NeutralParameters>
-Trk::Extrapolator::extrapolate(const xAOD::NeutralParticle& xnParticle,
-                               const Surface& sf,
-                               PropDirection dir,
-                               const BoundaryCheck& bcheck) const
-{
-  const Trk::NeutralPerigee& nPerigee = xnParticle.perigeeParameters();
-
-  return extrapolate(nPerigee, sf, dir, bcheck);
-}
-
-std::unique_ptr<Trk::TrackParameters>
-Trk::Extrapolator::extrapolate(const EventContext& ctx,
-                               const xAOD::TrackParticle& xtParticle,
-                               const Surface& sf,
-                               PropDirection dir,
-                               const BoundaryCheck& bcheck,
-                               ParticleHypothesis particle,
-                               MaterialUpdateMode matupmode) const
-{
-  const Trk::Perigee& tPerigee = xtParticle.perigeeParameters();
-  // !< @TODO: search for closest parameter in on new curvilinear
-  // x/y/z and surface distance ...
-  // ... for the moment ... take the perigee
-  return extrapolate(ctx, tPerigee, sf, dir, bcheck, particle, matupmode);
-}
-
-std::unique_ptr<Trk::NeutralParameters>
 Trk::Extrapolator::extrapolate(const NeutralParameters& parameters,
                                const Surface& sf,
                                PropDirection dir,
@@ -742,8 +715,8 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
           }
         } else if (staticVol->geometrySignature() != Trk::MS ||
                    !m_useMuonMatApprox ||
-                   (*iTer)->name().substr((*iTer)->name().size() - 4, 4) ==
-                     "PERM") { // retrieve
+                   (*iTer)->name().compare((*iTer)->name().size() - 4, 4, "PERM") ==
+                     0) { // retrieve
                                // inert
                                // detached
                                // objects
@@ -869,7 +842,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
         }
         auto mefot =
           std::make_unique<Trk::MaterialEffectsOnTrack>(dInX0, newsa, std::move(eloss), cvlTP->associatedSurface());
-        cache.m_matstates->push_back(new TrackStateOnSurface(nullptr, std::move(cvlTP), nullptr, std::move(mefot)));
+        cache.m_matstates->push_back(new TrackStateOnSurface(nullptr, std::move(cvlTP), std::move(mefot)));
         ATH_MSG_DEBUG("  [M] Collecting material from static volume '" << propagVol->volumeName()
                                                                        << "', t/X0 = " << dInX0);
       }
@@ -938,7 +911,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
       continue;
     }
     if (!active && staticVol->geometrySignature() == Trk::MS && m_useMuonMatApprox &&
-        (*dIter)->name().substr((*dIter)->name().size() - 4, 4) != "PERM") {
+        (*dIter)->name().compare((*dIter)->name().size() - 4, 4, "PERM") != 0) {
       continue;
     }
     const Trk::TrackingVolume* dVol = (*dIter)->trackingVolume();
@@ -1184,7 +1157,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
           dInX0, newsa, std::move(eloss), cvlTP->associatedSurface());
 
         cache.m_matstates->push_back(new TrackStateOnSurface(
-          nullptr, std::move(cvlTP), nullptr, std::move(mefot)));
+          nullptr, std::move(cvlTP), std::move(mefot)));
 
         ATH_MSG_DEBUG("  [M] Collecting material from dense volume '"
                       << cache.m_currentDense->volumeName() << "', t/X0 = " << dInX0);
@@ -1320,7 +1293,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                 auto mefot = std::make_unique<const Trk::MaterialEffectsOnTrack>(
                   dInX0, newsa, std::move(eloss), cvlTP->associatedSurface());
                 cache.m_matstates->push_back(new TrackStateOnSurface(
-                  nullptr, std::move(cvlTP), nullptr, std::move(mefot)));
+                  nullptr, std::move(cvlTP), std::move(mefot)));
               }
             }
           } // end material update at massive (static volume) boundary
@@ -1480,7 +1453,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
               auto mefot = std::make_unique<const Trk::MaterialEffectsOnTrack>(
                 dInX0, newsa, std::move(eloss), cvlTP->associatedSurface());
               cache.m_matstates->push_back(new TrackStateOnSurface(
-                nullptr, std::move(cvlTP), nullptr, std::move(mefot)));
+                nullptr, std::move(cvlTP), std::move(mefot)));
             }
             //
             if (m_cacheLastMatLayer) {
@@ -2085,14 +2058,15 @@ Trk::Extrapolator::extrapolateStepwise(const EventContext& ctx,
 }
 
 std::unique_ptr<Trk::TrackParameters>
-Trk::Extrapolator::extrapolate(const EventContext& ctx,
-                               const Trk::Track& trk,
-                               const Trk::Surface& sf,
-                               Trk::PropDirection dir,
-                               const Trk::BoundaryCheck& bcheck,
-                               Trk::ParticleHypothesis particle,
-                               MaterialUpdateMode matupmode,
-                               Trk::ExtrapolationCache* extrapolationCache) const
+Trk::Extrapolator::extrapolateTrack(
+  const EventContext& ctx,
+  const Trk::Track& trk,
+  const Trk::Surface& sf,
+  Trk::PropDirection dir,
+  const Trk::BoundaryCheck& bcheck,
+  Trk::ParticleHypothesis particle,
+  MaterialUpdateMode matupmode,
+  Trk::ExtrapolationCache* extrapolationCache) const
 {
   const IPropagator* searchProp = nullptr;
   // use global propagator for the search
@@ -2272,7 +2246,7 @@ Trk::Extrapolator::extrapolateM(const EventContext& ctx,
   if (parameterAtDestination) {
     ATH_MSG_VERBOSE("  [+] Adding the destination surface to the TSOS vector in extrapolateM() ");
     cache.m_matstates->push_back(
-      new TrackStateOnSurface(nullptr, parameterAtDestination.to_unique(), nullptr, nullptr));
+      new TrackStateOnSurface(nullptr, parameterAtDestination.to_unique(), nullptr));
   } else {
     ATH_MSG_VERBOSE("  [-] Destination surface was not hit extrapolateM(), but not required "
                     "through configuration.");
@@ -2282,17 +2256,6 @@ Trk::Extrapolator::extrapolateM(const EventContext& ctx,
   cache.m_matstates = nullptr;
   // retunr the material states
   return tmpMatStates;
-}
-
-// the validation action -> propagated to the SubTools
-void
-Trk::Extrapolator::validationAction() const
-{
-  // record the updator validation information
-  for (const auto *subupdater : m_subupdaters) {
-    subupdater->validationAction();
-  }
-  // record the navigator validation information
 }
 
 /* Private methods
@@ -2695,8 +2658,8 @@ Trk::Extrapolator::extrapolateImpl(const EventContext& ctx,
       ATH_MSG_DEBUG("  [+] next Tracking Volume = " << nextVolume->volumeName());
     }
     // set validity of last parameters to cache ------------------------------------------
-    updateLastValid = !(nextParameters && !cache.m_parametersOnDetElements && navParameters &&
-                        nextVolume && currentDistance > previousDistance);
+    updateLastValid = !nextParameters || cache.m_parametersOnDetElements || !navParameters ||
+                        !nextVolume || currentDistance <= previousDistance;
     // reset
     if (!nextParameters) {
       nextParameters = std::move(lastParameters);
@@ -4556,7 +4519,7 @@ Trk::Extrapolator::addMaterialEffectsOnTrack(const EventContext& ctx,
       tInX0, scatAngles, std::move(energyLoss), *lay.surfaceRepresentation().baseSurface());
     // push it to the material states
     cache.m_matstates->push_back(
-      new TrackStateOnSurface(nullptr, parsOnLayer.to_unique(), nullptr, std::move(meot)));
+      new TrackStateOnSurface(nullptr, parsOnLayer.to_unique(), std::move(meot)));
  
   }
 }
@@ -4565,12 +4528,13 @@ Trk::Extrapolator::addMaterialEffectsOnTrack(const EventContext& ctx,
 
 
 std::unique_ptr<std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
-Trk::Extrapolator::extrapolate(const EventContext& ctx,
-                               const Trk::TrackParameters& parm,
-                               Trk::PropDirection dir,
-                               Trk::ParticleHypothesis particle,
-                               std::vector<const Trk::TrackStateOnSurface*>*& material,
-                               int destination) const
+Trk::Extrapolator::collectIntersections(
+  const EventContext& ctx,
+  const Trk::TrackParameters& parm,
+  Trk::PropDirection dir,
+  Trk::ParticleHypothesis particle,
+  std::vector<const Trk::TrackStateOnSurface*>*& material,
+  int destination) const
 {
 
   // extrapolation method intended for collection of intersections with active layers/volumes
@@ -4769,8 +4733,8 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
           }
         } else if (cache.m_currentStatic->geometrySignature() != Trk::MS ||
                    !m_useMuonMatApprox ||
-                   (*iTer)->name().substr((*iTer)->name().size() - 4, 4) ==
-                     "PERM") {
+                   (*iTer)->name().compare((*iTer)->name().size() - 4, 4, "PERM") ==
+                     0) {
           // retrieve inert detached
           // objects only if needed
           if ((*iTer)->trackingVolume()->zOverAtimesRho() != 0. &&
@@ -4846,7 +4810,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
       continue;
     }
     if (!active && cache.m_currentStatic->geometrySignature() == Trk::MS && m_useMuonMatApprox &&
-        (*dIter)->name().substr((*dIter)->name().size() - 4, 4) != "PERM") {
+        (*dIter)->name().compare((*dIter)->name().size() - 4, 4, "PERM") != 0) {
       continue;
     }
     const Trk::TrackingVolume* dVol = (*dIter)->trackingVolume();
@@ -5128,7 +5092,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
         dInX0, newsa, std::move(eloss), *((nextPar->associatedSurface()).baseSurface()));
 
       cache.m_matstates->push_back(
-        new TrackStateOnSurface(nullptr, ManagedTrackParmPtr(nextPar).to_unique(), nullptr, std::move(mefot)));
+        new TrackStateOnSurface(nullptr, ManagedTrackParmPtr(nextPar).to_unique(), std::move(mefot)));
  
       ATH_MSG_DEBUG("  [M] Collecting material from dense volume '"
                     << cache.m_currentDense->volumeName() << "', t/X0 = " << dInX0);

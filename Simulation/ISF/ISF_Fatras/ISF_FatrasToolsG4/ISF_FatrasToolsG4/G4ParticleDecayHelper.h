@@ -14,6 +14,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaKernel/IAtRndmGenSvc.h"
+#include "CxxUtils/checker_macros.h"
 // ISF
 #include "ISF_Event/ITruthIncident.h"
 #include "ISF_Event/ISFParticleContainer.h"
@@ -46,7 +47,7 @@ namespace iFatras {
       @author Andreas.Salzburger@cern.ch, Joerg.Mechnich@cern.ch
    */
 
-  class G4ParticleDecayHelper : public extends<AthAlgTool, IParticleDecayHelper> {
+  class ATLAS_NOT_THREAD_SAFE G4ParticleDecayHelper : public extends<AthAlgTool, IParticleDecayHelper> {  // deprecated: ATLASSIM-6020
     public:
       /**AlgTool constructor for ParticleDecayHelper*/
       G4ParticleDecayHelper(const std::string&,const std::string&,const IInterface*);

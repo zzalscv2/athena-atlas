@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "readfile.h"
 #include "comphists.h"
+#include "CxxUtils/checker_macros.h"
 #include <iostream>
 #include <cassert>
 #include <cstdlib>
@@ -30,7 +31,7 @@ void classifyByKey( const KeyToHistMap& hists1,KeyToHistMap& hists2,
     histsOnlyIn2.push_back(*it2);
 }
 
-void usage(char**argv,int exitcode) {
+void usage ATLAS_NOT_THREAD_SAFE (char**argv,int exitcode) {
   std::cout << "Usage:"<<std::endl;
   std::cout << ""<<std::endl;
   std::cout << argv[0]<<" [flags] histfile1.root histfile2.root [outputfile.root]"<<std::endl;
@@ -59,7 +60,7 @@ bool fileExists(const std::string& filename) {
 }
 
 //Returns 0 if check ok, 1 if problems getting histograms from one of the files, 2 if check not ok.
-int main(int argc,char**argv){
+int main ATLAS_NOT_THREAD_SAFE (int argc,char**argv){
   //Decode arguments:
   bool verbose(false);
   std::vector<std::string> rootfiles;

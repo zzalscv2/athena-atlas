@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile OFC conditions tool and algorithm"""
 
@@ -9,7 +9,7 @@ def TileOFCCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile OFC conditions algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of Tile OFC conditions (COOL, FILE). Defaults to COOL.
         TileOfc -- name of Tile OFC conditions object starts with. Defaults to TileOfc. 
@@ -75,7 +75,7 @@ def TileCondToolOfcCoolCfg(flags, **kwargs):
     """Return component accumulator with configured Tile OFC conditions algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of Tile OFC conditions (COOL, FILE). Defaults to COOL.
         TileOfc -- name of Tile OFC conditions. Defaults to TileOfc + OfcType (capitalized).
@@ -107,7 +107,7 @@ def TileCondToolOfcCfg(flags, **kwargs):
     """Return component accumulator with configured Tile OFC conditions algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         OfcType -- type of Tile OFC. Defaults to OF2. Possible OFC types: OF1, OF2.
         OptFilterDeltaCorrelation -- flag to use delta correlation. Defaults to False.
@@ -153,7 +153,7 @@ def TileCondToolOfcCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -161,16 +161,17 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Tile.RunType = 'PHY'
+    flags.lock()
 
     acc = ComponentAccumulator()
 
-    ofcCoolTool = acc.popToolsAndMerge( TileCondToolOfcCoolCfg(ConfigFlags) )
+    ofcCoolTool = acc.popToolsAndMerge( TileCondToolOfcCoolCfg(flags) )
     print(ofcCoolTool)
 
-    ofcTool = acc.popToolsAndMerge( TileCondToolOfcCfg(ConfigFlags) )
+    ofcTool = acc.popToolsAndMerge( TileCondToolOfcCfg(flags) )
     print(ofcTool)
 
     acc.printConfig(withDetails = True, summariseProps = True)

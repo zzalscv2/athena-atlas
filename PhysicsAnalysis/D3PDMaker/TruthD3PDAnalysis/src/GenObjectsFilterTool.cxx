@@ -19,6 +19,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/Relatives.h"
+#include "AtlasHepMC/MagicNumbers.h"
 #include "GeneratorObjects/McEventCollection.h"
 
 // Local include(s):
@@ -67,7 +68,6 @@ GenObjectsFilterTool::GenObjectsFilterTool( const std::string& type,
    declareProperty( "BCHadronsDescendantsBarcodeCut",m_bcHadronsDescendantsBarcodeCut=-1); /// -1 for no cut
    declareProperty( "BCHadronsDescendantsEtaCut",m_bcHadronsDescendantsEtaCut=-1);/// -1 for no cut
    declareProperty( "KeepParticleWithPdgId",m_keepParticleWithPdgId);
-   declareProperty( "KeepFirstParticles", m_keepFirstParticles=-1);
 
    declareProperty( "KeepLeptonicWZBosons",m_keepLeptonicWZBosons=false);
    declareProperty( "KeepLeptonicWZBosonDecayChains",m_keepLeptonicWZBosonDecayChains=false);
@@ -131,7 +131,7 @@ bool GenObjectsFilterTool::pass( const HepMC::GenEvent* evt,
 
 bool GenObjectsFilterTool::isBCHadron(HepMC::ConstGenParticlePtr part) const{
 
-  if(HepMC::barcode(part) >= 200000) return false;
+  if(HepMC::is_simulation_particle(part)) return false;
   int type = HadronClass::type(part->pdg_id()).second;
   if(type == 5 || type == 4)  return true;
 
@@ -184,12 +184,8 @@ bool GenObjectsFilterTool::isRequested( HepMC::ConstGenParticlePtr part) const{
    double pt = p4.perp();
    double eta = p4.eta();
 
-   int barcode = HepMC::barcode(part);
    int pdg = part->pdg_id();
    int status = part->status();
-
-   //// keep first m_keepFirstParticles particles
-   if(barcode<m_keepFirstParticles) return true;
 
    /// always keep these pdgids
    if(isKeep(pdg)) return true;
@@ -266,7 +262,7 @@ bool GenObjectsFilterTool::isRequested( HepMC::ConstGenParticlePtr part) const{
      }
 #endif
    }
-
+   int barcode = HepMC::barcode(part);
    if(m_keepbcHadronDecayChain){
      //// keep particles from b/c hadron decay
 
@@ -306,7 +302,7 @@ bool GenObjectsFilterTool::isRequested( HepMC::ConstGenParticlePtr part) const{
    }
 
    if(m_keepLeptonicWZBosonDecayChains){
-     if(barcode < 200000){
+     if(!HepMC::is_simulation_particle(barcode)){
 
        bool isleptonicWZ=false;
 #ifdef HEPMC3
@@ -356,7 +352,7 @@ bool GenObjectsFilterTool::isRequested( HepMC::ConstGenParticlePtr part) const{
 
    if(m_keepStatusOneLeptonsFromWZ){
      if(abs(pdg) == 11 || abs(pdg) == 13 || abs(pdg) == 15 ){
-       if(barcode < 200000 && status == 1){
+       if(!HepMC::is_simulation_particle(barcode) && status == 1){
 
 	 bool isleptonicWZ=false;
 #ifdef HEPMC3
@@ -423,7 +419,7 @@ bool GenObjectsFilterTool::pass( HepMC::ConstGenParticlePtr part,
    // If we don't want to specifically select charged truth tracks, then this
    // is already good enough:
    if( ! m_selectTruthTracks ) return true;
-   if (HepMC::barcode(part) < 200000) {
+   if (!HepMC::is_simulation_particle(part)) {
      if( ! TruthHelper::IsGenStable()( part ) ) return false;
      if( ! TruthHelper::IsGenInteracting()( part ) ) return false;
    }
@@ -435,7 +431,7 @@ bool GenObjectsFilterTool::pass( HepMC::ConstGenParticlePtr part,
    const HepPDT::ParticleData* pd = m_partPropSvc->PDT()->particle( std::abs( pdg ) );
    if( ! pd ) {
      ATH_MSG_DEBUG( "Could not get particle data for pdg = " << pdg 
-		      << " status " << part->status() << " barcode " <<HepMC::barcode(part)
+		      << part
 		      << " process id " <<HepMC::signal_process_id(part->parent_event()));
       return false;
    }

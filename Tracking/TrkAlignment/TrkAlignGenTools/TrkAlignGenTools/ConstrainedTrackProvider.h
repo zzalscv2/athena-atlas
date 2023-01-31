@@ -60,6 +60,7 @@ namespace Trk {
     int           m_unconstrainedTracks;
     bool          m_useConstraintError;
     double        m_reduceConstraintUncertainty;
+    double        m_reduceConstraintUncert_z0;
     double        m_deltaScaling;
 
     int           m_minPIXHits;
@@ -81,7 +82,6 @@ namespace Trk {
     TH2F*           m_etaphiMap_P;
       // Corrections expected to be in GeV-1
 
-    bool            m_CorrectD0;
     std::string     m_constraintFileName_d0; 
     TFile*          m_constraintInputFile_d0;
     std::string     m_constraintHistName_d0; 
@@ -92,8 +92,16 @@ namespace Trk {
     std::string     m_constraintFileName_z0; 
     TFile*          m_constraintInputFile_z0;
     std::string     m_constraintHistName_z0; 
-    TH2F*           m_etaphiMap_z0;
       // Corrections expected to be in mm
+
+    TH2F*           m_etaphiMap_z0;
+
+    bool            m_CorrectD0;
+    bool            m_CorrectMeanD0;
+
+    bool          m_SelectByCharge;    
+    bool          m_SelectPositive;
+
     
   }; // end class
 

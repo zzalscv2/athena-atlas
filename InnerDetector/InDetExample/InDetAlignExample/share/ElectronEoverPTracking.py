@@ -63,7 +63,6 @@ ToolSvc += ElectronTrkMagField
 #
 # set up geometry
 #
-geom_svc=None
 cond_alg = TrackingCommon.createAndAddCondAlg(TrackingCommon.getTrackingGeometryCondAlg, "AtlasTrackingGeometryCondAlg", name="AtlasTrackingGeometryCondAlg")
 geom_cond_key = cond_alg.TrackingGeometryWriteKey
 #
@@ -83,7 +82,6 @@ ToolSvc += ElectronTrkStepPropagator
 #
 from TrkExTools.TrkExToolsConf import Trk__Navigator
 ElectronTrkNavigator = Trk__Navigator(name = 'ElectronTrkNavigator',
-			TrackingGeometrySvc = geom_svc,
 			TrackingGeometryKey = geom_cond_key)
 ToolSvc += ElectronTrkNavigator
 #

@@ -1,12 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArTools/LArHVPathologyDbTool.h" 
+#include "LArHVPathologyDbTool.h" 
 #include "LArRecConditions/LArHVPathologiesDb.h"
-
-#include "GaudiKernel/IToolSvc.h"
-#include "GaudiKernel/MsgStream.h"
 
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "CoralBase/AttributeListException.h"

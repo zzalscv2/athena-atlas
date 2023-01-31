@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 
 from AthenaCommon.Logging import logging
@@ -146,8 +146,11 @@ class RunToTimestampDict(JobProperty):
         313000:1553000000, ##MC16 PbPb (2018)
         330000: 1625000000, # MC21 pp (13.6 TeV Run 3 initial CP samples)
         340000: 1640000000, # MC21 pp (RUN-4)
-        410000: 1650000000  # MC21 pp (13.6 TeV Run 3 2022)
-        }
+        410000: 1650000000, # MC21/23a pp (13.6 TeV Run 3 2022)
+        420000: 1655000000, # MC21/23a pp (2022 low mu "Minbias" run)
+        425000: 1660000000, # MC21/23a 2022 Reserved
+        450000: 1680000000  # MC23c 2023
+    }
     def addEntry( self, run, timestamp, force=False):
         if not type(run) == int:
             raise ValueError( 'run is not the expected type (int) for the key of RunToTimestampDict!' )

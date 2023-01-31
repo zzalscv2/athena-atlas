@@ -8,7 +8,7 @@ namespace {
   class MatchEventNumber {
   public:
     MatchEventNumber(int eventNumber) : m_evtNumber(eventNumber) {}
-    bool operator()(const HepMC::GenEvent* pGE) {
+    bool operator()(const HepMC::GenEvent* pGE) const {
       return (m_evtNumber == pGE->event_number());
     }
   private:
@@ -17,7 +17,7 @@ namespace {
   class FilledMatchEventNumber {
   public:
     FilledMatchEventNumber(int eventNumber) : m_evtNumber(eventNumber) {}
-    bool operator()(const HepMC::GenEvent* pGE) {
+    bool operator()(const HepMC::GenEvent* pGE) const {
 #ifdef HEPMC3
       return ((m_evtNumber == pGE->event_number()) && !(pGE->vertices().empty()) );
 #else
@@ -36,7 +36,7 @@ McEventCollection::find(int eventNumber) const {
   if (end() == i)
     {
       //Didn't find a filled copy, so checking for an empty one.
-      return (end() != (i=std::find_if(begin(), end(), MatchEventNumber(eventNumber)))) ? *i : 0 ;
+      return (end() != (i=std::find_if(begin(), end(), MatchEventNumber(eventNumber)))) ? *i : nullptr ;
 
     }
   return *i;

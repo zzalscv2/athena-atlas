@@ -13,12 +13,10 @@
 #ifndef POOL_ROOTTREECONTAINER_H
 #define POOL_ROOTTREECONTAINER_H 1
 
-#include "AthContainersInterfaces/AuxTypes.h"
-
 // Framework include files
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbContainerImp.h"
-#include "RootAuxDynIO/RootAuxDynIO.h"
+#include "RootAuxDynIO/RootAuxDynIO.h"  //needed in all files that include this header because of the unique_ptr 
 
 #include <map>
 #include <vector>
@@ -33,8 +31,12 @@ class TTree;
 class TLeaf;
 class TClass;
 
-class IRootAuxDynReader;
-
+namespace SG { class IAuxStoreIO; }
+namespace RootAuxDynIO {
+   class IRootAuxDynWriter;
+   class IRootAuxDynReader;
+}
+     
 
 /*
  * POOL namespace declaration
@@ -55,9 +57,7 @@ namespace pool  {
     * object within the data store) is accessed by the "Event" number
     * inside its tree.
     *
-    * @author  M.Frank
-    * @date    1/8/2002
-    * @version 1.0
+    * @author  M.Frank M.Nowak
     */
   class RootTreeContainer : public DbContainerImp
   {
@@ -70,64 +70,55 @@ namespace pool  {
       void*             object;
       void*             buffer;
       const DbColumn*   column;
-      // extra variables used by Aux dynamic
+
+      // ----  extra variables used for AuxDyn attributes
+      // number of rows written to this branch so far
       size_t            rows_written = 0;
-      // AuxDyn reader if used by this branch
-      std::unique_ptr<IRootAuxDynReader> aux_reader;
+
+      /// IOStore interface offset for object type in this branch (for casting)
       int               aux_iostore_IFoffset = -1;
-      bool              is_basic_type = false;
-      bool              written = false;
-      
-      // Dummy object instance; used when there was no request to write
-      // this branch but we need to write it anyway (for example,
-      // a dynamic variable that wasn't written on this event).
-      using dummy_ptr_t = std::unique_ptr<void, std::function<void(void*)> >;
-      dummy_ptr_t dummyptr;
-      void* dummy = 0;
-      
+      // AuxDyn writer and the reader for this branch (object type)
+      std::unique_ptr<RootAuxDynIO::IRootAuxDynWriter>  auxdyn_writer;
+      std::unique_ptr<RootAuxDynIO::IRootAuxDynReader>  auxdyn_reader;
+
+
       BranchDesc()
-            : clazz(nullptr), 
+            : clazz(nullptr),
               branch(nullptr),
               leaf(nullptr),
               object(nullptr),
               buffer(nullptr),
               column(nullptr)
       {}
-      
-      BranchDesc( TClass* cl, 
+
+      BranchDesc( TClass* cl,
                   TBranch* b,
                   TLeaf* l,
                   void* o,
                   const DbColumn* c)
-            : clazz(cl), 
+            : clazz(cl),
               branch(b),
               leaf(l),
               object(nullptr),
               buffer(o),
               column(c)
       {}
-      // difference for branch.setAddress() for objects and basic types, used by Aux dynamic 
-      void*     objectAddr() { return is_basic_type? object : &object; }
 
-      void*     dummyAddr()
-      {
-        if (clazz) {
-          if (!dummy) {
-            using std::placeholders::_1;
-            void(TClass::*dxtor)(void*, Bool_t) = &TClass::Destructor;
-            std::function<void(void*)> del = std::bind(dxtor, clazz, _1, false);
-            dummyptr = dummy_ptr_t (clazz->New(), std::move(del));
-            dummy = dummyptr.get();
-          }
-          return &dummy;
-        }
-        return nullptr;
+      ~BranchDesc();
+       BranchDesc(BranchDesc const& other) = delete;
+       BranchDesc(BranchDesc && other) = default;
+       BranchDesc& operator=(BranchDesc const& other) = delete;
+       BranchDesc& operator=(BranchDesc && other) = default;
+
+      SG::IAuxStoreIO* getIOStorePtr() {
+         return ( aux_iostore_IFoffset >= 0 ?
+                  reinterpret_cast<SG::IAuxStoreIO*>( (char*)object + aux_iostore_IFoffset) : nullptr );
       }
     };
 
     /// Definition of the branch container
     typedef std::vector<BranchDesc> Branches;
-    
+
   protected:
     /// Reference to the root tree object
     TTree*             m_tree;
@@ -148,20 +139,12 @@ namespace pool  {
     /// flag set when a branch container was updated (but the branch was not Filled)
     bool               m_isDirty;
 
-    /// aux branches by auxid, used for AuxStore I/O
-    std::map<SG::auxid_t, BranchDesc>   m_auxBranchMap;
-    
   private:
 
     /// Add item branch
     DbStatus addBranch( const DbColumn* col,
                         BranchDesc& dsc,
                         const std::string& desc);
-
-    /// Add branch for AUX attribute
-    DbStatus addAuxBranch( const std::string& attr_name,
-                           const std::type_info* tinfo,
-                           BranchDesc& dsc);
 
     /// Add BLOB
     DbStatus addObject( const DbColumn* col, 
@@ -234,7 +217,7 @@ namespace pool  {
     bool        isBranchContainer() const { return !m_branchName.empty(); }
 
     /// set Tree Filling mode (true/false) for branch containers
-    void        setTreeFillMode(bool mode) { m_treeFillMode = mode; }
+    void        setTreeFillMode(bool mode);
 
     /// return true if this branch container is using TTree Filling mode
     bool        usingTreeFillMode() const { return  m_treeFillMode; }
@@ -260,11 +243,6 @@ namespace pool  {
       */
     virtual DbStatus loadObject( void** ptr, ShapeH shape, 
                                  Token::OID_t& oid) override;
-
-    /// Create TBranch for a basic type (ROOT type notation given in the leafname)
-    void createBasicAuxBranch(const std::string& branchname,
-                              const std::string& leafname,
-                              BranchDesc& dsc);
 
     /// Commit single entry to container
     virtual DbStatus writeObject(ActionList::value_type&) override;

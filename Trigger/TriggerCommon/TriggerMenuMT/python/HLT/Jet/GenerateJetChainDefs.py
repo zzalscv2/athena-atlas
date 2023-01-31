@@ -10,7 +10,7 @@ log.info("Importing %s",__name__)
 
 
 
-def generateChainConfigs( chainDict ):
+def generateChainConfigs(flags,  chainDict ):
     log.debug('full jet dictionary is: %s\n', pprint.pformat(chainDict))
 
     # Jet chain is assembled always from the full dictionary (multiple legs are handled internally by the jet reco / hypo)
@@ -20,7 +20,7 @@ def generateChainConfigs( chainDict ):
 
     for leg in range(len(chainDict['chainParts'])):
 
-        listOfChainDefs += [theChainDef.assembleChain()]
+        listOfChainDefs += [theChainDef.assembleChain(flags)]
 
     if len(listOfChainDefs) > 1:
         jetChain = mergeChainDefs(listOfChainDefs, chainDict) 

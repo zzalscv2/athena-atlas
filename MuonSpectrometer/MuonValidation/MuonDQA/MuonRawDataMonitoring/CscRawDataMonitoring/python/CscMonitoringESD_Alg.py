@@ -1,5 +1,5 @@
 #
-#Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from .CscMonUtils import getCSCLabelx
@@ -506,33 +506,34 @@ if __name__=='__main__':
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.ESD
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.ESD
 
-    ConfigFlags.Output.HISTFileName = 'CscMonitorOutput.root'
-    ConfigFlags.Detector.GeometryMuon=False
-    ConfigFlags.Detector.GeometryCSC=True
-    ConfigFlags.Detector.GeometryRPC=False
-    ConfigFlags.Detector.GeometryTGC=False
-    ConfigFlags.Detector.GeometryMM=False
-    ConfigFlags.Detector.GeometryMDT=False
-    #ConfigFlags.Muon.useAlignmentCorrections=False
-    ConfigFlags.Muon.Align.UseILines = False
-    #ConfigFlags.Muon.Align.UseAsBuilt = True
-    ConfigFlags.Muon.Align.UseALines = False
-    ConfigFlags.Muon.Align.UseBLines = False
+    flags.Output.HISTFileName = 'CscMonitorOutput.root'
+    flags.Detector.GeometryMuon=False
+    flags.Detector.GeometryCSC=True
+    flags.Detector.GeometryRPC=False
+    flags.Detector.GeometryTGC=False
+    flags.Detector.GeometryMM=False
+    flags.Detector.GeometryMDT=False
+    #flags.Muon.useAlignmentCorrections=False
+    flags.Muon.Align.UseILines = False
+    #flags.Muon.Align.UseAsBuilt = True
+    flags.Muon.Align.UseALines = False
+    flags.Muon.Align.UseBLines = False
 
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.lock()
+    flags.dump()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    cscMonitorAcc = CscMonitoringESD_AlgConfig(ConfigFlags)
+    cscMonitorAcc = CscMonitoringESD_AlgConfig(flags)
     cfg.merge(cscMonitorAcc)
 
     cfg.printConfig(withDetails=True) # set True for exhaustive info

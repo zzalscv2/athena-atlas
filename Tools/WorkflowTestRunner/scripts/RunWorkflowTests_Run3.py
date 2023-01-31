@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from sys import exit
 
 from WorkflowTestRunner.ScriptUtils import setup_logger, setup_parser, get_test_setup, get_standard_performance_checks, \
     run_tests, run_checks, run_summary
-from WorkflowTestRunner.StandardTests import DerivationTest, OverlayTest, PileUpTest, QTest, SimulationTest
+from WorkflowTestRunner.StandardTests import DerivationTest, GenerationTest, OverlayTest, PileUpTest, QTest, SimulationTest
 from WorkflowTestRunner.Test import WorkflowRun, WorkflowType
 
 
@@ -21,12 +21,21 @@ def main():
 
     # Define which tests to run
     tests_to_run = []
-    if options.simulation:
+    if options.generation:
+        dsid = "421356" if not options.dsid else options.dsid
+        tests_to_run.append(GenerationTest(f"gen{dsid}", run, WorkflowType.Generation, ["generate"], setup, options.extra_args))
+    elif options.simulation:
         if not options.workflow or options.workflow is WorkflowType.FullSim:
-            ami_tag = "s3760" if not options.ami_tag else options.ami_tag
-            tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, options.extra_args + " --postInclude Campaigns/postInclude.MC21BirksConstantTune.py"))
-        if not options.workflow or options.workflow is WorkflowType.AF3:
+            ami_tag = "s4006" if not options.ami_tag else options.ami_tag
+            tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, options.extra_args))
+        if options.workflow is WorkflowType.AF3:
             log.error("AF3 not supported yet")
+        if options.workflow is WorkflowType.HitsMerge:
+            ami_tag = "s4007" if not options.ami_tag else options.ami_tag
+            tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.HitsMerge, ["HITSMerge"], setup, options.extra_args))
+        if options.workflow is WorkflowType.HitsFilter:
+            ami_tag = "s4008" if not options.ami_tag else options.ami_tag
+            tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.HitsFilter, ["FilterHitTf"], setup, options.extra_args))
     elif options.overlay:
         if not options.workflow or options.workflow is WorkflowType.MCOverlay:
             tests_to_run.append(OverlayTest("d1759", run, WorkflowType.MCOverlay, ["Overlay"], setup, options.extra_args + " --runNumber 601229"))
@@ -40,12 +49,13 @@ def main():
         if not options.workflow or options.workflow is WorkflowType.MCPileUpReco:
             tests_to_run.append(QTest("q446", run, WorkflowType.MCPileUpReco, ["Overlay", "RAWtoALL"], setup, options.extra_args))
     elif options.derivation:
-        tests_to_run.append(DerivationTest("p5205", run, WorkflowType.Derivation, ["Derivation"], setup, options.extra_args))
+        test_id = "MC_PHYS" if not options.ami_tag else options.ami_tag
+        tests_to_run.append(DerivationTest(test_id, run, WorkflowType.Derivation, ["Derivation"], setup, options.extra_args))
     else:
         if not options.workflow or options.workflow is WorkflowType.MCReco:
             ami_tag = "q445" if not options.ami_tag else options.ami_tag
             if "--CA" in options.extra_args:
-                tests_to_run.append(QTest(ami_tag, run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, options.extra_args + " --steering doRAWtoALL"))
+                tests_to_run.append(QTest(ami_tag, run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, options.extra_args + " --steering no"))
             else:
                 tests_to_run.append(QTest(ami_tag, run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoALL"], setup, options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.DataReco:

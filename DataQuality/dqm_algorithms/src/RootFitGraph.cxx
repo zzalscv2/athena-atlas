@@ -62,10 +62,10 @@ dqm_algorithms::RootFitGraph::execute(	const std::string & name,
 {  
 
   //std::cout<<"ROOTFITGRAPH = calling rootfit with name "<<name<<std::endl;
-  TGraph * graph;
+  const TGraph * graph;
   if(object.IsA()->InheritsFrom( "TGraph" ))
     {  
-      graph = (TGraph*)&object;
+      graph = static_cast<const TGraph*>(&object);
     }
   else {
     throw dqm_core::BadConfig( ERS_HERE, name, "does not inherit from TGraph" );
@@ -169,7 +169,7 @@ dqm_algorithms::RootFitGraph::execute(	const std::string & name,
   */ 
 
   if(verbose)std::cout << "fit "<<name<< " with interval cut " << xmin << " - " << xmax  << std::endl;
-  graph->Fit( m_func.get(), option.c_str(),"",xmin,xmax );
+  const_cast<TGraph*>(graph)->Fit( m_func.get(), option.c_str(),"",xmin,xmax );
 
   const int numsig = m_func->GetParNumber("Sigma");
   if (numsig != -1 ){

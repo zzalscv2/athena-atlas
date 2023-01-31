@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "G4Step.hh"
@@ -59,7 +59,7 @@ DebugSteppingAction::DebugSteppingAction(const Config& config):m_config(config)
    }
    
    if (doPrint) {
-     InfracolorForce* string[2];
+     const InfracolorForce* string[2];
      string[i] = &(quirk->GetStringIn());
      string[1-i] = string[i]->GetReactionForce();
      

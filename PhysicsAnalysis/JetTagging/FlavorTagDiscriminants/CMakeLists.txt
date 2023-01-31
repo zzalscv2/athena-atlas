@@ -72,8 +72,11 @@ if (NOT XAOD_STANDALONE)
     src/BTaggingBuilderAlg.cxx
     src/PoorMansIpAugmenterAlg.cxx
     src/JetTagConditionalDecoratorAlg.cxx
+    src/TruthDecoratorHelpers.cxx
     src/TrackLeptonDecoratorAlg.cxx
     src/TrackTruthDecoratorAlg.cxx
+    src/SoftElectronDecoratorAlg.cxx
+    src/SoftElectronTruthDecoratorAlg.cxx
     src/components/FlavorTagDiscriminants_entries.cxx
     LINK_LIBRARIES FlavorTagDiscriminants
     )

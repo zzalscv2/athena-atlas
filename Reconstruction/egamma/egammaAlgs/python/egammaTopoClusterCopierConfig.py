@@ -25,6 +25,10 @@ def egammaTopoClusterCopierCfg(
         "OutputTopoCollectionShallow",
         "tmp_"+egtopocluster)
 
+    kwargs.setdefault(
+        "ECut",
+        700 if not flags.Egamma.doLowMu else 300)
+
     egcopierAlg = CompFactory.egammaTopoClusterCopier(name, **kwargs)
 
     acc.addEventAlgo(egcopierAlg)

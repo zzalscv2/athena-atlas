@@ -89,8 +89,6 @@ Stream1.ItemList+=["PixelRDOElemLinkVec#*"]
 svcMgr.MessageSvc.OutputLevel = WARNING
 svcMgr.MessageSvc.debugLimit  = 100000
 svcMgr.MessageSvc.errorLimit  = 100000
-#ClassIDSvc = Service( "ClassIDSvc" )
-#ClassIDSvc.OutputLevel = INFO
 InDetRawDataFakeWriter.OutputLevel = DEBUG
 
 from AthenaServices import AthenaServicesConf

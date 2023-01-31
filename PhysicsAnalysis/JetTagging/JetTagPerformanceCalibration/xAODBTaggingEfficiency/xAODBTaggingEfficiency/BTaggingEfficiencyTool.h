@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -29,6 +29,10 @@
 
 #include "CalibrationDataInterface/CalibrationDataVariables.h"
 #include "CalibrationDataInterface/CalibrationDataInterfaceROOT.h"
+
+// for the onnxtool
+#include "xAODBTaggingEfficiency/OnnxUtil.h"
+
 
 class BTaggingEfficiencyTool: public asg::AsgTool,
             public virtual IBTaggingEfficiencyTool
@@ -60,31 +64,31 @@ class BTaggingEfficiencyTool: public asg::AsgTool,
       The tagger and operating point under consideration are part of the configuration and hence aren't function arguments.
    */
   CP::CorrectionCode getScaleFactor( const xAOD::Jet & jet,
-             float & sf) const;
+             float & sf);
 
   /** Computes the data efficiency for the given jet.
       The tagger and operating point under consideration are part of the configuration and hence aren't function arguments.
    */
   CP::CorrectionCode getEfficiency( const xAOD::Jet & jet,
-				    float & eff) const;
+				    float & eff);
 
   /** Computes the data inefficiency for the given jet.
       The tagger and operating point under consideration are part of the configuration and hence aren't function arguments.
    */
   CP::CorrectionCode getInefficiency( const xAOD::Jet & jet,
-              float & eff) const;
+              float & eff);
 
   /** Computes the data/MC inefficiency scale factor for the given jet.
       The tagger and operating point under consideration are part of the configuration and hence aren't function arguments.
    */
   CP::CorrectionCode getInefficiencyScaleFactor( const xAOD::Jet & jet,
-             float & sf) const;
+             float & sf);
 
   /** Computes the MC efficiency for the given jet.
       The tagger and operating point under consideration are part of the configuration and hence aren't function arguments.
    */
   CP::CorrectionCode getMCEfficiency( const xAOD::Jet & jet,
-              float & eff) const;
+              float & eff);
 
   /// @name Methods equivalent to those above but not relying on the xAOD format
   /// @{
@@ -93,31 +97,41 @@ class BTaggingEfficiencyTool: public asg::AsgTool,
       The tagger and operating point under consideration are part of the configuration and hence aren't function arguments.
   */
   CP::CorrectionCode getScaleFactor( int flavour, const Analysis::CalibrationDataVariables& v,
-             float & sf) const;
+             float & sf);
 
   /** Computes the data efficiency for the jet, given its kinematics, (possibly) tagger weight and truth flavour.
       The tagger and operating point under consideration are part of the configuration and hence aren't function arguments.
    */
   CP::CorrectionCode getEfficiency( int flavour, const Analysis::CalibrationDataVariables& v,
-            float & eff) const;
+            float & eff);
 
   /** Computes the data inefficiency for the jet, given its kinematics, (possibly) tagger weight and truth flavour.
       The tagger and operating point under consideration are part of the configuration and hence aren't function arguments.
    */
   CP::CorrectionCode getInefficiency( int flavour, const Analysis::CalibrationDataVariables& v,
-              float & eff) const;
+              float & eff);
 
   /** Computes the data/MC inefficiency scale factor for the jet, given its kinematics, (possibly) tagger weight and truth flavour.
       The tagger and operating point under consideration are part of the configuration and hence aren't function arguments.
    */
   CP::CorrectionCode getInefficiencyScaleFactor( int flavour, const Analysis::CalibrationDataVariables& v,
-						 float & sf) const;
+						 float & sf);
 
   /** Computes the MC efficiency for the jet, given its kinematics, (possibly) tagger weight and truth flavour.
       The tagger and operating point under consideration are part of the configuration and hence aren't function arguments.
    */
   CP::CorrectionCode getMCEfficiency( int flavour, const Analysis::CalibrationDataVariables& v,
-              float & eff) const;
+              float & eff);
+
+  /** Computes the MC efficiency of the jets in a given event. (Uses the onnx tool)
+      For fixed cut wp
+   */
+  CP::CorrectionCode getMCEfficiencyONNX( const std::vector<std::vector<float>>& node_feat, std::vector<float>& effAllJet);
+    
+  /** Computes the MC efficiency of the jets in a given event. (Uses the onnx tool)
+      For continuous wp
+   */
+  CP::CorrectionCode getMCEfficiencyONNX( const std::vector<std::vector<float>>& node_feat, std::vector<std::vector<float>>& effAllJetAllWp);
 
   /// @}
 
@@ -280,7 +294,10 @@ private:
   bool fillVariables(const double jetPt, const double jetEta, const double jetTagWeight, Analysis::CalibrationDataVariables& x) const;
 
   /// pointer to the object doing the actual work
-  Analysis::CalibrationDataInterfaceROOT*  m_CDI = nullptr;
+  //Analysis::CalibrationDataInterfaceROOT*  m_CDI = nullptr;
+   std::shared_ptr<Analysis::CalibrationDataInterfaceROOT> m_CDI;
+   /// pointer to the onnx tool
+  std::unique_ptr<OnnxUtil> m_onnxUtil;
 
   /// @name core configuration properties (set at initalization time and not modified afterwards)
   /// @{
@@ -290,6 +307,7 @@ private:
 
   /// name of the data/MC efficiency scale factor calibration file (may be changed by the @c PathResolver)
   std::string m_SFFile;
+  std::string m_SFFileFull;
   /// name of the optional MC efficiency file (may be changed by the @c PathResolver)
   std::string m_EffFile;
   std::string m_EffConfigFile;
@@ -313,7 +331,7 @@ private:
   std::string m_jetAuthor;
   ///  minimum jet pT
   float m_minPt;
-  /// systematics model to be used (current choices are "SFEigen", "SFEigenRefined", and "Envelope")
+  /// systematics model to be used (current choices are "SFEigen", "SFEigenRefined", and "Envelope") // <-------- Addoing "SFGlobalEigen" to the list
   std::string m_systStrategy;
   /// if true, attempt to retrieve the data/MC efficiency scale factor calibration files from the @PathResolver development area
   bool m_useDevFile;
@@ -330,6 +348,10 @@ private:
   bool m_ignoreOutOfValidityRange;
   /// if false, suppress any non-error/warning printout from the underlying tool
   bool m_verboseCDITool;
+  /// 1D tagging only: define wether the cuts refer to b-tagging or c-tagging
+  bool m_useCTag = false;
+  /// if this string is empty, the onnx tool won't be created
+  std::string m_pathToONNX;
   /// @}
 
   /// @name Cached variables
@@ -347,6 +369,8 @@ private:
   CP::SystematicSet m_systematics;
   // specifically for continuous tagging
   bool m_isContinuous;
+  // specifically for continuous 2D tagging
+  bool m_isContinuous2D;
   // pointer to a member function of a b-tagger
   // tagWeight_member_t m_getTagWeight;
 
@@ -354,7 +378,7 @@ private:
   std::map<std::string, unsigned int> m_mapIndices;
 
   /// actual information identifying scale factor calibration objects
-  std::map<unsigned int, unsigned int> m_SFIndices;
+  std::map<unsigned int, unsigned int> m_SFIndices; // <------------- maps flavourID to an index corresponding to the index at which the container used for SFs is stored in CDIROOT's 
   /// actual information identifying efficiency calibration objects
   std::map<unsigned int, unsigned int> m_EffIndices;
 

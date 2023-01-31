@@ -72,7 +72,7 @@ from IOVDbSvc.CondDB import conddb
 conddb.blockFolder("/LAR/LArCellPositionShift")
 conddb.addFolderWithTag("LAR_OFL","/LAR/LArCellPositionShift","LArCellPositionShift-ideal",force=True,forceMC=True,className="CaloRec::CaloCellPositionShift")
 
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+include( "CaloConditions/CaloConditions_jobOptions.py" )
 include( "LArDetDescr/LArDetDescr_joboptions.py" )
 include( "LArConditionsCommon/LArConditionsCommon_comm_jobOptions.py")
 include("TileConditions/TileConditions_jobOptions.py" )

@@ -8,77 +8,59 @@
 
 #include <memory>
 
-
-
-#include "TrkSegment/Segment.h"
 #include "TrkEventPrimitives/FitQuality.h"
-
-std::atomic<unsigned int> Trk::Segment::s_numberOfInstantiations{ 0 };
+#include "TrkSegment/Segment.h"
 
 // default constructor
 Trk::Segment::Segment()
   : Trk::MeasurementBase()
+  , Trk::ObjectCounter<Trk::Segment>()
   , m_fitQuality(nullptr)
-  , m_containedMeasBases(nullptr)
+  , m_containedMeasBases()
   , m_author(AuthorUnknown)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new Segment, so increment total count
-#endif
 }
 
 Trk::Segment::Segment(const Trk::LocalParameters& locpars,
                       const Amg::MatrixX& locerr,
-                      DataVector<const MeasurementBase>* measurements,
+                      DataVector<const MeasurementBase>&& measurements,
                       FitQuality* fitqual,
                       Author author)
   : Trk::MeasurementBase(locpars, locerr)
+  , Trk::ObjectCounter<Trk::Segment>()
   , m_fitQuality(fitqual)
-  , m_containedMeasBases(measurements)
+  , m_containedMeasBases(std::move(measurements))
   , m_author(author)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new Segment, so increment total count
-#endif
 }
 
 // copy constructor
 Trk::Segment::Segment(const Trk::Segment& seg)
   : Trk::MeasurementBase(seg)
+  , Trk::ObjectCounter<Trk::Segment>(seg)
   , m_fitQuality(seg.m_fitQuality ? seg.m_fitQuality->clone() : nullptr)
-  , m_containedMeasBases(
-      std::make_unique<DataVector<const Trk::MeasurementBase>>())
+  , m_containedMeasBases()
   , m_author(seg.m_author)
 {
-  m_containedMeasBases->reserve(seg.m_containedMeasBases->size());
+  // DV deep copy
+  m_containedMeasBases.reserve(seg.m_containedMeasBases.size());
   for (const Trk::MeasurementBase* const measurement :
-       *(seg.m_containedMeasBases)) {
-    m_containedMeasBases->push_back(measurement->clone());
+       seg.m_containedMeasBases) {
+    m_containedMeasBases.push_back(measurement->clone());
   }
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new Segment, so increment total count
-#endif
 }
 
 // move constructor
 Trk::Segment::Segment(Trk::Segment&& seg) noexcept
   : Trk::MeasurementBase(seg)
-  , m_fitQuality (std::move(seg.m_fitQuality))
-  , m_containedMeasBases (std::move(seg.m_containedMeasBases))
+  , m_fitQuality(std::move(seg.m_fitQuality))
+  , m_containedMeasBases(std::move(seg.m_containedMeasBases))
   , m_author(seg.m_author)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new Segment, so increment total count
-#endif
 }
 
 // destructor - child save
-Trk::Segment::~Segment()
-{
-#ifndef NDEBUG
-  s_numberOfInstantiations--; // delete Segment, so decrement total count
-#endif
-}
+Trk::Segment::~Segment() = default;
 
 // assignment operator
 Trk::Segment&
@@ -87,20 +69,12 @@ Trk::Segment::operator=(const Trk::Segment& seg)
   if (this != &seg) {
     Trk::MeasurementBase::operator=(seg);
     m_fitQuality.reset(seg.m_fitQuality ? seg.m_fitQuality->clone() : nullptr);
-
-    if (seg.m_containedMeasBases) {
-      if (!m_containedMeasBases) {
-        m_containedMeasBases = std::make_unique<DataVector<const Trk::MeasurementBase>>();
-      } else {
-        m_containedMeasBases->clear();
-      }
-      m_containedMeasBases->reserve(seg.m_containedMeasBases->size());
-      for (const Trk::MeasurementBase* const measurement :
-           *(seg.m_containedMeasBases)) {
-        m_containedMeasBases->push_back(measurement->clone());
-      }
-    } else {
-      m_containedMeasBases.reset();
+    // Deep copy
+    m_containedMeasBases.clear();
+    m_containedMeasBases.reserve(seg.m_containedMeasBases.size());
+    for (const Trk::MeasurementBase* const measurement :
+         seg.m_containedMeasBases) {
+      m_containedMeasBases.push_back(measurement->clone());
     }
     m_author = seg.m_author;
   }
@@ -118,12 +92,6 @@ Trk::Segment::operator=(Trk::Segment&& seg) noexcept
     m_author = seg.m_author;
   }
   return (*this);
-}
-
-unsigned int
-Trk::Segment::numberOfInstantiations()
-{
-  return s_numberOfInstantiations;
 }
 
 std::string

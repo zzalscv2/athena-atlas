@@ -67,9 +67,9 @@ namespace PESA {
           for(auto tSOS = track.trackStateOnSurfaces()->begin();
               tSOS!=track.trackStateOnSurfaces()->end(); ++tSOS) {
             if ((*tSOS)->type(Trk::TrackStateOnSurface::Perigee) == false) {
-              const Trk::FitQualityOnSurface* fq =  (*tSOS)->fitQualityOnSurface();
+              const Trk::FitQualityOnSurface& fq =  (*tSOS)->fitQualityOnSurface();
               if(!fq) continue;
-              int nd = fq->numberDoF();
+              int nd = fq.numberDoF();
               if(nd==2) nPix++;
               if(nd==1) nSct++;
             }

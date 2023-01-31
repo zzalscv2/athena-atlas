@@ -9,35 +9,40 @@
 
 #include "ByteStreamData/RawEvent.h"
 
-#include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/Bootstrap.h"
+#include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/MsgStream.h"
 
-#include "LUCID_RawEvent/LUCID_RawData.h"
 #include "LUCID_RawEvent/LUCID_Digit.h"
+#include "LUCID_RawEvent/LUCID_RawData.h"
 
-class LUCID_RodEncoder {
-  
- public: 
-  
+class LUCID_RodEncoder
+{
+public:
   typedef std::vector<const LUCID_Digit*> VDIGIT;
-  
+  struct Cache
+  {
+    unsigned int hitcounter0 = 0;
+    unsigned int hitcounter1 = 0;
+    unsigned int hitcounter2 = 0;
+    unsigned int hitcounter3 = 0;
+    VDIGIT Digits{};
+  };
+
   LUCID_RodEncoder();
   ~LUCID_RodEncoder();
 
-  void addDigit(const LUCID_Digit* digit) { m_Digits.push_back(digit); }
-  void encode(std::vector<uint32_t>& data_block, MsgStream& log);
-  
-  VDIGIT getDigits() { return m_Digits;}
-  
- private:
+  void addDigit(const LUCID_Digit* digit, Cache& cache) const
+  {
+    cache.Digits.push_back(digit);
+  }
+  void encode(std::vector<uint32_t>& data_block,
+              Cache& cache,
+              MsgStream& log) const;
 
-  unsigned int m_hitcounter0;
-  unsigned int m_hitcounter1;
-  unsigned int m_hitcounter2;
-  unsigned int m_hitcounter3;
+  VDIGIT getDigits(Cache& cache) const { return cache.Digits; }
 
-  VDIGIT m_Digits;
-}; 
+private:
+};
 
 #endif

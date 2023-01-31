@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::HEC::HECGeometry
@@ -71,7 +71,9 @@ namespace LArG4 {
         {
           ServiceHandle<StoreGateSvc> detStore ("DetectorStore" ,"HECGeometry");
           ATH_CHECK(detStore.retrieve() );
-          ATH_CHECK(detStore->retrieve(m_hecManager));
+          // Split this up; otherwise, cppcheck doesn't see the retrieve().
+          StatusCode sc = detStore->retrieve(m_hecManager);
+          ATH_CHECK(sc);
         }
       // This is VERY clumsy, but at the moment the only way to get the eta boundaries
       // for a given block from the ReadoutGeometry and at the same time have the

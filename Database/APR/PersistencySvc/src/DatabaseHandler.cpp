@@ -40,8 +40,12 @@ pool::PersistencySvc::DatabaseHandler::DatabaseHandler( pool::IStorageSvc& stora
 
 pool::PersistencySvc::DatabaseHandler::~DatabaseHandler()
 {
-   rollBackTransaction();
-   m_storageSvc.disconnect( m_fileDescriptor );
+   int mode = 0;
+   pool::DbStatus sc = m_storageSvc.openMode(m_fileDescriptor, mode);
+   if ( sc.isSuccess() ) {
+     rollBackTransaction();
+     m_storageSvc.disconnect( m_fileDescriptor );
+   }
 }
 
 
@@ -70,6 +74,13 @@ pool::PersistencySvc::DatabaseHandler::rollBackTransaction()
 }
 
 
+
+bool
+pool::PersistencySvc::DatabaseHandler::disconnectTransaction()
+{
+   rollBackTransaction();
+   return ( m_storageSvc.disconnect( m_fileDescriptor ).isSuccess() );
+}
 
 std::vector< std::string >
 pool::PersistencySvc::DatabaseHandler::containers()

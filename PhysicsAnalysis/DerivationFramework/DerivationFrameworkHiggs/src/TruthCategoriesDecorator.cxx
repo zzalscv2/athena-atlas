@@ -159,7 +159,10 @@ namespace DerivationFramework {
         FloatDecorator dec_m{itr->second.m, ctx};
         const xAOD::EventInfo* eventInfo = dec_pt.cptr();
 
-        std::vector<float>&pt{dec_pt(*eventInfo)}, eta{dec_eta(*eventInfo)}, phi{dec_phi(*eventInfo)}, mass{dec_m(*eventInfo)};
+        std::vector<float>&pt = dec_pt(*eventInfo) ;
+        std::vector<float>&eta = dec_eta(*eventInfo);
+        std::vector<float>&phi = dec_phi(*eventInfo) ;
+        std::vector<float>&mass = dec_m(*eventInfo) ;
         for (const TLorentzVector& p4 : p4s) {
             pt.push_back(p4.Pt() * Gaudi::Units::GeV);
             eta.push_back(p4.Eta());

@@ -58,7 +58,6 @@ Trk::DenseEnvironmentsAmbiguityProcessorTool::
   declareProperty("caloSeededBrem"       , m_caloSeededBrem     = false);
   declareProperty("pTminBrem"            , m_pTminBrem          = 1000.);
   declareProperty("etaBounds"            , m_etaBounds,"eta intervals for internal monitoring");
-  declareProperty("ObserverToolWriter"   , m_observerToolWriter, "track observer tool writer");
 }
 //==================================================================================================
 
@@ -238,7 +237,7 @@ Trk::DenseEnvironmentsAmbiguityProcessorTool::solveTracks(const TracksScores &tr
         /// copy over the existing summary to prevent a new hole search.
         /// Not done in default tracking, only relevant when using holes from pattern recognition. 
         if (m_keepHolesFromBeforeFit && atrack.track()->trackSummary()) pRefittedTrack->setTrackSummary(std::make_unique<Trk::TrackSummary>(*atrack.track()->trackSummary()));
-        addTrack( pRefittedTrack, true , scoreTrackFitflagMap, prdToTrackMap, trackDustbin, stat, refittedTrack_uid);
+        addTrack( pRefittedTrack, true , scoreTrackFitflagMap, trackDustbin, stat, refittedTrack_uid);
       }
       // remove original copy, but delay removal since some pointer to it or its constituents may still be in used
       if (atrack.newTrack()) {
@@ -248,7 +247,7 @@ Trk::DenseEnvironmentsAmbiguityProcessorTool::solveTracks(const TracksScores &tr
       ATH_MSG_DEBUG ("Candidate excluded, add subtrack to map. Track "<<cleanedTrack.get());
       stat.incrementCounterByRegion(CounterIndex::kNsubTrack,cleanedTrack.get());
       // for this case clenedTrack is a new created object.
-      addTrack(cleanedTrack.release(), false, scoreTrackFitflagMap, prdToTrackMap, trackDustbin, stat, cleanedTrack_uid);
+      addTrack(cleanedTrack.release(), false, scoreTrackFitflagMap, trackDustbin, stat, cleanedTrack_uid);
       // remove original copy, but delay removal since some pointer to it or its constituents may still be in used
       if (atrack.newTrack()) {
          trackDustbin.emplace_back(atrack.release() );

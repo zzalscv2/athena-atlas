@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // McEventCollectionCnv_p6.h
@@ -120,15 +120,15 @@ class McEventCollectionCnv_p6 : public T_AthenaPoolTPCnvBase<
   HepMC::GenParticlePtr
   createGenParticle( const GenParticle_p6& p,
                      ParticlesMap_t& partToEndVtx,
-                     HepMC::DataPool& datapools, HepMC::GenVertexPtr parent=nullptr, bool add_to_output = true ) const;
+                     HepMC::DataPool& datapools, const HepMC::GenVertexPtr& parent=nullptr, bool add_to_output = true ) const;
 
   /** @brief Method to write a persistent @c GenVertex object. The persistent
    *  vertex is added to the persistent is added to the persistent
    *  @c GenEvent.
    */
 #ifdef HEPMC3
-  void writeGenVertex( HepMC::ConstGenVertexPtr vtx,
-                       McEventCollection_p6& persEvt ) const;
+  static void writeGenVertex( const HepMC::ConstGenVertexPtr& vtx,
+                       McEventCollection_p6& persEvt ) ;
 #else
   void writeGenVertex( const HepMC::GenVertex& vtx,
                        McEventCollection_p6& persEvt ) const;
@@ -140,8 +140,8 @@ class McEventCollectionCnv_p6 : public T_AthenaPoolTPCnvBase<
    *  persistent @c GenEvent
    */
 #ifdef HEPMC3
-  int writeGenParticle( HepMC::ConstGenParticlePtr p,
-                        McEventCollection_p6& persEvt ) const;
+  static int writeGenParticle( const HepMC::ConstGenParticlePtr& p,
+                        McEventCollection_p6& persEvt ) ;
 #else
   int writeGenParticle( const HepMC::GenParticle& p,
                         McEventCollection_p6& persEvt ) const;

@@ -34,10 +34,7 @@ InDet::InDetDenseEnvAmbiTrackSelectionTool::InDetDenseEnvAmbiTrackSelectionTool(
                                                                                 const std::string& n,
                                                                                 const IInterface*  p )
 :
-base_class(t,n,p)
-{
-  declareProperty("ObserverTool", m_observerTool, "track observer tool");
-}
+base_class(t,n,p){}
 
 //================ Initialisation =================================================
 
@@ -80,10 +77,9 @@ StatusCode InDet::InDetDenseEnvAmbiTrackSelectionTool::finalize() {
 
 
 // @TODO move cluster "map" creation to separate algorithm
-void InDet::InDetDenseEnvAmbiTrackSelectionTool::newEvent(CacheEntry* ) const
+void InDet::InDetDenseEnvAmbiTrackSelectionTool::newEvent(CacheEntry* ) 
 {
-   return;
-}
+   }
 
 
 //============================================================================================

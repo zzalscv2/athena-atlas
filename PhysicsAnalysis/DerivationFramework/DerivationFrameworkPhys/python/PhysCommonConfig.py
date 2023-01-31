@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # PhysCommonConfig
 # Contains the configuration for the common physics containers/decorations used in analysis DAODs
@@ -23,6 +23,7 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
             AddTruthCollectionNavigationDecorationsCfg)
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthCollectionMakerCfg
         PhysCommonTruthCharmTool = acc.getPrimaryAndMerge(TruthCollectionMakerCfg(
+            ConfigFlags,
             name                    = "PhysCommonTruthCharmTool",
             NewCollectionName       = "TruthCharm",
             KeepNavigationInfo      = False,
@@ -33,6 +34,7 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
         acc.merge(AddHFAndDownstreamParticlesCfg(ConfigFlags))
         acc.merge(AddStandardTruthContentsCfg(ConfigFlags))
         acc.merge(AddTruthCollectionNavigationDecorationsCfg(
+            ConfigFlags,
             TruthCollections=["TruthElectrons", 
                               "TruthMuons", 
                               "TruthPhotons", 
@@ -66,19 +68,20 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
     acc.merge(EGammaCommonCfg(ConfigFlags))
     # Jets, di-taus, tau decorations, flavour tagging, MET association
     from DerivationFrameworkJetEtMiss.JetCommonConfig import JetCommonCfg
-    from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollectionsCfg
-    from DerivationFrameworkTau.TauCommonConfig import (AddDiTauLowPtCfg, AddTauWPDecorationCfg, AddMuonRemovalTauAODReRecoAlgCfg)
+    from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
+    from DerivationFrameworkTau.TauCommonConfig import (AddDiTauLowPtCfg, AddMuonRemovalTauAODReRecoAlgCfg, AddTauIDDecorationCfg)
     from DerivationFrameworkJetEtMiss.METCommonConfig import METCommonCfg 
     acc.merge(JetCommonCfg(ConfigFlags))
     #We also need to build links between the newly created jet constituents (GlobalFE)
     #and electrons,photons,muons and taus
-    from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
-    #AOD do not have calorimeter cells for CaloCalTopoCluster, so we have to use
-    #this special setting for the muon-FE links.
-    acc.merge(PFGlobalFlowElementLinkingCfg(ConfigFlags, useMuonTopoClusters=True))
-    acc.merge(AddDiTauLowPtCfg(ConfigFlags, prefix = 'PhysCommon'))
-    acc.merge(AddMuonRemovalTauAODReRecoAlgCfg(ConfigFlags, prefix = 'PhysCommon'))
-    acc.merge(AddTauWPDecorationCfg(ConfigFlags, prefix = 'PhysCommon', evetoFixTag="v1"))
+    from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg    
+    acc.merge(PFGlobalFlowElementLinkingCfg(ConfigFlags))
+    acc.merge(AddDiTauLowPtCfg(ConfigFlags))
+    acc.merge(AddMuonRemovalTauAODReRecoAlgCfg(ConfigFlags))
+    # eVeto WP and DeepSet ID for taus and muon-subtracted taus
+    acc.merge(AddTauIDDecorationCfg(ConfigFlags, TauContainerName="TauJets"))
+    acc.merge(AddTauIDDecorationCfg(ConfigFlags, TauContainerName="TauJets_MuonRM"))
+
     FTagJetColl = ['AntiKt4EMPFlowJets','AntiKtVR30Rmax4Rmin02TrackJets']
     if ConfigFlags.GeoModel.Run >= LHCPeriod.Run4:
         FTagJetColl.append('AntiKt4EMTopoJets')
@@ -95,25 +98,14 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
             acc.merge(TriggerMatchingCommonRun2Cfg(ConfigFlags, 
                                                    name = "PhysCommonTrigMatchNoTau", 
                                                    OutputContainerPrefix = "TrigMatch_", 
-                                                   TriggerList = triggerListsHelper.Run2TriggerNamesNoTau))
+                                                   ChainNames = triggerListsHelper.Run2TriggerNamesNoTau))
             acc.merge(TriggerMatchingCommonRun2Cfg(ConfigFlags, 
                                                    name = "PhysCommonTrigMatchTau", 
                                                    OutputContainerPrefix = "TrigMatch_", 
-                                                   TriggerList = triggerListsHelper.Run2TriggerNamesTau, 
+                                                   ChainNames = triggerListsHelper.Run2TriggerNamesTau, 
                                                    DRThreshold = 0.2))
         if ConfigFlags.Trigger.EDMVersion == 3:
             acc.merge(TriggerMatchingCommonRun3Cfg(ConfigFlags, TriggerList = triggerListsHelper.Run3TriggerNames))
-            # This is here temporarily for testing/comparison/debugging purposes
-            acc.merge(TriggerMatchingCommonRun2Cfg(ConfigFlags, 
-                                                   name = "PhysCommonTrigMatchNoTau", 
-                                                   OutputContainerPrefix = "TrigMatch_", 
-                                                   TriggerList = triggerListsHelper.Run3TriggerNamesNoTau))
-            acc.merge(TriggerMatchingCommonRun2Cfg(ConfigFlags, 
-                                                   name = "PhysCommonTrigMatchTau", 
-                                                   OutputContainerPrefix = "TrigMatch_", 
-                                                   TriggerList = triggerListsHelper.Run3TriggerNamesTau, 
-                                                   DRThreshold = 0.2))
-
 
     return acc
 

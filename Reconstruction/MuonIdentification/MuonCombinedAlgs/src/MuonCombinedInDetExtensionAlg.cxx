@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCombinedInDetExtensionAlg.h"
@@ -11,7 +11,7 @@ MuonCombinedInDetExtensionAlg::MuonCombinedInDetExtensionAlg(const std::string& 
 
 StatusCode MuonCombinedInDetExtensionAlg::initialize() {
     ATH_MSG_VERBOSE(" usePRDs = " << m_usePRDs);
-    ATH_CHECK(m_muonCombinedInDetExtensionTools.retrieve());
+    ATH_CHECK(m_muonCombinedInDetExtensionTool.retrieve());
     ATH_CHECK(m_indetCandidateCollectionName.initialize());
     ATH_CHECK(m_MDT_ContainerName.initialize(m_usePRDs));
     ATH_CHECK(m_RPC_ContainerName.initialize(m_usePRDs));
@@ -32,64 +32,64 @@ StatusCode MuonCombinedInDetExtensionAlg::execute(const EventContext& ctx) const
     if (!indetCandidateCollection.isValid()) {
         ATH_MSG_ERROR("Could not read " << m_indetCandidateCollectionName);
         return StatusCode::FAILURE;
-    }
-
+    }    
     ATH_MSG_VERBOSE("Loaded InDetCandidateCollection " << m_indetCandidateCollectionName << " with  " << indetCandidateCollection->size()
                                                        << " elements.");
     if (msgLvl(MSG::VERBOSE)) {
-        for (const MuonCombined::InDetCandidate* candidate : *indetCandidateCollection)
-            msg(MSG::VERBOSE) << candidate->toString() << endmsg;
+        for (const MuonCombined::InDetCandidate* candidate : *indetCandidateCollection){
+            ATH_MSG_VERBOSE(candidate->toString());          
+        }
     }
 
-    SG::WriteHandle<MuonCombined::InDetCandidateToTagMap> tagMap(m_tagMap, ctx);
-    ATH_CHECK(tagMap.record(std::make_unique<MuonCombined::InDetCandidateToTagMap>()));
 
-    TrackCollection* combTracks = nullptr;
-    TrackCollection* meTracks = nullptr;
-    Trk::SegmentCollection* segments = nullptr;
-
-    if (!m_combTracks.key().empty()) {
-        SG::WriteHandle<TrackCollection> wh_combTracks(m_combTracks, ctx);
-        ATH_CHECK(wh_combTracks.record(std::make_unique<TrackCollection>()));
-        combTracks = wh_combTracks.ptr();
-    }
-    if (!m_METracks.key().empty()) {
-        SG::WriteHandle<TrackCollection> wh_meTracks(m_METracks, ctx);
-        ATH_CHECK(wh_meTracks.record(std::make_unique<TrackCollection>()));
-        meTracks = wh_meTracks.ptr();
-    }
-
-    if (!m_segments.key().empty()) {
-        SG::WriteHandle<Trk::SegmentCollection> wh_segs(m_segments, ctx);
-        ATH_CHECK(wh_segs.record(std::make_unique<Trk::SegmentCollection>()));
-        segments = wh_segs.ptr();
-    }
+    MuonCombined::InDetCandidateToTagMap* tagMap{nullptr};
+    TrackCollection* combTracks{nullptr}, *meTracks{nullptr};
+    Trk::SegmentCollection* segments{nullptr};
+    ATH_CHECK(record(ctx, m_tagMap, tagMap));
+    ATH_CHECK(record(ctx,m_combTracks, combTracks ));
+    ATH_CHECK(record(ctx,m_METracks, meTracks ));
+    ATH_CHECK(record(ctx,m_segments, segments ));
 
     if (m_usePRDs) {
-        MuonCombined::IMuonCombinedInDetExtensionTool::MuonPrdData prdData;
-        SG::ReadHandle<Muon::MdtPrepDataContainer> mdtPRDContainer(m_MDT_ContainerName, ctx);
-        prdData.mdtPrds = mdtPRDContainer.cptr();
-        if (m_hasCSC) {
-            SG::ReadHandle<Muon::CscPrepDataContainer> cscPRDContainer(m_CSC_ContainerName, ctx);
-            prdData.cscPrds = cscPRDContainer.cptr();
-        }
-        if (m_hasSTGC && m_hasMM) {
-            SG::ReadHandle<Muon::sTgcPrepDataContainer> stgcPRDContainer(m_sTGC_ContainerName, ctx);
-            SG::ReadHandle<Muon::MMPrepDataContainer> mmPRDContainer(m_MM_ContainerName, ctx);
-            prdData.stgcPrds = stgcPRDContainer.cptr();
-            prdData.mmPrds = mmPRDContainer.cptr();
-        }
-        SG::ReadHandle<Muon::RpcPrepDataContainer> rpcPRDContainer(m_RPC_ContainerName, ctx);
-        prdData.rpcPrds = rpcPRDContainer.cptr();
-        SG::ReadHandle<Muon::TgcPrepDataContainer> tgcPRDContainer(m_TGC_ContainerName, ctx);
-        prdData.tgcPrds = tgcPRDContainer.cptr();
-        for (const auto& tool : m_muonCombinedInDetExtensionTools) {
-            tool->extendWithPRDs(*indetCandidateCollection, tagMap.ptr(), prdData, combTracks, meTracks, segments, ctx);
-        }
+        MuonCombined::IMuonCombinedInDetExtensionTool::MuonPrdData prdData{};
+        ATH_CHECK(loadPrdContainer(ctx, m_MDT_ContainerName, prdData.mdtPrds));
+        ATH_CHECK(loadPrdContainer(ctx, m_CSC_ContainerName, prdData.cscPrds));
+        ATH_CHECK(loadPrdContainer(ctx, m_sTGC_ContainerName, prdData.stgcPrds));
+        ATH_CHECK(loadPrdContainer(ctx, m_MM_ContainerName, prdData.mmPrds));
+        ATH_CHECK(loadPrdContainer(ctx, m_RPC_ContainerName, prdData.rpcPrds));
+        ATH_CHECK(loadPrdContainer(ctx, m_TGC_ContainerName, prdData.tgcPrds));
+        m_muonCombinedInDetExtensionTool->extendWithPRDs(*indetCandidateCollection, tagMap, prdData, combTracks, meTracks, segments, ctx);
+        
     } else {
-        for (const auto& tool : m_muonCombinedInDetExtensionTools) {
-            tool->extend(*indetCandidateCollection, tagMap.ptr(), combTracks, meTracks, segments, ctx);
-        }
+        m_muonCombinedInDetExtensionTool->extend(*indetCandidateCollection, tagMap, combTracks, meTracks, segments, ctx);
     }
     return StatusCode::SUCCESS;
 }
+template <class ContType> StatusCode MuonCombinedInDetExtensionAlg::loadPrdContainer(const EventContext& ctx , const SG::ReadHandleKey<ContType>& key, const ContType* & target_ptr) const{
+    if (key.empty()) {
+        ATH_MSG_DEBUG("loadPrdContainer() -- No key given assume it's intended");
+        target_ptr = nullptr;
+        return StatusCode::SUCCESS;    
+    }
+    SG::ReadHandle<ContType> readHandle{key,ctx};
+    if (!readHandle.isValid()) {
+        ATH_MSG_FATAL("Failed to load "<<key.fullKey());
+        return StatusCode::FAILURE;
+    }
+    ATH_MSG_VERBOSE("Loaded successfully "<<key.fullKey());
+    target_ptr = readHandle.cptr();
+    return StatusCode::SUCCESS;
+}
+template <class ContType> StatusCode MuonCombinedInDetExtensionAlg::record(const EventContext& ctx, const SG::WriteHandleKey<ContType>& key, ContType* & target_ptr) const {
+    if (key.empty()) {
+        ATH_MSG_VERBOSE("record() -- No key was given... Assume it's intended ");
+        target_ptr = nullptr;
+        return StatusCode::SUCCESS;
+    }
+    SG::WriteHandle<ContType> writeHandle{key, ctx};
+    ATH_CHECK(writeHandle.record(std::make_unique<ContType>()));
+    target_ptr = writeHandle.ptr();
+    ATH_MSG_VERBOSE("record() -- Successfully written "<<key.fullKey());
+    return StatusCode::SUCCESS;
+}
+    

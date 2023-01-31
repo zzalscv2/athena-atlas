@@ -78,19 +78,20 @@ public:
   int getNTracks() const { return m_trackMatches.size(); }
   int getClusterId() const { return m_clusterId; }
   void setClusterId(int clusterId) { m_clusterId = clusterId; }
-  void setCellsWeight(std::map<IdentifierHash, double> cellsWeight)
+  void setCellsWeight(std::map<IdentifierHash, double> &&cellsWeight)
   {
-    m_cellsWeightMap = cellsWeight;
+    m_cellsWeightMap = std::move(cellsWeight);
   }
   const std::map<IdentifierHash, double>& getCellsWeight() const
   {
     return m_cellsWeightMap;
   }
-
-  int getClusterType();
-  const bool& isTouchable() { return m_isTouchable; }
+  /** Specifies if we have a cluster mainly in ECAL, HCAL or FCAL  */
+  int getClusterType() const {  return m_calorimeterType; }
+  bool isTouchable() const { return m_isTouchable; }
 
 private:
+  void setClusterType();
   /** ENUM that defines calorimeter regions as ECAL, HCAL or FCAL  */
   enum CalorimeterType
   {
@@ -104,13 +105,12 @@ private:
   };
 
   int m_clusterId;
+  int m_calorimeterType;
   xAOD::CaloCluster* m_cluster;
   ElementLink<xAOD::CaloClusterContainer> m_originalClusElementLink;
   ElementLink<xAOD::CaloClusterContainer> m_clusElementLink;
   bool m_isTouchable;
 
-  /** Specifies if we have a cluster mainly in ECAL, HCAL or FCAL  */
-  CalorimeterType m_calorimeterType;
 
   /* for EM mode, LC weight for cells are retrieved before doing any
    * subtraction; they will be used after subtraction */

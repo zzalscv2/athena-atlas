@@ -29,4 +29,4 @@ This is a rough sketch of how information flows through the b-tagging code. Litt
 Many of the functions to configure the above can be found in this
 package, with `Cfg` appended to the name. In particular, the main
 function here is `BTagAlgsCfg`, which can be found in
-[BTagRun3Config](python/BTagRun3Config.py).
+[BTagConfig](python/BTagConfig.py).

@@ -20,6 +20,7 @@
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 
+#include "CaloDetDescr/CaloDetDescrManager.h"
 //Event classes
 class LArDigitContainer;
 class CaloCellContainer;
@@ -66,9 +67,9 @@ class LArRawChannelBuilderSCAlg : public AthReentrantAlgorithm {
   //Identifier helper
   const LArOnline_SuperCellID* m_onlineId = nullptr;
 
-  /// Geometry manager.
-  const CaloSuperCellDetDescrManager* m_sem_mgr;
-
+  // Super Cell DD manager key
+  SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_caloSuperCellMgrKey{
+    this,"CaloSuperCellDetDescrManager","CaloSuperCellDetDescrManager","SG key of the resulting CaloSuperCellDetDescrManager"};
 };
 
 

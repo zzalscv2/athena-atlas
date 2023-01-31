@@ -42,7 +42,7 @@ atlas_add_library( DataQualityInterfaces
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
    ${TDAQ-COMMON_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${TDAQ-COMMON_LIBRARIES}
-   ${COOL_LIBRARIES} ${CORAL_LIBRARIES} nlohmann_json::nlohmann_json )
+   ${COOL_LIBRARIES} ${CORAL_LIBRARIES} nlohmann_json::nlohmann_json CxxUtils )
 
 atlas_add_executable( han
    src/han.cxx

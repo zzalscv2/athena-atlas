@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -19,8 +19,6 @@ HistValBase::HistValBase()
   : m_compareBinContentsOnEachFill(true),
     m_triggeredConversionToROOTHist(false)
 {
-  if (HistVal_trigger_conversion_all)
-    {}//do nothing - just avoid compilation warning for this unit 
 }
 
 //____________________________________________________________________
@@ -29,14 +27,14 @@ HistValBase::~HistValBase()
 }
 
 //____________________________________________________________________
-void HistValBase::compareAllContents() const
+void HistValBase::compareAllContents()
 {
   compareBinContents();
   compareMetaData();
 }
 
 //____________________________________________________________________
-void HistValBase::compareAll() const
+void HistValBase::compareAll()
 {
   compareAllContents();
   compareTH1s();

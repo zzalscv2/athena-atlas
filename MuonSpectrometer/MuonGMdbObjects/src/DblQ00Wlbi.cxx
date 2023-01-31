@@ -19,6 +19,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <limits>
 
 namespace MuonGM
 {
@@ -100,9 +101,9 @@ DblQ00Wlbi::DblQ00Wlbi(AmdcDb* wlbi) :
      m_d[i].num = (*it)->getInt("NUM");
      m_d[i].height = (*it)->getFloat("HEIGHT");
      m_d[i].thickness = (*it)->getFloat("THICKNESS");
-     if((*it)->getFloat("LOWERTHICK") != 999999999999.) m_d[i].lowerThickness   = (*it)->getFloat("LOWERTHICK");
+     if((*it)->getFloat("LOWERTHICK") != std::numeric_limits<float>::max()) m_d[i].lowerThickness   = (*it)->getFloat("LOWERTHICK");
      else m_d[i].lowerThickness   = m_d[i].thickness ;
-     if ((*it)->getFloat(".SHIFTYSTATION") != 999999999999.) m_d[i].yShift   = (*it)->getFloat("SHIFTYSTATION");
+     if ((*it)->getFloat(".SHIFTYSTATION") != std::numeric_limits<float>::max()) m_d[i].yShift   = (*it)->getFloat("SHIFTYSTATION");
      else m_d[i].yShift   = 0.;
   }
 }

@@ -60,6 +60,9 @@ add_lifetimes_lhe = False
 # Do we want to use PDG defaults?
 usePMGSettings = True
 
+# Do we need to use a custom plugin?
+plugin = None
+
 # Do we want 4FS or 5FS? 4 is default
 # * 5-flavor scheme always should use nQuarksMerge=5 [5FS -> nQuarksMerge=5]
 # * 4-flavor scheme with light-flavor MEs (p p > go go j , with j = g d u s c)

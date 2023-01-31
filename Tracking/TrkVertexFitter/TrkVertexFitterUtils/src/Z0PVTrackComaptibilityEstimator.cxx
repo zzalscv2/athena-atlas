@@ -65,7 +65,7 @@ namespace Trk{
 						     const xAOD::VertexContainer* primaryVertexContainer, unsigned int index) const{
     
     // TODO: do we want to doRemoval here? (I have it as false for now) 
-    const ImpactParametersAndSigma* ip =  m_ipEstimator->estimate(track, track, (*primaryVertexContainer)[index], false);
+    std::unique_ptr<ImpactParametersAndSigma> ip =  m_ipEstimator->estimate(track, track, (*primaryVertexContainer)[index], false);
     
     bool pileup = false;
   
@@ -118,16 +118,7 @@ namespace Trk{
       }
     }
   
-    if(std::abs(ip->IPz0) / ip->sigmaz0 < m_z0SignificanceMax && !pileup){
-
-      delete ip;
-      
-      return true;
-    }
-  
-    delete ip;
-    
-    return false;
+    return std::abs(ip->IPz0) / ip->sigmaz0 < m_z0SignificanceMax && !pileup;
   }
 
 

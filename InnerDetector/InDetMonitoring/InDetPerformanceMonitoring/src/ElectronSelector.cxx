@@ -54,7 +54,7 @@ ElectronSelector::~ElectronSelector()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void ElectronSelector::Init()
 {
-  (*m_msgStream) << MSG::INFO << " -- ElectronSelector::Init -- START -- " << endmsg;
+  (*m_msgStream) << MSG::DEBUG << " -- ElectronSelector::Init -- START -- " << endmsg;
   ISvcLocator* serviceLocator = Gaudi::svcLocator();
   IToolSvc* toolSvc;
   StatusCode sc = serviceLocator->service("ToolSvc", toolSvc, true);
@@ -96,7 +96,7 @@ void ElectronSelector::Init()
     (*m_msgStream) << MSG::WARNING << "Electron likelihood tool initialize() FAILURE!" << endmsg;
   }
 
-  (*m_msgStream) << MSG::INFO << " --ElectronSelector::Init -- COMPLETED -- " << endmsg;
+  (*m_msgStream) << MSG::DEBUG << " --ElectronSelector::Init -- COMPLETED -- " << endmsg;
   return;
 }
 
@@ -239,10 +239,6 @@ bool ElectronSelector::OrderElectronList()
     int elecposcount = 0;
 
     for (int ielec=0; ielec < (int) m_pxElTrackList.size(); ielec++) {
-      std::cout <<" -- ElectronSelector::OrderElectronList -- elec--> pt "<< m_pxElTrackList.at(ielec)->pt() << std::endl;
-      std::cout <<"                                                   d0 "<< m_pxElTrackList.at(ielec)->d0() << std::endl;
-      std::cout <<"                                             sigma_d0 "<< m_pxElTrackList.at(ielec)->definingParametersCovMatrixVec()[0] << std::endl;
-
       // negative electrons
       if (m_pxElTrackList.at(ielec)->charge()== -1) { // positive electron
 	elecnegcount++;

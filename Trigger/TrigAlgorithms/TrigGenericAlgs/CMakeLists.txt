@@ -11,7 +11,7 @@ atlas_add_component( TrigGenericAlgs
                      src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} AthenaBaseComps ByteStreamCnvSvcBaseLib
-                     DecisionHandlingLib xAODEventShape LumiBlockCompsLib IRegionSelector)
+                     DecisionHandlingLib xAODEventShape LumiBlockCompsLib IRegionSelector TrigCompositeUtilsLib )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-select=ATL900,ATL901 )

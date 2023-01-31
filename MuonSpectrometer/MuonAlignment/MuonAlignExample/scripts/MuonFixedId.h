@@ -146,7 +146,7 @@ namespace MuonCalib {
         /** @return the fixed station number for a station name
          * @param[in] station the station name string
          */
-        int stationStringToFixedStationNumber(const std::string station) const;
+        int stationStringToFixedStationNumber(const std::string& station) const;
         /** @return the station name string given the fixed station number
          * @param[in] station the station integer number
          */

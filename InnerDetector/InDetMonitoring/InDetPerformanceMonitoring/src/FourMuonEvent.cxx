@@ -62,11 +62,11 @@ FourMuonEvent::~FourMuonEvent()
 //==================================================================================
 void FourMuonEvent::Init()
 {
-  (*m_msgStream) << MSG::INFO << " * FourMuonEvent::Init * START *" << endmsg; 
+  (*m_msgStream) << MSG::DEBUG << " * FourMuonEvent::Init * START *" << endmsg; 
   
-  (*m_msgStream) << MSG::INFO << " * FourMuonEvent::Init * initializing muon selector *" << endmsg; 
+  (*m_msgStream) << MSG::DEBUG << " * FourMuonEvent::Init * initializing muon selector *" << endmsg; 
   m_xMuonID.Init();
-  (*m_msgStream) << MSG::INFO << " * FourMuonEvent::Init * initializing electron selector *" << endmsg; 
+  (*m_msgStream) << MSG::DEBUG << " * FourMuonEvent::Init * initializing electron selector *" << endmsg; 
   m_xElecID.Init();
 
   if (m_workAsFourMuons)     {(*m_msgStream) << MSG::INFO << " * FourMuonEvent::Init * working mode: 4 muons"     << endmsg; }
@@ -74,7 +74,7 @@ void FourMuonEvent::Init()
   if (m_workAsFourLeptons)   {(*m_msgStream) << MSG::INFO << " * FourMuonEvent::Init * working mode: 4 leptons"   << endmsg; }
 
   PARENT::Init();
-  (*m_msgStream) << MSG::INFO << " * FourMuonEvent::Init * Completed * " << endmsg; 
+  (*m_msgStream) << MSG::DEBUG << " * FourMuonEvent::Init * Completed * " << endmsg; 
 
   return;
 }

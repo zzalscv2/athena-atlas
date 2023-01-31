@@ -125,7 +125,7 @@ void InfracolorForce::CombineStringVector(const StringVector& v) {
 G4LorentzVector InfracolorForce::GetSumStrings() const {
     G4LorentzVector x(0,0,0,0);
     std::deque<StringVector>::const_iterator it = m_stringVectors.begin();
-    for (; it != m_stringVectors.end(); it++) {
+    for (; it != m_stringVectors.end(); ++it) {
         x += it->lv();
     }
     return x - m_borrowedString.lv();
@@ -135,7 +135,7 @@ G4ThreeVector InfracolorForce::GetAngMomentum() const {
     std::deque<StringVector>::const_iterator it = m_stringVectors.begin();
     G4LorentzVector x(0,0,0,0);
     G4ThreeVector L(0,0,0);
-    for (; it != m_stringVectors.end(); it++) {
+    for (; it != m_stringVectors.end(); ++it) {
         G4LorentzVector dx = it->lv();
         L += m_stringForce * x.vect().cross(dx.vect());
         x += dx;
@@ -147,7 +147,7 @@ G4ThreeVector InfracolorForce::GetMomentOfE() const {
     std::deque<StringVector>::const_iterator it = m_stringVectors.begin();
     G4LorentzVector x(0,0,0,0);
     G4ThreeVector Excm(0,0,0);
-    for (; it != m_stringVectors.end(); it++) {
+    for (; it != m_stringVectors.end(); ++it) {
         G4LorentzVector dx = it->lv();
         Excm += m_stringForce * (dx.t() * x.vect() - dx.vect() * x.t());
         x += dx;

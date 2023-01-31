@@ -9,6 +9,10 @@
 #include <GeoModelUtilities/GeoModelTool.h>
 #include <RDBAccessSvc/IRDBAccessSvc.h>
 
+namespace GeoModelIO{
+  class ReadGeoModel;
+}
+
 class GeoPhysVol;
 class GeoVPhysVol;
 class GmxInterface;
@@ -22,14 +26,17 @@ public:
 protected:
   bool isAvailable(const std::string& versionNode, const std::string& tableNode) const;
   std::string getBlob(const std::string& versionNode, const std::string& tableNode) const;
-  // returns a position in the world volume hierarchy
-  // -1 represents the volume named by m_detectorName not being found
-  int createTopVolume(GeoPhysVol* worldVol, GmxInterface& interface, const std::string& versionNode, const std::string& tableNode) const;
-  // version for detectors created within an envelope volume, returning a const GeoVPhysVol directly
-  const GeoVPhysVol * createTopVolume(GeoPhysVol* worldVol, GmxInterface& interface, const std::string& versionNode, const std::string& tableNode, const std::string& containingDetector, const std::string& envelopeName) const;
 
   // method for derived classes to initialize the services needed here
   StatusCode createBaseTool();
+
+  // method to check if we are using the Run4 geometry workflow, from a single sqlite file, and if so, return the reader
+  // NB return can be null - used downstream to check if we are using sqlite inputs or not
+  const GeoModelIO::ReadGeoModel* getSqliteReader() const;
+
+  // (optional) containingDetector/envelopeVolume can be used if the geometry tree needs to be further descended to add "topVolume"
+  // (optional) sqlreader steers if using a pre-built sqlite input, or parsing the geometry xml files to build it here
+  const GeoVPhysVol * createTopVolume(GeoPhysVol* worldVol, GmxInterface& interface, const std::string& versionNode, const std::string& tableNode, const std::string& containingDetector="", const std::string& envelopeName="", const GeoModelIO::ReadGeoModel* sqlreader=nullptr) const;
 
   Gaudi::Property<std::string> m_gmxFilename{this, "GmxFilename", "", "The name of the local file to read the geometry from"};
   Gaudi::Property<std::string> m_detectorName{this, "DetectorName", "ITkStrip", ""};
@@ -41,8 +48,8 @@ protected:
 private:
 
   Gaudi::Property<std::string> m_clobOutputFileName{this, "ClobOutputName", "", "Name of file to dump CLOB content to"};
-  void createTopVolume_impl(GeoPhysVol* worldVol, GmxInterface& interface, const std::string& versionNode, const std::string& tableNode) const;
-
+  //do the actual creation of the volume from the gmx files
+  void createVolume(GeoPhysVol* worldVol, GmxInterface& interface, const std::string& versionNode, const std::string& tableNode) const;
 };
 
 #endif // GEOMODELSVC_GEOMODELXMLTOOL_H

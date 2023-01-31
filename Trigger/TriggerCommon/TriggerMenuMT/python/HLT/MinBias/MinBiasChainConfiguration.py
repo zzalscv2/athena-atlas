@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -6,16 +6,16 @@ log = logging.getLogger( __name__ )
 
 from TriggerMenuMT.HLT.Config.MenuComponents import EmptyMenuSequence
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
-from AthenaConfiguration.ComponentFactory import isRun3Cfg
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
-if isRun3Cfg():
+if isComponentAccumulatorCfg():
     pass
 else:
     from TriggerMenuMT.HLT.MinBias.MinBiasMenuSequences import MinBiasSPSequence, MinBiasTrkSequence, MinBiasMbtsSequence, MinBiasZVertexFinderSequenceCfg
     from TriggerMenuMT.HLT.MinBias.ALFAMenuSequences import ALFAPerfSequence
     from TriggerMenuMT.HLT.MinBias.AFPMenuSequence import AFPTrkSequenceCfg, AFPGlobalSequenceCfg
 
-from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool, defineHistogram
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO,
@@ -41,8 +41,9 @@ def TrigAFPDijetComboHypoToolCfg(chainDict):
     name = chainDict['chainName']
     tool = TrigAFPDijetComboHypoTool(name)
 
-    monTool = GenericMonitoringTool("MonTool_"+name)
-    monTool.Histograms = [defineHistogram('DijetMass', type='TH1F', path='EXPERT', title="Dijet mass", xbins=100, xmin=0, xmax=2000)]
+    monTool = GenericMonitoringTool("MonTool_"+name,
+                                    HistPath = 'AFPComboHypo/'+tool.getName())
+    monTool.defineHistogram('DijetMass', type='TH1F', path='EXPERT', title="Dijet mass", xbins=100, xmin=0, xmax=2000)
     monTool.defineHistogram('DijetRapidity', type='TH1F', path='EXPERT', title="Dijet rapidity", xbins=100, xmin=-5, xmax=5)
 
     monTool.defineHistogram('XiJet1', type='TH1F', path='EXPERT', title="Jet 1 xi", xbins=100, xmin=0, xmax=1)
@@ -70,7 +71,6 @@ def TrigAFPDijetComboHypoToolCfg(chainDict):
     monTool.defineHistogram('SideC_diffX', type='TH1F', path='EXPERT', title="Track X diff side C", xbins=100, xmin=-50, xmax=50)
     monTool.defineHistogram('SideC_diffY', type='TH1F', path='EXPERT', title="Track Y diff side C", xbins=100, xmin=-50, xmax=50)
 
-    monTool.HistPath = 'AFPComboHypo/'+tool.getName()
     tool.MonTool = monTool
     return tool
 
@@ -90,55 +90,55 @@ class MinBiasChainConfig(ChainConfigurationBase):
     # ----------------------
     # Assemble the chain depending on information from chainName
     # ----------------------
-    def assembleChainImpl(self):
+    def assembleChainImpl(self, flags):
         log.debug("Assembling chain for %s", self.chainName)
         steps = []
 
         if "mbts" == self.chainPart['recoAlg'][0] or "mbts" in self.chainName:
-            steps.append(self.getMinBiasMbtsStep())
+            steps.append(self.getMinBiasMbtsStep(flags))
         elif "afprec" == self.chainPart['recoAlg'][0]:
-            steps.append(self.getAFPTrkStep())
+            steps.append(self.getAFPTrkStep(flags))
         else:
-            steps.append(self.getMinBiasEmptyMbtsStep())
+            steps.append(self.getMinBiasEmptyMbtsStep(flags))
 
         if "afptof" in self.chainPart['recoAlg']:
-            steps.append(self.getAFPGlobalStep())
+            steps.append(self.getAFPGlobalStep(flags))
 
         if self.chainPart['recoAlg'][0] in ['sp', 'sptrk', 'hmt', 'excl']:
-            steps.append(self.getMinBiasSpStep())
+            steps.append(self.getMinBiasSpStep(flags))
 
         if self.chainPart['recoAlg'][0] in ['sptrk', 'hmt', 'excl']:
-            steps.append(self.getMinBiasZFindStep())
-            steps.append(self.getMinBiasTrkStep())
+            steps.append(self.getMinBiasZFindStep(flags))
+            steps.append(self.getMinBiasTrkStep(flags))
 
         if "_alfaperf" in self.chainName:
-            steps.append(self.getALFAPerfStep())
+            steps.append(self.getALFAPerfStep(flags))
 
         return self.buildChain(steps)
 
-    def getMinBiasMbtsStep(self):
-        return self.getStep(1, 'Mbts',[MinBiasMbtsSequenceCfg])
+    def getMinBiasMbtsStep(self, flags):
+        return self.getStep(flags,1,'Mbts',[MinBiasMbtsSequenceCfg])
 
-    def getMinBiasEmptyMbtsStep(self):
-        return self.getStep(1,'EmptyMbts',[MinBiasMbtsEmptySequenceCfg])
+    def getMinBiasEmptyMbtsStep(self, flags):
+        return self.getStep(flags,1,'EmptyMbts',[MinBiasMbtsEmptySequenceCfg])
 
-    def getMinBiasSpStep(self):
-        return self.getStep(2,'SPCount',[MinBiasSPSequenceCfg])
+    def getMinBiasSpStep(self, flags):
+        return self.getStep(flags,2,'SPCount',[MinBiasSPSequenceCfg])
 
-    def getMinBiasZFindStep(self):
-        return self.getStep(3,'ZFind',[MinBiasZVertexFinderCfg])
+    def getMinBiasZFindStep(self, flags):
+        return self.getStep(flags,3,'ZFind',[MinBiasZVertexFinderCfg])
 
-    def getMinBiasEmptyZFindStep(self):
-        return self.getStep(3,'EmptyZFind',[MinBiasZFindEmptySequenceCfg])
+    def getMinBiasEmptyZFindStep(self, flags):
+        return self.getStep(flags,3,'EmptyZFind',[MinBiasZFindEmptySequenceCfg])
 
-    def getMinBiasTrkStep(self):
-        return self.getStep(4,'TrkCount',[MinBiasTrkSequenceCfg])
+    def getMinBiasTrkStep(self, flags):
+        return self.getStep(flags,4,'TrkCount',[MinBiasTrkSequenceCfg])
 
-    def getAFPTrkStep(self):
-         return self.getStep(1,'AFPTrk',[AFPTrkSequenceCfg])
+    def getAFPTrkStep(self, flags):
+         return self.getStep(flags,1,'AFPTrk',[AFPTrkSequenceCfg])
 
-    def getAFPGlobalStep(self):
-         return self.getStep(1,'AFPGlobal',[AFPGlobalSequenceCfg])
+    def getAFPGlobalStep(self, flags):
+         return self.getStep(flags,1,'AFPGlobal',[AFPGlobalSequenceCfg])
 
-    def getALFAPerfStep(self):
-        return self.getStep(1,'ALFAPerf',[ALFAPerfSequenceCfg])
+    def getALFAPerfStep(self, flags):
+        return self.getStep(flags,1,'ALFAPerf',[ALFAPerfSequenceCfg])

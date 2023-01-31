@@ -40,6 +40,9 @@ HelloWorld_tf.py --maxEvents=5 --CA --postInclude 'AthenaConfiguration.JobOptsDu
 HelloWorld_tf.py --maxEvents=5 --CA HelloWorld:True
 
 # CA arg test 2
+HelloWorld_tf.py --maxEvents=5 --CA HelloWorld:True HelloWorldSecond:False
+
+# CA arg test 3
 set +e
 
 if HelloWorld_tf.py --maxEvents=5; then

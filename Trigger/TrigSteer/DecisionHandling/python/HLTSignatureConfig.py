@@ -27,7 +27,7 @@ def InputMakerForFeatureAlg(name):
 
 
 #generalize
-from AthenaConfiguration.ComponentFactory import CompFactory, isRun3Cfg
+from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 
 def makeSequence(ConfigFlags, name,step, signature):    
     """
@@ -45,7 +45,7 @@ def makeSequence(ConfigFlags, name,step, signature):
     Alg.Output = name+signature+"Alg"+step+"_out"
     Alg.Input  = IM.Output
     
-    if isRun3Cfg():
+    if isComponentAccumulatorCfg():
         from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
         accAlg = ComponentAccumulator()
         accAlg.addEventAlgo(Alg)
@@ -103,7 +103,7 @@ def elMenuSequence(step, reconame, hyponame):
     (Sequence, IM, seqOut) = RecoFragmentsPool.retrieve(makeElSequence,ConfigFlags,name=reconame, step=step)
     elHypo = ElGamHypo(hyponame+"Step"+step+"ElHypo")
     elHypo.Input = seqOut
-    if isRun3Cfg():
+    if isComponentAccumulatorCfg():
         selAcc=SelectionCA(hyponame+"elStep"+step)        
         selAcc.mergeReco(Sequence) 
         selAcc.addHypoAlgo(elHypo)
@@ -116,7 +116,7 @@ def gamMenuSequence(step, reconame, hyponame):
     (Sequence, IM, seqOut) = RecoFragmentsPool.retrieve(makeElSequence,ConfigFlags,name=reconame, step=step)
     elHypo = ElGamHypo(hyponame+"Step"+step+"GamHypo")
     elHypo.Input = seqOut
-    if isRun3Cfg():
+    if isComponentAccumulatorCfg():
         selAcc=SelectionCA(hyponame+"gamStep"+step+"Gam")        
         selAcc.mergeReco(Sequence) 
         selAcc.addHypoAlgo(elHypo)
@@ -130,7 +130,7 @@ def muMenuSequence(step, reconame, hyponame):
     (Sequence, IM, seqOut) = RecoFragmentsPool.retrieve(makeMuSequence,ConfigFlags,name=reconame, step=step)
     muHypo = MuHypo(hyponame+"Step"+step+"MuHypo")
     muHypo.Input = seqOut
-    if isRun3Cfg():
+    if isComponentAccumulatorCfg():
         selAcc=SelectionCA(hyponame+"muStep"+step)        
         selAcc.mergeReco(Sequence) 
         selAcc.addHypoAlgo(muHypo)
@@ -143,7 +143,7 @@ def genMenuSequence(step, reconame, hyponame):
     (Sequence, IM, seqOut) = RecoFragmentsPool.retrieve(makeElSequence,ConfigFlags,name=reconame, step=step)
     elHypo = ElGamHypo(hyponame+"Hypo")
     elHypo.Input = seqOut
-    if isRun3Cfg():
+    if isComponentAccumulatorCfg():
         selAcc=SelectionCA(hyponame+"elStep"+step)        
         selAcc.mergeReco(Sequence) 
         selAcc.addHypoAlgo(elHypo)

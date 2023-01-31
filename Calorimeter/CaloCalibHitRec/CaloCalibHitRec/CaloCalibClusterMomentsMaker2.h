@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCALIBHITREC_CALOCALIBCLUSTERMOMENTSMAKER2_H
@@ -18,12 +18,13 @@
 class CaloCell_ID;
 class CaloDM_ID;
 class CaloDmDescrManager;
+class CaloDetDescrManager;
 class McEventCollection;
 class TruthParticleContainer;
 
 #include "GaudiKernel/ToolHandle.h" 
 
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "CaloGeoHelpers/CaloSampling.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloDmDetDescr/CaloDmDescrManager.h"
@@ -198,6 +199,9 @@ class CaloCalibClusterMomentsMaker2: public AthAlgTool, virtual public CaloClust
   /** ReadHandleKey for truth particle container */
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleContainerKey{this,"TruthParticles","TruthParticles","ReadHandleKey for truth particle container"};
   
+  /** Conditions Handle Key to access the CaloDetDescrManager */
+  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloDetDescrMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};
+
   const CaloCell_ID* m_calo_id;
 
   const CaloDM_ID*    m_caloDM_ID;
@@ -213,7 +217,7 @@ class CaloCalibClusterMomentsMaker2: public AthAlgTool, virtual public CaloClust
 
   std::vector<CalibHitIPhiIEtaRange> *m_i_phi_eta[3];
 
-  mutable std::atomic<bool> m_foundAllContainers;
+  mutable std::atomic<bool> m_foundAllContainers{};
 
   enum keys_dm_energy_sharing {kMatchDmOff, kMatchDmLoose, kMatchDmMedium, kMatchDmTight};
   enum keys_calib_frac_origin {kCalibFracEM, kCalibFracHAD, kCalibFracREST, kCalibFracMax};
@@ -233,7 +237,7 @@ class CaloCalibClusterMomentsMaker2: public AthAlgTool, virtual public CaloClust
   float m_apars_r0;
   int m_MatchDmType;
 
-  double angle_mollier_factor(double x) const;
+  static double angle_mollier_factor(double x) ;
   void get_calib_frac(const std::map<unsigned int,int>& truthBarcodeToPdgCodeMap,
                       const MyClusInfo& clusInfo, std::vector<double> &engFrac) const;
 };

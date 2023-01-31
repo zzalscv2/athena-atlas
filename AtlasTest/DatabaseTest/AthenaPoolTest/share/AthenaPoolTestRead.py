@@ -50,11 +50,7 @@ topSequence += AthenaPoolTestDataReader( "AthenaPoolTestDataReader" )
 #--------------------------------------------------------------
 svcMgr.MessageSvc.OutputLevel = WARNING
 svcMgr.MessageSvc.debugLimit  = 100000
-#rds ClassIDSvc = Service( "ClassIDSvc" )
-#rds ClassIDSvc.OutputLevel = 3
 AthenaPoolTestDataReader.OutputLevel = DEBUG
-#svcMgr.StoreGateSvc = Service( "StoreGateSvc" )
-#svcMgr.StoreGateSvc.Dump = TRUE 
 
 from AthenaServices import AthenaServicesConf
 AthenaEventLoopMgr = AthenaServicesConf.AthenaEventLoopMgr()

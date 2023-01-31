@@ -81,11 +81,8 @@ def fromRunArgs(runArgs):
     from Digitization.DigitizationConfigFlags import digitizationRunArgsToFlags
     digitizationRunArgsToFlags(runArgs, ConfigFlags)
 
-    # Setup for Overlay flags
-    if ConfigFlags.Overlay.FastChain:
-        from OverlayConfiguration.OverlaySkeleton import defaultOverlayFlags
-        defaultOverlayFlags(ConfigFlags)
-    else:
+    # Setup flags for pile-up
+    if not ConfigFlags.Overlay.FastChain:
         # Setup common digitization flags
         from Digitization.DigitizationConfigFlags import setupDigitizationFlags
         setupDigitizationFlags(runArgs, ConfigFlags)

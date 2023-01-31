@@ -368,7 +368,7 @@ StatusCode HGTD_SmearedDigitizationTool::fillMultiTruthCollection(PRD_MultiTruth
 
   if (trk_link.isValid()) {
     const int barcode(trk_link.barcode());
-    if (barcode != 0 && barcode != m_crazy_bc) {
+    if (barcode != 0 && barcode != HepMC::crazyParticleBarcode) {
       map->insert(std::make_pair(cluster->identify(), trk_link));
     }
   }

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -40,11 +40,11 @@ def add_modifier(run_nbr=None, evt_nbr=None, time_stamp=None, lbk_nbr=None, nevt
     return [run_nbr, evt_nbr, time_stamp, lbk_nbr, nevts, mod_bit]
 
 
-def buildListOfModifiers(ConfigFlags):
+def buildListOfModifiers(flags):
     # migrated from RunDMCFlags.py
     Modifiers = []
-    pDicts = ConfigFlags.Input.RunAndLumiOverrideList
-    DataRunNumber = ConfigFlags.Input.ConditionsRunNumber
+    pDicts = flags.Input.RunAndLumiOverrideList
+    DataRunNumber = flags.Input.ConditionsRunNumber
 
     if pDicts:
         for el in pDicts:
@@ -57,37 +57,37 @@ def buildListOfModifiers(ConfigFlags):
 
         # Using event numbers to avoid "some very large number" setting
         totalNumber = 1000000
-        if ConfigFlags.Exec.MaxEvents > 0:
-            totalNumber = ConfigFlags.Exec.MaxEvents + 1
-        if ConfigFlags.Exec.SkipEvents > 0:
-            totalNumber += ConfigFlags.Exec.SkipEvents
+        if flags.Exec.MaxEvents > 0:
+            totalNumber = flags.Exec.MaxEvents + 1
+        if flags.Exec.SkipEvents > 0:
+            totalNumber += flags.Exec.SkipEvents
 
-        InitialTimeStamp = ConfigFlags.IOVDb.RunToTimestampDict.get(DataRunNumber, 1) # TODO fix repeated configuration
+        InitialTimeStamp = flags.IOVDb.RunToTimestampDict.get(DataRunNumber, 1) # TODO fix repeated configuration
 
         FirstLB = 1
         Modifiers += add_modifier(run_nbr=DataRunNumber, lbk_nbr=FirstLB, time_stamp=InitialTimeStamp, nevts=totalNumber)
-    elif ConfigFlags.Input.RunNumber:
+    elif flags.Input.RunNumber:
         # Behaviour for Simulation jobs. For standard Simulation we
         # override the run number once per job. TODO Still need to deal with the specific case of DataOverlay
-        myRunNumber = ConfigFlags.Input.RunNumber[0]
+        myRunNumber = flags.Input.RunNumber[0]
         assert myRunNumber >= 0, (
             "ConfigFlags.Input.RunNumber[0] %d is negative. "
             "Use a real run number from data." % myRunNumber)
-        myFirstLB = ConfigFlags.Input.LumiBlockNumber[0]
-        myInitialTimeStamp = ConfigFlags.Input.TimeStamp[0]
+        myFirstLB = flags.Input.LumiBlockNumber[0]
+        myInitialTimeStamp = flags.Input.TimeStamp[0]
 
         # Using event numbers to avoid "some very large number" setting
         totalNumber = 1000000
-        if ConfigFlags.Exec.MaxEvents > 0:
-            totalNumber = ConfigFlags.Exec.MaxEvents + 1
-        if ConfigFlags.Exec.SkipEvents > 0:
-            totalNumber += ConfigFlags.Exec.SkipEvents
+        if flags.Exec.MaxEvents > 0:
+            totalNumber = flags.Exec.MaxEvents + 1
+        if flags.Exec.SkipEvents > 0:
+            totalNumber += flags.Exec.SkipEvents
         Modifiers += add_modifier(run_nbr=myRunNumber, lbk_nbr=myFirstLB, time_stamp=myInitialTimeStamp, nevts=totalNumber)
     return Modifiers
 
 
-def getFirstLumiBlock(ConfigFlags, run):
-    pDicts = ConfigFlags.Input.RunAndLumiOverrideList
+def getFirstLumiBlock(flags, run):
+    pDicts = flags.Input.RunAndLumiOverrideList
     if pDicts:
         allLBs = [1]
         for el in pDicts:
@@ -95,30 +95,30 @@ def getFirstLumiBlock(ConfigFlags, run):
                 allLBs += [el["lb"]]
         return min(allLBs) + 0
     else:
-        return ConfigFlags.Input.LumiBlockNumber[0]
+        return flags.Input.LumiBlockNumber[0]
 
 
-def getMinMaxRunNumbers(ConfigFlags):
+def getMinMaxRunNumbers(flags):
     """Get a pair (firstrun,lastrun + 1) for setting ranges in IOVMetaData """
     mini = 1
     maxi = 2147483647
-    pDicts = ConfigFlags.Input.RunAndLumiOverrideList
+    pDicts = flags.Input.RunAndLumiOverrideList
     if pDicts:
         # Behaviour for Digitization jobs using RunAndLumiOverrideList
         allruns = [element['run'] for element in pDicts]
         mini = min(allruns) + 0
         maxi = max(allruns) + 1
-    elif ConfigFlags.Input.ConditionsRunNumber>0:
+    elif flags.Input.ConditionsRunNumber>0:
         # Behaviour for Digitization jobs using DataRunNumber
-        DataRunNumber = ConfigFlags.Input.ConditionsRunNumber
+        DataRunNumber = flags.Input.ConditionsRunNumber
         assert DataRunNumber >= 0, (
             "ConfigFlags.Input.ConditionsRunNumber %d is negative. "
             "Use a real run number from data." % DataRunNumber)
         mini = DataRunNumber
         maxi = DataRunNumber+1
-    elif ConfigFlags.Input.RunNumber:
+    elif flags.Input.RunNumber:
         # Behaviour for Simulation jobs
-        myRunNumber = ConfigFlags.Input.RunNumber[0]
+        myRunNumber = flags.Input.RunNumber[0]
         assert myRunNumber >= 0, (
             "ConfigFlags.Input.RunNumber[0] %d is negative. "
             "Use a real run number from data." % myRunNumber)
@@ -127,20 +127,20 @@ def getMinMaxRunNumbers(ConfigFlags):
     return (mini,maxi)
 
 
-def EvtIdModifierSvcCfg(ConfigFlags, name="EvtIdModifierSvc", **kwargs):
+def EvtIdModifierSvcCfg(flags, name="EvtIdModifierSvc", **kwargs):
     acc = ComponentAccumulator()
-    isMT = ConfigFlags.Concurrency.NumThreads > 0
-    pileUp = ConfigFlags.Digitization.PileUp and ConfigFlags.Common.ProductionStep in [ProductionStep.Digitization, ProductionStep.PileUpPresampling, ProductionStep.FastChain] and not ConfigFlags.Overlay.FastChain
+    isMT = flags.Concurrency.NumThreads > 0
+    pileUp = flags.Common.ProductionStep in [ProductionStep.Digitization, ProductionStep.PileUpPresampling, ProductionStep.FastChain] and flags.Digitization.PileUp and not flags.Overlay.FastChain
     if pileUp and not isMT:
         kwargs.setdefault("EvtStoreName", "OriginalEvent_SG")
     else:
         kwargs.setdefault("EvtStoreName", "StoreGateSvc")
 
-    Modifiers = buildListOfModifiers(ConfigFlags)
+    Modifiers = buildListOfModifiers(flags)
     if len(Modifiers) > 0:
         kwargs.setdefault("Modifiers", Modifiers)
     iovDbMetaDataTool = CompFactory.IOVDbMetaDataTool()
-    iovDbMetaDataTool.MinMaxRunNumbers = getMinMaxRunNumbers(ConfigFlags)
+    iovDbMetaDataTool.MinMaxRunNumbers = getMinMaxRunNumbers(flags)
     acc.addPublicTool(iovDbMetaDataTool)
 
     acc.addService(CompFactory.EvtIdModifierSvc(name, **kwargs), create=True, primary=True)

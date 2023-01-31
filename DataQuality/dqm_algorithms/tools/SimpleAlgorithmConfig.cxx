@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file SimpleAlgorithmConfig  Defines the class SimpleAlgorithmConfig a concrete simple implementation of dqm_core::AlgorithmConfig
  *  \author andrea.dotti@cern.ch
  */
 #include <dqm_algorithms/tools/SimpleAlgorithmConfig.h>
+
+#include "CxxUtils/checker_macros.h"
 
 dqm_algorithms::tools::SimpleAlgorithmConfig::SimpleAlgorithmConfig() :
   dqm_core::AlgorithmConfig() , m_ref(0)
@@ -22,38 +24,21 @@ dqm_algorithms::tools::SimpleAlgorithmConfig::SimpleAlgorithmConfig( TObject * r
 #ifndef __MAKECINT__
 
 dqm_algorithms::tools::SimpleAlgorithmConfig::SimpleAlgorithmConfig(const AlgorithmConfig& conf):
-  dqm_core::AlgorithmConfig()
+  dqm_core::AlgorithmConfig(), m_ref(conf.getReference())
 {
   //Copy configuration in this
-  m_ref = conf.getReference();
-  m_param = conf.getParameters();
-  m_green = conf.getGreenThresholds();
-  m_red   = conf.getRedThresholds();
+  m_parameters         = conf.getParameters();
+  m_generic_parameters = conf.getGenericParameters();
+  m_green_thresholds   = conf.getGreenThresholds();
+  m_red_thresholds     = conf.getRedThresholds();
 }
 #endif
 
 TObject* 
 dqm_algorithms::tools::SimpleAlgorithmConfig::getReference() const
 {
-  return m_ref;
-}
-
-const std::map<std::string, double>&
-dqm_algorithms::tools::SimpleAlgorithmConfig::getParameters() const
-{
-  return m_param;
-}
-
-const std::map<std::string, double>&
-dqm_algorithms::tools::SimpleAlgorithmConfig::getGreenThresholds() const
-{
-  return m_green;
-}
-
-const std::map<std::string, double>&
-dqm_algorithms::tools::SimpleAlgorithmConfig::getRedThresholds() const
-{
-  return m_red;
+  TObject* ref ATLAS_THREAD_SAFE = const_cast<TObject*>(m_ref);  // dictated by interface
+  return ref;
 }
 
 void
@@ -65,18 +50,24 @@ dqm_algorithms::tools::SimpleAlgorithmConfig::setReference(TObject* o)
 void
 dqm_algorithms::tools::SimpleAlgorithmConfig::addParameter(std::string key, double value)
 {
-  m_param.insert( std::make_pair(key,value) );
+  m_parameters.insert( std::make_pair(key,value) );
+}
+
+void
+dqm_algorithms::tools::SimpleAlgorithmConfig::addGenericParameter(std::string key, std::string value)
+{
+  m_generic_parameters.emplace( key, value );
 }
 
 void
 dqm_algorithms::tools::SimpleAlgorithmConfig::addGreenThreshold(std::string key, double value)
 {
-  m_green.insert( std::make_pair(key,value) );
+  m_green_thresholds.insert( std::make_pair(key,value) );
 }
 
 void
 dqm_algorithms::tools::SimpleAlgorithmConfig::addRedThreshold(std::string key, double value)
 {
-  m_red.insert( std::make_pair(key,value) );
+  m_red_thresholds.insert( std::make_pair(key,value) );
 }
 

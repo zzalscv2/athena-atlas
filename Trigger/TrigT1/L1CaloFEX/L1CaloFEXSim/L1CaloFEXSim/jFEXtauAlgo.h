@@ -46,7 +46,7 @@ namespace LVL1 {
 
     virtual void buildSeeds() override; 
     virtual bool isSeedLocalMaxima() override;
-    virtual void setFirstEtRing(int First_ETring[])  override;
+    virtual void setFirstEtRing(int First_ETring[36])  override;
     virtual int getClusterEt() override;
     virtual int getIsLocalMaxima() override;
     virtual int getFirstEtRing()  override;

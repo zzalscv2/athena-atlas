@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # ===============================================================
 #  main()
@@ -7,13 +7,14 @@
 def main():
     from optparse import OptionParser
     parser = OptionParser(usage = "usage: %prog arguments", version="%prog")
-    parser.add_option("-r","--runNumber",        dest="InputFile", help="Input raw data run number (default: %default)")
+    parser.add_option("-r", dest="runNumber",type="string", help="Input raw data run number (default: %default)")
     parser.set_defaults(runNumber="00436354")
     (options,args) = parser.parse_args()
     
     import sys 
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     flags.Exec.MaxEvents = -1
     flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2022-02'
     import glob
@@ -69,5 +70,6 @@ def main():
 # ===============================================================
 if __name__ == '__main__':
     main()
+
 
 

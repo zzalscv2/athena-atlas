@@ -22,6 +22,7 @@
 #include <iomanip>
 #include <sstream>
 #include <atomic>
+#include <arpa/inet.h>
 
 #define DO_NOT_USE_MUON_TAG true
 
@@ -1071,29 +1072,42 @@ void TileROD_Decoder::unpack_frag5(uint32_t /* version */,
   return;
 }
 
+std::vector<uint32_t> TileROD_Decoder::get_correct_data(const uint32_t* p) const {
+
+  uint32_t size = (*p) - 1; // The size of fragment - start of the Tile subfragment (in v3format it is 0xff1234ff)
+
+  std::vector<uint32_t> data;
+  data.reserve(size);
+
+  // The first 4 words are correct (just copy)
+  std::copy_n(p, 4, std::back_inserter(data));
+
+  std::for_each(p + 4, p + size, [&data] (uint32_t p) {
+                                   data.push_back((ntohs(p >> 16) << 16) | (ntohs(p & 0xFFFF)));
+                                 });
+
+  return data;
+}
+ 
 void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
                                    uint32_t sizeOverhead,
                                    DigitsMetaData_t& digitsMetaData,
                                    const uint32_t* p, pDigiVec & pDigits) const
 {
-
-
-  int size = *(p) - sizeOverhead;
-
-  // second word is frag ID (0x100-0x4ff) and frag type
-  int frag = *(p + 1) & 0xFFFF;
-  bool remap = std::binary_search(m_demoFragIDs.begin(), m_demoFragIDs.end(), frag);
+  int size = *(p)- sizeOverhead;
+  const uint32_t* data = p+2; // pointer to current data word  Position of first data word,
+   // second word is frag ID (0x100-0x4ff) and frag type
+  int frag =  (*(p+1)) & 0xFFFF; /* (*(data +3)>>16) & 0xFF;*/
+  bool remap = std::binary_search(m_demoFragIDs.begin(),m_demoFragIDs.end(), frag);
   const std::vector<int> & chmap = (frag<0x300) ? m_demoChanLB : m_demoChanEB;
   
   HWIdentifier adcID;
   HWIdentifier drawerID = m_tileHWID->drawer_id(frag);
 
-  // pointer to current data word
-  const uint32_t* data = p + 2;     // Position of first data word, 
 
   uint32_t all00 = TileFragStatus::ALL_00;
   uint32_t allFF = TileFragStatus::ALL_FF;
-
+   
   for (int i = 0; i < size; ++i) {
     uint32_t w = data[i];
     if (allFF && w!=0xFFFFFFFF) {
@@ -1110,7 +1124,7 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
   digitsMetaData[6].push_back( status );
 
   // check that fragment is not dummy
-  if (m_suppressDummyFragments && status != TileFragStatus::ALL_OK) {
+  if (m_suppressDummyFragments && status != TileFragStatus::ALL_OK){
     ATH_MSG_WARNING("FRAG6: Suppress dummy fragment!!!");
     return; // nothing reasonable found
   }
@@ -1134,18 +1148,15 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
 
   float samples[2][48][16] = {{{0}}};
 
-  const uint32_t* const end_data = data + size;
+  const uint32_t* const end_data = data + size; 
   while (data < end_data) {
-    if ((*data & 0xFFFF0000) == 0xABCD0000) {
-      unsigned int miniDrawer = *(data+6) & 0xFF;
-     
-      if ((++data < end_data) && (*data == 0x12345678) && (++data < end_data)) {
-
-        unsigned int fragSize   = *data & 0xFF;
-        unsigned int paramsSize = (*data >> 8 ) & 0xFF;
+    if (*data == 0x12345678 ) {
+      unsigned int miniDrawer = *(data+5) & 0xFF;
+      if ((++data < end_data)) {
+	unsigned int fragSize   = *data & 0xFF;
+        unsigned int paramsSize = (*data >> 8 ) & 0xFF;      
         moduleID[miniDrawer]    = (*data >> 16) & 0xFF;
         runType[miniDrawer]     = (*data >> 24) & 0xFF;
-
         if (fragSize != 192) {
           ATH_MSG_ERROR("FRAG6: Unpacking minidrawer [" << miniDrawer 
                         << "] with fragment size: " << fragSize 
@@ -1155,7 +1166,6 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
         
         // check trailer
         const uint32_t* trailer = data + paramsSize + 3 + fragSize; // 2 = (BCID + L1ID)
-
 
         if ((trailer + 1) <= end_data // 3 = (trailer size)
             && *trailer == 0x87654321
@@ -1182,8 +1192,7 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
           bcid[miniDrawer] = (*(++data) >> 16) & 0xFFFF;
           l1id[miniDrawer] = *(++data);
 
-
-          
+	  
 
           if (msgLvl(MSG::VERBOSE)) {
             msg(MSG::VERBOSE) << "FRAG6: Found MD[" << miniDrawer << "] fragment"
@@ -1215,6 +1224,7 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
               for (int samplesIdx = 15; samplesIdx >= 0; --samplesIdx) {
                 samples[gain][channel][samplesIdx] = (*sample & 0x0FFF);
                 ++sample;
+               
               }
 
             }
@@ -1228,6 +1238,7 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
       }
     } else {
       ++data;
+      
     }
   }
 
@@ -1239,10 +1250,12 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
     // always 48 channels
     for (int channel = 0; channel < 48; ++channel) {
       int ch1 = (remap) ? chmap[channel] : channel;
-      adcID = m_tileHWID->adc_id(drawerID, ch1, gain);
+     
+       adcID = m_tileHWID->adc_id(drawerID, ch1, gain);
       // always 16 samples
       std::vector<float> digiVec(&samples[gain][channel][0], &samples[gain][channel][16]);
       pDigits.push_back(new TileDigits(adcID, digiVec));
+      
       ATH_MSG_VERBOSE("FRAG6: " << (std::string) *(pDigits.back()));
     }
     if (remap) std::sort(pDigits.end()-48,pDigits.end(),chan_order);
@@ -1256,7 +1269,6 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
   digitsMetaData[1].insert(digitsMetaData[1].end(), &chargeInjected[0], &chargeInjected[4]);
   digitsMetaData[1].insert(digitsMetaData[1].end(), &timeInjected[0], &timeInjected[4]);
   digitsMetaData[1].insert(digitsMetaData[1].end(), &capacitor[0], &capacitor[4]);
-  
 }
 
 void TileROD_Decoder::unpack_fragA(uint32_t /* version */,
@@ -1264,8 +1276,7 @@ void TileROD_Decoder::unpack_fragA(uint32_t /* version */,
                                    const uint32_t* p,
                                    pRwChVec & /* pChannel */) const {
   // second word is frag ID and frag type
-  int size = *(p);
-  
+  int size = *(p); 
   p += 2; // 2 words so far
   
   unsigned int w;
@@ -4289,6 +4300,65 @@ void TileROD_Decoder::fillCollection_TileMuRcv_RawChannel(const ROBData* rob , T
 
 return;
 }
+
+
+void TileROD_Decoder::fillCollection_FELIX_Digi(const ROBData* rob , TileDigitsCollection& coll) const {
+
+  ATH_MSG_DEBUG( "TileROD_Decoder::fillCollection_FELIX_Digi" );
+
+  uint32_t version  = rob->rod_version() & 0xFFFF;
+  uint32_t sizeOverhead = 3; // Sub fragment marker, size, and (id + type)
+
+  // initialize meta data storage
+  DigitsMetaData_t digitsMetaData(7);
+  RawChannelMetaData_t rawchannelMetaData;
+
+  pDigiVec pDigits;
+  pRwChVec pChannel;
+
+  uint32_t  error = 0; 
+  uint32_t size = data_size(rob, error);
+  const uint32_t* data = get_data(rob);
+  const uint32_t* const end_data = data + size;
+
+while (data < end_data) { // iterator over all words for a robid   
+    // first word is the start of the tile subfragment in v3format it is 0xff1234ff
+    if ((*data) == 0xff1234ff) {
+      uint32_t count = *(data + 1); // first word is frag size
+      uint32_t idAndType = *(data + 2); // second word is frag ID and frag type
+      int frag = (idAndType &  0xFFFF);
+      int type = (idAndType>>16)& 0xFF; // note special mask, we ignore one digit, keep only 0x10, 0x20, 0x30, ...
+      if (type == 0x06 &&  (frag == coll.identify())) {
+        ++data;
+        ATH_MSG_DEBUG( MSG::hex << "Found FELIX sub-fragment ID=0x" << frag
+                                <<" type=0x" << type << MSG::dec
+                                << " size=" << count );
+        std::vector<uint32_t> correct_data = get_correct_data(data);
+        unpack_frag6(version, sizeOverhead, digitsMetaData, correct_data.data(), pDigits);        
+        // store metadata for this collection
+        // size, fragID, BCID
+        digitsMetaData[0].push_back(count);
+        digitsMetaData[0].push_back(frag);
+        digitsMetaData[0].push_back(0);
+        break;
+      } else {
+        // carry on looping to search for 0x60
+        data += count;
+      }
+    }
+    ++data;
+  }
+
+  uint32_t bsflags = 0;
+  TileFragHash::TYPE rChType = TileFragHash::Digitizer;
+  TileRawChannelUnit::UNIT rChUnit = TileRawChannelUnit::ADCcounts;
+
+  make_copy(bsflags, rChType, rChUnit, digitsMetaData, rawchannelMetaData,
+            rob, pDigits, pChannel, coll, nullptr);
+
+}
+
+
 
 StatusCode TileROD_Decoder::convertTMDBDecision(const RawEvent* re, TileMuonReceiverContainer* tileMuRcv) const
 {

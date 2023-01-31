@@ -2,15 +2,22 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
+from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg, LArOnOffIdMappingSCCfg
 from IOVDbSvc.IOVDbSvcConfig import addFolders, addFoldersSplitOnline
 
-def LArBadChannelCfg(configFlags, tag=None):
+def LArBadChannelCfg(configFlags, tag=None, isSC=False):
 
     
 
-    result=LArOnOffIdMappingCfg(configFlags)
-    rekey="/LAR/BadChannels/BadChannels"
+    result=ComponentAccumulator()
+    if not isSC:
+      result.merge(LArOnOffIdMappingCfg(configFlags))
+      rekey="/LAR/BadChannels/BadChannels"
+      algname="LArBadChannelCondAlg"
+    else:
+      result.merge(LArOnOffIdMappingSCCfg(configFlags))
+      rekey="/LAR/BadChannels/BadChannelsSC"
+      algname="LArBadChannelCondSCAlg"
 
     if configFlags.Overlay.DataOverlay:
         # TODO: move this in a better location
@@ -19,10 +26,18 @@ def LArBadChannelCfg(configFlags, tag=None):
         result.merge(addFolders(configFlags,"/LAR/BadChannels/BadChannels","LAR_OFL",tag=tag,
                                 className="CondAttrListCollection"))
     else:
-        result.merge(addFoldersSplitOnline(configFlags,"LAR","/LAR/BadChannels/BadChannels",
+       if not isSC:
+          result.merge(addFoldersSplitOnline(configFlags,"LAR","/LAR/BadChannels/BadChannels",
                                         f"/LAR/BadChannelsOfl/BadChannels<key>{rekey}</key>",tag=tag,
                                         className="CondAttrListCollection"))  
-    theLArBadChannelCondAlgo=CompFactory.LArBadChannelCondAlg(ReadKey=rekey)
+       else :
+          result.merge(addFolders(configFlags,"/LAR/BadChannels/BadChannelsSC",
+                                        "LAR_ONL",tag=tag,
+                                        className="CondAttrListCollection"))  
+    theLArBadChannelCondAlgo=CompFactory.LArBadChannelCondAlg(name=algname,ReadKey=rekey,isSC=isSC)
+    if isSC:
+        theLArBadChannelCondAlgo.WriteKey="LArBadChannelSC"
+        theLArBadChannelCondAlgo.CablingKey="LArOnOffIdMapSC"
     result.addCondAlgo(theLArBadChannelCondAlgo)
     return result
 
@@ -31,10 +46,7 @@ def LArBadFebCfg(configFlags, tag=None):
     result=ComponentAccumulator()
     rekey="/LAR/BadChannels/MissingFEBs"
 
-    if configFlags.Overlay.DataOverlay:
-        # TODO: move this in a better location
-        result.merge(addFolders(configFlags, "/LAR/BadChannels/MissingFEBs", "LAR_OFL", className="AthenaAttributeList", tag="LArBadChannelsMissingFEBs-IOVDEP-04", db="OFLP200"))
-    elif configFlags.Input.isMC:
+    if configFlags.Input.isMC:
         result.merge(addFolders(configFlags,"/LAR/BadChannels/MissingFEBs","LAR_OFL",tag=tag,
                                 className="AthenaAttributeList"))
     else:

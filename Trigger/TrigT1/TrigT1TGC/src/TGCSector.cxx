@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCSector.h"
@@ -93,11 +93,12 @@ int TGCSector::getPatchPanelType(TGCSignalType signal, int layer) const
 }
 
 TGCSector::TGCSector()
- : m_regionType(FORWARD), m_numberOfHit(0), 
-   m_sideId(0), m_octantId(0), m_moduleId(0), 
-   m_forwardBackward(ForwardSector), 
-   m_SL(0), m_TMDB(0), m_NSW(0),m_BIS78(0),
-   m_tgcArgs(nullptr), m_dbMgr(nullptr)
+: m_regionType(FORWARD),
+  m_numberOfHit(0), 
+  m_octantId(0), m_moduleId(0), 
+  m_forwardBackward(ForwardSector), 
+  m_SL(0), m_TMDB(0), m_NSW(0),m_BIS78(0),
+  m_tgcArgs(nullptr), m_dbMgr(nullptr)
 {
   for(unsigned int iPatchPanelType=0; iPatchPanelType<NumberOfPatchPanelType; iPatchPanelType++) {
     m_ASDToPP[iPatchPanelType] = 0;
@@ -111,18 +112,18 @@ TGCSector::TGCSector()
   }
 }
 
-TGCSector::TGCSector(TGCArguments* tgcargs,
+TGCSector::TGCSector(LVL1TGCTrigger::TGCArguments* tgcargs,
                      int idIn, TGCRegionType type, 
 		     TGCForwardBackwardType forwardBackward, 
 		     const TGCDatabaseManager* db,
-		     const TGCTMDB*            tm,
-		     std::shared_ptr<const TGCNSW>  nsw,
-		     std::shared_ptr<const TGCBIS78>  bis78)
+		     std::shared_ptr<const LVL1TGC::TGCTMDB>   tm,
+		     std::shared_ptr<const LVL1TGC::TGCNSW> nsw,
+		     std::shared_ptr<const LVL1TGC::TGCBIS78>  bis78)
  : m_id(idIn), m_regionType(type), m_numberOfHit(0),
    m_TMDB(tm), m_NSW(nsw), m_BIS78(bis78),
    m_tgcArgs(tgcargs), m_dbMgr(db)
 {
-  m_sideId = (idIn/NumberOfModule)/NumberOfOctant;
+  m_sideId = static_cast<LVL1TGC::TGCSide>(idIn / NumberOfModule / NumberOfOctant);
   m_octantId = (idIn/NumberOfModule)%NumberOfOctant;
   m_moduleId = idIn%NumberOfModule;
   m_forwardBackward = forwardBackward;

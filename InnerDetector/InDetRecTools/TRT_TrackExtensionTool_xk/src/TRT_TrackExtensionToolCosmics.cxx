@@ -435,8 +435,7 @@ InDet::TRT_TrackExtensionToolCosmics::extendTrack(const EventContext& /*ctx*/,
 
   tp_sort_cosmics sorter(per->parameters()[Trk::theta]);
   std::sort(vecTP.begin(),vecTP.end(),sorter);  
-  for (int i=0;i<(int)vecTP.size();i++){ 
-    const Trk::TrackParameters *tmppar=vecTP[i];
+  for (const auto *tmppar : vecTP){ 
     if ((per->parameters()[Trk::theta]>M_PI/2 && per->position().z()<tmppar->position().z()) || (per->parameters()[Trk::theta]<M_PI/2 && per->position().z()>tmppar->position().z())) tpars_up->push_back(tmppar); 
     else tpars_down->push_back(tmppar);
 

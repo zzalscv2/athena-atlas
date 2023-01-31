@@ -9,7 +9,6 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IPartPropSvc.h"
 #include "GaudiKernel/IIncidentSvc.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
 #include "AthenaKernel/errorcheck.h"
 #include "CxxUtils/checker_macros.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -17,6 +16,7 @@
 
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 #include "HepPDT/ParticleData.hh"
 #include "HepPDT/ParticleDataTable.hh"
@@ -134,9 +134,9 @@ protected:
   /// @name Properties
   //@{
   /// StoreGate key for the MC event collection (defaults to GEN_EVENT)
-  std::string m_mcEventKey;
+  std::string m_mcEventKey{};
   /// Flag to determine if a new MC event collection should be made if it doesn't exist
-  bool m_mkMcEvent;
+  BooleanProperty m_mkMcEvent{this, "MakeMcEvent", false, "Create a new MC event collection if it doesn't exist"};
   //@}
 
 
@@ -157,7 +157,7 @@ protected:
 private:
 
   /// Handle on the particle property service
-  ServiceHandle<IPartPropSvc> m_ppSvc;
+  ServiceHandle<IPartPropSvc> m_ppSvc{this, "PartPropSvc", "PartPropSvc"};
 
   /// Const handle to the MC event collection
   SG::ReadHandleKey<McEventCollection> m_mcevents_const{ this, "McEventKey", "GEN_EVENT", "StoreGate key of the MC event collection" };

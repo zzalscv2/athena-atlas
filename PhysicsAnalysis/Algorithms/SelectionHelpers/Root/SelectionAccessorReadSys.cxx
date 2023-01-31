@@ -69,7 +69,7 @@ namespace CP
     std::string baseName = m_selectionName;
     if (auto split = baseName.find (',');
         split != std::string::npos)
-      baseName = baseName.substr (0, split);
+      baseName.resize (split);
     return svc.getDecorSystematics (objectName, baseName);
   }
 
@@ -88,7 +88,7 @@ namespace CP
         split != std::string::npos)
     {
       suffix = baseName.substr (split);
-      baseName = baseName.substr (0, split);
+      baseName.resize (split);
     }
 
     const CP::SystematicSet affecting

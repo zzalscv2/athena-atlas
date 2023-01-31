@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHEXJOBOPTIONS_EVTLOOPPRESELECTTOOL_H
@@ -7,6 +7,7 @@
 
 #include "AthenaKernel/IAthenaEvtLoopPreSelectTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "EventInfo/EventID.h"
 #include <string>
 
 
@@ -31,7 +32,7 @@ public:
    static const InterfaceID& interfaceID() { return IAthenaEvtLoopPreSelectTool::interfaceID(); }
 
 private:
-   int m_prescale;
+  EventID::event_number_t m_prescale;
 };
 
 #endif // !ATHEXJOBOPTIONS_CONCRETETOOL_H

@@ -173,32 +173,32 @@ public:
 
   //! estimator for FitQuality on Surface from a full track state, that is a
   //! state which contains the current hit (expressed as Amg::Vector2D).
-  virtual const FitQualityOnSurface* fullStateFitQuality(
+  virtual FitQualityOnSurface fullStateFitQuality(
     const TrackParameters&,
     const Amg::Vector2D&,
     const Amg::MatrixX&) const override final;
   //! estimator for FitQuality on Surface from a full track state, that is a
   //! state which contains the current hit (expressed as LocalParameters).
-  virtual const FitQualityOnSurface* fullStateFitQuality(
+  virtual FitQualityOnSurface fullStateFitQuality(
     const TrackParameters&,
     const LocalParameters&,
     const Amg::MatrixX&) const override final;
   //! estimator for FitQuality on Surface from a predicted track state, that is
   //! a state which contains the current hit (expressed as Amg::Vector2D).
-  virtual const FitQualityOnSurface* predictedStateFitQuality(
+  virtual FitQualityOnSurface predictedStateFitQuality(
     const TrackParameters&,
     const Amg::Vector2D&,
     const Amg::MatrixX&) const override final;
   //! estimator for FitQuality on Surface from a predicted track state, that is
   //! a state which contains the current hit (expressed as LocalParameters).
-  virtual const FitQualityOnSurface* predictedStateFitQuality(
+  virtual FitQualityOnSurface predictedStateFitQuality(
     const TrackParameters&,
     const LocalParameters&,
     const Amg::MatrixX&) const override final;
   //! estimator for FitQuality on Surface for the situation when a track is
   //! fitted to the parameters of another trajectory part extrapolated to the
   //! common surface.
-  virtual const FitQualityOnSurface* predictedStateFitQuality(
+  virtual FitQualityOnSurface predictedStateFitQuality(
     const TrackParameters&,
     const TrackParameters&) const override final;
   //! interface for reference-track KF, not implemented
@@ -305,24 +305,24 @@ private:
       The sign controls the calculation in case a predicted input track state
       (sign=+1) or smoothed/updated input track state (sign=-1).
   */
-  FitQualityOnSurface* makeChi2_1D(const SParVector5&,
+  FitQualityOnSurface  makeChi2_1D(const SParVector5&,
                                    const Amg::MatrixX&,
                                    const double&,
                                    const double&,
                                    const int&,
                                    const int&) const;
-  FitQualityOnSurface* makeChi2_2D(const SParVector5&,
+  FitQualityOnSurface  makeChi2_2D(const SParVector5&,
                                    const Amg::MatrixX&,
                                    const SParVector2&,
                                    const SCovMatrix2&,
                                    const int&,
                                    const int&) const;
-  FitQualityOnSurface* makeChi2_5D(const SParVector5&,
+  FitQualityOnSurface  makeChi2_5D(const SParVector5&,
                                    const Amg::MatrixX&,
                                    const SParVector5&,
                                    const Amg::MatrixX&,
                                    const int&) const;
-  FitQualityOnSurface* makeChi2Object(const Amg::VectorX&,
+  FitQualityOnSurface  makeChi2Object(const Amg::VectorX&,
                                       const Amg::MatrixX&,
                                       const Amg::MatrixX&,
                                       const Amg::MatrixX&,

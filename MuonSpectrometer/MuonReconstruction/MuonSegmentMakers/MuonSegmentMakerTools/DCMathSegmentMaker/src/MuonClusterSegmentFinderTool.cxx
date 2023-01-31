@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonClusterSegmentFinderTool.h"
@@ -16,6 +16,7 @@
 #include "TrkParameters/TrackParameters.h"
 #include "TrkPseudoMeasurementOnTrack/PseudoMeasurementOnTrack.h"
 #include "TrkTrack/Track.h"
+#include "MuonDetDescrUtils/MuonSectorMapping.h"
 
 
 
@@ -42,7 +43,7 @@ namespace {
 
     std::string to_string(const Amg::Vector3D& v) {
         std::stringstream sstr{};
-        sstr<<"[x,y,z]=("<<v.x()<<","<<v.y()<<","<<v.z()<<") [theta/eta/phi]=("<<(v.theta() / Gaudi::Units::degree)<<","<<v.eta()<<","<<v.phi()<<")";
+        sstr<<"[x,y,z]=("<<v.x()<<","<<v.y()<<","<<v.z()<<") [theta/eta/phi]=("<<(v.theta() / Gaudi::Units::degree)<<","<<v.eta()<<","<<(v.phi()/ Gaudi::Units::degree)<<")";
         return sstr.str();
     }
     /// Coarse eta cut on the segment direction if the beam spot constraint is activated
@@ -98,16 +99,17 @@ namespace Muon {
     ///
     using MeasVec= NSWSeed::MeasVec;
     NSWSeed::SeedMeasurement::SeedMeasurement(const Muon::MuonClusterOnTrack* cl):
-        m_cl{cl} {
-        static const Amg::Vector3D dir_loc{0., 1.,0.};
-        m_dir = std::make_unique<Amg::Vector3D>(cl->detectorElement()->transform(cl->identify()).linear()*dir_loc);
+        m_cl{cl},
+        m_dir (cl->detectorElement()->transform(cl->identify()).linear() * Amg::Vector3D(0, 1, 0))
+    {
     }
 
     NSWSeed::NSWSeed(const MuonClusterSegmentFinderTool* parent, const std::array<SeedMeasurement, 4>& seed,
                      const std::array<double,2>& lengths) :
-        m_parent{parent} {       
+      m_parent{parent},
+      m_pos {seed[0].pos() + lengths[0] * seed[0].dir()}
+    {       
        
-        m_pos = seed[0].pos() + lengths[0] * seed[0].dir();
         const Amg::Vector3D un_dir = (seed[1].pos() + lengths[1] *seed[1].dir() - m_pos);
         m_dir = un_dir.unit();
 
@@ -261,8 +263,7 @@ namespace Muon {
         ATH_CHECK(m_trackCleaner.retrieve());
         ATH_CHECK(m_trackSummary.retrieve());
         if (m_idHelperSvc->recoMM() || m_idHelperSvc->recosTgc()) {
-            ATH_CHECK(m_stgcClusterCreator.retrieve());
-            ATH_CHECK(m_mmClusterCreator.retrieve());
+            ATH_CHECK(m_muonClusterCreator.retrieve());
         }
         ATH_MSG_DEBUG(" Max cut " << m_maxClustDist);
         return StatusCode::SUCCESS;
@@ -316,7 +317,7 @@ namespace Muon {
                 wedge_segs = findStereoSegments(ctx, muonClusters, iWedge);
             } else {
                 std::vector<std::unique_ptr<Muon::MuonSegment>> etaSegs = findPrecisionSegments(ctx, muonClusters, iWedge);
-                wedge_segs = find3DSegments(ctx, segmentInput, etaSegs);
+                wedge_segs = find3DSegments(ctx, segmentInput, etaSegs, iWedge);
             }
             for (std::unique_ptr<Muon::MuonSegment>& seg : wedge_segs) segPerQuadColl->push_back(std::move(seg));
         }
@@ -568,8 +569,11 @@ namespace Muon {
                 MeasVec etaHitsCalibrated = getCalibratedClusters(seed2D);
 
                 // fit
-                if (hitsToTrack(ctx, etaHitsCalibrated, phiHitVec, *startpar, segTrkColl)) is3Dseg = true;
-
+                if (hitsToTrack(ctx, etaHitsCalibrated, phiHitVec, *startpar, segTrkColl)) {
+                    is3Dseg = true;
+                    ATH_MSG_VERBOSE("Segment successfully fitted for wedge "<<singleWedge<<std::endl<<
+                                   m_printer->print(segTrkColl.back()->measurementsOnTrack()->stdcont()));
+                }
             }  // end loop on phi seeds
 
             // if we failed to combine the eta segment with phi measurements,
@@ -1143,6 +1147,11 @@ namespace Muon {
                             if (eta < minEtaNSW || eta > maxEtaNSW) {
                                 continue;
                             }
+                            if (seed.dir().block<2,1>(0,0).dot(seed.pos().block<2,1>(0,0)) < 0.) continue;
+                            /// We will revise this requirement in the near future. Keep the block for the moment
+                            ///   static const Muon::MuonSectorMapping  sector_mapping{};
+                            ///   const double deltaPhi = std::abs(seed.dir().deltaPhi(seed.pos()));
+                            /// if (deltaPhi > sector_mapping.sectorWidth(m_idHelperSvc->sector(base_seed[0]->identify()))) continue;
                         }                   
                         getClustersOnSegment(orderedClusters, seed, {selLayers[0], selLayers[1],selLayers[2], selLayers[3]});
                         seeds.emplace_back(std::move(seed));
@@ -1306,13 +1315,10 @@ namespace Muon {
 
     //============================================================================
     MeasVec MuonClusterSegmentFinderTool::getCalibratedClusters(NSWSeed& seed) const {
+
         MeasVec calibratedClusters;
-
-        ATH_MSG_VERBOSE("seed global position " << seed.pos() << " seed direction " << seed.dir());
-        ATH_MSG_VERBOSE("seed global position theta " << seed.pos().theta() << " seed direction theta " << seed.dir().theta());
-        ATH_MSG_VERBOSE("seed global position phi " << seed.pos().phi() << " seed direction phi " << seed.dir().phi());
-
         MeasVec clusters = seed.measurements();
+
         // loop on the segment clusters and use the phi of the seed to correct them
         for (const SeedMeasurement& clus : clusters) {
             std::unique_ptr<const Muon::MuonClusterOnTrack> newClus;
@@ -1324,24 +1330,19 @@ namespace Muon {
 
             if (m_idHelperSvc->isMM(hitID)) {
                 // build a  new MM cluster on track with correct position
-                ATH_MSG_VERBOSE("Calibrate measurement from "<< to_string(intersect.position)<<" and direction "<<to_string(seed.dir()));
-                std::unique_ptr<const Muon::MuonClusterOnTrack> newClus {m_mmClusterCreator->calibratedCluster(*clus->prepRawData(), 
-                                                                                                               intersect.position, seed.dir())};
-                ATH_MSG_VERBOSE("Position before correction: " << to_string(clus->globalPosition()));
-                ATH_MSG_VERBOSE("Position after correction: " << to_string(newClus->globalPosition()));
+                std::unique_ptr<const Muon::MuonClusterOnTrack> newClus {m_muonClusterCreator->correct(*clus->prepRawData(), intersect.position, seed.dir())};
                 calibratedClusters.emplace_back(seed.newCalibClust(std::move(newClus)));
-                
             } else if (m_idHelperSvc->issTgc(hitID)) {
-                // calibration to be added for sTGCs
-                 std::unique_ptr<const Muon::MuonClusterOnTrack> newClus{m_stgcClusterCreator->createRIO_OnTrack(*(clus->prepRawData()), 
-                                                                                                                 intersect.position)};
-                 calibratedClusters.emplace_back(seed.newCalibClust(std::move(newClus)));               
+                // build a  new sTGC cluster on track with correct position
+                std::unique_ptr<const Muon::MuonClusterOnTrack> newClus {m_muonClusterCreator->correct(*clus->prepRawData(), intersect.position, seed.dir())};
+                calibratedClusters.emplace_back(seed.newCalibClust(std::move(newClus)));                             
             }
-           
-           
         }
+
         return calibratedClusters;
     }
+    
+    //============================================================================
     template <size_t N>
     std::string MuonClusterSegmentFinderTool::printSeed(const std::array<SeedMeasurement, N>& seed) const {
         std::stringstream sstr{};
@@ -1349,6 +1350,8 @@ namespace Muon {
         for (const SeedMeasurement& cl : seed) sstr << " *** " << print(cl) << std::endl;
         return sstr.str();
     }
+
+    //============================================================================
     std::string MuonClusterSegmentFinderTool::print(const SeedMeasurement& cl) const {
         std::stringstream sstr{};
         sstr << m_idHelperSvc->toString(cl->identify()) << " at " <<to_string(cl.pos()) 

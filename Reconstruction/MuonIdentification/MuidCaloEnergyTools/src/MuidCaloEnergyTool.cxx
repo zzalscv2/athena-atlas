@@ -230,7 +230,7 @@ namespace Rec {
                           << std::setprecision(3) << calo_observer->sigmaDeltaE() / Units::GeV << ") GeV,  CaloEnergy::Type " << eLossType);
         }
         return std::make_unique<Trk::TrackStateOnSurface>(
-          nullptr, std::move(middle_clone), nullptr, std::move(materialEffects), pattern);
+          nullptr, std::move(middle_clone), std::move(materialEffects), pattern);
     }
 
     //<<<<<< PRIVATE MEMBER FUNCTION DEFINITIONS                            >>>>>>

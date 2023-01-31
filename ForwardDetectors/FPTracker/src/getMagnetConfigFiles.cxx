@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPTracker/getMagnetConfigFiles.h"
 #include "FPTracker/getConfigFile.h"
-#include "FPTracker/SimpleLogger.h"
 #include "../src/openFile.tpl"
 #include <sstream>
 #include <iostream>
@@ -51,12 +50,7 @@ namespace FPTracker{
 
   boost::shared_ptr<std::ifstream> getMagnetConfigFiles(const std::string& dir, int IP, int magVer, const Side& side)
   {
-    
-    std::ostringstream ost;
-    ost<<determineMagnetConfigFileName(IP, side, magVer)<<'\n';
-    SimpleLogger::getLogger()->info(ost);
     return  getConfigFile( dir, determineMagnetConfigFileName(IP, side, magVer) );
-    
   }
   
 }

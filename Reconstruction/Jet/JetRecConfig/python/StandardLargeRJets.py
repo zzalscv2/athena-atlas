@@ -34,8 +34,8 @@ clustermods      = ("ECPSFrac","ClusterMoments",)
 truthmods        = ("PartonTruthLabel","TruthPartonDR",)
 pflowmods        = ()
 
-truthlabels = ("JetTaggingTruthLabel:R10TruthLabel_R21Consolidated","JetTaggingTruthLabel:R10TruthLabel_R21Precision","JetTaggingTruthLabel:R10TruthLabel_R21Precision_2022v1")
-truthlabels_SD = ("JetTaggingTruthLabel:R10TruthLabel_R21Precision","JetTaggingTruthLabel:R10TruthLabel_R21Precision_2022v1")
+truthlabels = ("JetTaggingTruthLabel:R10TruthLabel_R21Consolidated","JetTaggingTruthLabel:R10TruthLabel_R21Precision","JetTaggingTruthLabel:R10TruthLabel_R21Precision_2022v1","JetTaggingTruthLabel:R10TruthLabel_R22v1")
+truthlabels_SD = ("JetTaggingTruthLabel:R10TruthLabel_R21Precision","JetTaggingTruthLabel:R10TruthLabel_R21Precision_2022v1","JetTaggingTruthLabel:R10TruthLabel_R22v1")
 
 substrmods = ("nsubjettiness", "nsubjettinessR", "ktsplitter",
               "ecorr", "ecorrR", "qw",
@@ -95,7 +95,7 @@ AntiKt10UFOCSSK = JetDefinition("AntiKt",1.0,cst.UFOCSSK,
                                 )
 
 AntiKt10UFOCSSKSoftDrop = JetSoftDrop(AntiKt10UFOCSSK,
-                                      modifiers = ("Calib:SoftDrop:mc","Filter:100000")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels_SD+("JetGhostLabel",),
+                                      modifiers = ("Calib:SoftDrop:mc","Filter:100000","JetGhostLabel")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels_SD,
                                       Beta = 1., ZCut= 0.1,
                                      )
 
@@ -103,19 +103,19 @@ AntiKt10UFOCSSKSoftDrop = JetSoftDrop(AntiKt10UFOCSSK,
 
 AntiKt10Truth = JetDefinition("AntiKt",1.0,cst.Truth,
                                ghostdefs = flavourghosts , 
-                               modifiers = ("Sort", "Filter:50000","ktsplitter"),
+                               modifiers = ("Sort", "Filter:50000","ktsplitter","JetGhostLabel"),
                                standardRecoMode = True,                               
                                lock = True
 )
 
 
 AntiKt10TruthTrimmed = JetTrimming(AntiKt10Truth,
-                                   modifiers = ("Sort",)+substrmods+truthmods,
+                                   modifiers = ("Sort","JetGhostLabel")+substrmods+truthmods,
                                    PtFrac = 0.05, RClus = 0.2,                                    
                                    )
 
 AntiKt10TruthSoftDrop = JetSoftDrop(AntiKt10Truth,
-                                    modifiers = ("Sort",)+substrmods+truthmods,
+                                    modifiers = ("Sort","JetGhostLabel")+substrmods+truthmods,
                                     Beta = 1., ZCut= 0.1,
                                     )
 

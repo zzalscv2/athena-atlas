@@ -147,7 +147,7 @@ namespace CP {
             // use some maps for easy histo loading / arithmetics by name
             
             /// read the content of the correct bin in one of my histos. MCefficiencies actually do  not need a pt-dependet systematic
-            CorrectionCode GetContentFromHist(HistHandler* Hist, const xAOD::Muon& mu, float & SF, bool add_kine_syst) const;
+            CorrectionCode GetContentFromHist(const HistHandler* Hist, const xAOD::Muon& mu, float & SF, bool add_kine_syst) const;
             /// read a vector of replica contents in the correct bin in one of my histos
             CorrectionCode GetContentReplicasFromHist(EfficiencyScaleFactor::SFReplicaVec &replicas, const xAOD::Muon& mu, std::vector<float> & SF, bool add_kine_syst);
 

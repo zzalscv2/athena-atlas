@@ -19,12 +19,20 @@
 
 namespace CP {
 
-const static SystematicVariation JvtEfficiencyUp("JET_JvtEfficiency__1up");
-const static SystematicVariation JvtEfficiencyDown("JET_JvtEfficiency__1down");
+enum JvtTagger {
+  Jvt,
+  NNJvt,
+  fJvt,
+};
+
+const static SystematicVariation NNJvtEfficiencyUp("JET_NNJvtEfficiency__1up");
+const static SystematicVariation NNJvtEfficiencyDown("JET_NNJvtEfficiency__1down");
 const static SystematicVariation fJvtEfficiencyUp("JET_fJvtEfficiency__1up");
 const static SystematicVariation fJvtEfficiencyDown("JET_fJvtEfficiency__1down");
-const static SystematicVariation MVfJvtEfficiencyUp("JET_MVfJvtEfficiency__1up");
-const static SystematicVariation MVfJvtEfficiencyDown("JET_MVfJvtEfficiency__1down");
+// for backwards compatibility
+const static SystematicVariation JvtEfficiencyUp("JET_JvtEfficiency__1up");
+const static SystematicVariation JvtEfficiencyDown("JET_JvtEfficiency__1down");
+
 
 class IJetJvtEfficiency : public virtual CP::ISystematicsTool {
 
@@ -52,9 +60,12 @@ public:
     //Returns the jvt scale factors as decorations on the input jets and fills in the combined scale factor into sf
     virtual CorrectionCode applyAllEfficiencyScaleFactor(const xAOD::IParticleContainer *jets,float& sf) = 0;
 
-    //Checks if the jet passes the jvt cut threshold. 
+    //Checks if the jet passes the conifgured WP.
     //Uses maximum validity range by default, but there is a configurable parameter
     virtual bool passesJvtCut(const xAOD::Jet& jet) const = 0;
+
+    //Re-evaluates the classifier score (only required for NNJvt)
+    virtual StatusCode recalculateScores(const xAOD::JetContainer& jets) const = 0;
 
     //Checks if the jet lies in the pt and eta range where Jvt is valid.
     virtual bool isInRange(const xAOD::Jet& jet) const = 0;

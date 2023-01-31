@@ -1,14 +1,14 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-def MonitoredCfg():
+def MonitoredCfg(flags):
     result = ComponentAccumulator()
     monAlg = CompFactory.MonitoredAlg('MonAlg')
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool('MonTool')
+    monTool = GenericMonitoringTool(flags, 'MonTool')
 
     #monTool.HistPath = 'MyGroup/MySubDir'  # default is the parent name of MonTool
     monTool.defineHistogram( 'nTracks', path='EXPERT', type='TH1F', title='Counts',
@@ -33,8 +33,9 @@ def MonitoredCfg():
 
 if __name__=="__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Exec.MaxEvents=10
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(MonitoredCfg())
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Exec.MaxEvents = 10
+    cfg = MainServicesCfg(flags)
+    cfg.merge(MonitoredCfg(flags))
     cfg.run()

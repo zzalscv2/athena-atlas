@@ -30,7 +30,7 @@ StatusCode CP::TrigEventSelectionAlg::initialize()
 
   if (!m_selectionDecoration.empty()) {
     for (const std::string &chain : m_trigList) {
-      m_selectionAccessors.emplace_back(m_selectionDecoration + "_" + RCU::substitute (chain, "-", "_"));
+      m_selectionAccessors.emplace_back(m_selectionDecoration + "_" + RCU::substitute(RCU::substitute(chain, ".", "p"), "-", "_"));
     }
   }
 

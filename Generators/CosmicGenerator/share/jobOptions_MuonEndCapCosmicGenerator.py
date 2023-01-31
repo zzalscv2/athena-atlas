@@ -15,12 +15,6 @@ ServiceMgr += PartPropSvc()
 #--------------------------------------------------------------
 # Private Application Configuration options
 #--------------------------------------------------------------
-# The following is needed to load the Athena Random
-# Number Generation Service.
-from RngComps.RngCompsConf import AtRndmGenSvc
-ServiceMgr += AtRndmGenSvc()
-ServiceMgr.AtRndmGenSvc.Seeds = ["SINGLE 2040160768 443921183"]
-# ServiceMgr.AtRndmGenSvc.ReadFromFile = true;
 
 #--------------------------------------------------------------
 # Set output level threshold (1=VERBOSE, 2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )

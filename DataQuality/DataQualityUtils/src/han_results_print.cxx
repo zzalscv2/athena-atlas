@@ -2,10 +2,10 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <iostream>
-#include <string>
 #include <cstdlib>
 #include <filesystem>
+#include <iostream>
+#include <string>
 
 #include "CxxUtils/checker_macros.h"
 #include "DataQualityUtils/HanOutputFile.h"
@@ -24,17 +24,18 @@ namespace
     std::string hresults;
   };
 
-} // unnamed namespace
+}  // unnamed namespace
 
-int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[])
+int main ATLAS_NOT_THREAD_SAFE(int argc, char* argv[])
 {
   CmdLineArgs arg;
   int rc = arg.parse(argc, argv);
-  if (rc!=0) return rc;
+  if (rc != 0) return rc;
 
   std::string resultsName(arg.hresults);
 
-  if (!std::filesystem::exists(resultsName)) {
+  if (!std::filesystem::exists(resultsName))
+  {
     std::cerr << "File " << resultsName << " does not seem to exist. Exiting" << std::endl;
     return 1;
   }
@@ -69,17 +70,14 @@ namespace
     return exit_code;
   }
 
-  int CmdLineArgs::
-    parse(int argc, char* argv[])
+  int CmdLineArgs::parse(int argc, char* argv[])
   {
     command = argv[0];
-    if (argc > 2)
-      return usage(command, 1);
-    if (argc < 2)
-      return usage(command, 0);
+    if (argc > 2) return usage(command, 1);
+    if (argc < 2) return usage(command, 0);
 
     hresults = argv[1];
     return 0;
   }
 
-} // unnamed namespace
+}  // unnamed namespace

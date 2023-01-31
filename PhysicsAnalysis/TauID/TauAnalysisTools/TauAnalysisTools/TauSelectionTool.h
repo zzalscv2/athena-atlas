@@ -129,6 +129,7 @@ private:
   // EleID working point
   std::string m_sEleIDWP;
   int m_iEleIDWP;
+  int m_iEleIDVersion;
   // do muon OLR
   bool m_bMuonOLR;
 

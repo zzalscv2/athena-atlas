@@ -1,8 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-
-################################################################################
-# Package: FastCaloSim
-################################################################################
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( FastCaloSim )
@@ -63,4 +59,5 @@ atlas_add_test( AddNoiseCellBuilderToolConfigTest_test
 atlas_add_test( AddNoiseCellBuilderTool_test
                 SCRIPT python -m FastCaloSim.AddNoiseCellBuilderTool_test
                 PROPERTIES TIMEOUT 600
-                LOG_SELECT_PATTERN "ERROR|error|WARNING [^U]|FATAL|processing|TestAlg|xxx" )
+                LOG_SELECT_PATTERN "ERROR|error|WARNING [^U]|FATAL|processing|TestAlg|xxx"
+                LOG_IGNORE_PATTERN "no dictionary for class DataHeader_p2|DataHeaderElement_p2|PoolToken_p1" )

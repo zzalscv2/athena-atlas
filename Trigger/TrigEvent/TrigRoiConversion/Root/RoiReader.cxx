@@ -50,12 +50,10 @@ void RoiReader::execute( std::vector<std::string>& keys ) {
 
     deserialiser( *roicollection, keys[ik] );
 
-    if ( roicollection ) { 
-      if ( evtStore()->overwrite( roicollection, newkey, false ).isFailure() ) { 
-	ATH_MSG_INFO( "RoiReader::execute() could not write "  << newkey );
-      }
+    if ( evtStore()->overwrite( roicollection, newkey, false ).isFailure() ) {
+      ATH_MSG_INFO( "RoiReader::execute() could not write "  << newkey );
     }
-    
+
   }
 
   ATH_MSG_DEBUG( "RoiReader::execute() out " );

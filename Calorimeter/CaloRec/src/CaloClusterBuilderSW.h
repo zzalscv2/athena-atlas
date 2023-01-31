@@ -46,7 +46,7 @@ Updated: Feb 2014 (W.Lampl)
 ********************************************************************/
 
 // INCLUDE HEADER FILES:
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 

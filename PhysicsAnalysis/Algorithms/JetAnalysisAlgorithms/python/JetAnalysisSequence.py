@@ -6,6 +6,7 @@ from __future__ import print_function
 from AnaAlgorithm.AnaAlgSequence import AnaAlgSequence
 from AnaAlgorithm.DualUseConfig import createAlgorithm, addPrivateTool
 import re
+import ROOT
 
 # These algorithms set up the jet recommendations as-of 04/02/2019.
 # Jet calibration recommendations
@@ -26,8 +27,8 @@ def makeJetAnalysisSequence( dataType, jetCollection, postfix = '',
                              enableKinematicHistograms = False,
                              **kwargs):
     """Create a jet analysis algorithm sequence
-      The jet collection is interpreted and selects the correct function to call, 
-      makeSmallRJetAnalysisSequence, makeRScanJetAnalysisSequence or 
+      The jet collection is interpreted and selects the correct function to call,
+      makeSmallRJetAnalysisSequence, makeRScanJetAnalysisSequence or
       makeLargeRJetAnalysisSequence
 
       Keyword arguments
@@ -62,9 +63,9 @@ def makeJetAnalysisSequence( dataType, jetCollection, postfix = '',
         jetCollectionName="AntiKt4EMPFlowJets"
     if(jetCollection=="AnalysisLargeRJets") :
         jetCollectionName="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
-    
+
     #AntiKt10UFO CSSKSoftDropBeta100Zcut10Jets
-    
+
     # interpret the jet collection
     collection_pattern = re.compile(
         r"AntiKt(\d+)(EMTopo|EMPFlow|LCTopo|TrackCaloCluster|UFO)(TrimmedPtFrac5SmallR20|CSSKSoftDropBeta100Zcut10)?Jets")
@@ -88,7 +89,7 @@ def makeJetAnalysisSequence( dataType, jetCollection, postfix = '',
 
     # Set up the jet ghost muon association algorithm:
     if runGhostMuonAssociation:
-        alg = createAlgorithm( 'CP::JetGhostMuonAssociationAlg', 
+        alg = createAlgorithm( 'CP::JetGhostMuonAssociationAlg',
             'JetGhostMuonAssociationAlg'+postfix )
         seq.append( alg, inputPropName = 'jets', outputPropName = 'jetsOut', stageName = 'calibration' )
 
@@ -101,7 +102,7 @@ def makeJetAnalysisSequence( dataType, jetCollection, postfix = '',
             dataType, jetCollection, jetInput=jetInput, postfix=postfix, **kwargs)
     elif radius in [2, 6]:
         makeRScanJetAnalysisSequence(seq,
-            dataType, jetCollection, jetInput=jetInput, radius=radius, 
+            dataType, jetCollection, jetInput=jetInput, radius=radius,
             postfix=postfix, **kwargs)
     else:
         trim = match.group(3)
@@ -139,11 +140,11 @@ def makeJetAnalysisSequence( dataType, jetCollection, postfix = '',
         alg.deepCopy = True
         seq.append( alg, inputPropName = 'input', outputPropName = 'output',
                     stageName = 'selection' )
-    
+
     return seq
 
 def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
-                                   jetInput, postfix = '', 
+                                   jetInput, postfix = '',
                                    runJvtUpdate = False, runNNJvtUpdate = False, runFJvtUpdate = False,
                                    runJvtSelection = True, runFJvtSelection = False,
                                    runJvtEfficiency = True, runFJvtEfficiency = False,
@@ -166,13 +167,13 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
         reduction -- Which NP reduction scheme should be used (All, Global, Category, Scenario)
         JEROption -- Which variant of the reduction should be used (All, Full, Simple). Note that not all combinations of reduction and JEROption are valid!
     """
-    
+
     jetCollectionName=jetCollection
     if(jetCollection=="AnalysisJets") :
         jetCollectionName="AntiKt4EMPFlowJets"
     if(jetCollection=="AnalysisLargeRJets") :
         jetCollectionName="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
-    
+
     if jetInput not in ["EMTopo", "EMPFlow"]:
         raise ValueError(
             "Unsupported input type '{0}' for R=0.4 jets!".format(jetInput) )
@@ -272,7 +273,8 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
         else:
             alg.efficiencyTool.SFFile = 'JetJvtEfficiency/Moriond2018/JvtSFFile_EMTopoJets.root'
             alg.efficiencyTool.MaxPtForJvt = 120e3
-        alg.efficiencyTool.WorkingPoint = 'Tight' if jetInput == 'EMPFlow' else 'Medium'
+        alg.efficiencyTool.TaggingAlg = ROOT.CP.JvtTagger.NNJvt
+        alg.efficiencyTool.WorkingPoint = 'FixedEffPt'
         alg.truthJetCollection = 'AntiKt4TruthDressedWZJets'
         alg.selection = 'jvt_selection'
         alg.scaleFactorDecoration = 'jvt_effSF_%SYS%'
@@ -294,8 +296,8 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
             alg.efficiencyTool.SFFile = 'JetJvtEfficiency/May2020/fJvtSFFile.EMPFlow.root'
         else:
             alg.efficiencyTool.SFFile = 'JetJvtEfficiency/May2020/fJvtSFFile.EMtopo.root'
-        alg.efficiencyTool.WorkingPoint = 'Tight'
-        alg.efficiencyTool.UseMuSFFormat = True
+        alg.efficiencyTool.TaggingAlg = ROOT.CP.JvtTagger.fJvt
+        alg.efficiencyTool.WorkingPoint = 'Loose'
         alg.truthJetCollection = 'AntiKt4TruthDressedWZJets'
         alg.dofJVT = True
         alg.fJVTStatus = 'passFJVT,as_char'
@@ -327,14 +329,14 @@ def makeRScanJetAnalysisSequence( seq, dataType, jetCollection,
         radius -- The radius of the r-scan jets.
         postfix -- String to be added to the end of all public names.
     """
-    
+
     jetCollectionName=jetCollection
     if(jetCollection=="AnalysisJets") :
         jetCollectionName="AntiKt4EMPFlowJets"
     if(jetCollection=="AnalysisLargeRJets") :
         jetCollectionName="AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"
 
-    
+
     if jetInput != "LCTopo":
         raise ValueError(
             "Unsupported input type '{0}' for R-scan jets!".format(jetInput) )
@@ -419,23 +421,23 @@ def makeLargeRJetAnalysisSequence( seq, dataType, jetCollection,
     seq.append( alg, inputPropName = 'jets', outputPropName = 'jetsOut', stageName = 'calibration' )
 
     # Jet uncertainties
-       
+
     if jetInput == "UFO":
         print("WARNING: uncertainties for UFO jets are not yet released!")
 
     if jetInput != "UFO":
         alg = createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+postfix )
-        # R=1.0 jets have a validity range 
+        # R=1.0 jets have a validity range
         alg.outOfValidity = 2 # SILENT
         alg.outOfValidityDeco = 'outOfValidity'
         addPrivateTool( alg, 'uncertaintiesTool', 'JetUncertaintiesTool' )
-        
+
         alg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
         alg.uncertaintiesTool.ConfigFile = \
             "rel21/Moriond2018/R10_{0}Mass_all.config".format(largeRMass)
         alg.uncertaintiesTool.MCType = "MC16a"
         alg.uncertaintiesTool.IsData = (dataType == "data")
-        
+
         seq.append( alg, inputPropName = 'jets', outputPropName = 'jetsOut',
                     stageName = 'calibration',
                     metaConfig = {'selectionDecorNames' : ['outOfValidity'], 'selectionDecorCount' : [1]} )

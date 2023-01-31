@@ -143,8 +143,8 @@ Trk::PRDtoTrackMapTool::getPrdsOnTrack(Trk::PRDtoTrackMap &virt_prd_to_track_map
     if (!prd) return;
     const Identifier rot_id = prd->identify();
     /// Accept only non muon hits or muon precision hits
-    if ( !( !m_idHelperSvc->isMuon(rot_id) || m_idHelperSvc->isMdt(rot_id) || m_idHelperSvc->isMM(rot_id) || m_idHelperSvc->issTgc(rot_id) ||
-          (m_idHelperSvc->isCsc(rot_id) && !m_idHelperSvc->measuresPhi(rot_id)) )) return;
+    if ( m_idHelperSvc->isMuon(rot_id) && !m_idHelperSvc->isMdt(rot_id) && !m_idHelperSvc->isMM(rot_id) && !m_idHelperSvc->issTgc(rot_id) &&
+          (!m_idHelperSvc->isCsc(rot_id) || m_idHelperSvc->measuresPhi(rot_id)) ) return;
     vec.push_back(prd);
   };
   for (const MeasurementBase* meas : *track.measurementsOnTrack()) {

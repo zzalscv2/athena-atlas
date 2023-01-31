@@ -102,7 +102,7 @@ StatusCode GlobalSequentialCorrection::initialize() {
   TString depthString = "";
   if ( m_depthString != "auto" ) depthString = m_depthString;
   else depthString = m_config->GetValue("GSCDepth","Full");
-  if ( !depthString.Contains("ChargedFraction") && !depthString.Contains("Tile0") && !depthString.Contains("EM3") && !depthString.Contains("nTrk") && !depthString.Contains("trackWIDTH") && !depthString.Contains("PunchThrough") && !depthString.Contains("N90Constituents") && !depthString.Contains("N90Constituents") && !depthString.Contains("caloWIDTH") && !depthString.Contains("Full") ) {
+  if ( !depthString.Contains("ChargedFraction") && !depthString.Contains("Tile0") && !depthString.Contains("EM3") && !depthString.Contains("nTrk") && !depthString.Contains("trackWIDTH") && !depthString.Contains("PunchThrough") && !depthString.Contains("N90Constituents") && !depthString.Contains("TileGap3") && !depthString.Contains("caloWIDTH") && !depthString.Contains("Full") ) {
     ATH_MSG_FATAL("depthString flag not properly set, please check your config file.");
     return StatusCode::FAILURE;
   }

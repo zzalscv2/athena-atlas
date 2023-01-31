@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -56,7 +56,7 @@ CaloCell2ClusterMapper::CaloCell2ClusterMapper(const std::string& name,
 //###############################################################################
 
 CaloCell2ClusterMapper::~CaloCell2ClusterMapper()
-{ }
+= default;
 
 //###############################################################################
 

@@ -8,7 +8,7 @@
 #define CALOUTILS_CALOCLUSTERLOCALCALIB_H 
 
 
-#include "CaloRec/CaloClusterProcessor.h"
+#include "CaloUtils/CaloClusterProcessor.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "CaloEvent/CaloRecoStatus.h"
 #include "CaloInterface/IClusterCellWeightTool.h"

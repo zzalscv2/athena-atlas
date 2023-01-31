@@ -57,12 +57,6 @@ StatusCode HIJetConstituentSubtractionTool::modify(xAOD::JetContainer& jets) con
     }
   }
 
-  if(m_modulatorTool->retrieveShape().isFailure())
-  {
-    ATH_MSG_ERROR("Could not retrieve output shape w/ modulator tool");
-    return StatusCode::FAILURE;
-  }
-
   const xAOD::HIEventShape* eshape = nullptr;
   if(m_modulatorTool->getShape(eshape).isFailure())
   {

@@ -28,6 +28,8 @@
 
 // Tool handles
 #include "AsgTools/AnaToolHandle.h"
+#include "MuonAnalysisInterfaces/IMuonLRTOverlapRemovalTool.h"
+#include "EgammaAnalysisInterfaces/IElectronLRTOverlapRemovalTool.h"
 
 // Configuration
 #include "TEnv.h"
@@ -163,8 +165,8 @@ namespace ST {
     StatusCode GetJetsSyst(const xAOD::JetContainer& calibjets, xAOD::JetContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, const bool recordSG = true, const std::string& jetkey = "") override final;
     StatusCode GetFatJets(xAOD::JetContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, const bool recordSG = false, const std::string& jetkey = "", const bool doLargeRdecorations = false, const xAOD::JetContainer* containerToBeCopied = nullptr) override final;
     StatusCode GetTaus(xAOD::TauJetContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, const bool recordSG = true, const std::string& taukey = "TauJets", const xAOD::TauJetContainer* containerToBeCopied = nullptr) override final;
-    StatusCode GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, const bool recordSG = true, const std::string& muonkey = "Muons", const xAOD::MuonContainer* containerToBeCopied = nullptr) override final;
-    StatusCode GetElectrons(xAOD::ElectronContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, const bool recordSG = true, const std::string& elekey = "Electrons", const xAOD::ElectronContainer* containerToBeCopied = nullptr) override final;
+    StatusCode GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, const bool recordSG = true, const std::string& muonkey = "Muons", const std::string& lrtmuonkey = "MuonsLRT", const xAOD::MuonContainer* containerToBeCopied = nullptr) override final;
+    StatusCode GetElectrons(xAOD::ElectronContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, const bool recordSG = true, const std::string& elekey = "Electrons", const std::string& lrtelekey = "LRTElectrons", const xAOD::ElectronContainer* containerToBeCopied = nullptr) override final;
     StatusCode GetPhotons(xAOD::PhotonContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, const bool recordSG = true, const std::string& photonkey = "Photons", const xAOD::PhotonContainer* containerToBeCopied = nullptr) override final;
     StatusCode GetMET(xAOD::MissingETContainer& met,
                       const xAOD::JetContainer* jet,
@@ -186,6 +188,17 @@ namespace ST {
                          bool doTST = true, bool doJVTCut = true
 		         ) override final;
 
+    StatusCode MergeMuons(const  xAOD::MuonContainer & muons, const std::vector<bool> &writeMuon, xAOD::MuonContainer* outputCol) const override final;
+
+    const xAOD::MuonContainer* prompt_muons = nullptr;
+    const xAOD::MuonContainer* lrt_muons = nullptr;
+    mutable xAOD::Muon* newMuon = nullptr;
+
+    StatusCode MergeElectrons(const  xAOD::ElectronContainer & electrons, xAOD::ElectronContainer* outputCol, const std::set<const xAOD::Electron *> &ElectronsToRemove) const override final;
+    const xAOD::ElectronContainer* prompt_electrons = nullptr;
+    const xAOD::ElectronContainer* lrt_electrons = nullptr;
+    mutable xAOD::Electron* newElectron = nullptr;
+
     bool IsPFlowCrackVetoCleaning(const xAOD::ElectronContainer* elec = nullptr, const xAOD::PhotonContainer* gamma = nullptr) const override final;
 
     bool IsSignalJet(const xAOD::Jet& input, const float ptcut, const float etacut) const override final;
@@ -193,7 +206,7 @@ namespace ST {
     bool IsBadJet(const xAOD::Jet& input) const override final;
 
     bool IsBJetLoose(const xAOD::Jet& input) const override final;
-    bool JetPassJVT(xAOD::Jet& input, bool update_jvt) override final;
+    bool JetPassJVT(xAOD::Jet& input) override final;
 
 
     bool IsSignalMuon(const xAOD::Muon& input, const float ptcut, const float d0sigcut, const float z0cut, const float etacut = DUMMYDEF) const override final;
@@ -221,11 +234,11 @@ namespace ST {
 
     int IsTrackBJetContinuous(const xAOD::Jet& input) const override final;
 
-    float BtagSF(const xAOD::JetContainer* jets) const override final;
+    float BtagSF(const xAOD::JetContainer* jets) override final;
 
     float BtagSFsys(const xAOD::JetContainer* jets, const CP::SystematicSet& systConfig) override final;
 
-    float BtagSF_trkJet(const xAOD::JetContainer* trkjets) const override final;
+    float BtagSF_trkJet(const xAOD::JetContainer* trkjets) override final;
 
     float BtagSFsys_trkJet(const xAOD::JetContainer* trkjets, const CP::SystematicSet& systConfig) override final;
 
@@ -584,6 +597,8 @@ namespace ST {
     std::string m_eleIsoHighPt_WP;
     double      m_eleIsoHighPtThresh;
     std::string m_eleChID_WP;
+    bool m_eleLRT; 
+    int m_eleLRT_strat;
     bool        m_eleChIso; // use Charge ID SF with/without Iso applied
     bool        m_eleChID_signal; // allows to run ECID but remove it from signal definition
     bool        m_runECIS; //run ChargeIDSelector if valid WP was selected
@@ -631,6 +646,7 @@ namespace ST {
     double m_muCosmicd0;
     double m_badmuQoverP;
     int    m_muCalibrationMode;
+    bool m_muLRT; 
 
     double m_photonBaselinePt;
     double m_photonBaselineEta;
@@ -646,6 +662,8 @@ namespace ST {
     std::string m_tauConfigPath;
     std::string m_tauConfigPathBaseline;
     bool   m_tauDoTTM;
+    std::string m_tauSmearingToolRecommendationTag;
+    std::string m_tauSmearingToolGenerator;
 
     double m_jetPt;
     double m_jetEta;
@@ -716,6 +734,7 @@ namespace ST {
 
     std::map<std::string,bool> m_slices;
     bool m_isRun3;
+    bool m_isPHYSLITE;
 
     std::string m_metJetSelection;
 
@@ -745,7 +764,6 @@ namespace ST {
     asg::AnaToolHandle<ICPJetUncertaintiesTool> m_fatjetUncertaintiesTool;
     asg::AnaToolHandle<IJetSelector> m_jetCleaningTool;
     asg::AnaToolHandle<IJetUpdateJvt> m_jetJvtUpdateTool;
-    asg::AnaToolHandle<IJetModifier> m_jetFwdJvtTool;
     asg::AnaToolHandle<CP::IJetJvtEfficiency> m_jetJvtEfficiencyTool;
     asg::AnaToolHandle<CP::IJetJvtEfficiency> m_jetFwdJvtEfficiencyTool;
 
@@ -782,6 +800,8 @@ namespace ST {
     asg::AnaToolHandle<CP::IMuonEfficiencyScaleFactors> m_muonHighPtIsolationSFTool;
     asg::AnaToolHandle<CP::IMuonTriggerScaleFactors> m_muonTriggerSFTool;
     ToolHandleArray<CP::IMuonTriggerScaleFactors> m_muonTrigSFTools;
+    asg::AnaToolHandle<CP::IMuonLRTOverlapRemovalTool> m_muonLRTORTool;
+    SG::WriteHandleKey<xAOD::MuonContainer>     m_outMuonLocation{this, "OutputMuonLocation", "StdWithLRTMuons", "name of the muon container to write"};   /** Combined muon collection.   */
     //
     asg::AnaToolHandle<IAsgElectronEfficiencyCorrectionTool> m_elecEfficiencySFTool_reco;
     asg::AnaToolHandle<IAsgElectronEfficiencyCorrectionTool> m_elecEfficiencySFTool_id;
@@ -795,6 +815,9 @@ namespace ST {
     std::vector<asg::AnaToolHandle<IAsgElectronEfficiencyCorrectionTool>> m_elecEfficiencySFTool_trigEff_mixLep;
     ToolHandleArray<IAsgElectronEfficiencyCorrectionTool> m_elecTrigSFTools;
     ToolHandleArray<IAsgElectronEfficiencyCorrectionTool> m_elecTrigEffTools;
+    asg::AnaToolHandle<CP::IElectronLRTOverlapRemovalTool> m_elecLRTORTool;
+    SG::WriteHandleKey<xAOD::ElectronContainer>     m_outElectronLocation{this, "OutputElectronLocation", "StdWithLRTElectrons", "name of the muon container to write"};   /** Combined electron collection.   */
+
     //
     asg::AnaToolHandle<CP::IEgammaCalibrationAndSmearingTool> m_egammaCalibTool;
     asg::AnaToolHandle<IAsgElectronLikelihoodTool> m_elecSelLikelihood;

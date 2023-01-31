@@ -38,7 +38,7 @@ public:
     bool userSelection(Pythia8::Event&, std::string, std::vector<double>);
     void printSignalSelections(const std::vector<int>&,const std::vector<double>&, const std::vector<double>&, unsigned int) const;
     
-    static IAtRndmGenSvc* p_AtRndmGenSvc;
+  static CLHEP::HepRandomEngine* p_rndmEngine;
     
 private:
     

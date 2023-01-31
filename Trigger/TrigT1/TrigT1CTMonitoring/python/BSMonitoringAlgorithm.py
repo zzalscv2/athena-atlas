@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 def BSMonitoringConfig(inputFlags):
     '''Function to configure LVL1 BSMonitoring algorithm in the monitoring system.'''
@@ -35,7 +35,7 @@ def BSMonitoringConfig(inputFlags):
         #info('In BSMonitoringConfig: isOnline')
         ProcessRoIBResult = True
         InclusiveTriggerThresholds = True
-        ProcessMuctpiData = False #True
+        ProcessMuctpiData = True #True
         ProcessMuctpiDataRIO = False #True
         RunOnESD = False
         CompareRerun = False
@@ -48,7 +48,6 @@ def BSMonitoringConfig(inputFlags):
             # Wrap everything in a sequence which will force algs to execute in order, even in MT mode
             #from AthenaCommon.AlgSequence import AthSequencer
             #CTPMonSeq=AthSequencer('CTPMonSeq')
-            #from AthenaConfiguration.AllConfigFlags import ConfigFlags
             #if 'IS_SIMULATION' not in metadata['eventTypes']:
             
             #none of these 2 work - pretty unsatisfying! - to be fixed asap!!!!! 
@@ -63,7 +62,7 @@ def BSMonitoringConfig(inputFlags):
                 #CTPMonSeq += CTPSimulationOnData("CTPSimulation")
                 
                 #from TrigT1MuctpiPhase1.TrigT1MuctpiPhase1Config import L1MuctpiPhase1_on_Data #MUCTPI_AthAlgCfg #L1MuctpiPhase1 #L1MuctpiPhase1_on_Data
-                #CTPMonSeq += L1MuctpiPhase1_on_Data("MUCTPI_AthTool") # MUCTPI_AthAlgCfg(ConfigFlags) #L1MuctpiPhase1() #L1MuctpiPhase1_on_Data()
+                #CTPMonSeq += L1MuctpiPhase1_on_Data("MUCTPI_AthTool") # MUCTPI_AthAlgCfg(inputFlags) #L1MuctpiPhase1() #L1MuctpiPhase1_on_Data()
                 
         # check if global muons are on 
         if not inputFlags.Reco.EnableCombinedMuon:
@@ -545,20 +544,24 @@ def BSMonitoringConfig(inputFlags):
 
         #mult
         monPath="/MUCTPI/Mult"
-        myGroup.defineHistogram('multX;mult', title='MLT thresholds total count', path=monPath,xbins=32,xmin=-0.5,xmax=31.5,opt='kAlwaysCreate')
-        myGroup.defineHistogram('multPerLBX,multPerLBY;multPerLB', title='MLT thresholds total count - per LB', type='TH2F',path=monPath,xbins=2000,xmin=0,xmax=2000,ybins=32,ymin=-0.5,ymax=31.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('multThrX;multThr', title='MLT thresholds total count', path=monPath,xbins=32,xmin=-0.5,xmax=31.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('multThrVsLBX,multThrVsLBY;multThrVsLB', title='MLT thresholds total count - per LB', type='TH2F',path=monPath,xbins=2000,xmin=0,xmax=2000,ybins=32,ymin=-0.5,ymax=31.5,opt='kAlwaysCreate')
 
-        multSliceVsMultMUCTPIBinLabels = [ #cxx indices
-        "Central Slice"         ,      #1
-        "Other Slice"           ,      #2
-        ]
-        myGroup.defineHistogram('multSliceVsMultX,multSliceVsMulY;multSliceVsMult',title='Mult slice vs Thr', type='TH2F', path=monPath, xbins=32,xmin=-0.5,xmax=31.5, ybins=len(multSliceVsMultMUCTPIBinLabels), ymin=0., ymax=len(multSliceVsMultMUCTPIBinLabels), ylabels=multSliceVsMultMUCTPIBinLabels, opt='kAlwaysCreate')
+        myGroup.defineHistogram('multBitsX;multBits', title='MLT bits total count', path=monPath,xbins=64,xmin=-0.5,xmax=63.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('multBitsVsLBX,multBitsVsLBY;multBitsVsLB', title='MLT bits total count - per LB', type='TH2F',path=monPath,xbins=2000,xmin=0,xmax=2000,ybins=64,ymin=-0.5,ymax=63.5,opt='kAlwaysCreate')
 
         #cand
         monPath="/MUCTPI/Cand"
         myGroup.defineHistogram('candPtBAX;candPtBA', title='BA cand pT', path=monPath,xbins=6,xmin=0.5,xmax=6.5,opt='kAlwaysCreate')
         myGroup.defineHistogram('candPtECX;candPtEC', title='EC cand pT', path=monPath,xbins=15,xmin=0.5,xmax=15.5,opt='kAlwaysCreate')
         myGroup.defineHistogram('candPtFWX;candPtFW', title='FW cand pT', path=monPath,xbins=15,xmin=0.5,xmax=15.5,opt='kAlwaysCreate')
+
+        myGroup.defineHistogram('candSLVsLBBAX,candSLVsLBBAY;candSLVsLBBA', title='BA cand SL vs LB', type='TH2F', path=monPath,xbins=2000,xmin=0.5,xmax=2000.5, ybins=64,ymin=-0.5,ymax=63.5 ,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candSLVsLBECX,candSLVsLBECY;candSLVsLBEC', title='EC cand SL vs LB', type='TH2F', path=monPath,xbins=2000,xmin=0.5,xmax=2000.5, ybins=96,ymin=-0.5,ymax=95.5 ,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candSLVsLBFWX,candSLVsLBFWY;candSLVsLBFW', title='FW cand SL vs LB', type='TH2F', path=monPath,xbins=2000,xmin=0.5,xmax=2000.5, ybins=48,ymin=-0.5,ymax=47.5 ,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candVetoFlag_RoiVsSLBAX,candVetoFlag_RoiVsSLBAY;candVetoFlag_RoiVsSLBA', title='BA cand VetoFlag | RoI vs SL', type='TH2F', path=monPath,xbins=64,xmin=-0.5,xmax=63.5,ybins=30,ymin=-0.5,ymax=29.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candVetoFlag_RoiVsSLECX,candVetoFlag_RoiVsSLECY;candVetoFlag_RoiVsSLEC', title='EC cand VetoFlag | RoI vs SL', type='TH2F', path=monPath,xbins=96,xmin=-0.5,xmax=95.5,ybins=64,ymin=-0.5,ymax=63.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candVetoFlag_RoiVsSLFWX,candVetoFlag_RoiVsSLFWY;candVetoFlag_RoiVsSLFW', title='FW cand VetoFlag | RoI vs SL', type='TH2F', path=monPath,xbins=48,xmin=-0.5,xmax=47.5,ybins=148,ymin=-0.5,ymax=147.5,opt='kAlwaysCreate')
 
         myGroup.defineHistogram('candRoiVsSLBACentralSliceX,candRoiVsSLBACentralSliceY;candRoiVsSLBACentralSlice', title='BA cand RoI vs SL (central slice)', type='TH2F', path=monPath,xbins=64,xmin=-0.5,xmax=63.5,ybins=30,ymin=-0.5,ymax=29.5,opt='kAlwaysCreate')
         myGroup.defineHistogram('candRoiVsSLECCentralSliceX,candRoiVsSLCentralSliceECY;candRoiVsSLECCentralSlice', title='EC cand RoI vs SL (central slice)', type='TH2F', path=monPath,xbins=96,xmin=-0.5,xmax=95.5,ybins=64,ymin=-0.5,ymax=63.5,opt='kAlwaysCreate')
@@ -577,8 +580,8 @@ def BSMonitoringConfig(inputFlags):
         "InnerCoin"             ,          #2
         "GoodMF"                ,          #2
         ]
-        myGroup.defineHistogram('candCandFlagsVsSLBACentralSliceX,candCandFlagsVsSLBACentralSliceY;candCandFlagssVsSLBACentralSlice', title='BA cand CandFlags vs SL (central slice)', type='TH2F', path=monPath, xbins=64, xmin=-0.5,xmax=63.5,  ybins=2, ymin=-0.5,ymax=1.5,ylabels=candFlagsMUCTPIBinLabels_BA,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candCandFlagssVsSLECCentralSliceX,candCandFlagssVsSLCentralSliceECY;candCandFlagsVsSLECCentralSlice', title='EC cand CandFlags vs SL (central slice)', type='TH2F', path=monPath,xbins=96, xmin=-0.5,xmax=95.5,  ybins=4, ymin=-0.5,ymax=3.5,ylabels=candFlagsMUCTPIBinLabels_ECFW,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candCandFlagsVsSLBACentralSliceX,candCandFlagsVsSLBACentralSliceY;candCandFlagsVsSLBACentralSlice', title='BA cand CandFlags vs SL (central slice)', type='TH2F', path=monPath, xbins=64, xmin=-0.5,xmax=63.5,  ybins=2, ymin=-0.5,ymax=1.5,ylabels=candFlagsMUCTPIBinLabels_BA,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candCandFlagsVsSLECCentralSliceX,candCandFlagsVsSLCentralSliceECY;candCandFlagsVsSLECCentralSlice', title='EC cand CandFlags vs SL (central slice)', type='TH2F', path=monPath,xbins=96, xmin=-0.5,xmax=95.5,  ybins=4, ymin=-0.5,ymax=3.5,ylabels=candFlagsMUCTPIBinLabels_ECFW,opt='kAlwaysCreate')
         myGroup.defineHistogram('candCandFlagsVsSLFWCentralSliceX,candCandFlagsVsSLFWCentralSliceY;candCandFlagsVsSLFWCentralSlice', title='FW cand CandFlags vs SL (central slice)', type='TH2F', path=monPath,  xbins=48,xmin=-0.5,xmax=47.5, ybins=4, ymin=-0.5,ymax=3.5,ylabels=candFlagsMUCTPIBinLabels_ECFW,opt='kAlwaysCreate')
 
         #sec err per LB
@@ -612,12 +615,21 @@ def BSMonitoringConfig(inputFlags):
         monPath="/MUCTPI/Timing"
 
         candSliceVsSLMUCTPIBinLabels = [ #cxx indices
-        "Central Slice"         ,    #1
-        "Other Slice"           ,    #2
+        "-3 Slice"           ,    #1
+        "-2 Slice"           ,    #2
+        "-1 Slice"           ,    #3
+        "Central Slice"      ,    #4
+        "+1 Slice"           ,    #5
+        "+2 Slice"           ,    #6
+        "+3 Slice"           ,    #7
         ]
-        myGroup.defineHistogram('candSliceVsSLBAX,candSliceVsSLBAY;candSliceVsSLBA',title='SL (BA) slice vs SL', type='TH2F', path=monPath, xbins=64, xmin=-0.5, xmax=63.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=2., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
-        myGroup.defineHistogram('candSliceVsSLECX,candSliceVsSLECY;candSliceVsSLEC',title='SL (EC) slice vs SL', type='TH2F', path=monPath, xbins=96, xmin=-0.5, xmax=95.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=2., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
-        myGroup.defineHistogram('candSliceVsSLFWX,candSliceVsSLFWY;candSliceVsSLFW',title='SL (FW) slice vs SL', type='TH2F', path=monPath, xbins=48, xmin=-0.5, xmax=47.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=2., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
+        myGroup.defineHistogram('candSliceVsSLBAX,candSliceVsSLBAY;candSliceVsSLBA',title='SL (BA) slice vs SL', type='TH2F', path=monPath, xbins=64, xmin=-0.5, xmax=63.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=7., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
+        myGroup.defineHistogram('candSliceVsSLECX,candSliceVsSLECY;candSliceVsSLEC',title='SL (EC) slice vs SL', type='TH2F', path=monPath, xbins=96, xmin=-0.5, xmax=95.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=7., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
+        myGroup.defineHistogram('candSliceVsSLFWX,candSliceVsSLFWY;candSliceVsSLFW',title='SL (FW) slice vs SL', type='TH2F', path=monPath, xbins=48, xmin=-0.5, xmax=47.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=7., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
+        #same histos, but aiming to fill only for specific BG (FirstInTrain) for better profiles
+        myGroup.defineHistogram('candSliceVsSLBAFirstInTrainX,candSliceVsSLBAFirstInTrainY;candSliceVsSLBAFirstInTrain',title='SL (BA) slice vs SL (BG=FirstInTrain)', type='TH2F', path=monPath, xbins=64, xmin=-0.5, xmax=63.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=7., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
+        myGroup.defineHistogram('candSliceVsSLECFirstInTrainX,candSliceVsSLECFirstInTrainY;candSliceVsSLECFirstInTrain',title='SL (EC) slice vs SL (BG=FirstInTrain)', type='TH2F', path=monPath, xbins=96, xmin=-0.5, xmax=95.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=7., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
+        myGroup.defineHistogram('candSliceVsSLFWFirstInTrainX,candSliceVsSLFWFirstInTrainY;candSliceVsSLFWFirstInTrain',title='SL (FW) slice vs SL (BG=FirstInTrain)', type='TH2F', path=monPath, xbins=48, xmin=-0.5, xmax=47.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=7., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
 
 
 
@@ -632,24 +644,25 @@ def BSMonitoringConfig(inputFlags):
 if __name__=='__main__':
 
     # set input file and config options
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     import glob
     inputs = glob.glob('/eos/atlas/atlastier0/rucio/data18_13TeV/physics_Main/00354311/data18_13TeV.00354311.physics_Main.recon.ESD.f1129/data18_13TeV.00354311.physics_Main.recon.ESD.f1129._lb0013._SFO-8._0001.1')
-
-    ConfigFlags.Input.Files = inputs
-    ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput_CTPMonitoring.root'
-    ConfigFlags.lock()
-    #ConfigFlags.dump() # print all the configs
+  
+    flags = initConfigFlags()
+    flags.Input.Files = inputs
+    flags.Output.HISTFileName = 'ExampleMonitorOutput_CTPMonitoring.root'
+    flags.lock()
+    #flags.dump() # print all the configs
 
     from AthenaCommon.AppMgr import ServiceMgr
     ServiceMgr.Dump = False
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg  
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    BSMonitorCfg = BSMonitoringConfig(ConfigFlags)
+    BSMonitorCfg = BSMonitoringConfig(flags)
     cfg.merge(BSMonitorCfg)
     # message level for algorithm
     BSMonitorCfg.getEventAlgo('BSMonAlg').OutputLevel = 1 # 1/2 INFO/DEBUG

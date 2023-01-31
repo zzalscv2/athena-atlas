@@ -380,12 +380,10 @@ protected:
     * @return a valid reference if the object is found or otherwise an invalid reference.
     */
     ObjRef find( T_Obj *obj) const {
-      unsigned int idx=m_objs.size();
       for (typename std::vector< std::pair<T_Obj *, short> >::const_reverse_iterator
               iter =m_objs.rbegin();
            iter != m_objs.rend();
            ++iter) {
-         --idx;
          if (iter->first == obj) {
             assert( m_objs.at(m_objs.rend()-iter-1).first == obj);
              ObjRef ref( static_cast<unsigned short>(m_objs.rend()-iter-1) ); // @TODO std::distance ?

@@ -21,14 +21,28 @@ def PhysValBTagCfg(flags, **kwargs):
     import ROOT
     path = ROOT.PathResolver.find_file( 'JetTagDQA/PhysValBtag_VariablesMenu.json', 'DATAPATH' )
     from PhysValMonitoring.PhysValUtils import getHistogramDefinitions
-    kwargs.setdefault("HistogramDefinitions", getHistogramDefinitions(path, 'PHYSVAL', 'ALL'))
+    definitions = getHistogramDefinitions(path, 'PHYSVAL', 'ALL')
+
+    # Run-dependent histo definitions
+    path_Run = ROOT.PathResolver.find_file( \
+                'JetTagDQA/PhysValBtag_VariablesMenu_Run3.json' if flags.GeoModel.Run <= LHCPeriod.Run3 \
+                else 'JetTagDQA/PhysValBtag_VariablesMenu_Run4.json',
+                'DATAPATH' )
+    definitions_Run = getHistogramDefinitions(path_Run, 'PHYSVAL', 'ALL')
+
+    kwargs.setdefault("HistogramDefinitions", definitions + definitions_Run)
     kwargs.setdefault("JetEtaCut", 2.5 if flags.GeoModel.Run <= LHCPeriod.Run3 else 4.0)
-    kwargs.setdefault("hasJetFitterNN", flags.BTagging.RunJetFitterNN)
 
     if "trackTruthOriginTool" not in kwargs:
         from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import InDetTrackTruthOriginToolCfg
         kwargs.setdefault("trackTruthOriginTool", acc.popToolsAndMerge(
             InDetTrackTruthOriginToolCfg(flags)))
+
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        kwargs.setdefault("dipsTaggerName",    "dipsrun420221008")
+        kwargs.setdefault("DL1dv00TaggerName", "DL1drun420221017")
+        kwargs.setdefault("DL1dv01TaggerName", "")
+        kwargs.setdefault("GN1TaggerName",     "GN1run420221010")
 
     tool = CompFactory.JetTagDQA.PhysValBTag(**kwargs)
     acc.setPrivateTools(tool)

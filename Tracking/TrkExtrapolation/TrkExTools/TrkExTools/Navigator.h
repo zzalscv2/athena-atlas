@@ -21,24 +21,12 @@
 #include "TrkParameters/TrackParameters.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "TrkGeometry/TrackingGeometry.h"
+#include "TrkDetDescrInterfaces/ITrackingGeometrySvc.h"
 
-
-// STD
 #include <cstring>
-#include <exception>
-
 #include <Gaudi/Accumulators.h>
 
 namespace Trk {
-
-  class ITrackingGeometrySvc;
-
-  /** Exception to be thrown when TrackingGeometry not found */
-  class NavigatorException : public std::exception
-  {
-     const char* what() const throw()
-     { return "Problem with TrackingGeometry loading"; }
-  };
 
   class IGeometryBuilder;
   class IPropagator;
@@ -66,12 +54,10 @@ namespace Trk {
       /** Constructor */
       Navigator(const std::string&, const std::string&, const IInterface*);
       /** Destructor */
-      virtual ~Navigator();
+      virtual ~Navigator() = default;
 
       /** AlgTool initialize method.*/
       virtual StatusCode initialize() override;
-      /** AlgTool finalize method */
-      virtual StatusCode finalize() override;
 
       /** INavigator interface method - returns the TrackingGeometry used for
        * navigation */
@@ -139,7 +125,11 @@ namespace Trk {
       };
 
       /// ToolHandle to the TrackingGeometrySvc
-      ServiceHandle<Trk::ITrackingGeometrySvc> m_trackingGeometrySvc;
+      ServiceHandle<Trk::ITrackingGeometrySvc> m_trackingGeometrySvc{
+        this,
+        "TrackingGeometrySvc",
+        ""
+      };
       /// Name of the TrackingGeometry as given in Detector Store
       std::string m_trackingGeometryName;
       /******************************************************************/
@@ -155,19 +145,6 @@ namespace Trk {
       bool m_searchWithDistance;
       //------------ Magnetic field properties
       bool m_fastField;
-      // ------ PERFORMANCE STATISTICS -------------------------------- //
-      /* All performance stat counters are atomic (the simplest solution perhaps
-       * not the most performant one)*/
-      mutable Gaudi::Accumulators::Counter<>       m_forwardCalls;              //!< counter for forward nextBounday calls
-      mutable Gaudi::Accumulators::Counter<>       m_forwardFirstBoundSwitch;   //!< counter for failed first forward nextBounday calls
-      mutable Gaudi::Accumulators::Counter<>       m_forwardSecondBoundSwitch;  //!< counter for failed second forward nextBounday calls
-      mutable Gaudi::Accumulators::Counter<>       m_forwardThirdBoundSwitch;   //!< counter for failed third forward nextBounday calls
-      mutable Gaudi::Accumulators::Counter<>       m_backwardCalls;             //!< counter for backward nextBounday calls
-      mutable Gaudi::Accumulators::Counter<>       m_backwardFirstBoundSwitch;  //!< counter for failed first backward nextBounday calls
-      mutable Gaudi::Accumulators::Counter<>       m_backwardSecondBoundSwitch; //!< counter for failed second backward nextBounday calls
-      mutable Gaudi::Accumulators::Counter<>       m_backwardThirdBoundSwitch;  //!< counter for failed third backward nextBounday calls
-      mutable Gaudi::Accumulators::Counter<>       m_outsideVolumeCase;         //!< counter for navigation-break in outside volume cases (ovc)
-      mutable Gaudi::Accumulators::Counter<>       m_sucessfulBackPropagation;  //!< counter for sucessful recovery of navigation-break in ovc
     };
 
 } // end of namespace

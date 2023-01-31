@@ -11,6 +11,7 @@
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ISvcLocator.h"
+#include "GeoModelInterfaces/IGeoDbTagSvc.h"
 
 namespace InDetDD {
   DistortedMaterialManager::DistortedMaterialManager() {
@@ -19,13 +20,17 @@ namespace InDetDD {
     MsgStream log(Athena::getMessageSvc(), "ExtraMaterialManager");
     log << MSG::DEBUG << "Initialized InDet Distorted Material Manager" << endmsg;
 
-    StoreGateSvc* detStore;
+    StoreGateSvc* detStore{nullptr};
     StatusCode sc = svcLocator->service("DetectorStore", detStore);
     if (sc.isFailure()) log << MSG::FATAL << "Could not locate DetectorStore" << endmsg;
 
-    IRDBAccessSvc* rdbSvc;
-    sc = svcLocator->service("RDBAccessSvc", rdbSvc);
-    if (sc.isFailure()) log << MSG::FATAL << "Could not locate RDBAccessSvc" << endmsg;
+    IGeoDbTagSvc* geoDbTag{nullptr};
+    sc = svcLocator->service("GeoDbTagSvc",geoDbTag);
+    if (sc.isFailure()) log << MSG::FATAL << "Could not locate GeoDbTagSvc" << endmsg;
+
+    IRDBAccessSvc* rdbSvc{nullptr};
+    sc = svcLocator->service(geoDbTag->getParamSvcName(), rdbSvc);
+    if (sc.isFailure()) log << MSG::FATAL << "Could not locate " << geoDbTag->getParamSvcName() << endmsg;
 
     // Get version tag and node for InDet.
     DecodeVersionKey versionKey("InnerDetector");

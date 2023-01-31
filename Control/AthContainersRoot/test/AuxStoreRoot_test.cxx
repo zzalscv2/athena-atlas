@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainersRoot/test/AuxStoreRoot_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -221,7 +219,8 @@ AuxStoreRootTest::resolveAuxID (SG::IAuxBranches& /*container*/,
     }
     else {
       assert (elem_type_name == "int");
-      assert (branch_type_name == "SG::PackedContainer<int>");
+      // ???
+      assert (branch_type_name == "SG::PackedContainer<int,allocator<int> >");
     }
     assert  (*ti == typeid (int));
     return a.auxid();
@@ -293,7 +292,7 @@ void test1()
   assert (&store.m_log[1].m_container == &branches);
   assert (store.m_log[1].m_auxid == branches.m_baz_id);
   assert (&store.m_log[1].m_branch == branches.m_br_baz);
-  assert (std::string(store.m_log[1].m_cl->GetName()) == "SG::PackedContainer<int>");
+  assert (std::string(store.m_log[1].m_cl->GetName()) == "SG::PackedContainer<int,allocator<int> >");
   assert (store.m_log[1].m_entry == 122);
   auto baz_vec = reinterpret_cast<SG::PackedContainer<int>* > (store.m_log[1].m_vector);
   assert (baz_vec->size() == 1);

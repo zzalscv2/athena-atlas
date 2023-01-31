@@ -25,9 +25,8 @@ def l1menu_generated():
 def getTrigConfFromCool(runNumber, lumiBlock):
     from TrigConfStorage.TriggerCoolUtil import TriggerCoolUtil 
     db = TriggerCoolUtil.GetConnection('CONDBR2' if runNumber > 230000 else 'COMP200')
-    runRange = [[runNumber,runNumber]]
+    runRange = [[(runNumber,lumiBlock), (runNumber,lumiBlock)]]
     d = {key: value for key, value in TriggerCoolUtil.getHLTConfigKeys(db, runRange)[runNumber].items() if  key in ["SMK", "DB"]}
-    d["DB"] = d["DB"].split(';')[0]
     for (hltpsk, firstlb, lastlb) in TriggerCoolUtil.getHLTPrescaleKeys(db, runRange)[runNumber]['HLTPSK2']:
         if firstlb<=lumiBlock and lumiBlock<=lastlb:
             d['HLTPSK'] = hltpsk
@@ -129,7 +128,7 @@ def _doMenuConversion(flags):
 def _getMenuFileName(flags):
     """Return base name for menu files"""
     if not _doMenuConversion(flags):  # menu created in this release
-        from AthenaCommon.AppMgr import release_metadata
+        from PyUtils.Helpers import release_metadata
         return '_'+flags.Trigger.triggerMenuSetup+'_'+release_metadata()['release']
     else:  # menu files created via JSON conversion
         return ''
@@ -376,8 +375,8 @@ if __name__ == "__main__":
             l1menu_generated._hasRun = False
 
         def test_currentMenu(self):
-            from AthenaConfiguration.AllConfigFlags import _createCfgFlags
-            ConfigFlags = _createCfgFlags()
+            from AthenaConfiguration.AllConfigFlags import initConfigFlags
+            ConfigFlags = initConfigFlags()
             ConfigFlags.Trigger.EDMVersion = 3
             from AthenaConfiguration.TestDefaults import defaultTestFiles
             ConfigFlags.Input.Files = defaultTestFiles.RAW
@@ -388,8 +387,8 @@ if __name__ == "__main__":
             HLTPrescaleCondAlgCfg( ConfigFlags )
 
         def test_legacyMenu(self):
-            from AthenaConfiguration.AllConfigFlags import _createCfgFlags
-            ConfigFlags = _createCfgFlags()
+            from AthenaConfiguration.AllConfigFlags import initConfigFlags
+            ConfigFlags = initConfigFlags()
             from AthenaConfiguration.TestDefaults import defaultTestFiles
             ConfigFlags.Input.Files = defaultTestFiles.RAW
             ConfigFlags.lock()

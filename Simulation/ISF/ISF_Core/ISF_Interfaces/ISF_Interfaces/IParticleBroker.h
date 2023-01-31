@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -23,6 +23,8 @@
 #include "ISF_Event/EntryLayer.h"
 #include "ISF_Interfaces/ISimulationSelector.h"
 
+#include "CxxUtils/checker_macros.h"
+
 namespace ISF {
 
   class ISFParticle;
@@ -34,7 +36,7 @@ namespace ISF {
   
       @ author Andreas.Salzburger -at- cern.ch , Elmar.Ritsch -at- cern.ch
      */
-  class IParticleBroker : virtual public IInterface {
+  class ATLAS_NOT_THREAD_SAFE IParticleBroker : virtual public IInterface {
 
       /////////////////////////////////////////////////////////////////// 
       // Public methods: 
@@ -57,7 +59,7 @@ namespace ISF {
       virtual void push( ISFParticle *particle, const ISFParticle *parent) = 0;
            
       /** Get vectors of ISF particles from the broker */
-      virtual const ConstISFParticleVector& popVector(size_t maxVectorSize=10240) = 0;
+      virtual const ISFParticleVector& popVector(size_t maxVectorSize=10240) = 0;
 
       /** Get the current number of particles stored */
       virtual size_t numParticles() const = 0;

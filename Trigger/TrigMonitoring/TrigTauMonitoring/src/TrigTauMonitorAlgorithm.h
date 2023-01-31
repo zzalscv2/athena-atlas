@@ -81,7 +81,7 @@ class TrigTauMonitorAlgorithm : public AthMonitorAlgorithm {
     return sqrt(deta*deta + dphi*dphi);
   };
 
-  inline bool HLTMatching(const xAOD::TauJet* offline_tau, std::vector<const xAOD::TauJet*> online_tau_vec, float threshold) const
+  inline bool HLTMatching(const xAOD::TauJet* offline_tau, const std::vector<const xAOD::TauJet*>& online_tau_vec, float threshold) const
   {
     for(auto online_tau: online_tau_vec){
       float deltaR = dR(offline_tau->eta(),offline_tau->phi(), online_tau->eta(),online_tau->phi());
@@ -103,7 +103,7 @@ class TrigTauMonitorAlgorithm : public AthMonitorAlgorithm {
     return false;
   };
   
-  inline bool HLTTruthMatching(const xAOD::TruthParticle* true_taus, const std::vector<const xAOD::TauJet*> online_tau_vec, float threshold) const
+  inline bool HLTTruthMatching(const xAOD::TruthParticle* true_taus, const std::vector<const xAOD::TauJet*>& online_tau_vec, float threshold) const
   {
     for(auto online_tau: online_tau_vec){
       float deltaR = dR(true_taus->eta(),true_taus->phi(), online_tau->eta(),online_tau->phi());
@@ -157,7 +157,6 @@ class TrigTauMonitorAlgorithm : public AthMonitorAlgorithm {
   SG::ReadHandleKey< xAOD::jFexTauRoIContainer>  m_phase1l1jTauRoIKey {this, "phase1l1jTauRoIKey", "L1_jFexTauRoI","jTau Phase1 L1 RoI key"};
   SG::ReadHandleKey< xAOD::TauJetContainer> m_hltTauJetKey { this, "hltTauJetKey", "HLT_TrigTauRecMerged_MVA", "HLT taujet container key" };
   SG::ReadHandleKey< xAOD::TauJetContainer> m_hltTauJetCaloMVAOnlyKey { this, "hltTauJetCaloMVAOnlyKey", "HLT_TrigTauRecMerged_CaloMVAOnly", "HLT taujet container key" };
-  SG::ReadHandleKey< xAOD::JetContainer> m_hltSeedJetKey { this, "hltSeedJetKey", "HLT_jet_seed", "HLT jet seed container key" };
   SG::ReadHandleKey< xAOD::TruthParticleContainer> m_truthParticleKey { this, "truthParticleKey", "TruthParticles", "TruthParticleContainer key" };
 
 };

@@ -196,11 +196,10 @@ InDet::SimpleTRT_SeededSpacePointFinder_ATL::find2Sp(const EventContext& ctx,
       msg(MSG::VERBOSE) << "------------------------------------------------------------------------------------------" << endmsg;
       msg(MSG::VERBOSE) << "   Direction of space Point vectors: "<< endmsg;
       msg(MSG::VERBOSE) << ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . " << endmsg;
-      for (std::list<std::pair<const Trk::SpacePoint*, const Trk::SpacePoint*> >::iterator it = listOfSpacePointPairsBuffer.begin();
-	   it != listOfSpacePointPairsBuffer.end(); ++it)
+      for (auto & it : listOfSpacePointPairsBuffer)
 	{
-	  Amg::Vector3D s1 = it->first->globalPosition();
-	  Amg::Vector3D s2 = it->second->globalPosition();
+	  Amg::Vector3D s1 = it.first->globalPosition();
+	  Amg::Vector3D s2 = it.second->globalPosition();
 	  Amg::Vector3D s1s2 = s2-s1;  // vector from s1 to s2
 	  msg(MSG::VERBOSE) << "   Positions:  ( " << s1.x() << " , "<< s1.y() << " , "<< s1.z() << " ) " << endmsg;
 	  msg(MSG::VERBOSE) << "               ( " << s2.x() << " , "<< s2.y() << " , "<< s2.z() << " ) " << endmsg;
@@ -245,10 +244,8 @@ void InDet::SimpleTRT_SeededSpacePointFinder_ATL::getHashesInROI(const Trk::Trac
   m_pRegionSelector->HashIDList( roi, listOfSCT_Hashes );
 
   // copy Hashes into Set to be able to search them
-  for (std::vector<IdentifierHash>::const_iterator it = listOfSCT_Hashes.begin();
-       it != listOfSCT_Hashes.end();
-       ++it)
-    setOfSCT_Hashes.insert(*it);
+  for (auto listOfSCT_Hashe : listOfSCT_Hashes)
+    setOfSCT_Hashes.insert(listOfSCT_Hashe);
 }
 
 //=====================================================================================================

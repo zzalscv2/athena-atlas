@@ -83,14 +83,13 @@ public:
     std::cerr << "=================================\n";
     std::cerr << "HERE I CAN PUT SOME ERROR MESSAGE\n";
     std::cerr << "=================================\n";
-    ThePEG::Repository::cleanup();
-    exit( EXIT_FAILURE );
+    quit();
   }
 
   /// Bail out and be quiet
   virtual void quit() const {
     ThePEG::Repository::cleanup();
-    exit( EXIT_FAILURE );
+    std::abort();
   }
 
   /// Return the standard out stream to be used
@@ -196,6 +195,9 @@ private:
 
   /// Scale integrated cross section by a factor for MetaData output
   double m_xsscale;
+
+  /// Gen_tf.py run args needed in interface 
+  int m_dsid;
 
   SG::ReadHandleKey<xAOD::EventInfo>  m_evtInfoKey{this
       , "EventInfo"

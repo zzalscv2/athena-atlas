@@ -14,6 +14,7 @@
 #include "TArrayI.h"
 #include "TVectorD.h"
 #include "TMatrixD.h"
+#include "CxxUtils/checker_macros.h"
 
 #include "LArCafJobs/Definitions.h"
 
@@ -24,7 +25,7 @@ namespace LArSamples {
 
   class SimpleShape;
   
-  class AbsShape  {
+  class  ATLAS_NOT_THREAD_SAFE AbsShape  {
   
     public:
       

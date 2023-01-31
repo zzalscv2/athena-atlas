@@ -1,8 +1,17 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import BeamType
+from AthenaConfiguration.Enums import BeamType, FlagEnum
 from InDetConfig.InDetConfigFlags import TrackFitterType
+
+class TrackingComponent(FlagEnum):
+    AthenaChain = "AthenaChain"  # full Athena Chain (default)
+    ActsChain = "ActsChain"  # full Acts Chain 
+    # Validation options
+    ValidateActsClusters = "ValidateActsClusters"
+    ValidateActsSpacePoints = "ValidateActsSpacePoints" 
+    ValidateActsSeeds = "ValidateActsSeeds"
+    ValidateActsTracks = "ValidateActsTracks"
 
 # TODO : Add some exta levels?
 
@@ -45,7 +54,7 @@ def createITkConfigFlags():
   itkcf.addFlag("ITk.Tracking.doFastTracking", False) # Turn running of ITk FastTracking on and off
   itkcf.addFlag("ITk.Tracking.doConversionFinding",True) # Turn running of ConversionFinding second pass on and off
   itkcf.addFlag("ITk.Tracking.doLargeD0", False)
-  itkcf.addFlag("ITk.Tracking.storeSeparateLargeD0Container", False)
+  itkcf.addFlag("ITk.Tracking.storeSeparateLargeD0Container", True)
   itkcf.addFlag("ITk.Tracking.doBremRecovery", True) # Turn on running of Brem Recover in tracking
   itkcf.addFlag("ITk.Tracking.doCaloSeededBrem", True) # Brem Recover in tracking restricted to Calo ROIs
   itkcf.addFlag("ITk.Tracking.doHadCaloSeededSSS", False) # Use Recover SSS to Calo ROIs
@@ -67,20 +76,19 @@ def createITkConfigFlags():
   itkcf.addFlagsCategory ("ITk.trackingGeometry", createITkTrackingGeometryFlags, prefix=True)
 
   # config flags for tracking cuts
-  from InDetConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkLargeD0TrackingPassFlags, createITkConversionFindingTrackingPassFlags, createITkFastTrackingPassFlags, createITkLargeD0FastTrackingPassFlags
+  from InDetConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkLargeD0TrackingPassFlags, createITkConversionFindingTrackingPassFlags, createITkFastTrackingPassFlags, createITkLargeD0FastTrackingPassFlags, createITkFTFPassFlags
 
   itkcf.addFlagsCategory ("ITk.Tracking.MainPass", createITkTrackingPassFlags, prefix=True)
   itkcf.addFlagsCategory ("ITk.Tracking.LargeD0Pass", createITkLargeD0TrackingPassFlags, prefix=True)
   itkcf.addFlagsCategory ("ITk.Tracking.ConversionFindingPass", createITkConversionFindingTrackingPassFlags, prefix=True)
   itkcf.addFlagsCategory ("ITk.Tracking.FastPass", createITkFastTrackingPassFlags, prefix=True)
   itkcf.addFlagsCategory ("ITk.Tracking.LargeD0FastPass", createITkLargeD0FastTrackingPassFlags, prefix=True)
+  itkcf.addFlagsCategory ("ITk.Tracking.FTFPass", createITkFTFPassFlags, prefix=True)
 
   from InDetConfig.VertexFindingFlags import createITkPriVertexingFlags
   itkcf.addFlagsCategory("ITk.PriVertex", createITkPriVertexingFlags, prefix=True)
 
-  itkcf.addFlag("ITk.Tracking.convertInDetClusters", False) # Turn on conversion of InDet clusters to xAOD clusters
-  itkcf.addFlag("ITk.Tracking.convertXAODClusters", False) # Turn on conversion of xAOD clusters to InDet clusters
-  itkcf.addFlag("ITk.Tracking.EnableNativexAODclusters", False) # Turn on native xAOD clusters creation. Incompatible with convertInDetClusters!
-  itkcf.addFlag("ITk.Tracking.produceNewSpacePointContainer", False) # Turn on to produce ActsTrk::SpacePointContainers
+  # enable reco steps 
+  itkcf.addFlag("ITk.Tracking.recoChain", [TrackingComponent.AthenaChain])
 
   return itkcf

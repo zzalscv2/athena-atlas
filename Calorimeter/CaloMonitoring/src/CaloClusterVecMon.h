@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -113,7 +113,7 @@ class CaloClusterVecMon : public CaloMonToolBase {
    const CaloCell_ID*   m_caloCellHelper;
 
    // cluster stat variables
-   int m_eventsCounter; // add
+   int m_eventsCounter = 0; // add
    int m_cluscount;
    int m_cluscount_top;
    int m_cluscount_bot;
@@ -130,15 +130,15 @@ class CaloClusterVecMon : public CaloMonToolBase {
    double m_EMphi;
 
    // cell hists
-   TH1I*       m_nCells;
-   TH1F*       m_maxEcellToEclusterRatio;
-   TH2F*       m_dominantCellOccupancy_etaphi;
-   TProfile2D* m_dominantCellAverageEnergy_etaphi;
-   TProfile2D* m_nCellInCluster_etaphi;
-   TH2F*       m_clusterTimeVsEnergy;
-   TH1F*       m_clusterTime;
-   TH1F*       m_cellTime;
-   TH2F*       m_cellvsclust_time;
+   TH1I*       m_nCells = nullptr;
+   TH1F*       m_maxEcellToEclusterRatio = nullptr;
+   TH2F*       m_dominantCellOccupancy_etaphi = nullptr;
+   TProfile2D* m_dominantCellAverageEnergy_etaphi = nullptr;
+   TProfile2D* m_nCellInCluster_etaphi = nullptr;
+   TH2F*       m_clusterTimeVsEnergy = nullptr;
+   TH1F*       m_clusterTime = nullptr;
+   TH1F*       m_cellTime = nullptr;
+   TH2F*       m_cellvsclust_time = nullptr;
 
    // mult-threshold cluster hists
    TH2F*       m_clus_etaphi_Et_thresh[MAX_E];
@@ -154,43 +154,43 @@ class CaloClusterVecMon : public CaloMonToolBase {
    TH2F*       m_etaphi_thresh_Totalenergy[MAX_E];
 
    // negative energy cluster hists
-   TH2F*       m_etaVsPhiNegEn;
-   TProfile2D* m_averageNegativeEnergy_etaphi;
+   TH2F*       m_etaVsPhiNegEn = nullptr;
+   TProfile2D* m_averageNegativeEnergy_etaphi = nullptr;
 
    // no threshold cluster hists
-   TProfile*   m_averageEnergy_phi;
-   TProfile*   m_averageEnergy_eta;
+   TProfile*   m_averageEnergy_phi = nullptr;
+   TProfile*   m_averageEnergy_eta = nullptr;
 
-   TH1F*       m_clusterEnergyVsEta_barrel;
-   TH1F*       m_clusterEnergyVsEta_endcap;
-   TH1F*       m_clusterEnergyVsEta_hecfcal;
-   TH1F*       m_clusterEtVsEta_barrel; // only for non-cosmics 
-   TH1F*       m_clusterEtVsEta_endcap; // only for non-cosmics
-   TH1F*       m_clusterEtVsEta_hecfcal; // only for non-cosmics
+   TH1F*       m_clusterEnergyVsEta_barrel = nullptr;
+   TH1F*       m_clusterEnergyVsEta_endcap = nullptr;
+   TH1F*       m_clusterEnergyVsEta_hecfcal = nullptr;
+   TH1F*       m_clusterEtVsEta_barrel = nullptr; // only for non-cosmics 
+   TH1F*       m_clusterEtVsEta_endcap = nullptr; // only for non-cosmics
+   TH1F*       m_clusterEtVsEta_hecfcal = nullptr; // only for non-cosmics
 
    // energy > 500GeV cluster hists
-   TProfile2D* m_averageEtOver500_etaphi; // only for non-cosmics
+   TProfile2D* m_averageEtOver500_etaphi = nullptr; // only for non-cosmics
 
    // cluster stat hists
 
-   TH1I*       m_nClusters;
-   TH2I*       m_nClustersBottomVsTop;
-   TProfile2D* m_averageEnergy_etaphi_maxEclusters; 
-   TH2F*       m_dEtaVsdPhi_maxEclustersTopVsBottom; // only for cosmics
+   TH1I*       m_nClusters = nullptr;
+   TH2I*       m_nClustersBottomVsTop = nullptr;
+   TProfile2D* m_averageEnergy_etaphi_maxEclusters = nullptr; 
+   TH2F*       m_dEtaVsdPhi_maxEclustersTopVsBottom = nullptr; // only for cosmics
 
    // tile hists 
-   TProfile*   m_clustersCellsRatioEta;
-   TProfile*   m_clustersCellsRatioPhi;
-   TProfile*   m_clustersCellsRatioE;
+   TProfile*   m_clustersCellsRatioEta = nullptr;
+   TProfile*   m_clustersCellsRatioPhi = nullptr;
+   TProfile*   m_clustersCellsRatioE = nullptr;
 
-   TH1F*       m_clustersE;
-   TProfile*   m_clustersEta;
-   TProfile*   m_clustersPhi;
-   TH2F*       m_clustersEtaPhi;
+   TH1F*       m_clustersE = nullptr;
+   TProfile*   m_clustersEta = nullptr;
+   TProfile*   m_clustersPhi = nullptr;
+   TH2F*       m_clustersEtaPhi = nullptr;
 
-   TProfile*   m_clustersCellsE;
-   TProfile*   m_clustersCellsEta;
-   TProfile*   m_clustersCellsPhi;
+   TProfile*   m_clustersCellsE = nullptr;
+   TProfile*   m_clustersCellsEta = nullptr;
+   TProfile*   m_clustersCellsPhi = nullptr;
 
 };
 

@@ -70,9 +70,9 @@ namespace ISF {
     int                       parentPdgCode() const override final;
     /** Return the parent particle as a HepMC particle type
         (usually only called for particles that will enter the HepMC truth event) */
-    HepMC::GenParticlePtr     parentParticle() const override final;
+    HepMC::GenParticlePtr      parentParticle() override final;
     /** Return the barcode of the parent particle */
-    Barcode::ParticleBarcode  parentBarcode() const override final;
+    Barcode::ParticleBarcode  parentBarcode() override final;
     /** Return the bunch-crossing identifier of the parent particle */
     int                       parentBCID() const override final;
     /** Return a boolean whether or not the parent particle survives the incident */
@@ -95,7 +95,7 @@ namespace ISF {
         Barcode to the simulator particle (usually only called for particles that
         will enter the HepMC truth event) */
     HepMC::GenParticlePtr     childParticle(unsigned short index,
-                                            Barcode::ParticleBarcode bc) const override final;
+                                            Barcode::ParticleBarcode bc) override final;
     /** Update the properties of a child particle from a pre-defined
         interaction based on the properties of the ith child of the
         current TruthIncident (only used in quasi-stable particle
@@ -108,10 +108,10 @@ namespace ISF {
     ISFTruthIncident();
 
     /** return attached truth particle */
-    inline HepMC::GenParticlePtr getHepMCTruthParticle( const ISF::ISFParticle& particle ) const;
+    inline HepMC::GenParticlePtr getHepMCTruthParticle( ISF::ISFParticle& particle ) const;
 
     /** convert ISFParticle to GenParticle and attach to ISFParticle's TruthBinding */
-    inline HepMC::GenParticlePtr updateHepMCTruthParticle( ISF::ISFParticle& particle, const ISF::ISFParticle* parent=nullptr ) const;
+    inline HepMC::GenParticlePtr updateHepMCTruthParticle( ISF::ISFParticle& particle, ISF::ISFParticle* parent=nullptr ) const;
 
     ISF::ISFParticle&                  m_parent;
     const ISFParticleVector&           m_children;

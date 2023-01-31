@@ -3,7 +3,7 @@
 */
 
 #include "TrkGlobalChi2Fitter/GXFTrajectory.h"
-#include "TrkGlobalChi2Fitter/GXFMaterialEffects.h"
+#include "TrkTrack/GXFMaterialEffects.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkSurfaces/Surface.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
@@ -248,14 +248,9 @@ namespace Trk {
       }
     } else {
       m_states.insert(m_states.begin() + index, std::move(state));
-      int previousscats = 0;
       int previousbrems = 0;
       
       for (int i = 0; i < index; i++) {
-        if (m_states[i]->getStateType(TrackStateOnSurface::Scatterer)) {
-          previousscats++;
-        }
-        
         if ((m_states[i]->materialEffects() != nullptr)
             && m_states[i]->materialEffects()->sigmaDeltaE() > 0) {
           previousbrems++;
@@ -298,7 +293,7 @@ namespace Trk {
             isdownstream = true;
           }
         } else {
-          DistanceSolution distsol = (**it2).surface()->straightLineDistanceEstimate(m_refpar->position(),m_refpar->momentum().unit());
+          DistanceSolution distsol = (**it2).associatedSurface().straightLineDistanceEstimate(m_refpar->position(),m_refpar->momentum().unit());
           
           if (distsol.numberOfSolutions() == 1) {
             distance = distsol.first();
@@ -381,7 +376,7 @@ namespace Trk {
       m_states[index]->resetStateType(TrackStateOnSurface::Outlier);
       m_nmeasoutl += nmeas;
       m_noutl++;
-      m_states[index]->setFitQuality(nullptr);
+      m_states[index]->setFitQuality({});
     } else {
       m_ndof += nmeas;
       m_states[index]->resetStateType(TrackStateOnSurface::Measurement);

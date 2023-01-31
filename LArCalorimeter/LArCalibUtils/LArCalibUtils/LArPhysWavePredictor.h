@@ -18,9 +18,12 @@
 #include <vector>
 #include <string>
 
+#include "CxxUtils/checker_macros.h"
+
+
 class LArOnlineID_Base;
 
-class LArPhysWavePredictor : public AthAlgorithm
+class ATLAS_NOT_THREAD_SAFE LArPhysWavePredictor : public AthAlgorithm
 {
  public:
   LArPhysWavePredictor(const std::string & name, ISvcLocator * pSvcLocator);

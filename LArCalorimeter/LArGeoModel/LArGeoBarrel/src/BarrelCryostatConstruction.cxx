@@ -10,7 +10,7 @@
 #include "LArGeoBarrel/BarrelCryostatConstruction.h"
 #include "LArGeoBarrel/BarrelConstruction.h"
 #include "LArGeoBarrel/BarrelPresamplerConstruction.h"
-#include "LArGeoBarrel/BarrelDMConstruction.h"
+#include "CrackRegionGeoModel/CrackDMConstruction.h"
 
 #include "GeoModelKernel/GeoElement.h"
 #include "GeoModelKernel/GeoMaterial.h"
@@ -1065,8 +1065,8 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 
   if(rdbAccess->getChildTag("LArBarrelDM",larVersionKey.tag(),larVersionKey.node())!="" && m_fullGeo) {
     // Dead material in barrel
-    BarrelDMConstruction barrelDMConstruction(m_activateFT);
-    barrelDMConstruction.create (m_cryoMotherPhysical);
+    CrackDMConstruction crackDMConstruction(rdbAccess,geoModel,materialManager,m_activateFT);
+    crackDMConstruction.create(m_cryoMotherPhysical);
   }
 
   return m_cryoMotherPhysical;

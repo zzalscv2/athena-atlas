@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_ALGORITHMTIMER_H
@@ -11,7 +11,6 @@
  * @author Rolf Seuster, Frank Winklmeier
  *     (based on TrigTimeAlgs/CookTimer, which in turn is based in AthenaKernel/CookTimer by W. Lavrijsen, S. Binet)
  *
- * $Id: AlgorithmTimer.h,v 1.3 2009-05-14 16:58:21 dquarrie Exp $
  */
 
 // Framework includes
@@ -26,11 +25,9 @@
 #endif
 
 // STL includes
+#include <functional>
 #include <string>
 #include <list>
-
-// Boost includes
-#include <boost/function.hpp>
 
 #ifdef __APPLE__
 typedef sigval sigval_t;
@@ -99,10 +96,9 @@ namespace Athena {
       {
         DEFAULT          = 0x0,    ///< default
         USEREALTIME      = 0x1,    ///< use real time instead of system time
-        DELIVERYBYTHREAD = 0x2     ///< deprecated; delivery is always by thread.
       };
   
-    typedef boost::function<void()> callbackFct_t;
+    typedef std::function<void()> callbackFct_t;
   
     /**
      * @brief Create AlgorithmTimer instance and start it (unless seconds==0)

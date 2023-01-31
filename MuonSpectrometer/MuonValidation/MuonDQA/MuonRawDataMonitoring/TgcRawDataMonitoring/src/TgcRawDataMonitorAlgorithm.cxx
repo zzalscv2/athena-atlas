@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcRawDataMonitorAlgorithm.h"
@@ -19,6 +19,7 @@ namespace {
   /// End of the barrel region
   constexpr double barrel_end = 1.05;
   constexpr double eifi_boundary = 1.3;
+  constexpr double endcap_end = 1.9;
   constexpr double trigger_end = 2.4;
 
   // offset for better drawing
@@ -73,7 +74,7 @@ StatusCode TgcRawDataMonitorAlgorithm::initialize() {
     std::unique_ptr<TObjArray> monTrigs( Str.Tokenize(";") );
     for(int i = 0 ; i < monTrigs->GetEntries() ; i++){
       TString monTrig = monTrigs->At(i)->GetName();
-      if(monTrig=="")continue;
+      if(monTrig.IsNull())continue;
       CtpDecMonObj monObj;
       monObj.trigItem = monObj.title = "dummy";
       monObj.rpcThr=monObj.tgcThr=monObj.multiplicity=0;
@@ -81,7 +82,7 @@ StatusCode TgcRawDataMonitorAlgorithm::initialize() {
       std::unique_ptr<TObjArray> monElement( monTrig.Tokenize(",") );
       for(int j = 0 ; j < monElement->GetEntries() ; j++){
 	std::string sysItem = monElement->At(j)->GetName();
-	if(sysItem=="")continue;
+	if(sysItem.empty())continue;
 	std::string item = sysItem.substr(4,sysItem.size());// remove "Tit:", "CTP:", "HLT:", "RPC:", "TGC:"
 	if(sysItem.find("Tit")==0){
 	  monObj.title = item;
@@ -91,13 +92,13 @@ StatusCode TgcRawDataMonitorAlgorithm::initialize() {
 	  monObj.trigItem = item;
 	}else if(sysItem.find("RPC")==0){
 	  monObj.rpcThr = std::atoi(item.data());
-	  monObj.rpcR = (item.find("R")!=std::string::npos);
-	  monObj.rpcM = (item.find("M")!=std::string::npos);
+	  monObj.rpcR = (item.find('R')!=std::string::npos);
+	  monObj.rpcM = (item.find('M')!=std::string::npos);
 	}else if(sysItem.find("TGC")==0){
 	  monObj.tgcThr = std::atoi(item.data());
-	  monObj.tgcF = (item.find("F")!=std::string::npos);
-	  monObj.tgcC = (item.find("C")!=std::string::npos);
-	  monObj.tgcH = (item.find("H")!=std::string::npos);
+	  monObj.tgcF = (item.find('F')!=std::string::npos);
+	  monObj.tgcC = (item.find('C')!=std::string::npos);
+	  monObj.tgcH = (item.find('H')!=std::string::npos);
 	}
       }
       m_CtpDecMonObj.push_back(monObj);
@@ -196,7 +197,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
       if( !triggerList.empty() ){
 	for(const auto &trig : triggerList) {
 	  if( trig.find("HLT_mu") != 0 )continue; // muon trigger
-	  if( trig.find("-") != std::string::npos )continue; // vetoing topo item
+	  if( trig.find('-') != std::string::npos )continue; // vetoing topo item
 	  if( trig.find("L1MU") == std::string::npos )continue; // RoI-seedeed L1 muon trigger
 	  if( trig.find("mu") !=  trig.rfind("mu") )continue;  // mu occurrence only once -> single muon trigger
 	  if( trig.find("MU") !=  trig.rfind("MU") )continue;  // MU occurrence only once -> single muon trigger
@@ -827,7 +828,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 	  }
 	  muon2pv_dz.push_back(dz);
 	  muon2pv_dca.push_back(dca);
-	  if( std::abs(dz) > m_muonToPVdz.value() )continue;
+	  if( std::abs(dz-m_muonToPVdzOffset.value()) > m_muonToPVdz.value() )continue;
 	  if( std::abs(dca) > m_muonToPVdca.value() )continue;
 	}
 
@@ -856,6 +857,11 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 	// minimum requirements on muon quality
 	if ( muon2->author() > xAOD::Muon::Author::MuidSA )continue;
 	if ( muon2->muonType() > xAOD::Muon::MuonType::MuonStandAlone )continue;
+
+	// tag muon to be only in the other region, barrel or endcap, to remove possible bias from the same region
+	if( m_tagMuonInDifferentSystem.value() &&
+	    ( (std::abs(muon->eta()) < barrel_end && std::abs(muon2->eta()) < barrel_end) ||
+	      (std::abs(muon->eta()) > barrel_end && std::abs(muon2->eta()) > barrel_end) ) )continue;
 
 	// isolation calculation
 	double dr_muons = xAOD::P4Helpers::deltaR(muon,muon2,false);
@@ -970,7 +976,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 							     m_endcapPivotPlaneMaximumRadius.value());
 	  const Trk::BoundaryCheck boundaryCheck = true;
 	  const auto extTrkParams = m_extrapolator->extrapolate(ctx,
-								*trackParticle,
+								trackParticle->perigeeParameters(),
 								*disc,
 								Trk::alongMomentum,
 								boundaryCheck,
@@ -1098,6 +1104,18 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
     oflmuon_variables.push_back(oflmuon_phi);
 
 
+    auto muon_charge = Monitored::Collection("muon_charge",mymuons,[](const MyMuon& m){
+	return m.muon->charge();
+      });
+    oflmuon_variables.push_back(muon_charge);
+    auto muon_chargePos = Monitored::Collection("muon_chargePos",mymuons,[](const MyMuon& m){
+return (m.muon->charge()>0);
+      });
+    oflmuon_variables.push_back(muon_chargePos);
+    auto muon_chargeNeg = Monitored::Collection("muon_chargeNeg",mymuons,[](const MyMuon& m){
+	return (m.muon->charge()<0);
+      });
+    oflmuon_variables.push_back(muon_chargeNeg);
     auto muon_eta4gev = Monitored::Collection("muon_eta4gev",mymuons,[](const MyMuon& m){
     	return (m.muon->pt()>pt_4_cut)?m.muon->eta():-10;
       });
@@ -1154,6 +1172,18 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 	return (std::abs(m.muon->eta()) > barrel_end && std::abs(m.muon->eta()) < trigger_end && m.muon->pt() > pt_4_cut && m.muon->eta() < 0) ? m.muon->phi() : -10;
       });
     oflmuon_variables.push_back(muon_phi4gev_tgcC);
+    auto muon_phi0gev_tgc = Monitored::Collection("muon_phi0gev_tgc",mymuons,[](const MyMuon& m){
+	return (std::abs(m.muon->eta()) > barrel_end && std::abs(m.muon->eta()) < trigger_end) ? m.muon->phi() : -10;
+      });
+    oflmuon_variables.push_back(muon_phi0gev_tgc);
+    auto muon_phi0gev_tgcA = Monitored::Collection("muon_phi0gev_tgcA",mymuons,[](const MyMuon& m){
+	return (std::abs(m.muon->eta()) > barrel_end && std::abs(m.muon->eta()) < trigger_end && m.muon->eta() > 0) ? m.muon->phi() : -10;
+      });
+    oflmuon_variables.push_back(muon_phi0gev_tgcA);
+    auto muon_phi0gev_tgcC = Monitored::Collection("muon_phi0gev_tgcC",mymuons,[](const MyMuon& m){
+	return (std::abs(m.muon->eta()) > barrel_end && std::abs(m.muon->eta()) < trigger_end && m.muon->eta() < 0) ? m.muon->phi() : -10;
+      });
+    oflmuon_variables.push_back(muon_phi0gev_tgcC);
     auto muon_eta = Monitored::Collection("muon_eta", mymuons, [](const MyMuon &m) {
     	return (m.muon->pt() > pt_30_cut) ? m.muon->eta() : -10;
       });
@@ -1194,6 +1224,18 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
     	return (std::abs(m.muon->eta()) > barrel_end && std::abs(m.muon->eta()) < trigger_end) ? m.muon->pt() / Gaudi::Units::GeV : -10;
       });
     oflmuon_variables.push_back(muon_pt_tgc);
+    auto muon_barrel = Monitored::Collection("muon_barrel", mymuons, [](const MyMuon &m) {
+	return (std::abs(m.muon->eta()) < barrel_end);
+      });
+    oflmuon_variables.push_back(muon_barrel);
+    auto muon_endcap = Monitored::Collection("muon_endcap", mymuons, [](const MyMuon &m) {
+	return (std::abs(m.muon->eta()) > barrel_end && std::abs(m.muon->eta()) < endcap_end);
+      });
+    oflmuon_variables.push_back(muon_endcap);
+    auto muon_forward = Monitored::Collection("muon_forward", mymuons, [](const MyMuon &m) {
+	return (std::abs(m.muon->eta()) > endcap_end && std::abs(m.muon->eta()) < trigger_end);
+      });
+    oflmuon_variables.push_back(muon_forward);
     auto muon_l1passThr1TGC = Monitored::Collection("muon_l1passThr1TGC", mymuons, [](const MyMuon &m) {
     	return m.matchedL1ThrInclusiveTGC.find(1) != m.matchedL1ThrInclusiveTGC.end();
       });
@@ -1518,8 +1560,8 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 	  for(const auto& chamHasHit : map_muon_and_tgchits[muon]){
 	    if( chamHasHit.find(tgcHit.gap_name()) != std::string::npos ) continue; // skipping the same gap
 	    if( chamHasHit.find("M04") != std::string::npos ) continue; // skipping EI/FI
-	    if( chamHasHit.find("W") != std::string::npos ) nWhits++;
-	    if( chamHasHit.find("S") != std::string::npos ) nShits++;
+	    if( chamHasHit.find('W') != std::string::npos ) nWhits++;
+	    if( chamHasHit.find('S') != std::string::npos ) nShits++;
 	  }
 	  if(nWhits < m_nHitsInOtherBWTGCWire.value())continue;
 	  if(nShits < m_nHitsInOtherBWTGCStrip.value())continue;
@@ -1689,7 +1731,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 	  if(cham.iM()!=4){
 	    tgcHitBCMaskBWSectors["All"].push_back( (cham.iSide()==TGC::TGCSIDE::TGCASIDE)?( +1 * cham.iSec() ):(-1 * cham.iSec()) );
 	    tgcHitBCMaskForBWSectors["All"].push_back(tgcHit.bcmask());
-	    if(chamberNameWithWS.find("W")!=std::string::npos){
+	    if(chamberNameWithWS.find('W')!=std::string::npos){
 	      tgcHitBCMaskBWSectors["Wire"].push_back( (cham.iSide()==TGC::TGCSIDE::TGCASIDE)?( +1 * cham.iSec() ):(-1 * cham.iSec()) );
 	      tgcHitBCMaskForBWSectors["Wire"].push_back(tgcHit.bcmask());
 	    }else{
@@ -1753,8 +1795,8 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 	      for(const auto& chamHasHit : map_muon_and_tgchits[ext.muon]){
 		if( chamHasHit.find(gap_name) != std::string::npos ) continue; // skipping the same gap
 		if( chamHasHit.find("M04") != std::string::npos ) continue; // skipping EI/FI
-		if( chamHasHit.find("W") != std::string::npos ) nWhits++;
-		if( chamHasHit.find("S") != std::string::npos ) nShits++;
+		if( chamHasHit.find('W') != std::string::npos ) nWhits++;
+		if( chamHasHit.find('S') != std::string::npos ) nShits++;
 	      }
 	      if(nWhits < m_nHitsInOtherBWTGCWire.value())continue;
 	      if(nShits < m_nHitsInOtherBWTGCStrip.value())continue;
@@ -1779,6 +1821,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
       std::vector<Monitored::ObjectsCollection<std::vector<double>, double>> varowner_hiteff;
       std::vector<Monitored::ObjectsCollection<std::vector<TGC::TgcHit>, double>> varowner_eachchamber;
       std::vector<Monitored::ObjectsCollection<std::vector<double>, double>> varowner_eachchamber_double;
+      std::map<std::string,std::vector<double>> cham_and_res;
 
       if(m_fillGapByGapHistograms.value()){
 
@@ -1814,17 +1857,16 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 	varowner_eachchamber_double.reserve(tgcHitsMap.size());
       	for (const auto &tgcHitMap : tgcHitsMap) {
 	  auto chanName = tgcHitMap.first;
-	  if(chanName.find("L")!=std::string::npos){ // individual gaps
+	  if(chanName.find('L')!=std::string::npos){ // individual gaps
 	    varowner_eachchamber.push_back(Monitored::Collection(Form("hit_on_%s",chanName.data()),tgcHitMap.second,[](const TGC::TgcHit&m){return m.channel();}));
 	    hit_variables.push_back(varowner_eachchamber.back());
 	  }else{ // only summed over the gaps
-	    std::vector<double> res;
 	    for(const auto&tgcHit:tgcHitMap.second){
 	      for(const auto&tgcRes:tgcHit.residuals()){
-		res.push_back(tgcRes.second);
+		cham_and_res[chanName].push_back(tgcRes.second);
 	      }
 	    }
-	    varowner_eachchamber_double.push_back(Monitored::Collection(Form("hit_residual_on_%s",chanName.data()),res,[](const double&m){return m;}));
+	    varowner_eachchamber_double.push_back(Monitored::Collection(Form("hit_residual_on_%s",chanName.data()),cham_and_res[chanName],[](const double&m){return m;}));
 	    hit_variables.push_back(varowner_eachchamber_double.back());
 	  }
       	}
@@ -2164,7 +2206,7 @@ void TgcRawDataMonitorAlgorithm::fillTgcCoinEff(const std::string & type,
       double deltaR = vec.Mod() - TVector2(ext.extPos.x(), ext.extPos.y()).Mod();
       if( std::abs(deltaPhi) > m_dPhiCutOnM3 || std::abs(deltaR) > m_dRCutOnM3 )continue;
       matched |= 1;
-      int charge = (tgcTrig.isPositiveDeltaR==0) ? (+1) : (-1);
+      int charge = (tgcTrig.isPositiveDeltaR==0) ? (-1) : (+1);
       matchedQ |= (ext.muon->charge()*charge>0);
       matchedF |= (tgcTrig.pt>>CoinFlagF) & 0x1;
       matchedC |= (tgcTrig.pt>>CoinFlagC) & 0x1;

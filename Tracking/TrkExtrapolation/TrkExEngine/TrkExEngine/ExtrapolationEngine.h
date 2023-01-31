@@ -26,9 +26,6 @@
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "TrkGeometry/TrackingGeometry.h"
-#ifdef LEGACY_TRKGEOM
-#include "TrkDetDescrInterfaces/ITrackingGeometrySvc.h"
-#endif
 #include "CxxUtils/checker_macros.h"
 
 namespace Trk {
@@ -98,16 +95,8 @@ namespace Trk {
         //!< return and retrieve
         const TrackingGeometry& trackingGeometry() const;
 
-#ifdef LEGACY_TRKGEOM
-        ServiceHandle<ITrackingGeometrySvc> m_trackingGeometrySvc {this, "TrackingGeometrySvc", "",""};
-#endif
         void throwFailedToGetTrackingGeomtry() const;
         const TrackingGeometry* retrieveTrackingGeometry(const EventContext& ctx) const {
-#ifdef LEGACY_TRKGEOM
-           if (m_trackingGeometryReadKey.key().empty()) {
-              return m_trackingGeometrySvc->trackingGeometry();
-           }
-#endif
            SG::ReadCondHandle<TrackingGeometry>  handle(m_trackingGeometryReadKey,ctx);
            if (!handle.isValid()) {
               EX_MSG_FATAL("", "updateGeo", "", "Could not load TrackingGeometry with name '" << m_trackingGeometryReadKey.key() << "'. Aborting." );

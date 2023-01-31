@@ -13,9 +13,7 @@
  */
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "PileUpTools/IPileUpTool.h"
-
-static constexpr unsigned int crazyParticleBarcode(std::numeric_limits<int32_t>::max());
-//Barcodes at the HepMC level are int
+#include "AtlasHepMC/MagicNumbers.h" // for crazyParticleBarcode
 
 class PileUpToolBase :  public extends<AthAlgTool, IPileUpTool> {
 public:
@@ -57,7 +55,7 @@ protected:
       "First bunch-crossing in which det is live"};
   Gaudi::Property<int> m_lastXing {this, "LastXing", 999,
       "Last bunch-crossing in which det is live"};
-  Gaudi::Property<int> m_vetoThisBarcode{this, "ParticleBarcodeVeto", crazyParticleBarcode,
+  Gaudi::Property<int> m_vetoThisBarcode{this, "ParticleBarcodeVeto", HepMC::crazyParticleBarcode,
       "Barcode of particle to ignore"};
   bool m_filterPassed{true}; ///stores whether the filter for this PileUpTool was passed.
 };

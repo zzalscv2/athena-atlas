@@ -1,6 +1,5 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon.AppMgr import ServiceMgr as svcMgr
 from GeneratorModules.EvgenAlg import EvgenAlg
 from ParticleGun.samplers import ParticleSampler
 from ParticleGun.samplers import * # noqa: F401, F403 (import into our namespace)
@@ -20,11 +19,10 @@ class ParticleGun(EvgenAlg):
     A simple but flexible algorithm for generating events from simple distributions.
     """
 
-    def __init__(self, name="ParticleGun", randomSvcName="AtRndmGenSvc", randomStream="ParticleGun", randomSeed=None):
+    def __init__(self, name="ParticleGun", randomStream="ParticleGun", randomSeed=None):
         super(ParticleGun, self).__init__(name=name)
         self.samplers = [ParticleSampler()]
         self.randomStream = randomStream
-        self.randomSvcName = randomSvcName
         self.randomSeed = randomSeed
 
     @property
@@ -38,38 +36,27 @@ class ParticleGun(EvgenAlg):
 
 
     def initialize(self):
-        """
-        Pass the AtRndmGenSvc seed to Python's random module, or use a fixed value set via pg.randomSeed.
-        """
-        seed = None
-        ## Use self.randomSeed directly, or if it's None find a seed string from the ATLAS random number service
-        if self.randomSeed is not None:
-            seed = self.randomSeed
-        else:
-            randomSvc = getattr(svcMgr, self.randomSvcName, None)
-            if randomSvc is not None:
-                for seedstr in randomSvc.Seeds:
-                    if seedstr.startswith(self.randomStream):
-                        seed = seedstr
-                        self.msg.info("ParticleGun: Using random seed '%s' ", seed)
-                        break
-                if seed is None:
-                    self.msg.warning("ParticleGun: Failed to find a seed for the random stream named '%s' ", self.randomStream)
-            else:
-                self.msg.warning("ParticleGun: Failed to find random number service called '%s' ", self.randomSvcName)
-        ## Apply the seed
-        if seed is not None:
-            random.seed(seed)
-            return StatusCode.Success
-        else:
-            self.msg.error("ParticleGun: randomSeed property not set, and no %s random number service found", self.randomSvcName)
-            return StatusCode.Failure
+        return StatusCode.Success
 
 
     def fillEvent(self, evt):
         """
         Sample a list of particle properties, which are then used to create a new GenEvent in StoreGate.
         """
+        # set the random seed
+        offset = self.randomSeed if self.randomSeed is not None else 0
+        seed = ROOT.ATHRNG.calculateSeedsPython(self.randomStream, self._ctx.eventID().event_number(), self._ctx.eventID().run_number(), offset)
+
+        if seed is None:
+            self.msg.warning("Failed to find a seed for the random stream named '%s'.", self.randomStream)
+            seed = self.randomSeed
+        if seed is not None:
+            self.msg.debug("Set random seed to %s.", str(seed))
+            random.seed(seed)
+        else:
+            self.msg.error("Failed to set random seed.")
+            return StatusCode.Failure
+
         ## Set event weight(s)
         # TODO: allow weighted sampling?
         try:

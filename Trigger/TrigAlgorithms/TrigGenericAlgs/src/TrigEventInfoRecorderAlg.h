@@ -10,6 +10,7 @@
 #include "xAODEventShape/EventShape.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODTrigger/TrigCompositeContainer.h"
 #include "LumiBlockComps/ILumiBlockMuTool.h"
@@ -32,8 +33,12 @@ class TrigEventInfoRecorderAlg : public AthReentrantAlgorithm {
     private:
     
     // WRITE HANDLE KEY FOR OUTPUT CONTAINER
-    SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_TrigEventInfoKey{this, "trigEventInfoKey","Undefined", ""};
+    SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_TrigEventInfoKey{this, "trigEventInfoKey","Undefined"};
 
+    SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_rhoDecor{this, "RhoPFlowDecor", m_TrigEventInfoKey, "JetDensityEMPFlow"};
+    SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_rhoEMTDecor{this, "RhoEMTopoDecor", m_TrigEventInfoKey, "JetDensityEMTopo"};
+    SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_muDecor{this, "AvgMuDecor", m_TrigEventInfoKey, "AvgMu"};
+    SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_numPVDecor{this, "NumPVDecor", m_TrigEventInfoKey, "NumPV"};
 
     // TLA AREA
     Gaudi::Property<bool> m_decorateTLA {
@@ -49,3 +54,4 @@ class TrigEventInfoRecorderAlg : public AthReentrantAlgorithm {
 
 };
 #endif
+

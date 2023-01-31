@@ -20,10 +20,12 @@
 <class name="std::pair<HWIdentifier32,LArBadFeb>"/>
 <class name="std::vector<std::pair<HWIdentifier32,LArBadFeb>>"/>
 
-<class name="LArBadChannelEnum"/>
+<class name="LArBadChannel::LArBadChannelEnum"/>
+<class name="LArBadChannel::LArBadChannelSCEnum"/>
 <class name="LArBadChanBitPacking"/>
 <class name="LArBadChannelState"/>
 <class name="LArBadChannelState::CoolChannelData"/>
-<class name="std::pair<bool,LArBadChannelEnum::ProblemType>"/> 
+<class name="std::pair<bool,LArBadChannel::LArBadChannelEnum::ProblemType>"/> 
+<class name="std::pair<bool,LArBadChannel::LArBadChannelSCEnum::ProblemType>"/> 
 
 </lcgdict>

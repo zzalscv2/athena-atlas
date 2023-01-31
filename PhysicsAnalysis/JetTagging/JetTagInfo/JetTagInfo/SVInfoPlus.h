@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFO_SVINFOPLUS_H
@@ -20,7 +20,7 @@ class SVInfoPlus : public BaseTagInfo
   SVInfoPlus();
   
   /** constructor with info type */
-  SVInfoPlus(TagInfoType x);
+  SVInfoPlus(const TagInfoType& x);
   
   /** copy destructor */
   SVInfoPlus(const SVInfoPlus& SVInfoPlus);

@@ -212,12 +212,12 @@ double TFCS1DFunctionSpline::optimize(TSpline3& sp_best,std::vector<double>& npr
   double max_penalty=-1;
   double p_gotobest=0.5/nsplinepoints;
   int ntry=200/p_gotobest;
-  int itrytot=0;
+  //int itrytot=0;
   for(double dproploop=0.4/nsplinepoints;dproploop>0.02/nsplinepoints;dproploop/=2) {
     double dprop=dproploop;
     int n_nogain=0;
     for(int itry=0;itry<ntry;++itry) {
-      itrytot++;
+      //itrytot++;
       for(int i=0;i<nsplinepoints;++i) {
         nx[i]=hist_fct.rnd_to_fct(nprop_try[i]);
       }

@@ -50,14 +50,11 @@ bool TrigEgammaEmulationFastElectronHypoTool::decide( const Trig::TrigData &/*in
      ATH_MSG_DEBUG( "AcceptAll property not set: applying selection" );
    }
 
-  int cutCounter = 0;  
- 
 
   const xAOD::TrackParticle* trkIter = electron-> trackParticle();
   if ( trkIter == 0 ){  // disconsider candidates without track
      return false;
   }
-  cutCounter++;
 
   // Retrieve all quantities
   float dPhiCalo    = electron->trkClusDphi();
@@ -72,34 +69,28 @@ bool TrigEgammaEmulationFastElectronHypoTool::decide( const Trig::TrigData &/*in
     ATH_MSG_DEBUG( "Fails pt cut" << ptCalo << " < " << m_trackPt );
     return false;
   }
-  cutCounter++;
 
   if ( dEtaCalo > m_caloTrackDEta ) {
     ATH_MSG_DEBUG( "Fails dEta cut " << dEtaCalo << " < " << m_caloTrackDEta );
     return false;
   }
-  cutCounter++;
   if ( dPhiCalo > m_caloTrackDPhi ) {
     ATH_MSG_DEBUG( "Fails dPhi cut " << dPhiCalo << " < " << m_caloTrackDPhi );
     return false;
   }
 
-  cutCounter++;
   if( eToverPt <  m_caloTrackdEoverPLow ) {
     ATH_MSG_DEBUG( "Fails eoverp low cut " << eToverPt << " < " <<  m_caloTrackdEoverPLow );
     return false;
   }
-  cutCounter++;
   if ( eToverPt > m_caloTrackdEoverPHigh ) {
     ATH_MSG_DEBUG( "Fails eoverp high cut " << eToverPt << " < " << m_caloTrackdEoverPHigh );
     return false;
   }
-  cutCounter++;
   if ( TRTHitRatio < m_trtRatio ){
     ATH_MSG_DEBUG( "Fails TRT cut " << TRTHitRatio << " < " << m_trtRatio );
     return false;
   }
-  cutCounter++;
 
 
   if(m_doLRT){

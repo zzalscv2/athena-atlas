@@ -136,7 +136,7 @@ namespace MCTesting {
 
   class is_photon {
   public:
-    bool operator() ( HepMC::ConstGenParticlePtr p ) {
+    bool operator() ( const HepMC::ConstGenParticlePtr& p ) {
       return ( p && p->pdg_id() == 22 );
     }
   };
@@ -223,7 +223,7 @@ namespace MCTesting {
     }
 
 #ifdef HEPMC3
-    for (auto vtx: ge.vertices())  ge.remove_vertex(vtx);
+    for (const auto& vtx: ge.vertices())  ge.remove_vertex(vtx);
 #else
     if(!ge.vertices_empty()){
       HepMC::GenEvent::vertex_iterator itvtx = ge.vertices_begin();

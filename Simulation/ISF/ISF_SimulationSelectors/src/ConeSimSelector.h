@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// ConeSimSelector.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_TOOLS_CONESIMSELECTOR_H
 #define ISF_TOOLS_CONESIMSELECTOR_H 1
@@ -17,6 +13,8 @@
 // Framework
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
+
+#include "CxxUtils/checker_macros.h"
 
 namespace ISF
 {
@@ -33,7 +31,7 @@ namespace ISF
 
       @author Andreas.Salzburger -at- cern.ch , Elmar.Ritsch -at- cern.ch
   */
-  class ConeSimSelector final: public BaseSimulationSelector, public ConeParticleCuts
+  class ATLAS_NOT_THREAD_SAFE ConeSimSelector final: public BaseSimulationSelector, public ConeParticleCuts
   {
 
   public:

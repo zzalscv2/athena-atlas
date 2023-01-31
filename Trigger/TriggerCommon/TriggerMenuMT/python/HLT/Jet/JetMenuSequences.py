@@ -9,7 +9,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from ..CommonSequences.FullScanDefs import  trkFSRoI
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 from .JetRecoCommon import jetRecoDictToString
-from .JetRecoSequences import jetClusterSequence, jetCaloRecoSequences, jetTrackingRecoSequences, jetHICaloRecoSequences, JetRoITrackJetTagSequence, getJetViewAlg, getFastFtaggedJetCopyAlg
+from .JetRecoSequences import jetClusterSequence, jetCaloRecoSequences, jetTrackingRecoSequences, jetHICaloRecoSequences, JetRoITrackJetTagSequence, getJetViewAlg, getFastFtaggedJetCopyAlg, eventinfoRecordSequence
 
 # Hypo tool generators
 from TrigHLTJetHypo.TrigJetHypoToolConfig import trigJetHypoToolFromDict
@@ -74,6 +74,7 @@ def getTrackingInputMaker(trkopt):
                 RoisWriteHandleKey  = recordable( IDTrigConfig.roi ),
                 RoIEtaWidth = IDTrigConfig.etaHalfWidth,
                 RoIPhiWidth = IDTrigConfig.phiHalfWidth,
+                RoIZWidth   = IDTrigConfig.zedHalfWidth,
             ),
             Views = "JetSuperRoIViews",
             InViewRoIs = "InViewRoIs",
@@ -204,6 +205,9 @@ def jetHICaloHypoMenuSequence(configFlags, isPerf, **jetRecoDict):
 # To combine either with a presel or a passthrough sequence
 # As this does not run topoclustering, the cluster collection
 # name needs to be passed in
+# Event variable info (NPV, avg mu, pile-up density rho) is
+# recorded in this hypo case for monitoring and
+# online-derived pflow jet calibration
 def jetFSTrackingHypoMenuSequence(configFlags, clustersKey, isPerf, **jetRecoDict):
     InputMakerAlg = getTrackingInputMaker(jetRecoDict['trkopt'])
     jetRecoSequences, jetsIn, jetDef = RecoFragmentsPool.retrieve(
@@ -212,8 +216,14 @@ def jetFSTrackingHypoMenuSequence(configFlags, clustersKey, isPerf, **jetRecoDic
 
     jetDefString = jetRecoDictToString(jetRecoDict)
     jetAthRecoSeq = parOR(f"jetFSTrackingHypo_{jetDefString}_RecoSequence", jetRecoSequences)
+
+    pvKey = getInDetTrigConfig('jet').vertex_jet
+    evtInfoRecordSeq = RecoFragmentsPool.retrieve(
+        eventinfoRecordSequence,
+        configFlags, suffix='jet', pvKey=pvKey)
+
     log.debug("Generating jet tracking hypo menu sequence for reco %s",jetDefString)
-    jetAthMenuSeq = seqAND(f"jetFSTrackingHypo_{jetDefString}_MenuSequence",[InputMakerAlg,jetAthRecoSeq])
+    jetAthMenuSeq = seqAND(f"jetFSTrackingHypo_{jetDefString}_MenuSequence",[InputMakerAlg,jetAthRecoSeq, evtInfoRecordSeq])
 
     hypoType = JetHypoAlgType.STANDARD
     if isPerf: hypoType = JetHypoAlgType.PASSTHROUGH

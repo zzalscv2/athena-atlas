@@ -26,7 +26,7 @@ class BeamHaloGenerator;
 class BeamHaloGeneratorAlg : public GenModule {
 public:
   BeamHaloGeneratorAlg(const std::string& name, ISvcLocator *svcLocator);
-  virtual ~BeamHaloGeneratorAlg();
+  virtual ~BeamHaloGeneratorAlg() = default;
   virtual StatusCode genInitialize();
   virtual StatusCode genFinalize();
 
@@ -44,45 +44,45 @@ private:
 
   /** Input file type and therefore associated beam halo generator
       that should be used. */
-  std::string m_inputTypeStr;
+  StringProperty m_inputTypeStr{this, "inputType", "MARS-NM"};
   
   /** Input file name */
-  std::string m_inputFile;
+  StringProperty m_inputFile{this, "inputFile", "bgi-b2l1.1"};
   
   /** The position of the interface plane in mm. */
-  double m_interfacePlane;
+  DoubleProperty m_interfacePlane{this, "interfacePlane", 20850.0}; // (mm)
   
   /** Flag for flipping event */
-  bool m_enableFlip;
+  BooleanProperty m_enableFlip{this, "enableFlip", false};
   
   /** Flip probability */
-  float m_flipProbability;
+  FloatProperty m_flipProbability{this, "flipProbability", 0.0};
   
   /** Flag to enable or disable sampling. */
-  bool m_enableSampling;
+  BooleanProperty m_enableSampling{this, "enableSampling", false};
   
   /** The name of the binary buffer file, needed for sampling from a
       converted file. */
-  std::string m_bufferFileName;
+  StringProperty m_bufferFileName{this, "bufferFileName", "BinaryBuffer.bin"};
   
   /** A vector of strings defining generator settings. */
-  std::vector<std::string> m_generatorSettings;
+  StringArrayProperty m_generatorSettings{this, "generatorSettings", {}, "A set of cuts to be applied to generated particles."};
   
   /** A flag to allow monitoring plots to be turned on or off. */
-  bool m_doMonitoringPlots;
+  BooleanProperty m_doMonitoringPlots{this, "doMonitoringPlots", false};
   
   /** A pointer to the THist service for validation plots. */
-  ITHistSvc *m_tHistSvc;
+  ITHistSvc *m_tHistSvc{};
   
   /** Name of the random number stream */
-  std::string m_randomStream;
+  StringProperty m_randomStream{this, "randomStream", "BeamHalo"};
   
   /** A pointer to the beam halo generator */
-  BeamHaloGenerator *m_beamHaloGenerator;
+  BeamHaloGenerator *m_beamHaloGenerator{};
 
   /** An empty GenEvent to cache the generate output between
       callGenerator and fillEvt. */
-  HepMC::GenEvent m_evt;
+  HepMC::GenEvent m_evt{};
 
   enum validationPlotsEnum {
     PRI_R,

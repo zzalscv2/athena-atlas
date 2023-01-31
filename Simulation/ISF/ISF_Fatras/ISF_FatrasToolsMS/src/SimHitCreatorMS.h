@@ -11,6 +11,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaKernel/IAtRndmGenSvc.h"
 #include "GaudiKernel/IIncidentListener.h"
+#include "CxxUtils/checker_macros.h"
 // ISF includes
 #include "ISF_FatrasInterfaces/ISimHitCreator.h"
 // Tracking includes
@@ -61,7 +62,7 @@ namespace iFatras
                Andreas Salzburger <Andreas.Salzburger@cern.ch>
   */  
 
-  class SimHitCreatorMS : public extends<AthAlgTool, ISimHitCreator, IIncidentListener>
+  class ATLAS_NOT_THREAD_SAFE SimHitCreatorMS : public extends<AthAlgTool, ISimHitCreator, IIncidentListener>  // deprecated: ATLASSIM-6020
     {
     public:
       SimHitCreatorMS(const std::string&,const std::string&,const IInterface*);

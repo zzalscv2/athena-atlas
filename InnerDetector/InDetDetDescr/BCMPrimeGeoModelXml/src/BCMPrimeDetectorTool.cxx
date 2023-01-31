@@ -33,9 +33,13 @@ StatusCode BCMPrimeDetectorTool::create()
   //
   std::string node{"InnerDetector"};
   std::string table{"BCMPrimeXDD"};
-  if (!isAvailable(node, table)) {
-    ATH_MSG_ERROR("No BCMPrime geometry found. BCMPrime can not be built.");
-    return StatusCode::FAILURE;
+
+  const GeoModelIO::ReadGeoModel* sqlreader = getSqliteReader();
+  if(!sqlreader){
+      if (!isAvailable(node, table)) {
+        ATH_MSG_ERROR("No BCMPrime geometry found. BCMPrime can not be built.");
+        return StatusCode::FAILURE;
+      }
   }
   //
   // Create the detector manager
@@ -47,13 +51,13 @@ StatusCode BCMPrimeDetectorTool::create()
 
   InDetDD::BCMPrimeGmxInterface gmxInterface(manager);
 
-  // Load the geometry, create the volume,
-  // and then find the volume index within the world to allow it to be added
-  // last two arguments are the location in the DB to look for the clob
-  // (may want to make those configurables)
-  int childIndex = createTopVolume(world, gmxInterface, node, table);
-  if (childIndex != -1) { //-1 represents an error state from the above method
-    manager->addTreeTop(&*world->getChildVol(childIndex));
+  // Load the geometry, create the volume, 
+  // node,table are the location in the DB to look for the clob
+  // empty strings are the (optional) containing detector and envelope names
+  // allowed to pass a null sqlreader ptr - it will be used to steer the source of the geometry
+  const GeoVPhysVol* topVolume = createTopVolume(world, gmxInterface, node, table,"","",sqlreader);
+  if (topVolume) { //see that a valid pointer is returned
+    manager->addTreeTop(topVolume);
   } else {
     ATH_MSG_FATAL("Could not find the Top Volume!!!");
     return StatusCode::FAILURE;

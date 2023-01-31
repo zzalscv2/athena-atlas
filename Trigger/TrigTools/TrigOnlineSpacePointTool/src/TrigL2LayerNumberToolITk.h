@@ -50,48 +50,47 @@ class TrigL2LayerNumberToolITk : virtual public ITrigL2LayerNumberTool, public A
   virtual ~TrigL2LayerNumberToolITk(){};
 		
   // standard Athena methods
-  StatusCode initialize();
-  StatusCode finalize();
+  virtual StatusCode initialize() override;
 
   //concrete implementations
 
-  virtual int maxSiliconLayerNum() const  {return m_MaxSiliconLayerNum;}
-  virtual int offsetEndcapPixels() const {return m_OffsetEndcapPixels;}
-  virtual int offsetBarrelSCT() const  {return m_OffsetBarrelSCT;}
-  virtual int offsetEndcapSCT() const  {return m_OffsetEndcapSCT;}
-  virtual void report() const ;//prints out the above 
+  virtual int maxSiliconLayerNum() const override  {return m_MaxSiliconLayerNum;}
+  virtual int offsetEndcapPixels() const override {return m_OffsetEndcapPixels;}
+  virtual int offsetBarrelSCT() const override {return m_OffsetBarrelSCT;}
+  virtual int offsetEndcapSCT() const override {return m_OffsetEndcapSCT;}
+  virtual void report() const override;//prints out the above
 
-  virtual int maxNumberOfUniqueLayers() const {
+  virtual int maxNumberOfUniqueLayers() const override {
     return static_cast<int>(m_hashMap.size());
   }
 
-  virtual const std::vector<short>* pixelLayers() const {
+  virtual const std::vector<short>* pixelLayers() const override {
     return &m_pixelLayers;
   }
 
-  virtual const std::vector<short>* sctLayers() const {
+  virtual const std::vector<short>* sctLayers() const override {
     return &m_sctLayers;
   }
 
-  virtual const std::vector<TrigInDetSiLayer>* layerGeometry() const {
+  virtual const std::vector<TrigInDetSiLayer>* layerGeometry() const override {
     return &m_layerGeometry;
   }
 
  protected:
 
-  bool m_useNewScheme;
+  Gaudi::Property<bool> m_useNewScheme{this, "UseNewLayerScheme", false};
 
   //cached values
-  int m_MaxSiliconLayerNum;
-  int m_OffsetEndcapPixels;
-  int m_OffsetBarrelSCT;
-  int m_OffsetEndcapSCT;
-  int m_LastBarrelLayer;
+  int m_MaxSiliconLayerNum{-1};
+  int m_OffsetEndcapPixels{-1};
+  int m_OffsetBarrelSCT{-1};
+  int m_OffsetEndcapSCT{-1};
+  int m_LastBarrelLayer{0};
 
-  const SCT_ID*  m_sctId;
-  const PixelID* m_pixelId;
-  const InDetDD::PixelDetectorManager* m_pixelManager;
-  const InDetDD::SCT_DetectorManager* m_sctManager;
+  const SCT_ID*  m_sctId{nullptr};
+  const PixelID* m_pixelId{nullptr};
+  const InDetDD::PixelDetectorManager* m_pixelManager{nullptr};
+  const InDetDD::SCT_DetectorManager* m_sctManager{nullptr};
 
   void createModuleHashMap(std::map<std::tuple<int, int, short, short>,std::vector<PhiEtaHashITk> >&);
   

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -106,8 +106,6 @@ StatusCode LArCellMaskingTool::fillIncludedCellsMap(const LArOnOffIdMapping* cab
     if (haveChannel) msg() << " channel=" << channel;
     msg() << endmsg;
 
-    unsigned nOnlExceptions=0;
-    unsigned nOfflExceptions=0;
     unsigned nChannels=0;
     unsigned nDisconnected=0;
     HWIdentifier chanId;
@@ -131,10 +129,8 @@ StatusCode LArCellMaskingTool::fillIncludedCellsMap(const LArOnOffIdMapping* cab
 	      nDisconnected++;
 	  }
 	  catch (const LArOnlID_Exception&) {
-	    nOnlExceptions++;
 	  }
 	  catch(const LArID_Exception&) {
-	    nOfflExceptions++;
 	  }
 	  if (!haveChannel) channel++;
 	}while (!haveChannel && channel<channelMax); 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -37,6 +37,7 @@
 // Athena includes
 #include "AthenaKernel/errorcheck.h"
 #include "StoreGate/ReadHandle.h"
+#include "StoreGate/ReadCondHandle.h"
 
 // Gaudi incldes
 #include "GaudiKernel/ServiceHandle.h"
@@ -69,8 +70,7 @@ StatusCode TileL2Builder::initialize() {
 
   ATH_CHECK( detStore()->retrieve(m_tileHWID) );
 
-  // get TileCondToolEmscale
-  ATH_CHECK( m_tileToolEmscale.retrieve() );
+  ATH_CHECK( m_emScaleKey.initialize() );
 
   // get TileBadChanTool
   ATH_CHECK( m_tileBadChanTool.retrieve() );
@@ -166,9 +166,17 @@ StatusCode TileL2Builder::initialize() {
 }
 
 StatusCode TileL2Builder::process(int fragmin, int fragmax, TileL2Container *l2Container) const {
+  const EventContext& ctx{Gaudi::Hive::currentContext()};
+  return process(fragmin, fragmax, l2Container, ctx);
+};
+
+StatusCode TileL2Builder::process(int fragmin, int fragmax, TileL2Container *l2Container, const EventContext& ctx) const {
+
+  SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+  ATH_CHECK( emScale.isValid() );
 
   // Get TileRawChannels
-  SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_rawChannelContainerKey);
+  SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_rawChannelContainerKey, ctx);
   ATH_CHECK( rawChannelContainer.isValid() );
 
   std::vector<unsigned int> extraWord;
@@ -211,8 +219,8 @@ StatusCode TileL2Builder::process(int fragmin, int fragmax, TileL2Container *l2C
         int adc = m_tileHWID->adc(adc_id);
         float ampl = rawChannel->amplitude();
         if (recalibrate) {
-          E_MeV[channel] = m_tileToolEmscale->channelCalib(drawerIdx, channel, adc, ampl, rChUnit
-                                                          , TileRawChannelUnit::MegaElectronVolts);
+          E_MeV[channel] = emScale->calibrateChannel(drawerIdx, channel, adc, ampl, rChUnit
+                                                     , TileRawChannelUnit::MegaElectronVolts);
         } else {
           E_MeV[channel] = ampl; // no conversion since energy is in MeV already
         }

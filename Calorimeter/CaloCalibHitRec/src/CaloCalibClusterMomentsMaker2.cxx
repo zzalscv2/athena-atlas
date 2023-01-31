@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -256,7 +256,7 @@ StatusCode CaloCalibClusterMomentsMaker2::initialize()
       }
       for (int im=0;im<3;im++) {
         if ( ietaMin[im] <= ietaMax[im] ) {
-          CalibHitIPhiIEtaRange theRange;
+          CalibHitIPhiIEtaRange theRange{};
           theRange.iPhi = (char)jp;
           theRange.iEtaMin = (char)ietaMin[im];
           theRange.iEtaMax = (char)ietaMax[im];
@@ -271,6 +271,8 @@ StatusCode CaloCalibClusterMomentsMaker2::initialize()
 
   ATH_CHECK(m_truthParticleContainerKey.initialize());
 
+  ATH_CHECK(m_caloDetDescrMgrKey.initialize());
+
   return StatusCode::SUCCESS;
 }
 
@@ -279,9 +281,10 @@ StatusCode CaloCalibClusterMomentsMaker2::initialize()
 StatusCode
 CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
                                        xAOD::CaloClusterContainer *theClusColl) const
-{
-  const CaloDetDescrManager* calo_dd_man = nullptr;
-  ATH_CHECK( detStore()->retrieve (calo_dd_man, "CaloMgr") );
+{  
+
+  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloDetDescrMgrKey,ctx};
+  const CaloDetDescrManager* calo_dd_man = *caloMgrHandle;
 
   bool foundAllContainers (true);
   std::vector<const CaloCalibrationHitContainer *> v_cchc;
@@ -647,7 +650,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
   std::map<unsigned int,int> truthBarcodeToPdgCodeMap;
   
   //loop on truth particle container is slow, so put needed information in a map for faster key lookup in later loops
-  for ( auto thisTruthParticle : *truthParticleContainerReadHandle){	  
+  for ( const auto *thisTruthParticle : *truthParticleContainerReadHandle){	  
 
     if (!thisTruthParticle){
       ATH_MSG_WARNING("Got invalid pointer to TruthParticle");
@@ -781,7 +784,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
 /* ****************************************************************************
 
 **************************************************************************** */
-double CaloCalibClusterMomentsMaker2::angle_mollier_factor(double x) const
+double CaloCalibClusterMomentsMaker2::angle_mollier_factor(double x) 
 {
   double eta = fabs(x);
   double ff;

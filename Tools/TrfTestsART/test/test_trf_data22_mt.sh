@@ -3,7 +3,7 @@
 # art-description: Reco_tf.py data22 RAWtoALL in MT mode
 # art-type: grid
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # art-athena-mt: 8
 
 timeout 64800 Reco_tf.py \
@@ -20,7 +20,6 @@ timeout 64800 Reco_tf.py \
   --conditionsTag "all:CONDBR2-BLKPA-2022-07" \
   --geometryVersion="all:ATLAS-R3S-2021-03-00-00" \
   --runNumber="429782" \
-  --steering="doRAWtoALL" \
   --postExec 'FPEAuditor.NStacktracesOnFPE=10' \
   --maxEvents='-1'
 

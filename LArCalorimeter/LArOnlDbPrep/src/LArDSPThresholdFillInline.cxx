@@ -84,7 +84,7 @@ StatusCode LArDSPThresholdFillInline::initialize() {
     const CaloCell_ID* caloCellID = nullptr;
     ATH_CHECK( detStore()->retrieve(caloCellID,"CaloCell_ID") );
 
-    if (m_thrPerCell.setDefinition(caloCellID,m_cellGroupStr,msg())==false)
+    if (m_thrPerCell.setDefinition(dynamic_cast<const CaloCell_Base_ID*>(caloCellID),m_cellGroupStr,msg())==false)
       return StatusCode::FAILURE;
     m_thrPerCell.printDef();
 

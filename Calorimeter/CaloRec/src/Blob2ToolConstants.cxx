@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CaloRec/Blob2ToolConstants.h"
+#include "Blob2ToolConstants.h"
 
 #include "CaloConditions/ToolConstants.h"
 #include "CoralBase/Attribute.h"

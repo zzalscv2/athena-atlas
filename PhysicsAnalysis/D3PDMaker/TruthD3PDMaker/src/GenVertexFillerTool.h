@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: GenVertexFillerTool.h 639304 2015-01-13 20:08:39Z ssnyder $
 /**
  * @file EventCommonD3PDMaker/src/GenVertexFillerTool.h
  * @author scott snyder <snyder@bnl.gov>
@@ -44,7 +41,7 @@ public:
 
 
   /// Book variables for this block.
-  virtual StatusCode book();
+  virtual StatusCode book() final;
 
 
   /**
@@ -55,7 +52,7 @@ public:
    * is responsible for arranging that all the pointers for booked variables
    * are set appropriately upon entry.
    */
-  virtual StatusCode fill (const HepMC::GenVertex& p);
+  virtual StatusCode fill (const HepMC::GenVertex& p) override;
 
 
 private:

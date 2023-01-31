@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPTracker/Collimator.h"
@@ -7,7 +7,6 @@
 #include "FPTracker/TransversePoint.h"
 #include "FPTracker/beamlineXPosition.h"
 #include "FPTracker/FPTrackerConstants.h"
-#include "FPTracker/SimpleLogger.h"
 #include <cmath>
 #include <sstream>
 #include <iostream>
@@ -76,7 +75,7 @@ namespace FPTracker{
 
   } 
 
-  void Collimator::calibrate(IParticle& particle) const
+  void Collimator::calibrate(IParticle& particle)
   {						
     // the collimator jaws start wide open.
     this->track(particle);

@@ -13,7 +13,7 @@
 #include "TrigT1CaloToolInterfaces/IL1TriggerTowerToolRun3.h"
 #include "TrigT1Interfaces/TrigT1CaloDefs.h"
 #include "TrigT1CaloCalibConditions/L1CaloRunParametersContainer.h"  
-#include "TrigT1CaloCalibConditions/L1CaloReadoutConfigContainer.h"
+#include "TrigT1CaloCalibConditions/L1CaloReadoutConfigContainerJSON.h"
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 #include "xAODTrigL1Calo/CPMTowerContainer.h" 
 #include "xAODTrigL1Calo/JetElementContainer.h"
@@ -29,9 +29,9 @@ public: MistimedStreamMonitorAlgorithm( const std::string& name, ISvcLocator* pS
   
   /// Struct to contain PPM trigger tower info
   struct MonitorTT { 
-    const xAOD::TriggerTower* tower;
-    double phiScaled; /// phi for 2d maps with integer bins (taking into account granularity in eta)
-    double phi1d;     /// phi for 1d phi distributions (taking into account granularity in eta) 
+    const xAOD::TriggerTower* tower = nullptr;
+    double phiScaled = 0; /// phi for 2d maps with integer bins (taking into account granularity in eta)
+    double phi1d = 0;     /// phi for 1d phi distributions (taking into account granularity in eta)
   };
 
   /// Struct to contain CPM tower info
@@ -56,7 +56,7 @@ private:
   
   StringProperty m_packageName{this,"PackageName","MistimedStreamMonitor","group name for histogramming"};
 
-  bool pulseQuality(const std::vector<uint16_t> ttPulse, int peakSlice) const;
+  bool pulseQuality(const std::vector<uint16_t>& ttPulse, int peakSlice) const;
  
 
   // TrigDecisionTool
@@ -81,7 +81,7 @@ private:
   
   // L1Calo Conditions 
   SG::ReadCondHandleKey<L1CaloRunParametersContainer>  m_runParametersContainer{ this, "InputKeyRunParameters", "L1CaloRunParametersContainer"};
-  SG::ReadCondHandleKey<L1CaloReadoutConfigContainer>  m_readoutConfigContainer{ this, "InputKeyReadoutConfig", "L1CaloReadoutConfigContainer"};
+  SG::ReadCondHandleKey<L1CaloReadoutConfigContainerJSON>  m_readoutConfigContainerJSON{ this, "InputKeyReadoutConfig", "L1CaloReadoutConfigContainerJSON"};
 
 
 

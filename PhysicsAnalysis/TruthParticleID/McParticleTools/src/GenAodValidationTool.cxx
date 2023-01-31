@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -41,7 +41,7 @@ GenAodValidationTool::GenAodValidationTool( const std::string& type,
 					    const std::string& name, 
 					    const IInterface* parent ) : 
   TruthParticleValidationBaseTool( type, name, parent ),
-  m_outFile( 0 )
+  m_outFile( nullptr )
 {
   //
   // Property declaration
@@ -82,7 +82,7 @@ GenAodValidationTool::~GenAodValidationTool()
   if ( m_outFile ) {
     m_outFile->close();
     delete m_outFile;
-    m_outFile = 0;
+    m_outFile = nullptr;
   }
 
 }
@@ -98,7 +98,7 @@ StatusCode GenAodValidationTool::initializeTool()
 
   if ( m_outFile ) {
     delete m_outFile;
-    m_outFile = 0;
+    m_outFile = nullptr;
   }
   m_outFile = new std::ofstream( m_hardVtxOutFileName.value().c_str(),
 				 std::ios::trunc );
@@ -107,7 +107,7 @@ StatusCode GenAodValidationTool::initializeTool()
 		  << m_hardVtxOutFileName.value());
     if ( m_outFile ) {
       delete m_outFile;
-      m_outFile = 0;
+      m_outFile = nullptr;
     }
     return StatusCode::FAILURE;
   }
@@ -139,9 +139,9 @@ StatusCode GenAodValidationTool::finalizeTool()
 StatusCode GenAodValidationTool::executeTool()
 {
   // retrieve reference McEventCollection
-  const McEventCollection * refMcEvents = 0;
+  const McEventCollection * refMcEvents = nullptr;
   if ( evtStore()->retrieve( refMcEvents, m_refMcEventsName ).isFailure() ||
-       0 == refMcEvents ) {
+       nullptr == refMcEvents ) {
     ATH_MSG_ERROR("Could not retrieve reference McEventCollection at ["
 		  << m_refMcEventsName << "] !!");
     return StatusCode::FAILURE;
@@ -156,9 +156,9 @@ StatusCode GenAodValidationTool::executeTool()
   }
 
   // retrieve checking McEventCollection
-  const McEventCollection * checkMcEvents = 0;
+  const McEventCollection * checkMcEvents = nullptr;
   if ( evtStore()->retrieve(checkMcEvents, m_checkMcEventsName).isFailure() ||
-       0 == checkMcEvents ) {
+       nullptr == checkMcEvents ) {
     ATH_MSG_ERROR("Could not retrieve 'to-be-validated' McEventCollection at ["
 		  << m_checkMcEventsName << "] !!");
     return StatusCode::FAILURE;
@@ -180,12 +180,12 @@ StatusCode
 GenAodValidationTool::executeTool( const McEventCollection* refMcEvents,
 				   const McEventCollection* checkMcEvents )
 {
-  if ( 0 == refMcEvents ) {
+  if ( nullptr == refMcEvents ) {
     ATH_MSG_ERROR("NULL pointer to reference McEventCollection !!");
     return StatusCode::FAILURE;
   }
 
-  if ( 0 == checkMcEvents ) {
+  if ( nullptr == checkMcEvents ) {
     ATH_MSG_ERROR("NULL pointer to the 'to-be-validated' McEventCollection !!");
     return StatusCode::FAILURE;
   }
@@ -216,12 +216,12 @@ StatusCode
 GenAodValidationTool::executeTool( const HepMC::GenEvent* refMcEvts,
 				   const HepMC::GenEvent* checkMcEvts )
 {
-  if ( 0 == refMcEvts ) {
+  if ( nullptr == refMcEvts ) {
     ATH_MSG_ERROR("NULL pointer to reference HepMC::GenEvent !!");
     return StatusCode::FAILURE;
   }
 
-  if ( 0 == checkMcEvts ) {
+  if ( nullptr == checkMcEvts ) {
     ATH_MSG_ERROR("NULL pointer to the 'to-be-validated' HepMC::GenEvent !!");
     return StatusCode::FAILURE;
   }
@@ -234,7 +234,7 @@ GenAodValidationTool::executeTool( const HepMC::GenEvent* refMcEvts,
 
 #ifdef HEPMC3   
   // loop over reference vertices
-  for ( auto  vtx: refMcEvts->vertices()) {
+  for ( const auto&  vtx: refMcEvts->vertices()) {
     if ( m_ppFilter.isAccepted(vtx) &&
 	 !m_showerFilter.isAccepted(vtx) ) {
       HepMC::Print::line(*m_outFile,vtx);
@@ -242,14 +242,14 @@ GenAodValidationTool::executeTool( const HepMC::GenEvent* refMcEvts,
       if ( !checkVtx ) {
 	ATH_MSG_WARNING
 	  ("Output GenEvent is missing the selected HardScattering Vtx !!"
-	   << " (" << HepMC::barcode(vtx) << ")");
+	   << " (" << vtx << ")");
       } else {
 	(*m_outFile) << "---------" << std::endl;
 	 HepMC::Print::line(*m_outFile,checkVtx);
 	if ( !compareVtx( vtx, checkVtx ) ) {
 	  ATH_MSG_WARNING("Selected HardScattering vertices are NOT the same !!"
 			  << " at Event [" << evtNbr << "]"
-			  << " refVtx = " << HepMC::barcode(vtx));
+			  << " refVtx = " << vtx);
 	}
       }
     }
@@ -258,18 +258,18 @@ GenAodValidationTool::executeTool( const HepMC::GenEvent* refMcEvts,
   // loop over slimmed HepMC::GenEvent and check that vertices
   // are comparable
   // loop over reference vertices
-  for (auto checkVtx: checkMcEvts->vertices()) {
+  for (const auto& checkVtx: checkMcEvts->vertices()) {
     HepMC::ConstGenVertexPtr refVtx = HepMC::barcode_to_vertex(refMcEvts,HepMC::barcode(checkVtx));
     if (!refVtx) {
       ATH_MSG_WARNING("In Event [" << evtNbr
-		      << "]: got null ref-vertex (barcode: " 
-		      << HepMC::barcode(checkVtx) << ")");
+		      << "]: got null ref-vertex ( " 
+		      << checkVtx << ")");
       continue;
     }
     if ( !compareVtx( refVtx, checkVtx ) ) {
       ATH_MSG_WARNING("In Event [" << evtNbr
 		      << "]: vertices are not the SAME (" 
-		      << HepMC::barcode(refVtx) << ")");
+		      << refVtx << ")");
       std::stringstream refVtxStr;
       HepMC::Print::line(refVtxStr,refVtx);
       std::stringstream checkVtxStr;
@@ -346,7 +346,7 @@ GenAodValidationTool::executeTool( const HepMC::GenEvent* refMcEvts,
   return StatusCode::SUCCESS;
 }
 
-bool GenAodValidationTool::compareVtx( HepMC::ConstGenVertexPtr vtx1, HepMC::ConstGenVertexPtr vtx2 ) const
+bool GenAodValidationTool::compareVtx( const HepMC::ConstGenVertexPtr& vtx1, const HepMC::ConstGenVertexPtr& vtx2 ) const
 {
   if ( !vtx1 || !vtx2 ) {
     ATH_MSG_ERROR("One of vertices is a NULL pointer !!" << endmsg
@@ -356,51 +356,32 @@ bool GenAodValidationTool::compareVtx( HepMC::ConstGenVertexPtr vtx1, HepMC::Con
   }
 
 #ifdef HEPMC3 
-  const int inVtx1 = vtx1->particles_in().size();
-  const int inVtx2 = vtx2->particles_in().size();
-
-  const int outVtx1 = vtx1->particles_out().size();
-  const int outVtx2 = vtx2->particles_out().size();
-  
-  if (  inVtx1 !=  inVtx2 || outVtx1 != outVtx2 ) {
-    ATH_MSG_ERROR("Not the same number of branches !!" << endmsg
-		  << " in:  " << inVtx1  << "\t" << inVtx2  << endmsg
-		  << " out: " << outVtx1 << "\t" << outVtx2);
+  auto inVtx1 = vtx1->particles_in();
+  auto inVtx2 = vtx2->particles_in();
+  if (inVtx1.size() !=  inVtx2.size()) {
+    ATH_MSG_ERROR("Not the same number of branches !!" << endmsg  << " in:  " << inVtx1.size()  << "\t" << inVtx2.size());
     return false;
   }
-
-  for ( auto inPart1: vtx1->particles_in()) {
-    bool inParticleOK = false;
-    for ( auto inPart2: vtx2->particles_in()) {
-      if ( compareParts( inPart1, inPart2 ) ) {
-	inParticleOK = true;
-	break;
-      }
-    } //> end loop over in-part2
-
-    if ( !inParticleOK ) {
-      ATH_MSG_ERROR("In-going particles are NOT matching !!");
-      return false;
-    }
-
-  }//> end loop over in-part1
-
-
-  for ( auto outPart1: vtx1->particles_out()) {
-    bool outParticleOK = false;
-    for ( auto outPart2: vtx2->particles_out()) {
-      if ( compareParts( outPart1, outPart2 ) ) {
-	outParticleOK = true;
-	break;
-      }
-    } //> end loop over out-part2
-
-    if ( !outParticleOK ) {
-      ATH_MSG_ERROR("Out-going particles are NOT matching !!");
-      return false;
-    }
-
-  }//> end loop over out-part1	
+  std::sort(inVtx1.begin(), inVtx1.end(), [](auto& a, auto& b) -> bool{return a->momentum().pz() > b->momentum().pz(); });
+  std::sort(inVtx2.begin(), inVtx2.end(), [](auto& a, auto& b) -> bool{return a->momentum().pz() > b->momentum().pz(); });
+  for (size_t i=0; i<inVtx1.size(); ++i){
+     if ( compareParts( inVtx1.at(i), inVtx2.at(i) ) ) continue;
+     ATH_MSG_ERROR("In-going particles are NOT matching !!");
+     return false;
+  }
+  auto outVtx1 = vtx1->particles_out();
+  auto outVtx2 = vtx2->particles_out();
+  if (outVtx1.size() !=  outVtx2.size()) {
+    ATH_MSG_ERROR("Not the same number of branches !!" << endmsg  << " out:  " << outVtx1.size()  << "\t" << outVtx2.size());
+    return false;
+  }
+  std::sort(outVtx1.begin(), outVtx1.end(), [](auto& a, auto& b) -> bool{return a->momentum().pz() > b->momentum().pz(); });
+  std::sort(outVtx2.begin(), outVtx2.end(), [](auto& a, auto& b) -> bool{return a->momentum().pz() > b->momentum().pz(); });
+  for (size_t i=0; i<outVtx1.size(); ++i){
+     if ( compareParts( outVtx1.at(i), outVtx2.at(i) ) ) continue;
+     ATH_MSG_ERROR("Out-going particles are NOT matchiutg !!");
+     return false;
+  }
 #else
   const int inVtx1 = vtx1->particles_in_size();
   const int inVtx2 = vtx2->particles_in_size();
@@ -461,10 +442,10 @@ bool GenAodValidationTool::compareVtx( HepMC::ConstGenVertexPtr vtx1, HepMC::Con
 }
 
 bool 
-GenAodValidationTool::compareParts( HepMC::ConstGenParticlePtr p1, HepMC::ConstGenParticlePtr p2 ) const
+GenAodValidationTool::compareParts( const HepMC::ConstGenParticlePtr& p1, const HepMC::ConstGenParticlePtr& p2 ) const
 {
   if ( !p1 || !p2 ) {
-    ATH_MSG_ERROR("One of particlees is a NULL pointer !!" << endmsg
+    ATH_MSG_ERROR("One of particles is a NULL pointer !!" << endmsg
 		  << " p1: " << p1 << endmsg
 		  << " p2: " << p2);
     return false;

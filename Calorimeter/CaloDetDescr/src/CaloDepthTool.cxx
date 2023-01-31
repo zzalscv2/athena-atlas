@@ -671,7 +671,11 @@ CaloDepthTool::get_entrance_radius(CaloCell_ID::CaloSample sample,
   if (!elt) {
     return s_default;
   }
-  return (elt->r() - elt->dr());
+
+  //Only for tile is dR the full radius of the layer  - for
+  //other calorimeters it is half the radius
+  if (elt->is_tile()) return (elt->r() - elt->dr()/2);
+  else return (elt->r() - elt->dr());
 }
 
 double
@@ -684,7 +688,11 @@ CaloDepthTool::get_entrance_z(CaloCell_ID::CaloSample sample,
   if (!elt) {
     return s_default;
   }
-  return (elt->z() - (elt->z() < 0 ? -elt->dz() : elt->dz()));
+
+  //Only for tile is dZ the full Z length of the layer  - for
+  //other calorimeters it is half of this
+  if (elt->is_tile()) return (elt->z() - (elt->z() < 0 ? -elt->dz()/2 : elt->dz()/2));
+  else return (elt->z() - (elt->z() < 0 ? -elt->dz() : elt->dz()));
 }
 
 double
@@ -726,7 +734,11 @@ CaloDepthTool::get_exit_radius(CaloCell_ID::CaloSample sample,
   if (!elt) {
     return s_default;
   }
-  return (elt->r() + elt->dr());
+
+  //Only for tile is dR the full radius of the layer  - for
+  //other calorimeters it is half the radius
+  if (elt->is_tile()) return (elt->r() + elt->dr()/2);
+  else return (elt->r() + elt->dr());
 }
 
 double
@@ -740,6 +752,10 @@ CaloDepthTool::get_exit_z(CaloCell_ID::CaloSample sample,
   if (!elt) {
     return s_default;
   }
-  return (elt->z() + (elt->z() < 0 ? -elt->dz() : elt->dz()));
+  
+  //Only for tile is dZ the full Z length of the layer  - for
+  //other calorimeters it is half of this
+  if (elt->is_tile()) return (elt->z() + (elt->z() < 0 ? -elt->dz()/2 : elt->dz()/2));
+  else return (elt->z() + (elt->z() < 0 ? -elt->dz() : elt->dz()));
 }
 

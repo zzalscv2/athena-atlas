@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // -------------------------------------------------------------
@@ -98,12 +98,10 @@ StatusCode TrimuMassRangeFilter::filterEvent() {
 
     // Loop over all particles in the event
     const HepMC::GenEvent* genEvt = (*itr);
-    int n=0;
     auto genEvt_particles_begin  = HepMC::begin(*genEvt);
     auto genEvt_particles_end    = HepMC::end(*genEvt);
     for(auto pitr1 = genEvt_particles_begin;
 	pitr1!=genEvt_particles_end; ++pitr1 ){
-      n++;
       if( ( std::abs((*pitr1)->pdg_id()) != std::abs(m_PartId1)  && 99999 != std::abs(m_PartId1) ) || //PDG ID selection
           (*pitr1)->status() != m_PartStatus  ||    //status of the particle 
           (*pitr1)->momentum().perp() < m_Ptmin1  || // pT cut

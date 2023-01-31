@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:41:26 CET 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -111,9 +111,9 @@ void handler(int sig) {
 // useful function to return a string with the 
 // current date   
 std::string time_str() { 
-  time_t _t;
-  time(&_t);
-  std::string s(ctime(&_t));
+  time_t t;
+  time(&t);
+  std::string s(ctime(&t));
   //  std::string::size_type pos = s.find("\n");
   // if ( pos != std::string::npos ) 
   return s.substr(0,s.find('\n'));
@@ -680,6 +680,15 @@ int main(int argc, char** argv)
     }
   }
 
+  std::string exclude = "";
+
+  TrackAssociator* ex_matcher = 0;
+
+  if ( inputdata.isTagDefined("Exclude") ) { 
+    exclude    = inputdata.GetString("Exclude");
+    ex_matcher = new Associator_BestDeltaRZSinThetaMatcher( "deltaRZ", 0.01, 0.01, 2 ); 
+  }
+
   if (refChains.size() == 0){
     std::cerr << "Error: refChains is empty\n" <<std::endl;
     return -1;
@@ -775,7 +784,7 @@ int main(int argc, char** argv)
   //  }
   
 
-  std::vector<double> _lumiblocks;
+  std::vector<double> lumiblocks;
   lumiParser  goodrunslist;
 
 
@@ -788,10 +797,10 @@ int main(int argc, char** argv)
   }
   else if ( inputdata.isTagDefined("LumiBlocks") )  { 
     /// else get the list from the dat file directly
-    _lumiblocks = inputdata.GetVector("LumiBlocks");
+    lumiblocks = inputdata.GetVector("LumiBlocks");
     
-    for (unsigned int i=0 ; i<_lumiblocks.size()-2 ; i+=3 ){ 
-      goodrunslist.addRange( _lumiblocks[i],  _lumiblocks[i+1],  _lumiblocks[i+2] );  
+    for (unsigned int i=0 ; i<lumiblocks.size()-2 ; i+=3 ){
+      goodrunslist.addRange( lumiblocks[i],  lumiblocks[i+1],  lumiblocks[i+2] );
     }
   }
   
@@ -1299,9 +1308,9 @@ int main(int argc, char** argv)
 
   /// Determine what sort of matching is required ...
 
-  TrackAssociator* _matcher = 0;
+  TrackAssociator* matcher = 0;
 
-  if      ( useMatcher == "Sigma" )    _matcher = new Associator_BestSigmaMatcher("sigma", Rmatch); 
+  if      ( useMatcher == "Sigma" )    matcher = new Associator_BestSigmaMatcher("sigma", Rmatch);
   else if ( useMatcher == "DeltaRZ" || useMatcher == "DeltaRZSinTheta" )  { 
     double deta = 0.05;
     double dphi = 0.05;
@@ -1310,21 +1319,21 @@ int main(int argc, char** argv)
     if ( inputdata.isTagDefined("Matcher_dphi" ) ) dphi = inputdata.GetValue("Matcher_dphi"); 
     if ( inputdata.isTagDefined("Matcher_dzed" ) ) dzed = inputdata.GetValue("Matcher_dzed"); 
 
-    if ( useMatcher == "DeltaRZ" ) _matcher = new Associator_BestDeltaRZMatcher(         "deltaRZ", deta, dphi, dzed ); 
-    else                           _matcher = new Associator_BestDeltaRZSinThetaMatcher( "deltaRZ", deta, dphi, dzed ); 
+    if ( useMatcher == "DeltaRZ" ) matcher = new Associator_BestDeltaRZMatcher(         "deltaRZ", deta, dphi, dzed );
+    else                           matcher = new Associator_BestDeltaRZSinThetaMatcher( "deltaRZ", deta, dphi, dzed );
   }
   else if ( useMatcher == "pT_2" ) { 
     double pTmatchLim_2 = 1.0;
     if ( inputdata.isTagDefined("Matcher_pTLim_2") ) pTmatchLim_2 = inputdata.GetValue("Matcher_pTLim_2");
-    _matcher = new Associator_SecondBestpTMatcher("SecpT", pTmatchLim_2);
+    matcher = new Associator_SecondBestpTMatcher("SecpT", pTmatchLim_2);
   }
   else if ( useMatcher == "Truth" ) {  
-    _matcher = new Associator_TruthMatcher();
+    matcher = new Associator_TruthMatcher();
   }
   else { 
     /// default to deltaR matcher
     /// track matcher for best fit deltaR matcher
-    _matcher = new Associator_BestDeltaRMatcher("deltaR", Rmatch); 
+    matcher = new Associator_BestDeltaRMatcher("deltaR", Rmatch);
   }
   
   /// extra matcher for additionally matching reference to truth 
@@ -1470,7 +1479,6 @@ int main(int argc, char** argv)
 
 
 
-  int addedfiles = 0;
 
 
 
@@ -1509,7 +1517,6 @@ int main(int argc, char** argv)
 
     bool newfile = true;
 
-    addedfiles++;  
 
     TFile*  finput = TFile::Open( filenames[ifile].c_str() );
 
@@ -1667,6 +1674,7 @@ int main(int argc, char** argv)
         }
       }
     }
+    
     /// select the reference offline vertices
 
     std::vector<TIDA::Vertex> vertices; // keep for now as needed for line 1709
@@ -1683,6 +1691,7 @@ int main(int argc, char** argv)
       double  selection = 0;
       
       //  std::vector<TIDA::Vertex>& vertices = vertices;
+
       if ( debugPrintout ) std::cout << "vertices:\n" << mv << std::endl;      
       
       if ( bestPTVtx || bestPT2Vtx )  {  
@@ -1759,22 +1768,74 @@ int main(int argc, char** argv)
 
           //Get tracks from within reference roi
 
-          refTracks.selectTracks( chains[ic].rois()[0].tracks() );
+	  /// get any objects to exclude matched from the reference selection
 
-          /// get objects if requested
+	  if ( exclude.empty() ) { 
+	    refTracks.selectTracks( chains[ic].rois()[0].tracks() );
+	  }
+	  else { 
 
-          if ( chains[ic].rois()[0].objects().size()>0 ) { 
-            tom = TrigObjectMatcher( &refTracks, chains[ic].rois()[0].objects(), SelectObjectETovPT );
-          }
+	    std::vector<TIDA::Track> tmptracks = chains[ic][0].tracks();
 
-          break;
+	    for ( size_t ix=chains.size() ; ix-- ; ) {
+	      
+	      if ( chains[ix].name()==exclude ) {
+		
+		std::vector<TIDA::Track> extracks = chains[ix][0].tracks();
 
-        }
+		std::vector<TIDA::Track*> refp;
+		std::vector<TIDA::Track*> refx;
+		
+		for ( size_t it=tmptracks.size() ; it-- ; )  refp.push_back( &tmptracks[it] );
+		for ( size_t it=extracks.size()  ; it-- ; )  refx.push_back( &extracks[it] );
 
+		/// match between the reference tracks and the objects to be excluded, 
+		/// and rebuild the reference tracks without the matches  
+		
+		ex_matcher->match( refp, refx );
+
+		std::vector<TIDA::Track*> refp_ex;
+
+		for ( size_t it=refp.size() ; it-- ; ) { 
+		  /// if no match then add back to the standard reefrence 
+		  if ( ex_matcher->matched(refp[it])==0 ) refp_ex.push_back(refp[it]);
+		}
+		
+		refTracks.clear();
+		refTracks.selectTracks( refp_ex );
+
+		if ( debugPrintout ) { 
+		  
+		  std::cout << "\nexclude: " << refp.size() << "\t" << refp_ex.size() << std::endl;
+		  std::cout << "exclude:\n"  << extracks << std::endl;
+		  std::cout << "reference tracks: " << std::endl;
+
+		  size_t it0 = refp_ex.size();
+		  
+		  for ( size_t it=0 ; it<refp.size() && it0>0 ; it++ ) { 
+		    if ( refp[it]==refp_ex[it0-1] ) std::cout << it << "\t" << *refp[it] << "\t" << *refp_ex[--it0] << std::endl;
+		    else 		            std::cout << "\n" << it << "\t" << *refp[it] << "\t----\n" << std::endl;
+		  }
+
+		}
+
+		break;
+	      }
+
+	    }
+	  }
+
+	  /// get objects if requested
+	  
+	  if ( chains[ic].rois()[0].objects().size()>0 ) { 
+	    tom = TrigObjectMatcher( &refTracks, chains[ic].rois()[0].objects(), SelectObjectETovPT );
+	  }
+	  
+	  break; 
+	}
       }
-
     }
-
+    
     if ( !foundReference ) continue;
     
     if ( debugPrintout ) { 
@@ -1808,9 +1869,9 @@ int main(int argc, char** argv)
 	foutdir->cd();
 	cf->initialiseInternal();
 	// changes to output directory and books the invariant mass histograms
-	TH1F* m_invmass     = cf->getHist_invmass();
-	TH1F* m_invmass_obj = cf->getHist_invmassObj();
-	rois = TnP_tool->GetRois( track_ev->chains(), &refTracks, refFilter, m_invmass, m_invmass_obj, &tom );
+	TH1F* invmass     = cf->getHist_invmass();
+	TH1F* invmass_obj = cf->getHist_invmassObj();
+	rois = TnP_tool->GetRois( track_ev->chains(), &refTracks, refFilter, invmass, invmass_obj, &tom );
       } 
       else {
 	// if not a tnp analysis then fill rois in the normal way
@@ -2024,7 +2085,7 @@ int main(int argc, char** argv)
             double pt = std::atof( ptconfig.c_str() );
             if ( pt>0 ) { 
               std::vector<TIDA::Track*> reft; reft.reserve(refp_vec.size());
-              for ( std::vector<TIDA::Track*>::const_iterator itr=refp_vec.begin() ; itr!=refp_vec.end() ; itr++ ) { 
+              for ( std::vector<TIDA::Track*>::const_iterator itr=refp_vec.begin() ; itr!=refp_vec.end() ; ++itr ) { 
                 if ( std::fabs((*itr)->pT())>=pt ) reft.push_back( *itr );
               }
               refp_vec = reft;
@@ -2052,8 +2113,10 @@ int main(int argc, char** argv)
               while (  itr!=refp_vec.end() ) { 
                 const TrackTrigObject* tobj = tom.object( (*itr)->id() );
 
-                if ( tobj==0 || tobj->pt()<ETconfig ) refp_vec.erase( itr );
-                else itr++;
+                if ( tobj==0 || tobj->pt()<ETconfig ) 
+		  itr=refp_vec.erase( itr );
+                else 
+		  ++itr;
               }
             }
           }
@@ -2156,10 +2219,10 @@ int main(int argc, char** argv)
           }
         }
 
-        _matcher->match( refp, testp);
+        matcher->match( refp, testp);
        
-        if ( tom.status() ) analitr->second->execute( refp, testp, _matcher, &tom );
-        else                analitr->second->execute( refp, testp, _matcher );
+        if ( tom.status() ) analitr->second->execute( refp, testp, matcher, &tom );
+        else                analitr->second->execute( refp, testp, matcher );
 
         ConfVtxAnalysis* vtxanal = 0;
         analitr->second->store().find( vtxanal, "rvtx" );
@@ -2189,8 +2252,8 @@ int main(int argc, char** argv)
           std::cout << "ref tracks refp.size() "    << refp.size() << "\n" << refp  << std::endl;
           std::cout << "test tracks testp.size() " << testp.size() << "\n" << testp << std::endl;
           
-          TrackAssociator::map_type::const_iterator titr = _matcher->TrackAssociator::matched().begin();
-          TrackAssociator::map_type::const_iterator tend = _matcher->TrackAssociator::matched().end();
+          TrackAssociator::map_type::const_iterator titr = matcher->TrackAssociator::matched().begin();
+          TrackAssociator::map_type::const_iterator tend = matcher->TrackAssociator::matched().end();
           int im=0;
           std::cout << "track matches:\n";
           while (titr!=tend) { 
@@ -2226,7 +2289,7 @@ int main(int argc, char** argv)
           testPurityTracks.selectTracks( troi.tracks() );
           std::vector<TIDA::Track*> testpp = testPurityTracks.tracks();
 
-          _matcher->match(refpp, testpp); /// ???
+          matcher->match(refpp, testpp); /// ???
             
 
           std::map<std::string,TrackAnalysis*>::iterator analitrp = analysis.find(chain.name()+"-purity");
@@ -2234,11 +2297,10 @@ int main(int argc, char** argv)
           if ( analitrp == analysis.end() ) continue;
 
 
-          analitrp->second->execute( refpp, testpp, _matcher );
+          analitrp->second->execute( refpp, testpp, matcher );
           
 
-          static int ecounter = 0;
-          ecounter++;
+         
         }
       } // loop through rois
       
@@ -2258,7 +2320,7 @@ int main(int argc, char** argv)
             << "\ttimes "  << mintime << " " << maxtime 
             << "\t( grl: " << grl_counter << " / " << pregrl_events << " )" << std::endl;
 
-  if ( monitorZBeam ) zbeam _zbeam( refz, testz );
+  if ( monitorZBeam ) zbeam zb( refz, testz );
 
   foutdir->cd();
   
@@ -2280,6 +2342,8 @@ int main(int argc, char** argv)
 
   foutput.Write();
   foutput.Close();
+
+  if ( ex_matcher ) delete ex_matcher;
 
   std::cout << "done" << std::endl;
 

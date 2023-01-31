@@ -17,7 +17,7 @@ class TH1I;
   
 namespace LArSamples {
     
-  class OccupancyMonitor : public MonitorBase  
+  class ATLAS_NOT_THREAD_SAFE OccupancyMonitor : public MonitorBase  
   {
   
     public:

@@ -13,7 +13,6 @@ from TrigByteStreamTools.hltResultMT import get_collections
 import logging
 msg = logging.getLogger('PyJobTransforms.' + __name__)
 
-
 class dbgEventInfo:
 
     def __init__(self, dbgStep='_Default', inputFile=''):
@@ -27,15 +26,18 @@ class dbgEventInfo:
         self.Node_ID                               = 0
         self.HLT_Result                            = 'None'
         self.SuperMasterKey                        = 0
-        self.HLTPrescaleKey                           = 0
-        self.HLT_Application                       = 'None'
+        self.HLTPrescaleKey                        = 0
         self.HLT_Decision                          = False
         self.L1_Chain_Names                        = []
         self.HLT_Chain_Names                       = []
         self.EventStatusNames                      = 'None'
 
+        #define the string length 
+        self.strlength = 100
+
         self.eventCounter = 0
         self.rootDefinitions(dbgStep, inputFile)
+        
 
         # Full event Specific Status - based on ATL-DAQ-98-129 
         self.EventSpecificStatus = ['Reserved',
@@ -96,6 +98,19 @@ class dbgEventInfo:
 
         streamtagTypes = ','.join([tag.type for tag in event.stream_tag()])
         self.Stream_Tag_Type = streamtagTypes
+        
+        
+        # Check if the length of the Stream_Tag_Name & Stream_Tag_Type
+        # if too long then cut off the end so that the Root file can fill properly
+        if (len(self.Stream_Tag_Name) > self.strlength):
+            # print warning and cut out the string characters > strlength char 
+            msg.warn("Stream_Tag_Name has length %s reducing to length %s",len(self.Stream_Tag_Name), self.strlength)
+            self.Stream_Tag_Name = self.Stream_Tag_Name[0:self.strlength]
+        
+        if (len(self.Stream_Tag_Type) > self.strlength):
+            # print warning and cut out the string characters > strlength char 
+            msg.warn("Stream_Tag_Type has length %s reducing to length %s",len(self.Stream_Tag_Type), self.strlength)
+            self.Stream_Tag_Type = self.Stream_Tag_Type[0:self.strlength]
 
         self.eventStatus(event)
         self.lvl1Info(event, L1ChainNames)
@@ -170,9 +185,16 @@ class dbgEventInfo:
                 msg.warn("Cannot find additional words for PSC_PROBLEM")
 
         self.EventStatusNames = ','.join(str(name) for name in statusList)
-        msg.info('Event Status :{0}'.format(self.EventStatusNames))
+        msg.info('Event Status :%s', self.EventStatusNames)
+        
+        # Check if the length of the EventStatusNames
+        # if too long then cut off the end so that the Root file can fill properly
+        if (len(self.EventStatusNames) > self.strlength):
+            # print warning and cut out the string characters > strlength char 
+            msg.warn("EventStatusNames has length %s reducing to length %s",len(self.EventStatusNames), self.strlength)
+            self.EventStatusNames = self.EventStatusNames[0:self.strlength]
 
-
+ 
     def lvl1Info(self, event, L1ItemNames):
         # Get LVL1 info for BP AV and AV-TrigIDs and store them in ROOT vectors
         self.L1_Triggered_BP.clear()
@@ -317,7 +339,6 @@ class dbgEventInfo:
         self.Event_Info.SuperMasterKey         = self.SuperMasterKey
         self.Event_Info.HLTPrescaleKey         = self.HLTPrescaleKey
         self.Event_Info.HLT_Decision           = self.HLT_Decision
-        self.Event_Info.HLT_Application        = self.HLT_Application
         self.Event_Info.EventStatusNames       = self.EventStatusNames
 
         self.event_info_tree.Fill()
@@ -328,22 +349,23 @@ class dbgEventInfo:
         gStyle.SetOptStat(000000)
         gROOT.SetStyle("Plain")
   
+      
         # Create new ROOT Tree to store debug info
         if dbgStep == "_Pre" :
-            gROOT.ProcessLine("struct EventInfoTree {\
-            Char_t  Code_File[30];\
+            gROOT.ProcessLine("#define STRINGLENGTH "+str(self.strlength))
+            gROOT.ProcessLine(
+            "struct EventInfoTree {\
             Int_t   Run_Number;\
-            Char_t  Stream_Tag_Name[80];\
-            Char_t  Stream_Tag_Type[80];\
+            Char_t  Stream_Tag_Name[STRINGLENGTH];\
+            Char_t  Stream_Tag_Type[STRINGLENGTH];\
             UInt_t  Lvl1_ID;\
-            Int_t   Global_ID;\
+            ULong_t Global_ID;\
             Int_t   Lumiblock;\
             Int_t   Node_ID;\
             Int_t   SuperMasterKey;\
             Int_t   HLTPrescaleKey;\
             Bool_t  HLT_Decision;\
-            Char_t  HLT_Application[50];\
-            Char_t  EventStatusNames[50];\
+            Char_t  EventStatusNames[STRINGLENGTH];\
             };" )
   
         # Bind the ROOT tree with EventInfo class members
@@ -361,7 +383,6 @@ class dbgEventInfo:
         self.event_info_tree.Branch('SuperMasterKey',   addressof(self.Event_Info, 'SuperMasterKey'),   'superMasterKey/I')
         self.event_info_tree.Branch('HLTPrescaleKey',   addressof(self.Event_Info, 'HLTPrescaleKey'),   'hltPrescaleKey/I')
         self.event_info_tree.Branch('HLT_Decision',     addressof(self.Event_Info, 'HLT_Decision'),     'hLT_Decision/B')
-        self.event_info_tree.Branch('HLT_Application',  addressof(self.Event_Info, 'HLT_Application'),  'HLT_Application/C')
         self.event_info_tree.Branch('EventStatusNames', addressof(self.Event_Info, 'EventStatusNames'), 'eventStatusNames/C')
 
         # Setup vector data

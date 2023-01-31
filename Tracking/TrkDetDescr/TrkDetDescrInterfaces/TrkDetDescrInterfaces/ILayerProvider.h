@@ -19,9 +19,6 @@ namespace Trk {
 
 class Layer;
 
-/** Interface ID for ILayerProviders*/
-static const InterfaceID IID_ILayerProvider("ILayerProvider", 1, 0);
-
 /** @class ILayerProvider
 
   Interface class ILayerProviders
@@ -33,20 +30,18 @@ class ILayerProvider : virtual public IAlgTool
 {
 
 public:
+  /// Creates the InterfaceID and interfaceID() method
+  DeclareInterfaceID(ILayerProvider, 1, 0);
+
   /**Virtual destructor*/
   virtual ~ILayerProvider() {}
 
-  /** AlgTool and IAlgTool interface methods */
-  static const InterfaceID& interfaceID() { return IID_ILayerProvider; }
-
-  /** LayerBuilder interface method - returning the layers at negative side */
-  virtual const std::vector<Layer*> negativeLayers() const = 0;
+  /** LayerBuilder interface method - returning the endcap layer */
+  virtual std::pair<const std::vector<Layer*>, const std::vector<Layer*> >
+  endcapLayer() const = 0;
 
   /** LayerBuilder interface method - returning the central layers */
   virtual const std::vector<Layer*> centralLayers() const = 0;
-
-  /** LayerBuilder interface method - returning the layers at negative side */
-  virtual const std::vector<Layer*> positiveLayers() const = 0;
 
   /** Name identification */
   virtual const std::string& identification() const = 0;

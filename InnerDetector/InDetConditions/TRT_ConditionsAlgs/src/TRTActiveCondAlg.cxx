@@ -95,7 +95,7 @@ StatusCode TRTActiveCondAlg::execute()
 
   float rMinEndcap = 617.; 
   float rMaxEndcap = 1106.;
-  int countAll(0), countDead(0), countSaved(0), countPhiSkipped(0), countEtaSkipped(0), countInvalidEtaValues(0); 
+  int countAll(0), countDead(0), countPhiSkipped(0), countEtaSkipped(0), countInvalidEtaValues(0); 
   for (std::vector<Identifier>::const_iterator it = m_trtId->straw_layer_begin(); it != m_trtId->straw_layer_end(); ++it  ) {
      int nStrawsInLayer = m_trtId->straw_max(*it);
      for (int i=0; i<=nStrawsInLayer; i++) { 
@@ -165,7 +165,6 @@ StatusCode TRTActiveCondAlg::execute()
 	if (etaMaxBin<0) etaMaxBin = writeCdo->getEtaBins().size() - 1;
         if (etaMaxBin<etaMinBin) ATH_MSG_WARNING( "TRTCond::ActiveFraction: etaMaxBin<etaMinBin " << etaMinBin << " " << etaMaxBin << ", side: " << side);
 
-        countSaved++; // now save straw info for these bins
 	for (int iEta = etaMinBin; iEta <= etaMaxBin; iEta++) {
 	   dummyTableCountAll[iEta][phiBin]++;
 	   if (status) dummyTableCountDead[iEta][phiBin]++;

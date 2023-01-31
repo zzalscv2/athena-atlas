@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: CaloClusterCorrection/test/config_t.py
@@ -1080,33 +1080,34 @@ def test23 (flags_in):
 
 from AthenaConfiguration.TestDefaults import defaultTestFiles
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-ConfigFlags.Input.Files = defaultTestFiles.RAW
-ConfigFlags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2017-05"
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+flags = initConfigFlags()
+flags.Input.Files = defaultTestFiles.RAW
+flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2017-05"
 
-test1 (ConfigFlags)
-test2 (ConfigFlags)
-test3 (ConfigFlags)
-test4 (ConfigFlags)
-test5 (ConfigFlags)
-test6 (ConfigFlags)
-test7 (ConfigFlags)
-test8 (ConfigFlags)
-test9 (ConfigFlags)
-test10 (ConfigFlags)
-test11 (ConfigFlags)
-test12 (ConfigFlags)
-test13 (ConfigFlags)
-test14 (ConfigFlags)
-test15 (ConfigFlags)
-test16 (ConfigFlags)
-test17 (ConfigFlags)
-test18 (ConfigFlags)
-test19 (ConfigFlags)
-test20 (ConfigFlags)
-test21 (ConfigFlags)
-test22 (ConfigFlags)
-test23 (ConfigFlags)
+test1 (flags)
+test2 (flags)
+test3 (flags)
+test4 (flags)
+test5 (flags)
+test6 (flags)
+test7 (flags)
+test8 (flags)
+test9 (flags)
+test10 (flags)
+test11 (flags)
+test12 (flags)
+test13 (flags)
+test14 (flags)
+test15 (flags)
+test16 (flags)
+test17 (flags)
+test18 (flags)
+test19 (flags)
+test20 (flags)
+test21 (flags)
+test22 (flags)
+test23 (flags)
 
 
 c.analyze()

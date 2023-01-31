@@ -8,7 +8,7 @@ project( AthDataQuality VERSION ${_version} LANGUAGES C CXX )
 unset( _version )
 
 # Set the version of tdaq-common to use for the build:
-set( TDAQ-COMMON_VERSION "04-04-00" CACHE STRING
+set( TDAQ-COMMON_VERSION "10-00-00" CACHE STRING
    "The version of tdaq-common to use for the build" )
 set( TDAQ-COMMON_ATROOT
    "$ENV{TDAQ_RELEASE_BASE}/tdaq-common/tdaq-common-${TDAQ-COMMON_VERSION}"
@@ -18,11 +18,14 @@ set( TDAQ-COMMON_ATROOT
 find_package( AtlasCMake REQUIRED )
 
 # Build the project against LCG:
-set( LCG_VERSION_POSTFIX "_ATLAS_26"
+set( LCG_VERSION_POSTFIX "b_ATLAS_11"
    CACHE STRING "Version postfix for the LCG release to use" )
-set( LCG_VERSION_NUMBER 101
+set( LCG_VERSION_NUMBER 102
    CACHE STRING "Version number for the LCG release to use" )
 find_package( LCG ${LCG_VERSION_NUMBER} EXACT REQUIRED )
+
+# HepMC3
+set( HEPMC3_USE TRUE CACHE BOOL "Build with HepMC3" )
 
 # Set up tdaq-common explicitly.
 find_package( tdaq-common REQUIRED )
@@ -33,6 +36,7 @@ find_package( GSL )
 find_package( PNG )
 find_package( TBB )
 find_package( TIFF )
+find_package( libffi )
 
 # Disable flake8.
 set( ATLAS_FLAKE8 true   # <- this is the shell builtin `true`

@@ -24,7 +24,7 @@ class ServiceExtensionManager : public GeoVDetectorManager  {
  public:
   
   // Constructor
-  ServiceExtensionManager();
+  ServiceExtensionManager(const std::string & name);
 
   // Destructor
   ~ServiceExtensionManager();

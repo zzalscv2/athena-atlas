@@ -42,7 +42,6 @@ preexec_reco = [
   "InDetFlags.doR3LargeD0.set_Value_and_Lock(False)",
   "InDetFlags.doForwardTracks.set_Value_and_Lock(False)",
 ]
-preexec_aod = preexec_reco
 Input   = 'data_cos'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 

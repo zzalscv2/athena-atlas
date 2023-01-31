@@ -155,19 +155,19 @@ void CaloDetDescriptor::dump(std::ostream& os) const
 
   //calculate euler angles
   double theta1, psi1, phi1;
-  if (fabs(fabs(rot(2,1))-1) > 0.00001)
+  if (std::abs(std::abs(rot(2,1))-1.0f) > 0.00001)
   {
-      theta1 = -asin(rot(2,0));
-      psi1 = atan2(rot(2,1)/cos(theta1), rot(2,2)/cos(theta1));
-      phi1 = atan2(rot(1,0)/cos(theta1), rot(0,0)/cos(theta1));
+      theta1 = -std::asin(rot(2,0));
+      psi1 = std::atan2(rot(2,1)/std::cos(theta1), rot(2,2)/std::cos(theta1));
+      phi1 = std::atan2(rot(1,0)/std::cos(theta1), rot(0,0)/std::cos(theta1));
   } else {
       phi1 = 0;
       if(rot(2,0) == -1){
           theta1 = M_PI*0.5;
-          psi1 = atan2(rot(0,1),rot(0,2));
+          psi1 = std::atan2(rot(0,1),rot(0,2));
       } else {
           theta1 = -(M_PI * 0.5);
-          psi1 = atan2(-rot(0,1), -rot(0,2));
+          psi1 = std::atan2(-rot(0,1), -rot(0,2));
       }
   }
 
@@ -278,7 +278,7 @@ int CaloDetDescriptor::phi_channel(double phi) const
 
   // -M_PI,M_PI convention :
   if (phi <= m_lar_phi_min) 
-    phi_fixed = phi_fixed + 4*asin(1.);
+    phi_fixed = phi_fixed + 2.0*M_PI;
 
   int chan = (int)((phi_fixed - m_lar_phi_min)/m_lar_dphi) + m_calo_helper->phi_min(m_id);
 
@@ -308,7 +308,7 @@ int CaloDetDescriptor::phi_channel_raw(double phi) const
   
   // -M_PI,M_PI convention :
   if (phi <= m_calo_phi_min)
-    phi_fixed = phi_fixed + 4*asin(1.);
+    phi_fixed = phi_fixed + 2.0*M_PI;
     
   int chan = (int)((phi_fixed - m_calo_phi_min)/m_lar_dphi) + m_calo_helper->phi_min(m_id);
   

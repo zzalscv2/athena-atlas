@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOEVENT_CALOCELLCONTAINER_H
@@ -100,7 +100,7 @@ class CaloCellContainer : public DataVector<CaloCell>
 
 
   /** @brief dump (obsolete) */
-  void print() const;
+  static void print() ;
 
   /** @brief get const iterators on cell of just one calo */
   CaloCellContainer::const_iterator beginConstCalo(CaloCell_ID::SUBCALO caloNum) const, endConstCalo(CaloCell_ID::SUBCALO caloNum) const;

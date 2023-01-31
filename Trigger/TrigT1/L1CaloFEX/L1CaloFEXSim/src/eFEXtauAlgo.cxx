@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*************************************************************************
@@ -206,6 +206,9 @@ unsigned int LVL1::eFEXtauAlgo::getEt()
   out += m_hadcells[1][m_offPhi];
   out += m_hadcells[2][m_offPhi];
 
+  // Overflow handling
+  if (out > 0xffff) out = 0xffff;
+
   return out;
 }
 
@@ -223,6 +226,9 @@ unsigned int LVL1::eFEXtauAlgo::rCoreCore()
   out += m_em2cells[m_seed][m_offPhi];
   out += m_em2cells[m_seed + 1][m_offPhi];
   out += m_em2cells[m_seed - 1][m_offPhi];
+
+  // Overflow handling
+  if (out > 0xffff) out = 0xffff;
 
   return out;
 
@@ -248,6 +254,9 @@ unsigned int LVL1::eFEXtauAlgo::rCoreEnv()
   out += m_em2cells[m_seed - 3][m_offPhi];
   out += m_em2cells[m_seed + 4][m_offPhi];
   out += m_em2cells[m_seed - 4][m_offPhi];
+
+  // Overflow handling
+  if (out > 0xffff) out = 0xffff;
 
   return out;
 
@@ -292,6 +301,9 @@ unsigned int LVL1::eFEXtauAlgo::rHadCore()
   out += m_hadcells[1][m_offPhi];
   out += m_hadcells[2][m_offPhi];
 
+  // Overflow handling
+  if (out > 0xffff) out = 0xffff;
+
   return out;
 
 }
@@ -320,6 +332,9 @@ unsigned int LVL1::eFEXtauAlgo::rHadEnv()
   out += m_em1cells[m_seed][m_offPhi];
   out += m_em1cells[m_seed - 1][m_offPhi];
   out += m_em1cells[m_seed + 1][m_offPhi];
+
+  // Overflow handling
+  if (out > 0xffff) out = 0xffff;
 
   return out;
 
@@ -358,11 +373,9 @@ void LVL1::eFEXtauAlgo::setUnDAndOffPhi()
 
   unsigned int upwardEt = 0;
   upwardEt += m_em2cells[m_seed][2];
-  upwardEt += m_em1cells[m_seed][2];
   
   unsigned int downwardEt = 0;
   downwardEt += m_em2cells[m_seed][0];
-  downwardEt += m_em1cells[m_seed][0];
 
   if (downwardEt > upwardEt) {
     m_offPhi = 0;
@@ -374,13 +387,31 @@ void LVL1::eFEXtauAlgo::setUnDAndOffPhi()
   }
 }
 
+
+// Utility function to calculate and return jet discriminant sums for specified location
+// Intended to allow xAOD TOBs to be decorated with this information
+void LVL1::eFEXtauAlgo::getSums(unsigned int seed, bool UnD, 
+                         std::vector<unsigned int> & RcoreSums, 
+                         std::vector<unsigned int> & RemSums) 
+{
+  // Set seed parameters to supplied values
+  m_und = UnD;
+  m_seed = seed + 4; // In this function seed has range 4-7
+
+  // Now just call the 2 discriminant calculation methods
+  getRCore(RcoreSums);
+  getRHad(RemSums);
+
+}
+
+
 // Find the supercell seed eta value, must be in central cell so in the range 4-7 inclusive
 void LVL1::eFEXtauAlgo::setSupercellSeed()
 {
-  unsigned int seed = 4;
+  unsigned int seed = 7;
   int max_et = 0;
   int cell_et = 0;
-  for(unsigned int i = 4; i < 8; i++)
+  for(unsigned int i = 7; i > 3; --i)
   {
     cell_et = m_em2cells[i][1];
     if (cell_et > max_et)

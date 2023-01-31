@@ -6,12 +6,11 @@
 #include "GaudiKernel/PhysicalConstants.h"
 #include "xAODJet/JetContainer.h"
 #include "CLHEP/Random/RandomEngine.h"
-#include "AthenaKernel/IAtRndmGenSvc.h" // For random numbers...
+#include "AthenaKernel/RNGWrapper.h"
 #include "TF1.h" // For holding the weighting function
 
 QCDTruthMultiJetFilter::QCDTruthMultiJetFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name,pSvcLocator)
-  , m_rand("AtRndmGenSvc",name)
   , m_total(0)
   , m_passed(0)
   , m_ptfailed(0)
@@ -30,6 +29,9 @@ QCDTruthMultiJetFilter::QCDTruthMultiJetFilter(const std::string& name, ISvcLoca
 
 
 StatusCode QCDTruthMultiJetFilter::filterInitialize() {
+
+  CHECK(m_rndmSvc.retrieve());
+
   m_NjetMinPt /= Gaudi::Units::GeV;
   m_MinLeadJetPt /= Gaudi::Units::GeV;
   m_MaxLeadJetPt /= Gaudi::Units::GeV;
@@ -60,7 +62,8 @@ StatusCode QCDTruthMultiJetFilter::filterEvent() {
   m_total++; // Bookkeeping
 
   // Grab random number engine - this is kept with the QCDTruthJetFilter engine
-  CLHEP::HepRandomEngine* rndm = m_rand->GetEngine("QCDTruthJetFilter");
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  CLHEP::HepRandomEngine* rndm = this->getRandomEngine(name(), ctx);
   if (!rndm) {
     ATH_MSG_WARNING("Failed to retrieve random number engine QCDTruthJetFilter");
     setFilterPassed(false);
@@ -130,4 +133,14 @@ StatusCode QCDTruthMultiJetFilter::filterEvent() {
     else (*mec)[i]->weights().push_back( w*m_norm*orig );
   }
   return StatusCode::SUCCESS;
+}
+
+
+CLHEP::HepRandomEngine* QCDTruthMultiJetFilter::getRandomEngine(const std::string& streamName,
+                                                                const EventContext& ctx) const
+{
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, streamName);
+  std::string rngName = name()+streamName;
+  rngWrapper->setSeed( rngName, ctx );
+  return rngWrapper->getEngine(ctx);
 }

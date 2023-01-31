@@ -470,30 +470,27 @@ StatusCode Trk::MeasurementVectorNtupleTool::fillTrackData (
 
   // Loop over all track states on surfaces
   int stateIndexCounter=0;
-  for (DataVector<const Trk::TrackStateOnSurface>::const_iterator it=trackStates->
-         begin();
-       it!=trackStates->end();
-       ++it) {
+  for (const auto *trackState : *trackStates) {
 
 
-    if (!(*it)) {
+    if (!trackState) {
       msg(MSG::WARNING) << "TrackStateOnSurface == Null" << endmsg;
       continue;
     }
-    if ((*it)->type(Trk::TrackStateOnSurface::Measurement) ||
-        (*it)->type(Trk::TrackStateOnSurface::Outlier)     ) {
+    if (trackState->type(Trk::TrackStateOnSurface::Measurement) ||
+        trackState->type(Trk::TrackStateOnSurface::Outlier)     ) {
 
       ++stateIndexCounter;
       ATH_MSG_VERBOSE ("try to get measurement for track state");
       // Get pointer to measurement on track
-      const Trk::MeasurementBase *measurement = (*it)->measurementOnTrack();
+      const Trk::MeasurementBase *measurement = trackState->measurementOnTrack();
       if (!measurement) {
         msg(MSG::ERROR) << "measurementOnTrack == Null for a TrackStateOnSurface "
                         << "of type Measurement or Outlier" << endmsg;
         return StatusCode::FAILURE;
       } // end if (!measurement)
       TrackState::MeasurementType detectorType = m_detTypeHelper->defineType(measurement);
-      const Trk::TrackParameters* theParameters = (*it)->trackParameters();
+      const Trk::TrackParameters* theParameters = trackState->trackParameters();
       const Trk::TrackParameters* unbiasedParameters = nullptr;
 
       // -----------------------------------------
@@ -505,7 +502,7 @@ StatusCode Trk::MeasurementVectorNtupleTool::fillTrackData (
       //    will be used).
       if (theParameters && m_updator && (m_isUnbiased==1)
           && (detectorType!=TrackState::Pseudo)
-	  && (! (*it)->type(Trk::TrackStateOnSurface::Outlier)) ) {
+	  && (! trackState->type(Trk::TrackStateOnSurface::Outlier)) ) {
         if ( theParameters->covariance() ) {
             // Get unbiased state
           unbiasedParameters = m_updator->removeFromState( *theParameters,
@@ -540,12 +537,12 @@ StatusCode Trk::MeasurementVectorNtupleTool::fillTrackData (
 
       if ((fillMeasurementData(measurement,
                                theParameters,
-                               ((*it)->type(Trk::TrackStateOnSurface::Outlier)),
+                               (trackState->type(Trk::TrackStateOnSurface::Outlier)),
                                detectorType)).isFailure())
         msg(MSG::WARNING) << "info about TrackState could not be written to ntuple" << endmsg;
       if ((callHelperTools(measurement,
                            theParameters,
-                           ((*it)->type(Trk::TrackStateOnSurface::Outlier)),
+                           (trackState->type(Trk::TrackStateOnSurface::Outlier)),
                            detectorType,
                            stateIndexCounter)).isFailure())
         msg(MSG::WARNING) << "Could not call helper Tool! " << endmsg;
@@ -564,14 +561,12 @@ StatusCode Trk::MeasurementVectorNtupleTool::fillTrackData (
       msg(MSG::WARNING) << "Got no holes on track" << endmsg;
       return StatusCode::SUCCESS;
     }
-    for (DataVector<const Trk::TrackStateOnSurface>::const_iterator it=holesOnTrack->begin();
-         it!=holesOnTrack->end();
-         ++it) {
-      if (!(*it)) {
+    for (const auto *it : *holesOnTrack) {
+      if (!it) {
         msg(MSG::WARNING) << "TrackStateOnSurface from hole search tool == Null" << endmsg;
         continue;
       }
-      if (fillHoleData(*(*it)).isFailure()) {
+      if (fillHoleData(*it).isFailure()) {
         msg(MSG::WARNING) << "info about TrackState (hole) could not be written to ntuple" << endmsg;
       }
     } // end loop on holes
@@ -747,7 +742,7 @@ StatusCode Trk::MeasurementVectorNtupleTool::fillMeasurementData(
       float pullLocX     = s_errorEntry;
       float pullLocY     = s_errorEntry;
       if (trkParameters) {
-        const Trk::ResidualPull* residualPull
+        std::unique_ptr<Trk::ResidualPull> residualPull
           = m_residualPullCalculator->residualPull(measurement, trkParameters,
                                                    (m_isUnbiased==1) ? Trk::ResidualPull::Unbiased :
                                                     Trk::ResidualPull::Biased);
@@ -772,7 +767,6 @@ StatusCode Trk::MeasurementVectorNtupleTool::fillMeasurementData(
                              << (isOutlier? " (flagged as outlier)." : "."));
             }
           }
-          delete residualPull;
         } else {
           msg(MSG::WARNING) << "ResidualPullCalculator failed!" << endmsg;
         }

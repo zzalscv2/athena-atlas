@@ -83,8 +83,6 @@ if hasattr(runArgs,"inputRDO_TRIGFile"):
     athenaCommonFlags.PoolRDOInput.set_Value_and_Lock( runArgs.inputRDO_TRIGFile)
     ConfigFlags.Input.Files = athenaCommonFlags.PoolRDOInput()
     rec.doTrigger.set_Value_and_Lock(False)
-    from TrigHLTMonitoring.HLTMonFlags import HLTMonFlags
-    HLTMonFlags.doMonTier0 = False
     from AthenaMonitoring.DQMonFlags import DQMonFlags
     DQMonFlags.doCTPMon = False
     DQMonFlags.doHLTMon = False
@@ -92,7 +90,7 @@ if hasattr(runArgs,"inputRDO_TRIGFile"):
     DQMonFlags.doLVL1CaloMon = False
     # Configure HLT output
     from TriggerJobOpts.HLTTriggerResultGetter import HLTTriggerResultGetter
-    hltOutput = HLTTriggerResultGetter()
+    hltOutput = HLTTriggerResultGetter(ConfigFlags)
     # Add Trigger menu metadata
     from RecExConfig.ObjKeyStore import objKeyStore
     if rec.doFileMetaData():

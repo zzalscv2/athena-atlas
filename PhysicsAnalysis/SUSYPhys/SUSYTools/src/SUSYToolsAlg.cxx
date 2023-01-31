@@ -112,7 +112,7 @@ StatusCode SUSYToolsAlg::initialize() {
   ATH_CHECK( m_SUSYTools.setProperty("DataSource",m_dataSource) );
   ATH_CHECK(m_SUSYTools.setProperty("PRWLumiCalcFiles", m_PRWLumiCalcFiles) );
   ATH_CHECK(m_SUSYTools.setProperty("OutputLevel", this->msg().level()) );
-  ATH_CHECK(m_SUSYTools.setProperty("DebugMode", ((int)(this->msg().level())<3?true:false )));
+  ATH_CHECK(m_SUSYTools.setProperty("DebugMode", (static_cast<int>(this->msg().level())<3?true:false )));
   if (m_usePRWAutoconfig){
     ATH_CHECK(m_SUSYTools.setProperty("AutoconfigurePRWTool", true) );
     ATH_CHECK(m_SUSYTools.setProperty("mcCampaign", m_mcCampaign) );
@@ -1024,8 +1024,8 @@ StatusCode SUSYToolsAlg::execute() {
             }
           }
         }
-        ATH_MSG_VERBOSE( "  Electron passing baseline selection?" << (int) el->auxdata<char>("baseline") );
-        ATH_MSG_VERBOSE( "  Electron passing signal selection?" << (int) el->auxdata<char>("signal") );
+        ATH_MSG_VERBOSE( "  Electron passing baseline selection? "  << static_cast<int>( el->auxdata<char>("baseline")));
+        ATH_MSG_VERBOSE( "  Electron passing signal selection? "    << static_cast<int>( el->auxdata<char>("signal")));
         if (el->auxdata< char >("signal") == 1)
           ATH_MSG_VERBOSE( "  Electron weight " << el->auxdata<double>("effscalefact") );
 
@@ -1058,8 +1058,8 @@ StatusCode SUSYToolsAlg::execute() {
             }
           }
         }
-        ATH_MSG_VERBOSE( "  Photon passing baseline selection?" << (int) ph->auxdata<char>("baseline") );
-        ATH_MSG_VERBOSE( "  Photon passing signal selection?" << (int) ph->auxdata<char>("signal") );
+        ATH_MSG_VERBOSE( "  Photon passing baseline selection? "  << static_cast<int>(ph->auxdata<char>("baseline")));
+        ATH_MSG_VERBOSE( "  Photon passing signal selection? "    << static_cast<int>(ph->auxdata<char>("signal")));
         if (ph->auxdata< char >("signal") == 1)
           ATH_MSG_VERBOSE( "  Photon weight " << ph->auxdata<double>("effscalefact") );
       }
@@ -1091,9 +1091,9 @@ StatusCode SUSYToolsAlg::execute() {
             }
           }
         }
-        ATH_MSG_VERBOSE( "  Muon passing baseline selection?" << (int) mu->auxdata<char>("baseline") );
-        ATH_MSG_VERBOSE( "  Muon passing signal selection?" << (int) mu->auxdata<char>("signal") );
-        ATH_MSG_VERBOSE( "  Muon is a cosmic ray?" << (int) mu->auxdata<char>("cosmic") );
+        ATH_MSG_VERBOSE( "  Muon passing baseline selection? "  << static_cast<int>(mu->auxdata<char>("baseline")));
+        ATH_MSG_VERBOSE( "  Muon passing signal selection? "    << static_cast<int>(mu->auxdata<char>("signal")));
+        ATH_MSG_VERBOSE( "  Muon is a cosmic ray? "             << static_cast<int>(mu->auxdata<char>("cosmic")));
         if (mu->auxdata< char >("signal") == 1)
           ATH_MSG_VERBOSE( "  Muon weight " << mu->auxdata<double>("effscalefact") );
       }
@@ -1117,14 +1117,14 @@ StatusCode SUSYToolsAlg::execute() {
     if (m_slices["jet"]) {
       ATH_MSG_DEBUG("Working on jets");
       for ( const auto& jet : *jets ) {
-        ATH_MSG_VERBOSE( " Jet is bad? " << (int) jet->auxdata<char>("bad") );
-        ATH_MSG_VERBOSE( " Jet is baseline ? " << (int) jet->auxdata<char>("baseline") );
-        ATH_MSG_VERBOSE( " Jet passes OR ? " << (int) jet->auxdata<char>("passOR") );
+        ATH_MSG_VERBOSE( " Jet is bad? "        << static_cast<int>(jet->auxdata<char>("bad")));
+        ATH_MSG_VERBOSE( " Jet is baseline ? "  << static_cast<int>(jet->auxdata<char>("baseline")));
+        ATH_MSG_VERBOSE( " Jet passes OR ? "    << static_cast<int>(jet->auxdata<char>("passOR")));
         if (jet->auxdata<char>("passOR")) {
           if (m_slices["bjet"] && (isNominal || syst_affectsJets || syst_affectsBTag)) {
             m_SUSYTools->IsBJet(*jet);
           }
-          ATH_MSG_VERBOSE( " Jet is bjet ? " << (int) jet->auxdata<char>("bjet") );
+          ATH_MSG_VERBOSE( " Jet is bjet ? "    << static_cast<int>(jet->auxdata<char>("bjet")));
         }
       }
 
@@ -1169,9 +1169,9 @@ StatusCode SUSYToolsAlg::execute() {
     if( m_slices["fjet"] && doFatJets ) {
       ATH_MSG_DEBUG("Working on fat jets");
       for ( const auto& fatjet : *fatjets ) {
-        ATH_MSG_VERBOSE( " Jet is bad? " << (int) fatjet->auxdata<char>("bad") );
-        ATH_MSG_VERBOSE( " Jet is baseline ? " << (int) fatjet->auxdata<char>("baseline") );
-        ATH_MSG_VERBOSE( " Jet passes OR ? " << (int) fatjet->auxdata<char>("passOR") );
+        ATH_MSG_VERBOSE( " Jet is bad? "       << static_cast<int>(fatjet->auxdata<char>("bad")));
+        ATH_MSG_VERBOSE( " Jet is baseline ? " << static_cast<int>(fatjet->auxdata<char>("baseline")));
+        ATH_MSG_VERBOSE( " Jet passes OR ? "   << static_cast<int>(fatjet->auxdata<char>("passOR")));
       }
 
       float fatjet_weight(1.);
@@ -1198,9 +1198,9 @@ StatusCode SUSYToolsAlg::execute() {
     if( m_slices["tjet"] && doTrkJets ) {
       ATH_MSG_DEBUG("Working on trk jets");
       for ( const auto& trkjet : *trkjets ) {
-        ATH_MSG_VERBOSE( " Jet is bad? " << (int) trkjet->auxdata<char>("bad") );
-        ATH_MSG_VERBOSE( " Jet is baseline ? " << (int) trkjet->auxdata<char>("baseline") );
-        ATH_MSG_VERBOSE( " Jet passes OR ? " << (int) trkjet->auxdata<char>("passOR") );
+        ATH_MSG_VERBOSE( " Jet is bad? "        << static_cast<int>(trkjet->auxdata<char>("bad")));
+        ATH_MSG_VERBOSE( " Jet is baseline ? "  << static_cast<int>(trkjet->auxdata<char>("baseline")));
+        ATH_MSG_VERBOSE( " Jet passes OR ? "    << static_cast<int>(trkjet->auxdata<char>("passOR")));
       }
 
       float trkjet_weight(1.);
@@ -1234,8 +1234,8 @@ StatusCode SUSYToolsAlg::execute() {
             }
           }
         }
-        ATH_MSG_VERBOSE( "  Tau passing baseline selection?" << (int) ta->auxdata<char>("baseline") );
-        ATH_MSG_VERBOSE( "  Tau passing signal selection?" << (int) ta->auxdata<char>("signal") );
+        ATH_MSG_VERBOSE( "  Tau passing baseline selection? " << static_cast<int>(ta->auxdata<char>("baseline")));
+        ATH_MSG_VERBOSE( "  Tau passing signal selection? "   << static_cast<int>(ta->auxdata<char>("signal")));
         if (ta->auxdata< char >("signal") == 1)
           ATH_MSG_VERBOSE( "  Tau weight " << ta->auxdata<double>("effscalefact") );
       }
@@ -1407,6 +1407,7 @@ StatusCode SUSYToolsAlg::bookHistograms(void) {
 void SUSYToolsAlg::groupSysts(void) {
   syst_all.clear();
   syst_weights.clear();
+  const std::vector<std::string> Nominal{"Nominal"};
   for (const auto& sysInfo : sysInfoList) {
     std::string sys_name = sysInfo.systset.name();
     std::string sys_affects = ST::testAffectsObject(sysInfo.affectsType);
@@ -1416,13 +1417,13 @@ void SUSYToolsAlg::groupSysts(void) {
 
     // collect all syst names
     // per affected object
-    if (syst_all.find(sys_affects) == syst_all.end()) syst_all[sys_affects] = {"Nominal"};
-    syst_all[sys_affects].push_back(sys_name);
+    const auto & [pairPtr, inserted] = syst_all.try_emplace(sys_affects, Nominal);
+    pairPtr->second.push_back(sys_name);
 
     // weight related syst
     if (sys_affects_weights) {
-       if (syst_weights.find(sys_affects) == syst_weights.end()) syst_weights[sys_affects] = {"Nominal"};
-       syst_weights[sys_affects].push_back(sys_name);
+      const auto & [pairPtr_w, inserted_w] = syst_weights.try_emplace(sys_affects, Nominal);
+      pairPtr_w->second.push_back(sys_name);
     }
   }
 }

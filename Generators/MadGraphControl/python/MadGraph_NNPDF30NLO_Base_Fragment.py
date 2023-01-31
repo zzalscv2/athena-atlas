@@ -1,9 +1,25 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import MadGraphControl.MadGraphUtils
 MadGraphControl.MadGraphUtils.MADGRAPH_PDFSETTING={
-    'central_pdf':260000,     # NNPDF30_nlo_as_0118
-    'pdf_variations':[260000,93300], # NNPDF30_nlo_as_0118 and PDF4LHC21
-    'alternative_pdfs':[266000,265000,303200,27400,27100,14000,14400,304400,304200,331500,331100,14200,14300,14100], # NNPDF30_nnlo_as_0118_hessian, MSHT20nnlo_as118, MSHT20nlo_as118, CT18NNLO, CT18NLO, NNPDF31_nnlo_as_0118_hessian, NNPDF31_nlo_as_0118_hessian, NNPDF40_nnlo_as_01180_hessian, NNPDF40_nlo_as_01180, CT18ANNLO, CT18XNNLO, CT18ZNNLO
+    'central_pdf': 303000, #NNPDF30_nlo_as_0118_hessian    
+    'pdf_variations':[303000,93300], # NNPDF30_nlo_as_0118_hessian PDF4LHC21_40_pdfas
+    'alternative_pdfs':[266000, #NNPDF30_nlo_as_0119
+                        265000, #NNPDF30_nlo_as_0117
+                        303200, #NNPDF30_nnlo_as_0118_hessian
+                        27400, #MSHT20nnlo_as118
+                        27100, #MSHT20nlo_as118
+                        14000, #CT18NNLO
+                        14400, #CT18NLO
+                        304400, #NNPDF31_nnlo_as_0118_hessian
+                        304200, #NNPDF31_nlo_as_0118_hessian
+                        331500, #NNPDF40_nnlo_as_01180_hessian
+                        331700, #NNPDF40_nlo_as_01180
+                        14200, #CT18ANNLO
+                        14300, #CT18XNNLO
+                        14100, #CT18ZNNLO
+                        13100, #CT14nlo 
+                        25200, #MMHT2014nlo68clas118 
+                        ],    
     'scale_variations':[0.5,1.,2.],
 }

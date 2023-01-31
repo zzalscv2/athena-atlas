@@ -9,8 +9,6 @@
 # - The number of hits Pixel/SCT/TRT (default)
 # We optionally can add
 # - Holes  in the measurement set (default False)
-# - Shared Hits between tracks (default False)
-# - Expected Hits in Inner/next to Inner most using
 # the fitted perigee parameters (default False)
 # - Muon specific additional information
 #
@@ -29,10 +27,11 @@ def InDetTrackSummaryToolCfg(flags,
         return ITkTrackSummaryToolCfg(flags, name, **kwargs)
 
     acc = ComponentAccumulator()
-    do_holes = kwargs.get("doHolesInDet", True)
+
+    kwargs.setdefault("doHolesInDet", True)
 
     if 'InDetSummaryHelperTool' not in kwargs:
-        if do_holes:
+        if kwargs["doHolesInDet"]:
             from InDetConfig.InDetTrackSummaryHelperToolConfig import (
                 InDetTrackSummaryHelperToolCfg)
             InDetSummaryHelperTool = acc.popToolsAndMerge(
@@ -44,55 +43,8 @@ def InDetTrackSummaryToolCfg(flags,
                 InDetSummaryHelperNoHoleSearchCfg(flags))
         kwargs.setdefault("InDetSummaryHelperTool", InDetSummaryHelperTool)
 
-    kwargs.setdefault("doSharedHits", False)
-    kwargs.setdefault("doHolesInDet", do_holes)
-
     acc.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name, **kwargs))
     return acc
-
-
-def InDetTrackSummaryToolAmbiCfg(flags,
-                                 name='InDetTrackSummaryToolAmbi',
-                                 **kwargs):
-    acc = ComponentAccumulator()
-
-    if 'InDetSummaryHelperTool' not in kwargs:
-        from InDetConfig.InDetTrackSummaryHelperToolConfig import (
-            InDetTrackSummaryHelperToolCfg)
-        InDetSummaryHelperTool = acc.popToolsAndMerge(
-            InDetTrackSummaryHelperToolCfg(
-                flags,
-                name="InDetAmbiguityProcessorSplitProbSummaryHelper" +
-                flags.InDet.Tracking.ActivePass.extension,
-                ClusterSplitProbabilityName="InDetAmbiguityProcessorSplitProb" + flags.InDet.Tracking.ActivePass.extension))
-        kwargs.setdefault("InDetSummaryHelperTool", InDetSummaryHelperTool)
-
-    InDetTrackSummaryTool = acc.popToolsAndMerge(
-        InDetTrackSummaryToolCfg(flags, name, **kwargs))
-    acc.setPrivateTools(InDetTrackSummaryTool)
-    return acc
-
-
-def InDetTrackSummaryToolSharedHitsCfg(
-        flags,
-        name='InDetTrackSummaryToolSharedHits',
-        **kwargs):
-    acc = ComponentAccumulator()
-    if 'InDetSummaryHelperTool' not in kwargs:
-        from InDetConfig.InDetTrackSummaryHelperToolConfig import (
-            InDetSummaryHelperSharedHitsCfg)
-        InDetSummaryHelperSharedHits = acc.popToolsAndMerge(
-            InDetSummaryHelperSharedHitsCfg(flags))
-        kwargs.setdefault("InDetSummaryHelperTool",
-                          InDetSummaryHelperSharedHits)
-
-    kwargs.setdefault("doSharedHits", flags.InDet.Tracking.doSharedHits)
-
-    InDetTrackSummaryTool = acc.popToolsAndMerge(
-        InDetTrackSummaryToolCfg(flags, name, **kwargs))
-    acc.setPrivateTools(InDetTrackSummaryTool)
-    return acc
-
 
 def InDetTrackSummaryToolNoHoleSearchCfg(flags,
                                          name='InDetTrackSummaryToolNoHoleSearch',
@@ -101,10 +53,13 @@ def InDetTrackSummaryToolNoHoleSearchCfg(flags,
     return InDetTrackSummaryToolCfg(flags, name, **kwargs)
 
 
-def InDetTrigTrackSummaryToolCfg(flags,
-                                 name="InDetTrigTrackSummaryTool",
-                                 **kwargs):
+def InDetTrigTrackSummaryToolCfg(flags,name="InDetTrigTrackSummaryTool",**kwargs):
+    """
+    instance with hole search
+    """
     acc = ComponentAccumulator()
+
+    kwargs.setdefault("doHolesInDet", True)
 
     if 'InDetSummaryHelperTool' not in kwargs:
         from InDetConfig.InDetTrackSummaryHelperToolConfig import (
@@ -113,19 +68,33 @@ def InDetTrigTrackSummaryToolCfg(flags,
             TrigTrackSummaryHelperToolCfg(flags))
         kwargs.setdefault("InDetSummaryHelperTool", summaryHelperTool)
 
-    kwargs.setdefault("doSharedHits", True)
-    kwargs.setdefault("doHolesInDet", True)
-
-    acc.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name, **kwargs))
+    acc.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name = name, **kwargs))
     return acc
 
+def InDetTrigFastTrackSummaryToolCfg(flags, name="InDetTrigFastTrackSummaryTool", **kwargs):
+    """
+    faster instance without hole search and TRT 
+    """
+
+    acc = ComponentAccumulator()
+    from InDetConfig.InDetTrackSummaryHelperToolConfig import TrigTrackSummaryHelperToolSiOnlyCfg
+    summaryHelperTool = acc.popToolsAndMerge(
+        TrigTrackSummaryHelperToolSiOnlyCfg(flags,
+                                            ))
+        
+    return InDetTrigTrackSummaryToolCfg(flags,
+                                        name = name,
+                                        doHolesInDet = False,
+                                        InDetSummaryHelperTool=summaryHelperTool,
+                                        **kwargs)
 
 def ITkTrackSummaryToolCfg(flags, name='ITkTrackSummaryTool', **kwargs):
     acc = ComponentAccumulator()
-    do_holes = kwargs.get("doHolesInDet", True)
+
+    kwargs.setdefault("doHolesInDet", True)
 
     if 'InDetSummaryHelperTool' not in kwargs:
-        if do_holes:
+        if kwargs["doHolesInDet"]:
             from InDetConfig.InDetTrackSummaryHelperToolConfig import (
                 ITkTrackSummaryHelperToolCfg)
             ITkSummaryHelperTool = acc.popToolsAndMerge(
@@ -137,51 +106,8 @@ def ITkTrackSummaryToolCfg(flags, name='ITkTrackSummaryTool', **kwargs):
                 ITkSummaryHelperNoHoleSearchCfg(flags))
         kwargs.setdefault("InDetSummaryHelperTool", ITkSummaryHelperTool)
 
-    kwargs.setdefault("doSharedHits", False)
-    kwargs.setdefault("doHolesInDet", do_holes)
-
     acc.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name, **kwargs))
     return acc
-
-
-def ITkTrackSummaryToolAmbiCfg(flags,
-                               name='ITkTrackSummaryToolAmbi',
-                               **kwargs):
-    acc = ComponentAccumulator()
-
-    if 'InDetSummaryHelperTool' not in kwargs:
-        from InDetConfig.InDetTrackSummaryHelperToolConfig import (
-            ITkTrackSummaryHelperToolCfg)
-        ITkSummaryHelperTool = acc.popToolsAndMerge(
-            ITkTrackSummaryHelperToolCfg(
-                flags,
-                ClusterSplitProbabilityName="ITkAmbiguityProcessorSplitProb" + flags.ITk.Tracking.ActivePass.extension))
-        kwargs.setdefault("InDetSummaryHelperTool", ITkSummaryHelperTool)
-
-    ITkTrackSummaryTool = acc.popToolsAndMerge(
-        ITkTrackSummaryToolCfg(flags, name, **kwargs))
-    acc.setPrivateTools(ITkTrackSummaryTool)
-    return acc
-
-
-def ITkTrackSummaryToolSharedHitsCfg(flags,
-                                     name='ITkTrackSummaryToolSharedHits',
-                                     **kwargs):
-    acc = ComponentAccumulator()
-    if 'InDetSummaryHelperTool' not in kwargs:
-        from InDetConfig.InDetTrackSummaryHelperToolConfig import (
-            ITkSummaryHelperSharedHitsCfg)
-        ITkSummaryHelperSharedHits = acc.popToolsAndMerge(
-            ITkSummaryHelperSharedHitsCfg(flags))
-        kwargs.setdefault("InDetSummaryHelperTool", ITkSummaryHelperSharedHits)
-
-    kwargs.setdefault("doSharedHits", flags.ITk.Tracking.doSharedHits)
-
-    ITkTrackSummaryTool = acc.popToolsAndMerge(
-        ITkTrackSummaryToolCfg(flags, name, **kwargs))
-    acc.setPrivateTools(ITkTrackSummaryTool)
-    return acc
-
 
 def ITkTrackSummaryToolNoHoleSearchCfg(flags,
                                        name='ITkTrackSummaryToolNoHoleSearch',
@@ -204,13 +130,9 @@ def GSFTrackSummaryToolCfg(flags,
             InDetTrackSummaryHelperToolCfg(
                 flags,
                 name="GSFBuildTrackSummaryHelperTool",
-                HoleSearch=None,
-                AssoTool=None
-            ))
+                HoleSearch=None))
 
-    kwargs.setdefault("doSharedHits", False)
     kwargs.setdefault("doHolesInDet", False)
-    kwargs.setdefault("AddExpectedHits", True)
 
     # Particle creator needs a public one
     acc.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name, **kwargs))
@@ -223,7 +145,6 @@ def MuonTrackSummaryToolCfg(flags, name="MuonTrackSummaryTool", **kwargs):
     track_summary_helper = result.popToolsAndMerge(
         MuonTrackSummaryHelperToolCfg(flags))
     kwargs.setdefault("MuonSummaryHelperTool", track_summary_helper)
-    kwargs.setdefault("doSharedHits", False)
     kwargs.setdefault("AddDetailedMuonSummary", True)
     result.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name, **kwargs))
     return result
@@ -238,23 +159,19 @@ def MuonCombinedTrackSummaryToolCfg(flags,
     if "InDetSummaryHelperTool" not in kwargs:
         from InDetConfig.InDetTrackSummaryHelperToolConfig import AtlasTrackSummaryHelperToolCfg
         from InDetConfig.InDetTrackHoleSearchConfig import CombinedMuonIDHoleSearchCfg
-        #from InDetConfig.TrackRecoConfig import ClusterSplitProbabilityContainerName
         atlasHoleSearchTool = result.popToolsAndMerge(
             CombinedMuonIDHoleSearchCfg(flags))
         result.addPublicTool(atlasHoleSearchTool)
         kwargs.setdefault("InDetSummaryHelperTool", result.popToolsAndMerge(
             AtlasTrackSummaryHelperToolCfg(
-                flags, name="CombinedMuonIDSummaryHelper", 
-                AssoTool='', HoleSearch = atlasHoleSearchTool,
-                RunningTIDE_Ambi=False)))
-        #ClusterSplitProbabilityName = ClusterSplitProbabilityContainerName(flags) ,
-        # TODO Add this back once the issue on !57767 is resolved
+                flags, name="CombinedMuonIDSummaryHelper",
+                HoleSearch = atlasHoleSearchTool)))
+
     if "MuonSummaryHelperTool" not in kwargs:
         from MuonConfig.MuonRecToolsConfig import MuonTrackSummaryHelperToolCfg
         kwargs.setdefault("MuonSummaryHelperTool", result.popToolsAndMerge(
             MuonTrackSummaryHelperToolCfg(flags)))
 
-    kwargs.setdefault("doSharedHits", False)
     kwargs.setdefault("doHolesInDet", True)
     kwargs.setdefault("doHolesMuon", False)
     kwargs.setdefault("AddDetailedMuonSummary", True)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -139,24 +139,36 @@ namespace NSWL1 {
 
     unsigned int particles = entries.rbegin()->first.second +1, nskip=0;
     for (unsigned int i=0; i<particles; i++) {
-      double trueta = -999., trupt = -999., dt = -999., tpos = -999., ppos = -999.;
+      double trueta = -999., truphi = -999., trutheta = -999., trupt = -999., dt = -999., tpos = -999., ppos = -999., epos = -999., tent = -999., pent = -999., eent = -999.;
       // We need to extract truth info, if available
       std::pair<int, unsigned int> pair_event (event,i);
       if (!Event_Info.empty()) {
         auto tru_it = Event_Info.find(pair_event);
         if (tru_it != Event_Info.end()) {
           evInf_entry truth_info(tru_it->second);
+          trutheta = truth_info.theta_ip; // truth muon at the IP
+          truphi = truth_info.phi_ip;
           trueta = truth_info.eta_ip;
           trupt = truth_info.pt;
-          tpos=truth_info.theta_pos;
+          tpos=truth_info.theta_pos; // muEntry position
           ppos=truth_info.phi_pos;
+          epos=truth_info.eta_pos;
+          tent=truth_info.theta_ent; // muEntry momentum
+          pent=truth_info.phi_ent;
+          eent=truth_info.eta_ent;
           dt=truth_info.dtheta;
           if (m_doNtuple) {
             m_trigger_trueEtaRange->push_back(trueta);
             m_trigger_truePtRange->push_back(trupt);
-            m_trigger_trueThe->push_back(truth_info.theta_ent);
-            m_trigger_truePhi->push_back(ppos);
-            m_trigger_trueDth->push_back(dt);
+            m_trigger_trueThe->push_back(trutheta);
+            m_trigger_truePhi->push_back(truphi);
+            m_trigger_trueDth->push_back(dt); // theta_pos-theta_ent
+            m_trigger_trueEtaPos->push_back(epos);
+            m_trigger_trueThePos->push_back(tpos);
+            m_trigger_truePhiPos->push_back(ppos);
+            m_trigger_trueEtaEnt->push_back(eent);
+            m_trigger_trueTheEnt->push_back(tent);
+            m_trigger_truePhiEnt->push_back(pent);
           }
         } else ATH_MSG_DEBUG( "Extra reco particle with no truth candidate available" );
       }
@@ -195,10 +207,12 @@ namespace NSWL1 {
                 m_trigger_strip->push_back(hitDatas[ihds].strip);
               }
             }
-            std::vector<double> slopes = diamond->getHitSlopes();
-            if (m_doNtuple) for (const auto &s : slopes) m_trigger_RZslopes->push_back(s);
+            if (m_doNtuple) {
+              std::vector<double> slopes = diamond->getHitSlopes();
+              for (const auto &s : slopes) m_trigger_RZslopes->push_back(s);
+              slopes.clear();
+            }
             diamond->resetSlopes();
-            slopes.clear();
             /*
              * Here we create roads with all MMT_Hit collected before (if any), then we save the results
              */
@@ -247,14 +261,14 @@ namespace NSWL1 {
                     if (bc == slope.BC) {
                       Muon::NSW_TrigRawDataSegment* trigRawDataSegment = new Muon::NSW_TrigRawDataSegment();
 
-                      // Phi-id
+                      // Phi-id - here use local phi (not phiShf)
                       uint8_t phi_id = 0;
-                      if (slope.phiShf*M_PI/180.0 > m_phiMax || slope.phiShf*M_PI/180.0 < m_phiMin) trigRawDataSegment->setPhiIndex(phi_id);
+                      if (slope.phi > m_phiMax || slope.phi < m_phiMin) trigRawDataSegment->setPhiIndex(phi_id);
                       else {
                         uint8_t nPhi = (1<<m_phiBits) -2; // To accomodate the new phi-id encoding prescription around 0
                         float phiSteps = (m_phiMax - m_phiMin)/nPhi;
                         for (uint8_t i=0; i<nPhi; i++) {
-                          if ((slope.phiShf*M_PI/180.0) < (m_phiMin+i*phiSteps)) {
+                          if ((slope.phi) < (m_phiMin+i*phiSteps)) {
                             phi_id = i;
                             break;
                           }

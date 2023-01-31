@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 // ***************************************************************************************
@@ -1209,7 +1209,6 @@ StatusCode IDAlignMonResiduals::fillHistograms() {
                                                                  << "  has size =" << tracks->size());
 
   int nTracks = 0;
-  int nHitsEvent = 0;
 
   for (DataVector<Trk::Track>::const_iterator trackItr = tracks->begin(); trackItr != tracks->end(); ++trackItr) { //looping
                                                                                                                    // over
@@ -1430,7 +1429,7 @@ StatusCode IDAlignMonResiduals::fillHistograms() {
                                                                        // safe to keep it without redefinition
         //Not clear to me here. isPullUnbiased is set to true. Why inside the Function I am checking if it is true or
         // not? Useless I would say.
-        const Trk::ResidualPull* residualPull = m_residualPullCalculator->residualPull(mesh,
+        std::unique_ptr<Trk::ResidualPull> residualPull = m_residualPullCalculator->residualPull(mesh,
                                                                                        trackParameterUnbiased,
                                                                                        (isPullUnbiased) ?
                                                                                        Trk::ResidualPull::Unbiased :
@@ -1443,7 +1442,6 @@ StatusCode IDAlignMonResiduals::fillHistograms() {
         }
 
         delete trackParameterUnbiased;
-        delete residualPull;
 
         float residualR = hitR - perdictR;
 
@@ -2382,7 +2380,6 @@ StatusCode IDAlignMonResiduals::fillHistograms() {
         }
       }
       ++nHits;
-      ++nHitsEvent;
     }//end of loop on track surfaces
 
     // filling of residuals completed
@@ -2545,7 +2542,7 @@ StatusCode IDAlignMonResiduals::getSiResiduals(const Trk::Track* track, const Tr
 
       //const Trk::ResidualPull* residualPull = m_residualPullCalculator->residualPull(hit, trackParameterForResiduals,
       // unBias);
-      const Trk::ResidualPull* residualPull = nullptr;
+      std::unique_ptr<Trk::ResidualPull> residualPull = nullptr;
       if (unBias) residualPull = m_residualPullCalculator->residualPull(mesh, trackParameterForResiduals, Trk::ResidualPull::Unbiased);
       else residualPull = m_residualPullCalculator->residualPull(mesh, trackParameterForResiduals, Trk::ResidualPull::Biased);
 
@@ -2571,7 +2568,6 @@ StatusCode IDAlignMonResiduals::getSiResiduals(const Trk::Track* track, const Tr
           }
         }
 
-        delete residualPull;
       } else {
         if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "ResidualPullCalculator failed!" << endmsg;
         sc = StatusCode::FAILURE;

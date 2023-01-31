@@ -21,6 +21,7 @@
 #include "CLHEP/Random/RandFlat.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "EventPrimitives/EventPrimitives.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace Trk {
   class MaterialProperties;
@@ -33,7 +34,8 @@ namespace iFatras {
      @author Noemi.Calace@cern.ch , Andreas.Salzburger@cern.ch
   */
   
-  class MultipleScatteringSamplerGaussianMixture : public extends<AthAlgTool, IMultipleScatteringSampler> {
+  // deprecated: ATLASSIM-6020
+  class ATLAS_NOT_THREAD_SAFE MultipleScatteringSamplerGaussianMixture : public extends<AthAlgTool, IMultipleScatteringSampler> {
       
   public:
       /** AlgTool like constructor */

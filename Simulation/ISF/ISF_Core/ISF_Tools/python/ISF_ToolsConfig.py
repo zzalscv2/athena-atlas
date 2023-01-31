@@ -21,7 +21,7 @@ def MemoryMonitorToolCfg(flags, name="ISF_MemoryMonitor", **kwargs):
     return acc
 
 
-def EntryLayerFilterCfg(ConfigFlags, **kwargs):
+def EntryLayerFilterCfg(flags, **kwargs):
     """Return the MCxEntryLayerFilterCfg config flagged by Sim.TruthStrategy"""
     from SimulationConfig.SimEnums import TruthStrategy
     stratmap = {
@@ -41,8 +41,8 @@ def EntryLayerFilterCfg(ConfigFlags, **kwargs):
         # TruthStrategy.Global: GlobalTruthServiceCfg,
         TruthStrategy.Cosmic: CosmicEventFilterToolCfg,
     }
-    MCxCfg = stratmap[ConfigFlags.Sim.TruthStrategy]
-    return MCxCfg(ConfigFlags, **kwargs)
+    MCxCfg = stratmap[flags.Sim.TruthStrategy]
+    return MCxCfg(flags, **kwargs)
 
 
 def MC12EntryLayerFilterCfg(flags, name="ISF_MC12EntryLayerFilter", **kwargs):

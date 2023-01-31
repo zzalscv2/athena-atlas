@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           Summary.cxx  -  description
@@ -11,39 +11,30 @@
 #include "TrkTrackSummary/TrackSummary.h"
 #include "GaudiKernel/MsgStream.h"
 
-#ifndef NDEBUG
-std::atomic<unsigned int> Trk::TrackSummary::s_numberOfInstantiations{ 0 };
-#endif
 const int Trk::TrackSummary::SummaryTypeNotSet = -1;
 
 Trk::TrackSummary::TrackSummary()
-  : m_information(numberOfTrackSummaryTypes, SummaryTypeNotSet)
+  : Trk::ObjectCounter<Trk::TrackSummary>()
+  , m_information(numberOfTrackSummaryTypes, SummaryTypeNotSet)
   , m_idHitPattern(0)
   , m_muonTrackSummary(nullptr)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new TrackSummary, so increment total count
-#endif
 }
 
 Trk::TrackSummary::TrackSummary(const std::vector<int>& information,
                                 std::bitset<numberOfDetectorTypes>& hitPattern)
-  : m_information(information)
+  : Trk::ObjectCounter<Trk::TrackSummary>()
+  , m_information(information)
   , m_idHitPattern(hitPattern.to_ulong())
   , m_muonTrackSummary(nullptr)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new TrackSummary, so increment total count
-#endif
 }
 
 Trk::TrackSummary::TrackSummary(const TrackSummary& rhs)
-  : m_information(rhs.m_information)
+  : Trk::ObjectCounter<Trk::TrackSummary>(rhs)
+  , m_information(rhs.m_information)
   , m_idHitPattern(rhs.m_idHitPattern)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new TrackSummary, so increment total count
-#endif
   if (rhs.m_muonTrackSummary) {
     m_muonTrackSummary =
       std::make_unique<MuonTrackSummary>(*rhs.m_muonTrackSummary);
@@ -65,12 +56,7 @@ Trk::TrackSummary::operator=(const TrackSummary& rhs)
   return *this;
 }
 
-Trk::TrackSummary::~TrackSummary()
-{
-#ifndef NDEBUG
-  s_numberOfInstantiations--; // delete TrackSummary, so decrement total count
-#endif
-}
+Trk::TrackSummary::~TrackSummary() = default;
 
 Trk::TrackSummary&
 Trk::TrackSummary::operator+=(const TrackSummary& ts)
@@ -110,26 +96,14 @@ dumpTrackSummary(T_out& out, const TrackSummary& trackSum)
       << trackSum.get(numberOfContribPixelLayers) << "\n";
   out << " * Number of Innermost Pixel layer hits        : "
       << trackSum.get(numberOfInnermostPixelLayerHits) << "\n";
-  out << " * Number of Innermost Pixel layer shared hits : "
-      << trackSum.get(numberOfInnermostPixelLayerSharedHits) << "\n";
-  out << " * Number of Innermost Pixel layer outliers    : "
-      << trackSum.get(numberOfInnermostPixelLayerOutliers) << "\n";
   out << " * Number of Next-To-Innermost Pixel layer hits        : "
       << trackSum.get(numberOfNextToInnermostPixelLayerHits) << "\n";
-  out << " * Number of Next-To-Innermost Pixel layer shared hits : "
-      << trackSum.get(numberOfNextToInnermostPixelLayerSharedHits) << "\n";
-  out << " * Number of Next-To-Innermost Pixel layer outliers    : "
-      << trackSum.get(numberOfNextToInnermostPixelLayerOutliers) << "\n";
   out << " * Number of pixel hits          : "
       << trackSum.get(numberOfPixelHits) << "\n";
-  out << " * Number of pixel outliers      : "
-      << trackSum.get(numberOfPixelOutliers) << "\n";
   out << " * Number of spoilt pixel hits   : "
       << trackSum.get(numberOfPixelSpoiltHits) << "\n";
   out << " * Number of pixel holes         : "
       << trackSum.get(numberOfPixelHoles) << "\n";
-  out << " * Number of pixel shared hits   : "
-      << trackSum.get(numberOfPixelSharedHits) << "\n";
   out << " * Number of GangedPixels        : "
       << trackSum.get(numberOfGangedPixels) << "\n";
   out << " * Number of GangedFlaggedFakes  : "
@@ -138,14 +112,10 @@ dumpTrackSummary(T_out& out, const TrackSummary& trackSum)
       << trackSum.get(numberOfPixelDeadSensors) << "\n";
   out << " * Number of SCT hits            : " << trackSum.get(numberOfSCTHits)
       << "\n";
-  out << " * Number of SCT outliers        : "
-      << trackSum.get(numberOfSCTOutliers) << "\n";
   out << " * Number of SCT holes           : " << trackSum.get(numberOfSCTHoles)
       << "\n";
   out << " * Number of SCT double Holes    : "
       << trackSum.get(numberOfSCTDoubleHoles) << "\n";
-  out << " * Number of SCT shared hits     : "
-      << trackSum.get(numberOfSCTSharedHits) << "\n";
   out << " * Number of dead SCT sensors    : "
       << trackSum.get(numberOfSCTDeadSensors) << "\n";
   out << " * Number of spoilt SCT hits     : "
@@ -166,8 +136,6 @@ dumpTrackSummary(T_out& out, const TrackSummary& trackSum)
       << "\n";
   out << " * Number of TRT tube hits       : "
       << trackSum.get(numberOfTRTTubeHits) << "\n";
-  out << " * Number of TRT Shared hits     : "
-      << trackSum.get(numberOfTRTSharedHits) << "\n";
   out << " * Number of dead TRT straws     : "
       << trackSum.get(numberOfTRTDeadStraws) << "\n";
   out << " * Number of MDT hits            : " << trackSum.get(numberOfMdtHits)
@@ -242,15 +210,3 @@ Trk::operator<<(MsgStream& out, const TrackSummary& trackSum)
 {
   return dumpTrackSummary(out, trackSum);
 }
-
-unsigned int
-Trk::TrackSummary::numberOfInstantiations()
-{
-
-#ifndef NDEBUG
-  return s_numberOfInstantiations;
-#else
-  return 0;
-#endif
-}
-

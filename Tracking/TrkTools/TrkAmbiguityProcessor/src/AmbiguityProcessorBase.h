@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AmbiguityProcessorBase_h
@@ -92,7 +92,6 @@ namespace Trk {
     void
     addTrack(Trk::Track* in_track, const bool fitted,
              TrackScoreMap &trackScoreTrackMap,
-             Trk::PRDtoTrackMap &prdToTrackMap,
              std::vector<std::unique_ptr<const Trk::Track> >& trackDustbin,
              Counter &stat,
              int parentTrackId) const;
@@ -128,7 +127,7 @@ namespace Trk {
        @todo The actual tool that is used should be configured through job options*/
     ToolHandle<ITrackScoringTool> m_scoringTool{this, "ScoringTool", "", "track scoring tool"};
     /**Observer tool      This tool is used to observe the tracks and their 'score' */
-    PublicToolHandle<Trk::ITrkObserverTool> m_observerTool{this, "TrackObserverTool", "", "track observer within ambiguity solver"};
+    PublicToolHandle<Trk::ITrkObserverTool> m_observerTool{this, "ObserverTool", "", "track observer within ambiguity solver"};
     ToolHandle<Trk::IExtendedTrackSummaryTool> m_trackSummaryTool{this, "TrackSummaryTool", "InDetTrackSummaryToolNoHoleSearch"};
 
   private:

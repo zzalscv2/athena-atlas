@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JSSTaggerBase.h"
@@ -20,7 +20,7 @@ JSSTaggerBase::JSSTaggerBase(const std::string &name) :
 {
 
   /// Tagger configuration properties
-  declareProperty( "ContainerName", m_containerName = "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",     "Name of jet container" );
+  declareProperty( "ContainerName", m_containerName = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",     "Name of jet container" );
   declareProperty( "ConfigFile",    m_configFile = "",        "Name of config file" );
   declareProperty( "CalibArea",     m_calibArea = "",         "Path to config file" );
   declareProperty( "CalcSF",        m_calcSF = false,         "Flag to calculate the efficiency SF"  );
@@ -164,6 +164,15 @@ StatusCode JSSTaggerBase::initialize() {
   ATH_CHECK( m_readECFG331Key.initialize() );
   ATH_CHECK( m_readECFG311Key.initialize() );
   ATH_CHECK( m_readECFG212Key.initialize() );
+
+  m_readParentKey = m_containerName + "." + m_readParentKey.key();
+  ATH_CHECK( m_readParentKey.initialize() );
+
+  m_decNtrk500Key = m_containerName + "." + m_decNtrk500Key.key();
+  ATH_CHECK( m_decNtrk500Key.initialize() );
+
+  m_readNtrk500Key = m_containerName + "." + m_readNtrk500Key.key();
+  ATH_CHECK( m_readNtrk500Key.initialize() );
   
   ATH_CHECK( m_decTaggedKey.initialize() );
   ATH_CHECK( m_decValidPtRangeHighKey.initialize() );
@@ -486,6 +495,7 @@ int JSSTaggerBase::calculateJSSRatios( const xAOD::Jet &jet ) const {
       }
       else result = 1;
     }
+    decL2(jet) = L2;
   }
 
   if(!readL3.isAvailable()){
@@ -495,16 +505,80 @@ int JSSTaggerBase::calculateJSSRatios( const xAOD::Jet &jet ) const {
       }
       else result = 1;
     }
+    decL3(jet) = L3;
   }
-
-  decL2(jet) = L2;
-  decL3(jet) = L3;
 
   // TODO: Add ECFG for ANN tagger whenever it is defined
 
   return result;
 
 }
+
+int JSSTaggerBase::findPV() const{
+
+  int indexPV = -1;
+
+  const xAOD::VertexContainer* vxCont = 0;
+  if ( evtStore()->retrieve( vxCont, "PrimaryVertices" ).isFailure() ) {
+    ATH_MSG_WARNING( "Unable to retrieve primary vertex container PrimaryVertices" );
+  }
+  else {
+    int vtx_counter = 0;
+    for ( const auto *vx : *vxCont ) {
+      if ( vx->vertexType()==xAOD::VxType::PriVtx ) {
+	indexPV = vtx_counter;
+        break;
+      }
+      vtx_counter++;
+    }
+  }
+
+  return indexPV;
+
+}
+
+/// Retrieve the Ntrk variable from the ungroomed parent jet 
+StatusCode JSSTaggerBase::GetUnGroomTracks( const xAOD::Jet &jet, int indexPV ) const {
+
+  SG::WriteDecorHandle<xAOD::JetContainer, int> decNtrk500(m_decNtrk500Key);
+
+  SG::ReadDecorHandle<xAOD::JetContainer, ElementLink<xAOD::JetContainer> > readParent(m_readParentKey);
+
+  const xAOD::Jet * ungroomedJet = 0;
+  if ( readParent.isAvailable() ) {
+    ElementLink<xAOD::JetContainer> linkToUngroomed = readParent(jet);
+    if ( linkToUngroomed.isValid() ) {
+      ungroomedJet = *linkToUngroomed;
+      
+      static const SG::AuxElement::ConstAccessor< std::vector<int> >acc_Ntrk("NumTrkPt500");
+      
+      if ( acc_Ntrk.isAvailable(*ungroomedJet) ) {
+	
+	const std::vector<int> NTrkPt500 = acc_Ntrk(*ungroomedJet);
+	
+	int jet_ntrk = NTrkPt500.at(indexPV);
+	decNtrk500(jet) = jet_ntrk;
+	
+      }
+      else {
+	ATH_MSG_ERROR("WARNING: Unable to retrieve Ntrk of the ungroomed parent jet. Please make sure this variable is in your derivations!!!");
+	return StatusCode::FAILURE;
+      }
+    }
+    else {
+      ATH_MSG_ERROR("WARNING: Unable to retrieve the parent ungroomed jet. Please make sure this variable is in your derivations!!!");
+      return StatusCode::FAILURE;
+    }
+  }
+  else {
+    ATH_MSG_ERROR("WARNING: Unable to retrieve the link to the parent ungroomed jet. Please make sure this variable is in your derivations!!!");
+    return StatusCode::FAILURE;
+  }
+
+  return StatusCode::SUCCESS;
+
+}
+
 
 /// Get SF weight
 StatusCode JSSTaggerBase::getWeight( const xAOD::Jet& jet, bool passSel, asg::AcceptData &acceptData ) const {

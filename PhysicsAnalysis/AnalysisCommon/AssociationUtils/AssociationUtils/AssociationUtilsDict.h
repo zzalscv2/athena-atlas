@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASSOCIATIONUTILSDICT_H
@@ -15,7 +15,6 @@
 #include "AssociationUtils/EleJetOverlapTool.h"
 #include "AssociationUtils/EleMuSharedTrkOverlapTool.h"
 #include "AssociationUtils/MuJetOverlapTool.h"
-#include "AssociationUtils/MuPFJetOverlapTool.h"
 #include "AssociationUtils/AltMuJetOverlapTool.h"
 #include "AssociationUtils/TauLooseEleOverlapTool.h"
 #include "AssociationUtils/TauLooseMuOverlapTool.h"

@@ -17,9 +17,6 @@
 // xAOD includes:
 #include "xAODEgamma/ElectronContainer.h"
 
-// Asg selectors include:
-#include "RingerSelectorTools/IAsgElectronRingerSelector.h"
-
 // StoreGate includes:
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
@@ -69,8 +66,7 @@ class CaloRingerElectronsReader : public CaloRingerInputReader,
 
     /// @name CaloRingerElectronsReader private methods:
     /// @{
-    /** Retrieve Electron Asg Selector */
-    StatusCode retrieveSelectors();
+
     /// @}
 
     /** Add decorations for a given selector */
@@ -81,8 +77,8 @@ class CaloRingerElectronsReader : public CaloRingerInputReader,
     /**
      * @brief Electron selectors.
      **/
-    PublicToolHandleArray<IAsgElectronRingerSelector> m_ringerSelectors {this,
-	"ElectronSelectors", {}, "The ASG Electron Selectors."};
+  //   PublicToolHandleArray<IAsgElectronRingerSelector> m_ringerSelectors {this,
+	// "ElectronSelectors", {}, "The ASG Electron Selectors."};
 
     /** @brief electron collection input name*/
     SG::ReadHandleKey<xAOD::ElectronContainer> m_inputElectronContainerKey {this,

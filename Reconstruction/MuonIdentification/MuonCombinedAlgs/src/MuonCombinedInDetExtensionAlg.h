@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDALGS_MUONCOMBINEDINDETEXTENSIONALG_H
@@ -12,8 +12,13 @@
 #include "MuonCombinedEvent/InDetCandidateCollection.h"
 #include "MuonCombinedEvent/InDetCandidateToTagMap.h"
 #include "MuonCombinedToolInterfaces/IMuonCombinedInDetExtensionTool.h"
+
 #include "MuonPrepRawData/MMPrepDataContainer.h"
-#include "MuonPrepRawData/MuonPrepDataContainer.h"
+#include "MuonPrepRawData/TgcPrepDataContainer.h"
+#include "MuonPrepRawData/MdtPrepDataContainer.h"
+#include "MuonPrepRawData/CscPrepDataContainer.h"
+#include "MuonPrepRawData/TgcPrepDataContainer.h"
+#include "MuonPrepRawData/RpcPrepDataContainer.h"
 #include "MuonPrepRawData/sTgcPrepDataContainer.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "TrkSegment/SegmentCollection.h"
@@ -30,8 +35,10 @@ public:
     StatusCode execute(const EventContext& ctx) const override;
 
 private:
-    ToolHandleArray<MuonCombined::IMuonCombinedInDetExtensionTool> m_muonCombinedInDetExtensionTools{
-        this, "MuonCombinedInDetExtensionTools", {}};
+    template <class ContType> StatusCode loadPrdContainer(const EventContext& ctx , const SG::ReadHandleKey<ContType>& key, const ContType* & target_ptr) const;
+    template <class ContType> StatusCode record(const EventContext& ctx, const SG::WriteHandleKey<ContType>& key, ContType* & target_ptr) const;
+    ToolHandle<MuonCombined::IMuonCombinedInDetExtensionTool> m_muonCombinedInDetExtensionTool{
+        this, "MuonCombinedInDetExtensionTool", ""};
     SG::ReadHandleKey<InDetCandidateCollection> m_indetCandidateCollectionName{
         this,
         "InDetCandidateLocation",

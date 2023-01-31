@@ -10,9 +10,7 @@
  * Implementation code for MultiComponentStateModeCalculator
  */
 
-
 #include "TrkGaussianSumFilterUtils/MultiComponentStateModeCalculator.h"
-#include "TrkGaussianSumFilterUtils/MultiComponentState.h"
 //
 #include "CxxUtils/phihelper.h"
 #include <cmath>
@@ -21,7 +19,26 @@ namespace {
 constexpr double invsqrt2PI =
   M_2_SQRTPI / (2. * M_SQRT2); // 1. / sqrt(2. * M_PI);
 
-using namespace Trk::MultiComponentStateModeCalculator;
+// Simple representation of 1D component
+struct Component
+{
+  Component() = default;
+  ~Component() = default;
+  Component(const Component&) = default;
+  Component& operator=(const Component&) = default;
+  Component(Component&&) = default;
+  Component& operator=(Component&&) = default;
+  // Constructor with arguments
+  Component(double aWeight, double aMean, double aSigma)
+    : weight(aWeight)
+    , mean(aMean)
+    , sigma(aSigma)
+  {}
+  double weight = 0;
+  double mean = 0;
+  double sigma = 0;
+};
+
 
 /** bried method to determine the value of the a gaussian distribution at a
  * given value */
@@ -88,9 +105,8 @@ width(int i, const std::array<std::vector<Component>, 5>& mixture)
 }
 
 void
-fillMixture(
-  const Trk::MultiComponentState& multiComponentState,
-  std::array<std::vector<Component>, 5>& mixture)
+fillMixture(const Trk::MultiComponentState& multiComponentState,
+            std::array<std::vector<Component>, 5>& mixture)
 {
   constexpr Trk::ParamDefs parameter[5] = {
     Trk::d0, Trk::z0, Trk::phi, Trk::theta, Trk::qOverP
@@ -137,10 +153,9 @@ fillMixture(
 }
 
 double
-findMode(
-  double xStart,
-  int i,
-  const std::array<std::vector<Component>, 5>& mixture)
+findMode(double xStart,
+         int i,
+         const std::array<std::vector<Component>, 5>& mixture)
 {
 
   bool converged = false;
@@ -187,13 +202,12 @@ findMode(
 }
 
 double
-findRoot(
-  double& result,
-  double xlo,
-  double xhi,
-  double value,
-  double i,
-  const std::array<std::vector<Component>, 5>& mixture)
+findRoot(double& result,
+         double xlo,
+         double xhi,
+         double value,
+         double i,
+         const std::array<std::vector<Component>, 5>& mixture)
 {
   // Do the root finding using the Brent-Decker method. Returns a boolean
   // status and loads 'result' with our best guess at the root if true.
@@ -298,26 +312,11 @@ findRoot(
   return false;
 }
 
-} // end of anonymous namespace
-
+/**
+ * @ brief method to evaluate the Mode
+ */
 std::array<double, 10>
-Trk::MultiComponentStateModeCalculator::calculateMode(
-  const Trk::MultiComponentState& multiComponentState)
-{
-  // Check to see if the multi-component state is measured
-  if (!MultiComponentStateHelpers::isMeasured(multiComponentState)) {
-    return {};
-  }
-
-  std::array<std::vector<Component>, 5> mixture;
-
-  fillMixture(multiComponentState, mixture);
-  return calculateMode(mixture);
-}
-
-std::array<double, 10>
-Trk::MultiComponentStateModeCalculator::calculateMode(
-  const std::array<std::vector<Component>, 5>& mixture)
+evaluateMode(const std::array<std::vector<Component>, 5>& mixture)
 {
   std::array<double, 10> modes{};
   /* loop over the 5 direction , d0,z0,phi,theta,qOverP*/
@@ -385,3 +384,19 @@ Trk::MultiComponentStateModeCalculator::calculateMode(
   }
   return modes;
 }
+} // end of anonymous namespace
+
+std::array<double, 10>
+Trk::MultiComponentStateModeCalculator::calculateMode(
+  const Trk::MultiComponentState& multiComponentState)
+{
+  // Check to see if all components have covariance
+  if (!MultiComponentStateHelpers::allHaveCovariance(multiComponentState)) {
+    return {};
+  }
+  std::array<std::vector<Component>, 5> mixture;
+
+  fillMixture(multiComponentState, mixture);
+  return evaluateMode(mixture);
+}
+

@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import os
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import FlagEnum, Format
+from AthenaConfiguration.Enums import FlagEnum, Format, LHCPeriod
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaCommon.Logging import logging
 
@@ -33,8 +33,7 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.enableL1MuonPhase1', lambda prevFlags: prevFlags.Trigger.EDMVersion >= 3 or prevFlags.Detector.EnableMM or prevFlags.Detector.EnablesTGC)
 
     # Enable Run-3 LVL1 calo simulation and/or decoding
-    # TODO: when Fex decoders work reliably, change it to: "lambda prevFlags: (prevFlags.Trigger.EDMVersion >= 3 or prevFlags.GeoModel.Run >= LHCPeriod.Run3) and not prevFlags.Trigger.doHLT"
-    flags.addFlag('Trigger.enableL1CaloPhase1', False)
+    flags.addFlag('Trigger.enableL1CaloPhase1', lambda prevFlags: (prevFlags.Trigger.EDMVersion >= 3 or prevFlags.GeoModel.Run >= LHCPeriod.Run3) and not prevFlags.Trigger.doHLT)
 
     # Enable L1Topo simulation to write inputs to txt
     flags.addFlag('Trigger.enableL1TopoDump', False)
@@ -138,7 +137,7 @@ def createTriggerFlags(doTriggerRecoFlags):
                 _log.warning("All input files seem to be empty, cannot determine EDM version. Guessing EDMVersion=3")
                 return 3
 
-        _log.warning("Could not determine EDM version from the input file. Return default EDMVersion=%d",
+        _log.info("Could not determine EDM version from the input file. Return default EDMVersion=%d",
                      default_version)
         return default_version
 
@@ -148,7 +147,7 @@ def createTriggerFlags(doTriggerRecoFlags):
     # Flag to control the scheduling of online Run 3 trigger navigation compactification into a single collection (uses slimming framework).
     flags.addFlag('Trigger.doOnlineNavigationCompactification', True)
 
-    # Flag to control the scheduling of offline Run 3 trigger navigation slimming in RAWtoESD, RAWtoAOD, AODtoDAOD or RAWtoALL transforms.
+    # Flag to control the scheduling of offline Run 3 trigger navigation slimming in RAWtoALL, RAWtoAOD or AODtoDAOD transforms.
     flags.addFlag('Trigger.doNavigationSlimming', True)
 
     # True if we have at least one input file, it is a POOL file, it has a metadata store, and the store has xAOD trigger configuration data
@@ -178,10 +177,18 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.L1.doCalo', True)
 
     # enable L1Calo Input ([ejg]Towers) ByteStream conversion / simulation
-    flags.addFlag('Trigger.L1.doCaloInputs', lambda prevFlags: prevFlags.Trigger.enableL1CaloPhase1 and not prevFlags.Trigger.doHLT)
+    flags.addFlag('Trigger.L1.doCaloInputs', lambda prevFlags: prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1 and not prevFlags.Trigger.doHLT)
 
-    # enable L1Topo ByteStream conversion / simulation
+    # finer steering of phase-1 L1Calo ByteStream conversion / simulation with one flag per FEX
+    flags.addFlag('Trigger.L1.doeFex', lambda prevFlags: prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1)
+    flags.addFlag('Trigger.L1.dojFex', lambda prevFlags: prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1)
+    flags.addFlag('Trigger.L1.dogFex', lambda prevFlags: prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1)
+
+    # enable L1Topo ByteStream conversion / simulation (general flag steering both legacy and phase-1 Topo)
     flags.addFlag('Trigger.L1.doTopo', True)
+
+    # finer-grained control like for the FEXes above to disable only phase-1 Topo even when doTopo flag is True
+    flags.addFlag('Trigger.L1.doTopoPhase1', lambda prevFlags: prevFlags.Trigger.L1.doTopo and prevFlags.Trigger.enableL1CaloPhase1)
 
     # enable CTP ByteStream conversion / simulation
     flags.addFlag('Trigger.L1.doCTP', True)
@@ -287,6 +294,7 @@ def createTriggerRecoFlags():
         muonflags.Muon.useTGCPriorNextBC=True
         muonflags.Muon.MuonTrigger=True
         muonflags.Muon.SAMuonTrigger=True
+        muonflags.Muon.runCommissioningChain=False
         return muonflags
 
     def __muon():
@@ -324,6 +332,11 @@ def createTriggerRecoFlags():
         from TrigInDetConfig.TrigTrackingPassFlagsITk import createTrigTrackingPassFlagsITk
         return createTrigTrackingPassFlagsITk()
     flags.addFlagsCategory( 'Trigger.ITkTracking', __idITk )
+
+    def __trigCalo():
+        from TrigCaloRec.TrigCaloConfigFlags import createTrigCaloConfigFlags
+        return createTrigCaloConfigFlags()
+    flags.addFlagsCategory( 'Trigger.Calo', __trigCalo )
      
     # NB: Longer term it may be worth moving these into a PF set of config flags, but right now the only ones that exist do not seem to be used in the HLT.
     # When we use component accumulators for this in the HLT maybe we should revisit this
@@ -335,10 +348,7 @@ def createTriggerRecoFlags():
     flags.addFlag("Trigger.FSHad.PFOMuonRemoval", "Calo")
 
     # the minimum pT threshold to use for the muon removal
-    flags.addFlag("Trigger.FSHad.PFOMuonRemovalMinPt", 10 * GeV)
-
-    # Switch on MC20 EOverP maps for the jet slice
-    flags.addFlag("Trigger.Jet.doMC20_EOverP", True)
+    flags.addFlag("Trigger.FSHad.PFOMuonRemovalMinPt", 10 * GeV)   
 
     # enable fast b-tagging for all fully calibrated HLT PFlow jets
     flags.addFlag("Trigger.Jet.fastbtagPFlow", True)
@@ -355,6 +365,12 @@ def createTriggerRecoFlags():
         return createHTTConfigFlags()
     flags.addFlagsCategory("Trigger.HTT", __httFlags, prefix=True )
 
+    # L1 MUCTPI trigger flags
+    def __muctpiFlags():
+        from TrigT1MuctpiPhase1.TrigMUCTPIConfigFlags import createTrigMUCTPIConfigFlags
+        return createTrigMUCTPIConfigFlags()
+    flags.addFlagsCategory('Trigger.MUCTPI', __muctpiFlags )
+
     return flags
 
 if __name__ == "__main__":
@@ -363,7 +379,9 @@ if __name__ == "__main__":
     class Tests(unittest.TestCase):
         def test_recoFlags(self):
             """Check if offline reco flags can be added to trigger"""
-            from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+            from AthenaConfiguration.AllConfigFlags import initConfigFlags
+
+            flags = initConfigFlags()
             flags.Trigger.Offline.Tau.doTauRec=False
             flags.Tau.doTauRec=True
             self.assertEqual(flags.Trigger.Offline.Tau.doTauRec, False, " dependent flag setting does not work")

@@ -123,7 +123,7 @@ namespace CP {
         for (const xAOD::IParticle* particle : *container) {
             if (m_dec_isoselection) (*m_dec_isoselection)(*particle) = true && m_selectorTool->accept(*particle);
             const IsoVector& iso_types = getIsolationTypes(particle);
-            if (iso_types.empty()) { ATH_MSG_WARNING("No isolation types have been defined for particle type " << particleName(particle)); }
+            if (iso_types.empty()) { ATH_MSG_DEBUG("No isolation types have been defined for particle type " << particleName(particle)); }
             for (const IsoType type : iso_types) {
                 IsoHelperMap::const_iterator Itr = m_isohelpers.find(type);
                 if (Itr == m_isohelpers.end() || Itr->second->backupIsolation(particle) == CorrectionCode::Error) {
@@ -133,7 +133,7 @@ namespace CP {
                 }
             }
             if (!passSelectionQuality(particle)) continue;
-            cache.prim_parts.insert(const_cast<xAOD::IParticle*>(particle));
+            cache.prim_parts.insert(particle);
         }
     }
     void IsolationCloseByCorrectionTool::loadAssociatedObjects(const EventContext& ctx, ObjectCache& cache) const {
@@ -148,7 +148,7 @@ namespace CP {
     }
     PflowSet IsolationCloseByCorrectionTool::getAssocFlowElements(const EventContext& ctx, const xAOD::IParticle* particle) const {
         ObjectCache cache{};
-        cache.prim_parts = {const_cast<xAOD::IParticle*>(particle)};
+        cache.prim_parts = {particle};
         loadAssociatedObjects(ctx, cache);
         return cache.flows;
     }
@@ -180,8 +180,10 @@ namespace CP {
             }
         }
     }
-    CorrectionCode IsolationCloseByCorrectionTool::getCloseByIsoCorrection(const xAOD::ElectronContainer* Electrons, const xAOD::MuonContainer* Muons,
-                                                                           const xAOD::PhotonContainer* Photons) const {
+
+    /// not thread-safe because of const_cast
+    CorrectionCode IsolationCloseByCorrectionTool::getCloseByIsoCorrection ATLAS_NOT_THREAD_SAFE (xAOD::ElectronContainer* Electrons, xAOD::MuonContainer* Muons,
+                                                                           xAOD::PhotonContainer* Photons) const {
         if (!m_isInitialised) {
             ATH_MSG_ERROR("The IsolationCloseByCorrectionTool was not initialised!!!");
             return CorrectionCode::Error;
@@ -203,9 +205,10 @@ namespace CP {
 
         return performCloseByCorrection(ctx, cache);
     }
-    CorrectionCode IsolationCloseByCorrectionTool::performCloseByCorrection(const EventContext& ctx, ObjectCache& cache) const {
-        for (xAOD::IParticle* Particle : cache.prim_parts) {
-            if (subtractCloseByContribution(ctx, Particle, cache) == CorrectionCode::Error) {
+    CorrectionCode IsolationCloseByCorrectionTool::performCloseByCorrection ATLAS_NOT_THREAD_SAFE (const EventContext& ctx, ObjectCache& cache) const {
+        for (const xAOD::IParticle* Particle : cache.prim_parts) {
+            auto Particle_nc = const_cast<xAOD::IParticle*>(Particle); // this needs to be fixed
+            if (subtractCloseByContribution(ctx, Particle_nc, cache) == CorrectionCode::Error) {
                 ATH_MSG_ERROR("Failed to correct the isolation of particle with pt: " << Particle->pt() * MeVtoGeV << " GeV"
                                                                                       << " eta: " << Particle->eta()
                                                                                       << " phi: " << Particle->phi());
@@ -297,19 +300,21 @@ namespace CP {
                     ATH_MSG_ERROR("Failed to apply track correction");
                     return CorrectionCode::Error;
 
-                } else if (isTopoEtIso(iso_type)) {
-                    if (getCloseByCorrectionTopoIso(ctx, &par, iso_type, cache, (*Cone)) == CorrectionCode::Error) {
-                        ATH_MSG_ERROR("Failed to apply topo cluster correction");
-                        return CorrectionCode::Error;
-                    }
-                } else if (isPFlowIso(iso_type)) {
-                    if (getCloseByCorrectionPflowIso(ctx, &par, iso_type, cache, (*Cone)) == CorrectionCode::Error) {
-                        ATH_MSG_ERROR("Failed to apply pflow correction");
-                        return CorrectionCode::Error;
-                    }
                 }
-                ++Cone;
             }
+            else if (isTopoEtIso(iso_type)) {
+              if (getCloseByCorrectionTopoIso(ctx, &par, iso_type, cache, (*Cone)) == CorrectionCode::Error) {
+                ATH_MSG_ERROR("Failed to apply topo cluster correction");
+                return CorrectionCode::Error;
+              }
+            }
+            else if (isPFlowIso(iso_type)) {
+              if (getCloseByCorrectionPflowIso(ctx, &par, iso_type, cache, (*Cone)) == CorrectionCode::Error) {
+                ATH_MSG_ERROR("Failed to apply pflow correction");
+                return CorrectionCode::Error;
+              }
+            }
+            ++Cone;
         }
         return CorrectionCode::Ok;
     }
@@ -462,7 +467,7 @@ namespace CP {
             static const FloatAccessor acc_eta{pflowDecors()[0]};
             static const FloatAccessor acc_phi{pflowDecors()[1]};
             static const FloatAccessor acc_ene{pflowDecors()[2]};
-            static const BoolAccessor acc_isDecor{pflowDecors()[3]};
+            static const CharAccessor acc_isDecor{pflowDecors()[3]};
             for (const xAOD::IParticle* others : cache.prim_parts) {
                 if (others == primary) continue;
                 if (!acc_isDecor.isAvailable(*others) || !acc_isDecor(*others)) {
@@ -492,13 +497,13 @@ namespace CP {
             ATH_MSG_ERROR("getCloseByCorrectionTopoIso() -- The isolation type is not an et cone variable " << toString(type));
             return CorrectionCode::Error;
         }
-        if (m_isohelpers.at(type)->getOrignalIsolation(primary, isoValue) != CorrectionCode::Error) {
+        if (m_isohelpers.at(type)->getOrignalIsolation(primary, isoValue) == CorrectionCode::Error) {
             ATH_MSG_WARNING("Could not retrieve the isolation variable.");
             return CorrectionCode::Error;
         }
         /// Disable the correction of already isolated objects
         if (isoValue <= 0.) {
-            ATH_MSG_DEBUG("Topo et cone variable is already sufficnetly isolated");
+            ATH_MSG_DEBUG("Topo et cone variable is already sufficiently isolated");
             return CorrectionCode::Ok;
         }
         float ref_eta{0.f}, ref_phi{0.f};
@@ -520,7 +525,7 @@ namespace CP {
             static const FloatAccessor acc_eta{caloDecors()[0]};
             static const FloatAccessor acc_phi{caloDecors()[1]};
             static const FloatAccessor acc_ene{caloDecors()[2]};
-            static const BoolAccessor acc_isDecor{caloDecors()[3]};
+            static const CharAccessor acc_isDecor{caloDecors()[3]};
              for (const xAOD::IParticle* others : cache.prim_parts) {
                 if (others == primary) continue;
                 if (!acc_isDecor.isAvailable(*others) || !acc_isDecor(*others)) {
@@ -541,7 +546,7 @@ namespace CP {
     void IsolationCloseByCorrectionTool::getExtrapEtaPhi(const xAOD::IParticle* par, float& eta, float& phi) const {
         static const FloatAccessor acc_assocEta{IsolationCloseByCorrectionTool::caloDecors()[0]};
         static const FloatAccessor acc_assocPhi{IsolationCloseByCorrectionTool::caloDecors()[1]};
-        static const BoolAccessor acc_isDecor{caloDecors()[3]};
+        static const CharAccessor acc_isDecor{caloDecors()[3]};
         if (par->type() != xAOD::Type::ObjectType::Muon) {
             eta = par->eta();
             phi = par->phi();
@@ -552,7 +557,7 @@ namespace CP {
             float assoc_ene{0.f};
             static const FloatDecorator dec_assocEta{IsolationCloseByCorrectionTool::caloDecors()[0]};
             static const FloatDecorator dec_assocPhi{IsolationCloseByCorrectionTool::caloDecors()[1]};
-            static const  BoolDecorator dec_isDecor{caloDecors()[3]};
+            static const  CharDecorator dec_isDecor{caloDecors()[3]};
             associateCluster(par,eta, phi, assoc_ene);
             dec_assocEta(*par) = eta;
             dec_assocPhi(*par) = phi;
@@ -669,15 +674,17 @@ namespace CP {
         strPar.pt = x.pt();
         strPar.eta = x.eta();
         strPar.type = x.type();
-        if (getCloseByCorrection(strPar.isolationValues, x, iso_types, closePar) == CorrectionCode::Error) {
+        std::vector<float> corrections;
+        if (getCloseByCorrection(corrections, x, iso_types, closePar) == CorrectionCode::Error) {
             ATH_MSG_WARNING("Could not calculate the corrections. acceptCorrected(x) is done without the corrections.");
             if (m_dec_isoselection) (*m_dec_isoselection)(x) = bool(m_selectorTool->accept(x));
             return m_selectorTool->accept(x);
         }
         for (unsigned int i = 0; i < iso_types.size(); ++i) {
+            strPar.isolationValues[iso_types[i]] = corrections[i];
             const SG::AuxElement::Accessor<float>* acc = xAOD::getIsolationAccessor(iso_types.at(i));
             float old = (*acc)(x);
-            ATH_MSG_DEBUG("Correcting " << toString(iso_types.at(i)) << " from " << old << " to " << strPar.isolationValues.at(i));
+            ATH_MSG_DEBUG("Correcting " << toString(iso_types.at(i)) << " from " << old << " to " << corrections[i]);
         }
         auto accept = m_selectorTool->accept(strPar);
         if (m_dec_isoselection) (*m_dec_isoselection)(x) = bool(accept);

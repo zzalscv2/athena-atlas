@@ -15,10 +15,14 @@
 #include "ExpressionEvaluation/IProxyLoader.h"
 
 #include "AthContainers/AuxElement.h"
+#include "RootUtils/TSMethodCall.h"
 #include "TMethodCall.h"
 #include "TVirtualCollectionProxy.h"
+#include "CxxUtils/checker_macros.h"
+#include "CxxUtils/ConcurrentStrMap.h"
+#include "CxxUtils/SimpleUpdater.h"
 
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <typeinfo>
 
@@ -32,8 +36,8 @@ namespace ExpressionParsing {
 
       virtual int getIntValue(const SG::AuxElement *auxElement) const = 0;
       virtual double getDoubleValue(const SG::AuxElement *auxElement) const = 0;
-      virtual std::vector<int> getVecIntValue(const SG::AuxVectorData *auxVectorData) const = 0;
-      virtual std::vector<double> getVecDoubleValue(const SG::AuxVectorData *auxVectorData) const = 0;
+      virtual std::vector<int> getVecIntValue(const SG::AuxVectorData *auxVectorData) = 0;
+      virtual std::vector<double> getVecDoubleValue(const SG::AuxVectorData *auxVectorData) = 0;
   };
 
 
@@ -72,7 +76,7 @@ namespace ExpressionParsing {
         return (double) m_acc(*auxElement);
       }
 
-      virtual std::vector<int> getVecIntValue(const SG::AuxVectorData *auxVectorData) const {
+      virtual std::vector<int> getVecIntValue(const SG::AuxVectorData *auxVectorData) {
         size_t N = auxVectorData->size_v();
         std::vector<int> result(N);
         for (size_t i = 0; i < N; ++i) {
@@ -81,7 +85,7 @@ namespace ExpressionParsing {
         return result;
       }
 
-      virtual std::vector<double> getVecDoubleValue(const SG::AuxVectorData *auxVectorData) const {
+      virtual std::vector<double> getVecDoubleValue(const SG::AuxVectorData *auxVectorData) {
         size_t N = auxVectorData->size_v();
         std::vector<double> result(N);
         for (size_t i = 0; i < N; ++i) {
@@ -102,17 +106,17 @@ namespace ExpressionParsing {
       TMethodWrapper(const TMethodWrapper&) = delete;
       TMethodWrapper& operator= (const TMethodWrapper&) = delete;
       virtual ~TMethodWrapper();
-      IProxyLoader::VariableType variableType() const;
+      IProxyLoader::VariableType variableType();
       virtual bool isValid(const SG::AuxElement *auxElement) const;
       virtual bool isValid(const SG::AuxVectorData *auxVectorData) const;
 
       virtual int getIntValue(const SG::AuxElement *auxElement) const;
       virtual double getDoubleValue(const SG::AuxElement *auxElement) const;
-      virtual std::vector<int> getVecIntValue(const SG::AuxVectorData *auxVectorData) const;
-      virtual std::vector<double> getVecDoubleValue(const SG::AuxVectorData *auxVectorData) const;
+      virtual std::vector<int> getVecIntValue(const SG::AuxVectorData *auxVectorData);
+      virtual std::vector<double> getVecDoubleValue(const SG::AuxVectorData *auxVectorData);
 
     private:
-      TMethodCall *m_methodCall;
+      mutable RootUtils::TSMethodCall m_methodCall ATLAS_THREAD_SAFE;
       bool m_valid;
   };
 
@@ -123,64 +127,78 @@ namespace ExpressionParsing {
       TMethodCollectionWrapper(const TMethodCollectionWrapper&) = delete;
       TMethodCollectionWrapper& operator= (const TMethodCollectionWrapper&) = delete;
       virtual ~TMethodCollectionWrapper();
-      IProxyLoader::VariableType variableType() const;
+      IProxyLoader::VariableType variableType();
       virtual bool isValid(const SG::AuxElement *auxElement) const;
       virtual bool isValid(const SG::AuxVectorData *auxVectorData) const;
 
       virtual int getIntValue(const SG::AuxElement *auxElement) const;
       virtual double getDoubleValue(const SG::AuxElement *auxElement) const;
-      virtual std::vector<int> getVecIntValue(const SG::AuxVectorData *auxVectorData) const;
-      virtual std::vector<double> getVecDoubleValue(const SG::AuxVectorData *auxVectorData) const;
+      virtual std::vector<int> getVecIntValue(const SG::AuxVectorData *auxVectorData);
+      virtual std::vector<double> getVecDoubleValue(const SG::AuxVectorData *auxVectorData);
 
     private:
       TVirtualCollectionProxy *m_collectionProxy;
-      TMethodCall *m_methodCall;
+      mutable RootUtils::TSMethodCall m_methodCall ATLAS_THREAD_SAFE;
       bool m_valid;
   };
 
 
-  class xAODElementProxyLoader : public IProxyLoader {
-    public:
-      xAODElementProxyLoader();
-      xAODElementProxyLoader(const SG::AuxElement *auxElement);
+  class xAODProxyLoader : public IProxyLoader {
+  public:
+    xAODProxyLoader();
+    virtual ~xAODProxyLoader();
 
-      virtual ~xAODElementProxyLoader();
-      virtual void reset();
+    /// Disallow copy construction and assignment.
+    xAODProxyLoader(const xAODProxyLoader&) = delete;
+    xAODProxyLoader& operator=(const xAODProxyLoader&) = delete;
 
-      void setData(const SG::AuxElement *auxElement);
+    virtual void reset();
 
-      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname);
-      virtual int loadIntVariableFromString(const std::string &varname);
-      virtual double loadDoubleVariableFromString(const std::string &varname);
-      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname);
-      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname);
+  protected:
+    template<class TYPE, class AUX>
+    bool try_type(const std::string& varname, const std::type_info* ti, const AUX* data) const;
 
-    private:
-      const SG::AuxElement *m_auxElement;
-      std::map<std::string, BaseAccessorWrapper*> m_accessorCache;
+    template<class AUX>
+    IProxyLoader::VariableType try_all_known_types(const std::string& varname, const AUX* data, bool isVector) const;
+
+    using accessorCache_t = CxxUtils::ConcurrentStrMap<BaseAccessorWrapper*, CxxUtils::SimpleUpdater>;
+    mutable accessorCache_t m_accessorCache ATLAS_THREAD_SAFE;
   };
 
 
-  class xAODVectorProxyLoader : public IProxyLoader {
+  class xAODElementProxyLoader : public xAODProxyLoader {
     public:
-      xAODVectorProxyLoader();
-      xAODVectorProxyLoader(const SG::AuxVectorData *auxVectorData);
+      xAODElementProxyLoader() = default;
+      xAODElementProxyLoader(const SG::AuxElement *auxElement);
 
-      virtual ~xAODVectorProxyLoader();
-      virtual void reset();
+      void setData(const SG::AuxElement *auxElement);
+
+      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname) const;
+      virtual int loadIntVariableFromString(const std::string &varname) const;
+      virtual double loadDoubleVariableFromString(const std::string &varname) const;
+      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname) const;
+      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname) const;
+
+    private:
+      const SG::AuxElement *m_auxElement{nullptr};
+  };
+
+
+  class xAODVectorProxyLoader : public xAODProxyLoader {
+    public:
+      xAODVectorProxyLoader() = default;
+      xAODVectorProxyLoader(const SG::AuxVectorData *auxVectorData);
 
       void setData(const SG::AuxVectorData *auxElement);
 
-      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname);
-      virtual int loadIntVariableFromString(const std::string &varname);
-      virtual double loadDoubleVariableFromString(const std::string &varname);
-      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname);
-      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname);
+      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname) const;
+      virtual int loadIntVariableFromString(const std::string &varname) const;
+      virtual double loadDoubleVariableFromString(const std::string &varname) const;
+      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname) const;
+      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname) const;
 
     private:
-      const SG::AuxVectorData *m_auxVectorData;
-      std::map<std::string, BaseAccessorWrapper*> m_accessorCache;
-
+      const SG::AuxVectorData *m_auxVectorData{nullptr};
   };
 
 }

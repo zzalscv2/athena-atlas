@@ -85,10 +85,10 @@ DerivationFramework::EgammaTrackParticleThinning::finalize()
   ATH_MSG_INFO("Selected " << m_nSelEgammas <<" out of " << m_nEgammas
                            << " objects from " << m_egammaKey.key());
   ATH_MSG_INFO("Kept " << m_nGSFPass << " out of " << m_ntotGSF
-                       << " objects from" << m_gsfSGKey.key());
+                       << " objects from " << m_gsfSGKey.key());
 
   if (!m_inDetSGKey.empty()) {
-    ATH_MSG_INFO("Kept " << m_npass << "out of " << m_ntot << " objects from"
+    ATH_MSG_INFO("Kept " << m_npass << "out of " << m_ntot << " objects from "
                          << m_inDetSGKey.key());
   }
 

@@ -45,6 +45,9 @@ try:
     if "StreamHITS" in f.infos["stream_names"]:
         from Digitization.DigitizationFlags import digitizationFlags
         simdict = digitizationFlags.specialConfiguration.get_Value()
+        if simdict is None:
+            # Here we are in a ReSim job, so the input is a HITS file
+            raise ValueError
         doG4SimConfig = False
     else:
         from G4AtlasApps.SimFlags import simFlags
@@ -55,6 +58,10 @@ try:
         simdict = simFlags.specialConfiguration.get_Value()
 except:
     from G4AtlasApps.SimFlags import simFlags
+    if not "InteractingPDGCodes" in simFlags.specialConfiguration.get_Value():
+        assert "CHARGE" in simFlags.specialConfiguration.get_Value()
+        CODE=10000000+int(float(simFlags.specialConfiguration.get_Value()["CHARGE"])*100)
+        simFlags.specialConfiguration.get_Value()['InteractingPDGCodes'] = str([CODE,-1*CODE])
     simdict = simFlags.specialConfiguration.get_Value()
 
 assert "MASS" in simdict

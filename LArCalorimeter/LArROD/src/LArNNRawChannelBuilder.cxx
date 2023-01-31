@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "LArNNRawChannelBuilder.h"
@@ -8,15 +8,7 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "LArRawEvent/LArRawChannelContainer.h"
 
-#include "CaloIdentifier/CaloCell_ID.h"
-#include "CaloIdentifier/CaloIdManager.h"
-
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloDetDescr/CaloDetDescrManager.h"
-#include "CaloDetDescr/CaloDetDescrElement.h"
-
 #include "LArRawEvent/LArDigitContainer.h"
-#include "LArIdentifier/LArOnline_SuperCellID.h"
 #include "LArIdentifier/LArOnlineID.h"
 #include "LArCOOLConditions/LArDSPThresholdsFlat.h"
 #include <cmath>
@@ -27,32 +19,29 @@
 #include <fstream>
 
 
+
 LArNNRawChannelBuilder::LArNNRawChannelBuilder(const std::string& name, ISvcLocator* pSvcLocator) :
   AthReentrantAlgorithm(name, pSvcLocator) {
 }
 
-
 StatusCode LArNNRawChannelBuilder::initialize() {
   ATH_CHECK(m_digitKey.initialize());
-  ATH_CHECK(m_cellKey.initialize(m_isSC));
-  ATH_CHECK(m_rawChannelKey.initialize(!m_isSC));
+  ATH_CHECK(m_rawChannelKey.initialize());
   ATH_CHECK(m_pedestalKey.initialize());
   ATH_CHECK(m_adc2MeVKey.initialize());
   ATH_CHECK(m_cablingKey.initialize() );
-
-
-  if ( m_isSC ) {
-    const LArOnline_SuperCellID* ll;
-    ATH_CHECK(detStore()->retrieve(ll, "LArOnline_SuperCellID"));
-    m_onlineId = (const LArOnlineID_Base*)ll;
-    ATH_CHECK( detStore()->retrieve (m_sem_mgr, "CaloSuperCellMgr") );
-  }
-  else {
-    const LArOnlineID* ll;
-    ATH_CHECK(detStore()->retrieve(ll, "LArOnlineID"));
-    m_onlineId = (const LArOnlineID_Base*)ll;
+  ATH_CHECK(m_ofcKey.initialize());	 
+  ATH_CHECK(m_shapeKey.initialize());
+  ATH_CHECK(m_run1DSPThresholdsKey.initialize(SG::AllowEmpty) );
+  ATH_CHECK(m_run2DSPThresholdsKey.initialize(SG::AllowEmpty) );
+  if (m_useDBFortQ) {
+    if (m_run1DSPThresholdsKey.empty() && m_run2DSPThresholdsKey.empty()) {
+      ATH_MSG_ERROR ("useDB requested but neither Run1DSPThresholdsKey nor Run2DSPThresholdsKey initialized.");
+      return StatusCode::FAILURE;
+    }
   }
 
+  ATH_CHECK(detStore()->retrieve(m_onlineId,"LArOnlineID"));
 
   return StatusCode::SUCCESS;
 }
@@ -66,13 +55,6 @@ StatusCode LArNNRawChannelBuilder::execute(const EventContext& ctx) const {
   //Write output via write handle
 
   auto outputContainerLRPtr = std::make_unique<LArRawChannelContainer>();
-
-  if (m_isSC) {
-      ATH_MSG_ERROR("No energy computation for super cells");
-      return StatusCode::FAILURE;
-
-    }
-
 
   //Get Conditions input
   SG::ReadCondHandle<ILArPedestal>pedHdl(m_pedestalKey, ctx);
@@ -103,7 +85,7 @@ StatusCode LArNNRawChannelBuilder::execute(const EventContext& ctx) const {
     //The following creates a sub-sample vector of the correct size to be passed on to the NN
     std::vector<short>subsamples(nSamples, 0.0);
     for (size_t i = m_firstSample; i < m_firstSample+nSamples; ++i) {
-      subsamples.push_back(samples[i]);
+      subsamples[i-m_firstSample] = samples[i];
     }
 
     const int gain = digit->gain();
@@ -128,6 +110,7 @@ StatusCode LArNNRawChannelBuilder::execute(const EventContext& ctx) const {
     }
 
     // Compute amplitude
+    float An = 0;
     float A = 0;
     bool saturated = false;
 
@@ -172,10 +155,11 @@ StatusCode LArNNRawChannelBuilder::execute(const EventContext& ctx) const {
     // Calculate the output value of the NN based on the inputs given
     auto outputs = graph.compute(inputs, input_sequences);
 
+    //normalised output
+    An = outputs.begin()->second;
 
-    A = outputs.begin()->second;
-
-    
+    //taking the normalisation into account
+    A = An*4096.0;
 
     //Apply Ramp
     const float E = adc2mev[0]+A*adc2mev[1];

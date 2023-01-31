@@ -1,26 +1,29 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <atomic>
 #ifdef LW_DEBUG_POOLS_DEBUG_USAGE
 #include <iostream>
 #include <map>
+#include <mutex>
 #endif
 
 //____________________________________________________________________
 class LWPools::PoolList {
   //basically an array of pools which inits to null
 public:
-  LWPool * & operator[](unsigned i) { return m_poolarr[i]; }
-  const LWPool * operator[](unsigned i) const { return m_poolarr[i]; }
+  std::atomic<LWPool*>& operator[](unsigned i) { return m_poolarr[i]; }
+  const LWPool * operator[](unsigned i) const { return m_poolarr[i].load(); }
   PoolList();
   void cleanup();
 #ifdef LW_DEBUG_POOLS_DEBUG_USAGE
   std::map<char*,unsigned> m_memoryHandedOut;
+  std::mutex m_mutex;
 #endif
 private:
   void nullout();
-  LWPool * m_poolarr[LWPoolSelector::numberOfPools];
+  std::atomic<LWPool*> m_poolarr[LWPoolSelector::numberOfPools];
 };
 
 //____________________________________________________________________
@@ -53,6 +56,7 @@ inline char * LWPools::acquire(unsigned length)
 #endif
 
 #ifdef LW_DEBUG_POOLS_DEBUG_USAGE
+  std::scoped_lock lock (m_mutex);
   std::map<char*,unsigned>::const_iterator it = s_pools.m_memoryHandedOut.find(c);
   if (it!=s_pools.m_memoryHandedOut.end()) {
     std::cout<<"LWPools::acquire("<<length<<") INTERNAL ERROR: Handing out the same address ("<<(void*)c<<") twice!!"<<std::endl;
@@ -69,6 +73,7 @@ inline char * LWPools::acquire(unsigned length)
 inline void LWPools::release(char*c,unsigned length)
 {
 #ifdef LW_DEBUG_POOLS_DEBUG_USAGE
+  std::scoped_lock lock (m_mutex);
   if (!c||length==0)
     std::cout<<"LWPools::release("<<(void*)c<<", "<<length<<")"<<std::endl;
   std::map<char*,unsigned>::iterator it = s_pools.m_memoryHandedOut.find(c);

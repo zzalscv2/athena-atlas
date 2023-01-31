@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************************************************************
@@ -126,11 +126,9 @@ TrigMuonEFInfo::TrigMuonEFInfo( const TrigMuonEFInfo& rhs ) :
 
 	// deep copy of m_trackContainer
 	m_trackContainer = new TrigMuonEFInfoTrackContainer();
-	for (TrigMuonEFInfoTrackContainer::const_iterator TrackItr = rhs.m_trackContainer->begin() ;TrackItr!=rhs.m_trackContainer->end();TrackItr++)
+        for (const TrigMuonEFInfoTrack* t : *rhs.m_trackContainer)
 	{  // loop over container content
-		TrigMuonEFInfoTrack* infoTrackDest = new TrigMuonEFInfoTrack(**TrackItr); // clone elements
-		m_trackContainer->push_back(infoTrackDest);  // add to container
-
+		m_trackContainer->push_back(std::make_unique<TrigMuonEFInfoTrack>(*t));
 	}
 
 	// check for legacy tracks
@@ -164,11 +162,10 @@ TrigMuonEFInfo& TrigMuonEFInfo::operator=( const TrigMuonEFInfo& rhs )
 
 		// deep copy of m_trackContainer
 		m_trackContainer = new TrigMuonEFInfoTrackContainer();
-	    for (TrigMuonEFInfoTrackContainer::const_iterator TrackItr = rhs.m_trackContainer->begin() ;TrackItr!=rhs.m_trackContainer->end();TrackItr++)
-	    {  // loop over container content
-	              TrigMuonEFInfoTrack* infoTrackDest = new TrigMuonEFInfoTrack(**TrackItr); // clone elements
-	              m_trackContainer->push_back(infoTrackDest);  // add to container
-	    }
+                for (const TrigMuonEFInfoTrack* t : *rhs.m_trackContainer)
+                {
+                  m_trackContainer->push_back(std::make_unique<TrigMuonEFInfoTrack>(*t));
+                }
 
 		// check for legacy tracks
 		if (rhs.m_spectrometerTrack) {
@@ -447,10 +444,7 @@ bool operator== ( const TrigMuonEFInfo& a, const TrigMuonEFInfo& b ) {
 		return false;
 	if (a.hasTrack() && b.hasTrack() ) {
 		// simple check for the number of entries in container:
-		if (
-				( a.TrackContainer()->begin() - a.TrackContainer()->end())
-				!= ( b.TrackContainer()->begin() - b.TrackContainer()->end())
-		)
+		if ( a.TrackContainer()->size() != b.TrackContainer()->size() )
 		{
 			return false;
 		}
@@ -468,7 +462,7 @@ bool operator== ( const TrigMuonEFInfo& a, const TrigMuonEFInfo& b ) {
 		for (
 				TrigMuonEFInfoTrackContainer::const_iterator TrkItrA = a.TrackContainer()->begin();
 				TrkItrA != a.TrackContainer()->end();
-				TrkItrA++
+				++TrkItrA
 		)
 		{
 			// find match in containerB
@@ -479,7 +473,7 @@ bool operator== ( const TrigMuonEFInfo& a, const TrigMuonEFInfo& b ) {
 					tmpContB->erase(TrkItrB);
 					break;
 				}
-				TrkItrB++;
+				++TrkItrB;
 			}
 		}
 
@@ -553,7 +547,7 @@ void diff( const TrigMuonEFInfo& a, const TrigMuonEFInfo& b,
 	for (
 			TrigMuonEFInfoTrackContainer::const_iterator TrkItrA = a.TrackContainer()->begin();
 			TrkItrA != a.TrackContainer()->end();
-			TrkItrA++
+			++TrkItrA
 	)
 	{
 		// find match in containerB
@@ -568,7 +562,7 @@ void diff( const TrigMuonEFInfo& a, const TrigMuonEFInfo& b,
 				tmpContB->erase(TrkItrB);
 				break;
 			}
-			TrkItrB++;
+			++TrkItrB;
 		}
 	}
 	// clean up

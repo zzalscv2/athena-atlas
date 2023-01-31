@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERS_QCDTRUTHJETFILTER_H
@@ -7,9 +7,12 @@
 
 #include "GeneratorModules/GenFilter.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 #include <string>
 
-class IAtRndmGenSvc;
+namespace CLHEP {
+  class HepRandomEngine;
+}
 
 class QCDTruthJetFilter : public GenFilter {
 public:
@@ -20,6 +23,9 @@ public:
   StatusCode filterEvent();
 
 private:
+
+  CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName,
+                                          const EventContext& ctx) const;
 
   double m_MinPt;  //!< Min pT for the truth jets
   double m_MaxPt;  //!< Max pT for the truth jets
@@ -32,7 +38,7 @@ private:
   
   std::string m_TruthJetContainerName;  //!< Name of the truth jet container
 
-  ServiceHandle<IAtRndmGenSvc> m_rand;  //!< Random number generator
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};
 
   long m_total;    //!< Total number of events tested
   long m_passed;   //!< Number of events passing all cuts

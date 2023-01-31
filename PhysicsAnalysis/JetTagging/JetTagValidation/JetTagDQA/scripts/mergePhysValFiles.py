@@ -22,7 +22,6 @@ categories = ['jet',
               'tagger_RNNIP',
               'tagger_DIPS',
               'tagger_SV1',
-              'tagger_JetFitter',
               'tagger_DL1dv00',
               'tagger_DL1dv01',
               'tagger_DL1r',
@@ -44,7 +43,7 @@ sub_categories_type_1 = [ '_incl',
                    '_muon',
                  ]
 
-categories_with_subcategories_type_2 = ['tagger_IP3D', 'tagger_RNNIP', 'tagger_DIPS', 'tagger_SV1', 'tagger_JetFitter', 'tagger_DL1dv00', 'tagger_DL1dv01', 'tagger_DL1r', 'tagger_GN1']
+categories_with_subcategories_type_2 = ['tagger_IP3D', 'tagger_RNNIP', 'tagger_DIPS', 'tagger_SV1', 'tagger_DL1dv00', 'tagger_DL1dv01', 'tagger_DL1r', 'tagger_GN1']
 
 sub_categories_type_2 = [ '_pt_ttbar',
                    '_pt_Zprime',

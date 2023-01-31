@@ -1,9 +1,10 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 #ifndef TopoCore_BaseTOB
 #define TopoCore_BaseTOB
 
 #include <iostream>
+#include <cstdint>
 #include "L1TopoCommon/Types.h"
 
 namespace TCS {

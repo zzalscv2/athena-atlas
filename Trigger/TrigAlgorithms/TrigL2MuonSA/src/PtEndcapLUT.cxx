@@ -24,7 +24,7 @@ TrigL2MuonSA::PtEndcapLUT::PtEndcapLUT(const std::string& type,
 
 TrigL2MuonSA::PtEndcapLUT::~PtEndcapLUT()
 {
-  for (TableMap::iterator it = m_tables.begin(); it != m_tables.end(); it++) {
+  for (TableMap::iterator it = m_tables.begin(); it != m_tables.end(); ++it) {
     delete it->second;
   }
 }

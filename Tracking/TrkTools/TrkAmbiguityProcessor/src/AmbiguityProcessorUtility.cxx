@@ -43,18 +43,18 @@ namespace AmbiguityProcessor{
       vecTsos.push_back(newTsos);
       if((*iTsos)->type(Trk::TrackStateOnSurface::Measurement)){  //Get the chi2 and number of hits
         if ((*iTsos)->fitQualityOnSurface()) {
-          reXi2 += (*iTsos)->fitQualityOnSurface()->chiSquared();
-          nDF   += (*iTsos)->fitQualityOnSurface()->numberDoF();
+          reXi2 += (*iTsos)->fitQualityOnSurface().chiSquared();
+          nDF   += (*iTsos)->fitQualityOnSurface().numberDoF();
         }
       }
     }
-    Trk::FitQuality* fq = new Trk::FitQuality(reXi2,nDF-5);
+    auto fq = std::make_unique<Trk::FitQuality>(reXi2,nDF-5);
     Trk::TrackInfo info;
     info.addPatternRecoAndProperties(track.info());
     Trk::TrackInfo newInfo;
     newInfo.setPatternRecognitionInfo(Trk::TrackInfo::SimpleAmbiguityProcessorTool);
     info.addPatternReco(newInfo); 
-    return std::make_unique<Trk::Track>(info, std::move(vecTsos), fq);
+    return std::make_unique<Trk::Track>(info, std::move(vecTsos), std::move(fq));
   }
   //
   int getUid() {

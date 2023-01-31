@@ -23,7 +23,7 @@ from LArROD.LArNNChannelBuilder import LArNNRawChannelBuilderCfg
 from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
 # for Trigger Tower
 from CaloConditions.CaloConditionsConfig import CaloTriggerTowerCfg
-from SGComps.AddressRemappingConfig import InputRenameCfg, InputOverwriteCfg
+from SGComps.AddressRemappingConfig import InputOverwriteCfg
 
 def useLArFloat(flags):
     """Return bool for simplified transient LArHit with float E,time"""
@@ -156,7 +156,7 @@ def LArPileUpToolCfg(flags, name="LArPileUpTool", **kwargs):
     acc.setPrivateTools(LArPileUpTool(name, **kwargs))
     return acc
 
-def LArHitEMapToDigitAlgCfg(flags, name="LArHitEMapToDigitAlgCfg", **kwargs):
+def LArHitEMapToDigitAlgCfg(flags, name="LArHitEMapToDigitAlg", **kwargs):
     """Return ComponentAccumulator with configured LArHitEMapToDigitAlg"""
     acc = LArGMCfg(flags)
 
@@ -406,17 +406,4 @@ def LArSuperCellOverlayCfg(flags, **kwargs):
     acc.merge(LArSuperCellBuilderAlgCfg(flags))
     acc.merge(LArSuperCellBCIDAlgCfg(flags))
     acc.merge(OutputStreamCfg(flags, "RDO", ["CaloCellContainer#SCell"]))
-    return acc
-
-
-def LArHitFilterCfg(flags, **kwargs):
-    """ Return ComponentAccumulator with LArHitFilter """
-    acc = ComponentAccumulator()
-    from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
-    acc.merge(DetDescrCnvSvcCfg(flags))  # we do not need the whole geometry, identifiers are enough
-    acc.merge(InputRenameCfg("LArHitContainer","LArHitEMB","LArHitEMBOLD"))
-    acc.merge(InputRenameCfg("LArHitContainer","LArHitEMEC","LArHitEMECOLD"))
-    acc.merge(InputRenameCfg("LArHitContainer","LArHitHEC","LArHitHECOLD"))
-    acc.merge(InputRenameCfg("LArHitContainer","LArHitFCAL","LArHitFCALOLD"))
-    acc.addEventAlgo(CompFactory.LArHitFilter("LArHitFilter"))
     return acc

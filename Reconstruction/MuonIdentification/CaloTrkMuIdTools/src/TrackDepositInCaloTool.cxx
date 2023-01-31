@@ -271,7 +271,7 @@ std::vector<const CaloCell*> TrackDepositInCaloTool::getCaloCellsForTile(const C
     std::vector<const CaloCell*> result{};
     // --- Get all the relevant kinematical variables ---
     double phiPar = parEntrance->position().phi();
-    double phiParEntrance = parEntrance->position().phi();
+    double phiParEntrance = phiPar;
     double zParEntrance = parEntrance->position().z();
     double phiParExit = parExit->position().phi();
     double zParExit = parExit->position().z();

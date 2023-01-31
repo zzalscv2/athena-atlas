@@ -51,7 +51,10 @@ def addOutputCopyAlgorithms (algSeq, postfix, inputContainer, outputContainer, s
     algSeq += copyalg
 
 
-def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteBroken) :
+def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken) :
+
+    vars = []
+    metVars = []
 
     # Include, and then set up the pileup analysis sequence:
     prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
@@ -74,14 +77,11 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
              'EventInfo.eventNumber   -> eventNumber', ]
 
 
-    # FIX ME: this algorithm should be run on both data and MC, but in MC
-    # it produces strange errors in CutFlowSvc in Athena
-    if not forCompare or dataType == 'data' :
-        # Skip events with no primary vertex:
-        algSeq += createAlgorithm( 'CP::VertexSelectionAlg',
-                                   'PrimaryVertexSelectorAlg' )
-        algSeq.PrimaryVertexSelectorAlg.VertexContainer = 'PrimaryVertices'
-        algSeq.PrimaryVertexSelectorAlg.MinVertices = 1
+    # Skip events with no primary vertex:
+    algSeq += createAlgorithm( 'CP::VertexSelectionAlg',
+                               'PrimaryVertexSelectorAlg' )
+    algSeq.PrimaryVertexSelectorAlg.VertexContainer = 'PrimaryVertices'
+    algSeq.PrimaryVertexSelectorAlg.MinVertices = 1
 
 
     # Include, and then set up the jet analysis algorithm sequence:
@@ -92,24 +92,35 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
     else :
         input = jetContainer
     jetSequence = makeJetAnalysisSequence( dataType, jetContainer,
-                                           runJvtUpdate = True, runNNJvtUpdate = True,
+                                           runJvtUpdate = False, runNNJvtUpdate = True,
                                            enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False,
                                            runGhostMuonAssociation = not isPhyslite)
 
+    from FTagAnalysisAlgorithms.FTagAnalysisSequence import makeFTagAnalysisSequence
+    btagger = "DL1dv01"
+    btagWP = "FixedCutBEff_60"
+    makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = False,
+                              enableCutflow=True, btagger = btagger, btagWP = btagWP, kinematicSelection = True )
+    vars += [
+        'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select_%SYS%',
+    ]
+    if dataType != 'data' :
+        vars += [
+            'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_eff_%SYS%'
+        ]
     if not noPhysliteBroken :
         from FTagAnalysisAlgorithms.FTagAnalysisSequence import makeFTagAnalysisSequence
         btagger = "DL1r"
         btagWP = "FixedCutBEff_77"
         makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = False, legacyRecommendations = True,
-                                  enableCutflow=True, btagger = btagger, btagWP = btagWP )
-        if not forCompare :
+                                  enableCutflow=True, btagger = btagger, btagWP = btagWP, kinematicSelection = True, postfix='legacy' )
+        vars += [
+            'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_legacy_select_%SYS%',
+        ]
+        if dataType != 'data' :
             vars += [
-                'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select_%SYS%',
+                'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_legacy_eff_%SYS%'
             ]
-            if dataType != 'data' :
-                vars += [
-                    'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_eff_%SYS%'
-                ]
 
     jetSequence.configure( inputName = input, outputName = 'AnaJets_%SYS%' )
 
@@ -340,13 +351,11 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
 
     # Add the sequence to the job:
     algSeq += metSequence
-    if not forCompare :
-        vars += [
-            'AnaMET_%SYS%.mpx   -> met_mpx_%SYS%',
-            'AnaMET_%SYS%.mpy   -> met_mpy_%SYS%',
-            'AnaMET_%SYS%.sumet -> met_sumet_%SYS%',
-            'AnaMET_%SYS%.name  -> met_name_%SYS%',
-        ]
+    metVars += [
+        'AnaMET_%SYS%.mpx   -> met_mpx_%SYS%',
+        'AnaMET_%SYS%.mpy   -> met_mpy_%SYS%',
+        'AnaMET_%SYS%.sumet -> met_sumet_%SYS%',
+    ]
 
 
     # Make view containers holding as inputs for OR
@@ -392,7 +401,7 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
     # Include, and then set up the overlap analysis algorithm sequence:
     from AsgAnalysisAlgorithms.OverlapAnalysisSequence import \
         makeOverlapAnalysisSequence
-    overlapSequence = makeOverlapAnalysisSequence( dataType, doMuPFJetOR=True, doTaus=False, enableCutflow=True, shallowViewOutput = False, inputLabel = 'preselectOR', outputLabel = 'passesOR' )
+    overlapSequence = makeOverlapAnalysisSequence( dataType, doTaus=True, enableCutflow=True, shallowViewOutput = False, inputLabel = 'preselectOR', outputLabel = 'passesOR' )
     overlapSequence.configure(
         inputName = {
             'electrons' : 'AnaElectrons_%SYS%',
@@ -404,14 +413,13 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
         outputName = { } )
 
     algSeq += overlapSequence
-    if not forCompare :
-        vars += [
-            'OutJets_%SYS%.passesOR_%SYS% -> jet_select_or_%SYS%',
-            'OutElectrons_%SYS%.passesOR_%SYS% -> el_select_or_%SYS%',
-            'OutPhotons_%SYS%.passesOR_%SYS% -> ph_select_or_%SYS%',
-            'OutMuons_%SYS%.passesOR_%SYS% -> mu_select_or_%SYS%',
-            'OutTauJets_%SYS%.passesOR_%SYS% -> tau_select_or_%SYS%',
-        ]
+    vars += [
+        'OutJets_%SYS%.passesOR_%SYS% -> jet_select_or_%SYS%',
+        'OutElectrons_%SYS%.passesOR_%SYS% -> el_select_or_%SYS%',
+        'OutPhotons_%SYS%.passesOR_%SYS% -> ph_select_or_%SYS%',
+        'OutMuons_%SYS%.passesOR_%SYS% -> mu_select_or_%SYS%',
+        'OutTauJets_%SYS%.passesOR_%SYS% -> tau_select_or_%SYS%',
+    ]
 
     if dataType != 'data' :
         # Include, and then set up the generator analysis sequence:
@@ -422,15 +430,12 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
         vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
 
 
-    # FIX ME: this algorithm should be run on both data and MC, but in MC
-    # it produces strange errors in CutFlowSvc in Athena
-    if not forCompare or dataType == 'data' :
-        # Include, and then set up the trigger analysis sequence:
-        from TriggerAnalysisAlgorithms.TriggerAnalysisSequence import \
-            makeTriggerAnalysisSequence
-        triggerSequence = makeTriggerAnalysisSequence( dataType, triggerChains=triggerChains, noFilter=True )
-        algSeq += triggerSequence
-        vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
+    # Include, and then set up the trigger analysis sequence:
+    from TriggerAnalysisAlgorithms.TriggerAnalysisSequence import \
+        makeTriggerAnalysisSequence
+    triggerSequence = makeTriggerAnalysisSequence( dataType, triggerChains=triggerChains, noFilter=True )
+    algSeq += triggerSequence
+    vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
 
 
 
@@ -447,182 +452,265 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
     addOutputCopyAlgorithms (algSeq, 'Jets', 'AnaJets_%SYS%', 'OutJets_%SYS%',
                              'selectPtEta')
 
+
+    # Add an ntuple dumper algorithm:
+    treeMaker = createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' )
+    treeMaker.TreeName = 'analysis'
+    # the auto-flush setting still needs to be figured out
+    #treeMaker.TreeAutoFlush = 0
+    algSeq += treeMaker
+    ntupleMaker = createAlgorithm( 'CP::AsgxAODNTupleMakerAlg', 'NTupleMaker' )
+    ntupleMaker.TreeName = 'analysis'
+    ntupleMaker.Branches = vars
+    # ntupleMaker.OutputLevel = 2  # For output validation
+    algSeq += ntupleMaker
+    if len (metVars) > 0:
+        ntupleMaker = createAlgorithm( 'CP::AsgxAODMetNTupleMakerAlg', 'MetNTupleMaker' )
+        ntupleMaker.TreeName = 'analysis'
+        ntupleMaker.Branches = metVars
+        #ntupleMaker.OutputLevel = 2  # For output validation
+        algSeq += ntupleMaker
+    treeFiller = createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' )
+    treeFiller.TreeName = 'analysis'
+    algSeq += treeFiller
+
     pass
 
 
 
-def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteBroken) :
+def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken) :
+
+    vars = []
+    metVars = []
+
+    from AnalysisAlgorithmsConfig.ConfigFactory import makeConfig
+
+    # it seems the right containers are in the test input files so far
+    largeRJets = False
+    # there are no track jets in PHYSLITE, or in the sequence configuration
+    trackJets = not isPhyslite and not forCompare
 
     configSeq = ConfigSequence ()
 
+    outputContainers = {'mu_': 'OutMuons',
+                        'el_': 'OutElectrons',
+                        'ph_': 'OutPhotons',
+                        'tau_': 'OutTauJets',
+                        'jet_': 'OutJets',
+                        'met_': 'AnaMET'}
 
     if not isPhyslite :
         # Include, and then set up the pileup analysis sequence:
         prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
 
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import \
-            makePileupReweightingConfig
-        makePileupReweightingConfig (configSeq,
-                                     userPileupConfigs=prwfiles,
-                                     userLumicalcFiles=lumicalcfiles)
+        configSeq += makeConfig ('Event.PileupReweighting', None)
+        configSeq.setOptionValue ('.userPileupConfigs', prwfiles)
+        configSeq.setOptionValue ('.userLumicalcFiles', lumicalcfiles)
 
     vars += [ 'EventInfo.runNumber     -> runNumber',
               'EventInfo.eventNumber   -> eventNumber', ]
 
 
-    # FIX ME: this algorithm should be run on both data and MC, but in MC
-    # it produces strange errors in CutFlowSvc in Athena
-    if not forCompare or dataType == 'data' :
-        # Skip events with no primary vertex:
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import \
-            makePrimaryVertexConfig
-        makePrimaryVertexConfig (configSeq)
+    # Skip events with no primary vertex:
+    configSeq += makeConfig ('Event.Cleaning', None)
+
+
+    # Include, and then set up the jet analysis algorithm sequence:
+    configSeq += makeConfig( 'Jets', 'AnaJets', jetCollection='AntiKt4EMPFlowJets')
+    configSeq.setOptionValue ('.runJvtUpdate', False )
+    configSeq.setOptionValue ('.runNNJvtUpdate', True )
+
+    btagger = "DL1dv01"
+    btagWP = "FixedCutBEff_60"
+    configSeq += makeConfig( 'FlavourTagging', 'AnaJets.ftag' )
+    configSeq.setOptionValue ('.noEfficiency', False)
+    configSeq.setOptionValue ('.btagger', btagger)
+    configSeq.setOptionValue ('.btagWP', btagWP)
+    configSeq.setOptionValue ('.kinematicSelection', True )
+    if not noPhysliteBroken :
+        btagger = "DL1r"
+        btagWP = "FixedCutBEff_77"
+        configSeq += makeConfig( 'FlavourTagging', 'AnaJets.ftag_legacy' )
+        configSeq.setOptionValue ('.noEfficiency', False)
+        configSeq.setOptionValue ('.legacyRecommendations', True)
+        configSeq.setOptionValue ('.btagger', btagger)
+        configSeq.setOptionValue ('.btagWP', btagWP)
+        configSeq.setOptionValue ('.kinematicSelection', True )
+
+    configSeq += makeConfig( 'Jets.Jvt', 'AnaJets' )
+
+    if largeRJets :
+        configSeq += makeConfig( 'Jets', 'AnaLargeRJets', jetCollection='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets')
+        configSeq.setOptionValue ('.postfix', 'largeR_jets' )
+        outputContainers['larger_jet_'] = 'OutLargeRJets'
+
+    if trackJets :
+        configSeq += makeConfig( 'Jets', 'AnaTrackJets', jetCollection='AntiKtVR30Rmax4Rmin02PV0TrackJets')
+        configSeq.setOptionValue ('.postfix', 'track_jets' )
+        outputContainers['track_jet_'] = 'OutTrackJets'
 
 
     # Include, and then set up the electron analysis algorithm sequence:
-    from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import makeElectronCalibrationConfig, makeElectronWorkingPointConfig
 
     likelihood = True
     recomputeLikelihood=False
+    configSeq += makeConfig ('Electrons', 'AnaElectrons')
+    configSeq += makeConfig ('Electrons.Selection', 'AnaElectrons.loose')
     if likelihood:
-        workingpoint = 'LooseLHElectron.Loose_VarRad'
+        configSeq.setOptionValue ('.likelihoodWP', 'LooseLHElectron')
     else:
-        workingpoint = 'LooseDNNElectron.Loose_VarRad'
+        configSeq.setOptionValue ('.likelihoodWP', 'LooseDNNElectron')
     # FIXME: fails for PHYSLITE with missing data item
     # ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000
-    if noPhysliteBroken :
-        workingpoint = workingpoint.split('.')[0] + '.NonIso'
-    makeElectronCalibrationConfig (configSeq, 'AnaElectrons')
-    makeElectronWorkingPointConfig (configSeq, 'AnaElectrons', workingpoint, postfix = 'loose',
-                                    recomputeLikelihood=recomputeLikelihood)
-    vars += [ 'OutElectrons_NOSYS.eta -> el_eta',
-              'OutElectrons_NOSYS.phi -> el_phi',
-              'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
-              'OutElectrons_NOSYS.charge -> el_charge',
-              'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%', ]
-    if dataType != 'data':
-        vars += [ 'OutElectrons_%SYS%.effSF_loose_%SYS% -> el_effSF_loose_%SYS%', ]
+    if not noPhysliteBroken :
+        configSeq.setOptionValue ('.isolationWP', 'Loose_VarRad')
+    else :
+        configSeq.setOptionValue ('.isolationWP', 'NonIso')
+    configSeq.setOptionValue ('.recomputeLikelihood', recomputeLikelihood)
 
 
     # Include, and then set up the photon analysis algorithm sequence:
-    from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import makePhotonCalibrationConfig, makePhotonWorkingPointConfig
-
-    makePhotonCalibrationConfig (configSeq, 'AnaPhotons', recomputeIsEM=False)
-    makePhotonWorkingPointConfig (configSeq, 'AnaPhotons', 'Tight.FixedCutTight', postfix = 'tight', recomputeIsEM=False)
-    vars += [ 'OutPhotons_NOSYS.eta -> ph_eta',
-              'OutPhotons_NOSYS.phi -> ph_phi',
-              'OutPhotons_%SYS%.pt  -> ph_pt_%SYS%',
-              'OutPhotons_%SYS%.baselineSelection_tight -> ph_select_tight_%SYS%', ]
-    if dataType != 'data':
-        vars += [ 'OutPhotons_%SYS%.ph_effSF_tight_%SYS% -> ph_effSF_tight_%SYS%', ]
+    configSeq += makeConfig ('Photons', 'AnaPhotons')
+    configSeq.setOptionValue ('.recomputeIsEM', False)
+    configSeq += makeConfig ('Photons.Selection', 'AnaPhotons.tight')
+    configSeq.setOptionValue ('.qualityWP', 'Tight')
+    configSeq.setOptionValue ('.isolationWP', 'FixedCutTight')
+    configSeq.setOptionValue ('.recomputeIsEM', False)
 
 
-    # Include, and then set up the muon analysis algorithm sequence:
-    from MuonAnalysisAlgorithms.MuonAnalysisConfig import makeMuonCalibrationConfig, makeMuonWorkingPointConfig
-
-    makeMuonCalibrationConfig (configSeq, 'AnaMuons')
-    makeMuonWorkingPointConfig (configSeq, 'AnaMuons', workingPoint='Medium.Iso', postfix='medium')
-    makeMuonWorkingPointConfig (configSeq, 'AnaMuons', workingPoint='Tight.Iso', postfix='tight')
-    vars += [ 'OutMuons_NOSYS.eta -> mu_eta',
-              'OutMuons_NOSYS.phi -> mu_phi',
-              'OutMuons_%SYS%.pt  -> mu_pt_%SYS%',
-              'OutMuons_NOSYS.charge -> mu_charge',
-              'OutMuons_%SYS%.baselineSelection_medium -> mu_select_medium_%SYS%',
-              'OutMuons_%SYS%.baselineSelection_tight  -> mu_select_tight_%SYS%', ]
-    if dataType != 'data':
-        vars += [ 'OutMuons_%SYS%.muon_effSF_medium_%SYS% -> mu_effSF_medium_%SYS%', ]
-        vars += [ 'OutMuons_%SYS%.muon_effSF_tight_%SYS% -> mu_effSF_tight_%SYS%', ]
+    # set up the muon analysis algorithm sequence:
+    configSeq += makeConfig ('Muons', 'AnaMuons')
+    configSeq += makeConfig ('Muons.Selection', 'AnaMuons.medium')
+    configSeq.setOptionValue ('.quality', 'Medium')
+    configSeq.setOptionValue ('.isolation', 'Iso')
+    configSeq += makeConfig ('Muons.Selection', 'AnaMuons.tight')
+    configSeq.setOptionValue ('.quality', 'Tight')
+    configSeq.setOptionValue ('.isolation', 'Iso')
 
 
     # Include, and then set up the tau analysis algorithm sequence:
-    from TauAnalysisAlgorithms.TauAnalysisConfig import makeTauCalibrationConfig, makeTauWorkingPointConfig
-
-    makeTauCalibrationConfig (configSeq, 'AnaTauJets')
-    makeTauWorkingPointConfig (configSeq, 'AnaTauJets', workingPoint='Tight', postfix='tight')
-    vars += [ 'OutTauJets_NOSYS.eta -> tau_eta',
-              'OutTauJets_NOSYS.phi -> tau_phi',
-              'OutTauJets_NOSYS.charge -> tau_charge',
-              'OutTauJets_%SYS%.pt  -> tau_pt_%SYS%',
-              'OutTauJets_%SYS%.baselineSelection_tight  -> tau_select_tight_%SYS%', ]
-    if dataType != 'data':
-        vars += [ 'OutTauJets_%SYS%.tau_effSF_tight_%SYS% -> tau_effSF_tight_%SYS%', ]
-
-    # Include, and then set up the jet analysis algorithm sequence:
-    from JetAnalysisAlgorithms.JetAnalysisConfig import makeJetAnalysisConfig
-    jetContainer = 'AntiKt4EMPFlowJets'
-    makeJetAnalysisConfig( configSeq, 'AnaJets', jetContainer, runJvtUpdate = True, runNNJvtUpdate = True )
-    vars += ['OutJets_%SYS%.pt  -> jet_pt_%SYS%',
-             'OutJets_NOSYS.phi -> jet_phi',
-             'OutJets_NOSYS.eta -> jet_eta', ]
-
-    from JetAnalysisAlgorithms.JetJvtAnalysisConfig import makeJetJvtAnalysisConfig
-    makeJetJvtAnalysisConfig( configSeq, 'AnaJets', jetContainer )
-    if dataType != 'data':
-        vars += [
-            'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%',
-        ]
+    configSeq += makeConfig ('TauJets', 'AnaTauJets')
+    configSeq += makeConfig ('TauJets.Selection', 'AnaTauJets.tight')
+    configSeq.setOptionValue ('.quality', 'Tight')
 
 
     if dataType != 'data' :
         # Include, and then set up the generator analysis sequence:
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import \
-            makeGeneratorAnalysisConfig
-        makeGeneratorAnalysisConfig( configSeq, saveCutBookkeepers=True, runNumber=284500, cutBookkeepersSystematics=True )
-        vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
+        configSeq += makeConfig( 'Event.Generator', None)
+        configSeq.setOptionValue ('.saveCutBookkeepers', True)
+        configSeq.setOptionValue ('.runNumber', 284500)
+        configSeq.setOptionValue ('.cutBookkeepersSystematics', True)
 
 
-    # FIX ME: this algorithm should be run on both data and MC, but in MC
-    # it produces strange errors in CutFlowSvc in Athena
-    if not forCompare or dataType == 'data' :
-        # Include, and then set up the trigger analysis sequence:
-        from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import \
-            makeTriggerAnalysisConfig
-        makeTriggerAnalysisConfig( configSeq, triggerChains=triggerChains, noFilter=True )
-        vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
+    # Include, and then set up the trigger analysis sequence:
+    configSeq += makeConfig( 'Trigger.Chains', None )
+    configSeq.setOptionValue ('.triggerChains', triggerChains )
+    configSeq.setOptionValue ('.noFilter', True )
 
 
-    from AsgAnalysisAlgorithms.AsgAnalysisConfig import makePtEtaSelectionConfig
-
-    makePtEtaSelectionConfig (configSeq, 'AnaElectrons',
-                              selectionDecoration='selectPtEta',
-                              minPt=electronMinPt, maxEta=electronMaxEta)
-    makePtEtaSelectionConfig (configSeq, 'AnaPhotons',
-                              selectionDecoration='selectPtEta',
-                              minPt=photonMinPt, maxEta=photonMaxEta)
-    makePtEtaSelectionConfig (configSeq, 'AnaMuons',
-                              selectionDecoration='selectPtEta',
-                              minPt=muonMinPt, maxEta=muonMaxEta)
-    makePtEtaSelectionConfig (configSeq, 'AnaTauJets',
-                              selectionDecoration='selectPtEta',
-                              minPt=tauMinPt, maxEta=tauMaxEta)
-    makePtEtaSelectionConfig (configSeq, 'AnaJets',
-                              selectionDecoration='selectPtEta',
-                              minPt=jetMinPt, maxEta=jetMaxEta)
-
-
-    from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeOutputThinningConfig
-
-    makeOutputThinningConfig (configSeq, 'AnaElectrons',
-                              selection='selectPtEta&&baselineSelection_loose,as_char',
-                              outputName='OutElectrons')
-    makeOutputThinningConfig (configSeq, 'AnaPhotons',
-                              selection='selectPtEta&&baselineSelection_tight,as_char',
-                              outputName='OutPhotons')
-    makeOutputThinningConfig (configSeq, 'AnaMuons',
-                              selection='selectPtEta&&baselineSelection_medium,as_char',
-                              outputName='OutMuons')
-    makeOutputThinningConfig (configSeq, 'AnaTauJets',
-                              selection='selectPtEta&&baselineSelection_tight,as_char',
-                              outputName='OutTauJets')
-    makeOutputThinningConfig (configSeq, 'AnaJets',
-                              selection='selectPtEta',
-                              outputName='OutJets')
+    configSeq += makeConfig ('Selection.PtEta', 'AnaElectrons')
+    configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
+    configSeq.setOptionValue ('.minPt', electronMinPt, noneAction='ignore')
+    configSeq.setOptionValue ('.maxEta', electronMaxEta, noneAction='ignore')
+    configSeq += makeConfig ('Selection.PtEta', 'AnaPhotons')
+    configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
+    configSeq.setOptionValue ('.minPt', photonMinPt, noneAction='ignore')
+    configSeq.setOptionValue ('.maxEta', photonMaxEta, noneAction='ignore')
+    configSeq += makeConfig ('Selection.PtEta', 'AnaMuons')
+    configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
+    configSeq.setOptionValue ('.minPt', muonMinPt, noneAction='ignore')
+    configSeq.setOptionValue ('.maxEta', muonMaxEta, noneAction='ignore')
+    configSeq += makeConfig ('Selection.PtEta', 'AnaTauJets')
+    configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
+    configSeq.setOptionValue ('.minPt', tauMinPt, noneAction='ignore')
+    configSeq.setOptionValue ('.maxEta', tauMaxEta, noneAction='ignore')
+    configSeq += makeConfig ('Selection.PtEta', 'AnaJets')
+    configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
+    configSeq.setOptionValue ('.minPt', jetMinPt, noneAction='ignore')
+    configSeq.setOptionValue ('.maxEta', jetMaxEta, noneAction='ignore')
+    if largeRJets :
+        configSeq += makeConfig ('Selection.PtEta', 'AnaLargeRJets')
+        configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
+        configSeq.setOptionValue ('.minPt', jetMinPt, noneAction='ignore')
+        configSeq.setOptionValue ('.maxEta', jetMaxEta, noneAction='ignore')
+    if trackJets :
+        configSeq += makeConfig ('Selection.PtEta', 'AnaTrackJets')
+        configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
+        configSeq.setOptionValue ('.minPt', jetMinPt, noneAction='ignore')
+        configSeq.setOptionValue ('.maxEta', jetMaxEta, noneAction='ignore')
 
 
+    # Include, and then set up the met analysis algorithm config:
+    configSeq += makeConfig ('MissingET', 'AnaMET')
+    configSeq.setOptionValue ('.jets', 'AnaJets')
+    configSeq.setOptionValue ('.taus', 'AnaTauJets.tight')
+    configSeq.setOptionValue ('.electrons', 'AnaElectrons.loose')
+    configSeq.setOptionValue ('.photons', 'AnaPhotons.tight')
+    # Note that the configuration for the muons is not what you'd
+    # normally do.  This is specifically here because this is a unit
+    # test and I wanted to make sure that selection expressions work.
+    # For an actual analysis that would just be `AnaMuons.medium`, but
+    # since `tight` is a strict subset of `medium` it doesn't matter
+    # if we do an "or" of the two.
+    configSeq.setOptionValue ('.muons', 'AnaMuons.medium||tight')
+
+
+    # Include, and then set up the overlap analysis algorithm config:
+    configSeq += makeConfig( 'OverlapRemoval', None )
+    configSeq.setOptionValue ('.electrons',   'AnaElectrons.loose')
+    configSeq.setOptionValue ('.photons',     'AnaPhotons.tight')
+    configSeq.setOptionValue ('.muons',       'AnaMuons.medium||tight')
+    configSeq.setOptionValue ('.jets',        'AnaJets')
+    configSeq.setOptionValue ('.taus',        'AnaTauJets.tight')
+    configSeq.setOptionValue ('.inputLabel',  'preselectOR')
+    configSeq.setOptionValue ('.outputLabel', 'passesOR' )
+
+
+    configSeq += makeConfig ('Output.Thinning', 'AnaElectrons.Thinning')
+    configSeq.setOptionValue ('.selectionName', 'loose')
+    configSeq.setOptionValue ('.outputName', 'OutElectrons')
+    configSeq += makeConfig ('Output.Thinning', 'AnaPhotons.Thinning')
+    configSeq.setOptionValue ('.selectionName', 'tight')
+    configSeq.setOptionValue ('.outputName', 'OutPhotons')
+    configSeq += makeConfig ('Output.Thinning', 'AnaMuons.Thinning')
+    configSeq.setOptionValue ('.selectionName', 'medium')
+    configSeq.setOptionValue ('.outputName', 'OutMuons')
+    configSeq += makeConfig ('Output.Thinning', 'AnaTauJets.Thinning')
+    configSeq.setOptionValue ('.selectionName', 'tight')
+    configSeq.setOptionValue ('.outputName', 'OutTauJets')
+    configSeq += makeConfig ('Output.Thinning', 'AnaJets.Thinning')
+    configSeq.setOptionValue ('.outputName', 'OutJets')
+    if largeRJets :
+        configSeq += makeConfig ('Output.Thinning', 'AnaLargeRJets.Thinning')
+        configSeq.setOptionValue ('.outputName', 'OutLargeRJets')
+    if trackJets :
+        configSeq += makeConfig ('Output.Thinning', 'AnaTrackJets.Thinning')
+        configSeq.setOptionValue ('.outputName', 'OutTrackJets')
+
+    configSeq += makeConfig ('Output.Simple', 'Output')
+    configSeq.setOptionValue ('.treeName', 'analysis')
+    configSeq.setOptionValue ('.vars', vars)
+    configSeq.setOptionValue ('.metVars', metVars)
+    configSeq.setOptionValue ('.containers', outputContainers)
 
     configAccumulator = ConfigAccumulator (dataType, algSeq, isPhyslite=isPhyslite)
     configSeq.fullConfigure (configAccumulator)
 
+
+def printSequenceAlgs (sequence) :
+    """print the algorithms in the sequence without the sequence structure
+
+    This is mostly meant for easy comparison of different sequences
+    during configuration, particularly the sequences resulting from
+    the old sequence configuration and the new block configuration.
+    Those have different sequence structures in the output, but the
+    algorithms should essentially be configured the same way."""
+    if isinstance (sequence, AlgSequence) :
+        for alg in sequence :
+            printSequenceAlgs (alg)
+    else :
+        # assume this is an algorithm then
+        print (sequence)
 
 
 def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = False, isPhyslite = False, noPhysliteBroken = False) :
@@ -648,28 +736,22 @@ def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = Fal
     if not noSystematics :
         sysService.sigmaRecommended = 1
 
-    vars = []
+    # Need to explicitly instantiate the CutFlowSvc in Athena to allow
+    # the event filters to run.  In AnalysisBase that is (currently)
+    # not necessary, but we may need a CutFlowSvc instance to report
+    # cutflows to the user.
+    try :
+        from EventBookkeeperTools.CutFlowHelpers import CreateCutFlowSvc
+        CreateCutFlowSvc( seq=algSeq )
+    except ModuleNotFoundError :
+        # must be in AnalysisBase
+        pass
+
     if not useBlocks :
-        makeSequenceOld (dataType, algSeq, vars=vars, forCompare=forCompare,
+        makeSequenceOld (dataType, algSeq, forCompare=forCompare,
                          isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken)
     else :
-        makeSequenceBlocks (dataType, algSeq, vars=vars, forCompare=forCompare,
+        makeSequenceBlocks (dataType, algSeq, forCompare=forCompare,
                             isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken)
-
-
-    # Add an ntuple dumper algorithm:
-    treeMaker = createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' )
-    treeMaker.TreeName = 'analysis'
-    # the auto-flush setting still needs to be figured out
-    #treeMaker.TreeAutoFlush = 0
-    algSeq += treeMaker
-    ntupleMaker = createAlgorithm( 'CP::AsgxAODNTupleMakerAlg', 'NTupleMaker' )
-    ntupleMaker.TreeName = 'analysis'
-    ntupleMaker.Branches = vars
-    # ntupleMaker.OutputLevel = 2  # For output validation
-    algSeq += ntupleMaker
-    treeFiller = createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' )
-    treeFiller.TreeName = 'analysis'
-    algSeq += treeFiller
 
     return algSeq

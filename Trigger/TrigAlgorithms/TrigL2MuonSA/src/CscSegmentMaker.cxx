@@ -43,8 +43,7 @@ ReturnCode CscSegmentMaker::FindSuperPointCsc( const TrigL2MuonSA::CscHits &cscH
   
   if( !cscHits.empty() ){
     
-    std::vector<TrigL2MuonSA::TrackPattern>::iterator itTrack;
-    for (itTrack=v_trackPatterns.begin(); itTrack!=v_trackPatterns.end(); itTrack++) { // loop for track candidates
+    for (TrigL2MuonSA::TrackPattern& track : v_trackPatterns) { // loop for track candidates
       
       //get module hash  to read
       int hash_clusters[32]={0};      
@@ -72,7 +71,7 @@ ReturnCode CscSegmentMaker::FindSuperPointCsc( const TrigL2MuonSA::CscHits &cscH
       
       //decide which module to read
       int hashSPs[2]={999,999};
-      if( getModuleSP( hashSPs, tgcFitResult, (*itTrack).phiBin, muroad, hash_clusters)!=ReturnCode::FAILURE ){
+      if( getModuleSP( hashSPs, tgcFitResult, track.phiBin, muroad, hash_clusters)!=ReturnCode::FAILURE ){
         
 	bool found_segment=false;
 	for(int ihash=0; ihash<2; ++ihash){
@@ -85,14 +84,14 @@ ReturnCode CscSegmentMaker::FindSuperPointCsc( const TrigL2MuonSA::CscHits &cscH
 	  CscSegment cscsegment, cscsegment_noip;
 	  if (this->make_segment(hashSP, clusters[hashSP] , cscsegment, cscsegment_noip, muDetMgr) != ReturnCode::FAILURE  ){
 	    found_segment=true;
-	    (*itTrack).hashID_CSC = hashSP;
+	    track.hashID_CSC = hashSP;
 
 	    xAOD::L2MuonParameters::Chamber csc = xAOD::L2MuonParameters::Chamber::CSC;
 	    xAOD::L2MuonParameters::Chamber outer = xAOD::L2MuonParameters::Chamber::EndcapOuter;
-	    TrigL2MuonSA::SuperPoint* superPoint = &((*itTrack).superPoints[csc]);
-	    const TrigL2MuonSA::SuperPoint* outerSP = &((*itTrack).superPoints[outer]);
-	    bool &large_dphidz = (*itTrack).large_dPhidZ;
-	    double &outerCorFactor =  (*itTrack).outerCorFactor;
+	    TrigL2MuonSA::SuperPoint* superPoint = &(track.superPoints[csc]);
+	    const TrigL2MuonSA::SuperPoint* outerSP = &(track.superPoints[outer]);
+	    bool &large_dphidz = track.large_dPhidZ;
+	    double &outerCorFactor =  track.outerCorFactor;
 	    
             //tgcfitresult
 	    double tgcmid1z = tgcFitResult.tgcMid1[3];

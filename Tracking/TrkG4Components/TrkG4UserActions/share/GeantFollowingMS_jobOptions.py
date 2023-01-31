@@ -152,26 +152,16 @@ myPDG = 13  # 998 = Charged Geantino 999 = neutral Geantino, 13 = Muon
 #from AthenaCommon.CfgGetter import getAlgorithm
 #topSeq += getAlgorithm("BeamEffectsAlg", tryDefaultConfigurable=True)
 
+simFlags.RandomSeedOffset = myRandomOffset
+
 # sept 2014 run ParticleGun
 import ParticleGun as PG
-pg = PG.ParticleGun(randomSvcName=simFlags.RandomSvc.get_Value(), randomStream="SINGLE")
+pg = PG.ParticleGun(randomStream = "SINGLE", randomSeed = simFlags.RandomSeedOffset.get_Value())
 #pg.sampler.pid = PG.CyclicSeqSampler([-13,13])
 pg.sampler.pid = myPDG
 pg.sampler.mom = PG.EEtaMPhiSampler(energy=myMomentum, eta=[myMinEta,myMaxEta])
 #pg.sampler.mom = PG.PtEtaMPhiSampler(pt=myMomentum, eta=[myMinEta,myMaxEta])
 topSeq += pg
-
-simFlags.RandomSeedOffset = myRandomOffset
-
-### new rel17 (check Simulation/G4Atlas/G4AtlasApps/python/simFlags.py for details)
-simFlags.RandomSeedList.addSeed( "SINGLE", myRandomSeed1, myRandomSeed2 )
-
-from RngComps.RngCompsConf import AtRndmGenSvc
-myAtRndmGenSvc = AtRndmGenSvc()
-myAtRndmGenSvc.Seeds = ["SINGLE "+str(myRandomSeed1)+" "+str(myRandomSeed2) ]
-#myAtRndmGenSvc.OutputLevel          = VERBOSE
-myAtRndmGenSvc.EventReseeding   = False
-ServiceMgr += myAtRndmGenSvc
 
 # suppress the enormous amount of MC output
 # from TruthExamples.TruthExamplesConf import PrintMC

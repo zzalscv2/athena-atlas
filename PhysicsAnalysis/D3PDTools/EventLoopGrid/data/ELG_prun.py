@@ -99,7 +99,7 @@ def ELG_prun(sample) :
         dummycmd = copy.deepcopy(cmd)
         dummycmd += ["--outTarBall=jobcontents.tgz"]
         if len(sample.meta().castString('nc_EventLoop_UserFiles')) :
-            dummycmd += ["--extFile=jobdef.root,runjob.sh," + ",".join (sample.meta().castString('nc_EventLoop_UserFiles'))]
+            dummycmd += ["--extFile=jobdef.root,runjob.sh," + sample.meta().castString('nc_EventLoop_UserFiles').replace(" ",",")]
             pass
         else :
             dummycmd += ["--extFile=jobdef.root,runjob.sh"]

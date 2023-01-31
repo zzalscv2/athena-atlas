@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // MultiPY8Pileup.cxx - extension of GenModule_i to generate multiple pileup
@@ -20,7 +20,6 @@ MultiParticleGunPileup::MultiParticleGunPileup(const std::string& name, ISvcLoca
   m_ngen(0),
   m_nbad(0),
   // m_evnumber(1),
-  m_randomEngine(NULL),
   m_file(NULL),
   m_htgPileupProfile(NULL),
   m_htgPileupMu(NULL),
@@ -84,12 +83,12 @@ StatusCode MultiParticleGunPileup::genInitialize() {
 
 StatusCode MultiParticleGunPileup::callGenerator() {
   // initialise random generators the first time - delayed after Pythia init
-  if ( !m_randomEngine)
-    m_randomEngine = atRndmGenSvc().GetEngine( "ParticleGun" );
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  CLHEP::HepRandomEngine* rndmEngine = this->getRandomEngine("ParticleGun", ctx);
 
   // decide how many events to generate
 
-  int muval = ( m_ncollevent > 0 ? m_ncollevent : nPileupEvents() );
+  int muval = ( m_ncollevent > 0 ? m_ncollevent : nPileupEvents(rndmEngine) );
   if (m_file) m_htgPileupMu->Fill(muval+0.1);
   m_evts.clear();
 
@@ -141,6 +140,7 @@ StatusCode MultiParticleGunPileup::callGenerator() {
       HepMC::set_signal_process_id(evt,pid+10000*bcid);
       ATH_MSG_DEBUG("Signal process ID " << pid << " set to " <<
 		    HepMC::signal_process_id(evt) << " for BCID " << bcid);
+      HepMC::fillBarcodesAttribute(evt);
       m_evts.push_back(evt);
       ++m_ngen;
     }
@@ -180,9 +180,9 @@ StatusCode MultiParticleGunPileup::genFinalize() {
 }
 
 
-int MultiParticleGunPileup::nPileupEvents() {
+int MultiParticleGunPileup::nPileupEvents(CLHEP::HepRandomEngine* rndmEngine) {
   // return the instantaneous mu value according to the profile
-  double threshold = m_randomEngine->flat() * m_pileupProfileIntegral.back();
+  double threshold = rndmEngine->flat() * m_pileupProfileIntegral.back();
   std::vector< double >::iterator itr = std::lower_bound( m_pileupProfileIntegral.begin(), m_pileupProfileIntegral.end(), threshold );
   return std::distance( m_pileupProfileIntegral.begin(), itr );
 }

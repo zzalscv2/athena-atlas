@@ -113,11 +113,11 @@ StatusCode InDet::TRT_DetElementsRoadCondAlg_xk::execute(const EventContext& ctx
       }
       
       std::sort(pE.begin(),pE.end(),InDet::compTRTDetElements_AZ());
-      for(unsigned int j=0; j!=pE.size(); ++j) {
+      for(auto & j : pE) {
 
-        if (pE[j]) {
+        if (j) {
 
-          InDet::TRT_DetElementsRoadUtils_xk::detElementInformation(*(pE[j]),
+          InDet::TRT_DetElementsRoadUtils_xk::detElementInformation(*j,
                                                                     P);
           Wf = sqrt(P[20] * P[20] + P[21] * P[21]);
           Wz = sqrt(P[22] * P[22] + P[23] * P[23]);
@@ -149,7 +149,7 @@ StatusCode InDet::TRT_DetElementsRoadCondAlg_xk::execute(const EventContext& ctx
             dfm = df1;
           if (df2 > dfm)
             dfm = df2;
-          layer.add(InDet::TRT_DetElementLink_xk(pE[j], P));
+          layer.add(InDet::TRT_DetElementLink_xk(j, P));
         }
       }
       double r  =(rmax+rmin)*.5;
@@ -190,11 +190,11 @@ StatusCode InDet::TRT_DetElementsRoadCondAlg_xk::execute(const EventContext& ctx
 	  }
 	  std::sort(pE.begin(),pE.end(),InDet::compTRTDetElements_A());
 	  
-	  for(unsigned int j=0; j!=pE.size(); ++j) {
+	  for(auto & j : pE) {
 	    
-	    if(pE[j]) {
+	    if(j) {
 
-	      InDet::TRT_DetElementsRoadUtils_xk::detElementInformation(*(pE[j]),P);
+	      InDet::TRT_DetElementsRoadUtils_xk::detElementInformation(*j,P);
 	      Wf = sqrt(P[20]*P[20]+P[21]*P[21]);
 	      Wz = sqrt(P[22]*P[22]+P[23]*P[23]); 
 	      
@@ -213,7 +213,7 @@ StatusCode InDet::TRT_DetElementsRoadCondAlg_xk::execute(const EventContext& ctx
 	      if(df1>dfm) dfm = df1;
 	      if(df2>dfm) dfm = df2;
 	      
-	      layer.add(InDet::TRT_DetElementLink_xk(pE[j],P));
+	      layer.add(InDet::TRT_DetElementLink_xk(j,P));
 	    }
 	  }
 	  double r  =(rmax+rmin)*.5;

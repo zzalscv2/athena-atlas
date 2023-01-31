@@ -1,28 +1,29 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # A minimal job that demonstrates what PerfMonMTSvc does
 if __name__ == '__main__':
 
     # Import the common flags/services
     from AthenaConfiguration.ComponentFactory import CompFactory
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
 
     # Set the necessary configuration flags
     # Process 100 events in 1 thread/slot and do full monitoring
-    ConfigFlags.Input.Files = []
-    ConfigFlags.Exec.MaxEvents = 100
-    ConfigFlags.Concurrency.NumThreads = 1
-    ConfigFlags.PerfMon.doFullMonMT = True
-    ConfigFlags.PerfMon.OutputJSON = 'perfmonmt_test.json'
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = []
+    flags.Exec.MaxEvents = 100
+    flags.Concurrency.NumThreads = 1
+    flags.PerfMon.doFullMonMT = True
+    flags.PerfMon.OutputJSON = 'perfmonmt_test.json'
+    flags.lock()
 
     # Set up the configuration and add the relevant services
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PerfMonMTSvcCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PerfMonMTSvcCfg(flags))
 
     # Burn 100 +/- 1 ms per event
     CpuCruncherAlg = CompFactory.getComp('PerfMonTest::CpuCruncherAlg')
@@ -34,7 +35,7 @@ if __name__ == '__main__':
 
     # Print the configuration and dump the flags
     cfg.printConfig(withDetails = True, summariseProps = True)
-    ConfigFlags.dump()
+    flags.dump()
 
     # Run the job
     sc = cfg.run()

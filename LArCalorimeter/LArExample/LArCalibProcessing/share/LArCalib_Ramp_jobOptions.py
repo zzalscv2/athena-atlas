@@ -19,6 +19,12 @@ if not "SuperCells" in dir():
 if not 'SC_SampleShift' in dir():
    SC_SampleShift=0   
 
+if not 'SCIgnoreBarrelChannels' in dir():
+   SCIgnoreBarrelChannels=False
+
+if not 'SCIgnoreEndcapChannels' in dir():
+   SCIgnoreEndcapChannels=False
+
 if not SuperCells: include("LArCalibProcessing/LArCalib_Flags.py")
 if SuperCells:     include("LArCalibProcessing/LArCalib_FlagsSC.py")
 include("LArCalibProcessing/GetInputFiles.py")
@@ -138,7 +144,7 @@ if not 'SaveAllSamples' in dir():
    SaveAllSamples = False # Add Samples and RMS to RAMPS TTree
 
 if not 'CorrectBadChannels' in dir():
-   CorrectBadChannels=False
+   CorrectBadChannels=True
 
 if not 'ApplyAdHocCorrection' in dir():
    ApplyAdHocCorrection=False
@@ -391,6 +397,8 @@ if ( runAccumulator ):
       larRawSCDataReadingAlg.etIdCollKey = ""
       larRawSCDataReadingAlg.LATOMEDecoder = theLArLATOMEDecoder
       larRawSCDataReadingAlg.OutputLevel = WARNING
+      larRawSCDataReadingAlg.LATOMEDecoder.IgnoreBarrelChannels = SCIgnoreBarrelChannels
+      larRawSCDataReadingAlg.LATOMEDecoder.IgnoreEndcapChannels = SCIgnoreEndcapChannels
       topSequence += larRawSCDataReadingAlg
    else:
       from LArByteStream.LArByteStreamConf import LArRawCalibDataReadingAlg
@@ -456,6 +464,8 @@ else :
 
 from LArBadChannelTool.LArBadChannelToolConf import LArBadChannelCondAlg, LArBadFebCondAlg
 theLArBadChannelCondAlg=LArBadChannelCondAlg(ReadKey=BadChannelsFolder)
+if SuperCells:
+   theLArBadChannelCondAlg.isSC=True
 condSeq+=theLArBadChannelCondAlg
 
 theLArBadFebCondAlg=LArBadFebCondAlg(ReadKey=MissingFEBsFolder)
@@ -513,7 +523,11 @@ ServiceMgr.PoolSvc.ReadCatalog += larCalibCatalogs
 
 if ( doLArCalibDataQuality  ) :
    ## The reference is the Oracle DB
-   conddb.addFolder("LAR_ONL","/LAR/ElecCalibOnl/Ramp<key>LArRampRef</key>"+ChannelSelection,className="LArRampComplete")
+   if not SuperCells:
+      conddb.addFolder("LAR_ONL","/LAR/ElecCalibOnl/Ramp<key>LArRampRef</key>"+ChannelSelection)
+   else:   
+      #FIXME once the SC calib data are in oracle
+      conddb.addFolder("","/LAR/ElecCalibOflSC/Ramps/RampLinea<key>LArRampRef</key><dbConnection>sqlite://;schema=/eos/atlas/atlascerngroupdisk/det-larg/SuperCells/CalibData/poolFiles/LATOMERun_EndcapWeekly_220411-182904/db_00417648_00417649_00417650.db;dbname=CONDBR2</dbConnection><tag>LARElecCalibOflSCRampsRampLinea-UPD3-00</tag>"+ChannelSelection)
 
 #if (CorrectBadChannels or StripsXtalkCorr):
 #   conddb.addFolder("LAR","/LAR/BadChannelsOfl/BadChannels")
@@ -659,6 +673,14 @@ if CorrectBadChannels:
    
    theLArRampPatcher.ProblemsToPatch=["deadCalib","deadReadout","deadPhys","almostDead","short"]
    theLArRampPatcher.UseCorrChannels=False      
+
+   if SuperCells:
+      theLArRampPatcher.OnOffMap="LArOnOffIdMapSC"
+      theLArRampPatcher.CalibLineKey="LArCalibIdMapSC"
+      theLArRampPatcher.SuperCell=True
+   
+   ## block standard patching for this CB
+   theLArRampPatcher.DoNotPatchCBs=[0x3e198000]
    topSequence+=theLArRampPatcher
 
 if ( ApplyAdHocCorrection ):
@@ -704,21 +726,25 @@ if ( doLArCalibDataQuality  ) :
    theRampValidationAlg.ProblemsToMask=["deadReadout","deadCalib","deadPhys","almostDead",
                                         "highNoiseHG","highNoiseMG","highNoiseLG"]
    theRampValidationAlg.KeyList=GainList
-   theRampValidationAlg.PatchMissingFEBs=True
+   if not SuperCells:
+      theRampValidationAlg.PatchMissingFEBs=True
+   else:
+      theRampValidationAlg.PatchMissingFEBs=False
+      theRampValidationAlg.CablingKey="LArOnOffIdMapSC"
+      theRampValidationAlg.CalibLineKey="LArCalibIdMapSC"
    theRampValidationAlg.UseCorrChannels=False 
    theRampValidationAlg.ValidationKey="LArRamp"
    theRampValidationAlg.ReferenceKey="LArRampRef"
    
+   theRampValidationAlg.OutputLevel=INFO
    theRampValidationAlg.MsgLevelForDeviations=WARNING
    theRampValidationAlg.ListOfDevFEBs="rampFebs.txt"
    theRampValidationAlg.ThinnedValContainer="ThinRampsVal"
    theRampValidationAlg.ThinnedRefContainer="ThinRampsRef"
+
    ##in case of CalibBoard patching, please uncomment:
    ## adding new patching
-   #theRampValidationAlg.PatchCBs=[0x3e198000]
-   ## block standard patching for this CB
-   #if CorrectBadChannels:
-   #   topSequence.LArRampPatcher.DoNotPatchCBs=[0x3e198000]
+   theRampValidationAlg.PatchCBs=[0x3e198000]
 
    topSequence+=theRampValidationAlg
 
@@ -812,6 +838,11 @@ if (WriteNtuple):
    LArRamps2Ntuple.ApplyCorr = ApplyCorr
    LArRamps2Ntuple.AddFEBTempInfo = False
    LArRamps2Ntuple.isSC = SuperCells
+   if SuperCells:
+      LArRamps2Ntuple.CalibMapKey = "LArCalibIdMapSC"
+      from CaloAlignmentAlgs.CaloAlignmentAlgsConf import CaloSuperCellAlignCondAlg
+      condSeq += CaloSuperCellAlignCondAlg("CaloSuperCellAlignCondAlg")
+      LArRamps2Ntuple.ExtraInputs += (('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager'))
    
    topSequence+= LArRamps2Ntuple
       

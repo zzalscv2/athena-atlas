@@ -84,7 +84,7 @@ StatusCode LUCID_HitsMoniTool::bookHistograms() {
   
   int hCounter = 0;
   
-  for(; histo_itr != histo_end; histo_itr++) { 
+  for(; histo_itr != histo_end; ++histo_itr) { 
        
     if (hCounter < 3) {
       

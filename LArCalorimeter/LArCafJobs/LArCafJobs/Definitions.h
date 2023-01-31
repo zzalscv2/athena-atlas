@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LArSamples_Definitions_H
@@ -11,10 +11,10 @@ namespace LArSamples {
   typedef TMatrixTSym<double> CovMatrix;
 
   struct Definitions {
-    static unsigned int nChannels;
-    static unsigned int samplingInterval;
+    static const unsigned int nChannels;
+    static const unsigned int samplingInterval;
     static double samplingTime(unsigned int i) { return samplingInterval*i; }
-    static double none;
+    static const double none;
     static bool isNone(double x) { return (x < 0.999*none); }
   };
   

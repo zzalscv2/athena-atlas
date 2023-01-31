@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCafJobs/Definitions.h"
@@ -8,6 +8,6 @@
 using namespace LArSamples;
 
 
-unsigned int Definitions::nChannels = 195072;
-unsigned int Definitions::samplingInterval = 25;
-double Definitions::none = -DBL_MAX;
+const unsigned int Definitions::nChannels = 195072;
+const unsigned int Definitions::samplingInterval = 25;
+const double Definitions::none = -DBL_MAX;

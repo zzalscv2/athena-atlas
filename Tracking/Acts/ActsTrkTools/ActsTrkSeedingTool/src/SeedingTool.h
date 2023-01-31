@@ -3,7 +3,7 @@
 */
 
 #ifndef ACTSTRKSEEDINGTOOL_SEEDINGTOOL_H
-#define ACTSTRKSEEDINGTOOL_SEEDINGTOOL_H 1
+#define ACTSTRKSEEDINGTOOL_SEEDINGTOOL_H
 
 // ATHENA
 #include "ActsTrkToolInterfaces/ISeedingTool.h"
@@ -16,22 +16,25 @@
 #include "Acts/Seeding/SpacePointGrid.hpp"
 #include "Acts/Seeding/BinFinder.hpp"
 #include "Acts/Seeding/BinnedSPGroup.hpp"
-#include "Acts/Seeding/SeedfinderConfig.hpp"
+#include "Acts/Seeding/SeedFinderConfig.hpp"
 #include "Acts/Seeding/SeedFilterConfig.hpp"
 #include "Acts/Seeding/SeedFilter.hpp"
-#include "Acts/Seeding/Seedfinder.hpp"
+#include "Acts/Seeding/SeedFinder.hpp"
 #include "Acts/Seeding/Seed.hpp"
 
 #include <cmath> //for M_PI
 
 namespace ActsTrk {
-  
+
   class SeedingTool :
     public extends<AthAlgTool, ActsTrk::ISeedingTool> {
-    
   public:
-    SeedingTool(const std::string& type, const std::string& name,
-		    const IInterface* parent);
+    using value_type = ActsTrk::SpacePoint;
+    using seed_type = Acts::Seed< ActsTrk::SpacePoint >;
+    
+    SeedingTool(const std::string& type, 
+		const std::string& name,
+		const IInterface* parent);
     virtual ~SeedingTool() = default;
     
     virtual StatusCode initialize() override;
@@ -42,9 +45,9 @@ namespace ActsTrk {
 		  const std::vector<const ActsTrk::SpacePoint*>& spContainer,
 		  const Acts::Vector3& beamSpotPos,
 		  const Acts::Vector3& bField,
-		  ActsTrk::SeedContainer& seedContainer ) const override;
+		  ActsTrk::SeedContainer& seedContainer) const override;
     
-  private:        
+  protected:
     // metafunction to obtain correct type in iterated container given the iterator type
     template<typename spacepoint_iterator_t>
     struct external_spacepoint {
@@ -55,25 +58,25 @@ namespace ActsTrk {
                        >::type;
     };
 
-    template< typename spacepoint_iterator_t >
+    template< typename external_iterator_t >
       StatusCode
-      createSeeds( spacepoint_iterator_t spBegin,
-		   spacepoint_iterator_t spEnd,
+      createSeeds( external_iterator_t spBegin,
+		   external_iterator_t spEnd,
 		   const Acts::Vector3& beamSpotPos,
 		   const Acts::Vector3& bField,
-       std::vector< Acts::Seed< typename external_spacepoint<spacepoint_iterator_t>::type > >&  seeds) const;
+		   std::vector< seed_type >& seeds) const;
     
-    template< typename external_spacepoint_t >
-      const std::pair< 
-                   Acts::SpacePointGridConfig, 
-                   Acts::SeedfinderConfig< external_spacepoint_t > 
+    const std::pair< 
+      Acts::SpacePointGridConfig, 
+      Acts::SeedFinderConfig< value_type >
       > 
-      prepareConfiguration( const Acts::Vector2& beamPos, 
-			    const Acts::Vector3& bField ) const;
+      prepareConfiguration(const Acts::Vector2& beamPos, 
+			   const Acts::Vector3& bField) const;
     
     // *********************************************************************
     // *********************************************************************
-  private:
+
+  protected:
 
     // Properties to set SpacePointGridConfig
     Gaudi::Property< float > m_minPt {this, "minPt", 900. * Acts::UnitConstants::MeV,
@@ -93,7 +96,7 @@ namespace ActsTrk {
       "enable non equidistant binning in z"}; // Used in SeedfinderConfig as well
     Gaudi::Property< float > m_gridRMax {this, "gridRMax", 320. * Acts::UnitConstants::mm,
       "radial extension of subdetector to be used in grid building"};
-    Gaudi::Property< float > m_gridPhiMin {this, "gridPhiMin", 0.,
+    Gaudi::Property< float > m_gridPhiMin {this, "gridPhiMin", 0,
       "phi min for space point grid formation"};
     Gaudi::Property< float > m_gridPhiMax {this, "gridPhiMax", 2*M_PI,
       "phi max for space point grid formation"};
@@ -105,7 +108,7 @@ namespace ActsTrk {
     // Properties to set SeedfinderConfig
     Gaudi::Property< float > m_rMax {this, "rMax", 320. * Acts::UnitConstants::mm,
       "limiting location of measurements"};
-    Gaudi::Property< float > m_binSizeR {this, "binSizeR", 2. * Acts::UnitConstants::mm,
+    Gaudi::Property< float > m_binSizeR {this, "binSizeR", 1. * Acts::UnitConstants::mm,
       "defining radial bin for space point sorting"};
     Gaudi::Property< bool > m_forceRadialSorting {this, "forceRadialSorting", true,
       "enable radial sorting in space point grid"};
@@ -119,7 +122,7 @@ namespace ActsTrk {
       "minimum distance in r between middle and top SP"};
     Gaudi::Property< float > m_deltaRMaxBottomSP {this, "deltaRMaxBottomSP", 120. * Acts::UnitConstants::mm,
       "maximum distance in r between middle and top SP"};
-    Gaudi::Property< float > m_deltaZMax {this, "deltaZMax",  10e6,
+    Gaudi::Property< float > m_deltaZMax {this, "deltaZMax",  600,
       "maximum distance in z between two measurements within one seed"};
     Gaudi::Property< float > m_collisionRegionMin {this, "collisionRegionMin", -200. * Acts::UnitConstants::mm,
       "limiting location of collision region in z"};
@@ -129,7 +132,7 @@ namespace ActsTrk {
       "how many sigmas of scattering angle should be considered"};
     Gaudi::Property< float > m_maxPtScattering {this, "maxPtScattering", 10e6,
       "Upper pt limit for scattering calculation"};
-    Gaudi::Property< float > m_radLengthPerSeed {this, "radLengthPerSeed", 0.09804522341059585,
+    Gaudi::Property< float > m_radLengthPerSeed {this, "radLengthPerSeed", 0.1,
       "average radiation lengths of material on the length of a seed. used for scattering"};
     Gaudi::Property< int > m_maxSeedsPerSpM {this, "maxSeedsPerSpM", 4,
       "In dense environments many seeds may be found per middle space point. Only seeds with the highest weight will be kept if this limit is reached."}; // Used in SeedFilterConfig as well
@@ -164,6 +167,15 @@ namespace ActsTrk {
       // Used in SeedFilterConfig as well
     Gaudi::Property< size_t > m_seedConfCentralNTopSmallR {this, "seedConfCentralNTopSmallR", 2,
       "nTop for small R central seed confirmation"};
+    // Used in SeedFilterConfig as well 
+    Gaudi::Property< float > m_seedConfCentralMinBottomRadius {this, "seedConfCentralMinBottomRadius", 60 * Acts::UnitConstants::mm,
+	"Minimum radius for bottom SP in seed confirmation"};
+    // Used in SeedFilterConfig as well 
+    Gaudi::Property< float > m_seedConfCentralMaxZOrigin {this, "seedConfCentralMaxZOrigin", 150 * Acts::UnitConstants::mm,
+	"Maximum zOrigin in seed confirmation"};
+    // Used in SeedFilterConfig as well 
+    Gaudi::Property< float > m_seedConfCentralMinImpact {this, "seedConfCentralMinImpact", 1. * Acts::UnitConstants::mm,
+	"Minimum impact parameter for seed confirmation"};
       // Used in SeedFilterConfig as well
     Gaudi::Property< float > m_seedConfForwardZMin {this, "seedConfForwardZMin", -3000. * Acts::UnitConstants::mm,
       "minimum z for forward seed confirmation "};
@@ -179,13 +191,22 @@ namespace ActsTrk {
       // Used in SeedFilterConfig as well
     Gaudi::Property< size_t > m_seedConfForwardNTopSmallR {this, "seedConfForwardNTopSmallR", 2,
       "nTop for small R forward seed confirmation"};
-      // Used in SeedFilterConfig as well
+    // Used in SeedFilterConfig as well 
+    Gaudi::Property< float > m_seedConfForwardMinBottomRadius {this, "seedConfForwardMinBottomRadius", 60 * Acts::UnitConstants::mm,
+	"Minimum radius for bottom SP in seed confirmation"};
+    // Used in SeedFilterConfig as well 
+    Gaudi::Property< float > m_seedConfForwardMaxZOrigin {this, "seedConfForwardMaxZOrigin", 150 * Acts::UnitConstants::mm,
+	"Maximum zOrigin in seed confirmation"};
+    // Used in SeedFilterConfig as well 
+    Gaudi::Property< float > m_seedConfForwardMinImpact {this, "seedConfForwardMinImpact", 1. * Acts::UnitConstants::mm,
+	"Minimum impact parameter for seed confirmation"};
+    // Used in SeedFilterConfig as well 
     Gaudi::Property< bool > m_useDetailedDoubleMeasurementInfo {this, "useDetailedDoubleMeasurementInfo", false,
       "enable use of double measurement details"};
 
     Gaudi::Property<float> m_toleranceParam {this, "toleranceParam", 1.1 * Acts::UnitConstants::mm, 
       "tolerance parameter used to check the compatibility of SPs coordinates in xyz"};
-    Gaudi::Property<float> m_phiMin {this, "phiMin", -M_PI, ""};
+    Gaudi::Property<float> m_phiMin {this, "phiMin", - M_PI, ""};
     Gaudi::Property<float> m_phiMax {this, "phiMax", M_PI, ""};
     Gaudi::Property<float> m_rMin {this, "rMin", 33 * Acts::UnitConstants::mm, ""};    
     Gaudi::Property<float> m_zAlign {this, "zAlign", 0 * Acts::UnitConstants::mm, ""};
@@ -215,12 +236,6 @@ namespace ActsTrk {
       "use deltaR (top radius - middle radius) instead of top radius"};
     Gaudi::Property<float> m_deltaInvHelixDiameter {this, "deltaInvHelixDiameter", 0.00003 * 1. / Acts::UnitConstants::mm, 
       "the allowed delta between two inverted seed radii for them to be considered compatible"};
-    Gaudi::Property<float> m_seedConfMinBottomRadius {this, "seedConfMinBottomRadius", 60. * Acts::UnitConstants::mm,
-      "increment in seed weight if the number of compatible seeds is larger than numSeedIncrement, this is used in case of high occupancy scenarios if we want to increase the weight of the seed by seedWeightIncrement when the number of compatible seeds is higher than a certain value"};
-    Gaudi::Property<float> m_seedConfMaxZOrigin {this, "seedConfMaxZOrigin", 150. * Acts::UnitConstants::mm, 
-      "maximum zOrigin in seed confirmation"};
-    Gaudi::Property<float> m_minImpactSeedConf {this, "minImpactSeedConf", 1. * Acts::UnitConstants::mm,
-      "minimum impact parameter for seed confirmation"};
 
     // Properties to set other objects used in
     // seeding algorithm
@@ -233,9 +248,8 @@ namespace ActsTrk {
       "vector containing the map of z bins in the top layers"};
     Gaudi::Property< int > m_numPhiNeighbors {this, "numPhiNeighbors", 1,
       "number of phi bin neighbors at each side of the current bin that will be used to search for SPs"};
-
   };
-  
+
 } // namespace
 
 #endif

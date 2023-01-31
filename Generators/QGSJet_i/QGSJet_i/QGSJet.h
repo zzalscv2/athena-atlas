@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORMODULESQGSJET_H
@@ -27,32 +27,35 @@
 class QGSJet: public GenModule {
 public:
   QGSJet(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~QGSJet();
-  
+  virtual ~QGSJet() = default;
+
   virtual StatusCode genInitialize();
   virtual StatusCode callGenerator();
   virtual StatusCode genFinalize();
   virtual StatusCode fillEvt(HepMC::GenEvent* evt);
 
 protected:
-    // event counter
-  int m_events;
-  int m_ievent; //event counter in Epos
-  int m_iout; //output type
+  // event counter
+  int m_events{0}; // current event number (counted by interface)
+  int m_ievent{0}; // current event number counted by QGSJet
+  int m_iout{0}; //output type
 
-    // setable properties
-  double      m_beamMomentum;
-  double      m_targetMomentum;
-  int         m_model;
-  int         m_primaryParticle;
-  int         m_targetParticle;
-  std::string m_paramFile;
-  std::string m_lheout;
-  int         m_itab;
-  int         m_ilheout;
-  int         m_nEvents;
+  // setable properties
+  DoubleProperty m_beamMomentum{this, "BeamMomentum", -3500.0};
+  DoubleProperty m_targetMomentum{this, "TargetMomentum", 3500.0};
+  IntegerProperty m_model{this, "Model", 7}; // 0=EPOS 1.99 LHC, 1=EPOS 1.99, 7=QGSJETII04
+  IntegerProperty m_primaryParticle{this, "PrimaryParticle", 1}; // 1=p, 12=C, 120=pi+, 207=Pb
+  IntegerProperty m_targetParticle{this, "TargetParticle", 1};
+  StringProperty   m_paramFile{this, "ParamFile", "crmc.param"};
+  StringProperty   m_lheout{this, "LheFile", "qgsjet.lhe"};
+  IntegerProperty m_itab{this, "TabCreate", 0};
+  IntegerProperty m_ilheout{this, "LheOutput", 0};
+  IntegerProperty m_nEvents{this, "nEvents", 5500};
 
-  static const size_t kMaxParticles = HEPEVT_EntriesAllocation; 
+  //Gen_tf run args.
+  IntegerProperty m_dsid{this, "Dsid", 999999};
+
+  static const size_t kMaxParticles = HEPEVT_EntriesAllocation;
   std::vector<int>    m_partID;
   std::vector<double> m_partPx;
   std::vector<double> m_partPy;
@@ -65,4 +68,3 @@ protected:
 };
 
 #endif
-

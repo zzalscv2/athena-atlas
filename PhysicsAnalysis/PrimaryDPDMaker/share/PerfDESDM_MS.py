@@ -317,6 +317,12 @@ if hasMuons:
     
     filAlg_CT=muonTrkTrackThinTool("muonTrkTrackThinTool_CT", TrackCollectionKey = "CombinedMuonTracks")
     desdAlignmentTriggerMuonSequence+=filAlg_CT
+    
+    filAlg_MSOE=muonTrkTrackThinTool("muonTrkTrackThinTool_MSOE", TrackCollectionKey = "MSOnlyExtrapolatedTracks")
+    desdAlignmentTriggerMuonSequence+=filAlg_MSOE
+    
+    filAlg_ME=muonTrkTrackThinTool("muonTrkTrackThinTool_ME", TrackCollectionKey = "ExtrapolatedMuonTracks")
+    desdAlignmentTriggerMuonSequence+=filAlg_ME
     pass
 print(topSequence)
         
@@ -336,6 +342,8 @@ else:
 if primDPDAlignTrigMu.ApplyThinning():
     AlignmentTriggerMuonStream.AcceptAlgs(["muonTrkTrackThinTool_MS"])
     AlignmentTriggerMuonStream.AcceptAlgs(["muonTrkTrackThinTool_CT"])
+    AlignmentTriggerMuonStream.AcceptAlgs(["muonTrkTrackThinTool_MSOE"])
+    AlignmentTriggerMuonStream.AcceptAlgs(["muonTrkTrackThinTool_ME"])
     pass
 
 if primDPDAlignTrigMu.ApplySkimming():
@@ -407,6 +415,8 @@ AlignmentTriggerMuonStream.AddItem(["xAOD::VertexContainer#PrimaryVertices"])
 AlignmentTriggerMuonStream.AddItem(["xAOD::VertexAuxContainer#PrimaryVerticesAux.-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"])
 AlignmentTriggerMuonStream.AddItem(["TrackCollection#MuonSpectrometerTracks"])
 AlignmentTriggerMuonStream.AddItem(["TrackCollection#CombinedMuonTracks"])
+AlignmentTriggerMuonStream.AddItem(["TrackCollection#MSOnlyExtrapolatedTracks"])
+AlignmentTriggerMuonStream.AddItem(["TrackCollection#ExtrapolatedMuonTracks"])
 #AlignmentTriggerMuonStream.AddItem(["TrackCollection#Tracks"])
 #RPC
 AlignmentTriggerMuonStream.AddItem(["MuCTPI_RDO#MUCTPI_RDO"])
@@ -417,6 +427,7 @@ AlignmentTriggerMuonStream.AddItem(["RpcSectorLogicContainer#RPC_SECTORLOGIC"])
 #TGC
 AlignmentTriggerMuonStream.AddItem(["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionPriorBC"])
 AlignmentTriggerMuonStream.AddItem(["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionNextBC"])
+AlignmentTriggerMuonStream.AddItem(["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionNextNextBC"])
 AlignmentTriggerMuonStream.AddItem(["Muon::TgcCoinDataContainer#TrigT1CoinDataCollection"])
 AlignmentTriggerMuonStream.AddItem(["xAOD::TruthParticleContainer#MuonTruthParticles"])
 AlignmentTriggerMuonStream.AddItem(["xAOD::TruthParticleAuxContainer#MuonTruthParticlesAux."])

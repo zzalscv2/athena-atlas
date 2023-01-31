@@ -151,7 +151,7 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
     typePattern.set(Trk::TrackStateOnSurface::Perigee);
     
-   const Trk::TrackStateOnSurface *pertsos=new Trk::TrackStateOnSurface(nullptr,std::move(per),nullptr,nullptr,typePattern);
+   const Trk::TrackStateOnSurface *pertsos=new Trk::TrackStateOnSurface(nullptr,std::move(per),nullptr,typePattern);
    auto traj = DataVector<const Trk::TrackStateOnSurface>();
    traj.push_back(pertsos);
    
@@ -189,7 +189,7 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
           continue;
         }
         // create the ROTs for the reference trajectory
-        const Trk::TrackStateOnSurface *tsos=new Trk::TrackStateOnSurface(std::move(rot),thispar->uniqueClone(),nullptr,nullptr,typePattern);
+        const Trk::TrackStateOnSurface *tsos=new Trk::TrackStateOnSurface(std::move(rot),thispar->uniqueClone(),nullptr,typePattern);
         traj.push_back(tsos);
         prevpar=std::move(thispar);
    }
@@ -232,23 +232,22 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
      refittedtrack2=(m_trackFitter->fit(Gaudi::Hive::currentContext(),*refittedtrack,measset,false,materialInteractions)).release();
      if (!refittedtrack2){
        auto traj2 = DataVector<const Trk::TrackStateOnSurface>();
-       for (int j=0;j<(int)refittedtrack->trackStateOnSurfaces()->size();j++) traj2.push_back(new Trk::TrackStateOnSurface(*(*refittedtrack->trackStateOnSurfaces())[j]));
+       for (const auto *j : *refittedtrack->trackStateOnSurfaces()) traj2.push_back(new Trk::TrackStateOnSurface(*j));
        std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern2;
        typePattern2.set(Trk::TrackStateOnSurface::Outlier);
        //measset needs to be unique_ptr before progress further
-       for (int j = 0; j < (int)measset.size(); j++) {
+       for (auto & j : measset) {
          traj2.push_back(new Trk::TrackStateOnSurface(
-           std::unique_ptr<const MeasurementBase>(measset[j]),
-           nullptr,
+           std::unique_ptr<const MeasurementBase>(j),
            nullptr,
            nullptr,
            typePattern2));
        }
        refittedtrack2 = new Trk::Track(refittedtrack->info(),
                                        std::move(traj2),
-                                       refittedtrack->fitQuality()->clone());
+                                       refittedtrack->fitQuality()->uniqueClone());
      }
-     else for (int j=0;j<(int)measset.size();j++) delete measset[j];
+     else for (auto & j : measset) delete j;
    } else if(!refittedtrack){
     ATH_MSG_VERBOSE("Track fit of truth trajectory NOT successful, NO track created. ");
     return nullptr;

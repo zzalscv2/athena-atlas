@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -17,14 +17,14 @@ def ActsTrkStripSpacePointToolCfg(flags, name = "ActsTrkStripSpacePointTool", **
     acc.setPrivateTools(CompFactory.ActsTrk.StripSpacePointFormationTool(name, **kwargs))
     return acc
 
-def ActsTrkPixelSpacePointFormationCfg(ConfigFlags,
+def ActsTrkPixelSpacePointFormationCfg(flags,
                                        name = "ActsTrkPixelSpacePointFormation",
                                        **kwargs):
 
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-    acc = ITkPixelReadoutGeometryCfg(ConfigFlags)
+    acc = ITkPixelReadoutGeometryCfg(flags)
 
-    ActsTrkPixelSpacePointTool = acc.popToolsAndMerge(ActsTrkPixelSpacePointToolCfg(ConfigFlags))
+    ActsTrkPixelSpacePointTool = acc.popToolsAndMerge(ActsTrkPixelSpacePointToolCfg(flags))
     kwargs.setdefault("SpacePointFormationTool", ActsTrkPixelSpacePointTool)
 
     kwargs.setdefault("PixelClusters", "ITkPixelClusters")
@@ -33,21 +33,21 @@ def ActsTrkPixelSpacePointFormationCfg(ConfigFlags,
     kwargs.setdefault("PixelSpacePoints", "ITkPixelSpacePoints")
     kwargs.setdefault("PixelSpacePointData", "ITkPixelSpacePointData")
 
-    if ConfigFlags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkPixelSpacePointFormatioLiveMonitoringToolCfg
-        kwargs.setdefault("MonTool", acc.popToolsAndMerge(ActsTrkPixelSpacePointFormatioLiveMonitoringToolCfg(ConfigFlags)))
+    if flags.Acts.doMonitoring:
+        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkPixelSpacePointFormationMonitoringToolCfg
+        kwargs.setdefault("MonTool", acc.popToolsAndMerge(ActsTrkPixelSpacePointFormationMonitoringToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.PixelSpacePointFormationAlg(name, **kwargs))
     return acc
 
-def ActsTrkStripSpacePointFormationCfg(ConfigFlags,
+def ActsTrkStripSpacePointFormationCfg(flags,
                                        name = "ActsTrkStripSpacePointFormation",
                                        **kwargs):
 
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-    acc = ITkStripReadoutGeometryCfg(ConfigFlags)
+    acc = ITkStripReadoutGeometryCfg(flags)
 
-    ActsTrkStripSpacePointTool = acc.popToolsAndMerge(ActsTrkStripSpacePointToolCfg(ConfigFlags))
+    ActsTrkStripSpacePointTool = acc.popToolsAndMerge(ActsTrkStripSpacePointToolCfg(flags))
     kwargs.setdefault("SpacePointFormationTool", ActsTrkStripSpacePointTool)
 
     kwargs.setdefault("StripClusters", "ITkStripClusters")
@@ -60,10 +60,35 @@ def ActsTrkStripSpacePointFormationCfg(ConfigFlags,
     kwargs.setdefault("StripOverlapSpacePointData", "ITkStripOverlapSpacePointData")
     kwargs.setdefault("ProcessOverlapForStrip", True)
 
-    if ConfigFlags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkStripSpacePointFormatioLiveMonitoringToolCfg
-        kwargs.setdefault("MonTool", acc.popToolsAndMerge(ActsTrkStripSpacePointFormatioLiveMonitoringToolCfg(ConfigFlags)))
+    if flags.Acts.doMonitoring:
+        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkStripSpacePointFormationMonitoringToolCfg
+        kwargs.setdefault("MonTool", acc.popToolsAndMerge(ActsTrkStripSpacePointFormationMonitoringToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.StripSpacePointFormationAlg(name, **kwargs))
     return acc
 
+def ActsTrkSpacePointFormationCfg(flags):
+    acc = ComponentAccumulator()
+    if flags.Detector.EnableITkPixel:
+        acc.merge(ActsTrkPixelSpacePointFormationCfg(flags))
+    if flags.Detector.EnableITkStrip:
+        # Need to schedule this here in case the Athena space point formation is not schedule
+        # This is because as of now requires at least ITkSiElementPropertiesTableCondAlgCfg
+        # This may be because the current strip space point formation algorithm is not using Acts
+        # May be not necessary once the Acts-based strip space point maker is ready
+        from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
+        acc.merge(ITkStripReadoutGeometryCfg(flags))
+        
+        from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+        acc.merge(BeamSpotCondAlgCfg(flags))
+        
+        from InDetConfig.SiSpacePointFormationConfig import ITkSiElementPropertiesTableCondAlgCfg
+        acc.merge(ITkSiElementPropertiesTableCondAlgCfg(flags))
+        
+        acc.merge(ActsTrkStripSpacePointFormationCfg(flags))
+
+    if flags.Acts.doAnalysis:
+        from ActsTrkAnalysis.ActsTrkAnalysisConfig import ActsTrkSpacePointAnalysisCfg
+        acc.merge(ActsTrkSpacePointAnalysisCfg(flags))
+        
+    return acc

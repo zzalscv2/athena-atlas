@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -8,8 +8,6 @@
 // Author: S.Binet<binet@cern.ch>
 /////////////////////////////////////////////////////////////////// 
 
-
-// STL includes
 
 // FrameWork includes
 
@@ -84,9 +82,9 @@ StatusCode SpclMcValidationTool::finalizeTool()
 StatusCode SpclMcValidationTool::executeTool()
 {
   // retrieve McEventCollection
-  const McEventCollection * mcEvents = 0;
+  const McEventCollection * mcEvents = nullptr;
   if ( evtStore()->retrieve( mcEvents, m_mcEventsName ).isFailure() ||
-       0 == mcEvents ) {
+       nullptr == mcEvents ) {
     ATH_MSG_ERROR("Could not retrieve McEventCollection at ["
 		  << m_mcEventsName << "] !!");
     return StatusCode::FAILURE;
@@ -96,9 +94,9 @@ StatusCode SpclMcValidationTool::executeTool()
   }
 
   // retrieve TruthParticleContainer
-  const TruthParticleContainer * mcParts = 0;
+  const TruthParticleContainer * mcParts = nullptr;
   if ( evtStore()->retrieve( mcParts, m_truthParticlesName ).isFailure() ||
-       0 == mcParts ) {
+       nullptr == mcParts ) {
     ATH_MSG_ERROR("Could not retrieve TruthParticleContainer at ["
 		  << m_truthParticlesName << "] !!");
     return StatusCode::FAILURE;
@@ -114,12 +112,12 @@ StatusCode
 SpclMcValidationTool::executeTool( const McEventCollection* mcEvents,
 				   const TruthParticleContainer* mcParts )
 {
-  if ( 0 == mcEvents ) {
+  if ( nullptr == mcEvents ) {
     ATH_MSG_ERROR("NULL pointer to reference McEventCollection !!");
     return StatusCode::FAILURE;
   }
 
-  if ( 0 == mcParts ) {
+  if ( nullptr == mcParts ) {
     ATH_MSG_ERROR("NULL pointer to the 'to-be-validated' "\
 		  "TruthParticleContainer !!");
     return StatusCode::FAILURE;
@@ -131,7 +129,7 @@ SpclMcValidationTool::executeTool( const McEventCollection* mcEvents,
   }
 
   const HepMC::GenEvent * genEvt = (*mcEvents)[0];
-  if ( 0 == genEvt ) {
+  if ( nullptr == genEvt ) {
     ATH_MSG_ERROR("NULL pointer to reference GenEvent !!");
     return StatusCode::FAILURE;
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArCellsEmptyMonitoring
@@ -153,16 +153,16 @@ void LArCellsEmptyMonitoring::TestRun(const TString& inputfile)
       textfilename.Form("Output/BadCellList_run%d.txt",runNumber);
       pFile = fopen (textfilename , "w");
       if (!pFile){
-	printf("Cannot open output text file\n");
-	exit(0);}
+        printf("Cannot open output text file\n");
+        std::abort();}
     } else {
       // placeholder - in case someone wants to look at individual partitions only!
       if (m_SetPartition){
 	textfilename.Form("Output/BadCellList_%s_run%d.txt",m_LarIdTranslator->GetPartitonLayerName(m_PartitionIndex),runNumber);
 	pFile = fopen (textfilename , "w");
 	if (!pFile){
-	  printf("Cannot open output text file\n");
-	  exit(0);}
+      printf("Cannot open output text file\n");
+      std::abort();}
       }
     }
   }
@@ -436,12 +436,12 @@ void LArCellsEmptyMonitoring::Run(const TString& inputfile)
     printf("WARNING: Received instruction to select recurring bad cells only in SetSelectRecurringBadCells(bool flag)\n");
     printf("-------> Only one algorithm selected for cell selection criteria in SetAlgo(int algoindex)\n");
     printf("-------> Recurring cell selection overides algorithm specification\n");
-    exit(0);
+    std::abort();
   }
 
   if (m_SetPartition && m_PartitionIndex == -1){
     printf("ERROR: Partition not specified in SetPartition(bool set_part,  std::string partname)\n");
-    exit(0);
+    std::abort();
   } else if (m_SetPartition){
     printf("Running cell selection on %s only.\n",m_LarIdTranslator->GetPartitonLayerName(m_PartitionIndex));
   }
@@ -521,13 +521,13 @@ void LArCellsEmptyMonitoring::Run(const TString& inputfile)
   outputFile = fopen (textfilename , "w");
   if (!outputFile){
     std::cout<<("Cannot open output selection summary file " + textfilename)<< "\n";
-    exit(0);}
+    std::abort();}
   } else {
     textfilename.Form("BadCellSelection_%s_run%d.txt",m_LarIdTranslator->GetPartitonLayerName(m_PartitionIndex),runNumber);
     outputFile = fopen (textfilename , "w");
     if (!outputFile){
       std::cout<<("Cannot open output selection summary file " + textfilename)<< "\n";
-      exit(0);}
+      std::abort();}
   }
   
 
@@ -538,15 +538,15 @@ void LArCellsEmptyMonitoring::Run(const TString& inputfile)
       textfilename.Form("Output/BadCellList_run%d.txt",runNumber);
       pFile = fopen (textfilename , "w");
       if (!pFile){
-	printf("Cannot open output text file\n");
-	exit(0);}
+        printf("Cannot open output text file\n");
+        std::abort();}
     } else {
       if (m_SetPartition){
-	textfilename.Form("BadCellList_%s_run%d.txt",m_LarIdTranslator->GetPartitonLayerName(m_PartitionIndex),runNumber);
-	pFile = fopen (textfilename , "w");
-	if (!pFile){
-	  printf("Cannot open output text file\n");
-	  exit(0);}
+        textfilename.Form("BadCellList_%s_run%d.txt",m_LarIdTranslator->GetPartitonLayerName(m_PartitionIndex),runNumber);
+        pFile = fopen (textfilename , "w");
+        if (!pFile){
+          printf("Cannot open output text file\n");
+          std::abort();}
       }
     }
   }
@@ -1379,7 +1379,7 @@ void LArCellsEmptyMonitoring::SetPartition(bool setpart, const std::string& part
 	printf("ERROR: Partition %s does not exist! Invalid input name.\n",partname.c_str());
 	printf("Possible candidates are:\n");
 	for (int j=0;j<npl;j++){ printf("%s\n",m_LarIdTranslator->GetPartitonLayerName(j)); }
-	exit(0);
+	std::abort();
       }
     }
 }

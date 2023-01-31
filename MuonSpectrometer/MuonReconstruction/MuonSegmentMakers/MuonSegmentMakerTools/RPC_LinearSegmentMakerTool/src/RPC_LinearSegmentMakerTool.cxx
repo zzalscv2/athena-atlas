@@ -265,16 +265,16 @@ RPC_LinearSegmentMakerTool::find(const Trk::TrackRoad& road,
 
 
         Trk::FitQuality* pFitQuality = new Trk::FitQuality(dChi2, nDegf);
-        DataVector<const Trk::MeasurementBase>* pRios = new DataVector<const Trk::MeasurementBase>;
+        auto pRios = DataVector<const Trk::MeasurementBase>();
         for (Muon::Fit2D::PointArray::const_iterator itPt = zPoints.begin(); itPt != zPoints.end(); ++itPt)
         {
             Muon::Fit2D::Point* pPt = *itPt;
             if (!pPt->bExclude)
             {
               
-              pRios->push_back(static_cast<const Trk::MeasurementBase*>((const Muon::MuonClusterOnTrack*)(pPt->pData))->clone());
-              Trk::Intersection intersection = pRios->back()->associatedSurface().straightLineIntersection(pos,dir);
-              Amg::Vector3D loc3Dframe = pRios->back()->associatedSurface().transform().inverse()*intersection.position;
+              pRios.push_back(static_cast<const Trk::MeasurementBase*>((const Muon::MuonClusterOnTrack*)(pPt->pData))->clone());
+              Trk::Intersection intersection = pRios.back()->associatedSurface().straightLineIntersection(pos,dir);
+              Amg::Vector3D loc3Dframe = pRios.back()->associatedSurface().transform().inverse()*intersection.position;
               
               ATH_MSG_DEBUG("Hit on segment " << loc3Dframe.x() << " " << loc3Dframe.y() << " " << loc3Dframe.z() );
             }
@@ -284,14 +284,14 @@ RPC_LinearSegmentMakerTool::find(const Trk::TrackRoad& road,
             Muon::Fit2D::Point* pPt = *itPt;
             if (!pPt->bExclude)
             {
-                pRios->push_back(static_cast<const Trk::MeasurementBase*>((const Muon::MuonClusterOnTrack*)(pPt->pData))->clone());
+                pRios.push_back(static_cast<const Trk::MeasurementBase*>((const Muon::MuonClusterOnTrack*)(pPt->pData))->clone());
             }
         }
         Muon::MuonSegment* pMuonSeg = new Muon::MuonSegment(pSegPos,
                                                             pSegDir,
                                                             pcov/*new Trk::ErrorMatrix()*/,
                                                             pSurface->clone(),
-                                                            pRios,
+                                                            std::move(pRios),
                                                             pFitQuality);
         if (msgLvl(MSG::DEBUG))
 //            pMuonSeg->dump(log);

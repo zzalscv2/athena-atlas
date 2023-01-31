@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -35,9 +35,8 @@ Trk::PseudoMeasurementOnTrack::PseudoMeasurementOnTrack(
   const Surface& assocSurf)
   : Trk::MeasurementBase(locpars, locerr)
   , SurfacePtrHolder(assocSurf)
-  , m_globalPosition()
+  , m_globalPosition(m_associatedSurface->center())
 {
-  m_globalPosition = m_associatedSurface->center();
 }
 
 Trk::PseudoMeasurementOnTrack::PseudoMeasurementOnTrack(
@@ -46,9 +45,8 @@ Trk::PseudoMeasurementOnTrack::PseudoMeasurementOnTrack(
   Trk::ConstSurfaceUniquePtr assocSurf)
   : Trk::MeasurementBase(locpars, locerr)
   , SurfacePtrHolder(assocSurf.release())
-  , m_globalPosition()
+  , m_globalPosition(m_associatedSurface->center())
 {
-  m_globalPosition = m_associatedSurface->center();
 }
 
 // default constructor:

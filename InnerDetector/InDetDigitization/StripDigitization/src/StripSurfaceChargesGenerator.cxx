@@ -323,7 +323,6 @@ void StripSurfaceChargesGenerator::process(const SiDetectorElement* element,
                                           const EventContext& ctx) {
   ATH_MSG_VERBOSE("StripSurfaceChargesGenerator::process starts");
   processSiHit(element, *phit, inserter, phit.eventTime(), phit.eventId(), rndmEngine, ctx);
-  return;
 }
 
 // -------------------------------------------------------------------------------------------
@@ -632,8 +631,7 @@ void StripSurfaceChargesGenerator::processSiHit(const SiDetectorElement* element
       } // end of loop on charges
     }
   }
-  return;
-}
+  }
 
 bool StripSurfaceChargesGenerator::chargeIsTrapped(double spess,
                                                   const SiDetectorElement* element,

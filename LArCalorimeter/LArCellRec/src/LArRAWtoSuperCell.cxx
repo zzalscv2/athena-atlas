@@ -15,6 +15,7 @@
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "LArRecConditions/LArBadChannel.h"
 
 LArRAWtoSuperCell::LArRAWtoSuperCell( const std::string& name, ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm( name, pSvcLocator)//, m_sem_mgr(0)
@@ -30,6 +31,7 @@ LArRAWtoSuperCell::initialize()
         ATH_CHECK( m_cablingKey.initialize() );
 	ATH_CHECK(detStore()->retrieve(m_laronline_id,"LArOnline_SuperCellID"));
 	ATH_CHECK( m_caloMgrKey.initialize());
+	ATH_CHECK( m_bcContKey.initialize(SG::AllowEmpty) );
         return StatusCode::SUCCESS;
 }
 
@@ -48,6 +50,12 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
 	const LArOnOffIdMapping* cabling;
 	SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey,context};
 	cabling=*cablingHdl;
+
+	const LArBadChannelCont* badchannel(nullptr);
+        if ( !m_bcContKey.empty() ){
+        SG::ReadCondHandle<LArBadChannelCont> larBadChan{ m_bcContKey, context };
+	badchannel = *larBadChan;
+        }
         
         const LArRawSCContainer* scells_from_sg = cellsHandle.cptr();
         ATH_MSG_DEBUG("Got a CaloCellContainer input with size : "<<scells_from_sg->size());
@@ -77,6 +85,15 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
 		// convert ET (coming from LATOMEs) into Energy and
 		// apply magic 12.5 factor
                 cell->setEnergy( 12.5*energy*cosh(cell->eta()) );
+
+		// set some provenance to indicate bad channel
+		if(badchannel) {
+		   LArBadChannel bc = badchannel->offlineStatus(off_id);
+		   if ( !bc.good() && bc.statusBad(LArBadChannel::LArBadChannelSCEnum::maskedOSUMBit) ){
+		     cell->setProvenance(cell->provenance()|0x80);
+		   }
+		   
+		}
 		// we probably should soon associate some quality information to the saturation, maybe the bcid to provenance
 		cell->setQuality((unsigned short)saturation);
                 new_scell_cont->push_back( std::move(cell) );

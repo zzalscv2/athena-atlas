@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Fri 12 Oct 2012 13:39:05 BST 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -195,7 +195,7 @@ T* Get( TFile& f, const std::string& n, const std::string& dir="",
 
   if ( h == 0 ) { 
     if ( chainmap && chainmap->size()!=0 ) { 
-      for ( chainmap_t::const_iterator itr=chainmap->begin() ; itr!=chainmap->end() ; itr++ ) { 
+      for ( chainmap_t::const_iterator itr=chainmap->begin() ; itr!=chainmap->end() ; ++itr ) { 
 	if ( contains( name, itr->first ) ) { 
 	  std::cout << "\tmatch: " << itr->first << " -> " << itr->second << std::endl;
 	  name.replace( name.find(itr->first), itr->first.size(), itr->second );
@@ -281,7 +281,7 @@ TH1F* d0rebin( TH1F* h ) {
 
   double x = 0; 
 
-  for ( int i=0 ; x<20 ; i++ ) { 
+  for ( [[maybe_unused]] int i=0 ; x<20 ; i++ ) { 
   
     alimits.push_back(x);
 
@@ -577,7 +577,7 @@ int main(int argc, char** argv) {
   bool make_ref_efficiencies = false;
   bool refit_resplots        = false;
   bool refitref_resplots     = false;
-  bool _bayes      = true;
+  bool bayes       = true;
   bool nostats     = false;
   bool nomeans     = false;
   bool noref       = false;
@@ -613,7 +613,7 @@ int main(int argc, char** argv) {
   double xoffset = 0;
 
   
-  double _ypos = 0;
+  double ypos_arg = 0;
 
   std::string pattern = "";
   std::string regex   = "";
@@ -760,7 +760,7 @@ int main(int argc, char** argv) {
       usechainref = true;
     }
     else if ( arg=="-nb" || arg=="--nobayes" ) { 
-      _bayes = false;
+      bayes = false;
     }
     else if ( arg=="-es" || arg=="--effscale" ) { 
       if ( ++i<argc ) scale_eff=std::atof(argv[i]);
@@ -804,7 +804,7 @@ int main(int argc, char** argv) {
       else return usage(argv[0], -1, "no xoffset provided");
     }
     else if ( arg=="-yp" || arg=="--ypos" ) { 
-      if ( ++i<argc ) _ypos=std::atof(argv[i]);
+      if ( ++i<argc ) ypos_arg=std::atof(argv[i]);
       else return usage(argv[0], -1, "no y position provided");
     }
     else if ( arg=="-xe" || arg=="--xerror" ) { 
@@ -960,7 +960,7 @@ int main(int argc, char** argv) {
 
   std::cout << argv[0] << " options:" << std::endl;
   std::cout << "\tATLAS style:                 " << ( atlasstyle ? "true" : "false" ) << std::endl; 
-  std::cout << "\tBayesian uncertainties:      " << ( _bayes ? "true" : "false" ) << std::endl; 
+  std::cout << "\tBayesian uncertainties:      " << ( bayes ? "true" : "false" ) << std::endl; 
   std::cout << "\trefit resplot uncertainties: " << ( refit_resplots ? "true" : "false" ) << std::endl; 
   std::cout << "\tsuppress mean and rms stats: " << ( nostats ? "true" : "false" ) << std::endl;  
   if ( !nostats ) std::cout << "\tsuppress meanstats:          " << ( nomeans ? "true" : "false" ) << std::endl;  
@@ -1169,7 +1169,7 @@ int main(int argc, char** argv) {
       
       std::cout << "\nusing chain map:" << std::endl;
       
-      for ( chainmap_t::iterator itr=chainmap->begin() ; itr!=chainmap->end() ; itr++ ) { 
+      for ( chainmap_t::iterator itr=chainmap->begin() ; itr!=chainmap->end() ; ++itr ) { 
 	std::cout << "\t" << itr->first << "\t" << itr->second << std::endl;
       }
     }
@@ -1597,7 +1597,7 @@ int main(int argc, char** argv) {
 	else            ypos = 0.18;
       }
 
-      if ( _ypos!=0 ) ypos = _ypos;
+      if ( ypos_arg!=0 ) ypos = ypos_arg;
       
       double xpos_original = xpos;
 
@@ -1880,7 +1880,7 @@ int main(int argc, char** argv) {
 	  std::cout << xaxis << std::endl;
 
 	  if ( htest==0 ) { 
-	    if ( htest==0 ) std::cerr << "missing test histogram: " << (chains[j]+" / "+reghist) << " " << htest<< std::endl; 
+	    std::cerr << "missing test histogram: " << (chains[j]+" / "+reghist) << " " << htest<< std::endl; 
 	    continue;
 	  }
 
@@ -1908,7 +1908,7 @@ int main(int argc, char** argv) {
 
 
 	  if ( !noreftmp && hreft==0 ) { 
-	    if ( hreft==0 ) std::cerr << "missing ref histogram: " << (refchain[j]+" / "+reghist)  
+	    std::cerr << "missing ref histogram: " << (refchain[j]+" / "+reghist)  
 				      << " " << hreft << std::endl; 
 	    noreftmp = true;
 	    Plotter::setplotref(false);
@@ -2006,7 +2006,7 @@ int main(int argc, char** argv) {
 	}
 
 	
-	if ( _bayes ) { 
+	if ( bayes ) { 
 
 	  if ( htest && contains( std::string(htest->GetName()), "eff" ) ) {
 
@@ -2370,14 +2370,14 @@ int main(int argc, char** argv) {
 
 	    if ( range<0.2*scale_eff ) {
  
-	      double _max = int( (h->GetMaximum() + 20)*0.1 )*0.1*scale_eff;
-	      double _min = int( (h->GetMinimum() - 10)*0.1 )*0.1*scale_eff;
+	      double max = int( (h->GetMaximum() + 20)*0.1 )*0.1*scale_eff;
+	      double min = int( (h->GetMinimum() - 10)*0.1 )*0.1*scale_eff;
 	    
-	      if ( _max>1*scale_eff ) _max = 1.02*scale_eff;
-	      if ( _min<0 )           _min = 0;
+	      if ( max>1*scale_eff ) max = 1.02*scale_eff;
+	      if ( min<0 )           min = 0;
 	    
-	      h->SetMinimum(_min);
-	      h->SetMaximum(_max);
+	      h->SetMinimum(min);
+	      h->SetMaximum(max);
 	   
 	    }
 
@@ -2669,22 +2669,22 @@ int main(int argc, char** argv) {
       
 	/// actually draw the plot here ...
       
-	if ( fulldbg ) if ( fulldbg ) std::cout << __LINE__ << std::endl;
+	if ( fulldbg ) std::cout << __LINE__ << std::endl;
 	
 	plots.Draw( legend );
 
-	if ( fulldbg ) if ( fulldbg ) std::cout << __LINE__ << std::endl;
+	if ( fulldbg ) std::cout << __LINE__ << std::endl;
 
-	if ( atlasstyle ) ATLASLabel( xpos, ypositions[0]+deltay, atlaslabel.c_str(), kBlack, ncolsp, nrowsp );
+	if ( atlasstyle ) ATLASLabel( xpos, ypositions[0]+deltay, atlaslabel, kBlack, ncolsp, nrowsp );
 
-	if ( fulldbg ) if ( fulldbg ) std::cout << __LINE__ << std::endl;
+	if ( fulldbg ) std::cout << __LINE__ << std::endl;
           
 	for ( unsigned it=0 ; it<taglabels.size() ; it++ ) { 
 	  DrawLabel( xpos, ypositions[it], taglabels[it], kBlack, 0.04 );
 	}
       }
     
-      if ( fulldbg ) if ( fulldbg ) std::cout << __LINE__ << std::endl;
+      if ( fulldbg ) std::cout << __LINE__ << std::endl;
 
 
       if ( ( !nostats || !nomeans ) && !noplots ) { 

@@ -1,14 +1,14 @@
 #
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # 
-
+from AthenaConfiguration.ComponentFactory import CompFactory
 EnableFilterMonitoring = False  # Can be changed in a precommand/preExec
 
-def setupFilterMonitoring( filterAlg ):
+def setupFilterMonitoring( flags, filterAlg ):
     if not EnableFilterMonitoring or not hasattr(filterAlg, "Input"):
         return
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool('MonTool')
+    monTool = GenericMonitoringTool(flags, 'MonTool')
     
     inputKeys = [str(i) for i in filterAlg.Input]
 
@@ -20,18 +20,18 @@ def setupFilterMonitoring( filterAlg ):
 
     filterAlg.MonTool = monTool
 
-def TriggerSummaryAlg( name ):
+def TriggerSummaryAlg( flags, name ):
     from AthenaConfiguration.ComponentFactory import CompFactory
     alg = CompFactory.TriggerSummaryAlg( name )
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool('MonTool', HistPath='HLTFramework/'+name)
+    monTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
     monTool.defineHistogram('TIME_SinceEventStart', path='EXPERT', type='TH1F',
                                    title='Time since beginning of event processing;time [ms]',
                                    xbins=100, xmin=0, xmax=3.5e3   )
     alg.MonTool = monTool
     return alg
 
-def ComboHypoCfg( name ):
-    from DecisionHandling.DecisionHandlingConf import ComboHypo
-    alg = ComboHypo( name )
+def ComboHypoCfg( name ):    
+    alg = CompFactory.ComboHypo( name )
     return alg
+

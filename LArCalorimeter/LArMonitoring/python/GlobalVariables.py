@@ -301,24 +301,24 @@ lArDQGlobals.Cell_Variables["phiNbin"]["FCal"]["C"]= lArDQGlobals.Cell_Variables
 #Number of bins in eta in each range of cells (defining only for A side since C side is symmetric)
 # https://edms.cern.ch/ui/file/1257047/1/OffMappingNote.pdf
 # Table 2.1 
-lArDQGlobals.Cell_Variables["etaNbin"]["EMB"]["A"]=    {"0":[0,60],"1":[0,447,452],"2":[0,60],"3":[0,27]}
+lArDQGlobals.Cell_Variables["etaNbin"]["EMB"]["A"]= {"0":[0,61],"1":[0,1,447,451],"2":[0,58,60],"3":[0, 27, 28]}
 lArDQGlobals.Cell_Variables["etaMin" ]["EMB"]["A"]=    {"0":0.0,"1":0.0,"2":0.0,"3":0.0}
-lArDQGlobals.Cell_Variables["etaCellSize"]["EMB"]["A"]={"0":[0.025],"1":[0.003125,0.025],"2":[0.025],"3":[0.05]}
+lArDQGlobals.Cell_Variables["etaCellSize"]["EMB"]["A"]={"0":[0.025],"1":[0.025/4,0.025/8,0.025],"2":[0.025,0.05],"3":[0.05, 0.125]}
 
 # Table 3.1
-lArDQGlobals.Cell_Variables["etaNbin"]["EMEC"]["A"]=    {"0":[0,11],"1":[0,1,4,100,148,212,216,223],"2":[0,1,4,44,51],"3":[0,20]}
-lArDQGlobals.Cell_Variables["etaMin" ]["EMEC"]["A"]=    {"0":1.5,"1":1.375,"2":1.375,"3":1.5}
-lArDQGlobals.Cell_Variables["etaCellSize"]["EMEC"]["A"]={"0":[0.025],"1":[0.05,0.025,0.003125,0.1/24,0.00625,0.025,0.1],"2":[0.05,0.025,0.025,0.1],"3":[0.05]}
+lArDQGlobals.Cell_Variables["etaNbin"]["EMEC"]["A"]= {"0":[0,12],"1":[0,1,3,107,155,219,223,230],"2":[0,1,47,54],"3":[0,20]}
+lArDQGlobals.Cell_Variables["etaMin" ]["EMEC"]["A"]= {"0":1.5,"1":1.375,"2":1.375,"3":1.5}
+lArDQGlobals.Cell_Variables["etaCellSize"]["EMEC"]["A"]= {"0":[0.025],"1":[0.05,0.025,0.025/8,0.025/6,0.025/4,0.025,0.1],"2":[0.05,0.025,0.1],"3":[0.05]}
 
 # Table 4.1
-lArDQGlobals.Cell_Variables["etaNbin"]["HEC"]["A"]=    {"0":[0,9,13],"1":[0,9,13],"2":[0,9,13],"3":[0,9,13]}
-lArDQGlobals.Cell_Variables["etaMin" ]["HEC"]["A"]=    {"0":1.5,"1":1.5,"2":1.5,"3":1.5}
-lArDQGlobals.Cell_Variables["etaCellSize"]["HEC"]["A"]={"0":[0.1,0.2],"1":[0.1,0.2],"2":[0.1,0.2],"3":[0.1,0.2]}
+lArDQGlobals.Cell_Variables["etaNbin"]["HEC"]["A"]= {"0":[0,10,14],"1":[0,10,13],"2":[0,9,12],"3":[0,8,12]}
+lArDQGlobals.Cell_Variables["etaMin" ]["HEC"]["A"]= {"0":1.5,"1":1.5,"2":1.6,"3":1.7}
+lArDQGlobals.Cell_Variables["etaCellSize"]["HEC"]["A"]= {"0":[0.1,0.2],"1":[0.1,0.2],"2":[0.1,0.2],"3":[0.1,0.2]}
 
 # Table 5.1
-lArDQGlobals.Cell_Variables["etaNbin"]["FCal"]["A"]=    {"1":[0,9,12,17,23],"2":[0,17],"3":[0,4]}
-lArDQGlobals.Cell_Variables["etaMin" ]["FCal"]["A"]=    {"1":3.1,"2":3.1,"3":3.1}
-lArDQGlobals.Cell_Variables["etaCellSize"]["FCal"]["A"]={"1":[0.1,0.1,0.1,0.15],"2":[0.1],"3":[0.4]}
+lArDQGlobals.Cell_Variables["etaNbin"]["FCal"]["A"]=    {"1":[0, 3, 9, 13, 15],"2":[0, 1, 4, 5, 6, 7, 10, 12, 13, 14, 17, 21, 25, 27, 28, 29, 30, 31],"3":[0,2,4,5,6,8]}#
+lArDQGlobals.Cell_Variables["etaMin" ]["FCal"]["A"]=    {"1":3.08,"2":3.192,"3":3.27}
+lArDQGlobals.Cell_Variables["etaCellSize"]["FCal"]["A"]= {"1":[0.04, 0.1, 0.2, 0.11],"2":[0.007, 0.0035, 0.008, 0.0005, 0.012, 0.01, 0.04, 0.03, 0.02, 0.043, 0.0125, 0.066, 0.132, 0.265, 0.135, 0.15, 0.16],"3":[0.08, 0.135, 0.21, 0.42, 0.21]}
 
 
 ###################

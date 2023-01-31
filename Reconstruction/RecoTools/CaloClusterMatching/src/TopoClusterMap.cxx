@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloClusterMatching/TopoClusterMap.h"
@@ -43,11 +43,9 @@ StatusCode TopoClusterMap::SetTopoClusters(const xAOD::CaloClusterContainer *inp
 {
 
   double eta, phi;
-  int i(-1);
 
   for(const auto cc : *inputTopoClusterContainer) 
   {
-    i++;
     //Retrieve eta, phi from ith topocluster.
     eta = cc->eta();
     phi = cc->phi();

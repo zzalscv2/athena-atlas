@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATOR_PHOTOSPP_H
@@ -8,80 +8,85 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 
-class IAtRndmGenSvc;
+#include "AthenaKernel/IAthRNGSvc.h"
+#include "CLHEP/Random/RandomEngine.h"
 
 extern "C" double phoranc_(int *idum);
 
 class Photospp_i : public AthAlgorithm{
-  
+
 public:
-  
+
   /// Standard Athena algorithm constructor
   Photospp_i(const std::string &name, ISvcLocator *pSvcLocator);
-  
+
   /// Initialise the Photospp_i algorithm and required services
   StatusCode initialize();
-  
+
   /// Run Photos on one event
   /// Will require a pre-existing HepMC event in Storegate
   StatusCode execute();
-  
-  /// Finalize the algorithm
-  /// This probably doesn't do much
-  StatusCode finalize();
-  
+
   /// Set up the Photos class
-  /// This may be called in the initialize method or directly before the 
+  /// This may be called in the initialize method or directly before the
   /// generation of the first event
   void setupPhotos();
-  
+
   /// This external fortran function is the PHOTOS++ random number generator
-  /// We make it a friend so it can access our AtRndmGenSvc
+  /// We make it a friend so it can access our AthRNGSvc
   friend double ::phoranc_(int *idum);
-  
+
+  static CLHEP::HepRandomEngine* p_rndmEngine;
+
 private:
-  
-  /// Rather than a static pointer to the AtRndmGenSvc, we use a static member function.
-  /// This allows access to the extern fortran function above, and is anyway nicer since
-  /// it follows the "construct on first use" idiom for static members (although in this case the 
-  /// service is useless before an instance of Photospp_i has been initialised) and provides nicer 
-  /// encapsulation than a global static pointer.
-  static IAtRndmGenSvc* &atRndmGenSvc();
-  
-  /// This is the name of the random number stream.  Static function returning reference for the same reasons as above
-  static std::string &photospp_stream();
-  
-  /// The GenEvent StoreGate key (default "GEN_EVENT")
-  std::string m_genEventKey;
-  
+
+  /// @name Features for derived classes to use internally
+  //@{
+  void reseedRandomEngine(const std::string& streamName, const EventContext& ctx);
+  CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName, unsigned long int randomSeedOffset, const EventContext& ctx) const;
+  CLHEP::HepRandomEngine* getRandomEngineDuringInitialize(const std::string& streamName, unsigned long int randomSeedOffset, unsigned int conditionsRun=1, unsigned int lbn=1) const;
+  //@}
+
+  // Random number service
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};
+
+  //Gen_tf run args.
+  IntegerProperty m_dsid{this, "Dsid", 999999};
+
+  /// Seed for random number engine
+  IntegerProperty m_randomSeed{this, "RandomSeed", 1234567, "Random seed for the built-in random engine"}; // FIXME make this into an unsigned long int?
+
+  /// The GenEvent StoreGate key - FIXME should be using Read/WriteHandles here
+  StringProperty m_genEventKey{this, "MCEventKey", "GEN_EVENT"};
+
   /// Whether to use exponentiation mode (default = yes)
-  bool m_exponentiation;
-  
+  BooleanProperty m_exponentiation{this, "ExponentiationMode", true};
+
   /// Whether to create history entries (default = yes)
-  bool m_createHistory;
+  BooleanProperty m_createHistory{this, "CreateHistory", false};
 
   /// Whether to stop on critical error (default = no)
-  bool m_stopCritical;
-  
+  BooleanProperty m_stopCritical{this, "StopCriticalErrors", false};
+
   /// Delay initialisation until just before first event execution (default = no)
-  bool m_delayInitialisation;
-  
+  BooleanProperty m_delayInitialisation{this, "DelayInitialisation", false};
+
   /// Whether to apply ME correction to Z decays (default = no, until validated)
-  bool m_ZMECorrection;
- 
+  BooleanProperty m_ZMECorrection{this, "ZMECorrection", false};
+
   /// Whether to apply ME correction to W decays (default = no, until validated)
-  bool m_WMECorrection;
-  
+  BooleanProperty m_WMECorrection{this, "WMECorrection", false};
+
   /// Whether to include photon splitting
-  bool m_photonSplitting;
-  
-  /// 
-  double m_infraRedCutOff;
+  BooleanProperty m_photonSplitting{this, "PhotonSplitting", false};
+
   ///
-  double m_maxWtInterference;
-  
+  DoubleProperty m_infraRedCutOff{this, "InfraRedCutOff", -1./*, 1.e-07, 0.01/91.187*/};
+  ///
+  DoubleProperty m_maxWtInterference{this, "WtInterference", 3.};
+
   /// Value of alpha_QED
-  double m_alphaQED;
-  
+  DoubleProperty m_alphaQED{this, "AlphaQED", 0.00729735039};
+
 };
 #endif

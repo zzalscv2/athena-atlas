@@ -17,8 +17,8 @@ def JpsiFinderCfg(ConfigFlags,name="JpsiFinder", **kwargs):
     kwargs.setdefault("useV0Fitter", False)
     kwargs.setdefault("V0VertexFitterTool", None)
     if "TrkVertexFitterTool" not in kwargs:
-        from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
-        kwargs.setdefault("TrkVertexFitterTool", acc.popToolsAndMerge(TrkVKalVrtFitterCfg(ConfigFlags)))
+        from TrkConfig.TrkVKalVrtFitterConfig import BPHY_TrkVKalVrtFitterCfg
+        kwargs.setdefault("TrkVertexFitterTool", acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags)))
     if "TrackSelectorTool" not in kwargs:
         from InDetConfig.InDetTrackSelectorToolConfig import BPHY_InDetDetailedTrackSelectorToolCfg
         kwargs.setdefault("TrackSelectorTool", acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags)))

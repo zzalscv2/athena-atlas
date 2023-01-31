@@ -6,6 +6,7 @@
 //____________________________________________________________________
 inline char* LWPool::acquire()
 {
+  std::scoped_lock lock (m_mutex);
   char * c = (m_likelyNonEmptyArea?m_likelyNonEmptyArea->acquire():0);
   return c ? c : searchAcquire();
 }
@@ -20,12 +21,14 @@ inline bool LWPool::belongsInArea(char*c,LWPoolArea*a) const
 //____________________________________________________________________
 inline void LWPool::release(char*c)
 {
+  std::scoped_lock lock (m_mutex);
   assert(!m_likelyReleaseArea||(m_likelyReleaseArea->belongsInArea(c)==belongsInArea(c,m_likelyReleaseArea)));
   if (!m_likelyReleaseArea||!belongsInArea(c,m_likelyReleaseArea))
     m_likelyReleaseArea = findArea(c);
   assert(m_likelyReleaseArea);
   m_likelyReleaseArea->release(c);
-  if (m_likelyReleaseArea->isUnused()&&!isMotherPool())//NB: Mother pool never releases!!!!
-    //cppcheck-suppress thisUseAfterFree
+  if (m_likelyReleaseArea->isUnused()&&!isMotherPool()) {//NB: Mother pool never releases!!!!
+    // cppcheck-suppress thisUseAfterFree; xxx check this!
     freeArea(m_likelyReleaseArea);
+  }
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------
@@ -10,33 +10,52 @@
 #include "GaudiKernel/System.h"
 
 
-template <typename VALUE>
-const typename DataPool<VALUE>::alloc_t::Params DataPool<VALUE>::s_params
-  = typename DataPool<VALUE>::alloc_t::initParams<VALUE> (DataPool<VALUE>::s_minRefCount);
+#define DATAPOOL_T template <typename VALUE, DataPoolClearFuncPtr_t<VALUE> clear>
+DATAPOOL_T
+const typename DataPool<VALUE, clear>::alloc_t::Params DataPool<VALUE, clear>::s_params
+  = DataPool<VALUE, clear>::initParams();
+
+
+DATAPOOL_T
+typename DataPool<VALUE, clear>::alloc_t::Params DataPool<VALUE, clear>::initParams()
+{
+  typename alloc_t::Params params = alloc_t::initParams<VALUE> (s_minRefCount);
+  if (clear != nullptr) {
+    params.clear = callClear;
+  }
+  return params;
+}
+
+
+DATAPOOL_T
+void DataPool<VALUE, clear>::callClear (SG::ArenaAllocatorBase::pointer p)
+{
+  clear (reinterpret_cast<VALUE*> (p));
+}
 
 
 //-----------------------------------------------------------
 
-template <typename VALUE>
-DataPool<VALUE>::DataPool(size_type n /*= 0*/)
+DATAPOOL_T
+DataPool<VALUE, clear>::DataPool(size_type n /*= 0*/)
   : m_handle (&s_params)
 {
   if (n > 0)
     m_handle.reserve (std::max (n, s_minRefCount));
 }
 
-template <typename VALUE>
-DataPool<VALUE>::DataPool(const EventContext& ctx,
-                          size_type n /*= 0*/)
+DATAPOOL_T
+DataPool<VALUE, clear>::DataPool(const EventContext& ctx,
+                                 size_type n /*= 0*/)
   : m_handle (static_cast<SG::ArenaHeader*>(nullptr), ctx, &s_params)
 {
   if (n > 0)
     m_handle.reserve (std::max (n, s_minRefCount));
 }
 
-template <typename VALUE>
-DataPool<VALUE>::DataPool(SG::Arena* arena,
-                          size_type n /*= 0*/)
+DATAPOOL_T
+DataPool<VALUE, clear>::DataPool(SG::Arena* arena,
+                                 size_type n /*= 0*/)
   : m_handle (arena, nullptr, &s_params)
 {
   if (n > 0)
@@ -45,15 +64,15 @@ DataPool<VALUE>::DataPool(SG::Arena* arena,
 
 //-----------------------------------------------------------
 /// release all elements in the pool.
-template <typename VALUE>
-void DataPool<VALUE>::reset()
+DATAPOOL_T
+void DataPool<VALUE, clear>::reset()
 {
   m_handle.reset();
 }
 
 /// free all memory in the pool.
-template <typename VALUE>
-void DataPool<VALUE>::erase()
+DATAPOOL_T
+void DataPool<VALUE, clear>::erase()
 {
   m_handle.erase();
 }
@@ -61,21 +80,21 @@ void DataPool<VALUE>::erase()
 // reserve space for the pool
 // allocated elements will not be deleted.
 
-template <typename VALUE>
-void DataPool<VALUE>::reserve(unsigned int size)
+DATAPOOL_T
+void DataPool<VALUE, clear>::reserve(unsigned int size)
 {
   m_handle.reserve (size);
 }
 
 
-template <typename VALUE>
-unsigned int DataPool<VALUE>::capacity()
+DATAPOOL_T
+unsigned int DataPool<VALUE, clear>::capacity()
 {
   return m_handle.stats().elts.total;
 }
 
-template <typename VALUE>
-unsigned int DataPool<VALUE>::allocated()
+DATAPOOL_T
+unsigned int DataPool<VALUE, clear>::allocated()
 {
   return m_handle.stats().elts.inuse;
 }
@@ -83,14 +102,14 @@ unsigned int DataPool<VALUE>::allocated()
 
 //-----------------------------------------------------------
 /// begin iterators over pool
-template <typename VALUE>
-typename DataPool<VALUE>::iterator DataPool<VALUE>::begin()
+DATAPOOL_T
+typename DataPool<VALUE, clear>::iterator DataPool<VALUE, clear>::begin()
 { 
   return iterator (m_handle.begin());
 }
 
-template <typename VALUE>
-typename DataPool<VALUE>::const_iterator DataPool<VALUE>::begin() const
+DATAPOOL_T
+typename DataPool<VALUE, clear>::const_iterator DataPool<VALUE, clear>::begin() const
 { 
   return const_Iterator (m_handle.begin());
 }
@@ -99,14 +118,14 @@ typename DataPool<VALUE>::const_iterator DataPool<VALUE>::begin() const
 /// the end() method will allow looping over only valid elements
 /// and not over ALL elements of the pool 
 
-template <typename VALUE>
-typename DataPool<VALUE>::iterator DataPool<VALUE>::end()
+DATAPOOL_T
+typename DataPool<VALUE, clear>::iterator DataPool<VALUE, clear>::end()
 { 
   return iterator (m_handle.end());
 }
 
-template <typename VALUE>
-typename DataPool<VALUE>::const_iterator DataPool<VALUE>::end() const { 
+DATAPOOL_T
+typename DataPool<VALUE, clear>::const_iterator DataPool<VALUE, clear>::end() const { 
   return const_iterator (m_handle.end());
 }
 
@@ -114,8 +133,8 @@ typename DataPool<VALUE>::const_iterator DataPool<VALUE>::end() const {
 /// obtain the next available element in pool by pointer
 /// return as void* to minimize misuse, client usage is:
 /// MyElement* m = new(pool->mem) MyElement(...); // pool is ptr
-template <typename VALUE>
-void* DataPool<VALUE>::mem() {
+DATAPOOL_T
+void* DataPool<VALUE, clear>::mem() {
     pointer p = nextElementPtr();
     return p;
 }
@@ -124,15 +143,15 @@ void* DataPool<VALUE>::mem() {
 /// MyElement* m = new ((*pool)()) MyElement(...); // pool = pointer
 /// MyElement* m = new (pool()) MyElement(...); // pool = value
 
-template <typename VALUE>
-void* DataPool<VALUE>::operator()() { 
+DATAPOOL_T
+void* DataPool<VALUE, clear>::operator()() { 
     return mem(); 
 }
 
 //-----------------------------------------------------------
 /// typename of pool
-template <typename VALUE>
-const std::string& DataPool<VALUE>::typeName() {
+DATAPOOL_T
+const std::string& DataPool<VALUE, clear>::typeName() {
   static std::string name = System::typeinfoName (typeid (VALUE));
   return name;
 }
@@ -140,11 +159,12 @@ const std::string& DataPool<VALUE>::typeName() {
 //-----------------------------------------------------------
 /// obtain the next available element in pool by pointer
 /// pool is resized if reached its limit
-template <typename VALUE>
+DATAPOOL_T
 inline
-typename DataPool<VALUE>::pointer DataPool<VALUE>::nextElementPtr()
+typename DataPool<VALUE, clear>::pointer DataPool<VALUE, clear>::nextElementPtr()
 {
   return m_handle.allocate();
 }
   
 
+#undef DATAPOOL_T

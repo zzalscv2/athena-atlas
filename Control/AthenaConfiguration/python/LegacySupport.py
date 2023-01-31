@@ -5,9 +5,9 @@
 
 from AthenaCommon import CfgMgr, CFElements
 from AthenaCommon.AlgSequence import AlgSequence
-from AthenaCommon.Configurable import Configurable, ConfigurableRun3Behavior
+from AthenaCommon.Configurable import Configurable, ConfigurableCABehavior
 from AthenaCommon.Logging import logging
-from AthenaConfiguration.ComponentFactory import CompFactory, isRun3Cfg
+from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 from AthenaConfiguration.ComponentAccumulator import ConfigurationError
 from AthenaConfiguration.Deduplication import DeduplicationFailed
 
@@ -363,13 +363,13 @@ def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppre
 def CAtoGlobalWrapper(cfgFunc, flags, **kwargs):
     """Execute the cfgFunc CA with the given flags and arguments and run appendCAtoAthena.
     Return the result of cfgFunc."""
-    if isRun3Cfg():
+    if isComponentAccumulatorCfg():
         raise RuntimeError("CAtoGlobalWrapper should not be called in pure CA config")
 
     if not callable(cfgFunc):
         raise TypeError("CAtoGlobalWrapper must be called with a configuration-function as parameter")
 
-    with ConfigurableRun3Behavior():
+    with ConfigurableCABehavior():
         result = cfgFunc(flags, **kwargs)
         if isinstance(result, tuple):
             ca = result[0]
@@ -428,10 +428,8 @@ def appendCAtoAthena(ca):
                                               "{origPropValue} and {propValue}")
 
     def _fetchOldSeq(name=""):
-        currentBehaviour = Configurable.configurableRun3Behavior
-        Configurable.configurableRun3Behavior=0
-        seq = AlgSequence(name)
-        Configurable.configurableRun3Behavior=currentBehaviour
+        with ConfigurableCABehavior(target_state=False):
+            seq = AlgSequence(name)
         return seq
 
     def _mergeSequences( currentConfigurableSeq, conf2Sequence, indent="" ):

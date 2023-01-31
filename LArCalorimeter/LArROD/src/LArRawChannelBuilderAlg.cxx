@@ -217,10 +217,10 @@ StatusCode LArRawChannelBuilderAlg::execute(const EventContext& ctx) const {
       double q=0;
       if (m_useShapeDer) {
 	const auto& fullshapeDer=shapes->ShapeDer(id,gain);
-	if (ATH_UNLIKELY(fullshapeDer.size()<nSamples+firstSample)) {
+	if (ATH_UNLIKELY(fullshapeDer.size()<nOFC+firstSample)) {
 	  ATH_MSG_ERROR("No valid shape derivative for channel " <<  m_onlineId->channel_name(id) 
 			<< " gain " << gain);
-	  ATH_MSG_ERROR("Got size " << fullshapeDer.size() << ", expected at least " << nSamples+firstSample);
+	  ATH_MSG_ERROR("Got size " << fullshapeDer.size() << ", expected at least " << nOFC+firstSample);
 	  return StatusCode::FAILURE;
 	}
 

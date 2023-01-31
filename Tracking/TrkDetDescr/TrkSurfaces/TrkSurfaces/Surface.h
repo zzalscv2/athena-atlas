@@ -24,6 +24,7 @@
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkEventPrimitives/SurfaceTypes.h"
 #include "TrkEventPrimitives/SurfaceUniquePtrT.h"
+#include "TrkEventPrimitives/TrkObjectCounter.h"
 //
 #include "TrkParametersBase/Charged.h"
 #include "TrkParametersBase/Neutral.h"
@@ -69,13 +70,8 @@ enum SurfaceOwner
  @author Shaun Roe (interface cleanup)
  */
 
-class Surface
+class Surface: public Trk::ObjectCounter<Trk::Surface>
 {
-
-  /** Declare the ILayerBuilder / ITrackingVolumeHelper to be a friend class
-   * such it is able to set the layer */
-  friend class ILayerBuilder;
-  friend class ITrackingVolumeHelper;
 
 public:
   /*
@@ -132,20 +128,6 @@ public:
   /**Default Constructor
    for inheriting classes */
   Surface();
-
-  /**Copy constructor - it resets the associated
-   detector element to 0 and the identifier to invalid,
-   as the copy cannot be owned by the same detector element as the original */
-  Surface(const Surface& sf);
-
-  /**Assignment operator- it sets the associated
-   detector element to 0 and the associated identifier to invalid,
-   as the copy cannot be owned by the same detector element as the original */
-  Surface& operator=(const Surface& sf);
-
-  // Move operators for inheriting classes
-  Surface(Surface&& sf) noexcept = default;
-  Surface& operator=(Surface&& sf) noexcept = default;
 
   /**Virtual Destructor*/
   virtual ~Surface();
@@ -428,57 +410,53 @@ public:
   /** Return properly formatted class name */
   virtual std::string name() const = 0;
 
-  /**return number of surfaces currently created - needed for EDM monitor */
-  static unsigned int numberOfInstantiations();
-  /**return number of free surfaces currently created (i.e. those not belonging
-   * to a DE) - needed for EDM monitor */
-  static unsigned int numberOfFreeInstantiations();
-
   /** method to associate the associated Trk::Layer which is alreay owned
      - only allowed by LayerBuilder
      - only done if no Layer is set already  */
   void associateLayer(const Layer& lay);
 
 protected:
-  /** Helper method to factorize in one place common operations
-  calculate inverse transofrm and multiply with position */
-  Amg::Transform3D inverseTransformHelper() const;
-  Amg::Vector3D inverseTransformMultHelper(const Amg::Vector3D& glopos) const;
+ /**Copy operators for inheriting classes
+  They  resets the associated
+  detector element to nullptr and the identifier to invalid,
+  as the copy cannot be owned by the same detector element as the original */
+ Surface(const Surface& sf);
+ Surface& operator=(const Surface& sf);
+ // Move operators for inheriting classes
+ Surface(Surface&& sf) noexcept = default;
+ Surface& operator=(Surface&& sf) noexcept = default;
 
-  friend class ::SurfaceCnv_p1;
+ /** Helper method to factorize in one place common operations
+ calculate inverse transofrm and multiply with position */
+ Amg::Transform3D inverseTransformHelper() const;
+ Amg::Vector3D inverseTransformMultHelper(const Amg::Vector3D& glopos) const;
 
-  //!< Unique Pointer to the Transforms struct*/
-  std::unique_ptr<Transforms> m_transforms = nullptr;
+ friend class ::SurfaceCnv_p1;
 
-  /** Not owning Pointer to the TrkDetElementBase*/
-  const TrkDetElementBase* m_associatedDetElement = nullptr;
+ //!< Unique Pointer to the Transforms struct*/
+ std::unique_ptr<Transforms> m_transforms = nullptr;
 
-  /** Identifier for the TrkDetElementBase*/
-  Identifier m_associatedDetElementId;
+ /** Not owning Pointer to the TrkDetElementBase*/
+ const TrkDetElementBase* m_associatedDetElement = nullptr;
 
-  /**The associated layer Trk::Layer
-   - layer in which the Surface is be embedded
-   (not owning pointed)
-   */
-  const Layer* m_associatedLayer = nullptr;
-  /** Possibility to attach a material descrption
-  - potentially given as the associated material layer
-    (not owning pointer)
+ /** Identifier for the TrkDetElementBase*/
+ Identifier m_associatedDetElementId;
+
+ /**The associated layer Trk::Layer
+  - layer in which the Surface is embedded
+  (not owning pointed)
   */
-  Layer* m_materialLayer = nullptr;
-  /** enum for surface owner : 0  free surface */
-  SurfaceOwner m_owner;
+ const Layer* m_associatedLayer = nullptr;
+ /** Possibility to attach a material descrption
+ - potentially given as the associated material layer
+   (not owning pointer)
+ */
+ Layer* m_materialLayer = nullptr;
+ /** enum for surface owner : 0  free surface */
+ SurfaceOwner m_owner;
 
-  /**Tolerance for being on Surface */
-  static constexpr double s_onSurfaceTolerance = 10e-5; // 0.1 * micron
-#ifndef NDEBUG
-  /** number of objects of this type in memory - needed for EDM monitor*/
-  static std::atomic<unsigned int> s_numberOfInstantiations;
-
-  /** number of objects of this type in memory which do not belong to a detector
-   * element - needed for EDM monitor*/
-  static std::atomic<unsigned int> s_numberOfFreeInstantiations;
-#endif
+ /**Tolerance for being on Surface */
+ static constexpr double s_onSurfaceTolerance = 10e-5;  // 0.1 * micron
 };
 /**Overload of << operator for both, MsgStream and std::ostream for debug
  * output*/

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_HIGG1D1.py
@@ -29,7 +29,7 @@ def HIGG1D1KernelCfg(ConfigFlags, name='HIGG1D1Kernel', **kwargs):
     #CustomJetsConfig
     acc.merge(HIGG1D1CustomJetsCfg(ConfigFlags))
     
-    from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollectionsCfg
+    from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
     acc.merge(FtagJetCollectionsCfg(ConfigFlags, ['AntiKt4EMPFlowCustomVtxJets'], ['HggPrimaryVertices']))
 
     #Custom MET
@@ -119,18 +119,21 @@ def HIGG1D1KernelCfg(ConfigFlags, name='HIGG1D1Kernel', **kwargs):
     from DerivationFrameworkHiggs.SkimmingToolHIGG1Config import SkimmingToolHIGG1Cfg
     
     # Requires something in this list of triggers
-    SkipTriggerRequirement= ConfigFlags.Input.isMC and float(ConfigFlags.Beam.Energy) == 4000000.0 
+    SkipTriggerRequirement = ConfigFlags.Input.isMC and float(ConfigFlags.Beam.Energy) == 4000000.0 
     # 8 TeV MC does not have trigger information
-    print( "HIGG1D1.py SkipTriggerRequirement", SkipTriggerRequirement)
+    print("HIGG1D1.py SkipTriggerRequirement", SkipTriggerRequirement)
     TriggerExp = []
     if not SkipTriggerRequirement:
         if float(ConfigFlags.Beam.Energy) == 4000000.0:
             #  8 TeV data
             TriggerExp               = ["EF_g35_loose_g25_loose"]
         if float(ConfigFlags.Beam.Energy) == 6500000.0:
-            # 13 TeV MC
+            # 13 TeV MC 
             TriggerExp               = ["HLT_2g50_loose_L12EM20VH","HLT_2g25_loose_g15_loose","HLT_g35_medium_g25_medium_L12EM20VH","HLT_2g25_tight_L12EM20VH","HLT_2g22_tight_L12EM15VHI","HLT_g35_loose_g25_loose","HLT_g35_medium_g25_medium","HLT_2g50_loose","HLT_2g20_tight","HLT_2g22_tight","HLT_2g20_tight_icalovloose_L12EM15VHI","HLT_2g20_tight_icalotight_L12EM15VHI","HLT_2g22_tight_L12EM15VHI","HLT_2g22_tight_icalovloose_L12EM15VHI","HLT_2g22_tight_icalotight_L12EM15VHI","HLT_2g22_tight_icalovloose","HLT_2g25_tight_L12EM20VH","HLT_2g20_loose","HLT_2g20_loose_L12EM15","HLT_g35_medium_g25_medium","HLT_g35_medium_g25_medium_L12EM15VH","HLT_g35_loose_g25_loose","HLT_g35_loose_g25_loose_L12EM15VH", "HLT_2g20_loose_g15_loose", "HLT_3g20_loose", "HLT_3g15_loose", "HLT_2g6_tight_icalotight_L1J100", "HLT_2g6_loose_L1J100", "HLT_2g6_tight_icalotight_L1J50", "HLT_2g6_loose_L1J50","HLT_g120_loose","HLT_g140_loose"]
-
+        if float(ConfigFlags.Beam.Energy) == 6800000.0:
+            # 13.6 TeV
+            TriggerExp               = ["HLT_2g50_loose_L12EM20VH","HLT_2g25_loose_g15_loose_L12EM20VH","HLT_g35_medium_g25_medium_L12EM20VH","HLT_2g22_tight_L12EM15VHI","HLT_2g20_tight_icaloloose_L12EM15VHI","HLT_2g20_loose_L12EM15VH","HLT_2g9_loose_25dphiAA_invmAA80_L12EM7","HLT_2g15_loose_25dphiAA_invmAA80_L12EM7","HLT_2g15_tight_25dphiAA_invmAA80_L12EM7","HLT_2g15_tight_25dphiAA_L12EM7","HLT_g120_loose_L1EM22VHI","HLT_g140_loose_L1EM22VHI","HLT_2g50_loose_L12eEM24L","HLT_2g25_loose_g15_loose_L12eEM24L","HLT_g35_medium_g25_medium_L12eEM24L","HLT_2g22_tight_L12eEM18M","HLT_2g20_tight_icaloloose_L12eEM18M","HLT_2g20_loose_L12eEM18L","HLT_2g9_loose_25dphiAA_invmAA80_L1DPHI-M70-2eEM9","HLT_2g15_loose_25dphiAA_invmAA80_L1DPHI-M70-2eEM15M","HLT_2g15_tight_25dphiAA_L1DPHI-M70-2eEM15M","HLT_2g15_tight_L1DPHI-M70-2eEM15M","HLT_g120_loose_L1eEM26M","HLT_g140_loose_L1eEM26M"]
+    print("HIGG1D1.py Skimming Tool Triggers:", ",".join(TriggerExp))
     skimmingTool = acc.popToolsAndMerge( SkimmingToolHIGG1Cfg(ConfigFlags,RequireTrigger=not SkipTriggerRequirement,Triggers=TriggerExp) )
     acc.addPublicTool(skimmingTool)
 
@@ -191,7 +194,7 @@ def HIGG1D1Cfg(ConfigFlags):
     acc = ComponentAccumulator()
     
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    HIGG1D1TriggerListsHelper = TriggerListsHelper()
+    HIGG1D1TriggerListsHelper = TriggerListsHelper(ConfigFlags)
     
     acc.merge(HIGG1D1KernelCfg(ConfigFlags, name="HIGG1D1Kernel", StreamName = 'StreamDAOD_HIGG1D1', TriggerListsHelper = HIGG1D1TriggerListsHelper))
 
@@ -202,7 +205,7 @@ def HIGG1D1Cfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    HIGG1D1SlimmingHelper = SlimmingHelper("HIGG1D1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    HIGG1D1SlimmingHelper = SlimmingHelper("HIGG1D1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     HIGG1D1SlimmingHelper.SmartCollections = ["EventInfo",
                                               "Electrons",
                                               "Photons",
@@ -291,7 +294,6 @@ def HIGG1D1Cfg(ConfigFlags):
                                               "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
                                               "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
                                               "TruthPrimaryVertices.t.x.y.z",
-                                              "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
                                               "EventInfo.hardScatterVertexLink.timeStampNSOffset",
                                               "TauJets.dRmax.etOverPtLeadTrk",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
@@ -321,34 +323,25 @@ def HIGG1D1Cfg(ConfigFlags):
                                            "AFPToFTrackContainer"]
     # Add Btagging information
     from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent,BTaggingXbbContent
-    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowCustomVtxJets")
-    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowJets")
-    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingXbbContent("AntiKt4EMPFlowCustomVtxJets")
-    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingXbbContent("AntiKt4EMPFlowJets")
+    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowCustomVtxJets", ConfigFlags)
+    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowJets", ConfigFlags)
+    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingXbbContent("AntiKt4EMPFlowCustomVtxJets", ConfigFlags)
+    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingXbbContent("AntiKt4EMPFlowJets", ConfigFlags)
 
     # is this really needed given Photons are in the AllVariables list ?
     from DerivationFrameworkEGamma.PhotonsCPDetailedContent import PhotonsCPDetailedContent
     HIGG1D1SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
 
 
-    # Add the variables for Gain adn Cluster energy  --  need to get the tools first to use existing functions 
-    from DerivationFrameworkCalo.DerivationFrameworkCaloFactories import getGainDecorations, getClusterEnergyPerLayerDecorations  
-    GainDecoratorTool = None
-    ClusterEnergyPerLayerDecorators = []  
-    for toolStr in acc.getEventAlgo("HIGG1D1Kernel").AugmentationTools:
-        toolStr  = f"{toolStr}"
-        splitStr = toolStr.split('/')
-        tool =  acc.getPublicTool(splitStr[1])
-        if splitStr[0]== "DerivationFramework::GainDecorator":
-            GainDecoratorTool = tool
-        elif splitStr[0] ==  "DerivationFramework::ClusterEnergyPerLayerDecorator":
-            ClusterEnergyPerLayerDecorators.append( tool )
-
-    if GainDecoratorTool :
-        HIGG1D1SlimmingHelper.ExtraVariables.extend( getGainDecorations(GainDecoratorTool) )
-    for tool in ClusterEnergyPerLayerDecorators:
-        HIGG1D1SlimmingHelper.ExtraVariables.extend( getClusterEnergyPerLayerDecorations(tool) )
-    
+    # Add the variables for Gain and Cluster energy
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
+        getGainDecorations, getClusterEnergyPerLayerDecorations )
+    gainDecorations = getGainDecorations(acc, 'HIGG1D1Kernel')
+    HIGG1D1SlimmingHelper.ExtraVariables.extend(gainDecorations)
+    clusterEnergyDecorations = getClusterEnergyPerLayerDecorations(
+        acc, 'HIGG1D1Kernel' )
+    HIGG1D1SlimmingHelper.ExtraVariables.extend(clusterEnergyDecorations)
+        
     # Add HTXS variables
     HIGG1D1SlimmingHelper.ExtraVariables.extend(["EventInfo.HTXS_prodMode",
                                                  "EventInfo.HTXS_errorCode",
@@ -388,6 +381,8 @@ def HIGG1D1Cfg(ConfigFlags):
                                                  "Photons.maxEcell_gain",
                                                  "Photons.maxEcell_onlId",
                                                  "Photons.zvertex"])
+    # Add TTVA variables
+    HIGG1D1SlimmingHelper.ExtraVariables.extend(["InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers"])
 
     # Trigger content
     HIGG1D1SlimmingHelper.IncludeTriggerNavigation = False

@@ -103,7 +103,7 @@ std::unique_ptr<RegSelSiLUT> TGC_RegSelCondAlg::createTable( const EventContext&
   int maxChannelId = 0;
   cabling->getReadoutIDRanges(maxRodId, maxSRodId, maxSswId, maxSbloc, minChannelId, maxChannelId);
 
-  for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; i++) {
+  for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; ++i) {
    
     Identifier     Id = *i;
     IdentifierHash hashId;

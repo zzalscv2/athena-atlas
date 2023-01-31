@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1NSWSimTools/MMT_struct.h"
@@ -304,6 +304,12 @@ MMT_Parameters::MMT_Parameters(par_par inputParams, char wedgeSize, const MuonGM
   //z = into wedge along beamline
   //x = horizontal distance from beam looking down
 
+  m_pitch = roParam_bottom_mult1.stripPitch;
+  m_lWidth = mm_top_mult1->lWidth();
+  m_innerRadiusEta1 = roParam_bottom_mult1.distanceFromZAxis;
+  m_innerRadiusEta2 = roParam_top_mult1.distanceFromZAxis;
+  m_missedBottomEta = roParam_bottom_mult1.nMissedBottomEta;
+  m_missedBottomStereo = roParam_bottom_mult1.nMissedBottomStereo;
   if (sector == 'L') {
     ATH_MSG_DEBUG("LM1 \n" <<
                  "\t\t\t\t Total Strips: " << roParam_bottom_mult1.tStrips << " with pitch: " << roParam_bottom_mult1.stripPitch << "\n" <<

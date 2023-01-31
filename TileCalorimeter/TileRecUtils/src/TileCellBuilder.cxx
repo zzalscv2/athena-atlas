@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -176,6 +176,7 @@ StatusCode TileCellBuilder::initialize() {
   ATH_CHECK( m_eventInfoKey.initialize() );
   ATH_CHECK( m_DQstatusKey.initialize() );
   ATH_CHECK( m_EventInfoTileStatusKey.initialize() );
+  ATH_CHECK( m_emScaleKey.initialize() );
 
   ATH_CHECK( detStore()->retrieve(m_tileMgr) );
   ATH_CHECK( detStore()->retrieve(m_tileID) );
@@ -188,13 +189,10 @@ StatusCode TileCellBuilder::initialize() {
   // access tools and store them
   ATH_CHECK( m_noiseFilterTools.retrieve() );
 
-  //=== get TileCondToolEmscale
-  ATH_CHECK( m_tileToolEmscale.retrieve() );
-
   //=== get TileCondToolTiming
   ATH_CHECK( m_tileToolTiming.retrieve() );
 
-  CHECK( m_tileDCS.retrieve(EnableTool{m_checkDCS}) );
+  ATH_CHECK( m_DCSStateKey.initialize(m_checkDCS) );
 
   ATH_CHECK( m_cablingSvc.retrieve() );
   m_cabling = m_cablingSvc->cablingService();
@@ -738,7 +736,7 @@ unsigned char TileCellBuilder::qbits (TileDrawerEvtStatusArray& drawerEvtStatus,
 // masking for MBTS with single channel
 bool
 TileCellBuilder::maskBadChannel (TileDrawerEvtStatusArray& drawerEvtStatus,
-                                 const TileDQstatus* DQstatus,
+                                 const TileDQstatus* DQstatus, const TileDCSState* dcsState,
                                  TileCell* pCell, HWIdentifier hwid) const
 {
   int ros = m_tileHWID->ros(hwid);
@@ -759,8 +757,8 @@ TileCellBuilder::maskBadChannel (TileDrawerEvtStatusArray& drawerEvtStatus,
 
     // Now checking the DQ status
     if (!bad && m_notUpgradeCabling && DQstatus) {
-      bad = !(DQstatus->isAdcDQgood(ros, drawer, chan, gain)
-            && isChanDCSgood(ros, drawer, chan));
+      bad = !(DQstatus->isAdcDQgood(ros, drawer, chan, gain))
+        || (dcsState ? dcsState->isStatusBad(ros, drawer, chan) : false);
     }
   }
 
@@ -795,7 +793,7 @@ TileCellBuilder::maskBadChannel (TileDrawerEvtStatusArray& drawerEvtStatus,
 
 // masking for normal cells
 bool TileCellBuilder::maskBadChannels (TileDrawerEvtStatusArray& drawerEvtStatus,
-                                       const TileDQstatus* DQstatus,
+                                       const TileDQstatus* DQstatus, const TileDCSState* dcsState,
                                        TileCell* pCell) const
 {
   bool single_PMT_C10 = false;
@@ -826,8 +824,8 @@ bool TileCellBuilder::maskBadChannels (TileDrawerEvtStatusArray& drawerEvtStatus
 
     // Now checking the DQ status
     if (!bad1 && m_notUpgradeCabling && DQstatus) {
-      bad1 = !(DQstatus->isAdcDQgood(ros1, drawer1, chan1, gain1)
-              && isChanDCSgood(ros1, drawer1, chan1));
+      bad1 = !(DQstatus->isAdcDQgood(ros1, drawer1, chan1, gain1))
+        || (dcsState ? dcsState->isStatusBad(ros1, drawer1, chan1) : false);
     }
   }
 
@@ -878,8 +876,8 @@ bool TileCellBuilder::maskBadChannels (TileDrawerEvtStatusArray& drawerEvtStatus
 
       // Now checking the DQ status
       if (!bad2 && m_notUpgradeCabling && DQstatus) {
-        bad2 = !(DQstatus->isAdcDQgood(ros2, drawer2, chan2, gain2)
-                && isChanDCSgood(ros2, drawer2, chan2));
+        bad2 = !(DQstatus->isAdcDQgood(ros2, drawer2, chan2, gain2))
+          || (dcsState ? dcsState->isStatusBad(ros2, drawer2, chan2) : false);
       }
     }
 
@@ -1039,6 +1037,9 @@ void TileCellBuilder::build (const EventContext& ctx,
     DQstatus = SG::makeHandle (m_DQstatusKey, ctx).get();
   }
 
+  const TileDCSState* dcsState = m_checkDCS ? SG::ReadCondHandle(m_DCSStateKey, ctx).cptr() : nullptr;
+  SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+
   /* zero all counters and sums */
   int nTwo = 0;
   int nCell = 0;
@@ -1082,7 +1083,8 @@ void TileCellBuilder::build (const EventContext& ctx,
     if (params.m_correctAmplitude && time > m_timeMinThresh && time < m_timeMaxThresh) { // parabolic correction
       if (params.m_RChUnit > TileRawChannelUnit::OnlineADCcounts) { // convert from online units to ADC counts
         oldUnit = TileRawChannelUnit::ADCcounts;
-        amp = m_tileToolEmscale->undoOnlCalib(drawerIdx, channel, gain, amp, params.m_RChUnit);
+        amp = emScale->undoOnlineChannelCalibration(drawerIdx, channel, gain, amp, params.m_RChUnit);
+
         if (amp > m_ampMinThresh) // amp cut in ADC counts
           amp *= TileRawChannelBuilder::correctAmp(time,params.m_of2);
       } else if (params.m_RChUnit == TileRawChannelUnit::ADCcounts
@@ -1175,8 +1177,8 @@ void TileCellBuilder::build (const EventContext& ctx,
         ++nE4pr;
 
         // convert ADC counts to MeV. like for normal cells
-        float ener = m_tileToolEmscale->channelCalib(drawerIdx, channel, gain, amp , oldUnit
-                                                     , TileRawChannelUnit::MegaElectronVolts);
+        float ener = emScale->calibrateChannel(drawerIdx, channel, gain, amp, oldUnit
+                                               , TileRawChannelUnit::MegaElectronVolts);
 
         eE4prTot += ener;
         unsigned char iqual = iquality(qual);
@@ -1215,7 +1217,7 @@ void TileCellBuilder::build (const EventContext& ctx,
             msg(MSG::VERBOSE) << endmsg;
         }
 
-        if (m_maskBadChannels && maskBadChannel(drawerEvtStatus, DQstatus,
+        if (m_maskBadChannels && maskBadChannel(drawerEvtStatus, DQstatus, dcsState,
                                                 pCell, adc_id))
           ATH_MSG_VERBOSE ( "cell with id=" << m_tileTBID->to_string(cell_id)
                              << " bad channel masked, new energy=" << pCell->energy() );
@@ -1230,8 +1232,8 @@ void TileCellBuilder::build (const EventContext& ctx,
         ++nMBTS;
 
         // convert ADC counts to pCb and not to MeV
-        float ener = m_tileToolEmscale->channelCalib(drawerIdx, channel, gain, amp , oldUnit
-                                                     , TileRawChannelUnit::PicoCoulombs);
+        float ener = emScale->calibrateChannel(drawerIdx, channel, gain, amp , oldUnit
+                                               , TileRawChannelUnit::PicoCoulombs);
 
         eMBTSTot += ener;
         unsigned char iqual = iquality(qual);
@@ -1271,7 +1273,7 @@ void TileCellBuilder::build (const EventContext& ctx,
             msg(MSG::VERBOSE) << endmsg;
         }
 
-        if (m_maskBadChannels && maskBadChannel(drawerEvtStatus, DQstatus,
+        if (m_maskBadChannels && maskBadChannel(drawerEvtStatus, DQstatus, dcsState,
                                                 pCell, adc_id))
           ATH_MSG_VERBOSE ( "cell with id=" << m_tileTBID->to_string(cell_id)
                              << " bad channel masked, new energy=" << pCell->energy() );
@@ -1281,8 +1283,8 @@ void TileCellBuilder::build (const EventContext& ctx,
       }
     } else if (index != -1) { // connected channel
 
-      float ener = m_tileToolEmscale->channelCalib(drawerIdx, channel, gain, amp
-           , oldUnit, TileRawChannelUnit::MegaElectronVolts);
+      float ener = emScale->calibrateChannel(drawerIdx, channel, gain, amp
+                                             , oldUnit, TileRawChannelUnit::MegaElectronVolts);
 
       eCellTot += ener;
 
@@ -1393,7 +1395,7 @@ void TileCellBuilder::build (const EventContext& ctx,
     if (pCell) {      // cell exists
 
       if (m_maskBadChannels)
-        if (maskBadChannels (drawerEvtStatus, DQstatus, pCell))
+        if (maskBadChannels (drawerEvtStatus, DQstatus, dcsState, pCell))
           ATH_MSG_VERBOSE ( "cell with id=" << m_tileID->to_string(pCell->ID(), -2)
                            << " bad channels masked, new energy=" << pCell->energy() );
 
@@ -1463,20 +1465,4 @@ void TileCellBuilder::build (const EventContext& ctx,
 
     msg(MSG::DEBUG) << endmsg;
   }
-}
-
-
-bool TileCellBuilder::isChanDCSgood (int ros, int drawer, int channel) const
-{
-  if (!m_checkDCS) return true;
-  TileDCSState::TileDCSStatus status = m_tileDCS->getDCSStatus(ros, drawer, channel);
-
-  if (status > TileDCSState::WARNING) {
-    ATH_MSG_DEBUG("Module=" << TileCalibUtils::getDrawerString(ros, drawer)
-                  << " channel=" << channel
-                  << " masking becasue of bad DCS status=" << status);
-    return false;
-  }
-
-  return true;
 }

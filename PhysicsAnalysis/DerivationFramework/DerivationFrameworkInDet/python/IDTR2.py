@@ -41,8 +41,8 @@ def IDTR2Cfg(ConfigFlags):
     MaterialSVFinderTool = acc.popToolsAndMerge(MaterialSVFinderToolCfg(ConfigFlags))
     acc.addPublicTool(MaterialSVFinderTool)
     acc.addEventAlgo(CompFactory.Rec.NewVrtSecInclusiveAlg(name = "NewVrtSecInclusive_Material", 
-                                                       TrackContainerName = "InDetWithLRTTrackParticles",
-                                                       PVContainerName = "PrimaryVertices",
+                                                       TrackParticleContainer = "InDetWithLRTTrackParticles",
+                                                       PrimaryVertexContainer = "PrimaryVertices",
                                                        BVertexContainerName = "NewVrtSecInclusive_SecondaryVertices_Material",  
                                                        BVertexTool = MaterialSVFinderTool
                                                        ))
@@ -50,8 +50,8 @@ def IDTR2Cfg(ConfigFlags):
     DVFinderToolCfg = acc.popToolsAndMerge(DVFinderToolCfg(ConfigFlags))
     acc.addPublicTool(DVFinderToolCfg)
     acc.addEventAlgo(CompFactory.Rec.NewVrtSecInclusiveAlg(name = "NewVrtSecInclusive_DV", 
-                                                       TrackContainerName = "InDetWithLRTTrackParticles",
-                                                       PVContainerName = "PrimaryVertices",
+                                                       TrackParticleContainer = "InDetWithLRTTrackParticles",
+                                                       PrimaryVertexContainer = "PrimaryVertices",
                                                        BVertexContainerName = "NewVrtSecInclusive_SecondaryVertices_DV",  
                                                        BVertexTool = DVFinderToolCfg
                                                        ))
@@ -81,7 +81,7 @@ def IDTR2Cfg(ConfigFlags):
                                                                               maxTrtD0            = 99999.,
                                                                               maxSiZ0             = 99999.,
                                                                               maxTrtZ0            = 99999.,
-                                                                              minPt               = 1000.0,
+                                                                              minPt               = 500.0,
                                                                               significanceD0_Si   = 0.,
                                                                               significanceD0_Trt  = 0.,
                                                                               significanceZ0_Trt  = 0.,
@@ -115,8 +115,34 @@ def IDTR2Cfg(ConfigFlags):
                                   LambdabarContainerName = IDTR2LambdabarContainerName,
                                   CheckVertexContainers  = ['PrimaryVertices'])
 
+    IDTR2TrackFilterTool = CompFactory.InDet.InclusiveTrackFilterTool(name = "IDTR2V0Decorator")
+    acc.addPublicTool(IDTR2TrackFilterTool)
+    acc.addEventAlgo(CompFactory.InDet.TrackSystematicsAlg(
+                        name ="InDetTrackSystematicsAlg",
+                        InputTrackContainer  = "InDetWithLRTTrackParticles",
+                        OutputTrackContainer = "InDetWithLRTTrackParticles_TRK_EFF_LARGED0_GLOBAL__1down",
+                        TrackFilterTool      = IDTR2TrackFilterTool
+                      ))
+
+    IDTR2_Reco_V0FinderSyst   = CompFactory.DerivationFramework.Reco_V0Finder(
+                                  name                   = "IDTR2_Reco_V0Finder_Syst",
+                                  V0FinderTool           = acc.popToolsAndMerge(InDetV0FinderToolCfg(ConfigFlags,"IDTR2_V0FinderTool",
+                                       TrackParticleCollection = "InDetWithLRTTrackParticles_TRK_EFF_LARGED0_GLOBAL__1down",
+                                       TrackSelectorTool = V0TrackSelectorLoose,
+                                       V0ContainerName = IDTR2V0ContainerName + "Syst",
+                                       KshortContainerName = IDTR2KshortContainerName + "Syst",
+                                       LambdaContainerName = IDTR2LambdaContainerName + "Syst",
+                                       LambdabarContainerName = IDTR2LambdabarContainerName + "Syst",
+                                       **args)),
+                                  Decorator              = V0Decorator,
+                                  V0ContainerName        = IDTR2V0ContainerName + "Syst",
+                                  KshortContainerName    = IDTR2KshortContainerName + "Syst",
+                                  LambdaContainerName    = IDTR2LambdaContainerName + "Syst",
+                                  LambdabarContainerName = IDTR2LambdabarContainerName + "Syst",
+                                  CheckVertexContainers  = ['PrimaryVertices'])
+
     skimmingTools     = []
-    augmentationTools = [IDTR2_Reco_V0Finder]
+    augmentationTools = [IDTR2_Reco_V0Finder,IDTR2_Reco_V0FinderSyst]
     for t in  augmentationTools : acc.addPublicTool(t)
 
     # Define the main kernel
@@ -132,7 +158,7 @@ def IDTR2Cfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
-    IDTR2SlimmingHelper = SlimmingHelper("IDTR2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    IDTR2SlimmingHelper = SlimmingHelper("IDTR2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
     IDTR2SlimmingHelper.AllVariables = [
                                         "EventInfo",
@@ -161,6 +187,14 @@ def IDTR2Cfg(ConfigFlags):
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % 'IDTR2RecoLambdaCandidates']
     StaticContent += ["xAOD::VertexContainer#%s"        %                 'IDTR2RecoLambdabarCandidates']
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % 'IDTR2RecoLambdabarCandidates']
+    StaticContent += ["xAOD::VertexContainer#%s"        %                 'IDTR2RecoV0CandidatesSyst']
+    StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % 'IDTR2RecoV0CandidatesSyst']
+    StaticContent += ["xAOD::VertexContainer#%s"        %                 'IDTR2RecoKshortCandidatesSyst']
+    StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % 'IDTR2RecoKshortCandidatesSyst']
+    StaticContent += ["xAOD::VertexContainer#%s"        %                 'IDTR2RecoLambdaCandidatesSyst']
+    StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % 'IDTR2RecoLambdaCandidatesSyst']
+    StaticContent += ["xAOD::VertexContainer#%s"        %                 'IDTR2RecoLambdabarCandidatesSyst']
+    StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % 'IDTR2RecoLambdabarCandidatesSyst']
 
     IDTR2SlimmingHelper.StaticContent = StaticContent
 

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from sys import exit
 
 from WorkflowTestRunner.ScriptUtils import setup_logger, setup_parser, get_test_setup, get_standard_performance_checks, \
     run_tests, run_checks, run_summary
-from WorkflowTestRunner.StandardTests import QTest, SimulationTest, OverlayTest, DataOverlayTest, PileUpTest, DerivationTest
+from WorkflowTestRunner.StandardTests import QTest, GenerationTest, SimulationTest, OverlayTest, DataOverlayTest, PileUpTest, DerivationTest
 from WorkflowTestRunner.Test import WorkflowRun, WorkflowType
 
 
@@ -21,9 +21,12 @@ def main():
 
     # Define which tests to run
     tests_to_run = []
-    if options.simulation:
+    if options.generation:
+        dsid = "421356" if not options.dsid else options.dsid
+        tests_to_run.append(GenerationTest(f"gen{dsid}", run, WorkflowType.Generation, ["generate"], setup, options.extra_args))
+    elif options.simulation:
         if not options.workflow or options.workflow is WorkflowType.FullSim:
-            tests_to_run.append(SimulationTest("s3759", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, options.extra_args))
+            tests_to_run.append(SimulationTest("s4005", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.AF3:
             tests_to_run.append(SimulationTest("s3779", run, WorkflowType.AF3, ["EVNTtoHITS"], setup, options.extra_args))
     elif options.overlay:
@@ -38,15 +41,16 @@ def main():
         if not options.workflow or options.workflow is WorkflowType.PileUpPresampling:
             tests_to_run.append(PileUpTest("d1730", run, WorkflowType.PileUpPresampling, ["HITtoRDO"], setup, options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.MCPileUpReco:
-            tests_to_run.append(QTest("q444", run, WorkflowType.MCPileUpReco, ["RAWtoESD", "ESDtoAOD"], setup, options.extra_args))
+            tests_to_run.append(QTest("q444", run, WorkflowType.MCPileUpReco, ["Overlay", "RAWtoALL"], setup, options.extra_args))
     elif options.derivation:
-        tests_to_run.append(DerivationTest("p5205", run, WorkflowType.Derivation, ["Derivation"], setup, options.extra_args))
+        test_id = "MC_PHYS" if not options.ami_tag else options.ami_tag
+        tests_to_run.append(DerivationTest(test_id, run, WorkflowType.Derivation, ["Derivation"], setup, options.extra_args))
     else:
         if not options.workflow or options.workflow is WorkflowType.MCReco:
             if "--CA" in options.extra_args:
-                tests_to_run.append(QTest("q443", run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, options.extra_args + " --steering doRAWtoALL"))
+                tests_to_run.append(QTest("q443", run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, options.extra_args + " --steering no"))
             else:
-                tests_to_run.append(QTest("q443", run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoESD", "ESDtoAOD"], setup, options.extra_args))
+                tests_to_run.append(QTest("q443", run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoALL"], setup, options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.DataReco:
             tests_to_run.append(QTest("q442", run, WorkflowType.DataReco, ["RAWtoALL"], setup, options.extra_args))
 

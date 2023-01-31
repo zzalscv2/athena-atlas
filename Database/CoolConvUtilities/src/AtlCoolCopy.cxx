@@ -144,7 +144,7 @@ class AtlCoolCopy {
   int tagParents();
   int writeTagInfo();
   int listPoolRefs();
-  int resolvePoolRefs();
+  int resolvePoolRefs ATLAS_NOT_THREAD_SAFE ();
   static std::string getCoolHistGUID(const std::string& file);
   void filePoolRefs();
   static pool::IFileCatalog* setupCatalog(const std::vector<std::string>& catvec);
@@ -577,8 +577,7 @@ int AtlCoolCopy::copyFolder ATLAS_NOT_THREAD_SAFE
 	p1=metadata.find("<timeStamp>");
 	p2=metadata.find("</timeStamp>");
 	if (p1!=std::string::npos && p2!=std::string::npos) {
-	  metadata=metadata.substr(0,p1)+"<timeStamp>"+newmeta+
-	    metadata.substr(p2);
+	  metadata.replace(0,p2,"<timeStamp>"+newmeta);
   	  std::cout << "Forced destination folder to " << newmeta << " : "
 		  << metadata << std::endl;
 	} else {
@@ -3019,7 +3018,7 @@ int AtlCoolCopy::listPoolRefs() {
   return 0;
 }
 
-int AtlCoolCopy::resolvePoolRefs() {
+int AtlCoolCopy::resolvePoolRefs ATLAS_NOT_THREAD_SAFE () {
   std::cout << "Total of " << m_poolrefs.size() << " POOL Files referenced"
 	    << std::endl;
   pool::IFileCatalog* catalog=setupCatalog(m_poolcat);

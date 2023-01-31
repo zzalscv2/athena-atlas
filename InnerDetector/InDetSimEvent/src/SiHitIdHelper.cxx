@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <mutex>
@@ -39,9 +39,10 @@ void SiHitIdHelper::Initialize() {
   // cache the HL-LHC decision
   m_isITkHGTD = isITkHGTD || isITkHGTDPLR || isITk_HGTD_NewID_PLR;
 
-  if (m_isITkHGTD) InitializeField("Part",0,2);
+  if (isITkHGTD) InitializeField("Part",0,2);
+  else if (isITkHGTDPLR || isITk_HGTD_NewID_PLR) InitializeField("Part",0,3);
   else InitializeField("Part",0,1);
-  if (isDBM || isITkHGTDPLR) InitializeField("BarrelEndcap",-4,4);
+  if (isDBM || isITkHGTDPLR || isITk_HGTD_NewID_PLR) InitializeField("BarrelEndcap",-4,4);
   else InitializeField("BarrelEndcap",-2,2);
   InitializeField("LayerDisk",0,20);
   if (m_isITkHGTD) InitializeField("EtaModule",-100,100);
@@ -57,22 +58,19 @@ void SiHitIdHelper::Initialize() {
 bool SiHitIdHelper::isPixel(const int& hid) const
 {
   int psh = this->GetFieldValue("Part", hid);
-  if (psh ==0 ) return true;
-  else return false;
+  return psh ==0;
 }
 
 bool SiHitIdHelper::isSCT(const int& hid) const
 {
   int psh = this->GetFieldValue("Part", hid);
-  if (psh ==1 ) return true;
-  else return false;
+  return psh ==1;
 }
 
 bool SiHitIdHelper::isHGTD(const int& hid) const
 {
   int psh = this->GetFieldValue("Part", hid);
-  if (psh ==2 ) return true;
-  else return false;
+  return psh ==2;
 }
 
 bool SiHitIdHelper::isPLR(const int& hid) const
@@ -80,8 +78,7 @@ bool SiHitIdHelper::isPLR(const int& hid) const
   if (!m_isITkHGTD) return false;
 
   int psh = this->GetFieldValue("BarrelEndcap", hid);
-  if (std::abs(psh) == 4) return true;
-  else return false;
+  return std::abs(psh) == 4;
 }
 
 

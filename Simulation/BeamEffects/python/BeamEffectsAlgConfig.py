@@ -160,6 +160,11 @@ def BeamSpotReweightingAlgCfg(flags, name="BeamSpotReweightingAlg", **kwargs):
     kwargs.setdefault("Input_beam_sigma_z", flags.Digitization.InputBeamSigmaZ)
 
     acc.addEventAlgo(CompFactory.Simulation.BeamSpotReweightingAlg(name, **kwargs))
+
+    # Ignore dependencies
+    from AthenaConfiguration.MainServicesConfig import OutputUsageIgnoreCfg
+    acc.merge(OutputUsageIgnoreCfg(flags, name))
+
     return acc
 
 
@@ -169,10 +174,9 @@ if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    from SimulationFlags import ConfigFlagsSimulation
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
-    ConfigFlags.join(ConfigFlagsSimulation)
     # Set up logging
     log.setLevel(DEBUG)
 
@@ -180,43 +184,43 @@ if __name__ == "__main__":
     inputDir = os.environ.get("ATLAS_REFERENCE_DATA",
                               "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art")
     # Provide input
-    ConfigFlags.Input.Files = [
+    flags.Input.Files = [
         inputDir +
         "/SimCoreTests/e_E50_eta34_49.EVNT.pool.root"
         ]
 
     # Specify output
-    ConfigFlags.Output.HITSFileName = "myHITS.pool.root"
+    flags.Output.HITSFileName = "myHITS.pool.root"
 
     # set the source of vertex positioning
     from SimulationConfig.SimEnums import VertexSource
-    # ConfigFlags.Sim.VertexSource = VertexSource.VertexOverrideFile
-    ConfigFlags.Sim.VertexSource = VertexSource.CondDB
-    # ConfigFlags.Sim.VertexSource = VertexSource.LongBeamspotVertexPositioner"
+    # flags.Sim.VertexSource = VertexSource.VertexOverrideFile
+    flags.Sim.VertexSource = VertexSource.CondDB
+    # flags.Sim.VertexSource = VertexSource.LongBeamspotVertexPositioner"
 
     # included to stop segmentation error - TODO see why it's failing
-    ConfigFlags.Input.isMC = True
-    ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-14"  # conditions tag for conddb (which one to use - old one for simulation)
-    ConfigFlags.Input.RunNumber = [284500]  # run test job with and without run number and 222510
+    flags.Input.isMC = True
+    flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-14"  # conditions tag for conddb (which one to use - old one for simulation)
+    flags.Input.RunNumber = [284500]  # run test job with and without run number and 222510
 
     # Finalize
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize a new component accumulator
-    cfg = MainServicesCfg(ConfigFlags)  # use this syntax for storegate
+    cfg = MainServicesCfg(flags)  # use this syntax for storegate
     # Add configuration to read EVNT pool file
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg.merge(PoolReadCfg(flags))
 
     # Make use of our defiend function
-    cfg.merge(BeamEffectsAlgCfg(ConfigFlags))
+    cfg.merge(BeamEffectsAlgCfg(flags))
 
     cfg.getService("StoreGateSvc").Dump = True
     cfg.printConfig(withDetails=True)
-    ConfigFlags.dump()
-
-    # Run it in athena
-    cfg.run(maxEvents=20)
+    flags.dump()
 
     # Store in a pickle file
     with open("BeamEffectsAlg.pkl", "wb") as f:
         cfg.store(f)
+
+    # Run it in athena
+    cfg.run(maxEvents=20)

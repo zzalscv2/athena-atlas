@@ -31,7 +31,7 @@ svcMgr.IOVDbSvc.GlobalTag = "COMCOND-ES1PA-006-02"
 
 #Get identifier mapping (needed by LArConditionsContainer)
 include("LArConditionsCommon/LArIdMap_comm_jobOptions.py")
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+include( "CaloConditions/CaloConditions_jobOptions.py" )
 
 # for LArBadChannelTool, instead of conddb.AddFolder below
 #include("LArConditionsCommon/LArConditionsCommon_comm_jobOptions.py") 

@@ -27,8 +27,8 @@ def FourLeptonVertexerCfg(flags, name="FourLeptonVertexAlg", **kwargs):
                                                                            menu=electronLHmenu.offlineMC21 if flags.GeoModel.Run >= LHCPeriod.Run3 else electronLHmenu.offlineMC20)))
     ###
     from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
-    kwargs.setdefault("VertexFitter", result.popToolsAndMerge(TrkVKalVrtFitterCfg(flags,
-                                                                               FirstMeasuredPoint = False))) 
+    kwargs.setdefault("VertexFitter", result.popToolsAndMerge(
+        TrkVKalVrtFitterCfg(flags, FirstMeasuredPoint = False)))
     kwargs.setdefault("MinMuonPt", 4000)
     kwargs.setdefault("MinElecPt", 6000)    
     vtx_tool = CompFactory.DerivationFramework.FourLeptonVertexingAlgorithm(name , **kwargs)

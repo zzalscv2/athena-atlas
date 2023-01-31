@@ -20,3 +20,19 @@ from AthenaCommon.GlobalFlags import globalflags
 from TRT_ConditionsServices.TRT_ConditionsServicesConf import TRT_StrawStatusSummaryTool
 InDetTrigTRTStrawStatusSummaryTool = TRT_StrawStatusSummaryTool(name = "InDetTrigTRTStrawStatusSummaryTool",
                                                                 isGEANT4 = (globalflags.DataSource == 'geant4'))
+
+
+
+def CAtoLegacyPublicToolDecorator(func,**kwargs):
+
+  from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper, conf2toConfigurable
+  from InDetTrigRecExample import InDetTrigCA
+  
+  ca = CAtoGlobalWrapper(func,InDetTrigCA.InDetTrigConfigFlags,**kwargs)
+  privateTool = ca.popPrivateTools()
+  tool = conf2toConfigurable(privateTool)
+
+  from AthenaCommon.AppMgr import ToolSvc
+  ToolSvc += tool
+
+  return tool

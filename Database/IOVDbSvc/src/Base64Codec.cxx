@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 // @file Base64Codec.cxx
 // Header for base64 encoding/decoding functions
@@ -7,32 +7,26 @@
 // @date November 2019
 
 #include "CoralBase/Blob.h"
-#include <boost/archive/iterators/base64_from_binary.hpp>
-#include <boost/archive/iterators/insert_linebreaks.hpp>
-#include <boost/archive/iterators/transform_width.hpp>
-#include <boost/archive/iterators/ostream_iterator.hpp>
-#include <sstream>
-#include <algorithm>
+#include "CxxUtils/base64.h"
 
-using namespace boost::archive::iterators;
+#include <cstring> //memcpy
+
 
 
 namespace IOVDbNamespace{
-std::string
+  std::string
   base64Encode(const coral::Blob & blob){
-    typedef base64_from_binary<transform_width<const char *,6,8>> base64Text;
-    const unsigned int nBytes = blob.size();
     //Blob::startingAddress returns a const void *, so cast to byte size
-    const auto address = static_cast<const char *>(blob.startingAddress());
-    unsigned int writePaddChars = (3-nBytes%3)%3;
-    std::string result(base64Text(address), base64Text(address + nBytes));
-    result.append(writePaddChars,'=');
-    return result;
+    const auto address = static_cast<const unsigned char *>(blob.startingAddress());
+    const unsigned int nBytes = blob.size();
+    return CxxUtils::base64_encode(address, nBytes);
   }
 
   coral::Blob
-  base64Decode(const std::string & /*base64String*/){
-    coral::Blob blob;
+  base64Decode(const std::string & base64String){
+    const auto &charVec = CxxUtils::base64_decode(base64String);
+    coral::Blob blob(charVec.size());
+    memcpy(blob.startingAddress(), charVec.data(), charVec.size());
     return blob;
   }
 }

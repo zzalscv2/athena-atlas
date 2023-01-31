@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,9 +12,9 @@
 #define G4ATLASTESTS_CALOCALIBRATIONHITSTESTTOOL_H
  
 #include "SimTestToolBase.h"
+#include "CaloDetDescr/CaloDetDescrManager.h"
+#include "StoreGate/ReadCondHandleKey.h"
 
-class CaloDetDescrManager;
- 
 class CaloCalibrationHitsTestTool : public SimTestToolBase {
  
  
@@ -22,9 +22,8 @@ class CaloCalibrationHitsTestTool : public SimTestToolBase {
  
   CaloCalibrationHitsTestTool(const std::string& type, const std::string& name, const IInterface* parent);
  
-  StatusCode initialize(); 
- 
-  StatusCode processEvent();
+  virtual StatusCode initialize() override;
+  virtual StatusCode processEvent() override;
 
  private:
   // keys
@@ -37,7 +36,11 @@ class CaloCalibrationHitsTestTool : public SimTestToolBase {
   TH1 *m_eTot_partID, *m_eTot_eta, *m_eTot_phi;
   TH1 *m_partID_large, *m_partID_small;
 
-  const CaloDetDescrManager* m_caloMgr{nullptr};
+  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey { this
+      , "CaloDetDescrManager"
+      , "CaloDetDescrManager"
+      , "SG Key for CaloDetDescrManager in the Condition Store" };
+
 };
  
 #endif

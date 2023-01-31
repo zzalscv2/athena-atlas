@@ -246,7 +246,7 @@ void AGDD2GeoModelBuilder::CreateSnake(AGDDSnake* v) const
 	double delta_l1=0;
 	double delta_l2=radius*std::tan(angle2);
 	double lengthnew=length+delta_l2;
-	GeoShape* solid=new GeoTubs(0.,radius,lengthnew/2.,0.,4*std::asin(1.));
+	GeoShape* solid=new GeoTubs(0.,radius,lengthnew/2.,0.,2.0*M_PI);
 	
 	const GeoTrf::Vector3D vt(0.,0.,-lengthnew/2.+delta_l2+2.);
 	GeoTrf::Transform3D rrr = GeoTrf::RotateY3D(angle2)*GeoTrf::RotateZ3D(phi(axis2));
@@ -283,7 +283,7 @@ void AGDD2GeoModelBuilder::CreateSnake(AGDDSnake* v) const
 		GeoTrf::Vector3D vvref(0.,0.,-lengthnew/2+delta_l1);
 		GeoTrf::Transform3D ttref = GeoTrf::Transform3D::Identity()*GeoTrf::Translation3D(vvref);
 		
-		GeoShape* ss=new GeoTubs(0.,radius,lengthnew/2.,0.,4*std::asin(1.));
+		GeoShape* ss=new GeoTubs(0.,radius,lengthnew/2.,0.,2.0*M_PI);
 
 		const GeoTrf::Vector3D vt1(0.,0.,+lengthnew/2.-delta_l1-2.);
 		const GeoTrf::Vector3D vt2(0.,0.,-lengthnew/2.+delta_l2+2.);
@@ -469,7 +469,7 @@ void AGDD2GeoModelBuilder::CreatePgon(AGDDPgon* v) const
 void AGDD2GeoModelBuilder::CreateComposition(AGDDComposition *v)
 {
 	static const GeoMaterial * const ether = GetMMMaterial("special::Ether");
-        static const ConstLink<GeoShape> fakeVol = new GeoTubs(0.,500.,1000.,0.,4*std::asin(1.));
+        static const ConstLink<GeoShape> fakeVol = new GeoTubs(0.,500.,1000.,0.,2.0*M_PI);
 
 	if (!v->GetVolume())
 	{

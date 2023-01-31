@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -26,7 +26,7 @@ CaloTowerxAODFromCells::CaloTowerxAODFromCells(const std::string& name,ISvcLocat
 }
 
 CaloTowerxAODFromCells::~CaloTowerxAODFromCells()
-{ }
+= default;
 
 StatusCode CaloTowerxAODFromCells::initialize() {
 

@@ -15,15 +15,17 @@ tool1.JVTToolEMPFlow = jvtToolPFlow
 tool1.JVTToolEMTopo.JetContainer = "AntiKt4EMTopoJets"
 tool1.JVTToolEMPFlow.JetContainer = "AntiKt4EMPFlowJets"
 
+# for EMTopo jets no NNJvt is calculated so we need to fall back to Jvt
+# (re-calculated in MissingEtDQA::PhysValMET as "NewJvt")
 mettoolTopo = CfgMgr.met__METMaker('METMaker_AntiKt4Topo',
-                                   JetSelection="Default",
+                                   JetSelection="Loose",
+                                   UseR21JvtFallback=True,
                                    JetJvtMomentName="NewJvt",
                                    DoPFlow=False)
 tool1.METMakerTopo = mettoolTopo
 
 mettoolPFlow = CfgMgr.met__METMaker('METMaker_AntiKt4PFlow',
-                                    JetSelection="PFlow",
-                                    JetJvtMomentName="NewJvt",
+                                    JetSelection="Loose",
                                     DoPFlow=True)
 tool1.METMakerPFlow = mettoolPFlow
 from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags

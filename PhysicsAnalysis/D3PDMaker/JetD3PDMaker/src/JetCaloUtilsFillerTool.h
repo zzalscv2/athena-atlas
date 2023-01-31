@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file JetD3PDMaker/src/JetCaloUtilsFillerTool.h
  * @author Jet Goodson < jgoodson AT cern.ch > 
@@ -42,7 +39,7 @@ namespace D3PD {
     
 
     /// Book variables for this block.
-    virtual StatusCode book();
+    virtual StatusCode book() final;
     
     
     /**
@@ -53,7 +50,7 @@ namespace D3PD {
      * is responsible for arranging that all the pointers for booked variables
      * are set appropriately upon entry.
      */
-    virtual StatusCode fill (const Jet& jet);
+    virtual StatusCode fill (const Jet& jet) override;
     
     
   private:

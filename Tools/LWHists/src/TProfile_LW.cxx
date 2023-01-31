@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -17,6 +17,7 @@
 #include "Flex1DProfileHisto.h"
 #include "LWHistRootUtils.h"
 #include "TProfile.h"
+#include <utility>
 
 #define CALL(x,y) m_rootHisto ? m_rootHisto-> x : m_flexHisto-> y
 #ifdef LW_DEBUG_HEAVY_USERS
@@ -127,7 +128,11 @@ TProfile_LW::~TProfile_LW()
 }
 
 //____________________________________________________________________
-TH1* TProfile_LW::getROOTHistBaseNoAlloc() const
+const TH1* TProfile_LW::getROOTHistBaseNoAlloc() const
+{
+  return m_rootHisto;
+}
+TH1* TProfile_LW::getROOTHistBaseNoAlloc()
 {
   return m_rootHisto;
 }
@@ -192,20 +197,26 @@ const char* TProfile_LW::GetErrorOption() const { return CALL(GetErrorOption(),g
 const float * TProfile_LW::getVarBins() const
 {
   assert(!m_rootHisto);
+  return std::as_const(m_flexHisto)->getVarBins();
+}
+
+float * TProfile_LW::getVarBins()
+{
+  assert(!m_rootHisto);
   return m_flexHisto->getVarBins();
 }
 
 double TProfile_LW::getXMin() const
 {
   if (m_rootHisto)
-    return m_rootHisto->GetXaxis()->GetXmin();
+    return std::as_const(*m_rootHisto).GetXaxis()->GetXmin();
   return m_flexHisto->getXMin();
 }
 
 double TProfile_LW::getXMax() const
 {
   if (m_rootHisto)
-    return m_rootHisto->GetXaxis()->GetXmax();
+    return std::as_const(*m_rootHisto).GetXaxis()->GetXmax();
   return m_flexHisto->getXMax();
 }
 

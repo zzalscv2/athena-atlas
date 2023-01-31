@@ -9,7 +9,6 @@
 #include "../CaloClusterMomentsMaker.h"
 #include "../CaloClusterMomentsMaker_DigiHSTruth.h"
 #include "../CaloCell2ClusterMapper.h"
-#include "../CaloCellContainerMergerTool.h"
 #include "../CaloCellContainerCorrectorTool.h"
 #include "../CaloCellContainerCheckerTool.h"
 #include "../CaloCellContainerFinalizerTool.h"
@@ -22,7 +21,7 @@
 //#include "CaloRec/CaloClusterPrinter.h"
 //#include "CaloRec/CaloClusterLockVars.h"
 #include "../CaloTopoTowerAlg.h"
-#include "CaloRec/Blob2ToolConstants.h"
+#include "../Blob2ToolConstants.h"
 #include "../CaloCellFastCopyTool.h"
 #include "../CaloTowerxAODFromCells.h"
 #include "../CaloTowerxAODFromClusters.h"
@@ -36,12 +35,17 @@
 #include "../CaloCellContainerAliasAlg.h"
 #include "../ToolConstantsCondAlg.h"
 #include "../CaloNoiseSigmaDiffCondAlg.h"
+#include "../CaloCellWeightCorrection.h"
 
 //Includes for CaloTopoTowers
 #include "../CaloTopoClusterTowerMerger.h"
 #include "../CaloTopoTowerFromClusterCalibrator.h"
 #include "../CaloTopoTowerFromClusterMaker.h"
 #include "../CaloTopoTowerMaker.h"
+#include "../CaloTopoTowerBuilderTool.h"
+
+#include "../CaloTowerStoreTestAlg.h"
+
 
 DECLARE_COMPONENT( CaloTowerMonitor )
 DECLARE_COMPONENT( CaloTowerAlgorithm )
@@ -65,7 +69,6 @@ DECLARE_COMPONENT( CaloClusterCopier )
 DECLARE_COMPONENT( CaloClusterBuilderSW )
 DECLARE_COMPONENT( CaloClusterMomentsMaker )
 DECLARE_COMPONENT( CaloClusterMomentsMaker_DigiHSTruth )
-DECLARE_COMPONENT( CaloCellContainerMergerTool )
 DECLARE_COMPONENT( CaloCellContainerCorrectorTool )
 DECLARE_COMPONENT( CaloCellContainerCheckerTool )
 DECLARE_COMPONENT( CaloCellContainerFinalizerTool )
@@ -92,3 +95,8 @@ DECLARE_COMPONENT( CaloTopoClusterTowerMerger )
 DECLARE_COMPONENT( CaloTopoTowerFromClusterMaker )
 DECLARE_COMPONENT( CaloTopoTowerFromClusterCalibrator )
 DECLARE_COMPONENT( CaloTopoTowerMaker )
+DECLARE_COMPONENT( CaloCellWeightCorrection )
+
+DECLARE_COMPONENT ( CaloTopoTowerBuilderTool )
+
+DECLARE_COMPONENT( CaloTowerStoreTestAlg )

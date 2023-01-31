@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPTracker/readConfigData.h"
 #include "FPTracker/ConfigData.h"
-#include "FPTracker/SimpleLogger.h"
 #include "boost/lexical_cast.hpp"
 #include "boost/tokenizer.hpp"
 #include <fstream>
@@ -31,10 +30,6 @@ namespace FPTracker{
 	{
 	  m_errors = true;
 	  ok      = false;
-
-	  std::ostringstream ost;
-	  ost<<"error converting "<< s <<'\n';
-	  SimpleLogger::getLogger()->info(ost);
 
 	  m_notConverted.push_back(s);
 	}
@@ -103,8 +98,6 @@ namespace FPTracker{
 	
       }
 
-    SimpleLogger::getLogger()->info( ost );
-    
     return !vs.errors();
   }
 }

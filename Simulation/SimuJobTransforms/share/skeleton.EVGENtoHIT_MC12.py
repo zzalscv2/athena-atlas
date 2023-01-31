@@ -105,6 +105,9 @@ if hasattr(runArgs, "preExec"):
 ## Pre-include
 if hasattr(runArgs, "preInclude"):
     for fragment in runArgs.preInclude:
+        if '/' not in fragment:
+            atlasG4log.warning('Trying to use CA-based preInclude, trying to fallback to legacy equivalent')
+            fragment = f"{fragment.replace('.', '/')}.py"
         include(fragment)
 
 ## Include common skeleton after the preExec/preInclude
@@ -217,6 +220,8 @@ if jobproperties.Beam.beamType.get_Value() == 'cosmics':
         if hasattr(runArgs, "outputEVNT_TRFile"):
             simFlags.WriteTR = runArgs.outputEVNT_TRFile
         include( 'CosmicGenerator/jobOptions_ConfigCosmicProd.py' )
+        job.CosmicGenerator.Dsid = simFlags.RunNumber.get_Value()
+
 
 ## Add filters for non-cosmics simulation
 ## FIXME: This block should be moved out of the skeleton into job options.
@@ -301,6 +306,9 @@ if nThreads > 0:
 ## Post-include
 if hasattr(runArgs, "postInclude"):
     for fragment in runArgs.postInclude:
+        if '/' not in fragment:
+            atlasG4log.warning('Trying to use CA-based postInclude, trying to fallback to legacy equivalent')
+            fragment = f"{fragment.replace('.', '/')}.py"
         include(fragment)
 
 if hasattr(runArgs, "outputEVNT_TRFile"):

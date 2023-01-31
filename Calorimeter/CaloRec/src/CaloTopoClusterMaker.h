@@ -30,15 +30,12 @@
  * Like all other cluster maker tools this class derives from
  * CaloClusterCollectionProcessor.  */
 
-#include "GaudiKernel/ToolHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "Identifier/IdContext.h"
-#include "StoreGate/DataHandle.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "Identifier/IdentifierHash.h"
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "CaloConditions/CaloNoise.h"
 #include "StoreGate/ReadCondHandleKey.h"

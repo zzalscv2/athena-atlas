@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKD3PDMAKER_PERIGEEFILLERTOOL_H
@@ -18,9 +18,9 @@ public:
 		     const std::string& name,
 		     const IInterface* parent);
 
-  virtual StatusCode book();
+  virtual StatusCode book() final;
 
-  virtual StatusCode fill (const Trk::TrackParameters &p);
+  virtual StatusCode fill (const Trk::TrackParameters &p) override;
 
 private:
 

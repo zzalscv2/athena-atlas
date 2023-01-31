@@ -57,9 +57,11 @@ namespace CP {
         ATH_CHECK(m_tree.write());
         return StatusCode::SUCCESS;
     }
-    template <class CONT_TYPE>
-    StatusCode TestIsolationCloseByCorrAlg::loadContainer(const EventContext& ctx, const SG::ReadHandleKey<CONT_TYPE>& key,
-                                                          const CONT_TYPE*& cont) const {
+    template <class TARGET_TYPE, class CONT_TYPE, class COPY_TYPE>
+    StatusCode TestIsolationCloseByCorrAlg::loadContainer(const EventContext& ctx, 
+                                                          const SG::ReadHandleKey<CONT_TYPE>& key,
+                                                          std::pair<std::unique_ptr<COPY_TYPE>, 
+                                                          std::unique_ptr<xAOD::ShallowAuxContainer>>& cont) const {
         if (key.empty()) {
             ATH_MSG_DEBUG("No key given. Assume it's no required to load the container");
             return StatusCode::SUCCESS;
@@ -69,9 +71,11 @@ namespace CP {
             ATH_MSG_FATAL("Failed to load container " << key.fullKey());
             return StatusCode::FAILURE;
         }
-        cont = readHandle.ptr();
+        
+        cont = xAOD::shallowCopyContainer(dynamic_cast<const TARGET_TYPE&> (*readHandle),ctx);
         if (!m_selDecorator && !m_isoDecorator) return StatusCode::SUCCESS;
-        for (const auto part : *cont) {
+        std::unique_ptr<COPY_TYPE>& elems = cont.first;
+        for (auto part : *(elems.get()) ) {
             if (m_selDecorator) (*m_selDecorator)(*part) = passSelection(ctx, part);
             if (m_isoDecorator) (*m_isoDecorator)(*part) = true && m_isoSelectorTool->accept(*part);
         }
@@ -95,15 +99,21 @@ namespace CP {
 
     StatusCode TestIsolationCloseByCorrAlg::execute() {
         const EventContext& ctx = Gaudi::Hive::currentContext();
-        const xAOD::ElectronContainer* Electrons{nullptr};
-        const xAOD::MuonContainer* Muons{nullptr};
-        const xAOD::PhotonContainer* Photons{nullptr};
-        const xAOD::EgammaContainer* Egamma{nullptr};
-        ATH_CHECK(loadContainer(ctx, m_elecKey, Egamma));
-        Electrons = dynamic_cast<const xAOD::ElectronContainer*>(Egamma);
-        ATH_CHECK(loadContainer(ctx, m_photKey, Egamma));
-        Photons = dynamic_cast<const xAOD::PhotonContainer*>(Egamma);
-        ATH_CHECK(loadContainer(ctx, m_muonKey, Muons));
+        //
+        xAOD::ElectronContainer* Electrons = nullptr;
+        std::pair<std::unique_ptr<xAOD::ElectronContainer>, std::unique_ptr<xAOD::ShallowAuxContainer>> ElShallow;
+        ATH_CHECK(loadContainer<xAOD::ElectronContainer>(ctx, m_elecKey, ElShallow));
+        Electrons = ElShallow.first.get();
+        //
+        xAOD::PhotonContainer*  Photons = nullptr;
+        std::pair<std::unique_ptr<xAOD::PhotonContainer>, std::unique_ptr<xAOD::ShallowAuxContainer>> PhShallow;
+        ATH_CHECK(loadContainer<xAOD::PhotonContainer>(ctx, m_photKey, PhShallow));
+        Photons = PhShallow.first.get();
+        //
+        xAOD::MuonContainer* Muons = nullptr;
+        std::pair<std::unique_ptr<xAOD::MuonContainer>, std::unique_ptr<xAOD::ShallowAuxContainer>> MuonsShallow;
+        ATH_CHECK(loadContainer<xAOD::MuonContainer>(ctx, m_muonKey, MuonsShallow));
+        Muons = MuonsShallow.first.get();
 
         // Okay everything is defined for the preselection of the algorithm. lets  pass the things  towards the IsoCorrectionTool
         if (m_isoCloseByCorrTool->getCloseByIsoCorrection(Electrons, Muons, Photons).code() == CorrectionCode::Error) {

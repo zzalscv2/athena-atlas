@@ -24,7 +24,7 @@ def getTileRange(name="TileRange", **kwargs):
 def TileHitVecToCntTool(name="TileHitVecToCntTool", **kwargs):
     ## FIXME includes to be replaced by confGetter configuration.
     from AthenaCommon.Resilience import protectedInclude
-    protectedInclude( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+    protectedInclude( "CaloConditions/CaloConditions_jobOptions.py" )
     protectedInclude( "TileConditions/TileConditions_jobOptions.py" )
     kwargs.setdefault("TileHitVectors", ["TileHitVec" , "MBTSHits" ])
     kwargs.setdefault("TileHitContainer", "TileHitCnt")

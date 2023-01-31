@@ -118,6 +118,14 @@ def TIDAMonitoring( flags=None, name=None, monlevel=None, mcTruth=False ) :
                               "HLT_mu.*ivarperf.*:key=HLT_IDTrack_MuonIso_IDTrig:roi=HLT_Roi_MuonIso",
                               "HLT_mu.*_mu.*idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
                               "HLT_mu.*_mu.*idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
+                              "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
+                              "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
+                              "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:te=1",
+                              "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:te=1",
+                              "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
+                              "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1",
+                              "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
+                              "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1",
                               "HLT_mu.*_mu.*idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:te=1",
                               "HLT_mu.*_mu.*idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:te=1",
                               "HLT_mu.*_mu.*idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
@@ -290,6 +298,30 @@ def TIDAMonitoring( flags=None, name=None, monlevel=None, mcTruth=False ) :
                 tools += [ tidacosmic ]
 
 
+        #### bphysics #### - note pdgID=531 for B_s (can we use a list of pdgID?)
+
+        if mcTruth:
+                tidabphysics = TrigR3Mon_builder( flags, name = "IDBphysicsTruth"+toolkey+"Tool", mcTruth=True, pdgID=531 )
+                tidabphysics.SliceTag = "HLT/TRIDT/BphysicsTruth/"+key
+        else:
+                tidabphysics = TrigR3Mon_builder( flags, name = "IDBphysics"+toolkey+"Tool", useHighestPT=True )
+                tidabphysics.SliceTag = "HLT/TRIDT/Bphysics/"+key
+
+        tidabphysics.AnalysisConfig = "Tier0"
+
+        chains = getchains( [ "HLT_mu.*_bBmumux_BsmumuPhi.*:key=HLT_IDTrack_Bmumux_FTF",
+                              "HLT_mu.*_bBmumux_BsmumuPhi.*:key=HLT_IDTrack_Bmumux_IDTrig" ], monlevel )
+
+
+        if len(chains)>0 :
+
+                tidabphysics.ntupleChainNames += chains
+
+                tidabphysics.MonTools = createMonTools( flags,  tidabphysics.SliceTag, chains )
+
+                tools += [ tidabphysics ]
+
+
         return tools
 
 
@@ -355,7 +387,7 @@ def TIDAMonitoringCA( flags, monlevels=None ):
         from AthenaMonitoring import AthMonitorCfgHelper
         monConfig = AthMonitorCfgHelper(flags, "TrigIDMon")
 
-##        algs = TIDAMonitoring(flags, "All" )
+        #algs = TIDAMonitoring(flags, "All" )
         algs = TIDAMonitoring(flags, "Tier0", monlevel="idMon:t0:shifter" )
         algs += TIDAMonitoring(flags, "Shifter", monlevel="idMon:shifter", mcTruth=False ) 
       

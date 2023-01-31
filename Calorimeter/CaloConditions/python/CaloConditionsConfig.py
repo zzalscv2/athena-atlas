@@ -7,7 +7,7 @@ from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline, addFolders
 
 def CaloTriggerTowerCfg(flags):
     """Return ComponentAccumulator configured for Trigger Tower"""
-    # replaces CaloConditions_jobOptions.py or CaloDetMgrDetDescrCnv_joboptions.py
+    # replaces CaloConditions_jobOptions.py
     acc = ComponentAccumulator()
     if flags.GeoModel.Layout != "ctbh8":
         acc.merge(LArTTCellMapCfg(flags))

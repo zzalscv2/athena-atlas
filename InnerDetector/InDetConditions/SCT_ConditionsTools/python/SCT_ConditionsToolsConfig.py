@@ -326,19 +326,8 @@ def SCT_ReadCalibChipDataCfg(flags, name="SCT_ReadCalibChip", **kwargs):
     # Folders
     noiseFolder = kwargs.get("noiseFolder", "/SCT/DAQ/Calibration/ChipNoise")
     gainFolder = kwargs.get("gainFolder", "/SCT/DAQ/Calibration/ChipGain")
-    if flags.Overlay.DataOverlay:
-        forceDb="OFLP200"
-        noiseTag="SctDaqCalibrationChipNoise-Apr10-01"
-        gainTag="SctDaqCalibrationChipGain-Apr10-01"
-    else:
-        forceDb=None
-        noiseTag=None
-        gainTag=None
-
-    acc.merge(addFoldersSplitOnline(flags, "SCT", noiseFolder, noiseFolder, "CondAttrListCollection",
-                                    forceDb=forceDb, tag=noiseTag))
-    acc.merge(addFoldersSplitOnline(flags, "SCT", gainFolder, gainFolder, "CondAttrListCollection",
-                                    forceDb=forceDb, tag=gainTag))
+    acc.merge(addFoldersSplitOnline(flags, "SCT", noiseFolder, noiseFolder, "CondAttrListCollection"))
+    acc.merge(addFoldersSplitOnline(flags, "SCT", gainFolder, gainFolder, "CondAttrListCollection"))
 
     # Algorithms
     acc.addCondAlgo(CompFactory.SCT_ReadCalibChipNoiseCondAlg(name=f"{name}NoiseCondAlg", ReadKey=noiseFolder))
@@ -371,9 +360,18 @@ def SCT_ReadCalibDataToolCfg(flags, name="InDetSCT_ReadCalibDataTool", cond_kwar
                                     className="CondAttrListCollection",
                                     splitMC=True))
 
+    ignore_defects = ["NOISE_SLOPE","OFFSET_SLOPE","GAIN_SLOPE","BAD_OPE","NO_HI","HI_GAIN","LO_GAIN"]
+    from AthenaConfiguration.Enums import LHCPeriod
+    if flags.GeoModel.Run >= LHCPeriod.Run3:
+        ignore_defects_parameters = [-1000.,-1000.,-1000.,-1000.,-1000.,-1000.,-1000.]
+    else:
+        ignore_defects_parameters = [-1000.,-1000.,-1000.,-1000.,-1000.,-1000.,15.]
+
     acc.addCondAlgo(CompFactory.SCT_ReadCalibDataCondAlg(name=cond_kwargs["ReadCalibDataCondAlgName"],
                                                          ReadKeyGain=cond_kwargs["GainFolder"],
-                                                         ReadKeyNoise=cond_kwargs["NoiseFolder"]))
+                                                         ReadKeyNoise=cond_kwargs["NoiseFolder"],
+                                                         IgnoreDefects=ignore_defects,
+                                                         IgnoreDefectsParameters=ignore_defects_parameters))
     from SCT_Cabling.SCT_CablingConfig import SCT_CablingToolCfg
     kwargs.setdefault("SCT_CablingTool", acc.popToolsAndMerge(SCT_CablingToolCfg(flags)))
 
@@ -443,20 +441,27 @@ def SCT_SiliconConditionsCfg(flags, name="SCT_Silicon", **kwargs):
 
     # Condition algorithms
     algkwargs = {}
-    DCSConditionsTool = kwargs.get("DCSConditionsTool")
-    if DCSConditionsTool:
+
+    useDCS = kwargs.get("useDCS", True)
+    toolkwargs = {}
+    if  useDCS:
+      DCSConditionsTool = kwargs.get("DCSConditionsTool")
+      if DCSConditionsTool:
         algkwargs["UseState"] = DCSConditionsTool.ReadAllDBFolders
         algkwargs["DCSConditionsTool"] = DCSConditionsTool
-    else:
+      else:
         algkwargs["UseState"] = not flags.Common.isOnline
         algkwargs["DCSConditionsTool"] = acc.popToolsAndMerge(SCT_DCSConditionsCfg(flags))
-    acc.addCondAlgo(CompFactory.SCT_SiliconHVCondAlg(name=f"{name}HVCondAlg", **algkwargs))
-    acc.addCondAlgo(CompFactory.SCT_SiliconTempCondAlg(name=f"{name}TempCondAlg", **algkwargs))
+        
+      acc.addCondAlgo(CompFactory.SCT_SiliconHVCondAlg(name=f"{name}HVCondAlg", **algkwargs))
+      acc.addCondAlgo(CompFactory.SCT_SiliconTempCondAlg(name=f"{name}TempCondAlg", **algkwargs))
 
-    # Condition tool
-    toolkwargs = {}
-    toolkwargs["UseDB"] = kwargs.get("UseDB", True)
-    toolkwargs["ForceUseGeoModel"] = kwargs.get("ForceUseGeoModel", False)
+      toolkwargs["UseDB"] = kwargs.get("UseDB", True)
+      toolkwargs["ForceUseGeoModel"] = kwargs.get("ForceUseGeoModel", False)
+    else:
+      toolkwargs["UseDB"] = kwargs.get("UseDB", False)
+      toolkwargs["ForceUseGeoModel"] = kwargs.get("ForceUseGeoModel", True)
+
     acc.setPrivateTools(CompFactory.SCT_SiliconConditionsTool(name=f"{name}ConditionsTool", **toolkwargs))
 
     return acc

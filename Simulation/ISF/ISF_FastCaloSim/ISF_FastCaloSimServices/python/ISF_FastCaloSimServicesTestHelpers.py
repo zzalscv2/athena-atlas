@@ -111,11 +111,12 @@ def printAndRun(accessor, configFlags, args):
         accessor.getService("StoreGateSvc").Dump = True
     configFlags.dump()
 
+    # Dump config summary
+    accessor.printConfig(withDetails=False)
+
     # Execute and finish
     sc = accessor.run(maxEvents=args.maxEvents)
 
-    # Dump config summary
-    accessor.printConfig(withDetails=False)
 
     # Success should be 0
     return not sc.isSuccess()

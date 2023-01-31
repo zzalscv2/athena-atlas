@@ -23,9 +23,6 @@ namespace Trk {
 class Layer;
 class TrackingGeometry;
 
-/** Interface ID for ILayerProviderConds*/
-static const InterfaceID IID_ILayerProviderCond("ILayerProviderCond", 1, 0);
-
 /** @class ILayerProviderCond
 
   Interface class ILayerProviderConds
@@ -37,11 +34,11 @@ class ILayerProviderCond : virtual public IAlgTool
 {
 
 public:
+  /// Creates the InterfaceID and interfaceID() method
+  DeclareInterfaceID(ILayerProviderCond, 1, 0);
+
   /**Virtual destructor*/
   virtual ~ILayerProviderCond() {}
-
-  /** AlgTool and IAlgTool interface methods */
-  static const InterfaceID& interfaceID() { return IID_ILayerProviderCond; }
 
   /** LayerBuilder interface method - returning the endcap layer */
   virtual std::pair<const std::vector<Layer*>, const std::vector<Layer*> >

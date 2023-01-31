@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file egammaD3PDMaker/src/egammaConversion0FillerTool.h
  * @author scott snyder <snyder@bnl.gov>
@@ -43,7 +40,7 @@ public:
   
 
   /// Book variables for this block.
-  virtual StatusCode book();
+  virtual StatusCode book() final;
 
 
   /**
@@ -54,7 +51,7 @@ public:
    * is responsible for arranging that all the pointers for booked variables
    * are set appropriately upon entry.
    */
-  virtual StatusCode fill (const xAOD::Photon& p);
+  virtual StatusCode fill (const xAOD::Photon& p) override;
 
 
 private:

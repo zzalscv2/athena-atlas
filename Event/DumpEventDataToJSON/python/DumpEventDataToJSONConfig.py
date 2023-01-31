@@ -1,27 +1,26 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Constants import VERBOSE
-DumpEventDataToJsonAlg = CompFactory.DumpEventDataToJsonAlg
 
 
-def DumpEventDataToJSONAlgCfg(configFlags, doExtrap=False, **kwargs):
+def DumpEventDataToJSONAlgCfg(flags, doExtrap=False, **kwargs):
     result = ComponentAccumulator()
     extrapolationEngine = ""
     if doExtrap:
         from AtlasGeoModel.GeoModelConfig import GeoModelCfg
-        gmsAcc = GeoModelCfg(configFlags)
+        gmsAcc = GeoModelCfg(flags)
         result.merge(gmsAcc)
 
         from TrkConfig.AtlasExtrapolationEngineConfig import AtlasExtrapolationEngineCfg
-        extrapAcc = AtlasExtrapolationEngineCfg(configFlags)
+        extrapAcc = AtlasExtrapolationEngineCfg(flags)
         extrapolationEngine = extrapAcc.getPrimary()
         result.merge(extrapAcc)
 
         kwargs.setdefault('Extrapolator', extrapolationEngine)
 
-    dumpAlg = DumpEventDataToJsonAlg(
+    dumpAlg = CompFactory.DumpEventDataToJsonAlg(
         ExtrapolateTrackParticles=doExtrap, **kwargs)
     result.addEventAlgo(dumpAlg)
     return result
@@ -43,7 +42,7 @@ if __name__ == "__main__":
         args.input, args.output, args.prependCalib))
 
     from AthenaCommon.Logging import log
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
@@ -51,73 +50,74 @@ if __name__ == "__main__":
     # from AthenaCommon.Constants import DEBUG
     # log.setLevel(DEBUG)
 
+    flags = initConfigFlags()
     # To run on MC do e.g.
-    ConfigFlags.Input.Files = [args.input]
+    flags.Input.Files = [args.input]
     # To run on data do e.g.
-    # ConfigFlags.Input.Files = ["../q431/myESD.pool.root"]
+    # flags.Input.Files = ["../q431/myESD.pool.root"]
 
     # This should run serially for the moment.
-    ConfigFlags.Concurrency.NumThreads = 1
-    ConfigFlags.Concurrency.NumConcurrentEvents = 1
+    flags.Concurrency.NumThreads = 1
+    flags.Concurrency.NumConcurrentEvents = 1
 
-    ConfigFlags.dump()
+    flags.dump()
     log.debug('Lock config flags now.')
-    ConfigFlags.lock()
+    flags.lock()
 
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    if ConfigFlags.Detector.GeometryBpipe:
+    if flags.Detector.GeometryBpipe:
         from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
-        cfg.merge(BeamPipeGeometryCfg(ConfigFlags))
+        cfg.merge(BeamPipeGeometryCfg(flags))
 
-    if ConfigFlags.Detector.GeometryPixel:
+    if flags.Detector.GeometryPixel:
         from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
-        cfg.merge(PixelReadoutGeometryCfg(ConfigFlags))
+        cfg.merge(PixelReadoutGeometryCfg(flags))
 
-    if ConfigFlags.Detector.GeometrySCT:
+    if flags.Detector.GeometrySCT:
         from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
-        cfg.merge(SCT_ReadoutGeometryCfg(ConfigFlags))
+        cfg.merge(SCT_ReadoutGeometryCfg(flags))
 
-    if ConfigFlags.Detector.GeometryTRT:
+    if flags.Detector.GeometryTRT:
         from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
-        cfg.merge(TRT_ReadoutGeometryCfg(ConfigFlags))
+        cfg.merge(TRT_ReadoutGeometryCfg(flags))
 
-    if ConfigFlags.Detector.GeometryITkPixel:
+    if flags.Detector.GeometryITkPixel:
         from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-        cfg.merge(ITkPixelReadoutGeometryCfg(ConfigFlags))
+        cfg.merge(ITkPixelReadoutGeometryCfg(flags))
 
-    if ConfigFlags.Detector.GeometryITkStrip:
+    if flags.Detector.GeometryITkStrip:
         from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-        cfg.merge(ITkStripReadoutGeometryCfg(ConfigFlags))
+        cfg.merge(ITkStripReadoutGeometryCfg(flags))
 
-    if ConfigFlags.Detector.GeometryLAr:
+    if flags.Detector.GeometryLAr:
         from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-        cfg.merge(LArGMCfg(ConfigFlags))
+        cfg.merge(LArGMCfg(flags))
 
-    if ConfigFlags.Detector.GeometryTile:
+    if flags.Detector.GeometryTile:
         from TileGeoModel.TileGMConfig import TileGMCfg
-        cfg.merge(TileGMCfg(ConfigFlags))
+        cfg.merge(TileGMCfg(flags))
 
-    if ConfigFlags.Detector.GeometryMuon:
+    if flags.Detector.GeometryMuon:
         from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-        cfg.merge(MuonGeoModelCfg(ConfigFlags))
+        cfg.merge(MuonGeoModelCfg(flags))
 
     from TrkConfig.AtlasTrackingGeometrySvcConfig import TrackingGeometrySvcCfg
-    cfg.merge(TrackingGeometrySvcCfg(ConfigFlags))
+    cfg.merge(TrackingGeometrySvcCfg(flags))
 
     from TrkConfig.TrackCollectionReadConfig import TrackCollectionReadCfg
-    cfg.merge(TrackCollectionReadCfg(ConfigFlags, 'Tracks'))
+    cfg.merge(TrackCollectionReadCfg(flags, 'Tracks'))
 
     muon_edm_helper_svc = CompFactory.Muon.MuonEDMHelperSvc("MuonEDMHelperSvc")
     cfg.addService(muon_edm_helper_svc)
 
     # Disable doExtrap if you would prefer not to use the extrapolator.
     topoAcc = DumpEventDataToJSONAlgCfg(
-        ConfigFlags, doExtrap=False, OutputLevel=VERBOSE, DumpTestEvent=args.prependCalib, OutputLocation=args.output,
-        CscPrepRawDataKey = "CSC_Clusters" if ConfigFlags.Detector.EnableCSC else "",
-        MMPrepRawDataKey = "MM_Measurements" if ConfigFlags.Detector.EnableMM else "",
-        sTgcPrepRawDataKey = "STGC_Measurements" if ConfigFlags.Detector.EnablesTGC else "",
+        flags, doExtrap=False, OutputLevel=VERBOSE, DumpTestEvent=args.prependCalib, OutputLocation=args.output,
+        CscPrepRawDataKey = "CSC_Clusters" if flags.Detector.EnableCSC else "",
+        MMPrepRawDataKey = "MM_Measurements" if flags.Detector.EnableMM else "",
+        sTgcPrepRawDataKey = "STGC_Measurements" if flags.Detector.EnablesTGC else "",
         )
     
     cfg.merge(topoAcc)

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, ConfigurationError
 import os
@@ -125,7 +125,8 @@ def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modif
         folders.append(fs)
 
 
-    result = IOVDbSvcCfg(flags, Folders=folders)
+    result = IOVDbSvcCfg(flags)
+    result.getPrimary().Folders+=folders
     if loadFolders:
         result.getCondAlgo('CondInputLoader').Load += loadFolders
         from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
@@ -212,9 +213,12 @@ _dblist = {
 }
 
 
-def addOverride(flags, folder, tag):
+def addOverride(flags, folder, tag, db=None):
     """Add a tag override for the specified folder"""
-    return IOVDbSvcCfg(flags, overrideTags=[f'<prefix>{folder}</prefix> <tag>{tag}</tag>'])
+    suffix = ''
+    if db:
+        suffix = f' <db>{db}</db>'
+    return IOVDbSvcCfg(flags, overrideTags=[f'<prefix>{folder}</prefix> <tag>{tag}</tag>{suffix}'])
 
 
 def _extractFolder(folderString):
@@ -244,13 +248,13 @@ def _extractFolder(folderString):
 
 
 if __name__ == '__main__':
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.lock()
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.lock()
-
-    acc = IOVDbSvcCfg(ConfigFlags)
+    acc = IOVDbSvcCfg(flags)
 
     with open('test.pkl','wb') as f:
         acc.store(f)

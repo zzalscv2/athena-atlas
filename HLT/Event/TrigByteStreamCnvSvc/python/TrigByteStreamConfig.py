@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -7,13 +7,13 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
 
-def getTrigByteStreamInputSvc(name='ByteStreamInputSvc'):
+def getTrigByteStreamInputSvc(flags, name='ByteStreamInputSvc'):
     svc = CompFactory.TrigByteStreamInputSvc(name)
 
     # Enable checking the CTP ROB with module ID 1 (the RoIB ROB), ATR-25217
     svc.CheckCTPFragmentModuleID = 1  # ROB ID 0x770001
 
-    svc.MonTool = GenericMonitoringTool('MonTool', HistPath='HLTFramework/'+name)
+    svc.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
     svc.MonTool.defineHistogram('L1Result_NumROBs', path='EXPERT', type='TH1F',
                                 title='Number of ROBs received in L1 result;Number of ROBs;Events',
                                 xbins=100, xmin=0, xmax=100)
@@ -34,9 +34,9 @@ def getTrigByteStreamInputSvc(name='ByteStreamInputSvc'):
                                 xbins=100, xmin=0, xmax=100, opt='kCanRebin')
     return svc
 
-def getTrigByteStreamCnvSvc(name='ByteStreamCnvSvc'):
+def getTrigByteStreamCnvSvc(flags, name='ByteStreamCnvSvc'):
     svc = CompFactory.TrigByteStreamCnvSvc(name)
-    svc.MonTool = GenericMonitoringTool('MonTool', HistPath='HLTFramework/'+name)
+    svc.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
     svc.MonTool.defineHistogram('TIME_eventDone', path='EXPERT', type='TH1F',
                                 title='Time of DataCollector::eventDone() calls;Time [ms];Calls',
                                 xbins=400, xmin=0, xmax=2)
@@ -93,10 +93,10 @@ def getTrigByteStreamCnvSvc(name='ByteStreamCnvSvc'):
 def TrigByteStreamCfg(flags, type_names=[]):
     acc = ComponentAccumulator()
 
-    bytestream_conversion = getTrigByteStreamCnvSvc()
+    bytestream_conversion = getTrigByteStreamCnvSvc(flags)
     acc.addService(bytestream_conversion, primary=True)
 
-    bytestream_input = getTrigByteStreamInputSvc()
+    bytestream_input = getTrigByteStreamInputSvc(flags)
     acc.addService(bytestream_input)
 
     event_selector = CompFactory.TrigEventSelectorByteStream(

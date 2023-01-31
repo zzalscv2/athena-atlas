@@ -27,12 +27,6 @@ theApp.EvtMax = 5
 #--------------------------------------------------------------
 # Algorithms Private Options
 #--------------------------------------------------------------
-from RngComps.RngCompsConf import AtRndmGenSvc
-ServiceMgr += AtRndmGenSvc()
-ServiceMgr.AtRndmGenSvc.Seeds = ["PYTHIA 4789899 989240512",
-"PYTHIA_INIT 820021 2347532"]
-# ServiceManager.AtRndmGenSvc.ReadFromFile = true;
-
 from AthenaCommon.AlgSequence import AlgSequence
 job=AlgSequence()
 from Pythia_i.Pythia_iConf import Pythia

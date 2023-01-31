@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -54,23 +54,23 @@ public:
             DiscBounds* dbounds,
             const LayerMaterialProperties& laymatprop,
             double thickness = 0.,
-            OverlapDescriptor* od = nullptr,
+            std::unique_ptr<OverlapDescriptor> od = nullptr,
             int laytyp = int(Trk::active));
 
   /**Constructor with DiscSurface and MaterialProperties */
   DiscLayer(DiscSurface* disc,
             const LayerMaterialProperties& laymatprop,
             double thickness = 0.,
-            OverlapDescriptor* od = nullptr,
+            std::unique_ptr<OverlapDescriptor> od = nullptr,
             int laytyp = int(Trk::active));
 
   /**Constructor with DiscSurface components and pointer to SurfaceArray
    * (passing ownership) */
   DiscLayer(const Amg::Transform3D& transform,
             DiscBounds* dbounds,
-            SurfaceArray* surfaceArray,
+            std::unique_ptr<SurfaceArray> surfaceArray,
             double isontolerance = 0.,
-            OverlapDescriptor* od = nullptr,
+            std::unique_ptr<OverlapDescriptor> od = nullptr,
             IApproachDescriptor* ad = nullptr,
             int laytyp = int(Trk::active));
 
@@ -78,10 +78,10 @@ public:
      MaterialProperties and pointer SurfaceArray (passing ownership) */
   DiscLayer(const Amg::Transform3D& transform,
             DiscBounds* dbounds,
-            SurfaceArray* surfaceArray,
+            std::unique_ptr<SurfaceArray> surfaceArray,
             const LayerMaterialProperties& laymatprop,
             double thickness = 0.,
-            OverlapDescriptor* od = nullptr,
+            std::unique_ptr<OverlapDescriptor> od = nullptr,
             IApproachDescriptor* ad = nullptr,
             int laytyp = int(Trk::active));
 
@@ -121,7 +121,6 @@ public:
   /** move the Layer non-const*/
   virtual void moveLayer(Amg::Transform3D& shift) override final;
 
- private:
   /** Resize the layer to the tracking volume - only works for
    * CylinderVolumeBouns */
   virtual void resizeLayer(const VolumeBounds& vBounds,
@@ -132,6 +131,7 @@ public:
                                         const Amg::Vector3D& cCenter,
                                         double envelop) override final;
 
+ private:
   /** build approach surfaces */
   void buildApproachDescriptor();
 

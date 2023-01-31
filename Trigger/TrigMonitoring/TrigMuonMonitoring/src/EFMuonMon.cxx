@@ -171,10 +171,13 @@ StatusCode EFMuonMon :: fillVariablesPerOfflineMuonPerChain(const EventContext &
         // correlation histograms offlineSA (matched to EFSA) vs. offlineSA (matched to L2SA)
         // get L2SA feature
         const TrigCompositeUtils::Decision* EFSAMuonDecision = EFSAMuonLinkInfo.source;
-        const TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer> L2SALinkInfo = TrigCompositeUtils::findLink<xAOD::L2StandAloneMuonContainer>(EFSAMuonDecision, "feature");
-        ATH_CHECK( L2SALinkInfo.isValid() );
-        const ElementLink<xAOD::L2StandAloneMuonContainer> L2SAEL = L2SALinkInfo.link;
-  
+        const std::vector<TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer>> L2SALinkInfo = TrigCompositeUtils::findLinks<xAOD::L2StandAloneMuonContainer>(EFSAMuonDecision, "feature");
+        if(L2SALinkInfo.size() > 1) {
+           ATH_MSG_DEBUG("More than one L2SA candidate associated to the EFSA");
+        } 
+        ATH_CHECK( L2SALinkInfo.at(0).isValid());
+        const ElementLink<xAOD::L2StandAloneMuonContainer> L2SAEL = L2SALinkInfo.at(0).link;
+
         // get offline muon matched to L2SA
         const xAOD::Muon *OfflineSAmatchedL2SA = m_matchTool->matchL2SAtoOff(ctx, (*L2SAEL));
         if (OfflineSAmatchedL2SA){
@@ -241,9 +244,12 @@ StatusCode EFMuonMon :: fillVariablesPerOfflineMuonPerChain(const EventContext &
         // correlation histograms offlineCB (matched to EFCB) vs. offlineCB (matched to  L2CB)
         // get L2CB feature
         const TrigCompositeUtils::Decision* EFCBMuonDecision = EFCBMuonLinkInfo.source;
-        const TrigCompositeUtils::LinkInfo<xAOD::L2CombinedMuonContainer> L2CBLinkInfo = TrigCompositeUtils::findLink<xAOD::L2CombinedMuonContainer>(EFCBMuonDecision, "feature");
-        ATH_CHECK( L2CBLinkInfo.isValid() );
-        const ElementLink<xAOD::L2CombinedMuonContainer> L2CBEL = L2CBLinkInfo.link;
+        const std::vector<TrigCompositeUtils::LinkInfo<xAOD::L2CombinedMuonContainer>>L2CBLinkInfo = TrigCompositeUtils::findLinks<xAOD::L2CombinedMuonContainer>(EFCBMuonDecision, "feature");
+        if(L2CBLinkInfo.size() >1) {
+           ATH_MSG_DEBUG("More than one L2CB muon associated to EFCBMuon");
+        }
+        ATH_CHECK( L2CBLinkInfo.at(0).isValid() );
+        const ElementLink<xAOD::L2CombinedMuonContainer> L2CBEL = L2CBLinkInfo.at(0).link;
   
         // get offline muon matched to L2CB
         const xAOD::Muon *OfflineCBmatchedL2CB = m_matchTool->matchL2CBtoOff(ctx, (*L2CBEL));

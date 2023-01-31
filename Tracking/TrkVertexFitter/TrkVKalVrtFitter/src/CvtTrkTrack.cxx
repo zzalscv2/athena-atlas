@@ -145,13 +145,15 @@ namespace Trk{
     State& state = static_cast<State&> (istate);
     auto	perigee{CreatePerigee(0., 0., 0., VKPerigee, VKCov, state)};
 				      
-    const Trk::FitQuality* fitQuality = new Trk::FitQuality(10.,1);
+    auto fitQuality = std::make_unique<Trk::FitQuality>(10.,1);
     auto trackStateOnSurfaces = DataVector<const Trk::TrackStateOnSurface>();
+    std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern(0);
+    typePattern.set(Trk::TrackStateOnSurface::Perigee);
     const Trk::TrackStateOnSurface* trackSOS =
-      new Trk::TrackStateOnSurface(nullptr, std::move(perigee), nullptr, nullptr);
+      new Trk::TrackStateOnSurface(nullptr, std::move(perigee), nullptr, typePattern);
     trackStateOnSurfaces.push_back(trackSOS);
     Trk::TrackInfo info;
-    return new Trk::Track( info, std::move(trackStateOnSurfaces), fitQuality) ;
+    return new Trk::Track( info, std::move(trackStateOnSurfaces), std::move(fitQuality)) ;
   }
 
 

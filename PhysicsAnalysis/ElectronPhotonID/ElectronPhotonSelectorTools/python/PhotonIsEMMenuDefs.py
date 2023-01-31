@@ -2,16 +2,12 @@
 
 # default configuration of the PhotonIsEMSelectorCutDefs
 
-# Import a needed helper
-from PATCore.HelperUtils import GetTool
 
 
 def PhotonIsEMLooseSelectorConfig(theTool):
     '''
     These are the photon isEM definitions *DC14* Loose
     '''
-
-    theTool = GetTool(theTool)
 
     #
     # PHOTON Loose cuts, with updated using *DC14*.
@@ -23,8 +19,6 @@ def PhotonIsEMMediumSelectorConfig(theTool):
     '''
     These are the photon isEM definitions from *DC14*
     '''
-
-    theTool = GetTool(theTool)
 
     # MEDIUM (20/11/2013 -- Ludovica@cern.ch)
     #  Coming from Fer
@@ -41,8 +35,6 @@ def PhotonIsEMTightSelectorConfig(theTool):
     '''
     These are the photon isEM definitions for Tight menu
     '''
-
-    theTool = GetTool(theTool)
 
     #
     # Pt-dependent tight cuts, derived in August 2018 ("v11")
@@ -61,8 +53,6 @@ def PhotonIsEMTightSelectorConfigPtInclJan2018(theTool):
     These are the photon isEM definitions for Tight menu
     '''
 
-    theTool = GetTool(theTool)
-
     #
     # PHOTON tight cuts, now with January 2018 re-optimization
     #
@@ -78,8 +68,6 @@ def PhotonIsEMTightSelectorConfigMuDependent2022(theTool):
     '''
     These are the photon isEM definitions for the mu-dependent Tight menu
     '''
-
-    theTool = GetTool(theTool)
 
     #
     # PHOTON tight cuts, with mu-dependent January 2022 re-optimization

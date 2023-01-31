@@ -95,6 +95,7 @@ if not opts.minimal:
 # -- end of minimal
 
 ## user level configuration
+from AthenaCommon.Include import IncludeError
 try:
    include( "$HOME/.athenarc" )
 except IncludeError:
@@ -169,11 +170,7 @@ if opts.showincludes:
    AthCIncMod.marker = AthCIncMod.__marker__      # reset
 del AthCIncMod
 
-if opts.drop_cfg:
-   import AthenaCommon.ConfigurationCleanup
-   AthenaCommon.ConfigurationCleanup.doCleanse = True
-
-if opts.do_leak_chk != False:
+if opts.do_leak_chk:
    from Hephaestus.Auditor import HephaestusAuditor
    theApp.AuditAlgorithms = True
    svcMgr.AuditorSvc += HephaestusAuditor(

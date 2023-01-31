@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -49,9 +49,7 @@ static const InterfaceID IID_IExtrapolator("IExtrapolator", 1, 0);
  @author Christos Anastopoulos (Athena MT)
  */
 
-class IPropagator;
 class INavigator;
-class IMaterialUpdater;
 class Track;
 class Surface;
 class TrackingVolume;
@@ -70,14 +68,6 @@ public:
   /** AlgTool interface methods */
   static const InterfaceID& interfaceID() { return IID_IExtrapolator; }
 
-  /** Extrapolate Neutral xAOD particle to surface.
-   * Starts from the perigee parameters. */
-  virtual std::unique_ptr<NeutralParameters> extrapolate(
-    const xAOD::NeutralParticle& xnParticle,
-    const Surface& sf,
-    PropDirection dir = anyDirection,
-    const BoundaryCheck& bcheck = true) const = 0;
-
   /** Main extrapolation Interface starting from neutral parameters 
    * and aiming at surface.*/
   virtual std::unique_ptr<NeutralParameters> extrapolate(
@@ -85,17 +75,6 @@ public:
     const Surface& sf,
     PropDirection dir = anyDirection,
     const BoundaryCheck& bcheck = true) const = 0;
-
-  /** Extrapolate Charged xAOD particle to surface
-   * Starts from the perigee parameters.*/
-  virtual std::unique_ptr<TrackParameters> extrapolate(
-    const EventContext& ctx,
-    const xAOD::TrackParticle& particleBase,
-    const Surface& sf,
-    PropDirection dir = anyDirection,
-    const BoundaryCheck& bcheck = true,
-    ParticleHypothesis particle = pion,
-    MaterialUpdateMode matupmode = addNoise) const = 0;
 
   /** Main extrapolation interface starting from charged parameters and aiming
    * at Surface*/
@@ -124,7 +103,7 @@ public:
   /** Main extrapolation interface starting from a Trk::Track and aiming
    * at Surface. It uses the navigator to find the closest parameters
    * of the track to the surface. */
-  virtual std::unique_ptr<TrackParameters> extrapolate(
+  virtual std::unique_ptr<TrackParameters> extrapolateTrack(
     const EventContext& ctx,
     const Track& trk,
     const Surface& sf,
@@ -193,29 +172,25 @@ public:
 
   /** Extrapolation method collecting intersections with subdetector
    * boundaries and active volumes/layers. Destination
-   * (subdetector boundary) : geoID (+ entry, -exit) ( default MS exit )
+   * (subdetector boundary) : geoID (+ entry, -exit) 
+   * default Calo = 3 exit (see GeometrySignature.h)
    * Employs the STEP propagator, used in the ParticleCaloExtension
    * mainly for muons and Particle Flow.
    */
   virtual std::unique_ptr<
-    std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
-  extrapolate(const EventContext& ctx,
-              const Trk::TrackParameters& parm,
-              Trk::PropDirection dir,
-              Trk::ParticleHypothesis particle,
-              std::vector<const Trk::TrackStateOnSurface*>*& material,
-              int destination = 3) const = 0;
+      std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
+  collectIntersections(
+    const EventContext& ctx,
+    const Trk::TrackParameters& parm,
+    Trk::PropDirection dir,
+    Trk::ParticleHypothesis particle,
+    std::vector<const Trk::TrackStateOnSurface*>*& material,
+    int destination = 3) const = 0;
 
   /** Return the TrackingGeometry used by the Extrapolator (forwards information
    * from Navigator) */
   virtual const TrackingGeometry* trackingGeometry() const = 0;
 
-  /** Validation Action*/
-  virtual void validationAction() const = 0;
-
-  /** Access the subPropagator to the given volume*/
-  virtual const IPropagator* subPropagator(
-    const TrackingVolume& tvol) const = 0;
 };
 } // end of namespace
 

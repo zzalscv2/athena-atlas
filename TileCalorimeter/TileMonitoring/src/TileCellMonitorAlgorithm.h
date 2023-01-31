@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILECELLMONITORALGORITHM_H
 #define TILEMONITORING_TILECELLMONITORALGORITHM_H
 
 #include "TileEvent/TileDQstatus.h"
-#include "TileConditions/ITileBadChanTool.h"
 #include "TileConditions/TileBadChannels.h"
 #include "TileConditions/TileCablingSvc.h"
 #include "TileMonitorAlgorithm.h"

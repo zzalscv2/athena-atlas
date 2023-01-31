@@ -10,7 +10,6 @@
 ## Output: 5 output streams<br>
 ##         8 root collections<br>
 ## @author JackCranshaw (Jack.Cranshaw@cern.ch)
-## $Id: EventSplit_jo.py,v 1.27 2009-05-20 13:34:21 cranshaw Exp $
 #====================================================================
 
 #--------------------------------------------------------------
@@ -90,8 +89,6 @@ topSequence+=Triggered
 #--------------------------------------------------------------
 
 from AthenaPoolCnvSvc.WriteAthenaPool import AthenaPoolOutputStream
-
-ToolSvc = Service( "ToolSvc" )
 
 # Filtered stream 2
 Stream2 = AthenaPoolOutputStream( "Stream2", "AthenaPoolMultiTest_Split2.root", False, noTag=False )

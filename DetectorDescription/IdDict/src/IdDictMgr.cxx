@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Header: /build/atlas/cvs/atlas/offline/DetectorDescription/IdDict/src/IdDictMgr.cxx,v 1.43 2008-12-09 09:49:43 dquarrie Exp $  
@@ -214,7 +214,7 @@ void IdDictMgr::resolve_references ()
     }  
 } 
  
-void IdDictMgr::generate_implementation (std::string tag)  
+void IdDictMgr::generate_implementation (const std::string& tag)  
 {  
 
   if (Debugger::debug ()) 
@@ -785,7 +785,7 @@ static void get_bits (const RV& regions, size_t level, const std::string& group)
 } 
  
 void IdDictDictionary::generate_implementation (const IdDictMgr& idd,
-						std::string tag) 
+						const std::string& tag) 
 { 
 
   if (Debugger::debug ()) 
@@ -1910,13 +1910,7 @@ IdDictDictionary::unpack (const Identifier& id,
 			  size_t region_index,
 			  int& field) const
 {
-
     field = 0; 
-    const IdDictRegion& region = *m_regions[region_index];
-    const IdDictFieldImplementation& impl = region.m_implementation[field_index]; 
-    size_t prefix_offset = 0;
-
-    size_t position = Identifier::NBITS; // overall bit position
 
     if (m_do_checks) {
 	
@@ -1926,6 +1920,12 @@ IdDictDictionary::unpack (const Identifier& id,
 		      << region_index << " " << m_regions.size() << std::endl;
 	    return (1);
 	}
+    }
+
+    const IdDictRegion& region = *m_regions.at(region_index);
+
+    if (m_do_checks) {
+	
 	// check number of fields
 	if (field_index >= region.m_implementation.size()) {
 	    std::cout << "IdDictDictionary::unpack - field index too large. Index, nfields " 
@@ -1936,6 +1936,11 @@ IdDictDictionary::unpack (const Identifier& id,
 	
     }
     
+    const IdDictFieldImplementation& impl = region.m_implementation.at(field_index); 
+    size_t prefix_offset = 0;
+
+    size_t position = Identifier::NBITS; // overall bit position
+
     // One or more fields missing from prefix, get the offset
     if (first_field_index) {
 	if (m_do_checks) {
@@ -2132,7 +2137,7 @@ void IdDictField::resolve_references (const IdDictMgr& /*idd*/)
 } 
  
 void IdDictField::generate_implementation (const IdDictMgr& /*idd*/, 
-					   std::string /*tag*/) 
+					   const std::string& /*tag*/) 
 { 
 } 
  
@@ -2319,7 +2324,7 @@ IdDictGroup::resolve_references (const IdDictMgr& idd,
 void 
 IdDictGroup::generate_implementation (const IdDictMgr& idd,  
 				      IdDictDictionary& dictionary, 
-				      std::string tag)
+				      const std::string& tag)
 {
   if (Debugger::debug ()) 
     { 
@@ -2504,7 +2509,7 @@ IdDictAltRegions::resolve_references (const IdDictMgr& idd,
 void 
 IdDictAltRegions::generate_implementation (const IdDictMgr& idd,  
 					  IdDictDictionary& dictionary, 
-					  std::string tag)
+					  const std::string& tag)
 {
     // Find the region given by the tag
     map_iterator region_it = m_regions.find(tag);
@@ -2621,7 +2626,7 @@ void IdDictRegion::resolve_references (const IdDictMgr& idd,
   
 void IdDictRegion::generate_implementation (const IdDictMgr& idd, 
 					    IdDictDictionary& dictionary,
-					    std::string tag) 
+					    const std::string& tag) 
 { 
 
   if (Debugger::debug ()) 
@@ -2827,7 +2832,7 @@ IdDictSubRegion::~IdDictSubRegion ()
 void 
 IdDictSubRegion::generate_implementation (const IdDictMgr& /*idd*/, 
 					  IdDictDictionary& /*dictionary*/, 
-					  std::string /*tag*/)
+					  const std::string& /*tag*/)
 {
     std::cout << "IdDictSubRegion::generate_implementation - SHOULD NEVER BE CALLED "  << std::endl;
 }
@@ -2837,7 +2842,7 @@ void
 IdDictSubRegion::generate_implementation (const IdDictMgr& idd,  
 					  IdDictDictionary& dictionary, 
 					  IdDictRegion& region,
-					  std::string tag) 
+					  const std::string& tag) 
 { 
 
   if (Debugger::debug ()) 
@@ -2892,7 +2897,7 @@ void IdDictRegionEntry::resolve_references (const IdDictMgr& /*idd*/,
 void IdDictRegionEntry::generate_implementation (const IdDictMgr& /*idd*/,  
 						 IdDictDictionary& /*dictionary*/, 
 						 IdDictRegion& /*region*/,
-						 std::string /*tag*/) 
+						 const std::string& /*tag*/) 
 { 
 } 
   
@@ -2993,7 +2998,7 @@ void IdDictRange::resolve_references (const IdDictMgr& /*idd*/,
 void IdDictRange::generate_implementation (const IdDictMgr& /*idd*/,  
 					   IdDictDictionary& dictionary, 
 					   IdDictRegion& region,
-					   std::string /*tag*/) 
+					   const std::string& /*tag*/) 
 { 
 
     // Add IdDictFieldImplementation to this region
@@ -3187,7 +3192,7 @@ void IdDictRangeRef::resolve_references (const IdDictMgr& idd,
 void IdDictRangeRef::generate_implementation (const IdDictMgr& idd,  
 					      IdDictDictionary& dictionary, 
 					      IdDictRegion& region,
-					      std::string tag) 
+					      const std::string& tag) 
 { 
     if (m_range) m_range->generate_implementation (idd, dictionary, region, tag);
 } 
@@ -3241,7 +3246,7 @@ void IdDictReference::resolve_references (const IdDictMgr& /*idd*/,
 void IdDictReference::generate_implementation (const IdDictMgr& idd,  
 					       IdDictDictionary& dictionary, 
 					       IdDictRegion& region,
-					       std::string tag) 
+					       const std::string& tag) 
 { 
 
   if (Debugger::debug ()) 
@@ -3311,7 +3316,7 @@ void IdDictDictionaryRef::resolve_references (const IdDictMgr& idd,
 void IdDictDictionaryRef::generate_implementation (const IdDictMgr& idd,  
 						   IdDictDictionary& dictionary, 
 						   IdDictRegion& region,
-						   std::string tag) 
+						   const std::string& tag) 
 { 
     if(!m_generated_implementation) {
 	if(m_dictionary) {

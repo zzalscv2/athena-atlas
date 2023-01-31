@@ -16,22 +16,12 @@
 #include "AthenaKernel/errorcheck.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/MagicNumbers.h"
 #include "HepPID/ParticleIDMethods.hh"
 #include "GaudiKernel/SystemOfUnits.h"
 #include <algorithm>
 
 
-namespace {
-
-
-const int PARTONPDGMAX = 43;
-const int NPPDGMIN = 1000000;
-const int NPPDGMAX = 8999999;
-const int PHOTOSMIN = 10000;
-const int GEANTMIN = 200000;
-
-
-} // anonymous namespace
 
 
 namespace D3PD {
@@ -151,7 +141,7 @@ TruthParticleFilterTool::isAccepted (HepMC::ConstGenParticlePtr p)
     ok=true;
   }
 
-  if (HepMC::barcode(p) > GEANTMIN && !m_writeGeant && !m_writeEverything && !ok) {
+  if (HepMC::is_simulation_particle(barcode) && !m_writeGeant && !m_writeEverything && !ok) {
     if (! (pdg_id == PDG::gamma &&
            m_geantPhotonPtThresh >= 0 &&
            p->momentum().perp() > m_geantPhotonPtThresh) )
@@ -168,23 +158,23 @@ TruthParticleFilterTool::isAccepted (HepMC::ConstGenParticlePtr p)
 
   // OK if we select partons and are at beginning of event record
   if( m_writePartons &&
-      (pdg_id <= PARTONPDGMAX || (pdg_id >= NPPDGMIN && pdg_id <= NPPDGMAX) ) &&
+      (pdg_id <= HepMC::PARTONPDGMAX || (pdg_id >= HepMC::NPPDGMIN && pdg_id <= HepMC::NPPDGMAX) ) &&
       (m_partonPtThresh<0 || p->momentum().perp()>m_partonPtThresh) )
     ok = true;
 
   //  OK if we should select hadrons and are in hadron range 
-  if( m_writeHadrons && HepPID::isHadron (pdg_id) && barcode < PHOTOSMIN )
+  if( m_writeHadrons && HepPID::isHadron (pdg_id) && barcode < HepMC::PHOTOSMIN )
     ok = true;
 
   // OK if we should select b hadrons and are in hadron range 
-  if( m_writeBHadrons && barcode < PHOTOSMIN && HepPID::isHadron (pdg_id) && HepPID::hasBottom (pdg_id) )
+  if( m_writeBHadrons && barcode < HepMC::PHOTOSMIN && HepPID::isHadron (pdg_id) && HepPID::hasBottom (pdg_id) )
     ok= true;
 
   // PHOTOS range: check whether photons come from parton range or 
   // hadron range
   int motherPDGID = 999999999;
   HepMC::ConstGenVertexPtr vprod = p->production_vertex();
-  if( barcode > PHOTOSMIN && barcode < GEANTMIN && vprod )
+  if( barcode > HepMC::PHOTOSMIN && !HepMC::is_simulation_particle(barcode) && vprod )
   {
 #ifdef HEPMC3
     if (vprod->particles_in().size() > 0) {
@@ -204,7 +194,7 @@ TruthParticleFilterTool::isAccepted (HepMC::ConstGenParticlePtr p)
   }
 
   // OK if we should select G4 particles and are in G4 range
-  if( m_writeGeant && barcode > GEANTMIN )
+  if( m_writeGeant && HepMC::is_simulation_particle(barcode) )
     ok = true;
 
   if(isLeptonFromTau(p)) 
@@ -395,7 +385,7 @@ bool TruthParticleFilterTool::isBoson(HepMC::ConstGenParticlePtr part) const{
 bool TruthParticleFilterTool::isFsrFromLepton(HepMC::ConstGenParticlePtr part) const {
   int pdg = part->pdg_id();
   if(std::abs(pdg) != 22) return false; // photon
-  if(HepMC::barcode(part) >=  200000) return false; // Geant photon
+  if(HepMC::is_simulation_particle(part)) return false; // Geant photon
 
   auto prod = part->production_vertex();
   if(!prod) return false; // no parent.

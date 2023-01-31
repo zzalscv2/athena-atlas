@@ -591,7 +591,7 @@ StatusCode electronMonTool::fillHistograms() {
     if (!((*e_iter)->author(xAOD::EgammaParameters::AuthorElectron)|| (*e_iter)->author(xAOD::EgammaParameters::AuthorAmbiguous))) continue;
 
     //reject electrons outside the kinematic acceptance
-    if (!((*e_iter)->pt()> 7000. || fabs((*e_iter)->eta()) < 2.47 )) continue;
+    if ((*e_iter)->pt()<= 7000. && std::abs((*e_iter)->eta()) >= 2.47 ) continue;
 
     // Check what electron is being processed
     bool isGood;

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 ###############################################################
 #
@@ -64,6 +64,6 @@ if not hasattr (svcMgr.ToolSvc, 'IOVDbMetaDataTool'):
     svcMgr.ToolSvc += CfgMgr.IOVDbMetaDataTool()
 
 # Enable ByteStream to read MetaData
-svcMgr.MetaDataSvc.MetaDataTools += [ "ByteStreamMetadataTool" ]
 if not hasattr (svcMgr.ToolSvc, 'ByteStreamMetadataTool'):
     svcMgr.ToolSvc += CfgMgr.ByteStreamMetadataTool()
+    svcMgr.MetaDataSvc.MetaDataTools += [ "ByteStreamMetadataTool" ]

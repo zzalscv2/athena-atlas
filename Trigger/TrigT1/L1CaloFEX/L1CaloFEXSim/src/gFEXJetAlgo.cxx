@@ -692,21 +692,21 @@ void gFEXJetAlgo::gBlockMax192(  gTowersJetEngine gBlkSum,
                                  std::array<int, 3> & gBlockPhip,
                                  int index){
 
-  int inpv[192];
-  int maxv1[96];
-  int maxv2[48];
-  int maxv3[24];
-  int maxv4[12];
-  int maxv5[6];
-  int maxv6[3];
+  int inpv[192]{};
+  int maxv1[96]{};
+  int maxv2[48]{};
+  int maxv3[24]{};
+  int maxv4[12]{};
+  int maxv5[6]{};
+  int maxv6[3]{};
 
-  int inpi[192];
-  int maxi1[96];
-  int maxi2[48];
-  int maxi3[24];
-  int maxi4[12];
-  int maxi5[6];
-  int maxi6[3];
+  int inpi[192]{};
+  int maxi1[96]{};
+  int maxi2[48]{};
+  int maxi3[24]{};
+  int maxi4[12]{};
+  int maxi5[6]{};
+  int maxi6[3]{};
 
   int maxvall;
   int maxiall;
@@ -967,15 +967,13 @@ void gFEXJetAlgo::gJetTOBgen(std::array<int, FEXAlgoSpaceDefs::ABCrows>  jetOut,
                              std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBeta,
                              std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBphi ){
 
-  int jetOutZS[FEXAlgoSpaceDefs::ABCrows]; 
+  int jetOutZS[FEXAlgoSpaceDefs::ABCrows]{};
   // apply the tobthreshold to the values 
   //note that jetThreshold is not a configurable parameter in firmware, it is used to check that jet values are positive
   for( int irow =0; irow<FEXAlgoSpaceDefs::ABCrows; irow++){
     if(  jetOut[irow] > jetThreshold ) {
       jetOutZS[irow] = jetOut[irow];
-    } else {
-      jetOutZS[irow] = 0 ; 
-    }
+    };
   }
 
 
@@ -983,21 +981,21 @@ void gFEXJetAlgo::gJetTOBgen(std::array<int, FEXAlgoSpaceDefs::ABCrows>  jetOut,
   int etaOff[4] = {8,14,20,26};
 
   // see tob_gen.vhd
-  int l1mv[16];
-  int l1met[16];
-  int l1mphi[16];
+  int l1mv[16]{};
+  int l1met[16]{};
+  int l1mphi[16]{};
 
-  int l2mv[8];
-  int l2met[8];
-  int l2mphi[8];
+  int l2mv[8]{};
+  int l2met[8]{};
+  int l2mphi[8]{};
 
-  int l3mv[4];
-  int l3met[4];
-  int l3mphi[4];
+  int l3mv[4]{};
+  int l3met[4]{};
+  int l3mphi[4]{};
 
-  int l4mv[2];
-  int l4met[2];
-  int l4mphi[2];
+  int l4mv[2]{};
+  int l4met[2]{};
+  int l4mphi[2]{};
   
 
   for(int i=0; i<16; i++){

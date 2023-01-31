@@ -29,7 +29,7 @@ namespace InDet {
 
 namespace DerivationFramework {
   
-  class BMuonTrackIsoTool : public BPhysVertexTrackBase {
+  class ATLAS_NOT_THREAD_SAFE BMuonTrackIsoTool : public BPhysVertexTrackBase {
 
   private:
     typedef BPhysVertexTrackBase super;

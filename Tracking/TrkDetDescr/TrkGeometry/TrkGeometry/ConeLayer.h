@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -49,33 +49,33 @@ public:
             ConeBounds* cbounds,
             const LayerMaterialProperties& laymatprop,
             double thickness = 0.,
-            OverlapDescriptor* od = nullptr,
+            std::unique_ptr<OverlapDescriptor> od = nullptr,
             int laytyp = int(Trk::active));
 
   /**Constructor with ConeSurface and  MaterialProperties */
   ConeLayer(ConeSurface* cyl,
             const LayerMaterialProperties& laymatprop,
             double thickness = 0.,
-            OverlapDescriptor* od = nullptr,
+            std::unique_ptr<OverlapDescriptor> od = nullptr,
             int laytyp = int(Trk::active));
 
   /**Constructor with ConeSurface components and pointer to SurfaceArray
    * (passing ownership) */
   ConeLayer(const Amg::Transform3D& transform,
             ConeBounds* cbounds,
-            SurfaceArray* surfaceArray,
+            std::unique_ptr<SurfaceArray> surfaceArray,
             double thickness = 0.,
-            OverlapDescriptor* od = nullptr,
+            std::unique_ptr<OverlapDescriptor> od = nullptr,
             int laytyp = int(Trk::active));
 
   /**Constructor with ConeSurface components,
      MaterialProperties and pointer SurfaceArray (passing ownership) */
   ConeLayer(const Amg::Transform3D& transform,
             ConeBounds* cbounds,
-            SurfaceArray* surfaceArray,
+            std::unique_ptr<SurfaceArray> surfaceArray,
             const LayerMaterialProperties& laymatprop,
             double thickness = 0.,
-            OverlapDescriptor* od = nullptr,
+            std::unique_ptr<OverlapDescriptor> od = nullptr,
             int laytyp = int(Trk::active));
 
   /**Copy constructor of ConeLayer*/
@@ -107,10 +107,9 @@ public:
   /** move the Layer */
   virtual void moveLayer(Amg::Transform3D& shift) override final;
 
-private:
   /** Resize the layer to the tracking volume - not (yet) supported for
    * ConeLayer */
-  void resize(const VolumeBounds&, double) const {}
+  virtual void resizeLayer(const VolumeBounds&, double) override final{}
 
   /** Resize the layer to the tracking volume - not supported since this an
    * entry layer method*/

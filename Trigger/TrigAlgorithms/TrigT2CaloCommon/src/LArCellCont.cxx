@@ -181,21 +181,16 @@ m_hashSym.resize(onlineId->febHashMax());
 		hashTab.push_back( indexsetmax);
 	} // end of if bad cell
 	} // end of for ch loop
-	std::map<LArRoIMap::TT_ID,std::vector<LArCell* > >::const_iterator
-	mapIt = collMap.begin();
-	std::map<LArRoIMap::TT_ID,std::vector<LArCell* > >::const_iterator
-	mapItEnd = collMap.end();
-	for (;mapIt!=mapItEnd;++mapIt) {
+	for (const auto& [ttid, cells] : collMap) {
 		// Ones needs to dump the mapped vector to an allocated vector
-                DataVector<LArCell> *vec = new DataVector<LArCell>(SG::VIEW_ELEMENTS);
-		vec->reserve(mapIt->second.size());
-		for(std::vector<LArCell*>::const_iterator it
-		  = mapIt->second.begin(); it != mapIt->second.end(); it++)
+		DataVector<LArCell> *vec = new DataVector<LArCell>(SG::VIEW_ELEMENTS);
+		vec->reserve(cells.size());
+		for(LArCell* c : cells)
 		{
-		// 	if(doCellMasking && m_masker->cellShouldBeMasked((*it)->ID()) )
-		  vec->push_back(*it);
+		// 	if(doCellMasking && m_masker->cellShouldBeMasked(c->ID()) )
+		  vec->push_back(c);
 		}
-        	(*this)[idx]->setTT(mapIt->first,vec->begin(),vec->end());
+		(*this)[idx]->setTT(ttid,vec->begin(),vec->end());
 		m_vecs.push_back(vec);
         }//End of loop over the map
    } // End of check for missing FEB

@@ -28,16 +28,10 @@ job += AddFlowByShifting()
 theApp.Dlls   += [ "Hijing_i", "FlowAfterburner" ]
 theApp.TopAlg  = [ "Hijing" ]
 theApp.TopAlg += [ "AddFlowByShifting" ]
-#theApp.ExtSvc += [ "AtRndmGenSvc" ]
 
 #--------------------------------------------------------------
 # Algorithms Private Options
 #--------------------------------------------------------------
-from RngComps.RngCompsConf import AtRndmGenSvc
-svcMgr += AtRndmGenSvc()
-svcMgr.AtRndmGenSvc.Seeds = ["HIJING 4789891 989240511",
-                      "HIJING_INIT 889223461 78782321"]
-#AtRndmGenSvc.ReadFromFile = true;
 
 Hijing = job.Hijing
 Hijing.McEventKey = "HIJING_EVENT"

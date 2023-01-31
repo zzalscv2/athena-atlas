@@ -309,6 +309,7 @@ StatusCode TgcDigitizationTool::digitizeCore(const EventContext& ctx) {
     ATH_MSG_WARNING("/TGC/DIGIT/XTALK is not provided. Probabilities of TGC channel crosstalk will be zero.");
   }
 
+  std::vector<std::unique_ptr<TgcDigitCollection> > collections;
 
   TimedHitCollection<TGCSimHit>::const_iterator i, e; 
   while(m_thpcTGC->nextDetectorElement(i, e)) {
@@ -340,7 +341,7 @@ StatusCode TgcDigitizationTool::digitizeCore(const EventContext& ctx) {
 	uint16_t newBcTag    = (*it_digiHits)->bcTag();
 	Identifier elemId    = m_idHelper->elementID(newDigiId);
 	
-	TgcDigitCollection* digitCollection ATLAS_THREAD_SAFE = nullptr;
+	TgcDigitCollection* digitCollection = nullptr;
 	
 	IdentifierHash coll_hash;
 	if(m_idHelper->get_hash(elemId, coll_hash, &tgcContext)) {
@@ -352,27 +353,21 @@ StatusCode TgcDigitizationTool::digitizeCore(const EventContext& ctx) {
 	} 
 	
 	// make new TgcDigit and record it in StoreGate
-	TgcDigit* newDigit = new TgcDigit(newDigiId, newBcTag);
+	auto newDigit = std::make_unique<TgcDigit>(newDigiId, newBcTag);
   
 	// record the digit container in StoreGate
 	bool duplicate = false;
-  	TgcDigitCollection *coll = nullptr;
-	auto sc ATLAS_THREAD_SAFE  = digitContainer->naughtyRetrieve(coll_hash,coll);
-	if(sc.isFailure()) return StatusCode::FAILURE;
-	if(nullptr ==  coll) {
-	  digitCollection = new TgcDigitCollection(elemId, coll_hash);
+        if (coll_hash >= collections.size()) {
+          collections.resize (coll_hash+1);
+        }
+  	digitCollection = collections[coll_hash].get();
+	if(nullptr ==  digitCollection) {
+          collections[coll_hash] = std::make_unique<TgcDigitCollection>(elemId, coll_hash);
+          digitCollection = collections[coll_hash].get();
 	  ATH_MSG_DEBUG("Digit Id(1st) = " << m_idHelper->show_to_string(newDigiId)
 			<< " BC tag = " << newBcTag << " Coll. key = " << coll_hash); 
-	  digitCollection->push_back(newDigit);
-	  StatusCode status = digitContainer->addCollection(digitCollection, coll_hash);
-	  if(status.isFailure()) {
-	    ATH_MSG_WARNING("Couldn't record TgcDigitCollection with key=" << coll_hash << " in StoreGate!"); 
-	  } else {
-	    ATH_MSG_DEBUG("New TgcHitCollection with key=" << coll_hash << " recorded in StoreGate."); 
-	  }
+	  digitCollection->push_back(std::move(newDigit));
 	} else {
-	  digitCollection = coll;
-
 	  // to avoid to store digits with identical id
 	  TgcDigitCollection::const_iterator it_tgcDigit;
 	  for(it_tgcDigit=digitCollection->begin(); it_tgcDigit != digitCollection->end(); ++it_tgcDigit) {
@@ -383,13 +378,12 @@ StatusCode TgcDigitizationTool::digitizeCore(const EventContext& ctx) {
 	      ATH_MSG_DEBUG("Duplicate digit(removed) = "
 			    << m_idHelper->show_to_string(newDigiId, &context) 
 			    << " BC tag = " << newBcTag);  
-	      delete newDigit; 
-	      newDigit = nullptr;
+	      newDigit.reset();
 	      break;
 	    }
 	  }
 	  if(!duplicate) {
-	    digitCollection->push_back(newDigit);
+	    digitCollection->push_back(std::move(newDigit));
 	    ATH_MSG_DEBUG("Digit Id= " << m_idHelper->show_to_string(newDigiId) 
 			  << " BC tag = " << newBcTag); 
 	  }
@@ -429,6 +423,12 @@ StatusCode TgcDigitizationTool::digitizeCore(const EventContext& ctx) {
       digiHits = nullptr;
     }//while(i != e)
   }//while(m_thpcTGC->nextDetectorElement(i, e))
+
+  for (size_t coll_hash = 0; coll_hash < collections.size(); ++coll_hash) {
+    if (collections[coll_hash]) {
+      ATH_CHECK( digitContainer->addCollection (collections[coll_hash].release(), coll_hash) );
+    }
+  }
 
   return StatusCode::SUCCESS;
 }

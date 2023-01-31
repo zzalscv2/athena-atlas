@@ -11,13 +11,17 @@ ElectronValidationPlots::ElectronValidationPlots(PlotBase* pParent, const std::s
 										      m_oTruthAllPlots(this, "Truth/All/", "Truth Electron All"),
 										      m_oTruthAllIsoPlots(this, "Truth/All/Iso/", "Truth Electron Prompt"),
 										      m_oTruthIsoPlots(this, "Truth/Iso/", "Truth Electron Prompt"),
+                                              m_oTruthAllPromptPlots(this, "Truth/All/Prompt/", "Truth Electron Prompt"),
+                                              m_oTruthPromptElecPlots(this, "Truth/Prompt_elec/", "Truth Electron Prompt from EgammaTruthContainer"),
 										      author(nullptr),
 										      mu_average(nullptr),
-							                              mu_actual(nullptr),
+                                              mu_actual(nullptr),
 										      res_et(nullptr),
 										      res_eta(nullptr),
 										      res_et_cut(nullptr),
 										      res_eta_cut(nullptr),
+                                              res_et_cut_pt_20(nullptr),
+                                              res_eta_cut_pt_20(nullptr),
 										      //pt_ratio(nullptr),
 										      matrix(nullptr)
 
@@ -32,6 +36,8 @@ void ElectronValidationPlots::initializePlots(){
   res_eta      = BookTProfile("res_eta"," IsoElectron;#eta;(E_{T} - E_{T}^{Truth})/E_{T}^{Truth}",50, -2.5, 2.5);
   res_et_cut   = BookTProfile("res_et_cut"," IsoElectron;E_{T}^{Truth}, [GeV];(E_{T} - E_{T}^{Truth})/E_{T}^{Truth}",100, 0., 200.);
   res_eta_cut  = BookTProfile("res_eta_cut"," IsoElectron;#eta;(E_{T} - E_{T}^{Truth})/E_{T}^{Truth}",50, -2.5, 2.5);
+  res_et_cut_pt_20   = BookTProfile("res_et_cut_pt_20"," Prompt Electron;E_{T}^{Truth}, [GeV];(E_{T} - E_{T}^{Truth})/E_{T}^{Truth}",100, 0., 200.);
+  res_eta_cut_pt_20  = BookTProfile("res_eta_cut_pt_20"," Prompt Electron;#eta;(E_{T} - E_{T}^{Truth})/E_{T}^{Truth}",50, -2.5, 2.5);
   matrix       = Book2D("matrix","reco vs truth pt",200,0.,200.,200,0.,200.);
 
 }

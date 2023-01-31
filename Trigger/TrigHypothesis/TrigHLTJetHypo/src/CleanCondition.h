@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGHLTJETHYPO_CLEANCONDITION_H
@@ -25,7 +25,7 @@ class ITrigJetHypoInfoCollector;
 
 class CleanCondition: public ICondition{
  public:
-   CleanCondition(std::string cName);
+   CleanCondition(const std::string& cName);
 
    bool isSatisfied(const HypoJetVector &,
                     const std::unique_ptr<ITrigJetHypoInfoCollector> &) const override;

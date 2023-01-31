@@ -230,7 +230,6 @@ StatusCode PixelRodDecoder::fillCollection( const ROBFragment *robFrag, IPixelRD
     generalwarning("In ROB 0x" << std::hex << robId <<  ": IBL/DBM SLink number not in correct range (0-3): SLink = " << std::dec << sLinkSourceId);
   }
   // Store length of module fragments, for monitoring
-  uint32_t nwords_in_module_fragment = 0;
   bool corruptionError = false;
   // To check duplicated pixels
   std::unordered_set<Identifier> foundPixels;
@@ -241,7 +240,7 @@ StatusCode PixelRodDecoder::fillCollection( const ROBFragment *robFrag, IPixelRD
     const uint32_t rawDataWord = vint[dataword_it];
     corruptionError = corruptionError || checkDataWordsCorruption( rawDataWord );
     uint32_t word_type = getDataType(rawDataWord, link_start);   // get type of data word
-    ++nwords_in_module_fragment;
+
     serviceCodeCounter = 0;
     serviceCode = 0;
 
@@ -297,7 +296,6 @@ StatusCode PixelRodDecoder::fillCollection( const ROBFragment *robFrag, IPixelRD
         isIBLModule = false;
         isDBMModule = false;
         countHitCondensedWords = 0;
-        nwords_in_module_fragment = 1;
         if (m_is_ibl_present) {
           isIBLModule = isIBL(robId);
           isDBMModule = isDBM(robId);

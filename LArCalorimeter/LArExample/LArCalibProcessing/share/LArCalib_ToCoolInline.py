@@ -33,6 +33,11 @@ if 'foldertag' not in dir():
    else:
       foldertag = '-UPD3-00'
 
+if 'foldertag' not in dir():
+   if SuperCells:
+      foldertag = '-UPD3-01'
+   else:
+      foldertag = '-UPD3-00'
 if 'sqliteIn' not in dir():
   sqliteIn="freshConstants.db"
 
@@ -92,23 +97,28 @@ theLArCompleteToFlat.FakeEMBPSLowGain=True
 theLArCompleteToFlat.isSC = SuperCells
 
 outTypes = []
-
+overrides = []
 for (fldr,tag,key,classtype) in inputFolders:
   if "Pedestal" in fldr:
     outTypes.append("Pedestal")
     theLArCompleteToFlat.PedestalInput=key
+    overrides.extend(["Pedestal", "PedestalRMS"])
   elif "Ramp" in fldr:
     outTypes.append("Ramp")
     theLArCompleteToFlat.RampInput=key
+    overrides.extend(["RampVec"])
   elif "OFC" in fldr:
     outTypes.append("OFC")
     theLArCompleteToFlat.OFCInput=key
+    overrides.extend(["OFCa", "OFCb","TimeOffset"])
   elif "MphysOverMcal" in fldr:
     outTypes.append("MphysOverMcal")
     theLArCompleteToFlat.MphysOverMcalInput=key
+    overrides.extend(["MphysOverMcal"])
   elif "Shape" in fldr:
     outTypes.append("Shape")
     theLArCompleteToFlat.ShapeInput=key
+    overrides.extend(["Shape"])
   if len(tag):
      conddb.addFolder("","<db>"+inputDB+"</db>"+fldr+"<tag>"+tag+"</tag>",className=classtype)
   else:
@@ -124,7 +134,6 @@ if "outObjects" not in dir():
   outObjects=["CondAttrListCollection#/LAR/"+flatName+"/"+ot for ot in outTypes]
 
 outTags=[]
-
 from RegistrationServices.OutputConditionsAlg import OutputConditionsAlg
 theOutputConditionsAlgRec=OutputConditionsAlg("OutputConditionsAlgInline","dummy.root", outObjects,outTags,True)
 
@@ -136,11 +145,12 @@ from RegistrationServices.RegistrationServicesConf import IOVRegistrationSvc
 svcMgr += IOVRegistrationSvc()
 svcMgr.IOVRegistrationSvc.RecreateFolders = True
 svcMgr.IOVRegistrationSvc.SVFolder=True
-svcMgr.IOVRegistrationSvc.OverrideNames += [ "Pedestal","PedestalRMS","OFCa"   ,"OFCb"    ,"TimeOffset","RampVec","Shape","ShapeDer","HVScaleCorr","MphysOverMcal","DAC2uA","uA2MeV"]
+print("OVERRIDES ARE:",overrides)
+svcMgr.IOVRegistrationSvc.OverrideNames = overrides
 types=[]
 for i in range(len(svcMgr.IOVRegistrationSvc.OverrideNames)):
     types.append("Blob16M");
-svcMgr.IOVRegistrationSvc.OverrideTypes += types;
+svcMgr.IOVRegistrationSvc.OverrideTypes = types;
 
 svcMgr.DetectorStore.Dump=True
 

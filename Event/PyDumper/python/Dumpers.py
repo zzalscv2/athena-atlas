@@ -25,7 +25,8 @@ from functools import cmp_to_key
 from math import \
      log as math_log,\
      sqrt as math_sqrt,\
-     hypot as math_hypot
+     hypot as math_hypot, \
+     isnan as math_isnan
 
 from AthenaPython import PyAthena
 from PyUtils.fprint import fprint, fprintln, fwrite
@@ -56,6 +57,10 @@ muonNull = cppyy.bind_object(cppyy.nullptr, Muon) if Muon else None
 InDet = getattr (cppyy.gbl, 'InDet', None)
 InDetLowBetaCandidate = getattr (InDet, 'InDetLowBetaCandidate', None)
 InDetLowBetaCandidateNull = cppyy.bind_object(cppyy.nullptr, InDetLowBetaCandidate) if InDetLowBetaCandidate else None
+
+Trk = getattr (cppyy.gbl, 'Trk', None)
+FitQuality = getattr (Trk, 'FitQuality', None)
+fitQualityNull = cppyy.bind_object(cppyy.nullptr, FitQuality) if FitQuality else None
 
 
 # Work around a cling bug.
@@ -141,6 +146,8 @@ def signalstate (o, state):
 
 
 def daz(f):
+    if math_isnan(f):
+        return 'nan'
     if abs(f) < 1e-38:
         return 0.0
     return f
@@ -1591,7 +1598,7 @@ def dump_TrackParticle (p, f):
         dump_Threevec (vx.recVertex().position(), f)
     else:
         fprint (f, tonone (vx))
-    if p.fitQuality():
+    if p.fitQuality() != fitQualityNull:
         fprint (f, '\n        fq')
         dump_FitQuality (p.fitQuality(), f)
     if p.trackSummary():

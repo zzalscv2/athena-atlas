@@ -9,7 +9,6 @@
 #include "TrkParameters/TrackParameters.h"
 #include "InDetRIO_OnTrack/TRT_DriftCircleOnTrack.h"
 #include "CLHEP/GenericFunctions/CumulativeChiSquare.hh"
-#include "TMath.h"
 #include <vector>
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -92,12 +91,12 @@ Trk::TrackScore InDet::InDetCosmicScoringTool::simpleScore( const Trk::Track& tr
     
     if ((nWeightedClusters >= m_nWeightedClustersMin) and (trthits >= m_minTRTHits)){ 
       // calculate track score only if min number of hits
-      int tubehits=0,drifthits=0;
-      for (unsigned int i=0;i<track.measurementsOnTrack()->size();i++){
-	if (dynamic_cast<const InDet::TRT_DriftCircleOnTrack*>((*track.measurementsOnTrack())[i])){
-	  double error=sqrt((*track.measurementsOnTrack())[i]->localCovariance()(0,0));
+      int tubehits=0;
+      for (const auto *i : *track.measurementsOnTrack()){
+	if (dynamic_cast<const InDet::TRT_DriftCircleOnTrack*>(i)){
+	  double error=sqrt(i->localCovariance()(0,0));
 	  if (error>1) tubehits++;
-	  else drifthits++;
+	  
 	  
 	}
       }

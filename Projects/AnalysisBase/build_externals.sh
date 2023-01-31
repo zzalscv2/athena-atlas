@@ -9,7 +9,9 @@
 ATLAS_PROJECT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 ATLAS_EXT_PROJECT_NAME="AnalysisBaseExternals"
 ATLAS_BUILDTYPE="RelWithDebInfo"
-ATLAS_EXTRA_CMAKE_ARGS=(-DATLAS_ONNXRUNTIME_USE_CUDA=FALSE)
+ATLAS_EXTRA_CMAKE_ARGS=(-DATLAS_ONNXRUNTIME_USE_CUDA=FALSE
+                        -DATLAS_DAVIX_PATCH="PATCH_COMMAND;sed;-i.orig;51d;deps/curl/CMakeLists.txt"
+                        -DATLAS_DAVIX_FORCEDOWNLOAD_MESSAGE="Forcing the re-download of Davix (2022.12.04.)")
 ATLAS_EXTRA_MAKE_ARGS=()
 
 # Let "the common script" do all the heavy lifting.

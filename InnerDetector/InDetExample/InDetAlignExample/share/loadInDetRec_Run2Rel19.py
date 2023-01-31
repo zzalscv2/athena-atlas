@@ -208,8 +208,6 @@ else:
 ##Implementing x277 requirements  PF 26/10/2014
 #rec.doJetMissingETTag=False  -> Not needed for this Jo since it properly set the Calo off
 rec.doTau=False
-from TrigHLTMonitoring.HLTMonFlags import HLTMonFlags
-HLTMonFlags.doBphys=False
 from AthenaMonitoring import DQMonFlags
 DQMonFlags.doJetMon=False
 DQMonFlags.doMissingEtMon=False

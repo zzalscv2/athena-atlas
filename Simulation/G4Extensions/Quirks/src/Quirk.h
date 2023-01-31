@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef QUIRK_H
@@ -26,15 +26,11 @@ public:
         G4double            magneticMoment = 0.0
     );
     ~Quirk();
-    InfracolorForce& GetStringIn() const;
+    const InfracolorForce& GetStringIn() const { return *m_stringIn; }
+    InfracolorForce& GetStringIn() { return *m_stringIn; }
 
 private:
     InfracolorForce* m_stringIn;
 };
-
-/** Force on this quirk from its partner */
-inline InfracolorForce& Quirk::GetStringIn() const {
-    return *m_stringIn;
-}
 
 #endif

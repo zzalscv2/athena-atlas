@@ -37,7 +37,7 @@ Some of the other classes are described here:
  - PixelDetectorFactory: Top level factory. It in turn calls the component factories.
  - GeoVPixelFactory: %Base class for all component factories.
  - PixelGeometryManager: %Base class for interfaces to primary numbers. 
- - OraclePixGeoManager: Interface to primary numbers from the Detector Description Database.
+ - DBPixelGeoManager: Interface to primary numbers from the Detector Description Database.
 
 
 

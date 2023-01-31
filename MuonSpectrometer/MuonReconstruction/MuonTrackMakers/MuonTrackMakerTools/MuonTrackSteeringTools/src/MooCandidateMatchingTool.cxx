@@ -1030,8 +1030,7 @@ namespace Muon {
                 // normal (non-overlap) MDT segments have no X nor phi(angleXZ) measurement, and give error on local angleYZ
 
                 // Y,angleYZ 2x2 sub-set of predicted covariance
-                Amg::MatrixX predCovar(2, 2);
-                predCovar.setIdentity();
+                AmgSymMatrix(2) predCovar{AmgSymMatrix(2)::Zero()};
                 predCovar(0, 0) = localPredCovar(Trk::locY, Trk::locY);    // Y
                 predCovar(1, 1) = localPredCovar(Trk::theta, Trk::theta);  // angleYZ
                 predCovar(1, 0) = localPredCovar(Trk::theta, Trk::locY);   // also sets (0,1)
@@ -1039,7 +1038,7 @@ namespace Muon {
                 info.predictionCovariance = predCovar;
 
                 // Y,angleYZ 2x2 sub-set of measured covariance
-                Amg::MatrixX measCovar(2, 2);
+                AmgSymMatrix(2) measCovar{AmgSymMatrix(2)::Zero()};
                 measCovar.setIdentity();
                 measCovar(0, 0) = measErrors(Trk::locY, Trk::locY);
                 measCovar(1, 1) = measErrors(Trk::theta, Trk::theta);
@@ -1051,7 +1050,11 @@ namespace Muon {
                 // add alignment errors
                 info.totalCovariance(0, 0) += m_alignErrorPosY * m_alignErrorPosY;
                 info.totalCovariance(1, 1) += m_alignErrorAngleY * m_alignErrorAngleY;
-
+                if (std::abs(info.totalCovariance.determinant()) < 
+                        std::numeric_limits<float>::epsilon()){
+                    info.reason = TrackSegmentMatchResult::NoMeasErrors;
+                    return;
+                }
                 // now fill the difference vector
                 Amg::VectorX diffVec(2);
                 diffVec[0] = info.localPosYDiff;

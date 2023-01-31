@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # self test of ComponentAccumulator
 
@@ -16,8 +16,6 @@ import unittest
 
 TestAlgo = CompFactory.HelloAlg
 
-
-Configurable.configurableRun3Behavior=True
 ComponentAccumulator.debugMode="trackCA trackCondAlgo trackPublicTool trackEventAlgo"
 class TestComponentAccumulator( unittest.TestCase ):
     def setUp(self):
@@ -567,10 +565,11 @@ class TestSequencesMerging( unittest.TestCase ):
         pass
 
     def test_sequences_merging(self):
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        if '_ATHENA_GENERIC_INPUTFILE_NAME_' in ConfigFlags.Input.Files:
-            ConfigFlags.Input.Files = []
-        ConfigFlags.lock()
+        from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        flags = initConfigFlags()
+        if '_ATHENA_GENERIC_INPUTFILE_NAME_' in flags.Input.Files:
+            flags.Input.Files = []
+        flags.lock()
         from AthenaCommon.Logging import logging
         logging.getLogger('ComponentAccumulator').setLevel(DEBUG)
         
@@ -583,7 +582,7 @@ class TestSequencesMerging( unittest.TestCase ):
 
         print("ca2")
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-        ca2 = OutputStreamCfg(ConfigFlags, "RDO", ItemList = [
+        ca2 = OutputStreamCfg(flags, "RDO", ItemList = [
             "SCT_RDO_Container#SCT_RDOs",
             "InDetSimDataCollection#SCT_SDO_Map"])
         ca2.printConfig()
@@ -596,7 +595,7 @@ class TestSequencesMerging( unittest.TestCase ):
                 
         print("Instantiating top CA")
         from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-        topca = MainServicesCfg( ConfigFlags )
+        topca = MainServicesCfg(flags)
         topca.printConfig()
 
         print("Merging to the top level CA")        
@@ -610,10 +609,11 @@ class TestDifferentSequencesMerging( unittest.TestCase ):
         pass
 
     def test_sequences_merging(self):
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        if '_ATHENA_GENERIC_INPUTFILE_NAME_' in ConfigFlags.Input.Files:
-            ConfigFlags.Input.Files = []
-        ConfigFlags.lock()
+        from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        flags = initConfigFlags()
+        if '_ATHENA_GENERIC_INPUTFILE_NAME_' in flags.Input.Files:
+            flags.Input.Files = []
+        flags.lock()
         from AthenaCommon.Logging import logging
         logging.getLogger('ComponentAccumulator').setLevel(DEBUG)
         

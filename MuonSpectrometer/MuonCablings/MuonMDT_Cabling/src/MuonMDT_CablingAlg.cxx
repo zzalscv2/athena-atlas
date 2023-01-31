@@ -306,11 +306,11 @@ StatusCode MuonMDT_CablingAlg::loadMezzanineSchema(const EventContext& ctx, Even
     /// Add the October fest mezznines
     if (m_isRun3) {
         if (!cabling_map.addMezzanineLine(61, 0, 666666, msgStream())) {
-            ATH_MSG_ERROR("There's the custom saying everything that happens @ bavarian regional customs also remains there");
+            ATH_MSG_ERROR("Failed to add the BIS78 regular mezzanines.");
             return StatusCode::FAILURE;
         }
         if (!cabling_map.addMezzanineLine(71, 0, 666666, msgStream())) {
-            ATH_MSG_ERROR("There's the custom saying everything that happens @ bavarian regional customs also remains there");
+            ATH_MSG_ERROR("There's the common idiom: everything that happens @ bavarian regional customs also remains there");
             return StatusCode::FAILURE;
         }
     }

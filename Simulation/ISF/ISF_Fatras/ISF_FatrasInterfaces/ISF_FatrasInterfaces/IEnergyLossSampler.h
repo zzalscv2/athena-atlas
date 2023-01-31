@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,6 +15,7 @@
 // Trk
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
+#include "CxxUtils/checker_macros.h"
 
 // STL
 #include <utility>
@@ -35,7 +36,8 @@ namespace iFatras {
      @author Noemi.Calace@cern.ch, Andreas.Salzburger@cern.ch
   */
 
-  class IEnergyLossSampler : virtual public IAlgTool {
+  // deprecated: ATLASSIM-6020
+  class ATLAS_NOT_THREAD_SAFE IEnergyLossSampler : virtual public IAlgTool {
     
   public:
     /**Virtual destructor*/

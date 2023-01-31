@@ -29,10 +29,23 @@ def OutputStreamCfg(configFlags, streamName, ItemList=[], MetadataItemList=[],
    writingTool = CompFactory.AthenaOutputStreamTool(f"Stream{streamName}Tool",
                                                     DataHeaderKey=outputStreamName)
 
+   # If we're running in augmentation mode, configure the writing tool accordingly
+   parentStream = f"Output.{streamName}ParentStream"
+   childStream = f"Output.{streamName}ChildStream"
+   if configFlags.hasFlag(childStream):
+      writingTool.SaveDecisions = True
+   elif configFlags.hasFlag(parentStream):
+      disableEventTag = True
+      writingTool.OutputCollection = f"POOLContainer_{streamName}"
+      writingTool.PoolContainerPrefix = f"CollectionTree_{streamName}"
+      writingTool.MetaDataOutputCollection = f"MetaDataHdr_{streamName}"
+      writingTool.MetaDataPoolContainerPrefix = f"MetaData_{streamName}"
+      msg.info(f"Stream {streamName} running in augmentation mode with {configFlags._get(parentStream)} as parent")
+
    # In DAOD production the EventInfo is prepared specially by the SlimmingHelper to ensure it is written in AuxDyn form
    # So for derivations the ItemList from the SlimmingHelper alone is used without the extra EventInfo items
    finalItemList = []
-   if ("DAOD_" or "D2AOD_") in streamName:
+   if any(name in streamName for name in {"DAOD_", "D2AOD_"}):
       finalItemList = ItemList
    else:
       finalItemList = [f"xAOD::EventInfo#{eventInfoKey}", f"xAOD::EventAuxInfo#{eventInfoKey}Aux."] + ItemList 
@@ -41,12 +54,18 @@ def OutputStreamCfg(configFlags, streamName, ItemList=[], MetadataItemList=[],
       f"OutputStream{streamName}",
       StreamName=outputStreamName,
       WritingTool=writingTool,
-      ItemList = finalItemList,
-      MetadataItemList = MetadataItemList,
+      ItemList=finalItemList,
+      MetadataItemList=MetadataItemList,
       OutputFile=fileName,
    )
    outputStream.AcceptAlgs += AcceptAlgs
    outputStream.ExtraOutputs += [("DataHeader", f"StoreGateSvc+{outputStreamName}")]
+   if configFlags.Concurrency.NumThreads > 0 and configFlags.Scheduler.CheckOutputUsage:
+      outputStream.ExtraInputs = [tuple(l.split('#')) for l in finalItemList if '*' not in l and 'Aux' not in l]
+      # Ignore dependencies
+      from AthenaConfiguration.MainServicesConfig import OutputUsageIgnoreCfg
+      result.merge(OutputUsageIgnoreCfg(configFlags, outputStream.name))
+
    result.addService(CompFactory.StoreGateSvc("MetaDataStore"))
    outputStream.MetadataStore = result.getService("MetaDataStore")
    outputStream.MetadataItemList += [
@@ -142,6 +161,7 @@ def OutputStreamCfg(configFlags, streamName, ItemList=[], MetadataItemList=[],
    result.addEventAlgo(outputStream, domain='IO')
    return result
 
+
 def addToESD(configFlags, itemOrList, **kwargs):
    """
    Adds items to ESD stream
@@ -155,6 +175,7 @@ def addToESD(configFlags, itemOrList, **kwargs):
       return ComponentAccumulator()
    items = [itemOrList] if isinstance(itemOrList, str) else itemOrList
    return OutputStreamCfg(configFlags, "ESD", ItemList=items, **kwargs)
+
 
 def addToAOD(configFlags, itemOrList, **kwargs):
    """

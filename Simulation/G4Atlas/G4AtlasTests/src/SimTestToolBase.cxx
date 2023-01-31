@@ -5,6 +5,7 @@
 #include "SimTestToolBase.h"
 
 #include "AtlasHepMC/GenEvent.h"
+#include "AtlasHepMC/MagicNumbers.h"
 #include "GeneratorObjects/McEventCollection.h"
 
 SimTestToolBase::SimTestToolBase(const std::string& type, 
@@ -23,7 +24,7 @@ HepMC::ConstGenParticlePtr   SimTestToolBase::getPrimary()
     DataVector<HepMC::GenEvent>::const_iterator e;
     for (e=mcCollection->begin();e!=mcCollection->end(); ++e) {
       for (auto p : (**e)) {
-	if ( HepMC::barcode(p)<200000 ) {
+	if (!HepMC::is_simulation_particle(p)) {
 	  return p;
 	}
       }

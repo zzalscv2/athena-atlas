@@ -200,7 +200,7 @@ class CtbSim(TBSimSkeleton):
         from AtlasGeoModel import GeoModelInit  # noqa: F401
         if(DetFlags.Calo_on()):
             # Common for the Calo
-            include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+            include( "CaloConditions/CaloConditions_jobOptions.py" )
             include( "CaloIdCnv/CaloIdCnv_joboptions.py" )
             if(DetFlags.em_on()):
                 include("LArDetDescr/LArDetDescr_H8_joboptions.py")
@@ -349,7 +349,7 @@ class Tile2000_2003(TBSimSkeleton):
         from AtlasGeoModel import GeoModelInit  # noqa: F401
         if(DetFlags.Calo_on()):
             # Common for the Calo
-            include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+            include( "CaloConditions/CaloConditions_jobOptions.py" )
             include( "CaloIdCnv/CaloIdCnv_joboptions.py" )
         ##--- Persistency of test-beam layout ----------------------------------
         if jobproperties.AthenaCommonFlags.PoolHitsOutput.statusOn :
@@ -491,7 +491,7 @@ class LArH6_TB(TBSimSkeleton):
 
         if(DetFlags.Calo_on()):
             # Common for the Calo
-            include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+            include( "CaloConditions/CaloConditions_jobOptions.py" )
             include( "CaloIdCnv/CaloIdCnv_joboptions.py" )
 
         ## Explicitly create DetectorGeometrySvc - temporary fix

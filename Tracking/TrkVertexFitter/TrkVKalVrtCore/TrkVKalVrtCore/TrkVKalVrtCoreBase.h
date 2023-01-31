@@ -169,11 +169,11 @@ namespace Trk {
        std::vector<std::unique_ptr<VKConstraintBase> > ConstraintList;
 
 
-       void setRefV(double []) noexcept;
-       void setCnstV(double []) noexcept;
-       void setRefIterV(double []) noexcept;
-       void setIniV(double []) noexcept;
-       void setFitV(double []) noexcept;
+       void setRefV(double v[3]) noexcept;
+       void setCnstV(double v[3]) noexcept;
+       void setRefIterV(double v[]) noexcept;
+       void setIniV(double v[3]) noexcept;
+       void setFitV(double v[3]) noexcept;
 
 
        VKVertex * nextCascadeVrt;

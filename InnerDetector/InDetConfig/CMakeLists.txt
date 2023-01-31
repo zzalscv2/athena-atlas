@@ -21,12 +21,12 @@ if (NOT SIMULATIONBASE)
 
     atlas_add_test( TRTSegmentFindingConfig_test
         SCRIPT python -m InDetConfig.TRTSegmentFindingConfig
-        PROPERTIES TIMEOUT 300
+        PROPERTIES TIMEOUT 600
         POST_EXEC_SCRIPT nopost.sh)
 
     atlas_add_test( TrackRecoConfig_test
         SCRIPT python -m InDetConfig.TrackRecoConfig
-        PROPERTIES TIMEOUT 600
+        PROPERTIES TIMEOUT 900
         POST_EXEC_SCRIPT nopost.sh)
 
     atlas_add_test( ITkTrackRecoConfig_test
@@ -34,22 +34,22 @@ if (NOT SIMULATIONBASE)
         POST_EXEC_SCRIPT nopost.sh)
 
     atlas_add_test( VertexFindingConfigGaussAgaptive_test
-        SCRIPT python -m InDetConfig.VertexFindingConfig  GaussAdaptiveMultiFinding
+        SCRIPT python -m InDetConfig.InDetPriVxFinderConfig  GaussAdaptiveMultiFinding
         POST_EXEC_SCRIPT nopost.sh)
 
     atlas_add_test( VertexFindingConfigActsGaussAgaptive_test
-        SCRIPT python -m InDetConfig.VertexFindingConfig ActsGaussAdaptiveMultiFinding
+        SCRIPT python -m InDetConfig.InDetPriVxFinderConfig ActsGaussAdaptiveMultiFinding
         POST_EXEC_SCRIPT nopost.sh)
 
         atlas_add_test( VertexFindingConfigAdaptive_test
-        SCRIPT python -m InDetConfig.VertexFindingConfig AdaptiveMultiFinding
+        SCRIPT python -m InDetConfig.InDetPriVxFinderConfig AdaptiveMultiFinding
         POST_EXEC_SCRIPT nopost.sh) 
 
     atlas_add_test( VertexFindingConfigIterative_test
-        SCRIPT python -m InDetConfig.VertexFindingConfig IterativeFinding
+        SCRIPT python -m InDetConfig.InDetPriVxFinderConfig IterativeFinding
         POST_EXEC_SCRIPT nopost.sh)
 
     atlas_add_test( VertexFindingConfigGaussIterative_test
-        SCRIPT python -m InDetConfig.VertexFindingConfig GaussIterativeFinding
+        SCRIPT python -m InDetConfig.InDetPriVxFinderConfig GaussIterativeFinding
         POST_EXEC_SCRIPT nopost.sh)
 endif()

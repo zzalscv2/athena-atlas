@@ -87,55 +87,6 @@ emptyRecycleBins(Trk::IMultiStateExtrapolator::Cache& cache)
   cache.m_tpRecycleBin.clear();
 }
 
-/** GSF Method to propagate a number of components simultaneously */
-inline Trk::MultiComponentState
-multiStatePropagate(
-  const EventContext& ctx,
-  const Trk::IPropagator& propagator,
-  const Trk::MultiComponentState& multiComponentState,
-  const Trk::Surface& surface,
-  const Trk::MagneticFieldProperties& fieldProperties,
-  const Trk::PropDirection direction = Trk::anyDirection,
-  const Trk::BoundaryCheck& boundaryCheck = true,
-  const Trk::ParticleHypothesis particleHypothesis = Trk::nonInteracting)
-{
-
-  Trk::MultiComponentState propagatedState{};
-  propagatedState.reserve(multiComponentState.size());
-  Trk::MultiComponentState::const_iterator component =
-    multiComponentState.begin();
-  double sumw(0); // sum of the weights of the propagated parameters
-  for (; component != multiComponentState.end(); ++component) {
-    const Trk::TrackParameters* currentParameters = component->first.get();
-    if (!currentParameters) {
-      continue;
-    }
-    auto propagatedParameters = propagator.propagate(ctx,
-                                                     *currentParameters,
-                                                     surface,
-                                                     direction,
-                                                     boundaryCheck,
-                                                     fieldProperties,
-                                                     particleHypothesis);
-    if (!propagatedParameters) {
-      continue;
-    }
-    sumw += component->second;
-    // Propagation does not affect the weightings of the states
-    propagatedState.emplace_back(std::move(propagatedParameters),
-                                 component->second);
-  }
-  // Protect low weight propagation
-  // We want at least  1./(max number of states)
-  // to have been propagated.
-  constexpr double minPropWeight =
-    1. / GSFConstants::maxNumberofStateComponents;
-  if (sumw < minPropWeight) {
-    propagatedState.clear();
-  }
-  return propagatedState;
-}
-
 int
 radialDirection(const Trk::MultiComponentState& pars, Trk::PropDirection dir)
 {
@@ -148,7 +99,6 @@ radialDirection(const Trk::MultiComponentState& pars, Trk::PropDirection dir)
            ? -1
            : 1;
 }
-
 /**
 Check for radial (perpendicular) direction change,
 returns true if the radial direction change is allowed
@@ -470,14 +420,13 @@ Trk::GsfExtrapolator::extrapolateImpl(
 
   if (!foundFinalBoundary) {
     Trk::MultiComponentState bailOutState =
-      multiStatePropagate(ctx,
-                          *m_propagator,
-                          *currentState,
-                          surface,
-                          m_fieldProperties,
-                          Trk::anyDirection,
-                          boundaryCheck,
-                          particleHypothesis);
+      m_propagator->multiStatePropagate(ctx,
+                                        *currentState,
+                                        surface,
+                                        m_fieldProperties,
+                                        Trk::anyDirection,
+                                        boundaryCheck,
+                                        particleHypothesis);
 
     emptyRecycleBins(cache);
     return bailOutState;
@@ -509,14 +458,13 @@ Trk::GsfExtrapolator::extrapolateImpl(
   }
 
   if (destinationState.empty()) {
-    destinationState = multiStatePropagate(ctx,
-                                           *m_propagator,
-                                           *currentState,
-                                           surface,
-                                           m_fieldProperties,
-                                           Trk::anyDirection,
-                                           boundaryCheck,
-                                           particleHypothesis);
+    destinationState = m_propagator->multiStatePropagate(ctx,
+                                                         *currentState,
+                                                         surface,
+                                                         m_fieldProperties,
+                                                         Trk::anyDirection,
+                                                         boundaryCheck,
+                                                         particleHypothesis);
   }
   emptyRecycleBins(cache);
   return destinationState;
@@ -534,14 +482,13 @@ Trk::GsfExtrapolator::extrapolateDirectlyImpl(
   const Trk::BoundaryCheck& boundaryCheck,
   Trk::ParticleHypothesis particleHypothesis) const
 {
-  return multiStatePropagate(ctx,
-                             *m_propagator,
-                             multiComponentState,
-                             surface,
-                             m_fieldProperties,
-                             direction,
-                             boundaryCheck,
-                             particleHypothesis);
+  return m_propagator->multiStatePropagate(ctx,
+                                           multiComponentState,
+                                           surface,
+                                           m_fieldProperties,
+                                           direction,
+                                           boundaryCheck,
+                                           particleHypothesis);
 }
 
 /*
@@ -828,14 +775,13 @@ Trk::GsfExtrapolator::extrapolateInsideVolume(
   // FALLBACK POINT: If no destination layer is found fall-back and extrapolate
   // directly
   Trk::MultiComponentState returnState =
-    multiStatePropagate(ctx,
-                        *m_propagator,
-                        *currentState,
-                        surface,
-                        m_fieldProperties,
-                        direction,
-                        boundaryCheck,
-                        particleHypothesis);
+    m_propagator->multiStatePropagate(ctx,
+                                      *currentState,
+                                      surface,
+                                      m_fieldProperties,
+                                      direction,
+                                      boundaryCheck,
+                                      particleHypothesis);
 
   // No destination layer exists so layer recall method cannot be used and
   // should be reset
@@ -944,14 +890,13 @@ Trk::GsfExtrapolator::extrapolateToIntermediateLayer(
 
   // Propagate over all components
   Trk::MultiComponentState destinationState =
-    multiStatePropagate(ctx,
-                        *m_propagator,
-                        *initialState,
-                        layer.surfaceRepresentation(),
-                        m_fieldProperties,
-                        direction,
-                        true,
-                        particleHypothesis);
+    m_propagator->multiStatePropagate(ctx,
+                                      *initialState,
+                                      layer.surfaceRepresentation(),
+                                      m_fieldProperties,
+                                      direction,
+                                      true,
+                                      particleHypothesis);
 
   if (destinationState.empty()) {
     return {};
@@ -1019,14 +964,13 @@ Trk::GsfExtrapolator::extrapolateToDestinationLayer(
 
   // Propagate over all components
   Trk::MultiComponentState destinationState =
-    multiStatePropagate(ctx,
-                        *m_propagator,
-                        multiComponentState,
-                        surface,
-                        m_fieldProperties,
-                        direction,
-                        boundaryCheck,
-                        particleHypothesis);
+    m_propagator->multiStatePropagate(ctx,
+                                      multiComponentState,
+                                      surface,
+                                      m_fieldProperties,
+                                      direction,
+                                      boundaryCheck,
+                                      particleHypothesis);
 
   // Require a fall-back if the initial state is close to the destination
   // surface then a fall-back solution is required
@@ -1035,14 +979,13 @@ Trk::GsfExtrapolator::extrapolateToDestinationLayer(
     combinedState = initialState->begin()->first.get();
     if (surface.isOnSurface(
           combinedState->position(), true, 0.5 * layer.thickness())) {
-      destinationState = multiStatePropagate(ctx,
-                                             *m_propagator,
-                                             *initialState,
-                                             surface,
-                                             m_fieldProperties,
-                                             Trk::anyDirection,
-                                             boundaryCheck,
-                                             particleHypothesis);
+      destinationState = m_propagator->multiStatePropagate(ctx,
+                                                           *initialState,
+                                                           surface,
+                                                           m_fieldProperties,
+                                                           Trk::anyDirection,
+                                                           boundaryCheck,
+                                                           particleHypothesis);
     }
     combinedState = nullptr;
     if (destinationState.empty()) {

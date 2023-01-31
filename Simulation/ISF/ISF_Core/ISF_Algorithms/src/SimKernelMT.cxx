@@ -190,7 +190,7 @@ StatusCode ISF::SimKernelMT::execute() {
 
   unsigned int loopCounter{0};
   // loop until there are no more particles to simulate
-  ISF::ConstISFParticleVector particles{};
+  ISF::ISFParticleVector particles{};
   ISimulatorTool* lastSimulator{};
   ISFParticleContainer newSecondaries{};
   while ( particleQueue.size() ) {

@@ -6,7 +6,7 @@
  **     @author  Mark Sutton (sutt@cern.ch)
  **     @date    Tue  8 Feb 2022 09:08:26 GMT
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 #include "TrigInDetAnalysis/Filter_AcceptAll.h"
@@ -14,9 +14,6 @@
 #include "TrigInDetAnalysisUtils/Filters.h"
 #include "TrigInDetAnalysisUtils/Filter_Track.h"
 #include "TrigInDetAnalysisUtils/TagNProbe.h"
-
-// #include "AthenaMonitoring/AthenaMonManager.h"
-// #include "AthenaMonitoring/ManagedMonitorToolTest.h"
 
 #include "TrigInDetAnalysisExample/ChainString.h"
 #include "TrigInDetAnalysisExample/TIDAHistogram.h"
@@ -45,7 +42,7 @@ TrigR3Mon::TrigR3Mon( const std::string & name, ISvcLocator* pSvcLocator)
      m_legacy(true), 
      m_fiducial_radius(32),
      m_requireDecision(false),
-     m_filter_on_roi(false)  
+     m_filter_on_roi(false)
 {
   msg(MSG::INFO) << "TrigR3Mon::TrigR3Mon() compiled: " << __DATE__ << " " << __TIME__ << endmsg;
 
@@ -56,6 +53,8 @@ TrigR3Mon::TrigR3Mon( const std::string & name, ISvcLocator* pSvcLocator)
   declareProperty( "d0Cut",   m_d0Cut   = 1000 );
   declareProperty( "z0Cut",   m_z0Cut   = 2000 );
   declareProperty( "siHits",  m_siHits  = -1 );
+  m_pixHits=0;
+  m_sctHits=0;
 
   declareProperty( "trtHits",   m_trtHits   = -2 );
   declareProperty( "strawHits", m_strawHits = -2 );
@@ -194,7 +193,7 @@ StatusCode TrigR3Mon::bookHistograms() {
   /// make a copy of the input truth setting job option, so that we can
   /// change it if required
 
-  bool m_mcTruth = m_mcTruthIn;
+  bool mcTruth = m_mcTruthIn;
 
   if ( m_buildNtuple ) { 
   
@@ -215,7 +214,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 	  
 	m_sequences.back()->releaseData(m_releaseMetaData);
 	if ( m_requireDecision ) m_sequences.back()->setRequireDecision(true);
-	if ( m_mcTruthIn )       m_sequences.back()->setMCTruth(m_mcTruth);
+	if ( m_mcTruthIn )       m_sequences.back()->setMCTruth(mcTruth);
 	m_sequences.back()->setFilterOnRoi( m_filter_on_roi );
   }
   else if ( m_analysis_config=="Tier0" ) {
@@ -291,7 +290,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 	/// check for configured chains only ...
 	
 	if ( chainName.head().find("HLT_")==std::string::npos ) {
-	  toolitr++;
+	  ++toolitr;
 	  continue;
 	}
 	
@@ -305,7 +304,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 	
 	if ( selectChain=="" ) { 
 	  msg(MSG::WARNING) << "^[[91;1m" << "No chain matched\tchain input " << chainName.head() << "  :  " << chainName.tail() << "^[[m"<< endmsg;
-	  toolitr++;
+	  ++toolitr;
 	  continue;
 	}
 	  
@@ -351,18 +350,18 @@ StatusCode TrigR3Mon::bookHistograms() {
 		   ( shifter_ftf<shifterChains && chainName.vtx()!="" && chainName.vtx()==lastvtx ) ) {  
 	      msg(MSG::DEBUG) << "^[[91;1m" << "Matching chain " << selectChain << " excluded - Shifter chain already definied^[[m" << endmsg;
 	      /// pre and postfix operators generate the same code with optimisation
-	      toolitr++;
+	      ++toolitr;
 	      continue;
 	    }
-	    shifter_ftf++;
+	    ++shifter_ftf;
 	    lastvtx = chainName.vtx();
 	  }
 	  else if ( chainName.tail().find("_IDTrig")!=std::string::npos || chainName.tail().find("CosmicsN_EFID")!=std::string::npos ) { 
 	    /// EFID chain
-	    shifter_efid++;
+	    ++shifter_efid;
 	    if ( shifter_efid>shifterChains ) {
 	      msg(MSG::DEBUG) << "^[[91;1m" << "Matching chain " << selectChain << " excluded - Shifter chain already definied^[[m" << endmsg;
-	      toolitr++;
+	      ++toolitr;
 	      continue;
 	    }
 	  }
@@ -371,7 +370,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 	    shifter_efid_run1++;
 	    if ( shifter_efid_run1>shifterChains ) {
 	      msg(MSG::DEBUG) << "^[[91;1m" << "Matching chain " << selectChain << " excluded - Shifter chain already definied^[[m" << endmsg;
-	      toolitr++;
+	      ++toolitr;
 	      continue;
 	    }
 	  }
@@ -385,7 +384,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 	
       }
      
-      toolitr++;
+      ++toolitr;
     }
 	
     m_chainNames = chains;
@@ -405,7 +404,7 @@ StatusCode TrigR3Mon::bookHistograms() {
       allcs.emplace_back( ChainString( allchains[i] ) );
       if ( allcs.back().head().find("HLT_")==0 ) continue;
       if ( allcs.back().head()=="Offline" ) { 
-	m_mcTruth   = false;
+	mcTruth   = false;
 	if ( allcs.back().tail()!="" ) {
 	  if ( allcs.back().tail().find("+")==0 ) { 
 	    mtypes.push_back( allcs.back().tail().substr(1) );
@@ -451,7 +450,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 	  double massMin = 40;
 	  double massMax = 150;
 
-	  if ( m_mcTruth ) tnp = new TagNProbe( "Truth",   massMin, massMax );
+	  if ( mcTruth ) tnp = new TagNProbe( "Truth",   massMin, massMax );
 	  else             tnp = new TagNProbe( "Offline", massMin, massMax );
 
 	  tnp->tag(tag.raw()) ;
@@ -488,7 +487,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 
 	analysis->initialise();
 
-	if ( m_mcTruth ) { 
+	if ( mcTruth ) {
 	    analysis->setPdgID( m_selectTruthPdgId );
 	    analysis->setParentPdgID( m_selectParentTruthPdgId );	    
 

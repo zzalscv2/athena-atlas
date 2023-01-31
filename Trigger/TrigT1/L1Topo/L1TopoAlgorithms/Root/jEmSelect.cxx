@@ -23,7 +23,7 @@ TCS::jEmSelect::jEmSelect(const std::string & name) :
    defineParameter( "OutputWidth", 10 );
    defineParameter( "MinET", 0 );
    defineParameter( "MinEta", 0 );
-   defineParameter( "MaxEta", 0 );
+   defineParameter( "MaxEta", 196 );
    defineParameter( "IsoMin", 0 );
    defineParameter( "Frac1Min", 0 );
    defineParameter( "Frac2Min", 0 );

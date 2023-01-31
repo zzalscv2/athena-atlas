@@ -102,15 +102,15 @@ MuonSegmentSelectionTool::nswSegmentQuality(const MuonSegment& seg, const Identi
     IMuonSegmentHitSummaryTool::HitCounts hitCounts = m_hitSummaryTool->getHitCounts(seg);
     const uint8_t nPrecHits = hitCounts.nnswHits();
     /// For the moment count the micromega hits to precision eta hits
-    const uint8_t nPrecEtaHits = hitCounts.nmmEtaHits + hitCounts.nstgcHits.netaHits;
-    const uint8_t nPrecPhiHits =  nPrecHits - nPrecEtaHits;
+    const uint8_t nPrecEtaHits = hitCounts.nmmHits() + hitCounts.nstgcHits.netaHits;
+    const uint8_t nPrecPhiHits =  hitCounts.nstgcHits.nphiHits;
 
     const uint8_t nMM_Hits = hitCounts.nmmHits();
     const uint8_t nSTGC_Hits = hitCounts.nstgcHits();
     /**********************************/
     /*       cuts for quality level 0 */
     // remove NSW segments with only 3  hits
-    if (nPrecHits < 4) return -1;
+    if (nPrecEtaHits < 2) return -1;
 
     /**********************************/
     /*       cuts for quality level 1 */

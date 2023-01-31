@@ -192,7 +192,8 @@ StatusCode MuCTPIPhase1ByteStreamAlgo::convert( const IROBDataProviderSvc::ROBF*
               if(tmNum==3)
               {
                   slice.mlt.nswMon       = LVL1::MuCTPIBits::maskedWord(word,LVL1::MuCTPIBits::RUN3_NSW_MONITORING_TRIGGER_SHIFT, LVL1::MuCTPIBits::RUN3_NSW_MONITORING_TRIGGER_MASK);
-                  slice.mlt.candOverflow =  LVL1::MuCTPIBits::maskedWord(word,LVL1::MuCTPIBits::RUN3_MULTIPLICITY_OVERFLOW_SHIFT, LVL1::MuCTPIBits::RUN3_MULTIPLICITY_OVERFLOW_MASK);
+                  slice.mlt.candOverflow = LVL1::MuCTPIBits::maskedWord(word,LVL1::MuCTPIBits::RUN3_MULTIPLICITY_OVERFLOW_SHIFT,  LVL1::MuCTPIBits::RUN3_MULTIPLICITY_OVERFLOW_MASK);
+                  slice.mlt.bits         = sliceMultiplicity;
 
                   //process the long mult word into 32 mlt thr counters
                   for(uint iThr=0;iThr<m_muctpi_Nbits.size();iThr++)
@@ -216,7 +217,15 @@ StatusCode MuCTPIPhase1ByteStreamAlgo::convert( const IROBDataProviderSvc::ROBF*
 
           }
           else
-              ATH_MSG_WARNING("MUCTPI DQ DEBUG: skipping Mult processing, no nbits defined");
+          {
+              //if nbits size !=32, then it's not set
+              //for now, ignore, and can fill the histos with the Mult bits, as they come
+              //without decoding
+              //=>suppress this warning
+              //ATH_MSG_WARNING("MUCTPI DQ DEBUG: skipping Mult processing, no nbits defined");
+
+              //todo: add code + histos for Mult bits
+          }
 
           break;
       }

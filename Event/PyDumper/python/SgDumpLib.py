@@ -48,7 +48,14 @@ def _gen_jobo(dct):
             inputFileSummary['geometry'] = 'ATLAS-R1-2012-02-00-00'
 
         from RecExConfig.RecFlags import rec
-        rec.AutoConfiguration = ['everything']
+        # Don't try to rebuild truth.
+        # Need to set this here or autoconfig may lock it on.
+        rec.doTruth.set_Value_and_Lock(False)
+        # Skip auto-config for EVNT files.
+        if inputFileSummary['stream_names'] == ['StreamEVGEN']:
+            rec.AutoConfiguration.set_Value_and_Lock ([])
+        else:
+            rec.AutoConfiguration = ['everything']
         import RecExConfig.AutoConfiguration as auto
         auto.ConfigureFromListOfKeys(rec.AutoConfiguration())
 
@@ -276,13 +283,6 @@ def _run_jobo(job, msg, options):
     app = out
     jobo = _make_jobo(job)
 
-    if options.use_recex_links:
-        sc,out = subprocess.getstatusoutput ('RecExCommon_links.sh')
-        if sc != 0:
-            msg.error("could not run 'RecExCommon_links.sh':\n%s", out)
-            return sc, out
-        msg.info ('installed RecExCommon links')
-    
     sc,out = subprocess.getstatusoutput ('which sh')
     if sc != 0:
         msg.error("could not locate 'sh':\n%s",out)
@@ -371,7 +371,6 @@ def run_sg_dump(files, output,
                 nevts=-1,
                 skip=0,
                 dump_jobo=False,
-                use_recex_links=True,
                 pyalg_cls='PyDumper.PyComps:PySgDumper',
                 include='*',
                 exclude='',
@@ -388,7 +387,6 @@ def run_sg_dump(files, output,
      `dump_jobo` switch to store or not the automatically generated jobo (put
                  the name of the jobo output name in there if you want to keep
                  it)
-     `use_recex_links` switch to run RecExCommon_links and thus a local db replica
      `pyalg_cls` the fully qualified name of the PyAthena.Alg class to process the file(s) content (PySgDumper or DataProxyLoader)
      `include`: comma-separates list of type#key container names to dump.
      `exclude`: comma-separated list of glob patterns for keys/types to ignore.
@@ -462,7 +460,6 @@ def run_sg_dump(files, output,
     msg.info('events:          %s', nevts)
     msg.info('skip:            %s', skip)
     msg.info('out (ascii):     %s', output)
-    msg.info('use recex links: %s', use_recex_links)
     msg.info('pyalg-class:     %s:%s', pyalg_pkg, pyalg_cls)
     msg.info('file_type:       %s', file_type)
     msg.info('include:         %s', include)
@@ -479,9 +476,8 @@ def run_sg_dump(files, output,
 
     from collections import namedtuple
     Options = namedtuple('Options',
-                         'oname use_recex_links do_clean_up athena_opts')
+                         'oname do_clean_up athena_opts')
     opts = Options(oname=output,
-                   use_recex_links=use_recex_links,
                    do_clean_up=do_clean_up,
                    athena_opts=athena_opts)
     

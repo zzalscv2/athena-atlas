@@ -3,7 +3,7 @@
 */
 
 #include "LArRecConditions/LArBadChannelCont.h"
-#include "LArRecConditions/LArBadChannelEnum.h"
+#include "LArRecConditions/LArBadChanBitPacking.h"
 
 
 int main (int /*argc*/, char** /*argv[]*/) {
@@ -11,19 +11,19 @@ int main (int /*argc*/, char** /*argv[]*/) {
   LArBadChannelCont cont;
 
   HWIdentifier id1(0x39569400);
-  LArBadChannel bc1(0x1 << LArBadChannelEnum::sporadicBurstNoiseBit |
-		    0x1 << LArBadChannelEnum::highNoiseHGBit);
+  LArBadChannel bc1(0x1 << LArBadChannel::LArBadChannelEnum::sporadicBurstNoiseBit |
+		    0x1 << LArBadChannel::LArBadChannelEnum::highNoiseHGBit);
   cont.add(id1,bc1);
 
   HWIdentifier id2(0x39568f00);
-  LArBadChannel bc2(0x1 << LArBadChannelEnum::deadReadoutBit);
+  LArBadChannel bc2(0x1 << LArBadChannel::LArBadChannelEnum::deadReadoutBit);
   cont.add(id2,bc2);
 
   HWIdentifier id3(0x3956be00);
-  LArBadChannel bc3(0x1 << LArBadChannelEnum::deadPhysBit);
+  LArBadChannel bc3(0x1 << LArBadChannel::LArBadChannelEnum::deadPhysBit);
   cont.add(id3,bc3);
 
-  LArBadChannel bc2a(0x1 << LArBadChannelEnum::deadCalibBit);
+  LArBadChannel bc2a(0x1 << LArBadChannel::LArBadChannelEnum::deadCalibBit);
   cont.add(id2,bc2a);
   
   

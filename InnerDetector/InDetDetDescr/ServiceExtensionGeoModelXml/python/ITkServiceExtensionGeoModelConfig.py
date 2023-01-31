@@ -6,7 +6,7 @@ def ITkServiceExtensionGeoModelCfg(flags):
     geoModelSvc = acc.getPrimary()
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    ITkServiceExtensionTool = CompFactory.ITk.ServiceExtensionTool()
+    ITkServiceExtensionTool = CompFactory.ITk.ServiceExtensionTool('ITkservices')
     ITkServiceExtensionTool.GmxFilename = "ITKLayouts/Common/Type2Services.gmx"
     ITkServiceExtensionTool.ContainingDetector = "LArBarrel"
     ITkServiceExtensionTool.EnvelopeVolume = "LAr::Barrel::Cryostat::ITkServices"

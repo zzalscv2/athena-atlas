@@ -7,9 +7,9 @@
 
 #include "tauRecTools/ITauToolBase.h"
 
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "xAODTau/TauJetContainer.h"
 #include "xAODTau/TauJetAuxContainer.h"
 #include "xAODPFlow/PFOContainer.h"
@@ -37,12 +37,13 @@
  *  found in the TauRec package.
  */
 
-class TauAODRunnerAlg: public AthAlgorithm {
+class TauAODRunnerAlg: public AthReentrantAlgorithm {
     public:
         TauAODRunnerAlg(const std::string &name, ISvcLocator *);
         ~TauAODRunnerAlg(){};
         virtual StatusCode initialize() override;
-        virtual StatusCode execute() override;
+	virtual StatusCode execute(const EventContext& ctx) const override;
+
     private:
         //Tool handle array
         ToolHandleArray<ITauToolBase>  m_modificationTools{this, "modificationTools", {}, "Tools for modifying the taus"};
@@ -57,6 +58,7 @@ class TauAODRunnerAlg: public AthAlgorithm {
         SG::WriteHandleKey<xAOD::PFOContainer>          m_hadronicPFOOutputContainer{this, "Key_hadronicPFOOutputContainer",    "TauHadronicPFOs_AODReco",      "output tau hadronic pfo key"};
         SG::WriteHandleKey<xAOD::TauTrackContainer>     m_tauTrackOutputContainer   {this, "Key_tauTrackOutputContainer",       "TauTracks_AODReco",            "output tau track key"};
         SG::WriteHandleKey<xAOD::VertexContainer>       m_vertexOutputContainer     {this, "Key_vertexOutputContainer",         "TauSecondaryVertices_AODReco", "output vertex container key"};
+
         //helper
         bool isTauModified(const xAOD::TauJet* newtau) const;
 };

@@ -15,13 +15,14 @@
 #include "CaloIdentifier/CaloGain.h"
 #include <vector>
 #include "LArElecCalib/LArVectorProxy.h"
+#include "CxxUtils/checker_macros.h"
 
 class TH1D;
 
 
 namespace LArSamples {
 
-  class DataContainer {
+  class ATLAS_NOT_THREAD_SAFE DataContainer {
     
     public:
       

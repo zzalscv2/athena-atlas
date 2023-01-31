@@ -146,6 +146,3 @@ acc.printConfig(withDetails = True, summariseProps = True)
 
 acc.run(maxEvents=args.maxEvents)
 
-f=open("GeantinoStepRecordingITk.pkl","wb")
-acc.store(f)
-f.close()

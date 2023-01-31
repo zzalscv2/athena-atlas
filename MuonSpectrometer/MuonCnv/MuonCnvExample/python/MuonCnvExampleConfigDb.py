@@ -30,6 +30,10 @@ addTool( "MuonCnvExample.MuonReadBSConfig.sTgcROD_Decoder",         "sTgcROD_Dec
 addTool( "MuonCnvExample.MuonReadBSConfig.sTgcRawDataProviderTool", "sTgcRawDataProviderTool" )
 addAlgorithm("Muon::sTgcRawDataProvider",                           "MuonsTgcRawDataProvider" )
 
+addTool( "MuonCnvExample.MuonReadBSConfig.sTgcPadTriggerROD_Decoder",         "sTgcPadTriggerROD_Decoder" )
+addTool( "MuonCnvExample.MuonReadBSConfig.sTgcPadTriggerRawDataProviderTool", "sTgcPadTriggerRawDataProviderTool" )
+addAlgorithm("Muon::sTgcPadTriggerRawDataProvider",                           "MuonsTgcPadTriggerRawDataProvider" )
+
 ################################################################################
 # Tools/algorithms/services from MuonCnvExample.MuonCalibConfig
 ################################################################################

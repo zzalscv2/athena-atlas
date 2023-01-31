@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # File: CoolLumiUtilities/python/OnlineLumiCalibrationCondAlgConfig.py
 # Created: May 2019, sss
@@ -10,16 +10,16 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from IOVDbSvc.IOVDbSvcConfig import addFolders
 
 
-def OnlineLumiCalibrationCondAlgCfg (configFlags):
+def OnlineLumiCalibrationCondAlgCfg (flags):
     name = 'OnlineLumiCalibrationCondAlg'
     result = ComponentAccumulator()
 
-    if configFlags.Input.isMC:
+    if flags.Input.isMC:
         return result
 
     # For both runs 1 and 2
     folder = '/TDAQ/OLC/CALIBRATIONS'
-    result.merge (addFolders (configFlags, folder, 'TDAQ',
+    result.merge (addFolders (flags, folder, 'TDAQ',
                               className='CondAttrListCollection'))
 
     OnlineLumiCalibrationCondAlg=CompFactory.OnlineLumiCalibrationCondAlg
@@ -32,11 +32,11 @@ def OnlineLumiCalibrationCondAlgCfg (configFlags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     print ('--- data')
-    flags1 = ConfigFlags.clone()
+    flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RAW
     flags1.lock()
     acc1 = OnlineLumiCalibrationCondAlgCfg (flags1)
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     acc1.wasMerged()
 
     print ('--- mc')
-    flags2 = ConfigFlags.clone()
+    flags2 = initConfigFlags()
     flags2.Input.Files = defaultTestFiles.ESD
     flags2.lock()
     acc2 = OnlineLumiCalibrationCondAlgCfg (flags2)

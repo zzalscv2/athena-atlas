@@ -81,31 +81,31 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
 
   if (recordCollection->empty()) ATH_MSG_WARNING ("action required but record size is 0");
 
-  for (TrackRecordCollection::const_iterator record = recordCollection->begin();  record != recordCollection->end();++record){
+  const int barcodepart = HepMC::barcode(part);
+  for (const auto & record : *recordCollection){
 
-    if ( (*record).GetBarCode() == HepMC::barcode(part) ) {
+    if ( record.GetBarCode() != barcodepart ) continue;
 
-      id = (*record).GetPDGCode();
+      id = record.GetPDGCode();
       pd = m_particleDataTable->particle(std::abs(id));
       if (!pd) {
         ATH_MSG_WARNING ("found barcode but could not digest pdg_id. " <<
-                         HepMC::barcode(part) << " , " << id);
+                         barcodepart << " , " << id);
         continue;
       }
 
-      CLHEP::Hep3Vector tv = (*record).GetPosition();
+      CLHEP::Hep3Vector tv = record.GetPosition();
       prodVertexVector = Amg::Vector3D(tv.x(),tv.y(),tv.z());
       globalPos = prodVertexVector;
 
-      Amg::Vector3D hv2((*record).GetMomentum().x(), (*record).GetMomentum().y(),
-                            (*record).GetMomentum().z());
+      Amg::Vector3D hv2(record.GetMomentum().x(), record.GetMomentum().y(),
+                            record.GetMomentum().z());
       globalMom = hv2;
 
-      ATH_MSG_DEBUG("found barcode " << HepMC::barcode(part) << " with pdg ID " <<
+      ATH_MSG_DEBUG("found barcode " << barcodepart << " with pdg ID " <<
                     id << ", momentum " << hv2 << " production " << globalPos);
 
 
-    } // if barcodes match
   }   // loop over G4 records
 
   if (pd) {
@@ -152,11 +152,11 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
 
   if (recordCollection->empty()) ATH_MSG_WARNING ("action required but record size is 0");
 
-  for (TrackRecordCollection::const_iterator record = recordCollection->begin();  record != recordCollection->end();++record){
+  for (const auto & record : *recordCollection){
 
-    if ( (*record).GetBarCode() == part->barcode() ) {
+    if ( record.GetBarCode() == part->barcode() ) {
 
-      id = (*record).GetPDGCode();
+      id = record.GetPDGCode();
       pd = m_particleDataTable->particle(std::abs(id));
       if (!pd) {
         ATH_MSG_WARNING ("found barcode but could not digest pdg_id. " <<
@@ -164,12 +164,12 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
         continue;
       }
 
-      CLHEP::Hep3Vector  tv = (*record).GetPosition();
+      CLHEP::Hep3Vector  tv = record.GetPosition();
       prodVertexVector = Amg::Vector3D(tv.x(),tv.y(),tv.z());
       globalPos = prodVertexVector;
 
-      Amg::Vector3D hv2((*record).GetMomentum().x(), (*record).GetMomentum().y(),
-                            (*record).GetMomentum().z());
+      Amg::Vector3D hv2(record.GetMomentum().x(), record.GetMomentum().y(),
+                            record.GetMomentum().z());
       globalMom = hv2;
 
       ATH_MSG_DEBUG("found barcode " << part->barcode() << " with pdg ID " <<

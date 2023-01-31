@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file GeneratorObjects/HepMcParticleLink.icc
@@ -85,6 +85,17 @@ HepMcParticleLink::ExtendedBarCode::ExtendedBarCode (const ExtendedBarCode& rhs)
 
 
 /**
+ * @brief Move constructor.  (Can't be defaulted due to the atomic member.)
+ */
+inline
+HepMcParticleLink::ExtendedBarCode::ExtendedBarCode (ExtendedBarCode&& rhs) noexcept
+  : m_BC (std::exchange(rhs.m_BC,0)),
+    m_evtIndex (rhs.m_evtIndex.load()), // no move constructor for atomics
+    m_evtColl (std::exchange(rhs.m_evtColl,EBC_MAINEVCOLL))
+{
+}
+
+/**
  * @brief Assignment.  (Can't be defaulted due to the atomic member.)
  */
 inline
@@ -99,6 +110,20 @@ HepMcParticleLink::ExtendedBarCode::operator= (const ExtendedBarCode& rhs)
   return *this;
 }
 
+/**
+ * @brief Assignment.  (Can't be defaulted due to the atomic member.)
+ */
+inline
+HepMcParticleLink::ExtendedBarCode&
+HepMcParticleLink::ExtendedBarCode::operator= (ExtendedBarCode&& rhs) noexcept
+{
+  if (this != &rhs) {
+    m_BC = std::exchange(rhs.m_BC, 0);
+    m_evtIndex = static_cast<index_type>(rhs.m_evtIndex.load());
+    m_evtColl = std::exchange(rhs.m_evtColl, EBC_MAINEVCOLL);
+  }
+  return *this;
+}
 
 /**
  * @brief Barcode of target variable (0 for a null link).
@@ -409,7 +434,7 @@ HepMcParticleLink::HepMcParticleLink (barcode_type barCode,
  * @param sg Optional specification of a specific store to reference.
  */
 inline
-HepMcParticleLink::HepMcParticleLink (HepMC::ConstGenParticlePtr part,
+HepMcParticleLink::HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                                       uint32_t eventIndex,
                                       const std::string& evCollName,
                                       PositionFlag positionFlag /*= IS_INDEX*/,
@@ -434,7 +459,7 @@ HepMcParticleLink::HepMcParticleLink (HepMC::ConstGenParticlePtr part,
  * @param ctx Context of the store to reference.
  */
 inline
-HepMcParticleLink::HepMcParticleLink (HepMC::ConstGenParticlePtr part,
+HepMcParticleLink::HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                                       uint32_t eventIndex,
                                       EBC_EVCOLL evColl,
                                       PositionFlag positionFlag,
@@ -443,34 +468,6 @@ HepMcParticleLink::HepMcParticleLink (HepMC::ConstGenParticlePtr part,
                        Atlas::getExtendedEventContext(ctx).proxy())
 {
 }
-
-
-/**
- * @brief Copy constructor.
- */
-inline
-HepMcParticleLink::HepMcParticleLink (const HepMcParticleLink& rhs)
-  : m_store(rhs.m_store),
-    m_ptr(rhs.m_ptr),
-    m_extBarcode(rhs.m_extBarcode)
-{
-}
-
-
-/**
- * @brief Assignment.
- */
-inline
-HepMcParticleLink& HepMcParticleLink::operator= (const HepMcParticleLink& rhs)
-{
-  if (this != &rhs) {
-    m_store = rhs.m_store;
-    m_ptr = rhs.m_ptr;
-    m_extBarcode = rhs.m_extBarcode;
-  }
-  return *this;
-}
-
 
 /**
  * @brief Dereference.

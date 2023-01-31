@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -246,7 +246,6 @@ int main(int argc, const char *argv[])
       
       catinfo.setCatalogs( &collectionService ); 
 
-      unsigned int collCounter = 0;
       unsigned int evtCounterTotal = 0;
 
       std::map<std::string, int>   CollCnts;
@@ -265,7 +264,6 @@ int main(int argc, const char *argv[])
                                                                    srcinfo.connect(), 
                                                                    readOnly );
          collMap[i] = collection;
-         collCounter++;
 
          const pool::ICollectionDescription &description = collection->description();
          unsigned int maxNameSize = 0;

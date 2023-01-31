@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TESTDRIVER_H
@@ -20,10 +20,12 @@ public:
 
   // default values for this test
   std::string           m_filename      = "pool_test.root";
-  std::string           m_containerName = "MyContainer";
-  int                   m_nObjects      = 100;
+  std::string           m_objContainerName = "MyObjContainer";
+  std::string           m_strContainerName = "MyString";
+  int                   m_nObjects      = 10;
 
   pool::DbType          m_storageType   = pool::ROOTTREE_StorageType;
+  bool                  m_commitEveryRow = false;
 
 };
 

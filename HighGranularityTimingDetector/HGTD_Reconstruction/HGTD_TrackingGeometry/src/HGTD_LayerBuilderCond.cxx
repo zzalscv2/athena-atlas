@@ -1,6 +1,6 @@
  
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -254,8 +254,9 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
     }
     
     // prepare the binned array, it can be with one to several rings
-    Trk::BinnedArray<Trk::Surface>* currentBinnedArray =
-      new Trk::BinnedArray1D1D<Trk::Surface>(discSurfaces[discCounter], BinUtilityR, subBinUtilitiesPhi);
+    auto currentBinnedArray =
+        std::make_unique<Trk::BinnedArray1D1D<Trk::Surface>>(
+            discSurfaces[discCounter], BinUtilityR, subBinUtilitiesPhi);
 
     ATH_MSG_DEBUG( "... done!" ); 
     
@@ -303,21 +304,21 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
     activeLayerTransform = Amg::Translation3D(0.,0.,thisDiscZpos);
       
     Trk::DiscBounds* activeLayerBounds = new Trk::DiscBounds(minRmin, maxRmax);
-     
-    Trk::OverlapDescriptor* olDescriptor = new HGTD_OverlapDescriptor(currentBinnedArray, 
-                                                                       rBins, phiBins);
-     
+
+    auto olDescriptor = std::make_unique<HGTD_OverlapDescriptor>(
+        currentBinnedArray.get(), rBins, phiBins);
+
+    // register the layer to the surfaces
+    Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces = currentBinnedArray->arrayObjects();
     // layer creation; deletes currentBinnedArray in baseclass 'Layer' upon destruction
     // activeLayerTransform deleted in 'Surface' baseclass
     Trk::DiscLayer* activeLayer = new Trk::DiscLayer(activeLayerTransform,
                                                      activeLayerBounds,
-                                                     currentBinnedArray,
+                                                     std::move(currentBinnedArray),
                                                      layerMaterial,
                                                      thickness,
-                                                     olDescriptor);
+                                                     std::move(olDescriptor));
     
-    // register the layer to the surfaces
-    Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces = currentBinnedArray->arrayObjects();
     registerSurfacesToLayer(layerSurfaces,*activeLayer);
     discLayers->push_back(activeLayer);
     // increase the disc counter by one

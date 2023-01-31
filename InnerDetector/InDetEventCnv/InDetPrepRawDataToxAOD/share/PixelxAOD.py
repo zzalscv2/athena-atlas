@@ -58,8 +58,8 @@ if (printIdTrkDxAODConf):
 
 DRAW_ZMUMU_SkimmingTool=None
 if DRAWZSel:
-    sel_muon1  = 'Muons.pt > 25*GeV && Muons.ptcone40/Muons.pt < 0.3 && Muons.passesIDCuts && (Muons.quality <= 2)'
-    sel_muon2  = 'Muons.pt > 20*GeV && Muons.ptcone40/Muons.pt < 0.3 && Muons.passesIDCuts && (Muons.quality <= 2)'
+    sel_muon1  = 'Muons.pt > 25*GeV && Muons.ptcone40/Muons.pt < 0.3 && Muons.passesIDCuts'
+    sel_muon2  = 'Muons.pt > 20*GeV && Muons.ptcone40/Muons.pt < 0.3 && Muons.passesIDCuts'
     draw_zmumu = '( count (  DRZmumuMass > 70*GeV   &&  DRZmumuMass < 110*GeV ) >= 1 )'
     from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__InvariantMassTool
     DRZmumuMassTool = DerivationFramework__InvariantMassTool(name = "DRZmumuMassTool",
@@ -229,7 +229,7 @@ PIXELVALIDStream.AddItem("xAOD::ElectronAuxContainer#ElectronsAux.")
 PIXELVALIDStream.AddItem("xAOD::TauJetContainer#TauJets")
 PIXELVALIDStream.AddItem("xAOD::TauJetAuxContainer#TauJetsAux.-VertexedClusters.")
 PIXELVALIDStream.AddItem("xAOD::JetContainer#AntiKt4LCTopoJets")
-PIXELVALIDStream.AddItem("xAOD::JetAuxContainer#AntiKt4LCTopoJetsAux.")
+PIXELVALIDStream.AddItem("xAOD::JetAuxContainer#AntiKt4LCTopoJetsAux.-PseudoJet")
 PIXELVALIDStream.AddItem("xAOD::BTaggingContainer#BTagging_AntiKt4LCTopo")
 PIXELVALIDStream.AddItem("xAOD::BTaggingAuxContainer#BTagging_AntiKt4LCTopoAux.")
 PIXELVALIDStream.AddItem("xAOD::MissingETContainer#MET_Calo")

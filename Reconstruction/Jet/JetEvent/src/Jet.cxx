@@ -289,7 +289,7 @@ void Jet::copy_from_jet( const Jet* pJet, CopyDataMembers cdm0, CopyDataMembers 
       //std::cout<< "copy constituent "<< std::endl;
       const_iterator firstConst = pJet->firstConstituent();
       const_iterator lastConst  = pJet->lastConstituent();
-      for ( ; firstConst != lastConst; firstConst++ )
+      for ( ; firstConst != lastConst; ++firstConst )
 	{
 	  Jet::index_type theIndex;
 	  if ( pJet->getIndex(firstConst,theIndex) ) // getIndex by iterator more efficient ?
@@ -505,7 +505,7 @@ bool Jet::addJet(const Jet* pJet, double wght)
 {
   const_iterator fC(pJet->begin());
   const_iterator lC(pJet->end());
-  for ( ; fC != lC ; fC++ )
+  for ( ; fC != lC ; ++fC )
     {
       index_t ind(index_t(-1));
       if ( pJet->getIndex(fC,ind) )
@@ -534,12 +534,12 @@ bool Jet::cleanUp()
     {
       const_iterator fC(this->begin());
       const_iterator lC(this->end());
-      for ( ; fC != lC; fC++ )
+      for ( ; fC != lC; ++fC )
 	{
 	  double weight(this->getWeight(fC));
-	  if ( fabs(weight)< m_ignoreWeight )
+	  if ( std::abs(weight)< m_ignoreWeight )
 	    {
-	      aCtr++;
+	      ++aCtr;
 	      this->removeConstituent(*fC);
 	    }
 	}
@@ -612,9 +612,9 @@ bool Jet::isIdentical(const Jet* pJet ) const
       while ( ( fK != lK ) && !((*fC) == (*fK) &&
 				fabs(this->getWeight(fK)-wJ) < m_ignoreWeight) )
  
-	{ fK++; }
+	{ ++fK; }
       isEqual = fK != lK;
-      fC++;
+      ++fC;
     }
 
   return isEqual;
@@ -669,7 +669,7 @@ Jet* Jet::getOverlap(const Jet* pJet, bool /*noKine = false*/) const
   // de-compose Jet
   const_iterator fC(pJet->begin());
   const_iterator lC(pJet->end());
-  for ( ; fC != lC; fC++ )
+  for ( ; fC != lC; ++fC )
     {
       const constituent_type* c = *fC;
       if ( std::find (constituents.begin(), constituents.end(), c) != 
@@ -787,7 +787,7 @@ Jet* Jet::clone(bool copyStores, bool copyConstituents) const
 
 JetKeyDescriptorInstance * Jet::keyDesc() const {
   if( m_collection ) return m_collection->keyDesc();
-  return &JetKeyDescriptorInstance::s_instance;
+  return JetKeyDescriptorInstance::instance();
 }
 
 /////////////
@@ -844,26 +844,6 @@ Jet::shape_t Jet::getShape(const mkey_t& shapeName,bool addIfMissing) const
     }
   return shape_t();
 }
-
-//////////////////
-// Associations //
-//////////////////
-
-/// RSRSRS
-// void Jet::fillAssoToken(INavigationToken& /* token */ ) const
-// {
-//   assostore_t::const_iterator fAss(m_assocStore->begin());
-//   assostore_t::const_iterator lAss(m_assocStore->end());
-//   for ( ; fAss != lAss; fAss++ )
-//     {
-//       // RS HERE
-//       // (*fAss)->fillToken(token);
-//     }
-// }
-
-////////////////////////////
-// Constituent Navigation //
-////////////////////////////
 
 /////////////
 // TagInfo //

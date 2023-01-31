@@ -8,6 +8,7 @@
 #include "AthenaKernel/ClassID_traits.h"
 #include "TrigNavStructure/TriggerElement.h"
 #include "Run2ToRun3TrigNavConverterV2.h"
+#include "TrigCompositeUtils/ChainNameParser.h"
 
 namespace TCU = TrigCompositeUtils;
 
@@ -17,21 +18,37 @@ ConvProxy::ConvProxy(const HLT::TriggerElement *t) : te{t}
   teIDs.push_back(te->getId());
 }
 
+// find if proxy is a child of other proxies, also follows to children of the children etc...
+bool ConvProxy::isChild(const ConvProxy* other ) const {
+  for ( auto c: children ) {
+    if (other == c)
+      return true;
+    if ( c->isChild(other) )
+      return true;
+  } 
+  return false;
+}
+
+bool ConvProxy::isParent(const ConvProxy* other ) const {
+  for ( auto c: parents ) {
+    if (other == c)
+      return true;
+    if ( c->isParent(other) )
+      return true;
+  } 
+  return false;
+}
+
+
 bool ConvProxy::mergeAllowed(const ConvProxy *other) const
 {
   if (this == other)
     return false; // no merging with self
   // never merge children with parents
-  for (auto c : children)
-  {
-    if (other == c)
-      return false;
-  }
-  for (auto p : parents)
-  {
-    if (other == p)
-      return false;
-  }
+  if ( isChild(other) )
+    return false;
+  if ( isParent(other) )
+    return false;
   return true;
 }
 
@@ -60,15 +77,15 @@ void ConvProxy::merge(ConvProxy *other)
   C1 C2
 
   */
-  auto add = [](ConvProxy *toadd, std::vector<ConvProxy *> &coll)
+  auto add = [](ConvProxy *toadd, std::set<ConvProxy *> &coll)
   {
     if (std::find(coll.begin(), coll.end(), toadd) == coll.end())
     {
-      coll.push_back(toadd);
+      coll.insert(toadd);
     }
   };
 
-  auto remove = [](ConvProxy *torem, std::vector<ConvProxy *> &coll)
+  auto remove = [](ConvProxy *torem, std::set<ConvProxy *> &coll)
   {
     auto place = std::find(coll.begin(), coll.end(), torem);
     if (place != coll.end())
@@ -109,6 +126,10 @@ std::string ConvProxy::description() const
   std::string ret;
   ret += " N parents: " + std::to_string(parents.size());
   ret += " N children: " + std::to_string(children.size());
+  std::ostringstream os;
+  for ( auto c: children )
+    os << c << " ";
+  ret += " ptrs: " + os.str();
   ret += " feaHash: " + std::to_string(feaHash);
   ret += " N run chains: " + std::to_string(runChains.size());
   return ret;
@@ -262,11 +283,11 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
   {
     ATH_CHECK(numberOfHNodesPerProxyNotExcessive(convProxies));
   }
-
+  
+  ATH_CHECK(createL1Nodes(convProxies, *decisionOutput, context));
   ATH_CHECK(linkFeaNode(convProxies, *decisionOutput, *run2NavigationPtr, context));
   ATH_CHECK(linkRoiNode(convProxies, *run2NavigationPtr));
   ATH_CHECK(linkTrkNode(convProxies, *run2NavigationPtr));
-  ATH_CHECK(createL1Nodes(convProxies, *decisionOutput, context));
   ATH_CHECK(createSFNodes(convProxies, *decisionOutput, m_finalTEIdsToChains, context));
   ATH_MSG_DEBUG("Conversion done, from " << convProxies.size() << " elements to " << decisionOutput->size() << " elements");
 
@@ -285,7 +306,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
   ATH_CHECK(not m_configSvc->chains().empty());
   for (auto ptrChain : m_configSvc->chains())
   {
-    std::string chainName = ptrChain->name();
+    std::string chainName = ptrChain->name();    
     if (not m_chainsToSave.empty())
     {
       auto found = std::find(m_chainsToSave.begin(), m_chainsToSave.end(), chainName);
@@ -294,21 +315,61 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
         continue;
       }
     }
-
+    // chains with a single leg
     HLT::Identifier chainId = HLT::Identifier(chainName);
     ATH_MSG_DEBUG(" CHAIN name " << chainName << " CHAIN Id " << chainId);
     for (auto ptrHLTSignature : ptrChain->signatures())
     {
       for (auto ptrHLTTE : ptrHLTSignature->outputTEs())
       {
-        unsigned int trigConfDataId = ptrHLTTE->id();
-        allTEs[trigConfDataId].insert(chainId);
+        unsigned int teId = ptrHLTTE->id();
+        allTEs[teId].insert(chainId);
         if (ptrHLTSignature == ptrChain->signatures().back())
         {
-          finalTEs[trigConfDataId].insert(chainId);
+          finalTEs[teId].insert(chainId);
         }
       }
     }
+    // chains with a multiple legs
+    std::vector<int> multiplicities = ChainNameParser::multiplicities(chainName);
+    if ( multiplicities.size() > 1 ) {
+      // the chain structure (in terms of multiplicities) may change along the way
+      // we'll assign legs only to these TEs of the steps that have identical multiplicity pattern
+      // e.g. for the chain: HLT_2g25_loose_g20 the multiplicities are: [2, 1]
+      // 
+      ATH_MSG_DEBUG("CHAIN " << chainName << " needs legs: " << multiplicities );
+
+      for (auto ptrHLTSignature : ptrChain->signatures())
+        {
+          std::vector<int> teCounts;
+          std::vector<unsigned int> teIds;
+          unsigned int lastSeenId = 0;
+          for (auto ptrHLTTE : ptrHLTSignature->outputTEs())
+          {
+            if ( lastSeenId != ptrHLTTE->id()) {
+              teCounts.push_back(1);
+              teIds.push_back(ptrHLTTE->id());
+            } else { 
+              teCounts.back()++;
+            }
+            lastSeenId = ptrHLTTE->id();
+          }
+          const bool isLastStep = ptrHLTSignature == ptrChain->signatures().back();
+
+          ATH_MSG_DEBUG("TE multiplicities seen in this step " << teCounts);
+          if ( multiplicities == teCounts ) {
+            ATH_MSG_DEBUG("There is a match, will assign chain leg IDs to TEs " << teCounts);
+            for ( size_t legNumber = 0; legNumber < teIds.size(); ++ legNumber){
+              HLT::Identifier chainLegId = TrigCompositeUtils::createLegName(chainId, legNumber);
+              allTEs[teIds[legNumber]].insert(chainLegId);
+              if ( isLastStep ) {
+                finalTEs[teIds[legNumber]].insert(chainLegId);
+              }
+            }
+          }
+        }
+    }
+
   }
   ATH_MSG_DEBUG("Recognised " << allTEs.size() << " kinds of TEs and among them " << finalTEs.size() << " final types");
   return StatusCode::SUCCESS;
@@ -334,8 +395,8 @@ StatusCode Run2ToRun3TrigNavConverterV2::mirrorTEsStructure(ConvProxySet_t &conv
       ConvProxy *predecessorProxy = teToProxy[predecessor];
       if (predecessorProxy != nullptr)
       { // because we skip some
-        proxy->parents.push_back(predecessorProxy);
-        predecessorProxy->children.push_back(proxy);
+        proxy->parents.insert(predecessorProxy);
+        predecessorProxy->children.insert(proxy);
       }
     }
   }
@@ -346,7 +407,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::mirrorTEsStructure(ConvProxySet_t &conv
     for (auto proxy : convProxies)
     {
       counter++;
-      ATH_MSG_WARNING("Proxy " << counter << " " << proxy->description() << "ptr " << proxy);
+      ATH_MSG_DEBUG("Proxy " << counter << " " << proxy->description() << "ptr " << proxy);
       for (auto p : proxy->children)
         ATH_MSG_DEBUG("Child ptr " << p);
       for (auto p : proxy->parents)
@@ -446,25 +507,20 @@ StatusCode Run2ToRun3TrigNavConverterV2::cureUnassociatedProxies(ConvProxySet_t 
 
 StatusCode Run2ToRun3TrigNavConverterV2::removeUnassociatedProxies(ConvProxySet_t &convProxies) const
 {
-
-  auto rem = [](auto &collection, auto element)
-  {
-    collection.erase(std::remove(collection.begin(), collection.end(), element), collection.end());
-  };
   // remove proxies that have no chains
   for (auto i = std::begin(convProxies); i != std::end(convProxies);)
   {
     if ((*i)->runChains.empty())
     {
-      const ConvProxy *toDel = *i;
+      ConvProxy *toDel = *i;
       // remove it from parents/children
       for (auto parent : toDel->parents)
       {
-        rem(parent->children, toDel);
+          parent->children.erase(toDel);
       }
       for (auto child : toDel->children)
       {
-        rem(child->parents, toDel);
+        child->parents.erase(toDel);
       }
       delete toDel;
       i = convProxies.erase(i);
@@ -593,13 +649,15 @@ StatusCode Run2ToRun3TrigNavConverterV2::collapseFeaturelessProxies(ConvProxySet
          \ |  | /
         merged child
       */
+      auto hasSomeFeatures = [](const ConvProxy* p){ return p->feaHash != ConvProxy::MissingFEA; };
       if (proxy->children.size() == 1 and
-          proxy->children[0]->feaHash != ConvProxy::MissingFEA and
-          proxy->parents.size() == 1 and
-          proxy->parents[0]->feaHash != ConvProxy::MissingFEA)
+          std::all_of(proxy->children.begin(), proxy->children.end(), hasSomeFeatures ) and
+          proxy->parents.size() == 1 and 
+          std::all_of(proxy->parents.begin(), proxy->parents.end(), hasSomeFeatures ) 
+          )
       {
         ATH_MSG_VERBOSE("Proxy to possibly merge: " << proxy->description());
-        groupedProxies[{proxy->parents[0], proxy->children[0], 0}].insert(proxy);
+        groupedProxies[{*(proxy->parents.begin()), *(proxy->children.begin()), 0}].insert(proxy);
         // TODO expand it to cover longer featureless sequences
       }
       else
@@ -685,10 +743,16 @@ StatusCode Run2ToRun3TrigNavConverterV2::fillRelevantRois(ConvProxySet_t &convPr
   }
 
   // roiPropagator
-  std::function<void(std::vector<ConvProxy *> &, std::vector<HLT::TriggerElement::FeatureAccessHelper> &)> roiPropagator = [&](std::vector<ConvProxy *> &convProxyChildren, std::vector<HLT::TriggerElement::FeatureAccessHelper> &roiParent)
+  std::set<const ConvProxy*>  visited;
+  std::function<void(std::set<ConvProxy *> &, const std::vector<HLT::TriggerElement::FeatureAccessHelper> &)> 
+   roiPropagator = [&](std::set<ConvProxy *> &convProxyChildren, const std::vector<HLT::TriggerElement::FeatureAccessHelper> &roiParent)
   {
     for (auto &proxyChild : convProxyChildren)
     {
+      if ( visited.count(proxyChild) == 1 ) {
+        continue;
+      }
+      visited.insert(proxyChild);
       if (proxyChild->rois.empty())
       { // no roi update, copy from parent
         proxyChild->rois = roiParent;
@@ -1129,7 +1193,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::noUnconnectedHNodes(const xAOD::TrigCom
     {
       if (linkedHNodes.count(d) == 0)
       {
-        ATH_MSG_ERROR("Orphanted H node");
+        ATH_MSG_ERROR("Orphaned H node");
         return StatusCode::FAILURE;
       }
     }

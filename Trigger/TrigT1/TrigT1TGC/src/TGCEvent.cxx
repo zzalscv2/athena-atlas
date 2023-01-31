@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream> 
@@ -41,11 +41,8 @@ TGCASDOut* TGCEvent::NewASDOut(TGCReadoutIndex tgcrindex,
 void TGCEvent::Clear()
 {
   // delete ASDOut
-  std::vector<TGCASDOut*>::iterator it_vecASDOut;
-  for (it_vecASDOut= m_vecASDOut.begin(); 
-       it_vecASDOut != m_vecASDOut.end(); it_vecASDOut++) {
-
-    if(*it_vecASDOut) delete *it_vecASDOut;
+  for (const TGCASDOut* p : m_vecASDOut) {
+    delete p;
   }
   m_vecASDOut.clear();
 }

@@ -399,7 +399,7 @@ void displayEndcapPhiZ::displayTRT_Measurement( GlobalPosition& strawPosition, d
 
     // draw drift circle or full NODRIFTTIME tube
     if (driftRadius != 0.0) {
-      TEllipse* hit = m_shapeCreator.createEllipse( strawPosition, driftRadius, atan(driftRadius / Rho) * phiScale );
+      TEllipse* hit = m_shapeCreator.createEllipse( strawPosition, driftRadius, std::atan(driftRadius / Rho) * phiScale );
       hit->SetLineColor( color_hit );
       hit->SetLineWidth( 2     );
       //m_display->addArc( hit );
@@ -408,7 +408,7 @@ void displayEndcapPhiZ::displayTRT_Measurement( GlobalPosition& strawPosition, d
       geometry->push_back(hitObj);
     } else {
       // tube used w/o drift time -> 4mm/sqrt(12) error
-      TEllipse* hit = m_shapeCreator.createEllipse( strawPosition, 1.15, atan(1.15 / Rho) * phiScale );
+      TEllipse* hit = m_shapeCreator.createEllipse( strawPosition, 1.15, std::atan(1.15 / Rho) * phiScale );
       hit->SetLineColor( color_hit );
       hit->SetFillColor( color_hit );
       hit->SetLineWidth( 2     );
@@ -417,7 +417,7 @@ void displayEndcapPhiZ::displayTRT_Measurement( GlobalPosition& strawPosition, d
     }
 
     // draw TRT tube
-    TEllipse* tube = m_shapeCreator.createEllipse( strawPosition, tube_radius, atan(tube_radius / Rho) * phiScale );
+    TEllipse* tube = m_shapeCreator.createEllipse( strawPosition, tube_radius, std::atan(tube_radius / Rho) * phiScale );
     tube->SetLineColor( color_tube );
     //m_display->addArc( tube );
     //m_arcs.push_back(tube);
@@ -425,7 +425,7 @@ void displayEndcapPhiZ::displayTRT_Measurement( GlobalPosition& strawPosition, d
     geometry->push_back(tubeObj);
 
     // draw circle at straw (wire) position
-    TEllipse* tube_c = m_shapeCreator.createEllipse( strawPosition, 0.05, atan(0.05 / Rho) * phiScale );
+    TEllipse* tube_c = m_shapeCreator.createEllipse( strawPosition, 0.05, std::atan(0.05 / Rho) * phiScale );
     tube_c->SetLineColor( color_tube );
     tube_c->SetFillColor( color_tube );
     //m_display->addArc( tube_c );
@@ -438,7 +438,7 @@ void displayEndcapPhiZ::displayTRT_Measurement( GlobalPosition& strawPosition, d
                                      Rho*strawPosition.y()/l + driftRadius * strawPosition.x()/l,
                                      strawPosition.z());
     
-    TEllipse* maxRad1 = m_shapeCreator.createEllipse( maxRadiusInPhiPosition1, 0.05, atan(0.05 / Rho) * phiScale );
+    TEllipse* maxRad1 = m_shapeCreator.createEllipse( maxRadiusInPhiPosition1, 0.05, std::atan(0.05 / Rho) * phiScale );
     maxRad1->SetLineColor( color_hit );
     maxRad1->SetFillColor( color_hit );
     //m_display->addArc( tube_c );
@@ -449,7 +449,7 @@ void displayEndcapPhiZ::displayTRT_Measurement( GlobalPosition& strawPosition, d
                                      Rho*strawPosition.y()/l - driftRadius * strawPosition.x()/l,
                                      strawPosition.z());
     
-    TEllipse* maxRad2 = m_shapeCreator.createEllipse( maxRadiusInPhiPosition2, 0.05, atan(0.05 / Rho) * phiScale );
+    TEllipse* maxRad2 = m_shapeCreator.createEllipse( maxRadiusInPhiPosition2, 0.05, std::atan(0.05 / Rho) * phiScale );
     maxRad2->SetLineColor( color_hit );
     maxRad2->SetFillColor( color_hit );
     //m_display->addArc( tube_c );

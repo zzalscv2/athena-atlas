@@ -21,8 +21,8 @@ class MsgStream;
 class LArBadChannelDecoder {
 public:
 
-  LArBadChannelDecoder(   const LArOnlineID_Base* onlineID) :
-    m_onlineID( onlineID) {}
+  LArBadChannelDecoder(   const LArOnlineID_Base* onlineID,  bool isSC=false) :
+    m_onlineID( onlineID), m_isSC(isSC) {}
 
   typedef LArBadChannelState                     State;
   typedef LArBadChannelState::BadChanEntry       BadChanEntry;
@@ -41,7 +41,10 @@ private:
 
   const LArOnlineID_Base*   m_onlineID;
   LArBadChanBitPacking m_packing;
+  LArBadChanSCBitPacking m_SCpacking;
   LArBadFebBitPacking  m_febPacking;
+
+  bool m_isSC;
 
   HWIdentifier constructChannelId( const std::vector<int>& intVec, 
 				   State::CoolChannelEnum coolChan,

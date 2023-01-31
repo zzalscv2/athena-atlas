@@ -132,10 +132,10 @@ def AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(slimmingHelper):
 # Some graph nodes and edges which were only of use online are removed.
 # This level of slimming is designed to support T0 trigger monitoring.
 #
-# If the job is configured to produce AODFULL/AODRun3_LARGE level output, then the ESD level graph is saved also to the AOD.
+# If the job is configured to produce AODFULL level output, then the ESD level graph is saved also to the AOD.
 # Hence T0 trigger monitoring is also supported in AODFULL as it is in ESD.
 #
-# If the job is configured to produce AODSLIM/AODRun3_SMALL level output, then the graph is additionally slimmed.
+# If the job is configured to produce AODSLIM level output, then the graph is additionally slimmed.
 # The navigation graph is reduced to only refer to the final-feature and initial-ROI,
 # all nodes from intermediate steps between these two are dropped.
 # All branches corresponding to chains which failed the trigger are dropped.
@@ -152,6 +152,15 @@ def TrigNavSlimmingMTCfg(ConfigFlags):
   from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
   
   ca = ComponentAccumulator()
+
+  # We only run this if we are in a job which is decoding the HLT data in reconstruction, and if the slimming has not been switched off
+  if ConfigFlags.Trigger.DecodeHLT is False:
+    log.debug("Nothing to do as Trigger.DecodeHLT is False")
+    return ca
+
+  if ConfigFlags.Trigger.doNavigationSlimming is False:
+    log.debug("Nothing to do as Trigger.doNavigationSlimming is False")
+    return ca
 
   # TODO remove when deprecated
   from RecExConfig.RecFlags  import rec
@@ -196,14 +205,14 @@ def TrigNavSlimmingMTCfg(ConfigFlags):
     aodSlim.NodesToDrop = ["F"]
     aodSlim.ChainsFilter = []
     #
-    if ConfigFlags.Trigger.AODEDMSet == "AODFULL" or ConfigFlags.Trigger.AODEDMSet == "AODRun3_LARGE":
+    if ConfigFlags.Trigger.AODEDMSet == "AODFULL":
       aodSlim.KeepFailedBranched = True
       aodSlim.KeepOnlyFinalFeatures = False
-      log.info("Producing AOD LARGE Slimmed Trigger Navigation Collection. Reading {} and writing {}".format(aodSlim.PrimaryInputCollection, aodSlim.OutputCollection))
+      log.info("Producing AODFULL Slimmed Trigger Navigation Collection. Reading {} and writing {}".format(aodSlim.PrimaryInputCollection, aodSlim.OutputCollection))
     else:
       aodSlim.KeepFailedBranched = False
       aodSlim.KeepOnlyFinalFeatures = True
-      log.info("Producing AOD SMALL Trigger Navigation Collection. Reading {} and writing {}".format(aodSlim.PrimaryInputCollection, aodSlim.OutputCollection))
+      log.info("Producing AODSLIM Trigger Navigation Collection. Reading {} and writing {}".format(aodSlim.PrimaryInputCollection, aodSlim.OutputCollection))
     ca.addEventAlgo(aodSlim)
     if aodSlim.OutputCollection not in possible_keys:
       log.error("Producing a collection {} which is not listed in 'possible_keys'! Add this here too.".format(esdSlim.OutputCollection))

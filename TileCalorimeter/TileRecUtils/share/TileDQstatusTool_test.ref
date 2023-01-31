@@ -164,7 +164,19 @@ ApplicationMgr       INFO Application Manager Started successfully
 AthenaEventLoopMgr   INFO   ===>>>  start of run 1    <<<===
 IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to LARAlign-IOVDEP-00 for folder /LAR/Align
 IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to LArCellPositionShift-ideal for folder /LAR/LArCellPositionShift
-CaloMgrDetDescrCnv   INFO in createObj: creating a Calo Detector Manager object in the detector store
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
+IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02CalibCes-SIM-06 for folder /TILE/OFL02/CALIB/CES
+IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02CalibCisFitLin-COM-00 for folder /TILE/OFL02/CALIB/CIS/FIT/LIN
+IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02CalibCisFitNln-COM-00 for folder /TILE/OFL02/CALIB/CIS/FIT/NLN
+IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02CalibEms-COM-00 for folder /TILE/OFL02/CALIB/EMS
+IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02CalibLasFiber-000-00 for folder /TILE/OFL02/CALIB/LAS/FIBER
+IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02CalibLasLin-COM-00 for folder /TILE/OFL02/CALIB/LAS/LIN
+IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02CalibLasNln-COM-00 for folder /TILE/OFL02/CALIB/LAS/NLN
+IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02CalibSfr-SIM-02 for folder /TILE/OFL02/CALIB/SFR
+IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02NoiseSample-TwoGauss-19 for folder /TILE/OFL02/NOISE/SAMPLE
+IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02StatusAdc-IOVDEP-03 for folder /TILE/OFL02/STATUS/ADC
+IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02TimeChanneloffsetPhy-000-00 for folder /TILE/OFL02/TIME/CHANNELOFFSET/PHY
+LArAlignCondAlg      INFO recorded new GeoAlignmentStore object for LAr with key LArAlignmentStore and range {[0,l:0] - [177530,l:0]}
 CaloIdMgrDetDes...   INFO in createObj: creating a CaloDescrManager object in the detector store
 CaloIDHelper_ID...   INFO in createObj: creating a CaloDM_ID helper object in the detector store
 CaloDM_ID            INFO initialize_from_dictionary
@@ -184,19 +196,6 @@ AtlasDetectorID      INFO initialize_from_dictionary - OK
 AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIdMgrDetDes...   INFO  Finished 
 CaloIdMgrDetDes...   INFO Initializing CaloIdMgr from values in CaloIdMgrDetDescrCnv 
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
-IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02CalibCes-SIM-06 for folder /TILE/OFL02/CALIB/CES
-IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02CalibCisFitLin-COM-00 for folder /TILE/OFL02/CALIB/CIS/FIT/LIN
-IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02CalibCisFitNln-COM-00 for folder /TILE/OFL02/CALIB/CIS/FIT/NLN
-IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02CalibEms-COM-00 for folder /TILE/OFL02/CALIB/EMS
-IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02CalibLasFiber-000-00 for folder /TILE/OFL02/CALIB/LAS/FIBER
-IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02CalibLasLin-COM-00 for folder /TILE/OFL02/CALIB/LAS/LIN
-IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02CalibLasNln-COM-00 for folder /TILE/OFL02/CALIB/LAS/NLN
-IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02CalibSfr-SIM-02 for folder /TILE/OFL02/CALIB/SFR
-IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02NoiseSample-TwoGauss-19 for folder /TILE/OFL02/NOISE/SAMPLE
-IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02StatusAdc-IOVDEP-03 for folder /TILE/OFL02/STATUS/ADC
-IOVDbFolder          INFO HVS tag OFLCOND-RUN12-SDR-35 resolved to TileOfl02TimeChanneloffsetPhy-000-00 for folder /TILE/OFL02/TIME/CHANNELOFFSET/PHY
-LArAlignCondAlg      INFO recorded new GeoAlignmentStore object for LAr with key LArAlignmentStore and range {[0,l:0] - [177530,l:0]}
 CaloAlignCondAlg     INFO recorded new CaloDetDescr Manager condition object with key CaloDetDescrManager and range {[0,l:0] - [177530,l:0]}
 TileBadChannels...   INFO Updating TileBchStatus::isBad() definition from DB
 TileBadChannels...   INFO Updating TileBchStatus::isNoisy() definition from DB

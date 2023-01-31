@@ -12,6 +12,7 @@
 #include <utility>
 #include <cmath>
 #include "logLinearBinning.h"
+#include "TruthUtils/MagicNumbers.h"
 
 namespace{
   constexpr float undefinedValue{-9999.};
@@ -230,10 +231,10 @@ InDetPerfPlot_Resolution::fill(const xAOD::TrackParticle& trkprt, const xAOD::Tr
   trueBC = truthprt.barcode();
   int isPrimTrk = 0;
   int isSecdTrk = 0;
-  if ((trueBC > 0) && (trueBC < 200000)) {
+  if ((trueBC > 0) && (!HepMC::is_simulation_particle(trueBC))) {
     isPrimTrk = 1;
   }
-  if ((trueBC > 200000)) {
+  if (HepMC::is_simulation_particle(trueBC)) {
     isSecdTrk = 1;
   }
 

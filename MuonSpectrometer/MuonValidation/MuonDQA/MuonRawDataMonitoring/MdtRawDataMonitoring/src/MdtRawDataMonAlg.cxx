@@ -345,7 +345,7 @@ StatusCode MdtRawDataMonAlg::fillHistograms(const EventContext& ctx) const
 
             // ATH_CHECK(muons.isValid());
 
-            for (const auto mu : *muons) {
+            for (const auto *const mu : *muons) {
                 // add quality selection here
                 if (mu) {
                     const Trk::Track* trk = mu->track();
@@ -380,17 +380,16 @@ StatusCode MdtRawDataMonAlg::fillHistograms(const EventContext& ctx) const
             std::map<std::string, std::vector<std::string>> v_hit_in_chamber;
             for (Muon::MdtPrepDataContainer::const_iterator containerIt = mdt_container->begin(); containerIt != mdt_container->end();
                  ++containerIt) {
-                if (containerIt == mdt_container->end() || (*containerIt)->size() == 0) continue;  // check if there are counts
+                if (containerIt == mdt_container->end() || containerIt->empty()) continue;  // check if there are counts
                 nColl++;
 
                 bool isHit_above_ADCCut = false;
                 // loop over hits
-                for (Muon::MdtPrepDataCollection::const_iterator mdtCollection = (*containerIt)->begin();
-                     mdtCollection != (*containerIt)->end(); ++mdtCollection) {
+                for (const auto *mdtCollection : **containerIt) {
                     nPrd++;
 
-                    float adc = (*mdtCollection)->adc();
-                    hardware_name = getChamberName(*mdtCollection);
+                    float adc = mdtCollection->adc();
+                    hardware_name = getChamberName(mdtCollection);
 
                     if (hardware_name.substr(0, 3) == "BMG") adc /= m_adcScale;
                     if (adc > m_ADCCut) {
@@ -402,16 +401,16 @@ StatusCode MdtRawDataMonAlg::fillHistograms(const EventContext& ctx) const
                         }
                         v_hit_in_chamber_allphi.push_back(hardware_name);
                     }
-                    fillMDTOverviewVects(*mdtCollection, isNoiseBurstCandidate, overviewPlots);
+                    fillMDTOverviewVects(mdtCollection, isNoiseBurstCandidate, overviewPlots);
                     //=======================================================================
                     //=======================================================================
                     //=======================================================================
-                    ATH_CHECK(fillMDTSummaryVects(*mdtCollection, chambers_from_tracks, isNoiseBurstCandidate, trig_BARREL, trig_ENDCAP,
+                    ATH_CHECK(fillMDTSummaryVects(mdtCollection, chambers_from_tracks, isNoiseBurstCandidate, trig_BARREL, trig_ENDCAP,
                                                   summaryPlots.get()));
                     //=======================================================================
                     //=======================================================================
                     //=======================================================================
-                    if (m_doChamberHists) { ATH_CHECK(fillMDTHistograms(*mdtCollection)); }
+                    if (m_doChamberHists) { ATH_CHECK(fillMDTHistograms(mdtCollection)); }
 
                     std::map<std::string, int>::iterator iter_hitsperchamber = evnt_hitsperchamber_map.find(hardware_name);
                     if (iter_hitsperchamber == evnt_hitsperchamber_map.end()) {
@@ -1142,7 +1141,7 @@ StatusCode MdtRawDataMonAlg::fillMDTSegmentHistograms(const MDTSegmentHistogramS
         std::string MDT_regionGroup = "MDT_regionGroup" + region[iregion];  // MDTXX/Overview, 4 gruppi
         for (int ilayer = 0; ilayer < 4; ++ilayer) {
             for (int stationPhi = 0; stationPhi < 16; ++stationPhi) {
-                auto& thisVects = vects[iregion][ilayer][stationPhi];
+                const auto& thisVects = vects[iregion][ilayer][stationPhi];
 
                 auto adc_segs_mon = Monitored::Collection("adc_segs_mon", thisVects.adc_segs_mon);
                 auto adc_segs_overall_mon = Monitored::Collection("adc_segs_overall_mon", thisVects.adc_segs_mon);

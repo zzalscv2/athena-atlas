@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 ///////////////////////////////////////////////////////////////////
@@ -214,14 +214,14 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
               else vecPrdComb.push_back(rot->prepRawData());
             }
             // merge lists
-            for (unsigned int i = 0; i < vecPrd.size(); i++) {
+            for (auto & i : vecPrd) {
               double inprod =
-                (vecPrd[i]->detectorElement()->surface(vecPrd[i]->identify()).center() - siPerigee->position()).dot(
+                (i->detectorElement()->surface(i->identify()).center() - siPerigee->position()).dot(
                   siPerigee->momentum());
               if (inprod < 0) {
-                vecPrdComb.insert(vecPrdComb.begin(), vecPrd[i]);
+                vecPrdComb.insert(vecPrdComb.begin(), i);
               } else {
-                vecPrdComb.push_back(vecPrd[i]);
+                vecPrdComb.push_back(i);
               }
             }
             //statistics
@@ -279,13 +279,13 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
               rotSet.push_back(*RIOit);
             }
             // merge RIO-on-track lists
-            for (unsigned int i = 0; i < pThisExtensionPair->second.size(); i++) {
-              double inprod = (pThisExtensionPair->second[i]->associatedSurface().center() - siPerigee->position()).dot(
+            for (const auto *i : pThisExtensionPair->second) {
+              double inprod = (i->associatedSurface().center() - siPerigee->position()).dot(
                 siPerigee->momentum());
               if (inprod < 0) {
-                rotSet.insert(rotSet.begin(), pThisExtensionPair->second[i]);
+                rotSet.insert(rotSet.begin(), i);
               } else {
-                rotSet.push_back(pThisExtensionPair->second[i]);
+                rotSet.push_back(i);
               }
             }
             ATH_MSG_DEBUG("normal fit track");
@@ -311,7 +311,7 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
         }
       } else {
         if (m_trackSummaryTool.isEnabled()) {
-          m_trackSummaryTool->computeAndReplaceTrackSummary(ctx,*newtrack, nullptr, m_suppressHoleSearch);
+          m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *newtrack, m_suppressHoleSearch);
         }
         // score old and new tool and decide which one to push back
         Trk::TrackScore oldScore = m_scoringTool->score(*thisTrack, m_suppressHoleSearch);
@@ -337,7 +337,7 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
             // score again
             // @TODO should score newBremTrack
             if (m_trackSummaryTool.isEnabled()) {
-              m_trackSummaryTool->computeAndReplaceTrackSummary(ctx,*newBremTrack, nullptr, m_suppressHoleSearch);
+              m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *newBremTrack, m_suppressHoleSearch);
             }
             newScore = m_scoringTool->score(*newtrack, m_suppressHoleSearch);
             ATH_MSG_DEBUG("recovered new track has score      : " << newScore);
@@ -429,7 +429,7 @@ InDet::InDetExtensionProcessor::trackPlusExtension(
   constexpr std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> outlierPattern(outlierDigit);
   //create new track state on surface
   auto createNewTSOS = [outlierPattern](const Trk::MeasurementBase* pm) -> const Trk::TrackStateOnSurface*{
-                         return new Trk::TrackStateOnSurface(pm->uniqueClone(), nullptr, nullptr, nullptr, outlierPattern);
+                         return new Trk::TrackStateOnSurface(pm->uniqueClone(), nullptr, nullptr, outlierPattern);
                        };
   //Adding to cosmic tracks beginning or end depending on the direction of track
   auto addNewTSOS_ForCosmics = [&pExtendedTrajectory, siTrack, createNewTSOS](const Trk::MeasurementBase* pm) {
@@ -455,9 +455,9 @@ InDet::InDetExtensionProcessor::trackPlusExtension(
   nExtStates += pExtendedTrajectory.size();
   const auto& pFitQuality {siTrack->fitQuality()};
   Trk::Track* extTrack =
-    new Trk::Track(siTrack->info(), std::move(pExtendedTrajectory), (pFitQuality ? pFitQuality->clone() : nullptr));
+    new Trk::Track(siTrack->info(), std::move(pExtendedTrajectory), (pFitQuality ? pFitQuality->uniqueClone() : nullptr));
   if (m_trackSummaryTool.isEnabled()) {
-    m_trackSummaryTool->computeAndReplaceTrackSummary(ctx,*extTrack, nullptr, m_suppressHoleSearch);
+    m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *extTrack, m_suppressHoleSearch);
   }
   Trk::TrackScore extScore = m_scoringTool->score(*extTrack, m_suppressHoleSearch);
   ATH_MSG_DEBUG("rejected extension saved as Trk::Track with " << nSiStates <<

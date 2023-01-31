@@ -72,7 +72,7 @@ namespace PanTau {
                    int              itsCharge,
                    std::vector<int> itsType,
                    double           itsBDTValue,
-                   xAOD::PFO*       itsPFOLink);
+                   const xAOD::PFO* itsPFO);
     
     
     /** Destructor */
@@ -164,7 +164,7 @@ namespace PanTau {
     double                          m_BDTValue;
     int                             m_Charge;
     
-    xAOD::PFO*                      m_PFOLink;
+    const xAOD::PFO*                m_PFO;
     
     // the constituents in there are owned by this! delete them!
     std::vector<TauConstituent*>    m_Shots;

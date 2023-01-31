@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile raw channel builder tools using Optimal Filtering methods"""
 
@@ -9,7 +9,7 @@ def TileRawChannelBuilderOpt2FilterCfg(flags, method = 'Opt2', **kwargs):
     """Return component accumulator with configured private Tile raw channel builder tool (Opt2)
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
         method -- flavour of Tile Optimal Filtering method. Defaults to Opt2. Possible values: Opt2, OptATLAS, OF1
     """
 
@@ -85,7 +85,7 @@ def TileRawChannelBuilderOptATLASCfg(flags):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -93,19 +93,20 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.Tile.NoiseFilter = 1
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Tile.RunType = 'PHY'
+    flags.Tile.NoiseFilter = 1
+    flags.lock()
 
-    ConfigFlags.dump()
+    flags.dump()
 
     acc = ComponentAccumulator()
 
     #Comment for now, priting configurables isn't reliable with GaudiConfig2
-    acc.popToolsAndMerge( TileRawChannelBuilderOpt2Cfg(ConfigFlags) ) 
-    acc.popToolsAndMerge( TileRawChannelBuilderOptATLASCfg(ConfigFlags) ) 
-    acc.popToolsAndMerge( TileRawChannelBuilderOF1Cfg(ConfigFlags) ) 
+    acc.popToolsAndMerge( TileRawChannelBuilderOpt2Cfg(flags) ) 
+    acc.popToolsAndMerge( TileRawChannelBuilderOptATLASCfg(flags) ) 
+    acc.popToolsAndMerge( TileRawChannelBuilderOF1Cfg(flags) ) 
 
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.store( open('TileRawChannelBuilder.pkl','wb') )

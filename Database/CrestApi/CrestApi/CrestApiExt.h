@@ -130,7 +130,7 @@ namespace Crest {
          (name, (std::string), "")
          (size, (int), 1000)
          (page, (int), 0)
-         (sort, (std::string), "name:ASC")
+         (sort, (std::string), "id.since:ASC")
       )
       ) {
       return listGlobalTags(name, size, page, sort);

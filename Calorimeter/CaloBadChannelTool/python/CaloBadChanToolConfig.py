@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured private Calo bad channels tool"""
 
@@ -31,7 +31,7 @@ def CaloBadChanToolCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -39,15 +39,16 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
 
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    flags.fillFromArgs()
+    flags.lock()
 
     acc = ComponentAccumulator()
 
-    print( acc.popToolsAndMerge( CaloBadChanToolCfg(ConfigFlags) ) )
-    ConfigFlags.dump()
+    print( acc.popToolsAndMerge( CaloBadChanToolCfg(flags) ) )
+    flags.dump()
 
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.store( open('CaloBadChanTool.pkl','wb') )

@@ -28,7 +28,7 @@ namespace InDet {
 
 namespace DerivationFramework {
   
-  class BVertexClosestTrackTool : virtual public BPhysVertexTrackBase {
+  class ATLAS_NOT_THREAD_SAFE BVertexClosestTrackTool : virtual public BPhysVertexTrackBase {
 
   private:
     typedef BPhysVertexTrackBase super;
@@ -37,7 +37,7 @@ namespace DerivationFramework {
     // internal helper class
     //
   protected:
-    class CtItem : public BaseItem {
+    class ATLAS_NOT_THREAD_SAFE CtItem : public BaseItem {
 
       public:
 	CtItem(const std::string& Name="_none_",

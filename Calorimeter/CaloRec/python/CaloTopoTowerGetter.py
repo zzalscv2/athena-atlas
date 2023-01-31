@@ -86,7 +86,7 @@ class CaloTopoTowerGetter ( Configured )  :
 
                 # configure CaloTopoTowerAlgorithm here
                 try:
-                    from CaloUtils.CaloUtilsConf import CaloTopoTowerBuilderTool
+                    from CaloRec.CaloRecConf import CaloTopoTowerBuilderTool
                     theCaloTopoTowerBuilderTool=CaloTopoTowerBuilderTool("TopoTowerTwrBldr")
                 except Exception:
                     mlog.error("could not get handle to CaloTopoTowerBuilderTool Quit")

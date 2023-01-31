@@ -21,7 +21,7 @@ class TFile;
 
 namespace LArSamples {
   
-  class PersistentAccessor {
+  class ATLAS_NOT_THREAD_SAFE PersistentAccessor {
   
     public:
    

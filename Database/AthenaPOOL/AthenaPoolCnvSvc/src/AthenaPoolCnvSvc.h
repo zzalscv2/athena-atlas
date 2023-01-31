@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_ATHENAPOOLCNVSVC_H
@@ -38,7 +38,7 @@ template <class TYPE> class SvcFactory;
 /** @class AthenaPoolCnvSvc
  *  @brief This class provides the interface between Athena and PoolSvc.
  **/
-class ATLAS_CHECK_THREAD_SAFETY AthenaPoolCnvSvc : public ::AthCnvSvc,
+class AthenaPoolCnvSvc : public ::AthCnvSvc,
 		public virtual IAthenaPoolCnvSvc,
 		public virtual IIncidentListener,
 		public virtual IIoComponent {
@@ -186,8 +186,9 @@ private: // member functions
 	   bool doClear = true) const;
 
 private: // data
-   pool::DbType    m_dbType{pool::ROOTTREEINDEX_StorageType};
-   std::string     m_lastInputFileName;
+   /// decoded storage tech requested in "StorageTechnology" property
+   pool::DbType                  m_dbType;  
+   std::string                   m_lastInputFileName;
    ServiceHandle<IPoolSvc>       m_poolSvc{this,"PoolSvc","PoolSvc"};
    ServiceHandle<IChronoStatSvc> m_chronoStatSvc{this,"ChronoStatSvc","ChronoStatSvc"};
    ServiceHandle<IClassIDSvc>    m_clidSvc{this,"ClassIDSvc","ClassIDSvc"};
@@ -204,8 +205,10 @@ private: // properties
    /// default = false.
    BooleanProperty m_useDetailChronoStat{this,"UseDetailChronoStat",false};
 
+   /// Default Storage Tech for containers (ROOTTREE, ROOTTREEINDEX, ROOTRNTUPLE)
+   StringProperty  m_storageTechProp{this,"StorageTechnology", "ROOTTREEINDEX"};
    /// PoolContainerPrefix, prefix for top level POOL container: default = "POOLContainer"
-   StringProperty  m_containerPrefixProp{this,"PoolContainerPrefix","ROOTTREEINDEX:CollectionTree"};
+   StringProperty  m_containerPrefixProp{this,"PoolContainerPrefix","CollectionTree"};
    /// TopLevelContainerName, naming hint policy for top level POOL container: default = "<type>"
    StringProperty  m_containerNameHintProp{this,"TopLevelContainerName",""};
    /// SubLevelBranchName, naming hint policy for POOL branching: default = "" (no branching)

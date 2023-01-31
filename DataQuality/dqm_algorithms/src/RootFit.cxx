@@ -85,10 +85,10 @@ dqm_algorithms::RootFit::execute(	const std::string & name,
 					const dqm_core::AlgorithmConfig & config )
 {  
   //std::cout<<"ROOTFIT = calling rootfit with name "<<name<<std::endl;
-  TH1 * histogram;
+  const TH1 * histogram;
   if(object.IsA()->InheritsFrom( "TH1" ))
     {  
-      histogram = (TH1*)&object;
+      histogram = static_cast<const TH1*>(&object);
       if (histogram->GetDimension() > 1 ){ 
         throw dqm_core::BadConfig( ERS_HERE, name, "dimension > 1 for Fit" );
       }
@@ -124,7 +124,7 @@ dqm_algorithms::RootFit::execute(	const std::string & name,
     return result;
   }
   
-  TAxis *x = histogram->GetXaxis();
+  const TAxis *x = histogram->GetXaxis();
   int nbins = x->GetNbins();
   double high = x->GetBinUpEdge(nbins);
   double low = x->GetBinUpEdge(0);
@@ -173,7 +173,7 @@ dqm_algorithms::RootFit::execute(	const std::string & name,
   }
   else if (m_name == "doublegaus"){
     TF1 f1("f1","gaus",xmin,xmax);
-    histogram->Fit(&f1,"q");
+    const_cast<TH1*>(histogram)->Fit(&f1,"q");
     double par[6] ;
 
     f1.GetParameters(par);
@@ -238,7 +238,7 @@ dqm_algorithms::RootFit::execute(	const std::string & name,
     }
 
   }
-  histogram->Fit( m_func.get(), option.c_str(),"",xmin,xmax );
+  const_cast<TH1*>(histogram)->Fit( m_func.get(), option.c_str(),"",xmin,xmax );
   if (m_name == "doublegaus") {
     double par[6];
     m_func->GetParameters(par);

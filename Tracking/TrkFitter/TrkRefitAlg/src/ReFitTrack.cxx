@@ -170,7 +170,7 @@ StatusCode Trk::ReFitTrack::execute()
   std::vector<std::unique_ptr<Trk::Track> > new_tracks;
 
   // loop over tracks
-  for (TrackCollection::const_iterator itr  = (*tracks).begin(); itr < (*tracks).end(); itr++){
+  for (TrackCollection::const_iterator itr  = (*tracks).begin(); itr < (*tracks).end(); ++itr){
 
     ATH_MSG_VERBOSE ("input track:" << **itr);
 
@@ -193,7 +193,7 @@ StatusCode Trk::ReFitTrack::execute()
          n_trt_hits = (*itr)->trackSummary()->get(numberOfTRTHits);
       }
       else {
-         std::unique_ptr<const Trk::TrackSummary> summary(  m_trkSummaryTool->summaryNoHoleSearch(**itr, prd_to_track_map.get()));
+         std::unique_ptr<const Trk::TrackSummary> summary(  m_trkSummaryTool->summaryNoHoleSearch(**itr));
          n_trt_hits = summary->get(numberOfTRTHits);
       }
       if ( (**itr).measurementsOnTrack()->size() - n_trt_hits<3 )
@@ -218,10 +218,10 @@ StatusCode Trk::ReFitTrack::execute()
 
          ATH_MSG_VERBOSE ("Creating measurement for beamspot.");
          // extrapolate the track to the vertex -- for consistent Measurement frame
-         std::unique_ptr<const Trk::TrackParameters> tp( m_extrapolator->extrapolate(ctx,
-                                                                                     **itr,
-                                                                                     *constrainSf,
-                                                                                     Trk::anyDirection) );
+         std::unique_ptr<const Trk::TrackParameters> tp( m_extrapolator->extrapolateTrack(ctx,
+                                                                                          **itr,
+                                                                                          *constrainSf,
+                                                                                          Trk::anyDirection) );
          const Trk::Perigee* tpConstrainedSf = dynamic_cast<const Trk::Perigee*>(tp.get());
          // create the vertex/beamsptOnTrack
          std::unique_ptr<Trk::VertexOnTrack> bsvxOnTrack( tpConstrainedSf ? new Trk::VertexOnTrack(*constrainVx,*tpConstrainedSf) : nullptr );
@@ -295,7 +295,7 @@ StatusCode Trk::ReFitTrack::execute()
   std::unique_ptr<TrackCollection> new_track_collection = std::make_unique<TrackCollection>();
   new_track_collection->reserve(new_tracks.size());
   for(std::unique_ptr<Trk::Track> &new_track : new_tracks ) {
-    m_trkSummaryTool->computeAndReplaceTrackSummary(*new_track, prd_to_track_map.get(), false /* DO NOT suppress hole search*/);
+    m_trkSummaryTool->computeAndReplaceTrackSummary(*new_track, false /* DO NOT suppress hole search*/);
     new_track_collection->push_back(std::move(new_track));
   }
 

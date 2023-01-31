@@ -103,7 +103,6 @@ namespace JetTagDQA {
 
     float m_jetPtCut = -1;
     bool m_onZprime = false;
-    bool m_hasJetFitterNN = false;
     float m_jetPtCutTtbar;
     float m_jetPtCutZprime;
     float m_jetEtaCut;
@@ -111,6 +110,11 @@ namespace JetTagDQA {
     float m_JVTCutLargerEtaAntiKt4EMTopoJets;
     float m_JVTCutAntiKt4EMPFlowJets;
     float m_truthMatchProbabilityCut;
+
+    std::string m_dipsName;
+    std::string m_DL1dv00Name;
+    std::string m_DL1dv01Name;
+    std::string m_GN1Name;
 
     JetTagDQA::BTaggingValidationPlots m_antiKt4EMTopoPlots;
     JetTagDQA::BTaggingValidationPlots m_antiKt4EMPFlowJetsPlots;
@@ -121,12 +125,6 @@ namespace JetTagDQA {
     StatusCode book(PlotBase& plots);
   };
 
-  // I/O operators
-  //////////////////////
-
-  ///////////////////////////////////////////////////////////////////
-  // Inline methods:
-  ///////////////////////////////////////////////////////////////////
 }
 
 #endif //> !JETTAGDQA_PHYSVALBTag_H

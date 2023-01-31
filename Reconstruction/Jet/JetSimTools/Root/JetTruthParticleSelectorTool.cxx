@@ -16,22 +16,24 @@
 
 #include "JetUtils/JetDistances.h"
 
+#include "AtlasHepMC/MagicNumbers.h"
+
 namespace {
   // TEMPORARY recopy some helper from TruthHelper and GeneratorUtils packages. 
   // We'll have to use this package when they work properly with xAOD.
 
   inline bool isStable(const xAOD::TruthParticle* p) {
-    if (p->barcode() >= 200000) return false; // This particle is from G4
+    if (HepMC::is_simulation_particle(p->barcode())) return false; // This particle is from G4
     if (p->pdgId() == 21 && p->p4().E() == 0) return false; //< Workaround for a gen bug?
     return ((p->status() % 1000 == 1) || //< Fully stable, even if marked that way by G4
-            (p->status() % 1000 == 2 && p->hasDecayVtx() && p->decayVtx() != NULL && p->decayVtx()->barcode() < -200000)); //< Gen-stable with G4 decay
+            (p->status() % 1000 == 2 && p->hasDecayVtx() && p->decayVtx() != NULL && HepMC::is_simulation_vertex(p->decayVtx()->barcode()))); //< Gen-stable with G4 decay
     /// @todo Add a no-descendants-from-G4 check?
   }
   
 
   bool isInteracting( const xAOD::TruthParticle* const p){
       if (! isStable(p)) return false;
-      const int apid = abs(p->pdgId() );
+      const int apid = std::abs(p->pdgId() );
       if (apid == 12 || apid == 14 || apid == 16) return false;
       if (p->status() % 1000 == 1 &&
           (apid == 1000022 || apid == 1000024 || apid == 5100022 ||
@@ -40,11 +42,11 @@ namespace {
     }
 
   bool isMuon(const xAOD::TruthParticle* truthPart) {
-    return ( abs(truthPart->pdgId()) == 13) ;        
+    return ( std::abs(truthPart->pdgId()) == 13) ;        
   }
 
   bool isWZDecay(const xAOD::TruthParticle* p) {
-    int pdg_id = abs(p->pdgId() );
+    int pdg_id = std::abs(p->pdgId() );
     int mom_pdg_id = pdg_id;
     const xAOD::TruthVertex* vprod = p->prodVtx();
     const xAOD::TruthVertex*oldVprod = vprod;
@@ -324,7 +326,7 @@ JetTruthParticleSelectorTool::finalize()
       msg(MSG::INFO) << "Counts of PDGs of all stable particles :" << endmsg;
       msg(MSG::INFO) << "========================================" << endmsg;
       msg(MSG::INFO) << "|    PDG    |  # particles  |" << endmsg;
-      for ( PDGList::iterator it = m_pdgList.begin(); it != m_pdgList.end(); it++ )
+      for ( PDGList::iterator it = m_pdgList.begin(); it != m_pdgList.end(); ++it )
         {
           msg(MSG::INFO) << "|"
                          << std::setw(10) << it->first << " |"
@@ -332,17 +334,17 @@ JetTruthParticleSelectorTool::finalize()
                          << endmsg;
         }
       msg(MSG::INFO) << "|    PDG    |    <p>    |    rms    |    <pt>    |    rms    |    <eta>    |    rms    |" << endmsg;
-      for ( PDGList::iterator it = m_pdgList.begin(); it != m_pdgList.end(); it++ )
+      for ( PDGList::iterator it = m_pdgList.begin(); it != m_pdgList.end(); ++it )
         {
           int n=it->second;
           double p=m_avP[it->first]/n;
-          double p2=sqrt(m_av2P[it->first]/n-
+          double p2=std::sqrt(m_av2P[it->first]/n-
                          m_avP[it->first]*m_avP[it->first]/n/n);
           double pt=m_avPt[it->first]/n;
-          double pt2=sqrt(m_av2Pt[it->first]/n-
+          double pt2=std::sqrt(m_av2Pt[it->first]/n-
                           m_avPt[it->first]*m_avPt[it->first]/n/n);
           double eta=m_avEta[it->first]/n;
-          double eta2=sqrt(m_av2Eta[it->first]/n-
+          double eta2=std::sqrt(m_av2Eta[it->first]/n-
                            m_avEta[it->first]*m_avEta[it->first]/n/n);
           msg(MSG::INFO) << "|"
                          << std::setw(15) << it->first << " |"
@@ -355,16 +357,16 @@ JetTruthParticleSelectorTool::finalize()
                          << endmsg;
         }
       msg(MSG::INFO) << "|    PDG    |   <phi>   |    rms    |     <m>     |     rms    |" << endmsg;
-      for ( PDGList::iterator it = m_pdgList.begin(); it != m_pdgList.end(); it++ )
+      for ( PDGList::iterator it = m_pdgList.begin(); it != m_pdgList.end(); ++it )
         {
           int n=it->second;
           double phi=m_avPhi[it->first]/n;
-          double phi2=sqrt(m_av2Phi[it->first]/n-
+          double phi2=std::sqrt(m_av2Phi[it->first]/n-
                            m_avPhi[it->first]*m_avPhi[it->first]/n/n);
           double m=m_avM[it->first]/n;
           double m2=0;
           if ( m_av2M[it->first]/n > m_avM[it->first]*m_avM[it->first]/n/n)
-            m2=sqrt(m_av2M[it->first]/n-
+            m2=std::sqrt(m_av2M[it->first]/n-
                     m_avM[it->first]*m_avM[it->first]/n/n);
           msg(MSG::INFO) << "|"
                          << std::setw(15) << it->first << " |"

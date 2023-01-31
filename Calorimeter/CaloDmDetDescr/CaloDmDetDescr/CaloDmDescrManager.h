@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /* ****************************************************************************
@@ -144,8 +144,8 @@ class CaloDmDescrManager {
     int get_dm_area(const Identifier& cellId) const;
     void show_element(const Identifier& cellId) const;
 
-    CaloCell_ID::CaloSample get_calo_sample(const std::string &SamplingName);
-    CaloCell_ID::CaloSample get_calo_sample(const std::string &SamplingName, float &etaMin, float &etaMax);
+    static CaloCell_ID::CaloSample get_calo_sample(const std::string &SamplingName);
+    static CaloCell_ID::CaloSample get_calo_sample(const std::string &SamplingName, float &etaMin, float &etaMax);
 
     std::string m_DmRegionFileName;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file DataStore_test.cxx
@@ -18,6 +18,8 @@
 #include "AthenaKernel/getMessageSvc.h"
 #include "AthenaKernel/IAddressProvider.h"
 #include "CxxUtils/checker_macros.h"
+#include "TestTools/random.h"
+#include "boost/timer/timer.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <cassert>
@@ -531,9 +533,153 @@ void test_dummy ATLAS_NOT_THREAD_SAFE ()
 }
 
 
-int main ATLAS_NOT_THREAD_SAFE ()
+//*****************************************************************************
+// Timing test for clearStore().
+
+
+std::string make_name (size_t& icount)
+{
+  return "prox" + std::to_string (++icount);
+}
+
+
+std::vector<SG::DataProxy*> make_proxies (size_t n,
+                                          bool resetOnly,
+                                          size_t& icount,
+                                          uint32_t& seed,
+                                          IStringPool& pool)
+{
+  std::vector<SG::DataProxy*> ret;
+  ret.reserve (n);
+  for (size_t i = 0; i < n; i++) {
+    std::string name = make_name (icount);
+    CLID clid = 123;
+    SG::StringPool::sgkey_t sgkey = pool.stringToKey (name, clid);
+    SG::DataProxy* dp = make_proxy (clid, name, sgkey);
+    dp->resetOnly (resetOnly);
+    dp->addRef();
+
+    std::string alias_name;
+    if (Athena_test::randi_seed (seed, 10) == 0) {
+      alias_name = make_name (icount);
+      dp->setAlias (alias_name);
+    }
+    
+    int nsymlink = Athena_test::randi_seed (seed, 4);
+    for (int i = 0; i < nsymlink; i++) {
+      dp->setTransientID (++clid);
+    }
+    
+    ret.push_back (dp);
+  }
+  return ret;
+}
+
+
+void addProxies (const std::vector<SG::DataProxy*>& dps, SG::DataStore& store)
+{
+  for (SG::DataProxy* dp : dps) {
+    for (CLID clid : dp->transientID()) {
+      assert (store.addToStore (clid, dp).isSuccess());
+    }
+    for (const std::string& alias : dp->alias()) {
+      assert (store.addAlias (alias, dp).isSuccess());
+    }
+  }
+}
+
+
+void check_proxy (const SG::DataProxy& dp)
+{
+  if (!dp.isResetOnly()) {
+    assert (dp.refCount() == 1);
+  }
+  else {
+    size_t nclid = dp.transientID().size();
+    size_t nalias = dp.alias().size();
+    size_t nref = 1 + nclid * (nalias+1);
+    assert (dp.refCount() == nref);
+  }
+}
+
+
+class Timer
+{
+public:
+  Timer();
+
+  class RunTimer
+  {
+  public:
+    RunTimer (boost::timer::cpu_timer& timer) : m_timer (&timer)
+    { timer.resume(); }
+    RunTimer (RunTimer&& other) : m_timer (other.m_timer) { other.m_timer = nullptr; }
+    ~RunTimer() { if (m_timer) m_timer->stop(); }
+  private:
+    boost::timer::cpu_timer* m_timer;
+  };
+  RunTimer run() { return RunTimer (m_timer); }
+
+  std::string format() const { return m_timer.format(3); }
+
+private:
+  boost::timer::cpu_timer m_timer;
+};
+
+
+Timer::Timer()
+{
+  m_timer.stop();
+}
+
+
+void time_clear (size_t niter)
+{
+  SGTest::TestStore pool;
+  SG::DataStore store (pool);
+  size_t icount = 0;
+  uint32_t seed = 123;
+  std::vector<SG::DataProxy*> persProxies = make_proxies (300, true, icount,
+                                                          seed, pool);
+  std::vector<SG::DataProxy*> transProxies = make_proxies (700, false,
+                                                           icount, seed, pool);
+  addProxies (persProxies, store);
+
+  Timer tclear;
+  Timer ttotal;
+
+  {
+    Timer::RunTimer rt_total = ttotal.run();
+    for (size_t i = 0; i < niter; i++) {
+      addProxies (transProxies, store);
+      {
+        Timer::RunTimer rt_clear = tclear.run();
+        store.clearStore (false, false, nullptr);
+      }
+      for (const SG::DataProxy* dp : persProxies) check_proxy (*dp);
+      for (const SG::DataProxy* dp : transProxies) check_proxy (*dp);
+    }
+  }
+  std::cout << "clear " << tclear.format();
+  std::cout << "total " << ttotal.format();
+}
+
+
+//*****************************************************************************
+
+
+int main ATLAS_NOT_THREAD_SAFE (int argc, char** argv)
 {
   Athena::getMessageSvcQuiet = true;
+
+  if (argc > 1 && strncmp (argv[1], "--timeClear", 11) == 0) {
+    size_t niter = 1000;
+    if (argv[1][11] == '=') {
+      niter = std::stoul (std::string (argv[1] + 12));
+    }
+    time_clear (niter);
+    return 0;
+  }
   test_ctor();
   test_addToStore();
   test_addAlias();

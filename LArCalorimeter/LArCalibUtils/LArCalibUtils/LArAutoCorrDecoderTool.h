@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -10,29 +10,23 @@
 
 #include "LArElecCalib/ILArAutoCorrDecoderTool.h"
 
-#include "GaudiKernel/ToolHandle.h"
-
 #include "LArElecCalib/ILArAutoCorr.h"
 #include <Eigen/Dense>
 
-#include "StoreGate/DataHandle.h"
 #include "LArIdentifier/LArOnlineID.h"
 #include "LArIdentifier/LArOnline_SuperCellID.h"
 
-#include "LArRawConditions/LArConditionsContainer.h"
-
 #include "AthenaBaseComps/AthAlgTool.h"
 
-class LArAutoCorrDecoderTool: public AthAlgTool,
-			      virtual public ILArAutoCorrDecoderTool
+class LArAutoCorrDecoderTool: 
+        public extends<AthAlgTool,ILArAutoCorrDecoderTool>
 
 {
  public:
   
   // constructor
-  LArAutoCorrDecoderTool(const std::string& type, 
-			 const std::string& name, 
-			 const IInterface* parent); 
+  using base_class::base_class;
+
   
   // destructor 
   virtual ~LArAutoCorrDecoderTool();
@@ -49,21 +43,16 @@ class LArAutoCorrDecoderTool: public AthAlgTool,
 
  private:
 
-  unsigned m_decodemode;
-
-  bool m_alwaysHighGain;
+  //Properties:
+  Gaudi::Property<unsigned> m_decodemode{this,"DecodeMode",0};
+  Gaudi::Property<bool> m_alwaysHighGain{this,"UseAlwaysHighGain",false};
+  Gaudi::Property<bool> m_isSC{this,"isSC",false};
+  Gaudi::Property<std::string> m_keyAutoCorr{this,"KeyAutoCorr","LArAutoCorr"};
 
   const Eigen::MatrixXd ACDiagonal( const HWIdentifier&  CellID, int gain, unsigned nSamples) const;
   const Eigen::MatrixXd ACPhysics( const HWIdentifier&  CellID, int gain, unsigned nSamples) const;
 
-  const LArOnlineID_Base*  m_onlineID;
-
-  std::string m_keyAutoCorr;
-
-  const DataHandle<ILArAutoCorr> m_autoCorr;
-
-  // Running on cells or supercells?
-  bool m_isSC;
+  const LArOnlineID_Base*  m_onlineID=nullptr;
 };
 
 #endif

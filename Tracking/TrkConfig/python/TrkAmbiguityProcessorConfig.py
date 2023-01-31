@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Configuration of TrkAmbiguityProcessor
 # The ambiguity processor drives the ambiguity resolution step that
@@ -29,7 +29,7 @@ def SimpleAmbiguityProcessorToolCfg(flags,
             from InDetConfig.InDetTrackScoringToolsConfig import InDetCosmicsScoringToolCfg
             InDetAmbiScoringTool = acc.popToolsAndMerge(
                 InDetCosmicsScoringToolCfg(flags))
-        elif (flags.InDet.Tracking.ActivePass.extension == "R3LargeD0" and
+        elif (flags.InDet.Tracking.ActiveConfig.extension == "R3LargeD0" and
               flags.InDet.Tracking.nnCutLargeD0Threshold > 0):
             # Set up NN config
             from InDetConfig.InDetTrackScoringToolsConfig import InDetNNScoringToolSiCfg
@@ -42,7 +42,7 @@ def SimpleAmbiguityProcessorToolCfg(flags,
         kwargs.setdefault("ScoringTool", InDetAmbiScoringTool)
 
     if "Fitter" not in kwargs:
-        if flags.InDet.Tracking.ActivePass.isLowPt:
+        if flags.InDet.Tracking.ActiveConfig.isLowPt:
             from TrkConfig.CommonTrackFitterConfig import InDetTrackFitterLowPtCfg
             InDetTrackFitter = acc.popToolsAndMerge(InDetTrackFitterLowPtCfg(flags))
         else:
@@ -58,10 +58,9 @@ def SimpleAmbiguityProcessorToolCfg(flags,
 
     if "TrackSummaryTool" not in kwargs:
         from TrkConfig.TrkTrackSummaryToolConfig import (
-            InDetTrackSummaryToolAmbiCfg)
+            InDetTrackSummaryToolCfg)
         kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(
-            InDetTrackSummaryToolAmbiCfg(flags, 
-            name="InDetAmbiguityProcessorSplitProbTrackSummaryTool" + flags.InDet.Tracking.ActivePass.extension)))
+            InDetTrackSummaryToolCfg(flags)))
 
     if "SelectionTool" not in kwargs:
         from InDetConfig.InDetAmbiTrackSelectionToolConfig import (
@@ -72,27 +71,27 @@ def SimpleAmbiguityProcessorToolCfg(flags,
     kwargs.setdefault("InputClusterSplitProbabilityName",
                       ClusterSplitProbContainer)
     kwargs.setdefault("OutputClusterSplitProbabilityName",
-                      'InDetAmbiguityProcessorSplitProb'+flags.InDet.Tracking.ActivePass.extension)
+                      'InDetAmbiguityProcessorSplitProb'+flags.InDet.Tracking.ActiveConfig.extension)
     kwargs.setdefault("SuppressHoleSearch", False)
     kwargs.setdefault("tryBremFit",
                       flags.InDet.Tracking.doBremRecovery and
-                      (flags.InDet.Tracking.ActivePass.extension == "" or
-                       flags.InDet.Tracking.ActivePass.extension == "BLS"))
+                      (flags.InDet.Tracking.ActiveConfig.extension == "" or
+                       flags.InDet.Tracking.ActiveConfig.extension == "BLS"))
     kwargs.setdefault(
         "caloSeededBrem", flags.InDet.Tracking.doCaloSeededBrem and
         flags.Detector.EnableCalo)
-    kwargs.setdefault("pTminBrem", flags.InDet.Tracking.ActivePass.minPTBrem)
+    kwargs.setdefault("pTminBrem", flags.InDet.Tracking.ActiveConfig.minPTBrem)
     kwargs.setdefault("RefitPrds", True)
     kwargs.setdefault(
         "MatEffects", flags.InDet.Tracking.materialInteractionsType
         if flags.InDet.Tracking.materialInteractions else 0)
 
-    if flags.InDet.Tracking.ActivePass.extension == (
+    if flags.InDet.Tracking.ActiveConfig.extension == (
         "Pixel"):
         kwargs.setdefault("SuppressHoleSearch", True)
 
     acc.setPrivateTools(CompFactory.Trk.SimpleAmbiguityProcessorTool(
-        name+flags.InDet.Tracking.ActivePass.extension, **kwargs))
+        name+flags.InDet.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
 
@@ -131,17 +130,10 @@ def SimpleAmbiguityProcessorTool_TRT_Cfg(
         kwargs.setdefault("ScoringTool", InDetTRT_SeededScoringTool)
 
     if "TrackSummaryTool" not in kwargs:
-        if flags.Beam.Type is BeamType.Cosmics:
-            from TrkConfig.TrkTrackSummaryToolConfig import (
-                InDetTrackSummaryToolSharedHitsCfg)
-            InDetTRT_SeededSummaryTool = acc.popToolsAndMerge(
-                InDetTrackSummaryToolSharedHitsCfg(flags))
-        else:
-            from TrkConfig.TrkTrackSummaryToolConfig import (
-                InDetTrackSummaryToolCfg)
-            InDetTRT_SeededSummaryTool = acc.popToolsAndMerge(
-                InDetTrackSummaryToolCfg(flags))
-        kwargs.setdefault("TrackSummaryTool", InDetTRT_SeededSummaryTool)
+        from TrkConfig.TrkTrackSummaryToolConfig import (
+            InDetTrackSummaryToolCfg)
+        kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(
+            InDetTrackSummaryToolCfg(flags)))
 
     if "SelectionTool" not in kwargs:
         from InDetConfig.InDetAmbiTrackSelectionToolConfig import (
@@ -153,7 +145,7 @@ def SimpleAmbiguityProcessorTool_TRT_Cfg(
                       ClusterSplitProbContainer)
     kwargs.setdefault(
         "OutputClusterSplitProbabilityName",
-        'InDetTRT_SeededAmbiguityProcessorSplitProb'+flags.InDet.Tracking.ActivePass.extension)
+        'InDetTRT_SeededAmbiguityProcessorSplitProb'+flags.InDet.Tracking.ActiveConfig.extension)
     kwargs.setdefault("RefitPrds", False)
     kwargs.setdefault("SuppressTrackFit", False)
     kwargs.setdefault("SuppressHoleSearch", False)
@@ -175,12 +167,12 @@ def SimpleAmbiguityProcessorTool_Trig_Cfg(
 
     acc = ComponentAccumulator()
 
-    # TODO False if flags.InDet.Tracking.ActivePass.name == 'cosmics' else True
+    # TODO False if flags.InDet.Tracking.ActiveConfig.name == 'cosmics' else True
     kwargs.setdefault("SuppressHoleSearch", False)
     # kwargs.setdefault("RefitPrds", False)
-    # #TODO clarify this setting False if flags.InDet.Tracking.ActivePass.name == 'cosmics' else True
+    # #TODO clarify this setting False if flags.InDet.Tracking.ActiveConfig.name == 'cosmics' else True
     kwargs.setdefault("tryBremFit", True
-                      if flags.InDet.Tracking.ActivePass.name == 'electron'
+                      if flags.InDet.Tracking.ActiveConfig.name == 'electron'
                       and flags.InDet.Tracking.doBremRecovery
                       else False)
     kwargs.setdefault("pTminBrem", 5*Units.GeV)
@@ -235,7 +227,7 @@ def DenseEnvironmentsAmbiguityScoreProcessorToolCfg(
             from InDetConfig.InDetTrackScoringToolsConfig import InDetCosmicsScoringToolCfg
             InDetAmbiScoringTool = acc.popToolsAndMerge(
                 InDetCosmicsScoringToolCfg(flags))
-        elif (flags.InDet.Tracking.ActivePass.extension == "R3LargeD0"
+        elif (flags.InDet.Tracking.ActiveConfig.extension == "R3LargeD0"
               and flags.InDet.Tracking.nnCutLargeD0Threshold > 0):
             from InDetConfig.InDetTrackScoringToolsConfig import InDetNNScoringToolSiCfg
             InDetAmbiScoringTool = acc.popToolsAndMerge(
@@ -264,24 +256,30 @@ def DenseEnvironmentsAmbiguityScoreProcessorToolCfg(
                           acc.popToolsAndMerge(PRDtoTrackMapToolCfg(flags)))
 
     kwargs.setdefault("AssociationMapName",
-                      f"PRDToTrackMap{flags.InDet.Tracking.ActivePass.extension}")
+                      f"PRDToTrackMap{flags.InDet.Tracking.ActiveConfig.extension}")
 
-    if flags.InDet.Tracking.ActivePass.useTIDE_Ambi:
+    if flags.InDet.Tracking.ActiveConfig.useTIDE_Ambi:
         kwargs.setdefault(
             "sharedProbCut", flags.InDet.Tracking.pixelClusterSplitProb1)
         kwargs.setdefault("sharedProbCut2",
                           flags.InDet.Tracking.pixelClusterSplitProb2)
         kwargs.setdefault(
             "SplitClusterMap_new",
-            f"SplitClusterAmbiguityMap{flags.InDet.Tracking.ActivePass.extension}")
+            f"SplitClusterAmbiguityMap{flags.InDet.Tracking.ActiveConfig.extension}")
 
     kwargs.setdefault("InputClusterSplitProbabilityName",
                       ClusterSplitProbContainer)
     kwargs.setdefault("OutputClusterSplitProbabilityName",
-                      f"SplitProb{flags.InDet.Tracking.ActivePass.extension}")
+                      f"SplitProb{flags.InDet.Tracking.ActiveConfig.extension}")
+
+    if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring and flags.InDet.Tracking.ActiveConfig.extension == "":
+        from TrkConfig.TrkValToolsConfig import TrkObserverToolCfg
+        TrkObserverTool = acc.popToolsAndMerge(TrkObserverToolCfg(flags))
+        acc.addPublicTool(TrkObserverTool)
+        kwargs.setdefault("ObserverTool", TrkObserverTool)
 
     acc.setPrivateTools(CompFactory.Trk.DenseEnvironmentsAmbiguityScoreProcessorTool(
-        f"{name}{flags.InDet.Tracking.ActivePass.extension}", **kwargs))
+        f"{name}{flags.InDet.Tracking.ActiveConfig.extension}", **kwargs))
     return acc
 
 
@@ -305,7 +303,8 @@ def ITkDenseEnvironmentsAmbiguityScoreProcessorToolCfg(
         else:
             from InDetConfig.InDetTrackScoringToolsConfig import (
                 ITkAmbiScoringToolCfg)
-            ITkAmbiScoringTool = acc.popToolsAndMerge(ITkAmbiScoringToolCfg(flags))
+            ITkAmbiScoringTool = acc.popToolsAndMerge(
+                ITkAmbiScoringToolCfg(flags))
         kwargs.setdefault("ScoringTool", ITkAmbiScoringTool)
 
     if "SplitProbTool" not in kwargs:
@@ -331,17 +330,17 @@ def ITkDenseEnvironmentsAmbiguityScoreProcessorToolCfg(
     kwargs.setdefault("sharedProbCut2",
                       flags.ITk.Tracking.pixelClusterSplitProb2)
     kwargs.setdefault("SplitClusterMap_new", 'SplitClusterAmbiguityMap' +
-                      flags.ITk.Tracking.ActivePass.extension)
+                      flags.ITk.Tracking.ActiveConfig.extension)
     kwargs.setdefault("AssociationMapName", 'ITkPRDToTrackMap' +
-                      flags.ITk.Tracking.ActivePass.extension)
+                      flags.ITk.Tracking.ActiveConfig.extension)
     kwargs.setdefault("InputClusterSplitProbabilityName",
                       ClusterSplitProbContainer)
     kwargs.setdefault("OutputClusterSplitProbabilityName",
-                      'SplitProb'+flags.ITk.Tracking.ActivePass.extension)
+                      'SplitProb'+flags.ITk.Tracking.ActiveConfig.extension)
 
     # DenseEnvironmentsAmbiguityScoreProcessorTool
     acc.setPrivateTools(CompFactory.Trk.DenseEnvironmentsAmbiguityScoreProcessorTool(
-        name+flags.ITk.Tracking.ActivePass.extension, **kwargs))
+        name+flags.ITk.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
 
@@ -358,7 +357,7 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
             from InDetConfig.InDetTrackScoringToolsConfig import InDetCosmicsScoringToolCfg
             InDetAmbiScoringTool = acc.popToolsAndMerge(
                 InDetCosmicsScoringToolCfg(flags))
-        elif (flags.InDet.Tracking.ActivePass.extension == "R3LargeD0" and
+        elif (flags.InDet.Tracking.ActiveConfig.extension == "R3LargeD0" and
               flags.InDet.Tracking.nnCutLargeD0Threshold > 0):
             from InDetConfig.InDetTrackScoringToolsConfig import InDetNNScoringToolSiCfg
             InDetAmbiScoringTool = acc.popToolsAndMerge(
@@ -372,13 +371,13 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
     if "Fitter" not in kwargs:
         fitter_list = []
 
-        if flags.InDet.Tracking.ActivePass.isLowPt:
+        if flags.InDet.Tracking.ActiveConfig.isLowPt:
             from TrkConfig.CommonTrackFitterConfig import (
                 InDetTrackFitterLowPtAmbiCfg)
             InDetTrackFitterLowPt = acc.popToolsAndMerge(
                 InDetTrackFitterLowPtAmbiCfg(
                     flags,
-                    name='InDetTrackFitterLowPt'+flags.InDet.Tracking.ActivePass.extension))
+                    name='InDetTrackFitterLowPt'+flags.InDet.Tracking.ActiveConfig.extension))
             fitter_list.append(InDetTrackFitterLowPt)
         else:
             from TrkConfig.CommonTrackFitterConfig import  (
@@ -386,7 +385,7 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
             InDetTrackFitterAmbi = acc.popToolsAndMerge(
                 InDetTrackFitterAmbiCfg(
                     flags,
-                    name='InDetTrackFitterAmbi'+flags.InDet.Tracking.ActivePass.extension))
+                    name='InDetTrackFitterAmbi'+flags.InDet.Tracking.ActiveConfig.extension))
             fitter_list.append(InDetTrackFitterAmbi)
 
         kwargs.setdefault("Fitter", fitter_list)
@@ -399,11 +398,9 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
 
     if "TrackSummaryTool" not in kwargs:
         from TrkConfig.TrkTrackSummaryToolConfig import (
-            InDetTrackSummaryToolAmbiCfg)
+            InDetTrackSummaryToolCfg)
         kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(
-            InDetTrackSummaryToolAmbiCfg(
-                flags,
-                name="InDetAmbiguityProcessorSplitProbTrackSummaryTool" + flags.InDet.Tracking.ActivePass.extension)))
+            InDetTrackSummaryToolCfg(flags)))
 
     if "SelectionTool" not in kwargs:
         from InDetConfig.InDetAmbiTrackSelectionToolConfig import (
@@ -412,25 +409,36 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
             InDetAmbiTrackSelectionToolCfg(flags)))
 
     kwargs.setdefault("AssociationMapName", 'PRDToTrackMap' +
-                      flags.InDet.Tracking.ActivePass.extension)
+                      flags.InDet.Tracking.ActiveConfig.extension)
     kwargs.setdefault("InputClusterSplitProbabilityName",
-                      'SplitProb'+flags.InDet.Tracking.ActivePass.extension)
+                      'SplitProb'+flags.InDet.Tracking.ActiveConfig.extension)
     kwargs.setdefault("OutputClusterSplitProbabilityName",
-                      'InDetAmbiguityProcessorSplitProb'+flags.InDet.Tracking.ActivePass.extension)
+                      'InDetAmbiguityProcessorSplitProb'+flags.InDet.Tracking.ActiveConfig.extension)
     kwargs.setdefault("SuppressHoleSearch", False)
     kwargs.setdefault("tryBremFit", flags.InDet.Tracking.doBremRecovery and (
-        flags.InDet.Tracking.ActivePass.extension == "" or
-        flags.InDet.Tracking.ActivePass.extension == "BLS"))
+        flags.InDet.Tracking.ActiveConfig.extension == "" or
+        flags.InDet.Tracking.ActiveConfig.extension == "BLS"))
     kwargs.setdefault(
         "caloSeededBrem", flags.InDet.Tracking.doCaloSeededBrem and
         flags.Detector.EnableCalo)
-    kwargs.setdefault("pTminBrem", flags.InDet.Tracking.ActivePass.minPTBrem)
+    kwargs.setdefault("pTminBrem", flags.InDet.Tracking.ActiveConfig.minPTBrem)
     kwargs.setdefault("RefitPrds", True)
     kwargs.setdefault("KeepHolesFromBeforeRefit", False)
+    kwargs.setdefault(
+        "MatEffects", flags.InDet.Tracking.materialInteractionsType
+        if flags.InDet.Tracking.materialInteractions else 0)
 
-    InDetAmbiguityProcessor = CompFactory.Trk.DenseEnvironmentsAmbiguityProcessorTool(
-        name=name+flags.InDet.Tracking.ActivePass.extension, **kwargs)
-    acc.setPrivateTools(InDetAmbiguityProcessor)
+    if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring and flags.InDet.Tracking.ActiveConfig.extension == "":
+        from TrkConfig.TrkValToolsConfig import TrkObserverToolCfg, WriterTrkObserverToolCfg
+        TrkObserverTool = acc.popToolsAndMerge(TrkObserverToolCfg(flags))
+        acc.addPublicTool(TrkObserverTool)
+        kwargs.setdefault("ObserverTool", TrkObserverTool)
+        TrkObserverToolWriter = acc.popToolsAndMerge(WriterTrkObserverToolCfg(flags))
+        acc.addPublicTool(TrkObserverToolWriter)
+        kwargs.setdefault("ObserverToolWriter", TrkObserverToolWriter)
+
+    acc.setPrivateTools(CompFactory.Trk.DenseEnvironmentsAmbiguityProcessorTool(
+        name=name+flags.InDet.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
 
@@ -443,15 +451,18 @@ def ITkDenseEnvironmentsAmbiguityProcessorToolCfg(
     #
     # --- set up different Scoring Tool for collisions and cosmics
     #
-    if flags.Beam.Type is BeamType.Cosmics:
-        from InDetConfig.InDetTrackScoringToolsConfig import (
-            ITkCosmicsScoringToolCfg)
-        ITkAmbiScoringTool = acc.popToolsAndMerge(
-            ITkCosmicsScoringToolCfg(flags))
-    else:
-        from InDetConfig.InDetTrackScoringToolsConfig import (
-            ITkAmbiScoringToolCfg)
-        ITkAmbiScoringTool = acc.popToolsAndMerge(ITkAmbiScoringToolCfg(flags))
+    if "ScoringTool" not in kwargs:
+        if flags.Beam.Type is BeamType.Cosmics:
+            from InDetConfig.InDetTrackScoringToolsConfig import (
+                ITkCosmicsScoringToolCfg)
+            ITkAmbiScoringTool = acc.popToolsAndMerge(
+                ITkCosmicsScoringToolCfg(flags))
+        else:
+            from InDetConfig.InDetTrackScoringToolsConfig import (
+                ITkAmbiScoringToolCfg)
+            ITkAmbiScoringTool = acc.popToolsAndMerge(
+                ITkAmbiScoringToolCfg(flags))
+        kwargs.setdefault("ScoringTool", ITkAmbiScoringTool)
 
     if "Fitter" not in kwargs:
         from TrkConfig.CommonTrackFitterConfig import (
@@ -460,54 +471,47 @@ def ITkDenseEnvironmentsAmbiguityProcessorToolCfg(
         ITkTrackFitterAmbi = acc.popToolsAndMerge(
             ITkTrackFitterAmbiCfg(
                 flags,
-                name='ITkTrackFitterAmbi'+flags.ITk.Tracking.ActivePass.extension))
+                name='ITkTrackFitterAmbi'+flags.ITk.Tracking.ActiveConfig.extension))
         fitter_list.append(ITkTrackFitterAmbi)
         kwargs.setdefault("Fitter", fitter_list)
 
+    if "AssociationTool" not in kwargs:
+        from InDetConfig.InDetAssociationToolsConfig import (
+            ITkPRDtoTrackMapToolGangedPixelsCfg)
+        kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(
+            ITkPRDtoTrackMapToolGangedPixelsCfg(flags)))
 
-    from InDetConfig.InDetAssociationToolsConfig import (
-        ITkPRDtoTrackMapToolGangedPixelsCfg)
-    ITkPRDtoTrackMapToolGangedPixels = acc.popToolsAndMerge(
-        ITkPRDtoTrackMapToolGangedPixelsCfg(flags))
+    if "TrackSummaryTool" not in kwargs:
+        from TrkConfig.TrkTrackSummaryToolConfig import (
+            ITkTrackSummaryToolCfg)
+        kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(
+            ITkTrackSummaryToolCfg(flags)))
 
-    from TrkConfig.TrkTrackSummaryToolConfig import (
-        ITkTrackSummaryToolAmbiCfg)
-    ambi_track_summary_tool = acc.getPrimaryAndMerge(
-        ITkTrackSummaryToolAmbiCfg(
-            flags,
-            name="ITkAmbiguityProcessorSplitProbTrackSummaryTool" + flags.ITk.Tracking.ActivePass.extension))
+    if "SelectionTool" not in kwargs:
+        from InDetConfig.InDetAmbiTrackSelectionToolConfig import (
+            ITkAmbiTrackSelectionToolCfg)
+        kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(
+            ITkAmbiTrackSelectionToolCfg(flags)))
 
-    from InDetConfig.InDetAmbiTrackSelectionToolConfig import (
-        ITkAmbiTrackSelectionToolCfg)
-    ITkAmbiTrackSelectionTool = acc.popToolsAndMerge(
-        ITkAmbiTrackSelectionToolCfg(flags))
-
-    kwargs.setdefault("AssociationTool", ITkPRDtoTrackMapToolGangedPixels)
     kwargs.setdefault("AssociationMapName", 'ITkPRDToTrackMap' +
-                      flags.ITk.Tracking.ActivePass.extension)
-    kwargs.setdefault("TrackSummaryTool", ambi_track_summary_tool)
-    kwargs.setdefault("ScoringTool", ITkAmbiScoringTool)
-    kwargs.setdefault("SelectionTool", ITkAmbiTrackSelectionTool)
+                      flags.ITk.Tracking.ActiveConfig.extension)
     kwargs.setdefault("InputClusterSplitProbabilityName",
-                      'SplitProb'+flags.ITk.Tracking.ActivePass.extension)
+                      'SplitProb'+flags.ITk.Tracking.ActiveConfig.extension)
     kwargs.setdefault("OutputClusterSplitProbabilityName",
-                      'ITkAmbiguityProcessorSplitProb'+flags.ITk.Tracking.ActivePass.extension)
+                      'ITkAmbiguityProcessorSplitProb'+flags.ITk.Tracking.ActiveConfig.extension)
     kwargs.setdefault("SuppressHoleSearch", False)
     # Disabled for second passes in reco
     kwargs.setdefault(
         "tryBremFit", flags.ITk.Tracking.doBremRecovery and
         flags.Detector.EnableCalo and
-        flags.ITk.Tracking.ActivePass.extension == "")
+        flags.ITk.Tracking.ActiveConfig.extension == "")
     kwargs.setdefault(
         "caloSeededBrem", flags.ITk.Tracking.doCaloSeededBrem and
         flags.Detector.EnableCalo)
-    kwargs.setdefault("pTminBrem", flags.ITk.Tracking.ActivePass.minPTBrem[0])
+    kwargs.setdefault("pTminBrem", flags.ITk.Tracking.ActiveConfig.minPTBrem[0])
     kwargs.setdefault("RefitPrds", True)
     kwargs.setdefault("KeepHolesFromBeforeRefit", False)
 
-    # DenseEnvironmentsAmbiguityProcessorTool
-    ProcessorTool = CompFactory.Trk.DenseEnvironmentsAmbiguityProcessorTool
-    ITkAmbiguityProcessor = ProcessorTool(
-        name=name+flags.ITk.Tracking.ActivePass.extension, **kwargs)
-    acc.setPrivateTools(ITkAmbiguityProcessor)
+    acc.setPrivateTools(CompFactory.Trk.DenseEnvironmentsAmbiguityProcessorTool(
+        name=name+flags.ITk.Tracking.ActiveConfig.extension, **kwargs))
     return acc

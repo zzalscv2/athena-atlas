@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /* Author: Andrii Verbytskyi andrii.verbytskyi@mpp.mpg.de */
 
@@ -72,7 +72,7 @@ public:
       auto it = m_vertexBC.find (barcode->value());
       if (it != m_vertexBC.end()) {
         m_vertexBC.erase (it);
-      }        
+      }
     }
   }
 
@@ -91,8 +91,54 @@ public:
       auto it = m_particleBC.find (barcode->value());
       if (it != m_particleBC.end()) {
         m_particleBC.erase (it);
-      }        
+      }
     }
+  }
+  
+  std::map<int, ConstGenVertexPtr> barcode_to_vertex_map() const {
+    std::map<int, ConstGenVertexPtr> ret;
+    for (const auto &bcvertpair: m_vertexBC)
+      ret.insert({bcvertpair.first,std::const_pointer_cast<const HepMC3::GenVertex>(bcvertpair.second)});
+    return ret;
+   }
+  std::map<int, ConstGenParticlePtr> barcode_to_particle_map() const {
+    std::map<int, ConstGenParticlePtr> ret;
+    for (const auto &bcpartpair: m_particleBC)
+      ret.insert({bcpartpair.first,std::const_pointer_cast<const HepMC3::GenParticle>(bcpartpair.second)});
+    return ret;
+   }
+
+  void fillAttribute(GenEvent* e) {
+    auto barcodeAttributes = e->attributes()["barcode"];
+    auto particles = e->particles();
+    for (size_t i = 1; i <= particles.size(); i++) {
+      if (barcodeAttributes.count(i)) {
+        auto ptr = barcodeAttributes.at(i);
+        if (ptr->is_parsed()) {
+          m_particleBC[std::dynamic_pointer_cast<HepMC3::IntAttribute>(ptr)->value()] = ptr->particle();
+        }
+        else {
+          m_particleBC[std::atoi(ptr->unparsed_string().c_str())] = ptr->particle();
+        }
+      } else {
+        m_particleBC[i] = particles[i-1];
+      }
+    }
+    auto vertices = e->vertices();
+    for (size_t i = 1; i <= vertices.size(); i++) {
+      if (barcodeAttributes.count(-i)) {
+        auto ptr = barcodeAttributes.at(-i);
+        if (ptr->is_parsed()) {
+          m_vertexBC[std::dynamic_pointer_cast<HepMC3::IntAttribute>(ptr)->value()] = ptr->vertex();
+        }
+        else {
+          m_vertexBC[std::atoi(ptr->unparsed_string().c_str())] = ptr->vertex();
+        }
+      } else {
+        m_vertexBC[-i] = vertices[i-1];
+      }
+    }
+    set_is_parsed(true);
   }
 
 private:
@@ -123,7 +169,7 @@ inline std::vector<HepMC3::GenParticlePtr>::const_iterator  end(HepMC3::GenEvent
 inline std::vector<HepMC3::ConstGenParticlePtr>::const_iterator  begin(const HepMC3::GenEvent& e) { return e.particles().begin(); }
 inline std::vector<HepMC3::ConstGenParticlePtr>::const_iterator  end(const HepMC3::GenEvent& e) { return e.particles().end(); }
 
-inline GenEvent* newGenEvent(const int signal_process_id, const int event_number ) {
+inline GenEvent* newGenEvent(const int signal_process_id, const int event_number ) { // TODO Update event_number to long long int?
     GenEvent* e= new GenEvent();
     std::shared_ptr<HepMC3::IntAttribute> signal_process_id_A = std::make_shared<HepMC3::IntAttribute>(signal_process_id);
     e->add_attribute("signal_process_id",signal_process_id_A);
@@ -156,64 +202,150 @@ inline GenEvent* copyemptyGenEvent(const GenEvent* inEvt) {
   return e;
 }
 
+inline void fillBarcodesAttribute(GenEvent* e) {
+  auto barcodes = e->attribute<GenEventBarcodes> ("barcodes");
+  if (!barcodes) {
+    barcodes = std::make_shared<GenEventBarcodes>();
+    e->add_attribute("barcodes", barcodes);
+  }
+  // force re-parsing as calling barcodes->is_parsed() returns true here
+  barcodes->fillAttribute(e);
+}
+
 inline ConstGenVertexPtr  barcode_to_vertex(const GenEvent* e, int id ) {
-    auto barcodes = e->attribute<GenEventBarcodes> ("barcodes");
-    if (barcodes) {
-      ConstGenVertexPtr ptr = barcodes->barcode_to_vertex (id);
-      if (ptr) return ptr;
-    }
-    auto vertices=e->vertices();
-    if (-id>0&&-id<=(int)vertices.size()) {
-      if (!vertices[-id-1]->attribute<HepMC3::IntAttribute>("barcode")) {
-        return vertices[-id-1];
+  // Prefer to use optimized GenEvent barcodes attribute
+  auto barcodes = e->attribute<GenEventBarcodes> ("barcodes");
+  if (barcodes) {
+    ConstGenVertexPtr ptr = barcodes->barcode_to_vertex (id);
+    if (ptr) return ptr;
+  }
+  // Fallback to unoptimized GenVertex barcode attribute
+  auto vertices=e->vertices();
+  auto barcodeAttributes = e->attributes()["barcode"]; // If there are no "barcode" Attributes, then an empty map would be generated.
+  for (size_t i = 1; i <= vertices.size(); i++) {
+    if (barcodeAttributes.count(-i)) {
+      auto ptr = barcodeAttributes.at(-i);
+      if (ptr->is_parsed()) {
+        if (id == std::dynamic_pointer_cast<HepMC3::IntAttribute>(ptr)->value()) {
+          return ptr->vertex();
+        }
+      }
+      else {
+        if (id == std::atoi(ptr->unparsed_string().c_str())) {
+          return ptr->vertex();
+        }
       }
     }
-    return  HepMC3::ConstGenVertexPtr();
+  }
+  // No barcodes attribute, so assume that we are passing the id member variable instead of a barcode
+  if (-id>0&&-id<=(int)vertices.size()) {
+    if (!vertices[-id-1]->attribute<HepMC3::IntAttribute>("barcode")) {
+      return vertices[-id-1];
+    }
+  }
+  return  HepMC3::ConstGenVertexPtr();
 }
 
 inline ConstGenParticlePtr  barcode_to_particle(const GenEvent* e, int id ) {
-    auto barcodes = e->attribute<GenEventBarcodes> ("barcodes");
-    if (barcodes) {
-      ConstGenParticlePtr ptr = barcodes->barcode_to_particle (id);
-      if (ptr) return ptr;
-    }
-    auto particles=e->particles();
-    if (id>0&&id<=(int)particles.size()) {
-      if (!particles[id-1]->attribute<HepMC3::IntAttribute>("barcode")) {
-        return particles[id-1];
+  // Prefer to use optimized GenEvent barcodes attribute
+  auto barcodes = e->attribute<GenEventBarcodes> ("barcodes");
+  if (barcodes) {
+    ConstGenParticlePtr ptr = barcodes->barcode_to_particle (id);
+    if (ptr) return ptr;
+  }
+  // Fallback to unoptimized GenParticle barcode attribute
+  auto particles=e->particles();
+  auto barcodeAttributes = e->attributes()["barcode"]; // If there are no "barcode" Attributes, then an empty map would be generated.
+  for (size_t i = 1; i <= particles.size(); i++) {
+    if (barcodeAttributes.count(i)) {
+      auto ptr = barcodeAttributes.at(i);
+      if (ptr->is_parsed()) {
+        if (id == std::dynamic_pointer_cast<HepMC3::IntAttribute>(ptr)->value()) {
+          return ptr->particle();
+        }
+      }
+      else {
+        if (id == std::atoi(ptr->unparsed_string().c_str())) {
+          return ptr->particle();
+        }
       }
     }
-    return  HepMC3::ConstGenParticlePtr();
+  }
+  // No barcodes attribute, so assume that we are passing the id member variable instead of a barcode
+  if (id>0&&id<=(int)particles.size()) {
+    if (!particles[id-1]->attribute<HepMC3::IntAttribute>("barcode")) {
+      return particles[id-1];
+    }
+  }
+  return  HepMC3::ConstGenParticlePtr();
 }
 
 inline GenVertexPtr  barcode_to_vertex(GenEvent* e, int id ) {
-    auto barcodes = e->attribute<GenEventBarcodes> ("barcodes");
-    if (barcodes) {
-      GenVertexPtr ptr = barcodes->barcode_to_vertex (id);
-      if (ptr) return ptr;
-    }
-    auto vertices=e->vertices();
-    if (-id>0&&-id<=(int)vertices.size()) {
-      if (!vertices[-id-1]->attribute<HepMC3::IntAttribute>("barcode")) {
-        return vertices[-id-1];
+  // Prefer to use optimized GenEvent barcodes attribute
+  auto barcodes = e->attribute<GenEventBarcodes> ("barcodes");
+  if (barcodes) {
+    GenVertexPtr ptr = barcodes->barcode_to_vertex (id);
+    if (ptr) return ptr;
+  }
+  // Fallback to unoptimized GenVertex barcode attribute
+  auto vertices=e->vertices();
+  auto barcodeAttributes = e->attributes()["barcode"]; // If there are no "barcode" Attributes, then an empty map would be generated.
+  for (size_t i = 1; i <= vertices.size(); i++) {
+    if (barcodeAttributes.count(-i)) {
+      auto ptr = barcodeAttributes.at(-i);
+      if (ptr->is_parsed()) {
+        if (id == std::dynamic_pointer_cast<HepMC3::IntAttribute>(ptr)->value()) {
+          return ptr->vertex();
+        }
+      }
+      else {
+        if (id == std::atoi(ptr->unparsed_string().c_str())) {
+          return ptr->vertex();
+        }
       }
     }
-    return  HepMC3::GenVertexPtr();
+  }
+  // No barcodes attribute, so assume that we are passing the id member variable instead of a barcode
+  if (-id>0&&-id<=(int)vertices.size()) {
+    if (!vertices[-id-1]->attribute<HepMC3::IntAttribute>("barcode")) {
+      return vertices[-id-1];
+    }
+  }
+  return  HepMC3::GenVertexPtr();
 }
 
 inline GenParticlePtr  barcode_to_particle(GenEvent* e, int id ) {
-    auto barcodes = e->attribute<GenEventBarcodes> ("barcodes");
-    if (barcodes) {
-      GenParticlePtr ptr = barcodes->barcode_to_particle (id);
-      if (ptr) return ptr;
-    }
-    auto particles=e->particles();
-    if (id>0&&id<=(int)particles.size()) {
-      if (!particles[id-1]->attribute<HepMC3::IntAttribute>("barcode")) {
-        return particles[id-1];
+  // Prefer to use optimized GenEvent barcodes attribute
+  auto barcodes = e->attribute<GenEventBarcodes> ("barcodes");
+  if (barcodes) {
+    GenParticlePtr ptr = barcodes->barcode_to_particle (id);
+    if (ptr) return ptr;
+  }
+  // Fallback to unoptimized GenParticle barcode attribute
+  auto particles=e->particles();
+  auto barcodeAttributes = e->attributes()["barcode"]; // If there are no "barcode" Attributes, then an empty map would be generated.
+  for (size_t i = 1; i <= particles.size(); i++) {
+    if (barcodeAttributes.count(i)) {
+      auto ptr = barcodeAttributes.at(i);
+      if (ptr->is_parsed()) {
+        if (id == std::dynamic_pointer_cast<HepMC3::IntAttribute>(ptr)->value()) {
+          return ptr->particle();
+        }
+      }
+      else {
+        if (id == std::atoi(ptr->unparsed_string().c_str())) {
+          return ptr->particle();
+        }
       }
     }
-    return  HepMC3::GenParticlePtr();
+  }
+  // No barcodes attribute, so assume that we are passing the id member variable instead of a barcode
+  if (id>0&&id<=(int)particles.size()) {
+    if (!particles[id-1]->attribute<HepMC3::IntAttribute>("barcode")) {
+      return particles[id-1];
+    }
+  }
+  return  HepMC3::GenParticlePtr();
 }
 
 inline int mpi(const GenEvent evt) {
@@ -252,7 +384,13 @@ template <class T> void set_signal_process_vertex(GenEvent* e, T v) {
 }
 inline ConstGenVertexPtr signal_process_vertex(const GenEvent* e) { for (auto v: e->vertices()) if (v->attribute<HepMC3::IntAttribute>("signal_process_vertex")) return v; return nullptr; }
 inline      GenVertexPtr signal_process_vertex(GenEvent* e) { for (auto v: e->vertices()) if (v->attribute<HepMC3::IntAttribute>("signal_process_vertex")) return v; return nullptr; }
-inline bool valid_beam_particles(const GenEvent* e) { if (!e) return false; if  (e->beams().size()!=2) return false; return true;}
+inline bool valid_beam_particles(const GenEvent* e) { 
+  if (!e) return false; 
+  size_t nBeams = 0;
+  for (const auto& p : e->beams()) { if (p->status() == 4)  ++nBeams; }
+  if  (nBeams != 2) return false; 
+  return true;
+}
 
 template <class T> bool suggest_barcode(T p, int i) {
   if (!p->parent_event()) return false;
@@ -290,6 +428,7 @@ inline GenEvent::particle_const_iterator  begin(const HepMC::GenEvent& e) { retu
 inline GenEvent::particle_const_iterator  end(const HepMC::GenEvent& e) { return e.particles_end(); }
 inline GenEvent* newGenEvent(const int a, const int b ) { return new GenEvent(a,b); }
 inline GenVertex* signal_process_vertex(const GenEvent* e) { return e->signal_process_vertex(); }
+inline void fillBarcodesAttribute(GenEvent* ) { }
 inline GenVertex* barcode_to_vertex(const GenEvent* e, int id ) {return  e->barcode_to_vertex(id);}
 inline GenParticle* barcode_to_particle(const GenEvent* e, int id ) {return  e->barcode_to_particle(id);}
 inline int mpi(const GenEvent e) {

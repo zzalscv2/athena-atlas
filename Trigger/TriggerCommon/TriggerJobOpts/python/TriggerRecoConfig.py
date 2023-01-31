@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -15,6 +15,12 @@ log = logging.getLogger('TriggerRecoConfig')
 
 
 def TriggerRecoCfg(flags):
+    if flags.Input.isMC:
+        return TriggerRecoCfgMC(flags)
+    else:
+        return TriggerRecoCfgData(flags)
+
+def TriggerRecoCfgData(flags):
     """ Configures trigger data decoding
     Run 3 data:
     HLTResultMTByteStreamDecoderAlg -> TriggerEDMDeserialiserAlg
@@ -25,6 +31,7 @@ def TriggerRecoCfg(flags):
     Run 1 data:
     as for Run 2 + Run 1 EDM to xAOD conversion
     """
+    log.debug("TriggerRecoCfgData: Preparing the trigger handling of reconstruction of data")
     acc = ComponentAccumulator()
     acc.merge( ByteStreamReadCfg(flags) )
     if flags.Trigger.L1.doMuon or flags.Trigger.L1.doCalo or flags.Trigger.L1.doTopo or flags.Trigger.L1.doCTP:
@@ -35,15 +42,13 @@ def TriggerRecoCfg(flags):
 
     # Run 3+
     if flags.Trigger.EDMVersion >= 3:
-        if flags.Trigger.DecodeHLT:
-            acc.merge(Run3TriggerBSUnpackingCfg(flags))
+        acc.merge(Run3TriggerBSUnpackingCfg(flags))
 
         from TrigDecisionMaker.TrigDecisionMakerConfig import Run3DecisionMakerCfg
         acc.merge(Run3DecisionMakerCfg(flags))
 
-        if flags.Trigger.DecodeHLT and flags.Trigger.doNavigationSlimming:
-            from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTCfg
-            acc.merge(TrigNavSlimmingMTCfg(flags))
+        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTCfg
+        acc.merge(TrigNavSlimmingMTCfg(flags))
 
     # Run 1+2
     elif flags.Trigger.EDMVersion in [1, 2]:
@@ -52,8 +57,7 @@ def TriggerRecoCfg(flags):
         from TrigDecisionMaker.TrigDecisionMakerConfig import Run1Run2DecisionMakerCfg
         acc.merge (Run1Run2DecisionMakerCfg(flags) )
 
-        if flags.Trigger.DecodeHLT and flags.Trigger.doNavigationSlimming:
-            acc.merge(Run2Run1NavigationSlimingCfg(flags))
+        acc.merge(Run2Run1NavigationSlimingCfg(flags))
     else:
         raise RuntimeError("Invalid EDMVersion=%s " % flags.Trigger.EDMVersion)
 
@@ -67,8 +71,35 @@ def TriggerRecoCfg(flags):
             from L1TopoByteStream.L1TopoByteStreamConfig import L1TopoRawDataContainerBSCnvCfg
             acc.merge( L1TopoRawDataContainerBSCnvCfg(flags) )
 
-    if flags.Output.doWriteESD or flags.Output.doWriteAOD:
-        acc.merge(TriggerEDMCfg(flags))
+    acc.merge(TriggerEDMCfg(flags))
+
+    return acc
+
+def TriggerRecoCfgMC(flags):
+    """ Configures trigger MC handing during reconstruction
+    Run 3 MC:
+    Propagation of HLT collections from input RDO_TRIG to output POOL files
+    Execution of reconstruction-level trigger navigation slimming
+
+    RDO_TRIG containing simulation of the Run 1, Run 2 trigger:
+    Not currently supported.
+    """
+
+    # Check for currently unsuported operational modes, these may be supported in the future if needed
+    if flags.Input.Format is Format.BS:
+        log.warning("TriggerRecoCfgMC does not currently support MC files encoded as bytestream. Switching off handling of trigger inputs.")
+        return ComponentAccumulator()
+    if flags.Trigger.EDMVersion in [1, 2]:
+        log.warning("TriggerRecoCfgMC does not currently support MC files with Run 1 or Run 2 trigger payload. Switching off handling of trigger inputs.")
+        return ComponentAccumulator()
+
+    log.debug("TriggerRecoCfgMC: Preparing the trigger handling of reconstruction of MC")
+    acc = ComponentAccumulator()
+
+    from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTCfg
+    acc.merge(TrigNavSlimmingMTCfg(flags))
+
+    acc.merge(TriggerEDMCfg(flags))
 
     return acc
 
@@ -88,6 +119,12 @@ def TriggerMetadataWriterCfg(flags):
 def TriggerEDMCfg(flags):
     """Configures which trigger collections are recorded"""
     acc = ComponentAccumulator()
+
+    # Check if we have anything to do
+    if flags.Output.doWriteESD is False and flags.Output.doWriteAOD is False:
+        log.debug("TriggerEDMCfg: Nothing to do as both Output.doWriteAOD and Output.doWriteESD are False")
+        return acc
+
     # standard collections & metadata
     # TODO consider unifying with TriggerConfig.triggerPOOLOutputCfg - there the assumption is that Run3 
     # metadata
@@ -140,6 +177,15 @@ def TriggerEDMCfg(flags):
 def Run2Run1NavigationSlimingCfg(flags):
     """Configures legacy Run1/2 navigation slimming"""
     acc = ComponentAccumulator()
+
+    if flags.Trigger.DecodeHLT is False:
+        log.debug("Run2Run1NavigationSlimingCfg: Nothing to do as Trigger.DecodeHLT is False")
+        return acc
+
+    if flags.Trigger.doNavigationSlimming is False:
+        log.debug("Run2Run1NavigationSlimingCfg: Nothing to do as Trigger.doNavigationSlimming is False")
+        return acc
+
     def _flatten(edm):
         return list(y.split('-')[0] for x in edm.values() for y in x)
     from TrigNavTools.TrigNavToolsConfig import TrigNavigationThinningSvcCfg
@@ -173,14 +219,16 @@ def Run1Run2BSExtractionCfg( flags ):
 
     acc = ComponentAccumulator()
     extr = CompFactory.TrigBSExtraction()
-
-    # Run-1: add xAOD conversion tool
-    if flags.Trigger.EDMVersion == 1:
-        extr.BStoxAOD = acc.popToolsAndMerge( Run1xAODConversionCfg(flags) )
+    robIDMap = {}   # map of result keys and their ROB ID
 
     # Add fictional output to ensure data dependency in AthenaMT
     extr.ExtraOutputs += [("TrigBSExtractionOutput", "StoreGateSvc+TrigBSExtractionOutput")]
+
     if flags.Trigger.DecodeHLT:
+        # Run-1: add xAOD conversion tool
+        if flags.Trigger.EDMVersion == 1:
+            extr.BStoxAOD = acc.popToolsAndMerge( Run1xAODConversionCfg(flags) )
+
         serialiserTool = CompFactory.TrigTSerializer()
         acc.addPublicTool(serialiserTool)
         extr.NavigationForL2 = CompFactory.HLT.Navigation("NavigationForL2", 
@@ -192,7 +240,7 @@ def Run1Run2BSExtractionCfg( flags ):
         from TrigEDMConfig.TriggerEDM import getPreregistrationList
         extr.Navigation.ClassesToPreregister = getPreregistrationList(flags.Trigger.EDMVersion)
         from eformat import helper as efh
-        robIDMap = {}   # map of result keys and their ROB ID
+ 
         if flags.Trigger.EDMVersion == 1:  # Run-1 has L2 and EF result
             acc.merge(InputRenameCfg("HLT::HLTResult", "HLTResult_L2", "HLTResult_L2_BS"))
             acc.merge(InputRenameCfg("HLT::HLTResult", "HLTResult_EF", "HLTResult_EF_BS"))
@@ -207,6 +255,7 @@ def Run1Run2BSExtractionCfg( flags ):
             robIDMap["HLTResult_HLT_BS"] = efh.SourceIdentifier(efh.SubDetector.TDAQ_HLT, 0).code()
             extr.HLTResultKeyIn = "HLTResult_HLT_BS"
             extr.HLTResultKeyOut = "HLTResult_HLT"
+        
         # Configure DataScouting
         from PyUtils.MetaReaderPeeker import metadata
         if 'stream' in metadata:
@@ -218,6 +267,7 @@ def Run1Run2BSExtractionCfg( flags ):
                 robIDMap[ds_tag+"_BS"] = efh.SourceIdentifier(efh.SubDetector.TDAQ_HLT, ds_id).code()
                 extr.DSResultKeysIn += [ ds_tag+"_BS" ]
                 extr.DSResultKeysOut += [ ds_tag ]
+
     else:
         log.info("Will not schedule real HLT bytestream extraction, instead EDM gap filling is running")
         # if data doesn't have HLT info set HLTResult keys as empty strings to avoid warnings
@@ -227,7 +277,6 @@ def Run1Run2BSExtractionCfg( flags ):
 
     HLTResults = [ f"HLT::HLTResult/{k}" for k in robIDMap.keys() ]
     acc.addService( CompFactory.ByteStreamAddressProviderSvc( TypeNames = HLTResults) )
-
 
     from TrigEDMConfig.TriggerEDM import getTPList
     acc.addPublicTool( CompFactory.TrigSerTPTool(TPMap = getTPList((flags.Trigger.EDMVersion))) )
@@ -285,6 +334,11 @@ def Run1xAODConversionCfg(flags):
 def Run3TriggerBSUnpackingCfg(flags):
     """Configures conversions BS -> HLTResultMT -> Collections """
     acc = ComponentAccumulator()
+
+    if flags.Trigger.DecodeHLT is False:
+        log.debug("Run3TriggerBSUnpackingCfg: Nothing to do as Trigger.DecodeHLT is False")
+        return acc
+
     from AthenaCommon.CFElements import seqAND
     decoder = CompFactory.HLTResultMTByteStreamDecoderAlg()
     deserialiser = CompFactory.TriggerEDMDeserialiserAlg("TrigDeserialiser")
@@ -299,8 +353,9 @@ def Run3TriggerBSUnpackingCfg(flags):
 
 if __name__ == '__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
+    flags = initConfigFlags()
     flags.fillFromArgs()
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles

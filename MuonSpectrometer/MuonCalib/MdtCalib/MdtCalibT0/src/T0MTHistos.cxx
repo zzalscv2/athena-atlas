@@ -432,7 +432,7 @@ namespace MuonCalib {
 #endif
         std::list<Slice>::iterator it = slice_chi2.end();
         do {
-            it--;
+            --it;
             if (it == slice_chi2.begin()) {
 #ifndef NDEBUG
                 if (log.level() <= MSG::VERBOSE) log << MSG::VERBOSE << "No gain in slicing!" << endmsg;

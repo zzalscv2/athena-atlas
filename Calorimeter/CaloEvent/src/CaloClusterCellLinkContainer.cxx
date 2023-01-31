@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloEvent/CaloClusterCellLinkContainer.h"
@@ -9,7 +9,7 @@ CaloClusterCellLinkContainer::CaloClusterCellLinkContainer() :
   DataVector<CaloClusterCellLink>()
 {}
 
-CaloClusterCellLinkContainer::~CaloClusterCellLinkContainer() {}
+CaloClusterCellLinkContainer::~CaloClusterCellLinkContainer() = default;
 
 /**@brief Prepare for writing.
  */

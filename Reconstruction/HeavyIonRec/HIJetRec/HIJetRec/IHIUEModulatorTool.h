@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // IHIUEModulatorTool.h
@@ -35,7 +35,6 @@ class IHIUEModulatorTool : virtual public asg::IAsgTool {
 
   virtual void setHarmonics(const std::vector<unsigned int>&) = 0;
 
-  virtual StatusCode retrieveShape() const = 0;
   virtual StatusCode getShape(const xAOD::HIEventShape* & shape) const = 0;
 
 

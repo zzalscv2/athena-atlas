@@ -80,4 +80,4 @@ MDTMonGroupStruct::MDTMonGroupStruct(ManagedMonitorToolBase* b, const std::strin
 
 {}
 
-MDTMonGroupStruct::~MDTMonGroupStruct() {}
+MDTMonGroupStruct::~MDTMonGroupStruct() = default;

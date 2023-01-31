@@ -101,12 +101,11 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
 
     acc.merge(HistogramDefinitionSvcCfg(flags))
 
-    jets_name_for_HardScatter = 'AntiKt4EMTopoJets'
     # if we are running with sumpT(w) hard scatter selection, we need to schedule jet finding
     if flags.PhysVal.IDPVM.hardScatterStrategy == 2:
 
         from InDetPhysValMonitoring.addRecoJetsConfig import AddRecoJetsIfNotExistingCfg
-        acc.merge(AddRecoJetsIfNotExistingCfg(flags, jets_name_for_HardScatter))
+        acc.merge(AddRecoJetsIfNotExistingCfg(flags, flags.PhysVal.IDPVM.jetsNameForHardScatter))
 
     if flags.PhysVal.IDPVM.GRL:
         grlTool = acc.popToolsAndMerge(GoodRunsListSelectionToolCfg(flags))
@@ -128,7 +127,7 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
             hardScatterSelectionTool.RedoHardScatter=True
             # for sumpt(w), make sure the HS selection tool picks up the correct jets
             if flags.PhysVal.IDPVM.hardScatterStrategy == 2:
-                hardScatterSelectionTool.JetContainer = jets_name_for_HardScatter
+                hardScatterSelectionTool.JetContainer = flags.PhysVal.IDPVM.jetsNameForHardScatter
             hardScatterSelectionTool.SelectionMode = flags.PhysVal.IDPVM.hardScatterStrategy
             kwargs.setdefault("hardScatterSelectionTool", hardScatterSelectionTool)
 

@@ -54,6 +54,9 @@ StatusCode TrackRecordGenerator::callGenerator() {
   m_polarization.clear();
   m_pdgCode.clear();
 
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  CLHEP::HepRandomEngine* rndmEngine = this->getRandomEngine(name(), ctx);
+
   const TrackRecordCollection* coll;
   CHECK( evtStore()->retrieve(coll,m_recordName) );
 
@@ -77,13 +80,13 @@ StatusCode TrackRecordGenerator::callGenerator() {
 
       // if Z is maximal, move in X and Y; otherwise move in Z and "phi"
       if ( particle4Position.z() == 22031 || particle4Position.z() == -22031 ){ //FIXME Hardcoded limits!
-        particle4Position.setX( particle4Position.x() + CLHEP::RandFlat::shoot(&randomEngine(), -m_smearTR, m_smearTR) );
-        particle4Position.setY( particle4Position.y() + CLHEP::RandFlat::shoot(&randomEngine(), -m_smearTR, m_smearTR) );
+        particle4Position.setX( particle4Position.x() + CLHEP::RandFlat::shoot(rndmEngine, -m_smearTR, m_smearTR) );
+        particle4Position.setY( particle4Position.y() + CLHEP::RandFlat::shoot(rndmEngine, -m_smearTR, m_smearTR) );
       } else {
-        particle4Position.setZ( particle4Position.z() + CLHEP::RandFlat::shoot(&randomEngine(), -m_smearTR, m_smearTR) );
+        particle4Position.setZ( particle4Position.z() + CLHEP::RandFlat::shoot(rndmEngine, -m_smearTR, m_smearTR) );
         double R = std::sqrt( std::pow( particle4Position.x(),2 ) + std::pow(particle4Position.y(),2 ) );
         double dPhi = std::atan2( m_smearTR, R );
-        dPhi = CLHEP::RandFlat::shoot( &randomEngine(), -dPhi, dPhi );
+        dPhi = CLHEP::RandFlat::shoot( rndmEngine, -dPhi, dPhi );
         double theta = std::atan2( particle4Position.x() , particle4Position.y() );
         particle4Position.setX( R*std::sin( theta + dPhi ) );
         particle4Position.setY( R*std::cos( theta + dPhi ) );
@@ -95,8 +98,8 @@ StatusCode TrackRecordGenerator::callGenerator() {
       ATH_MSG_DEBUG( "Track record momentum was " << particle4Momentum );
 
       // Keep p - smear an angle, and then randomly spin that change in (0,2PI)
-      double dTheta = CLHEP::RandFlat::shoot(&randomEngine(), 0, m_smearTRp);
-      double dPhi   = CLHEP::RandFlat::shoot(&randomEngine(), 0, 2*M_PI);
+      double dTheta = CLHEP::RandFlat::shoot(rndmEngine, 0, m_smearTRp);
+      double dPhi   = CLHEP::RandFlat::shoot(rndmEngine, 0, 2*M_PI);
 
       // Need a perpendicular vector...
       CLHEP::HepLorentzVector perpendicularMomentum( 1 , 0 , 0 , 0);
@@ -147,7 +150,7 @@ StatusCode TrackRecordGenerator::callGenerator() {
       particle4Momentum.setZ(0);
       particle4Momentum.setT(mass);
 
-      double settime=CLHEP::RandFlat::shoot(&randomEngine(),m_stopped_tminus, m_stopped_tplus);
+      double settime=CLHEP::RandFlat::shoot(rndmEngine,m_stopped_tminus, m_stopped_tplus);
       ATH_MSG_DEBUG( "Setting particle time to something uniform between "<<m_stopped_tminus<<" and "<<m_stopped_tplus<<" ns : " << settime );
       if (m_add_cL){
         settime += particle4Position.rho()/CLHEP::c_light;

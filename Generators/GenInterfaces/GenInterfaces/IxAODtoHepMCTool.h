@@ -28,6 +28,7 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 
 class IxAODtoHepMCTool : public virtual asg::IAsgTool {

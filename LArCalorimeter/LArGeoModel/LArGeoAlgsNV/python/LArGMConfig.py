@@ -27,14 +27,8 @@ def LArGMCfg(configFlags):
                 result.merge(addFolders(configFlags,"/LAR/Align","LAR_OFL"))
                 result.merge(addFolders(configFlags,"/LAR/LArCellPositionShift","LAR_OFL"))
         else:
-            if configFlags.Overlay.DataOverlay:
-                #Data overlay
-                result.merge(addFolders(configFlags, "/LAR/Align", "LAR_ONL",className="DetCondKeyTrans"))
-                result.merge(addFolders(configFlags, "/LAR/LArCellPositionShift", "LAR_OFL", tag="LArCellPositionShift-ideal", db="OFLP200",className="CaloRec::CaloCellPositionShift"))
-            else:
-                #Regular offline data processing
-                result.merge(addFolders(configFlags,"/LAR/Align","LAR_ONL",className="DetCondKeyTrans"))
-                result.merge(addFolders(configFlags,"/LAR/LArCellPositionShift","LAR_ONL",className="CaloRec::CaloCellPositionShift"))
+            result.merge(addFolders(configFlags,"/LAR/Align","LAR_ONL",className="DetCondKeyTrans"))
+            result.merge(addFolders(configFlags,"/LAR/LArCellPositionShift","LAR_ONL",className="CaloRec::CaloCellPositionShift"))
 
         if activateCondAlgs:
             result.addCondAlgo(CompFactory.LArAlignCondAlg())
@@ -53,7 +47,7 @@ def LArGMCfg(configFlags):
                         sCellsInInput = True
 
             AthReadAlg_ExtraInputs.append(('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'))            
-            if (configFlags.GeoModel.Run is LHCPeriod.Run3 and configFlags.Detector.GeometryTile and configFlags.Common.ProductionStep != ProductionStep.Overlay) or sCellsInInput:
+            if (configFlags.GeoModel.Run is LHCPeriod.Run3 and configFlags.Detector.GeometryTile) or sCellsInInput:
                 # TODO: avoid depending on Tile in SuperCell alignment
                 from TileGeoModel.TileGMConfig import TileGMCfg
                 result.merge(TileGMCfg(configFlags))

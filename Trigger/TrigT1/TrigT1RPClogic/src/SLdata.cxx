@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPClogic/SLdata.h"
@@ -95,16 +95,16 @@ void SLdata::PrintElement(std::ostream& stream,std::string element,bool detail)
     const
 {
     bool all  = (element == name() || element == "")? true : false;
-    bool nSL = sl_patterns().size();
+    bool nSL = m_sl_patterns.size();
     bool printed = false;
 
-    if(nSL && (element == (*sl_patterns().begin()).name() || all))
+    if(nSL && (element == (*m_sl_patterns.begin()).name() || all))
     {
         stream << name() << " contains " << m_sl_patterns.size()
 	       << " Sector Logic patterns:" << std::endl;  
         printed = true;
 	PATTERNSlist::const_iterator it = m_sl_patterns.begin();
-	while(it != sl_patterns().end())
+	while(it != m_sl_patterns.end())
         {
             it->Print(stream,detail);
 	    ++it;

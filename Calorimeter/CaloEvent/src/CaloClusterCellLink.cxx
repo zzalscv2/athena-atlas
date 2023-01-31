@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloEvent/CaloClusterCellLink.h"
 
-CaloClusterCellLink::~CaloClusterCellLink() {}
+CaloClusterCellLink::~CaloClusterCellLink() = default;
 
-CaloClusterCellLink::CaloClusterCellLink() {}
+CaloClusterCellLink::CaloClusterCellLink() = default;
 		      
 //0-size vector for dummy iterator
 const CaloClusterCellLink::linkAndWeightCollType CaloClusterCellLink::m_dummyIndicesAndWeights(0);
@@ -29,7 +29,7 @@ CaloClusterCellLink::CaloClusterCellLink(const DataLink<CaloCellContainer>& cell
 CaloClusterCellLink::iterator CaloClusterCellLink::removeCell(CaloClusterCellLink::iterator cellItr) {
   linkAndWeightCollType::iterator toDelete=cellItr.m_it;
   auto newVecIt=m_indicesAndWeights.erase(toDelete);
-  return iterator(cellItr.m_ccc,newVecIt);
+  return {cellItr.m_ccc,newVecIt};
   
 }
 

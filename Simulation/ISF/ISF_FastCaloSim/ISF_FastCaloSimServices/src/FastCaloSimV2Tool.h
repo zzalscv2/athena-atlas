@@ -53,7 +53,7 @@ namespace ISF {
     virtual StatusCode initialize() override final;
 
     /** Simulation Call */
-    virtual StatusCode simulate(const ISFParticle& isp, ISFParticleContainer&, McEventCollection* mcEventCollection) override final;
+    virtual StatusCode simulate(ISFParticle& isp, ISFParticleContainer&, McEventCollection* mcEventCollection) override final;
 
     /** Setup Event chain - in case of a begin-of event action is needed */
     virtual StatusCode setupEvent(const EventContext&) override final;
@@ -70,14 +70,15 @@ namespace ISF {
     StatusCode commonSetup(const EventContext& ctx);
 
     ServiceHandle<IFastCaloSimParamSvc> m_paramSvc{this, "ParamSvc", "ISF_FastCaloSimV2ParamSvc"};
-    bool m_doPunchThrough{false};
+    bool m_doPunchThrough{true};
     ToolHandle< IPunchThroughTool >     m_punchThroughTool{this, "PunchThroughTool", ""};
     PublicToolHandleArray<ICaloCellMakerTool> m_caloCellMakerToolsSetup{this, "CaloCellMakerTools_setup", {}, ""};
     PublicToolHandleArray<ICaloCellMakerTool> m_caloCellMakerToolsRelease{this, "CaloCellMakerTools_release", {}, ""};
 
     PublicToolHandle<IFastCaloSimCaloExtrapolation> m_FastCaloSimCaloExtrapolation{this, "FastCaloSimCaloExtrapolation", "", ""};
 
-    CaloCellContainer*        m_theContainer{};
+    std::unique_ptr<CaloCellContainer>        m_theContainer{};
+    CaloCellContainer*                                    m_theContainerPtr{};
     SG::WriteHandleKey< CaloCellContainer > m_caloCellKey{ this, "CaloCells", "DefaultCaloCellContainer", "The name of the output CaloCellContainer" };
 
     ServiceHandle<IAthRNGSvc> m_rndmGenSvc{this, "RandomSvc", "AthRNGSvc", ""};

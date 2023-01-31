@@ -305,7 +305,7 @@ ParticleCaloExtensionTool::caloExtension(const EventContext& ctx,
    * The extrapolation stop at the indicated subdetector exit
    */
   std::unique_ptr<std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
-    caloParameters = m_extrapolator->extrapolate(
+    caloParameters = m_extrapolator->collectIntersections(
       ctx, startPars, propDir, particleType, material, m_extrapolDetectorID);
 
   if (material) {

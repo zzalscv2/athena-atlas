@@ -9,13 +9,14 @@
  */
 
 
+#include "TrkVertexSeedFinderUtils/IMode3dFinder.h"
+#include "GaudiKernel/SystemOfUnits.h"
+#include "StoreGate/WriteHandle.h"
+//undefine NDEBUG after EDM 
 #undef NDEBUG
 #include "VertexSeedFinderTestAlg.h"
-#include "TrkVertexSeedFinderUtils/IMode3dFinder.h"
-#include "StoreGate/WriteHandle.h"
 #include "TestTools/FLOATassert.h"
 #include "TestTools/random.h"
-#include "GaudiKernel/SystemOfUnits.h"
 #include <cassert>
 #include <cmath>
 
@@ -287,9 +288,9 @@ StatusCode VertexSeedFinderTestAlg::execute()
 StatusCode
 VertexSeedFinderTestAlg::makeMcEventCollection (const EventContext& ctx) const
 {
-  auto evt1 = new HepMC::GenEvent();
-  auto evt2 = new  HepMC::GenEvent();
-  auto evt3 = new HepMC::GenEvent();
+  auto *evt1 = new HepMC::GenEvent();
+  auto *evt2 = new  HepMC::GenEvent();
+  auto *evt3 = new HepMC::GenEvent();
 
   HepMC::set_signal_process_vertex (evt1,HepMC::newGenVertexPtr(HepMC::FourVector{1*mm,   2*mm,  12*mm,0.0}));
   HepMC::set_signal_process_vertex (evt2,HepMC::newGenVertexPtr(HepMC::FourVector{0.3*mm,-0.7*mm,-3*mm,0.0}));
@@ -321,6 +322,9 @@ VertexSeedFinderTestAlg::makeMcEventCollection (const EventContext& ctx) const
   }
 
   auto evtcoll = std::make_unique<McEventCollection>();
+  HepMC::fillBarcodesAttribute(evt1);
+  HepMC::fillBarcodesAttribute(evt2);
+  HepMC::fillBarcodesAttribute(evt3);
   evtcoll->push_back (evt1);
   evtcoll->push_back (evt2);
   evtcoll->push_back (evt3);

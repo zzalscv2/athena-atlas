@@ -579,7 +579,6 @@ void LArG4::EC::EnergyCalculator::PrepareFieldMap(Wheel_Efield_Map* ChCollWheelT
       }
 
       G4int ipnt=-1;  // new counter for numbering the selected points
-      G4int nredef=0; //counter to know how many weights are redefined to be 1 (only for V00)
       const G4int npoints=ChCollFoldType->NofPointsinLayer[i];
       //if(npoints>0) {
       for(G4int j=0;j<npoints;++j){
@@ -608,8 +607,6 @@ void LArG4::EC::EnergyCalculator::PrepareFieldMap(Wheel_Efield_Map* ChCollWheelT
                 if ((y>=Ylimits[0] && y<=Ylimits[1]) ||
                     (y>=Ylimits[2] && y<=Ylimits[3])) {  //point in LAr
                   wx=1.;     // Dice computes the Ylimits at (z+GridShift) value,
-                  ++nredef;  // I don't know why...By neglecting GridShift nredef
-                  // is much less.
                 }
               }// endif for old map
             } //endif for  w<0

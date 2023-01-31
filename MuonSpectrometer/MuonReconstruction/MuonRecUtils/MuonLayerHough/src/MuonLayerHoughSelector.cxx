@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonLayerHough/MuonLayerHoughSelector.h"
@@ -13,9 +13,9 @@ namespace MuonHough {
 
     using valPair = std::pair<int, float>;
 
-    MuonLayerHoughSelector::MuonLayerHoughSelector(std::vector<std::pair<int, float>> cutValues) {
-        m_cutValues = std::move(cutValues);
-
+    MuonLayerHoughSelector::MuonLayerHoughSelector(std::vector<std::pair<int, float>> cutValues)
+      : m_cutValues (std::move (cutValues))
+    {
         auto comp = [](const valPair& a, const valPair& b) -> bool { return a.first < b.first; };
         std::sort(m_cutValues.begin(), m_cutValues.end(), comp);
 

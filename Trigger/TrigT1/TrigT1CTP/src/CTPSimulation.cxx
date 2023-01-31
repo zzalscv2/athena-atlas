@@ -1016,9 +1016,13 @@ LVL1CTP::CTPSimulation::simulateItems(const std::map<std::string, unsigned int> 
    unsigned char triggerType(0);
    CHECK( m_resultBuilder->constructResultVectors( itemDecisionMap, tbp, tap, tav, triggerType ) );
 
+   // Create a fixed vector of 6 extra words to allow for inserting prescale change information
+   // when running a partition with preloaded data, see ATR-24654
+   const std::vector<uint32_t> extra(size_t{6}, uint32_t{0});
+
    auto eventID = context.eventID();
-   std::unique_ptr<CTP_RDO> rdo = m_resultBuilder->constructRDOResult( eventID, tbp, tap, tav, tip );
-   std::unique_ptr<CTPSLink> roi = m_resultBuilder->constructRoIResult( eventID, tbp, tap, tav, tip, triggerType );
+   std::unique_ptr<CTP_RDO> rdo = m_resultBuilder->constructRDOResult( eventID, tbp, tap, tav, tip, extra );
+   std::unique_ptr<CTPSLink> roi = m_resultBuilder->constructRoIResult( eventID, tbp, tap, tav, tip, extra, triggerType );
 
    // create CTP output format and store in the event
    auto rdoWriteHandle = SG::makeHandle( m_oKeyRDO, context );

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -12,7 +12,7 @@
 namespace xAODMaker {
 
    // Helper typedef:
-   typedef xAOD::TruthMetaDataContainer Cont_t;
+   using Cont_t = xAOD::TruthMetaDataContainer;
 
    TruthMetaDataTool::TruthMetaDataTool( const std::string& name )
       : asg::AsgMetadataTool( name ),
@@ -53,7 +53,7 @@ namespace xAODMaker {
       ATH_CHECK( inputMetaStore()->retrieve( input, m_inputKey ) );
 
       // Create an output container if it doesn't exist yet:
-      if( ( ! m_truthMeta.get() ) && ( ! m_truthMetaAux.get() ) ) {
+      if( ( ! m_truthMeta ) && ( ! m_truthMetaAux ) ) {
          ATH_MSG_DEBUG( "Creating output container" );
          m_truthMeta = std::make_unique<xAOD::TruthMetaDataContainer>( );
          m_truthMetaAux = std::make_unique<xAOD::TruthMetaDataAuxContainer>( );

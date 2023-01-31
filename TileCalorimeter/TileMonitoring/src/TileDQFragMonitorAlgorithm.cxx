@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileDQFragMonitorAlgorithm.h"
@@ -18,15 +18,17 @@ StatusCode TileDQFragMonitorAlgorithm::initialize() {
 
   ATH_MSG_INFO("in initialize()");
 
+  ATH_CHECK( detStore()->retrieve(m_tileID) );
   ATH_CHECK( detStore()->retrieve(m_tileHWID) );
 
-  ATH_CHECK(  m_tileBadChanTool.retrieve() );
+  ATH_CHECK( m_badChannelsKey.initialize() );
 
   ATH_CHECK( m_cablingSvc.retrieve() );
   m_cabling = m_cablingSvc->cablingService();
 
   ATH_CHECK( m_DQstatusKey.initialize() );
   ATH_CHECK( m_DCSStateKey.initialize(m_checkDCS) );
+  ATH_CHECK( m_emScaleKey.initialize() );
   ATH_CHECK( m_digitsContainerKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_rawChannelContainerKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_eventInfoTileStatusKey.initialize() );
@@ -46,6 +48,7 @@ StatusCode TileDQFragMonitorAlgorithm::initialize() {
   m_badChannelNegNotMaskGroups = Monitored::buildToolMap<int>(m_tools, "TileBadChannelsNegNotMaskMap", Tile::MAX_ROS - 1);
 
   m_badPulseQualityGroups = Monitored::buildToolMap<int>(m_tools, "TileBadPulseQualityMap", Tile::MAX_ROS - 1);
+  m_negativeEnergyGroups = Monitored::buildToolMap<int>(m_tools, "TileNegativeEnergyMap", Tile::MAX_ROS - 1);
 
   ATH_CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
   m_ADCmaxMinusEps = m_tileInfo->ADCmax() - 0.01;
@@ -66,6 +69,11 @@ StatusCode TileDQFragMonitorAlgorithm::fillHistograms( const EventContext& ctx )
 
   const TileDQstatus* dqStatus = SG::makeHandle (m_DQstatusKey, ctx).get();
   const TileDCSState* dcsState = m_checkDCS ? SG::ReadCondHandle(m_DCSStateKey, ctx).cptr() : nullptr;
+  SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+  ATH_CHECK( emScale.isValid() );
+
+  SG::ReadCondHandle<TileBadChannels> badChannels(m_badChannelsKey, ctx);
+  ATH_CHECK( badChannels.isValid() );
 
   auto lumiBlock = Monitored::Scalar<int>("lumiBlock", eventInfo->lumiBlock());
 
@@ -118,9 +126,10 @@ StatusCode TileDQFragMonitorAlgorithm::fillHistograms( const EventContext& ctx )
         int fragId = rawChannelCollection->identify();
         int drawer = (fragId & 0x3F); // range 0-63
         int ros = fragId >> 8;  // range 1-4
+        unsigned int drawerIdx = TileCalibUtils::getDrawerIdx(ros, drawer);
 
         monitoredModule = drawer;
-
+        clearDigiError(dmus, errors);
         for (const TileRawChannel* rawChannel : *rawChannelCollection) {
 
           HWIdentifier adcId = rawChannel->adc_HWID();
@@ -129,18 +138,44 @@ StatusCode TileDQFragMonitorAlgorithm::fillHistograms( const EventContext& ctx )
 
           // By convetion errors are saved in pedestal as 100000 + 10000*error
           float pedestal = rawChannel->pedestal();
-          float quality = rawChannel->quality();
+          float quality = std::abs(rawChannel->quality());
+          float amplitude = rawChannel->amplitude();
+          float time = rawChannel->uncorrTime(); // take uncorrected time (if available)
 
           monitoredChannel = channel;
 
-          if ((pedestal > 80000. || quality > m_qualityCut)
-              && !(m_tileBadChanTool->getAdcStatus(adcId, ctx).isBad()
-                   || (m_checkDCS && dcsState->isStatusBad(ros, drawer, channel)))) {
+          if (dqStatus->isChanDQgood(ros, drawer, channel)
+               && !(badChannels->getAdcStatus(adcId).isBad()
+                    || (m_checkDCS && dcsState->isStatusBad(ros, drawer, channel)))) {
 
-            fill(m_tools[m_badPulseQualityGroups[ros - 1]], monitoredModule, monitoredChannel);
+            if (pedestal > 80000. || quality > m_qualityCut) {
+              fill(m_tools[m_badPulseQualityGroups[ros - 1]], monitoredModule, monitoredChannel);
+            }
+
+            int pmt;
+            int index;
+            Identifier cell_id = m_cabling->h2s_cell_id_index (ros, drawer, channel, index, pmt);
+            if (index >= 0) { // connected channel, exluding MBTS and E4'
+
+              if (quality > m_qualityCut) {
+                bool overflow = (pedestal > 10000. + m_ADCmaskValueMinusEps);
+                if (!(overflow && gain == TileID::LOWGAIN && amplitude > 0.
+                      && time > m_timeMinThresh && time < m_timeMaxThresh)) { // overflow in low gain is not masked
+                  int dmu = channel / 3;
+                  setDigiError(dmus, errors, dmu, MAX_DIGI_ERROR + BAD_QUALITY);
+                }
+              }
+
+              float minEnergy = (m_tileID->sample(cell_id) == TileID::SAMP_E) ? m_minGapEnergy : m_minChannelEnergy;
+              float energy = emScale->calibrateChannel(drawerIdx, channel, gain, amplitude, rawChannelUnit, TileRawChannelUnit::MegaElectronVolts);
+              if (energy < minEnergy) {
+                int dmu = channel / 3;
+                setDigiError(dmus, errors, dmu, MAX_DIGI_ERROR + BIG_NEGATIVE_AMPLITUDE);
+
+                fill(m_tools[m_negativeEnergyGroups[ros - 1]], monitoredModule, monitoredChannel);
+              }
+            }
           }
-
-          float amplitude = rawChannel->amplitude();
 
           if (amplitude < ((gain) ? m_negativeAmplitudeCutHG : m_negativeAmplitudeCutLG)) {
 
@@ -149,7 +184,7 @@ StatusCode TileDQFragMonitorAlgorithm::fillHistograms( const EventContext& ctx )
 
             if (!(m_skipGapCells && ros > 2  // Choose extended barrel and channels: 0,1, 12,13, 18,19
                   && (channelDividedBy2 == 0 || channelDividedBy2 == 6 || channelDividedBy2 == 9))
-                && !(m_skipMasked && m_tileBadChanTool->getAdcStatus(adcId, ctx).isBad())) {
+                && !(m_skipMasked && badChannels->getAdcStatus(adcId).isBad())) {
 
               fill(m_tools[m_badChannelNegGroups[ros - 1]], monitoredModule, monitoredChannel);
 
@@ -191,6 +226,9 @@ StatusCode TileDQFragMonitorAlgorithm::fillHistograms( const EventContext& ctx )
             }
           }
         }
+        if (!errors.empty()) {
+          fill(m_tools[m_errorsGroups[ros - 1][drawer]], drawerDMUs, errorsInDMUs);
+        }
       }
     }
   }
@@ -215,9 +253,9 @@ StatusCode TileDQFragMonitorAlgorithm::fillHistograms( const EventContext& ctx )
       if (l1TriggerType == 0x82) {
 
         unsigned int nBadOrDisconnectedChannels(0);
-        unsigned int drawerIdx = Tile::getDrawerIdx(ros, drawer);
         for (unsigned int channel = 0; channel < Tile::MAX_CHAN; ++channel) {
-          if (m_tileBadChanTool->getChannelStatus(drawerIdx, channel, ctx).isBad()
+          HWIdentifier channel_id = m_tileHWID->channel_id(ros, drawer, channel);
+          if (badChannels->getChannelStatus(channel_id).isBad()
               || (m_cabling->isDisconnected(ros, drawer, channel)) ) {
             ++nBadOrDisconnectedChannels;
           }
@@ -252,7 +290,7 @@ StatusCode TileDQFragMonitorAlgorithm::fillHistograms( const EventContext& ctx )
         error = TileRawChannelBuilder::CorruptedData(ros, drawer, channel, gain, tile_digits->samples(), minSample, maxSample, m_ADCmaxMinusEps, m_ADCmaskValueMinusEps);
 
         if ( (error > 0) &&
-             !(m_cabling->isDisconnected(ros, drawer, channel) || m_tileBadChanTool->getAdcStatus(adcId, ctx).isBad()) ) {
+             !(m_cabling->isDisconnected(ros, drawer, channel) || badChannels->getAdcStatus(adcId).isBad()) ) {
 
           if (msgLvl(MSG::DEBUG)) {
             msg(MSG::DEBUG) << "LB " << eventInfo->lumiBlock()
@@ -332,11 +370,9 @@ StatusCode TileDQFragMonitorAlgorithm::fillHistograms( const EventContext& ctx )
 
         bool isMaskedDMU = m_ignoreNoRecoFragError ? (error == NO_RECO_FRAG) : false;
 
-        unsigned int drawerIdx = Tile::getDrawerIdx(ros, drawer);
-
-        TileBchStatus channelStatus0 = m_tileBadChanTool->getChannelStatus(drawerIdx, channel, ctx);
-        TileBchStatus channelStatus1 = m_tileBadChanTool->getChannelStatus(drawerIdx, channel + 1, ctx);
-        TileBchStatus channelStatus2 = m_tileBadChanTool->getChannelStatus(drawerIdx, channel + 2, ctx);
+        TileBchStatus channelStatus0 = badChannels->getChannelStatus( m_tileHWID->channel_id(ros, drawer, channel) );
+        TileBchStatus channelStatus1 = badChannels->getChannelStatus( m_tileHWID->channel_id(ros, drawer, channel + 1) );
+        TileBchStatus channelStatus2 = badChannels->getChannelStatus( m_tileHWID->channel_id(ros, drawer, channel + 2) );
 
         bool specialEB; // special treatment of EBA15, EBC18
 

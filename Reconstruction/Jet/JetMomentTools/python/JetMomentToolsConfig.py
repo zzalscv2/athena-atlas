@@ -128,7 +128,7 @@ def getTrackMomentsTool(jetdef, modspec):
         TrackVertexAssociation = trackingKeys["TVA"],
         TrackMinPtCuts = [500, 1000],
         TrackSelector = jettrackselloose,
-        DoPFlowMoments = 'PFlow' in jetdef.fullname() ,
+        DoPFlowMoments = 'PFlow' in jetdef.fullname() or 'UFO' in jetdef.fullname() ,
     )
     return trackmoments
 

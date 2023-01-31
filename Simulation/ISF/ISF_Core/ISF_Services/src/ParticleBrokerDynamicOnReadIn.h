@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// ParticleBrokerDynamicOnReadIn.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_SERVICES_PARTICLEBROKERDYNAMICONREADIN_H
 #define ISF_SERVICES_PARTICLEBROKERDYNAMICONREADIN_H 1
@@ -55,7 +51,7 @@ namespace ISF {
   
       @author Andreas.Salzburger -at- cern.ch , Elmar.Ritsch -at- cern.ch
      */
-  class ParticleBrokerDynamicOnReadIn : public extends<AthService, IParticleBroker> {
+  class ATLAS_NOT_THREAD_SAFE ParticleBrokerDynamicOnReadIn : public extends<AthService, IParticleBroker> {
     public: 
       
       //** Constructor with parameters */
@@ -80,7 +76,7 @@ namespace ISF {
       virtual void push( ISFParticle *particle, const ISFParticle *ancestor);
             
       /** Get vectors of ISF particles from the broker */
-      virtual const ConstISFParticleVector& popVector(size_t maxVectorSize);
+      virtual const ISFParticleVector& popVector(size_t maxVectorSize);
       
       /** Get the current stack size */
       virtual size_t numParticles() const;
@@ -139,7 +135,7 @@ namespace ISF {
       ISFParticleOrderedQueue                   m_particles;
 
       /** the vector of particles returned for simulation (via popVector() ) */
-      ConstISFParticleVector                    m_popParticles;
+      ISFParticleVector                         m_popParticles;
 
       /** the simulation selectors per geoID (the actual routing chain) */
       SimSelectorArray                          m_simSelector[AtlasDetDescr::fNumAtlasRegions]; //!< selectors per geoID

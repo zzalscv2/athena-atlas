@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 // ATHENA
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -38,9 +38,9 @@ using namespace Acts::UnitLiterals;
 
 ActsLayerBuilder::ActsLayerBuilder(const Config&                cfg,
                       std::unique_ptr<const Acts::Logger> logger)
-  : m_logger(std::move(logger))
+  : m_cfg (cfg),
+    m_logger(std::move(logger))
 {
-  m_cfg = cfg;
   if(m_cfg.mode == Mode::Undefined) {
     throw std::invalid_argument("ALB mode is undefined");
   }

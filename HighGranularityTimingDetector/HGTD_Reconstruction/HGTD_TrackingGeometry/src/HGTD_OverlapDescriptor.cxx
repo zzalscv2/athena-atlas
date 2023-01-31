@@ -107,8 +107,8 @@ bool HGTD_OverlapDescriptor::dumpSurfaces(std::vector<Trk::SurfaceIntersection>&
   }
   
   std::cout << "Dumping Surfaces for HGTD with size = " << surfaces.size() << std::endl;
-  for (unsigned int surf = 0; surf < surfaces.size(); surf++) {
-    Identifier hitId = ((surfaces.at(surf)).object)->associatedDetectorElementIdentifier(); 
+  for (auto & surface : surfaces) {
+    Identifier hitId = (surface.object)->associatedDetectorElementIdentifier(); 
     std::cout <<  "barrel_ec " << m_hgtdIdHelper.load()->endcap(hitId) << ", layer_disk " << m_hgtdIdHelper.load()->layer(hitId) << ", phi_module " << m_hgtdIdHelper.load()->phi_module(hitId) << ", eta_module " << m_hgtdIdHelper.load()->eta_module(hitId) << std::endl;
   }
   return true;

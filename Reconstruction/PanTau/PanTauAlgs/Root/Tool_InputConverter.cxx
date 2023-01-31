@@ -51,30 +51,23 @@ bool PanTau::Tool_InputConverter::passesPreselectionEnergy(double energy) const 
 
 
 // PFO converter
-StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(xAOD::PFO* pfo,
+StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO* pfo,
 								PanTau::TauConstituent* &tauConstituent,
 								const xAOD::TauJet* tauJet) const {
     
-  // check for invalid eta, phi, e "NAN" values:
-  if (pfo->eta() != pfo->eta()) {
-    ATH_MSG_WARNING("Will not convert PFO with eta value of " << pfo->eta() << " -> return to Tool_TauConstituentGetter");
-    return StatusCode::SUCCESS;
-  }
-  if (pfo->phi() != pfo->phi()) {
-    ATH_MSG_WARNING("Will not convert PFO with phi value of " << pfo->phi() << " -> return to Tool_TauConstituentGetter");
-    return StatusCode::SUCCESS;
-  }
-  if (pfo->e() != pfo->e()) {
-    ATH_MSG_WARNING("Will not convert PFO with e value of " << pfo->e() << " -> return to Tool_TauConstituentGetter");
-    return StatusCode::SUCCESS;
+  // check for invalid eta, phi, e "NAN" values -- likely no longer needed, raise severity to be sure
+  if (pfo->eta() != pfo->eta() || pfo->phi() != pfo->phi() || pfo->e() != pfo->e()) {
+    ATH_MSG_ERROR("Will not convert PFO with eta value of " << pfo->eta() << " -> return to Tool_TauConstituentGetter");
+    return StatusCode::FAILURE;
   }
   
   // Check whether neutral input pfo has pion mass (it may have if xAOD is being reprocessed)
-  // If it does, make it massless again and use that
+  // If it does, 
+  // - old (R21) approach: make it massless again and use that
+  // - new (R22) approach: complain and abort, reconstruction from AOD implies rebuilding PFOs upstream, so the mass should not have been set at that point
   if (!pfo->isCharged() && pfo->m() != 0) {
-    TLorentzVector tlvUpdate; 
-    PanTau::SetP4EEtaPhiM( tlvUpdate, pfo->e(), pfo->eta(), pfo->phi(), 0);
-    pfo->setP4(tlvUpdate.Pt(), pfo->eta(), pfo->phi(), 0);
+    ATH_MSG_ERROR("Input neutral PFO should have null mass. If reconstruction runs from AOD, PFOs must be rebuilt!");
+    return StatusCode::FAILURE;
   }
     
   // preselection to veto very low energy PFOs
@@ -158,7 +151,7 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(xAOD::PFO* pfo,
       continue;
     }
     
-    xAOD::PFO*              curShot         = const_cast<xAOD::PFO*>( dynamic_cast<const xAOD::PFO*>(list_TauShots.at(iShot)) );
+    const xAOD::PFO*        curShot         = dynamic_cast<const xAOD::PFO*>(list_TauShots.at(iShot));
     TLorentzVector          shotMomentum;
     PanTau::SetP4EEtaPhiM( shotMomentum, curShot->e(), curShot->eta(), curShot->phi(), curShot->m());
     std::vector<int>        shotTypeFlags   = std::vector<int>((unsigned int)PanTau::TauConstituent::t_nTypes, 0);

@@ -24,43 +24,42 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "TrkiPatFitterUtils/FitMatrices.h"
+
+#include <iomanip>
+#include <iostream>
+
+#include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "TrkExUtils/TrackSurfaceIntersection.h"
 #include "TrkiPatFitterUtils/FitMeasurement.h"
 #include "TrkiPatFitterUtils/FitParameters.h"
-#include "EventPrimitives/EventPrimitivesHelpers.h"
-#include <iomanip>
-#include <iostream>
 
 namespace Trk {
 
 FitMatrices::FitMatrices(bool constrainedAlignmentEffects)
-  : m_fitMatrix{}
-  , m_columnsDM(0)
-  , m_constrainedAlignmentEffects(constrainedAlignmentEffects)
-  , m_covariance(nullptr)
-  , m_derivativeMatrix(nullptr)
-  , m_finalCovariance(nullptr)
-  , m_largePhiWeight(10000.)
-  , // arbitrary - equiv to 10um
-  m_matrixFromCLHEP(false)
-  , m_measurements(nullptr)
-  , m_numberDoF(0)
-  , m_numberDriftCircles(0)
-  , m_numberPerigee(5)
-  , m_parameters(nullptr)
-  , m_perigee(nullptr)
-  , m_perigeeDifference(Amg::MatrixX(1, m_numberPerigee))
-  , m_perigeeWeight(nullptr)
-  , m_residuals(nullptr)
-  , m_rowsDM(0)
-  , m_usePerigee(false)
-  , m_weight(nullptr)
-  , m_weightedDifference(nullptr)
-{}
+    : m_fitMatrix{},
+      m_columnsDM(0),
+      m_constrainedAlignmentEffects(constrainedAlignmentEffects),
+      m_covariance(nullptr),
+      m_derivativeMatrix(nullptr),
+      m_finalCovariance(nullptr),
+      m_largePhiWeight(10000.),  // arbitrary - equiv to 10um
+      m_matrixFromCLHEP(false),
+      m_measurements(nullptr),
+      m_numberDoF(0),
+      m_numberDriftCircles(0),
+      m_numberPerigee(5),
+      m_parameters(nullptr),
+      m_perigee(nullptr),
+      m_perigeeDifference(Amg::MatrixX(1, m_numberPerigee)),
+      m_perigeeWeight(nullptr),
+      m_residuals(nullptr),
+      m_rowsDM(0),
+      m_usePerigee(false),
+      m_weight(nullptr),
+      m_weightedDifference(nullptr) {}
 
-FitMatrices::~FitMatrices(void)
-{
+FitMatrices::~FitMatrices(void) {
   delete m_covariance;
   delete m_derivativeMatrix;
   delete m_finalCovariance;
@@ -69,9 +68,7 @@ FitMatrices::~FitMatrices(void)
   delete m_weightedDifference;
 }
 
-void
-FitMatrices::checkPointers(MsgStream& log) const
-{
+void FitMatrices::checkPointers(MsgStream& log) const {
   // debugging: check smart pointers
   for (int col = 0; col < m_columnsDM; ++col) {
     // firstRow
@@ -94,26 +91,22 @@ FitMatrices::checkPointers(MsgStream& log) const
   }
 }
 
-double
-FitMatrices::chiSquaredChange(void) 
-{
+double FitMatrices::chiSquaredChange(void) {
   ////
   std::cout << " unexpected :chiSquaredChange  " << std::endl;
   return 0.;
   ////
 }
 
-const Amg::MatrixX*
-FitMatrices::fullCovariance(void)
-{
+const Amg::MatrixX* FitMatrices::fullCovariance(void) {
   // return result if matrix already inverted
-  if (m_covariance){
+  if (m_covariance) {
     return m_covariance;
   }
   m_covariance = new Amg::MatrixX(m_columnsDM, m_columnsDM);
 
   // fix weighting    ???? shouldn't we just remove large phi weight?
-  if (m_parameters->phiInstability()){
+  if (m_parameters->phiInstability()) {
     solveEquations();
   }
 
@@ -181,17 +174,13 @@ FitMatrices::fullCovariance(void)
   return m_covariance;
 }
 
-double
-FitMatrices::perigeeChiSquared(void)
-{
+double FitMatrices::perigeeChiSquared(void) {
   m_perigeeDifference = m_parameters->parameterDifference(*m_perigee);
   return (m_perigeeDifference * (*m_perigeeWeight) *
           m_perigeeDifference.transpose())(0, 0);
 }
 
-void
-FitMatrices::printDerivativeMatrix(void)
-{
+void FitMatrices::printDerivativeMatrix(void) {
   std::cout << "DerivativeMatrix:  rows * columns " << m_rowsDM << " * "
             << m_columnsDM << "  numberDoF " << m_numberDoF << std::endl;
 
@@ -250,7 +239,7 @@ FitMatrices::printDerivativeMatrix(void)
                 << std::setw(3) << row << " col  0     ";
     }
     for (int col = 0; col < m_columnsDM; ++col) {
-      if (col < firstCol || col > lastCol) // m_firstRowForParameter[row])
+      if (col < firstCol || col > lastCol)  // m_firstRowForParameter[row])
       {
         if (m_fitMatrix.derivative[row][col] == 0.) {
           std::cout << "            ";
@@ -275,9 +264,7 @@ FitMatrices::printDerivativeMatrix(void)
   std::cout << std::endl;
 }
 
-void
-FitMatrices::printWeightMatrix(void)
-{
+void FitMatrices::printWeightMatrix(void) {
   std::cout << std::endl
             << "WeightMatrix:  symmetric with rank " << m_columnsDM;
 
@@ -298,14 +285,12 @@ FitMatrices::printWeightMatrix(void)
   std::cout << std::endl;
 }
 
-void
-FitMatrices::refinePointers(void)
-{
+void FitMatrices::refinePointers(void) {
   // remove leading and trailing zeroes from smart pointers
   for (int col = 0; col < m_columnsDM; ++col) {
     int i = m_firstRowForParameter[col];
     int j = m_lastRowForParameter[col];
-    if (m_fitMatrix.derivative[i][col] == 0. && i < --j) {
+    if (i < --j && m_fitMatrix.derivative[i][col] == 0. ) {
       while (i != j && m_fitMatrix.derivative[i][col] == 0.)
         ++i;
       m_firstRowForParameter[col] = i;
@@ -318,9 +303,7 @@ FitMatrices::refinePointers(void)
   }
 }
 
-void
-FitMatrices::releaseMemory(void)
-{
+void FitMatrices::releaseMemory(void) {
   delete m_derivativeMatrix;
   delete m_weight;
   delete m_weightedDifference;
@@ -329,10 +312,8 @@ FitMatrices::releaseMemory(void)
   m_weightedDifference = nullptr;
 }
 
-int
-FitMatrices::setDimensions(std::vector<FitMeasurement*>& measurements,
-                           FitParameters* parameters)
-{
+int FitMatrices::setDimensions(std::vector<FitMeasurement*>& measurements,
+                               FitParameters* parameters) {
   // keep pointer for debug purposes
   m_measurements = &measurements;
 
@@ -407,7 +388,7 @@ FitMatrices::setDimensions(std::vector<FitMeasurement*>& measurements,
     // fit energyDeposit unless momentum fixed or near infinite
     if ((**m).isEnergyDeposit()) {
       //	    if (! m_parameters->fitMomentum() ||
-      //m_parameters->extremeMomentum())
+      // m_parameters->extremeMomentum())
       if (!m_parameters->fitMomentum()) {
         (**m).numberDoF(0);
         continue;
@@ -509,8 +490,7 @@ FitMatrices::setDimensions(std::vector<FitMeasurement*>& measurements,
       }
 
       parameters->addAlignment(m_constrainedAlignmentEffects,
-                               (**m).alignmentAngle(),
-                               (**m).alignmentOffset());
+                               (**m).alignmentAngle(), (**m).alignmentOffset());
       m_firstRowForParameter.push_back(firstAlignmentRow);
       m_firstRowForParameter.push_back(firstAlignmentRow);
       m_lastRowForParameter.push_back(++m_rowsDM);
@@ -537,16 +517,16 @@ FitMatrices::setDimensions(std::vector<FitMeasurement*>& measurements,
 
   // make some checks: return fitCode in case of problem
   int fitCode = 0;
-  // if (row > mxmeas)   		fitCode = 2;	// too many measurements for fit
-  // matrix size
+  // if (row > mxmeas)   		fitCode = 2;	// too many measurements for
+  // fit matrix size
   if (2 * measurements.size() > mxmeas)
-    fitCode = 2; // too many measurements for fit matrix size
+    fitCode = 2;  // too many measurements for fit matrix size
   if (numberParameters > mxparam)
-    fitCode = 3; // too many parameters for fit matrix size
+    fitCode = 3;  // too many parameters for fit matrix size
   if (m_numberDoF < 0)
-    fitCode = 4; // unconstrained fit: negative numberDoF
+    fitCode = 4;  // unconstrained fit: negative numberDoF
   if (numberEnergyDeposits > 1)
-    fitCode = 12; // too many EnergyDeposit parameters
+    fitCode = 12;  // too many EnergyDeposit parameters
   if (fitCode)
     return fitCode;
 
@@ -615,11 +595,10 @@ FitMatrices::setDimensions(std::vector<FitMeasurement*>& measurements,
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-__attribute__ ((flatten))
+__attribute__((flatten))
 #endif
-bool
-FitMatrices::solveEquations(void)
-{
+    bool
+    FitMatrices::solveEquations(void) {
   // use Eigen Matrix multiplication ATR-15723
   // note: fitMatrix (struct) is row-major whereas Eigen prefers column-major
   // storage
@@ -648,15 +627,13 @@ FitMatrices::solveEquations(void)
   // solve is faster than inverse: wait for explicit request for covariance
   // before inversion
   *m_weightedDifference =
-    weight.colPivHouseholderQr().solve(weightedDifference);
+      weight.colPivHouseholderQr().solve(weightedDifference);
 
   m_parameters->update(*m_weightedDifference);
   return true;
 }
 
-void
-FitMatrices::usePerigee(const FitMeasurement& measurement)
-{
+void FitMatrices::usePerigee(const FitMeasurement& measurement) {
   m_perigee = measurement.perigee();
   m_perigeeWeight = measurement.perigeeWeight();
   // TODO: needs eigen equiv !!
@@ -665,9 +642,7 @@ FitMatrices::usePerigee(const FitMeasurement& measurement)
   }
 }
 
-void
-FitMatrices::addPerigeeMeasurement(void)
-{
+void FitMatrices::addPerigeeMeasurement(void) {
   // TODO: needs eigen equiv !!
   // const Amg::MatrixX&	perigeeWeight		= *m_perigeeWeight;
   // Amg::MatrixX&	weight			= *m_weightCLHEP;
@@ -682,9 +657,7 @@ FitMatrices::addPerigeeMeasurement(void)
   // }
 }
 
-void
-FitMatrices::avoidMomentumSingularity(void)
-{
+void FitMatrices::avoidMomentumSingularity(void) {
   // fix momentum if line-fit or fit attempted with negligible field integral
   Amg::MatrixX& weight = *m_weight;
   if (m_parameters->fitEnergyDeposit() &&
@@ -705,4 +678,4 @@ FitMatrices::avoidMomentumSingularity(void)
   }
 }
 
-} // end of namespace
+}  // namespace Trk

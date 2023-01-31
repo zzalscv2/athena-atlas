@@ -394,7 +394,6 @@ InDet::TRT_SeededTrackFinder::execute(const EventContext& ctx) const{
                 // add it to output list
                 if (m_trackSummaryTool.isEnabled()) {
                   m_trackSummaryTool->computeAndReplaceTrackSummary(*trtSeg,
-                                      combinatorialData.PRDtoTrackMap(),
                                       false /* DO NOT suppress hole search*/);
                 }
                 outTracks->push_back(trtSeg);
@@ -406,7 +405,6 @@ InDet::TRT_SeededTrackFinder::execute(const EventContext& ctx) const{
               // add it to output list
               if (m_trackSummaryTool.isEnabled()) {
                 m_trackSummaryTool->computeAndReplaceTrackSummary(*globalTrackNew,
-                                    combinatorialData.PRDtoTrackMap(),
                                     false /* DO NOT suppress hole search*/);
               }
               outTracks->push_back(globalTrackNew);
@@ -539,7 +537,7 @@ Trk::Track* InDet::TRT_SeededTrackFinder::mergeSegments(const Trk::Track& tT, co
   // TSOS from the track
   const DataVector<const Trk::TrackStateOnSurface>* stsos = tT.trackStateOnSurfaces();
   // fitQuality from track
-  const Trk::FitQuality* fq = tT.fitQuality()->clone();
+  auto fq = tT.fitQuality()->uniqueClone();
   // output datavector of TSOS
   auto ntsos = DataVector<const Trk::TrackStateOnSurface>();
   int siHits = 0;
@@ -561,7 +559,7 @@ Trk::Track* InDet::TRT_SeededTrackFinder::mergeSegments(const Trk::Track& tT, co
     } else {
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Measurement);
-      const Trk::TrackStateOnSurface* seg_tsos = new Trk::TrackStateOnSurface(tS.measurement(it)->uniqueClone(), nullptr, nullptr, nullptr, typePattern);
+      const Trk::TrackStateOnSurface* seg_tsos = new Trk::TrackStateOnSurface(tS.measurement(it)->uniqueClone(), nullptr, nullptr, typePattern);
       ntsos.push_back(seg_tsos);
     }
   }
@@ -569,7 +567,7 @@ Trk::Track* InDet::TRT_SeededTrackFinder::mergeSegments(const Trk::Track& tT, co
   ///Construct the new track
   Trk::TrackInfo info;
   info.setPatternRecognitionInfo(Trk::TrackInfo::TRTSeededTrackFinder);
-  std::unique_ptr<Trk::Track> newTrack(std::make_unique<Trk::Track>(info, std::move(ntsos), fq));
+  std::unique_ptr<Trk::Track> newTrack(std::make_unique<Trk::Track>(info, std::move(ntsos), std::move(fq)));
 
   //Careful refitting at the end
   if (m_doRefit) {
@@ -619,9 +617,9 @@ Trk::Track* InDet::TRT_SeededTrackFinder::segToTrack(const EventContext& ctx, co
     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
     typePattern.set(Trk::TrackStateOnSurface::Measurement);
     if (it == 0){
-      seg_tsos = new Trk::TrackStateOnSurface(tS.measurement(it)->uniqueClone(), std::move(segPar), nullptr, nullptr, typePattern);
+      seg_tsos = new Trk::TrackStateOnSurface(tS.measurement(it)->uniqueClone(), std::move(segPar), nullptr, typePattern);
     } else {
-      seg_tsos = new Trk::TrackStateOnSurface(tS.measurement(it)->uniqueClone(), nullptr, nullptr, nullptr, typePattern);
+      seg_tsos = new Trk::TrackStateOnSurface(tS.measurement(it)->uniqueClone(), nullptr, nullptr, typePattern);
     }
     ntsos.push_back(seg_tsos);
   }
@@ -656,27 +654,25 @@ mergeExtension(const Trk::Track& tT, std::vector<const Trk::MeasurementBase*>& t
   // TSOS from the track
   const DataVector<const Trk::TrackStateOnSurface>* stsos = tT.trackStateOnSurfaces();
   // fitQuality from track
-  const Trk::FitQuality* fq = tT.fitQuality()->clone();
+  auto fq = tT.fitQuality()->uniqueClone();
   // output datavector of TSOS
   auto ntsos = DataVector<const Trk::TrackStateOnSurface>();
-  int siHits = 0;
   // copy track Si states into track
   DataVector<const Trk::TrackStateOnSurface>::const_iterator p_stsos;
   for (p_stsos = stsos->begin(); p_stsos != stsos->end(); ++p_stsos) {
     ntsos.push_back((*p_stsos)->clone());
-    if ((*p_stsos)->type(Trk::TrackStateOnSurface::Measurement)) siHits++;
   }
   // loop over TRT track extension
-  for (int it = 0; it < int(tS.size()); it++) {
+  for (auto & it : tS) {
     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
     typePattern.set(Trk::TrackStateOnSurface::Measurement);
-    const Trk::TrackStateOnSurface* seg_tsos = new Trk::TrackStateOnSurface(tS[it]->uniqueClone(), nullptr, nullptr, nullptr, typePattern);
+    const Trk::TrackStateOnSurface* seg_tsos = new Trk::TrackStateOnSurface(it->uniqueClone(), nullptr, nullptr, typePattern);
     ntsos.push_back(seg_tsos);
   }
   ///Construct the new track
   Trk::TrackInfo info;
   info.setPatternRecognitionInfo(Trk::TrackInfo::TRTSeededTrackFinder);
-  std::unique_ptr<Trk::Track> newTrack( std::make_unique<Trk::Track>(info, std::move(ntsos), fq) );
+  std::unique_ptr<Trk::Track> newTrack( std::make_unique<Trk::Track>(info, std::move(ntsos), std::move(fq)) );
   //Careful refitting at the end
   if (m_doRefit) {
     newTrack = (m_fitterTool->fit(Gaudi::Hive::currentContext(),*newTrack, false, Trk::pion) ) ;
@@ -706,17 +702,15 @@ InDet::TRT_SeededTrackFinder::Analyze(TrackCollection* tC) const{
   if(msgLvl(MSG::DEBUG)) {
     ATH_MSG_DEBUG( "Analyzing tracks..." );
     ATH_MSG_DEBUG( "Number of back tracks " << (tC->size()) );
-    int tc = 0; //Track counter
     int nsct1{}, nsct2{}, nsct3{}, nsct4{}; //SCT layer counters
     int nsctTot1{}, nsctTot2{}, nsctTot3{}, nsctTot4{}; //SCT layer counters
     int npix1{}, npix2{}, npix3{}; //Pixel layer counters
     int npixTot1{}, npixTot2{}, npixTot3{}; //Pixel layer counters
-    int nhits{}, nholes{}, noutl{};
     ///Loop over tracks in track collection
     TrackCollection::const_iterator r    = tC->begin();
     TrackCollection::const_iterator re = tC->end();
     for (; r != re ; ++r){
-      tc++; nsct1=nsct2=nsct3=nsct4=0; npix1=npix2=npix3=0; nhits=nholes=noutl=0;
+      nsct1=nsct2=nsct3=nsct4=0; npix1=npix2=npix3=0; 
       const DataVector<const Trk::TrackStateOnSurface>* newtsos = (*r)->trackStateOnSurfaces();
       if(!newtsos) continue;
       DataVector<const Trk::TrackStateOnSurface>::const_iterator itp, itpe=newtsos->end();
@@ -732,13 +726,6 @@ InDet::TRT_SeededTrackFinder::Analyze(TrackCollection* tC) const{
           if((340.<=rc)&&(rc<390.)){nsct2++;}  //2nd SCT layer
           if((390.<=rc)&&(rc<460.)){nsct3++;}  //3rd SCT layer
           if((460.<=rc)&&(rc<550.)){nsct4++;}  //4th SCT layer
-          nhits++;
-        }
-        if(clus && ((*itp)->type(Trk::TrackStateOnSurface::Outlier))){  //Count the total number of outliers per track
-          noutl++;
-        }
-        if(clus && ((*itp)->type(Trk::TrackStateOnSurface::Hole))){     //Count the total number of holes per track
-          nholes++;
         }
       }
       nsctTot1+=nsct1; nsctTot2+=nsct2; nsctTot3+=nsct3; nsctTot4+=nsct4;

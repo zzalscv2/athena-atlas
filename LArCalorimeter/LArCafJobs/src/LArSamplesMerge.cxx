@@ -13,10 +13,11 @@
 #include "TROOT.h"
 #include "TApplication.h"
 #include "TSystem.h"
+#include "CxxUtils/checker_macros.h"
 
 using namespace LArSamples;
 
-int main(int argc, char** argv) {
+int  main ATLAS_NOT_THREAD_SAFE (int argc, char** argv) {
 
   if (argc<3 || (argc>1 && (!strcmp(argv[1],"-h") || !strcmp(argv[1],"--help")))) {
     std::cout << "Syntax:" << std::endl;

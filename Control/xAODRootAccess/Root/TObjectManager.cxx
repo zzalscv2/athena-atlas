@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TObjectManager.cxx 731792 2016-03-23 10:27:41Z krasznaa $
 
 // ROOT include(s):
 #include <TBranch.h>
@@ -61,7 +60,7 @@ namespace xAOD {
       return *this;
    }
 
-   ::TBranch* TObjectManager::branch() const {
+   ::TBranch* TObjectManager::branch() {
 
       return m_branch;
    }
@@ -139,7 +138,12 @@ namespace xAOD {
    ///
    /// @return A typeless pointer to the object being managed
    ///
-   void* TObjectManager::object() const {
+   const void* TObjectManager::object() const {
+
+      return std::as_const(*m_holder).get();
+   }
+
+   void* TObjectManager::object() {
 
       return m_holder->get();
    }
@@ -155,12 +159,17 @@ namespace xAOD {
       return;
    }
 
-   /// @param forceSet Ignored, as full objects can't be missing
+   /// Dummy implementation as full objects can't be missing
    ///
+   ::Bool_t TObjectManager::create() {
+
+      return m_isSet;
+   }
+
    /// @returns <code>kTRUE</code> if the object for this event was set,
    ///          <code>kFALSE</code> otherwise
    ///
-   ::Bool_t TObjectManager::isSet( Bool_t /*forceSet*/ ) const {
+   ::Bool_t TObjectManager::isSet() const {
 
       return m_isSet;
    }

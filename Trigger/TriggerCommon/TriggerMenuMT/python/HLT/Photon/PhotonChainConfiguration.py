@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaCommon.Logging import logging
@@ -7,9 +7,9 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
-from AthenaConfiguration.ComponentFactory import isRun3Cfg
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
-if isRun3Cfg():
+if isComponentAccumulatorCfg():
     pass
 else:
     from ..CommonSequences.CaloSequences import fastCaloMenuSequence
@@ -22,7 +22,7 @@ else:
 
 
 
-from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool, defineHistogram
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO,
 # so let's make them functions already now
@@ -35,20 +35,19 @@ def fastPhotonSequenceCfg( flags ):
 
 def _diPhotonComboHypoToolFromDict(chainDict, lowermass=80000,uppermass=-999,dphi=1.5,applymass=False,applydphi=False): 
     name = chainDict['chainName']
-    monTool = GenericMonitoringTool("MonTool_"+name)
-    monTool.Histograms = [
-        defineHistogram('DphiOfAccepted', type='TH1F', path='EXPERT', title="PrecisionCalo Hypo entries per Phi;Phi", xbins=128, xmin=-3.2, xmax=3.2),
-        defineHistogram('MassOfAccepted', type='TH1F', path='EXPERT', title="Mass in accepted combinations [MeV]", xbins=75, xmin=0, xmax=150000)
-    ]
-    tool= TrigEgammaTopoHypoTool(name)
-    tool.AcceptAll = False
-    tool.ApplyMassCut = applymass
-    tool.LowerMassEgammaClusterCut = lowermass
-    tool.UpperMassEgammaClusterCut = uppermass
-    tool.ApplyDPhiCut = applydphi
-    tool.ThresholdDPhiCut = dphi
-    monTool.HistPath = 'EgammaMassHypo/'+tool.getName()
-    tool.MonTool = monTool
+    monTool = GenericMonitoringTool("MonTool_"+name,
+                                    HistPath = 'EgammaMassHypo/'+name)
+    monTool.defineHistogram('DphiOfAccepted', type='TH1F', path='EXPERT', title="PrecisionCalo Hypo entries per Phi;Phi", xbins=128, xmin=-3.2, xmax=3.2)
+    monTool.defineHistogram('MassOfAccepted', type='TH1F', path='EXPERT', title="Mass in accepted combinations [MeV]", xbins=75, xmin=0, xmax=150000)
+
+    tool= TrigEgammaTopoHypoTool(name,
+                                 AcceptAll = False,
+                                 ApplyMassCut = applymass,
+                                 LowerMassEgammaClusterCut = lowermass,
+                                 UpperMassEgammaClusterCut = uppermass,
+                                 ApplyDPhiCut = applydphi,
+                                 ThresholdDPhiCut = dphi,
+                                 MonTool = monTool)
     return tool
 
 def diphotonDPhiHypoToolFromDict(chainDict):
@@ -119,7 +118,7 @@ class PhotonChainConfiguration(ChainConfigurationBase):
     # ----------------------
     # Assemble the chain depending on information from chainName
     # ----------------------
-    def assembleChainImpl(self):
+    def assembleChainImpl(self, flags):
         log.debug("Assembling chain for %s", self.chainName)
         # This will contain the name of the steps we will want to configure
         steps = self.prepareSequence()
@@ -129,7 +128,7 @@ class PhotonChainConfiguration(ChainConfigurationBase):
         log.debug("stepNames: %s", steps)
         for step in steps:
             log.debug('Adding photon trigger step %s', step)
-            chainstep = getattr(self, step)()
+            chainstep = getattr(self, step)(flags)
             chainSteps+=[chainstep]
 
         myChain = self.buildChain(chainSteps)
@@ -139,30 +138,30 @@ class PhotonChainConfiguration(ChainConfigurationBase):
     # --------------------
     # Configuration of steps
     # --------------------
-    def getFastCalo(self):
+    def getFastCalo(self, flags):
         stepName = "PhotonFastCalo"
         doRinger = 'ringer' in self.chainPart['L2IDAlg']
 
-        return self.getStep(1,stepName,[ fastCaloMenuSequence], name = 'Photon', doRinger = doRinger)
+        return self.getStep(flags,1,stepName,[ fastCaloMenuSequence], name = 'Photon', doRinger = doRinger)
 
-    def getFastPhoton(self):
+    def getFastPhoton(self, flags):
         stepName = "FastPhoton"
-        return self.getStep(2,stepName,[ fastPhotonMenuSequence])
+        return self.getStep(flags,2,stepName,[ fastPhotonMenuSequence])
 
-    def getPrecisionCaloPhoton(self):
+    def getPrecisionCaloPhoton(self, flags):
         do_ion = 'ion' in self.chainPart['extra']
         if do_ion:
             stepName = "PhotonPrecisionHICalo"
         else:
             stepName = "PhotonPrecisionCalo"
 
-        return self.getStep(3,stepName,[ precisionCaloMenuSequence], name = 'Photon', ion=do_ion)
+        return self.getStep(flags,3,stepName,[ precisionCaloMenuSequence], name = 'Photon', ion=do_ion)
     
-    def getHipTRT(self):
+    def getHipTRT(self, flags):
         stepName = "hipTRT"
-        return self.getStep(2,stepName,[ hipTRTMenuSequence])
+        return self.getStep(flags,2,stepName,[ hipTRTMenuSequence])
 
-    def getPrecisionPhoton(self):
+    def getPrecisionPhoton(self, flags):
 
         stepName = "precision_photon"
         do_ion = 'ion' in self.chainPart['extra'] == 'ion'
@@ -171,9 +170,9 @@ class PhotonChainConfiguration(ChainConfigurationBase):
             stepName += '_ion'
         
 
-        return self.getStep(4,stepName,sequenceCfgArray=[precisionPhotonMenuSequence], name = 'Photon',  ion=do_ion)
+        return self.getStep(flags,4,stepName,sequenceCfgArray=[precisionPhotonMenuSequence], name = 'Photon',  ion=do_ion)
 
-    def getPhotonCaloIso(self):
+    def getPhotonCaloIso(self, flags):
 
         stepName = "precision_photon_CaloIso"
         comboTools = []
@@ -192,5 +191,5 @@ class PhotonChainConfiguration(ChainConfigurationBase):
 
        
 
-        return self.getStep(5,stepName,sequenceCfgArray=[precisionPhotonCaloIsoMenuSequence], name = 'Photon', comboTools=comboTools, ion=do_ion)
+        return self.getStep(flags,5,stepName,sequenceCfgArray=[precisionPhotonCaloIsoMenuSequence], name = 'Photon', comboTools=comboTools, ion=do_ion)
     

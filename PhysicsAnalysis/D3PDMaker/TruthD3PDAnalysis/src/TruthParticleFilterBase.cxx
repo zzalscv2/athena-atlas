@@ -219,16 +219,18 @@ TruthParticleFilterBase::addParticle (HepMC::ConstGenParticlePtr p, HepMC::GenEv
 #ifdef HEPMC3
   // Find the particle in the event.
   // If it doesn't exist yet, copy it.
-  HepMC::GenParticlePtr pnew = HepMC::barcode_to_particle (ev,HepMC::barcode(p));
-  if (!pnew) pnew = std::make_shared<HepMC::GenParticle>(*p);
+  HepMC::GenParticlePtr pnew = nullptr;
+  if (p && p->parent_event() != ev) pnew = std::make_shared<HepMC::GenParticle>(*p);
   // Add ourself to our vertices.
-  if (p->production_vertex()) {
-    HepMC::GenVertexPtr v = HepMC::barcode_to_vertex (ev,HepMC::barcode(p->production_vertex()));
-    if (v) v->add_particle_out (pnew);
+  if (p && p->production_vertex() && p->production_vertex()->parent_event() != ev) {
+    HepMC::GenVertexPtr v = std::make_shared<HepMC::GenVertex>(*p->production_vertex());
+    ev -> add_vertex(v);
+    v->add_particle_out (pnew);
   }
-  if (p->end_vertex()) {
-    HepMC::GenVertexPtr v =  HepMC::barcode_to_vertex (ev, HepMC::barcode(p->end_vertex()));
-    if (v) v->add_particle_in (pnew);
+  if (p && p->end_vertex() && p->end_vertex()->parent_event() != ev ) {
+    HepMC::GenVertexPtr v =  std::make_shared<HepMC::GenVertex>(*p->end_vertex());
+    ev -> add_vertex(v);
+    v->add_particle_in (pnew);
   }
 
 #else

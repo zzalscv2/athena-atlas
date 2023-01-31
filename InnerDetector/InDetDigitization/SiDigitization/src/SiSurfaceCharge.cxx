@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,10 +14,7 @@
 #include "SiDigitization/SiSurfaceCharge.h"
 using namespace InDetDD;
 // Copy constructor:
-SiSurfaceCharge::SiSurfaceCharge(const SiSurfaceCharge &surfaceCharge) :
-  m_position(surfaceCharge.m_position),
-  m_charge(surfaceCharge.m_charge)
-{}
+SiSurfaceCharge::SiSurfaceCharge(const SiSurfaceCharge &surfaceCharge)  = default;
 
 // Constructor with parameters:
 SiSurfaceCharge::SiSurfaceCharge(const SiLocalPosition &position,

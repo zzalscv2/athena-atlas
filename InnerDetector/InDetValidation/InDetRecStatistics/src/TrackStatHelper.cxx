@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -49,14 +49,10 @@ namespace Trk {
 // should be synchronised with ETrackSummaryTypes
 const Trk::SummaryType InDet::TrackStatHelper::s_summaryTypes[kNSummaryTypes] = {
    Trk::numberOfInnermostPixelLayerHits,
-   Trk::numberOfInnermostPixelLayerSharedHits,
-   Trk::numberOfInnermostPixelLayerOutliers,
    Trk::numberOfPixelHits,
-   Trk::numberOfPixelSharedHits,
    Trk::numberOfPixelHoles,
    Trk::numberOfGangedPixels,
    Trk::numberOfSCTHits,
-   Trk::numberOfSCTSharedHits,
    Trk::numberOfSCTHoles,
    Trk::numberOfSCTDoubleHoles,
    Trk::numberOfTRTHits,
@@ -69,14 +65,10 @@ const Trk::SummaryType InDet::TrackStatHelper::s_summaryTypes[kNSummaryTypes] = 
 // Table column labels. should be synchronised with ETrackSummaryTypes
 const char * const InDet::TrackStatHelper::s_summaryTypeName[kNSummaryTypes] = {
    "blay",
-   "shrd",
-   "outl",
    "pix",
-   "shrd",
    "hole",
    "gang",
    "SCT",
-   "shrd",
    "hole",
    "DHole",
    "TRT",
@@ -125,7 +117,6 @@ void InDet::TrackStatHelper::SetCuts(struct cuts ct)
 
 void InDet::TrackStatHelper::addEvent(const TrackCollection              * recTracks, 
 				      std::vector <const Trk::Track *>   & rec, 
-                                      Trk::PRDtoTrackMap *prd_to_track_map,
 				      const std::vector <std::pair<HepMC::ConstGenParticlePtr,int> > & gen, 
 				      const TrackTruthCollection         * truthMap, 
 				      const AtlasDetectorID              * const idHelper, 
@@ -200,7 +191,7 @@ void InDet::TrackStatHelper::addEvent(const TrackCollection              * recTr
     }
     else {
       ElementLink<TrackCollection> tracklink;
-      tracklink.setElement(const_cast<Trk::Track*>(track));
+      tracklink.setElement(track);
       tracklink.setStorableObject(*recTracks);
       const ElementLink<TrackCollection> tracklink2=tracklink;
       
@@ -235,7 +226,7 @@ void InDet::TrackStatHelper::addEvent(const TrackCollection              * recTr
     
     if (useTrackSummary) {
        if (!track->trackSummary()) {
-          cleanup = trkSummaryTool->summary(*track,prd_to_track_map);
+          cleanup = trkSummaryTool->summary(*track);
           summary=cleanup.get();
        }
 

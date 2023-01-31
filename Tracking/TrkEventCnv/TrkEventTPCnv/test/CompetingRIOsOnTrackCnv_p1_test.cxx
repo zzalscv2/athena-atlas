@@ -29,7 +29,7 @@ public:
                             const std::vector<double>& probs);
   
   virtual unsigned int numberOfContainedROTs() const override
-  { return m_assignProb->size(); }
+  { return m_assignProb.size(); }
 
   virtual const Trk::Surface& associatedSurface() const override
   { std::abort(); }
@@ -48,7 +48,7 @@ public:
 TestCompetingRIOsOnTrack::TestCompetingRIOsOnTrack (const Trk::LocalParameters& pars,
                                                     const Amg::MatrixX& cov,
                                                     const std::vector<double>& probs)
-  : Trk::CompetingRIOsOnTrack (new std::vector<double> (probs))
+  : Trk::CompetingRIOsOnTrack (std::vector<double> (probs))
 {
   m_localParams = pars;
   m_localCovariance = cov;

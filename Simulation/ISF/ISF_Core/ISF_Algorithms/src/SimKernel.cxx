@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ISF_Algs includes
@@ -386,7 +386,7 @@ StatusCode ISF::SimKernel::execute()
     ATH_MSG_VERBOSE("Main Loop pass no. " << loopCounter);
     ATH_MSG_VERBOSE("Queue starts with " << m_particleBroker->numParticles() << " particles.");
     // get next vector of particles for simulation
-    const ISF::ConstISFParticleVector &particles = m_particleBroker->popVector(m_maxParticleVectorSize);
+    const ISF::ISFParticleVector &particles = m_particleBroker->popVector(m_maxParticleVectorSize);
     const unsigned int numParticlesLeftInBroker = m_particleBroker->numParticles();
     int numParticles = particles.size();
 

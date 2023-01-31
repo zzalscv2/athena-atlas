@@ -15,6 +15,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaKernel/IAtRndmGenSvc.h"
+#include "CxxUtils/checker_macros.h"
 
 // Trk
 #include "TrkExInterfaces/IEnergyLossUpdator.h"
@@ -36,7 +37,7 @@ namespace iFatras{
       @author Tom.Atkinson@cern.ch, Andreas.Salzburger@cern.ch
    */
 
-  class McEnergyLossUpdator : public extends<AthAlgTool, Trk::IEnergyLossUpdator> {
+  class ATLAS_NOT_THREAD_SAFE McEnergyLossUpdator : public extends<AthAlgTool, Trk::IEnergyLossUpdator> {
 
   public:
 

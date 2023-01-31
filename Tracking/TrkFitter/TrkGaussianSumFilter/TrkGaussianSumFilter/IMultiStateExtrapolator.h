@@ -13,7 +13,7 @@
 #define TrkIMultiStateExtrapolator_H
 
 #include "TrkGaussianSumFilterUtils/GsfMaterial.h"
-#include "TrkGaussianSumFilterUtils/MultiComponentState.h"
+#include "TrkParameters/ComponentParameters.h"
 //
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "TrkEventPrimitives/PropDirection.h"

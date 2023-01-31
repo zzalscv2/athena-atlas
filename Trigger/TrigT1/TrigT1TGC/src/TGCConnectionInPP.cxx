@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCConnectionInPP.h"
@@ -354,33 +354,6 @@ TGCPatchPanel* TGCConnectionInPP::getOredPPIn(int connectorOut, int chOut)
     return m_oredPatchPanelIn[connectorOut][chOut];
   else
     return 0;
-}
-
-void TGCConnectionInPP::setConnection(int out, int chOut, int in, int chIn, TGCPatchPanel* PP)
-{
-  if (m_patchPanelIn[out][chOut]==0) {
-    m_patchPanelIn[out][chOut] = PP;
-    m_connectorIn[out][chOut] = in;
-    m_channelIn[out][chOut] = chIn;
-  }else{
-    // When the output channel correspond to the input channel has
-    // already connected, the input channel is connected as ored channel.
-    if(!existOredSignal()){
-      // prepare arrays for ored channel.s
-      int nPPOutCh = m_nCh[out];
-      m_oredPatchPanelIn[out] = new TGCPatchPanel* [nPPOutCh];
-      m_channelIn[out] = new int [nPPOutCh];
-      m_connectorIn[out] = new int [nPPOutCh];
-      m_oredPatchPanelIn[out] = new TGCPatchPanel* [nPPOutCh];
-      m_oredChannelIn[out] = new int [nPPOutCh];
-      m_oredConnectorIn[out] = new int [nPPOutCh];
-    }
-    if (m_oredPatchPanelIn[out][chOut]==0) {
-      m_oredPatchPanelIn[out][chOut] = PP;
-      m_oredConnectorIn[out][chOut] = in;
-      m_oredChannelIn[out][chOut] = chIn;
-    }
-   } 
 }
 
 bool TGCConnectionInPP::replacePatchPanelPointers(TGCPatchPanel* newPatchPanel, 

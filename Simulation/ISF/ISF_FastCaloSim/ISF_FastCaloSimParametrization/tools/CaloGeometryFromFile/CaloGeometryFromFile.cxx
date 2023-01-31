@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -20,9 +20,9 @@
 
 CaloGeometryFromFile::CaloGeometryFromFile() : CaloGeometry() {}
 
-bool CaloGeometryFromFile::LoadGeometryFromFile(std::string fileName,
-                                                std::string treeName,
-                                                std::string hashFileName)
+bool CaloGeometryFromFile::LoadGeometryFromFile(const std::string& fileName,
+                                                const std::string& treeName,
+                                                const std::string& hashFileName)
 {
   std::map<uint64_t, uint64_t> cellId_vs_cellHashId_map;
 

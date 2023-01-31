@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 """
@@ -66,25 +66,26 @@ def TrigExcl(configFlags):
 
 if __name__ == "__main__":
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.DQ.Environment = "AOD"
-    ConfigFlags.Concurrency.NumConcurrentEvents = 5
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.DQ.Environment = "AOD"
+    flags.Concurrency.NumConcurrentEvents = 5
 
-    ConfigFlags.Output.HISTFileName = "TestExclMonitorOutput.root"
-    ConfigFlags.fillFromArgs()
+    flags.Output.HISTFileName = "TestExclMonitorOutput.root"
+    flags.fillFromArgs()
     from AthenaCommon.Logging import logging
     log = logging.getLogger(__name__)
-    log.info("Input %s", str(ConfigFlags.Input.Files))
-    ConfigFlags.lock()
+    log.info("Input %s", str(flags.Input.Files))
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
-    cfg.merge(PoolReadCfg(ConfigFlags))
-    cfg.merge(TrigExcl(ConfigFlags)) # for local testing save reference histograms
+    cfg.merge(PoolReadCfg(flags))
+    cfg.merge(TrigExcl(flags)) # for local testing save reference histograms
 
     # If you want to turn on more detailed messages ...
     from AthenaCommon.Constants import DEBUG

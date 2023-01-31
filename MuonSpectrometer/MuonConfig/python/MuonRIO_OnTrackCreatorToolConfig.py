@@ -96,7 +96,7 @@ def MdtDriftCircleOnTrackCreatorCfg(flags,name="MdtDriftCircleOnTrackCreator", *
     result.setPrivateTools(CompFactory.Muon.MdtDriftCircleOnTrackCreator(name, WasConfigured=True, **kwargs))
     return result
     
-def MuonClusterOnTrackCreatorCfg(flags,name="MuonClusterOnTrackCreator", **kwargs):
+def MuonClusterOnTrackCreatorCfg(flags, name="MuonClusterOnTrackCreator", **kwargs):
     result=ComponentAccumulator()
     if not flags.Input.isMC: # collisions real data or simulated first data
         # scale TGC eta hit errors as long as TGC eta are not well aligned
@@ -104,17 +104,14 @@ def MuonClusterOnTrackCreatorCfg(flags,name="MuonClusterOnTrackCreator", **kwarg
         kwargs.setdefault("FixedErrorTgcEta", 15.)
     else:
         kwargs.setdefault("DoFixedErrorTgcEta", False) # This is ONLY to make the tool configured. Real solution is to use default name.
-    
+
+    if flags.Detector.EnablesTGC or flags.Detector.EnableMM:
+        from MuonConfig.MuonCalibrationConfig import NSWCalibToolCfg
+        from MuonConfig.MuonRecToolsConfig import SimpleMMClusterBuilderToolCfg
+        kwargs.setdefault("NSWCalibTool", result.popToolsAndMerge(NSWCalibToolCfg(flags)))
+        kwargs.setdefault("SimpleMMClusterBuilder", result.popToolsAndMerge(SimpleMMClusterBuilderToolCfg(flags))) 
+            
     muon_cluster_rot_creator = CompFactory.Muon.MuonClusterOnTrackCreator(name, **kwargs)
     result.setPrivateTools(muon_cluster_rot_creator)
     return result
 
-def MMClusterOnTrackCreatorCfg(flags,name="MMClusterOnTrackCreator", **kwargs):
-    result = ComponentAccumulator()
-    from MuonConfig.MuonCalibrationConfig import NSWCalibToolCfg
-    from MuonConfig.MuonRecToolsConfig import SimpleMMClusterBuilderToolCfg
-    kwargs.setdefault("NSWCalibTool", result.popToolsAndMerge(NSWCalibToolCfg(flags)))
-    kwargs.setdefault("SimpleMMClusterBuilder", result.popToolsAndMerge(SimpleMMClusterBuilderToolCfg(flags)))  
-    the_tool = CompFactory.Muon.MMClusterOnTrackCreator(name, **kwargs)
-    result.setPrivateTools(the_tool)
-    return result

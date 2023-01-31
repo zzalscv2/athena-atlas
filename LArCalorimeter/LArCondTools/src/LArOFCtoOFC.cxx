@@ -66,7 +66,7 @@ StatusCode LArOFCtoOFC::stop()
     ATH_CHECK( shape_cont->initialize() );
   }
 
-  unsigned count=0, countsh=0;
+  unsigned count=0;
   for(unsigned int gain = CaloGain::LARHIGHGAIN; gain < CaloGain::LARNGAIN; ++gain) {
     LArOFCComplete::ConstConditionsMapIterator it=cellOFC->begin(gain);
     LArOFCComplete::ConstConditionsMapIterator it_e=cellOFC->end(gain);
@@ -134,7 +134,6 @@ StatusCode LArOFCtoOFC::stop()
              ATH_MSG_DEBUG("Got empty Shape object for channel " << onlID->channel_name(id) << " (disconnected?)");
              continue;
           }
-          countsh++;
 
           std::vector<std::vector<float> > Shape;
           std::vector<std::vector<float> > ShapeDer;

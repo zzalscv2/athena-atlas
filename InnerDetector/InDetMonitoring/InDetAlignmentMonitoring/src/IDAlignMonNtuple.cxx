@@ -566,7 +566,7 @@ StatusCode IDAlignMonNtuple::fillHistograms() {
       //the key for the truth std::map is an ElementLink<TrackCollection> object
       //comprises a pointer to the track and reconstructed track collection
       ElementLink<TrackCollection> trackLink;
-      trackLink.setElement(const_cast<Trk::Track*>(track));
+      trackLink.setElement(track);
       trackLink.setStorableObject(*tracks);
       const ElementLink<TrackCollection> trackLink2 = trackLink;
 
@@ -706,7 +706,7 @@ StatusCode IDAlignMonNtuple::getSiResiduals(const Trk::Track* track, const Trk::
 
       //const Trk::ResidualPull* residualPull = m_residualPullCalculator->residualPull(hit, trackParameterForResiduals,
       // unBias);
-      const Trk::ResidualPull* residualPull = nullptr;
+      std::unique_ptr<Trk::ResidualPull> residualPull = nullptr;
       if (unBias) residualPull = m_residualPullCalculator->residualPull(mesh, trackParameterForResiduals, Trk::ResidualPull::Unbiased);
       else residualPull = m_residualPullCalculator->residualPull(mesh, trackParameterForResiduals, Trk::ResidualPull::Biased);
 
@@ -731,8 +731,6 @@ StatusCode IDAlignMonNtuple::getSiResiduals(const Trk::Track* track, const Trk::
             sc = StatusCode::FAILURE;
           }
         }
-
-        delete residualPull;
       } else {
         if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "ResidualPullCalculator failed!" << endmsg;
         sc = StatusCode::FAILURE;

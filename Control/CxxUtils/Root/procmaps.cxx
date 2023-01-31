@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <cstdint>
 #include <fstream>
 #include "CxxUtils/procmaps.h"
 procmaps::Entry::Entry(const char* procMapsLine) :

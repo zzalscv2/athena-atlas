@@ -77,7 +77,7 @@ void PixelGangedAmbiguitiesFinder::execute(
 			return;
 	  }
     int rowsPerFE = design->rows()/2;
-    auto pHelper = element->getIdHelper();
+    const auto *pHelper = element->getIdHelper();
     if (pHelper->helper() != AtlasDetectorID::HelperType::Pixel){
 			ATH_MSG_ERROR("The helper type is not Pixel at line "<<__LINE__<<" of PixelGangedAmbiguitiesFinder.cxx.");
 			return;
@@ -201,8 +201,8 @@ void PixelGangedAmbiguitiesFinder::execute(
                   int col=pixelID->eta_index(*rdo);
                   myvec2[col-cmin2].push_back(row);
                 }
-                for (int i=0;i<(int)myvec.size();i++) if (!myvec[i].empty()) std::sort(myvec[i].begin(),myvec[i].end());
-                for (int i=0;i<(int)myvec2.size();i++) if (!myvec2[i].empty()) std::sort(myvec2[i].begin(),myvec2[i].end());
+                for (auto & i : myvec) if (!i.empty()) std::sort(i.begin(),i.end());
+                for (auto & i : myvec2) if (!i.empty()) std::sort(i.begin(),i.end());
                 int nvictory1=0,nvictory2=0;
                 for (int i=0;i<(int)myvec.size();i++){
                   int maxsize1=0,maxsize2=0,maxsizeleft1=0,maxsizeright1=0,maxsizeleft2=0,maxsizeright2=0,thissize=0,thissizeright=0;

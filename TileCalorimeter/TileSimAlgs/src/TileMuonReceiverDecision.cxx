@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -84,11 +84,11 @@ StatusCode TileMuonReceiverDecision::initialize() {
   }
 
   //=== retrieve TileID helper from det store
-  CHECK( detStore()->retrieve(m_tileID) );
-  CHECK( detStore()->retrieve(m_tileHWID) );
-  CHECK(detStore()->retrieve(m_tileInfo, m_infoName));
+  ATH_CHECK( detStore()->retrieve(m_tileID) );
+  ATH_CHECK( detStore()->retrieve(m_tileHWID) );
+  ATH_CHECK(detStore()->retrieve(m_tileInfo, m_infoName));
 
-  CHECK(m_tileToolEmscale.retrieve());
+  ATH_CHECK( m_emScaleKey.initialize() );
 
   ATH_MSG_INFO("TileMuonReceiverDecision initialization completed" );
   return StatusCode::SUCCESS;
@@ -119,6 +119,9 @@ StatusCode TileMuonReceiverDecision::execute(const EventContext &ctx) const {
      thresholds.push_back(m_threshold_d6);
      thresholds.push_back(m_threshold_d5d6);
   }
+
+  SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+  ATH_CHECK( emScale.isValid() );
 
   // Get the container with the matched filter reconstructed raw channels in MeV
   //
@@ -170,7 +173,6 @@ StatusCode TileMuonReceiverDecision::execute(const EventContext &ctx) const {
     float time_d5d6   = 0.0;
 
     int ich   = 0;
-    int jch5  = 0;
     int jch6  = 0;
     int jch56 = 0;
 
@@ -212,9 +214,9 @@ StatusCode TileMuonReceiverDecision::execute(const EventContext &ctx) const {
       // TILE channel is the Tile HW channel
       int TILEchan = (eb_ros) ? EBchan[TMDBchan] : LBchan[TMDBchan];
       
-      float ADC2MeV_factor = m_tileToolEmscale->channelCalib(drawerIdx, TILEchan, TileID::LOWGAIN, 1.
-                                                                      , TileRawChannelUnit::PicoCoulombs
-                                                                      , TileRawChannelUnit::MegaElectronVolts) 
+      float ADC2MeV_factor = emScale->calibrateChannel(drawerIdx, TILEchan, TileID::LOWGAIN, 1.
+                                                       , TileRawChannelUnit::PicoCoulombs
+                                                       , TileRawChannelUnit::MegaElectronVolts)
                            / m_tileInfo->MuRcvCalib(adc_id);
 
       float energy = rawChannel->amplitude()*ADC2MeV_factor;
@@ -236,7 +238,6 @@ StatusCode TileMuonReceiverDecision::execute(const EventContext &ctx) const {
           }
           if ( TMDBchan==0 || TMDBchan==1 ) { /* choose d5 cell */
             energy_d5 += energy;
-            ++jch5;
           }
 
         }

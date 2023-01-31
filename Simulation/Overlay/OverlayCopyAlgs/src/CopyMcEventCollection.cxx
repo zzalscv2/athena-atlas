@@ -64,7 +64,9 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
 
   // Copy signal GenEvents
   for (McEventCollection::const_iterator it = signalContainer->begin(); it != signalContainer->end(); ++it) {
-    outputContainer->push_back(new HepMC::GenEvent(**it));
+    HepMC::GenEvent* copiedEvent = new HepMC::GenEvent(**it);
+    HepMC::fillBarcodesAttribute(copiedEvent);
+    outputContainer->push_back(copiedEvent);
   }
 
   // Copy background GenEvents if configured
@@ -74,7 +76,9 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
       ++it;
     }
     for ( ; it != bkgContainerPtr->end(); ++it) {
-      outputContainer->push_back(new HepMC::GenEvent(**it));
+      HepMC::GenEvent* copiedEvent = new HepMC::GenEvent(**it);
+      HepMC::fillBarcodesAttribute(copiedEvent);
+      outputContainer->push_back(copiedEvent);
     }
   }
 

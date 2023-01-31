@@ -70,11 +70,11 @@ namespace ISF {
     { return setupEvent(Gaudi::Hive::currentContext()); }
 
     /** */
-    virtual StatusCode simulate( const ISFParticle& , ISFParticleContainer&, McEventCollection*) override
+    virtual StatusCode simulate( ISFParticle& , ISFParticleContainer&, McEventCollection*) override
     { return StatusCode::FAILURE; }
 
     /** Simulation call for vectors of particles */
-    virtual StatusCode simulateVector(const ConstISFParticleVector& particles, ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) override
+    virtual StatusCode simulateVector(const ISFParticleVector& particles, ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) override
     {
       // this implementation is a wrapper in case the simulator does
       // implement particle-vector input

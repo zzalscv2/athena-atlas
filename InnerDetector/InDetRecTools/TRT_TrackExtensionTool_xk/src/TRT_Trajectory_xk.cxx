@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -33,7 +33,7 @@ void  InDet::TRT_Trajectory_xk::set
   m_zVertexWidth = std::abs(zvertexwidth) ;
   m_impact       = std::abs(impact      ) ;
   m_scale_error  = std::abs(scale       ) ;
-  for(int i=0; i!=400; ++i) m_elements[i].set(m,pr,up,riod,rion,m_scale_error);
+  for(auto & element : m_elements) element.set(m,pr,up,riod,rion,m_scale_error);
   m_minTRTSegmentpT = minTRTSegmentpT ;
 }
 
@@ -42,7 +42,7 @@ void  InDet::TRT_Trajectory_xk::set
 
 {
   m_fieldprop    = mp;
-  for(int i=0; i!=400; ++i) m_elements[i].set(mp, condObj);
+  for(auto & element : m_elements) element.set(mp, condObj);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -72,12 +72,21 @@ void InDet::TRT_Trajectory_xk::initiateForPrecisionSeed
   std::vector<const InDetDD::TRT_BaseElement*>::const_iterator d=De.begin(),de=De.end();
 
   std::list< std::pair<Amg::Vector3D,double> >::iterator i=Gp.begin(),i0=Gp.begin(),ie=Gp.end();
-  if(i0==ie) return;
+  // At least two elements are needed for the direction computation.
+  // So, return immediately if there are no elements, or if the next
+  // element is already the end.
+  if(Gp.empty() || ++i==ie) {
+     m_firstRoad       =  0;
+     m_lastRoad        =  0;
+     m_firstTrajectory = -1;
+     m_lastTrajectory  = -1;
+     return;
+  }
 
   // Primary trajectory direction calculation
   // Tp.parameters()[4] is the (signed) q/p
   double A[4]={0., 0., 0., Tp.parameters()[4]};
-  for(++i; i!=ie; ++i) {
+  for(; i!=ie; ++i) {
     if((*i).second-(*i0).second > 1.) {
       A[0] = (*i).first.x()-(*i0).first.x();
       A[1] = (*i).first.y()-(*i0).first.y();
@@ -150,11 +159,18 @@ void InDet::TRT_Trajectory_xk::initiateForTRTSeed
 
   std::list< std::pair<Amg::Vector3D,double> >::iterator i=Gp.begin(),i0=Gp.begin(),ie=Gp.end();
   if(i0==ie) return;
+  // At least two elements are needed for the direction computation.
+  // So, return immediately if there are no elements, or if the next
+  // element is already the end.
+  if(Gp.empty() || ++i==ie) {
+     m_lastTrajectory  = -1;
+     return;
+  }
 
   // Primary trajectory direction calculation
   //
   double A[4]={0.,0.,0.,Tp.parameters()[4]}; 
-  for(++i; i!=ie; ++i) {
+  for(; i!=ie; ++i) {
     if( (*i).second-(*i0).second > 1.) {
       A[0] = (*i).first.x()-(*i0).first.x();
       A[1] = (*i).first.y()-(*i0).first.y();
@@ -517,8 +533,7 @@ Trk::TrackSegment* InDet::TRT_Trajectory_xk::convert()
 
   const Trk::Surface* sur = &m_parameters.associatedSurface();
 
-  DataVector<const Trk::MeasurementBase>* rio
-      = new DataVector<const Trk::MeasurementBase>;
+  auto rio = DataVector<const Trk::MeasurementBase>{};
 
   // Pseudo-measurement production
   //
@@ -539,18 +554,18 @@ Trk::TrackSegment* InDet::TRT_Trajectory_xk::convert()
         //lastbarrelsurf=&r->associatedSurface();
       }
 
-      rio->push_back(r);
+      rio.push_back(r);
     }
   }
-  if(rio->empty()) {delete rio; return nullptr;}
+  if(rio.empty()) {return nullptr;}
   int bec=0;
   if (nbarrel>0 && nendcap>0) bec=1;
   else if (nbarrel==0 && nendcap>0) bec=2;
-  pms=pseudoMeasurements(&(**rio->begin()).associatedSurface(),&(**rio->rbegin()).associatedSurface(),bec);
-  if(pms.first) rio->insert(rio->begin(),pms.first);
+  pms=pseudoMeasurements(&(**rio.begin()).associatedSurface(),&(**rio.rbegin()).associatedSurface(),bec);
+  if(pms.first) rio.insert(rio.begin(),pms.first);
   if(pms.second) {
-    if (std::abs((**rio->rbegin()).associatedSurface().center().z())<2650.) rio->push_back(pms.second);
-    else rio->insert(rio->begin()+1,pms.second);
+    if (std::abs((**rio.rbegin()).associatedSurface().center().z())<2650.) rio.push_back(pms.second);
+    else rio.insert(rio.begin()+1,pms.second);
   }
   // Track segment production
   //
@@ -561,14 +576,20 @@ Trk::TrackSegment* InDet::TRT_Trajectory_xk::convert()
 	       p[3],
 	       p[4]};
 
-  if(!m_ndf) {m_ndf = rio->size()-5; m_xi2 = 0.;}
+  if(!m_ndf) {m_ndf = rio.size()-5; m_xi2 = 0.;}
 
   if(!sur) {
     Amg::Vector3D GP(0.,0.,0.); sur = new Trk::PerigeeSurface(GP);
   }
   Trk::FitQuality * fqu = new Trk::FitQuality(m_xi2,m_ndf);
 
-  return new Trk::TrackSegment(Trk::LocalParameters(P[0],P[1],P[2],P[3],P[4]),*m_parameters.covariance(),sur,rio,fqu,Trk::Segment::TRT_SegmentMaker);
+  return new Trk::TrackSegment(
+    Trk::LocalParameters(P[0], P[1], P[2], P[3], P[4]),
+    *m_parameters.covariance(),
+    sur,
+    std::move(rio),
+    fqu,
+    Trk::Segment::TRT_SegmentMaker);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -930,7 +951,7 @@ Trk::Track* InDet::TRT_Trajectory_xk::convert(const Trk::Track& Tr)
   //
   auto tsosn = DataVector<const Trk::TrackStateOnSurface>();
 
-  tsosn.push_back(new Trk::TrackStateOnSurface(nullptr,Tp.convert(true),nullptr,nullptr,(*s)->types()));
+  tsosn.push_back(new Trk::TrackStateOnSurface(nullptr,Tp.convert(true),nullptr,(*s)->types()));
 
   // Copy old information to new track
   //
@@ -945,7 +966,7 @@ Trk::Track* InDet::TRT_Trajectory_xk::convert(const Trk::Track& Tr)
     if(mb) {
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>  typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Measurement);
-      tsosn.push_back(new Trk::TrackStateOnSurface(std::move(mb),nullptr,nullptr,nullptr,typePattern));
+      tsosn.push_back(new Trk::TrackStateOnSurface(std::move(mb),nullptr,nullptr,typePattern));
     }
   }
 
@@ -956,7 +977,7 @@ Trk::Track* InDet::TRT_Trajectory_xk::convert(const Trk::Track& Tr)
     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>  typePattern;
     typePattern.set(Trk::TrackStateOnSurface::Measurement);
     tsosn.push_back
-      (new Trk::TrackStateOnSurface(std::move(mb),m_parameters.convert(true),nullptr,nullptr,typePattern));
+      (new Trk::TrackStateOnSurface(std::move(mb),m_parameters.convert(true),nullptr,typePattern));
   }
 
   // New fit quality production
@@ -966,8 +987,8 @@ Trk::Track* InDet::TRT_Trajectory_xk::convert(const Trk::Track& Tr)
     m_xi2+= fqo->chiSquared();
     m_ndf+= fqo->numberDoF ();
   }
-  Trk::FitQuality* fq = new Trk::FitQuality(m_xi2,m_ndf);
-  return new Trk::Track (Tr.info(),std::move(tsosn),fq);
+  auto fq = std::make_unique<Trk::FitQuality>(m_xi2,m_ndf);
+  return new Trk::Track (Tr.info(),std::move(tsosn),std::move(fq));
 }
 
 ///////////////////////////////////////////////////////////////////

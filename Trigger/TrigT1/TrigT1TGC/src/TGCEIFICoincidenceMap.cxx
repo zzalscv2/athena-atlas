@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCEIFICoincidenceMap.h"
@@ -13,9 +13,9 @@
 #include "TrigT1TGC/TGCDatabaseManager.h"
 #include "PathResolver/PathResolver.h"
 
-namespace LVL1TGCTrigger {
+namespace LVL1TGC {
 
-TGCEIFICoincidenceMap::TGCEIFICoincidenceMap(TGCArguments* tgcargs,
+TGCEIFICoincidenceMap::TGCEIFICoincidenceMap(LVL1TGCTrigger::TGCArguments* tgcargs,
                                              const SG::ReadCondHandleKey<TGCTriggerData>& readCondKey)
   :AthMessaging("LVL1TGC::TGCEIFICoincidenceMap"),
    m_verName("NA"),
@@ -28,14 +28,14 @@ TGCEIFICoincidenceMap::TGCEIFICoincidenceMap(TGCArguments* tgcargs,
 
   // intialize map
   ATH_MSG_DEBUG("initialising the map");
-  for (size_t sec=0; sec< N_EndcapSector; sec++){
-    for (size_t ssc=0; ssc< N_Endcap_SSC; ssc++){
-      for (size_t input=0; input< N_Input_InnerSector; input++){
+  for (size_t sec=0; sec < kNEndcapTrigSector; sec++) {
+    for (size_t ssc=0; ssc < kNMaxSSC; ssc++) {
+      for (size_t input=0; input < N_INNER_SECTORS; input++) {
 	m_map[input][ssc][sec].setTriggerBits(true);
       }
-      m_flagPT[ssc][sec] = std::bitset<N_PT_THRESH>(0x30);  // 6b'110000
+      m_flagPT[ssc][sec] = std::bitset<kNThresholdsR2>(0x30);  // 6b'110000
 
-      for (size_t pos=0; pos< N_ROI_IN_SSC; pos++){
+      for (size_t pos=0; pos < kNRoiInSSC; pos++){
 	m_flagROI[pos][ssc][sec] = 1;
       }
     }
@@ -45,7 +45,7 @@ TGCEIFICoincidenceMap::TGCEIFICoincidenceMap(TGCArguments* tgcargs,
   return;
 }
    
-TGCEIFICoincidenceMap::TGCEIFICoincidenceMap(TGCArguments* tgcargs,
+TGCEIFICoincidenceMap::TGCEIFICoincidenceMap(LVL1TGCTrigger::TGCArguments* tgcargs,
 					     const SG::ReadCondHandleKey<TGCTriggerData>& readCondKey,
                                              const std::string& version,
 					     int   sideID)
@@ -60,14 +60,14 @@ TGCEIFICoincidenceMap::TGCEIFICoincidenceMap(TGCArguments* tgcargs,
 
   // initialize map
   ATH_MSG_DEBUG("initialising the map");
-  for (size_t sec=0; sec< N_EndcapSector; sec++){
-    for (size_t ssc=0; ssc< N_Endcap_SSC; ssc++){
-      for (size_t input=0; input< N_Input_InnerSector; input++){
+  for (size_t sec=0; sec < kNEndcapTrigSector; sec++) {
+    for (size_t ssc=0; ssc < kNMaxSSC; ssc++) {
+      for (size_t input=0; input < N_INNER_SECTORS; input++) {
 	m_map[input][ssc][sec].setTriggerBits(true);
       }
-      m_flagPT[ssc][sec] = std::bitset<N_PT_THRESH>(0x30);  // 6b'110000
+      m_flagPT[ssc][sec] = std::bitset<kNThresholdsR2>(0x30);  // 6b'110000
 
-      for (size_t pos=0; pos< N_ROI_IN_SSC; pos++){
+      for (size_t pos=0; pos < kNRoiInSSC; pos++){
 	m_flagROI[pos][ssc][sec] = 1;
       }
     }
@@ -89,9 +89,9 @@ TGCEIFICoincidenceMap::TGCEIFICoincidenceMap(TGCArguments* tgcargs,
   } else {
     ATH_MSG_INFO(" NOT use inner station ");
     tgcArgs()->set_USE_INNER( false );
-    for (size_t sec=0; sec< N_EndcapSector; sec++){
-      for (size_t ssc=0; ssc< N_Endcap_SSC; ssc++){
-        m_flagPT[ssc][sec] = std::bitset<N_PT_THRESH>(0x00);  // 6b'000000
+    for (size_t sec=0; sec < kNEndcapTrigSector; sec++){
+      for (size_t ssc=0; ssc < kNMaxSSC; ssc++){
+        m_flagPT[ssc][sec] = std::bitset<kNThresholdsR2>(0x00);  // 6b'000000
       }
     }    
   }
@@ -107,14 +107,14 @@ TGCEIFICoincidenceMap::TGCEIFICoincidenceMap(const TGCEIFICoincidenceMap& right)
 {
   ATH_MSG_DEBUG("copy constructor");
 
-  for (size_t sec=0; sec< N_EndcapSector; sec++){
-    for (size_t ssc=0; ssc< N_Endcap_SSC; ssc++){
-      for (size_t input=0; input< N_Input_InnerSector; input++){
+  for (size_t sec=0; sec < kNEndcapTrigSector; sec++){
+    for (size_t ssc=0; ssc < kNMaxSSC; ssc++){
+      for (size_t input=0; input < N_INNER_SECTORS; input++){
 	m_map[input][ssc][sec] = right.m_map[input][ssc][sec];
       }
       m_flagPT[ssc][sec] = right.m_flagPT[ssc][sec];
 
-      for (size_t pos=0; pos< N_ROI_IN_SSC; pos++){
+      for (size_t pos=0; pos < kNRoiInSSC; pos++){
 	m_flagROI[pos][ssc][sec] = right.m_flagROI[pos][ssc][sec];
       }
     }
@@ -129,14 +129,14 @@ TGCEIFICoincidenceMap& TGCEIFICoincidenceMap::operator=(const TGCEIFICoincidence
   ATH_MSG_INFO("operator = ");
 
   if (this != &right) {
-    for (size_t sec=0; sec< N_EndcapSector; sec++){
-      for (size_t ssc=0; ssc< N_Endcap_SSC; ssc++){
-	for (size_t input=0; input< N_Input_InnerSector; input++){
+    for (size_t sec=0; sec < kNEndcapTrigSector; sec++){
+      for (size_t ssc=0; ssc < kNMaxSSC; ssc++){
+	for (size_t input=0; input< N_INNER_SECTORS; input++){
 	  m_map[input][ssc][sec] = right.m_map[input][ssc][sec];
 	}
         m_flagPT[ssc][sec] = right.m_flagPT[ssc][sec];
 
-	for (size_t pos=0; pos< N_ROI_IN_SSC; pos++){
+	for (size_t pos=0; pos < kNRoiInSSC; pos++){
 	  m_flagROI[pos][ssc][sec] = right.m_flagROI[pos][ssc][sec];
 	}
       }
@@ -152,7 +152,7 @@ TGCEIFICoincidenceMap& TGCEIFICoincidenceMap::operator=(const TGCEIFICoincidence
 bool TGCEIFICoincidenceMap::readMap() 
 {
   ATH_MSG_DEBUG("readMap");
-  const std::string SideName[NumberOfSide] = {"A","C"};
+  const std::string SideName[kNSide] = {"A","C"};
 
   // select right database according to a set of thresholds
   std::string dbname="";
@@ -175,18 +175,18 @@ bool TGCEIFICoincidenceMap::readMap()
 
   std::ifstream file(fullName.c_str(),std::ios::in);    
 
-  enum{BufferSize=1024};
+  static constexpr unsigned int BufferSize = 512;
   char buf[BufferSize];
   std::string tag;
 
   while(file.getline(buf,BufferSize)){
-    int sectorId = -1;
-    int sscId    = -1;
-    int use[N_PT_THRESH] = {0, 0, 0, 0, 0, 0};
-    int roi[N_ROI_IN_SSC] = {1, 1, 1, 1, 1, 1, 1, 1};
+    unsigned int sectorId = 999;
+    unsigned int sscId = 999;
+    int use[kNThresholdsR2] = {0, 0, 0, 0, 0, 0};
+    int roi[kNRoiInSSC] = {1, 1, 1, 1, 1, 1, 1, 1};
     std::istringstream header(buf); 
     header >> tag;
-    if(tag=="#"){ // read header part.     
+    if(tag == "#"){ // read header part.     
       header >> sectorId >> sscId 
 	     >> use[0] >> use[1] >> use[2] 
 	     >> use[3] >> use[4] >> use[5] 
@@ -194,17 +194,17 @@ bool TGCEIFICoincidenceMap::readMap()
 	     >> roi[4] >> roi[5] >> roi[6] >> roi[7];
     }
     // check Id
-    if( sectorId<0 || sectorId>=N_EndcapSector ||
-	sscId<0    || sscId>=N_Endcap_SSC ) {
+    if (sectorId >= kNEndcapTrigSector ||
+	sscId >= kNMaxSSC) {
       ATH_MSG_WARNING(" illegal parameter in database header : " << header.str()
 	  << " in file " << dbname);
       file.close();
       return false;
     }
-    for (size_t pt=0; pt<N_PT_THRESH; pt++){
+    for (size_t pt=0; pt < kNThresholdsR2; pt++){
       m_flagPT[sscId][sectorId][pt] = use[pt];
     }
-    for (size_t pos=0; pos< N_ROI_IN_SSC; pos++){
+    for (size_t pos=0; pos < kNRoiInSSC; pos++){
       m_flagROI[pos][sscId][sectorId] = roi[pos];
     }
 
@@ -212,7 +212,7 @@ bool TGCEIFICoincidenceMap::readMap()
     file.getline(buf,BufferSize);
     std::istringstream cont(buf);
     unsigned int word;
-    for(size_t pos=0; pos<N_Input_InnerSector; pos++){
+    for (size_t pos=0; pos < N_INNER_SECTORS; pos++) {
       cont >> word;
       m_map[pos][sscId][sectorId].setTriggerWord(word);
     }
@@ -230,8 +230,8 @@ void TGCEIFICoincidenceMap::dumpMap() const
 
   std::ofstream file(fullName.c_str());    
 
-  for (size_t sec=0; sec< N_EndcapSector; sec++){
-    for (size_t ssc=0; ssc< N_Endcap_SSC; ssc++){
+  for (size_t sec=0; sec < kNEndcapTrigSector; sec++){
+    for (size_t ssc=0; ssc < kNMaxSSC; ssc++){
       file << "# " << sec << " " << ssc << " ";
       for(int i=0; i<6; i++) file << m_flagPT[ssc][sec].test(i) << " ";
       for(int i=0; i<8; i++) file << m_flagROI[i][ssc][sec] << " ";
@@ -246,13 +246,13 @@ void TGCEIFICoincidenceMap::dumpMap() const
   file.close();	  
 }
 
-int TGCEIFICoincidenceMap::getFlagPT(const int pt,
-                                     const int ssc,
-                                     const int sec)  const
+int TGCEIFICoincidenceMap::getFlagPT(const unsigned int pt,
+                                     const unsigned int ssc,
+                                     const unsigned int sec)  const
 {
-  if ((pt<=0)||(pt>N_PT_THRESH)) return -1;
-  if ((ssc<0)||(ssc>=N_Endcap_SSC)) return 0;
-  if ((sec<0)||(sec>=N_EndcapSector)) return -1;
+  if (pt == 0 || pt > kNThresholdsR2) return -1;
+  if (ssc >= kNMaxSSC) return 0;
+  if (sec >= kNEndcapTrigSector) return -1;
 
   if  (tgcArgs()->USE_CONDDB()) {
     SG::ReadCondHandle<TGCTriggerData> readHandle{m_readCondKey};
@@ -263,13 +263,13 @@ int TGCEIFICoincidenceMap::getFlagPT(const int pt,
   }
 }
 
-int  TGCEIFICoincidenceMap::getFlagROI(const int roi,
-                                       const int ssc,
-                                       const int sec)  const
+int TGCEIFICoincidenceMap::getFlagROI(const unsigned int roi,
+                                      const unsigned int ssc,
+                                      const unsigned int sec)  const
 {
-  if ((roi<0)||(roi>=N_ROI_IN_SSC)) return -1;
-  if ((ssc<0)||(ssc>=N_Endcap_SSC)) return 0;
-  if ((sec<0)||(sec>=N_EndcapSector)) return -1;
+  if (roi >= kNRoiInSSC) return -1;
+  if (ssc >= kNMaxSSC) return 0;
+  if (sec >= kNEndcapTrigSector) return -1;
 
   if  (tgcArgs()->USE_CONDDB()) {
     SG::ReadCondHandle<TGCTriggerData> readHandle{m_readCondKey};

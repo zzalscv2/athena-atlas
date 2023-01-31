@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILECONDTOOLPULSESHAPE_H
 #define TILECONDITIONS_TILECONDTOOLPULSESHAPE_H
 
 // Tile includes
-#include "TileConditions/TileCalibData.h"
+#include "TileConditions/TilePulse.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -31,8 +31,10 @@ class TileCondToolPulseShape: public AthAlgTool {
 
   private:
 
-    //=== TileCalibData
-    SG::ReadCondHandleKey<TileCalibDataFlt> m_calibPulseShapeKey{this,
+   /**
+    * @brief Name of TilePulse in condition store
+    */
+    SG::ReadCondHandleKey<TilePulse> m_pulseShapeKey{this,
         "TilePulseShape", "TilePulseShape", "Input Tile pulse shape"};
 
 };

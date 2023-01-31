@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -23,9 +23,6 @@ namespace Trk {
 namespace Trk {
 
 
-  /** Interface ID for IMaterialMapper*/  
-  static const InterfaceID IID_IMaterialMapper("IMaterialMapper", 1, 0);
-  
   /** @class IMaterialMapper
      
      Interface class IMaterialMapper
@@ -40,13 +37,12 @@ namespace Trk {
   class IMaterialMapper : virtual public IAlgTool {
       
      public:
-         
+    /// Creates the InterfaceID and interfaceID() method
+    DeclareInterfaceID(IMaterialMapper, 1, 0);
+
        /** Virtual destructor */
        virtual ~IMaterialMapper(){}
        
-       /** AlgTool and IAlgTool interface methods */
-       static const InterfaceID& interfaceID() { return IID_IMaterialMapper; }
-        
        /** Record material hit - while stepping outwards */
        virtual void recordMaterialHit(const AssociatedMaterial& amhit, const Amg::Vector3D& projectedPosition) const = 0;
 

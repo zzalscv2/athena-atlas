@@ -48,7 +48,6 @@ namespace {
     static const SG::AuxElement::Accessor<float> acc_ET_EMCore("ET_EMCore");
     static const SG::AuxElement::Accessor<float> acc_ET_TileCore("ET_TileCore");
     static const SG::AuxElement::Accessor<float> acc_ET_HECCore("ET_HECCore");
-
 }  // namespace
 namespace MuonCombined {
 
@@ -109,6 +108,7 @@ namespace MuonCombined {
         for (const std::string &a_key : m_copyCharSummaryKeys ) {
            m_copyCharSummaryAccessors.push_back(std::make_unique< SG::AuxElement::Accessor<uint8_t> >(a_key));
         }
+
         return StatusCode::SUCCESS;
     }
     void MuonCreatorTool::create(const EventContext& ctx, const MuonCandidateCollection* muonCandidates,
@@ -433,7 +433,7 @@ namespace MuonCombined {
 
             if (outputData.combinedTrackParticleContainer) {
                 xAOD::TrackParticle* tp = m_particleCreator->createParticle(ctx, &tag->combinedParameters(), &fq, &info, &summary, {}, {},
-                                                                            xAOD::muon, outputData.combinedTrackParticleContainer, (idSummary!=nullptr));
+                                                                            xAOD::muon, outputData.combinedTrackParticleContainer);
                 if (!tp) {
                     ATH_MSG_WARNING("Failed to create track particle");
                 } else {
@@ -461,7 +461,7 @@ namespace MuonCombined {
                     const xAOD::TrackParticle &id_track_particle = candidate->indetTrackParticle();
                     for (const std::unique_ptr< SG::AuxElement::Accessor<float> > &accessor  : m_copyFloatSummaryAccessors ) {
                        (*accessor)( *tp ) = (*accessor)( id_track_particle );
-                    }
+		    }
                     for (const std::unique_ptr< SG::AuxElement::Accessor<uint8_t> > &accessor  : m_copyCharSummaryAccessors ) {
                        (*accessor)( *tp ) = (*accessor)( id_track_particle );
                     }
@@ -469,6 +469,7 @@ namespace MuonCombined {
                 }
             }  // endif outputData.combinedTrackParticleContainer
         }
+
         // add muon candidate
         addMuonCandidate(ctx, tag->muonCandidate(), muon, outputData);
 
@@ -500,7 +501,7 @@ namespace MuonCombined {
             if (outputData.combinedTrackParticleContainer) {
                 // create element link from the track
                 ElementLink<xAOD::TrackParticleContainer> link = createTrackParticleElementLink(
-                    tag->combinedTrackLink(), *outputData.combinedTrackParticleContainer, outputData.combinedTrackCollection);
+	             tag->combinedTrackLink(), *outputData.combinedTrackParticleContainer, outputData.combinedTrackCollection);
 
                 if (link.isValid()) {
                     // link.toPersistent();
@@ -510,7 +511,6 @@ namespace MuonCombined {
                     ATH_MSG_WARNING("Creating of Combined TrackParticle Link failed");
             }
         }
-
         // add muon candidate
         addMuonCandidate(ctx, tag->muonCandidate(), muon, outputData, tag->updatedExtrapolatedTrackLink());
 
@@ -574,7 +574,7 @@ namespace MuonCombined {
             if (outputData.combinedTrackParticleContainer) {
                 // create element link
                 ElementLink<xAOD::TrackParticleContainer> link = createTrackParticleElementLink(
-                    tag->combinedTrackLink(), *outputData.combinedTrackParticleContainer, outputData.combinedTrackCollection);
+	             tag->combinedTrackLink(), *outputData.combinedTrackParticleContainer, outputData.combinedTrackCollection);
 
                 if (link.isValid()) {
                     ATH_MSG_DEBUG("Adding MuGirlLowBeta: pt " << (*link)->pt() << " eta " << (*link)->eta() << " phi " << (*link)->phi());
@@ -613,7 +613,7 @@ namespace MuonCombined {
             if (outputData.combinedTrackParticleContainer) {
                 // create element link
                 ElementLink<xAOD::TrackParticleContainer> link = createTrackParticleElementLink(
-                    tag->combinedTrackLink(), *outputData.combinedTrackParticleContainer, outputData.combinedTrackCollection);
+	             tag->combinedTrackLink(), *outputData.combinedTrackParticleContainer, outputData.combinedTrackCollection);
 
                 if (link.isValid()) {
                     // link.toPersistent();
@@ -729,7 +729,7 @@ namespace MuonCombined {
         const ElementLink<TrackCollection>& trackLink, xAOD::TrackParticleContainer& trackParticleContainer,
         TrackCollection* trackCollection) const {
         ATH_MSG_DEBUG("createTrackParticleElementLink");
-        const xAOD::TrackParticle* tp = nullptr;
+        xAOD::TrackParticle* tp = nullptr;
         if (trackCollection) {
             trackCollection->push_back(new Trk::Track(**trackLink));
             // want to link the track particle to this track
@@ -1096,7 +1096,7 @@ namespace MuonCombined {
                 if (tag->author() == xAOD::Muon::MuidCo) {
                     const CombinedFitTag* cmb_tag = dynamic_cast<const CombinedFitTag*>(tag);
                     used_candidates.insert(&cmb_tag->muonCandidate());
-                } else if (indet_cand.second.size() == 1 && tag->author() == xAOD::Muon::STACO) {
+                } else if (tag->author() == xAOD::Muon::STACO && indet_cand.second[0] == tag) {
                     const StacoTag* staco_tag = dynamic_cast<const StacoTag*>(tag);
                     used_candidates.insert(&staco_tag->muonCandidate());
                 }
@@ -1155,7 +1155,7 @@ namespace MuonCombined {
                     ctx, *pars, meas->associatedSurface(), Trk::anyDirection, false, Trk::MagneticFieldProperties(Trk::NoField))};
                 if (!exPars) { ATH_MSG_VERBOSE("Could not propagate Track to segment surface"); }
                 Trk::TrackStateOnSurface* trackState =
-                    new Trk::TrackStateOnSurface(meas->uniqueClone(), std::move(exPars), nullptr, nullptr, typePattern);
+                    new Trk::TrackStateOnSurface(meas->uniqueClone(), std::move(exPars), nullptr, typePattern);
                 trackStateOnSurfaces.push_back(trackState);
             }  // end segment loop
         }
@@ -1164,10 +1164,10 @@ namespace MuonCombined {
         Trk::TrackInfo::TrackPatternRecoInfo author = Trk::TrackInfo::MuTag;
         info.setPatternRecognitionInfo(author);
         std::unique_ptr<Trk::Track> newtrack =
-            std::make_unique<Trk::Track>(info, std::move(trackStateOnSurfaces), (indetTrack.fitQuality())->clone());
+            std::make_unique<Trk::Track>(info, std::move(trackStateOnSurfaces), (indetTrack.fitQuality())->uniqueClone());
 
         // create a track summary for this track
-        if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(*newtrack, nullptr, false); }
+        if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(*newtrack, false); }
 
         return newtrack;
     }

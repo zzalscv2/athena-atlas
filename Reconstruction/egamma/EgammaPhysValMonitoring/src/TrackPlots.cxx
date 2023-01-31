@@ -39,9 +39,9 @@ void TrackPlots::initializePlots(){
   deta    = Book1D("deta", "#Delta#eta_{1} of "+m_sParticleType+";#Delta#eta_{1};Electrons", 100,-0.01, 0.01);           
   dphi    = Book1D("dphi", "#Delta#varphi_{2} of "+m_sParticleType+";#Delta#varphi_{2};Electrons", 100,-0.01, 0.01);
   dphirescaled = Book1D("dphirescaled", "#Delta#varphiRescaled_{2} of "+m_sParticleType+";#Delta#varphiRescaled_{2};Electrons",100,-0.01,0.01);
-  d0           = Book1D("d0", "d0 of "+m_sParticleType+"; d0;Electrons", 250, 0, 25);
-  z0           = Book1D("z0", "z0 of "+m_sParticleType+"; z0;Electrons", 250, 0, 25);
-  d0significance = Book1D("d0significance", "d0significance of "+m_sParticleType+"; d0significance;Electrons", 250, 0, 25);
+  d0           = Book1D("d0", "d0 of "+m_sParticleType+"; d0;Electrons", 200, -100, 100);
+  z0           = Book1D("z0", "z0 of "+m_sParticleType+"; z0;Electrons", 200, -100, 100);
+  d0significance = Book1D("d0significance", "d0significance of "+m_sParticleType+"; d0significance;Electrons", 50, -25, 25);
   blayer  = Book1D("blayer", "#blayer hits of "+m_sParticleType+";# blayer hits;Electrons", 5,0, 5);
   pixel   = Book1D("pixel", "#pixel hits of "+m_sParticleType+";# pixel hits;Electrons", 10, 0, 10);
   sct     = Book1D("sct", "#sct hits of "+m_sParticleType+";# sct hits;Electrons", 25, 0, 25);
@@ -51,7 +51,7 @@ void TrackPlots::initializePlots(){
   trt_total    = Book1D("trt_total", "#total trt hits of "+m_sParticleType+";# total trt hits;Electrons", 50, 0, 50);
   trt_ht       = Book1D("trt_ht", "#HT trt hits of "+m_sParticleType+";# HT trt hits;Electrons", 50, 0, 50);
   trt_ht_total = Book1D("trt_ht_total", "#HT total trt hits of "+m_sParticleType+";# total HT trt hits;Electrons", 50, 0, 50);
-  eProbHT      = Book1D("eProbabilityHT", "#eProbablity HT of "+m_sParticleType+";#eProbablity HT;Electrons", 50, 0, 5);
+  eProbHT      = Book1D("eProbabilityHT", "#eProbablity HT of "+m_sParticleType+";#eProbablity HT;Electrons", 20, 0, 1);
   deltaPoverP  = Book1D("deltaPoverP", "#DeltaP/P of "+m_sParticleType+";#DeltaP/P;Electrons", 100,-1.1, 1.1);           
   EoverP       = Book1D("EoverP", "E/P of "+m_sParticleType+";E/P;Electrons", 100, 0, 10);
   trtratio = Book2D("trtratio", "TRT ratio vs eta of"+m_sParticleType+";#eta; TRT ratio", 50, -2.5, 2.5,100,0.,1.);

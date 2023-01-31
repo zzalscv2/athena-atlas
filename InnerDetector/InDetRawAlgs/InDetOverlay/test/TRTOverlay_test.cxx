@@ -7,7 +7,6 @@
  * @brief Tests for TRTOverlay.
  */
 
-#undef NDEBUG
 
 // Otherwise we get warnings about mutable members in gmock.
 #include "CxxUtils/checker_macros.h"
@@ -46,6 +45,8 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
+//undefine NDEBUG after EDM
+#undef NDEBUG
 // Google Test
 #include "gtest/gtest.h"
 // Google Mock

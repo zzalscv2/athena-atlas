@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Sat Aug 30 2014 14:38:03 CEST  
  **
- **     Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 #ifndef COMPUTILS_H
@@ -88,7 +88,7 @@ void contents( std::vector<std::string>& keys,
 double realmax( TH1* h, bool include_error=true, double lo=0, double hi=0 );
 double realmin( TH1* h, bool include_error=true, double lo=0, double hi=0 );
 
-std::string findcell( std::string name, const std::string regex, const std::string splitex="/" );
+std::string findcell( std::string name, const std::string& regex, const std::string& splitex="/" );
 
 std::string findrun( TFile *f );
 
@@ -97,7 +97,7 @@ double plotable( TH1* h ); // , double xlo=-999, double xhi=-999 );
 
 class data_mismatch : public std::exception { 
 public:
-  data_mismatch(const std::string& s) { std::cerr << "exception:" << what() << " " << s << std::endl; }; 
+  data_mismatch(const std::string& s) { std::cerr << "exception:" << data_mismatch::what() << " " << s << std::endl; }; 
   virtual const char* what() const throw() { return "data don't match"; }
 };
 
@@ -335,9 +335,14 @@ class Legend {
 
 public:
 
-  Legend() : m_leg(0) { } 
+  Legend() : m_leg(nullptr){ 
+    m_x[0]=0.0;
+    m_y[0]=0.0;
+    m_x[1]=0.0;
+    m_y[1]=0.0;
+	  } 
 
-  Legend(double x1, double x2, double y1, double y2) { 
+  Legend(double x1, double x2, double y1, double y2): m_leg(nullptr) { 
     m_x[0]=x1;
     m_y[0]=y1;
     m_x[1]=x2;
@@ -347,7 +352,9 @@ public:
 
   // Legend( const Legend& leg ) : mleg((TLegend*)leg.mleg->Clone()) { } 
 
- Legend(const Legend& legend) : m_leg(legend.m_leg) { } 
+ Legend(const Legend& legend) : m_leg(legend.m_leg), 
+   m_x{legend.m_x[0], legend.m_x[1]}, 
+   m_y{legend.m_y[0], legend.m_y[1]} { } 
 
   ~Legend() { } 
 
@@ -457,7 +464,6 @@ public:
     m_entries(0), 
     m_trim_errors(false)
   {
-    // plotref = true;
   }
 
   
@@ -531,7 +537,7 @@ public:
        
       }
 
-      if ( plotref && href() ) { 
+      if ( s_plotref && href() ) {
 	if ( contains(href()->GetName(),"_vs_")  || 
 	     contains(href()->GetName(),"sigma") || 
 	     contains(href()->GetName(),"mean") || 
@@ -592,7 +598,7 @@ public:
 	
 	  char meanrefc[64];
 	  bool displayref = false;
-	  if ( meanplotref && href() ) { 
+	  if ( s_meanplotref && href() ) {
 	    displayref = true;
 	    true_mean muref( href() );
 	    std::sprintf( meanrefc, " <t> = %3.2f #pm %3.2f ms (ref)", muref.mean(), muref.error() );
@@ -625,7 +631,7 @@ public:
 	    dkey += std::string(" : ");
 	    
 	    if ( (dkey+meanc).size()>58 ) { 
-	      leg.AddEntry( htest(), dkey.c_str(), "p" );
+	      leg.AddEntry( htest(), dkey, "p" );
 	      leg.AddEntry( hnull,   meanc,        "p" ); 
 	    }
 	    else { 
@@ -638,7 +644,7 @@ public:
 	      //  leg.AddEntry( hnull, "", "l" );
 	      
 	      if ( (rkey+meanrefc).size()>58 ) { 
-		leg.AddEntry( href(), rkey.c_str(), "l" );
+		leg.AddEntry( href(), rkey, "l" );
 		leg.AddEntry( hnull,  meanrefc,     "l" ); 
 	      }
 	      else {
@@ -649,7 +655,7 @@ public:
 	  
 	}
 	else { 
-	  if ( LINEF || leg.size()<m_max_entries ) leg.AddEntry( htest(), key.c_str(), "p" );
+	  if ( LINEF || leg.size()<m_max_entries ) leg.AddEntry( htest(), key, "p" );
 	}
 	
 	m_entries++;
@@ -703,7 +709,7 @@ public:
 
 
 #if 0
-      if ( plotref && href() ) { 
+      if ( s_plotref && href() ) {
 	if ( contains(href()->GetName(),"_vs_")  || 
 	     contains(href()->GetName(),"sigma") || 
 	     contains(href()->GetName(),"mean") || 
@@ -762,7 +768,7 @@ public:
 
 	char meanrefc[64];
 	bool displayref = false;
-	if ( meanplotref && href() ) { 
+	if ( s_meanplotref && href() ) {
 	  displayref = true;
 	  true_mean muref( href() );
 	  std::sprintf( meanrefc, " <t> = %3.2f #pm %3.2f ms (ref)", muref.mean(), muref.error() );
@@ -796,7 +802,7 @@ public:
 	  dkey += std::string(" : ");
 
 	  if ( (dkey+meanc).size()>58 ) { 
-	    leg.AddEntry( htest(), dkey.c_str(), "p" );
+	    leg.AddEntry( htest(), dkey, "p" );
 	    leg.AddEntry( hnull,   meanc,        "p" ); 
 	  }
 	  else { 
@@ -808,7 +814,7 @@ public:
 	    //  leg.AddEntry( hnull, "", "l" );
 
 	    if ( (rkey+meanrefc).size()>58 ) { 
-	      leg.AddEntry( href(), rkey.c_str(), "l" );
+	      leg.AddEntry( href(), rkey, "l" );
 	      leg.AddEntry( hnull,  meanrefc,     "l" ); 
 	    }
 	    else {
@@ -819,7 +825,7 @@ public:
 
       }
       else { 
-	if ( LINEF || leg.size()<m_max_entries ) leg.AddEntry( htest(), key.c_str(), "p" );
+	if ( LINEF || leg.size()<m_max_entries ) leg.AddEntry( htest(), key, "p" );
       }
 
       m_entries++;
@@ -849,8 +855,8 @@ public:
 
 public:
 
-  static void setplotref( bool b )     { plotref=meanplotref=b; }
-  static void setmeanplotref( bool b ) { meanplotref=b; }
+  static void setplotref( bool b )     { s_plotref=s_meanplotref=b; }
+  static void setmeanplotref( bool b ) { s_meanplotref=b; }
 
 private:
 
@@ -863,8 +869,8 @@ private:
 
   std::string m_plotfilename;
 
-  static bool plotref;
-  static bool meanplotref;
+  inline static bool s_plotref{true};
+  inline static bool s_meanplotref{true};
 
   size_t  m_max_entries;
   size_t  m_entries;
@@ -872,15 +878,6 @@ private:
   bool m_trim_errors;
 
 };
-
-template<typename T>
-bool tPlotter<T>::plotref = true;
-
-
-template<typename T>
-bool tPlotter<T>::meanplotref = true;
-
-
 
 
 typedef tPlotter<TH1F> Plotter;
@@ -913,30 +910,31 @@ public:
     m_maxset(false), m_max(0),
     m_minset(false), m_min(0),
     m_rangeset(false), 
+    m_lo(0.0), m_hi(0.0),
     m_trim_errors(errors)
   { }
 
   double realmin( double lo=0, double hi=0 ) {
     bool first = true;
-    double _min = 1000;
+    double min = 1000;
     for ( unsigned i=0 ; i<size() ; i++ ) {
       double rmtest = ::realmin( at(i).htest(), false, lo, hi );
-      if ( rmtest!=0 && ( first || _min>rmtest ) ) _min = rmtest;
+      if ( rmtest!=0 && ( first || min>rmtest ) ) min = rmtest;
       if ( rmtest!=0 ) first = false;
     }
-    return _min;
+    return min;
   }
 
   double realmax(double lo=0, double hi=0) {
     bool first = true;
-    double _max = 0;
+    double max = 0;
     for ( unsigned i=0 ; i<size() ; i++ ) {
       //      double rmref  = realmin( at(i).href(), false );
       double rmtest = ::realmax( at(i).htest(), false, lo, hi );
-      if ( rmtest!=0 && ( first || _max<rmtest ) ) _max = rmtest;
+      if ( rmtest!=0 && ( first || max<rmtest ) ) max = rmtest;
       if ( rmtest!=0 ) first = false;
     }
-    return _max;
+    return max;
   }
 
 
@@ -1073,7 +1071,7 @@ public:
   
 
 
-  void sortx( const AxisInfo xinfo ) { // bool autoset=false, bool sym=false, bool logset=false, bool rangeset=false, double lo=0, double hi=0 ) { 
+  void sortx( const AxisInfo& xinfo ) {
     
     if ( xinfo.rangeset() ) { 
       m_lo = xinfo.lo();
@@ -1172,7 +1170,7 @@ public:
     //  for ( unsigned i=0 ; i<size() ; i++,  first=false ) at(i).Draw( i, &leg, means, first, (i==size()-1) );
     for ( unsigned i=size() ; i-- ;  first=false ) at(i).Draw( i, &leg, means, first, i==0 );
 
-    if ( watermark ) DrawLabel(0.1, 0.02, "built "+stime()+release, kBlack, 0.03 );
+    if ( s_watermark ) DrawLabel(0.1, 0.02, "built "+stime()+release, kBlack, 0.03 );
 
     gPad->SetLogy(m_logy);
     gPad->SetLogx(m_logx);
@@ -1191,11 +1189,11 @@ public:
     return "";
   }
 
-  void SetXaxisTitle(std::string s) { 
+  void SetXaxisTitle(const std::string& s) { 
     if ( size()>0 ) at(0).htest()->GetXaxis()->SetTitle(s.c_str());
   }
 
-  void SetYaxisTitle(std::string s) { 
+  void SetYaxisTitle(const std::string& s) { 
     if ( size()>0 ) at(0).htest()->GetYaxis()->SetTitle(s.c_str());
   }
 
@@ -1208,7 +1206,7 @@ public:
 
 public:
 
-  static void setwatermark(bool b) { watermark = b; }
+  static void setwatermark(bool b) { s_watermark = b; }
 
 private:
   
@@ -1234,7 +1232,7 @@ private:
 
 private:
 
-  static bool watermark;
+  static bool s_watermark;
 
 };
 

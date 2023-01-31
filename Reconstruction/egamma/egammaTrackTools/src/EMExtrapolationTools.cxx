@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "EMExtrapolationTools.h"
@@ -46,21 +46,15 @@ Trk::Perigee
 getRescaledPerigee(const xAOD::TrackParticle& trkPB,
                    const xAOD::CaloCluster& cluster)
 {
+  // copy over the one of the input track particle
+  Trk::Perigee perigee = trkPB.perigeeParameters();
+  // we rescale q/p
+  AmgVector(5) rescaled;
+  rescaled << trkPB.d0(), trkPB.z0(), trkPB.phi0(), trkPB.theta(),
+    trkPB.charge() / cluster.e();
+  perigee.setParameters(rescaled);
 
-  /*
-   * Take the 'defining parameters' that use the Trk::Perigee coordinate system:
-   * \f$( d_0, z_0, \phi, \theta, q/p )\f$.
-   * Expressed with respect to an origin (returned by vx(), vy() and vy() )
-   * Then replace the q/p with q/cluster->e()
-   * e.g create a new Perigee with q/cluster->e() rather than track->p()
-   */
-  return { trkPB.d0(),
-           trkPB.z0(),
-           trkPB.phi0(),
-           trkPB.theta(),
-           trkPB.charge() / cluster.e(),
-           Trk::PerigeeSurface(
-             Amg::Vector3D(trkPB.vx(), trkPB.vy(), trkPB.vz())) };
+  return perigee;
 }
 } // end of anonymous namespace
 
@@ -458,7 +452,8 @@ EMExtrapolationTools::getMomentumAtVertex(const EventContext& ctx,
     } else {
       Trk::PerigeeSurface surface(vertex.position());
       std::unique_ptr<const Trk::TrackParameters> params =
-        m_extrapolator->extrapolate(ctx, *tp, surface, Trk::alongMomentum);
+          m_extrapolator->extrapolate(ctx, tp->perigeeParameters(), surface,
+                                      Trk::alongMomentum);
       if (!params) {
         ATH_MSG_DEBUG("Extrapolation to vertex (perigee) failed");
       } else {

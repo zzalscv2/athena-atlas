@@ -12,9 +12,10 @@
 #include "GeneratorObjects/McEventCollection.h"
 #include "HepMCTruthReader.h"
 
-using namespace std;
+using std::cout;
+using std::endl;
 
-HepMCTruthReader::HepMCTruthReader(const string& name, ISvcLocator* svcLoc)
+HepMCTruthReader::HepMCTruthReader(const std::string& name, ISvcLocator* svcLoc)
   : AthAlgorithm(name, svcLoc)
 {
   /// @todo Provide these names centrally in a Python module and remove these hard-coded versions?
@@ -83,7 +84,7 @@ void HepMCTruthReader::printEvent(const HepMC::GenEvent* event) {
   cout << "        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx\n";
   cout << "--------------------------------------------------------------------------------\n";
 #ifdef HEPMC3
-  for (auto iv: event->vertices()) {  printVertex(iv);  } 
+  for (const auto& iv: event->vertices()) {  printVertex(iv);  } 
 #else
   for (HepMC::GenEvent::vertex_const_iterator iv = event->vertices_begin(); iv != event->vertices_end(); ++iv) {
     printVertex(*iv);
@@ -94,7 +95,7 @@ void HepMCTruthReader::printEvent(const HepMC::GenEvent* event) {
 
 // Print method for vertex - mimics the HepMC dump.
 // Particle print method called within here
-void HepMCTruthReader::printVertex(HepMC::ConstGenVertexPtr vertex) {
+void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex) {
   std::ios::fmtflags f( cout.flags() ); 
   cout << "GenVertex (" << vertex << "):";
   if (HepMC::barcode(vertex) != 0) {
@@ -107,8 +108,8 @@ void HepMCTruthReader::printVertex(HepMC::ConstGenVertexPtr vertex) {
       cout << " (X,cT)=";
       cout.width(9);
       cout.precision(2);
-      cout.setf(ios::scientific, ios::floatfield);
-      cout.setf(ios_base::showpos);
+      cout.setf(std::ios::scientific, std::ios::floatfield);
+      cout.setf(std::ios_base::showpos);
       cout << vertex->position().x() << ",";
       cout.width(9);
       cout.precision(2);
@@ -119,8 +120,8 @@ void HepMCTruthReader::printVertex(HepMC::ConstGenVertexPtr vertex) {
       cout.width(9);
       cout.precision(2);
       cout << vertex->position().t();
-      cout.setf(ios::fmtflags(0), ios::floatfield);
-      cout.unsetf(ios_base::showpos);
+      cout.setf(std::ios::fmtflags(0), std::ios::floatfield);
+      cout.unsetf(std::ios_base::showpos);
       cout << endl;
     } else {
       cout.width(9);
@@ -144,8 +145,8 @@ void HepMCTruthReader::printVertex(HepMC::ConstGenVertexPtr vertex) {
       cout << " (X,cT)=";
       cout.width(9);
       cout.precision(2);
-      cout.setf(ios::scientific, ios::floatfield);
-      cout.setf(ios_base::showpos);
+      cout.setf(std::ios::scientific, std::ios::floatfield);
+      cout.setf(std::ios_base::showpos);
       cout << vertex->position().x();
       cout.width(9);
       cout.precision(2);
@@ -156,8 +157,8 @@ void HepMCTruthReader::printVertex(HepMC::ConstGenVertexPtr vertex) {
       cout.width(9);
       cout.precision(2);
       cout << vertex->position().t();
-      cout.setf(ios::fmtflags(0), ios::floatfield);
-      cout.unsetf(ios_base::showpos);
+      cout.setf(std::ios::fmtflags(0), std::ios::floatfield);
+      cout.unsetf(std::ios_base::showpos);
       cout << endl;
     } else {
       cout.width(9);
@@ -178,7 +179,7 @@ void HepMCTruthReader::printVertex(HepMC::ConstGenVertexPtr vertex) {
   // }
   // Print out all the incoming, then outgoing particles
 #ifdef HEPMC3
-  for (auto  iPIn: vertex->particles_in()) {       
+  for (const auto&  iPIn: vertex->particles_in()) {       
     if ( iPIn == vertex->particles_in().front() ) {
       cout << " I: ";
       cout.width(2);
@@ -186,7 +187,7 @@ void HepMCTruthReader::printVertex(HepMC::ConstGenVertexPtr vertex) {
     } else cout << "      ";
     printParticle(iPIn);
   }
-  for (auto iPOut: vertex->particles_out()) {
+  for (const auto& iPOut: vertex->particles_out()) {
     if ( iPOut == vertex->particles_out().front()) {
       cout << " O: ";
       cout.width(2);
@@ -220,7 +221,7 @@ void HepMCTruthReader::printVertex(HepMC::ConstGenVertexPtr vertex) {
 
 
 // Print method for particle - mimics the HepMC dump.
-void HepMCTruthReader::printParticle(HepMC::ConstGenParticlePtr particle) {
+void HepMCTruthReader::printParticle(const HepMC::ConstGenParticlePtr& particle) {
   std::ios::fmtflags f( cout.flags() ); 
   cout << " ";
   cout.width(9);
@@ -229,8 +230,8 @@ void HepMCTruthReader::printParticle(HepMC::ConstGenParticlePtr particle) {
   cout << particle->pdg_id() << " ";
   cout.width(9);
   cout.precision(2);
-  cout.setf(ios::scientific, ios::floatfield);
-  cout.setf(ios_base::showpos);
+  cout.setf(std::ios::scientific, std::ios::floatfield);
+  cout.setf(std::ios_base::showpos);
   cout << particle->momentum().px() << ",";
   cout.width(9);
   cout.precision(2);
@@ -241,8 +242,8 @@ void HepMCTruthReader::printParticle(HepMC::ConstGenParticlePtr particle) {
   cout.width(9);
   cout.precision(2);
   cout << particle->momentum().e() << " ";
-  cout.setf(ios::fmtflags(0), ios::floatfield);
-  cout.unsetf(ios_base::showpos);
+  cout.setf(std::ios::fmtflags(0), std::ios::floatfield);
+  cout.unsetf(std::ios_base::showpos);
   if ( particle->status()==2 ) {
     if ( HepMC::barcode(particle->end_vertex())!=0 ) {
       cout.width(3);

@@ -201,7 +201,7 @@ InDet::InDetPRDtoTrackMapToolGangedPixels::getPrdsOnTrack(Trk::PRDtoTrackMap &vi
   DataVector<const Trk::MeasurementBase>::const_iterator itEnd = track.measurementsOnTrack()->end();
   for (;it!=itEnd;++it)
     {
-    const auto meas{*it};
+    const auto *const meas{*it};
     if (meas->type(Trk::MeasurementBaseType::RIO_OnTrack)) {
       const Trk::RIO_OnTrack* rot = static_cast<const Trk::RIO_OnTrack*>(meas);
       if(rot->prepRawData()) vec.push_back(rot->prepRawData());

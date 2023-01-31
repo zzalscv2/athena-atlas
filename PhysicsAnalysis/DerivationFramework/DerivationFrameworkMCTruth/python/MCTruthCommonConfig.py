@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # MCTruthCommonConfig
 # Contains the configuration for the common truth containers/decorations used in analysis DAODs
@@ -16,12 +16,12 @@ def TruthMetaDataWriterCfg(flags, name):
     acc.addEventAlgo(CommonAugmentation(f"{name}Kernel", AugmentationTools = [theTruthMetaDataWriter]))
     return acc 
 
-def HepMCtoXAODTruthCfg(ConfigFlags):
+def HepMCtoXAODTruthCfg(flags):
     """Conversion of HepMC to xAOD truth"""
     acc = ComponentAccumulator()
 
     # Only run for MC input
-    if ConfigFlags.Input.isMC is False:
+    if flags.Input.isMC is False:
         raise RuntimeError("Common MC truth building requested for non-MC input")
 
     # Local steering flag to identify EVNT input
@@ -29,35 +29,35 @@ def HepMCtoXAODTruthCfg(ConfigFlags):
     isEVNT = False
 
     # Ensure EventInfoCnvAlg is scheduled
-    if ("EventInfo#EventInfo" and "xAOD::EventInfo#EventInfo") not in ConfigFlags.Input.TypedCollections:
+    if ("EventInfo#EventInfo" and "xAOD::EventInfo#EventInfo") not in flags.Input.TypedCollections:
         from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-        acc.merge(EventInfoCnvAlgCfg(ConfigFlags, inputKey="McEventInfo", outputKey="EventInfo", disableBeamSpot=True))
+        acc.merge(EventInfoCnvAlgCfg(flags, inputKey="McEventInfo", outputKey="EventInfo", disableBeamSpot=True))
 
     # Build truth collection if input is HepMC. Must be scheduled first to allow slimming.
     # Input file is event generator output (EVNT)
     from xAODTruthCnv.xAODTruthCnvConfig import GEN_EVNT2xAODCfg
-    if "McEventCollection#GEN_EVENT" in ConfigFlags.Input.TypedCollections:                  
-        acc.merge(GEN_EVNT2xAODCfg(ConfigFlags,name="GEN_EVNT2xAOD",AODContainerName="GEN_EVENT"))
+    if "McEventCollection#GEN_EVENT" in flags.Input.TypedCollections:                  
+        acc.merge(GEN_EVNT2xAODCfg(flags,name="GEN_EVNT2xAOD",AODContainerName="GEN_EVENT"))
         isEVNT = True 
     # Input file is simulation output (HITS)
-    elif "McEventCollection#TruthEvent" in ConfigFlags.Input.TypedCollections:
+    elif "McEventCollection#TruthEvent" in flags.Input.TypedCollections:
         acc.merge(GEN_EVNT2xAODCfg(name="GEN_EVNT2xAOD",AODContainerName="TruthEvent"))
     # Input file already has xAOD truth. Don't do anything.
-    elif "xAOD::TruthEventContainer#TruthEvents" in ConfigFlags.Input.TypedCollections:
+    elif "xAOD::TruthEventContainer#TruthEvents" in flags.Input.TypedCollections:
         pass
     else:
         raise RuntimeError("No recognised HepMC truth information found in the input")
 
     # If it isn't available, make a truth meta data object (will hold MC Event Weights)
-    if "TruthMetaDataContainer#TruthMetaData" not in ConfigFlags.Input.TypedCollections and not isEVNT:
+    if "TruthMetaDataContainer#TruthMetaData" not in flags.Input.TypedCollections and not isEVNT:
         # If we are going to be making the truth collection (isEVNT) then this will be made elsewhere
-        acc.merge(TruthMetaDataWriterCfg(ConfigFlags, name = 'DFCommonTruthMetaDataWriter'))
+        acc.merge(TruthMetaDataWriterCfg(flags, name = 'DFCommonTruthMetaDataWriter'))
 
     return acc
 
 
 # Helper for adding truth jet collections via new jet config
-def AddTruthJetsCfg(ConfigFlags):
+def AddTruthJetsCfg(flags):
     acc = ComponentAccumulator()
 
     from JetRecConfig.StandardSmallRJets import AntiKt4Truth,AntiKt4TruthWZ,AntiKt4TruthDressedWZ,AntiKtVRTruthCharged
@@ -71,24 +71,24 @@ def AddTruthJetsCfg(ConfigFlags):
                AntiKt10TruthTrimmed,AntiKt10TruthSoftDrop]
 
     for jd in jetList:
-        acc.merge(JetRecCfg(ConfigFlags,jd))
+        acc.merge(JetRecCfg(flags,jd))
 
     return acc
 
 # Helper for scheduling the truth MET collection
-def AddTruthMETCfg(ConfigFlags):
+def AddTruthMETCfg(flags):
 
     acc = ComponentAccumulator()
 
     # Only do this if the truth MET is not present
     # This should handle EVNT correctly without an explicit check
-    if ( "MissingETContainer#MET_Truth") not in ConfigFlags.Input.TypedCollections:
+    if ( "MissingETContainer#MET_Truth") not in flags.Input.TypedCollections:
         from METReconstruction.METTruth_Cfg import METTruth_Cfg
-        acc.merge(METTruth_Cfg(ConfigFlags))
+        acc.merge(METTruth_Cfg(flags))
 
     return acc
 
-def PreJetMCTruthAugmentationsCfg(ConfigFlags, **kwargs):
+def PreJetMCTruthAugmentationsCfg(flags, **kwargs):
 
     acc = ComponentAccumulator()
 
@@ -110,12 +110,12 @@ def PreJetMCTruthAugmentationsCfg(ConfigFlags, **kwargs):
     DFCommonTruthBosonToolCfg, DFCommonTruthBSMToolCfg, DFCommonTruthElectronIsolationTool1Cfg,
     DFCommonTruthElectronIsolationTool2Cfg, DFCommonTruthMuonIsolationTool1Cfg, DFCommonTruthMuonIsolationTool2Cfg,
     DFCommonTruthPhotonIsolationTool1Cfg, DFCommonTruthPhotonIsolationTool2Cfg, DFCommonTruthPhotonIsolationTool3Cfg]:    
-        augmentationToolsList.append(acc.getPrimaryAndMerge(item()))
-    augmentationToolsList.append(acc.getPrimaryAndMerge(DFCommonTruthForwardProtonToolCfg(ConfigFlags)))
+        augmentationToolsList.append(acc.getPrimaryAndMerge(item(flags)))
+    augmentationToolsList.append(acc.getPrimaryAndMerge(DFCommonTruthForwardProtonToolCfg(flags)))
 
     if 'decorationDressing' in kwargs:
-        augmentationToolsList.append(acc.getPrimaryAndMerge(DFCommonTruthElectronDressingToolCfg(decorationName = kwargs['decorationDressing'])))
-        augmentationToolsList.append(acc.getPrimaryAndMerge(DFCommonTruthMuonDressingToolCfg(decorationName = kwargs['decorationDressing'])))
+        augmentationToolsList.append(acc.getPrimaryAndMerge(DFCommonTruthElectronDressingToolCfg(flags, decorationName = kwargs['decorationDressing'])))
+        augmentationToolsList.append(acc.getPrimaryAndMerge(DFCommonTruthMuonDressingToolCfg(flags, decorationName = kwargs['decorationDressing'])))
 
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     acc.addEventAlgo(CommonAugmentation(name = "MCTruthCommonPreJetKernel", AugmentationTools = augmentationToolsList))
@@ -123,43 +123,43 @@ def PreJetMCTruthAugmentationsCfg(ConfigFlags, **kwargs):
     return(acc)
 
 
-def PostJetMCTruthAugmentationsCfg(ConfigFlags, **kwargs):
+def PostJetMCTruthAugmentationsCfg(flags, **kwargs):
 
     acc = ComponentAccumulator()
 
     # Tau collections are built separately
     # truth tau matching needs truth jets, truth electrons and truth muons
     from DerivationFrameworkTau.TauTruthCommonConfig import TauTruthToolsCfg
-    acc.merge(TauTruthToolsCfg(ConfigFlags))
+    acc.merge(TauTruthToolsCfg(flags))
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthTauDressingToolCfg
-    augmentationToolsList = [ acc.getPrimaryAndMerge(DFCommonTruthTauDressingToolCfg()) ]
+    augmentationToolsList = [ acc.getPrimaryAndMerge(DFCommonTruthTauDressingToolCfg(flags)) ]
 
     #Save the post-shower HT and MET filter values that will make combining filtered samples easier (adds to the EventInfo)
     from DerivationFrameworkMCTruth.GenFilterToolConfig import GenFilterToolCfg
     # schedule the special truth building tools and add them to a common augmentation; note taus are handled separately below
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthDressedWZQGLabelToolCfg
-    augmentationToolsList += [ acc.getPrimaryAndMerge(GenFilterToolCfg()) ,
-                               acc.getPrimaryAndMerge(DFCommonTruthDressedWZQGLabelToolCfg())]
+    augmentationToolsList += [ acc.getPrimaryAndMerge(GenFilterToolCfg(flags)) ,
+                               acc.getPrimaryAndMerge(DFCommonTruthDressedWZQGLabelToolCfg(flags))]
 
     # SUSY signal decorations
     from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import IsSUSYSignalRun3
-    if IsSUSYSignalRun3(ConfigFlags):
+    if IsSUSYSignalRun3(flags):
         from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import DecorateSUSYProcessCfg
-        augmentationToolsList += DecorateSUSYProcessCfg(ConfigFlags, 'MCTruthCommon')
+        augmentationToolsList += DecorateSUSYProcessCfg(flags, 'MCTruthCommon')
 
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     acc.addEventAlgo(CommonAugmentation(name              = "MCTruthCommonPostJetKernel", 
                                         AugmentationTools = augmentationToolsList))
 
     # add SoW of individual SUSY final states, relies on augmentation from DecorateSUSYProcess()
-    if IsSUSYSignalRun3(ConfigFlags):
+    if IsSUSYSignalRun3(flags):
         from DerivationFrameworkSUSY.SUSYWeightMetadataConfig import AddSUSYWeightsCfg
-        acc.merge(AddSUSYWeightsCfg(ConfigFlags))
+        acc.merge(AddSUSYWeightsCfg(flags))
 
     return(acc)
 
 # This adds the entirety of TRUTH3
-def AddStandardTruthContentsCfg(ConfigFlags,
+def AddStandardTruthContentsCfg(flags,
                                 decorationDressing='dressedPhoton',
                                 includeTausInDressingPhotonRemoval=False,
                                 prefix=''):
@@ -167,38 +167,39 @@ def AddStandardTruthContentsCfg(ConfigFlags,
     acc = ComponentAccumulator()
 
     # Schedule HepMC->xAOD truth conversion
-    acc.merge(HepMCtoXAODTruthCfg(ConfigFlags))
+    acc.merge(HepMCtoXAODTruthCfg(flags))
 
     # Local flag
     isEVNT = False
-    if "McEventCollection#GEN_EVENT" in ConfigFlags.Input.TypedCollections: isEVNT = True
+    if "McEventCollection#GEN_EVENT" in flags.Input.TypedCollections: isEVNT = True
     # Tools that must come before jets
-    acc.merge(PreJetMCTruthAugmentationsCfg(ConfigFlags,decorationDressing = decorationDressing))
+    acc.merge(PreJetMCTruthAugmentationsCfg(flags,decorationDressing = decorationDressing))
     # Should photons that are dressed onto taus also be removed from truth jets?
     if includeTausInDressingPhotonRemoval:
         acc.getPublicTool("DFCommonTruthTauDressingTool").decorationName=decorationDressing
     # Jets and MET
-    acc.merge(AddTruthJetsCfg(ConfigFlags))
-    acc.merge(AddTruthMETCfg(ConfigFlags))
+    acc.merge(AddTruthJetsCfg(flags))
+    acc.merge(AddTruthMETCfg(flags))
     # Tools that must come after jets
-    acc.merge(PostJetMCTruthAugmentationsCfg(ConfigFlags, decorationDressing = decorationDressing))
+    acc.merge(PostJetMCTruthAugmentationsCfg(flags, decorationDressing = decorationDressing))
     # Add back the navigation contect for the collections we want
-    acc.merge(AddTruthCollectionNavigationDecorationsCfg(["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos", "TruthBSM", "TruthBottom", "TruthTop", "TruthBoson"], prefix=prefix))
+    acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, ["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos", "TruthBSM", "TruthBottom", "TruthTop", "TruthBoson"], prefix=prefix))
     # Some more additions for standard TRUTH3
-    acc.merge(AddBosonsAndDownstreamParticlesCfg())
-    if isEVNT: acc.merge(AddLargeRJetD2Cfg())
+    acc.merge(AddBosonsAndDownstreamParticlesCfg(flags))
+    if isEVNT: acc.merge(AddLargeRJetD2Cfg(flags))
     # Special collection for BSM particles
-    acc.merge(AddBSMAndDownstreamParticlesCfg())
+    acc.merge(AddBSMAndDownstreamParticlesCfg(flags))
     # Special collection for Born leptons
-    acc.merge(AddBornLeptonCollectionCfg())
+    acc.merge(AddBornLeptonCollectionCfg(flags))
     # Special collection for hard scatter (matrix element) - save TWO extra generations of particles
-    acc.merge(AddHardScatterCollectionCfg(2))
+    acc.merge(AddHardScatterCollectionCfg(flags, 2))
     # Energy density for isolation corrections
-    if isEVNT: acc.merge(AddTruthEnergyDensityCfg())
+    if isEVNT: acc.merge(AddTruthEnergyDensityCfg(flags))
 
     return acc
 
-def AddParentAndDownstreamParticlesCfg(generations=1,
+def AddParentAndDownstreamParticlesCfg(flags,
+                                       generations=1,
                                        parents=[6],
                                        prefix='TopQuark',
                                        collection_prefix=None,
@@ -207,7 +208,8 @@ def AddParentAndDownstreamParticlesCfg(generations=1,
     acc = ComponentAccumulator()
     collection_name=collection_prefix+'WithDecay' if collection_prefix is not None else 'Truth'+prefix+'WithDecay'
     # Set up a tool to keep the W/Z/H bosons and all downstream particles
-    collection_maker = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg(name                 ='DFCommon'+prefix+'AndDecaysTool',
+    collection_maker = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg(flags,
+                                                                           name                 ='DFCommon'+prefix+'AndDecaysTool',
                                                                            NewCollectionName    = collection_name,
                                                                            PDGIDsToKeep         = parents,
                                                                            Generations          = generations,
@@ -235,19 +237,23 @@ def AddParentAndDownstreamParticlesCfg(generations=1,
 #                                           rejectHadronChildren=rejectHadronChildren)
 
 # Add W/Z/H bosons and their downstream particles (notice "boson" here does not include photons and gluons)
-def AddBosonsAndDownstreamParticlesCfg(generations=1,
+def AddBosonsAndDownstreamParticlesCfg(flags,
+                                       generations=1,
                                        rejectHadronChildren=False):
     """Add bosons and downstream particles (not photons/gluons)"""
-    return AddParentAndDownstreamParticlesCfg(generations          = generations,
+    return AddParentAndDownstreamParticlesCfg(flags,
+                                              generations          = generations,
                                               parents              = [23,24,25],
                                               prefix               = 'Bosons',
                                               rejectHadronChildren = rejectHadronChildren)
 
 # Add top quark and their downstream particles
-def AddTopQuarkAndDownstreamParticlesCfg(generations=1,
+def AddTopQuarkAndDownstreamParticlesCfg(flags,
+                                         generations=1,
                                          rejectHadronChildren=False):
     """Add top quarks and downstream particles"""
-    return AddParentAndDownstreamParticlesCfg(generations=generations,
+    return AddParentAndDownstreamParticlesCfg(flags,
+                                              generations=generations,
                                               parents=[6],
                                               prefix='TopQuark',
                                               rejectHadronChildren=rejectHadronChildren)
@@ -271,7 +277,7 @@ def AddTopQuarkAndDownstreamParticlesCfg(generations=1,
 #
 
 # Add b/c-hadrons and their downstream particles (immediate and further decay products) in a special collection
-def AddHFAndDownstreamParticlesCfg(ConfigFlags, **kwargs):
+def AddHFAndDownstreamParticlesCfg(flags, **kwargs):
     """Add b/c-hadrons and their downstream particles"""
     kwargs.setdefault("addB",True)
     kwargs.setdefault("addC",True)
@@ -280,7 +286,8 @@ def AddHFAndDownstreamParticlesCfg(ConfigFlags, **kwargs):
     acc = ComponentAccumulator()
     # Set up a tool to keep b- and c-quarks and all downstream particles
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthDecayCollectionMakerCfg
-    DFCommonHFAndDecaysTool = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg( 
+    DFCommonHFAndDecaysTool = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg(
+        flags,
         name=kwargs['prefix']+"DFCommonHFAndDecaysTool",
         NewCollectionName=kwargs['prefix']+"TruthHFWithDecay",
         KeepBHadrons=kwargs['addB'],
@@ -293,13 +300,13 @@ def AddHFAndDownstreamParticlesCfg(ConfigFlags, **kwargs):
 
 
 # Add a one-vertex-per event "primary vertex" container
-def AddPVCollectionCfg(ConfigFlags):
+def AddPVCollectionCfg(flags):
     """Add a one-vertex-per event "primary vertex" container"""
     acc = ComponentAccumulator()
     # Set up a tool to keep the primary vertices
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthPVCollectionMakerCfg
     DFCommonTruthPVCollTool = acc.getPrimaryAndMerge(TruthPVCollectionMakerCfg( 
-        ConfigFlags,
+        flags,
         name="DFCommonTruthPVCollTool",
         NewCollectionName="TruthPrimaryVertices"))
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
@@ -308,12 +315,13 @@ def AddPVCollectionCfg(ConfigFlags):
     return acc
 
 # Add a mini-collection for the hard scatter and N subsequent generations
-def AddHardScatterCollectionCfg(generations=1):
+def AddHardScatterCollectionCfg(flags, generations=1):
     """Add a mini-collection for the hard scatter and N subsequent generations"""
     # Set up a tool to keep the taus and all downstream particles
     acc = ComponentAccumulator()
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import HardScatterCollectionMakerCfg
-    DFCommonHSCollectionTool = acc.getPrimaryAndMerge(HardScatterCollectionMakerCfg(name = "DFCommonHSCollectionTool",
+    DFCommonHSCollectionTool = acc.getPrimaryAndMerge(HardScatterCollectionMakerCfg(flags,
+                                                                                    name = "DFCommonHSCollectionTool",
                                                                                     NewCollectionName = "HardScatter",
                                                                                     Generations        = generations))
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
@@ -322,13 +330,14 @@ def AddHardScatterCollectionCfg(generations=1):
     return acc
 
 # Add navigation decorations on the truth collections
-def AddTruthCollectionNavigationDecorationsCfg(TruthCollections=[], prefix=''):
+def AddTruthCollectionNavigationDecorationsCfg(flags, TruthCollections=[], prefix=''):
     """Tool to add navigation decorations on the truth collections"""
     acc = ComponentAccumulator() 
     if len(TruthCollections)==0: return
     # Set up a tool to add the navigation decorations
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthNavigationDecoratorCfg
-    DFCommonTruthNavigationDecorator = acc.getPrimaryAndMerge(TruthNavigationDecoratorCfg(name             = prefix+'DFCommonTruthNavigationDecorator',
+    DFCommonTruthNavigationDecorator = acc.getPrimaryAndMerge(TruthNavigationDecoratorCfg(flags,
+                                                                                          name             = prefix+'DFCommonTruthNavigationDecorator',
                                                                                           InputCollections = TruthCollections))
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     acc.addEventAlgo(CommonAugmentation(prefix+"MCTruthNavigationDecoratorKernel",
@@ -336,12 +345,13 @@ def AddTruthCollectionNavigationDecorationsCfg(TruthCollections=[], prefix=''):
     return acc
 
 # Add BSM particles and their downstream particles (immediate and further decay products) in a special collection
-def AddBSMAndDownstreamParticlesCfg(generations=-1):
+def AddBSMAndDownstreamParticlesCfg(flags, generations=-1):
     """Add BSM particles and their downstream particles in a special collection"""
     acc = ComponentAccumulator()
     # Set up a tool to keep the taus and all downstream particles
      
-    DFCommonBSMAndDecaysTool = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg(name              = "DFCommonBSMAndDecaysTool",
+    DFCommonBSMAndDecaysTool = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg(flags,
+                                                                                   name              = "DFCommonBSMAndDecaysTool",
                                                                                    NewCollectionName = "TruthBSMWithDecay",
                                                                                    KeepBSM           = True,
                                                                                    Generations       = generations))
@@ -351,23 +361,25 @@ def AddBSMAndDownstreamParticlesCfg(generations=-1):
     return acc
 
 # Add a mini-collection for the born leptons
-def AddBornLeptonCollectionCfg():
+def AddBornLeptonCollectionCfg(flags):
     """Add born leptons as a mini collection"""
     acc = ComponentAccumulator()
     # Set up a tool to keep the taus and all downstream particles
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthBornLeptonCollectionMakerCfg
-    DFCommonBornLeptonCollTool = acc.getPrimaryAndMerge(TruthBornLeptonCollectionMakerCfg(name              = "DFCommonBornLeptonCollTool",
+    DFCommonBornLeptonCollTool = acc.getPrimaryAndMerge(TruthBornLeptonCollectionMakerCfg(flags,
+                                                                                          name              = "DFCommonBornLeptonCollTool",
                                                                                           NewCollectionName ="BornLeptons"))
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     acc.addEventAlgo(CommonAugmentation("MCTruthCommonBornLeptonsKernel", AugmentationTools = [DFCommonBornLeptonCollTool] ))
     return acc
 
-def AddLargeRJetD2Cfg():
+def AddLargeRJetD2Cfg(flags):
     """Add large-R jet D2 variable"""
     #Extra classifier for D2 variable
     acc = ComponentAccumulator()
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthD2DecoratorCfg
-    theTruthD2Decorator = acc.getPrimaryAndMerge(TruthD2DecoratorCfg(name            = "TruthD2Decorator",
+    theTruthD2Decorator = acc.getPrimaryAndMerge(TruthD2DecoratorCfg(flags,
+                                                                     name            = "TruthD2Decorator",
                                                                      JetContainerKey = "AntiKt10TruthSoftDropBeta100Zcut10Jets",
                                                                      DecorationName  = "D2"))
     TruthD2DecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
@@ -375,7 +387,7 @@ def AddLargeRJetD2Cfg():
     return acc
 
 # Truth energy density tools
-def AddTruthEnergyDensityCfg():
+def AddTruthEnergyDensityCfg(flags):
     """Truth energy density tools"""
     acc = ComponentAccumulator()
     from EventShapeTools.EventDensityConfig import configEventDensityTool
@@ -414,7 +426,7 @@ def AddTruthEnergyDensityCfg():
 
 
 # Sets up modifiers to move pointers to old truth collections to new mini truth collections
-def AddMiniTruthCollectionLinksCfg(ConfigFlags, **kwargs):
+def AddMiniTruthCollectionLinksCfg(flags, **kwargs):
     """Tool to move pointers to new mini truth collections"""
     acc = ComponentAccumulator()
     kwargs.setdefault("doElectrons",True)
@@ -424,21 +436,21 @@ def AddMiniTruthCollectionLinksCfg(ConfigFlags, **kwargs):
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthLinkRepointToolCfg
     if kwargs['doElectrons']:
         electron_relink = acc.getPrimaryAndMerge(TruthLinkRepointToolCfg(
-            ConfigFlags,
+            flags,
             name="ElMiniCollectionTruthLinkTool",
             RecoCollection="Electrons", 
             TargetCollections=["TruthMuons","TruthPhotons","TruthElectrons"]))
         aug_tools += [ electron_relink ]
     if kwargs['doPhotons']:
         photon_relink = acc.getPrimaryAndMerge(TruthLinkRepointToolCfg(
-            ConfigFlags,
+            flags,
             name="PhMiniCollectionTruthLinkTool",
             RecoCollection="Photons", 
             TargetCollections=["TruthMuons","TruthPhotons","TruthElectrons"]))
         aug_tools += [ photon_relink ]
     if kwargs['doMuons']:
         muon_relink = acc.getPrimaryAndMerge(TruthLinkRepointToolCfg(
-            ConfigFlags,
+            flags,
             name="MuMiniCollectionTruthLinkTool",
             RecoCollection="Muons", 
             TargetCollections=["TruthMuons","TruthPhotons","TruthElectrons"]))

@@ -5,7 +5,7 @@ from sys import exit
 
 from WorkflowTestRunner.ScriptUtils import setup_logger, setup_parser, get_test_setup, \
     run_tests, run_checks, run_summary
-from WorkflowTestRunner.StandardTests import DerivationTest, QTest, SimulationTest
+from WorkflowTestRunner.StandardTests import DerivationTest, GenerationTest, QTest, SimulationTest
 from WorkflowTestRunner.Test import WorkflowRun, WorkflowType
 
 
@@ -18,12 +18,13 @@ def main():
     parser = setup_parser()
     options = parser.parse_args()
     setup = get_test_setup(name, options, log)
-    # disable output checks for Run 4
-    setup.disable_output_checks = True
 
     # Define which tests to run
     tests_to_run = []
-    if options.simulation:
+    if options.generation:
+        dsid = "421356" if not options.dsid else options.dsid
+        tests_to_run.append(GenerationTest(f"gen{dsid}", run, WorkflowType.Generation, ["generate"], setup, options.extra_args))
+    elif options.simulation:
         tests_to_run.append(SimulationTest("s3761", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, options.extra_args))
     elif options.overlay:
         log.error("Overlay not supported yet")
@@ -34,7 +35,8 @@ def main():
     elif options.reco:
         tests_to_run.append(QTest("q447", run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, options.extra_args))
     elif options.derivation:
-        tests_to_run.append(DerivationTest("p5205", run, WorkflowType.Derivation, ["Derivation"], setup, options.extra_args))
+        test_id = "MC_PHYS" if not options.ami_tag else options.ami_tag
+        tests_to_run.append(DerivationTest(test_id, run, WorkflowType.Derivation, ["Derivation"], setup, options.extra_args))
     else:
         if setup.parallel_execution:
             log.error("Parallel execution not supported for the default Phase-II workflow")

@@ -1,12 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaCommon.Configurable import Configurable
 import unittest
 
-Configurable.configurableRun3Behavior=1
 class TestDataDependenciesCollection( unittest.TestCase ):
     def setUp(self):
         ca = ComponentAccumulator()

@@ -1,17 +1,21 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef GENERATORFILTERS_TAUFILTER_H
 #define GENERATORFILTERS_TAUFILTER_H
 
 #include "GeneratorModules/GenFilter.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 #include "CLHEP/Vector/LorentzVector.h"
-
-class IAtRndmGenSvc;
 
 /// @author Michael Heldmann, Jan 2003
 /// updated by Xin Chen, Nov. 2016
 /// updated by Simon Arnling B????th, Nov. 2017
+
+namespace CLHEP {
+  class HepRandomEngine;
+}
 
 class TauFilter : public GenFilter {
 public:
@@ -25,7 +29,10 @@ public:
 
 private:
 
-  ServiceHandle<IAtRndmGenSvc> m_rand; // Random number generator
+  CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName,
+                                          const EventContext& ctx) const;
+
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};// Random number generator
 
   int m_Ntau;
   double m_etaMaxe;

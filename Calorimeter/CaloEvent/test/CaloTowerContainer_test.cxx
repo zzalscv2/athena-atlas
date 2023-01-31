@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CaloTowerContainer_test.cxx
@@ -17,7 +17,7 @@
 #include <cstdarg>
 
 
-typedef CaloTowerContainer::index_t index_t;
+using index_t = CaloTowerContainer::index_t;
 
 
 bool comp (double x1, double x2, double thresh=1e-6)
@@ -81,7 +81,7 @@ void test1()
   footower.setEta (-1);
   footower.setPhi (-1);
   assert (tc1.getTowerIndex (tc1.getTower (10)) == 10);
-  assert (tc1.getTowerIndex (0) == tc1.flagOutOfRange());
+  assert (tc1.getTowerIndex (nullptr) == tc1.flagOutOfRange());
   assert (tc1.getTowerIndex (&footower) == tc1.flagOutOfRange());
 
   assert (tc1.getTowerIndex ((index_t)2, (index_t)3) == 12);
@@ -90,7 +90,7 @@ void test1()
   assert (tc1.getTowerIndex (0.15, -0.5) == tc1.flagOutOfRange());
 
   assert (tc1.getTowerEtaIndex (tc1.getTower (2, 3)) == 2);
-  assert (tc1.getTowerEtaIndex ((CaloTower*)0) == tc1.flagOutOfRange());
+  assert (tc1.getTowerEtaIndex ((CaloTower*)nullptr) == tc1.flagOutOfRange());
   assert (tc1.getTowerEtaIndex (&footower) == tc1.flagOutOfRange());
   assert (tc1.getTowerEtaIndex (0.15) == 2);
   assert (tc1.getTowerEtaIndex (2.0) == tc1.flagOutOfRange());
@@ -99,7 +99,7 @@ void test1()
   //assert (tc1.getTowerEtaIndex ((index_t)200) == tc1.flagOutOfRange());
 
   assert (tc1.getTowerPhiIndex (tc1.getTower (2, 3)) == 3);
-  assert (tc1.getTowerPhiIndex ((CaloTower*)0) == tc1.flagOutOfRange());
+  assert (tc1.getTowerPhiIndex ((CaloTower*)nullptr) == tc1.flagOutOfRange());
   assert (tc1.getTowerPhiIndex (&footower) == tc1.flagOutOfRange());
   assert (tc1.getTowerPhiIndex (0.5) == 3);
   assert (tc1.getTowerPhiIndex (3.0) == tc1.flagOutOfRange());
@@ -112,7 +112,7 @@ void test1()
   assert (tc1.getTowerIndices (tc1.getTower (2, 3), index_eta, index_phi));
   assert (index_eta == 2);
   assert (index_phi == 3);
-  assert (!tc1.getTowerIndices (0, index_eta, index_phi));
+  assert (!tc1.getTowerIndices (nullptr, index_eta, index_phi));
   assert (!tc1.getTowerIndices (&footower, index_eta, index_phi));
 
   index_eta = 0;
@@ -125,43 +125,43 @@ void test1()
 
   assert (comp (tc1.getTower (2, 3)->eta(), 0.15));
   assert (comp (tc1.getTower (2, 3)->phi(), 0.5));
-  assert (tc1.getTower (0, 3) == 0);
-  assert (tc1.getTower (2, 12) == 0);
+  assert (tc1.getTower (0, 3) == nullptr);
+  assert (tc1.getTower (2, 12) == nullptr);
 
   assert (comp (tc1.getTower ((index_t)2, (index_t)3)->eta(), 0.15));
   assert (comp (tc1.getTower ((index_t)2, (index_t)3)->phi(), 0.5));
-  assert (tc1.getTower ((index_t)0, (index_t)3) == 0);
-  assert (tc1.getTower ((index_t)2, (index_t)12) == 0);
+  assert (tc1.getTower ((index_t)0, (index_t)3) == nullptr);
+  assert (tc1.getTower ((index_t)2, (index_t)12) == nullptr);
 
   assert (comp (tc1.getTower (0.15, 0.5)->eta(), 0.15));
   assert (comp (tc1.getTower (0.15, 0.5)->phi(), 0.5));
-  assert (tc1.getTower (-0.5, 0.5) == 0);
-  assert (tc1.getTower (0.15, 3.0) == 0);
+  assert (tc1.getTower (-0.5, 0.5) == nullptr);
+  assert (tc1.getTower (0.15, 3.0) == nullptr);
 
   assert (comp (tc1.getTower (12)->eta(), 0.15));
   assert (comp (tc1.getTower (12)->phi(), 0.5));
-  assert (tc1.getTower (200) == 0);
+  assert (tc1.getTower (200) == nullptr);
 
   const CaloTowerContainer& ctc1 = tc1;
 
   assert (comp (ctc1.getTower (2, 3)->eta(), 0.15));
   assert (comp (ctc1.getTower (2, 3)->phi(), 0.5));
-  assert (ctc1.getTower (0, 3) == 0);
-  assert (ctc1.getTower (2, 12) == 0);
+  assert (ctc1.getTower (0, 3) == nullptr);
+  assert (ctc1.getTower (2, 12) == nullptr);
 
   assert (comp (ctc1.getTower ((index_t)2, (index_t)3)->eta(), 0.15));
   assert (comp (ctc1.getTower ((index_t)2, (index_t)3)->phi(), 0.5));
-  assert (ctc1.getTower ((index_t)0, (index_t)3) == 0);
-  assert (ctc1.getTower ((index_t)2, (index_t)12) == 0);
+  assert (ctc1.getTower ((index_t)0, (index_t)3) == nullptr);
+  assert (ctc1.getTower ((index_t)2, (index_t)12) == nullptr);
 
   assert (comp (ctc1.getTower (0.15, 0.5)->eta(), 0.15));
   assert (comp (ctc1.getTower (0.15, 0.5)->phi(), 0.5));
-  assert (ctc1.getTower (-0.5, 0.5) == 0);
-  assert (ctc1.getTower (0.15, 3.0) == 0);
+  assert (ctc1.getTower (-0.5, 0.5) == nullptr);
+  assert (ctc1.getTower (0.15, 3.0) == nullptr);
 
   assert (comp (ctc1.getTower (12)->eta(), 0.15));
   assert (comp (ctc1.getTower (12)->phi(), 0.5));
-  assert (ctc1.getTower (200) == 0);
+  assert (ctc1.getTower (200) == nullptr);
 
   assert (tc1.flagOutOfRange() == (index_t)-1);
   assert (tc1.isOutOfRange(tc1.flagOutOfRange()));
@@ -241,7 +241,7 @@ void test2()
   assert (tc1.getTower (2, 3) != tc2.getTower (2, 3));
 
   CaloTowerContainer tc4 (CaloTowerSeg (10, 10, 0, 1, 0, 2), true);
-  assert (tc4.size() == 0);
+  assert (tc4.empty());
 }
 
 

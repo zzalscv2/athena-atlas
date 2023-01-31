@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -24,11 +24,15 @@ inline FlexErrArray<T>::FlexErrArray( unsigned nbins )
   assert(sizeof(T)>sizeof(unsigned short));
   if (small()) {
     memset(groups(),0,nGroupsNeeded(nbins)*sizeof(void*));
+    // cppcheck-suppress assertWithSideEffect
     assert(!groups()[0]);
+    // cppcheck-suppress assertWithSideEffect
     assert(!groups()[nGroupsNeeded(nbins)-1]);
   } else {
     memset(superGroups(),0,nSuperGroups(nbins)*sizeof(void*));
+    // cppcheck-suppress assertWithSideEffect
     assert(!superGroups()[0]);
+    // cppcheck-suppress assertWithSideEffect
     assert(!superGroups()[nSuperGroups(nbins)-1]);
   }
 }
@@ -85,7 +89,7 @@ inline void FlexErrArray<T>::copyContents(T*__restrict__ cont,double*__restrict_
   //Process group for group:
   if (small()) {
     const unsigned n(nGroupsNeeded(m_nbins));
-    const FlexErrArrayGroup<T> ** grps(groups());
+    const FlexErrArrayGroup<T> * const* grps(groups());
     for (unsigned igr = 0; igr < n; ++igr) {
       const FlexErrArrayGroup<T> *gr = grps[igr];
       if (gr) {
@@ -96,9 +100,9 @@ inline void FlexErrArray<T>::copyContents(T*__restrict__ cont,double*__restrict_
     }
   } else {
     unsigned nsuper(nSuperGroups(m_nbins));
-    const FlexErrArrayGroup<T> *** supergroups(superGroups());
+    const FlexErrArrayGroup<T> * const* const* supergroups(superGroups());
     for (unsigned isuper = 0; isuper<nsuper;++isuper) {
-      const FlexErrArrayGroup<T> ** supergroup = supergroups[isuper];
+      const FlexErrArrayGroup<T> * const* supergroup = supergroups[isuper];
       if (supergroup) {
 	unsigned upper(isuper+1==nsuper?entriesInSuperGroup(isuper):FLEX1DERRARRAY_NGROUPSPERINDEX);
 	for (unsigned igr = 0; igr<upper;++igr) {
@@ -135,7 +139,7 @@ inline double FlexErrArray<T>::Integral() const
   double result(0);
   if (small()) {
     const unsigned n(nGroupsNeeded(m_nbins));
-    const FlexErrArrayGroup<T> ** grps(groups());
+    const FlexErrArrayGroup<T> * const* grps(groups());
     for (unsigned igr = 0; igr < n; ++igr) {
       const FlexErrArrayGroup<T> *gr = grps[igr];
       if (gr)
@@ -143,9 +147,9 @@ inline double FlexErrArray<T>::Integral() const
     }
   } else {
     unsigned nsuper(nSuperGroups(m_nbins));
-    const FlexErrArrayGroup<T> *** supergroups(superGroups());
+    const FlexErrArrayGroup<T> * const* const* supergroups(superGroups());
     for (unsigned isuper = 0; isuper<nsuper;++isuper) {
-      const FlexErrArrayGroup<T> ** supergroup = supergroups[isuper];
+      const FlexErrArrayGroup<T> * const* supergroup = supergroups[isuper];
       if (supergroup) {
 	unsigned upper(isuper+1==nsuper?entriesInSuperGroup(isuper):FLEX1DERRARRAY_NGROUPSPERINDEX);
 	for (unsigned igr = 0; igr<upper;++igr) {
@@ -232,7 +236,7 @@ inline void FlexErrArray<T>::setBinContent(unsigned bin, const T& content)
   assert(bin<m_nbins);
   FlexErrArrayGroup<T> * gr;
   if (content==0) {
-    gr = const_cast<FlexErrArrayGroup<T> *>(getGroupNoAlloc(bin));
+    gr = getGroupNoAlloc(bin);
     if (!gr)
       return;
   } else {
@@ -254,7 +258,7 @@ inline void FlexErrArray<T>::setBinError(unsigned bin, const double& error )
 #endif
   FlexErrArrayGroup<T> * gr;
   if (error==0) {
-    gr = const_cast<FlexErrArrayGroup<T> *>(getGroupNoAlloc(bin));
+    gr = getGroupNoAlloc(bin);
     if (!gr)
       return;
   } else {
@@ -277,7 +281,7 @@ inline void FlexErrArray<T>::setBinContentAndError(unsigned bin, const T& conten
   FlexErrArrayGroup<T> * gr;
   if (content==0&&error==0) {
     //Special case: Maybe we do not need an allocation:
-    gr = const_cast<FlexErrArrayGroup<T> *>(getGroupNoAlloc(bin));
+    gr = getGroupNoAlloc(bin);
     if (!gr)
       return;
   } else {

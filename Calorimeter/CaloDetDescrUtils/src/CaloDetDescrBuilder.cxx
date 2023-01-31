@@ -787,3 +787,9 @@ std::unique_ptr<CaloDetDescrManager> buildCaloDetDescr(ISvcLocator* svcLocator
 
   return caloMgr;
 }
+
+std::unique_ptr<CaloDetDescrManager> buildCaloDetDescrNoAlign(ISvcLocator* svcLocator
+							      , IMessageSvc* msgSvc)
+{
+  return buildCaloDetDescr(svcLocator,msgSvc,nullptr,nullptr);
+}

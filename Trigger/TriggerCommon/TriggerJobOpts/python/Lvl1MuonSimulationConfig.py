@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -22,8 +22,8 @@ def TMDBConfig(flags):
     from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
     acc.merge(TileCablingSvcCfg(flags))
 
-    from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-    emScaleTool = acc.popToolsAndMerge( TileCondToolEmscaleCfg(flags) )
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     tmdbAlg = CompFactory.TileMuonReceiverDecision('TileMuonReceiverDecision'
                                                    , TileRawChannelContainer = "MuRcvRawChCnt" # input
@@ -37,8 +37,7 @@ def TMDBConfig(flags):
                                                    # run 3 thresholds
                                                    , MuonReceiverEneThreshCellD5 = 500
                                                    , MuonReceiverEneThreshCellD6 = 500
-                                                   , MuonReceiverEneThreshCellD5andD6 = 500
-                                                   , TileCondToolEmscale = emScaleTool)
+                                                   , MuonReceiverEneThreshCellD5andD6 = 500)
     acc.addEventAlgo(tmdbAlg)
     return acc
 
@@ -198,7 +197,7 @@ def MuonRdoToMuonDigitToolCfg(flags, name="MuonRdoToMuonDigitTool", **kwargs ):
     kwargs.setdefault( "stgcRdoDecoderTool", result.popToolsAndMerge(STgcRdoDecoderCfg(flags))
                          if flags.Detector.GeometrysTGC else "" )
     kwargs.setdefault("mmRdoDecoderTool", result.popToolsAndMerge(MMRdoDecoderCfg(flags))
-                         if flags.Detector.GeometryMM else "" )    
+                         if flags.Detector.GeometryMM else "" )
     kwargs.setdefault("mdtRdoDecoderTool", result.popToolsAndMerge(MdtRdoDecoderCfg(flags)))
     the_tool = CompFactory.MuonRdoToMuonDigitTool (name, **kwargs)
     result.setPrivateTools(the_tool)
@@ -246,7 +245,7 @@ def MuonRdo2DigitConfig(flags):
                                                                  RpcDigitContainer = "RPC_DIGITS_L1",
                                                                  TgcDigitContainer = "TGC_DIGITS_L1"))
 
-   
+
 
     acc.addPublicTool(MuonRdoToMuonDigitTool)
     rdo2digit = CompFactory.MuonRdoToMuonDigit( "MuonRdoToMuonDigit",
@@ -339,7 +338,14 @@ def TGCTriggerConfig(flags):
     if flags.Trigger.L1MuonSim.EmulateNSW:
         tgcAlg.MuctpiPhase1LocationTGC = "L1MuctpiStoreTGCint"
 
+    if flags.Input.Format is Format.BS:
+        from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
+        readBSConfig = ByteStreamReadCfg(flags, ['ByteStreamMetadataContainer/ByteStreamMetadata'])
+        acc.merge(readBSConfig)
+    else:
+        tgcAlg.ByteStreamMetadataRHKey = ''
     acc.addEventAlgo(tgcAlg)
+
     from PathResolver import PathResolver
     bwCW_Run3_filePath=PathResolver.FindCalibFile("TrigT1TGC_CW/BW/CW_BW_Run3.v01.db")
     acc.merge(addFolders(flags, '<db>sqlite://;schema={0};dbname=OFLP200</db> /TGC/TRIGGER/CW_BW_RUN3'.format(bwCW_Run3_filePath),
@@ -375,8 +381,12 @@ def MuctpiConfig(flags):
                                                                        TGCRecRoiTool = tgcRecRoiTool)
     muctpiTool = CompFactory.LVL1MUCTPIPHASE1.MUCTPI_AthTool(name="MUCTPI_AthTool",
                                                               MuCTPICTPLocation = 'L1MuCTPItoCTPLocation',
-                                                              OverlapStrategyName = 'LUT',
-                                                              LUTXMLFile = 'TrigConfMuctpi/overlapRun3_20201214.xml',
+                                                              OverlapStrategyName = flags.Trigger.MUCTPI.OverlapStrategy,
+                                                              LUTXMLFile = flags.Trigger.MUCTPI.LUTXMLFile,
+                                                              BarrelRoIFile = flags.Trigger.MUCTPI.BarrelRoIFile,
+                                                              EndcapForwardRoIFile = flags.Trigger.MUCTPI.EndcapForwardRoIFile,
+                                                              Side0LUTFile = flags.Trigger.MUCTPI.Side0LUTFile,
+                                                              Side1LUTFile = flags.Trigger.MUCTPI.Side1LUTFile,
                                                               InputSource = 'DIGITIZATION',
                                                               RPCRecRoiTool = rpcRecRoiTool,
                                                               TGCRecRoiTool = tgcRecRoiTool,
@@ -407,7 +417,8 @@ def Lvl1MuonSimulationCfg(flags):
 
 if __name__ == "__main__":
     import sys
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.merge.RDO.e4993_s3214_r11315/RDO.17533168._000001.pool.root.1']
     flags.Common.isOnline=False
     flags.Exec.MaxEvents=25
@@ -418,6 +429,7 @@ if __name__ == "__main__":
     flags.Scheduler.ShowDataFlow=True
     flags.Trigger.enableL1MuonPhase1=True
     flags.Trigger.triggerMenuSetup='Dev_pp_run3_v1'
+    flags.fillFromArgs()
     flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg

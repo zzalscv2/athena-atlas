@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured TileHid2ReSrcIDCondAlg conditions algorithm"""
 
@@ -42,7 +42,7 @@ def TileHid2RESrcIDCondAlgCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import INFO
@@ -50,17 +50,18 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(INFO)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    cfg.merge( ByteStreamReadCfg(ConfigFlags) )
+    cfg.merge( ByteStreamReadCfg(flags) )
 
-    cfg.merge( TileHid2RESrcIDCondAlgCfg(ConfigFlags, ForHLT=True) )
+    cfg.merge( TileHid2RESrcIDCondAlgCfg(flags, ForHLT=True) )
 
     cfg.printConfig(withDetails = True, summariseProps = True)
     cfg.store( open('TileHid2ReSrcIDCondAlg.pkl','wb') )

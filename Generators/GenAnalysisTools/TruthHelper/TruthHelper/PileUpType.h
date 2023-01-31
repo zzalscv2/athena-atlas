@@ -34,7 +34,7 @@ class PileUpType {
 public:
 
     /**  need to pass the McEvntCollection
-	this class does not own this collection and will NOT delete it at the end */
+    this class does not own this collection and will NOT delete it at the end */
     PileUpType(const McEventCollection * collection);
 
 
@@ -77,7 +77,7 @@ public:
     /** return the MC events in [-inf,-2BC] and [2BC,+inf], excluding the cavern background and the beam halo */
     template<class Selector>
     void particles_outside_two_bunch_crossings( std::vector<HepMC::ConstGenParticlePtr>& particleList,
-                                                const Selector& select ) const;
+            const Selector& select ) const;
 
     /** return the MC events of the cavern background */
     template<class Selector>

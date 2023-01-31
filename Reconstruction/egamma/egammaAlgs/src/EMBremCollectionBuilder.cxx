@@ -326,8 +326,37 @@ EMBremCollectionBuilder::copyOverInfo(xAOD::TrackParticle& created,
     }
   }
 
+  // Copy shared hit content from original track
+  uint8_t dummy(0);
+
+  uint8_t nPixSplitHits =
+    original.summaryValue(dummy, xAOD::numberOfPixelSplitHits) ? dummy : 0;
+  created.setSummaryValue(nPixSplitHits, xAOD::numberOfPixelSplitHits);
+  uint8_t nInPixSplitHits =
+    original.summaryValue(dummy, xAOD::numberOfInnermostPixelLayerSplitHits) ? dummy : 0;
+  created.setSummaryValue(nInPixSplitHits, xAOD::numberOfInnermostPixelLayerSplitHits);
+  uint8_t nNInPixSplitHits =
+    original.summaryValue(dummy, xAOD::numberOfNextToInnermostPixelLayerSplitHits) ? dummy : 0;
+  created.setSummaryValue(nNInPixSplitHits, xAOD::numberOfNextToInnermostPixelLayerSplitHits);
+
+  uint8_t nPixSharedHits =
+    original.summaryValue(dummy, xAOD::numberOfPixelSharedHits) ? dummy : 0;
+  created.setSummaryValue(nPixSharedHits, xAOD::numberOfPixelSharedHits);
+  uint8_t nInPixSharedHits =
+    original.summaryValue(dummy, xAOD::numberOfInnermostPixelLayerSharedHits) ? dummy : 0;
+  created.setSummaryValue(nInPixSharedHits, xAOD::numberOfInnermostPixelLayerSharedHits);
+  uint8_t nNInPixSharedHits =
+    original.summaryValue(dummy, xAOD::numberOfNextToInnermostPixelLayerSharedHits) ? dummy : 0;
+  created.setSummaryValue(nNInPixSharedHits, xAOD::numberOfNextToInnermostPixelLayerSharedHits);
+  uint8_t nSCTSharedHits =
+    original.summaryValue(dummy, xAOD::numberOfSCTSharedHits) ? dummy : 0;
+  created.setSummaryValue(nSCTSharedHits, xAOD::numberOfSCTSharedHits);
+  uint8_t nTRTSharedHits =
+    original.summaryValue(dummy, xAOD::numberOfTRTSharedHits) ? dummy : 0;
+  created.setSummaryValue(nTRTSharedHits, xAOD::numberOfTRTSharedHits);
+
+
   if (isRefitted) {
-    uint8_t dummy(0);
     if (m_doPix) {
       // copy over dead sensors
       uint8_t deadPixel =
@@ -395,4 +424,5 @@ EMBremCollectionBuilder::copyOverInfo(xAOD::TrackParticle& created,
       created.setSummaryValue(nTRTHolesRefitted, xAOD::numberOfTRTHoles);
     }
   }
+
 }

@@ -68,10 +68,10 @@ class BCM_DigitizationTool : public PileUpToolBase {
   std::bitset<64> applyThreshold(int chan, std::vector<float> analog);
 
   /** Apply hole and spike filter to digital waveform */
-  void applyFilter(std::bitset<64> &digital);
+  static void applyFilter(std::bitset<64> &digital);
 
   /** Find first two pulses on digital waveform */
-  void findPulses(std::bitset<64> digital, int &p1x, int &p1w, int &p2x, int &p2w);
+  static void findPulses(std::bitset<64> digital, int &p1x, int &p1w, int &p2x, int &p2w);
 
   /** Create raw data object and put it in the container */
   void fillRDO(unsigned int chan, int p1x, int p1w, int p2x, int p2w);

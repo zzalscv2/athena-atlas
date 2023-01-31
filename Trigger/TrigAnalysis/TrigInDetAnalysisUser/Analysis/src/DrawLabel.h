@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Sun 11 Nov 2012 01:18:14 GMT 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -57,8 +57,8 @@ private:
 
 };
 
-inline std::ostream& operator<<( std::ostream& s, const DrawLabel& _d ) { 
-  return s << _d.text();
+inline std::ostream& operator<<( std::ostream& s, const DrawLabel& d ) {
+  return s << d.text();
 }
 
 

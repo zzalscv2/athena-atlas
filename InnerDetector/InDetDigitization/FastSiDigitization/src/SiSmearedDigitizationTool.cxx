@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////
 // SiSmearedDigitizationTool.cxx
 //   Implementation file for class SiSmearedDigitizationTool
 ////////////////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
 
 // Pixel digitization includes
 #include "FastSiDigitization/SiSmearedDigitizationTool.h"
@@ -22,6 +21,7 @@
 #include "InDetSimData/InDetSimDataCollection.h"
 
 // Random numbers
+#include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGauss.h"
@@ -65,11 +65,8 @@ using namespace InDetDD;
 SiSmearedDigitizationTool::SiSmearedDigitizationTool(const std::string &type, const std::string &name,
                                                      const IInterface* parent):
   PileUpToolBase(type, name, parent),
-  m_thpcsi(nullptr),
-  m_rndmSvc("AtRndmGenSvc",name),
   m_pixel_ID(nullptr),
   m_sct_ID(nullptr),
-  m_randomEngine(nullptr),
   m_randomEngineName("SiSmearedDigitization"),
   m_pitch_X(0),
   m_pitch_Y(0),
@@ -118,7 +115,6 @@ SiSmearedDigitizationTool::SiSmearedDigitizationTool(const std::string &type, co
   m_Err_x_SCT(0),
   m_Err_y_SCT(0)
 {
-  declareProperty("RndmSvc",                      m_rndmSvc, "Random Number Service used in SCT & Pixel digitization" );
   declareProperty("RndmEngine",                   m_randomEngineName, "Random engine name");
   declareProperty("InputObjectName",              m_inputObjectName="PixelHits", "Input Object name" );
   declareProperty("pitch_X",                      m_pitch_X);
@@ -166,14 +162,7 @@ StatusCode SiSmearedDigitizationTool::initialize()
   ATH_CHECK(m_pixelDetEleCollKey.initialize(m_SmearPixel));
   ATH_CHECK(m_SCTDetEleCollKey.initialize(not m_SmearPixel));
 
-  //Get own engine with own seeds:
-  m_randomEngine = m_rndmSvc->GetEngine(m_randomEngineName);
-  if (!m_randomEngine) {
-    ATH_MSG_ERROR( "Could not get random engine '" << m_randomEngineName << "'" );
-    return StatusCode::FAILURE;
-  }
-
-  if (m_inputObjectName=="")
+  if (m_inputObjectName.empty())
     {
       ATH_MSG_FATAL ( "Property InputObjectName not set !" );
       return StatusCode::FAILURE;
@@ -278,7 +267,6 @@ StatusCode SiSmearedDigitizationTool::prepareEvent(const EventContext& /*ctx*/, 
   ATH_MSG_DEBUG( "--- SiSmearedDigitizationTool: in pixel prepareEvent() ---" );
 
   m_siHitCollList.clear();
-  m_thpcsi = new TimedHitCollection<SiHit>();
   m_HardScatterSplittingSkipper = false;
 
   return StatusCode::SUCCESS;
@@ -300,7 +288,7 @@ StatusCode SiSmearedDigitizationTool::processBunchXing(int bunchXing,
 
   if (!(m_mergeSvc->retrieveSubSetEvtData(m_inputObjectName, hitCollList, bunchXing,
                                           bSubEvents, eSubEvents).isSuccess()) &&
-      hitCollList.size() == 0) {
+      hitCollList.empty()) {
     ATH_MSG_ERROR("Could not fill TimedHitCollList");
     return StatusCode::FAILURE;
   } else {
@@ -319,7 +307,6 @@ StatusCode SiSmearedDigitizationTool::processBunchXing(int bunchXing,
     ATH_MSG_VERBOSE("time index info. time: " << timeIndex.time()
                     << " index: " << timeIndex.index()
                     << " type: " << timeIndex.type());
-    m_thpcsi->insert(timeIndex, siHitColl);
     m_siHitCollList.push_back(siHitColl);
   }
 
@@ -402,7 +389,7 @@ StatusCode SiSmearedDigitizationTool::processAllSubEvents(const EventContext& ct
   //this is a list<pair<time_t, DataLink<SCTUncompressedHitCollection> > >
   TimedHitCollList hitCollList;
   unsigned int numberOfSimHits(0);
-  if ( !(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSimHits).isSuccess()) && hitCollList.size()==0 ) {
+  if ( !(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSimHits).isSuccess()) && hitCollList.empty() ) {
     ATH_MSG_ERROR ( "Could not fill TimedHitCollList" );
     return StatusCode::FAILURE;
   } else {
@@ -427,10 +414,9 @@ StatusCode SiSmearedDigitizationTool::processAllSubEvents(const EventContext& ct
     ATH_MSG_DEBUG ( "SiHitCollection found with " << p_collection->size() << " hits" );
     ++iColl;
   }
-  m_thpcsi = &thpcsi;
 
   // Process the Hits straw by straw: get the iterator pairs for given straw
-  if(this->digitize(ctx).isFailure()) {
+  if(this->digitize(ctx, thpcsi).isFailure()) {
     ATH_MSG_FATAL ( "digitize method failed!" );
     return StatusCode::FAILURE;
   }
@@ -732,8 +718,15 @@ StatusCode SiSmearedDigitizationTool::mergeClusters(SCT_detElement_RIO_map * clu
   return StatusCode::SUCCESS;
 }
 
-StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx)
+StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx,
+                                               TimedHitCollection<SiHit>& thpcsi)
 {
+  // Set the RNG to use for this event.
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomEngineName);
+  const std::string rngName = name()+m_randomEngineName;
+  rngWrapper->setSeed( rngName, ctx );
+  CLHEP::HepRandomEngine *rndmEngine = rngWrapper->getEngine(ctx);
+
   ATH_MSG_DEBUG( "--- SiSmearedDigitizationTool: in SiSmearedDigizationTool::digitize() ---" );
 
   // Get PixelDetectorElementCollection
@@ -765,7 +758,7 @@ StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx)
     m_sctClusterMap = new SCT_detElement_RIO_map;
   }
 
-  while (m_thpcsi->nextDetectorElement(i, e)) {
+  while (thpcsi.nextDetectorElement(i, e)) {
 
     while (i != e) {
       m_useDiscSurface = false;
@@ -943,13 +936,13 @@ StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx)
       int elementY = timesY+1;
 
       if(m_SmearPixel) {
-        if (CLHEP::RandFlat::shoot(m_randomEngine, 0.0, 1.0) < ProbY) { // number of crossed pixel is (timesY+1)+1
+        if (CLHEP::RandFlat::shoot(rndmEngine, 0.0, 1.0) < ProbY) { // number of crossed pixel is (timesY+1)+1
           sigmaY = (double)(timesY+2)*m_pitch_Y/sqrt(12.);
           elementY++;
         } else // number of crossed pixel is (timesY+1)
           sigmaY = (double)(timesY+1)*m_pitch_Y/sqrt(12.);
 
-        if (CLHEP::RandFlat::shoot(m_randomEngine, 0.0, 1.0) < ProbX) { // number of crossed pixel is (timesY+1)+1
+        if (CLHEP::RandFlat::shoot(rndmEngine, 0.0, 1.0) < ProbX) { // number of crossed pixel is (timesY+1)+1
           sigmaX = (double)(timesX+2)*m_pitch_X/sqrt(12.);
           elementX++;
         } else // number of crossed pixel is (timesY+1)

@@ -50,6 +50,13 @@
 
 #include "../CaloDummyCorrection.h"
 
+#include "../CaloLCClassificationTool.h"
+#include "../CaloLCWeightTool.h"
+#include "../CaloLCOutOfClusterTool.h"
+#include "../CaloLCDeadMaterialTool.h"
+
+#include "CaloClusterCorrection/ToolWithConstantsTestTool.h"
+
 
 DECLARE_COMPONENT( CaloClusterLocalCalib )
 DECLARE_COMPONENT( CaloClusterLogPos )
@@ -103,3 +110,9 @@ DECLARE_COMPONENT( CaloClusterRemoveBad )
 
 DECLARE_COMPONENT( CaloDummyCorrection )
 
+DECLARE_COMPONENT( CaloLCClassificationTool )
+DECLARE_COMPONENT( CaloLCWeightTool )
+DECLARE_COMPONENT( CaloLCOutOfClusterTool )
+DECLARE_COMPONENT( CaloLCDeadMaterialTool )
+
+DECLARE_COMPONENT( CaloUtils::ToolWithConstantsTestTool )

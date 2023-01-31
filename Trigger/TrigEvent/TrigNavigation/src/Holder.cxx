@@ -20,6 +20,7 @@
 #include "TrigSerializeCnvSvc/TrigStreamAddress.h"
 #include "AthenaKernel/CLIDRegistry.h"
 #include "SGTools/StlVectorClids.h"
+#include "CxxUtils/ClassName.h"
 #include "GaudiKernel/IConversionSvc.h"
 #include "RootUtils/Type.h"
 #include "TClass.h"
@@ -478,8 +479,23 @@ IHolder::deserializeDynVars (const std::vector<uint32_t>& dataBlob,
     const static char* const packed_pref = "SG::PackedContainer<";
     const static unsigned int packed_preflen = strlen(packed_pref);
     std::string vecname = tname;
-    if (strncmp (vecname.c_str(), packed_pref, packed_preflen) == 0)
-      vecname.replace (0, packed_preflen, "vector<");
+    if (strncmp (vecname.c_str(), packed_pref, packed_preflen) == 0) {
+      // Convert from SG::PackedContainer<T> to vector<T>.
+      // Also strip out a std::allocator<T> argument, but leave
+      // any other allocator.
+      auto makeRules = []() {
+        CxxUtils::ClassName::Rules rules;
+        rules.add ("SG::PackedContainer<$T, std::allocator<$T> >",
+                   "vector<$T>");
+        rules.add ("SG::PackedContainer<$T, allocator<$T> >",
+                   "vector<$T>");
+        rules.add ("SG::PackedContainer<$T, $ALLOC>",
+                   "vector<$T, $ALLOC>");
+        return rules;
+      };
+      const static CxxUtils::ClassName::Rules rules = makeRules();
+      vecname = rules.apply (vecname);
+    }
 
     // Handle schema evolution.  If we're expecting a different
     // type for the variable, then use that name instead.

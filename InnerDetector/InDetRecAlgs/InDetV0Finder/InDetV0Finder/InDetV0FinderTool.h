@@ -20,7 +20,10 @@
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "StoreGate/WriteDecorHandleKey.h"
+#include "StoreGate/ReadDecorHandleKey.h"
+#include "StoreGate/ReadDecorHandleKeyArray.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "BeamSpotConditionsData/BeamSpotData.h"
 #include "TrkParameters/TrackParameters.h"
 #include "GeoPrimitives/GeoPrimitives.h" //Needed for Amg::Vector3D
 #include <atomic>
@@ -205,7 +208,9 @@ namespace InDet
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_gprob;
 
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key{this, "EventInfo", "EventInfo", "Input event information"};
-
+    SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
+    SG::ReadDecorHandleKeyArray<xAOD::EventInfo> m_beamSpotDecoKey{this, "BeamSpotDecoKeys" ,{}, "Add the scheduler dependencies on the beamspot information"};
+    Gaudi::Property<bool>       m_useBeamSpotCond { this, "UseBeamSpotCond", false };
     // V0 candidate output container name (same calling alg)
     Gaudi::Property<std::string>       m_v0Key { this, "V0ContainerName", "V0Candidates", "V0 container name (same calling alg)" };
     Gaudi::Property<std::string>       m_ksKey { this, "KshortContainerName", "KshortCandidates", "Ks container name (same calling alg)" };

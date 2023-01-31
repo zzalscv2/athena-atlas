@@ -12,9 +12,9 @@
 
 namespace LVL1 {
 
-const int eFEXCompression::s_steps[] = {25, 50, 100, 200, 400, 102400};
-const int eFEXCompression::s_minET[] = {-750, 1600, 6400, 25600, 102400, 200000};
-const int eFEXCompression::s_minCode[] = {2, 96, 192, 384, 768, 1012};
+const int eFEXCompression::s_steps[] = {25, 50, 100, 400};
+const int eFEXCompression::s_minET[] = {-750, 5600, 18400, 44000};
+const int eFEXCompression::s_minCode[] = {2, 256, 512, 768};
 
 unsigned int eFEXCompression::compress(int Et) {
 
@@ -136,9 +136,6 @@ unsigned int eFEXCompression::decode(int EtVal, int layer) {
   /// Expand the ET value
   int Et = eFEXCompression::expand(code);
   
-  // Check for overflow
-  if (Et >= s_maxET) return s_eFEXOverflow;
-
   /// Convert to eFEX digit scale: 25 MeV
   unsigned int eFexET = Et/s_eFEXstep;
 

@@ -9,7 +9,7 @@
 
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODTau/TauJetContainer.h"
 #include "xAODPFlow/PFOContainer.h"
 #include "xAODPFlow/PFOAuxContainer.h"
@@ -27,7 +27,7 @@
  */
 
 
-class TauRunnerAlg: public AthAlgorithm
+class TauRunnerAlg: public AthReentrantAlgorithm
 {
     public:
         //-----------------------------------------------------------------
@@ -40,7 +40,7 @@ class TauRunnerAlg: public AthAlgorithm
         // Gaudi algorithm hooks
         //-----------------------------------------------------------------
         virtual StatusCode initialize() override;
-        virtual StatusCode execute() override;
+	virtual StatusCode execute(const EventContext& ctx) const override;
 
  private:
        

@@ -7,6 +7,9 @@ string( STRIP ${_version} _version )
 project( AthDerivation VERSION ${_version} LANGUAGES C CXX Fortran )
 unset( _version )
 
+# HepMC3
+set( HEPMC3_USE TRUE CACHE BOOL "Build with HepMC3" )
+
 # Configure flake8:
 set( ATLAS_FLAKE8 true   # <- this is the shell builtin `true`
    CACHE STRING "Default flake8 command" )
@@ -14,7 +17,7 @@ set( ATLAS_PYTHON_CHECKER ""
    CACHE STRING "Python checker command to run during Python module compilation" )
 
 # Set the versions of the TDAQ externals to pick up for the build:
-set( TDAQ-COMMON_VERSION "04-04-00" CACHE STRING
+set( TDAQ-COMMON_VERSION "10-00-00" CACHE STRING
    "The version of tdaq-common to use for the build" )
 set( TDAQ-COMMON_ATROOT
    "$ENV{TDAQ_RELEASE_BASE}/tdaq-common/tdaq-common-${TDAQ-COMMON_VERSION}"
@@ -37,6 +40,7 @@ find_package( tdaq-common REQUIRED )
 # Additional externals needed for the build/runtime:
 find_package( Frontier_Client )
 find_package( VDT )
+find_package( libffi )
 
 # Set up where to find the AthenaPoolUtilitiesTest CMake code.
 set( AthenaPoolUtilitiesTest_DIR

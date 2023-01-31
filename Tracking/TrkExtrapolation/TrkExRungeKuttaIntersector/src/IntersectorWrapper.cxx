@@ -166,20 +166,6 @@ IntersectorWrapper::intersect (const EventContext&              /*ctx*/,
   return solution;
 }
 
-void
-IntersectorWrapper::globalPositions (const EventContext&              /*ctx*/,
-                                     std::list<Amg::Vector3D>&,
-                                     const TrackParameters&,
-                                     const MagneticFieldProperties&,
-                                     const CylinderBounds&,
-                                     double,
-                                     ParticleHypothesis,
-                                     const TrackingVolume* ) const
-{
-  ATH_MSG_WARNING( "globalPositions method from the IPropagator interface"
-                   << " has NOT been implememnted" );
-}
-
 //<<<<<< PRIVATE MEMBER FUNCTION DEFINITIONS                            >>>>>>
 
 void

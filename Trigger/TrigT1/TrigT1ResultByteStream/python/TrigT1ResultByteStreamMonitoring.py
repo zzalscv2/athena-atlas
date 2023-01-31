@@ -1,11 +1,11 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 from libpyeformat_helper import SourceIdentifier, SubDetector
 
 def L1MuonBSConverterMonitoring(name, flags, encoder=False):
-    tool = GenericMonitoringTool('MonTool')
+    tool = GenericMonitoringTool(flags, 'MonTool')
     tool.HistPath = f'HLTFramework/L1BSConverters/{name}'
     tool.defineHistogram('NumWordsInROD', path='EXPERT', type='TH1F',
                          title='Size of the MUCTPI ROD payload;N words;N events',
@@ -72,7 +72,7 @@ def L1MuonBSConverterMonitoring(name, flags, encoder=False):
 def L1TriggerByteStreamDecoderMonitoring(name, flags, decoderTools):
 
     if flags.Trigger.doHLT:
-        monTool = GenericMonitoringTool('MonTool', HistPath = f'HLTFramework/L1BSConverters/{name}')
+        monTool = GenericMonitoringTool(flags, 'MonTool', HistPath = f'HLTFramework/L1BSConverters/{name}')
         topDir = 'EXPERT'
     elif flags.DQ.Steering.doHLTMon: # if used in offline reconstruction respect DQ convention (ATR-26371)
         from AthenaMonitoring import AthMonitorCfgHelper
@@ -110,13 +110,13 @@ def L1TriggerByteStreamDecoderMonitoring(name, flags, decoderTools):
                                 xbins=100, xmin=0, xmax=100)
         monTool.defineHistogram(f'LumiBlock,MissingROBFraction_{decoderName};MissingROBFraction_{decoderName}', path=topDir, type='TProfile',
                                 title=f'Fraction of missing ROBs requested by {decoderName} vs LBN;LumiBlock;N missing ROBs / N requested ROBs',
-                                xbins=100, xmin=0, xmax=100, opt='kCanRebin')
+                                xbins=100, xmin=0, xmax=100, opt='kCanRebin', merge=None if flags.Trigger.doHLT else 'merge')
         monTool.defineHistogram(f'LumiBlock,CorruptedROBFraction_{decoderName};CorruptedROBFraction_{decoderName}', path=topDir, type='TProfile',
                                 title=f'Fraction of corrupted ROBs requested by {decoderName} vs LBN;LumiBlock;N corrupted ROBs / N retrieved ROBs',
-                                xbins=100, xmin=0, xmax=100, opt='kCanRebin')
+                                xbins=100, xmin=0, xmax=100, opt='kCanRebin', merge=None if flags.Trigger.doHLT else 'merge')
         monTool.defineHistogram(f'LumiBlock,ErroneousROBFraction_{decoderName};ErroneousROBFraction_{decoderName}', path=topDir, type='TProfile',
                                 title=f'Fraction of erroneous ROBs requested by {decoderName} vs LBN;LumiBlock;N erroneous ROBs / N retrieved ROBs',
-                                xbins=100, xmin=0, xmax=100, opt='kCanRebin')
+                                xbins=100, xmin=0, xmax=100, opt='kCanRebin', merge=None if flags.Trigger.doHLT else 'merge')
 
     robIdLabels = [hex(id) for id in sorted(list(set(allRobIds)))]
     monTool.defineHistogram('MissingROB', path=topDir, type='TH1F',

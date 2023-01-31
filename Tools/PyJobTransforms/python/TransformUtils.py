@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.Logging import logging
 
 
@@ -38,38 +38,40 @@ def executeFromFragment(fragment_string, flags, cfg=None):
         function_def(flags, cfg)
 
 
-def processPreExec(runArgs, ConfigFlags):
+def processPreExec(runArgs, flags):
     """Process preExec from runtime arguments."""
     if hasattr(runArgs, 'preExec') and runArgs.preExec and runArgs.preExec != 'NONE':
+        ConfigFlags = flags  # noqa: F841
         for cmd in runArgs.preExec:
             exec(cmd)
 
 
-def processPostExec(runArgs, ConfigFlags, cfg):
+def processPostExec(runArgs, flags, cfg):
     """Process postExec from runtime arguments."""
-    if not ConfigFlags.locked():
+    if not flags.locked():
         raise RuntimeError('Running a postExec before locking ConfigFlags')
 
     if hasattr(runArgs, 'postExec') and runArgs.postExec and runArgs.postExec != 'NONE':
+        ConfigFlags = flags  # noqa: F841
         for cmd in runArgs.postExec:
             exec(cmd)
 
 
-def processPreInclude(runArgs, ConfigFlags):
+def processPreInclude(runArgs, flags):
     """Process preInclude from runtime arguments."""
     if hasattr(runArgs, 'preInclude') and runArgs.preInclude and runArgs.preInclude != 'NONE':
         for fragment in runArgs.preInclude:
-            executeFromFragment(fragment, ConfigFlags)
+            executeFromFragment(fragment, flags)
 
 
-def processPostInclude(runArgs, ConfigFlags, cfg):
+def processPostInclude(runArgs, flags, cfg):
     """Process postInclude from runtime arguments."""
-    if not ConfigFlags.locked():
+    if not flags.locked():
         raise RuntimeError('Running a postInclude before locking ConfigFlags')
 
     if hasattr(runArgs, 'postInclude') and runArgs.postInclude and runArgs.postInclude != 'NONE':
         for fragment in runArgs.postInclude:
-            executeFromFragment(fragment, ConfigFlags, cfg)
+            executeFromFragment(fragment, flags, cfg)
 
 
 def UseFrontier(flags):
@@ -99,3 +101,35 @@ def DumpPickle(flags, cfg):
     """Dump the pickle file for the current configuration"""
     with open("Configuration.pkl", "wb") as f:
         cfg.store(f)
+
+
+def SortInput(flags, cfg):
+    """Method that should be post-included after a typicaly configured Athena job
+    It will read original input files, create a list of Events in memory, sort them and produce
+    an intermediate Event Collection file that Athena will read instead of the original inputs
+    Event information is read from EventInfoTags (stored by default in all Athena data files)
+    The default sort key value (Lumi) can be oveerriden, as the sorting order
+    The intermediate Collection file can be inspected using CollQuery cmdline utility"""
+    import os
+    inputs = cfg.getService("EventSelector").InputCollections
+
+    # set default sort parameters, read overrides from locals()
+    tmpCollFile = locals().get("AthenaInputSortCollName", "sortedEventRefs" + str(os.getpid()) )
+    sortTag     = locals().get("AthenaInputSortTag",      "LumiBlockN")
+    sortOrd     = locals().get("AthenaInputSortOrder",    "Ascending")
+
+    from CollectionUtilities.SortedCollectionCreator import SortedCollectionCreator
+    sorter = SortedCollectionCreator(name="SortEvents")
+    # Sort Inputs based on one of the EventInfoTag attributes
+    # Store sorted event collection in a temporary file
+    # This should run as postInclude, so we assume EventSelector.InputCollections is set earlier
+    sorter.execute(inputs, outputCollection=tmpCollFile, sortAttribute=sortTag, sortOrder=sortOrd)
+
+    # Reading Events through References require a populated FileCatalog
+    for inpfile in inputs:
+        os.system('pool_insertFileToCatalog {}'.format(inpfile))
+
+    # Tell Athena to use the sorted collection instead of the original inputs
+    cfg.getService("EventSelector").InputCollections = [tmpCollFile + ".root"]
+    cfg.getService("EventSelector").CollectionType = "ExplicitROOT"
+    return cfg

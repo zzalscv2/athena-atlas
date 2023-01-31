@@ -160,7 +160,7 @@ def LRTElectronLHSelectorsCfg(ConfigFlags):
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHVeryLooseNoPix",
         ContainerName="Electrons",
-        StoreTResult=False))
+        StoreTResult=True))
 
     ElectronPassLHVeryLooseNoPixLRT = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
         ConfigFlags,
@@ -170,7 +170,7 @@ def LRTElectronLHSelectorsCfg(ConfigFlags):
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHVeryLooseNoPix",
         ContainerName="LRTElectrons",
-        StoreTResult=False))
+        StoreTResult=True))
 
     # decorate electrons with the output of LH loose
     ElectronPassLHLooseNoPix = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(

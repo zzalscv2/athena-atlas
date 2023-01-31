@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of SeedToTrackConversionTool package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -18,7 +18,7 @@ def SeedToTrackConversionToolCfg(flags, name="SeedToTrackConversionTool", **kwar
         acc.addPublicTool(RotCreator)
         kwargs.setdefault("RIO_OnTrackCreator", RotCreator)
 
-    kwargs.setdefault("OutputName", f"SiSPSeedSegments{flags.InDet.Tracking.ActivePass.extension}")
+    kwargs.setdefault("OutputName", f"SiSPSeedSegments{flags.InDet.Tracking.ActiveConfig.extension}")
 
     acc.setPrivateTools(CompFactory.InDet.SeedToTrackConversionTool(name, **kwargs))
     return acc
@@ -39,7 +39,7 @@ def ITkSeedToTrackConversionToolCfg(flags, name="ITkSeedToTrackConversionTool", 
         acc.addPublicTool(RotCreator)
         kwargs.setdefault("RIO_OnTrackCreator", RotCreator)
 
-    kwargs.setdefault("OutputName", f"SiSPSeedSegments{flags.ITk.Tracking.ActivePass.extension}")
+    kwargs.setdefault("OutputName", f"SiSPSeedSegments{flags.ITk.Tracking.ActiveConfig.extension}")
 
     acc.setPrivateTools(CompFactory.InDet.SeedToTrackConversionTool(name, **kwargs))
     return acc

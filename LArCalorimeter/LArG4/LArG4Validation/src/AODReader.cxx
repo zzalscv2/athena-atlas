@@ -130,7 +130,11 @@ StatusCode AODReader::execute()
   if (mcEvtColl) {
 	  McEventCollection::const_iterator mcTrPart = mcEvtColl->begin();
 	  if (mcTrPart != mcEvtColl->end()) {
-		  trPart = HepMC::barcode_to_particle((*mcTrPart),10001);
+#ifdef HEPMC3
+		  trPart = (*mcTrPart)->particles().size()?(*mcTrPart)->particles().front():nullptr;
+#else
+		  trPart = (*mcTrPart)->particles_size()?*((*mcTrPart)->particles_begin()):nullptr;
+#endif
 		  if (!trPart) {
 			  msg(MSG::WARNING) << "Not a single particle event. Truth information won't be available" << endmsg;
 		  }

@@ -48,6 +48,7 @@ class jFexRoiByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamToo
 
         // ------------------------- IAlgTool methods --------------------------------
         virtual StatusCode initialize() override;
+        virtual StatusCode start() override;
 
         // ------------------------- IL1TriggerByteStreamTool methods ----------------------
         /// BS->xAOD conversion
@@ -67,7 +68,7 @@ class jFexRoiByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamToo
         Gaudi::Property<std::vector<uint32_t>> m_robIds {this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
         Gaudi::Property<bool> m_convertExtendedTOBs {this, "ConvertExtendedTOBs", false, "Convert xTOBs instead of TOBs"};
         
-        Gaudi::Property<std::string> m_TobMapping {this, "jFexTobMapping", PathResolver::find_calib_file("L1CaloFEXByteStream/2022-10-19/jFexTobMap.txt"), "Text file to convert from hardware internal coordinates to eta-phi location"};
+        Gaudi::Property<std::string> m_TobMapping {this, "jFexTobMapping", "L1CaloFEXByteStream/2022-10-19/jFexTobMap.txt", "Text file to convert from hardware internal coordinates to eta-phi location"};
         
         //Read handle key for the L1Menu
         SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey   {this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"};
@@ -96,12 +97,19 @@ class jFexRoiByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamToo
         
         //unpacking internal coordinates
         
-        std::array<float,2> getEtaPhi  (unsigned int jfex, unsigned int fpga, uint32_t word) const;
+        std::array<float,2> getEtaPhi  (unsigned int jfex, unsigned int fpga, uint32_t word, const char* obj) const;
         std::array<uint8_t,2> unpackLocalCoords  (uint32_t word) const;
         static const int s_etaBit   = 5;
         static const int s_phiBit   = 1;
         static const int s_etaMask  = 0x1f;
         static const int s_phiMask  = 0xf;
+        
+        int m_jTauRes = 0;
+        int m_jJRes   = 0;
+        int m_jLJRes  = 0;
+        int m_jEMRes  = 0;
+        int m_jXERes  = 0;
+        int m_jTERes  = 0;
 
         
                 

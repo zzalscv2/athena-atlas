@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iomanip>
@@ -54,7 +54,7 @@ GlobalOutput::decision_field(const std::string & l1connName) const {
 }
 
 uint32_t
-GlobalOutput::decision_field(string l1connName, unsigned int clock) const {
+GlobalOutput::decision_field(const std::string& l1connName, unsigned int clock) const {
   if (m_decision.find(l1connName) != m_decision.end()) {
     if(clock==0) {
       // lower 32 bit
@@ -71,7 +71,7 @@ GlobalOutput::decision_field(string l1connName, unsigned int clock) const {
 }
 
 std::bitset<128>
-GlobalOutput::count_field(std::string l1connName) const {
+GlobalOutput::count_field(const std::string& l1connName) const {
   if (m_count.find(l1connName) != m_count.end()) {
     return m_count.find(l1connName)->second;
   }else{
@@ -81,7 +81,7 @@ GlobalOutput::count_field(std::string l1connName) const {
 }
 
 uint64_t 
-GlobalOutput::overflow_field(std::string l1connName) const {
+GlobalOutput::overflow_field(const std::string& l1connName) const {
   if (m_overflow.find(l1connName) != m_overflow.end()) {
     return m_overflow.find(l1connName)->second;
   }else{
@@ -91,7 +91,7 @@ GlobalOutput::overflow_field(std::string l1connName) const {
 }
 
 uint32_t
-GlobalOutput::overflow_field(string l1connName, unsigned int clock) const {
+GlobalOutput::overflow_field(const std::string& l1connName, unsigned int clock) const {
    if (m_overflow.find(l1connName) != m_overflow.end()) {
       if(clock==0) {
          // lower 32 bit

@@ -3,7 +3,7 @@
  **
  **     @author  mark sutton
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 #include "TrigInDetAnalysisExample/AnalysisConfigMT_Ntuple.h"
@@ -40,6 +40,58 @@ void remove_duplicates(std::vector<T>& vec) {
 }
 
 
+std::set<std::string> AnalysisConfigMT_Ntuple::get_configured_chains() {
+  std::set<std::string> chains;
+  const std::vector<std::string> configuredChains = (*m_tdt)->getListOfTriggers("L2_.*, EF_.*, HLT_.*");
+
+  if (m_provider->msg().level() <= MSG::VERBOSE) {
+    m_provider->msg(MSG::VERBOSE) << "[91;1m" << configuredChains.size() << " Configured Chains" << "[m" << endmsg;
+  }
+
+  for ( unsigned i=0 ; i<configuredChains.size() ; i++ ) {
+    if (m_provider->msg().level() <= MSG::VERBOSE) {
+      m_provider->msg(MSG::VERBOSE) << "[91;1m" << "Chain " << configuredChains[i] << "   (ACN)[m" << endmsg;
+    }
+    chains.insert( configuredChains[i] );
+  }
+
+  std::vector<ChainString> chainNames;
+  std::vector<ChainString>::iterator chainitr = m_chainNames.begin();
+
+  /// handle wildcard chain selection - but only the first time
+  while ( chainitr!=m_chainNames.end() ) {
+
+    /// get chain
+    ChainString& chainName = (*chainitr);
+
+    /// get matching chains
+
+    std::vector<std::string> selectChains;
+    selectChains.clear();
+    if ( chainitr->head()=="" ) selectChains.push_back("");
+    else                        selectChains = (*m_tdt)->getListOfTriggers( chainName.head() );
+
+    for ( unsigned iselected=0 ; iselected<selectChains.size() ; iselected++ ) {
+
+      selectChains[iselected] = chainName.subs( selectChains[iselected] );
+
+      /// replace wildcard with actual matching chains ...
+      chainNames.push_back( ChainString(selectChains[iselected]) );
+
+      m_provider->msg(MSG::INFO) << "[91;1m" << "Matching chain " << selectChains[iselected] << "[m" << endmsg;
+
+      /// if this has a cosmic chain, set the fiducial radius to be very large to
+      /// allow the production vertex of the cosmic to be included
+      if ( selectChains[iselected].find("cosmic")!=std::string::npos ) m_fiducial_radius = 1e10;
+
+    }
+
+		  ++chainitr;
+  }
+
+  m_chainNames = chainNames;
+  return chains;
+}
 
 
 void AnalysisConfigMT_Ntuple::loop() {
@@ -67,65 +119,8 @@ void AnalysisConfigMT_Ntuple::loop() {
 	//	m_provider->msg(MSG::INFO) << " offline beam position\tx=" << xbeam        << "\ty=" << ybeam        << "\tz=" << zbeam        << endmsg; 
 	//	m_provider->msg(MSG::INFO) << " online  beam position\tx=" << xbeam_online << "\ty=" << ybeam_online << "\tz=" << zbeam_online << endmsg; 
 
-	/// list the configured chains
-
-	static std::set<std::string> configuredHLTChains;
-
-	std::vector<ChainString> chainNames;
-
-	if ( m_tida_first ) { 
-
-		std::vector<std::string> configuredChains  = (*m_tdt)->getListOfTriggers("L2_.*, EF_.*, HLT_.*");
-
-		if (m_provider->msg().level() <= MSG::VERBOSE) {
-		  m_provider->msg(MSG::VERBOSE) << "[91;1m" << configuredChains.size() << " Configured Chains" << "[m" << endmsg;
-		}
-
-		for ( unsigned i=0 ; i<configuredChains.size() ; i++ ) { 
-		  if (m_provider->msg().level() <= MSG::VERBOSE) {
-		    m_provider->msg(MSG::VERBOSE) << "[91;1m" << "Chain " << configuredChains[i] << "   (ACN)[m" << endmsg;
-		  }
-		  configuredHLTChains.insert( configuredChains[i] );
-		}
-
-		m_tida_first = false;
-
-		std::vector<ChainString>::iterator chainitr = m_chainNames.begin();
-
-		/// handle wildcard chain selection - but only the first time
-		while ( chainitr!=m_chainNames.end() ) {
-
-		  /// get chain
-		  ChainString& chainName = (*chainitr);
-
-		  /// get matching chains
-		  
-		  std::vector<std::string> selectChains;
-		  selectChains.clear();
-		  if ( chainitr->head()=="" ) selectChains.push_back("");
-		  else                        selectChains = (*m_tdt)->getListOfTriggers( chainName.head() );
-		  
-		  for ( unsigned iselected=0 ; iselected<selectChains.size() ; iselected++ ) {
- 
-		      selectChains[iselected] = chainName.subs( selectChains[iselected] );
-
-		      /// replace wildcard with actual matching chains ...
-		      chainNames.push_back( ChainString(selectChains[iselected]) );
-
-		      m_provider->msg(MSG::INFO) << "[91;1m" << "Matching chain " << selectChains[iselected] << "[m" << endmsg;
-
-		      /// if this has a cosmic chain, set the fiducial radius to be very large to 
-		      /// allow the production vertex of the cosmic to be included
-		      if ( selectChains[iselected].find("cosmic")!=std::string::npos ) m_fiducial_radius = 1e10; 
-		     
-		  }
-		  
-		  chainitr++;
-		}
-		
-		m_chainNames = chainNames;
-
-	}
+	/// list the configured chains once
+    static const std::set<std::string> configuredHLTChains = get_configured_chains();
 
 	Filter_AcceptAll filter;
 	/// FIXME: should really have hardcoded limits encoded as 
@@ -924,7 +919,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 		    chain.back().addUserData(beamline_);
 		  }
 	  
-		  if ( roi_tmp ) delete roi_tmp;
+		  delete roi_tmp;
 		  roi_tmp = 0;
 
 		}
@@ -959,7 +954,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 	      
 	      std::vector<std::pair<double,double> > philims;
 	      
-	      for ( ; citr!=chains.end() ; citr++ ) {
+	      for ( ; citr!=chains.end() ; ++citr ) {
 		if ( citr->name().find("HLT_")!=std::string::npos ) { 
 		  for ( size_t ir=0 ; ir<citr->size() ; ir++ ) {
 		    TIDARoiDescriptor& roi = citr->rois()[ir].roi();
@@ -1007,7 +1002,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 		    }
 		    if ( remove_track ) { inc=false; tracks.erase( it ); }
 		  }
-		  if ( inc ) it++;
+		  if ( inc ) ++it;
 		}
 		
 		/// may well put the reporting back in, so leaving this 
@@ -1023,7 +1018,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 
 #endif
 
-	if ( mTree ) mTree->Fill();
+	if ( m_Tree ) m_Tree->Fill();
 	
 }
 

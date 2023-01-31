@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/ReadHandleKey.h
@@ -64,11 +64,11 @@ public:
    * separated by a "+":  "MyStore+Obj".  If no "+" is present
    * the store named by @c storeName is used.
    */
-  template <class OWNER, class K,
+  template <class OWNER,
             typename = typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type>
   ReadHandleKey( OWNER* owner,
                  const std::string& name,
-                 const K& key = {},
+                 const std::string& key = {},
                  const std::string& doc = "");
 
   
@@ -109,12 +109,12 @@ protected:
    * This is meant to be used by @c ReadDecorHandleKey, to allow fixing the
    * CLID to a base class to avoid scheduler issues.
    */
-  template <class OWNER, class K,
+  template <class OWNER,
             typename = typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type>
   ReadHandleKey( CLID clid,
                  OWNER* owner,
                  const std::string& name,
-                 const K& key,
+                 const std::string& key,
                  const std::string& doc);
 };
 

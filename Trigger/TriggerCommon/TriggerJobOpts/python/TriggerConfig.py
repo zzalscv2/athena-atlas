@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from collections import OrderedDict
 from builtins import str
@@ -9,6 +9,7 @@ from AthenaCommon.CFElements import seqAND, seqOR, parOR, flatAlgorithmSequences
 from AthenaCommon.Logging import logging
 from .TriggerRecoConfig import TriggerMetadataWriterCfg
 __log = logging.getLogger('TriggerConfig')
+
 
 def __isCombo(alg):
     return hasProp( alg, "MultiplicitiesMap" )
@@ -40,7 +41,7 @@ def collectHypos( steps ):
         __log.debug( "collecting hypos from step %s", stepSeq.getName() )
 #        start = {}
         for seq,algs in flatAlgorithmSequences(stepSeq).items():
-            for alg in sorted(algs, key=lambda t: str(t.name)):
+            for alg in sorted(algs, key=lambda t: str(t.getName())):
                 if isSequence( alg ):
                     continue
                 # will replace by function once dependencies are sorted
@@ -176,7 +177,7 @@ def triggerSummaryCfg(flags, hypos):
     """
     acc = ComponentAccumulator()
     from TrigOutputHandling.TrigOutputHandlingConfig import DecisionSummaryMakerAlgCfg
-    decisionSummaryAlg = DecisionSummaryMakerAlgCfg()
+    decisionSummaryAlg = DecisionSummaryMakerAlgCfg(flags)
     chainToLastCollection = OrderedDict() # keys are chain names, values are lists of collections
 
 
@@ -196,7 +197,7 @@ def triggerSummaryCfg(flags, hypos):
             hypoChains, hypoOutputKeys = __decisionsFromHypo( hypo )
             for chain in hypoChains:
                 if chain not in chainToCollectionInStep:
-                    chainToCollectionInStep[chain] = hypoOutputKeys
+                    chainToCollectionInStep[chain] = hypoOutputKeys                    
         chainToLastCollection.update( chainToCollectionInStep )
 
     from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
@@ -279,7 +280,7 @@ def triggerMonitoringCfg(flags, hypos, filters, hltSeeding):
     mon.L1Decisions  = getProp( hltSeeding, 'HLTSeedingSummaryKey' )
 
     from DecisionHandling.DecisionHandlingConfig import setupFilterMonitoring
-    [ [ setupFilterMonitoring( alg ) for alg in algs ]  for algs in list(filters.values()) ]
+    [ [ setupFilterMonitoring( flags, alg ) for alg in algs ]  for algs in list(filters.values()) ]
 
     return acc, mon
 
@@ -364,7 +365,7 @@ def triggerBSOutputCfg(flags, hypos, offline=False):
     from TrigOutputHandling.TrigOutputHandlingConfig import TriggerEDMSerialiserToolCfg, StreamTagMakerToolCfg, TriggerBitsMakerToolCfg
 
     # Tool serialising EDM objects to fill the HLT result
-    serialiser = TriggerEDMSerialiserToolCfg()
+    serialiser = TriggerEDMSerialiserToolCfg(flags)
     for item, modules in ItemModuleDict.items():
         sModules = sorted(modules)
         __log.debug('adding to serialiser list: %s, modules: %s', item, sModules)
@@ -390,7 +391,7 @@ def triggerBSOutputCfg(flags, hypos, offline=False):
         # Create HLT result maker and alg
         from TrigOutputHandling.TrigOutputHandlingConfig import HLTResultMTMakerCfg
         HLTResultMTMakerAlg=CompFactory.HLTResultMTMakerAlg
-        hltResultMakerTool = HLTResultMTMakerCfg()
+        hltResultMakerTool = HLTResultMTMakerCfg(flags)
         hltResultMakerTool.StreamTagMaker = stmaker
         hltResultMakerTool.MakerTools = [bitsmaker, serialiser]
         hltResultMakerAlg = HLTResultMTMakerAlg()
@@ -629,6 +630,10 @@ def triggerRunCfg( flags, menu=None ):
     acc.addSequence( parOR("HLTEndSeq"), parentName="HLTTop" )
     acc.addSequence( seqAND("HLTFinalizeSeq"), parentName="HLTEndSeq" )
 
+    nfilters = sum(len(v) for v in filters.values())
+    nhypos = sum(len(v) for v in hypos.values())
+    __log.info( "Algorithms counting: Number of Filter algorithms: %d  -  Number of Hypo algoirthms: %d", nfilters , nhypos)
+
     summaryAcc, summaryAlg = triggerSummaryCfg( flags, hypos )
     acc.merge( summaryAcc, sequenceName="HLTFinalizeSeq" )
     acc.addEventAlgo( summaryAlg, sequenceName="HLTFinalizeSeq" )
@@ -705,18 +710,19 @@ def triggerPostRunCfg(flags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
-    ConfigFlags.Trigger.HLTSeeding.forceEnableAllChains = True
-    ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1",]
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Trigger.HLTSeeding.forceEnableAllChains = True
+    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1",]
+    flags.lock()
 
     def testMenu(flags):
         menuCA = ComponentAccumulator()
         menuCA.addSequence( seqAND("HLTAllSteps") )
         return menuCA
 
-    acc = triggerRunCfg( ConfigFlags, menu = testMenu )
+    acc = triggerRunCfg( flags, menu = testMenu )
 
     f=open("TriggerRunConf.pkl","wb")
     acc.store(f)

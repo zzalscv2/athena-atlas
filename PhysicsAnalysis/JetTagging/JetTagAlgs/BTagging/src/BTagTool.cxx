@@ -42,7 +42,7 @@ namespace Analysis {
     declareProperty("Runmodus"   ,                    m_runModus); // The run modus (reference/analysis)
   }
 
-  BTagTool::~BTagTool() {}
+  BTagTool::~BTagTool() = default;
 
   StatusCode BTagTool::initialize() {
     
@@ -91,13 +91,13 @@ namespace Analysis {
     /* ----------------------------------------------------------------------------------- */
     /*               RETRIEVE PRIMARY VERTEX CONTAINER FROM STOREGATE                      */
     /* ----------------------------------------------------------------------------------- */
-    const xAOD::Vertex* primaryVertex(0);
+    const xAOD::Vertex* primaryVertex(nullptr);
     StatusCode sc = StatusCode::SUCCESS;
 
     if (vtx) {
       primaryVertex = vtx;
     } else {
-      const xAOD::VertexContainer* vxContainer(0);
+      const xAOD::VertexContainer* vxContainer(nullptr);
       
       sc = evtStore()->retrieve(vxContainer, m_vxPrimaryName);
       
@@ -106,14 +106,14 @@ namespace Analysis {
 	return StatusCode::SUCCESS;
       }
     
-      if (vxContainer->size()==0) {
+      if (vxContainer->empty()) {
 	ATH_MSG_DEBUG("#BTAG#  Vertex container is empty");
 	return StatusCode::SUCCESS;
       }
 
-      for (xAOD::VertexContainer::const_iterator fz = vxContainer->begin(); fz != vxContainer->end(); ++fz) {
-	if ((*fz)->vertexType() == xAOD::VxType::PriVtx) {
-	  primaryVertex = *fz;
+      for (const auto *fz : *vxContainer) {
+	if (fz->vertexType() == xAOD::VxType::PriVtx) {
+	  primaryVertex = fz;
 	  break;
 	}
       }
@@ -173,10 +173,10 @@ namespace Analysis {
       return StatusCode::SUCCESS;
     }
 
-    const xAOD::Vertex* primaryVertex(0);
-    for (xAOD::VertexContainer::const_iterator fz = h_VertexCollectionName->begin(); fz != h_VertexCollectionName->end(); ++fz) {
-      if ((*fz)->vertexType() == xAOD::VxType::PriVtx) {
-	primaryVertex = *fz;
+    const xAOD::Vertex* primaryVertex(nullptr);
+    for (const auto *fz : *h_VertexCollectionName) {
+      if (fz->vertexType() == xAOD::VxType::PriVtx) {
+	primaryVertex = fz;
 	break;
       }
     }

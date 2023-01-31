@@ -183,7 +183,8 @@ TrigFastTrackFinder::TrigFastTrackFinder(const std::string& name, ISvcLocator* p
 
   // Phase II
   declareProperty("ITkMode",           m_ITkMode = false);
-  declareProperty("StandaloneMode",           m_standaloneMode = false);
+  declareProperty("StandaloneMode",    m_standaloneMode = false);
+  declareProperty("UseEtaBinning",     m_tcs.m_useEtaBinning = false,"Split layers into eta bins");
 }
 
 //--------------------------------------------------------------------------
@@ -423,7 +424,8 @@ StatusCode TrigFastTrackFinder::execute(const EventContext& ctx) const {
   //RoI preparation/update
 
   if (m_standaloneMode) {
-    const TrigRoiDescriptor internalRoI = TrigRoiDescriptor(true);
+    //the default fullscan TrigRoiDescriptor settings for beamspot width (z-range) are incorrect
+    const TrigRoiDescriptor internalRoI = TrigRoiDescriptor(0, -4.5, 4.5, 0, -M_PI, M_PI, 0, -168.0, 168.0);
 
     ATH_CHECK(findTracks(trackEventData, internalRoI, inputTracks, *outputTracks, ctx));
 
@@ -970,12 +972,12 @@ double TrigFastTrackFinder::trackQuality(const Trk::Track* Tr) const {
   const double W       = 17.;
 
   for(; m!=me; ++m) {
-    const Trk::FitQualityOnSurface* fq =  (*m)->fitQualityOnSurface();
+    const Trk::FitQualityOnSurface fq =  (*m)->fitQualityOnSurface();
     if(!fq) continue;
 
-    double x2 = fq->chiSquared();
+    double x2 = fq.chiSquared();
     double q;
-    if(fq->numberDoF() == 2) q = (1.2*(W-x2*.5));
+    if(fq.numberDoF() == 2) q = (1.2*(W-x2*.5));
     else                     q =      (W-x2    );
     if(q < 0.) q = 0.;
     quality+=q;
@@ -1218,9 +1220,9 @@ void TrigFastTrackFinder::fillMon(const TrackCollection& tracks, const TrigVerte
     for(auto tSOS = track->trackStateOnSurfaces()->begin();
         tSOS!=track->trackStateOnSurfaces()->end(); ++tSOS) {
       if ((*tSOS)->type(Trk::TrackStateOnSurface::Perigee) == false) {
-        const Trk::FitQualityOnSurface* fq =  (*tSOS)->fitQualityOnSurface();
+        const Trk::FitQualityOnSurface fq =  (*tSOS)->fitQualityOnSurface();
         if(!fq) continue;
-        int nd = fq->numberDoF();
+        int nd = fq.numberDoF();
         if(nd==2) nPix++;
         if(nd==1) nSct++;
       }
@@ -2300,7 +2302,6 @@ float TrigFastTrackFinder::dEdx(const Trk::Track* track, int& pixelhits, int& n_
    const int PIXLOC_PIX_UNKNOWN = 5;
 
    std::multimap<float,int> dEdxMap;
-   int   n_usedIBLOverflowHits=0;
    float dEdxValue = 0;
 
    // Check for track states:
@@ -2357,10 +2358,10 @@ float TrigFastTrackFinder::dEdx(const Trk::Track* track, int& pixelhits, int& n_
 
 	 float chi2  = 0.;
 	 float ndof  = 0.;
-	 const Trk::FitQualityOnSurface* fq = (*tsosIter)->fitQualityOnSurface();
-	 if( fq != nullptr ) {
-	    chi2  = fq->chiSquared();
-	    ndof  = fq->doubleNumberDoF();
+	 const Trk::FitQualityOnSurface fq = (*tsosIter)->fitQualityOnSurface();
+	 if(fq) {
+	    chi2  = fq.chiSquared();
+	    ndof  = fq.doubleNumberDoF();
 	 }
 
 	 int iblOverflow=0; // keep track if this is IBL overflow
@@ -2408,7 +2409,6 @@ float TrigFastTrackFinder::dEdx(const Trk::Track* track, int& pixelhits, int& n_
 	    dEdxValue = charge*conversion_factor/thickness;
 	    dEdxMap.insert(std::pair<float,int>(dEdxValue, iblOverflow));
 	    pixelhits++;
-	    if(iblOverflow==1)n_usedIBLOverflowHits++;
 	 }
 	 ATH_MSG_VERBOSE("dEdx=" << dEdxValue);
 	 v_pixhit_dedx.push_back(dEdxValue); v_pixhit_tot.push_back(tot);
@@ -2571,12 +2571,12 @@ TrigFastTrackFinder::getTrkBarrelLayerInfo(Trk::Track* t) const
       DataVector<const Trk::TrackStateOnSurface>::const_iterator tsosIter    = recoTrackStates->begin();
       DataVector<const Trk::TrackStateOnSurface>::const_iterator tsosIterEnd = recoTrackStates->end();
       for ( ; tsosIter != tsosIterEnd; ++tsosIter) {
-	      const Trk::FitQualityOnSurface* fq = (*tsosIter)->fitQualityOnSurface();
+	      const Trk::FitQualityOnSurface fq = (*tsosIter)->fitQualityOnSurface();
 	      double x2 = 0;
 	      int  ndof = 0;
-	      if(fq!=nullptr) {
-	        x2 = fq->chiSquared();
-	        ndof = fq->numberDoF();
+	      if(fq) {
+	        x2 = fq.chiSquared();
+	        ndof = fq.numberDoF();
 	      }
 	      bool chi2_good = (x2 <= CHI2_GOOD_CUT);
 	      const Trk::MeasurementBase *measurement = (*tsosIter)->measurementOnTrack();
@@ -2628,12 +2628,12 @@ double TrigFastTrackFinder::disTrackQuality(const Trk::Track* Tr) const
    const double W = 17.;
 
    for(; m!=me; ++m) {
-      const Trk::FitQualityOnSurface* fq =  (*m)->fitQualityOnSurface();
+      const Trk::FitQualityOnSurface fq =  (*m)->fitQualityOnSurface();
       if(!fq) continue;
 
-      double x2 = fq->chiSquared();
+      double x2 = fq.chiSquared();
       double q;
-      if(fq->numberDoF() == 2) q = (1.2*(W-x2*.5));
+      if(fq.numberDoF() == 2) q = (1.2*(W-x2*.5));
       else                     q =      (W-x2    );
       if(q < 0.) q = 0.;
 
@@ -3227,11 +3227,8 @@ int TrigFastTrackFinder::recoAndFillDisTrkCand(const std::string& base_prefix,
    std::string prefix;
 
    int n_stored_tracks = 0;
-   int idx = -1;
 
    for (auto trk = tracks->begin(); trk!=tracks->end(); ++trk) {
-
-      idx++;
 
       Trk::Track* ptrk = *trk;
 

@@ -1,14 +1,15 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import importlib
 import string
 
-from AthenaConfiguration.ComponentFactory import isRun3Cfg
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
+
 
 class Singleton(type):
     _instances = {}
@@ -23,7 +24,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
 
     # Applicable to all menu instances
     calibCosmicMonSigs = ['Streaming','Monitor','Beamspot','Cosmic', 'Calib', 'EnhancedBias']
-    combinedSigs = ['MinBias','Electron','Photon','Muon','Tau','Jet', 'Bjet','MET','UnconventionalTracking']
+    combinedSigs = ['MinBias','Electron','Photon','Muon','Tau','Jet', 'Bjet','MET','UnconventionalTracking','HeavyIon']
     defaultSigs = ['Streaming']  # for noalg chains
 
     # Define which signatures (folders) are required for each slice
@@ -32,7 +33,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         allSigs = [
             'Test','Streaming','Monitor','Beamspot','Cosmic', 'Calib', 'EnhancedBias',
             'Electron','Photon','Muon','Tau','Jet', 'Bjet','MET','Bphysics',
-            'MinBias','UnconventionalTracking'
+            'MinBias','UnconventionalTracking', 'HeavyIon'
         ]
         signatureDeps = {sig:[sig] for sig in allSigs}
         # Special cases
@@ -159,7 +160,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         for chainDict in self.chainDicts:
             log.debug("Next: getting chain configuration for chain %s ", chainDict['chainName'])
             chainConfig,lengthOfChainConfigs = self.__generateChainConfig(flags, chainDict)
-            if isRun3Cfg():
+            if isComponentAccumulatorCfg():
                 # skip chain generation if no ChainConfig was found
                 if chainConfig is None:
                     continue
@@ -366,7 +367,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
             if currentSig in self.availableSignatures:
                 try:
                     log.debug("[__generateChainConfigs] Trying to get chain config for %s", currentSig)
-                    chainPartConfig = self.chainDefModule[currentSig].generateChainConfigs(chainPartDict)
+                    chainPartConfig = self.chainDefModule[currentSig].generateChainConfigs(flags, chainPartDict)
                 except Exception:
                     log.error('[__generateChainConfigs] Problems creating ChainDef for chain %s ', chainName)
                     log.error('[__generateChainConfigs] I am in chain part\n %s ', chainPartDict)
@@ -378,7 +379,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
                 raise Exception('Stopping the execution. Please correct the configuration.')
 
             log.debug("Chain %s \n chain configs: %s",chainPartDict['chainName'],chainPartConfig)
-            if isRun3Cfg() and \
+            if isComponentAccumulatorCfg() and \
                 (chainPartConfig is None or (any(["_MissingCA" in step.name for step in chainPartConfig.steps]) \
                     and "_MissingCA" not in chainPartConfig.steps[-1].name )):      
                     # if a MissingCA step exist and it's not the last one, do not build the chain because it's incomplete              
@@ -407,7 +408,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         # This part is to deal with combined chains between different signatures
         try:
             if len(listOfChainConfigs) == 0:
-                if isRun3Cfg():
+                if isComponentAccumulatorCfg():
                     raise NoCAmigration("[__generateChainConfigs] chain {0} generation missed configuration".format(mainChainDict['chainName']))                               
                 raise Exception('[__generateChainConfigs] No Chain Configuration found for {0}'.format(mainChainDict['chainName']))                    
             else:
@@ -431,7 +432,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
             log.exception('[__generateChainConfigs] Full chain dictionary is\n %s ', mainChainDict)
             raise Exception('[__generateChainConfigs] Stopping menu generation. Please investigate the exception shown above.')
         except AttributeError:                    
-            if isRun3Cfg():
+            if isComponentAccumulatorCfg():
                 log.warning(str(NoCAmigration("[__generateChainConfigs] addTopoInfo failed with CA configurables") )  )  
                 return None,[]                       
             raise Exception('[__generateChainConfigs] Stopping menu generation. Please investigate the exception shown above.')
@@ -450,7 +451,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
                 log.debug('Configuring event building sequence %s for chain %s', eventBuildType, mainChainDict['chainName'])
                 EventBuildingSequences.addEventBuildingSequence(flags, theChainConfig, eventBuildType, mainChainDict)
             except TypeError as ex:
-                if isRun3Cfg():
+                if isComponentAccumulatorCfg():
                     log.warning(str(NoCAmigration("[__generateChainConfigs] EventBuilding/TLA sequences failed with CA configurables")) )                                  
                 else:
                     log.error(ex)
@@ -467,22 +468,23 @@ class GenerateMenuMT(object, metaclass=Singleton):
         max_steps = max([len(cc.steps) for cc in chainConfigs], default=0)    
 
         steps_are_empty = [True for i in range(0,max_steps)]
-
+        emptySteps = []
         for cc in chainConfigs:
             for istep, the_step in enumerate(cc.steps):
                 if not the_step.isEmpty:
                     steps_are_empty[istep] = False
-        
+                else: 
+                    emptySteps.append(the_step)
+                            
         log.info("Are there any fully empty steps? %s", steps_are_empty)
-        
+        log.info("The empty step(s) and associated chain(s) are: %s", emptySteps)
         empty_step_indices = [i for i,is_empty in enumerate(steps_are_empty) if is_empty]
         
         if len(empty_step_indices) == 0:
             return chainConfigs
         
         if len(self.availableSignatures) != 1 and not (self.chainFilter and hasattr(self.chainFilter,'selectChains') and self.chainFilter.selectChains):
-            log.warning("[resolveEmptySteps] The menu you are trying to generate contains a fully empty step. This is only allowed for partial menus.")
-            #raise Exception("[resolveEmptySteps] Please find the source of this empty step and remove it from the menu.")  #ATR-25392 downgrade to warning only
+            raise Exception("[resolveEmptySteps] Please find the reason for this empty step and resolve it / remove it from the menu: %s", emptySteps)  
 
         log.info("Will now delete steps %s (indexed from zero)",empty_step_indices)
         

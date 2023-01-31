@@ -162,7 +162,7 @@ public:
        but uses the existing clone method.
        @return new object copied from the concrete type of this object.*/
   std::unique_ptr<ParametersBase<DIM, T>> uniqueClone() const{
-    return std::unique_ptr<ParametersBase<DIM, T>>(clone());
+    return std::unique_ptr<ParametersBase<DIM, T>>(this->clone());
   }
   
   

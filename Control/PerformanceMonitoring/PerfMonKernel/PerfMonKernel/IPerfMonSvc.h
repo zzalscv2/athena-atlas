@@ -193,8 +193,6 @@ class IPerfMonSvc : virtual public IMonitorSvc
   PerfMon::State::Type m_monState;
 }; 
 
-// I/O operators
-//////////////////////
 
 /////////////////////////////////////////////////////////////////// 
 // Inline methods: 

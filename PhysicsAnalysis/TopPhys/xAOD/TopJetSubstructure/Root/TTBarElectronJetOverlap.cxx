@@ -121,7 +121,7 @@ void TTBarElectronJetOverlap::SubtractEls() {
 
   for (size_t iJet = 0; iJet < nJets; iJet++) {
     TLorentzVector originalJet = fOrigJetTLVs[iJet];
-    for (set<int>::iterator iEl = fJetAssocElCls[iJet].begin(); iEl != fJetAssocElCls[iJet].end(); iEl++) {
+    for (set<int>::iterator iEl = fJetAssocElCls[iJet].begin(); iEl != fJetAssocElCls[iJet].end(); ++iEl) {
       ElIdx = *iEl;
       TLorentzVector elcorr = fElTLVs[ElIdx];
       fJetTLVs[iJet] -= elcorr;
@@ -252,7 +252,7 @@ void TTBarElectronJetOverlap::RecalcJVF() {
         fJetJVFs[iJet] < 0) continue;
 
     for (set<int>::iterator iEl = fJetAssocElCls[iJet].begin();
-         iEl != fJetAssocElCls[iJet].end(); iEl++) {
+         iEl != fJetAssocElCls[iJet].end(); ++iEl) {
       ElIdx = *iEl;
 
       trk.SetPtEtaPhiE(m_electrons->at(ElIdx)->trackParticle()->pt(),

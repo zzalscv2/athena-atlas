@@ -6,7 +6,7 @@ from BTagging.ImprovedJetFitterInitializationHelperConfig import ImprovedJetFitt
 from BTagging.TrkDistanceFinderNeutralNeutralConfig import TrkDistanceFinderNeutralNeutralCfg
 from BTagging.TrkDistanceFinderNeutralChargedConfig import TrkDistanceFinderNeutralChargedCfg
 
-def ImprovedJetFitterRoutinesCfg(name, useBTagFlagsDefaults = True, **options):
+def ImprovedJetFitterRoutinesCfg(flags, name, useBTagFlagsDefaults = True, **options):
     """Sets up a ImprovedJetFitterRoutines tool and returns it.
 
     The following options have BTaggingFlags defaults:
@@ -21,10 +21,10 @@ def ImprovedJetFitterRoutinesCfg(name, useBTagFlagsDefaults = True, **options):
     output: The actual tool, which can then by added to ToolSvc via ToolSvc += output."""
     acc = ComponentAccumulator()
     if useBTagFlagsDefaults:
-        improvedJetFitterInitializationHelper = acc.popToolsAndMerge(ImprovedJetFitterInitializationHelperCfg('ImprovedJFInitHelper'))
-        trkDistanceFinderNeutralNeutral = acc.popToolsAndMerge(TrkDistanceFinderNeutralNeutralCfg('TrkDistFinderNeutralNeutral'))
-        trkDistanceFinderNeutralCharged = acc.popToolsAndMerge(TrkDistanceFinderNeutralChargedCfg('TrkDistFinderNeutralCharged'))
-        #JFKalmanVertexOnJetAxisSmoother = acc.popToolsAndMerge(KalmanVertexOnJetAxisSmootherCfg('JFKalmanVertexOnJetAxisSmoother')
+        improvedJetFitterInitializationHelper = acc.popToolsAndMerge(ImprovedJetFitterInitializationHelperCfg(flags, 'ImprovedJFInitHelper'))
+        trkDistanceFinderNeutralNeutral = acc.popToolsAndMerge(TrkDistanceFinderNeutralNeutralCfg(flags, 'TrkDistFinderNeutralNeutral'))
+        trkDistanceFinderNeutralCharged = acc.popToolsAndMerge(TrkDistanceFinderNeutralChargedCfg(flags, 'TrkDistFinderNeutralCharged'))
+        #JFKalmanVertexOnJetAxisSmoother = acc.popToolsAndMerge(KalmanVertexOnJetAxisSmootherCfg(flags, 'JFKalmanVertexOnJetAxisSmoother')
         defaults = {
                      'BeFast'               : False,
                      'maxDRshift'           : 0.0,

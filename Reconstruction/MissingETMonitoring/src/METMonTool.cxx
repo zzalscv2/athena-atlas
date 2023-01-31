@@ -86,7 +86,7 @@ StatusCode METMonTool::initialize()
       for (; it != m_metKeys.end();)
         {
 	  if ((*it) == m_metFinKey) it = m_metKeys.erase(it);
-	  else it++;
+	  else ++it;
         }
       m_metKeys.value().push_back(m_metFinKey);
     }
@@ -100,7 +100,7 @@ StatusCode METMonTool::initialize()
   ATH_MSG_DEBUG("metRegKey = " << m_metRegKey);
   ATH_MSG_DEBUG("metKeys   = ");
   std::vector<std::string>::iterator it = m_metKeys.begin();
-  for (; it != m_metKeys.end(); it++)
+  for (; it != m_metKeys.end(); ++it)
     {
       ATH_MSG_DEBUG((*it));
     }
@@ -351,7 +351,7 @@ StatusCode METMonTool::bookSourcesHistograms(std::string& metName, MonGroup& met
   hTitle << "SumEt Distribution (" << metName << ")";
   hxTitle << "SumEt (GeV)";
   hyTitle << "Events";
-  if (metName == "MET_Cryo" || metName == "MET_MuonBoy" || metName == "MET_Cryo" || metName == "MET_CellOut_em")
+  if (metName == "MET_Cryo" || metName == "MET_MuonBoy" || metName == "MET_CellOut_em")
     sumetmax = m_etrange*m_etrangeSumFactor*0.25;
   h = new TH1F(hName.c_str(), hTitle.str().c_str(), m_etbin, sumetmin, sumetmax);
   h->GetXaxis()->SetTitle(hxTitle.str().c_str());

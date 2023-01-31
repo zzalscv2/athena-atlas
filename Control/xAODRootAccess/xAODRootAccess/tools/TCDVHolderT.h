@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TCDVHolderT.h 656386 2015-03-24 13:42:48Z krasznaa $
 #ifndef XAODROOTACCESS_TOOL_TCDVHOLDERT_H
 #define XAODROOTACCESS_TOOL_TCDVHOLDERT_H
 
@@ -25,9 +24,6 @@ namespace xAOD {
    ///
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
-   /// $Revision: 656386 $
-   /// $Date: 2015-03-24 14:42:48 +0100 (Tue, 24 Mar 2015) $
-   ///
    template< class T >
    class TCDVHolderT : public THolder {
 
@@ -41,6 +37,10 @@ namespace xAOD {
 
       /// Replace the managed object
       virtual void set( void* obj );
+
+      /// Return the object as a specific pointer
+      virtual void* getAs( const std::type_info& tid,
+                           ::Bool_t silent = kFALSE ) const;
 
       /// Return the object as a specific, constant pointer
       virtual const void* getAsConst( const std::type_info& tid,

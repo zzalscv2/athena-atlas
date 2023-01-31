@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CaloAna_tools_h
@@ -112,7 +112,7 @@ public:
   TSpline* fitsplines_EtaPhiAspectRatio()  const {return m_fitsplines_EtaPhiAspectRatio;};
 
   Double_t f_2DSpline_getd(double dxfcx_mm,double dyfcy_mm,int maxiter,double max_aspect) const;
-  static Double_t SplineEval(TSpline3* sp,Double_t x,Double_t xmin,Double_t xmax);
+  static Double_t SplineEval(const TSpline3* sp,Double_t x,Double_t xmin,Double_t xmax);
   Double_t f_2DSpline(double dxfcx_mm,double dyfcy_mm) const;
   Double_t CellIntegralEtaPhi(const CaloDetDescrElement& cell,const double eta, const double phi,double& ein_wide,double fcx, double fcy,double direction_factor) const;
   inline double eta_center(double eta,double direction_factor) const {if(eta>0) return eta+m_deta+direction_factor*m_reldeta;else return eta-m_deta+direction_factor*m_reldeta;};

@@ -59,7 +59,7 @@ void TrackParticleTruthCollectionCnv_p2::transToPers( const TrackParticleTruthCo
     pers->m_entries.reserve(trans->size());
     Rec::TrackParticleTruthCollection_p2::CollectionType::size_type ipers(0);
     TrackParticleTruthCollection::const_iterator itrans = trans->begin(); 
-    for( ; itrans!=trans->end(); itrans++, ipers++) {
+    for( ; itrans!=trans->end(); ++itrans, ++ipers) {
         Rec::TrackParticleTruthCollection_p2::Entry entry;
         const TrackParticleTruth& truth = itrans->second;
         // We must first convert the element link to check whether or

@@ -184,7 +184,7 @@ StatusCode JetBadChanCorrTool::correctionFromCellsInJet(const xAOD::JetContainer
     jet::JetCellAccessor::const_iterator cellIt =  jet::JetCellAccessor::begin(jet);
     jet::JetCellAccessor::const_iterator cellItE = jet::JetCellAccessor::end(jet);
 
-    for( ;cellIt!=cellItE; cellIt++) {
+    for( ;cellIt!=cellItE; ++cellIt) {
 
       const CaloDetDescrElement * dde = (*cellIt)->caloDDE();
       const CaloCell *cell = *cellIt;
@@ -259,7 +259,7 @@ float JetBadChanCorrTool::correctionFromCellsInCone(const xAOD::Jet* jet, const 
   std::vector<jet::CellPosition>::iterator itr = closeCells.begin();
   std::vector<jet::CellPosition>::iterator itrE = closeCells.end();
 
-  for(; itr!=itrE; itr++){
+  for(; itr!=itrE; ++itr){
 
     double cell_eta = itr->x();
     double cell_phi = itr->phi();
@@ -303,7 +303,7 @@ StatusCode JetBadChanCorrTool::correctionFromClustersBadCells(const xAOD::JetCon
 double JetBadChanCorrTool::getProfile(double pt, double dr, int sample, double eta, double phi) const {
   std::vector<ProfileData>::const_iterator itr =m_profileDatas[sample].begin();
   std::vector<ProfileData>::const_iterator itrE =m_profileDatas[sample].end();
-  for(; itr!=itrE; itr++){
+  for(; itr!=itrE; ++itr){
     if((*itr).match(pt/GeV,sample,eta,phi)){
       return (*itr).frac(dr);
     }

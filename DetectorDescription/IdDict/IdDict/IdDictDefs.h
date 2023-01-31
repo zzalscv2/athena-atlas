@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICT_IDDICTDEFS_H
@@ -69,7 +69,7 @@ public:
     
     ///  Construct dictionary after parsing
     void                  resolve_references      ();  
-    void                  generate_implementation (std::string tag = "");  
+    void                  generate_implementation (const std::string& tag = "");  
 
     ///  Reset of implementation
     void                  reset_implementation    ();  
@@ -116,7 +116,7 @@ public:
     void add_dictentry (IdDictDictEntry* entry);
     void add_subdictionary_name (const std::string& name);  
     void resolve_references (const IdDictMgr& idd);  
-    void generate_implementation (const IdDictMgr& idd, std::string tag = "");  
+    void generate_implementation (const IdDictMgr& idd, const std::string& tag = "");  
     void reset_implementation ();  
     bool verify   () const;
     void sort     ();  
@@ -326,7 +326,7 @@ public:
     const std::string& get_label (size_t index) const;  
     ExpandedIdentifier::element_type get_label_value (const std::string& name) const; 
     void resolve_references (const IdDictMgr& idd);  
-    void generate_implementation (const IdDictMgr& idd, std::string tag = "");  
+    void generate_implementation (const IdDictMgr& idd, const std::string& tag = "");  
     void reset_implementation ();  
     bool verify () const;  
     void clear (); 
@@ -372,7 +372,7 @@ public:
                              size_t& index);  
     void generate_implementation (const IdDictMgr& idd,  
                                   IdDictDictionary& dictionary, 
-                                  std::string tag = "");
+                                  const std::string& tag = "");
     void reset_implementation ();  
 
     bool verify () const;
@@ -405,7 +405,7 @@ public:
                                      IdDictDictionary& dictionary) = 0;  
     virtual void generate_implementation (const IdDictMgr& idd,  
                                           IdDictDictionary& dictionary, 
-                                          std::string tag = "") = 0;
+                                          const std::string& tag = "") = 0;
     virtual void reset_implementation () = 0;  
     virtual bool verify () const = 0;
  
@@ -429,7 +429,7 @@ public:
                              IdDictDictionary& dictionary);
     void generate_implementation (const IdDictMgr& idd, 
                                   IdDictDictionary& dictionary, 
-                                  std::string tag = "");  
+                                  const std::string& tag = "");  
     void reset_implementation ();  
     bool verify () const;  
  
@@ -462,7 +462,7 @@ public:
                              IdDictDictionary& dictionary); 
     void generate_implementation (const IdDictMgr& idd, 
                                   IdDictDictionary& dictionary, 
-                                  std::string tag = "");  
+                                  const std::string& tag = "");  
     void find_neighbours (const IdDictDictionary& dictionary);
     void reset_implementation ();  
     bool verify () const;  
@@ -510,12 +510,12 @@ public:
     // as an arg with the method below
     void generate_implementation (const IdDictMgr& idd, 
                                   IdDictDictionary& dictionary, 
-                                  std::string tag = "");  
+                                  const std::string& tag = "");  
     // Generate implementation - pass region to be filled for this subregion
     void generate_implementation (const IdDictMgr& idd,  
                                   IdDictDictionary& dictionary, 
                                   IdDictRegion& region,
-                                  std::string tag = "");  
+                                  const std::string& tag = "");  
     void reset_implementation ();  
 }; 
  
@@ -531,7 +531,7 @@ public:
     virtual void generate_implementation (const IdDictMgr& idd,  
                                           IdDictDictionary& dictionary, 
                                           IdDictRegion& region,
-                                          std::string tag = "");
+                                          const std::string& tag = "");
     virtual void reset_implementation ();  
     virtual bool verify () const;  
  
@@ -553,7 +553,7 @@ public:
     void generate_implementation (const IdDictMgr& idd,  
                                   IdDictDictionary& dictionary, 
                                   IdDictRegion& region,
-                                  std::string tag = "");  
+                                  const std::string& tag = "");  
     void reset_implementation ();  
     bool verify () const;  
  
@@ -614,7 +614,7 @@ public:
     void generate_implementation (const IdDictMgr& idd,  
                                   IdDictDictionary& dictionary, 
                                   IdDictRegion& region,
-                                  std::string tag = "");  
+                                  const std::string& tag = "");  
     void reset_implementation ();  
     bool verify () const;  
  
@@ -639,7 +639,7 @@ public:
     void generate_implementation (const IdDictMgr& idd,  
                                   IdDictDictionary& dictionary, 
                                   IdDictRegion& region,
-                                  std::string tag = "");  
+                                  const std::string& tag = "");  
     void reset_implementation ();  
     bool verify () const;  
  
@@ -665,7 +665,7 @@ public:
     void generate_implementation (const IdDictMgr& idd,  
                                   IdDictDictionary& dictionary, 
                                   IdDictRegion& region,
-                                  std::string tag = "");  
+                                  const std::string& tag = "");  
     void reset_implementation ();  
     bool verify () const;  
  

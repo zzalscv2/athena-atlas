@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/CondCont_test.cxx
@@ -427,6 +427,10 @@ void test1 (TestRCUSvc& rcusvc)
   //*** Test errors from extendLastRange().
   assert (cc_rl.extendLastRange (EventIDRange (timestamp (800), timestamp (900))).isFailure());
   assert (cc_ts.extendLastRange (EventIDRange (runlbn (50, 10), runlbn (50, 20))).isFailure());
+
+  assert (cc_rl.entries() == 2);
+  cc_rl.clear();
+  assert (cc_rl.entries() == 0);
 }
 
 
@@ -670,6 +674,7 @@ void test5 (TestRCUSvc& rcusvc)
   exp1 << "{[2,t:120,l:10] - [2,t:130,l:20]} " << bptrs[5] << "\n";
   //std::cout << "ss1: " << ss1.str() << "\nexp1: " << exp1.str() << "\n";
   assert (ss1.str() == exp1.str());
+  assert (cc.entries() == 6);
 
 
   // Ranges
@@ -792,6 +797,10 @@ void test5 (TestRCUSvc& rcusvc)
     std::cout.flush();
     std::abort();
   }
+
+  assert (cc.entries() == 8);
+  cc.clear();
+  assert (cc.entries() == 0);
 }
 
 
@@ -1256,7 +1265,17 @@ void testThread_MixedReader::operator()()
     if (m_map.find (key, obj, &rr)) {
       assert (lb >= rr->start().lumi_block() && lb < rr->stop().lumi_block());
       assert (ts >= rr->start().time_stamp() && ts < rr->stop().time_stamp());
-      assert (obj->m_x == static_cast<int> (rr->start().lumi_block() + rr->start().time_stamp()));
+      if (obj->m_x != static_cast<int> (rr->start().lumi_block() + rr->start().time_stamp()))
+      {
+        std::cerr << "testThread_MixedReader: Bad payload! " <<
+          obj->m_x << " rr " << *rr << " lb " << lb << " ts " << ts << "\n";
+        std::cerr << "  key: " << key << " start " << start << " stop " << stop << "\n";
+        std::cerr << "  rvec\n";
+        for (const EventIDRange& r : rvec) {
+          std::cerr << "    " << r << "\n";
+        }
+        std::abort();
+      }
     }
 
     if ((rvec.end()-1)->start().lumi_block() == (nwrites-1)/2) break;

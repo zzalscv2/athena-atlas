@@ -98,7 +98,7 @@ def generateEmuMenu(ConfigFlags):
     import TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig_newJO
     # set DEBUG flag on the control-flow builder (before building)
     TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig_newJO.log.setLevel(DEBUG)
-    menuAcc = generateDecisionTree(ConfigFlags, HLTMenuConfig.configsList()) 
+    menuAcc = generateDecisionTree(ConfigFlags, HLTMenuConfig)
     
     menuAcc.wasMerged()   
     menuAcc.printConfig()
@@ -197,20 +197,12 @@ if __name__ == "__main__":
     # switch on DEBUG on the trigger monitoring
     #acc.foreach_component("*/TrigSignatureMoni").OutputLevel = DEBUG
     
-    fName =  args.configOnly if args.configOnly else "test_menu_cf_newJO.pkl" 
-    log.info("Storing config in the file %s ", fName)
-    with open(fName, "wb") as p:
-        acc.store(p)
-        p.close()
-    
-    if not args.configOnly:
-        log.info("Running ...")
-        status = acc.run()
-        if status.isFailure():
-            import sys
-            sys.exit(1)
-    else:
-        log.info("The configOnly option used ... exiting.")
+    log.info("Running ...")
+    status = acc.run()
+    if status.isFailure():
+        import sys
+        sys.exit(1)
+
     
     
 

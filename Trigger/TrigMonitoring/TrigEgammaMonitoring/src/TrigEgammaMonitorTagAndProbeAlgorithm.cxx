@@ -549,12 +549,14 @@ double TrigEgammaMonitorTagAndProbeAlgorithm::simple_lxy(int flag,   double d1, 
                                                        double pt1, double pt2, double vx, double vy) const 
 {
   double simple = -99999.;
+  double den = sin(phi2-phi1);
 
   //require minimum opening angle of 1 microradian.
   if(fabs(phi1 - phi2) < 1e-6) return simple;
+  if(fabs(den) < 1e-6) return simple;
 
-  double simpleXv = (-d2*cos(phi1) + d1*cos(phi2)) / sin(phi2-phi1);
-  double simpleYv = (-d2*sin(phi1) + d1*sin(phi2)) / sin(phi2-phi1);
+  double simpleXv = (-d2*cos(phi1) + d1*cos(phi2)) / den;
+  double simpleYv = (-d2*sin(phi1) + d1*sin(phi2)) / den;
   double rxy  = sqrt((simpleXv-vx)*(simpleXv-vx) +
                      (simpleYv-vy)*(simpleYv-vy) );
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -16,6 +16,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <limits>
 
 namespace MuonGM
 {
@@ -136,7 +137,7 @@ DblQ00Wcsc::DblQ00Wcsc(AmdcDb* wcsc) :
      m_d[i].psndco = (*it)->getFloat("PSNDCO");
      m_d[i].azcat = 0.;
      float azcat = 0.;
-     if((*it)->getFloat("AZCAT") != 999999999999.) 
+     if((*it)->getFloat("AZCAT") != std::numeric_limits<float>::max()) 
      {
        azcat = (*it)->getFloat("AZCAT");
        m_d[i].azcat =   azcat;

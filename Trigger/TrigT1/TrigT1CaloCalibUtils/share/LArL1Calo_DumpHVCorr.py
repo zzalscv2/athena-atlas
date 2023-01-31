@@ -114,7 +114,7 @@ except:
 
 include( "AthenaCommon/Atlas_Gen.UnixStandardJob.py" )
 
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py")
+include( "CaloConditions/CaloConditions_jobOptions.py")
 include( "CaloIdCnv/CaloIdCnv_joboptions.py" )
 include( "TileIdCnv/TileIdCnv_jobOptions.py" )
 include( "LArDetDescr/LArDetDescr_joboptions.py" )

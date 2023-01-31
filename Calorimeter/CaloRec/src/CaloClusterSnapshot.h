@@ -6,7 +6,7 @@
 #ifndef CALOREC_CALOCLUSTERSNAPSHOT_H
 #define CALOREC_CALOCLUSTERSNAPSHOT_H
 
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "CaloEvent/CaloClusterCellLinkContainer.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 

@@ -11,6 +11,8 @@
 #define LArSamples_AbsLArCells_H
 
 #include "LArCafJobs/Definitions.h"
+#include "CxxUtils/checker_macros.h"
+
 #include <vector>
 
 namespace LArSamples {
@@ -19,7 +21,7 @@ namespace LArSamples {
   class History;
   class FilterParams;
   
-  class AbsLArCells  {
+  class ATLAS_NOT_THREAD_SAFE AbsLArCells  {
   
     public:
       

@@ -6,6 +6,9 @@
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 
+#include "CaloDetDescrUtils/CaloDetDescrBuilder.h"
+#include "AthenaKernel/getMessageSvc.h"
+
 using namespace std;
 
 /** Constructor **/
@@ -21,9 +24,14 @@ FastCaloSimGeometryHelper::~FastCaloSimGeometryHelper()
 StatusCode FastCaloSimGeometryHelper::initialize()
 {
   ATH_MSG_INFO("Initializing FastCaloSimGeometryHelper");
-  ATH_CHECK(detStore()->retrieve(m_caloMgr, "CaloMgr"));
-  LoadGeometryFromCaloDDM();
-  
+  m_caloMgr = detStore()->tryConstRetrieve<CaloDetDescrManager>(caloMgrStaticKey);
+  if(!m_caloMgr) {
+    std::unique_ptr<CaloDetDescrManager> caloMgrPtr = buildCaloDetDescrNoAlign(serviceLocator()
+									       , Athena::getMessageSvc());
+    ATH_CHECK(detStore()->record(std::move(caloMgrPtr), caloMgrStaticKey));
+    ATH_CHECK(detStore()->retrieve(m_caloMgr, caloMgrStaticKey));
+  }
+  LoadGeometryFromCaloDDM();  
   return StatusCode::SUCCESS;
 }
 

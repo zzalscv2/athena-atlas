@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/FPControl_test.cxx
@@ -66,13 +66,19 @@ void test1()
   assert (!fetestexcept (FE_DIVBYZERO));
 
   feenableexcept (FE_DIVBYZERO);
-  feclearexcept (FE_DIVBYZERO);
-  testit (false, true);
+#ifdef __aarch64__
+  // Some aarch64 implementations do not support trapping on FPEs :(...
+  if (fegetexcept() & FE_DIVBYZERO)
+#endif
+  {
+    feclearexcept (FE_DIVBYZERO);
+    testit (false, true);
 
-  feenableexcept (FE_DIVBYZERO);
-  feclearexcept (FE_DIVBYZERO);
-  testit (true, false);
-  assert (!fetestexcept (FE_DIVBYZERO));
+    feenableexcept (FE_DIVBYZERO);
+    feclearexcept (FE_DIVBYZERO);
+    testit (true, false);
+    assert (!fetestexcept (FE_DIVBYZERO));
+  }
 }
 
 

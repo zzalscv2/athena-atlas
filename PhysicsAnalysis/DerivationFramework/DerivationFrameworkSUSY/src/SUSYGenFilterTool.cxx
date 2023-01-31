@@ -6,13 +6,14 @@
 
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODJet/JetContainer.h"
+#include "TruthUtils/MagicNumbers.h"
 
 namespace DerivationFramework {
 
   using namespace MCTruthPartClassifier;
 
   static bool isNonInteracting(int pid) {
-    const int apid = abs(pid);
+    const int apid = std::abs(pid);
     if (apid == 12 || apid == 14 || apid == 16) return true; //< neutrinos
     if (apid == 1000022 || apid == 1000024 || apid == 5100022) return true; // SUSY & KK photon and Z partners
     if (apid == 39 || apid == 1000039 || apid == 5000039) return true; //< gravitons: standard, SUSY and KK
@@ -37,7 +38,6 @@ namespace DerivationFramework {
     declareProperty("MaxJetEta",m_MaxJetEta = 2.5);
     declareProperty("MinLeptonPt",m_MinLepPt = 25e3);
     declareProperty("MaxLeptonEta",m_MaxLepEta = 2.5);
-    declareProperty("SimBarcodeOffset", m_SimBarcodeOffset = 200000);
   }
   
   
@@ -135,11 +135,11 @@ namespace DerivationFramework {
     float MEx(0.), MEy(0.);
     for (const auto tp : *tpc){
       int pdgid = tp->pdgId();
-      if (tp->barcode() >= m_SimBarcodeOffset) continue; // Particle is from G4
+      if (HepMC::is_simulation_particle(tp)) continue; // Particle is from G4
       if (pdgid==21 && tp->e()==0) continue; // Work around for an old generator bug
       if ( tp->status() %1000 !=1 ) continue; // Stable!
 
-      if ((abs(pdgid)==11 || abs(pdgid)==13) && tp->pt()>m_MinLepPt && fabs(tp->eta())<m_MaxLepEta) {
+      if ((std::abs(pdgid)==11 || std::abs(pdgid)==13) && tp->pt()>m_MinLepPt && std::fabs(tp->eta())<m_MaxLepEta) {
 	if( isPrompt(tp) ) {
 	  ATH_MSG_VERBOSE("Adding prompt lepton with pt " << tp->pt()
 			  << ", eta " << tp->eta()

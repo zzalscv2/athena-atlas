@@ -175,17 +175,13 @@ StatusCode LArOFCCondAlg::execute() {
     ///////////////////////////////////////////////////
     std::vector<HWIdentifier>::const_iterator it = larOnlineID->channel_begin();
     std::vector<HWIdentifier>::const_iterator it_e = larOnlineID->channel_end();
-    int count = 0;
-    int count2 = 0;
 
     for (; it != it_e; ++it) {
-        count++;
         const HWIdentifier chid = *it;
         const IdentifierHash hid = larOnlineID->channel_Hash(chid);
 
         //if (!(larOnOffIdMapping->isOnlineConnected(chid))) continue;
         if (larOnOffIdMapping->isOnlineConnected(chid)) {
-            count2++;
             for (size_t igain = 0; igain < m_nGains; igain++) {
 
                 std::vector<float> OFCa_tmp, OFCb_tmp;

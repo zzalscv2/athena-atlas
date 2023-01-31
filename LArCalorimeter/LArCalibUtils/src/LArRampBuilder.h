@@ -140,10 +140,7 @@ private:
 
   const LArOnlineID_Base* m_onlineHelper=nullptr;
   const LArEM_Base_ID* m_emId=nullptr;
-
-
-  const DataHandle<ILArRinj> m_dd_rinj;
-  
+ 
   Gaudi::Property<bool>  m_isSC{this,"isSC",false,"Processing SC data yes/no"};
   Gaudi::Property<bool>  m_ishec{this,"isHEC",false,"Processing HEC data yes/no"};
   Gaudi::Property<bool>  m_iterate{this,"Iterate",false,"Iterative OF peak reco"};

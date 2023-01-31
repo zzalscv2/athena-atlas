@@ -1,14 +1,13 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import ProductionStep
 from AthenaCommon import Logging
 
-def GeoModelCfg(configFlags):
-    version=configFlags.GeoModel.AtlasVersion
 
-    from AthenaCommon.AppMgr import release_metadata
+def GeoModelCfg(flags):
+    from PyUtils.Helpers import release_metadata
     rel_metadata = release_metadata()
     relversion = rel_metadata['release'].split('.')
     if len(relversion) < 3:
@@ -18,15 +17,16 @@ def GeoModelCfg(configFlags):
 
     #Get DetDescrCnvSvc (for identifier dictionaries (identifier helpers)
     from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
-    result.merge(DetDescrCnvSvcCfg(configFlags))
+    result.merge(DetDescrCnvSvcCfg(flags))
 
     #TagInfoMgr used by GeoModelSvc but no ServiceHandle. Relies on string-name
     from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
-    result.merge(TagInfoMgrCfg(configFlags))
+    result.merge(TagInfoMgrCfg(flags))
 
-    gms=CompFactory.GeoModelSvc(AtlasVersion=version,
-                                SupportedGeometry = int(relversion[0]))
-    if configFlags.Common.ProductionStep == ProductionStep.Simulation:
+    gms=CompFactory.GeoModelSvc(AtlasVersion=flags.GeoModel.AtlasVersion,
+                                SQLiteDB=flags.GeoModel.SQLiteDB,
+                                SupportedGeometry=int(relversion[0]))
+    if flags.Common.ProductionStep == ProductionStep.Simulation:
         ## Protects GeoModelSvc in the simulation from the AlignCallbacks
         gms.AlignCallbacks = False
     result.addService(gms, primary=True, create=True)
@@ -35,10 +35,13 @@ def GeoModelCfg(configFlags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = []
+    flags.lock()
 
-    ConfigFlags.Input.Files = []
+    acc = GeoModelCfg(flags)
+    with open("test.pkl", "wb") as f:
+        acc.store(f)
 
-    acc = GeoModelCfg( ConfigFlags )
-    acc.store( open( "test.pkl", "wb" ) )
     Logging.log.info("All OK")

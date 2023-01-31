@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -23,6 +23,8 @@ class MsgStream;
 #include "TrkGeometry/OverlapDescriptor.h"
 #include "TrkNeutralParameters/NeutralParameters.h"
 #include "TrkParameters/TrackParameters.h"
+
+#include <memory>
 
 namespace Trk {
 
@@ -64,6 +66,7 @@ enum LayerType { passive = 0, active = 1 };
    [....] - other
 
    @author Andreas.Salzburger@cern.ch
+   @author Christos Anastopoulos (Athena MT)
 
 */
 
@@ -74,31 +77,26 @@ class Layer {
 
   /**Constructor with MaterialProperties */
   Layer(const LayerMaterialProperties& laymatprop, double thickness = 0.,
-        OverlapDescriptor* od = nullptr, int ltype = int(passive));
+        std::unique_ptr<OverlapDescriptor> od = nullptr,
+        int ltype = int(passive));
 
   /**Constructor with pointer to SurfaceArray (passing ownership) */
-  Layer(SurfaceArray* surfaceArray, double thickness = 0.,
-        OverlapDescriptor* od = nullptr, int ltype = int(passive));
+  Layer(std::unique_ptr<SurfaceArray> surfaceArray, double thickness = 0.,
+        std::unique_ptr<OverlapDescriptor> = nullptr, int ltype = int(passive));
 
   /**Constructor with MaterialProperties and pointer SurfaceArray (passing
    * ownership) */
-  Layer(SurfaceArray* surfaceArray, const LayerMaterialProperties& laymatprop,
-        double thickness = 0., OverlapDescriptor* od = nullptr,
+  Layer(std::unique_ptr<SurfaceArray> surfaceArray, const LayerMaterialProperties& laymatprop,
+        double thickness = 0., std::unique_ptr<OverlapDescriptor> od = nullptr,
         int ltype = int(passive));
 
-  /**Copy Constructor for Layers */
-  Layer(const Layer& lay);
-
   /**Destructor*/
-  virtual ~Layer();
+  virtual ~Layer() = default;
 
-  /** Assignment operator */
-  Layer& operator=(const Layer& lay);
-
-  /** Return the entire SurfaceArray, returns 0 if no SurfaceArray*/
+  /** Return the entire SurfaceArray, returns nullptr if no SurfaceArray*/
   const SurfaceArray* surfaceArray() const;
 
-  /** Return the entire SurfaceArray, returns 0 if no SurfaceArray*/
+  /** Return the entire SurfaceArray, returns nullptr if no SurfaceArray*/
   SurfaceArray* surfaceArray();
 
   /** If no subSurface array is defined or no subSurface can be found
@@ -224,15 +222,12 @@ class Layer {
   /** set the Layer coding */
   void setLayerType(int identifier);
 
-  /** boolean method to check if the layer needs a LayerMaterialProperties */
-  bool needsMaterialProperties() const;
-
   /** assignMaterialPropeties */
   void assignMaterialProperties(const LayerMaterialProperties&,
                                 double scale = 1.0);
 
   /** move the Layer */
-  virtual void moveLayer(Amg::Transform3D&){};
+  virtual void moveLayer(Amg::Transform3D&) = 0;
 
   /**register Volume associated to the layer */
   void registerRepresentingVolume(const Volume* theVol);
@@ -275,7 +270,7 @@ class Layer {
 
   /** resize layer to the TrackingVolume dimensions - to be overloaded by the
    * extended classes*/
-  virtual void resizeLayer(const VolumeBounds&, double) {}
+  virtual void resizeLayer(const VolumeBounds&, double) = 0;
 
   /** resize and reposition layer : dedicated for entry layers */
   virtual void resizeAndRepositionLayer(const VolumeBounds& vBounds,
@@ -283,28 +278,35 @@ class Layer {
                                         double envelope = 1.) = 0;
 
  protected:
-   SurfaceArray* m_surfaceArray; //!< SurfaceArray on this layer Surface
-   //!< MaterialPoperties of this layer Surface
-   SharedObject<LayerMaterialProperties> m_layerMaterialProperties;
-   //!< thickness of the Layer
-   double m_layerThickness;
-   //!< descriptor for overlap/next surface
-   OverlapDescriptor* m_overlapDescriptor;
+  /**Copy Constructor for Derived classes */
+  Layer(const Layer& lay);
+  /** Assignment operator for Derived classes*/
+  Layer& operator=(const Layer& lay);
 
-   // These are stored by pointers and never deleted as they belong to the
-   // Volume
-   //!< the previous Layer according to BinGenUtils
-   const Layer* m_previousLayer;
-   const Layer* m_nextLayer;       //!< next Layer according to BinGenUtils
-   const BinUtility* m_binUtility; //!< BinUtility for next/previous decission
-   //!< Enclosing TrackingVolume
-   const TrackingVolume* m_enclosingTrackingVolume;
-   //!< Enclosing DetachedTrackingVolume
-   const DetachedTrackingVolume* m_enclosingDetachedTrackingVolume;
-   LayerIndex m_index;                 //!< LayerIndex
-   int m_layerType;                    //!< active passive layer
-   const Volume* m_representingVolume; //!< Representing Volume
-   double m_ref; //!< reference measure for local coordinate convertors
+  //!< SurfaceArray on this layer Surface (owning ptr)
+  std::unique_ptr<SurfaceArray> m_surfaceArray;
+  //!< MaterialPoperties of this layer Surface
+  std::unique_ptr<LayerMaterialProperties> m_layerMaterialProperties;
+  //!< thickness of the Layer
+  double m_layerThickness;
+  //!< descriptor for overlap/next surface (owning ptr)
+  std::unique_ptr<OverlapDescriptor> m_overlapDescriptor;
+
+  // These are stored by not owning pointers belong to the  Volume
+  //!< the previous Layer according to BinGenUtils
+  const Layer* m_previousLayer;
+  //!< next Layer according to BinGenUtils
+  const Layer* m_nextLayer;
+  //!< BinUtility for next/previous decision
+  const BinUtility* m_binUtility;
+  //!< Enclosing TrackingVolume
+  const TrackingVolume* m_enclosingTrackingVolume;
+  //!< Enclosing DetachedTrackingVolume
+  const DetachedTrackingVolume* m_enclosingDetachedTrackingVolume;
+
+  LayerIndex m_index;  //!< LayerIndex
+  int m_layerType;     //!< active passive layer
+  double m_ref;        //!< reference measure for local coordinate convertors
 };
 
 }  // namespace Trk

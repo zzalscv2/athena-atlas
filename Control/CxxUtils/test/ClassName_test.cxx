@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CxxUtils/test/ClassName_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -33,6 +31,7 @@ void test1()
     assert (cn.qualifiedName() == "Foo");
     assert (cn.fullName() == "Foo");
     assert (cn.isConst() == false);
+    assert (cn.ntargs() == 0);
   }
 
   {
@@ -41,6 +40,7 @@ void test1()
     assert (cn.qualifiedName() == "Foo");
     assert (cn.fullName() == "const Foo");
     assert (cn.isConst() == true);
+    assert (cn.ntargs() == 0);
   }
 
   {
@@ -49,6 +49,7 @@ void test1()
     assert (cn.qualifiedName() == "Foo");
     assert (cn.fullName() == "const Foo");
     assert (cn.isConst() == true);
+    assert (cn.ntargs() == 0);
   }
 
   {
@@ -57,6 +58,7 @@ void test1()
     assert (cn.qualifiedName() == "Foo::Bar::Fee");
     assert (cn.fullName() == "Foo::Bar::Fee");
     assert (cn.isConst() == false);
+    assert (cn.ntargs() == 0);
   }
 
 
@@ -66,6 +68,8 @@ void test1()
     assert (cn.qualifiedName() == "Foo");
     assert (cn.fullName() == "Foo<Bar>");
     assert (cn.isConst() == false);
+    assert (cn.ntargs() == 1);
+    assert (cn.targ(0).fullName() == "Bar");
   }
 
   {
@@ -74,6 +78,9 @@ void test1()
     assert (cn.qualifiedName() == "Foo");
     assert (cn.fullName() == "Foo<Bar,Fee>");
     assert (cn.isConst() == false);
+    assert (cn.ntargs() == 2);
+    assert (cn.targ(0).fullName() == "Bar");
+    assert (cn.targ(1).fullName() == "Fee");
   }
 
   {
@@ -82,6 +89,9 @@ void test1()
     assert (cn.qualifiedName() == "Foo");
     assert (cn.fullName() == "Foo<const Bar,Fee>");
     assert (cn.isConst() == false);
+    assert (cn.ntargs() == 2);
+    assert (cn.targ(0).fullName() == "const Bar");
+    assert (cn.targ(1).fullName() == "Fee");
   }
 
   {
@@ -90,6 +100,9 @@ void test1()
     assert (cn.qualifiedName() == "Foo");
     assert (cn.fullName() == "const Foo<const Bar,Fee>");
     assert (cn.isConst() == true);
+    assert (cn.ntargs() == 2);
+    assert (cn.targ(0).fullName() == "const Bar");
+    assert (cn.targ(1).fullName() == "Fee");
   }
 
   {
@@ -98,6 +111,9 @@ void test1()
     assert (cn.qualifiedName() == "A::B<C>::Foo");
     assert (cn.fullName() == "A::B<C>::Foo<Bar,D<E> >");
     assert (cn.isConst() == false);
+    assert (cn.ntargs() == 2);
+    assert (cn.targ(0).fullName() == "Bar");
+    assert (cn.targ(1).fullName() == "D<E>");
   }
 
   {
@@ -106,12 +122,15 @@ void test1()
     assert (cn.qualifiedName() == "A");
     assert (cn.fullName() == "A<const S<T> >");
     assert (cn.isConst() == false);
+    assert (cn.ntargs() == 1);
+    assert (cn.targ(0).fullName() == "const S<T>");
   }
 
   {
     ClassName cn ("const std::foo");
     assert (cn.name() == "foo");
     assert (cn.qualifiedName() == "std::foo");
+    assert (cn.ntargs() == 0);
   }
 
   EXPECT_EXCEPTION (ClassName::ExcBadClassName, ClassName cn ("A>B"));

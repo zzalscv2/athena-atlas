@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile bad channels"""
 
@@ -11,7 +11,7 @@ def TileBadChannelsCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile bad channels conditions algorithm
 
     Arguments:
-        flags:  -- Athena configuration flags (ConfigFlags)
+        flags:  -- Athena configuration flags
     Keyword arguments:
         Source: -- source of Tile bad channels (COOL, FILE). Defaults to COOL.
         TileBadChannels -- name of Tile bad channels object. Defaults to TileBadChannels.
@@ -76,7 +76,7 @@ def TileBadChannelsCondAlgCfg(flags, **kwargs):
 def TileBadChanToolCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile bad channel tool
         Arguments:
-        flags:  -- Athena configuration flags (ConfigFlags)
+        flags:  -- Athena configuration flags
     Keyword arguments:
         Source: -- source of Tile bad channels (COOL, FILE). Defaults to COOL.
         TileBadChannels -- name of Tile bad channels object. Defaults to TileBadChannels.
@@ -104,7 +104,7 @@ def TileBadChanToolCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -112,12 +112,13 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.lock()
 
     acc = ComponentAccumulator()
 
-    badChanTool =  acc.popToolsAndMerge( TileBadChanToolCfg(ConfigFlags) )
+    badChanTool =  acc.popToolsAndMerge( TileBadChanToolCfg(flags) )
     print(badChanTool)
 
     acc.printConfig(withDetails = True, summariseProps = True)

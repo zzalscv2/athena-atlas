@@ -36,7 +36,6 @@ Trk::DenseEnvironmentsAmbiguityScoreProcessorTool::DenseEnvironmentsAmbiguitySco
   declareProperty("sharedProbCut"        , m_sharedProbCut           = 0.3);
   declareProperty("sharedProbCut2"       , m_sharedProbCut2          = 0.3);
   declareProperty("etaBounds"            , m_etaBounds,"eta intervals for internal monitoring");
-  declareProperty("ObserverTool"         , m_observerTool, "track observer tool");
 
 }
 //==================================================================================================
@@ -224,7 +223,6 @@ Trk::DenseEnvironmentsAmbiguityScoreProcessorTool::updatePixelSplitInformationFo
   InDet::PixelClusterSplitProb splitProb = m_splitProbTool->splitProbability( *clusterTrkPara.first, *clusterTrkPara.second );
   // update the split prob information on the cluster --  the use of the split flag is now questionable -- possible itP will now indicate if the cluster is shared between multiple tracks
   const InDet::PixelCluster* pixelCluster = clusterTrkPara.first;
-  //TODO: const_cast?
   if (msgLvl(MSG::DEBUG)) {
      const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo &splitProbCurrent = (pixelCluster
                                                                                       ? splitProbContainer.splitProbability(pixelCluster)

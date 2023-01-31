@@ -14,6 +14,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "CxxUtils/CachedPointer.h"
+#include "CxxUtils/checker_macros.h"
 #include "FastCaloSim/BasicCellBuilderTool.h"
 #include "FastCaloSim/CellInfoContainer.h"
 #include "FastSimulationEvent/GenParticleEnergyDepositMap.h"
@@ -50,7 +51,7 @@ class CellInfoContainer;
 #include "TrkParameters/TrackParameters.h"
 
 
-class FastShowerCellBuilderTool: public BasicCellBuilderTool
+class ATLAS_NOT_THREAD_SAFE FastShowerCellBuilderTool: public BasicCellBuilderTool  // obsolete: ATLASSIM-6133
 {
 public:
   struct Stats {

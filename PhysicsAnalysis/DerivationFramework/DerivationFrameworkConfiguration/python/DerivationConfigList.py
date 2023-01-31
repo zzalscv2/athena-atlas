@@ -59,6 +59,9 @@ from DerivationFrameworkBPhys.BPHY18 import BPHY18Cfg
 from DerivationFrameworkBPhys.BPHY21 import BPHY21Cfg
 from DerivationFrameworkBPhys.BPHY22 import BPHY22Cfg
 
+# STDM derivations
+from DerivationFrameworkSM.STDM7 import STDM7Cfg
+
 # TileCal derivations
 from DerivationFrameworkTileCal.TCAL1 import TCAL1Cfg
 from DerivationFrameworkTileCal.TCAL2 import TCAL2Cfg
@@ -100,6 +103,10 @@ from DerivationFrameworkJetEtMiss.JETM12 import JETM12Cfg
 # JETM14: MET trigger (single mu selection)
 from DerivationFrameworkJetEtMiss.JETM14 import JETM14Cfg
 
+# Trigger derivations
+# TRIG8: ID trigger performance (extra trigger info eg online tracks and RoIs [idperf chain skimming])
+from DerivationFrameworkTrigger.TRIG8 import TRIG8Cfg
+
 # Avoids compilation warnings from Flake8
 __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'TRUTH0Cfg','TRUTH1Cfg','TRUTH3Cfg',
@@ -114,9 +121,11 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'BPHY10Cfg', 'BPHY12Cfg', 'BPHY13Cfg', 'BPHY15Cfg',
            'BPHY16Cfg', 'BPHY18Cfg',
            'BPHY21Cfg', 'BPHY22Cfg',
+           'STDM7Cfg',
            'TCAL1Cfg', 'TCAL2Cfg',
            'EGAM1Cfg', 'EGAM2Cfg', 'EGAM3Cfg', 'EGAM4Cfg', 'EGAM5Cfg',
            'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg',
            'JETM1Cfg','JETM2Cfg','JETM3Cfg','JETM4Cfg','JETM5Cfg','JETM6Cfg',
            'JETM10Cfg','JETM11Cfg','JETM12Cfg','JETM14Cfg',
+           'TRIG8Cfg'
            ]

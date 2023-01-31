@@ -17,6 +17,7 @@
 #include <AsgAnalysisAlgorithms/AsgUnionSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgViewFromSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgxAODNTupleMakerAlg.h>
+#include <AsgAnalysisAlgorithms/AsgxAODMetNTupleMakerAlg.h>
 #include <AsgAnalysisAlgorithms/EventFlagSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/EventSelectionByObjectFlagAlg.h>
 #include <AsgAnalysisAlgorithms/IsolationCloseByCorrectionAlg.h>
@@ -42,6 +43,7 @@ DECLARE_COMPONENT (CP::AsgShallowCopyAlg)
 DECLARE_COMPONENT (CP::AsgUnionSelectionAlg)
 DECLARE_COMPONENT (CP::AsgViewFromSelectionAlg)
 DECLARE_COMPONENT (CP::AsgxAODNTupleMakerAlg)
+DECLARE_COMPONENT (CP::AsgxAODMetNTupleMakerAlg)
 DECLARE_COMPONENT (CP::EventFlagSelectionAlg)
 DECLARE_COMPONENT (CP::EventSelectionByObjectFlagAlg)
 DECLARE_COMPONENT (CP::IsolationCloseByCorrectionAlg)

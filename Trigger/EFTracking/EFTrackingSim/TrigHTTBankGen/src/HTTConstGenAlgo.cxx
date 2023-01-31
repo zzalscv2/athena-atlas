@@ -759,8 +759,8 @@ void HTTConstGenAlgo::writeSectors()
     FILE *sector_file = fopen(sector_filename.c_str(),"w");
     FILE *sectorHW_file = fopen(sectorHW_filename.c_str(),"w");
 
-    fprintf(sector_file,"%lu %d\n",m_geo_consts.size(),m_nLayers);
-    fprintf(sectorHW_file,"%lu %d\n",m_geo_consts.size(),m_nLayers);
+    fprintf(sector_file,"%zu %d\n",m_geo_consts.size(),m_nLayers);
+    fprintf(sectorHW_file,"%zu %d\n",m_geo_consts.size(),m_nLayers);
 
     // Write sectors
     HTTMatrixReader reader(m_good_tree, m_nLayers, m_nCoords);
@@ -769,16 +769,16 @@ void HTTConstGenAlgo::writeSectors()
         HTTMatrixAccumulator const & acc = reader.getAccumulator();
         size_t sector = reader.getEntry();
 
-        fprintf(sector_file,"%lu ", sector);
-        fprintf(sectorHW_file,"%lu ", sector);
+        fprintf(sector_file,"%zu ", sector);
+        fprintf(sectorHW_file,"%zu ", sector);
         for(int i=0;i<m_nLayers;i++)
         {
             fprintf(sector_file,"%d ", acc.FTK_modules[i]);
             fprintf(sectorHW_file,"%d ", reader.getModules()[i]);
         }
-        fprintf(sector_file,"0 %lu", acc.track_bins.size());
+        fprintf(sector_file,"0 %zu", acc.track_bins.size());
         fprintf(sector_file,"\n");
-        fprintf(sectorHW_file,"0 %lu", acc.track_bins.size());
+        fprintf(sectorHW_file,"0 %zu", acc.track_bins.size());
         fprintf(sectorHW_file,"\n");
 
         for (HTTTrackParsI const & pars : acc.track_bins)
@@ -805,7 +805,7 @@ void HTTConstGenAlgo::DumpConstants(std::vector<geo_constants> &geo_consts, std:
     fprintf(const_file," NPLANES\n");
     fprintf(const_file," %d\n",m_nLayers);
     fprintf(const_file," NSECTORS\n");
-    fprintf(const_file,"%lu\n",geo_consts.size());
+    fprintf(const_file,"%zu\n",geo_consts.size());
     fprintf(const_file," NDIM\n");
     fprintf(const_file," 2\n");
 
@@ -815,7 +815,7 @@ void HTTConstGenAlgo::DumpConstants(std::vector<geo_constants> &geo_consts, std:
     {
         //gcon file
         fprintf(const_file,"sector\n");
-        fprintf(const_file,"%lu\n", sector);
+        fprintf(const_file,"%zu\n", sector);
 
         fprintf(const_file," Vc \n");
         for(int i=0;i<m_nCoords;i++){

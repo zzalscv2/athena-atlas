@@ -9,7 +9,6 @@ from Digitization.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolde
 from Digitization.PileUpToolsConfig import PileUpToolsCfg
 from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
 
 # The earliest bunch crossing time for which interactions will be sent
 # to the HGTD Digitization code.
@@ -48,6 +47,10 @@ def HGTD_SurfaceChargesGeneratorCfg(flags, name="HGTD_SurfaceChargesGenerator", 
 
 def HGTD_DigitizationBasicToolCfg(flags, name="HGTD_DigitizationBasicTool", **kwargs):
     """Return ComponentAccumulator with configured HGTD_DigitizationTool"""
+    if flags.HGTD.Geometry.useGeoModelXml:
+        from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+    else:
+        from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
     acc = HGTD_ReadoutGeometryCfg(flags)
     # set up tool handles
     kwargs.setdefault("FrontEnd", acc.popToolsAndMerge(HGTD_FrontEndToolCfg(flags)))

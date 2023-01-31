@@ -69,7 +69,7 @@ namespace FlavorTagDiscriminants {
     m_muonMinpT = muonMinpT;
     m_flip_config = flipConfig;
 
-    m_muonSelectionTool.reset(new CP::MuonSelectionTool("MuonSelectionTool"));
+    m_muonSelectionTool.reset(new CP::MuonSelectionTool("BTaggingMuonSelectionTool"));
     StatusCode sc_init = m_muonSelectionTool->initialize();
     if (!sc_init.isSuccess()) {
       throw std::runtime_error("Failed to initialize MuonSelectionTool");

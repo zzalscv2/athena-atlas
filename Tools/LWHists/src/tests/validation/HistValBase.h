@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -22,8 +22,6 @@
 #include <string>
 #include <cassert>
 #include "LWHists/LWHistControls.h"
-
-static bool HistVal_trigger_conversion_all = false;
 
 class HistValBase {
 public:
@@ -59,14 +57,14 @@ public:
   { return m_compareBinContentsOnEachFill; }
 
   virtual void compareBinContents() const = 0;//bin contents (incl. over/underflow)
-  virtual void compareMetaData() const = 0;
-  void compareAllContents() const;//both of the above
-  virtual void compareTH1s() const = 0;//compare the TH1 and the TH1
-                                       //created from the light weight instance
-                                       //Extend in derived.
+  virtual void compareMetaData() = 0;
+  void compareAllContents();//both of the above
+  virtual void compareTH1s() = 0;//compare the TH1 and the TH1
+                                 //created from the light weight instance
+                                 //Extend in derived.
 
-  virtual void compareFastLoop() const = 0;
-  void compareAll() const;//compareAllContents(), compareTH1Fs() and compareFastLoop()
+  virtual void compareFastLoop() = 0;
+  void compareAll();//compareAllContents(), compareTH1Fs() and compareFastLoop()
 
   virtual void triggerConversionToROOTHist() = 0;
 
@@ -90,7 +88,7 @@ protected:
   bool converted() const { return m_triggeredConversionToROOTHist; }
   std::string convertedRootName(const std::string& n)
   {
-    static std::string prefix="::trigger::";
+    static const std::string prefix="::trigger::";
     //To avoid name clashes
     if (m_triggeredConversionToROOTHist)
       return prefix+n;

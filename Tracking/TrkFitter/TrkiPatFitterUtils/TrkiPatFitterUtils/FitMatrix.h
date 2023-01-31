@@ -10,11 +10,10 @@
 
 namespace Trk {
 
-struct fitMatrix
-{
+struct fitMatrix {
   double derivative[mxmeas][mxparam];
 };
 
-} // end of namespace
+}  // namespace Trk
 
-#endif // TRKIPATFITTERUTILS_FITMATRIX_H
+#endif  // TRKIPATFITTERUTILS_FITMATRIX_H

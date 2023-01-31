@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #********************************************************************
 # TauCommon.py
@@ -32,6 +32,10 @@ def AddTauAugmentation(Seq=None, doVeryLoose=None, doLoose=None, doMedium=None, 
     cppyy.load_library('libTauAnalysisTools')
 
     TauAugmentationTools = []
+
+    # note: the selection cuts in TauCommon are not the same as in TauCommonConfig
+    # here we only require a JetIDWP, in TauCommonConfig we require a more complete set of cuts defined in tau_selection_XX.conf
+    # so in TauCommon, we don't need to schedule the recalculation of fixed eVeto WPs within AddTauAugmentation
 
     if doVeryLoose:
         if not hasattr(ToolSvc,"TauVeryLooseWrapper"):
@@ -203,6 +207,7 @@ def addDiTauLowPt(Seq=None):
 #=======================================
 # TauWP decoration
 #=======================================
+# this should in principle be updated to support Deep Set tau ID, but legacy config is no longer maintained
 def addTauWPDecoration(Seq=None, evetoFixTag=None):
 
     if not Seq or hasattr(Seq,"TauWPDecorator"+Seq.name()):
@@ -212,7 +217,7 @@ def addTauWPDecoration(Seq=None, evetoFixTag=None):
     print ("Adding Tau WP Decoration")
     TauWPDecorations = []
     from AthenaCommon.AppMgr import ToolSvc
-    from DerivationFrameworkTau.DerivationFrameworkTauConf import DerivationFramework__TauWPDecoratorWrapper
+    from DerivationFrameworkTau.DerivationFrameworkTauConf import DerivationFramework__TauIDDecoratorWrapper
     
     if (evetoFixTag == "v1"):
         if not hasattr(ToolSvc,"TauWPDecoratorEvetoWrapper"):
@@ -231,9 +236,9 @@ def addTauWPDecoration(Seq=None, evetoFixTag=None):
                                                   DefineWPs = True )
             ToolSvc += evetoTauWPDecorator
 
-            evetoTauWPDecoratorWrapper = DerivationFramework__TauWPDecoratorWrapper(name               = "TauWPDecoratorEvetoWrapper",
+            evetoTauWPDecoratorWrapper = DerivationFramework__TauIDDecoratorWrapper(name               = "TauWPDecoratorEvetoWrapper",
                                                                                     TauContainerName   = "TauJets",
-                                                                                    TauWPDecorator     = evetoTauWPDecorator)
+                                                                                    TauIDTools         = [evetoTauWPDecorator])
             ToolSvc += evetoTauWPDecoratorWrapper
         else:
             evetoTauWPDecoratorWrapper = getattr(ToolSvc,"TauWPDecoratorEvetoWrapper")

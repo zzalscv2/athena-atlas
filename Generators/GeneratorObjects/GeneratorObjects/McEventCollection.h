@@ -71,6 +71,8 @@ inline McEventCollection& McEventCollection::operator=(const McEventCollection& 
       std::shared_ptr<HepMC3::GenRunInfo> nri =  std::make_shared<HepMC3::GenRunInfo>(*(ri.get()));
       nev->set_run_info(nri);
     }
+    // Fill barcodes attribute in copied GenEvent
+    HepMC::fillBarcodesAttribute(nev);
 #endif
     DataVector<HepMC::GenEvent>::push_back(nev);
     

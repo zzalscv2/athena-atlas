@@ -4,6 +4,7 @@
 #include "GeneratorFilters/TTbarWithJpsimumuFilter.h"
 
 #include "GaudiKernel/MsgStream.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 //--------------------------------------------------------------------------
 TTbarWithJpsimumuFilter::TTbarWithJpsimumuFilter(const std::string& fname,
@@ -46,9 +47,9 @@ StatusCode TTbarWithJpsimumuFilter::filterEvent() {
         // Loop over all truth particles in the event
         // ===========================================
         for(auto part: *genEvt) {
-            if(HepMC::barcode(part) > 200000) break;
+            if(HepMC::is_simulation_particle(part)) break;
             
-            int pdgid = abs(part->pdg_id());
+            int pdgid = std::abs(part->pdg_id());
             // don't loose time checking all if one found
             if (pdgid == 443) {
                if(!isLeptonDecay(part,13)) continue;
@@ -73,17 +74,14 @@ StatusCode TTbarWithJpsimumuFilter::filterEvent() {
 bool TTbarWithJpsimumuFilter::isLeptonDecay(HepMC::ConstGenParticlePtr part, int type) const {
     auto end = part->end_vertex();
     if(!end) return true;
-    int partbarcode = HepMC::barcode(part);
 #ifdef HEPMC3
     for (auto p: end->particles_out()) {
-        if (partbarcode > HepMC::barcode(p)) continue;
         if (std::abs(p->pdg_id()) !=  type ) return false;
     }
 #else
     HepMC::GenVertex::particle_iterator firstChild = end->particles_begin(HepMC::children);
     HepMC::GenVertex::particle_iterator endChild = end->particles_end(HepMC::children);
     for(; firstChild!=endChild; ++firstChild) {
-        if( partbarcode > (*firstChild)->barcode() ) continue; /// protection for sherpa
         int childtype = std::abs((*firstChild)->pdg_id());
         if( childtype != type ) {
             return false;

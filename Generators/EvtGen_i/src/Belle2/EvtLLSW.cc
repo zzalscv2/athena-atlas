@@ -70,12 +70,12 @@ void EvtLLSW::initProbMax()
   lnum = getDaug(1);
 
   // Leptons
-  static EvtId EM = EvtPDL::getId("e-");
-  static EvtId EP = EvtPDL::getId("e+");
-  static EvtId MUM = EvtPDL::getId("mu-");
-  static EvtId MUP = EvtPDL::getId("mu+");
-  static EvtId TAUM = EvtPDL::getId("tau-");
-  static EvtId TAUP = EvtPDL::getId("tau+");
+  static const EvtId EM = EvtPDL::getId("e-");
+  static const EvtId EP = EvtPDL::getId("e+");
+  static const EvtId MUM = EvtPDL::getId("mu-");
+  static const EvtId MUP = EvtPDL::getId("mu+");
+  static const EvtId TAUM = EvtPDL::getId("tau-");
+  static const EvtId TAUP = EvtPDL::getId("tau+");
 
 
   if (lnum == EP || lnum == EM || lnum == MUP || lnum == MUM) {
@@ -96,19 +96,19 @@ void EvtLLSW::init()
   if (getNArg() < 2) checkNArg(2);
   checkNDaug(3);
 
-  static EvtId D1P1P = EvtPDL::getId("D_1+");
-  static EvtId D1P1N = EvtPDL::getId("D_1-");
-  static EvtId D1P10 = EvtPDL::getId("D_10");
-  static EvtId D1P1B = EvtPDL::getId("anti-D_10");
-  static EvtId D3P2P = EvtPDL::getId("D_2*+");
-  static EvtId D3P2N = EvtPDL::getId("D_2*-");
-  static EvtId D3P20 = EvtPDL::getId("D_2*0");
-  static EvtId D3P2B = EvtPDL::getId("anti-D_2*0");
+  static const EvtId D1P1P = EvtPDL::getId("D_1+");
+  static const EvtId D1P1N = EvtPDL::getId("D_1-");
+  static const EvtId D1P10 = EvtPDL::getId("D_10");
+  static const EvtId D1P1B = EvtPDL::getId("anti-D_10");
+  static const EvtId D3P2P = EvtPDL::getId("D_2*+");
+  static const EvtId D3P2N = EvtPDL::getId("D_2*-");
+  static const EvtId D3P20 = EvtPDL::getId("D_2*0");
+  static const EvtId D3P2B = EvtPDL::getId("anti-D_2*0");
 
-  static EvtId DS1P = EvtPDL::getId("D_s1+");
-  static EvtId DS1M = EvtPDL::getId("D_s1-");
-  static EvtId DS2STP = EvtPDL::getId("D_s2*+");
-  static EvtId DS2STM = EvtPDL::getId("D_s2*-");
+  static const EvtId DS1P = EvtPDL::getId("D_s1+");
+  static const EvtId DS1M = EvtPDL::getId("D_s1-");
+  static const EvtId DS2STP = EvtPDL::getId("D_s2*+");
+  static const EvtId DS2STM = EvtPDL::getId("D_s2*-");
 
   EvtId daughter = getDaug(0);
 

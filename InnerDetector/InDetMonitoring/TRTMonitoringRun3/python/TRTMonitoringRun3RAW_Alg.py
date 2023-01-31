@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
 def TRTHoleSearchCfg(flags, **kwargs) :
@@ -27,16 +27,9 @@ def TRTHoleSearch(name='TRTTrackHoleSearchTool', **kwargs) :
 
 
 def TRTMonitoringRun3RAW_AlgConfig(inputFlags):
-    from AthenaConfiguration.ComponentFactory import isRun3Cfg
-    if isRun3Cfg():
-        from AthenaMonitoring import AthMonitorCfgHelper
-        isOnline = inputFlags.Common.isOnline
-        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-        rv = ComponentAccumulator()
-    else:
-        from AthenaMonitoring import AthMonitorCfgHelperOld as AthMonitorCfgHelper
-        from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-        isOnline = athenaCommonFlags.isOnline
+    from AthenaMonitoring import AthMonitorCfgHelper
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    rv = ComponentAccumulator()
     helper = AthMonitorCfgHelper(inputFlags, 'TRTMonitoringCfg')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
@@ -47,12 +40,9 @@ def TRTMonitoringRun3RAW_AlgConfig(inputFlags):
                                               )
 
     # @TODO really run the TRT hole search ? Hole search still seems to use a condition service
-    if isRun3Cfg():
-        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-        algTRTMonitoringRun3RAW.TrackSummaryTool = rv.popToolsAndMerge(InDetTrackSummaryToolCfg(inputFlags))
-        algTRTMonitoringRun3RAW.trt_hole_search= rv.popToolsAndMerge( TRTHoleSearchCfg(inputFlags) )
-    else :
-        algTRTMonitoringRun3RAW.trt_hole_search=TRTHoleSearch()
+    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
+    algTRTMonitoringRun3RAW.TrackSummaryTool = rv.popToolsAndMerge(InDetTrackSummaryToolCfg(inputFlags))
+    algTRTMonitoringRun3RAW.trt_hole_search= rv.popToolsAndMerge( TRTHoleSearchCfg(inputFlags) )
 
 
     maxLumiBlockSummary  = 3000
@@ -142,7 +132,7 @@ def TRTMonitoringRun3RAW_AlgConfig(inputFlags):
                 rdoEndcapGroup.defineHistogram('strawNumber,HitWMap_Ar_passed;hHitWMap_Ar_{0}'.format(side[iside]),cutmask='isAr',type='TProfile',title='Leading Edge in Time Window: Argon Straws (E{0});Straw Number in Stack;Probability'.format(side[iside]),path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')   
         for iside in range(2):
             regionTag = ' (' + beId[ibe] + sideId[iside] + ')'
-            regionMarker = (beId[ibe] + sideId[iside]) if isOnline is True else (sideId[iside])
+            regionMarker = (beId[ibe] + sideId[iside]) if inputFlags.Common.isOnline is True else (sideId[iside])
             rdoLLHLOccGroup = helper.addGroup(algTRTMonitoringRun3RAW,'RDOLLHLOccHistograms{0}{1}'.format(ibe,iside))
             rdoLLHLOccGroup.defineHistogram('AvgHLOcc_side_x,AvgHLOcc_side_y;hAvgHLOcc_{0}'.format(regionMarker),type='TProfile',title='Avg. HL Occupancy{0};{1};Occupancy'.format(regionTag,stackOrSector[ibe]),path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=32,xmin=1,xmax=33,opt='kAlwaysCreate')
             rdoLLHLOccGroup.defineHistogram('AvgLLOcc_side_x,AvgLLOcc_side_y;hAvgLLOcc_{0}'.format(regionMarker),type='TProfile',title='Avg. LL Occupancy{0};{1};Occupancy'.format(regionTag,stackOrSector[ibe]),path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=32,xmin=1,xmax=33,opt='kAlwaysCreate')
@@ -260,8 +250,5 @@ def TRTMonitoringRun3RAW_AlgConfig(inputFlags):
                 rdoShiftRebinnedEndcapGroup.defineHistogram('NHLHitsperLB_x,NHLHitsperLB_y;hNHLHitsperLB_{0}'.format(sideId[iside]),type='TProfile',title='Avg. HL Occupancy{0};Luminosity Block;Occupancy'.format(regionTag),path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=maxLumiBlockShift+1,xmin=-0.5,xmax=maxLumiBlockShift+0.5,duration='run',opt='kAlwaysCreate') #CAN_REBIN(m_hNHLHitsperLB_E[iside]);
 
 
-    if isRun3Cfg():
-        rv.merge(helper.result())
-        return rv
-    else:
-        return helper.result()
+    rv.merge(helper.result())
+    return rv

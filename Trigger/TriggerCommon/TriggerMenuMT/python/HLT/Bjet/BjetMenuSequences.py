@@ -1,10 +1,10 @@
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 # menu components
 from AthenaCommon.CFElements import seqAND, findAllAlgorithms
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable, appendCAtoAthena
-from AthenaCommon.Configurable import ConfigurableRun3Behavior
+from AthenaCommon.Configurable import ConfigurableCABehavior
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
@@ -29,7 +29,9 @@ def getBJetSequence(flags, jc_name=None):
 
     config=getInDetTrigConfig('jet')
     prmVtxKey = config.vertex
-    outputRoIName = getInDetTrigConfig('bjet').roi
+
+    bjetconfig    = getInDetTrigConfig('bjet')
+    outputRoIName = bjetconfig.roi
 
     jc_key = f'{jc_name}_'
     # Output container names as defined in TriggerEDMRun3
@@ -43,7 +45,10 @@ def getBJetSequence(flags, jc_name=None):
         RoITool = ViewCreatorCentredOnJetWithPVConstraintROITool(
             RoisWriteHandleKey  = recordable( outputRoIName ),
             VertexReadHandleKey = prmVtxKey,
-            PrmVtxLink = prmVtxKey.replace( "HLT_","" ),
+            PrmVtxLink  = prmVtxKey.replace( "HLT_","" ),
+            RoIEtaWidth = bjetconfig.etaHalfWidth,
+            RoIPhiWidth = bjetconfig.phiHalfWidth,
+            RoIZWidth   = bjetconfig.zedHalfWidth,
         ),
         Views = f"BTagViews_{jc_name}",
         InViewRoIs = "InViewRoIs",
@@ -62,10 +67,10 @@ def getBJetSequence(flags, jc_name=None):
         inputJets=InputMakerAlg.InViewJets
     )
 
-    with ConfigurableRun3Behavior():
+    with ConfigurableCABehavior():
         # Flavour Tagging
         from TriggerMenuMT.HLT.Bjet.BjetFlavourTaggingConfiguration import getFlavourTagging
-        acc_flavourTaggingAlgs = getFlavourTagging(
+        acc_flavourTaggingAlgs = getFlavourTagging(flags,
             inputJets=str(InputMakerAlg.InViewJets),
             inputVertex=prmVtxKey,
             inputTracks=PTTrackParticles[0],

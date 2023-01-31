@@ -33,8 +33,6 @@ topAlg = AlgSequence()
 from Hijing_i.Hijing_iConf import Hijing
 topAlg += Hijing()
 
-theApp.ExtSvc += ["AtRndmGenSvc"]
-
 # Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
 svcMgr.MessageSvc.OutputLevel  = 4
 svcMgr.MessageSvc.defaultLimit = 100000
@@ -59,13 +57,6 @@ seed1 = random.randint(2<<15-1,1<<31-1)
 seed2 = random.randint(2<<15-1,1<<31-1)
 seed1 &= 0xfffffffe
 seed2 &= 0xfffffffe
-
-if not hasattr(svcMgr, 'AtRndmGenSvc'):
-    from RngComps.RngCompsConf import AtRndmGenSvc
-    svcMgr += AtRndmGenSvc()
-    
-svcMgr.AtRndmGenSvc.Seeds = \
-       ["HIJING "+str(seed1)+" "+str(seed2), "HIJING_INIT 53240261 53827126"]
 
 Hijing = Algorithm( "Hijing" )
 Hijing.Initialize = ["efrm 5520.", "frame CMS", "proj A", "targ A",

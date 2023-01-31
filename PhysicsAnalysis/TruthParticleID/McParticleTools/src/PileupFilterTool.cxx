@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -45,7 +45,7 @@ PileupFilterTool::PileupFilterTool( const std::string& type,
 				    const IInterface* parent ) : 
   TruthParticleFilterBaseTool( type, name, parent ),
   m_barcodes (   ),
-  m_tesIO    ( 0 )
+  m_tesIO    ( nullptr )
 {
 
   declareProperty( "rIsolation",
@@ -105,7 +105,7 @@ PileupFilterTool::~PileupFilterTool()
 StatusCode PileupFilterTool::buildMcAod( const McEventCollection* in,
 					    McEventCollection* out )
 {
-  if ( 0 == in || 0 == out ) {
+  if ( nullptr == in || nullptr == out ) {
     ATH_MSG_ERROR("Invalid pointer to McEventCollection !" << endmsg
 		  << "  in: " << in << endmsg
 		  << " out: " << out);
@@ -169,7 +169,7 @@ StatusCode PileupFilterTool::selectSpclMcBarcodes()
   m_barcodes.clear();
 
   //+++ Get True Vertices from Storegate
-  const McEventCollection* mcTruth(0);
+  const McEventCollection* mcTruth(nullptr);
   sc = evtStore()->retrieve(mcTruth, m_mcEventsReadHandleKey.key());
   if( sc.isFailure() ) {
     ATH_MSG_WARNING("MC Event " << m_mcEventsReadHandleKey.key() << " not found.");
@@ -196,7 +196,7 @@ StatusCode PileupFilterTool::selectSpclMcBarcodes()
 
      // Loop over all particles, selecting special ones
      // keep track of them using their barcodes
-     for (auto  part: *genEvent) {
+     for (const auto&  part: *genEvent) {
         const int id      = part->pdg_id();
         const HepMC::FourVector hlv = part->momentum();
         const double pt   = hlv.perp();
@@ -238,7 +238,7 @@ StatusCode PileupFilterTool::selectSpclMcBarcodes()
 
         // Children
         if( isSpcl && decayVtx ) {
-          for(auto child: *(part->end_vertex())) {
+          for(const auto& child: *(part->end_vertex())) {
              if( isGenerator(child) && !m_removeDecayToSelf) { 
 	       m_barcodes.insert(HepMC::barcode(child));// its not there already
              }
@@ -261,7 +261,7 @@ StatusCode PileupFilterTool::shapeGenEvent( McEventCollection* genAod )
     std::vector<HepMC::GenParticlePtr> going_out;
 
     std::list<int> evtBarcodes;
-    for ( auto p: **evt) {
+    for ( const auto& p: **evt) {
       evtBarcodes.push_back( HepMC::barcode(p) );
     }
 
@@ -270,7 +270,7 @@ StatusCode PileupFilterTool::shapeGenEvent( McEventCollection* genAod )
 	  ++itrBc ) {
 //AV:  We modify the event!
       HepMC::GenParticlePtr p = HepMC::barcode_to_particle((HepMC::GenEvent*)(*evt),*itrBc);
-      ATH_MSG_DEBUG("[pdg,bc]= " << p->pdg_id() << ", " << HepMC::barcode( p));
+      ATH_MSG_DEBUG("[pdg,particle]= " << p->pdg_id() << ", " << p);
       if ( m_barcodes.find(HepMC::barcode(p)) == m_barcodes.end() ) { 
 	going_out.push_back(p); // list of useless particles
 	HepMC::GenVertexPtr pvtx = p->production_vertex();
@@ -280,8 +280,7 @@ StatusCode PileupFilterTool::shapeGenEvent( McEventCollection* genAod )
 	if ( msgLvl(MSG::DEBUG) ) {
 	  msg(MSG::DEBUG)
 	    << "Removing [" 
-	    << p->pdg_id() << ", " 
-	    <<HepMC::barcode( p) << "]" 
+	    <<p << "]" 
 	    << "\tprod/endVtx: " << pvtx 
 	    << "/"  << evtx 
 	    << endmsg;
@@ -345,7 +344,7 @@ StatusCode PileupFilterTool::shapeGenEvent( McEventCollection* genAod )
     // ==> Get rid of them
     std::vector<HepMC::ConstGenVertexPtr> going_out_again;
     for ( HepMC::ConstGenVertexPtr v: (*evt)->vertices() ) {
-      if ( v->particles_in().size() == 0 && v->particles_out().size() == 0 ){
+      if ( v->particles_in().empty() && v->particles_out().empty() ){
 	going_out_again.push_back(v);
       }
     }//> loop over vertices
@@ -386,7 +385,7 @@ StatusCode PileupFilterTool::shapeGenEvent( McEventCollection* genAod )
       const int sigProcBC = HepMC::barcode(sigProcVtx); 
       bool isInColl = false; 
 #ifdef HEPMC3
-      for ( auto itrVtx: (*evt)->vertices()){ 
+      for ( const auto& itrVtx: (*evt)->vertices()){ 
 	if ( sigProcBC == HepMC::barcode(itrVtx) ) { 
 	  isInColl = true; 
 	  break; 
@@ -417,7 +416,7 @@ StatusCode PileupFilterTool::shapeGenEvent( McEventCollection* genAod )
 StatusCode PileupFilterTool::reconnectParticles( const McEventCollection* in,
 						    McEventCollection* out )
 {
-  if ( 0 == in || 0 == out ) {
+  if ( nullptr == in || nullptr == out ) {
     ATH_MSG_ERROR("Invalid pointer to McEventCollection !!" << endmsg
 		  << "  in: " << in << endmsg
 		  << " out: " << out);
@@ -430,20 +429,20 @@ StatusCode PileupFilterTool::reconnectParticles( const McEventCollection* in,
     
     // Reconnect the particles
     ATH_MSG_VERBOSE("Reconnecting particles...");
-    for ( auto itrPart: *outEvt) {
+    for ( const auto& itrPart: *outEvt) {
       if ( itrPart->end_vertex() ) {
 	continue;
       }
       if ( rebuildLinks( evt, outEvt, itrPart ).isFailure() ) {
-	ATH_MSG_WARNING("Could not rebuild links for this particle [pdgId,bc]= "
+	ATH_MSG_WARNING("Could not rebuild links for this particle [pdgId,particle]= "
 			<< itrPart->pdg_id()
-			<< ", " << HepMC::barcode(itrPart));
+			<< ", " << itrPart);
       } else if ( msgLvl(MSG::VERBOSE) ) {
 	msg(MSG::VERBOSE)
 	  << "==========================================================="
 	  << endmsg
 	  << "Production vertex for particle " 
-	  << HepMC::barcode(itrPart) << " : ";
+	  << itrPart << " : ";
 	if ( itrPart->production_vertex() ) {
 	  std::stringstream prodVtx("");
 	  HepMC::Print::line(prodVtx,itrPart->production_vertex());
@@ -455,7 +454,7 @@ StatusCode PileupFilterTool::reconnectParticles( const McEventCollection* in,
 	}
 	
 	msg(MSG::VERBOSE) << "Decay vertex for particle " 
-			  << HepMC::barcode(itrPart) << " : ";
+			  << itrPart << " : ";
 	if ( itrPart->end_vertex() ) {
 	  std::stringstream dcyVtx("");
 	  HepMC::Print::line(dcyVtx,itrPart->end_vertex());
@@ -476,7 +475,7 @@ StatusCode PileupFilterTool::reconnectParticles( const McEventCollection* in,
 
 StatusCode PileupFilterTool::rebuildLinks( const HepMC::GenEvent * mcEvt,
 					      HepMC::GenEvent * outEvt,
-					      HepMC::GenParticlePtr mcPart )
+					      const HepMC::GenParticlePtr& mcPart )
 {
   if ( !mcPart ) {
     ATH_MSG_WARNING("Null GenParticle: can not rebuildLinks");
@@ -525,9 +524,9 @@ StatusCode PileupFilterTool::rebuildLinks( const HepMC::GenEvent * mcEvt,
   //
 #ifdef HEPMC3
   auto descendants=HepMC::descendant_vertices(dcyVtx);
-  for ( auto itrVtx: descendants) {
+  for ( const auto& itrVtx: descendants) {
     bool foundPdgId = false;
-    for ( auto itrPart: itrVtx->particles_in()) {
+    for ( const auto& itrPart: itrVtx->particles_in()) {
       // because the vertices are traversed in POST ORDER !!
       bcChildPart.push_front( HepMC::barcode(itrPart));
       if ( itrPart->pdg_id() == pdgId ) {
@@ -577,18 +576,18 @@ StatusCode PileupFilterTool::rebuildLinks( const HepMC::GenEvent * mcEvt,
 	++itrBcVtx ) {
     HepMC::GenVertexPtr childVtx = HepMC::barcode_to_vertex(outEvt,*itrBcVtx);
     if ( childVtx ) {
-      if ( childVtx->particles_in().size() > 0 ) {
-	for ( auto itrPart:  childVtx->particles_in()) {
+      if ( !childVtx->particles_in().empty() ) {
+	for ( const auto& itrPart:  childVtx->particles_in()) {
 	  if ( itrPart->pdg_id() == pdgId ) {
 	    HepMC::GenVertexPtr  prodVtx = itrPart->production_vertex();
 	    if ( prodVtx ) {
-	      if ( prodVtx->particles_in().size() > 0 ) {
+	      if ( !prodVtx->particles_in().empty() ) {
 		// Humm... This is not what we'd have expected
 		// so we skip it
 		if ( msgLvl(MSG::VERBOSE) ) {
 		  msg(MSG::VERBOSE)
-		    << "found a particle [bc,pdgId]= "
-		    << HepMC::barcode(itrPart) << ", "
+		    << "found a particle = "
+		    << itrPart << ", "
 		    << "but its production vertex has incoming particles !"
 		    << endmsg;
 		  continue;
@@ -702,7 +701,7 @@ StatusCode PileupFilterTool::initializeTool()
   // accessor for particles
   delete m_tesIO;
   m_tesIO = new GenAccessIO();
-  if( 0 == m_tesIO ) {
+  if( nullptr == m_tesIO ) {
     ATH_MSG_ERROR("Unable to retrieve GenAccessIO pointer");
     return StatusCode::FAILURE;
   }
