@@ -20,12 +20,12 @@ from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoAlg
 #----------------------------------------------------------------
 
 def trkFS_trkfast_Cfg( flags ):
-        return allTE_trkfast( signature="FS" )
+        return allTE_trkfast( flags, signature="FS" )
 
 def allTE_trkfast_Cfg( flags ):
-        return allTE_trkfast( signature="BeamSpot" )
+        return allTE_trkfast( flags, signature="BeamSpot" )
 
-def allTE_trkfast( signature="FS" ):
+def allTE_trkfast( flags, signature="FS" ):
         inputMakerAlg = EventViewCreatorAlgorithm("IM_beamspot_"+signature)
         inputMakerAlg.ViewFallThrough = True
         inputMakerAlg.RoIsLink = "initialRoI"
@@ -45,7 +45,7 @@ def allTE_trkfast( signature="FS" ):
 
         viewAlgs, viewVerify  = makeInDetTrigFastTracking( config = IDTrigConfig,  rois=inputMakerAlg.InViewRoIs)
 
-        vertexAlg = T2VertexBeamSpot_activeAllTE( "vertex_"+signature )
+        vertexAlg = T2VertexBeamSpot_activeAllTE(flags, "vertex_"+signature )
         vertexAlg.TrackCollection = IDTrigConfig.trkTracks_FTF()
 
         viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+beamspotViewRoI_'+signature ),
@@ -74,7 +74,7 @@ def allTE_trkfast( signature="FS" ):
                               HypoToolGen = beamspotHypoToolGen )
 
 
-def getBeamspotVtx():
+def getBeamspotVtx(flags):
         signature = "BeamspotJet"
 
         from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
@@ -89,7 +89,7 @@ def getBeamspotVtx():
 
         #-- Configuring Beamspot vertex alg
         from TrigT2BeamSpot.T2VertexBeamSpotConfig import T2VertexBeamSpot_activeAllTE
-        vertexAlg = T2VertexBeamSpot_activeAllTE( "vertex_"+signature )
+        vertexAlg = T2VertexBeamSpot_activeAllTE(flags, "vertex_"+signature )
         vertexAlg.TrackCollection = IDTrigConfig.trkTracks_FTF()
 
         #-- Setting up beamspotSequence
@@ -107,7 +107,7 @@ def getBeamspotVtx():
 
 
 def getBeamspotVtxCfg( flags ):
-        return getBeamspotVtx()
+        return getBeamspotVtx(flags)
 
 
 #----------------------------------------------------------------
