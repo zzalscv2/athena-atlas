@@ -12,7 +12,7 @@
 
 AtlasG4_tf.py \
     --CA \
-    --preExec 'ConfigFlags.Sim.GenerationConfiguration="ParticleGun.ParticleGunConfig.ParticleGun_SingleMuonCfg"' \
+    --preExec 'flags.Sim.GenerationConfiguration="ParticleGun.ParticleGunConfig.ParticleGun_SingleMuonCfg"' \
     --outputHITSFile 'test.CA.HITS.pool.root' \
     --maxEvents '2000' \
     --randomSeed '10' \
