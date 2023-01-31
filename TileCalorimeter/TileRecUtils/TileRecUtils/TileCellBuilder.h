@@ -28,7 +28,7 @@
 #include "TileEvent/TileDQstatus.h"
 #include "TileIdentifier/TileFragHash.h"
 #include "TileIdentifier/TileRawChannelUnit.h"
-#include "TileConditions/ITileBadChanTool.h"
+#include "TileConditions/TileBadChannels.h"
 #include "TileConditions/TileEMScale.h"
 #include "TileConditions/TileCondToolTiming.h"
 #include "TileConditions/TileCablingSvc.h"
@@ -200,8 +200,11 @@ private:
     const TileHWID* m_tileHWID; //!< Pointer to TileHWID
     const TileCablingService* m_cabling; //!< TileCabling instance
 
-    ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
-        "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};
+    /**
+     * @brief Name of TileBadChannels in condition store
+     */
+    SG::ReadCondHandleKey<TileBadChannels> m_badChannelsKey{this,
+        "TileBadChannels", "TileBadChannels", "Input Tile bad channel status"};
 
    /**
     * @brief Name of TileEMScale in condition store
@@ -280,10 +283,10 @@ private:
      */
     bool maskBadChannel (TileDrawerEvtStatusArray& drawerEvtStatus,
                          const TileDQstatus* DQstatus, const TileDCSState* dcsState,
-                         TileCell* pCell, HWIdentifier hwid) const;
+                         const TileBadChannels* badChannels, TileCell* pCell, HWIdentifier hwid) const;
     bool maskBadChannels (TileDrawerEvtStatusArray& drawerEvtStatus,
                           const TileDQstatus* DQstatus, const TileDCSState* dcsState,
-                          TileCell* pCell) const;
+                          const TileBadChannels* badChannels, TileCell* pCell) const;
 
     void correctCell(TileCell* pCell, int correction, int pmt, int gain, float ener, float time,
         unsigned char iqual, unsigned char qbit, int ch_type) const; //!< Compute calibrated energy, time, etc. for TileCell and adjust it.

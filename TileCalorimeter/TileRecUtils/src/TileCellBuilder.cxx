@@ -183,8 +183,7 @@ StatusCode TileCellBuilder::initialize() {
   ATH_CHECK( detStore()->retrieve(m_tileTBID) );
   ATH_CHECK( detStore()->retrieve(m_tileHWID) );
 
-  //=== get TileBadChanTool
-  ATH_CHECK( m_tileBadChanTool.retrieve() );
+  ATH_CHECK( m_badChannelsKey.initialize() );
 
   // access tools and store them
   ATH_CHECK( m_noiseFilterTools.retrieve() );
@@ -737,14 +736,13 @@ unsigned char TileCellBuilder::qbits (TileDrawerEvtStatusArray& drawerEvtStatus,
 bool
 TileCellBuilder::maskBadChannel (TileDrawerEvtStatusArray& drawerEvtStatus,
                                  const TileDQstatus* DQstatus, const TileDCSState* dcsState,
-                                 TileCell* pCell, HWIdentifier hwid) const
+                                 const TileBadChannels* badChannels, TileCell* pCell, HWIdentifier hwid) const
 {
   int ros = m_tileHWID->ros(hwid);
   int drawer = m_tileHWID->drawer(hwid);
   int chan = m_tileHWID->channel(hwid);
   int gain = m_tileHWID->adc(hwid);
-  int drawerIdx = TileCalibUtils::getDrawerIdx(ros, drawer);
-  TileBchStatus chStatus = m_tileBadChanTool->getAdcStatus(drawerIdx, chan, gain);
+  TileBchStatus chStatus = badChannels->getAdcStatus(hwid);
 
   // check quality first
   bool bad = ((int) pCell->qual1() > m_qualityCut);
@@ -794,7 +792,7 @@ TileCellBuilder::maskBadChannel (TileDrawerEvtStatusArray& drawerEvtStatus,
 // masking for normal cells
 bool TileCellBuilder::maskBadChannels (TileDrawerEvtStatusArray& drawerEvtStatus,
                                        const TileDQstatus* DQstatus, const TileDCSState* dcsState,
-                                       TileCell* pCell) const
+                                       const TileBadChannels* badChannels, TileCell* pCell) const
 {
   bool single_PMT_C10 = false;
 
@@ -810,8 +808,9 @@ bool TileCellBuilder::maskBadChannels (TileDrawerEvtStatusArray& drawerEvtStatus
   int ros1 = m_tileHWID->ros(ch_id1);
   int drawer1 = m_tileHWID->drawer(ch_id1);
   int chan1 = m_tileHWID->channel(ch_id1);
-  int drawerIdx1 = TileCalibUtils::getDrawerIdx(ros1, drawer1);
-  const TileBchStatus& chStatus1 = m_tileBadChanTool->getAdcStatus(drawerIdx1, chan1, (gain1 < 0) ? 1 : gain1);
+
+  HWIdentifier adc_id1 = m_tileHWID->adc_id(ros1, drawer1, chan1, ((gain1 < 0) ? 1 : gain1));
+  const TileBchStatus& chStatus1 = badChannels->getAdcStatus(adc_id1);
   
   // check quality first
   bool bad1 = ((int) pCell->qual1() > m_qualityCut);
@@ -862,8 +861,9 @@ bool TileCellBuilder::maskBadChannels (TileDrawerEvtStatusArray& drawerEvtStatus
     int ros2 = m_tileHWID->ros(ch_id2);
     int drawer2 = m_tileHWID->drawer(ch_id2);
     int chan2 = m_tileHWID->channel(ch_id2);
-    int drawerIdx2 = TileCalibUtils::getDrawerIdx(ros2, drawer2);
-    const TileBchStatus& chStatus2 = m_tileBadChanTool->getAdcStatus(drawerIdx2, chan2, (gain2 < 0) ? 1 : gain2);
+
+    HWIdentifier adc_id2 = m_tileHWID->adc_id(ros2, drawer2, chan2, ((gain2 < 0) ? 1 : gain2));
+    const TileBchStatus& chStatus2 = badChannels->getAdcStatus(adc_id2);
 
     // check quality first
     bool bad2 = ((int) pCell->qual2() > m_qualityCut);
@@ -1039,6 +1039,7 @@ void TileCellBuilder::build (const EventContext& ctx,
 
   const TileDCSState* dcsState = m_checkDCS ? SG::ReadCondHandle(m_DCSStateKey, ctx).cptr() : nullptr;
   SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+  SG::ReadCondHandle<TileBadChannels> badChannels(m_badChannelsKey, ctx);
 
   /* zero all counters and sums */
   int nTwo = 0;
@@ -1218,7 +1219,7 @@ void TileCellBuilder::build (const EventContext& ctx,
         }
 
         if (m_maskBadChannels && maskBadChannel(drawerEvtStatus, DQstatus, dcsState,
-                                                pCell, adc_id))
+                                                *badChannels, pCell, adc_id))
           ATH_MSG_VERBOSE ( "cell with id=" << m_tileTBID->to_string(cell_id)
                              << " bad channel masked, new energy=" << pCell->energy() );
 
@@ -1274,7 +1275,7 @@ void TileCellBuilder::build (const EventContext& ctx,
         }
 
         if (m_maskBadChannels && maskBadChannel(drawerEvtStatus, DQstatus, dcsState,
-                                                pCell, adc_id))
+                                                *badChannels, pCell, adc_id))
           ATH_MSG_VERBOSE ( "cell with id=" << m_tileTBID->to_string(cell_id)
                              << " bad channel masked, new energy=" << pCell->energy() );
 
@@ -1395,7 +1396,7 @@ void TileCellBuilder::build (const EventContext& ctx,
     if (pCell) {      // cell exists
 
       if (m_maskBadChannels)
-        if (maskBadChannels (drawerEvtStatus, DQstatus, dcsState, pCell))
+        if (maskBadChannels (drawerEvtStatus, DQstatus, dcsState, *badChannels, pCell))
           ATH_MSG_VERBOSE ( "cell with id=" << m_tileID->to_string(pCell->ID(), -2)
                            << " bad channels masked, new energy=" << pCell->energy() );
 
