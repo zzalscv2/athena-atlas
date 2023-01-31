@@ -1,4 +1,16 @@
 #!/bin/sh
 
-athena.py --concurrent-events=1 --threads=1 --evtMax=10 --filesInput="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1" -c 'isOnline=True;enableViews=False;doMuon=False;doID=False;enableL1MuonPhase1=False;' TrigT2CaloCommon/testDataAccessService.py
+rm -rf test.pkl
+python -m TrigT2CaloCommon.TrigCaloDataAccessConfig
+STA=$?
+if [ ${STA} -ne 0 ]
+then
+    echo "Failed configuring job, status", ${STA} 
+    exit -1
+fi
+
+echo "configuration stored in the pickle"
+confTool.py --printConf test.pkl
+echo "Executing the pickle file " 
+CARunner.py test.pkl --evtMax 10
 

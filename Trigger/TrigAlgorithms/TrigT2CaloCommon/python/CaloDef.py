@@ -4,11 +4,6 @@ from AthenaCommon.CFElements import seqAND, parOR
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TriggerMenuMT.HLT.CommonSequences.FullScanDefs import caloFSRoI
 
-def setMinimalCaloSetup() :
-  from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-  if not hasattr(svcMgr,'TrigCaloDataAccessSvc'):
-    from TrigT2CaloCommon.TrigT2CaloCommonConfig import TrigCaloDataAccessSvc
-    svcMgr+=TrigCaloDataAccessSvc()
 
 ########################
 ## ALGORITHMS
@@ -19,7 +14,7 @@ def _algoHLTCaloCell(name="HLTCaloCellMaker", inputEDM='', outputEDM='CellsClust
    if not inputEDM:
       from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
       inputEDM = mapThresholdToL1RoICollection("FSNOSEED")
-   setMinimalCaloSetup()
+
    from AthenaCommon.AppMgr import ServiceMgr as svcMgr
    from TrigCaloRec.TrigCaloRecConfig import HLTCaloCellMaker
    algo=HLTCaloCellMaker(name)
@@ -78,7 +73,7 @@ def _algoL2Egamma(inputEDM="", doRinger=False, ClustersName="HLT_FastCaloEMClust
         from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
         # using jet seeds for testing. we should use EM as soon as we have EM seeds into the L1
         inputEDM = mapThresholdToL1RoICollection("EM")
-    setMinimalCaloSetup()
+
     from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import T2CaloEgamma_ReFastAlgo
     algo=T2CaloEgamma_ReFastAlgo("FastCaloL2EgammaAlg", doRinger=doRinger, RingerKey=RingerKey)
     algo.RoIs=inputEDM

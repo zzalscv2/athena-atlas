@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -113,9 +113,6 @@ class T2CaloEgamma_All (CompFactory.T2CaloEgammaReFastAlgo):
        super(T2CaloEgamma_All, self).__init__(name)
       
        from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-       if not hasattr(svcMgr,'TrigCaloDataAccessSvc'):
-           from TrigT2CaloCommon.TrigT2CaloCommonConfig import TrigCaloDataAccessSvc
-           svcMgr += TrigCaloDataAccessSvc()
        tool = CompFactory.EgammaAllFex("EgammaAllFex",trigDataAccessMT=svcMgr.TrigCaloDataAccessSvc)
        tool.IncludeHad=True
        tool.ExtraInputs=[('TileEMScale','ConditionStore+TileEMScale'),('TileBadChannels','ConditionStore+TileBadChannels')]
@@ -134,9 +131,6 @@ class T2CaloEgamma_AllEm (CompFactory.T2CaloEgammaReFastAlgo):
        super(T2CaloEgamma_AllEm, self).__init__(name)
        
        from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-       if not hasattr(svcMgr,'TrigCaloDataAccessSvc'):
-           from TrigT2CaloCommon.TrigT2CaloCommonConfig import TrigCaloDataAccessSvc
-           svcMgr += TrigCaloDataAccessSvc()
        tool = CompFactory.EgammaAllFex("EgammaAllEmFex",trigDataAccessMT=svcMgr.TrigCaloDataAccessSvc)
        tool.ExtraInputs=[('TileEMScale','ConditionStore+TileEMScale'),('TileBadChannels','ConditionStore+TileBadChannels')]
        self.IReAlgToolList= [tool]
@@ -154,10 +148,7 @@ class T2CaloEgamma_ReFastAlgo (CompFactory.T2CaloEgammaReFastAlgo):
         super(T2CaloEgamma_ReFastAlgo, self).__init__(name)
         # here put your customizations
         from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-        if not hasattr(svcMgr,'TrigCaloDataAccessSvc'):
-            from TrigT2CaloCommon.TrigT2CaloCommonConfig import TrigCaloDataAccessSvc
-            svcMgr += TrigCaloDataAccessSvc()
-          
+
         samp2 = CompFactory.EgammaReSamp2Fex(name="ReFaAlgoSamp2FexConfig", trigDataAccessMT=svcMgr.TrigCaloDataAccessSvc, MaxDetaHotCell=0.15, MaxDphiHotCell=0.15 )
         samp1 = CompFactory.EgammaReSamp1Fex("ReFaAlgoSamp1FexConfig", trigDataAccessMT=svcMgr.TrigCaloDataAccessSvc)
         sampe = CompFactory.EgammaReEmEnFex("ReFaAlgoEmEnFexConfig", trigDataAccessMT=svcMgr.TrigCaloDataAccessSvc)
@@ -216,11 +207,6 @@ class T2CaloEgamma_ReFastFWDAlgo (CompFactory.T2CaloEgammaForwardReFastAlgo):
                         doRinger=False, RingerKey="HLT_FWDFastCaloRinger"):
         super(T2CaloEgamma_ReFastFWDAlgo, self).__init__(name)
         # here put your customizations
-        from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-        if not hasattr(svcMgr,'TrigCaloDataAccessSvc'):
-            from TrigT2CaloCommon.TrigT2CaloCommonConfig import TrigCaloDataAccessSvc
-            svcMgr += TrigCaloDataAccessSvc()
-
         self.IReAlgToolList = []
         self.ExtraInputs = [( 'IRegSelLUTCondData' , 'ConditionStore+RegSelLUTCondData_TTEM' ), ( 'IRegSelLUTCondData' , 'ConditionStore+RegSelLUTCondData_TTHEC' ), 
                             ( 'IRegSelLUTCondData' , 'ConditionStore+RegSelLUTCondData_TILE' ), ( 'IRegSelLUTCondData' , 'ConditionStore+RegSelLUTCondData_FCALEM' ), 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigT2CaloCommon )
@@ -37,7 +37,6 @@ function( _add_test name script )
       PROPERTIES WORKING_DIRECTORY ${rundir} )
 endfunction( _add_test )
 
-_add_test( TestService test/test_dataaccess.sh )
-_add_test( TestServiceNewJO test/test_dataaccessNewJO.sh )
+_add_test( TrigCaloDataAccessSvc test/test_dataaccess.sh )
 _add_test( caloOnly  test/test_t2calo_only_build.sh )
 _add_test( caloRinger test/test_t2calo_ringer_only_build.sh )
