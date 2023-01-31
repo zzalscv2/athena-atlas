@@ -171,6 +171,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_eleIsoHighPt_WP(""),
     m_eleIsoHighPtThresh(-99.),
     m_eleChID_WP(""),
+    m_eleLRT_strat(-99),
     m_eleChIso(true),
     m_eleChID_signal(false),
     m_runECIS(false),
