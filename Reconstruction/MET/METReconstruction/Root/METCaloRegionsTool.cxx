@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METCaloRegionsTool.cxx 
@@ -162,7 +162,7 @@ namespace met {
   }
 
   // Find MetTerm name for a given sampling
-  MissingET* METCaloRegionsTool::findMetTerm(MissingETContainer* metContainer, CaloSampling::CaloSample sample) const 
+  MissingET* METCaloRegionsTool::findMetTerm(MissingETContainer* metContainer, CaloSampling::CaloSample sample) 
   { 
     switch(sample) {
       case CaloSampling::EMB1:
@@ -203,7 +203,7 @@ namespace met {
       case CaloSampling::TileGap3:
         return metContainer->at(TILE); 
         //
-      default: return 0x0;
+      default: return nullptr;
     }
   }
 
@@ -272,8 +272,7 @@ namespace met {
   {
 
     // Loop over all clusters
-    for( CaloClusterContainer::const_iterator iClus=caloClusContainer->begin();
-                                              iClus!=caloClusContainer->end(); ++iClus ) {
+    for(const auto *iClus : *caloClusContainer) {
       // Loop over all samplings
       for(int iSample=CaloSampling::PreSamplerB;
               iSample<=CaloSampling::FCAL2; ++iSample) {
@@ -281,11 +280,11 @@ namespace met {
         CaloSampling::CaloSample sample = (CaloSampling::CaloSample) iSample;
 
         // Eta is only defined if Energy != 0
-        if(fabs((*iClus)->eSample(sample))>0) {
+        if(fabs(iClus->eSample(sample))>0) {
 
           // Calculate Et/phi
-          double et_sample  = (*iClus)->eSample(sample)/cosh((*iClus)->etaSample(sample));
-          double phi_sample = (*iClus)->phiSample(sample);
+          double et_sample  = iClus->eSample(sample)/cosh(iClus->etaSample(sample));
+          double phi_sample = iClus->phiSample(sample);
 
           // Find the associated MET 
           MissingET* metTerm  = findMetTerm(metContainer, sample); 

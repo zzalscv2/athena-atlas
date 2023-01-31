@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METRegionsTool.cxx 
@@ -55,7 +55,7 @@ namespace met {
   // Destructor
   ///////////////
   METRegionsTool::~METRegionsTool()
-  {}
+  = default;
 
   // Athena algtool's Hooks
   ////////////////////////////
@@ -67,12 +67,12 @@ namespace met {
     ATH_MSG_INFO("Base MET container: " << m_base_met_containerKey);
     ATH_MSG_INFO("Base MET key: " << m_base_met_inputKey);
 
-    if( m_base_met_containerKey.size()==0 || m_base_met_inputKey.size()==0 ) {
+    if( m_base_met_containerKey.empty() || m_base_met_inputKey.empty() ) {
       ATH_MSG_FATAL("Both InputMETContainer and InputMETKey must be provided.");
       return StatusCode::FAILURE;
     }
 
-    if( m_region_values.size() == 0) {
+    if( m_region_values.empty()) {
       ATH_MSG_WARNING("Setting up default regions");
       m_region_values.push_back( 1.5);
       m_region_values.push_back( 3.2);
@@ -189,15 +189,14 @@ namespace met {
       vector<const IParticle*> objectList = (*iterBaseConstit)->objects();
       vector<const IParticle*> dummyList;
 
-      for( vector<const IParticle*>::const_iterator iObj = objectList.begin(); iObj!=objectList.end(); ++iObj ) {
-	MissingETBase::Types::weight_t objWeight = (*iterBaseConstit)->weight(*iObj);
-        for(std::map< std::pair<float,float>, MissingET* >::iterator it=mapRangeToMET.begin();
-            it!=mapRangeToMET.end(); ++it) {
-            if( fabs((*iObj)->eta()) > it->first.first && fabs((*iObj)->eta()) < it->first.second ) {
-              it->second->add((*iObj)->pt()*cos((*iObj)->phi())*objWeight.wpx(),
-                              (*iObj)->pt()*sin((*iObj)->phi())*objWeight.wpy(),
-                              (*iObj)->pt()*objWeight.wet());
-	      MissingETComposition::insert( metMap, it->second, *iObj, dummyList, objWeight );
+      for(const auto *iObj : objectList) {
+	MissingETBase::Types::weight_t objWeight = (*iterBaseConstit)->weight(iObj);
+        for(auto & it : mapRangeToMET) {
+            if( fabs(iObj->eta()) > it.first.first && fabs(iObj->eta()) < it.first.second ) {
+              it.second->add(iObj->pt()*cos(iObj->phi())*objWeight.wpx(),
+                              iObj->pt()*sin(iObj->phi())*objWeight.wpy(),
+                              iObj->pt()*objWeight.wet());
+	      MissingETComposition::insert( metMap, it.second, iObj, dummyList, objWeight );
             }
         } // end of loop over met terms
       } // end of loop over constituents

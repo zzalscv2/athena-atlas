@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METSoftAssociator.h 
@@ -70,7 +70,7 @@ namespace met{
     METSoftAssociator();
 
     bool m_decorateSoftTermConst;
-    bool m_weight_soft_pfo;
+    bool m_weight_soft_pfo = false;
 
     SG::ReadHandleKey<xAOD::CaloClusterContainer> m_lcmodclus_key;
     SG::ReadHandleKey<xAOD::CaloClusterContainer> m_emmodclus_key;

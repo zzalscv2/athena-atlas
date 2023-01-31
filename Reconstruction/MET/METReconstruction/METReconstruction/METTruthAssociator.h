@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METMuonAssociator.h 
@@ -60,8 +60,8 @@ namespace met{
                                         std::vector<const xAOD::IParticle*>& truthlist) const;
     StatusCode extractTruthFromPhoton(const xAOD::IParticle* obj,
                                       std::vector<const xAOD::IParticle*>& truthlist) const;
-    StatusCode extractTruthFromMuon(const xAOD::IParticle* obj,
-                                    std::vector<const xAOD::IParticle*>& truthlist) const;
+    static StatusCode extractTruthFromMuon(const xAOD::IParticle* obj,
+                                    std::vector<const xAOD::IParticle*>& truthlist) ;
     StatusCode extractTruthFromTau(const xAOD::IParticle* obj,
                                      std::vector<const xAOD::IParticle*>& truthlist) const;
     //

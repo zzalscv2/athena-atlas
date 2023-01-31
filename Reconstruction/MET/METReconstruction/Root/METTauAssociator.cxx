@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METTauAssociator.cxx
@@ -34,8 +34,8 @@
 #include "PFlowUtils/IWeightPFOTool.h"
 
 
-typedef ElementLink<xAOD::TauJetContainer> TauLink_t;
-typedef ElementLink<xAOD::FlowElementContainer> FELink_t;
+using TauLink_t = ElementLink<xAOD::TauJetContainer>;
+using FELink_t = ElementLink<xAOD::FlowElementContainer>;
 
 namespace met {
 
@@ -145,7 +145,7 @@ namespace met {
     const TauJet* tau = static_cast<const TauJet*>(obj);
     const Jet* seedjet = *tau->jetLink();
     TLorentzVector momentum;
-    for(const auto pfo : *constits.pfoCont) {
+    for(const auto *const pfo : *constits.pfoCont) {
       bool match = false;
       if (!pfo->isCharged()) {
         if(xAOD::P4Helpers::isInDeltaR(*seedjet,*pfo,0.2,m_useRapidity) && pfo->eEM()>0) {
@@ -209,10 +209,10 @@ namespace met {
     cFELinks=chargedFEReadDecorHandle(*tau);
 
     // Charged FEs
-    for (FELink_t feLink : cFELinks) {
+    for (const FELink_t& feLink : cFELinks) {
       if (feLink.isValid()){
 	const xAOD::FlowElement* fe_init = *feLink;
-	for (const auto fe : *constits.feCont){
+	for (const auto *const fe : *constits.feCont){
 	  if (fe->index() == fe_init->index() && fe->isCharged()){ //index-based match between JetETmiss and CHSFlowElements collections
 	    const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
 	    if(  fe->isCharged() && PVMatchedAcc(*fe)&& ( !m_cleanChargedPFO || isGoodEoverP(static_cast<const xAOD::TrackParticle*>(fe->chargedObject(0))) ) ) {
@@ -225,10 +225,10 @@ namespace met {
     } // end cFE loop
 
     // Neutral FEs
-    for (FELink_t feLink : nFELinks) {
+    for (const FELink_t& feLink : nFELinks) {
       if (feLink.isValid()){
         const xAOD::FlowElement* fe_init = *feLink;
-	for (const auto fe : *constits.feCont){
+	for (const auto *const fe : *constits.feCont){
 	  if (fe->index() == fe_init->index() && !fe->isCharged()){ //index-based match between JetETmiss and CHSFlowElements collections
 	    if( ( !fe->isCharged()&& fe->e() > FLT_MIN ) ){ 
 	      ATH_MSG_DEBUG("Accept nFE with pt " << fe->pt() << ", e " << fe->e() << ", eta " << fe->eta() << ", phi " << fe->phi() << " in sum.");

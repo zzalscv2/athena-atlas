@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METAssociator.h
@@ -103,9 +103,9 @@ namespace met {
     bool m_pflow;
     bool m_useTracks;
     bool m_useRapidity;
-    bool m_useIsolationTools;
+    bool m_useIsolationTools = false;
     bool m_useModifiedClus;
-    bool m_weight_charged_pfo;
+    bool m_weight_charged_pfo = false;
     bool m_cleanChargedPFO;
 
     bool m_skipconst;
