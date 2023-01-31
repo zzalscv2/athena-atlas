@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 
@@ -91,9 +91,11 @@ def getRun3NavigationContainerFromInput(flags):
 
 
 if __name__ == '__main__':
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     import sys
+
+    flags = initConfigFlags()
     if '--RAWRUN2' in sys.argv:
         flags.Input.Files = defaultTestFiles.RAW
     else:
