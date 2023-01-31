@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/TimingClass.h"
@@ -170,7 +170,7 @@ void LArSamples::TimingClass::fitTimePerFebAllFebs(const std::string& nrun, cons
       for( int sl = 0; sl < 15; sl++ ){ //slot
 	
 	ostringstream histname; 
-	histname << "h_" << name.c_str() << "_" << d << "_" << ft << "_" << sl+1;         
+	histname << "h_" << name << "_" << d << "_" << ft << "_" << sl+1;         
 	timefeb[d][ft][sl+1] = (TH1F*)FebTime->Get(histname.str().c_str());
 	if( !timefeb[d][ft][sl+1] )
           break;
