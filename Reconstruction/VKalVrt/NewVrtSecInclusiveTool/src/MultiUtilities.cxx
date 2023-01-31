@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 ///
 ///     @author Vadim Kostyukhin <vadim.kostyukhin@cern.ch>
@@ -252,9 +252,8 @@ namespace Rec{
    bool NewVrtSecInclusiveTool::isPart( std::deque<long int> test, std::deque<long int> base)
    const
    {
-      std::deque<long int>::iterator trk=test.begin();
-      for(trk=test.begin(); trk!=test.end(); ++trk)
-         if(std::find(base.begin(), base.end(), (*trk)) == base.end()) return false;  //element not found => test is not part of base
+      for (long int trk : test)
+         if(std::find(base.begin(), base.end(), trk) == base.end()) return false;  //element not found => test is not part of base
       return true;
    }
 
