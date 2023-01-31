@@ -8,3 +8,4 @@ The tool is not affected by any systematic variations nor defines any new variat
 The main method of `MuonLRTOverlapRemovalTool` is `checkOverlap` which returns a pair of booleans.
 If the `overlapStrategy` property of the tool is set to `defaultStrategy`, the return booleans are the overlap removed decisions for the prompt and LRT muons (true if retained, false if rejected).
 If the property is instead set to `passThroughAndDecorate`, the booleans are returned as true (or equivalently, all muons are written to the combined container). Instead, a decoration `MuonLRTOverlapDecision` is added to the muons which is 0 if the muons do not overlap, 1 if they overlap and are rejected, and 2 if they overlap and are retained, with the resolution strategy being the same as the base case.
+The `UseRun3WP` property is used by the muon selection tool to set the geometry for the muon ID working point. Set it to true for run 3 geometry, and to false for run 2.

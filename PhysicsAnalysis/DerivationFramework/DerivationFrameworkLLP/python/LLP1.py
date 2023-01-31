@@ -10,6 +10,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 
 MergedElectronContainer = "StdWithLRTElectrons"
 MergedMuonContainer = "StdWithLRTMuons"
@@ -41,7 +42,8 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
                                 PromptMuonLocation    = "Muons",
                                 LRTMuonLocation       = "MuonsLRT",
                                 OutputMuonLocation    = MergedMuonContainer,
-                                CreateViewCollection  = True))
+                                CreateViewCollection  = True,
+                                UseRun3WP = ConfigFlags.GeoModel.Run == LHCPeriod.Run3))
 
     # LRT electrons merge
     from DerivationFrameworkLLP.LLPToolsConfig import LRTElectronMergerAlg
@@ -54,7 +56,6 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 
     # Max Cell sum decoration tool
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
-    from AthenaConfiguration.Enums import LHCPeriod
     acc.merge(LArOnOffIdMappingCfg(ConfigFlags))
 
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import MaxCellDecoratorCfg
