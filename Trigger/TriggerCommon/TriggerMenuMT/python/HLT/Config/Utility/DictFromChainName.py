@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
 Class to obtain the chain configuration dictionary from the short or long name
@@ -18,7 +18,7 @@ import collections.abc
 
 log = logging.getLogger( __name__ )
 
-def getOverallL1item(chainName):
+def getOverallL1item(flags, chainName):
     """
     Extracts the L1 seed from the chain name, checks for issue in naming, if found, fails
 
@@ -43,17 +43,16 @@ def getOverallL1item(chainName):
     if l1seed in ['L1_Bkg', 'L1_Standby', 'L1_Calo', 'L1_Calo_EMPTY', 'L1_PhysicsHigh_noPS', 'L1_PhysicsVeryHigh_noPS',
                   'L1_EMPTY_noPS', 'L1_FIRSTEMPTY_noPS', 'L1_UNPAIRED_ISO_noPS', 'L1_UNPAIRED_NONISO_noPS', 'L1_ABORTGAPNOTCALIB_noPS', 'L1_BKeePrimary', 'L1_BKeePrescaled'] :
         # For these item seed specifications we need to derive the precise list of item names from the L1Menu.
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        lvl1name = getL1MenuFileName(ConfigFlags)
+        lvl1name = getL1MenuFileName(flags)
         lvl1access = L1MenuAccess(lvl1name)
         itemsDict = lvl1access.items(includeKeys = ['name','ctpid','triggerType'])
-        l1seedlist = getSpecificL1Seeds(l1seed, itemsDict, ConfigFlags.Trigger.triggerMenuSetup)
+        l1seedlist = getSpecificL1Seeds(l1seed, itemsDict, flags.Trigger.triggerMenuSetup)
         return l1seedlist
 
     return l1seed
 
-def getL1item(chainName):
-    mainL1 = getOverallL1item(chainName)
+def getL1item(flags, chainName):
+    mainL1 = getOverallL1item(flags, chainName)
     return mainL1
 
 def getAllThresholdsFromItem(item):
@@ -624,7 +623,7 @@ def checkChainStream(myStream):
             return False
     return True
 
-def dictFromChainName(chainInfo):
+def dictFromChainName(flags, chainInfo):
     """
     Transforms ChainProp into the ChainDict
 
@@ -668,7 +667,7 @@ def dictFromChainName(chainInfo):
     if not checkChainStream(stream):
         raise RuntimeError("Chain {}, format of chainInfo:stream {} is not valid".format(chainName, stream))
 
-    L1item = getL1item(chainName)
+    L1item = getL1item(flags, chainName)
 
     log.debug("Analysing chain with name: %s", chainName)
     chainDict = analyseChainName(chainName,  l1Thresholds, L1item)
@@ -676,8 +675,7 @@ def dictFromChainName(chainInfo):
     
     from TriggerMenuMT.HLT.CommonSequences.EventBuildingSequences import isRoIBasedPEB
     # TODO: pass flags by argument instead of import, or find a way to determine PEB type without initialising a temporary PEB tool (which needs flags)
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    _isRoIBasedPEB = isRoIBasedPEB(ConfigFlags, chainDict['eventBuildType'])
+    _isRoIBasedPEB = isRoIBasedPEB(flags, chainDict['eventBuildType'])
 
     for chainPart in chainDict['chainParts']:
         # fill the sigFolder and subSigs folder

@@ -92,7 +92,7 @@ if __name__=='__main__':
   if args.emulate:
     # create and configure emulator tool
     from TrigEgammaEmulationTool.TrigEgammaEmulationToolConfigMT import TrigEgammaEmulationToolConfig
-    emulator = TrigEgammaEmulationToolConfig("EgammaEmulation") 
+    emulator = TrigEgammaEmulationToolConfig(flags, "EgammaEmulation")
 
     # configure all selectors
     emulator.PhotonCBConfigFilePath    = args.pidConfigPath # Cut-based

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TriggerMenuMT.HLT.Config.Utility.DictFromChainName import dictFromChainName
@@ -66,7 +66,7 @@ def TrigBtagEmulationToolCfg(flags,
     ### determine trigger thresholds from to be emulated chain names
     chainDefinitions = {}
     for chain in toBeEmulatedTriggers:
-        chainDict = dictFromChainName(chain)
+        chainDict = dictFromChainName(flags, chain)
         chainParts = ['L1item:' + chainDict['L1item']]
         for chainPart in chainDict['chainParts']:
             # Gaudi::Property has limited support for nested structures, put everything in a long string and parse in C++
