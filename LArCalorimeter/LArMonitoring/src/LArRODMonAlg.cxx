@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -258,9 +258,9 @@ StatusCode LArRODMonAlg::fillHistograms(const EventContext& ctx) const {
   const bool ignoreFebs=(ignoreFEBs.size()>0);
   std::set<HWIdentifier>::const_iterator ignoreFebsEnd=ignoreFEBs.end();
   
-  unsigned count_gain[(int)CaloGain::LARNGAIN];
+  unsigned count_gain[(int)CaloGain::LARNGAIN] = {0};
 
-  //Build an assoiciation of channels in the two LArRawChannelContainers.
+  //Build an association of channels in the two LArRawChannelContainers.
   //The LArRawChannelContainers are unordered collections of LArRawChannels. 
   //But we know that they have the same order because they were built from the same source (namely the LArDigits and RawChannels in the Bytestream)
   //and we know that the LArRawChannels built offline are a subset of the LArRawChannelContainers read from Bytestream.
