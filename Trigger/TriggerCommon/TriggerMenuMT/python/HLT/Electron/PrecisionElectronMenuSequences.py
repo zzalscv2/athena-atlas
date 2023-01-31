@@ -52,7 +52,8 @@ def precisionElectronMenuSequence(flags, is_probe_leg=False, ion=False,  variant
     
     from TrigEgammaHypo.TrigEgammaPrecisionElectronHypoTool import TrigEgammaPrecisionElectronHypoToolFromDict
     
-    return  MenuSequence( Maker       = precisionElectronViewsMaker,
+    return  MenuSequence( flags,
+                          Maker       = precisionElectronViewsMaker,
                           Sequence    = electronPrecisionAthSequence,
                           Hypo        = thePrecisionElectronHypo,
                           HypoToolGen = TrigEgammaPrecisionElectronHypoToolFromDict,

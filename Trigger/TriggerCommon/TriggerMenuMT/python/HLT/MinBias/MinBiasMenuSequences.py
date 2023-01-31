@@ -144,7 +144,8 @@ def MinBiasSPSequence(flags):
     spCountHypo =SPCountHypoAlg()
     spCountHypo.SpacePointsKey=recordable("HLT_SpacePointCounts")
 
-    return MenuSequence(Sequence    = spSequence,
+    return MenuSequence(flags,
+                        Sequence    = spSequence,
                         Maker       = spInputMakerAlg,
                         Hypo        = spCountHypo,
                         HypoToolGen = SPCountHypoToolGen )
@@ -163,10 +164,10 @@ def MinBiasZVertexFinderSequenceCfg(flags):
     selAcc = SelectionCA("ZVertexFinderSel")    
     selAcc.mergeReco(recoAcc)
     selAcc.addHypoAlgo( CompFactory.TrigZVertexHypoAlg("TrigZVertexHypoAlg", ZVertexKey=recordable("HLT_vtx_z")))
-    return MenuSequenceCA(selAcc, HypoToolGen = TrigZVertexHypoToolGen)
+    return MenuSequenceCA(flags, selAcc, HypoToolGen = TrigZVertexHypoToolGen)
 
 
-def MinBiasTrkSequence():
+def MinBiasTrkSequence(flags):
         from TrigMinBias.TrigMinBiasConf import TrackCountHypoAlg
 
         trkInputMakerAlg = EventViewCreatorAlgorithm("IM_TrkEventViewCreator")
@@ -198,12 +199,13 @@ def MinBiasTrkSequence():
         trkSequence = seqAND("TrkSequence", [trkInputMakerAlg, trkRecoSeq])
         trkInputMakerAlg.ViewNodeName = trkRecoSeq.name()
 
-        return MenuSequence(Sequence    = trkSequence,
+        return MenuSequence(flags,
+                            Sequence    = trkSequence,
                             Maker       = trkInputMakerAlg,
                             Hypo        = trackCountHypo,
                             HypoToolGen = TrackCountHypoToolGen)
 
-def MinBiasMbtsSequence():
+def MinBiasMbtsSequence(flags):
     from TrigMinBias.TrigMinBiasConf import MbtsHypoAlg
     from TrigMinBias.MbtsConfig import MbtsFexCfg
     fex = MbtsFexCfg(MbtsBitsKey=recordable("HLT_MbtsBitsContainer"))
@@ -221,7 +223,8 @@ def MinBiasMbtsSequence():
     hypo = MbtsHypoAlg("MbtsHypoAlg", MbtsBitsKey=fex.MbtsBitsKey)
 
 
-    return MenuSequence(Sequence    = MbtsSequence,
+    return MenuSequence(flags,
+                        Sequence    = MbtsSequence,
                         Maker       = MbtsInputMakerAlg,
                         Hypo        = hypo,
                         HypoToolGen = MbtsHypoToolGen)

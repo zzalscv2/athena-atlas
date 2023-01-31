@@ -133,7 +133,8 @@ def muFastSequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoToolFromDict
 
-    return MenuSequence( Sequence    = l2muFastSequence,
+    return MenuSequence( flags,
+                         Sequence    = l2muFastSequence,
                          Maker       = l2MuViewsMaker,
                          Hypo        = trigMufastHypo,
                          HypoToolGen = TrigMufastHypoToolFromDict,
@@ -150,7 +151,8 @@ def muFastCalibSequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoToolFromDict
 
-    return MenuSequence( Sequence    = l2muFastSequence,
+    return MenuSequence( flags,
+                         Sequence    = l2muFastSequence,
                          Maker       = l2MuViewsMaker,
                          Hypo        = trigMufastHypo,
                          HypoToolGen = TrigMufastHypoToolFromDict,
@@ -168,7 +170,8 @@ def muFastOvlpRmSequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoToolwORFromDict
 
-    return MenuSequence( Sequence    = l2muFastSequence,
+    return MenuSequence( flags,
+                         Sequence    = l2muFastSequence,
                          Maker       = l2MuViewsMaker,
                          Hypo        = trigMufastHypo,
                          HypoToolGen = TrigMufastHypoToolwORFromDict,
@@ -186,7 +189,8 @@ def mul2mtSAOvlpRmSequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import Trigl2mtSAHypoToolwORFromDict
 
-    return MenuSequence( Sequence    = l2muFastSequence,
+    return MenuSequence( flags,
+                         Sequence    = l2muFastSequence,
                          Maker       = l2MuViewsMaker,
                          Hypo        = trigMufastHypo,
                          HypoToolGen = Trigl2mtSAHypoToolwORFromDict,
@@ -299,7 +303,8 @@ def muCombSequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigmuCombHypoToolFromDict
 
-    return MenuSequence( Sequence    = l2muCombSequence,
+    return MenuSequence( flags,
+                         Sequence    = l2muCombSequence,
                          Maker       = l2muCombViewsMaker,
                          Hypo        = trigmuCombHypo,
                          HypoToolGen = TrigmuCombHypoToolFromDict,
@@ -361,7 +366,8 @@ def muCombLRTSequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigmuCombHypoToolFromDict
 
-    return MenuSequence( Sequence    = l2muCombLRTSequence,
+    return MenuSequence( flags,
+                         Sequence    = l2muCombLRTSequence,
                          Maker       = l2muCombLRTViewsMaker,
                          Hypo        = trigmuCombHypo,
                          HypoToolGen = TrigmuCombHypoToolFromDict,
@@ -379,7 +385,8 @@ def muCombOvlpRmSequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigmuCombHypoToolwORFromDict
 
-    return MenuSequence( Sequence    = l2muCombSequence,
+    return MenuSequence( flags,
+                         Sequence    = l2muCombSequence,
                          Maker       = l2muCombViewsMaker,
                          Hypo        = trigmuCombHypo,
                          HypoToolGen = TrigmuCombHypoToolwORFromDict,
@@ -399,7 +406,8 @@ def mul2IOOvlpRmSequence(flags, is_probe_leg=False):
     # from TrigMuonHypo.TrigMuonHypoConfig import TrigL2MuonOverlapRemoverMucombToolFromDict
     from TrigMuonHypo.TrigMuonHypoConfig import Trigl2IOHypoToolwORFromDict
 
-    return MenuSequence( Sequence    = l2muCombSequence,
+    return MenuSequence( flags,
+                         Sequence    = l2muCombSequence,
                          Maker       = l2muCombViewsMaker,
                          Hypo        = trigmuCombHypo,
                          HypoToolGen = Trigl2IOHypoToolwORFromDict,
@@ -417,7 +425,8 @@ def mul2mtCBOvlpRmSequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import Trigl2mtCBHypoToolwORFromDict
 
-    return MenuSequence( Sequence    = l2muCombSequence,
+    return MenuSequence( flags,
+                         Sequence    = l2muCombSequence,
                          Maker       = l2muCombViewsMaker,
                          Hypo        = trigmuCombHypo,
                          HypoToolGen = Trigl2mtCBHypoToolwORFromDict,
@@ -475,7 +484,8 @@ def muEFSASequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFMSonlyHypoToolFromDict
 
-    return MenuSequence( Sequence    = muonEFSAonlySequence,
+    return MenuSequence( flags,
+                         Sequence    = muonEFSAonlySequence,
                          Maker       = efsaViewsMaker,
                          Hypo        = trigMuonEFSAHypo,
                          HypoToolGen = TrigMuonEFMSonlyHypoToolFromDict,
@@ -551,7 +561,8 @@ def muEFCBSequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFCombinerHypoToolFromDict
 
-    return MenuSequence( Sequence    = muonEFCBSequence,
+    return MenuSequence( flags,
+                         Sequence    = muonEFCBSequence,
                          Maker       = efcbViewsMaker,
                          Hypo        = trigMuonEFCBHypo,
                          HypoToolGen = TrigMuonEFCombinerHypoToolFromDict,
@@ -569,7 +580,8 @@ def muEFCBIDperfSequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFCombinerHypoToolFromDict
 
-    return MenuSequence( Sequence    = muonEFCBSequence,
+    return MenuSequence( flags,
+                         Sequence    = muonEFCBSequence,
                          Maker       = efcbViewsMaker,
                          Hypo        = trigMuonEFCBHypo,
                          HypoToolGen = TrigMuonEFCombinerHypoToolFromDict,
@@ -584,7 +596,8 @@ def muEFIDtpSequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFIdtpHypoToolFromDict
 
-    return MenuSequence( Sequence    = muonEFCBSequence,
+    return MenuSequence( flags,
+                         Sequence    = muonEFCBSequence,
                          Maker       = efcbViewsMaker,
                          Hypo        = trigMuonEFIdtpHypo,
                          HypoToolGen = TrigMuonEFIdtpHypoToolFromDict,
@@ -628,7 +641,8 @@ def muEFCBLRTSequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFCombinerHypoToolFromDict
 
-    return MenuSequence( Sequence    = muonEFCBLRTSequence,
+    return MenuSequence( flags,
+                         Sequence    = muonEFCBLRTSequence,
                          Maker       = efcbViewsMaker,
                          Hypo        = trigMuonEFCBLRTHypo,
                          HypoToolGen = TrigMuonEFCombinerHypoToolFromDict,
@@ -647,7 +661,8 @@ def muEFCBLRTIDperfSequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFCombinerHypoToolFromDict
 
-    return MenuSequence( Sequence    = muonEFCBLRTSequence,
+    return MenuSequence( flags,
+                         Sequence    = muonEFCBLRTSequence,
                          Maker       = efcbViewsMaker,
                          Hypo        = trigMuonEFCBLRTHypo,
                          HypoToolGen = TrigMuonEFCombinerHypoToolFromDict,
@@ -696,7 +711,8 @@ def muEFSAFSSequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFMSonlyHypoToolFromName
 
-    return MenuSequence( Sequence    = muonEFSAFSSequence,
+    return MenuSequence( flags,
+                         Sequence    = muonEFSAFSSequence,
                          Maker       = efsafsInputMaker,
                          Hypo        = trigMuonEFSAFSHypo,
                          HypoToolGen = TrigMuonEFMSonlyHypoToolFromName,
@@ -767,7 +783,8 @@ def muEFCBFSSequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFCombinerHypoToolFromName
 
-    return MenuSequence( Sequence    = muonEFCBFSSequence,
+    return MenuSequence( flags,
+                         Sequence    = muonEFCBFSSequence,
                          Maker       = efcbfsInputMaker,
                          Hypo        = trigMuonEFCBFSHypo,
                          HypoToolGen = TrigMuonEFCombinerHypoToolFromName,
@@ -807,7 +824,8 @@ def efLateMuRoISequence(flags):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonLateMuRoIHypoToolFromDict
 
-    return MenuSequence( Sequence    = muonEFLateSequence,
+    return MenuSequence( flags,
+                         Sequence    = muonEFLateSequence,
                          Maker       = eflateViewsMaker,
                          Hypo        = trigMuonEFLateHypo,
                          HypoToolGen = TrigMuonLateMuRoIHypoToolFromDict )
@@ -862,7 +880,8 @@ def efLateMuSequence(flags):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFCombinerHypoToolFromDict
 
-    return MenuSequence( Sequence    = muonEFLateSequence,
+    return MenuSequence( flags,
+                         Sequence    = muonEFLateSequence,
                          Maker       = eflateViewsMaker,
                          Hypo        = trigMuonEFLateHypo,
                          HypoToolGen = TrigMuonEFCombinerHypoToolFromDict )
@@ -927,7 +946,8 @@ def muEFIsoSequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFTrackIsolationHypoToolFromDict
 
-    return MenuSequence( Sequence    = efmuIsoSequence,
+    return MenuSequence( flags,
+                         Sequence    = efmuIsoSequence,
                          Maker       = efmuIsoViewsMaker,
                          Hypo        = trigmuefIsoHypo,
                          HypoToolGen = TrigMuonEFTrackIsolationHypoToolFromDict,
@@ -944,7 +964,8 @@ def muEFMSIsoSequence(flags, is_probe_leg=False):
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFTrackIsolationHypoToolFromDict
 
-    return MenuSequence( Sequence    = efmuIsoSequence,
+    return MenuSequence( flags,
+                         Sequence    = efmuIsoSequence,
                          Maker       = efmuIsoViewsMaker,
                          Hypo        = trigmuefIsoHypo,
                          HypoToolGen = TrigMuonEFTrackIsolationHypoToolFromDict,
@@ -976,7 +997,8 @@ def muRoiClusterSequence(flags):
 
     hypo        = MuonClusterHypoAlgConfig('MuRoiClusterHypoAlg')
 
-    return MenuSequence( Sequence    = muvtx_sequence,
+    return MenuSequence( flags,
+                         Sequence    = muvtx_sequence,
                          Maker       = inputMaker,
                          Hypo        = hypo,
                          HypoToolGen = TrigLongLivedParticlesHypoToolFromDict )

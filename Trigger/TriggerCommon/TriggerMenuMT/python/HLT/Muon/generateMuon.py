@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, ChainStep, Chain, EmptyMenuSequence, SelectionCA, InViewRecoCA
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -182,7 +182,7 @@ def _muFastStepSeq(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(l2muFastHypo)
 
-    l2muFastSequence = MenuSequenceCA(selAcc, 
+    l2muFastSequence = MenuSequenceCA(flags, selAcc,
                                       HypoToolGen = TrigMufastHypoToolFromDict, isProbe=is_probe_leg )
 
     return (selAcc , l2muFastSequence)
@@ -225,7 +225,7 @@ def _muCombStepSeq(flags):
                                    muCombInfo = 'HLT_MuonL2CBInfo' )
 
     selAccL2CB.addHypoAlgo(l2muCombHypo)
-    l2muCombSequence = MenuSequenceCA(selAccL2CB,
+    l2muCombSequence = MenuSequenceCA(flags, selAccL2CB,
                                       HypoToolGen = TrigmuCombHypoToolFromDict)
 
     return (selAccL2CB , l2muCombSequence)
@@ -286,7 +286,7 @@ def _muEFSAStepSeq(flags, name='RoI'):
 
     selAccMS.addHypoAlgo(efmuMSHypo)
     
-    efmuMSSequence = MenuSequenceCA(selAccMS,
+    efmuMSSequence = MenuSequenceCA(flags, selAccMS,
                                     HypoToolGen = TrigMuonEFMSonlyHypoToolFromDict)
 
     return (selAccMS , efmuMSSequence)
@@ -384,7 +384,7 @@ def _muEFCBStepSeq(flags, name='RoI'):
 
     selAccEFCB.addHypoAlgo(efmuCBHypo)
 
-    efmuCBSequence = MenuSequenceCA(selAccEFCB,
+    efmuCBSequence = MenuSequenceCA(flags, selAccEFCB,
                                     HypoToolGen = TrigMuonEFCombinerHypoToolFromDict)
    
     return (selAccEFCB , efmuCBSequence)
@@ -434,7 +434,7 @@ def _muEFIsoStepSeq(flags):
                                   inputMuons = "MuonsIso" )
     selAccEFIso.addHypoAlgo(efmuIsoHypo)
 
-    efmuIsoSequence = MenuSequenceCA(selAccEFIso,
+    efmuIsoSequence = MenuSequenceCA(flags, selAccEFIso,
                                      HypoToolGen = TrigMuonEFTrackIsolationHypoToolFromDict)
     
     return (selAccEFIso , efmuIsoSequence)

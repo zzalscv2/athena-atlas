@@ -25,10 +25,10 @@ def MinBiasSPSequenceCfg(flags):
     return MinBiasSPSequence(flags)
 
 def MinBiasTrkSequenceCfg(flags):
-    return MinBiasTrkSequence()
+    return MinBiasTrkSequence(flags)
 
 def MinBiasMbtsSequenceCfg(flags):
-    return MinBiasMbtsSequence()
+    return MinBiasMbtsSequence(flags)
 
 def MinBiasMbtsEmptySequenceCfg(flags):
     return EmptyMenuSequence("EmptyMbts")
@@ -75,7 +75,7 @@ def TrigAFPDijetComboHypoToolCfg(chainDict):
     return tool
 
 def ALFAPerfSequenceCfg(flags):
-    return ALFAPerfSequence()
+    return ALFAPerfSequence(flags)
 
 def MinBiasZVertexFinderCfg(flags):
     #TODO we can do that inside of the getStep ... next interation

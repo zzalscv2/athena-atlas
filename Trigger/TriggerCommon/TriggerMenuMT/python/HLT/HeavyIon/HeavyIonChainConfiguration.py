@@ -17,7 +17,7 @@ else:
 # so let's make them functions already now
 #----------------------------------------------------------------
 def HIFwdGapMenuSequenceCfg(flags):
-  return HIFwdGapMenuSequence()
+  return HIFwdGapMenuSequence(flags)
 
 class HeavyIonChainConfig(ChainConfigurationBase):
 

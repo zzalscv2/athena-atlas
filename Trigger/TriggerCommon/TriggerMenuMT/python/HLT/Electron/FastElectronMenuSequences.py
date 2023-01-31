@@ -61,7 +61,8 @@ def fastElectronMenuSequence(flags, is_probe_leg=False, variant=''):
 
     from TrigEgammaHypo.TrigEgammaFastElectronHypoTool import TrigEgammaFastElectronHypoToolFromDict
 
-    return  MenuSequence( Maker       = fastElectronViewsMaker,                                        
+    return  MenuSequence( flags,
+                          Maker       = fastElectronViewsMaker,
                           Sequence    = fastElectronAthSequence,
                           Hypo        = theElectronHypo,
                           HypoToolGen = TrigEgammaFastElectronHypoToolFromDict,

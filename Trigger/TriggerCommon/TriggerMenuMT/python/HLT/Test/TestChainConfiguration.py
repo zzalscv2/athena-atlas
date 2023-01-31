@@ -20,52 +20,52 @@ def creator(flags, name):
 
 
 # Muons
-def muCfg(step,reconame, hyponame):
-    return muMenuSequence(step,reconame, hyponame)
+def muCfg(flags,step,reconame, hyponame):
+    return muMenuSequence(flags,step,reconame, hyponame)
 
 def muCfg111(flags):
-    return muCfg(step="1",reconame="v1", hyponame="v1")
+    return muCfg(flags,step="1",reconame="v1", hyponame="v1")
 
 def muCfg211(flags):
-    return muCfg(step="2",reconame="v1", hyponame="v1")
+    return muCfg(flags,step="2",reconame="v1", hyponame="v1")
 
 def muCfg311(flags):
-    return muCfg(step="3",reconame="v1", hyponame="v1")
+    return muCfg(flags,step="3",reconame="v1", hyponame="v1")
 
 def muCfg322(flags):
-    return muCfg(step="3",reconame="v2", hyponame="v2")
+    return muCfg(flags,step="3",reconame="v2", hyponame="v2")
 
 def muCfg411(flags):
-    return muCfg(step="4",reconame="v1", hyponame="v1")
+    return muCfg(flags,step="4",reconame="v1", hyponame="v1")
 
 def muCfg222(flags):
-    return muCfg(step="2",reconame="v2", hyponame="v2")
+    return muCfg(flags,step="2",reconame="v2", hyponame="v2")
 
 
 # Egamma
-def elCfg(step,reconame, hyponame):
-    return elMenuSequence(step,reconame, hyponame)
+def elCfg(flags,step,reconame, hyponame):
+    return elMenuSequence(flags,step,reconame, hyponame)
 
-def gamCfg(step,reconame, hyponame):
-    return gamMenuSequence(step,reconame, hyponame)
+def gamCfg(flags,step,reconame, hyponame):
+    return gamMenuSequence(flags,step,reconame, hyponame)
 
 def elCfg111(flags):
-    return elCfg(step="1",reconame="v1", hyponame="v1")
+    return elCfg(flags,step="1",reconame="v1", hyponame="v1")
 
 def elCfg211(flags):
-    return elCfg(step="2",reconame="v1", hyponame="v1")
+    return elCfg(flags,step="2",reconame="v1", hyponame="v1")
 
 def elCfg222(flags):
-    return elCfg(step="2",reconame="v2", hyponame="v2")
+    return elCfg(flags,step="2",reconame="v2", hyponame="v2")
 
 def elCfg223(flags):
-    return elCfg(step="2",reconame="v2", hyponame="v3")
+    return elCfg(flags,step="2",reconame="v2", hyponame="v3")
 
 def elCfg311(flags):
-    return elCfg(step="3",reconame="v1", hyponame="v1")
+    return elCfg(flags,step="3",reconame="v1", hyponame="v1")
 
 def gamCfg111(flags):
-    return gamCfg(step="1",reconame="v1", hyponame="v1")
+    return gamCfg(flags,step="1",reconame="v1", hyponame="v1")
 
 
  

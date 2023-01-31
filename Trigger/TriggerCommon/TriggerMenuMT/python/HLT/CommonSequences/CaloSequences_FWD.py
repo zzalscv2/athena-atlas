@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool, MenuSequence
@@ -49,7 +49,8 @@ def fastCaloMenuSequence_FWD(flags, name, doRinger=True, is_probe_leg=False):
     theFastCaloHypo = createTrigEgammaForwardFastCaloHypoAlgMT(name+"EgammaFastCaloFWDHypo", sequenceOut)
     CaloMenuDefs_FWD.L2CaloClusters = sequenceOut
 
-    return MenuSequence( Sequence    = sequence,
+    return MenuSequence( flags,
+                         Sequence    = sequence,
                          Maker       = fastCaloViewsMaker,
                          Hypo        = theFastCaloHypo,
                          HypoToolGen = TrigEgammaForwardFastCaloHypoToolFromDict,

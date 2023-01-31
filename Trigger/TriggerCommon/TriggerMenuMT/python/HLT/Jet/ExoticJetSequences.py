@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger("TriggerMenuMT.HLT.Jet.JetChainSequences")
@@ -36,7 +36,8 @@ def jetEJsMenuSequence(flags, jetsin, name):
     sequence = RecoFragmentsPool.retrieve( returnEJSequence , flags, algo=DummyInputMakerAlg)
 
 
-    return MenuSequence( Sequence    = sequence,
+    return MenuSequence( flags,
+                         Sequence    = sequence,
                          Maker       = DummyInputMakerAlg,
                          Hypo        = theEmergingJetsTriggerHypo,
                          HypoToolGen = trigJetEJsHypoToolFromDict,
@@ -68,7 +69,8 @@ def jetCRMenuSequence(flags, jetsin, name):
     theCalRatioTriggerHypo.Tracks    = sequenceOut
     theCalRatioTriggerHypo.Cells        = cellsin
 
-    return MenuSequence( Sequence    = sequence,
+    return MenuSequence( flags,
+                         Sequence    = sequence,
                          Maker       = IMAlg,
                          Hypo        = theCalRatioTriggerHypo,
                          HypoToolGen = trigJetCRHypoToolFromDict,

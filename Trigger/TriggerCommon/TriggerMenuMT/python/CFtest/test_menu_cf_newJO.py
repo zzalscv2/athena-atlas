@@ -92,7 +92,7 @@ def generateEmuMenu(flags):
     log.info("generateEmuMenu")
     # make menu manually here:
     from TriggerMenuMT.CFtest.EmuStepProcessingConfig import generateChainsManually       
-    generateChainsManually(0x7)
+    generateChainsManually(flags, 0x7)
 
     from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig_newJO import generateDecisionTree
     import TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig_newJO

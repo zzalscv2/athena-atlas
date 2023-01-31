@@ -371,7 +371,8 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
 
       The complete '*MenuSequence*' then looks as follows
       ```python
-        return MenuSequence( Sequence    = BjetAthSequence,
+        return MenuSequence( flags,
+                             Sequence    = BjetAthSequence,
                              Maker       = InputMakerAlg,
                              Hypo        = hypo,
                              HypoToolGen = TrigBjetBtagHypoToolFromDict)

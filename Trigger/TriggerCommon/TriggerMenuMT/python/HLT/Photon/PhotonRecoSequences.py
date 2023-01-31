@@ -80,7 +80,8 @@ def generatePhotonsCfg( flags ):
     l2CaloReco = RecoFragmentsPool.retrieve( l2CaloRecoCfg, flags )
     acc.merge( l2CaloReco )
     
-    fastCaloSequence = MenuSequence( Sequence    = l2CaloReco.sequence(),
+    fastCaloSequence = MenuSequence( flags,
+                                     Sequence    = l2CaloReco.sequence(),
                                      Maker       = l2CaloReco.inputMaker(),
                                      Hypo        = l2CaloHypo,
                                      HypoToolGen = TrigEgammaFastCaloHypoToolFromDict )
@@ -99,7 +100,8 @@ def generatePhotonsCfg( flags ):
 
     from TrigEgammaHypo.TrigEgammaFastPhotonHypoTool import TrigEgammaFastPhotonHypoToolFromDict
 
-    l2PhotonSequence = MenuSequence( Sequence    = l2PhotonReco.sequence(),
+    l2PhotonSequence = MenuSequence( flags,
+                                     Sequence    = l2PhotonReco.sequence(),
                                      Maker       = l2PhotonReco.inputMaker(),
                                      Hypo        = l2PhotonHypo,
                                      HypoToolGen = TrigEgammaFastPhotonHypoToolFromDict )

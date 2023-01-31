@@ -11,7 +11,6 @@ from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import (NoHypoToolCreated,
                                                              isHypoAlg)
 from AthenaCommon.CFElements import parOR, seqAND, compName, getProp, hasProp, findAlgorithmByPredicate
 from AthenaCommon.Configurable import Configurable
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -361,7 +360,7 @@ class MenuSequence(object):
     """ Class to group reco sequences with the Hypo"""
     """ By construction it has one Hypo Only; behaviour changed to support muFastOvlpRmSequence() which has two, but this will change"""
 
-    def __init__(self, Sequence, Maker,  Hypo, HypoToolGen, IsProbe=False):
+    def __init__(self, flags, Sequence, Maker,  Hypo, HypoToolGen, IsProbe=False):
         assert compName(Maker).startswith("IM"), "The input maker {} name needs to start with letter: IM".format(compName(Maker))        
 
         # For probe legs we need to substitute the inputmaker and hypo alg
@@ -374,10 +373,10 @@ class MenuSequence(object):
                 #_Sequence = Sequence 
                 log.warning(str(NoCAmigration('[MenuSequence] found a probe leg, dont know how to clone, no sequence {0}_probe created for CA components'.format(compName(Hypo))) ))                                                
             else:
-                _Hypo = RecoFragmentsPool.retrieve(MenuSequence.getProbeHypo,ConfigFlags,basehypo=Hypo)
+                _Hypo = RecoFragmentsPool.retrieve(MenuSequence.getProbeHypo,flags,basehypo=Hypo)
                 # Reset this so that HypoAlgNode.addOutput will actually do something
                 _Hypo.HypoOutputDecisions = "StoreGateSvc+UNSPECIFIED_OUTPUT"
-                _Maker = RecoFragmentsPool.retrieve(MenuSequence.getProbeInputMaker,ConfigFlags,baseIM=Maker)
+                _Maker = RecoFragmentsPool.retrieve(MenuSequence.getProbeInputMaker,flags,baseIM=Maker)
 
         else: # For regular legs, just use the provided components
             _Hypo = Hypo
@@ -388,7 +387,7 @@ class MenuSequence(object):
         input_maker_output= self.maker.readOutputList()[0] # only one since it's merged
 
         # Connect InputMaker output to ROBPrefetchingAlg(s) if there are any (except for probe seq which is handled later)
-        if ROBPrefetching.StepRoI in ConfigFlags.Trigger.ROBPrefetchingOptions:
+        if ROBPrefetching.StepRoI in flags.Trigger.ROBPrefetchingOptions:
             seqChildren = Sequence.getChildren() if hasattr(Sequence,'getChildren') else Sequence.Members
             for child in seqChildren:
                 if hasProp(child,'ROBPrefetchingInputDecisions') and input_maker_output not in child.ROBPrefetchingInputDecisions and not input_maker_output.endswith('_probe'):
@@ -401,7 +400,7 @@ class MenuSequence(object):
 
         self._name = CFNaming.menuSequenceName(compName(_Hypo))
         self._hypoToolConf = HypoToolConf( HypoToolGen )
-        Hypo.RuntimeValidation = ConfigFlags.Trigger.doRuntimeNaviVal
+        Hypo.RuntimeValidation = flags.Trigger.doRuntimeNaviVal
         self._hypo = HypoAlgNode( Alg = _Hypo )
         hypo_output = CFNaming.hypoAlgOutName(compName(_Hypo))
         self._hypo.addOutput(hypo_output)
@@ -420,7 +419,7 @@ class MenuSequence(object):
                     if isinstance(probeIM,CompFactory.EventViewCreatorAlgorithm):
                         for child in baseSeq.getChildren()[1:]:
                             probeChild = child.clone(child.getName()+"_probe")
-                            if hasProp(child,'ROBPrefetchingInputDecisions') and (ROBPrefetching.StepRoI in ConfigFlags.Trigger.ROBPrefetchingOptions):
+                            if hasProp(child,'ROBPrefetchingInputDecisions') and (ROBPrefetching.StepRoI in flags.Trigger.ROBPrefetchingOptions):
                                 # child is a ROB prefetching alg, map the probe IM decisions
                                 probeChild.ROBPrefetchingInputDecisions = [str(probeIM.InputMakerOutputDecisions)]
                             elif probeIM.ViewNodeName == child.getName():
@@ -553,7 +552,7 @@ class MenuSequence(object):
 class MenuSequenceCA(MenuSequence):
     ''' MenuSequence with Component Accumulator '''
 
-    def __init__(self, selectionCA, HypoToolGen, isProbe=False ):
+    def __init__(self, flags, selectionCA, HypoToolGen, isProbe=False ):
         self.ca = selectionCA
         allAlgs = self.ca.getEventAlgos()
         inputMaker = [ a for a in allAlgs if isInputMakerBase(a)]
@@ -562,7 +561,7 @@ class MenuSequenceCA(MenuSequence):
         hypoAlg = [ a for a in allAlgs if isHypoAlg(a)]
         assert len(hypoAlg) == 1, "Wrong number of hypo algs in the component accumulator {}".format(len(hypoAlg))
         hypoAlg = hypoAlg[0]         
-        MenuSequence.__init__(self, self.ca.topSequence(), inputMaker,  hypoAlg, HypoToolGen, IsProbe=isProbe)
+        MenuSequence.__init__(self, flags, self.ca.topSequence(), inputMaker,  hypoAlg, HypoToolGen, IsProbe=isProbe)
 
     @property
     def sequence(self):
@@ -1113,7 +1112,8 @@ def menuSequenceCAToGlobalWrapper(gen, flags, *args, **kwargs):
     msca.ca._sequence = None
     msca.ca._allSequences = []
     appendCAtoAthena(msca.ca)
-    return MenuSequence(Sequence   = sequence,
+    return MenuSequence(flags,
+                        Sequence   = sequence,
                         Maker       = maker,
                         Hypo        = hypo,
                         HypoToolGen = msca._hypoToolConf.hypoToolGen)

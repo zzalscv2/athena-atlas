@@ -43,7 +43,8 @@ def getFullScanRecoOnlySequence(flags):
     HypoAlg = TrigStreamerHypoAlg("UncTrkDummyStream")
 
     log.debug("Building the menu sequence for FullScanRecoOnlySequence")
-    return MenuSequence( Sequence    = seqAND("UncTrkrecoSeq", TrkSeq),
+    return MenuSequence( flags,
+                         Sequence    = seqAND("UncTrkrecoSeq", TrkSeq),
                          Maker       = InputMakerAlg,
                          Hypo        = HypoAlg,
                          HypoToolGen = StreamerHypoToolGenerator )

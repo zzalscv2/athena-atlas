@@ -61,7 +61,8 @@ def precisionPhotonCaloIsoMenuSequence(flags, name,ion=False):
     
     from TrigEgammaHypo.TrigEgammaPrecisionPhotonCaloIsoHypoTool import TrigEgammaPrecisionPhotonCaloIsoHypoToolFromDict
 
-    return MenuSequence( Sequence    = sequence,
+    return MenuSequence( flags,
+                         Sequence    = sequence,
                          Maker       = precisionPhotonCaloIsoViewsMaker, 
                          Hypo        = thePrecisionPhotonCaloIsoHypo,
                          HypoToolGen = TrigEgammaPrecisionPhotonCaloIsoHypoToolFromDict)

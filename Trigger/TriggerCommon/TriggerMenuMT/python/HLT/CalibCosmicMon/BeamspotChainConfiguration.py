@@ -20,12 +20,12 @@ from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoAlg
 #----------------------------------------------------------------
 
 def trkFS_trkfast_Cfg( flags ):
-        return allTE_trkfast( signature="FS" )
+        return allTE_trkfast( flags, signature="FS" )
 
 def allTE_trkfast_Cfg( flags ):
-        return allTE_trkfast( signature="BeamSpot" )
+        return allTE_trkfast( flags, signature="BeamSpot" )
 
-def allTE_trkfast( signature="FS" ):
+def allTE_trkfast( flags, signature="FS" ):
         inputMakerAlg = EventViewCreatorAlgorithm("IM_beamspot_"+signature)
         inputMakerAlg.ViewFallThrough = True
         inputMakerAlg.RoIsLink = "initialRoI"
@@ -68,13 +68,14 @@ def allTE_trkfast( signature="FS" ):
         beamspotHypoToolGen= StreamerHypoToolGenerator
 
 
-        return  MenuSequence( Sequence    = beamspotViewsSequence,
+        return  MenuSequence( flags,
+                              Sequence    = beamspotViewsSequence,
                               Maker       = inputMakerAlg,
                               Hypo        = beamspotHypoAlg,
                               HypoToolGen = beamspotHypoToolGen )
 
 
-def getBeamspotVtx():
+def getBeamspotVtx(flags):
         signature = "BeamspotJet"
 
         from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
@@ -100,14 +101,15 @@ def getBeamspotVtx():
         beamspotHypoAlg = TrigStreamerHypoAlg("BeamspotHypoAlg_"+signature)
         beamspotHypoToolGen= StreamerHypoToolGenerator
 
-        return  MenuSequence( Sequence    = beamspotViewsSequence,
+        return  MenuSequence( flags,
+                              Sequence    = beamspotViewsSequence,
                               Maker       = inputMakerAlg,
                               Hypo        = beamspotHypoAlg,
                               HypoToolGen = beamspotHypoToolGen )
 
 
 def getBeamspotVtxCfg( flags ):
-        return getBeamspotVtx()
+        return getBeamspotVtx(flags)
 
 
 #----------------------------------------------------------------

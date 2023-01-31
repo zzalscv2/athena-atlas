@@ -38,7 +38,7 @@ def generateChains( flags, chainDict ):
                                                     taujets = "HLT_TrigTauRecMerged_CaloMVAOnly" )
         selAcc.addHypoAlgo(hypoAlg)
         from TrigTauHypo.TrigTauHypoTool import TrigL2TauHypoToolFromDict
-        menuCA = MenuSequenceCA(selAcc, HypoToolGen=TrigL2TauHypoToolFromDict)
+        menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigL2TauHypoToolFromDict)
         return (selAcc , menuCA)
 
     def __calo():
@@ -83,7 +83,7 @@ def generateChains( flags, chainDict ):
                                                     trackcollection = flags.Trigger.InDetTracking.TauCore.trkTracks_FTF )
         selAcc.addHypoAlgo(hypoAlg)
         from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
-        menuCA = MenuSequenceCA(selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
+        menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
         return (selAcc , menuCA)
     
     def __ftfCore():                         
@@ -122,7 +122,7 @@ def generateChains( flags, chainDict ):
         selAcc.addHypoAlgo(hypoAlg)
 
         from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
-        menuCA = MenuSequenceCA(selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
+        menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
         return (selAcc , menuCA)
     
     def __ftfIso():
@@ -160,7 +160,7 @@ def generateChains( flags, chainDict ):
         selAcc.addHypoAlgo(hypoAlg)
 
         from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
-        menuCA = MenuSequenceCA(selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
+        menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
         return (selAcc , menuCA)
     
     def __ftfIsoBDT():

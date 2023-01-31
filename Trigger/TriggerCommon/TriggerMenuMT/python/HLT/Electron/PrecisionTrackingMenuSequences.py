@@ -52,7 +52,8 @@ def precisionTrackingMenuSequence(flags, name, is_probe_leg=False, ion=False, va
     thePrecisionTrackingHypo.FeatureIsROI = False
     def acceptAllHypoToolGen(chainDict):
         return TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
-    return MenuSequence( Sequence    = sequence,
+    return MenuSequence( flags,
+                         Sequence    = sequence,
                          Maker       = precisionTrackingViewsMaker, 
                          Hypo        = thePrecisionTrackingHypo,
                          HypoToolGen = acceptAllHypoToolGen, # Note: TrigEgammaPrecisionTrackingHypoAlg does not use HypoTools

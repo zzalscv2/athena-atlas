@@ -21,7 +21,8 @@ def tauCaloMVAMenuSeq(flags, name, is_probe_leg=False):
 
     from TrigTauHypo.TrigTauHypoTool import TrigL2TauHypoToolFromDict
 
-    return  MenuSequence( Sequence    = sequence,
+    return  MenuSequence( flags,
+                          Sequence    = sequence,
                           Maker       = tauCaloMVAViewsMaker,
                           Hypo        = theTauCaloMVAHypo,
                           HypoToolGen = TrigL2TauHypoToolFromDict,
@@ -40,7 +41,8 @@ def tauFTFTauCoreSeq(flags, is_probe_leg=False):
 
     from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
 
-    return  MenuSequence( Sequence    = sequence,
+    return  MenuSequence( flags,
+                          Sequence    = sequence,
                           Maker       = ftfCoreViewsMaker,
                           Hypo        = fastTrkHypo,
                           HypoToolGen = TrigTauTrackHypoToolFromDict,
@@ -60,7 +62,8 @@ def tauFTFTauLRTSeq(flags, is_probe_leg=False):
 
     from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
 
-    return  MenuSequence( Sequence    = sequence,
+    return  MenuSequence( flags,
+                          Sequence    = sequence,
                           Maker       = ftfLRTViewsMaker,
                           Hypo        = fastTrkHypo,
                           HypoToolGen = TrigTauTrackHypoToolFromDict,
@@ -79,7 +82,8 @@ def tauFTFTauIsoSeq(flags, is_probe_leg=False):
 
     from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
 
-    return  MenuSequence( Sequence    = sequence,
+    return  MenuSequence( flags,
+                          Sequence    = sequence,
                           Maker       = ftfIsoViewsMaker,
                           Hypo        = fastTrkHypo,
                           HypoToolGen = TrigTauTrackHypoToolFromDict,
@@ -99,7 +103,8 @@ def tauFTFTauIsoBDTSeq(flags, is_probe_leg=False):
 
     from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
 
-    return  MenuSequence( Sequence    = sequence,
+    return  MenuSequence( flags,
+                          Sequence    = sequence,
                           Maker       = ftfIsoBDTViewsMaker,
                           Hypo        = fastTrkHypo,
                           HypoToolGen = TrigTauTrackHypoToolFromDict,
@@ -118,7 +123,8 @@ def tauTrackTwoMVASeq(flags, is_probe_leg=False):
 
     from TrigTauHypo.TrigTauHypoTool import TrigEFTauMVHypoToolFromDict
 
-    return  MenuSequence( Sequence    = sequence,
+    return  MenuSequence( flags,
+                          Sequence    = sequence,
                           Maker       = mvaViewsMaker,
                           Hypo        = precisionHypo,
                           HypoToolGen = TrigEFTauMVHypoToolFromDict,
@@ -137,7 +143,8 @@ def tauTrackTwoLLPSeq(flags, is_probe_leg=False):
 
     from TrigTauHypo.TrigTauHypoTool import TrigEFTauMVHypoToolFromDict
 
-    return  MenuSequence( Sequence    = sequence,
+    return  MenuSequence( flags,
+                          Sequence    = sequence,
                           Maker       = mvaViewsMaker,
                           Hypo        = precisionHypo,
                           HypoToolGen = TrigEFTauMVHypoToolFromDict,
@@ -156,7 +163,8 @@ def tauTrackLRTSeq(flags, is_probe_leg=False):
 
     from TrigTauHypo.TrigTauHypoTool import TrigEFTauMVHypoToolFromDict
 
-    return  MenuSequence( Sequence    = sequence,
+    return  MenuSequence( flags,
+                          Sequence    = sequence,
                           Maker       = mvaViewsMaker,
                           Hypo        = precisionHypo,
                           HypoToolGen = TrigEFTauMVHypoToolFromDict,
@@ -176,7 +184,8 @@ def tauPrecTrackIsoSeq(flags, is_probe_leg=False):
 
     from TrigTauHypo.TrigTauHypoTool import TrigTrkPrecHypoToolFromDict
 
-    return  MenuSequence( Sequence    = sequence,
+    return  MenuSequence( flags,
+                          Sequence    = sequence,
                           Maker       = precTrackViewsMaker,
                           Hypo        = precTrkHypo,
                           HypoToolGen = TrigTrkPrecHypoToolFromDict,
@@ -196,7 +205,8 @@ def tauPrecTrackLRTSeq(flags, is_probe_leg=False):
 
     from TrigTauHypo.TrigTauHypoTool import TrigTrkPrecHypoToolFromDict
 
-    return  MenuSequence( Sequence    = sequence,
+    return  MenuSequence( flags,
+                          Sequence    = sequence,
                           Maker       = precTrackViewsMaker,
                           Hypo        = precTrkHypo,
                           HypoToolGen = TrigTrkPrecHypoToolFromDict,
