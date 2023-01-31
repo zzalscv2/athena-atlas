@@ -1,10 +1,10 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 def LArMonitoringConfig(inputFlags):
 
-
+    from AthenaMonitoring.DQConfigFlags import DQDataType
     from LArMonitoring.LArCollisionTimeMonAlg import LArCollisionTimeMonConfig
     from LArMonitoring.LArAffectedRegionsAlg import LArAffectedRegionsConfig
     from LArMonitoring.LArDigitMonAlg import LArDigitMonConfig
@@ -20,7 +20,7 @@ def LArMonitoringConfig(inputFlags):
     
     # algos which can run in ESD but not AOD:
     if inputFlags.DQ.Environment != 'AOD':
-        if inputFlags.DQ.DataType != 'cosmics':
+        if inputFlags.DQ.DataType is not DQDataType.Cosmics:
             from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
             acc.merge(BunchCrossingCondAlgCfg(inputFlags))
             acc.merge(LArCollisionTimeMonConfig(inputFlags))

@@ -60,8 +60,8 @@ def TileJetMonitoringConfig(flags, **kwargs):
     Do1DHistograms = kwargs.get('Do1DHistograms', tileJetMonAlg._descriptors['Do1DHistograms'].default)
     DoEnergyDiffHistograms  = kwargs.get('DoEnergyDiffHistograms', tileJetMonAlg._descriptors['DoEnergyDiffHistograms'].default)
 
-
-    if flags.DQ.DataType not in ('heavyioncollisions', 'cosmics'):
+    from AthenaMonitoring.DQConfigFlags import DQDataType
+    if flags.DQ.DataType not in (DQDataType.HeavyIon, DQDataType.Cosmics):
 
         jvtTool = CompFactory.JetVertexTaggerTool()
         jetContainer = kwargs.get('JetContainer', tileJetMonAlg._descriptors['JetContainer'].default)

@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
-
+from AthenaMonitoring.DQConfigFlags import DQDataType
 
 def FilledBunchFilterToolCfg(flags: AthConfigFlags):
    fbft_local_logger = logging.getLogger('FilledBunchFilterToolCfg')
@@ -13,7 +13,7 @@ def FilledBunchFilterToolCfg(flags: AthConfigFlags):
 
    if (flags.DQ.disableFilledBunchFilter
        or flags.Input.isMC
-       or flags.DQ.DataType != 'collisions'
+       or flags.DQ.DataType is not DQDataType.Collisions
        or flags.Input.TriggerStream == 'CosmicCalo'):
       fbft_local_logger.info('Filled bunch filter being configured to always return true')
       result.setPrivateTools(CompFactory.DQDummyFilterTool())

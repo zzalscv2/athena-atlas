@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file JetMonitoringExample.py
@@ -7,7 +7,7 @@
 @date 2019-03-12
 @brief Main python configuration for the Run III Jet Monitoring
 '''
-
+from AthenaMonitoring.DQConfigFlags import DQDataType
 from JetMonitoring.JetMonitoringConfig import JetMonAlgSpec, HistoSpec,  EventHistoSpec, SelectSpec, VarSpec
 
 # *********************************************
@@ -188,7 +188,7 @@ def jetMonAlgConfig(  jetName, inputFlags, truthJetName='', trigger=''):
     # then add pre-defined lists as defined above :
     histoSpecs += commonHistoSpecs 
 
-    if inputFlags.DQ.DataType != 'cosmics':
+    if inputFlags.DQ.DataType is not DQDataType.Cosmics:
         histoSpecs += jvfHistosSpec
 
     if 'Topo' in jetName:
