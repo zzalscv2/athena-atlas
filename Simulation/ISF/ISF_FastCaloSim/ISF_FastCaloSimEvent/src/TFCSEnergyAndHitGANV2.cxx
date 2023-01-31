@@ -28,7 +28,6 @@
 #include <fstream>
 #include <limits>
 
-
 //=============================================
 //======= TFCSEnergyAndHitGANV2 =========
 //=============================================
@@ -253,6 +252,7 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(TFCSSimulationState& simulstate, const TF
     // Now create hits
     for (int ix = 1; ix <= xBinNum; ++ix){
       int binsInAlphaInRBin = GetAlphaBinsForRBin(x, ix, yBinNum);
+
       //Horrible work around for variable # of bins along alpha direction 
       int binsToMerge = yBinNum == 32 ? 32/binsInAlphaInRBin : 1;
       for (int iy = 1; iy <= binsInAlphaInRBin; ++iy){
@@ -308,10 +308,20 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(TFCSSimulationState& simulstate, const TF
           for (int ialpha = 1; ialpha <= nHitsAlpha; ++ialpha){
             if (m_param.GetGANVersion() > 1){
               if (fitResults[layer][ix-1] != 0){
-                TF1* f1 = new TF1("f1","expo", x->GetBinLowEdge(ix), x->GetBinUpEdge(ix));
-                f1->SetParameter(1, fitResults[layer][ix-1]);
-                r = f1->GetRandom(x->GetBinLowEdge(ix), x->GetBinUpEdge(ix));
-                delete f1;
+                int tries = 0;
+                double a = CLHEP::RandFlat::shoot(simulstate.randomEngine(), x->GetBinLowEdge(ix), x->GetBinUpEdge(ix));
+                double rand_r = log((a - x->GetBinLowEdge(ix))/(x->GetBinWidth(ix)))/fitResults[layer][ix-1];
+                while ((rand_r < x->GetBinLowEdge(ix) || rand_r > x->GetBinUpEdge(ix)) && tries < 100){
+                  a = CLHEP::RandFlat::shoot(simulstate.randomEngine(), x->GetBinLowEdge(ix), x->GetBinUpEdge(ix));
+                  rand_r = log((a - x->GetBinLowEdge(ix))/(x->GetBinWidth(ix)))/fitResults[layer][ix-1];     
+                  tries++;            
+                }
+                if (tries >= 100){
+                  ATH_MSG_VERBOSE(" Too many tries for bin [" << x->GetBinLowEdge(ix) << "-" << x->GetBinUpEdge(ix) << "] having slope " << fitResults[layer][ix-1] << " will use grid (old method)" );
+                }
+                else{
+                  r = rand_r;
+                }
               }
             }
 
@@ -389,26 +399,23 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(TFCSSimulationState& simulstate, const TF
             } else {
               ATH_MSG_WARNING("no bins defined, is this intended?");
             }  
-         }
+          }
         }
         vox++;
       }
     }
-    
-    ATH_MSG_VERBOSE("Number of voxels " << vox);
-    
+
+    ATH_MSG_VERBOSE("Number of voxels " << vox);   
     ATH_MSG_VERBOSE("Done layer "<<layer);
   }
+
   if ( simulstate.E() > std::numeric_limits<double>::epsilon() ) {
     for(int ilayer=0;ilayer<CaloCell_ID_FCS::MaxSample;++ilayer) {
       simulstate.set_Efrac(ilayer,simulstate.E(ilayer)/simulstate.E());
     }
   }
 
-
-
   ATH_MSG_VERBOSE("Done particle");
-
   return true;
 }
 
