@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import print_function
 from AthenaCommon import CfgMgr
@@ -217,7 +217,6 @@ def getMETAssocTool(topconfig,msglvl):
         assocTool = CfgMgr.met__METAssociationTool('MET_AssociationTool_'+topconfig.suffix,
                                                    METAssociators = topconfig.assoclist,
                                                    METSuffix = topconfig.suffix,
-                                                   TimingDetail=0,
                                                    OutputLevel=msglvl)
         if metFlags.AllowOverwrite:
             assocTool.AllowOverwrite = True

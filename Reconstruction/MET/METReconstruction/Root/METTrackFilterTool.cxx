@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METTrackFilterTool.cxx 
@@ -68,7 +68,7 @@ namespace met {
   // Destructor
   ///////////////
   METTrackFilterTool::~METTrackFilterTool()
-  {}
+  = default;
 
   // Athena algtool's Hooks
   ////////////////////////////
@@ -142,7 +142,7 @@ namespace met {
         }
         isolfrac = ptcone20 / trk->pt();
         // etcone
-        for(const auto clus : *clusters) {
+        for(const auto *const clus : *clusters) {
           if (xAOD::P4Helpers::isInDeltaR(*clus,*trk,0.1,m_useRapidity)) {
             etcone10 += clus->pt();
           }
@@ -161,7 +161,7 @@ namespace met {
                                            *trk,
                                            trkIsoCones,
                                            trkIsoCorr);
-        ptcone20 = trkIsoResult.ptcones.size() > 0 ? trkIsoResult.ptcones[0] : 0;
+        ptcone20 = !trkIsoResult.ptcones.empty() ? trkIsoResult.ptcones[0] : 0;
         isolfrac = ptcone20/trk->pt();
         // etcone
         CaloIsolation caloIsoResult_coreCone;
@@ -173,7 +173,7 @@ namespace met {
                                                       *trk,
                                                       caloIsoCones_coreCone,
                                                       caloIsoCorr_coreCone);
-        etcone10 =  caloIsoResult_coreCone.etcones.size() > 0 ? 
+        etcone10 =  !caloIsoResult_coreCone.etcones.empty() ? 
                     caloIsoResult_coreCone.coreCorrections[xAOD::Iso::IsolationCaloCorrection::coreCone][xAOD::Iso::IsolationCorrectionParameter::coreEnergy] : 0.;
         EoverP   =  etcone10/trk->pt(); 
         /////////////////////////////////////////////////////////////////////////
@@ -249,7 +249,7 @@ namespace met {
       else {ATH_MSG_WARNING("Track filter given an object of type " << obj->type());}
     }
 
-    const Vertex* pv=0;
+    const Vertex* pv=nullptr;
     SG::ReadHandle<xAOD::VertexContainer> vxCont(m_pv_inputkey);
     if (!vxCont.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve input primary vertex container");
@@ -257,9 +257,9 @@ namespace met {
     vector<const Vertex*> vertices;
 
     if(m_trk_doPVsel) {
-      if(vxCont->size()>0) {
+      if(!vxCont->empty()) {
 	vertices.reserve(vxCont->size());
-	for(const auto vx : *vxCont) {
+	for(const auto *const vx : *vxCont) {
 	  if(vx->vertexType()==VxType::PriVtx) {pv = vx;}
 	  vertices.push_back(vx);
 	}
@@ -282,7 +282,7 @@ namespace met {
 
       bool firstVx(true);
       std::string basename = metTerm->name()+"_vx";
-      for(const auto vx : *vxCont){
+      for(const auto *const vx : *vxCont){
 	if(vx->vertexType()==VxType::PriVtx || vx->vertexType()==VxType::PileUp) {
 	  MissingET *met_vx = metTerm;
 	  if(!firstVx) {
@@ -367,7 +367,7 @@ namespace met {
     return StatusCode::SUCCESS;
   }
 
-  bool METTrackFilterTool::isElTrack(const xAOD::TrackParticle &trk, const std::vector<const xAOD::Electron*>& electrons, size_t &el_index) const
+  bool METTrackFilterTool::isElTrack(const xAOD::TrackParticle &trk, const std::vector<const xAOD::Electron*>& electrons, size_t &el_index) 
   {
     for(unsigned int eli=0; eli<electrons.size(); ++eli) {
       const xAOD::Electron *el=electrons.at(eli);
@@ -379,26 +379,25 @@ namespace met {
     return false;
   }
 
-  bool METTrackFilterTool::isMuTrack(const xAOD::TrackParticle &trk, const std::vector<const xAOD::Muon*>& muons) const
+  bool METTrackFilterTool::isMuTrack(const xAOD::TrackParticle &trk, const std::vector<const xAOD::Muon*>& muons) 
   {
-    for(unsigned mui=0;mui<muons.size();mui++) {
+    for(const auto *muon : muons) {
       //        if(((muon_list.at(mui))->trackParticle(xAOD::Muon::InnerDetectorTrackParticle))->pt()==trk->pt())
-      if(((muons.at(mui))->trackParticle(xAOD::Muon::InnerDetectorTrackParticle))==&trk) {
+      if((muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle))==&trk) {
 	return true;
       }
     }
     return false;
   }
 
-  void METTrackFilterTool::selectElectrons(const xAOD::ElectronContainer &elCont, std::vector<const xAOD::Electron*>& electrons) const
+  void METTrackFilterTool::selectElectrons(const xAOD::ElectronContainer &elCont, std::vector<const xAOD::Electron*>& electrons) 
   {
-    for(unsigned int eli=0; eli< elCont.size(); eli++) {
-      const xAOD::Electron *el=elCont.at(eli);
+    for(const auto *el : elCont) {
       if( (el)->author()&0x1  //electron author
 	  && (el)->pt()>10000   // electron pt
 	  && fabs(el->eta())<2.47  // electron eta
           ) {
-	if(!((fabs((el)->eta())>1.37) && (fabs((el)->eta())<1.52) )) {
+	if((fabs((el)->eta())<=1.37) || (fabs((el)->eta())>=1.52) ) {
 	  // crack region
 	  electrons.push_back(el);
 	}
@@ -407,10 +406,9 @@ namespace met {
   }
   
 
-  void METTrackFilterTool::selectMuons(const xAOD::MuonContainer &muCont, std::vector<const xAOD::Muon*>& muons) const
+  void METTrackFilterTool::selectMuons(const xAOD::MuonContainer &muCont, std::vector<const xAOD::Muon*>& muons) 
   {
-    for(unsigned int mui=0; mui<muCont.size();mui++) {
-      const xAOD::Muon *mu=muCont.at(mui);
+    for(const auto *mu : muCont) {
       if( (mu->muonType()==xAOD::Muon::Combined)
 	  && (mu->pt()>6000.)
 	  && fabs(mu->eta())<2.5

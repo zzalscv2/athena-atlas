@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METRefinerTool.cxx 
@@ -45,7 +45,7 @@ namespace met {
   // Destructor
   ///////////////
   METRefinerTool::~METRefinerTool()
-  {}
+  = default;
 
   // Athena algtool's Hooks
   ////////////////////////////
@@ -60,11 +60,11 @@ namespace met {
   {
     ATH_MSG_DEBUG ("In execute: " << name() << "...");
 
-    if( metTerm==0 ) {
+    if( metTerm==nullptr ) {
       ATH_MSG_ERROR("Invalid input MissingET pointer provided!");
       return StatusCode::FAILURE;
     }
-    if( metMap==0 ) {
+    if( metMap==nullptr ) {
       ATH_MSG_ERROR("Invalid input MissingETComponentMap pointer provided!");
       return StatusCode::FAILURE;
     }

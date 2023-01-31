@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METSoftTermsTool.h 
@@ -59,7 +59,7 @@ namespace met{
     virtual
     bool accept            (const xAOD::IParticle* object) const override;
     bool accept            (const xAOD::CaloCluster* clus) const;
-    bool accept            (const xAOD::TrackParticle* trk) const;
+    static bool accept            (const xAOD::TrackParticle* trk) ;
     // Overlap resolver function
     virtual
     bool resolveOverlap    (const xAOD::IParticle* object,

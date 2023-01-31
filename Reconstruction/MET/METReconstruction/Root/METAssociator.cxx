@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METAssociator.cxx
@@ -78,7 +78,7 @@ namespace met {
   // Destructor
   ///////////////
   METAssociator::~METAssociator()
-  {}
+  = default;
 
   // Athena algtool's Hooks
   ////////////////////////////
@@ -241,7 +241,7 @@ namespace met {
       ATH_MSG_DEBUG("Successfully retrieved primary vertex container");
       ATH_MSG_DEBUG("Container holds " << vxCont->size() << " vertices");
 
-      for(const auto vx : *vxCont) {
+      for(const auto *const vx : *vxCont) {
         ATH_MSG_VERBOSE( "Testing vertex " << vx->index() );
         if(vx->vertexType()==VxType::PriVtx)
           {constits.pv = vx; break;}
@@ -252,7 +252,7 @@ namespace met {
         ATH_MSG_VERBOSE("Primary vertex has z = " << constits.pv->z());
       }
 
-      constits.trkCont=0;
+      constits.trkCont=nullptr;
       ATH_MSG_DEBUG("Retrieving Track collection " << m_trkcollKey.key());
       SG::ReadHandle<TrackParticleContainer> trCont(m_trkcollKey);
       if (!trCont.isValid()) {
@@ -264,7 +264,7 @@ namespace met {
       if(m_pflow){
         if(!m_fecollKey.key().empty()){
           ATH_MSG_DEBUG("Retrieving FlowElement collection " << m_fecollKey.key());
-          constits.feCont = 0;
+          constits.feCont = nullptr;
           SG::ReadHandle<xAOD::FlowElementContainer> feCont(m_fecollKey);
           if (!feCont.isValid()) {
             ATH_MSG_ERROR("Unable to retrieve FlowElement container "<< m_fecollKey.key());
@@ -274,7 +274,7 @@ namespace met {
         }
         else{
           ATH_MSG_DEBUG("Retrieving PFlow collection " << m_pfcollKey.key());
-          constits.pfoCont = 0;
+          constits.pfoCont = nullptr;
           SG::ReadHandle<PFOContainer> pfCont(m_pfcollKey);
           if (!pfCont.isValid()) {
             ATH_MSG_WARNING("Unable to PFlow object container");
@@ -305,7 +305,7 @@ namespace met {
     std::vector<const IParticle*> constlist;
     constlist.reserve(20);
     std::vector<const IParticle*> hardObjs_tmp;
-    for(const auto obj : *hardObjs) {
+    for(const auto *const obj : *hardObjs) {
       hardObjs_tmp.push_back(obj);
     }
     std::sort(hardObjs_tmp.begin(),hardObjs_tmp.end(),greaterPt);
@@ -386,7 +386,7 @@ namespace met {
                                          *trk,
                                          trkIsoCones,
                                          trkIsoCorr);
-      ptcone20 = trkIsoResult.ptcones.size() > 0 ? trkIsoResult.ptcones[0] : 0;
+      ptcone20 = !trkIsoResult.ptcones.empty() ? trkIsoResult.ptcones[0] : 0;
       isolfrac = ptcone20/trk->pt();
       // etcone
       CaloIsolation caloIsoResult;
@@ -401,7 +401,7 @@ namespace met {
                                                     *trk,
                                                     caloIsoCones,
                                                     caloIsoCorr_coreCone);
-      if(caloIsoResult.etcones.size() > 0) {
+      if(!caloIsoResult.etcones.empty()) {
         // retrieve the correction value for the core cone
         etcone10 = caloIsoResult.coreCorrections[xAOD::Iso::IsolationCaloCorrection::coreCone][xAOD::Iso::IsolationCorrectionParameter::coreEnergy];
       } else {

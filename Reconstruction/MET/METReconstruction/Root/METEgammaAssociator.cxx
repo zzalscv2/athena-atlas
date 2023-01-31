@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METEgammaAssociator.cxx 
@@ -26,10 +26,10 @@
 // DeltaR calculation
 #include "FourMomUtils/xAODP4Helpers.h"
 
-typedef ElementLink<xAOD::ElectronContainer> ElectronLink_t;
-typedef ElementLink<xAOD::PhotonContainer> PhotonLink_t;
-typedef ElementLink<xAOD::PFOContainer> PFOLink_t;
-typedef ElementLink<xAOD::FlowElementContainer> FELink_t;
+using ElectronLink_t = ElementLink<xAOD::ElectronContainer>;
+using PhotonLink_t = ElementLink<xAOD::PhotonContainer>;
+using PFOLink_t = ElementLink<xAOD::PFOContainer>;
+using FELink_t = ElementLink<xAOD::FlowElementContainer>;
 
 namespace met {
 
@@ -53,7 +53,7 @@ namespace met {
   // Destructor
   ///////////////
   METEgammaAssociator::~METEgammaAssociator()
-  {}
+  = default;
 
   // Athena algtool's Hooks
   ////////////////////////////
@@ -97,7 +97,7 @@ namespace met {
     inputTC.reserve(10);
     
     if(m_tcMatch_method==DeltaR) {
-      for(const auto cl : *constits.tcCont) {
+      for(const auto *const cl : *constits.tcCont) {
         // this can probably be done more elegantly
         if(P4Helpers::isInDeltaR(*swclus,*cl,m_tcMatch_dR,m_useRapidity) && cl->e()>FLT_MIN) {
           // could consider also requirements on the EM fraction or depth
@@ -179,10 +179,10 @@ namespace met {
 
 
     // Charged PFOs
-    for (PFOLink_t pfoLink : cPFOLinks) {
+    for (const PFOLink_t& pfoLink : cPFOLinks) {
       if (pfoLink.isValid()){
 	const xAOD::PFO* pfo_init = *pfoLink;
-	for (const auto pfo : *constits.pfoCont){
+	for (const auto *const pfo : *constits.pfoCont){
 	  if (pfo->index() == pfo_init->index() && pfo->isCharged()){ //index-based match between JetETmiss and CHSParticleFlow collections
 	    const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
 	    if(  pfo->isCharged() && PVMatchedAcc(*pfo)&& ( !m_cleanChargedPFO || isGoodEoverP(pfo->track(0)) ) ) {
@@ -202,10 +202,10 @@ namespace met {
     double eg_cl_e = eg->caloCluster()->e();
     double sumE_pfo = 0.;
 
-    for (PFOLink_t pfoLink : nPFOLinks) {
+    for (const PFOLink_t& pfoLink : nPFOLinks) {
       if (pfoLink.isValid()){
         const xAOD::PFO* pfo_init = *pfoLink;
-	for (const auto pfo : *constits.pfoCont){
+	for (const auto *const pfo : *constits.pfoCont){
 	  if (pfo->index() == pfo_init->index() && !pfo->isCharged()){ //index-based match between JetETmiss and CHSParticleFlow collections
 	    double pfo_e = pfo->eEM();
 	    if( ( !pfo->isCharged()&& pfo->e() > FLT_MIN ) ){   
@@ -237,7 +237,7 @@ namespace met {
     // Preselect PFOs based on proximity: dR<0.4
     std::vector<const xAOD::PFO*> nearbyPFO;
     nearbyPFO.reserve(20);
-    for(const auto pfo : *constits.pfoCont) {
+    for(const auto *const pfo : *constits.pfoCont) {
       if(P4Helpers::isInDeltaR(*pfo, *swclus, 0.4, m_useRapidity)) {
         // We set a small -ve pt for cPFOs that were rejected
         // by the ChargedHadronSubtractionTool
@@ -269,7 +269,7 @@ namespace met {
     // because some PFOs don't correspond to the original TC
     bool doSum = true;
     double sumE_pfo = 0.;
-    const IParticle* bestbadmatch = 0;
+    const IParticle* bestbadmatch = nullptr;
     std::sort(nearbyPFO.begin(),nearbyPFO.end(),greaterPtPFO);
     for(const auto& pfo : nearbyPFO) {
       // Skip charged PFOs, as we already matched them
@@ -343,10 +343,10 @@ namespace met {
 
 
     // Charged FEs
-    for (FELink_t feLink : cFELinks) {
+    for (const FELink_t& feLink : cFELinks) {
       if (feLink.isValid()){
 	const xAOD::FlowElement* fe_init = *feLink;
-	for (const auto fe : *constits.feCont){
+	for (const auto *const fe : *constits.feCont){
 	  if (fe->index() == fe_init->index() && fe->isCharged()){ //index-based match between JetETmiss and CHSFlowElements collections
 	    const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
 	    if(  fe->isCharged() && PVMatchedAcc(*fe)&& ( !m_cleanChargedPFO || isGoodEoverP(static_cast<const xAOD::TrackParticle*>(fe->chargedObject(0))) ) ) {
@@ -362,10 +362,10 @@ namespace met {
     double eg_cl_e = eg->caloCluster()->e();
     double sumE_fe = 0.;
 
-    for (FELink_t feLink : nFELinks) {
+    for (const FELink_t& feLink : nFELinks) {
       if (feLink.isValid()){
         const xAOD::FlowElement* fe_init = *feLink;
-	for (const auto fe : *constits.feCont){
+	for (const auto *const fe : *constits.feCont){
 	  if (fe->index() == fe_init->index() && !fe->isCharged()){ //index-based match between JetETmiss and CHSFlowElements collections
 	    double fe_e = fe->e();
 	    if( ( !fe->isCharged()&& fe->e() > FLT_MIN ) ){   
@@ -433,7 +433,7 @@ namespace met {
     // because some PFOs don't correspond to the original TC
     bool doSum = true;
     double sumE_pfo = 0.;
-    const IParticle* bestbadmatch = 0;
+    const IParticle* bestbadmatch = nullptr;
     std::sort(nearbyFE.begin(),nearbyFE.end(),greaterPtFE);
     for(const xAOD::FlowElement* fe : nearbyFE) {
       // Skip charged PFOs, as we already matched them
@@ -479,7 +479,7 @@ namespace met {
 
     bool doSum = true;
     double sumE_tc = 0.;
-    const IParticle* bestbadmatch = 0;
+    const IParticle* bestbadmatch = nullptr;
     for(const auto& cl : inputTC) {
       double tcl_e = cl->e();
       // skip cluster if it's above our bad match threshold
@@ -530,7 +530,7 @@ namespace met {
     } // end ambiguous track case
 
     // in a small dR window, also accept tracks without an IBL hit
-    for(const auto track : *trkCont) {
+    for(const auto *const track : *trkCont) {
       if(P4Helpers::isInDeltaR(*track, *eg, m_extraTrkMatch_dR, m_useRapidity)) {
         // dR check should be faster than track summary retrieval
         uint8_t expect_innermostHit(false);

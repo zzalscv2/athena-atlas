@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METTruthTool.cxx 
@@ -121,9 +121,7 @@ namespace met {
   {
     ATH_MSG_VERBOSE("Check nonint");
     // stable and non-interacting
-    if (truth->isGenStable() && MC::isNonInteracting(truth->pdgId())) return true;
-
-    return false;
+    return truth->isGenStable() && MC::isNonInteracting(truth->pdgId());
   }
 
   bool METTruthTool::accept_int(const xAOD::TruthParticle* truth) const
@@ -209,13 +207,12 @@ namespace met {
     MissingETBase::Types::weight_t unitWeight(1.,1.,1.);
     MissingETBase::Types::weight_t minusWeight(-1.,-1.,1.);
     vector<const IParticle*> dummyList;
-    for( vector<const IParticle*>::const_iterator iPart=signalList.begin();
-	 iPart!=signalList.end(); ++iPart) {
+    for(const auto *iPart : signalList) {
       if(m_truth_type==MissingETBase::Source::NonInt) {
 	// flip direction for nonint
-	this->addToMET(*iPart,dummyList,metTerm,metMap,minusWeight);
+	this->addToMET(iPart,dummyList,metTerm,metMap,minusWeight);
       } else {
-	this->addToMET(*iPart,dummyList,metTerm,metMap,unitWeight);
+	this->addToMET(iPart,dummyList,metTerm,metMap,unitWeight);
       }
     }
 
