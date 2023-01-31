@@ -354,12 +354,11 @@ void HGTD_LayerBuilderCond::registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Su
    // register the surfaces to the layer
    for (const auto & surfaces : layerSurfaces) {
      if (surfaces) { 
-       // register the current surfaces --------------------------------------------------------
-       // Needs care for Athena MT 
-       Trk::ILayerBuilderCond::associateLayer(lay, (*surfaces));
+       // register the current surfaces
+       (*surfaces).associateLayer(lay);
      }
    }
-   }
+}
 
 void HGTD_LayerBuilderCond::evaluateBestBinning(std::vector<Trk::SurfaceOrderPosition>& surfaces,
                                                 std::vector<float>& rBins, float& maxRadius,

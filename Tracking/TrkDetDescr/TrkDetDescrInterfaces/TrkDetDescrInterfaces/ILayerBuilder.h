@@ -56,12 +56,6 @@ public:
    */
   virtual void validationAction() const {}
 
-protected:
-  /** Protected method to register the Layer to the Surface */
-  void associateLayer(const Layer& lay, Surface& sf) const
-  {
-    sf.associateLayer(lay);
-  }
 };
 
 } // end of namespace
