@@ -373,7 +373,7 @@ namespace MuonGM {
         std::map<int, pairRE_AlignTransf>::iterator it = m_REwithAlTransfInStation.begin();
         std::map<int, pairRE_AlignTransf>::iterator itEnd = m_REwithAlTransfInStation.end();
         MsgStream log(Athena::getMessageSvc(), "MuonStation");
-        for (; it != itEnd; it++) {
+        for (; it != itEnd; ++it) {
             MuonReadoutElement* re = ((*it).second).first;
             if (re == nullptr) {
                 if (log.level() <= MSG::WARNING)

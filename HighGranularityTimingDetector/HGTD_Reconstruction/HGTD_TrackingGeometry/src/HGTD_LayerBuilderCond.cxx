@@ -131,7 +131,7 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
   // and evaluates the number of discs
   // assuming you have the same number of modules on both sides
   int nlayers = 0;
-  for (; hgtdDetIter != readCdo->end(); hgtdDetIter++){
+  for (; hgtdDetIter != readCdo->end(); ++hgtdDetIter){
     Identifier    currentId((*hgtdDetIter)->identify());
     // skipping negative side
     if (m_hgtdHelper->endcap(currentId)<0) continue;
@@ -155,7 +155,7 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
   
   // get the missing dimensions by loop over DetElements
   hgtdDetIter = readCdo->begin();
-  for (; hgtdDetIter != readCdo->end(); hgtdDetIter++){
+  for (; hgtdDetIter != readCdo->end(); ++hgtdDetIter){
   // take it - if 
   // a) you have a detector element ... protection
   if ( (*hgtdDetIter) ) {
