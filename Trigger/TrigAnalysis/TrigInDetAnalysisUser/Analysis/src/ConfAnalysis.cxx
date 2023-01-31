@@ -58,7 +58,7 @@ BinConfig cosmicBinConfig("cosmic");
 
 void ConfAnalysis::initialise() { 
   if ( !m_initialiseFirstEvent ) { 
-    std::cout << "ConfAnalysis::initialize() " << std::endl;
+    std::cout << "ConfAnalysis::initialise() " << std::endl;
     initialiseInternal();
   }
 }
@@ -69,8 +69,7 @@ void ConfAnalysis::initialiseInternal() {
     
   m_initialised = true;
 
-  //  std::cout << "ConfAnalysis::initialise() " << name() << std::endl;
-
+  // std::cout << "ConfAnalysis::initialiseInternal() " << name() << std::endl;
 
   BinConfig& binConfig = g_binConfig;
  

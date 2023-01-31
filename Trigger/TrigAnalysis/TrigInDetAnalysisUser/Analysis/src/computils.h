@@ -869,8 +869,8 @@ private:
 
   std::string m_plotfilename;
 
-  inline static bool s_plotref{true};
-  inline static bool s_meanplotref{true};
+  static bool s_plotref;
+  static bool s_meanplotref;
 
   size_t  m_max_entries;
   size_t  m_entries;
@@ -881,6 +881,17 @@ private:
 
 
 typedef tPlotter<TH1F> Plotter;
+
+
+/// use non c++17 format for improved external compatability
+template<typename T>
+bool tPlotter<T>::s_plotref = true;
+
+
+template<typename T>
+bool tPlotter<T>::s_meanplotref = true;
+
+
 
 bool empty( TH1* h );
 

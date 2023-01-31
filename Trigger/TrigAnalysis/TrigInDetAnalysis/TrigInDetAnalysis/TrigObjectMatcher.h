@@ -31,7 +31,7 @@ public:
 
   TrigObjectMatcher() : m_status(0) { } 
 
-  TrigObjectMatcher(  const std::vector<TIDA::Track*>&      tracks, 
+  TrigObjectMatcher(  const std::vector<TIDA::Track*>&    tracks, 
 		      const std::vector<TrackTrigObject>& objects  ) 
     : m_status(1) {         
     for ( size_t i=tracks.size() ; i-- ; ) match( tracks[i]->id(), objects );
