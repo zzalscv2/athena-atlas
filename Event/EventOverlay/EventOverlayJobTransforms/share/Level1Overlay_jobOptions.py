@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 include.block("EventOverlayJobTransforms/Level1Overlay_jobOptions.py")
 
 from AthenaCommon import CfgGetter
@@ -61,7 +61,9 @@ if DetFlags.overlay.LVL1_on():
                 job.TileHitToTTL1.TileMBTSTTL1Container = overlayFlags.evtStore() + \
                     '+TileTTL1MBTS'
 
-        include("TileSimAlgs/TileMuonReceiver_jobOptions.py")
+        from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as commonGeoFlags
+        if commonGeoFlags.Run() != "RUN1":
+            include("TileSimAlgs/TileMuonReceiver_jobOptions.py")
 
         # Add special TTL1 overlay algorithm only for MC+MC overlay
         if not overlayFlags.isDataOverlay():

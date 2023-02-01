@@ -75,6 +75,7 @@ StatusCode TileMuonReceiverDecision::initialize() {
   bool doTileMuonReceiverCnt = (m_runPeriod > 1);
   ATH_CHECK( m_rawChannelContainerKey.initialize(doTileMuonReceiverCnt) );
   ATH_CHECK( m_muonReceiverContainerKey.initialize(doTileMuonReceiverCnt) );
+  ATH_CHECK( m_emScaleKey.initialize(m_runPeriod != 0) );
 
   if (m_runPeriod == 0) {
      ATH_MSG_INFO("Stopping ... TileMuonReceiverDecision should not be used for RUN1 simulations");
@@ -87,8 +88,6 @@ StatusCode TileMuonReceiverDecision::initialize() {
   ATH_CHECK( detStore()->retrieve(m_tileID) );
   ATH_CHECK( detStore()->retrieve(m_tileHWID) );
   ATH_CHECK(detStore()->retrieve(m_tileInfo, m_infoName));
-
-  ATH_CHECK( m_emScaleKey.initialize() );
 
   ATH_MSG_INFO("TileMuonReceiverDecision initialization completed" );
   return StatusCode::SUCCESS;

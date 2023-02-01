@@ -1,3 +1,4 @@
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 ###############################################################
 #
 # Job options file to configure:
@@ -48,7 +49,9 @@ if DetFlags.simulateLVL1.LAr_on():
 
 if DetFlags.simulateLVL1.Tile_on():
     protectedInclude( "TileSimAlgs/TileTTL1_jobOptions.py" )
-    protectedInclude( "TileSimAlgs/TileMuonReceiver_jobOptions.py" )
+    from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as commonGeoFlags
+    if commonGeoFlags.Run() != "RUN1":
+        protectedInclude( "TileSimAlgs/TileMuonReceiver_jobOptions.py" )
 
 if DetFlags.digitize.LVL1_on():
     # fwinkl, Oct 2021
