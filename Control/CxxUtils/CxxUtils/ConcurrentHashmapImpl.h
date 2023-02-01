@@ -488,7 +488,7 @@ public:
 
   /**
    * @brief Erase an entry from the table.
-   * @param key The key to find.
+   * @param key The key to erase.
    * @param hash The hash of the key.
    *
    * Mark the corresponding entry as deleted.

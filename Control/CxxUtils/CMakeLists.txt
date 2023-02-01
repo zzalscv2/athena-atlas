@@ -111,6 +111,16 @@ if ( IS_DIRECTORY /usr/include/ck )
 endif()
 
 
+atlas_add_test( ConcurrentMap_test
+  SOURCES test/ConcurrentMap_test.cxx
+  INCLUDE_DIRS ${TBB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CK_INCLUDE}
+  LINK_LIBRARIES CxxUtils TestTools ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${CK_LIBRARIES} )
+if ( IS_DIRECTORY /usr/include/ck )
+  target_compile_definitions(CxxUtils_ConcurrentMap_test
+    PRIVATE "-DHAVE_CK" )
+endif()
+
+
 atlas_add_test( ConcurrentPtrSet_test
   SOURCES test/ConcurrentPtrSet_test.cxx
   INCLUDE_DIRS ${TBB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CK_INCLUDE}
