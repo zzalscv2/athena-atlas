@@ -25,6 +25,11 @@ def OutputStreamCfg(configFlags, streamName, ItemList=[], MetadataItemList=[],
       raise ConfigurationError("Same name for input and output file %s" % fileName)
 
    result = ComponentAccumulator(sequence = CompFactory.AthSequencer("AthOutSeq", StopOverride=True))
+
+   # Set up AthenaPoolCnvSvc through PoolWriteCfg
+   from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
+   result.merge(PoolWriteCfg(configFlags))
+
    # define athena output stream
    writingTool = CompFactory.AthenaOutputStreamTool(f"Stream{streamName}Tool",
                                                     DataHeaderKey=outputStreamName)

@@ -5,7 +5,6 @@ from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
 from SimuJobTransforms.CommonSimulationSteering import specialConfigPreInclude, specialConfigPostInclude
 
 
@@ -135,7 +134,6 @@ def fromRunArgs(runArgs):
         cfg = MainServicesCfg(flags)
 
     cfg.merge(PoolReadCfg(flags))
-    cfg.merge(PoolWriteCfg(flags))
 
     # Simulation
     from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg

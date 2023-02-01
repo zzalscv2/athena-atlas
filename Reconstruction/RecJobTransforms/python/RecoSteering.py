@@ -235,13 +235,6 @@ def RecoSteering(flags):
 
     # setup output
     acc.flagPerfmonDomain('IO')
-    if any((flags.Output.doWriteESD,
-            flags.Output.doWriteAOD,
-            flags.Output.doWriteRDO)):
-        from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
-        acc.merge(PoolWriteCfg(flags))
-        log.info("setup POOL format writing")
-
     if flags.Output.doWriteESD:
         # Needed for Trk::Tracks TPCnv
         from TrkEventCnvTools.TrkEventCnvToolsConfigCA import (

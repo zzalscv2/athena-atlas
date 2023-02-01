@@ -57,9 +57,6 @@ def fromRunArgs(runArgs):
     cfg.merge(PoolReadCfg(ConfigFlags))
 
     # Output writing
-    from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
-    cfg.merge(PoolWriteCfg(ConfigFlags))
-
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     cfg.merge(OutputStreamCfg(ConfigFlags, 'AOD'))
     StreamAOD = cfg.getEventAlgo('OutputStreamAOD')

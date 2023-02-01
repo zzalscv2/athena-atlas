@@ -83,11 +83,9 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(ConfigFlags)
 
-    # Pool file reading and writing
+    # Pool file reading
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(ConfigFlags))
-    from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
-    cfg.merge(PoolWriteCfg(ConfigFlags))
 
     # Cut flow service
     from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg

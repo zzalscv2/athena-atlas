@@ -10,7 +10,6 @@ from AthenaConfiguration.Enums import ProductionStep
 from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
 from BCM_Digitization.BCM_DigitizationConfig import BCM_DigitizationCfg
 from Digitization.DigitizationParametersConfig import writeDigitizationMetadata
 from LArDigitization.LArDigitizationConfig import LArTriggerDigitizationCfg
@@ -55,7 +54,6 @@ def DigitizationMainServicesCfg(flags):
         acc = MainServicesCfg(flags)
 
     acc.merge(PoolReadCfg(flags))
-    acc.merge(PoolWriteCfg(flags))
 
     return acc
 

@@ -63,8 +63,5 @@ if __name__ == "__main__":
     readBSAcc = ByteStreamReadCfg(flags)
     acc.merge(HIRecCfg(flags))
 
-    from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
-    acc.merge(PoolWriteCfg(flags))
-
     import sys
     sys.exit(acc.run().isFailure())

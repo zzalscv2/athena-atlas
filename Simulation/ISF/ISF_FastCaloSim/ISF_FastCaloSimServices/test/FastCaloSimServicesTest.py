@@ -25,7 +25,6 @@ def FastCaloSimServicesMainCfg(flags):
     # Construct our accumulator to run
     acc = FCSServicesMainCfg(flags)
     acc.merge(PoolReadCfg(flags))
-    acc.merge(PoolWriteCfg(flags))
 
     # Add TileInfoLoader
     from TileConditions.TileInfoLoaderConfig import TileInfoLoaderCfg
@@ -65,7 +64,6 @@ if __name__ == '__main__':
 
     import sys
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
     from ISF_FastCaloSimServices.ISF_FastCaloSimServicesTestHelpers import (
