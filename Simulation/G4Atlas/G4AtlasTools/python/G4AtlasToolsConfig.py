@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
@@ -9,8 +9,10 @@ def FastSimulationToolListCfg(flags):
     result = ComponentAccumulator()
     tools = []
     if flags.Detector.GeometryBpipe:
-        #if hasattr(simFlags, 'ForwardDetectors') and simFlags.ForwardDetectors.statusOn and simFlags.ForwardDetectors() == 2:
-        #    FastSimulationList += ['ForwardTransportModel']
+        if  not flags.Detector.GeometryFwdRegion and (flags.Detector.GeometryAFP or flags.Detector.GeometryALFA or flags.Detector.GeometryZDC):
+            # equivalent of simFlags.ForwardDetectors() == 2:
+            from ForwardTransport.ForwardTransportConfig import ForwardTransportModelCfg
+            tools += [ result.popToolsAndMerge(ForwardTransportModelCfg(flags)) ]
         if flags.Sim.BeamPipeSimMode is not BeamPipeSimMode.Normal:
             from G4FastSimulation.G4FastSimulationConfig import SimpleFastKillerCfg
             tools += [ result.popToolsAndMerge(SimpleFastKillerCfg(flags)) ]
@@ -57,18 +59,24 @@ def FwdSensitiveDetectorListCfg(flags):
     # TODO: migrate to CA
     result = ComponentAccumulator()
     tools = []
-    if flags.Detector.EnableForward:
-        print ('G4AtlasToolsConfig.FwdSensitiveDetectorListCfg ERROR Forward Detector SD configuration has not been migrated to CA yet!')
     if flags.Detector.EnableLucid:
-        tools += [ 'LUCID_SensitiveDetector' ]
+        from LUCID_G4_SD.LUCID_G4_SDConfig import LUCID_SensitiveDetectorCfg
+        tools += [ result.popToolsAndMerge(LUCID_SensitiveDetectorCfg(flags)) ]
     if flags.Detector.EnableForward:
         if flags.Detector.EnableZDC:
-            tools += [ 'ZDC_PixelSD', 'ZDC_StripSD' ]
+            from ZDC_SD.ZDC_SDConfig import ZDC_PixelSDCfg, ZDC_StripSDCfg
+            tools += [ result.popToolsAndMerge(ZDC_PixelSDCfg(flags)) ]
+            tools += [ result.popToolsAndMerge(ZDC_StripSDCfg(flags)) ]
         if flags.Detector.EnableALFA:
-            tools += [ 'ALFA_SensitiveDetector' ]
+            from ALFA_G4_SD.ALFA_G4_SDConfig import ALFA_SensitiveDetectorCfg
+            tools += [ result.popToolsAndMerge(ALFA_SensitiveDetectorCfg(flags)) ]
         if flags.Detector.EnableAFP:
-            tools += [ 'AFP_SensitiveDetector' ]
-            #tools += [ 'AFP_SiDSensitiveDetector', 'AFP_TDSensitiveDetector' ]
+            from AFP_G4_SD.AFP_G4_SDConfig import AFP_SensitiveDetectorCfg
+            tools += [ result.popToolsAndMerge(AFP_SensitiveDetectorCfg(flags)) ]
+            # Alternative implementations
+            # from AFP_G4_SD.AFP_G4_SDConfig import AFP_SiDSensitiveDetectorCfg, AFP_TDSensitiveDetectorCfg
+            # tools += [ result.popToolsAndMerge(AFP_SiDSensitiveDetectorCfg(flags)) ]
+            # tools += [ result.popToolsAndMerge(AFP_TDSensitiveDetectorCfg(flags)) ]
     result.setPrivateTools(tools)
     return result
 

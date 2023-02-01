@@ -1,11 +1,19 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon import CfgMgr
-def getZDC_StripSD(name="ZDC_StripSD", **kwargs):
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+def ZDC_StripSDCfg(flags, name="ZDC_StripSD", **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("LogicalVolumeNames", ["ZDC::Strip_Logical"])
     kwargs.setdefault("OutputCollectionNames", ["ZDC_SimStripHit_Collection"])
-    return CfgMgr.ZDC_StripSDTool(name, **kwargs)
-def getZDC_PixelSD(name="ZDC_PixelSD", **kwargs):
+    result.setPrivateTools(CompFactory.ZDC_StripSDTool(name, **kwargs))
+    return result
+
+
+def ZDC_PixelSDCfg(flags, name="ZDC_PixelSD", **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("LogicalVolumeNames", ["ZDC::Pixel_Logical"])
     kwargs.setdefault("OutputCollectionNames", ["ZDC_SimPixelHit_Collection"])
-    return CfgMgr.ZDC_PixelSDTool(name, **kwargs)
+    result.setPrivateTools(CompFactory.ZDC_PixelSDTool(name, **kwargs))
+    return result

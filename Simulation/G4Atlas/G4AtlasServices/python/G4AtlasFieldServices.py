@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -19,16 +19,26 @@ def ForwardFieldSvcCfg(flags, name="ForwardField", **kwargs):
     return result
 
 
+def ForwardRegionFieldSvcCfg(flags, name="ForwardRegionFieldSvc", **kwargs):
+    result = ComponentAccumulator()
+    from ForwardRegionProperties.ForwardRegionPropertiesConfig import ForwardRegionPropertiesCfg
+    tool = result.popToolsAndMerge(ForwardRegionPropertiesCfg(flags))
+    result.addPublicTool(tool)
+    kwargs.setdefault("ForwardRegionProperties", result.getPublicTool(tool.name))
+    result.addService(CompFactory.MagField.ForwardRegionFieldSvc(name, **kwargs),
+                      primary=True)
+    return result
+
+
 def Q1FwdG4FieldSvcCfg(flags, name='Q1FwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q1",
-                                                                   # FIXME find a better way to do this.
-                                                                   Magnet=0,
-                                                                   MQXA_DataFile="MQXA_NOMINAL.dat"),
-                        primary=True)
-
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q1",
+                              Magnet=0,
+                              MQXA_DataFile="MQXA_NOMINAL.dat")).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -36,13 +46,13 @@ def Q1FwdG4FieldSvcCfg(flags, name='Q1FwdG4FieldSvc', **kwargs):
 
 def Q2FwdG4FieldSvcCfg(flags, name='Q2FwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q2",
-                                                                   # FIXME find a better way to do this.
-                                                                   Magnet=1,
-                                                                   MQXA_DataFile="MQXA_NOMINAL.dat"),
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q2",
+                              Magnet=1,
+                              MQXA_DataFile="MQXA_NOMINAL.dat")).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -50,13 +60,13 @@ def Q2FwdG4FieldSvcCfg(flags, name='Q2FwdG4FieldSvc', **kwargs):
 
 def Q3FwdG4FieldSvcCfg(flags, name='Q3FwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q3",
-                                                                   # FIXME find a better way to do this.
-                                                                   Magnet=2,
-                                                                   MQXA_DataFile="MQXA_NOMINAL.dat"),
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q3",
+                              Magnet=2,
+                              MQXA_DataFile="MQXA_NOMINAL.dat")).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -64,11 +74,12 @@ def Q3FwdG4FieldSvcCfg(flags, name='Q3FwdG4FieldSvc', **kwargs):
 
 def D1FwdG4FieldSvcCfg(flags, name='D1FwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("D1", Magnet=3),  # FIXME find a better way to do this.
-                        primary=True)
-
-    kwargs.setdefault("MagneticFieldSvc",result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="D1",
+                              Magnet=3)).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -76,10 +87,12 @@ def D1FwdG4FieldSvcCfg(flags, name='D1FwdG4FieldSvc', **kwargs):
 
 def D2FwdG4FieldSvcCfg(flags, name='D2FwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("D2", Magnet=4),  # FIXME find a better way to do this.
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="D2",
+                              Magnet=4)).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -87,10 +100,12 @@ def D2FwdG4FieldSvcCfg(flags, name='D2FwdG4FieldSvc', **kwargs):
 
 def Q4FwdG4FieldSvcCfg(flags, name='Q4FwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q4", Magnet=5),  # FIXME find a better way to do this.
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q4",
+                              Magnet=5)).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -98,10 +113,12 @@ def Q4FwdG4FieldSvcCfg(flags, name='Q4FwdG4FieldSvc', **kwargs):
 
 def Q5FwdG4FieldSvcCfg(flags, name='Q5FwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q5", Magnet=6),  # FIXME find a better way to do this.
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q5",
+                              Magnet=6)).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -109,10 +126,12 @@ def Q5FwdG4FieldSvcCfg(flags, name='Q5FwdG4FieldSvc', **kwargs):
 
 def Q6FwdG4FieldSvcCfg(flags, name='Q6FwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q6", Magnet=7),  # FIXME find a better way to do this.
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q6",
+                              Magnet=7)).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -120,10 +139,12 @@ def Q6FwdG4FieldSvcCfg(flags, name='Q6FwdG4FieldSvc', **kwargs):
 
 def Q7FwdG4FieldSvcCfg(flags, name='Q7FwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q7", Magnet=8),  # FIXME find a better way to do this.
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q7",
+                              Magnet=8)).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -131,10 +152,12 @@ def Q7FwdG4FieldSvcCfg(flags, name='Q7FwdG4FieldSvc', **kwargs):
 
 def Q1HKickFwdG4FieldSvcCfg(flags, name='Q1HKickFwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q1HKick", Magnet=9),  # FIXME find a better way to do this.
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q1HKick",
+                              Magnet=9)).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -143,10 +166,12 @@ def Q1HKickFwdG4FieldSvcCfg(flags, name='Q1HKickFwdG4FieldSvc', **kwargs):
 # note is lower case "v" in ForwardRegionMgFieldConfig.py
 def Q1VKickFwdG4FieldSvcCfg(flags, name='Q1VKickFwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q1VKick", Magnet=10),  # FIXME find a better way to do this.
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q1VKick",
+                              Magnet=10)).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -154,10 +179,12 @@ def Q1VKickFwdG4FieldSvcCfg(flags, name='Q1VKickFwdG4FieldSvc', **kwargs):
 
 def Q2HKickFwdG4FieldSvcCfg(flags, name='Q2HKickFwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q2HKick", Magnet=11),  # FIXME find a better way to do this.
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q2HKick",
+                              Magnet=11)).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -165,10 +192,12 @@ def Q2HKickFwdG4FieldSvcCfg(flags, name='Q2HKickFwdG4FieldSvc', **kwargs):
 
 def Q2VKickFwdG4FieldSvcCfg(flags, name='Q2VKickFwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q2VKick", Magnet=12),  # FIXME find a better way to do this.
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q2VKick",
+                              Magnet=12)).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -176,10 +205,12 @@ def Q2VKickFwdG4FieldSvcCfg(flags, name='Q2VKickFwdG4FieldSvc', **kwargs):
 
 def Q3HKickFwdG4FieldSvcCfg(flags, name='Q3HKickFwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q3HKick", Magnet=13),  # FIXME find a better way to do this.
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q3HKick",
+                              Magnet=13)).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -187,10 +218,12 @@ def Q3HKickFwdG4FieldSvcCfg(flags, name='Q3HKickFwdG4FieldSvc', **kwargs):
 
 def Q3VKickFwdG4FieldSvcCfg(flags, name='Q3VKickFwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q3VKick", Magnet=14),  # FIXME find a better way to do this.
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q3VKick",
+                              Magnet=14)).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -198,10 +231,12 @@ def Q3VKickFwdG4FieldSvcCfg(flags, name='Q3VKickFwdG4FieldSvc', **kwargs):
 
 def Q4VKickAFwdG4FieldSvcCfg(flags, name='Q4VKickAFwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q4VKickA", Magnet=15),  # FIXME find a better way to do this.
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q4VKickA",
+                              Magnet=15)).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -209,10 +244,12 @@ def Q4VKickAFwdG4FieldSvcCfg(flags, name='Q4VKickAFwdG4FieldSvc', **kwargs):
 
 def Q4HKickFwdG4FieldSvcCfg(flags, name='Q4HKickFwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q4HKick", Magnet=16),  # FIXME find a better way to do this.
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q4HKick",
+                              Magnet=16)).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -220,10 +257,12 @@ def Q4HKickFwdG4FieldSvcCfg(flags, name='Q4HKickFwdG4FieldSvc', **kwargs):
 
 def Q4VKickBFwdG4FieldSvcCfg(flags, name='Q4VKickBFwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q4VKickB", Magnet=17),  # FIXME find a better way to do this.
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q4VKickB",
+                              Magnet=17)).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -231,10 +270,12 @@ def Q4VKickBFwdG4FieldSvcCfg(flags, name='Q4VKickBFwdG4FieldSvc', **kwargs):
 
 def Q5HKickFwdG4FieldSvcCfg(flags, name='Q5HKickFwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q5HKick", Magnet=18),  # FIXME find a better way to do this.
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q5HKick",
+                              Magnet=18)).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result
@@ -242,10 +283,12 @@ def Q5HKickFwdG4FieldSvcCfg(flags, name='Q5HKickFwdG4FieldSvc', **kwargs):
 
 def Q6VKickFwdG4FieldSvcCfg(flags, name='Q6VKickFwdG4FieldSvc', **kwargs):
     result = ComponentAccumulator()
-    fieldAcc = ComponentAccumulator()
-    fieldAcc.addService(CompFactory.MagField.ForwardRegionFieldSvc("Q6VKick", Magnet=19),  # FIXME find a better way to do this.
-                        primary=True)
-    kwargs.setdefault("MagneticFieldSvc", result.getPrimaryAndMerge(fieldAcc).name)
+    kwargs.setdefault("MagneticFieldSvc",
+                      result.getPrimaryAndMerge(
+                          ForwardRegionFieldSvcCfg(
+                              flags,
+                              name="Q6VKick",
+                              Magnet=19)).name)
     fieldSvc = result.getPrimaryAndMerge(ForwardFieldSvcCfg(flags, name, **kwargs))
     result.addService(fieldSvc, primary=True)
     return result

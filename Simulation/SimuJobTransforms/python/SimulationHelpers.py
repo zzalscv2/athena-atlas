@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, LArParameterization
 
 
@@ -12,22 +12,21 @@ def getDetectorsFromRunArgs(flags, runArgs):
 
     # Support switching on Forward Detectors
     if hasattr(runArgs, 'LucidOn'):
-        detectors = detectors+['Lucid']
+        detectors = detectors.add('Lucid')
     if hasattr(runArgs, 'ZDCOn'):
-        detectors = detectors+['ZDC']
+        detectors = detectors.add('ZDC')
     if hasattr(runArgs, 'AFPOn'):
-        detectors = detectors+['AFP']
+        detectors = detectors.add('AFP')
     if hasattr(runArgs, 'ALFAOn'):
-        detectors = detectors+['ALFA']
+        detectors = detectors.add('ALFA')
     if hasattr(runArgs, 'FwdRegionOn'):
-        detectors = detectors+['FwdRegion']
+        detectors = detectors.add('FwdRegion')
     # TODO here support switching on Cavern geometry
     # if hasattr(runArgs, 'CavernOn'):
-    #     detectors = detectors+['Cavern']
+    #     detectors = detectors.add('Cavern')
 
     # Fatras does not support simulating the BCM, so have to switch that off
-    from SimulationConfig.SimEnums import SimulationFlavour
-    if flags.Sim.ISF.Simulator in [SimulationFlavour.ATLFASTIIFMT, SimulationFlavour.ATLFASTIIF_G4MS, SimulationFlavour.ATLFAST3F_G4MS]:
+    if flags.Sim.ISF.Simulator.usesFatras():
         try:
             detectors.remove('BCM')
         except ValueError:
