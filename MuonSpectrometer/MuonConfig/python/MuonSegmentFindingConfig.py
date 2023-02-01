@@ -87,15 +87,17 @@ def MdtMathSegmentFinderCfg(flags,name="MdtMathSegmentFinder", **kwargs):
 
     kwargs.setdefault("FinderDebugLevel", 0) # This is just to avoid that the tool seems unconfigured. Real fix is to use default name.
 
-    if flags.Beam.Type in [BeamType.SingleBeam, BeamType.Cosmics] or flags.Input.isMC is False:
-        kwargs.setdefault("AssociationRoadWidth", 2.)
-        kwargs.setdefault("MDTAssocationPullcut", 4.)
-        kwargs.setdefault("RecoverMdtOutliers", True )
-    elif doSegmentT0Fit:
+    if doSegmentT0Fit and not (flags.Muon.MuonTrigger and flags.Beam.Type in [BeamType.SingleBeam, BeamType.Cosmics]):
         kwargs.setdefault("AssociationRoadWidth", 3.)
         kwargs.setdefault("MDTAssocationPullcut", 3.)
         kwargs.setdefault("RecoverMdtOutliers", False)
         kwargs.setdefault("DCFitProvider", result.popToolsAndMerge(MdtSegmentT0FitterCfg(flags) ) )
+
+    if flags.Beam.Type in [BeamType.SingleBeam, BeamType.Cosmics] or flags.Input.isMC is False:
+        kwargs.setdefault("AssociationRoadWidth", 2.)
+        kwargs.setdefault("MDTAssocationPullcut", 4.)
+        kwargs.setdefault("RecoverMdtOutliers", True )
+        
 
     if flags.Muon.enableCurvedSegmentFinding:
         kwargs.setdefault("DoCurvedSegmentFinder",True)

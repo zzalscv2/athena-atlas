@@ -355,6 +355,7 @@ class DisableMdtT0Fit(_modifier):
         if flags.Trigger.doMuon:
             from MuonRecExample.MuonRecFlags import muonRecFlags
             muonRecFlags.doSegmentT0Fit.set_Value_and_Lock(False)
+            flags.Muon.doSegmentT0Fit=False
 
 ###############################################################
 # Monitoring and misc.
