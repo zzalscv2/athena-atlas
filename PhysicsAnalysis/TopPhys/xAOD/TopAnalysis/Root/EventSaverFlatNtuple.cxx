@@ -2339,7 +2339,7 @@ namespace top {
     }
 
     //event info
-    m_eventNumber = event.m_info->eventNumber();
+    m_eventNumber = (m_config->isDataOverlay()) ? event.m_info->mcEventNumber() : event.m_info->eventNumber();
     m_runNumber = event.m_info->runNumber();
     m_randomRunNumber = 0;
     if (m_config->isMC() && m_config->doPileupReweighting()) {
