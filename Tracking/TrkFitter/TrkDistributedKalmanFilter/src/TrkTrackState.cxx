@@ -25,14 +25,14 @@
 
 namespace Trk
 {
-  TrkTrackState::TrkTrackState() {
-    memset(m_Rk, 0, sizeof(m_Rk));
-    memset(m_Gk, 0, sizeof(m_Gk));
-    m_pSurface = nullptr;
-    m_scattMode = 0;
-    m_isScattered = false;
-    m_pPrevState = nullptr;
-  }
+TrkTrackState::TrkTrackState()
+    : m_scattMode(0),
+      m_isScattered(false),
+      m_pSurface(nullptr),
+      m_pPrevState(nullptr) {
+  memset(m_Rk, 0, sizeof(m_Rk));
+  memset(m_Gk, 0, sizeof(m_Gk));
+}
 
   TrkTrackState::TrkTrackState(const double Rk[5]) {
     int i;
