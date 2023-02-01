@@ -344,7 +344,7 @@ def MdtMathSegmentFinder(name="MdtMathSegmentFinder",extraFlags=None,**kwargs):
     doSegmentT0Fit = getattr(extraFlags,"doSegmentT0Fit",muonRecFlags.doSegmentT0Fit())
     enableCurvedSegmentFinding = getattr(extraFlags,"enableCurvedSegmentFinding", muonStandaloneFlags.enableCurvedSegmentFinding())
 
-    if doSegmentT0Fit:
+    if doSegmentT0Fit and not (ConfigFlags.Muon.MuonTrigger and (beamType =="cosmics" or globalflags.DataSource()=="data")):
         kwargs.setdefault("AssociationRoadWidth", 3.)
         kwargs.setdefault("MDTAssocationPullcut", 3.)
         kwargs.setdefault("RecoverMdtOutliers", False)
@@ -354,6 +354,7 @@ def MdtMathSegmentFinder(name="MdtMathSegmentFinder",extraFlags=None,**kwargs):
         kwargs.setdefault("AssociationRoadWidth", 2.)
         kwargs.setdefault("MDTAssocationPullcut", 4.)
         kwargs.setdefault("RecoverMdtOutliers", True )
+
 
     if enableCurvedSegmentFinding:
         kwargs.setdefault("DoCurvedSegmentFinder",True)

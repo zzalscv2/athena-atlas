@@ -443,7 +443,7 @@ def muEFSARecoSequence( flags, RoIs, name ):
         theSegmentFinderAlg = algorithmCAToGlobalWrapper(MuonSegmentFinderAlgCfg, flags, "TrigMuonSegmentMaker_"+name)
 
   else:
-    theSegmentFinderAlg = algorithmCAToGlobalWrapper(MooSegmentFinderAlgCfg,flags,name="TrigMuonSegmentMaker_"+name)
+    theSegmentFinderAlg = algorithmCAToGlobalWrapper(MooSegmentFinderAlgCfg,flags,name="TrigMuonSegmentMaker_"+name, UseTGCNextBC=False, UseTGCPriorBC=False)
 
   from MuonSegmentTrackMaker.MuonTrackMakerAlgsMonitoring import MuPatTrackBuilderMonitoring
 
@@ -680,7 +680,7 @@ def muEFInsideOutRecoSequence(flags, RoIs, name):
           theSegmentFinderAlg = algorithmCAToGlobalWrapper(MuonSegmentFinderAlgCfg, flags, "TrigMuonSegmentMaker_"+name)
 
       else:
-        theSegmentFinderAlg = algorithmCAToGlobalWrapper(MooSegmentFinderAlgCfg,flags,name="TrigMuonSegmentMaker_"+name)
+        theSegmentFinderAlg = algorithmCAToGlobalWrapper(MooSegmentFinderAlgCfg,flags,name="TrigMuonSegmentMaker_"+name, UseTGCNextBC=False, UseTGCPriorBC=False)
 
 
       efmuInsideOutRecoSequence+=theSegmentFinderAlg
