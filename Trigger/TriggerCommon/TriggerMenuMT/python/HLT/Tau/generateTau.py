@@ -182,7 +182,7 @@ if __name__ == "__main__":
     flags.Input.Files = defaultTestFiles.RAW
     flags.lock()
     from TriggerMenuMT.HLT.Config.Utility.DictFromChainName import dictFromChainName
-    chain = generateChains(flags, dictFromChainName('HLT_tau0_perf_ptonly_L1TAU8'))
+    chain = generateChains(flags, dictFromChainName(flags, 'HLT_tau0_perf_ptonly_L1TAU8'))
     for step in chain.steps:
         for s in step.sequences:
             if not isinstance(s, EmptyMenuSequence):

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 import itertools
 
 from TriggerMenuMT.HLT.Config.Utility.DictFromChainName import dictFromChainName
@@ -152,7 +152,7 @@ def loadChains(flags):
     chainsList = []
     for oneSigList in chainsInThisMenu.values():
         for chainProp in oneSigList:
-            mainChainDict = dictFromChainName(chainProp)
+            mainChainDict = dictFromChainName(flags, chainProp)
             if acceptChain( mainChainDict, flags.Trigger.triggerMenuModifier ):
                 chainsList.append(mainChainDict)
     sigGenMap = {}
@@ -258,21 +258,25 @@ def makeHLTTree(flags):
 
 
 if __name__ == "__main__":
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Trigger.triggerMenuSetup = "Dev_pp_run3_v1"
+    flags.lock()
+
     assert getGenerator("muon") is not None, "Can not get basic generator"
-    chainsInMenu = [dictFromChainName("HLT_e10_L1EM7"), dictFromChainName("HLT_e12_L1EM10"),
-                    dictFromChainName("HLT_e10_mu6_L1EM7_MU3V")]
+    chainsInMenu = [dictFromChainName(flags, "HLT_e10_L1EM7"),
+                    dictFromChainName(flags, "HLT_e12_L1EM10"),
+                    dictFromChainName(flags, "HLT_e10_mu6_L1EM7_MU3V")]
     sigMap = {}
     fillAllGeneratorsMap(chainsInMenu, sigMap)
     assert "Muon" in sigMap, "Muons missing"
     assert "Electron" in sigMap, "Electrons missing"
     log.info("Generators laoding works ok")
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
-
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Trigger.triggerMenuSetup = "Dev_pp_run3_v1"
-    ca = LoadAndGenerateMenu(ConfigFlags)
+    ca = LoadAndGenerateMenu(flags)
     ca.printConfig()
     ca.wasMerged()
     log.info("All ok")

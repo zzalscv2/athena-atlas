@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
 Dumps the trigger menu, optionally running some checks for name
@@ -81,7 +81,7 @@ def run():
     if args.names:
         dump_chains(chains)
     elif args.parse_names:
-        chain_to_dict, failed = get_chain_dicts(chains)
+        chain_to_dict, failed = get_chain_dicts(ConfigFlags, chains)
         if failed:
             sys.exit(1)
         if args.check_l1:
@@ -129,7 +129,7 @@ def is_new_error(error):
         return False
     return True
 
-def get_chain_dicts(chains):
+def get_chain_dicts(flags, chains):
     """
     returns map of chain names to dictionaries with a set of failed chains
     """
@@ -141,7 +141,7 @@ def get_chain_dicts(chains):
     chain_to_dict = {}
     for chain in chains:
         try:
-            chain_dict = dictFromChainName(chain)
+            chain_dict = dictFromChainName(flags, chain)
             name = chain_dict['chainName']
             chain_to_dict[name] = chain_dict
             passed.add(name)

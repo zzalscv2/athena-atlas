@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 ## This file runs runHLT_standalone with external menus
@@ -59,7 +59,7 @@ elif testopt.menuType == 'emuMenuTest':
     # HLT_TestChain
     generateHLTSeedingAndChainsByMenu(topSequence)
 elif testopt.menuType == 'emuManual':
-    generateHLTSeedingAndChainsManually(topSequence)
+    generateHLTSeedingAndChainsManually(ConfigFlags, topSequence)
 else:
     log.error("Input parameter %s not accepted",testopt.menuType)
 

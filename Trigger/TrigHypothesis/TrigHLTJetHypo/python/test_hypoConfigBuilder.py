@@ -1,7 +1,5 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """Make chain dicts for testing jet hypo config modules"""
-
-from __future__ import print_function
 
 from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import (
     SingleJetGroup,
@@ -30,6 +28,10 @@ from AthenaCommon.Constants import DEBUG
 logger = logging.getLogger( __name__)
 
 logger.setLevel(DEBUG)
+
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+flags = initConfigFlags()
+flags.lock()
 
 chains = [
     ChainProp(name='HLT_j0_DIJET70j12ptXX1000djmassXXdjdphi200XX400djdeta_pf_ftf_L1MJJ-500-NFF',
@@ -117,7 +119,7 @@ def testChainDictMaker(idict):
     result = []
     for cp in chain_props:
         logger.debug(cp)
-        chain_dict = dictFromChainName(cp)
+        chain_dict = dictFromChainName(flags, cp)
         result.append((cp.name, chain_dict))
 
     return result

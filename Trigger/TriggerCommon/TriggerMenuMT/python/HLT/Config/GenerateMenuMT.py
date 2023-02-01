@@ -88,7 +88,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
             self.chainFilter = f
 
 
-    def getChainDicts(self):
+    def getChainDicts(self, flags):
 
         def validSignature(currentSig, chainSig):
             """Check if chain is assigned to the correct signature"""
@@ -107,7 +107,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
             for chain in chains:
                 log.debug("Now processing chain: %s from signature %s", chain, sig)
                 chainCounter += 1
-                chainDict = dictFromChainName(chain)
+                chainDict = dictFromChainName(flags, chain)
                 chainDict['chainCounter'] = chainCounter
                 chainDict['prescale'] = 1  # set default chain prescale
 
@@ -209,7 +209,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
 
         # decoding of the chain name
         log.info("Will now get chain dictionaries for each chain")
-        self.getChainDicts()
+        self.getChainDicts(flags)
         
         if flags.Trigger.disableCPS:
             log.warning('Removing all CPS group because the flag Trigger.disableCPS is set')

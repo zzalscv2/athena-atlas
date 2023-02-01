@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.SystemOfUnits import GeV
@@ -146,10 +146,14 @@ class TestStringMethods(unittest.TestCase):
 
         chain_names = (
             'HLT_j0_FBDJNOSHARED10etXX20etXX34massXX50fbet_L1J20',)
-        
+
+        from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        flags = initConfigFlags()
+        flags.lock()
+
         wid = max(len(c) for c in chain_names)
         for chain_name in chain_names:
-            chain_dict = dictFromChainName(chain_name)
+            chain_dict = dictFromChainName(flags, chain_name)
             tool = trigJetHypoToolFromDict(chain_dict)
             self.assertIsNotNone(tool)
             logger.debug(chain_name.rjust(wid), str(tool))

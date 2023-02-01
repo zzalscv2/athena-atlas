@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from __future__ import print_function
@@ -83,7 +83,7 @@ class makeChainStep(object):
 
 chainsCounter = 0
 
-def makeChain( name, L1Thresholds, ChainSteps, Streams="physics:Main", Groups=["RATE:TestRateGroup", "BW:TestBW"]):
+def makeChain( flags, name, L1Thresholds, ChainSteps, Streams="physics:Main", Groups=["RATE:TestRateGroup", "BW:TestBW"]):
     """
     In addition to making the chain object fills the flags that are used to generate MnuCOnfig JSON file
     """
@@ -95,7 +95,7 @@ def makeChain( name, L1Thresholds, ChainSteps, Streams="physics:Main", Groups=["
     from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep
 
     from TriggerMenuMT.HLT.Config.Utility.DictFromChainName import dictFromChainName
-    chainDict = dictFromChainName( prop )
+    chainDict = dictFromChainName( flags, prop )
     global chainsCounter
     chainDict["chainCounter"] = chainsCounter
     chainsCounter += 1
