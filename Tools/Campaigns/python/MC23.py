@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.Enums import ProductionStep
 from Campaigns.Utils import Campaign
 
@@ -24,7 +24,7 @@ def MC23a(flags):
     flags.Digitization.PU.NumberOfLowPtMinBias = 84.335
     flags.Digitization.PU.NumberOfHighPtMinBias = 0.165
     flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
-    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run410000_MC21a_MultiBeamspot'
+    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run410000_MC23a_MultiBeamspot'
 
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         # ensure better randomisation of high-pt minbias events
@@ -36,7 +36,7 @@ def MC23aSingleBeamspot(flags):
     MC23a(flags)
 
     # override only pile-up profile
-    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run410000_MC21a_SingleBeamspot'
+    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run410000_MC23a_SingleBeamspot'
 
 
 def MC23LowMu(flags):
@@ -122,7 +122,7 @@ def MC23SimulationMultipleIoV(flags):
 
     from RunDependentSimComps.PileUpUtils import generateRunAndLumiProfile
     generateRunAndLumiProfile(flags,
-                              profile= 'RunDependentSimData.PileUpProfile_run410000_MC21a_MultiBeamspot')
+                              profile= 'RunDependentSimData.PileUpProfile_run410000_MC23a_MultiBeamspot')
 
 
 def MC23SimulationSingleIoVCalibrationHits(flags):
