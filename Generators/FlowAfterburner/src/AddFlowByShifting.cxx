@@ -204,14 +204,15 @@ StatusCode AddFlowByShifting::execute() {
 
 
 
-    auto mainvtx=HepMC::barcode_to_vertex(*itr,-1);
-    if(m_flow_fluctuations) Set_EbE_Fluctuation_Multipliers(mainvtx,hijing_pars->get_b(),rndmEngine);
-
 #ifdef HEPMC3
+    auto mainvtx=(*itr)->vertices().front();
+    if(m_flow_fluctuations) Set_EbE_Fluctuation_Multipliers(mainvtx,hijing_pars->get_b(),rndmEngine);
     int particles_in_event = (*itr)->particles().size();
     m_particles_processed = 0;
     for ( auto parent: mainvtx->particles_out())
 #else
+    auto mainvtx=*((*itr)->vertices_const_begin());
+    if(m_flow_fluctuations) Set_EbE_Fluctuation_Multipliers(mainvtx,hijing_pars->get_b(),rndmEngine);
       int particles_in_event = (*itr)->particles_size();
     m_particles_processed = 0;
     for ( auto parent: *mainvtx)

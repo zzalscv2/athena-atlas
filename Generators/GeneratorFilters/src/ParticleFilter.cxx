@@ -37,10 +37,11 @@ StatusCode ParticleFilter::filterEvent() {
             bool notSelfDecay = true;
             if (pitr->end_vertex()) {
               for (auto  child: *(pitr->end_vertex())) {
-                if ( child->pdg_id() == pitr->pdg_id() && HepMC::barcode(child)!=HepMC::barcode(pitr) && !HepMC::is_simulation_particle(child)) {
+                if ( child->pdg_id() != pitr->pdg_id()) continue;
+                if ( child == pitr) continue;
+                if ( HepMC::is_simulation_particle(child)) continue;
                   notSelfDecay = false;
                   break;
-                }
               }
             }
             if (notSelfDecay) nParts++;

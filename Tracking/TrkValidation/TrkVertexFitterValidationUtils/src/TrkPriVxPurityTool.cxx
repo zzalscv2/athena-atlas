@@ -98,10 +98,7 @@ namespace Trk {
 //first finding the vertex of primary pp interaction
 
 //and storing its position
-                CLHEP::HepLorentzVector pv_pos ( pv ->position().x(),
-                                          pv ->position().y(),
-                                          pv ->position().z(),
-                                          pv ->position().t() );
+                const auto& pv_pos = pv ->position();
                 double pv_r = pv_pos.perp();
                 double pv_z = pv_pos.z();
 
@@ -110,18 +107,16 @@ namespace Trk {
                 std::map<int,HepMC::ConstGenVertexPtr> vertex_ids;
 #ifdef HEPMC3
                 for (const auto& vtx: genEvent->vertices()){
+                    const auto& lv_pos = vtx->position();
+                    if ( std::abs ( lv_pos.perp() - pv_r ) <m_r_tol  && std::abs ( lv_pos.z() - pv_z ) <m_z_tol ) {vertex_ids[vtx->id()] = vtx;}
+                }//end  of loop over all the vertices
 #else
                 for ( HepMC::GenEvent::vertex_const_iterator i = genEvent->vertices_begin(); i != genEvent->vertices_end()  ;++i ) {
                     auto vtx=*i;
-#endif
-                    CLHEP::HepLorentzVector lv_pos ( vtx->position().x(),
-                                              vtx->position().y(),
-                                              vtx->position().z(),
-                                              vtx->position().t() );
-                    if ( std::abs ( lv_pos.perp() - pv_r ) <m_r_tol  && std::abs ( lv_pos.z() - pv_z ) <m_z_tol ) {
-                        vertex_ids[ HepMC::barcode(vtx) ]= vtx;
-                    }//end of accepted vertices check
+                    const auto& lv_pos = vtx->position();
+                    if ( std::abs ( lv_pos.perp() - pv_r ) <m_r_tol  && std::abs ( lv_pos.z() - pv_z ) <m_z_tol ) {vertex_ids[ HepMC::barcode(vtx) ]= vtx;}
                 }//end  of loop over all the vertices
+#endif
 
 
 //getting the track truth collection
@@ -193,8 +188,11 @@ namespace Trk {
                   
 //loop over the particles until decision is really taken
                                                 do {
-                                                    int tvrt_code = HepMC::barcode(pVertex);
-                                                    auto idf_res = vertex_ids.find ( tvrt_code );
+#ifdef HEPMC3
+                                                    auto idf_res = vertex_ids.find ( pVertex->id() );
+#else
+                                                    auto idf_res = vertex_ids.find ( HepMC::barcode(pVertex) );
+#endif
 
 //for the HepMcParticle Link, the signal event has an index 0.
 // tagging on it
