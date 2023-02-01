@@ -75,13 +75,6 @@ namespace CP
                 if (!electronPassesID(LRTElectron,"DFCommonElectronsLHVeryLooseNoPix"))  ElectronsToRemove.insert(LRTElectron);
             }
         }
-        else if (m_strategy == CP::IElectronLRTOverlapRemovalTool::agnosticStrategy){ 
-            ATH_MSG_DEBUG("Implementing overlap removal strategy 1");
-            for (const xAOD::Electron *LRTElectron : LRTElectronCol)
-            {
-                if (!electronPassesID(LRTElectron,m_IDWorkingPoint))  ElectronsToRemove.insert(LRTElectron);
-            }
-        }
         else if (m_strategy == CP::IElectronLRTOverlapRemovalTool::passThrough){
             ATH_MSG_DEBUG("Implementing overlap removal strategy 2");
             ATH_MSG_DEBUG("Electrons with overlapping clusters will be kept");
@@ -95,11 +88,13 @@ namespace CP
             const xAOD::CaloCluster_v1 *prompt_cluster = (*promptClusterLink);
 
             // Skip electrons that do not pass ID threshold
-            if (!electronPassesID(promptElectron,m_IDWorkingPoint))
-            {
-                ElectronsToRemove.insert(promptElectron);
-                continue;
-            }        
+            if (m_strategy == CP::IElectronLRTOverlapRemovalTool::defaultStrategy){
+                if (!electronPassesID(promptElectron,m_IDWorkingPoint))
+                {
+                    ElectronsToRemove.insert(promptElectron);
+                    continue;
+                }  
+            }      
 
             // loop over lrt electrons
             for (const xAOD::Electron *LRTElectron : LRTElectronCol)
@@ -108,8 +103,9 @@ namespace CP
                 const xAOD::CaloCluster_v1 *lrt_cluster = (*LRTClusterLink);
 
                 // Skip LRT electrons that do not pass ID threshold
-                if (!electronPassesID(LRTElectron,m_IDWorkingPoint)) continue;
-
+                if (m_strategy == CP::IElectronLRTOverlapRemovalTool::defaultStrategy){
+                    if (!electronPassesID(LRTElectron,m_IDWorkingPoint)) continue;
+                }
                 // check that clusters exist (necessary? copied from MuonSpec overlap, but all electrons have clusters...)
                 // TODO: This should then fall back to delta R if clusters are missing
                 if (!lrt_cluster and !prompt_cluster)
