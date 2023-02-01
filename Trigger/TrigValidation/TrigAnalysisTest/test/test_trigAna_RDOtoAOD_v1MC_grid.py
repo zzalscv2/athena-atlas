@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 # art-description: Test of transform RDO->RDO_TRIG->ESD->AOD->DAOD with threads=4, MC_pp_run3_v1 and AODSLIM
 # art-type: grid
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # art-athena-mt: 4
 # art-output: *.txt
 # art-output: *.log
