@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -17,10 +17,11 @@
 
 
 #include "TileRecUtils/ITileDQstatusTool.h"
-#include "TileConditions/ITileBadChanTool.h"
+#include "TileConditions/TileBadChannels.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "StoreGate/ReadCondHandleKey.h"
 class TileHWID;
 
 
@@ -77,10 +78,11 @@ private:
   ServiceHandle<IAthRNGSvc> m_athRNGSvc
   {this, "AthRNGSvc", "AthRNGSvc", "Random number service"};
 
-  /// Tool which provides trips probabilities and wrong BCID
-  ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
-      "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool."};
-
+  /**
+   * @brief Name of TileBadChannels in condition store
+   */
+  SG::ReadCondHandleKey<TileBadChannels> m_badChannelsKey{this,
+      "TileBadChannels", "TileBadChannels", "Input Tile bad channel status"};
 
   /// Tile ID helper.
   const TileHWID* m_tileHWID = nullptr;
