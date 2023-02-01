@@ -68,7 +68,6 @@ class AthMonitorCfgHelper(object):
         algObj.DataType = self.flags.DQ.DataType.value
         if self.flags.DQ.useTrigger:
             algObj.TrigDecisionTool = self.resobj.getPublicTool("TrigDecisionTool")
-            algObj.TriggerTranslatorTool = self.resobj.popToolsAndMerge(getTriggerTranslatorToolSimple(self.flags))
 
         if self.flags.DQ.enableLumiAccess:
             algObj.EnableLumi = True
@@ -341,41 +340,3 @@ def getDQTHistSvc(flags):
                                                                 flags.Output.HISTFileName)]
     result.addService(histsvc)
     return result
-
-def getTriggerTranslatorToolSimple(flags):
-    ''' Set up the Trigger Translator Tool; no reason for this to be called
-        outside the DQ setup code. '''
-    import logging
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    from TrigHLTMonitoring.HLTMonTriggerList import hltmonList
-    import collections.abc
-
-    TriggerTranslatorToolSimple=CompFactory.TriggerTranslatorToolSimple
-    
-    tdt_local_logger = logging.getLogger('getTriggerTranslatorToolSimple')
-    tdt_mapping = {}
-    for tdt_menu, tdt_menu_item in hltmonList.__dict__.items():
-        if not isinstance(tdt_menu_item, collections.abc.Iterable):
-            continue
-        # work around possibly buggy category items
-        if isinstance(tdt_menu_item, str):
-            tdt_local_logger.debug('String, not list: %s', tdt_menu)
-            tdt_menu_item = [tdt_menu_item]
-            if len([_ for _ in tdt_menu_item if not (_.startswith('HLT_') or _.startswith('L1'))]) != 0:
-                tdt_local_logger.debug('Bad formatting: %s', tdt_menu)
-        tdt_menu_item = [_ if (_.startswith('HLT_') or _.startswith('L1_')) else 'HLT_' + _
-                         for _ in tdt_menu_item]
-        tdt_mapping[tdt_menu] = ','.join(tdt_menu_item)
-
-    if not getTriggerTranslatorToolSimple.printed:
-        for k, v in tdt_mapping.items():
-            tdt_local_logger.info('Category %s resolves to %s', k, v)
-        getTriggerTranslatorToolSimple.printed = True
-
-    monTrigTransTool = TriggerTranslatorToolSimple(
-        triggerMapping = tdt_mapping)
-    rv = ComponentAccumulator()
-    rv.setPrivateTools(monTrigTransTool)
-    return rv
-getTriggerTranslatorToolSimple.printed = False

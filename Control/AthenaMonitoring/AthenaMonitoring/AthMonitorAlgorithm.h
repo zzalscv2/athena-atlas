@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -22,7 +22,6 @@
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "AthenaMonitoring/IDQFilterTool.h"
 #include "AthenaMonitoring/IMonitorToolBase.h"
-#include "AthenaMonitoring/ITriggerTranslatorTool.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
 #include "TrigDecisionTool/TrigDecisionTool.h"
@@ -334,23 +333,11 @@ public:
     virtual StatusCode parseList( const std::string& line, std::vector<std::string>& result ) const;
 
 
-    /**
-     * Expands trigger categories.
-     * 
-     * Searches through the vector of trigger names. If a trigger category is found, it finds the 
-     * constituent triggers in that category and expands the vector to include each one.
-     * 
-     * @param vTrigChainNames A vector of triggers which is modified.
-     */
-    virtual void unpackTriggerCategories( std::vector<std::string>& vTrigChainNames ) const;
-
-
 protected:
     // Using the new way to declare JO properties: Gaudi::Property<int> m_myProperty {this,"MyProperty",0};
     ToolHandleArray<GenericMonitoringTool> m_tools {this,"GMTools",{}}; ///< Array of Generic Monitoring Tools
     // Keep TDT public until final decision from trigger on interface
     PublicToolHandle<Trig::TrigDecisionTool> m_trigDecTool {this, "TrigDecisionTool",""}; ///< Tool to tell whether a specific trigger is passed
-    ToolHandle<ITriggerTranslatorTool> m_trigTranslator {this,"TriggerTranslatorTool",""}; ///< Tool to unpack trigger categories into a trigger list
     ToolHandleArray<IDQFilterTool> m_DQFilterTools {this,"FilterTools",{}}; ///< Array of Data Quality filter tools
 
     SG::ReadCondHandleKey<LuminosityCondData> m_lumiDataKey
