@@ -82,7 +82,7 @@ protected:
 
    /// true if the last writing of the DataHeader had to write a new DHForm
    bool                 m_wroteDHForm {false};
-   std::string          m_lastGoodDHFRef;
+   std::map< std::string, std::string>  m_lastGoodDHFRef;
 
    /// for use when reading DataHeader_p5
    DataHeaderCnv_p5                     m_tpInConverter_p5;  
