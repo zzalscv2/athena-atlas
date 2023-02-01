@@ -10,13 +10,16 @@ def InDetConversionTrackSelectorToolCfg(flags, name="TrackSelector", **kwargs):
 
     if "Extrapolator" not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
+            AtlasExtrapolatorCfg(flags)))
 
     kwargs.setdefault("RatioCut1", flags.InDet.SecVertex.TrkSel.RatioCut1)
     kwargs.setdefault("RatioCut2", flags.InDet.SecVertex.TrkSel.RatioCut2)
     kwargs.setdefault("RatioCut3", flags.InDet.SecVertex.TrkSel.RatioCut3)
-    kwargs.setdefault("TRTTrksBinnedRatioTRT", flags.InDet.SecVertex.TrkSel.TRTTrksBinnedRatioTRT)
-    kwargs.setdefault("TRTTrksEtaBins", flags.InDet.SecVertex.TrkSel.TRTTrksEtaBins)
+    kwargs.setdefault("TRTTrksBinnedRatioTRT",
+                      flags.InDet.SecVertex.TrkSel.TRTTrksBinnedRatioTRT)
+    kwargs.setdefault("TRTTrksEtaBins",
+                      flags.InDet.SecVertex.TrkSel.TRTTrksEtaBins)
     kwargs.setdefault("RatioTRT", flags.InDet.SecVertex.TrkSel.RatioTRT)
     kwargs.setdefault("RatioV0", flags.InDet.SecVertex.TrkSel.RatioV0)
     kwargs.setdefault("maxSiD0", flags.InDet.SecVertex.TrkSel.maxSiD0)
@@ -24,10 +27,12 @@ def InDetConversionTrackSelectorToolCfg(flags, name="TrackSelector", **kwargs):
     kwargs.setdefault("maxTrtD0", flags.InDet.SecVertex.TrkSel.maxTrtD0)
     kwargs.setdefault("maxTrtZ0", flags.InDet.SecVertex.TrkSel.maxTrtZ0)
     kwargs.setdefault("minPt", flags.InDet.SecVertex.TrkSel.minPt)
-    kwargs.setdefault("significanceD0_Si", flags.InDet.SecVertex.TrkSel.significanceD0_Si)
+    kwargs.setdefault("significanceD0_Si",
+                      flags.InDet.SecVertex.TrkSel.significanceD0_Si)
     kwargs.setdefault("IsConversion", flags.InDet.SecVertex.TrkSel.IsConversion)
 
-    acc.setPrivateTools(CompFactory.InDet.InDetConversionTrackSelectorTool(name, **kwargs))
+    acc.setPrivateTools(
+        CompFactory.InDet.InDetConversionTrackSelectorTool(name, **kwargs))
     return acc
 
 def V0InDetConversionTrackSelectorToolCfg(flags, name='InDetV0VxTrackSelector', **kwargs):
@@ -35,7 +40,8 @@ def V0InDetConversionTrackSelectorToolCfg(flags, name='InDetV0VxTrackSelector', 
 
     if "Extrapolator" not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
+            AtlasExtrapolatorCfg(flags)))
 
     kwargs.setdefault("maxTrtD0", 50.)
     kwargs.setdefault("maxSiZ0",  250.)
@@ -46,23 +52,54 @@ def V0InDetConversionTrackSelectorToolCfg(flags, name='InDetV0VxTrackSelector', 
     kwargs.setdefault("IsConversion", False)
     kwargs.setdefault("UseEventInfoBS", True)
 
-    acc.setPrivateTools(CompFactory.InDet.InDetConversionTrackSelectorTool(name, **kwargs))
+    acc.setPrivateTools(
+        CompFactory.InDet.InDetConversionTrackSelectorTool(name, **kwargs))
     return acc
 
-def InDetTrackSelectorToolCfg(flags, name='InDetTrackSelectorTool', **kwargs):
+def InDetV0VxTrackSelectorLooseCfg(flags, name='InDetV0VxTrackSelectorLoose', **kwargs):
+    acc = ComponentAccumulator()
 
-    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    if "Extrapolator" not in kwargs:
+        from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
+            InDetExtrapolatorCfg(flags)))
+
+    kwargs.setdefault("maxSiD0"           , 99999.)
+    kwargs.setdefault("maxTrtD0"          , 99999.)
+    kwargs.setdefault("maxSiZ0"           , 99999.)
+    kwargs.setdefault("maxTrtZ0"          , 99999.)
+    kwargs.setdefault("minPt"             , 500.0)
+    kwargs.setdefault("significanceD0_Si" , 0.)
+    kwargs.setdefault("significanceD0_Trt", 0.)
+    kwargs.setdefault("significanceZ0_Trt", 0.)
+    kwargs.setdefault("IsConversion"      , False)
+
+    acc.setPrivateTools(
+        CompFactory.InDet.InDetConversionTrackSelectorTool(name, **kwargs))
+    return acc
+
+
+def InDetTrackSelectorToolCfg(flags, name='InDetTrackSelectorTool', **kwargs):
     result = ComponentAccumulator()
+
     if "UseEventInfoBS" not in kwargs or kwargs["UseEventInfoBS"] is False:
-        from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
-        result.merge(BeamSpotCondAlgCfg(flags)) # To produce the input InDet::BeamSpotData CondHandle
-    result.merge(AtlasFieldCacheCondAlgCfg(flags)) # To produce the input AtlasFieldCacheCondObj
+        # To produce the input InDet::BeamSpotData CondHandle
+        from BeamSpotConditions.BeamSpotConditionsConfig import (
+            BeamSpotCondAlgCfg)
+        result.merge(BeamSpotCondAlgCfg(flags))
+
+    # To produce the input AtlasFieldCacheCondObj
+    from MagFieldServices.MagFieldServicesConfig import (
+        AtlasFieldCacheCondAlgCfg)
+    result.merge(AtlasFieldCacheCondAlgCfg(flags))
 
     if "Extrapolator" not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-        kwargs.setdefault("Extrapolator", result.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+        kwargs.setdefault("Extrapolator", result.popToolsAndMerge(
+            AtlasExtrapolatorCfg(flags)))
 
-    result.setPrivateTools(CompFactory.InDet.InDetDetailedTrackSelectorTool(name, **kwargs))
+    result.setPrivateTools(
+        CompFactory.InDet.InDetDetailedTrackSelectorTool(name, **kwargs))
     return result
 
 def InDetImprovedJetFitterTrackSelectorToolCfg(flags, name='InDetImprovedJFTrackSelTool', **kwargs):
@@ -74,7 +111,8 @@ def InDetImprovedJetFitterTrackSelectorToolCfg(flags, name='InDetImprovedJFTrack
     kwargs.setdefault("etaMax",     9999.0)
     kwargs.setdefault("nHitBLayer", 0)
     kwargs.setdefault("nHitPix",    1)
-    kwargs.setdefault("nHitSct",    4 if flags.GeoModel.Run < LHCPeriod.Run4 else 0)
+    kwargs.setdefault("nHitSct",
+                      4 if flags.GeoModel.Run < LHCPeriod.Run4 else 0)
     kwargs.setdefault("nHitSi",     7)
     kwargs.setdefault("nHitTrt",    0)
     kwargs.setdefault("fitChi2OnNdfMax", 3.5)
@@ -149,7 +187,8 @@ def CaloTrkMuIdAlgTrackSelectorToolCfg(flags, name='CaloTrkMuIdAlgTrackSelectorT
     kwargs.setdefault("nHitSi",     7)
     kwargs.setdefault("nHitTrt",    0)
 
-    from TrkConfig.TrkTrackSummaryToolConfig import MuonCombinedTrackSummaryToolCfg
+    from TrkConfig.TrkTrackSummaryToolConfig import (
+        MuonCombinedTrackSummaryToolCfg)
     kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(
         MuonCombinedTrackSummaryToolCfg(flags)))
 
@@ -179,7 +218,8 @@ def BPHY_InDetDetailedTrackSelectorToolCfg(flags, name='BPHY_InDetDetailedTrackS
     # Different from other InDetTrackSelectorToolCfg
     if "Extrapolator" not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(InDetExtrapolatorCfg(flags)))
+        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
+            InDetExtrapolatorCfg(flags)))
 
     kwargs.setdefault("pTMin"                , 400.0)
     kwargs.setdefault("IPd0Max"              , 10000.0)

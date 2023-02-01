@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY10.py
@@ -98,13 +98,17 @@ def BPHY10Cfg(ConfigFlags):
     BPHY10LambdaContainerName = "BPHY10RecoLambdaCandidates"
     BPHY10LambdabarContainerName = "BPHY10RecoLambdabarCandidates"
 
-    V0Decorator = CompFactory.InDet.V0MainDecorator(name = "BPHY10V0Decorator",
-                                    V0Tools = V0Tools,
-                                    V0ContainerName = BPHY10V0ContainerName,
-                                    KshortContainerName = BPHY10KshortContainerName,
-                                    LambdaContainerName = BPHY10LambdaContainerName,
-                                    LambdabarContainerName = BPHY10LambdabarContainerName)
+    from InDetConfig.InDetV0FinderConfig import V0MainDecoratorCfg
+    V0Decorator = acc.popToolsAndMerge(V0MainDecoratorCfg(
+        ConfigFlags,
+        name = "BPHY10V0Decorator",
+        V0Tools = V0Tools,
+        V0ContainerName = BPHY10V0ContainerName,
+        KshortContainerName = BPHY10KshortContainerName,
+        LambdaContainerName = BPHY10LambdaContainerName,
+        LambdabarContainerName = BPHY10LambdabarContainerName))
     acc.addPublicTool(V0Decorator)
+
     BPHY10BdKstSelectAndWrite  = CompFactory.DerivationFramework.Reco_Vertex(
                                     name                   = "BPHY10BdKstSelectAndWrite",
                                     VertexSearchTool     = BPHY10BdJpsiKst,
