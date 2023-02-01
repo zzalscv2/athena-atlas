@@ -43,7 +43,7 @@ StatusCode JetTrackSelectionAlg::execute(const EventContext& ctx) const {
     }
   }
 
-
+  ATH_MSG_DEBUG(" ouputing to "<< m_output.key() << " selected size = "<< selectedTracks->size() );
   // Write out in the event store 
   auto handle_out =  SG::makeHandle(m_output, ctx);
   

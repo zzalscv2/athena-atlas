@@ -16,13 +16,11 @@ from JetRecConfig.JetRecConfig import isAnalysisRelease
 
 
 
-def getIDTrackSelectionTool(trkOpt, **userProps):
-    from JetRecConfig.StandardJetContext import jetContextDic
-    # see the default options in jetContextDic from StandardJetContext.py
-    selProperties = jetContextDic[trkOpt]["trackSelOptions"].clone( **userProps)
-    idtracksel = CompFactory.getComp("InDet::InDetTrackSelectionTool")(
-        "idtracksel_"+trkOpt,
-        **selProperties )
+def getIDTrackSelectionTool(toolname, **toolProps):
+    """returns a InDetTrackSelectionTool configured with toolProps
+     (except in Analysis releases where some un-used (?) options are explicitely turned off)
+    """
+    idtracksel = CompFactory.getComp("InDet::InDetTrackSelectionTool")(toolname, **toolProps)
 
     if not isAnalysisRelease():
         # thes options can not be set in AnalysisBase/AthAnalysis. (but not setting them is equivalent to set them to False)
@@ -35,38 +33,25 @@ def getTrackSelAlg(trkOpt="default", trackSelOpt=False):
     from JetRecConfig.StandardJetContext import jetContextDic
     trkProperties = jetContextDic[trkOpt]
 
-    trkSelAlg = None
+    trackToolProps = dict(**trkProperties["trackSelOptions"])
 
     if not trackSelOpt:
         # track selection from trkOpt but OVERWRITING the CutLevel for e.g. ghosts (typically, only a pt>500MeV cut remains): 
-        idtracksel = getIDTrackSelectionTool(trkOpt, CutLevel=trkProperties['GhostTrackCutLevel'])
+        trackToolProps.update( CutLevel=trkProperties['GhostTrackCutLevel'] )
         outContainerKey = "JetTracks"
+        trkOpt= trkOpt+'ghost' # just so it gives a different tool name below
     else:
-        # Track-jet selection criteria, use the selection from trkOpt
-        idtracksel = getIDTrackSelectionTool(trkOpt)
         outContainerKey = "JetTracksQualityCuts"
 
     # build the selection alg 
-    trkSelAlg = CompFactory.JetTrackSelectionAlg( f"trackselalg_qual{trackSelOpt}_{trkProperties[outContainerKey]}",
-                                                  TrackSelector = idtracksel,
+    trkSelAlg = CompFactory.JetTrackSelectionAlg( f"trackselalg_{trkOpt}_{trkProperties[outContainerKey]}",
+                                                  TrackSelector = getIDTrackSelectionTool(f"tracksel{trkOpt}",**trackToolProps),
                                                   InputContainer = trkProperties["Tracks"],
                                                   OutputContainer = trkProperties[outContainerKey],
                                                   DecorDeps = ["TTVA_AMVFWeights_forReco", "TTVA_AMVFVertices_forReco"] # Hardcoded for now... we might want to have this context-dependent ??
                                                  )
 
     return trkSelAlg
-
-def getTrackSelTool(trkOpt=""):
-    # this tool is still used by trk moment tools.
-    # it should be deprecated in favor of simply the InDet tool
-    idtrackselloose = getIDTrackSelectionTool(trkOpt)
-
-    jettrackselloose = CompFactory.JetTrackSelectionTool(
-        "jettrackselloose",
-        Selector        = idtrackselloose
-    )
-
-    return jettrackselloose
 
 
 def getJetTrackVtxAlg( trkOpt,   algname="jetTVA", **ttva_overide):

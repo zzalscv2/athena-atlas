@@ -3,7 +3,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow, AntiKt4LCTopo, AntiKt4EMTopo, AntiKt4Truth
 from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_noVR
 from JetRecConfig.JetRecConfig import JetRecCfg
-
+from AthenaConfiguration.Enums import LHCPeriod
 
 def addTruthPileupJetsToOutputCfg(flags, toAOD=True, toESD=True):
     result = ComponentAccumulator()
@@ -67,6 +67,10 @@ def JetRecoSteeringCfg(flags):
     # the Standard list of jets to run :
     jetdefs = [AntiKt4EMTopo, AntiKt4EMPFlow, AntiKt4LCTopo, AntiKt4Truth, AntiKt10LCTopo_noVR]
 
+    # change the jetcontext according to the flag :
+    if flags.GeoModel.Run > LHCPeriod.Run3 :
+        jetdefs = [jd.clone(context='HL_LHC') for jd in jetdefs ]
+                   
     from JetRecConfig.JetConfigFlags import jetInternalFlags
     # We're in Reco job : propagate this info to the runIII jet config
     # (see JetConfigFlags.py for motivations on this way of doing)
