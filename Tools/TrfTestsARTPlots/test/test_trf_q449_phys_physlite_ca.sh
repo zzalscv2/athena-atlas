@@ -5,7 +5,8 @@
 # art-include: master/Athena
 # art-athena-mt: 8
 # art-output: dcube*
-# art-html: dcube_physlite
+# art-output: ecube*
+# art-html: ecube
 
 export ATHENA_CORE_NUMBER=8
 Reco_tf.py \
@@ -38,12 +39,12 @@ fpeStat=$?
 
 echo "art-result: ${fpeStat} FPEs in logfiles"
 
-echo "============ checkxAOD myAOD.pool.root"
-checkxAOD myAOD.pool.root
-echo "============ checkxAOD DAOD_PHYS.art.pool.root"
-checkxAOD DAOD_PHYS.art.pool.root
-echo "============ checkxAOD DAOD_PHYSLITE.art.pool.root"
-checkxAOD DAOD_PHYSLITE.art.pool.root
+echo "============ checkxAOD myAOD.pool.root" | tee -a xaod_sizes.log
+checkxAOD myAOD.pool.root | tee -a xaod_sizes.log
+echo "============ checkxAOD DAOD_PHYS.art.pool.root" | tee -a xaod_sizes.log
+checkxAOD DAOD_PHYS.art.pool.root | tee -a xaod_sizes.log
+echo "============ checkxAOD DAOD_PHYSLITE.art.pool.root" | tee -a xaod_sizes.log
+checkxAOD DAOD_PHYSLITE.art.pool.root | tee -a xaod_sizes.log
 rc2=$?
 echo "art-result: ${rc2} checkxAOD" 
 
@@ -69,3 +70,28 @@ echo "============ dcube"
 $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -p --jobId PHYSLITETest -c ${dcubeXML} -r ${dcubeRef} -x dcube_physlite hist_physlite_latest.root
 rc5=$?
 echo "art-result: ${rc5} dcube_physlite" 
+
+# Collect xAOD sizes from logs
+echo "============ trf_xaod_sizes_art.py"
+mkdir -p ecube/images
+datestamp=$AtlasBuildStamp
+arch=$CMTCONFIG
+trf_xaod_sizes_art.py --date $datestamp --arch $arch --logfile xaod_sizes.log
+rc6=$?
+echo "art-result: ${rc6} parse_xaod_arttest" 
+
+# Create ratio plots from TH1F histo files
+echo "============ trf_ratioplot_art.py"
+trf_ratioplot_art.py --reffile ${dcubeRef} --testfile hist_physlite_latest.root
+rc7=$?
+echo "art-result: ${rc7} ratioplots" 
+
+# Move PNG and webfiles to ecube directory
+echo "============ move files to ecube directory"
+mv *.png ecube/images
+get_files trf_index.php
+sed "s/Plot comparison/TrfTestsARTPlots ${datestamp}/g" trf_index.php > index.php
+get_files trf_stylesheet.css
+mv index.php ecube
+mv trf_stylesheet.css ecube
+echo "============ done "

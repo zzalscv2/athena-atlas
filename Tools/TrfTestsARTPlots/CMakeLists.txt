@@ -8,3 +8,4 @@ atlas_subdir( TrfTestsARTPlots )
 # Install files from the package:
 atlas_install_runtime( test/*.sh )
 atlas_install_scripts( test/*.sh test/*.py )
+atlas_install_data( test/*.css test/*.php )
