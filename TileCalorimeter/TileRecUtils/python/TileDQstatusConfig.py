@@ -19,10 +19,8 @@ def TileDQstatusToolCfg(flags, **kwargs):
 
     kwargs.setdefault('SimulateTrips', False)
 
-    if 'TileBadChanTool' not in kwargs:
-        from TileConditions.TileBadChannelsConfig import TileBadChanToolCfg
-        badChanTool = acc.popToolsAndMerge( TileBadChanToolCfg(flags) )
-        kwargs['TileBadChanTool'] = badChanTool
+    from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
+    acc.merge( TileBadChannelsCondAlgCfg(flags) )
 
     TileDQstatusTool=CompFactory.TileDQstatusTool
     acc.setPrivateTools( TileDQstatusTool(**kwargs) )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -23,7 +23,7 @@
 #include <CLHEP/Random/RandomEngine.h>
 #include <CLHEP/Random/RandFlat.h>
 #include "GaudiKernel/EventContext.h"
-
+#include "StoreGate/ReadCondHandle.h"
 
 /**
  * @brief Standard Gaudi tool constructor.
@@ -46,7 +46,7 @@ StatusCode TileDQstatusTool::initialize()
 {
   ATH_CHECK( detStore()->retrieve(m_tileHWID, "TileHWID") );
 
-  ATH_CHECK( m_tileBadChanTool.retrieve() );
+  ATH_CHECK( m_badChannelsKey.initialize() );
 
   if (m_simulateTrips) {
     ATH_CHECK( m_athRNGSvc.retrieve() );
@@ -73,6 +73,9 @@ TileDQstatusTool::makeStatus (const EventContext& ctx,
 {
   dqstatus.setAllGood();
   dqstatus.setRODBCID (ctx.eventID().bunch_crossing_id());
+
+  SG::ReadCondHandle<TileBadChannels> badChannels(m_badChannelsKey, ctx);
+  ATH_CHECK( badChannels.isValid() );
 
   ATH_CHECK( doBeamElem (tileBeamElemContainer, dqstatus) );
 
@@ -136,9 +139,12 @@ TileDQstatusTool::makeStatus (const EventContext& ctx,
         unsigned short fragBCID = coll->getFragBCID();
         if (fragBCID & existingDMUs) {
 
-          unsigned int drawerIdx = TileCalibUtils::getDrawerIdxFromFragId(frag);
+          int drawer = (frag & 0x3F); // range 0-63
+          int ros = frag >> 8;  // range 1-4
+
           for (unsigned int channel = 0; channel < TileCalibUtils::MAX_CHAN; ++channel) {
-            if (m_tileBadChanTool->getChannelStatus(drawerIdx, channel).isWrongBCID()) {
+            HWIdentifier channel_id = m_tileHWID->channel_id(ros, drawer, channel);
+            if (badChannels->getChannelStatus(channel_id).isWrongBCID()) {
               int dmu = channel / 3;
               if (dmu == 1) {
                 // If BCID in 2nd DMU is wrong then there is no sence
@@ -172,10 +178,10 @@ TileDQstatusTool::makeStatus (const EventContext& ctx,
       incomplete |= (coll->size() < 48);
 
       if (coll->size() > 0) {
-	int dsize = (*(coll->begin()))->NtimeSamples();
-	if (4 < dsize && dsize < 15) { // don't use strange fragments
-	  isCalib |= coll->isCalibMode();
-	}
+        int dsize = (*(coll->begin()))->NtimeSamples();
+        if (4 < dsize && dsize < 15) { // don't use strange fragments
+          isCalib |= coll->isCalibMode();
+        }
       }
     }
     dqstatus.setIncompleteDigits (incomplete);
@@ -188,10 +194,11 @@ TileDQstatusTool::makeStatus (const EventContext& ctx,
     wrapper->setSeed (this->name(), ctx);
     CLHEP::HepRandomEngine* engine = wrapper->getEngine (ctx);
     double rndmVec[TileCalibUtils::MAX_DRAWER];
-
+    const std::vector<float> defaultTripsProbs(TileCalibUtils::MAX_DRAWER, 0.0F);
+    const std::vector<std::vector<float>>& tripsProbs = badChannels->getTripsProbabilities();
     for (unsigned int partition = 1; partition < TileCalibUtils::MAX_ROS; ++partition) {
       CLHEP::RandFlat::shootArray (engine, TileCalibUtils::MAX_DRAWER, rndmVec);
-      std::vector<float> trips = m_tileBadChanTool->getTripsProbabilities(partition);
+      const std::vector<float>& trips = tripsProbs.size() ? tripsProbs.at(partition - 1) : defaultTripsProbs;
       dqstatus.fillTrips(partition, trips, rndmVec, this->msg());
     }
   }
