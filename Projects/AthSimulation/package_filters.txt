@@ -33,6 +33,8 @@
 + Control/AthenaConfiguration
 + Control/AthenaCommon
 + Control/AthenaExamples/AthExHelloWorld
++ Control/AthenaExamples/AthExHive
++ Control/AthenaExamples/AthExUnittest
 + Control/AthenaInterprocess
 + Control/AthenaKernel
 + Control/AthenaMP

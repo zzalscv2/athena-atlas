@@ -196,7 +196,7 @@ def initConfigFlags():
 #Geo Model Flags:
     def __geomodel():
         from AthenaConfiguration.GeoModelConfigFlags import createGeoModelConfigFlags
-        return createGeoModelConfigFlags()
+        return createGeoModelConfigFlags(not isGaudiEnv() or acf.Common.Project is Project.AthAnalysis)
     acf.addFlagsCategory( "GeoModel", __geomodel )
 
 #Reco Flags:
@@ -368,13 +368,16 @@ def initConfigFlags():
 
 ConfigFlags=initConfigFlags()
 
-if __name__=="__main__":
-    import sys
-    if len(sys.argv)>1:
-        ConfigFlags.Input.Files = sys.argv[1:]
-    else:
-        ConfigFlags.Input.Files = [ "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1",]
 
-    ConfigFlags.loadAllDynamicFlags()
-    ConfigFlags.initAll()
-    ConfigFlags.dump()
+if __name__=="__main__":
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    flags = initConfigFlags()
+    import sys
+    if len(sys.argv) > 1:
+        flags.Input.Files = sys.argv[1:]
+    else:
+        flags.Input.Files = defaultTestFiles.AOD_RUN3_DATA
+
+    flags.loadAllDynamicFlags()
+    flags.initAll()
+    flags.dump()
