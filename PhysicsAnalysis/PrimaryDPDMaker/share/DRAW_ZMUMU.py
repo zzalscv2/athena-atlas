@@ -55,6 +55,9 @@ goodMuonSkimmingTool = DerivationFramework__DRAW_ZMUMUSkimmingTool(name = "DRAW_
                                                                MuonPtCut = 20.0) 
 ToolSvc += goodMuonSkimmingTool
 
+from AthenaConfiguration.AllConfigFlags import ConfigFlags
+TriggerAPI.setConfigFlags(ConfigFlags)
+
 periods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future
 allUnprescaledTriggers = TriggerAPI.getLowestUnprescaledAnyPeriod(periods, TriggerType.mu) + ["HLT_noalg_L1MU14FCH", "L1_MU14FCH" ]
 print("DRAW_ZMUMU: will skim on an OR of the following muon triggers (list provided at run-time by the TriggerAPI):")

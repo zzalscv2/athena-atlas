@@ -1,5 +1,6 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
 from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod, TriggerType
 
@@ -17,7 +18,8 @@ def getTriggerList( trigger_type, matching_pattern="", reject_list=[] ):
     # -- physics objects: el, mu, j, bj, tau, g [also xe, ht, exotics]
 
     triggerList = []
-    
+
+    TriggerAPI.setConfigFlags(ConfigFlags)
     lowestUnprescaled = TriggerAPI.getLowestUnprescaled(
         TriggerPeriod.future, trigger_type, matchPattern=matching_pattern )
     lowestUnprescaledAny = TriggerAPI.getLowestUnprescaledAnyPeriod(

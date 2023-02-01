@@ -1,4 +1,4 @@
-4# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+4# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM11.py
@@ -13,8 +13,8 @@ def JETM11TriggerSkimmingToolCfg(ConfigFlags):
     acc = ComponentAccumulator()
 
     from DerivationFrameworkJetEtMiss import TriggerLists
-    singleElTriggers = TriggerLists.single_el_Trig()
-    singleMuTriggers = TriggerLists.single_mu_Trig()
+    singleElTriggers = TriggerLists.single_el_Trig(ConfigFlags)
+    singleMuTriggers = TriggerLists.single_mu_Trig(ConfigFlags)
 
     JETM11TrigSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool( name                   = "JETM11TrigSkimmingTool1",
                                                                                   TriggerListOR          = singleElTriggers + singleMuTriggers)

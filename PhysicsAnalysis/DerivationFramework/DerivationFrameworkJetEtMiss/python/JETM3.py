@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM3.py
@@ -13,8 +13,8 @@ def JETM3SkimmingToolCfg(ConfigFlags):
     acc = ComponentAccumulator()
 
     from DerivationFrameworkJetEtMiss import TriggerLists
-    electronTriggers = TriggerLists.single_el_Trig()
-    muonTriggers = TriggerLists.single_mu_Trig()
+    electronTriggers = TriggerLists.single_el_Trig(ConfigFlags)
+    muonTriggers = TriggerLists.single_mu_Trig(ConfigFlags)
 
     elofflinesel = '(count((Electrons.pt > 20*GeV) && (Electrons.DFCommonElectronsLHMedium)) >= 2)'
     muofflinesel = '(count((Muons.pt > 20*GeV) && (Muons.DFCommonMuonPassPreselection)) >= 2)'

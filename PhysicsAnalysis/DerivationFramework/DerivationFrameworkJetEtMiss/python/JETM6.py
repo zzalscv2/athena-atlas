@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM6.py
@@ -13,10 +13,10 @@ def JETM6SkimmingToolCfg(ConfigFlags):
     acc = ComponentAccumulator()
 
     from DerivationFrameworkJetEtMiss import TriggerLists
-    electronTriggers = TriggerLists.single_el_Trig()
-    muonTriggers = TriggerLists.single_mu_Trig()
-    photonTriggers = TriggerLists.single_photon_Trig()
-    jetTriggers = TriggerLists.jetTrig()
+    electronTriggers = TriggerLists.single_el_Trig(ConfigFlags)
+    muonTriggers = TriggerLists.single_mu_Trig(ConfigFlags)
+    photonTriggers = TriggerLists.single_photon_Trig(ConfigFlags)
+    jetTriggers = TriggerLists.jetTrig(ConfigFlags)
 
     # Trigger API doesn't currently return all triggers used in Run-3
     # Adding all jets triggers via explicit list for the moment
