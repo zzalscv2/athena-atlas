@@ -401,7 +401,7 @@ bool TruthParticleFilterTool::isFsrFromLepton(HepMC::ConstGenParticlePtr part) c
     if(std::abs(parentId) == 11 || 
        std::abs(parentId) == 13 ||
        std::abs(parentId) == 15) {
-      ATH_MSG_DEBUG("Photon with barcode " << HepMC::barcode(part) << " matched to particle with pdgId = " << parentId );
+      ATH_MSG_DEBUG("Photon" << part << " matched to particle with pdgId = " << parentId );
       return true; // Has lepton parent
     }
 

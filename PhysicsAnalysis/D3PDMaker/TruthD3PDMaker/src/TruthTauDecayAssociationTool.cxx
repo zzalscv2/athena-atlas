@@ -52,13 +52,8 @@ TruthTauDecayAssociationTool::reset (const TruthParticle& p)
     // Loop over GenEvent's.
     for (const HepMC::GenEvent* ev_in : *mcec) {
       if (!ev_in) continue;
-      for (auto Part: *ev_in){
-        if ( (Part) && HepMC::barcode(Part)==p.barcode() ){
-          // Found it!
-          addStableDaughters( (Part) );
-          break;
-        }
-      } // Loop over particles
+      auto Part = HepMC::barcode_to_particle(ev_in,p.barcode());
+      if (Part) addStableDaughters( Part );
     } // Loop over events
   } // Successful retrieve
 

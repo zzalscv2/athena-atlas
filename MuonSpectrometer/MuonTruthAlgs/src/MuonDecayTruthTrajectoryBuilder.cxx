@@ -30,7 +30,7 @@ namespace Muon {
         if (input) {
             HepMC::ConstGenParticlePtr next{nullptr};
             auto current = input;
-            ATH_MSG_DEBUG(" New TruthTrajectory: input: barcode " << HepMC::barcode(input) << " PDG id " << input->pdg_id());
+            ATH_MSG_DEBUG(" New TruthTrajectory: input: " << input << " PDG id " << input->pdg_id());
 
             // Extend trajectory outwards.  The last particle should go at [0]
             // in the TruthTrajectory, so we need to use a tmp storage while
@@ -60,7 +60,7 @@ namespace Muon {
             for (; pit != pit_end; ++pit) {
                 const HepMC::GenParticle& par = *pit->cptr();
                 if (msgLvl(MSG::DEBUG)) {
-                    msg(MSG::DEBUG) << " PDG ID " << par.pdg_id() << " barcode: " << HepMC::barcode(par)
+                    msg(MSG::DEBUG) << " PDG ID " << par.pdg_id() 
                                     << " pt: " << par.momentum().perp();
                     if (par.production_vertex())
                         msg(MSG::DEBUG) << " vertices prod: r " << par.production_vertex()->position().perp() << " z "
@@ -103,7 +103,7 @@ namespace Muon {
                 HepMC::ConstGenParticlePtr passed_cuts{nullptr};
                 for (auto candidate : *vtx) {
                     if (msgLvl(MSG::DEBUG)) {
-                        msg(MSG::DEBUG) << " PDG ID " << candidate->pdg_id() << " barcode: " << HepMC::barcode(candidate)
+                        msg(MSG::DEBUG) << " PDG ID " << candidate->pdg_id() << " particle: " << candidate
                                         << " pt: " << candidate->momentum().perp();
                         if (candidate->production_vertex())
                             msg(MSG::DEBUG) << " vertices prod: r " << candidate->production_vertex()->position().perp() << " z "
