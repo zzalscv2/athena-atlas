@@ -93,7 +93,7 @@ class TileDigitsMaker: public AthReentrantAlgorithm {
                                        std::vector<std::vector<double>>& drawerBufferHi,
                                        std::vector<int>& igain, int ros, int drawer, int drawerIdx,
                                        std::vector<int>& over_gain, const TileEMScale* emScale,
-                                       const TileSampleNoise& sampleNoise, const TileDQstatus* dqStatus,
+                                       const TileSampleNoise* sampleNoise, const TileDQstatus* dqStatus,
                                        const TileBadChannels* badChannels) const;
 
     StatusCode fillDigitCollection(const TileHitCollection* hitCollection,
@@ -203,7 +203,7 @@ class TileDigitsMaker: public AthReentrantAlgorithm {
     /**
      * @brief Name of TileSampleNoise in condition store
      */
-    SG::ReadCondHandleKey<TileCalibDataFlt> m_sampleNoiseKey{this,
+    SG::ReadCondHandleKey<TileSampleNoise> m_sampleNoiseKey{this,
         "TileSampleNoise", "TileSampleNoise", "Input Tile sample noise"};
 
     /**

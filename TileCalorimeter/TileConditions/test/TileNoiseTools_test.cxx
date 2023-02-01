@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -7,6 +7,7 @@
 // Tile includes
 #include "TileCalibBlobObjs/TileCalibDrawerFlt.h"
 #include "TileConditions/TileCalibData.h"
+#include "TileConditions/TileSampleNoise.h"
 #include "TileConditions/TileEMScale.h"
 #include "TileConditions/TileCondToolNoiseSample.h"
 #include "TileConditions/TileCondToolNoiseRawChn.h"
@@ -179,20 +180,22 @@ void testTileCondToolNoiseSample(ISvcLocator* svcLoc, const EventContext &ctx) {
     assert(emScale.record(EVENT_RANGE, emScaleData.release()).isSuccess());
 
 
-    SG::WriteCondHandleKey<TileCalibDataFlt> calibSampleNoiseKey{TILE_SAMPLE_NOISE};
-    assert(calibSampleNoiseKey.initialize().isSuccess());
+    SG::WriteCondHandleKey<TileSampleNoise> sampleNoiseKey{TILE_SAMPLE_NOISE};
+    assert(sampleNoiseKey.initialize().isSuccess());
 
-    SG::WriteCondHandle<TileCalibDataFlt> calibSampleNoise{calibSampleNoiseKey, ctx};
+    SG::WriteCondHandle<TileSampleNoise> sampleNoise{sampleNoiseKey, ctx};
     std::unique_ptr<TileCalibDataFlt> calibSampleNoiseData = getCalibData(SAMPLE_NOISE);
-    assert(calibSampleNoise.record(EVENT_RANGE, calibSampleNoiseData.release()).isSuccess());
+    auto sampleNoiseData = std::make_unique<TileSampleNoise>(std::move(calibSampleNoiseData));
+    assert(sampleNoise.record(EVENT_RANGE, sampleNoiseData.release()).isSuccess());
 
 
-    SG::WriteCondHandleKey<TileCalibDataFlt> calibOnlineSampleNoiseKey{TILE_ONLINE_SAMPLE_NOISE};
-    assert(calibOnlineSampleNoiseKey.initialize().isSuccess());
+    SG::WriteCondHandleKey<TileSampleNoise> onlineSampleNoiseKey{TILE_ONLINE_SAMPLE_NOISE};
+    assert(onlineSampleNoiseKey.initialize().isSuccess());
 
-    SG::WriteCondHandle<TileCalibDataFlt> calibOnlineSampleNoise{calibOnlineSampleNoiseKey, ctx};
+    SG::WriteCondHandle<TileSampleNoise> onlineSampleNoise{onlineSampleNoiseKey, ctx};
     std::unique_ptr<TileCalibDataFlt> calibOnlineSampleNoiseData = getCalibData(ONLINE_PEDESTAL);
-    assert(calibOnlineSampleNoise.record(EVENT_RANGE, calibOnlineSampleNoiseData.release()).isSuccess());
+    auto onlineSampleNoiseData = std::make_unique<TileSampleNoise>(std::move(calibOnlineSampleNoiseData));
+    assert(onlineSampleNoise.record(EVENT_RANGE, onlineSampleNoiseData.release()).isSuccess());
 
   }
 

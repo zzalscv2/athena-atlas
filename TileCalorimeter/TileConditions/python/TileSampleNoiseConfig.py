@@ -55,11 +55,10 @@ def TileSampleNoiseCondAlgCfg(flags, **kwargs):
     else:
         raise(Exception("Invalid source: %s" % source))
 
-
-    TileCalibFltCondAlg=CompFactory.getComp("TileCalibCondAlg<TileCalibDrawerFlt>")
-    sampleNoiseCondAlg = TileCalibFltCondAlg( name = name,
-                                              ConditionsProxy = sampleNoiseProxy,
-                                              TileCalibData = sampleNoise)
+    TileSampleNoiseCondAlg = CompFactory.getComp("TileCondAlg<TileSampleNoise,TileCalibDrawerFlt>")
+    sampleNoiseCondAlg = TileSampleNoiseCondAlg( name = name,
+                                                 ConditionsProxy = sampleNoiseProxy,
+                                                 TileCondData = sampleNoise)
 
     acc.addCondAlgo(sampleNoiseCondAlg)
 

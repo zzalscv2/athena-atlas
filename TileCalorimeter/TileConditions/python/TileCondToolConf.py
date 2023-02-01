@@ -531,9 +531,10 @@ def getTileCondToolNoiseSample(source = 'FILE', name = 'TileCondToolNoiseSample'
         #========================================================
         sampleNoiseProxy = getTileCondProxy('FILE','Flt','TileDefault.ped','TileCondProxyFile_NoiseSample')
 
-    bookTileCalibCondAlg(sampleNoise, sampleNoiseProxy)
+    from TileConditions.TileConditionsConf import TileCondAlg_TileSampleNoise_TileCalibDrawerFlt_ as TileSampleNoiseCondAlg
+    bookTileCondAlg(TileSampleNoiseCondAlg, sampleNoise, sampleNoiseProxy)
     if (onlineSampleNoiseProxy):
-        bookTileCalibCondAlg(onlineSampleNoise, onlineSampleNoiseProxy)
+        bookTileCondAlg(TileSampleNoiseCondAlg, onlineSampleNoise, onlineSampleNoiseProxy)
 
     tool = TileCondToolNoiseSample(name,
                                    TileSampleNoise = sampleNoise,

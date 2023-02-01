@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILESAMPLENOISE_H
@@ -8,11 +8,18 @@
 // Tile includes
 #include "TileConditions/TileCalibData.h"
 
+#include "AthenaKernel/CLASS_DEF.h"
+#include "AthenaKernel/CondCont.h"
+
+/**
+ * @class TileSampleNoise
+ * @brief Condition object to keep and provide Tile sample noise
+ */
 class TileSampleNoise {
 
   public:
 
-    TileSampleNoise(const TileCalibDataFlt* sampleNosie) : m_sampleNoise{sampleNosie} {};
+    TileSampleNoise(std::unique_ptr<TileCalibDataFlt> sampleNoise) : m_sampleNoise{std::move(sampleNoise)} {};
 
     virtual ~TileSampleNoise() = default;
 
@@ -30,7 +37,7 @@ class TileSampleNoise {
 
   private:
 
-    const TileCalibDataFlt* m_sampleNoise;
+    std::unique_ptr<TileCalibDataFlt> m_sampleNoise;
 };
 
 
@@ -74,5 +81,9 @@ float TileSampleNoise::getHfnNorm(unsigned int drawerIdx, unsigned int channel, 
   return (calibDrawer->getObjSizeUint32() < 6) ? 0.0 : calibDrawer->getData(channel, adc, 5);
 }
 
+// Set up the ClassID of this class (obtained using 'clid -s TileSampleNoise')
+CLASS_DEF(TileSampleNoise, 197315591, 0)
+// Set up the ClassID of the container (obtained using 'clid -cs TileSampleNoise')
+CONDCONT_DEF(TileSampleNoise, 176906267);
 
 #endif
