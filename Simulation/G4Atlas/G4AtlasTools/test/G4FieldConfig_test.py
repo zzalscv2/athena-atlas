@@ -19,7 +19,13 @@ if __name__ == '__main__':
   inputDir = defaultTestFiles.d
   flags = initConfigFlags()
   flags.Input.Files = defaultTestFiles.EVNT
-
+  # Arbitrary configuration for Twiss Files
+  flags.Sim.TwissFileBeam1 = '3.5TeV/0090.00m/nominal/v02/beam1.tfs'
+  flags.Sim.TwissFileBeam2 = '3.5TeV/0090.00m/nominal/v02/beam2.tfs'
+  flags.Sim.TwissFileBeta = 90000 # in mm
+  flags.Sim.TwissFileNomReal = 'nominal'
+  flags.Sim.TwissFileVersion = 'v02'
+  flags.Beam.Energy = '3500000'
   # Finalize
   flags.lock()
 

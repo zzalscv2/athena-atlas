@@ -252,6 +252,7 @@
 + LArCalorimeter/LArIdentifier
 + LArCalorimeter/LArSimEvent
 + MagneticField/BFieldData
++ MagneticField/MagFieldConfig
 + MagneticField/MagFieldInterfaces
 + MagneticField/MagFieldServices
 + MagneticField/MagFieldUtils

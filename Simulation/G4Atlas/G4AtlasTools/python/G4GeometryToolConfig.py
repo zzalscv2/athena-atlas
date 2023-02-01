@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, LHCPeriod
@@ -535,8 +535,7 @@ def getATLAS_RegionCreatorList(flags):
         if flags.Detector.GeometryBpipe:
             if flags.Sim.BeamPipeSimMode is not BeamPipeSimMode.Normal:
                 regionCreatorList += [BeampipeFwdCutPhysicsRegionToolCfg(flags)]
-            #if simFlags.ForwardDetectors.statusOn and simFlags.ForwardDetectors() == 2:
-            if False:
+            if not flags.Detector.GeometryFwdRegion and (flags.Detector.GeometryAFP or flags.Detector.GeometryALFA or flags.Detector.GeometryZDC):
                 regionCreatorList += [FWDBeamLinePhysicsRegionToolCfg(flags)]
     if flags.Detector.GeometryITk:
         if flags.Detector.GeometryITkPixel:
@@ -550,8 +549,7 @@ def getATLAS_RegionCreatorList(flags):
         if flags.Detector.GeometryBpipe:
             if flags.Sim.BeamPipeSimMode is not BeamPipeSimMode.Normal:
                 regionCreatorList += [BeampipeFwdCutPhysicsRegionToolCfg(flags)]
-            #if simFlags.ForwardDetectors.statusOn and simFlags.ForwardDetectors() == 2:
-            if False:
+            if not flags.Detector.GeometryFwdRegion and (flags.Detector.GeometryAFP or flags.Detector.GeometryALFA or flags.Detector.GeometryZDC):
                 regionCreatorList += [FWDBeamLinePhysicsRegionToolCfg(flags)]
     if flags.Detector.GeometryCalo:
         if flags.Detector.GeometryLAr:
@@ -648,73 +646,72 @@ def ATLAS_FieldMgrListCfg(flags):
         fieldMgrList += [tool]
 
     #sort these forward ones later
-    if flags.Detector.GeometryForward: #needed?
-        if flags.Detector.GeometryFwdRegion: #or forward?
-          accQ1FwdRegionFieldManager = Q1FwdFieldManagerToolCfg(flags)
-          accQ2FwdRegionFieldManager = Q2FwdFieldManagerToolCfg(flags)
-          accQ3FwdRegionFieldManager = Q3FwdFieldManagerToolCfg(flags)
-          accD1FwdRegionFieldManager = D1FwdFieldManagerToolCfg(flags)
-          accD2FwdRegionFieldManager = D2FwdFieldManagerToolCfg(flags)
-          accQ4FwdRegionFieldManager = Q4FwdFieldManagerToolCfg(flags)
-          accQ5FwdRegionFieldManager = Q5FwdFieldManagerToolCfg(flags)
-          accQ6FwdRegionFieldManager = Q6FwdFieldManagerToolCfg(flags)
-          accQ7FwdRegionFieldManager = Q7FwdFieldManagerToolCfg(flags)
-          accQ1HKickFwdRegionFieldManager = Q1HKickFwdFieldManagerToolCfg(flags)
-          accQ1VKickFwdRegionFieldManager = Q1VKickFwdFieldManagerToolCfg(flags)
-          accQ2HKickFwdRegionFieldManager = Q2HKickFwdFieldManagerToolCfg(flags)
-          accQ2VKickFwdRegionFieldManager = Q2VKickFwdFieldManagerToolCfg(flags)
-          accQ3HKickFwdRegionFieldManager = Q3HKickFwdFieldManagerToolCfg(flags)
-          accQ3VKickFwdRegionFieldManager = Q3VKickFwdFieldManagerToolCfg(flags)
-          accQ4VKickAFwdRegionFieldManager = Q4VKickAFwdFieldManagerToolCfg(flags)
-          accQ4HKickFwdRegionFieldManager = Q4HKickFwdFieldManagerToolCfg(flags)
-          accQ4VKickBFwdRegionFieldManager = Q4VKickBFwdFieldManagerToolCfg(flags)
-          accQ5HKickFwdRegionFieldManager = Q5HKickFwdFieldManagerToolCfg(flags)
-          accQ6VKickFwdRegionFieldManager = Q6VKickFwdFieldManagerToolCfg(flags)
-          accFwdRegionFieldManager = FwdRegionFieldManagerToolCfg(flags)
+    if flags.Detector.GeometryFwdRegion: #or forward?
+      accQ1FwdRegionFieldManager = Q1FwdFieldManagerToolCfg(flags)
+      accQ2FwdRegionFieldManager = Q2FwdFieldManagerToolCfg(flags)
+      accQ3FwdRegionFieldManager = Q3FwdFieldManagerToolCfg(flags)
+      accD1FwdRegionFieldManager = D1FwdFieldManagerToolCfg(flags)
+      accD2FwdRegionFieldManager = D2FwdFieldManagerToolCfg(flags)
+      accQ4FwdRegionFieldManager = Q4FwdFieldManagerToolCfg(flags)
+      accQ5FwdRegionFieldManager = Q5FwdFieldManagerToolCfg(flags)
+      accQ6FwdRegionFieldManager = Q6FwdFieldManagerToolCfg(flags)
+      accQ7FwdRegionFieldManager = Q7FwdFieldManagerToolCfg(flags)
+      accQ1HKickFwdRegionFieldManager = Q1HKickFwdFieldManagerToolCfg(flags)
+      accQ1VKickFwdRegionFieldManager = Q1VKickFwdFieldManagerToolCfg(flags)
+      accQ2HKickFwdRegionFieldManager = Q2HKickFwdFieldManagerToolCfg(flags)
+      accQ2VKickFwdRegionFieldManager = Q2VKickFwdFieldManagerToolCfg(flags)
+      accQ3HKickFwdRegionFieldManager = Q3HKickFwdFieldManagerToolCfg(flags)
+      accQ3VKickFwdRegionFieldManager = Q3VKickFwdFieldManagerToolCfg(flags)
+      accQ4VKickAFwdRegionFieldManager = Q4VKickAFwdFieldManagerToolCfg(flags)
+      accQ4HKickFwdRegionFieldManager = Q4HKickFwdFieldManagerToolCfg(flags)
+      accQ4VKickBFwdRegionFieldManager = Q4VKickBFwdFieldManagerToolCfg(flags)
+      accQ5HKickFwdRegionFieldManager = Q5HKickFwdFieldManagerToolCfg(flags)
+      accQ6VKickFwdRegionFieldManager = Q6VKickFwdFieldManagerToolCfg(flags)
+      accFwdRegionFieldManager = FwdRegionFieldManagerToolCfg(flags)
 
-          toolQ1FwdRegionFieldManager = result.popToolsAndMerge(accQ1FwdRegionFieldManager)
-          toolQ2FwdFieldManager = result.popToolsAndMerge(accQ2FwdRegionFieldManager)
-          toolQ3FwdFieldManager = result.popToolsAndMerge(accQ3FwdRegionFieldManager)
-          toolD1FwdFieldManager = result.popToolsAndMerge(accD1FwdRegionFieldManager)
-          toolD2FwdFieldManager = result.popToolsAndMerge(accD2FwdRegionFieldManager)
-          toolQ4FwdFieldManager = result.popToolsAndMerge(accQ4FwdRegionFieldManager)
-          toolQ5FwdFieldManager = result.popToolsAndMerge(accQ5FwdRegionFieldManager)
-          toolQ6FwdFieldManager = result.popToolsAndMerge(accQ6FwdRegionFieldManager)
-          toolQ7FwdFieldManager = result.popToolsAndMerge(accQ7FwdRegionFieldManager)
-          toolQ1HKickFwdFieldManager = result.popToolsAndMerge(accQ1HKickFwdRegionFieldManager)
-          toolQ1VKickFwdFieldManager = result.popToolsAndMerge(accQ1VKickFwdRegionFieldManager)
-          toolQ2HKickFwdFieldManager = result.popToolsAndMerge(accQ2HKickFwdRegionFieldManager)
-          toolQ2VKickFwdFieldManager = result.popToolsAndMerge(accQ2VKickFwdRegionFieldManager)
-          toolQ3HKickFwdFieldManager = result.popToolsAndMerge(accQ3HKickFwdRegionFieldManager)
-          toolQ3VKickFwdFieldManager = result.popToolsAndMerge(accQ3VKickFwdRegionFieldManager)
-          toolQ4VKickAFwdFieldManager = result.popToolsAndMerge(accQ4VKickAFwdRegionFieldManager)
-          toolQ4HKickFwdFieldManager = result.popToolsAndMerge(accQ4HKickFwdRegionFieldManager)
-          toolQ4VKickBFwdFieldManager = result.popToolsAndMerge(accQ4VKickBFwdRegionFieldManager)
-          toolQ5HKickFwdFieldManager = result.popToolsAndMerge(accQ5HKickFwdRegionFieldManager)
-          toolQ6VKickFwdFieldManager = result.popToolsAndMerge(accQ6VKickFwdRegionFieldManager)
-          toolFwdRegionFieldManager = result.popToolsAndMerge(accFwdRegionFieldManager)
+      toolQ1FwdRegionFieldManager = result.popToolsAndMerge(accQ1FwdRegionFieldManager)
+      toolQ2FwdFieldManager = result.popToolsAndMerge(accQ2FwdRegionFieldManager)
+      toolQ3FwdFieldManager = result.popToolsAndMerge(accQ3FwdRegionFieldManager)
+      toolD1FwdFieldManager = result.popToolsAndMerge(accD1FwdRegionFieldManager)
+      toolD2FwdFieldManager = result.popToolsAndMerge(accD2FwdRegionFieldManager)
+      toolQ4FwdFieldManager = result.popToolsAndMerge(accQ4FwdRegionFieldManager)
+      toolQ5FwdFieldManager = result.popToolsAndMerge(accQ5FwdRegionFieldManager)
+      toolQ6FwdFieldManager = result.popToolsAndMerge(accQ6FwdRegionFieldManager)
+      toolQ7FwdFieldManager = result.popToolsAndMerge(accQ7FwdRegionFieldManager)
+      toolQ1HKickFwdFieldManager = result.popToolsAndMerge(accQ1HKickFwdRegionFieldManager)
+      toolQ1VKickFwdFieldManager = result.popToolsAndMerge(accQ1VKickFwdRegionFieldManager)
+      toolQ2HKickFwdFieldManager = result.popToolsAndMerge(accQ2HKickFwdRegionFieldManager)
+      toolQ2VKickFwdFieldManager = result.popToolsAndMerge(accQ2VKickFwdRegionFieldManager)
+      toolQ3HKickFwdFieldManager = result.popToolsAndMerge(accQ3HKickFwdRegionFieldManager)
+      toolQ3VKickFwdFieldManager = result.popToolsAndMerge(accQ3VKickFwdRegionFieldManager)
+      toolQ4VKickAFwdFieldManager = result.popToolsAndMerge(accQ4VKickAFwdRegionFieldManager)
+      toolQ4HKickFwdFieldManager = result.popToolsAndMerge(accQ4HKickFwdRegionFieldManager)
+      toolQ4VKickBFwdFieldManager = result.popToolsAndMerge(accQ4VKickBFwdRegionFieldManager)
+      toolQ5HKickFwdFieldManager = result.popToolsAndMerge(accQ5HKickFwdRegionFieldManager)
+      toolQ6VKickFwdFieldManager = result.popToolsAndMerge(accQ6VKickFwdRegionFieldManager)
+      toolFwdRegionFieldManager = result.popToolsAndMerge(accFwdRegionFieldManager)
 
-          fieldMgrList+=[toolQ1FwdRegionFieldManager,
-                         toolQ2FwdFieldManager,
-                         toolQ3FwdFieldManager,
-                         toolD1FwdFieldManager,
-                         toolD2FwdFieldManager,
-                         toolQ4FwdFieldManager,
-                         toolQ5FwdFieldManager,
-                         toolQ6FwdFieldManager,
-                         toolQ7FwdFieldManager,
-                         toolQ1HKickFwdFieldManager,
-                         toolQ1VKickFwdFieldManager,
-                         toolQ2HKickFwdFieldManager,
-                         toolQ2VKickFwdFieldManager,
-                         toolQ3HKickFwdFieldManager,
-                         toolQ3VKickFwdFieldManager,
-                         toolQ4VKickAFwdFieldManager,
-                         toolQ4HKickFwdFieldManager,
-                         toolQ4VKickBFwdFieldManager,
-                         toolQ5HKickFwdFieldManager,
-                         toolQ6VKickFwdFieldManager,
-                         toolFwdRegionFieldManager]
+      fieldMgrList+=[toolQ1FwdRegionFieldManager,
+                     toolQ2FwdFieldManager,
+                     toolQ3FwdFieldManager,
+                     toolD1FwdFieldManager,
+                     toolD2FwdFieldManager,
+                     toolQ4FwdFieldManager,
+                     toolQ5FwdFieldManager,
+                     toolQ6FwdFieldManager,
+                     toolQ7FwdFieldManager,
+                     toolQ1HKickFwdFieldManager,
+                     toolQ1VKickFwdFieldManager,
+                     toolQ2HKickFwdFieldManager,
+                     toolQ2VKickFwdFieldManager,
+                     toolQ3HKickFwdFieldManager,
+                     toolQ3VKickFwdFieldManager,
+                     toolQ4VKickAFwdFieldManager,
+                     toolQ4HKickFwdFieldManager,
+                     toolQ4VKickBFwdFieldManager,
+                     toolQ5HKickFwdFieldManager,
+                     toolQ6VKickFwdFieldManager,
+                     toolFwdRegionFieldManager]
 
     result.setPrivateTools(fieldMgrList)
     return result
@@ -764,8 +761,7 @@ def G4AtlasDetectorConstructionToolCfg(flags, name="G4AtlasDetectorConstructionT
         else:
             kwargs.setdefault("World", result.popToolsAndMerge(ATLASEnvelopeCfg(flags)))
         kwargs.setdefault("RegionCreators", getATLAS_RegionCreatorList(flags))
-        #if hasattr(simFlags, 'MagneticField') and simFlags.MagneticField.statusOn:
-        if True:
+        if flags.BField.solenoidOn or flags.BField.barrelToroidOn or flags.BField.endcapToroidOn:
             acc = ATLAS_FieldMgrListCfg(flags)
             fieldMgrList = result.popToolsAndMerge(acc)
             kwargs.setdefault("FieldManagers", fieldMgrList)
