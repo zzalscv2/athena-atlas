@@ -25,6 +25,7 @@ def defineMenu():
         'L1_BTAG-MU5VFjJ90',
         'L1_BPH-0M9-EM7-EM5',
         'L1_BPH-0DR3-EM7J15',
+        'L1_cTAU20M_DR-eTAU20eTAU12-jJ40',
     ]
 
     # To replace thresholds in the physics menu
