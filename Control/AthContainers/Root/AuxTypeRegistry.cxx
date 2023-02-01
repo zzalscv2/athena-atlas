@@ -465,7 +465,11 @@ AuxTypeRegistry::findAuxID (const std::string& name,
                             const std::type_info& ti,
                             IAuxTypeVectorFactory* (AuxTypeRegistry::*makeFactory) () const)
 {
-  std::string key = makeKey (name, clsname);
+
+  // The extra test here is to avoid having to copy a string
+  // in the common case where clsname is blank.
+  const std::string& key = clsname.empty() ? name : makeKey (name, clsname);
+
 
   // Fast path --- try without acquiring the lock.
   {
