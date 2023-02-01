@@ -42,12 +42,14 @@ namespace TCS {
       // Returns true when a matching is found
       static bool cTauMatching( const xAOD::eFexTauRoI & eTau, const xAOD::jFexTauRoI & jTau );
       // Converts the isolation score to bit to be used for the working point assignement 
-      static unsigned int convertIsoToBit( float jtauIso, float etauPt ); 
+      static unsigned int convertIsoToBit( const std::map<std::string, int> & isoFW_CTAU, const float jtauIso, const float etauEt ); 
       #endif
 
    private:
 
       TrigConf::L1Threshold const * m_threshold{nullptr};
+      std::map<std::string, int> m_isoFW_CTAU;
+
       // This function is used to map the ctau isolation working points into a common format with eFEX EM and taus.
       // This allows us to use same functionalities from ConfigurableAlg (L1TopoInterfaces) to apply isolation cuts in multiplicity algorithms for all flavour of TOBS 
       unsigned int convertIsoToBit( const TCS::cTauTOB * etauCand, const TCS::cTauTOB * jtauCand ) const; 

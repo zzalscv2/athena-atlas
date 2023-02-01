@@ -26,6 +26,10 @@ TCS::jTauNoSort::~jTauNoSort() {}
 TCS::StatusCode
 TCS::jTauNoSort::initialize() {
    m_numberOfjTaus = parameter("OutputWidth").value();
+   m_iso = parameter("Isolation").value();
+
+   m_isoFW_JTAU = isolationFW_JTAU();
+
    return TCS::StatusCode::SUCCESS;
 }
 
@@ -37,8 +41,8 @@ TCS::jTauNoSort::sort(const InputTOBArray & input, TOBArray & output) {
    // fill output array with GenericTOB built from clusters
    for(jTauTOBArray::const_iterator jtau = clusters.begin(); jtau!= clusters.end(); ++jtau ) {
 
-      // Isolation cut (to be implemented)
-      // See jTauMultiplicity.cxx for reference
+      // Isolation cut
+      if ( !isocut(m_iso, convertIsoToBit(*jtau)) ) {continue;}
  
       const GenericTOB gtob(**jtau);
       output.push_back( gtob );
@@ -54,5 +58,18 @@ TCS::jTauNoSort::sort(const InputTOBArray & input, TOBArray & output) {
       }
    }
    return TCS::StatusCode::SUCCESS;
+}
+
+
+unsigned int
+TCS::jTauNoSort::convertIsoToBit(const TCS::jTauTOB * jtau) const {
+  unsigned int bit = 0;
+
+  // Assign the tightest accept WP as default bit
+  if( jtau->EtIso()*1024 < jtau->Et()*m_isoFW_JTAU.at("Loose") ) bit = 1;
+  if( jtau->EtIso()*1024 < jtau->Et()*m_isoFW_JTAU.at("Medium") ) bit = 2;
+  if( jtau->EtIso()*1024 < jtau->Et()*m_isoFW_JTAU.at("Tight") ) bit = 3;
+
+  return bit;
 }
 
