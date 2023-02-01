@@ -4,7 +4,7 @@
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import ProductionStep
-
+from AthenaConfiguration.Enums import LHCPeriod
 
 def TileTriggerDigitizationCfg(flags):
     """Return ComponentAccumulator with standard Tile Trigger Digitization configuration"""
@@ -12,11 +12,12 @@ def TileTriggerDigitizationCfg(flags):
     from TileSimAlgs.TileHitToTTL1Config import TileHitToTTL1OutputCfg
     acc = TileHitToTTL1OutputCfg(flags)
 
-    from TileSimAlgs.TileMuonReceiverConfig import TilePulseForTileMuonReceiverOutputCfg
-    acc.merge( TilePulseForTileMuonReceiverOutputCfg(flags) )
+    if flags.GeoModel.Run > LHCPeriod.Run1:
+        from TileSimAlgs.TileMuonReceiverConfig import TilePulseForTileMuonReceiverOutputCfg
+        acc.merge( TilePulseForTileMuonReceiverOutputCfg(flags) )
 
-    from TileSimAlgs.TileMuonReceiverDecisionConfig import TileMuonReceiverDecisionOutputCfg
-    acc.merge( TileMuonReceiverDecisionOutputCfg(flags) )
+        from TileSimAlgs.TileMuonReceiverDecisionConfig import TileMuonReceiverDecisionOutputCfg
+        acc.merge( TileMuonReceiverDecisionOutputCfg(flags) )
 
     from TileL2Algs.TileL2Config import TileRawChannelToL2OutputCfg
     acc.merge( TileRawChannelToL2OutputCfg(flags, streamName = 'RDO') )
@@ -28,11 +29,12 @@ def TileOverlayTriggerDigitizationCfg(flags):
     """Return ComponentAccumulator with Overlay Tile Trigger Digitization configuration"""
     acc = ComponentAccumulator()
 
-    from TileSimAlgs.TileMuonReceiverConfig import TilePulseForTileMuonReceiverOutputCfg
-    acc.merge( TilePulseForTileMuonReceiverOutputCfg(flags) )
+    if flags.GeoModel.Run > LHCPeriod.Run1:
+        from TileSimAlgs.TileMuonReceiverConfig import TilePulseForTileMuonReceiverOutputCfg
+        acc.merge( TilePulseForTileMuonReceiverOutputCfg(flags) )
 
-    from TileSimAlgs.TileMuonReceiverDecisionConfig import TileMuonReceiverDecisionOutputCfg
-    acc.merge( TileMuonReceiverDecisionOutputCfg(flags) )
+        from TileSimAlgs.TileMuonReceiverDecisionConfig import TileMuonReceiverDecisionOutputCfg
+        acc.merge( TileMuonReceiverDecisionOutputCfg(flags) )
 
     from TileL2Algs.TileL2Config import TileRawChannelToL2OutputCfg
     acc.merge( TileRawChannelToL2OutputCfg(flags, streamName = 'RDO') )
