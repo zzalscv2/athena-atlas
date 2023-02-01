@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.CFElements import seqAND
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
 from AthenaCommon.Logging import logging
@@ -10,7 +10,7 @@ trkPairOutName = "HLT_TrigDV_VSITrkPair"
 vtxOutName = "HLT_TrigDV_VSIVertex"
 vtxCountName = "HLT_TrigDV_VtxCount"
 
-def DVRecoFragment(ConfigFlags):
+def DVRecoFragment(flags):
 
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
     FSConfig = getInDetTrigConfig("jet")
@@ -62,12 +62,11 @@ def DVRecoFragment(ConfigFlags):
 
 
 
-def DVRecoSequence():
+def DVRecoSequence(flags):
     from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoAlg
     from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ( TrkSeq, InputMakerAlg, sequenceOut) = RecoFragmentsPool.retrieve(DVRecoFragment,ConfigFlags)
+    ( TrkSeq, InputMakerAlg, sequenceOut) = RecoFragmentsPool.retrieve(DVRecoFragment,flags)
 
     HypoAlg = TrigStreamerHypoAlg("TrigDVRecoDummyStream")
 

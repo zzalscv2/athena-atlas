@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # menu components   
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'PhotonCaloIso'
 
-def precisionPhotonCaloIsoSequence(ConfigFlags, ion=False):
+def precisionPhotonCaloIsoSequence(flags, ion=False):
     """ This function creates the PrecisionPhotonCaloIso sequence"""
     # Prepare first the EventView
     InViewRoIs="PrecisionPhotonCaloIsoRoIs"                                          
@@ -34,7 +34,7 @@ def precisionPhotonCaloIsoSequence(ConfigFlags, ion=False):
     theSequence = seqAND(tag(ion)+"Sequence", [])
     # Add first the sequence part that is FS, so to run outside the view
     from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import egammaFSEventDensitySequence
-    theSequence += egammaFSEventDensitySequence()
+    theSequence += egammaFSEventDensitySequence(flags)
 
     # And now add the the rest which is run isnide the EventView:
     theSequence += [precisionPhotonCaloIsoViewsMaker,precisionPhotonCaloIsoInViewSequence]
@@ -47,9 +47,8 @@ def precisionPhotonCaloIsoMenuSequence(flags, name,ion=False):
 
     # This will be executed after pricisionPhoton
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
     """Creates precisionPhotonCaloIso  sequence"""
-    (sequence, precisionPhotonCaloIsoViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(precisionPhotonCaloIsoSequence,ConfigFlags,ion=ion)
+    (sequence, precisionPhotonCaloIsoViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(precisionPhotonCaloIsoSequence,flags,ion=ion)
 
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
     TrigEgammaKeys = getTrigEgammaKeys()

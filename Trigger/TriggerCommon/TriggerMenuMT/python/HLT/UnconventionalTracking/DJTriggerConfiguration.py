@@ -1,11 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CFElements import (seqAND, parOR)
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
 from AthenaCommon.Logging import logging
 
 from ..Config.MenuComponents import RecoFragmentsPool, algorithmCAToGlobalWrapper
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorCentredOnIParticleROITool
@@ -41,7 +40,7 @@ def DJPromptStep():
                          HypoToolGen = TrigDJHypoPromptToolFromDict,
                      )
 
-def DJDispFragment(ConfigFlags):
+def DJDispFragment(flags):
     lrtcfg = getInDetTrigConfig( 'DJetLRT' )
     roiTool = ViewCreatorCentredOnIParticleROITool('ViewCreatorDJRoI', RoisWriteHandleKey = recordable(lrtcfg.roi), RoIEtaWidth = lrtcfg.etaHalfWidth, RoIPhiWidth = lrtcfg.phiHalfWidth)
     InputMakerAlg = EventViewCreatorAlgorithm("IMDJRoIFTF",mergeUsingFeature = True, RoITool = roiTool,Views = "DJRoIViews",InViewRoIs = "InViewRoIs",RequireParentView = False,ViewFallThrough = True)
@@ -58,11 +57,11 @@ def DJDispFragment(ConfigFlags):
     InputMakerAlg.ViewNodeName = reco_seq.name()
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, ConfigFlags, nameSuffix=InputMakerAlg.name())[0]
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=InputMakerAlg.name())[0]
 
     return (seqAND("UncTrkrecoSeqDJTrigDisp", [InputMakerAlg, robPrefetchAlg, reco_seq]), InputMakerAlg)
 
-def DJDispStep():
+def DJDispStep(flags):
     from TrigLongLivedParticlesHypo.TrigDJHypoConfig import TrigDJHypoDispToolFromDict
     from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import (DisplacedJetDispHypoAlg)
 
@@ -74,7 +73,7 @@ def DJDispStep():
     hypo_alg.lrtTracksKey = lrtcfg.tracks_FTF()
     hypo_alg.vtxKey = fscfg.vertex_jet
 
-    ( alg_seq ,im_alg) = RecoFragmentsPool.retrieve(DJDispFragment,ConfigFlags)
+    ( alg_seq ,im_alg) = RecoFragmentsPool.retrieve(DJDispFragment,flags)
 
     return MenuSequence(Sequence    = alg_seq,
                         Maker       = im_alg,

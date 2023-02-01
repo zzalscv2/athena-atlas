@@ -104,19 +104,19 @@ class UnconventionalTrackingChainConfiguration(ChainConfigurationBase):
 
 def IsoHPtTrackTriggerCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.IsoHighPtTrackTriggerConfiguration import IsoHPtTrackTriggerHypoSequence
-    return IsoHPtTrackTriggerHypoSequence()
+    return IsoHPtTrackTriggerHypoSequence(flags)
 
 def FTFRecoOnlyCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getFullScanRecoOnlySequence
-    return getFullScanRecoOnlySequence()
+    return getFullScanRecoOnlySequence(flags)
 
 def FSLRTTriggerCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.FullScanLRTTrackingConfiguration import FullScanLRTTriggerMenuSequence
-    return FullScanLRTTriggerMenuSequence()
+    return FullScanLRTTriggerMenuSequence(flags)
 
 def VSITriggerCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.VrtSecInclusiveConfiguration import VrtSecInclusiveMenuSequence
-    return VrtSecInclusiveMenuSequence()
+    return VrtSecInclusiveMenuSequence(flags)
 
 def dEdxTriggerCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.dEdxTriggerConfiguration import dEdxTriggerHypoSequence
@@ -128,7 +128,7 @@ def HitDVTriggerCfg(flags):
 
 def JetRecoOnlyCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.HitDVConfiguration import UTTJetRecoSequence
-    return UTTJetRecoSequence()
+    return UTTJetRecoSequence(flags)
 
 def DisTrkTriggerCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.DisTrkTriggerConfiguration import DisTrkTriggerHypoSequence
@@ -140,11 +140,11 @@ def DJPromptStepCfg(flags):
 
 def DJDispStepCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.DJTriggerConfiguration import DJDispStep
-    return DJDispStep()
+    return DJDispStep(flags)
 
 def DVRecoStepCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.DVTriggerConfiguration import DVRecoSequence
-    return DVRecoSequence()
+    return DVRecoSequence(flags)
 
 def DVEDStepCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.DVTriggerConfiguration import DVTriggerEDSequence

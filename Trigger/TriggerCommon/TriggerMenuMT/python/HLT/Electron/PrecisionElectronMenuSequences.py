@@ -1,10 +1,8 @@
 #
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
-# menu components   
+# menu components
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
 from AthenaCommon.CFElements import parOR, seqAND
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
@@ -16,7 +14,7 @@ def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'Electron'
 
 
-def precisionElectronSequence(ConfigFlags, ion=False, variant=''):
+def precisionElectronSequence(flags, ion=False, variant=''):
     """ fifth step:  precision electron....."""
     InViewRoIs = "electronPrecision"
     # EVCreator:
@@ -30,7 +28,7 @@ def precisionElectronSequence(ConfigFlags, ion=False, variant=''):
 
     # Configure the reconstruction algorithm sequence
     from TriggerMenuMT.HLT.Electron.PrecisionElectronRecoSequences import precisionElectronRecoSequence
-    (electronPrecisionRec, sequenceOut, sequenceOut_dummy) = precisionElectronRecoSequence(InViewRoIs, ion, doGSF=False, doLRT = 'LRT' in variant)
+    (electronPrecisionRec, sequenceOut, sequenceOut_dummy) = precisionElectronRecoSequence(flags, InViewRoIs, ion, doGSF=False, doLRT = 'LRT' in variant)
 
     # Suffix to distinguish probe leg sequences
     electronPrecisionInViewAlgs = parOR(tag(ion) + "InViewAlgs" + variant, [electronPrecisionRec])
@@ -40,9 +38,9 @@ def precisionElectronSequence(ConfigFlags, ion=False, variant=''):
     return (electronPrecisionAthSequence, precisionElectronViewsMaker, sequenceOut, sequenceOut_dummy)
 
 
-def precisionElectronMenuSequence(is_probe_leg=False, ion=False,  variant=''):
+def precisionElectronMenuSequence(flags, is_probe_leg=False, ion=False,  variant=''):
     # retrieve the reco seuqence+EVC
-    (electronPrecisionAthSequence, precisionElectronViewsMaker, sequenceOut, sequenceOut_dummy) = RecoFragmentsPool.retrieve(precisionElectronSequence, ConfigFlags, ion=ion, variant=variant)
+    (electronPrecisionAthSequence, precisionElectronViewsMaker, sequenceOut, sequenceOut_dummy) = RecoFragmentsPool.retrieve(precisionElectronSequence, flags, ion=ion, variant=variant)
 
     # make the Hypo
     from TrigEgammaHypo.TrigEgammaPrecisionElectronHypoTool import createTrigEgammaPrecisionElectronHypoAlg
@@ -60,5 +58,5 @@ def precisionElectronMenuSequence(is_probe_leg=False, ion=False,  variant=''):
                           HypoToolGen = TrigEgammaPrecisionElectronHypoToolFromDict,
                           IsProbe     = is_probe_leg)
 
-def precisionElectronMenuSequence_LRT(is_probe_leg=False ):
-    return precisionElectronMenuSequence(is_probe_leg=is_probe_leg, ion=False, variant='_LRT')
+def precisionElectronMenuSequence_LRT(flags, is_probe_leg=False ):
+    return precisionElectronMenuSequence(flags, is_probe_leg=is_probe_leg, ion=False, variant='_LRT')

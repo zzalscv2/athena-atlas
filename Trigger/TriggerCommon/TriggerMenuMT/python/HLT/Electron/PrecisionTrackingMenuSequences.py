@@ -1,10 +1,8 @@
 #
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
-# menu components   
+# menu components
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
 from AthenaCommon.CFElements import parOR, seqAND
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
@@ -14,7 +12,7 @@ def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'Tracking'
 
 
-def precisionTrackingSequence(ConfigFlags, ion=False, variant=''):
+def precisionTrackingSequence(flags, ion=False, variant=''):
     """ fourth step:  precision electron....."""
 
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
@@ -45,9 +43,9 @@ def precisionTrackingSequence(ConfigFlags, ion=False, variant=''):
 
 
 
-def precisionTrackingMenuSequence(name, is_probe_leg=False, ion=False, variant=''):
+def precisionTrackingMenuSequence(flags, name, is_probe_leg=False, ion=False, variant=''):
     """ Creates precisionCalo MENU sequence """
-    (sequence, precisionTrackingViewsMaker, caloClusters, trackParticles) = RecoFragmentsPool.retrieve(precisionTrackingSequence, ConfigFlags, ion=ion, variant=variant)
+    (sequence, precisionTrackingViewsMaker, caloClusters, trackParticles) = RecoFragmentsPool.retrieve(precisionTrackingSequence, flags, ion=ion, variant=variant)
 
     from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoAlg, TrigStreamerHypoTool
     thePrecisionTrackingHypo = TrigStreamerHypoAlg(name + tag(ion) + "Hypo" + variant)
@@ -61,5 +59,5 @@ def precisionTrackingMenuSequence(name, is_probe_leg=False, ion=False, variant='
                          IsProbe     = is_probe_leg)
 
 
-def precisionTrackingMenuSequence_LRT(name, is_probe_leg=False):
-    return precisionTrackingMenuSequence(name, is_probe_leg=is_probe_leg, ion=False, variant='_LRT')
+def precisionTrackingMenuSequence_LRT(flags, name, is_probe_leg=False):
+    return precisionTrackingMenuSequence(flags, name, is_probe_leg=is_probe_leg, ion=False, variant='_LRT')
