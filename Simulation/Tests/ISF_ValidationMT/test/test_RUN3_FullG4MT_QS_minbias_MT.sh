@@ -1,8 +1,10 @@
 #!/bin/sh
 #
-# art-description: MC21-style simulation using FullG4MT_QS in AthenaMT
-# art-include: 22.0/Athena
+# art-description: MC23-style RUN3 simulation using FullG4MT_QS in AthenaMT
+# art-include: 23.0/Athena
+# art-include: 23.0/AthSimulation
 # art-include: master/Athena
+# art-include: master/AthSimulation
 # art-type: grid
 # art-athena-mt: 8
 # art-architecture:  '#x86_64-intel'
@@ -13,7 +15,7 @@
 export ATHENA_CORE_NUMBER=8
 
 # RUN3 setup
-# ATLAS-R3S-2021-03-00-00 and OFLCOND-MC21-SDR-RUN3-07
+# ATLAS-R3S-2021-03-01-00 and OFLCOND-MC21-SDR-RUN3-07
 Sim_tf.py \
     --CA \
     --multithreaded \
@@ -21,8 +23,8 @@ Sim_tf.py \
     --simulator 'FullG4MT_QS' \
     --postExec 'all:from IOVDbSvcConfig import addOverride;cfg.merge(addOverride(flags, "/Indet/Beampos", "IndetBeampos-RunDep-MC21-BestKnowledge-002"))' \
     --postInclude 'PyJobTransforms.UseFrontier' \
-    --preInclude 'EVNTtoHITS:Campaigns.MC21Simulation' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
+    --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc22_pre/valid2.900311.Epos_minbias_inelastic_lowjetphoton.evgen.EVNT.e8480/EVNT.30415957._001017.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents 200 \
@@ -41,8 +43,8 @@ Sim_tf.py \
     --simulator 'FullG4MT_QS' \
     --postExec 'all:conddb.addOverride("/Indet/Beampos", "IndetBeampos-RunDep-MC21-BestKnowledge-002");' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc22_pre/valid2.900311.Epos_minbias_inelastic_lowjetphoton.evgen.EVNT.e8480/EVNT.30415957._001017.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents 200 \
@@ -55,8 +57,8 @@ Sim_tf.py \
     --simulator 'FullG4MT_QS' \
     --postExec 'all:conddb.addOverride("/Indet/Beampos", "IndetBeampos-RunDep-MC21-BestKnowledge-002");' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc22_pre/valid2.900311.Epos_minbias_inelastic_lowjetphoton.evgen.EVNT.e8480/EVNT.30415957._001017.pool.root.1" \
     --outputHITSFile "test.CG.HITS.pool.root" \
     --maxEvents 200 \
