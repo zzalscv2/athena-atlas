@@ -72,6 +72,7 @@ def SimpleAmbiguityProcessorToolCfg(flags,
                       ClusterSplitProbContainer)
     kwargs.setdefault("OutputClusterSplitProbabilityName",
                       'InDetAmbiguityProcessorSplitProb'+flags.InDet.Tracking.ActiveConfig.extension)
+    kwargs.setdefault("SuppressTrackFit", not flags.InDet.Tracking.ActiveConfig.doAmbiguityProcessorTrackFit)
     kwargs.setdefault("SuppressHoleSearch", False)
     kwargs.setdefault("tryBremFit",
                       flags.InDet.Tracking.doBremRecovery and
@@ -147,7 +148,7 @@ def SimpleAmbiguityProcessorTool_TRT_Cfg(
         "OutputClusterSplitProbabilityName",
         'InDetTRT_SeededAmbiguityProcessorSplitProb'+flags.InDet.Tracking.ActiveConfig.extension)
     kwargs.setdefault("RefitPrds", False)
-    kwargs.setdefault("SuppressTrackFit", False)
+    kwargs.setdefault("SuppressTrackFit", not flags.InDet.Tracking.ActiveConfig.doAmbiguityProcessorTrackFit)
     kwargs.setdefault("SuppressHoleSearch", False)
     kwargs.setdefault("ScoringTool", InDetTRT_SeededScoringTool)
     kwargs.setdefault(
@@ -167,6 +168,7 @@ def SimpleAmbiguityProcessorTool_Trig_Cfg(
 
     acc = ComponentAccumulator()
 
+    kwargs.setdefault("SuppressTrackFit", not flags.InDet.Tracking.ActiveConfig.doAmbiguityProcessorTrackFit)
     # TODO False if flags.InDet.Tracking.ActiveConfig.name == 'cosmics' else True
     kwargs.setdefault("SuppressHoleSearch", False)
     # kwargs.setdefault("RefitPrds", False)
@@ -414,6 +416,7 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
                       'SplitProb'+flags.InDet.Tracking.ActiveConfig.extension)
     kwargs.setdefault("OutputClusterSplitProbabilityName",
                       'InDetAmbiguityProcessorSplitProb'+flags.InDet.Tracking.ActiveConfig.extension)
+    kwargs.setdefault("SuppressTrackFit", not flags.InDet.Tracking.ActiveConfig.doAmbiguityProcessorTrackFit)
     kwargs.setdefault("SuppressHoleSearch", False)
     kwargs.setdefault("tryBremFit", flags.InDet.Tracking.doBremRecovery and (
         flags.InDet.Tracking.ActiveConfig.extension == "" or
@@ -499,6 +502,7 @@ def ITkDenseEnvironmentsAmbiguityProcessorToolCfg(
                       'SplitProb'+flags.ITk.Tracking.ActiveConfig.extension)
     kwargs.setdefault("OutputClusterSplitProbabilityName",
                       'ITkAmbiguityProcessorSplitProb'+flags.ITk.Tracking.ActiveConfig.extension)
+    kwargs.setdefault("SuppressTrackFit", not flags.ITk.Tracking.ActiveConfig.doAmbiguityProcessorTrackFit)
     kwargs.setdefault("SuppressHoleSearch", False)
     # Disabled for second passes in reco
     kwargs.setdefault(

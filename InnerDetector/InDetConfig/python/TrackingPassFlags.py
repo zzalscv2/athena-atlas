@@ -207,6 +207,7 @@ def createTrackingPassFlags():
     icf.addFlag("useTIDE_Ambi", lambda pcf: pcf.InDet.Tracking.doTIDE_Ambi)
     icf.addFlag("useTRTExtension", lambda pcf: pcf.InDet.Tracking.doTRTExtension)
     icf.addFlag("storeSeparateContainer", False)
+    icf.addFlag("doAmbiguityProcessorTrackFit", True)
 
     icf.addFlag("minPT", minPT_ranges )
     icf.addFlag("minSecondaryPt", minSecondaryPT_ranges ) #Pt cut for back tracking + segment finding for these
@@ -381,6 +382,7 @@ def createITkTrackingPassFlags():
     icf.addFlag("usePrdAssociationTool"     , False)
     icf.addFlag("storeSeparateContainer"    , False)
     icf.addFlag("doZBoundary"               , True)
+    icf.addFlag("doAmbiguityProcessorTrackFit", True)
 
     icf.addFlag("useEtaDepCuts"             , True)
     # Maximum bin set to 9999 instead of four to prevent out of bounds lookups
