@@ -41,6 +41,7 @@ TCS::StatusCode
 TCS::jTauMultiplicity::initialize() { 
 
   m_threshold = getThreshold();
+  m_isoFW_JTAU = isolationFW_JTAU();
 
   // book histograms
   std::string hname_accept = "jTauMultiplicity_accept_EtaPt_"+m_threshold->name();
@@ -106,10 +107,9 @@ TCS::jTauMultiplicity::convertIsoToBit(const TCS::jTauTOB * jtau) const {
   unsigned int bit = 0;
 
   // Assign the tightest accept WP as default bit
-  // TO DO: read WPs from the menu
-  if( jtau->EtIso() < jtau->Et() * 0.4 ) bit = 1; // Loose
-  if( jtau->EtIso() < jtau->Et() * 0.35) bit = 2; // Medium
-  if( jtau->EtIso() < jtau->Et() * 0.3 ) bit = 3; // Tight 
+  if( jtau->EtIso()*1024 < jtau->Et()*m_isoFW_JTAU.at("Loose") ) bit = 1;
+  if( jtau->EtIso()*1024 < jtau->Et()*m_isoFW_JTAU.at("Medium") ) bit = 2;
+  if( jtau->EtIso()*1024 < jtau->Et()*m_isoFW_JTAU.at("Tight") ) bit = 3;
   
   return bit;
 }

@@ -6,6 +6,7 @@
 #include "StoreGate/exceptions.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "L1TopoAlgorithms/cTauMultiplicity.h"
+#include "L1TopoCoreSim/TopoSteeringStructure.h"
 
 
 namespace {
@@ -31,7 +32,7 @@ StatusCode cTauRoIThresholdsTool::initialize() {
 
 uint64_t cTauRoIThresholdsTool::getPattern(const xAOD::eFexTauRoI& eTau,
                                            const RoIThresholdsTool::ThrVec& menuThresholds,
-                                           const TrigConf::L1ThrExtraInfoBase& /*menuExtraInfo*/) const {
+                                           const TrigConf::L1ThrExtraInfoBase& menuExtraInfo) const {
   // Get the jTau matched to the eTau
   using jTauLink_t = ElementLink<xAOD::jFexTauRoIContainer>;
   SG::ReadDecorHandle<xAOD::eFexTauRoIContainer, jTauLink_t> jTauLinkAcc{m_jTauLinkKey, Gaudi::Hive::currentContext()};
@@ -54,8 +55,11 @@ uint64_t cTauRoIThresholdsTool::getPattern(const xAOD::eFexTauRoI& eTau,
     // isolation in units of 200 MeV
     unsigned int jFexIso{jTau->tobIso()};
 
+    std::map<std::string, int> isoFW_CTAU;
+    TCS::TopoSteeringStructure::setIsolationFW_CTAU( isoFW_CTAU, menuExtraInfo );
+
     // The isolation value is multiplied by 2 to normalise to 100 MeV/counts units
-    isolation_score = TCS::cTauMultiplicity::convertIsoToBit( 2*float(jFexIso), float(eFexEt) );
+    isolation_score = TCS::cTauMultiplicity::convertIsoToBit( isoFW_CTAU, 2*float(jFexIso), float(eFexEt) );
 
     ATH_MSG_DEBUG("eFex tau eta,phi = " << eTau.iEta() << ", " << eTau.iPhi()
                   << ", jFex tau eta,phi = " << jTau->globalEta() << ", " << jTau->globalPhi()

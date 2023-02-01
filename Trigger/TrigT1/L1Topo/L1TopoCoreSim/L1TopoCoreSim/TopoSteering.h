@@ -90,6 +90,10 @@ namespace TCS {
 
       void setLegacyMode(bool isLegacyTopo) {m_isLegacyTopo=isLegacyTopo;}
 
+      // l1menu  isolation info
+      void setIsolationFW_CTAU( const std::map<std::string, int> & isolationFW_CTAU ) { m_isolationFW_CTAU = isolationFW_CTAU; }
+      void setIsolationFW_JTAU( const std::map<std::string, int> & isolationFW_JTAU ) { m_isolationFW_JTAU = isolationFW_JTAU; }  
+
       /**
        * @brief enables the histogramming service
        */
@@ -151,6 +155,9 @@ namespace TCS {
       bool m_useBitwise{false};                  // Using bitwise algorithms? Disabled by default. Needs a menu global flag.
 
       bool m_isLegacyTopo{false};
+
+      std::map<std::string, int> m_isolationFW_CTAU; // FW isolation WPs for cTau
+      std::map<std::string, int> m_isolationFW_JTAU; // FW isolation WPs for jTau 
      
       TopoInputEvent         m_inputEvent;       // the input event
 

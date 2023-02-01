@@ -55,6 +55,20 @@ namespace TCS {
       // resets the connectors (status, intermediate TOBs, and decision of algs)
       StatusCode reset();
 
+      // l1menu isolation info
+      const std::map<std::string, int> & isolationFW_CTAU() const { return m_isolationFW_CTAU; } 
+      const std::map<std::string, int> & isolationFW_JTAU() const { return m_isolationFW_JTAU; } 
+
+      void setIsolationFW_CTAU(const TrigConf::L1Menu& l1menu);
+      void setIsolationFW_JTAU(const TrigConf::L1Menu& l1menu);
+
+      // Functions used by HLT seeding
+      #ifndef TRIGCONF_STANDALONE
+
+      static void setIsolationFW_CTAU( std::map<std::string, int>& isoFW_CTAU, const TrigConf::L1ThrExtraInfoBase& menuExtraInfo );
+
+      #endif
+
       // print
       void print(std::ostream & o) const;
 
@@ -87,6 +101,9 @@ namespace TCS {
       std::map<std::string, TCS::CountingConnector*> m_countLookup; // counting connectors (subset of m_connectors) by connector name
 
       std::map<std::string, TCS::InputConnector*> m_inputLookup; // input connectors (subset of m_connectors) by connector name
+
+      std::map<std::string, int> m_isolationFW_CTAU; // FW isolation WPs for cTau
+      std::map<std::string, int> m_isolationFW_JTAU; // FW isolation WPs for jTau
 
       std::vector<TCS::ParameterSpace*> m_parameters;
       

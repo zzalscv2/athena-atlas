@@ -29,7 +29,12 @@ namespace TCS {
    private:
 
       parType_t      m_numberOfjTaus = { 0 };
-      //parType_t      m_iso = { 0 };
+      parType_t      m_iso = { 0 };
+
+      std::map<std::string, int> m_isoFW_JTAU;
+
+      unsigned int convertIsoToBit( const TCS::jTauTOB * jtau ) const;
+
    };
 
 } // end of namespace TCS
