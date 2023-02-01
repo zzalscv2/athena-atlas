@@ -18,15 +18,18 @@
 #include "TrkPrepRawData/PrepRawData.h"
 
 namespace Trk {
-  TrkBaseNode::TrkBaseNode() : m_chi2Cut{}, m_nodeType{}, m_pSurface{}, m_pPRD{} {
-    m_ndof = 0;
-    m_dChi2 = 0.0;
-    m_nodeState = 1;
-    m_pTrackState = nullptr;
-  }
+TrkBaseNode::TrkBaseNode()
+    : m_nodeState(1),
+      m_chi2Cut{},
+      m_nodeType{},
+      m_pSurface{},
+      m_pPRD{},
+      m_dChi2(0.0),
+      m_ndof(0),
+      m_pTrackState(nullptr) {}
 
-  bool TrkBaseNode::isValidated() {
-    return(m_nodeState != 0);
+bool TrkBaseNode::isValidated() {
+  return (m_nodeState != 0);
   }
 
   TrkPlanarSurface* TrkBaseNode::getSurface() {

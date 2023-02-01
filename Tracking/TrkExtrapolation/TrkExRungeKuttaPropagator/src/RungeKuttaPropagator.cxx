@@ -1512,12 +1512,11 @@ propagateRungeKutta(Cache& cache,
 Trk::RungeKuttaPropagator::RungeKuttaPropagator(const std::string& p,
                                                 const std::string& n,
                                                 const IInterface* t)
-  : AthAlgTool(p, n, t)
-{
-  m_dlt = .000200;
-  m_helixStep = 1.;
-  m_straightStep = .01;
-  m_usegradient = false;
+    : AthAlgTool(p, n, t),
+      m_dlt(.000200),
+      m_helixStep(1.),
+      m_straightStep(.01),
+      m_usegradient(false) {
 
   declareInterface<Trk::IPropagator>(this);
   declareInterface<Trk::IPatternParametersPropagator>(this);
