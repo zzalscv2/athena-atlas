@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -9,8 +9,8 @@ from AthenaCommon.Logging import logging
 #
 # Search ConfigFlags.Input.Collections, allow sub-string matches (e.g. handle extra classname mangling in ESD files) 
 #
-def isCollectionInInputPOOLFile(ConfigFlags, checkString):
-  return any(checkString in entry for entry in ConfigFlags.Input.Collections)
+def isCollectionInInputPOOLFile(flags, checkString):
+  return any(checkString in entry for entry in flags.Input.Collections)
 
 #
 # Return an instance of the TrigNavSlimmingMTAlg to be used in an online environment, either at P1,
@@ -18,7 +18,7 @@ def isCollectionInInputPOOLFile(ConfigFlags, checkString):
 #
 # Returns a single alg with no dependencies, no need to make this function return a ComponentAccumulator.
 #
-def getTrigNavSlimmingMTOnlineConfig(ConfigFlags):
+def getTrigNavSlimmingMTOnlineConfig(flags):
   onlineSlim = CompFactory.TrigNavSlimmingMTAlg('TrigNavSlimmingMTAlg_Online')
   onlineSlim.TrigDecisionTool = "" # We do NOT filter on chains online, no additional tools/services required.
   onlineSlim.OutputCollection = "HLTNav_Summary_OnlineSlimmed"
@@ -28,7 +28,7 @@ def getTrigNavSlimmingMTOnlineConfig(ConfigFlags):
   onlineSlim.EdgesToDrop = []
   onlineSlim.NodesToDrop = []
   onlineSlim.ChainsFilter = []
-  onlineSlim.RuntimeValidation = ConfigFlags.Trigger.doRuntimeNaviVal
+  onlineSlim.RuntimeValidation = flags.Trigger.doRuntimeNaviVal
   return onlineSlim
 
 #
@@ -50,20 +50,20 @@ def getTrigNavSlimmingMTOnlineConfig(ConfigFlags):
 # NOTE: Unlike all other levels, the content of the DAOD is not controlled by TrigEDMRun3.py
 # NOTE: We therefore also need to run AddRun3TrigNavSlimmingCollectionsToEDM to register the outputs to a SlimmingHelper
 #
-def TrigNavSlimmingMTDerivationCfg(ConfigFlags, chainsFilter = []):
+def TrigNavSlimmingMTDerivationCfg(flags, chainsFilter = []):
 
   log = logging.getLogger("TrigNavSlimmingMTDerivationCfg.py")
 
-  if isCollectionInInputPOOLFile(ConfigFlags, "HLTNav_Summary_DAODSlimmed"):
+  if isCollectionInInputPOOLFile(flags, "HLTNav_Summary_DAODSlimmed"):
     log.info("Will not create a new DAOD Slimmed Trigger Navigation Collection in this job (already present in input file)")
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     return ComponentAccumulator()
 
   from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg, getRun3NavigationContainerFromInput, possible_keys
-  ca = TrigDecisionToolCfg(ConfigFlags)
+  ca = TrigDecisionToolCfg(flags)
   tdt = ca.getPrimary()
 
-  inputCollection = getRun3NavigationContainerFromInput(ConfigFlags)
+  inputCollection = getRun3NavigationContainerFromInput(flags)
 
   daodSlim = CompFactory.TrigNavSlimmingMTAlg('TrigNavSlimmingMTAlg_DAOD')
   daodSlim.TrigDecisionTool = tdt
@@ -144,7 +144,7 @@ def AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(slimmingHelper):
 # (in case we needed to do offline trigger matching with more than the 4-vector, for example) and no chainsFilter
 # is applied.
 #
-def TrigNavSlimmingMTCfg(ConfigFlags):
+def TrigNavSlimmingMTCfg(flags):
 
   log = logging.getLogger("TrigNavSlimmingMTCfg.py")
   
@@ -154,11 +154,11 @@ def TrigNavSlimmingMTCfg(ConfigFlags):
   ca = ComponentAccumulator()
 
   # We only run this if we are in a job which is decoding the HLT data in reconstruction, and if the slimming has not been switched off
-  if ConfigFlags.Trigger.DecodeHLT is False:
+  if flags.Trigger.DecodeHLT is False:
     log.debug("Nothing to do as Trigger.DecodeHLT is False")
     return ca
 
-  if ConfigFlags.Trigger.doNavigationSlimming is False:
+  if flags.Trigger.doNavigationSlimming is False:
     log.debug("Nothing to do as Trigger.doNavigationSlimming is False")
     return ca
 
@@ -167,12 +167,12 @@ def TrigNavSlimmingMTCfg(ConfigFlags):
 
   # NOTE: Derivations currently have a different configuration hook, see TrigNavSlimmingMTDerivationCfg above.
 
-  inputCollection = getRun3NavigationContainerFromInput(ConfigFlags)
-  doESDSlim = not isCollectionInInputPOOLFile(ConfigFlags, "HLTNav_Summary_ESDSlimmed")
-  doAODSlim = not isCollectionInInputPOOLFile(ConfigFlags, "HLTNav_Summary_AODSlimmed")
+  inputCollection = getRun3NavigationContainerFromInput(flags)
+  doESDSlim = not isCollectionInInputPOOLFile(flags, "HLTNav_Summary_ESDSlimmed")
+  doAODSlim = not isCollectionInInputPOOLFile(flags, "HLTNav_Summary_AODSlimmed")
 
-  if (ConfigFlags.Output.doWriteESD or rec.doWriteESD() or rec.doESD()) and doESDSlim:
-    tdt = ca.getPrimaryAndMerge(TrigDecisionToolCfg(ConfigFlags))
+  if (flags.Output.doWriteESD or rec.doWriteESD() or rec.doESD()) and doESDSlim:
+    tdt = ca.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
     esdSlim = CompFactory.TrigNavSlimmingMTAlg('TrigNavSlimmingMTAlg_ESD')
     esdSlim.TrigDecisionTool = tdt
     esdSlim.OutputCollection = "HLTNav_Summary_ESDSlimmed"
@@ -192,8 +192,8 @@ def TrigNavSlimmingMTCfg(ConfigFlags):
   else:
     log.info("Will not create ESD Slimmed Trigger Navigation Collection in this job")
 
-  if (ConfigFlags.Output.doWriteAOD or rec.doWriteAOD() or rec.doAOD()) and doAODSlim:
-    tdt = ca.getPrimaryAndMerge(TrigDecisionToolCfg(ConfigFlags))
+  if (flags.Output.doWriteAOD or rec.doWriteAOD() or rec.doAOD()) and doAODSlim:
+    tdt = ca.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
     aodSlim = CompFactory.TrigNavSlimmingMTAlg('TrigNavSlimmingMTAlg_AOD')
     aodSlim.TrigDecisionTool = tdt
     aodSlim.OutputCollection = "HLTNav_Summary_AODSlimmed"
@@ -205,7 +205,7 @@ def TrigNavSlimmingMTCfg(ConfigFlags):
     aodSlim.NodesToDrop = ["F"]
     aodSlim.ChainsFilter = []
     #
-    if ConfigFlags.Trigger.AODEDMSet == "AODFULL":
+    if flags.Trigger.AODEDMSet == "AODFULL":
       aodSlim.KeepFailedBranched = True
       aodSlim.KeepOnlyFinalFeatures = False
       log.info("Producing AODFULL Slimmed Trigger Navigation Collection. Reading {} and writing {}".format(aodSlim.PrimaryInputCollection, aodSlim.OutputCollection))
@@ -218,7 +218,5 @@ def TrigNavSlimmingMTCfg(ConfigFlags):
       log.error("Producing a collection {} which is not listed in 'possible_keys'! Add this here too.".format(esdSlim.OutputCollection))
   else:
     log.info("Will not create AOD Slimmed Trigger Navigation Collection in this job")
-
-
 
   return ca
