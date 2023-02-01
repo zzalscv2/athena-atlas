@@ -242,10 +242,9 @@ JetTrackMomentsTool::TrackMomentStruct JetTrackMomentsTool::getTrackMoments(cons
     // Finish processing the moments
     moments.trackWidth = moments.sumPtTrk > 0 ? moments.trackWidth / moments.sumPtTrk : -1;
 
-    ATH_MSG_VERBOSE("JetTrackMomentsTool " << name()
-                    << ": nsel=" << nkeep
-                    << ", nrej=" << nskip );
-
+    ATH_MSG_DEBUG(" jet index= " << jet.index() << " pt="<<jet.pt() 
+		 << ": nsel=" << nkeep
+		 << ", nrej=" << nskip << "  minpt="<<minTrackPt);
     return moments;
 }
 

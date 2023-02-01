@@ -14,7 +14,7 @@
 
 ########################################################################
 from .JetDefinition import xAODType,  JetInputConstitSeq, JetInputExternal, JetConstitModifier, JetInputConstit
-from .StandardJetContext import inputsFromContext
+from .StandardJetContext import inputsFromContext, propFromContext
 from .JetRecConfig import isAnalysisRelease 
 from AthenaConfiguration.Enums import BeamType
 
@@ -127,6 +127,8 @@ _stdInputList = [
                      prereqs= [ inputsFromContext("Tracks") ], # in std context, this is InDetTrackParticles (see StandardJetContext)
                      algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef.context, trackSelOpt=False )
                      ),
+
+    
     # Apply quality criteria defined via trackSelOptions in jdef.context (used e.g. for track-jets)
     JetInputExternal("JetSelectedTracks_trackSelOpt",     xAODType.TrackParticle,
                      prereqs= [ inputsFromContext("Tracks") ], # in std context, this is InDetTrackParticles (see StandardJetContext)  
@@ -363,7 +365,6 @@ def _getPFOTool(*l):
     return CompFactory.getComp("CP::WeightPFOTool")("weightPFO")
     
 
-from JetRecConfig.StandardJetContext import propFromContext
 
 vtxKey = "PrimaryVertices"
 tvaKey = "JetTrackVtxAssoc"
@@ -391,7 +392,7 @@ _stdModList = [
                        prereqs= lambda parentjdef : [inputsFromContext("Vertices"),] + ( [inputsFromContext("TVA")] if parentjdef.context=='default' else []) ,
                        properties=dict(VertexContainerKey=propFromContext("Vertices"),                                       
                                        TrackVertexAssociation=propFromContext("TVA"),
-                                       UseTrackToVertexTool= lambda jdef,_: jdef.context=='default', 
+                                       UseTrackToVertexTool= lambda jdef,_: jdef.context in ['default', 'HL_LHC'], 
                                        )),
     
     # Pileup suppression

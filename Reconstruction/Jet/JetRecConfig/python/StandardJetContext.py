@@ -28,7 +28,7 @@ jetContextDic = ldict(
 
         # options passed to InDet::InDetTrackSelectionTool.
         #   Note : these are the standard options used for track calculations. Tracks selected for ghost-associaton have CutLevel=NoCut by default : see ghostTrackCutLevel above
-        trackSelOptions = ldict( CutLevel = "Loose", minPt=500 ),
+        trackSelOptions = ldict( CutLevel = "Loose", minPt=500, maxAbsEta=2.5 ),
 
     ),
 
@@ -40,6 +40,11 @@ jetContextDic = ldict(
 
 jetContextDic[""] = jetContextDic["default"]
 jetContextDic["notrk"] = jetContextDic["default"] # used in trigger
+
+# A context for HL-LHC jobs. 
+jetContextDic["HL_LHC"] = jetContextDic["default"].clone(
+    trackSelOptions = jetContextDic["default"]["trackSelOptions"].clone(maxAbsEta=4.0) # set range of track selection up to eta=4
+)
 
 
 def propFromContext(propName):
