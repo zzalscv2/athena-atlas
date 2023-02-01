@@ -302,14 +302,20 @@ std::unique_ptr<DataHeader_p5> DataHeaderCnv::poolReadObject_p5()
 std::unique_ptr<DataHeader_p6> DataHeaderCnv::poolReadObject_p6()
 {
    void* voidPtr1 = nullptr;
-   m_athenaPoolCnvSvc->setObjPtr(voidPtr1, m_i_poolToken);
+   std::string error_message;
+   try {
+      m_athenaPoolCnvSvc->setObjPtr(voidPtr1, m_i_poolToken);
+   } catch(const std::exception& err) {
+      voidPtr1 = nullptr;
+      error_message = err.what();
+   }
    if (voidPtr1 == nullptr) {
-      throw std::runtime_error("Could not get object for token = " + m_i_poolToken->toString());
+      throw std::runtime_error("Could not get object for token = " + m_i_poolToken->toString() + ", " + error_message);
    }
    std::unique_ptr<DataHeader_p6> header( reinterpret_cast<DataHeader_p6*>(voidPtr1) );
 
    // see if the DataHeaderForm is already cached
-   const std::string &dhFormToken =  header->dhFormToken();
+   std::string dhFormToken =  header->dhFormToken();
    if( dhFormToken.empty() || m_inputDHForms.find(dhFormToken) == m_inputDHForms.end() ) {
       // no cached DHForm
       size_t dbpos = dhFormToken.find("[DB=");
@@ -334,18 +340,53 @@ std::unique_ptr<DataHeader_p6> DataHeaderCnv::poolReadObject_p6()
       if (mapToken.classID() != Guid::null()) {
          try {
             m_athenaPoolCnvSvc->setObjPtr(voidPtr2, &mapToken);
-            if( dhFormToken.find("CNT=MetaDataHdr") == std::string::npos ) m_lastGoodDHFRef = dhFormToken;
          } catch(const std::exception& err) {
-            // if there is no good lastGoodDHFRef then the only option is to pass on the exception
-            if( m_lastGoodDHFRef.empty() ) throw;
-            // try to reuse the last good DHForm Ref (object is already cached)
-            ATH_MSG_WARNING("DataHeaderForm read exception: " << err.what() << " - reusing the last good DHForm");
-            header->setDhFormToken(m_lastGoodDHFRef);
+            voidPtr2 = nullptr;
+            error_message = err.what();
+         }
+         if (voidPtr2 == nullptr) {
+            // if there is no good lastGoodDHFRef then try reading DataHeaderForm Token from the first DataHeader
+            if( m_lastGoodDHFRef.find(m_i_poolToken->contID()) == m_lastGoodDHFRef.end() ) {
+               Token firstToken;
+               m_i_poolToken->setData(&firstToken);
+               firstToken.setOid(Token::OID_t(firstToken.oid().first, 0));
+               void* firstPtr1 = nullptr;
+               try {
+                  m_athenaPoolCnvSvc->setObjPtr(firstPtr1, &firstToken);
+               } catch(const std::exception& err) {
+                  firstPtr1 = nullptr;
+                  error_message = err.what();
+               }
+               if (firstPtr1 == nullptr) throw std::runtime_error("Could not get first DataHeader for token = " + firstToken.toString() + ", " + error_message);
+
+               // Get DataHeaderForm Token from the first DataHeader
+               std::unique_ptr<DataHeader_p6> firstHeader( reinterpret_cast<DataHeader_p6*>(firstPtr1) );
+               dhFormToken = firstHeader->dhFormToken();
+
+               // Read DataHeaderForm and insert it to the cache
+               mapToken.fromString( dhFormToken );
+               mapToken.setAuxString( m_i_poolToken->auxString() );  // set PersSvc context
+               try {
+                  m_athenaPoolCnvSvc->setObjPtr(voidPtr2, &mapToken);
+               } catch(const std::exception& err) {
+                  voidPtr2 = nullptr;
+                  error_message = err.what();
+               }
+               if (voidPtr2 == nullptr) throw std::runtime_error("Could not get DataHeaderForm for token = " + mapToken.toString() + ", " + error_message);
+               m_lastGoodDHFRef[m_i_poolToken->contID()] = dhFormToken;
+               m_inputDHForms[dhFormToken].reset( reinterpret_cast<DataHeaderForm_p6*>(voidPtr2) );
+               ATH_MSG_WARNING("DataHeaderForm read exception: " << error_message << " - reusing the last good DHForm");
+            } else {
+               // try to reuse the last good DHForm Ref (object is already cached)
+               ATH_MSG_WARNING("DataHeaderForm read exception: " << error_message << " - reusing the last good DHForm");
+            }
+            header->setDhFormToken(m_lastGoodDHFRef[m_i_poolToken->contID()]);
             return header;
          }
          if (voidPtr2 == nullptr) {
             throw std::runtime_error("Could not get object for token = " + mapToken.toString());
          }
+         m_lastGoodDHFRef[m_i_poolToken->contID()] = dhFormToken;
       }
       m_inputDHForms[dhFormToken].reset( reinterpret_cast<DataHeaderForm_p6*>(voidPtr2) );
    }
