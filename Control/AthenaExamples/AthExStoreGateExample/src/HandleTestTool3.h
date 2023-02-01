@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthExStoreGateExample/src/HandleTestTool3.h
@@ -43,6 +43,9 @@ private:
 
   SG::WriteDecorHandleKey<MyDataObj> m_wdhKey
   { this, "WDecorKey", m_whKey, "wdecor", "WriteDecorHandleKey depending on WHKey" };
+
+  SG::WriteDecorHandleKey<MyDataObj> m_wdhKey2
+  { this, "WDecorKey2", m_rhKey, "wdecor2", "WriteDecorHandleKey depending on RHKey" };
 };
 
 

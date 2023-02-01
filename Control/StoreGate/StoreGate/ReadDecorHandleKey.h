@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/ReadDecorHandleKey.h
@@ -55,10 +55,10 @@ namespace SG {
  *      ...
  *@endcode
  *
- * Alternatively, one can construct the key with an additional ReadHandleKey
+ * Alternatively, one can construct the key with an additional VarHandleKey
  * that represents the container and the key then only holds the decoration
  * name. This is useful to avoid hard-coding the container name twice in case
- * the algorithm also needs a @c ReadHandleKey for the container:
+ * the algorithm also has a @c ReadHandleKey or @c WriteHandleKey for the container:
  *
  * Example:
  *
@@ -105,14 +105,14 @@ public:
 
  /**
    * @brief Constructor with associated container.
-   * @param contKey ReadHandleKey of the associated container
+   * @param contKey VarHandleKey of the associated container
    * @param decorKey The decoration name.
    * @param storeName Name to use for the store.
    *
    * The decoration @decorKey will be read from the container referenced
    * by @contKey.
    */
-  ReadDecorHandleKey (const ReadHandleKey<T>& contKey,
+  ReadDecorHandleKey (const VarHandleKey& contKey,
                       const std::string& decorKey = "",
                       const std::string& storeName = StoreID::storeName(StoreID::EVENT_STORE));
 
@@ -142,7 +142,7 @@ public:
    * @brief auto-declaring Property Constructor.
    * @param owner Owning component.
    * @param name name of the Property
-   * @param contKey ReadHandleKey of the associated container
+   * @param contKey VarHandleKey of the associated container
    * @param decorKey name The decoration name.
    * @param doc Documentation string.
    *
@@ -152,7 +152,7 @@ public:
             typename = typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type>
   ReadDecorHandleKey( OWNER* owner,
                       const std::string& name,
-                      const ReadHandleKey<T>& contKey,
+                      const VarHandleKey& contKey,
                       const std::string& decorKey = {},
                       const std::string& doc = "");
 
@@ -223,7 +223,7 @@ private:
    * could just keep it in a (non-)owning pointer depending on the use-case.
    * But that would require a dedicated copy constructor for this class, etc.
    */
-  const ReadHandleKey<T>* m_contKey{nullptr};
+  const VarHandleKey* m_contKey{nullptr};
 };
 
 
