@@ -298,10 +298,6 @@ Chains2Monitor['MT'] = {
                                              'RefChain': 'NONE',
                                              'OfflineColl': 'NONE'},
   
-  'HLT_2j330_a10t_lcw_jes_35smcINF_L1J100': {'HLTColl': 'HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes', # TODO: Remove after 21st Round Sample A (has old naming convention)
-                                             'RefChain': 'NONE',
-                                             'OfflineColl': 'NONE'},
-
   'HLT_2j330_35smcINF_a10t_lcw_jes_L1J100': {'HLTColl': 'HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes',
                                              'RefChain': 'NONE',
                                              'OfflineColl': 'NONE'},
@@ -322,10 +318,6 @@ Chains2Monitor['MT'] = {
   'HLT_2j330_a10sd_cssk_pf_jes_ftf_presel2j225_L1SC111-CJ15': {'HLTColl': 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',
                                                                'RefChain': 'NONE',
                                                                'OfflineColl': 'NONE'},
-  
-  'HLT_2j330_a10sd_cssk_pf_jes_ftf_35smcINF_presel2j225_L1SC111-CJ15': {'HLTColl': 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf', # TODO: Remove after 21st Round Sample A (has old naming convention)
-                                                                        'RefChain': 'NONE',
-                                                                        'OfflineColl': 'NONE'},
   
   'HLT_2j330_35smcINF_a10sd_cssk_pf_jes_ftf_presel2j225_L1SC111-CJ15': {'HLTColl': 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',
                                                                         'RefChain': 'NONE',
@@ -831,7 +823,9 @@ def jetMonitoringConfig(inputFlags,jetcoll,athenaMT):
            if "subresjesgscIS" in jetcoll:
                addFlavourTagVariables(conf,"fastDIPS20211215")
        if 'fastftag' in jetcoll:
-         addFlavourTagVariables(conf,"fastDips")
+           addFlavourTagVariables(conf,"fastDips")
+       if 'EMTopo' in jetcoll: #dedicated histograms for online EMTopo jets
+           conf.appendHistos("Timing")
      else:
        for hist in ExtraLargeROnlineHists: conf.appendHistos(hist)
      # Add matched jets plots
@@ -881,16 +875,19 @@ def jetMonitoringConfig(inputFlags,jetcoll,athenaMT):
        )
    else: # offline
      for hist in ExtraOfflineHists: conf.appendHistos(hist)
-     if 'AntiKt4' in jetcoll: conf.appendHistos(SelectSpec('LooseBadFailedJets', 'LooseBad',
-                                                           InverseJetSel=True,
-                                                           FillerTools = ["pt",
-                                                                          "phi",
-                                                                          "phi_tight",
-                                                                          "eta"])) #cleaning variables not applicable for large-R collections
+     if 'AntiKt4' in jetcoll:
+         conf.appendHistos(SelectSpec('LooseBadFailedJets', 'LooseBad',
+                                      InverseJetSel=True,
+                                      FillerTools = ["pt",
+                                                     "phi",
+                                                     "phi_tight",
+                                                     "eta"])) #cleaning variables not applicable for large-R collections
      
-     if 'PF' in jetcoll: # dedicated histograms for offline PFlow jets
-       conf.appendHistos("SumPtChargedPFOPt500[0]")
-       conf.appendHistos("fCharged")
+         if 'PF' in jetcoll: # dedicated histograms for offline PFlow jets
+             conf.appendHistos("SumPtChargedPFOPt500[0]")
+             conf.appendHistos("fCharged")
+         elif 'EMTopo' in jetcoll:
+             conf.appendHistos("Timing")
      if OfflineJetCollections[jetcoll]['MatchTo'] != 'NONE':
        def defineHistoForOfflineJetMatch(conf, parentAlg, monhelper , path):
          # create a monitoring group with the histo path starting from the parentAlg
