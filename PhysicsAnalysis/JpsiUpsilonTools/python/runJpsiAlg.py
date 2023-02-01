@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 
 if __name__ == "__main__":
@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     # use one of the predefined files
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.AOD_MC
+    ConfigFlags.Input.Files = defaultTestFiles.AOD_RUN2_MC
     ConfigFlags.Input.isMC=True
     ConfigFlags.fillFromArgs()
 

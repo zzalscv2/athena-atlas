@@ -41,7 +41,7 @@ if __name__ == "__main__":
     log.setLevel(DEBUG)
 
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.AOD
+    flags.Input.Files = defaultTestFiles.AOD_RUN2_DATA
     flags.Tile.RunType = 'PHY'
     flags.lock()
 

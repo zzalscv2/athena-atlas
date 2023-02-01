@@ -45,7 +45,7 @@ def main():
 
     flags = AllConfigFlags.initConfigFlags()
     flags.Exec.OutputLevel = Constants.DEBUG
-    flags.Input.Files = TestDefaults.defaultTestFiles.AOD
+    flags.Input.Files = TestDefaults.defaultTestFiles.AOD_RUN2_DATA
     flags.Output.AODFileName = "test.pool.root"
     flags.Output.doWriteAOD = True
     flags.Concurrency.NumThreads = 4
