@@ -34,6 +34,8 @@ Threads = 8
 Slots   = 8
 Release = "current"
 preexec_reco = [
+  "from AthenaCommon.BeamFlags import jobproperties",
+  "jobproperties.Beam.beamType.set_Value_and_Lock('cosmics')",
   "from InDetRecExample.InDetJobProperties import InDetFlags",
   "InDetFlags.doCosmics.set_Value_and_Lock(True)",
   "InDetFlags.doTRTStandalone.set_Value_and_Lock(False)",
