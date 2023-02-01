@@ -46,9 +46,6 @@ def fromRunArgs(runArgs):
     from TrigTLAMonitoring.decodeBS_TLA_AOD import setupDecodeCfgCA as TLADecodeConfig
     cfg = TLADecodeConfig(ConfigFlags)
 
-    from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
-    cfg.merge(PoolWriteCfg(ConfigFlags))
-
     # process post-include/exec
     processPostInclude(runArgs, ConfigFlags, cfg)
     processPostExec(runArgs, ConfigFlags, cfg)

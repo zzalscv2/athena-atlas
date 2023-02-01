@@ -52,9 +52,7 @@ def fromRunArgs(runArgs):
     cfg = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
     cfg.merge(PoolReadCfg(flags))
-    cfg.merge(PoolWriteCfg(flags))
 
     # Ensure proper metadata propagation
     from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg

@@ -66,9 +66,7 @@ if __name__ == '__main__':
     ## Initialize a new component accumulator
     cfg = MainServicesCfg(flags)
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
     cfg.merge(PoolReadCfg(flags))
-    cfg.merge(PoolWriteCfg(flags))
 
     # add BeamEffectsAlg
     from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg

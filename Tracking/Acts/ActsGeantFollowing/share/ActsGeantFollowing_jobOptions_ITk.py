@@ -86,9 +86,7 @@ def printAndRun(accessor, flags, args):
 def ITkCfg(flags):
     acc = MainServicesCfg(flags)
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
     acc.merge(PoolReadCfg(flags))
-    acc.merge(PoolWriteCfg(flags))
 
     # add BeamEffectsAlg
     from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg

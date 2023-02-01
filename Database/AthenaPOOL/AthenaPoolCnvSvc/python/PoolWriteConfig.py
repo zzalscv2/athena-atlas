@@ -3,6 +3,8 @@
 Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """
 
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+
 def _overrideTreeAutoFlush(logger, flags, stream, value):
     """Helper function to override TreeAutoFlush from flags."""
     if not flags.Output.TreeAutoFlush or not isinstance(flags.Output.TreeAutoFlush, dict):
@@ -18,7 +20,7 @@ def _overrideTreeAutoFlush(logger, flags, stream, value):
 
     return value
 
-
+@AccumulatorCache
 def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
     """Return ComponentAccumulator configured to Write POOL files"""
     # based on WriteAthenaPool._configureWriteAthenaPool
