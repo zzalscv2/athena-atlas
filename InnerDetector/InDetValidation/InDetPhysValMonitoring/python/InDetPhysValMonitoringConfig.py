@@ -47,12 +47,6 @@ def InDetRttTruthSelectionToolCfg(flags, name="InDetRttTruthSelectionTool", **kw
     acc.setPrivateTools(tool)
     return acc
 
-def HardScatterSelectionToolCfg(flags, **kwargs):
-    acc = ComponentAccumulator()
-    tool = CompFactory.InDet.InDetHardScatterSelectionTool(name = "InDetHardScatterSelectionTool", **kwargs)
-    acc.setPrivateTools(tool)
-    return acc
-
 def GoodRunsListSelectionToolCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
@@ -123,7 +117,10 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
             kwargs.setdefault("TruthSelectionTool", TruthSelectionTool)
 
         if 'hardScatterSelectionTool' not in kwargs:
-            hardScatterSelectionTool = acc.popToolsAndMerge(HardScatterSelectionToolCfg(flags))
+            from InDetConfig.InDetHardScatterSelectionToolConfig import (
+                InDetHardScatterSelectionToolCfg)
+            hardScatterSelectionTool = acc.popToolsAndMerge(
+                InDetHardScatterSelectionToolCfg(flags))
             hardScatterSelectionTool.RedoHardScatter=True
             # for sumpt(w), make sure the HS selection tool picks up the correct jets
             if flags.PhysVal.IDPVM.hardScatterStrategy == 2:

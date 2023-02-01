@@ -5,11 +5,14 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def InDetTrackTruthOriginToolCfg(flags, name="InDetTrackTruthOriginTool", **kwargs):
     acc = ComponentAccumulator()
+
     kwargs.setdefault("isFullPileUpTruth", flags.Digitization.PileUp \
                       and flags.Digitization.DigiSteeringConf in ['StandardPileUpToolsAlg', \
                                                                   'StandardInTimeOnlyTruthPileUpToolsAlg', \
                                                                   'StandardInTimeOnlyGeantinoTruthPileUpToolsAlg'])
-    acc.setPrivateTools(CompFactory.InDet.InDetTrackTruthOriginTool(name, **kwargs))
+
+    acc.setPrivateTools(
+        CompFactory.InDet.InDetTrackTruthOriginTool(name, **kwargs))
     return acc
 
 def InDetTrackTruthFilterToolCfg(flags, name="InDetTrackTruthFilterTool", **kwargs):
@@ -19,7 +22,8 @@ def InDetTrackTruthFilterToolCfg(flags, name="InDetTrackTruthFilterTool", **kwar
         kwargs.setdefault("trackOriginTool", acc.popToolsAndMerge(
             InDetTrackTruthOriginToolCfg(flags)))
 
-    acc.setPrivateTools(CompFactory.InDet.InDetTrackTruthFilterTool(name, **kwargs))
+    acc.setPrivateTools(
+        CompFactory.InDet.InDetTrackTruthFilterTool(name, **kwargs))
     return acc
 
 def JetTrackFilterToolCfg(flags, name="JetTrackFilterTool", **kwargs):
@@ -32,3 +36,18 @@ def JetTrackFilterToolCfg(flags, name="JetTrackFilterTool", **kwargs):
     acc.setPrivateTools(CompFactory.InDet.JetTrackFilterTool(name, **kwargs))
     return acc
 
+def InclusiveTrackFilterToolCfg(flags, name="InclusiveTrackFilterTool", **kwargs):
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(
+        CompFactory.InDet.InclusiveTrackFilterTool(name, **kwargs))
+    return acc
+
+def TrackSystematicsAlgCfg(flags, name="InDetTrackSystematicsAlg", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "TrackFilterTool" not in kwargs:
+        kwargs.setdefault("TrackFilterTool", acc.popToolsAndMerge(
+            InclusiveTrackFilterToolCfg(flags)))
+
+    acc.addEventAlgo(CompFactory.InDet.TrackSystematicsAlg(name, **kwargs))
+    return acc
