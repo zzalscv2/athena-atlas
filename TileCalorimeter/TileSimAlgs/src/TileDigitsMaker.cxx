@@ -274,8 +274,8 @@ StatusCode TileDigitsMaker::execute(const EventContext &ctx) const {
     rngEngine = rngWrapper->getEngine(ctx);
   }
 
-  SG::ReadCondHandle<TileCalibDataFlt> sampleNoiseHandle(m_sampleNoiseKey, ctx);
-  TileSampleNoise sampleNoise(*sampleNoiseHandle);
+  SG::ReadCondHandle<TileSampleNoise> sampleNoise(m_sampleNoiseKey, ctx);
+  ATH_CHECK( sampleNoise.isValid() );
 
   bool first = (msgLvl(MSG::VERBOSE) && ctx.evt() == 0 && !m_rndmEvtOverlay );
   if (first) {
@@ -293,14 +293,14 @@ StatusCode TileDigitsMaker::execute(const EventContext &ctx) const {
         IdentifierHash idhash;
         m_tileHWID->get_hash(drawer_id, idhash, &drawer_context);
         for (int ch = 0; ch < nchMax; ++ch) {
-          double pedSimHi = sampleNoise.getPed(idhash, ch, TileID::HIGHGAIN);
-          double sigmaHi_Hfn1 = sampleNoise.getHfn1(idhash, ch, TileID::HIGHGAIN);
-          double sigmaHi_Hfn2 = sampleNoise.getHfn2(idhash, ch, TileID::HIGHGAIN);
-          double sigmaHi_Norm = sampleNoise.getHfnNorm(idhash, ch, TileID::HIGHGAIN);
-          double pedSimLo = sampleNoise.getPed(idhash, ch, TileID::LOWGAIN);
-          double sigmaLo_Hfn1 = sampleNoise.getHfn1(idhash, ch, TileID::LOWGAIN);
-          double sigmaLo_Hfn2 = sampleNoise.getHfn2(idhash, ch, TileID::LOWGAIN);
-          double sigmaLo_Norm = sampleNoise.getHfnNorm(idhash, ch, TileID::LOWGAIN);
+          double pedSimHi = sampleNoise->getPed(idhash, ch, TileID::HIGHGAIN);
+          double sigmaHi_Hfn1 = sampleNoise->getHfn1(idhash, ch, TileID::HIGHGAIN);
+          double sigmaHi_Hfn2 = sampleNoise->getHfn2(idhash, ch, TileID::HIGHGAIN);
+          double sigmaHi_Norm = sampleNoise->getHfnNorm(idhash, ch, TileID::HIGHGAIN);
+          double pedSimLo = sampleNoise->getPed(idhash, ch, TileID::LOWGAIN);
+          double sigmaLo_Hfn1 = sampleNoise->getHfn1(idhash, ch, TileID::LOWGAIN);
+          double sigmaLo_Hfn2 = sampleNoise->getHfn2(idhash, ch, TileID::LOWGAIN);
+          double sigmaLo_Norm = sampleNoise->getHfnNorm(idhash, ch, TileID::LOWGAIN);
           ATH_MSG_VERBOSE( "Channel " << m_tileHWID->to_string(drawer_id,-2) << "/" << ch
                            << " pedHi="<< pedSimHi
                            << " pedLo="<< pedSimLo
@@ -555,7 +555,7 @@ StatusCode TileDigitsMaker::execute(const EventContext &ctx) const {
     if (m_rndmEvtOverlay && collItrRndm != lastCollRndm) {
       const TileDigitsCollection *bkgDigitCollection(*collItrRndm);
       ATH_CHECK(overlayBackgroundDigits(bkgDigitCollection, hitCollection, drawerBufferLo, drawerBufferHi,
-                                        igain, ros, drawer, drawerIdx, over_gain, *emScale, sampleNoise, dqStatus, badChannels));
+                                        igain, ros, drawer, drawerIdx, over_gain, *emScale, *sampleNoise, dqStatus, badChannels));
       ++collItrRndm; // skip to next digi collection
     }
 
@@ -677,18 +677,18 @@ StatusCode TileDigitsMaker::execute(const EventContext &ctx) const {
         overNoiseHG &= (m_rndmEvtOverlay && m_allChannels>1); // set it to true only for overlay
         tileNoiseHG = m_tileNoise || overNoiseHG;
 
-        pedSimHi = sampleNoise.getPed(idhash, ich, TileID::HIGHGAIN);
+        pedSimHi = sampleNoise->getPed(idhash, ich, TileID::HIGHGAIN);
         // bug fix for wrong ped value in DB
         if (pedSimHi == 0.0 && (signal_in_channel[ich] || pmt_id.is_valid()))
           pedSimHi = 50.;
 
-        sigmaHi_Hfn1 = sampleNoise.getHfn1(idhash, ich, TileID::HIGHGAIN);
-        sigmaHi_Hfn2 = sampleNoise.getHfn2(idhash, ich, TileID::HIGHGAIN);
+        sigmaHi_Hfn1 = sampleNoise->getHfn1(idhash, ich, TileID::HIGHGAIN);
+        sigmaHi_Hfn2 = sampleNoise->getHfn2(idhash, ich, TileID::HIGHGAIN);
         if (sigmaHi_Hfn1>0 || sigmaHi_Hfn2) {
           sigmaHi_Norm = sigmaHi_Hfn1 / (sigmaHi_Hfn1
-                       + sigmaHi_Hfn2 * sampleNoise.getHfnNorm(idhash, ich, TileID::HIGHGAIN));
+                       + sigmaHi_Hfn2 * sampleNoise->getHfnNorm(idhash, ich, TileID::HIGHGAIN));
         } else {
-          sigmaHi_Hfn1 = sampleNoise.getHfn(idhash, ich, TileID::HIGHGAIN);
+          sigmaHi_Hfn1 = sampleNoise->getHfn(idhash, ich, TileID::HIGHGAIN);
           sigmaHi_Norm = 1.;
         }
       }
@@ -697,18 +697,18 @@ StatusCode TileDigitsMaker::execute(const EventContext &ctx) const {
         overNoiseLG &= (m_rndmEvtOverlay && m_allChannels>1); // set it to true only for overlay
         tileNoiseLG = m_tileNoise || overNoiseLG;
 
-        pedSimLo = sampleNoise.getPed(idhash, ich, TileID::LOWGAIN);
+        pedSimLo = sampleNoise->getPed(idhash, ich, TileID::LOWGAIN);
         // bug fix for wrong ped value in DB
         if (pedSimLo == 0.0 && (signal_in_channel[ich] || pmt_id.is_valid()))
           pedSimLo = 30.;
 
-        sigmaLo_Hfn1 = sampleNoise.getHfn1(idhash, ich, TileID::LOWGAIN);
-        sigmaLo_Hfn2 = sampleNoise.getHfn2(idhash, ich, TileID::LOWGAIN);
+        sigmaLo_Hfn1 = sampleNoise->getHfn1(idhash, ich, TileID::LOWGAIN);
+        sigmaLo_Hfn2 = sampleNoise->getHfn2(idhash, ich, TileID::LOWGAIN);
         if (sigmaLo_Hfn1 > 0 || sigmaLo_Hfn2) {
           sigmaLo_Norm = sigmaLo_Hfn1 / (sigmaLo_Hfn1
-                       + sigmaLo_Hfn2 * sampleNoise.getHfnNorm(idhash, ich, TileID::LOWGAIN));
+                       + sigmaLo_Hfn2 * sampleNoise->getHfnNorm(idhash, ich, TileID::LOWGAIN));
         } else {
-          sigmaLo_Hfn1 = sampleNoise.getHfn(idhash, ich, TileID::LOWGAIN);
+          sigmaLo_Hfn1 = sampleNoise->getHfn(idhash, ich, TileID::LOWGAIN);
           sigmaLo_Norm = 1.;
         }
       }
@@ -1252,7 +1252,7 @@ StatusCode TileDigitsMaker::overlayBackgroundDigits(const TileDigitsCollection *
                                                     std::vector<std::vector<double>>& drawerBufferHi,
                                                     std::vector<int>& igain, int ros, int drawer, int drawerIdx,
                                                     std::vector<int>& over_gain, const TileEMScale* emScale,
-                                                    const TileSampleNoise& sampleNoise, const TileDQstatus* dqStatus,
+                                                    const TileSampleNoise* sampleNoise, const TileDQstatus* dqStatus,
                                                     const TileBadChannels* badChannels) const {
 
   if (hitCollection->identify() != bkgDigitCollection->identify()) {
@@ -1323,7 +1323,7 @@ StatusCode TileDigitsMaker::overlayBackgroundDigits(const TileDigitsCollection *
           float ratio = emScale->applyOnlineChargeCalibration(drawerIdx, channel, TileID::HIGHGAIN, 1.)
             / emScale->applyOnlineChargeCalibration(drawerIdx, channel, TileID::LOWGAIN, 1.); // ratio between low and high gain
 
-          dig=std::min(digits[0],std::max(digmin, sampleNoise.getPed(drawerIdx, channel, TileID::HIGHGAIN)));
+          dig=std::min(digits[0],std::max(digmin, sampleNoise->getPed(drawerIdx, channel, TileID::HIGHGAIN)));
 
           std::transform(digits.begin(), digits.end(), bufferLG.begin(), [dig,ratio](float digit){return (digit - dig) * ratio;});
           isFilledLG = true;

@@ -53,5 +53,7 @@ class TileCondAlg: public AthReentrantAlgorithm {
 #include "TileConditions/TilePulse.h"
 typedef TileCondAlg<TilePulse,TileCalibDrawerFlt> TilePulseShapeCondAlg;
 
+#include "TileConditions/TileSampleNoise.h"
+typedef TileCondAlg<TileSampleNoise,TileCalibDrawerFlt> TileSampleNoiseCondAlg;
 
 #endif // TILECONDITIONS_TILECONDALG_H

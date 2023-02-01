@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILECONDTOOLNOISESAMPLE_H
@@ -7,7 +7,7 @@
 
 // Tile includes
 #include "TileConditions/ITileCondToolNoise.h"
-#include "TileConditions/TileCalibData.h"
+#include "TileConditions/TileSampleNoise.h"
 #include "TileConditions/TileEMScale.h"
 #include "TileIdentifier/TileRawChannelUnit.h"
 
@@ -59,10 +59,10 @@ class TileCondToolNoiseSample: public AthAlgTool
 
   private:
 
-    SG::ReadCondHandleKey<TileCalibDataFlt> m_calibSampleNoiseKey{this,
+    SG::ReadCondHandleKey<TileSampleNoise> m_sampleNoiseKey{this,
         "TileSampleNoise", "TileSampleNoise", "Input Tile sample noise constants"};
 
-    SG::ReadCondHandleKey<TileCalibDataFlt> m_calibOnlineSampleNoiseKey{this,
+    SG::ReadCondHandleKey<TileSampleNoise> m_onlineSampleNoiseKey{this,
         "TileOnlineSampleNoise", "", "Input Tile online noise sample constants (e.g.: TileOnlineSampleNoise)"};
 
     SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
