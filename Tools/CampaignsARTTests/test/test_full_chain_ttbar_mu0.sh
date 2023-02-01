@@ -1,6 +1,6 @@
 #!/bin/bash
 # art-description: Run-4 Sim to DAOD_PHYSVAL and output plots via dcube, on non-all-had ttbar with no pile-up
-# art-input: mc15_14TeV.600012.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.evgen.EVNT.e8185
+# art-input: mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8481
 # art-input-nfiles: 1
 # art-type: grid
 # art-include: master/Athena
