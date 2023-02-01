@@ -14,14 +14,12 @@ namespace CxxUtils {
 
 #define T_CONCURRENTMAP template <class KEY, class VALUE,               \
                                   template <class> class UPDATER,       \
-                                  CxxUtils::detail::ConcurrentHashmapVal_t NULLVAL, \
-                                  CxxUtils::detail::ConcurrentHashmapVal_t TOMBSTONE> \
-  ATH_REQUIRES (std::is_standard_layout_v<VALUE> &&                     \
-                std::is_trivial_v<VALUE> &&                             \
-                (sizeof (VALUE) <= sizeof (uintptr_t)) &&               \
-                std::is_standard_layout_v<KEY> &&                       \
-                std::is_trivial_v<KEY> &&                               \
-                (sizeof (KEY) <= sizeof (uintptr_t)))
+                                  detail::ConcurrentHashmapVal_t NULLVAL, \
+                                  detail::ConcurrentHashmapVal_t TOMBSTONE> \
+  ATH_REQUIRES (detail::IsConcurrentHashmapPayload<KEY> &&    \
+                detail::IsConcurrentHashmapPayload<VALUE> &&  \
+                detail::IsUpdater<UPDATER>)
+
 
 #define CONCURRENTMAP ConcurrentMap<KEY, VALUE, UPDATER, NULLVAL, TOMBSTONE>
 

@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/concepts.h
@@ -45,6 +45,8 @@
 
 #ifdef __cpp_concepts
 
+#define HAVE_CONCEPTS 1
+
 #include <concepts>
 #define ATH_REQUIRES(...) requires __VA_ARGS__
 
@@ -59,6 +61,8 @@
   RETTYPE
 
 #else
+
+#define HAVE_CONCEPTS 0
 
 #define ATH_REQUIRES(...)
 

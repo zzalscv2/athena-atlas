@@ -13,9 +13,8 @@ namespace CxxUtils {
 
 
 #define T_CONCURRENTSTRMAP template <class VALUE, template <class> class UPDATER> \
-  ATH_REQUIRES (std::is_standard_layout_v<VALUE> &&                     \
-                std::is_trivial_v<VALUE> &&                             \
-                (sizeof (VALUE) <= sizeof (uintptr_t)))
+  ATH_REQUIRES (detail::IsConcurrentHashmapPayload<VALUE> &&  \
+                detail::IsUpdater<UPDATER>)
 
 #define CONCURRENTSTRMAP ConcurrentStrMap<VALUE, UPDATER>
 

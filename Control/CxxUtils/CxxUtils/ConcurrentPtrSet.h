@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/ConcurrentPtrSet.h
@@ -11,6 +11,8 @@
 
 
 #include "CxxUtils/ConcurrentHashmapImpl.h"
+#include "CxxUtils/concepts.h"
+#include "CxxUtils/IsUpdater.h"
 #include "boost/iterator/iterator_facade.hpp"
 #include "boost/range/iterator_range.hpp"
 #include <type_traits>
@@ -36,9 +38,8 @@ namespace CxxUtils {
  *
  * Besides the pointer target type,
  * this class is templated on an UPDATER class, which is used to manage
- * the underlying memory.  The requirements are the same as for the 
- * UPDATER template argument of ConcurrentRangeMap; see there for
- * further details.  (AthenaKernel/RCUUpdater is a concrete version
+ * the underlying memory.  See IsUpdater.h for details.
+ * (AthenaKernel/RCUUpdater is a concrete version
  * that should work in the context of Athena.)
  *
  * This mostly supports the interface of std::unordered_set, with a few
@@ -73,7 +74,7 @@ namespace CxxUtils {
  * since the test doesn't do any locking in that case.
  */
 template <class VALUE, template <class> class UPDATER>
-// FIXME: Check UPDATER.
+ATH_REQUIRES (detail::IsUpdater<UPDATER>)
 class ConcurrentPtrSet
 {
 private:

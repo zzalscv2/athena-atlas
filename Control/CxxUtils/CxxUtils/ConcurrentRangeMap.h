@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/ConcurrentRangeMap.h
@@ -15,6 +15,8 @@
 
 
 #include "CxxUtils/stall.h"
+#include "CxxUtils/concepts.h"
+#include "CxxUtils/IsUpdater.h"
 #include "boost/range/iterator_range.hpp"
 #include <atomic>
 #include <mutex>
@@ -89,6 +91,41 @@ private:
 //*****************************************************************************
 
 
+#if HAVE_CONCEPTS
+
+
+namespace detail {
+
+
+/**
+ * @brief Concept for comparison template argument.
+ *        See below for details.
+ */
+template <class COMPARE, class RANGE, class KEY, class CONTEXT>
+concept IsConcurrentRangeCompare = requires (const COMPARE& c,
+                                             const RANGE& r1,
+                                             const RANGE& r2,
+                                             RANGE& r_nc,
+                                             const KEY& k,
+                                             const CONTEXT& ctx)
+{
+  { c(k, r2) } -> std::same_as<bool>;
+  { c(r1, r2) } -> std::same_as<bool>;
+  { c.inRange (k, r2) } -> std::same_as<bool>;
+  { c.overlap (ctx, r1, r_nc) } -> std::same_as<int>;
+  { c.extendRange (r_nc, r2) } -> std::same_as<int>;
+};
+
+
+} // namespace detail
+
+
+#endif // HAVE_CONCEPTS
+
+
+//*****************************************************************************
+
+
 /**
  * @brief Map from range to payload object, allowing concurrent, lockless reads.
  *
@@ -146,8 +183,8 @@ private:
  *  //        only be moved forward (increased), never backwards.
  *  //  -1 -- duplicate: NEWRANGE is entirely inside OLDRANGE.
  *  //        Delete the new range.         
- *  bool overlap (const Context_t& ctx,
- *                const RANGE& oldRange, RANGE& newRange) const;
+ *  int overlap (const Context_t& ctx,
+ *               const RANGE& oldRange, RANGE& newRange) const;
  *
  *  // Possibly extend an existing range at the end.
  *  // RANGE is the existing range, and NEWRANGE is the range
@@ -162,24 +199,7 @@ private:
  * In order to implement updating concurrently with reading, we need to
  * defer deletion of objects until no thread can be referencing them any more.
  * The policy for this for the internal implementation objcets
- * is set by the template UPDATER<T>.  An object
- * of this type owns an object of type T.  It should provide a typedef
- * Context_t, giving a type for an event context, identifying which
- * thread/slot is currently executing.  It should implement these operations:
- *
- *   - const T& get() const
- *     Return the current object.
- *   - void update (std::unique_ptr<T> p, const Context_t ctx);
- *     Atomically update the current object to be p.
- *     Deletion of the previous version should be deferred until
- *     no thread can be referencing it.
- *   - void quiescent (const Context_t& ctx);
- *     Declare that the thread described by ctx is no longer accessing
- *     the object.
- *   - static const Context_t& defaultContext();
- *     Return a context object for the currently-executing thread.
- *
- * For an example, see AthenaKernel/RCUUpdater.h.
+ * is set by the template UPDATER<T>.  For details, see IsUpdater.h.
  *
  * Deletion of payload objects is managed via the @c IRangeMapPayloadDeleter
  * object passed to the constructor.
@@ -194,6 +214,8 @@ private:
  */
 template <class RANGE, class KEY, class T, class COMPARE,
           template <class> class UPDATER>
+ATH_REQUIRES (detail::IsUpdater<UPDATER> &&
+              detail::IsConcurrentRangeCompare<COMPARE, RANGE, KEY, typename UPDATER<int>::Context_t>)
 class ConcurrentRangeMap
 {
 public:
