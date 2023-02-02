@@ -201,24 +201,17 @@ findMinimumIndex(const float* distancesIn, const int n)
  * we need padding to use the
  * simd findMinimumIndex
  */
-#if (defined(__GNUC__) || defined(__clang__))
-[[gnu::always_inline]]
-#endif
-constexpr inline int32_t
-extraElements(const int32_t nn)
-{
-  const int32_t remainder = (nn & 15);
-  return remainder == 0 ? 0 : (16 - remainder);
-}
 
 #if (defined(__GNUC__) || defined(__clang__))
 [[gnu::always_inline]]
 #endif
 constexpr inline int32_t
-numDistances(const int32_t n)
+numPadded(const int32_t n)
 {
-  const int32_t npadded = n + extraElements(n);
-  return npadded;
+  //This always return a padded number dividable
+  //with 16
+  //e.g ((33+15)&~15) = 48
+  return ((n+15)&~15);
 }
 
 #if (defined(__GNUC__) || defined(__clang__))
@@ -227,7 +220,7 @@ numDistances(const int32_t n)
 inline int32_t
 numDistances(const int32_t n, float* distancesIn)
 {
-  const int32_t npadded = n + extraElements(n);
+  const int32_t npadded = numPadded(n);
   // Make sure the padded elements are set to max
   std::fill(
     distancesIn + n, distancesIn + npadded, std::numeric_limits<float>::max());
@@ -462,7 +455,7 @@ findMergesImpl(const Component1DArray& componentsIn,
     copyComponents.components.data());
   // Based on the inputSize n allocate enough space for the pairwise distances
   int32_t nn = n * (n - 1) / 2;
-  int32_t nnpadded = numDistances(nn);
+  int32_t nnpadded = numPadded(nn);
   AlignedDynArray<float, GSFConstants::alignment> distances(
     nnpadded, std::numeric_limits<float>::max());
   // initial distance calculation
