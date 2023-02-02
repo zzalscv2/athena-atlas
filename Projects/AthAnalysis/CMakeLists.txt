@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.6 )
@@ -32,6 +32,7 @@ find_package( BLAS )
 find_package( VDT )
 find_package( requests )
 find_package( libffi )
+find_package( gl2ps )
 
 # Compile flag(s).
 add_definitions( -DXAOD_ANALYSIS )

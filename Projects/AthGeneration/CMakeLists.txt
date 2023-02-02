@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.6 )
@@ -33,6 +33,7 @@ find_package( BLAS )
 find_package( AIDA )
 find_package( VDT )
 find_package( libffi )
+find_package( gl2ps )
 
 # Set the project into "GENERATIONBASE mode".
 set( GENERATIONBASE TRUE CACHE BOOL
