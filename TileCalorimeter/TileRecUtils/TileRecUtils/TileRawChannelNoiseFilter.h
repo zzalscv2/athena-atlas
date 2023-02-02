@@ -14,7 +14,7 @@
 #include "TileIdentifier/TileRawChannelUnit.h"
 #include "TileRecUtils/ITileRawChannelTool.h"
 #include "TileConditions/TileEMScale.h"
-#include "TileConditions/ITileBadChanTool.h"
+#include "TileConditions/TileBadChannels.h"
 #include "TileConditions/TileCondToolNoiseSample.h"
 #include "TileEvent/TileDQstatus.h"
 
@@ -68,8 +68,11 @@ class TileRawChannelNoiseFilter: public extends<AthAlgTool, ITileRawChannelTool>
     ToolHandle<TileCondToolNoiseSample> m_tileToolNoiseSample{this,
         "TileCondToolNoiseSample", "TileCondToolNoiseSample", "Tile noise sample tool"};
 
-    ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
-        "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};
+    /**
+     * @brief Name of TileBadChannels in condition store
+     */
+    SG::ReadCondHandleKey<TileBadChannels> m_badChannelsKey{this,
+        "TileBadChannels", "TileBadChannels", "Input Tile bad channel status"};
 
     // properties
     SG::ReadHandleKey<TileDQstatus> m_DQstatusKey{this, "TileDQstatus", 

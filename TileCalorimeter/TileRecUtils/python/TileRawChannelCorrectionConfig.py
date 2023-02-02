@@ -73,10 +73,8 @@ def TileRawChannelNoiseFilterCfg(flags, **kwargs):
         sampleNoiseTool = acc.popToolsAndMerge( TileCondToolNoiseSampleCfg(flags) )
         kwargs['TileCondToolNoiseSample'] = sampleNoiseTool
 
-    if 'TileBadChanTool' not in kwargs:
-        from TileConditions.TileBadChannelsConfig import TileBadChanToolCfg
-        badChanTool = acc.popToolsAndMerge( TileBadChanToolCfg(flags) )
-        kwargs['TileBadChanTool'] = badChanTool
+    from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
+    acc.merge( TileBadChannelsCondAlgCfg(flags) )
 
     TileRawChannelNoiseFilter=CompFactory.TileRawChannelNoiseFilter
     acc.setPrivateTools( TileRawChannelNoiseFilter(**kwargs) )
@@ -114,10 +112,8 @@ def TileTimeBCOffsetFilterCfg(flags, **kwargs):
     from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
     acc.merge( TileEMScaleCondAlgCfg(flags) )
 
-    if 'TileBadChanTool' not in kwargs:
-        from TileConditions.TileBadChannelsConfig import TileBadChanToolCfg
-        badChanTool = acc.popToolsAndMerge( TileBadChanToolCfg(flags) )
-        kwargs['TileBadChanTool'] = badChanTool
+    from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
+    acc.merge( TileBadChannelsCondAlgCfg(flags) )
 
     if kwargs['CheckDCS']:
         from TileConditions.TileDCSConfig import TileDCSCondAlgCfg
