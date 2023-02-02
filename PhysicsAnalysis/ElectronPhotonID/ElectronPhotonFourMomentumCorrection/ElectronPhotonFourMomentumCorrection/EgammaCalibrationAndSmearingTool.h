@@ -150,11 +150,11 @@ private:
   int m_useLayerCorrection;
   int m_usePSCorrection;
   int m_useS12Correction;
-  int m_useLayer2Recalibration;
   int m_useIntermoduleCorrection;
   int m_usePhiUniformCorrection;
   int m_useCaloDistPhiUnifCorrection;
   int m_useGainCorrection;
+  int m_useGainInterpolation;
   int m_doADCLinearityCorrection;
   int m_doLeakageCorrection;
   bool m_use_ep_combination;

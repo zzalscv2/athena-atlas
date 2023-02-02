@@ -56,6 +56,10 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
             "ESModel", "es2018_R21_v0").isSuccess())
         self.assertTrue(tool.initialize().isSuccess())
 
+        self.assertTrue(tool.setProperty(
+            "ESModel", "es2022_R21_Precision").isSuccess())
+        self.assertTrue(tool.initialize().isSuccess())
+
     def generator_kinematics(self, eta_range=None,
                              e_range=None,
                              phi_range=None):

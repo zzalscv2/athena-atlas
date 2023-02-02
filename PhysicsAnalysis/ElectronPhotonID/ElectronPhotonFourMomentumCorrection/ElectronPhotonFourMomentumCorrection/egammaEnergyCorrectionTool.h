@@ -32,6 +32,7 @@ class e1hg_systematics;
 class LinearityADC;
 
 class TH1;
+class TProfile;
 class TH2;
 class TAxis;
 class TList;
@@ -351,6 +352,7 @@ namespace AtlasRoot {
     // For run2, precision final recommendation, when we correct for L2Gain,
     // we do not use the size of the effect as systematic uncertainty, but the estimated uncertainty
     void setApplyL2GainCorrection() { m_useL2GainCorrection = true; }
+    void setApplyL2GainInterpolation() { m_useL2GainInterpolation = true; }
 
     // Idem for leakage correction
     void setApplyLeakageCorrection(bool interp = false)
@@ -513,6 +515,8 @@ namespace AtlasRoot {
     std::unique_ptr<TH1>         m_zeePhys;
     std::unique_ptr<TH1>         m_uA2MeV_2015_first2weeks_correction;
 
+    std::unique_ptr<TProfile>    m_meanZeeProfile;
+
     std::unique_ptr<TH1>         m_resNom;
     std::unique_ptr<TH1>         m_resNom_datalowmu;
     std::unique_ptr<TH1>         m_resSyst;
@@ -553,6 +557,13 @@ namespace AtlasRoot {
     std::unique_ptr<TList>        m_s12UnconvertedGraphs;
     std::unique_ptr<TAxis>        m_s12ConvertedEtaBins;
     std::unique_ptr<TList>        m_s12ConvertedGraphs;
+
+    std::unique_ptr<TAxis>        m_EaccElectronEtaBins;
+    std::unique_ptr<TList>        m_EaccElectronGraphs;
+    std::unique_ptr<TAxis>        m_EaccUnconvertedEtaBins;
+    std::unique_ptr<TList>        m_EaccUnconvertedGraphs;
+    std::unique_ptr<TAxis>        m_EaccConvertedEtaBins;
+    std::unique_ptr<TList>        m_EaccConvertedGraphs;
 
     std::unique_ptr<TH1>         m_pedestalL0;
     std::unique_ptr<TH1>         m_pedestalL1;
@@ -654,6 +665,7 @@ namespace AtlasRoot {
     bool m_use_stat_error_scaling;  // default = false
 
     bool m_useL2GainCorrection;
+    bool m_useL2GainInterpolation;
     bool m_useLeakageCorrection;
     bool m_usepTInterpolationForLeakage;
 
