@@ -1,6 +1,6 @@
 // $Id$
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/WriteDecorHandleKey.icc
@@ -59,7 +59,7 @@ WriteDecorHandleKey<T>::WriteDecorHandleKey (const std::string& key /*= ""*/,
  * by @contKey.
  */
 template <class T>
-WriteDecorHandleKey<T>::WriteDecorHandleKey (const WriteHandleKey<T>& contKey,
+WriteDecorHandleKey<T>::WriteDecorHandleKey (const VarHandleKey& contKey,
                                              const std::string& decorKey /*= ""*/,
                                              const std::string& storeName /*= "StoreGateSvc"*/) :
   Base (makeContDecorKey (contKey, decorKey), storeName),
@@ -112,7 +112,7 @@ template <class OWNER,
 inline
 WriteDecorHandleKey<T>::WriteDecorHandleKey( OWNER* owner,
                                              const std::string& name,
-                                             const WriteHandleKey<T>& contKey,
+                                             const VarHandleKey& contKey,
                                              const std::string& decorKey /*={}*/,
                                              const std::string& doc /*=""*/)
   : Base (owner, name, makeContDecorKey (contKey, decorKey), doc),

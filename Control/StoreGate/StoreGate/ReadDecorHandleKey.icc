@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/ReadDecorHandleKey.icc
@@ -46,7 +46,7 @@ ReadDecorHandleKey<T>::ReadDecorHandleKey (const std::string& key /*= ""*/,
  */
 template <class T>
 inline
-ReadDecorHandleKey<T>::ReadDecorHandleKey (const ReadHandleKey<T>& contKey,
+ReadDecorHandleKey<T>::ReadDecorHandleKey (const VarHandleKey& contKey,
                                            const std::string& decorKey /*= /""*/,
                                            const std::string& storeName /*= StoreID::storeName(StoreID::EVENT_STORE*/)
   : Base (ClassID_traits<topbase_t>::ID(), makeContDecorKey (contKey, decorKey), storeName),
@@ -102,7 +102,7 @@ template <class OWNER,
 inline
 ReadDecorHandleKey<T>::ReadDecorHandleKey( OWNER* owner,
                                            const std::string& name,
-                                           const ReadHandleKey<T>& contKey,
+                                           const VarHandleKey& contKey,
                                            const std::string& decorKey /*= {}*/,
                                            const std::string& doc /*= ""*/)
   : Base (ClassID_traits<topbase_t>::ID(), owner, name, makeContDecorKey (contKey, decorKey), doc),

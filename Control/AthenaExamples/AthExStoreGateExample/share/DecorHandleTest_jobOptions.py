@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # File: AthExStoreGateExample/share/HandleTest_jobOptions.py
 # Author: Frank Winklmeier
@@ -21,4 +21,5 @@ topSeq += AthEx__HandleTestAlg ('testalg',
                                                                 RHKey="myrcont",
                                                                 RDecorKey="myrdecor",
                                                                 WHKey="mywcont",
-                                                                WDecorKey="mywdecor"))
+                                                                WDecorKey="mywdecor",
+                                                                WDecorKey2="mywdecor2"))
