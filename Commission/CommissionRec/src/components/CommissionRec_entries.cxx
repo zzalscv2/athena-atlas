@@ -1,4 +1,4 @@
-#include "CommissionRec/ComTimeRec.h"
+#include "../ComTimeRec.h"
 
 DECLARE_COMPONENT( ComTimeRec )
 
