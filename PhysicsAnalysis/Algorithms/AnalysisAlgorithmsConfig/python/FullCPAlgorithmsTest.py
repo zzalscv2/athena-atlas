@@ -600,6 +600,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         configSeq.setOptionValue ('.saveCutBookkeepers', True)
         configSeq.setOptionValue ('.runNumber', 284500)
         configSeq.setOptionValue ('.cutBookkeepersSystematics', True)
+        vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
 
 
     # Include, and then set up the trigger analysis sequence:
