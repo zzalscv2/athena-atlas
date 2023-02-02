@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from DiTauRec.DiTauToolsConfig import SeedJetBuilderCfg, SubjetBuilderCfg, ElMuFinderCfg, JetAlgCfg, VertexFinderCfg, DiTauTrackFinderCfg, CellFinderCfg, IDVarCalculatorCfg
@@ -12,7 +12,7 @@ def DiTauBuilderCfg(flags, name="DiTauBuilder", **kwargs):
         acc.popToolsAndMerge(SubjetBuilderCfg(flags))
     ]
 
-    if flags.InDet.PriVertex.doVertexFinding: # Simplified wrt old config
+    if flags.Tracking.doVertexFinding: # Simplified wrt old config
         acc.merge(JetAlgCfg(flags)) # To run TVA tool for VertexFinder
         tools.append(acc.popToolsAndMerge(VertexFinderCfg(flags)))
 
@@ -43,7 +43,7 @@ def DiTauBuilderLowPtCfg(flags, name="DiTauLowPtBuilder", **kwargs):
         acc.popToolsAndMerge(SubjetBuilderCfg(flags))
     ]
 
-    if flags.InDet.PriVertex.doVertexFinding: # Simplified wrt old config
+    if flags.Tracking.doVertexFinding: # Simplified wrt old config
         acc.merge(JetAlgCfg(flags)) # To run TVA tool for VertexFinder
         tools.append(acc.popToolsAndMerge(VertexFinderCfg(flags)))
 

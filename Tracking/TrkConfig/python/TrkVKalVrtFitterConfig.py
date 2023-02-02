@@ -17,16 +17,26 @@ def TrkVKalVrtFitterCfg(flags, name="TrkVKalVrtFitter", **kwargs):
     return acc
 
 def SecVx_TrkVKalVrtFitterCfg(flags, name="SecVx_TrkVKalVrtFitter", **kwargs):
-    kwargs.setdefault("FirstMeasuredPoint", flags.InDet.SecVertex.Fitter.FirstMeasuredPoint)
-    kwargs.setdefault("FirstMeasuredPointLimit", flags.InDet.SecVertex.Fitter.FirstMeasuredPointLimit)
-    kwargs.setdefault("InputParticleMasses", flags.InDet.SecVertex.Fitter.InputParticleMasses)
-    kwargs.setdefault("IterationNumber", flags.InDet.SecVertex.Fitter.IterationNumber)
-    kwargs.setdefault("MakeExtendedVertex", flags.InDet.SecVertex.Fitter.MakeExtendedVertex)
-    kwargs.setdefault("Robustness", flags.InDet.SecVertex.Fitter.Robustness)
-    kwargs.setdefault("usePhiCnst", flags.InDet.SecVertex.Fitter.usePhiCnst)
-    kwargs.setdefault("useThetaCnst", flags.InDet.SecVertex.Fitter.useThetaCnst)
-    kwargs.setdefault("CovVrtForConstraint", flags.InDet.SecVertex.Fitter.CovVrtForConstraint)
-    kwargs.setdefault("VertexForConstraint", flags.InDet.SecVertex.Fitter.VertexForConstraint)
+    kwargs.setdefault("FirstMeasuredPoint",
+                      flags.Tracking.SecVertex.Fitter.FirstMeasuredPoint)
+    kwargs.setdefault("FirstMeasuredPointLimit",
+                      flags.Tracking.SecVertex.Fitter.FirstMeasuredPointLimit)
+    kwargs.setdefault("InputParticleMasses",
+                      flags.Tracking.SecVertex.Fitter.InputParticleMasses)
+    kwargs.setdefault("IterationNumber",
+                      flags.Tracking.SecVertex.Fitter.IterationNumber)
+    kwargs.setdefault("MakeExtendedVertex",
+                      flags.Tracking.SecVertex.Fitter.MakeExtendedVertex)
+    kwargs.setdefault("Robustness",
+                      flags.Tracking.SecVertex.Fitter.Robustness)
+    kwargs.setdefault("usePhiCnst",
+                      flags.Tracking.SecVertex.Fitter.usePhiCnst)
+    kwargs.setdefault("useThetaCnst",
+                      flags.Tracking.SecVertex.Fitter.useThetaCnst)
+    kwargs.setdefault("CovVrtForConstraint",
+                      flags.Tracking.SecVertex.Fitter.CovVrtForConstraint)
+    kwargs.setdefault("VertexForConstraint",
+                      flags.Tracking.SecVertex.Fitter.VertexForConstraint)
 
     return TrkVKalVrtFitterCfg(flags, name, **kwargs)
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetTrackSelectionTool package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -81,11 +81,6 @@ def IDAlignMonTrackSelectionToolCfg(flags, name="IDAlignMonTrackSelectionTool", 
 ###############################################
 
 def VtxInDetTrackSelectionCfg(flags, name="VertexInDetTrackSelectionTool", **kwargs):
-    if flags.Detector.GeometryITk:
-        vtxFlags = flags.ITk.PriVertex
-    else:
-        vtxFlags = flags.InDet.PriVertex
-
     for key in (
         "maxAbsEta",
         "maxD0",
@@ -101,7 +96,7 @@ def VtxInDetTrackSelectionCfg(flags, name="VertexInDetTrackSelectionTool", **kwa
         "minNTrtHits",
         "minPt",
     ):
-        kwargs.setdefault(key, getattr(vtxFlags, key))
+        kwargs.setdefault(key, getattr(flags.Tracking.PriVertex, key))
 
     kwargs.setdefault("UseTrkTrackTools", False)
     return InDetTrackSelectionTool_TightPrimary_Cfg(flags, name, **kwargs)

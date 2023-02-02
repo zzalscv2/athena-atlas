@@ -93,20 +93,20 @@ if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.ComponentAccumulator import printProperties
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from InDetConfig.VertexFindingFlags import VertexSetup
+    from TrkConfig.VertexFindingFlags import VertexSetup
 
     flags.Input.Files = defaultTestFiles.RDO_RUN2
     import sys
     if 'ActsGaussAdaptiveMultiFinding' in sys.argv:
-        flags.InDet.PriVertex.setup = VertexSetup.ActsGaussAMVF
+        flags.Tracking.PriVertex.setup = VertexSetup.ActsGaussAMVF
     elif "IterativeFinding" in sys.argv:
-        flags.InDet.PriVertex.setup = VertexSetup.IVF
+        flags.Tracking.PriVertex.setup = VertexSetup.IVF
     elif "GaussIterativeFinding" in sys.argv:
-        flags.InDet.PriVertex.setup = VertexSetup.GaussIVF
+        flags.Tracking.PriVertex.setup = VertexSetup.GaussIVF
     elif "AdaptiveMultiFinding" in sys.argv:
-        flags.InDet.PriVertex.setup = VertexSetup.AMVF
+        flags.Tracking.PriVertex.setup = VertexSetup.AMVF
     elif "GaussAdaptiveMultiFinding" in sys.argv:
-        flags.InDet.PriVertex.setup = VertexSetup.GaussAMVF
+        flags.Tracking.PriVertex.setup = VertexSetup.GaussAMVF
     flags.lock()
 
     acc = MainServicesCfg(flags)

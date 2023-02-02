@@ -24,7 +24,7 @@ def createTrackingConfigFlags():
     # The following flags are only used in InDet configurations for now
     # No corresponding ITk config is available yet
 
-    # Turn running of doLargeD0 second pass down to 100 MeV on and off Turn running of doLargeD0 second pass on and off
+    # Turn running of doLargeD0 second pass down to 100 MeV on and off
     icf.addFlag("Tracking.doLowPtLargeD0", False)
     # Turn running of high pile-up reconstruction on and off
     icf.addFlag("Tracking.doHighPileup", False)
@@ -32,5 +32,20 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doVtxLumi", False)
     # Special reconstruction for vertex beamspot measurement
     icf.addFlag("Tracking.doVtxBeamSpot", False)
+
+    # Vertexing flags
+    from TrkConfig.VertexFindingFlags import (
+        createSecVertexingFlags, createEGammaPileUpSecVertexingFlags,
+        createPriVertexingFlags)
+    icf.addFlagsCategory("Tracking.PriVertex",
+                         createPriVertexingFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.SecVertex",
+                         createSecVertexingFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.SecVertexEGammaPileUp",
+                         createEGammaPileUpSecVertexingFlags, prefix=True)
+
+    # Turn on the primary vertex reconstruction
+    icf.addFlag("Tracking.doVertexFinding",
+                lambda prevFlags: prevFlags.Beam.Type is not BeamType.Cosmics)
 
     return icf

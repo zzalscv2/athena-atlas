@@ -100,9 +100,9 @@ def getNewConfigFlags():
         InDetFlags.init()
         ConfigFlags.InDet.Tracking.doTIDE_Ambi = InDetFlags.doTIDE_Ambi()
         ConfigFlags.InDet.useDCS = InDetFlags.useDCS()
-        ConfigFlags.InDet.PriVertex.doVertexFinding = InDetFlags.doVertexFinding()
+        ConfigFlags.Tracking.doVertexFinding = InDetFlags.doVertexFinding()
     except ImportError:
-        log.info('InDetRecExample not available, "ConfigFlags.InDet.Tracking.doTIDE_Ambi", "ConfigFlags.InDet.useDCS" and "ConfigFlags.InDet.PriVertex.doVertexFinding" not set')
+        log.info('InDetRecExample not available, "ConfigFlags.InDet.Tracking.doTIDE_Ambi", "ConfigFlags.InDet.useDCS" and "ConfigFlags.Tracking.doVertexFinding" not set')
         pass
 
 

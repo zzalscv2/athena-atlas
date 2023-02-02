@@ -116,7 +116,7 @@ def ITkTrackRecoCfg(flags):
                                            AssociationMapName = "PRDtoTrackMapCombinedITkTracks" \
                                            if not flags.ITk.Tracking.doFastTracking else ""))
 
-    if flags.ITk.PriVertex.doVertexFinding:
+    if flags.Tracking.doVertexFinding:
         from InDetConfig.InDetPriVxFinderConfig import primaryVertexFindingCfg
         result.merge(primaryVertexFindingCfg(flags))
 

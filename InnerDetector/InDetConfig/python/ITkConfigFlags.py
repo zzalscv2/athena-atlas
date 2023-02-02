@@ -83,9 +83,6 @@ def createITkConfigFlags():
   itkcf.addFlagsCategory ("ITk.Tracking.LargeD0FastPass", createITkLargeD0FastTrackingPassFlags, prefix=True)
   itkcf.addFlagsCategory ("ITk.Tracking.FTFPass", createITkFTFPassFlags, prefix=True)
 
-  from InDetConfig.VertexFindingFlags import createITkPriVertexingFlags
-  itkcf.addFlagsCategory("ITk.PriVertex", createITkPriVertexingFlags, prefix=True)
-
   # enable reco steps 
   itkcf.addFlag("ITk.Tracking.recoChain", [TrackingComponent.AthenaChain])
 

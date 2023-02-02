@@ -246,12 +246,4 @@ def createInDetConfigFlags():
     icf.addFlagsCategory("InDet.Tracking.RobustRecoPass",
                          createRobustRecoTrackingPassFlags, prefix=True)
 
-    from InDetConfig.VertexFindingFlags import (
-        createSecVertexingFlags, createEGammaPileUpSecVertexingFlags, createPriVertexingFlags)
-    icf.addFlagsCategory(
-        "InDet.PriVertex", createPriVertexingFlags, prefix=True)
-    icf.addFlagsCategory(
-        "InDet.SecVertex", createSecVertexingFlags, prefix=True)
-    icf.addFlagsCategory("InDet.SecVertexEGammaPileUp",
-                         createEGammaPileUpSecVertexingFlags, prefix=True)
     return icf

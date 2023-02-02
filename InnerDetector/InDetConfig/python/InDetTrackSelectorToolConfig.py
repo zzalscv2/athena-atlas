@@ -13,23 +13,24 @@ def InDetConversionTrackSelectorToolCfg(flags, name="TrackSelector", **kwargs):
         kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
             AtlasExtrapolatorCfg(flags)))
 
-    kwargs.setdefault("RatioCut1", flags.InDet.SecVertex.TrkSel.RatioCut1)
-    kwargs.setdefault("RatioCut2", flags.InDet.SecVertex.TrkSel.RatioCut2)
-    kwargs.setdefault("RatioCut3", flags.InDet.SecVertex.TrkSel.RatioCut3)
+    kwargs.setdefault("RatioCut1", flags.Tracking.SecVertex.TrkSel.RatioCut1)
+    kwargs.setdefault("RatioCut2", flags.Tracking.SecVertex.TrkSel.RatioCut2)
+    kwargs.setdefault("RatioCut3", flags.Tracking.SecVertex.TrkSel.RatioCut3)
     kwargs.setdefault("TRTTrksBinnedRatioTRT",
-                      flags.InDet.SecVertex.TrkSel.TRTTrksBinnedRatioTRT)
+                      flags.Tracking.SecVertex.TrkSel.TRTTrksBinnedRatioTRT)
     kwargs.setdefault("TRTTrksEtaBins",
-                      flags.InDet.SecVertex.TrkSel.TRTTrksEtaBins)
-    kwargs.setdefault("RatioTRT", flags.InDet.SecVertex.TrkSel.RatioTRT)
-    kwargs.setdefault("RatioV0", flags.InDet.SecVertex.TrkSel.RatioV0)
-    kwargs.setdefault("maxSiD0", flags.InDet.SecVertex.TrkSel.maxSiD0)
-    kwargs.setdefault("maxSiZ0", flags.InDet.SecVertex.TrkSel.maxSiZ0)
-    kwargs.setdefault("maxTrtD0", flags.InDet.SecVertex.TrkSel.maxTrtD0)
-    kwargs.setdefault("maxTrtZ0", flags.InDet.SecVertex.TrkSel.maxTrtZ0)
-    kwargs.setdefault("minPt", flags.InDet.SecVertex.TrkSel.minPt)
+                      flags.Tracking.SecVertex.TrkSel.TRTTrksEtaBins)
+    kwargs.setdefault("RatioTRT", flags.Tracking.SecVertex.TrkSel.RatioTRT)
+    kwargs.setdefault("RatioV0",  flags.Tracking.SecVertex.TrkSel.RatioV0)
+    kwargs.setdefault("maxSiD0",  flags.Tracking.SecVertex.TrkSel.maxSiD0)
+    kwargs.setdefault("maxSiZ0",  flags.Tracking.SecVertex.TrkSel.maxSiZ0)
+    kwargs.setdefault("maxTrtD0", flags.Tracking.SecVertex.TrkSel.maxTrtD0)
+    kwargs.setdefault("maxTrtZ0", flags.Tracking.SecVertex.TrkSel.maxTrtZ0)
+    kwargs.setdefault("minPt",    flags.Tracking.SecVertex.TrkSel.minPt)
     kwargs.setdefault("significanceD0_Si",
-                      flags.InDet.SecVertex.TrkSel.significanceD0_Si)
-    kwargs.setdefault("IsConversion", flags.InDet.SecVertex.TrkSel.IsConversion)
+                      flags.Tracking.SecVertex.TrkSel.significanceD0_Si)
+    kwargs.setdefault("IsConversion",
+                      flags.Tracking.SecVertex.TrkSel.IsConversion)
 
     acc.setPrivateTools(
         CompFactory.InDet.InDetConversionTrackSelectorTool(name, **kwargs))

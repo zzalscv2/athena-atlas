@@ -27,7 +27,7 @@ def TauBuildAlgCfg(flags):
         tools.append( result.popToolsAndMerge(tauTools.TauElectronExcluderCfg(flags)) )
 
     # run vertex finder only in case vertexing is available
-    if flags.Tau.isStandalone or flags.InDet.PriVertex.doVertexFinding:
+    if flags.Tau.isStandalone or flags.Tracking.doVertexFinding:
         tools.append( result.popToolsAndMerge(tauTools.TauVertexFinderCfg(flags)) )
 
     tools.append( result.popToolsAndMerge(tauTools.TauAxisCfg(flags)) )
@@ -140,7 +140,7 @@ def TauRunnerAlgCfg(flags):
     tools.append( result.popToolsAndMerge(tauTools.Pi0ScoreCalculatorCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.Pi0SelectorCfg(flags)) )
 
-    if flags.Tau.isStandalone or flags.InDet.PriVertex.doVertexFinding:
+    if flags.Tau.isStandalone or flags.Tracking.doVertexFinding:
         tools.append(result.popToolsAndMerge(tauTools.TauVertexVariablesCfg(flags)) )
 
     tools.append( result.popToolsAndMerge(tauTools.TauCommonCalcVarsCfg(flags)) )
