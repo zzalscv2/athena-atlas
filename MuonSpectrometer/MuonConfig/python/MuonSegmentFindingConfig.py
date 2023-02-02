@@ -745,24 +745,14 @@ def MuonSegmentFindingCfg(flags, cardinality=1):
 if __name__=="__main__":
     # To run this, do e.g. 
     # python -m MuonConfig.MuonSegmentFindingConfig --run --threads=1
-    from MuonConfig.MuonConfigUtils import SetupMuonStandaloneArguments, SetupMuonStandaloneConfigFlags, SetupMuonStandaloneOutput, SetupMuonStandaloneCA
+    from MuonConfig.MuonConfigUtils import SetupMuonStandaloneConfigFlags, SetupMuonStandaloneOutput, SetupMuonStandaloneCA
 
-    args = SetupMuonStandaloneArguments()
-    flags = SetupMuonStandaloneConfigFlags(args)
-    cfg = SetupMuonStandaloneCA(args,flags)
+    args, flags = SetupMuonStandaloneConfigFlags()
+    cfg = SetupMuonStandaloneCA(args, flags)
 
     # Run the actual test.
-    acc = MuonSegmentFindingCfg(flags, cardinality=args.threads)
+    acc = MuonSegmentFindingCfg(flags)
     cfg.merge(acc)
-    
-    if args.threads>1 and args.forceclone:
-        from AthenaCommon.Logging import log
-        log.info('Forcing segment finding cardinality to be equal to '+str(args.threads))
-        # We want to force the algorithms to run in parallel (eventually the algorithm will be marked as cloneable in the source code)
-        AlgResourcePool=CompFactory.AlgResourcePool
-        cfg.addService(AlgResourcePool( OverrideUnClonable=True ) )
-        segment_finder = acc.getPrimary()
-        segment_finder.Cardinality=args.threads
 
     # This is a temporary fix - it should go someplace central as it replaces the functionality of addInputRename from here:
     # https://gitlab.cern.ch/atlas/athena/blob/master/Control/SGComps/python/AddressRemappingSvc.py
@@ -784,8 +774,8 @@ if __name__=="__main__":
     f=open("MuonSegmentFinding.pkl","wb")
     cfg.store(f)
     f.close()
-
-    if args.run:
+    
+    if not args.config_only:
         sc = cfg.run(20)
         if not sc.isSuccess():
             import sys

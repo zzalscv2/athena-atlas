@@ -3,40 +3,13 @@
 # This file is just for shared functions etc used by this package.
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-
-def SetupMuonStandaloneArguments():
-    from argparse import ArgumentParser
     
-    parser = ArgumentParser()
-    parser.add_argument("-t", "--threads", dest="threads", type=int,
-                        help="number of threads", default=1)
-                        
-    parser.add_argument("-o", "--output", dest="output", default='newESD.pool.root',
-                        help="write ESD to FILE", metavar="FILE")
-                        
-    parser.add_argument("--run", help="Run directly from the python. If false, just stop once the pickle is written.",
-                        action="store_true")
-                        
-    parser.add_argument("--forceclone", help="Override default cloneability of algorithms to force them to run in parallel",
-                        action="store_true")
-    parser.add_argument("-d","--debug", default=None, help="attach debugger (gdb) before run, <stage>: conf, init, exec, fini")
-    parser.add_argument("--input", "-i", help="Input file to run the config", nargs="+",
-                                        default= ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/ESD.16747874._000011_100events.pool.root'])
-    args = parser.parse_args()
-    
-    return args
-    
-def SetupMuonStandaloneConfigFlags(args):
+def SetupMuonStandaloneConfigFlags( default_input = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/ESD.16747874._000011_100events.pool.root']):
+    """
+    Setup flags necessary for Muon standalone.
+    """
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    # Keeping this commented out so we can easily switch to the default for testing against that.
-    # from AthenaConfiguration.TestDefaults import defaultTestFiles
-    # flags.Input.Files = defaultTestFiles.ESD
-    flags.Input.Files = args.input
-    
-    flags.Concurrency.NumThreads=args.threads
-    flags.Concurrency.NumConcurrentEvents=args.threads # Might change this later, but good enough for the moment.
-
     flags.Detector.GeometryMDT   = True 
     flags.Detector.GeometryTGC   = True
     flags.Detector.GeometryCSC   = True     
@@ -47,17 +20,24 @@ def SetupMuonStandaloneConfigFlags(args):
 
     # FIXME This is temporary. I think it can be removed with some other refactoring
     flags.Muon.makePRDs          = False
-
-    flags.Output.ESDFileName=args.output
     
-    flags.Input.isMC = True
+    args = flags.fillFromArgs()
+
+    if flags.Input.Files == ['_ATHENA_GENERIC_INPUTFILE_NAME_'] :
+        # If something is set from an arg (i.e. the command line), this takes priority
+        flags.Input.Files = default_input
+
+    if flags.Output.ESDFileName == '':
+        flags.Output.ESDFileName='newESD.pool.root'
+    else:
+        print('ESD = ', flags.Output.ESDFileName )
     flags.lock()
     flags.dump()
-    return flags
+    return args, flags
     
 def SetupMuonStandaloneCA(args,flags):
     # When running from a pickled file, athena inserts some services automatically. So only use this if running now.
-    if args.run:
+    if not args.config_only:
         from AthenaConfiguration.MainServicesConfig import MainServicesCfg
         cfg = MainServicesCfg(flags)
         msgService = cfg.getService('MessageSvc')

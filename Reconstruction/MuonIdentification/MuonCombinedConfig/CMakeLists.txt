@@ -9,6 +9,6 @@ atlas_subdir( MuonCombinedConfig )
 atlas_install_python_modules( python/*.py  )
 
 atlas_add_test( MuonCombinedRecoConfigTest
-SCRIPT python -m MuonCombinedConfig.MuonCombinedReconstructionConfig --run --threads=1
+SCRIPT python -m MuonCombinedConfig.MuonCombinedReconstructionConfig --threads=1
 PROPERTIES TIMEOUT 900
 POST_EXEC_SCRIPT noerror.sh )

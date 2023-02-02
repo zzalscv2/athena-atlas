@@ -225,26 +225,14 @@ def MuonReconstructionCfg(flags):
 
 if __name__ == "__main__":
     # To run this, do e.g.
-    # python -m MuonConfig.MuonReconstructionConfig --run --threads=1
-    from MuonConfig.MuonConfigUtils import SetupMuonStandaloneArguments, SetupMuonStandaloneConfigFlags, SetupMuonStandaloneCA
+    # python -m MuonConfig.MuonReconstructionConfig --threads=1
+    from MuonConfig.MuonConfigUtils import SetupMuonStandaloneConfigFlags, SetupMuonStandaloneCA
 
-    args = SetupMuonStandaloneArguments()
-    flags = SetupMuonStandaloneConfigFlags(args)
+    args, flags = SetupMuonStandaloneConfigFlags()
     cfg = SetupMuonStandaloneCA(args, flags)
-
     # Run the actual test.
     acc = MuonReconstructionCfg(flags)
     cfg.merge(acc)
-
-    if args.threads > 1 and args.forceclone:
-        from AthenaCommon.Logging import log
-        log.info(
-            'Forcing track building cardinality to be equal to '+str(args.threads))
-        # We want to force the algorithms to run in parallel (eventually the algorithm will be marked as cloneable in the source code)
-        AlgResourcePool = CompFactory.AlgResourcePool
-        cfg.addService(AlgResourcePool(OverrideUnClonable=True))
-        track_builder = acc.getPrimary()
-        track_builder.Cardinality = args.threads
 
     from SGComps.AddressRemappingConfig import InputRenameCfg
     cfg.merge(InputRenameCfg("TrackCollection",
@@ -261,8 +249,7 @@ if __name__ == "__main__":
     f = open("MuonReconstruction.pkl", "wb")
     cfg.store(f)
     f.close()
-
-    if args.run:
+    if not args.config_only:
         sc = cfg.run(20)
         if not sc.isSuccess():
             import sys
