@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import CfgMgr
 
@@ -123,7 +123,7 @@ def getLArPileUpTool(name='LArPileUpTool', **kwargs): ## useLArFloat()=True,isOv
     # CosmicTriggerTimeTool for cosmics digitization
     from AthenaCommon.BeamFlags import jobproperties
     if jobproperties.Beam.beamType == "cosmics" :
-        from CommissionUtils.CommissionUtilsConf import CosmicTriggerTimeTool
+        from CommissionRec.CommissionRecConf import CosmicTriggerTimeTool
         from AthenaCommon.AppMgr import ToolSvc
         theTriggerTimeTool = CosmicTriggerTimeTool()
         ToolSvc += theTriggerTimeTool
