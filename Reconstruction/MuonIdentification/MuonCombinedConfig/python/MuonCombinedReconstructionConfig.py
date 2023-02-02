@@ -642,11 +642,22 @@ def MuonCombinedReconstructionCfg(flags):
     from TrkConfig.TrackCollectionReadConfig import TrackCollectionReadCfg
     result.merge(TrackCollectionReadCfg(flags, 'Tracks'))
 
-    result.merge(MuonCombinedInDetCandidateAlgCfg(flags))
+    
+    ### We do not need to schedule the Inner detector selector algs if none 
+    ### of the combined algs executed
+    if flags.MuonCombined.doMuGirl or \
+       flags.MuonCombined.doStatisticalCombination or \
+       flags.MuonCombined.doCaloTrkMuId  or \
+       flags.MuonCombined.doCombinedFit or \
+       flags.MuonCombined.doMuonSegmentTagger:
+    
+        result.merge(MuonCombinedInDetCandidateAlgCfg(flags))
+        if flags.Tracking.doLargeD0:
+            result.merge(LRT_MuonCombinedInDetCandidateAlgCfg(flags))
+    
     result.merge(MuonCombinedMuonCandidateAlgCfg(flags))
 
-    if flags.Tracking.doLargeD0:
-        result.merge(LRT_MuonCombinedInDetCandidateAlgCfg(flags))
+    
 
     if flags.MuonCombined.doStatisticalCombination or flags.MuonCombined.doCombinedFit:
         result.merge(MuonCombinedAlgCfg(flags))
