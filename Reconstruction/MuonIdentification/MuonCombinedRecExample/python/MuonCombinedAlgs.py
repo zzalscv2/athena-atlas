@@ -315,15 +315,22 @@ class MuonCombinedReconstruction(ConfiguredMuonRec):
         topSequence = AlgSequence()
 
         ## creates input collections for ID and MS candidates
-        topSequence += getAlgorithm("MuonCombinedInDetCandidateAlg")
         topSequence += getAlgorithm("MuonCombinedMuonCandidateAlg")
+        
+        if muonCombinedRecFlags.doStatisticalCombination()  or \
+           muonCombinedRecFlags.doCombinedFit() or \
+           muonCombinedRecFlags.doCaloTrkMuId() or \
+           muonCombinedRecFlags.doMuonSegmentTagger() or \
+           muonCombinedRecFlags.doMuGirl() :
+                topSequence += getAlgorithm("MuonCombinedInDetCandidateAlg")
+                if InDetFlags.doR3LargeD0(): 
+                    topSequence += getAlgorithm("MuonCombinedInDetCandidateAlg_LRT")
         
         ##### Prepare the MuonCombinedMuonCandidateAlg for EMEO tracks only
         if muonRecFlags.runCommissioningChain():
             topSequence += getAlgorithm("MuonCombinedMuonCandidateAlg_EMEO")
                      
-        if InDetFlags.doR3LargeD0(): 
-            topSequence += getAlgorithm("MuonCombinedInDetCandidateAlg_LRT")
+        
 
         # runs ID+MS combinations (fit, staco, mugirl, ID-taggers)
         if muonCombinedRecFlags.doStatisticalCombination() or muonCombinedRecFlags.doCombinedFit():
