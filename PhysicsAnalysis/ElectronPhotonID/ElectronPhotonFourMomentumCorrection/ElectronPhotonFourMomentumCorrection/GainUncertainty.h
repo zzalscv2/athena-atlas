@@ -28,7 +28,7 @@ public:
   double getUncertainty(double etaCalo_input, double et_input,
 			PATCore::ParticleType::Type ptype = PATCore::ParticleType::Electron,
 			bool useUncertainty = false) const;
-
+    void setInterpolation() { m_useInterpolation = true; }
 private:
 
   static const int s_nEtaBins=5;
@@ -38,6 +38,7 @@ private:
   std::unique_ptr<TH1> m_gain_Impact_conv[s_nEtaBins]{};
   std::unique_ptr<TH1> m_gain_Impact_unco[s_nEtaBins]{};
 
+  bool m_useInterpolation = false;
 };
 
 }

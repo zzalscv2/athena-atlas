@@ -303,11 +303,11 @@ EgammaCalibrationAndSmearingTool::EgammaCalibrationAndSmearingTool(const std::st
   declareProperty("useLayerCorrection", m_useLayerCorrection = AUTO);
   declareProperty("usePSCorrection", m_usePSCorrection = AUTO);
   declareProperty("useS12Correction", m_useS12Correction = AUTO);
-  declareProperty("useLayer2Recalibration", m_useLayer2Recalibration = AUTO);
   declareProperty("useIntermoduleCorrection", m_useIntermoduleCorrection = AUTO);
   declareProperty("usePhiUniformCorrection", m_usePhiUniformCorrection = AUTO);
   declareProperty("useCaloDistPhiUnifCorrection", m_useCaloDistPhiUnifCorrection = AUTO);
   declareProperty("useGainCorrection", m_useGainCorrection = AUTO);
+  declareProperty("useGainInterpolation", m_useGainInterpolation = AUTO);
   declareProperty("doADCLinearityCorrection", m_doADCLinearityCorrection = AUTO);
   declareProperty("doLeakageCorrection", m_doLeakageCorrection = AUTO);
   declareProperty("autoReseed", m_auto_reseed = true);
@@ -499,7 +499,10 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
     ATH_MSG_INFO("Layer recalibration already applied at cell level");
     m_useLayerCorrection = false;
   }
-  else{
+  else if(m_useLayerCorrection == false){
+    ATH_MSG_INFO("Layer corrections disabled!");
+  }
+  else {
     ATH_MSG_DEBUG("initializing layer recalibration tool (if needed)");
     if (m_layer_recalibration_tune == "") { // automatically configure layer recalibration tool
       m_layer_recalibration_tool = egammaLayerRecalibToolFactory(m_TESModel).release();
@@ -509,6 +512,19 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
       m_layer_recalibration_tool = new egammaLayerRecalibTool(m_layer_recalibration_tune);
     }
     if (m_layer_recalibration_tool) { m_layer_recalibration_tool->msg().setLevel(this->msg().level()); }
+
+    // disable PS if required
+    if(m_usePSCorrection == false && m_layer_recalibration_tool){
+      ATH_MSG_INFO("PS corrections disabled!");
+      m_layer_recalibration_tool->disable_PSCorrections();
+    }
+
+    // disable S12 if required
+    if(m_useS12Correction == false && m_layer_recalibration_tool){
+      ATH_MSG_INFO("S12 corrections disabled!");
+      m_layer_recalibration_tool->disable_S12Corrections();
+    }
+
   }
   
   if (m_use_temp_correction201215 != AUTO) m_rootTool->use_temp_correction201215(m_use_temp_correction201215);
@@ -523,6 +539,7 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
   if (m_useIntermoduleCorrection == AUTO) { m_useIntermoduleCorrection = use_intermodule_correction(m_TESModel); }
   if (m_usePhiUniformCorrection == AUTO) { m_usePhiUniformCorrection = use_phi_uniform_correction(m_TESModel); }
   m_use_mapping_correction = not is_run2(m_TESModel);
+  
   if (m_useGainCorrection == AUTO && m_TESModel != egEnergyCorr::es2022_R21_Precision) {
     ATH_MSG_DEBUG("initializing gain tool");
     m_gain_tool = gainToolFactory(m_TESModel).release();
@@ -530,13 +547,12 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
   }
   else if (m_useGainCorrection == AUTO && m_TESModel == egEnergyCorr::es2022_R21_Precision)
     {
-      m_useGainCorrection = 1;
-      ATH_MSG_INFO("initializing gain tool for run2 final precision recommendations");
-      std::string gain_tool_run_2_filename =
-        PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v25/gain_uncertainty_specialRun.root");
-      m_gain_tool_run2.reset(new egGain::GainUncertainty(gain_tool_run_2_filename,"GainCorrection"));
-      m_gain_tool_run2->msg().setLevel(this->msg().level());
-      m_rootTool->setApplyL2GainCorrection();
+      m_useGainCorrection = 0;
+      if(m_useGainInterpolation == AUTO || m_useGainInterpolation == 1){
+        ATH_MSG_INFO("Using linear interpolation in the gain tool (uncertainties only)");
+        m_useGainInterpolation = 1;
+        m_rootTool->setApplyL2GainInterpolation(); 
+      }
     }
   else if (m_useGainCorrection == 1) {
     if (m_TESModel != egEnergyCorr::es2022_R21_Precision) {
@@ -544,15 +560,19 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
       ATH_MSG_WARNING("cannot instantiate gain tool for this model (you can only disable the gain tool, but not enable it)");
     } else {
       ATH_MSG_INFO("initializing gain tool for run2 final precision recommendations");
+      ATH_MSG_WARNING("Gain corrections required but Zee scales are derived without Gain, will cause inconsistency!");
       std::string gain_tool_run_2_filename =
-	PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v25/gain_uncertainty_specialRun.root");
+	PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/gain_uncertainty_specialRun.root");
       m_gain_tool_run2.reset(new egGain::GainUncertainty(gain_tool_run_2_filename,"GainCorrection"));
       m_gain_tool_run2->msg().setLevel(this->msg().level());
-      m_rootTool->setApplyL2GainCorrection();
+      if(m_useGainInterpolation == AUTO || m_useGainInterpolation == 1){
+        m_useGainInterpolation = 1;
+        ATH_MSG_INFO("Using linear interpolation in the gain tool");
+        m_gain_tool_run2->setInterpolation();
+        m_rootTool->setApplyL2GainInterpolation(); 
+      }
     }
-  } else if(m_useGainCorrection == 0 && m_TESModel == egEnergyCorr::es2022_R21_Precision){
-    ATH_MSG_WARNING("es2022_R21_Precision recommendations use gain corrections for scale derivation. Disabling the GainCorrection flag will create inconsistency!");
-  }
+  } 
 
   if (m_TESModel == egEnergyCorr::es2022_R21_Precision) {
     // ADC non linearity correction
@@ -577,7 +597,7 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
     if (m_useCaloDistPhiUnifCorrection == AUTO || m_useCaloDistPhiUnifCorrection == 1) {
       m_useCaloDistPhiUnifCorrection = 1;
       std::string phiUnifCorrfileName =
-	PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v25/egammaEnergyCorrectionData.root");
+	PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v27/egammaEnergyCorrectionData.root");
       std::unique_ptr<TFile> fCorr(TFile::Open(phiUnifCorrfileName.c_str(), "READ"));
       m_caloDistPhiUnifCorr.reset(
 	dynamic_cast<TH2*>(fCorr->Get("CaloDistortionPhiUniformityCorrection/es2022_R21_Precision/h2DcorrPhiUnif")));
@@ -599,7 +619,6 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
   ATH_MSG_INFO("layer correction = " << m_useLayerCorrection);
   ATH_MSG_INFO("PS correction = " << m_usePSCorrection);
   ATH_MSG_INFO("S12 correction = " << m_useS12Correction);
-  ATH_MSG_INFO("layer2 recalibration = " << m_useLayer2Recalibration);
   ATH_MSG_INFO("intermodule correction = " << m_useIntermoduleCorrection);
   ATH_MSG_INFO("phi uniformity correction = " << m_usePhiUniformCorrection);
   ATH_MSG_INFO("distorted calo phi uniformity correction = " << m_useCaloDistPhiUnifCorrection);
@@ -960,7 +979,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(xAOD::Egamm
 	energy = m_gain_tool->CorrectionGainTool(cl_eta, energy / GeV, es2 / GeV, xAOD2ptype(input)); // cl_eta ok, TODO: check corrected E2
     } else if (m_gain_tool_run2) {
       double et   = energy / std::cosh(cl_eta);
-      double corr = m_gain_tool_run2->getUncertainty(etaCalo,et,xAOD2ptype(input));
+      double corr = m_gain_tool_run2->getUncertainty(etaCalo,et,xAOD2ptype(input),true);
       energy /= (1+corr);
     }
     ATH_MSG_DEBUG("energy after gain correction = " << boost::format("%.2f") % energy);

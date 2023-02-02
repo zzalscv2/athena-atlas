@@ -85,12 +85,23 @@ namespace egGain {
       ATH_MSG_WARNING("Trying to get Gain correction of not allowed particle type");
       return 0;
     }
-    double impact = hImpact->GetBinContent(hImpact->FindFixBin(0.001*et_input));
+    
+    double impact = 0;
+    if(m_useInterpolation){
+      impact = hImpact->Interpolate(0.001*et_input);
+       ATH_MSG_DEBUG("L2 gain impact without interpolation: " << hImpact->GetBinContent(hImpact->FindFixBin(0.001*et_input)));
+       ATH_MSG_DEBUG("L2 gain impact with interpolation: " << hImpact->Interpolate(0.001*et_input));
+    } 
+    else {
+      impact = hImpact->GetBinContent(hImpact->FindFixBin(0.001*et_input));
+    }
+  
+   
 
     int ieta = m_alpha_specialGainRun->FindFixBin(aeta);
-    double alphaG = useL2GainUncertainty ?
-      m_alpha_specialGainRun->GetBinError(ieta) :
-      m_alpha_specialGainRun->GetBinContent(ieta);
+    if(useL2GainUncertainty) ATH_MSG_INFO("Applying 100% uncertainy on l2 gain corrections");
+
+    double alphaG =  m_alpha_specialGainRun->GetBinContent(ieta);
 
     double impactZee = m_gain_impact_Zee->GetBinContent(m_gain_impact_Zee->FindFixBin(aeta));
 

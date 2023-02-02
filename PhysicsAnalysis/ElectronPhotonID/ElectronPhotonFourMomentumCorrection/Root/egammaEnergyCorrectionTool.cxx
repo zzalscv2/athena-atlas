@@ -65,7 +65,7 @@ namespace AtlasRoot {
     m_esmodel(egEnergyCorr::UNDEFINED)
   {
 
-    m_rootFileName = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v25/egammaEnergyCorrectionData.root");
+    m_rootFileName = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v27/egammaEnergyCorrectionData.root");
     
     if (m_rootFileName.empty()) {
       ATH_MSG_FATAL("cannot find configuration file");
@@ -106,6 +106,7 @@ namespace AtlasRoot {
 
     //
     m_useL2GainCorrection = false;
+    m_useL2GainInterpolation = false;
     m_useLeakageCorrection = false;
     m_usepTInterpolationForLeakage = false;
   }
@@ -692,7 +693,7 @@ namespace AtlasRoot {
         m_daS12Cor.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2012c/dalphaS12_cor")));                 m_daS12Cor->SetDirectory(nullptr);
       }
       else if (m_esmodel == egEnergyCorr::es2022_R21_Precision) {
-	m_aPSNom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2022_R21_Precision/alphaPS_uncor")));      m_aPSNom->SetDirectory(nullptr);
+	      m_aPSNom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2022_R21_Precision/alphaPS_uncor")));      m_aPSNom->SetDirectory(nullptr);
         m_aS12Nom.reset( dynamic_cast< TH1* >( m_rootFile->Get("Scales/es2022_R21_Precision/alphaS12_uncor")));    m_aS12Nom->SetDirectory(nullptr);
       }
       else {
@@ -968,7 +969,7 @@ namespace AtlasRoot {
         gain_tool_run_2_filename = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v11/gain_uncertainty_specialRun.root"); 
       }
       else if (m_esmodel == egEnergyCorr::es2022_R21_Precision) {
-	gain_tool_run_2_filename = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v25/gain_uncertainty_specialRun.root");
+	      gain_tool_run_2_filename = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v27/gain_uncertainty_specialRun.root");
       }
       else
       {
@@ -1112,12 +1113,20 @@ namespace AtlasRoot {
       m_psConvertedEtaBins.reset( dynamic_cast< TAxis* >( m_rootFile->Get("PSRecalibration/es2022_R21_Precision/ConvertedAxis")));
       m_psConvertedGraphs.reset( dynamic_cast< TList* >( m_rootFile->Get("PSRecalibration/es2022_R21_Precision/ConvertedBiasPS")));m_psConvertedGraphs->SetOwner();
 
-      m_s12ElectronEtaBins.reset( dynamic_cast< TAxis* >( m_rootFile->Get("S1Recalibration/es2022_R21_Precision/ElectronAxis")));
-      m_s12ElectronGraphs.reset( dynamic_cast< TList* >( m_rootFile->Get("S1Recalibration/es2022_R21_Precision/ElectronBiasS1")));m_s12ElectronGraphs->SetOwner();
-      m_s12UnconvertedEtaBins.reset( dynamic_cast< TAxis* >( m_rootFile->Get("S1Recalibration/es2022_R21_Precision/UnconvertedAxis")));
-      m_s12UnconvertedGraphs.reset( dynamic_cast< TList* >( m_rootFile->Get("S1Recalibration/es2022_R21_Precision/UnconvertedBiasS1")));m_s12UnconvertedGraphs->SetOwner();
-      m_s12ConvertedEtaBins.reset( dynamic_cast< TAxis* >( m_rootFile->Get("S1Recalibration/es2022_R21_Precision/ConvertedAxis")));
-      m_s12ConvertedGraphs.reset( dynamic_cast< TList* >( m_rootFile->Get("S1Recalibration/es2022_R21_Precision/ConvertedBiasS1")));m_s12ConvertedGraphs->SetOwner();
+
+      m_s12ElectronEtaBins.reset( dynamic_cast< TAxis* >( m_rootFile->Get("S2Recalibration/ElectronAxis")));
+      m_s12ElectronGraphs.reset( dynamic_cast< TList* >( m_rootFile->Get("S2Recalibration/ElectronBiasS2")));m_s12ElectronGraphs->SetOwner();
+      m_s12UnconvertedEtaBins.reset( dynamic_cast< TAxis* >( m_rootFile->Get("S1Recalibration/UnconvertedAxis")));
+      m_s12UnconvertedGraphs.reset( dynamic_cast< TList* >( m_rootFile->Get("S2Recalibration/UnconvertedBiasS2")));m_s12UnconvertedGraphs->SetOwner();
+      m_s12ConvertedEtaBins.reset( dynamic_cast< TAxis* >( m_rootFile->Get("S2Recalibration/ConvertedAxis")));
+      m_s12ConvertedGraphs.reset( dynamic_cast< TList* >( m_rootFile->Get("S2Recalibration/ConvertedBiasS2")));m_s12ConvertedGraphs->SetOwner();
+
+      m_EaccElectronEtaBins.reset( dynamic_cast< TAxis* >( m_rootFile->Get("SaccRecalibration/ElectronAxis")));
+      m_EaccElectronGraphs.reset( dynamic_cast< TList* >( m_rootFile->Get("SaccRecalibration/ElectronBiasSacc")));m_EaccElectronGraphs->SetOwner();
+      m_EaccUnconvertedEtaBins.reset( dynamic_cast< TAxis* >( m_rootFile->Get("SaccRecalibration/UnconvertedAxis")));
+      m_EaccUnconvertedGraphs.reset( dynamic_cast< TList* >( m_rootFile->Get("SaccRecalibration/UnconvertedBiasSacc")));m_EaccUnconvertedGraphs->SetOwner();
+      m_EaccConvertedEtaBins.reset( dynamic_cast< TAxis* >( m_rootFile->Get("SaccRecalibration/ConvertedAxis")));
+      m_EaccConvertedGraphs.reset( dynamic_cast< TList* >( m_rootFile->Get("SaccRecalibration/ConvertedBiasSacc")));m_EaccConvertedGraphs->SetOwner();      
     }
     else // run1
     {
@@ -1320,6 +1329,10 @@ namespace AtlasRoot {
 
     m_zeeES2Profile.reset( dynamic_cast< TH1* >( m_rootFile->Get("ZeeEnergyProfiles/p2MC")));    m_zeeES2Profile->SetDirectory(nullptr);
 
+    // mean Zee energy as function of eta
+    m_meanZeeProfile.reset( dynamic_cast< TProfile* >( m_rootFile->Get("ZeeMeanET/MC_eta_vs_et_profiled")));    m_meanZeeProfile->SetDirectory(nullptr);
+
+
     // OK, now we are all initialized and everything went fine
 
     m_initialized = true;
@@ -1468,7 +1481,9 @@ namespace AtlasRoot {
 						   egEnergyCorr::Scale::Variation var,
 						   double varSF ) const {
 
-    double meanET    = getZeeMeanET(cl_eta);
+    double meanET    = getZeeMeanET(m_use_etaCalo_scales ? cl_etaCalo : cl_eta);
+    ATH_MSG_DEBUG("getZeeMeanET() output " << meanET);
+    ATH_MSG_DEBUG("getZeeMeanET() eta: " << double(m_use_etaCalo_scales ? cl_etaCalo : cl_eta));
     double meanETGeV = meanET/GeV;
     double meanE     = meanET*std::cosh(cl_eta);
     double Et        = energy/std::cosh(cl_eta);
@@ -1479,8 +1494,9 @@ namespace AtlasRoot {
 
     // Sampling recalibration
 
-    double daPS, daS12, linPS, linS12;
-    daPS = daS12 = linPS = linS12 = 0.;
+    double daPS, daS12, linPS, linS12, linEacc, linPS_40_elec, linEacc_40_elec, linS12_40_elec;
+    daPS = daS12 = linPS = linS12 = linEacc= linPS_40_elec= linEacc_40_elec= linS12_40_elec= 0.;
+
 
     double daE4 = 0., linE4 = 0.;
     // E4 contribution
@@ -1518,11 +1534,20 @@ namespace AtlasRoot {
     if( var == egEnergyCorr::Scale::PSUp            || var == egEnergyCorr::Scale::PSDown ||
 	var == egEnergyCorr::Scale::PSb12Up         || var == egEnergyCorr::Scale::PSb12Down ||
 	var == egEnergyCorr::Scale::LArElecUnconvUp || var == egEnergyCorr::Scale::LArElecUnconvDown ) {
-
-      daPS  = getLayerUncertainty(  0, cl_eta, var, varSF );
-      linPS = getLayerNonLinearity( 0, cl_eta, energy, ptype )
-	- getLayerNonLinearity( 0, cl_eta, meanE,  PATCore::ParticleType::Electron );
-
+      if (m_esmodel != egEnergyCorr::es2022_R21_Precision){
+        daPS  = getLayerUncertainty(  0, cl_eta, var, varSF );
+        linPS = getLayerNonLinearity( 0, cl_eta, energy, ptype )- getLayerNonLinearity( 0, cl_eta, meanE,  PATCore::ParticleType::Electron );
+      }
+      else{
+        daPS  = getLayerUncertainty(  0, cl_eta, var, varSF );
+        linPS = getLayerNonLinearity( 0, cl_eta, energy, ptype );
+        linEacc = getLayerNonLinearity( 6, m_use_etaCalo_scales ? cl_etaCalo : cl_eta, energy,  ptype);
+        linPS_40_elec = getLayerNonLinearity( 0, cl_eta, meanE,  PATCore::ParticleType::Electron);
+        linEacc_40_elec= getLayerNonLinearity( 6, m_use_etaCalo_scales ? cl_etaCalo : cl_eta, meanET*std::cosh(m_use_etaCalo_scales ? cl_etaCalo : cl_eta),  PATCore::ParticleType::Electron);
+        ATH_MSG_DEBUG("es2022_R21_Precision PS non-linearity before Acc correction: " << linPS); 
+        linPS= linPS-linEacc*linPS_40_elec/linEacc_40_elec;
+        ATH_MSG_DEBUG("es2022_R21_Precision PS non-linearity after Acc correction: " << linPS); 
+      }
     }
 
     // ... S1 / S2 contribution
@@ -1531,8 +1556,20 @@ namespace AtlasRoot {
         var == egEnergyCorr::Scale::LArCalibExtra2015PreUp   || var == egEnergyCorr::Scale::LArCalibExtra2015PreDown ||
         var == egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Up || var == egEnergyCorr::Scale::S12ExtraLastEtaBinRun2Down)
       {
-        daS12  = getLayerUncertainty(1, cl_eta, var, varSF);
-	linS12 = getLayerNonLinearity( 1, cl_eta, energy, ptype ) - getLayerNonLinearity( 1, cl_eta, meanE,  PATCore::ParticleType::Electron );
+        if (m_esmodel != egEnergyCorr::es2022_R21_Precision){
+          daS12  = getLayerUncertainty(1, cl_eta, var, varSF);
+	        linS12 = getLayerNonLinearity( 1, cl_eta, energy, ptype ) - getLayerNonLinearity( 1, cl_eta, meanE,  PATCore::ParticleType::Electron );
+        }
+        else{
+          daS12  = getLayerUncertainty(  1 , cl_eta, var, varSF )*-1.; // uncertainty applied to E2 is equal to -delta E1/E2 scale 
+          linS12 = getLayerNonLinearity( 1, cl_eta, energy, ptype );
+          linEacc = getLayerNonLinearity( 6, m_use_etaCalo_scales ? cl_etaCalo : cl_eta, energy,  ptype);
+          linS12_40_elec = getLayerNonLinearity( 1, cl_eta, meanE,  PATCore::ParticleType::Electron);
+          linEacc_40_elec= getLayerNonLinearity( 6, m_use_etaCalo_scales ? cl_etaCalo : cl_eta, meanET*std::cosh(m_use_etaCalo_scales ? cl_etaCalo : cl_eta),  PATCore::ParticleType::Electron);
+          ATH_MSG_DEBUG("es2022_R21_Precision S12 non-linearity before Acc correction: " << linS12); 
+          linS12= linS12-linEacc*linS12_40_elec/linEacc_40_elec; 
+          ATH_MSG_DEBUG("es2022_R21_Precision S12 non-linearity after Acc correction: " << linS12); 
+        }
       }
 
     // Material contribution
@@ -1610,8 +1647,10 @@ namespace AtlasRoot {
         }
       }
       else if (m_gain_tool_run2) { // recipe for run 2, see ATLASEG-44
+        if(m_useL2GainInterpolation)m_gain_tool_run2->setInterpolation();
         daL2GainSwitch = m_gain_tool_run2->getUncertainty(cl_etaCalo, Et, ptype, m_useL2GainCorrection);
         if (var == egEnergyCorr::Scale::L2GainDown) daL2GainSwitch *= -1;
+        ATH_MSG_DEBUG("L2 gain uncertainty: " <<  daL2GainSwitch);
       }
       else {
         ATH_MSG_ERROR("trying to compute gain systematic, but no tool for doing it has been instantiated, setting sys to 0");
@@ -1692,6 +1731,8 @@ namespace AtlasRoot {
       if (var == egEnergyCorr::Scale::ADCLinDown)
 	daADCLin *= -1;
     }
+
+
 
     // Total
     double alphaTot = alphaZee;
@@ -1790,10 +1831,11 @@ namespace AtlasRoot {
 
 
   // returns mean electron ET at given eta
-  double egammaEnergyCorrectionTool::getZeeMeanET(double /* cl_eta */) const {
-
-    return 40000.; // to be replaced by histogram look-up at some point
-
+  double egammaEnergyCorrectionTool::getZeeMeanET(double  cl_eta) const {
+    if(m_esmodel != egEnergyCorr::es2022_R21_Precision) return 40000.; 
+    else {
+      return m_meanZeeProfile->GetBinContent(m_meanZeeProfile->FindBin(std::abs(cl_eta)))*1000;
+    }
   }
 
 
@@ -2783,7 +2825,8 @@ namespace AtlasRoot {
     double ET = energy/std::cosh(cl_eta);
 
     // move out of crack
-    aeta = nearestEtaBEC(aeta);
+    if (m_esmodel != egEnergyCorr::es2022_R21_Precision)
+      aeta = nearestEtaBEC(aeta);
 
     // argument ET is transverse energy in MeV
 
@@ -2804,6 +2847,12 @@ namespace AtlasRoot {
 	if (ieta >= 0 && ieta < m_s12ElectronGraphs->GetSize()) {
 	  value = ((TF1*)m_s12ElectronGraphs->At(ieta))->Eval( ET );
 	}
+      } else if( iLayer==6 ) { // Accordion correction (for Precision Run-2)
+
+	const int ieta = m_EaccElectronEtaBins->FindFixBin( aeta ) - 1;
+	if (ieta >= 0 && ieta < m_EaccElectronGraphs->GetSize()) {
+	  value = ((TF1*)m_EaccElectronGraphs->At(ieta))->Eval( ET );
+	}
       }
 
     } else if( ptype==PATCore::ParticleType::UnconvertedPhoton ) {
@@ -2820,6 +2869,12 @@ namespace AtlasRoot {
 	const int ieta = m_s12UnconvertedEtaBins->FindBin( aeta ) - 1;
 	if (ieta >= 0 && ieta < m_s12UnconvertedGraphs->GetSize()) {
 	  value = ((TF1*)m_s12UnconvertedGraphs->At(ieta))->Eval( ET );
+	}
+      } else if( iLayer==6 ) { // Accordion correction (for Precision Run-2)
+
+	const int ieta = m_EaccUnconvertedEtaBins->FindBin( aeta ) - 1;
+	if (ieta >= 0 && ieta < m_EaccUnconvertedGraphs->GetSize()) {
+	  value = ((TF1*)m_EaccUnconvertedGraphs->At(ieta))->Eval( ET );
 	}
       }
 
@@ -2838,10 +2893,23 @@ namespace AtlasRoot {
 	if (ieta >= 0 && ieta < m_s12ConvertedGraphs->GetSize()) {
 	  value = ((TF1*)m_s12ConvertedGraphs->At(ieta))->Eval( ET );
 	}
+      } else if( iLayer==6 ) { // Accordion correction (for Precision Run-2)
+
+	const int ieta = m_EaccConvertedEtaBins->FindBin( aeta ) - 1;
+	if (ieta >= 0 && ieta < m_EaccConvertedGraphs->GetSize()) {
+	  if (ET<10000. && (aeta<1.2 || (aeta>=1.59 && aeta<1.73))){
+      //harcoded condition to correct bad beahviour of function at low ET <10GeV
+      value = ((TF1*)m_EaccConvertedGraphs->At(ieta))->Eval( 10000. );
+    }
+    else{
+      value = ((TF1*)m_EaccConvertedGraphs->At(ieta))->Eval( ET );
+      }
+	}
       }
 
     }
-
+    
+    ATH_MSG_DEBUG("Layer non-linearity: " << iLayer << " value: " << value);
     if (value < 0) {
       ATH_MSG_DEBUG("Value is negative -> set to 0");
       value = 0;

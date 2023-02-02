@@ -49,13 +49,14 @@
 struct StdCalibrationInputs
 {
   float averageInteractionsPerCrossing;  // only for pileup correction
-  unsigned int RunNumber;   // only for HV presampler correction
+  unsigned int RunNumber;   // only for HV presampler correction and accordion energy correction
   double eta;
   double phi;               // only for HV presampler correction
   double E0raw;
   double E1raw;
   double E2raw;
   double E3raw;
+  double etaCalo;        
 };
 
 
@@ -188,6 +189,15 @@ struct GetAmountHisto2D : public GetAmountBase
 {
   GetAmountHisto2D(const TH2F& histo) : m_histo(histo) { m_histo.SetDirectory(0); };
   virtual GetAmountHisto2D* clone() const { return new GetAmountHisto2D(*this); };
+  virtual float operator()(const StdCalibrationInputs & input) const;
+protected:
+  TH2F m_histo;
+};
+
+struct GetAmountHisto2DEtaCaloRunNumber : public GetAmountBase
+{
+  GetAmountHisto2DEtaCaloRunNumber(const TH2F& histo) : m_histo(histo) { m_histo.SetDirectory(0); };
+  virtual GetAmountHisto2DEtaCaloRunNumber* clone() const { return new GetAmountHisto2DEtaCaloRunNumber(*this); };
   virtual float operator()(const StdCalibrationInputs & input) const;
 protected:
   TH2F m_histo;
@@ -344,8 +354,12 @@ public:
    * remove all the scale corrections
    **/
   void clear_corrections();
+  void disable_PSCorrections(){m_doPSCorrections=false;}
+  void disable_S12Corrections(){m_doS12Corrections=false;}
 private:
   std::string m_tune;
+  bool m_doPSCorrections = true;
+  bool m_doS12Corrections = true;
   const std::string resolve_path(std::string filename) const;
   const std::string& resolve_alias(const std::string& tune) const;
   ModifiersList m_modifiers;
