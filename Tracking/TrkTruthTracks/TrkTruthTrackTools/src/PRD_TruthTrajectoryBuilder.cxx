@@ -143,13 +143,13 @@ std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory > Trk::PRD_TruthTr
                     (prdTrajIter->second).nDoF += ndof;
                     ndofTotal = (prdTrajIter->second).nDoF;
                 }
-                ATH_MSG_INFO("  Associating PRD with " << ndof << " degrees of freedom, total N.d.o.F : " << ndofTotal );
-                ATH_MSG_INFO("  Associating Identifier " << curIdentifier << " with particle at [ " << curGenP << " ]." );
+                ATH_MSG_DEBUG("  Associating PRD with " << ndof << " degrees of freedom, total N.d.o.F : " << ndofTotal );
+                ATH_MSG_DEBUG("  Associating Identifier " << curIdentifier << " with particle at [ " << curGenP << " ]." );
                 std::string prdtype = m_idHelper->is_pixel(curIdentifier) ? "Pixel" : m_idHelper->is_sct(curIdentifier) ?  "SCT" : "TRT";
-                ATH_MSG_INFO("  PRD is a " << prdtype);
+                ATH_MSG_DEBUG("  PRD is a " << prdtype);
             } else {
                 std::string prdtype = m_idHelper->is_pixel(curIdentifier) ? "Pixel" : m_idHelper->is_sct(curIdentifier) ?  "SCT" : "TRT";
-                ATH_MSG_INFO("  Failed to get " << prdtype << " PRD");
+                ATH_MSG_DEBUG("  Failed to get " << prdtype << " PRD");
             }
         }        
     }
@@ -163,7 +163,7 @@ std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory > Trk::PRD_TruthTr
             ToolHandleArray<IPRD_TruthTrajectoryManipulator>::const_iterator prdTTMIterE = m_prdTruthTrajectoryManipulators.end();
             for ( ; prdTTMIter != prdTTMIterE; ++prdTTMIter ){
                 if ((*prdTTMIter)->manipulateTruthTrajectory((*prdTruthTrajIter).second))
-                    ATH_MSG_INFO("PRD truth trajectory got manipulated by: " << (*prdTTMIter).name() );
+                    ATH_MSG_DEBUG("PRD truth trajectory got manipulated by: " << (*prdTTMIter).name() );
             }
         }
     }
