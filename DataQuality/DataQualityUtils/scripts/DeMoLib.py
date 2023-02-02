@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-# Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble)- 2017 - 2022
+# Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble)- 2017 - 2023
 # Python 3 migration by Miaoran Lu (University of Iowa)- 2022
 #
 # Definition of system/year/tag characteristisc and functions used by DeMoUpdate, DeMoStatus
@@ -62,7 +62,23 @@ def returnPeriod(runNb,system,year,tag):
 
    return tmp2
    
+########################################################################
+# Return the year/tag properties (defect/veto/lumi tags...) stored in
+# YearStats-commonDeMoConfig-[year]-[tag].dat
+def retrieveYearTagProperties(year,tag):
+   ytp = {"Description":"","Defect tag":"","Veto tag":"","OflLumi tag":"","OflLumiAcct tag":""}
+   DeMoConfigFile = open("YearStats-common/DeMoConfig-%s-%s.dat"%(year,tag),"r")
+   for line in DeMoConfigFile:
+      for i_ytp in ytp.keys():
+         if ("%s: "%i_ytp in line):
+            ytp[i_ytp] = (line.split("%s: "%i_ytp)[1]).replace("\n","")
+   DeMoConfigFile.close()
 
+   for i_ytp in ytp.keys():
+      if (ytp[i_ytp] == ""):
+         print("ERROR: Missing (%s) in YearStats-common/DeMoConfig-%s-%s.dat -> Please check or define it with DeMoSetup.py"%(i_ytp,year,tag))
+
+   return ytp
 
 ########################################################################
 # Return a string with the luminosity in a human readable way
@@ -250,7 +266,10 @@ def plotStack(name,histo,index,indexName,histoIntLumi,lumiBool,resStack,resCanva
     if (approvedPlots):
       resLegend[name].SetHeader("#splitline{%s}{Total loss: %s / %s}"%(legendHeader,strLumi(totalIneff,unit),strLumi(totalIneffAux,unitAux)))
     else:
-      resLegend[name].SetHeader("#splitline{%s (%s)}{Total loss: %s / %s}"%(legendHeader,strLumi(totalIntegratedLumi,"pb"),strLumi(totalIneff,unit),strLumi(totalIneffAux,unitAux)))
+       if (totalIneff != 0.):
+          resLegend[name].SetHeader("#splitline{%s (%s)}{Total loss: %s / %s}"%(legendHeader,strLumi(totalIntegratedLumi,"pb"),strLumi(totalIneff,unit),strLumi(totalIneffAux,unitAux)))
+       else:
+          resLegend[name].SetHeader("%s (%s)"%(legendHeader,strLumi(totalIntegratedLumi,"pb")))
   if resStack["%s__recov"%name].GetEntries() != 0.:
     resStack["%s__recov"%name].SetMarkerStyle(20)
     resStack["%s__recov"%name].SetMarkerColor(kAzure+8)
@@ -272,34 +291,9 @@ def plotStack(name,histo,index,indexName,histoIntLumi,lumiBool,resStack,resCanva
 
 #########################################################################################
 #########################################################################################
-def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year = "2017",tag = "",runlist = {}):
+def initializeMonitoredDefects(system,partitions,defects0,defectVeto,veto,signOff,year,tag,runlist = {}):
 
-  # Path of the file containing the list of runs
-  if tag == "Tier0_%s"%year:
-     runlist["filename"] = "all-%s.dat"%year
-  if tag == "GRL_%s"%year:
-     runlist["filename"] = "grl-%s.dat"%year
-  
-
-  # Description used in TLegend and TAxis
-  yearTag["description"] = {"DQPaper_2015":"/Run 2 final",
-                            "DQPaper_2016":"/Run 2 final",
-                            "DQPaper_2017":"/Run 2 final",
-                            "DQPaper_2018":"/Run 2 final",
-                            "Tier0_2022":"/Tier0",
-                            "GRL_2022":"/GRL runs",
-                            "Tier0_2023":"/Tier0",
-                            "GRL_2023":"/GRL runs"}
-
-  # DB tag for the defect database - Common to all systems
-  # Please keep the definition below organised as it is. It is mandatory to extract the database tag by the DeMoGenerateWWW.py script
-  yearTag["defect"] = {"DQPaper_2015":"DetStatus-v105-pro22-13","DQPaper_2016":"DetStatus-v105-pro22-13","DQPaper_2017":"DetStatus-v105-pro22-13","DQPaper_2018":"DetStatus-v105-pro22-13","Tier0_2022":"HEAD","GRL_2022":"HEAD","Tier0_2023":"HEAD","GRL_2023":"HEAD"}
-
-  # Condition tag for the veto database - defined later per system when relevant
-  yearTag["veto"] = {}
-
-  yearTag["offlineLumiTag"] = {"OflLumi":{"2015":"OflLumi-13TeV-004","2016":"OflLumi-13TeV-009","2017":"OflLumi-13TeV-010","2018":"OflLumi-13TeV-010","2018_pbpb":"OflLumi-13TeV-001","2022":"OflLumi-Run3-002","2023":"OflLumi-Run3-002"},
-                               "OflLumiAcct":{"2022":"OflLumiAcct-Run3-002","2023":"OflLumiAcct-Run3-002"}}
+  runlist["filename"] = "runlist-%s-%s.dat"%(year,tag)
 
 #################################### NEWSYSTEM defects
 ###  if system == "NEWSYSTEM":
@@ -379,7 +373,7 @@ def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year =
     defectVeto["description"] = {"GLOBAL_STANDBY":"Standby", # Intolerable defects
                                  "CRATE_OUT":">=1 crate out",
                                  "ROD_OUT_MAJOR":"Large inefficency (ROD)",
-                                 "PERIOD_ERR_MAJOR":"Large inefficiency (PERIOD)",
+                                 "PERIOD_ERR_MAJOR":"Large inefficiency (Period)",
                                  "GLOBAL_DESYNC":"Global desync",
                                  "GLOBAL_RECONFIG":"Global reconfig",
                                  "GLOBAL_UNKNOWN":"Unknown",
@@ -443,13 +437,6 @@ def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year =
 # So far, only LAr use event veto
 # can be found with the twiki: https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/CoolProdTags#Tags_for_RUN_2_Bulk_Data_Process
   if system == "LAr":
-    # This tag is associated to conditions used in a processing
-    yearTag["veto"] = {"Tier0_2022":"LARBadChannelsOflEventVeto-RUN2-UPD4-11",
-                       "GRL_2022":"LARBadChannelsOflEventVeto-RUN2-UPD4-11",
-                       "Tier0_2023":"LARBadChannelsOflEventVeto-RUN2-UPD4-11",
-                       "GRL_2023":"LARBadChannelsOflEventVeto-RUN2-UPD4-11"
-                       }
-
     partitions["color"] = { 'EMBA':kYellow-9,'EMBC':kYellow,'EMECA':kOrange,'EMECC':kOrange-3,'HECA':kRed-3,'HECC':kRed+2,'FCALA':kBlue-3,'FCALC':kBlue+2}
     partitions["list"] = list(partitions["color"].keys())
 
@@ -985,7 +972,7 @@ def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year =
     defects0["partTol"] = []
     # Global intolerable and tolerable defects
     # Warning : do not remove/edit the comment specifying the system. It is used to display the defects in the webpage
-    defects0["globIntol"] = ["BUSY_GREATER50PCT","LOWMUCONFIG_IN_HIGHMU","OFFLINE_PROCESSING_PROBLEM","SOLENOID_OFF","SOLENOID_RAMPING","SOLENOID_NOTNOMINAL","TOROID_OFF","TOROID_NOTNOMINAL","TOROID_RAMPING"] # Global system
+    defects0["globIntol"] = ["BUSY_GREATER50PCT","LOWMUCONFIG_IN_HIGHMU","OFFLINE_PROCESSING_PROBLEM","SOLENOID_OFF","SOLENOID_RAMPING","SOLENOID_NOTNOMINAL","TOROID_OFF","TOROID_NOTNOMINAL","TOROID_RAMPING",                                 "NOTCONSIDERED","LHC_HIGHBETA","NONSTANDARD_BC","LOW_N_BUNCHES"] # Global system
     defects0["globTol"] = [] # Global system
     
     veto["all"] = [] # Veto name as defined in the COOL database
@@ -999,7 +986,12 @@ def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year =
                                  "SOLENOID_NOTNOMINAL":"Solenoid not nominal",
                                  "TOROID_OFF":"Toroid off",
                                  "TOROID_NOTNOMINAL":"Toroid not nominal",
-                                 "TOROID_RAMPING":"Toroid ramping"}
+                                 "TOROID_RAMPING":"Toroid ramping",
+                                 "NOTCONSIDERED":"Not considered",
+                                 "LHC_HIGHBETA":"LHC: high beta*",
+                                 "NONSTANDARD_BC":"LHC: non standard BC",
+                                 "LOW_N_BUNCHES":"LHC: low nbunches"
+                                 }
 
     signOff["EXPR."] = []
     signOff["BULK"] = []

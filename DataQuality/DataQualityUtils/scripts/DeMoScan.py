@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-# Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble) - 2017 - 2022
+# Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble) - 2017 - 2023
 # Python 3 migration by Miaoran Lu (University of Iowa)- 2022
 #
 # Displays the run affected per defect type
@@ -23,7 +23,7 @@ gROOT.SetBatch(False)
 
 sys.path.append("/afs/cern.ch/user/l/larmon/public/prod/Misc")
 from LArMonCoolLib import GetReadyFlag
-from DeMoLib import strLumi, initialize,MakeTH1,SetXLabel,MakeLegend,returnPeriod
+from DeMoLib import strLumi,initializeMonitoredDefects,retrieveYearTagProperties,MakeTH1,SetXLabel,MakeLegend,returnPeriod
 
 global debug
 debug = False
@@ -39,8 +39,8 @@ from argparse import RawTextHelpFormatter,ArgumentParser
 from DQDefects import DefectsDB
 
 parser = ArgumentParser(description='',formatter_class=RawTextHelpFormatter)
-parser.add_argument('-y','--year',dest='parser_year',default = ["2018"],nargs='*',help='Year [Default: 2018]',action='store')
-parser.add_argument('-t','--tag',dest='parser_tag',default = ["Tier0_2018"],nargs='*',help='Defect tag [Default: "Tier0_2018"]',action='store')
+parser.add_argument('-y','--year',dest='parser_year',default = ["2022"],nargs='*',help='Year [Default: 2022]',action='store')
+parser.add_argument('-t','--tag',dest='parser_tag',default = ["AtlasReady"],nargs='*',help='Defect tag [Default: "AtlasReady"]',action='store')
 parser.add_argument('-s','--system',dest='parser_system',default="LAr",help='System: LAr, CaloCP [Default: "LAr"]',action='store')
 parser.add_argument('-d','--directory',dest='parser_directory',default=".",help='Directory to display',action='store')
 parser.add_argument('-b','--batch',dest='parser_batchMode',help='Batch mode',action='store_true')
@@ -69,7 +69,7 @@ grlDef = {}
 defectVeto = {}
 veto = {}
 signOff = {}
-initialize(args.parser_system,yearTagProperties,partitions,grlDef,defectVeto,veto,signOff,args.parser_year[0])
+initializeMonitoredDefects(args.parser_system,partitions,grlDef,defectVeto,veto,signOff,args.parser_year[0],args.parser_tag[0])
 
 yearTagList = []
 yearTagDir = {}
@@ -79,7 +79,8 @@ for iYear in args.parser_year:
   for iTag in args.parser_tag:
     directory = "%s/YearStats-%s/%s/%s"%(args.parser_directory,args.parser_system,iYear,iTag)
     if os.path.exists(directory):
-      yearTag = "%s%s"%(iYear,yearTagProperties["description"][iTag])
+      yearTagProperties[iTag] = retrieveYearTagProperties(iYear,iTag)
+      yearTag = "%s%s"%(iYear,yearTagProperties[iTag]["Description"])
       yearTagList.append(yearTag)
       yearTagDir[yearTag] = directory
       yearTagTag[yearTag] = iTag # Used only to retrieve comments
@@ -138,8 +139,8 @@ options['recapDefects'] = args.parser_recapDefects
 options['prepareReproc'] = args.parser_reproc  
 runsFilter = []
 # If runs filter is requested, look for the runs of the chosen year/tag
-if (options['plotDiff2tags'] and options['restrictTagRuns'] in list(yearTagProperties["description"].keys()) and "%s%s"%(args.parser_year[0],yearTagProperties["description"][options['restrictTagRuns']]) in yearTagList): #if requested, restrict the runs to be considered to the one of the tag option
-  fRuns = open("%s/runs-ALL.dat"%yearTagDir["%s%s"%(args.parser_year[0],yearTagProperties["description"][options['restrictTagRuns']])])
+if (options['plotDiff2tags'] and options['restrictTagRuns'] in list(yearTagProperties.keys()) and "%s%s"%(args.parser_year[0],yearTagProperties[options['restrictTagRuns']]["Description"]) in yearTagList): #if requested, restrict the runs to be considered to the one of the tag option
+  fRuns = open("%s/runs-ALL.dat"%yearTagDir["%s%s"%(args.parser_year[0],yearTagProperties[options['restrictTagRuns']]["Description"])])
   for iline in fRuns.readlines():
     runWithoutPeriod = int(iline.split(" (")[0])
     runsFilter.append(runWithoutPeriod)
@@ -287,7 +288,7 @@ for iYT in yearTagList:
             loss_rLPR[iYT][iDefVeto].append(recovLumi)
             if options['retrieveComments'] and "defect" in defVetoType[iDefVeto]: # retrieve comments for defects
               print("@%d"%(runnumber))
-              db = DefectsDB(tag=yearTagProperties["defect"][yearTagTag[iYT]])
+              db = DefectsDB(tag=yearTagProperties[yearTagTag[iYT]]["Defect tag"])
               system_defects = []
               for iPrefix in grlDef["prefix"]:
                 system_defects += [d for d in (db.defect_names | db.virtual_defect_names) if (d.startswith(iPrefix) and iDefVeto in d)]
