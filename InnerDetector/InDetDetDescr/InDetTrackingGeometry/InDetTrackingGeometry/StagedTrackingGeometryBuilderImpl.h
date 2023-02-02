@@ -41,6 +41,69 @@ namespace Trk {
 }
 
 namespace InDet {
+struct LayerSetup
+{
+
+  // the layer cache
+  std::vector<Trk::Layer*> negativeLayers;
+  std::vector<Trk::Layer*> centralLayers;
+  std::vector<Trk::Layer*> positiveLayers;
+
+  // center information
+  double minRadiusCenter;
+  double maxRadiusCenter;
+  double zExtendCenter;
+  int binningCenter;
+
+  // endcap information
+  bool buildEndcap;
+  double minRadiusEndcap;
+  double maxRadiusEndcap;
+  double minZextendEndcap;
+  double maxZextendEndcap;
+  int binningEndcap;
+
+  // full setup information
+  double zSector;
+  double rMin;
+  double rMax;
+  double zMax;
+
+  std::string identification;
+  int colorCode;
+
+  LayerSetup(const std::string& idName, int cCode,
+             const std::vector<Trk::Layer*>& negLayers,
+             const std::vector<Trk::Layer*>& cenLayers,
+             const std::vector<Trk::Layer*>& posLayers, double minRc,
+             double maxRc, double zC, int binC, bool bec = false,
+             double minRe = 0., double maxRe = 0., double zMinE = 0.,
+             double zMaxE = 0., int binE = 0)
+      : negativeLayers(negLayers),
+        centralLayers(cenLayers),
+        positiveLayers(posLayers),
+        minRadiusCenter(minRc),
+        maxRadiusCenter(maxRc),
+        zExtendCenter(zC),
+        binningCenter(binC),
+        buildEndcap(bec),
+        minRadiusEndcap(minRe),
+        maxRadiusEndcap(maxRe),
+        minZextendEndcap(zMinE),
+        maxZextendEndcap(zMaxE),
+        binningEndcap(binE),
+        identification(idName),
+        colorCode(cCode) {
+    rMin =
+      minRadiusCenter < minRadiusEndcap ? minRadiusCenter : minRadiusEndcap;
+    rMax =
+      maxRadiusCenter > maxRadiusEndcap ? maxRadiusCenter : maxRadiusEndcap;
+    zMax = zExtendCenter > maxZextendEndcap ? zExtendCenter : maxZextendEndcap;
+    zSector =
+      buildEndcap ? 0.5 * (zExtendCenter + minZextendEndcap) : zExtendCenter;
+  }
+};
+
 
   /** @class StagedTrackingGeometryBuilderImpl
 
@@ -73,6 +136,14 @@ namespace InDet {
       virtual StatusCode finalize() override;
 
     protected:
+
+      std::unique_ptr<Trk::TrackingGeometry> trackingGeometryImpl(
+        std::vector<InDet::LayerSetup>& layerSetups,
+        double maximumLayerExtendZ,
+        double maximumLayerRadius,
+        double envelopeVolumeHalfZ,
+        double envelopeVolumeRadius) const;
+ 
       /** Private helper method to estimate the layer dimensions */
       void estimateLayerDimensions(const std::vector<Trk::Layer*>& layers,
                                    double& rMin,
@@ -101,6 +172,38 @@ namespace InDet {
         const std::vector<Trk::TrackingVolume*>& centralVolumes,
         const std::vector<Trk::TrackingVolume*>& posVolumes,
         const std::string& baseName = "UndefinedVolume") const;
+      /** Private helper method, estimates the overal dimensions */
+      LayerSetup estimateLayerSetup(
+        const std::string& idName,
+        size_t ils,
+        const std::vector<Trk::Layer*>& negLayers,
+        const std::vector<Trk::Layer*>& centralLayers,
+        const std::vector<Trk::Layer*>& posLayers,
+        double maxR,
+        double maxZ) const;
+
+      /** Private helper method to check if a sector is compatible with the cache */
+      bool setupFitsCache(
+        LayerSetup& layerSetup,
+        std::vector<InDet::LayerSetup>& layerSetupCache) const;
+
+      /** Private helper method to flush the cache into the id volumes - return
+       * volume is the one to be provided */
+      Trk::TrackingVolume* createFlushVolume
+      (std::vector<InDet::LayerSetup>& layerSetupCache,
+       double innerRadius,
+       double& outerRadius,
+       double extendZ) const;
+
+      /** Private helper method, creates and packs a triple containing of NegEndcap-Barrel-PosEndcap layers
+          - in case of a ring layout the subvolumes are created and the rMax is adapted
+         */
+      Trk::TrackingVolume* packVolumeTriple
+      (LayerSetup& layerSetup,
+       double rMin,
+       double& rMax,
+       double zMin,
+       double zPosCentral) const;
 
       /** Private helper method for detection of Ring layout */
       bool ringLayout(const std::vector<Trk::Layer*>& layers, std::vector<double>& rmins, std::vector<double>& rmaxs) const;
