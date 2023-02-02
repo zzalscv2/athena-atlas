@@ -54,7 +54,8 @@ def fastTrackingMenuSequence(flags, name, is_probe_leg=False, variant=''):
     theFastTrackingHypo.FeatureIsROI = False
     def acceptAllHypoToolGen(chainDict):
         return TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
-    return MenuSequence( Sequence    = sequence,
+    return MenuSequence( flags,
+                         Sequence    = sequence,
                          Maker       = fastTrackingViewsMaker, 
                          Hypo        = theFastTrackingHypo,
                          HypoToolGen = acceptAllHypoToolGen,

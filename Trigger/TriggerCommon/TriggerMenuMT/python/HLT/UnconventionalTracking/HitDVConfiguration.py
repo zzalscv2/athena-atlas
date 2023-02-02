@@ -41,14 +41,15 @@ def UTTJetRecoSequence(flags):
         from TrigT2CaloCommon.CaloDef import clusterFSInputMaker
         IMalg = clusterFSInputMaker()
 
-        return MenuSequence( Sequence    = seqAND("UTTJetRecoSeq", [IMalg,topoClusterSequence,JetSeq]),
+        return MenuSequence( flags,
+                             Sequence    = seqAND("UTTJetRecoSeq", [IMalg,topoClusterSequence,JetSeq]),
                              Maker       = IMalg,
                              Hypo        = HypoAlg,
                              HypoToolGen = StreamerHypoToolGenerator
                      )
 
 
-def HitDVHypoSequence():
+def HitDVHypoSequence(flags):
         from TrigLongLivedParticlesHypo.TrigHitDVHypoConfig import TrigHitDVHypoToolFromDict
         from TrigLongLivedParticlesHypo.TrigHitDVHypoConfig import createTrigHitDVHypoAlg
 
@@ -59,7 +60,8 @@ def HitDVHypoSequence():
         DummyInputMakerAlg = conf2toConfigurable(CompFactory.InputMakerForRoI( "IM_HitDV_HypoOnlyStep" ))
         DummyInputMakerAlg.RoITool = conf2toConfigurable(CompFactory.ViewCreatorInitialROITool())
 
-        return MenuSequence( Sequence    = seqAND("HitDVEmptyStep",[DummyInputMakerAlg]),
+        return MenuSequence( flags,
+                             Sequence    = seqAND("HitDVEmptyStep",[DummyInputMakerAlg]),
                              Maker       = DummyInputMakerAlg,
                              Hypo        = theHitDVHypo,
                              HypoToolGen = TrigHitDVHypoToolFromDict,

@@ -25,7 +25,8 @@ def IsoHPtTrackTriggerHypoSequence(flags):
         DummyInputMakerAlg.RoITool = conf2toConfigurable(CompFactory.ViewCreatorInitialROITool())
 
         log.debug("Building the Step dictinary for IsoHPt!")
-        return MenuSequence( Sequence    = seqAND("UncTrkEmptySeq",[DummyInputMakerAlg]),
+        return MenuSequence( flags,
+                             Sequence    = seqAND("UncTrkEmptySeq",[DummyInputMakerAlg]),
                              Maker       = DummyInputMakerAlg,
                              Hypo        = theIsoHPtTrackTriggerHypo,
                              HypoToolGen = TrigIsoHPtTrackTriggerHypoToolFromDict,

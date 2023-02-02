@@ -43,7 +43,8 @@ def VrtSecInclusiveMenuSequence(flags):
     theHypoAlg.isViewBased = False
 
     log.info("Building the Step dictinary for TrigVSI!")
-    return MenuSequence( Sequence    = TrkSeq,
+    return MenuSequence(flags,
+                        Sequence    = TrkSeq,
                         Maker       = im_alg,
                         Hypo        = theHypoAlg,
                         HypoToolGen = TrigVSIHypoToolFromDict,

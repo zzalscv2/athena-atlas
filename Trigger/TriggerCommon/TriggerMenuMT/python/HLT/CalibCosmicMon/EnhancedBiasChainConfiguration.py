@@ -94,10 +94,11 @@ def enhancedBiasMenuSequence(flags):
 
             return tool
 
-        return MenuSequence( Sequence   = enhancedBiasSequence,
+        return MenuSequence(flags,
+                            Sequence   = enhancedBiasSequence,
                             Maker       = inputMakerAlg,
                             Hypo        = hypoAlg,
-                            HypoToolGen = EnhancedBiasHypoToolGen )
+                            HypoToolGen = EnhancedBiasHypoToolGen)
 
 
 class EnhancedBiasChainConfiguration(ChainConfigurationBase):

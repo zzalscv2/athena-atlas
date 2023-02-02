@@ -120,11 +120,11 @@ def VSITriggerCfg(flags):
 
 def dEdxTriggerCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.dEdxTriggerConfiguration import dEdxTriggerHypoSequence
-    return dEdxTriggerHypoSequence()
+    return dEdxTriggerHypoSequence(flags)
 
 def HitDVTriggerCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.HitDVConfiguration import HitDVHypoSequence
-    return HitDVHypoSequence()
+    return HitDVHypoSequence(flags)
 
 def JetRecoOnlyCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.HitDVConfiguration import UTTJetRecoSequence
@@ -132,11 +132,11 @@ def JetRecoOnlyCfg(flags):
 
 def DisTrkTriggerCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.DisTrkTriggerConfiguration import DisTrkTriggerHypoSequence
-    return DisTrkTriggerHypoSequence()
+    return DisTrkTriggerHypoSequence(flags)
 
 def DJPromptStepCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.DJTriggerConfiguration import DJPromptStep
-    return DJPromptStep()
+    return DJPromptStep(flags)
 
 def DJDispStepCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.DJTriggerConfiguration import DJDispStep
@@ -148,4 +148,4 @@ def DVRecoStepCfg(flags):
 
 def DVEDStepCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.DVTriggerConfiguration import DVTriggerEDSequence
-    return DVTriggerEDSequence()
+    return DVTriggerEDSequence(flags)

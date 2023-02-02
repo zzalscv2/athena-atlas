@@ -40,7 +40,7 @@ def getLArNoiseBurst(flags):
 
     noiseBurstMenuSeq =  seqAND("LArNoiseMenuSeq", [noiseBurstInputMakerAlg, noiseBurstRecoSeq])
 
-    return MenuSequence(
+    return MenuSequence(flags,
             Sequence    = noiseBurstMenuSeq,
             Maker       = noiseBurstInputMakerAlg,
             Hypo        = hypoAlg,
@@ -69,7 +69,7 @@ def getCaloAllEMLayersPS(flags):
     TrigL2CaloLayersAlg = CompFactory.TrigL2CaloLayersAlg("TrigL2CaloLayersAlg_AllEM")
     TrigL2CaloLayersAlg.TrigClusterContainerKey = sequenceOut
 
-    return MenuSequence(
+    return MenuSequence(flags,
         Sequence    = sequence,
         Maker       = viewsmaker,
         Hypo        = TrigL2CaloLayersAlg,
@@ -100,7 +100,7 @@ def getCaloAllLayersPS(flags):
     TrigL2CaloLayersAlg = CompFactory.TrigL2CaloLayersAlg("TrigL2CaloLayersAlg_All")
     TrigL2CaloLayersAlg.TrigClusterContainerKey = sequenceOut
 
-    return MenuSequence(
+    return MenuSequence(flags,
         Sequence    = sequence,
         Maker       = viewsmaker,
         Hypo        = TrigL2CaloLayersAlg,
@@ -196,7 +196,8 @@ def IDCalibTriggerCfg(flags):
     DummyInputMakerAlg = conf2toConfigurable(CompFactory.InputMakerForRoI( "IM_IDCalib_HypoOnlyStep" ))
     DummyInputMakerAlg.RoITool = conf2toConfigurable(CompFactory.ViewCreatorInitialROITool())
 
-    return MenuSequence( Sequence    = seqAND("IDCalibEmptySeq",[DummyInputMakerAlg]),
+    return MenuSequence( flags,
+                         Sequence    = seqAND("IDCalibEmptySeq",[DummyInputMakerAlg]),
                          Maker       = DummyInputMakerAlg,
                          Hypo        = theHypoAlg,
                          HypoToolGen = IDCalibHypoToolFromDict,
@@ -213,7 +214,8 @@ def IDCalibFTFCfg(flags):
     from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
     HypoAlg = TrigStreamerHypoAlg("IDCalibTrkDummyStream")
 
-    return MenuSequence( Sequence    = seqAND("IDCalibTrkrecoSeq", TrkSeq),
+    return MenuSequence( flags,
+                         Sequence    = seqAND("IDCalibTrkrecoSeq", TrkSeq),
                          Maker       = InputMakerAlg,
                          Hypo        = HypoAlg,
                          HypoToolGen = StreamerHypoToolGenerator )
@@ -239,7 +241,7 @@ def acceptedEventsSequence(flags):
     hypoAlg = conf2toConfigurable(TimeBurnerCfg(name="AcceptedEventsHypo"))
     hypoAlg.SleepTimeMillisec = 0
 
-    return MenuSequence(
+    return MenuSequence(flags,
         Sequence    = inputMakerSeq,
         Maker       = inputMaker,
         Hypo        = hypoAlg,

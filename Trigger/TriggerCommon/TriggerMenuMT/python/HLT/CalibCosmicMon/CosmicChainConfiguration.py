@@ -3,7 +3,6 @@
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
-log.setLevel(2)
 
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
 from AthenaCommon.CFElements import parOR
@@ -39,7 +38,8 @@ def CosmicsTrkSequence(flags):
     trkInputMakerAlg.ViewNodeName = trkRecoSeq.name()
     log.debug("Prepared ID tracking sequence")
     log.debug(trkSequence)
-    return MenuSequence(Sequence    = trkSequence,
+    return MenuSequence(flags,
+                        Sequence    = trkSequence,
                         Maker       = trkInputMakerAlg,
                         Hypo        = trackCountHypo,
                         HypoToolGen = TrackCountHypoToolGen)

@@ -33,7 +33,7 @@ def addEventBuildingSequence(flags, chain, eventBuildType, chainDict):
         return pebInfoWriterTool(flags, chainDict['chainName'], eventBuildType)
 
     inputMaker = pebInputMaker(flags, chain, eventBuildType)
-    seq = MenuSequence(
+    seq = MenuSequence(flags,
         Sequence    = pebSequence(eventBuildType, inputMaker),
         Maker       = inputMaker,
         Hypo        = PEBInfoWriterAlg('PEBInfoWriterAlg_' + eventBuildType),

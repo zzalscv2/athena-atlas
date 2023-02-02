@@ -51,7 +51,8 @@ def precisionTracks_GSFRefittedMenuSequence(flags, name, is_probe_leg=False, ion
     def acceptAllHypoToolGen(chainDict):
         return TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
 
-    return MenuSequence( Sequence    = sequence,
+    return MenuSequence( flags,
+                         Sequence    = sequence,
                          Maker       = precisionTracks_GSFRefittedViewsMaker, 
                          Hypo        = thePrecisionTrack_GSFRefittedHypo,
                          HypoToolGen = acceptAllHypoToolGen, # Note: TrigEgammaPrecisionTrackingHypoAlg does not use HypoTools

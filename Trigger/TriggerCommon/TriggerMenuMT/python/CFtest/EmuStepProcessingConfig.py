@@ -2,7 +2,6 @@
 
 from AthenaCommon.AlgScheduler import AlgScheduler
 from AthenaCommon.Logging import logging
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from HLTSeeding.HLTSeedingConf import CTPUnpackingEmulationTool, RoIsUnpackingEmulationTool
 from TriggerMenuMT.HLT.Config.MenuComponents import EmptyMenuSequence
 log = logging.getLogger('EmuStepProcessingConfig')
@@ -27,16 +26,16 @@ def generateHLTSeedingAndChainsManually(flags, topSequence):
     
 
 ###########################################################################    
-def generateHLTSeedingAndChainsByMenu(topSequence):
+def generateHLTSeedingAndChainsByMenu(flags, topSequence):
     log.info("generateHLTSeedingAndChainsByMenu")
     generateEmuEvents()
     emulateHLTSeeding(topSequence)
-    generateEmuMenu()
+    generateEmuMenu(flags)
 
 
 
 ###########################################################################    
-def generateEmuMenu(): 
+def generateEmuMenu(flags):
     """ 
      set Emu menu and reproduce generateMT
     """
@@ -50,7 +49,7 @@ def generateEmuMenu():
 
     # Generate the menu
     menu = GenerateMenuMT()
-    menu.generateAllChainConfigs(ConfigFlags)
+    menu.generateAllChainConfigs(flags)
     #menu.generateMT()
 
 
@@ -176,17 +175,17 @@ def generateChainsManually(flags, maskbit=0x7):
     if doMuon:
         from DecisionHandling.HLTSignatureConfig import  muMenuSequence
         #step1
-        mu11 = muMenuSequence(step="1",reconame="v1", hyponame="v1")
-        mu12 = muMenuSequence(step="1",reconame="v2", hyponame="v2")
+        mu11 = muMenuSequence(flags,step="1",reconame="v1", hyponame="v1")
+        mu12 = muMenuSequence(flags,step="1",reconame="v2", hyponame="v2")
                     
         #step2
-        mu21 = muMenuSequence(step="2",reconame="v1", hyponame="v1")
-        mu22 = muMenuSequence(step="2",reconame="v2", hyponame="v2")
+        mu21 = muMenuSequence(flags,step="2",reconame="v1", hyponame="v1")
+        mu22 = muMenuSequence(flags,step="2",reconame="v2", hyponame="v2")
         #step3
-        mu31 = muMenuSequence(step="3",reconame="v1", hyponame="v1")
-        mu32 = muMenuSequence(step="3",reconame="v2", hyponame="v2")
+        mu31 = muMenuSequence(flags,step="3",reconame="v1", hyponame="v1")
+        mu32 = muMenuSequence(flags,step="3",reconame="v2", hyponame="v2")
         #step4
-        mu41 = muMenuSequence(step="4",reconame="v1", hyponame="v1")
+        mu41 = muMenuSequence(flags,step="4",reconame="v1", hyponame="v1")
 
         step_mu11  = makeChainStep("Step1_mu11", [mu11] )
         step_mu21  = makeChainStep("Step2_mu21", [mu21] )
@@ -212,15 +211,15 @@ def generateChainsManually(flags, maskbit=0x7):
     ## #electron chains
     if doElectron:
         from DecisionHandling.HLTSignatureConfig import  elMenuSequence, gamMenuSequence
-        el11 = elMenuSequence(step="1",reconame="v1", hyponame="v1")
-        el21 = elMenuSequence(step="2",reconame="v1", hyponame="v1")
-        el22 = elMenuSequence(step="2",reconame="v2", hyponame="v2")
-        el23 = elMenuSequence(step="2",reconame="v2", hyponame="v3")
-        el31 = elMenuSequence(step="3",reconame="v1", hyponame="v1")
-        el41 = elMenuSequence(step="4",reconame="v1", hyponame="v1")
+        el11 = elMenuSequence(flags,step="1",reconame="v1", hyponame="v1")
+        el21 = elMenuSequence(flags,step="2",reconame="v1", hyponame="v1")
+        el22 = elMenuSequence(flags,step="2",reconame="v2", hyponame="v2")
+        el23 = elMenuSequence(flags,step="2",reconame="v2", hyponame="v3")
+        el31 = elMenuSequence(flags,step="3",reconame="v1", hyponame="v1")
+        el41 = elMenuSequence(flags,step="4",reconame="v1", hyponame="v1")
 
         # gamma
-        gamm11 = gamMenuSequence("1", reconame="v1", hyponame="v1")
+        gamm11 = gamMenuSequence(flags,"1", reconame="v1", hyponame="v1")
     
         ElChains  = [
             makeChain(flags, name='HLT_TestChain5_ev1_L1EM3', L1Thresholds=["EM3"], ChainSteps=[ makeChainStep("Step1_em11", [el11]), makeChainStep("Step2_em21",  [el21]), makeChainStep("Step3_em31",  [el31])] ),
@@ -240,23 +239,23 @@ def generateChainsManually(flags, maskbit=0x7):
         
         if not doElectron:
             from DecisionHandling.HLTSignatureConfig import elMenuSequence        
-            el11 = elMenuSequence(step="1",reconame="v1", hyponame="v1") 
-            el21 = elMenuSequence(step="2",reconame="v1", hyponame="v1")
-            el41 = elMenuSequence(step="4",reconame="v1", hyponame="v1")
+            el11 = elMenuSequence(flags,step="1",reconame="v1", hyponame="v1")
+            el21 = elMenuSequence(flags,step="2",reconame="v1", hyponame="v1")
+            el41 = elMenuSequence(flags,step="4",reconame="v1", hyponame="v1")
             
         if not doMuon:
             from DecisionHandling.HLTSignatureConfig import muMenuSequence
             #step1
-            mu11 = muMenuSequence(step="1",reconame="v1", hyponame="v1")
-            mu12 = muMenuSequence(step="1",reconame="v2", hyponame="v2")
+            mu11 = muMenuSequence(flags,step="1",reconame="v1", hyponame="v1")
+            mu12 = muMenuSequence(flags,step="1",reconame="v2", hyponame="v2")
             #step2
-            mu21 = muMenuSequence(step="2",reconame="v1", hyponame="v1")
-            mu22 = muMenuSequence(step="2",reconame="v2", hyponame="v2")
+            mu21 = muMenuSequence(flags,step="2",reconame="v1", hyponame="v1")
+            mu22 = muMenuSequence(flags,step="2",reconame="v2", hyponame="v2")
             #step3
-            mu31 = muMenuSequence(step="3",reconame="v1", hyponame="v1")
-            mu32 = muMenuSequence(step="3",reconame="v2", hyponame="v2")
+            mu31 = muMenuSequence(flags,step="3",reconame="v1", hyponame="v1")
+            mu32 = muMenuSequence(flags,step="3",reconame="v2", hyponame="v2")
             #step4
-            mu41 = muMenuSequence(step="4",reconame="v1", hyponame="v1")
+            mu41 = muMenuSequence(flags,step="4",reconame="v1", hyponame="v1")
            
            
         from DecisionHandling.HLTSignatureHypoTools import dimuDrComboHypoTool

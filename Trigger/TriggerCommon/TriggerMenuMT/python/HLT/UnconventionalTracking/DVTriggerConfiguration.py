@@ -71,7 +71,8 @@ def DVRecoSequence(flags):
     HypoAlg = TrigStreamerHypoAlg("TrigDVRecoDummyStream")
 
     log.debug("Building the Step dictinary for TrigDV reco")
-    return MenuSequence( Sequence    = TrkSeq,
+    return MenuSequence(flags,
+                        Sequence    = TrkSeq,
                         Maker       = InputMakerAlg,
                         Hypo        = HypoAlg,
                         HypoToolGen = StreamerHypoToolGenerator
@@ -80,7 +81,7 @@ def DVRecoSequence(flags):
 
 
 
-def DVTriggerEDSequence():
+def DVTriggerEDSequence(flags):
     from TrigLongLivedParticlesHypo.TrigVrtSecInclusiveHypoConfig import TrigVSIHypoToolFromDict
     from TrigLongLivedParticlesHypo.TrigVrtSecInclusiveHypoConfig import createTrigVSIHypoAlg
 
@@ -97,7 +98,8 @@ def DVTriggerEDSequence():
     inputMakerAlg.RoITool = conf2toConfigurable(CompFactory.ViewCreatorInitialROITool())
 
     log.info("Building the Step dictinary for DisVtxTrigger!")
-    return MenuSequence( Sequence    = seqAND("TrigDVEDEmptyStep",[inputMakerAlg]),
+    return MenuSequence(flags,
+                        Sequence    = seqAND("TrigDVEDEmptyStep",[inputMakerAlg]),
                         Maker       = inputMakerAlg,
                         Hypo        = theHypoAlg,
                         HypoToolGen = TrigVSIHypoToolFromDict,

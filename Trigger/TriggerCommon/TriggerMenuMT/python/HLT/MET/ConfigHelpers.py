@@ -201,7 +201,7 @@ class AlgConfig(ABC):
                 hypo = conf2toConfigurable(self.make_passthrough_hypo_alg(idx))
                 hypo_tool = streamer_hypo_tool
             sequences.append(
-                MenuSequence(
+                MenuSequence(flags,
                     Sequence=seq,
                     Maker=inputMakers[idx],
                     Hypo=hypo,

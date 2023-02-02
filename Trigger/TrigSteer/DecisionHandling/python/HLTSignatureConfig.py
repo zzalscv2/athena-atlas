@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from DecisionHandling.HLTSignatureHypoTools import MuTestHypoTool, ElTestHypoTool
@@ -99,7 +99,7 @@ def makeElSequence(ConfigFlags, name,step):
 # Menu sequences
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
 
-def elMenuSequence(step, reconame, hyponame):
+def elMenuSequence(flags, step, reconame, hyponame):
     (Sequence, IM, seqOut) = RecoFragmentsPool.retrieve(makeElSequence,ConfigFlags,name=reconame, step=step)
     elHypo = ElGamHypo(hyponame+"Step"+step+"ElHypo")
     elHypo.Input = seqOut
@@ -107,12 +107,12 @@ def elMenuSequence(step, reconame, hyponame):
         selAcc=SelectionCA(hyponame+"elStep"+step)        
         selAcc.mergeReco(Sequence) 
         selAcc.addHypoAlgo(elHypo)
-        return MenuSequenceCA(selAcc, HypoToolGen=ElTestHypoTool)                 
+        return MenuSequenceCA(flags, selAcc, HypoToolGen=ElTestHypoTool)
     else:
-        return MenuSequence( Maker=IM, Sequence=Sequence, Hypo=elHypo, HypoToolGen=ElTestHypoTool)
+        return MenuSequence(flags, Maker=IM, Sequence=Sequence, Hypo=elHypo, HypoToolGen=ElTestHypoTool)
    
 
-def gamMenuSequence(step, reconame, hyponame):
+def gamMenuSequence(flags, step, reconame, hyponame):
     (Sequence, IM, seqOut) = RecoFragmentsPool.retrieve(makeElSequence,ConfigFlags,name=reconame, step=step)
     elHypo = ElGamHypo(hyponame+"Step"+step+"GamHypo")
     elHypo.Input = seqOut
@@ -120,13 +120,13 @@ def gamMenuSequence(step, reconame, hyponame):
         selAcc=SelectionCA(hyponame+"gamStep"+step+"Gam")        
         selAcc.mergeReco(Sequence) 
         selAcc.addHypoAlgo(elHypo)
-        return MenuSequenceCA(selAcc, HypoToolGen=ElTestHypoTool)                 
+        return MenuSequenceCA(flags,selAcc, HypoToolGen=ElTestHypoTool)
     else:
-        return MenuSequence( Maker=IM, Sequence=Sequence, Hypo=elHypo, HypoToolGen=ElTestHypoTool)
+        return MenuSequence(flags, Maker=IM, Sequence=Sequence, Hypo=elHypo, HypoToolGen=ElTestHypoTool)
     
 
 
-def muMenuSequence(step, reconame, hyponame):
+def muMenuSequence(flags, step, reconame, hyponame):
     (Sequence, IM, seqOut) = RecoFragmentsPool.retrieve(makeMuSequence,ConfigFlags,name=reconame, step=step)
     muHypo = MuHypo(hyponame+"Step"+step+"MuHypo")
     muHypo.Input = seqOut
@@ -134,12 +134,12 @@ def muMenuSequence(step, reconame, hyponame):
         selAcc=SelectionCA(hyponame+"muStep"+step)        
         selAcc.mergeReco(Sequence) 
         selAcc.addHypoAlgo(muHypo)
-        return MenuSequenceCA(selAcc, HypoToolGen=MuTestHypoTool)                 
+        return MenuSequenceCA(flags, selAcc, HypoToolGen=MuTestHypoTool)
     else:
-        return MenuSequence( Maker=IM, Sequence=Sequence, Hypo=muHypo, HypoToolGen=MuTestHypoTool)
+        return MenuSequence(flags, Maker=IM, Sequence=Sequence, Hypo=muHypo, HypoToolGen=MuTestHypoTool)
     
         
-def genMenuSequence(step, reconame, hyponame):
+def genMenuSequence(flags, step, reconame, hyponame):
     (Sequence, IM, seqOut) = RecoFragmentsPool.retrieve(makeElSequence,ConfigFlags,name=reconame, step=step)
     elHypo = ElGamHypo(hyponame+"Hypo")
     elHypo.Input = seqOut
@@ -147,8 +147,6 @@ def genMenuSequence(step, reconame, hyponame):
         selAcc=SelectionCA(hyponame+"elStep"+step)        
         selAcc.mergeReco(Sequence) 
         selAcc.addHypoAlgo(elHypo)
-        return MenuSequenceCA(selAcc, HypoToolGen=ElTestHypoTool)                 
+        return MenuSequenceCA(flags, selAcc, HypoToolGen=ElTestHypoTool)
     else:
-        return MenuSequence( Maker=IM, Sequence=Sequence, Hypo=elHypo, HypoToolGen=ElTestHypoTool)
-    
- 
+        return MenuSequence(flags, Maker=IM, Sequence=Sequence, Hypo=elHypo, HypoToolGen=ElTestHypoTool)

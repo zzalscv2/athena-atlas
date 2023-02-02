@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -18,9 +18,9 @@ from AthenaCommon.CFElements import seqAND
 #----------------------------------------------------------------
 
 def StreamingSequenceCfg( flags ):    
-    return StreamingMenuSequence()
+    return StreamingMenuSequence(flags)
 
-def StreamingMenuSequence():
+def StreamingMenuSequence(flags):
 
     inputMakerAlg = InputMakerForRoI("IM_streamerInputMaker")
     inputMakerAlg.RoITool = ViewCreatorInitialROITool()
@@ -32,7 +32,8 @@ def StreamingMenuSequence():
     streamerHypoAlg.RuntimeValidation = False #Needed to avoid the ERROR ! Decision has no 'feature' ElementLink
     streamerHypoToolGen= StreamerHypoToolGenerator
     
-    return  MenuSequence( Sequence    = streamingSequence,
+    return  MenuSequence( flags,
+                          Sequence    = streamingSequence,
                           Maker       = inputMakerAlg,
                           Hypo        = streamerHypoAlg,
                           HypoToolGen = streamerHypoToolGen )

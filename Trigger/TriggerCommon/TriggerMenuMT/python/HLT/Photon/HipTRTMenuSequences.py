@@ -70,7 +70,8 @@ def hipTRTMenuSequence(flags):
     trtHTHhypo = TrigTRTHTHhypoAlg("TrigTRTHTHhypo")
     trtHTHhypo.RNNOutputName = sequenceOut 
 
-    return MenuSequence( Sequence    = trtDataSequence,
+    return MenuSequence( flags,
+                         Sequence    = trtDataSequence,
                          Maker       = trtViewsMaker, 
                          Hypo        = trtHTHhypo,
                          HypoToolGen = TrigTRTHTHhypoToolFromDict)

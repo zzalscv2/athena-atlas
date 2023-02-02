@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.CFElements import seqAND
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
 from AthenaCommon.Logging import logging
@@ -7,7 +7,7 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 
-def DisTrkTriggerHypoSequence():
+def DisTrkTriggerHypoSequence(flags):
 
         from TrigLongLivedParticlesHypo.TrigDisappearingTrackHypoConfig import TrigDisappearingTrackHypoToolFromDict
         from TrigLongLivedParticlesHypo.TrigDisappearingTrackHypoConfig import createTrigDisappearingTrackHypoAlg
@@ -20,7 +20,8 @@ def DisTrkTriggerHypoSequence():
         DummyInputMakerAlg.RoITool = conf2toConfigurable(CompFactory.ViewCreatorInitialROITool())
 
         log.debug("Building the Step dictinary for DisTrk")
-        return MenuSequence( Sequence    = seqAND("DisTrkEmptyStep",[DummyInputMakerAlg]),
+        return MenuSequence( flags,
+                             Sequence    = seqAND("DisTrkEmptyStep",[DummyInputMakerAlg]),
                              Maker       = DummyInputMakerAlg,
                              Hypo        = theDisTrkHypo,
                              HypoToolGen = TrigDisappearingTrackHypoToolFromDict,

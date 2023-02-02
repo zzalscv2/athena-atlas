@@ -68,7 +68,8 @@ def allTE_trkfast( flags, signature="FS" ):
         beamspotHypoToolGen= StreamerHypoToolGenerator
 
 
-        return  MenuSequence( Sequence    = beamspotViewsSequence,
+        return  MenuSequence( flags,
+                              Sequence    = beamspotViewsSequence,
                               Maker       = inputMakerAlg,
                               Hypo        = beamspotHypoAlg,
                               HypoToolGen = beamspotHypoToolGen )
@@ -100,7 +101,8 @@ def getBeamspotVtx(flags):
         beamspotHypoAlg = TrigStreamerHypoAlg("BeamspotHypoAlg_"+signature)
         beamspotHypoToolGen= StreamerHypoToolGenerator
 
-        return  MenuSequence( Sequence    = beamspotViewsSequence,
+        return  MenuSequence( flags,
+                              Sequence    = beamspotViewsSequence,
                               Maker       = inputMakerAlg,
                               Hypo        = beamspotHypoAlg,
                               HypoToolGen = beamspotHypoToolGen )

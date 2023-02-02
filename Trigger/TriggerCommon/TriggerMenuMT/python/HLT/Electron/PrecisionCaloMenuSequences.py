@@ -73,7 +73,8 @@ def precisionCaloMenuSequence(flags, name, is_probe_leg=False, ion=False, varian
     thePrecisionCaloHypo = TrigEgammaPrecisionCaloHypoAlg(name + tag(ion) + 'Hypo'+ variant)
     thePrecisionCaloHypo.CaloClusters = sequenceOut
 
-    return MenuSequence( Sequence    = sequence,
+    return MenuSequence( flags,
+                         Sequence    = sequence,
                          Maker       = precisionCaloViewsMaker, 
                          Hypo        = thePrecisionCaloHypo,
                          HypoToolGen = TrigEgammaPrecisionCaloHypoToolFromDict,

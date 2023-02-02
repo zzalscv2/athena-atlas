@@ -13,7 +13,7 @@ from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
-def DJPromptStep():
+def DJPromptStep(flags):
     from TrigLongLivedParticlesHypo.TrigDJHypoConfig import (TrigDJHypoPromptToolFromDict)
     from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import (DisplacedJetPromptHypoAlg)
 
@@ -34,7 +34,8 @@ def DJPromptStep():
     im_alg = conf2toConfigurable(CompFactory.InputMakerForRoI( "IM_DJTRIG_Prompt" ))
     im_alg.RoITool = conf2toConfigurable(CompFactory.ViewCreatorInitialROITool())
 
-    return MenuSequence( Sequence    = seqAND("DJTrigPromptEmptyStep",[im_alg]),
+    return MenuSequence( flags,
+                         Sequence    = seqAND("DJTrigPromptEmptyStep",[im_alg]),
                          Maker       = im_alg,
                          Hypo        = hypo_alg,
                          HypoToolGen = TrigDJHypoPromptToolFromDict,
@@ -75,7 +76,8 @@ def DJDispStep(flags):
 
     ( alg_seq ,im_alg) = RecoFragmentsPool.retrieve(DJDispFragment,flags)
 
-    return MenuSequence(Sequence    = alg_seq,
+    return MenuSequence(flags,
+                        Sequence    = alg_seq,
                         Maker       = im_alg,
                         Hypo        = hypo_alg,
                         HypoToolGen = TrigDJHypoDispToolFromDict,

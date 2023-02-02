@@ -57,7 +57,7 @@ if testopt.menuType == 'menuManual':
     checkL1HLTConsistency(ConfigFlags)
 elif testopt.menuType == 'emuMenuTest':
     # HLT_TestChain
-    generateHLTSeedingAndChainsByMenu(topSequence)
+    generateHLTSeedingAndChainsByMenu(ConfigFlags, topSequence)
 elif testopt.menuType == 'emuManual':
     generateHLTSeedingAndChainsManually(ConfigFlags, topSequence)
 else:

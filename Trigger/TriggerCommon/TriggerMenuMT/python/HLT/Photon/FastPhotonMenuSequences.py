@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 
 
@@ -70,7 +70,7 @@ def fastPhotonSequence(flags):
     
 
 
-def fastPhotonMenuSequence(flags=None):
+def fastPhotonMenuSequence(flags):
     """Creates secpond step photon sequence"""
     
     TrigEgammaKeys = getTrigEgammaKeys()
@@ -86,7 +86,8 @@ def fastPhotonMenuSequence(flags=None):
 
     from TrigEgammaHypo.TrigEgammaFastPhotonHypoTool import TrigEgammaFastPhotonHypoToolFromDict
 
-    return MenuSequence( Maker=l2PhotonViewsMaker,
+    return MenuSequence( flags,
+                         Maker=l2PhotonViewsMaker,
                          Sequence=photonAthSequence,
                          Hypo=thePhotonHypo,
                          HypoToolGen=TrigEgammaFastPhotonHypoToolFromDict

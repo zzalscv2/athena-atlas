@@ -122,7 +122,8 @@ def getBJetSequence(flags, jc_name=None):
     )
 
     from TrigBjetHypo.TrigBjetBtagHypoTool import TrigBjetBtagHypoToolFromDict
-    return MenuSequence( Sequence    = BjetAthSequence,
+    return MenuSequence( flags,
+                         Sequence    = BjetAthSequence,
                          Maker       = InputMakerAlg,
                          Hypo        = hypo,
                          HypoToolGen = TrigBjetBtagHypoToolFromDict)

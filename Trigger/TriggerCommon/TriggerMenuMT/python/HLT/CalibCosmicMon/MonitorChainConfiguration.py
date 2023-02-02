@@ -30,7 +30,7 @@ def TimeBurnerSequenceCfg(flags):
         hypoAlg = TimeBurnerCfg()
         hypoAlg.SleepTimeMillisec = 200
 
-        return MenuSequence(
+        return MenuSequence(flags,
             Sequence    = inputMakerSeq,
             Maker       = inputMaker,
             Hypo        = hypoAlg,
@@ -61,7 +61,7 @@ def L1TopoOnlineMonitorSequenceCfg(flags, isLegacy):
 
         hypoAlg = TopoMonConfig.getL1TopoOnlineMonitorHypo(flags)
 
-        return MenuSequence(
+        return MenuSequence(flags,
             Sequence    = topoMonSeq,
             Maker       = inputMaker,
             Hypo        = hypoAlg,
@@ -82,7 +82,7 @@ def MistimeMonSequenceCfg(flags):
         # Hypo to select on trig composite pass flag
         hypoAlg = TrigGenericHypoAlg("MistimeMonJ400HypoAlg", TrigCompositeContainer=outputName)
 
-        return MenuSequence(
+        return MenuSequence(flags,
                 Sequence    = mistimeMonSeq,
                 Maker       = inputMaker,
                 Hypo        = hypoAlg,

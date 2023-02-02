@@ -47,7 +47,8 @@ def FullScanLRTTriggerMenuSequence(flags):
 
 
     log.info("Building the Step dictinary for FullScanLRT!")
-    return MenuSequence( Sequence    = TrkSeq,
+    return MenuSequence(flags,
+                        Sequence    = TrkSeq,
                         Maker       = im_alg,
                         Hypo        = theHypoAlg,
                         HypoToolGen = TrigLRTHypoToolFromDict,

@@ -64,7 +64,7 @@ def bmumuxSequence(flags):
     sequence, viewMaker = RecoFragmentsPool.retrieve(bmumuxAlgSequence, flags)
     hypo = TrigBphysStreamerHypo('BmumuxStreamerHypoAlg')
 
-    return MenuSequence(
+    return MenuSequence(flags,
         Sequence = sequence,
         Maker = viewMaker,
         Hypo = hypo,
@@ -83,7 +83,7 @@ def dimuL2Sequence(flags):
         triggerList = getNoL2CombChainNames(),
         triggerLevel = 'L2')
 
-    return MenuSequence(
+    return MenuSequence(flags,
         Sequence = sequence,
         Maker = viewMaker,
         Hypo = hypo,
@@ -105,7 +105,7 @@ def dimuEFSequence(flags):
 
     hypo = TrigBphysStreamerHypo('DimuEFStreamerHypoAlg', triggerLevel = 'EF')
 
-    return MenuSequence(
+    return MenuSequence(flags,
         Sequence = sequence,
         Maker = viewMaker,
         Hypo = hypo,

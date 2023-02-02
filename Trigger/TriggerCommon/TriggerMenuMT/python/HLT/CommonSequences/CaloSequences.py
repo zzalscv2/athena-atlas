@@ -51,7 +51,8 @@ def fastCaloMenuSequence(flags, name, doRinger=True, is_probe_leg=False):
     CaloMenuDefs.L2CaloClusters = sequenceOut
 
     from TrigEgammaHypo.TrigEgammaFastCaloHypoTool import TrigEgammaFastCaloHypoToolFromDict
-    return MenuSequence( Sequence    = sequence,
+    return MenuSequence( flags,
+                         Sequence    = sequence,
                          Maker       = fastCaloViewsMaker,
                          Hypo        = theFastCaloHypo,
                          HypoToolGen = TrigEgammaFastCaloHypoToolFromDict,

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool, MenuSequence
 from AthenaCommon.CFElements import seqAND
@@ -48,7 +48,8 @@ def TLAJetMenuSequence( flags, jetsIn, attachBtag=True ):
 
     hypo.TLAOutputName = jetsOut
 
-    return MenuSequence( Sequence    = tlaJetAthSequence,
+    return MenuSequence( flags,
+                         Sequence    = tlaJetAthSequence,
                          Maker       = tlaJetInputMakerAlg,
                          Hypo        = hypo,
                          HypoToolGen = trigJetTLAHypoToolFromDict

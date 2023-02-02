@@ -52,7 +52,8 @@ def AFPTrkSequenceCfg(flags):
     def trigStreamerAFPHypoTool(chain_dict):
         return conf2toConfigurable(CompFactory.TrigStreamerHypoTool(chain_dict["chainName"]))
 
-    return MenuSequence(Sequence = AFPPassThroughSequence,
+    return MenuSequence(flags,
+                        Sequence = AFPPassThroughSequence,
                         Maker    = inputMaker,
                         Hypo     = hypoAlg,
                         HypoToolGen = trigStreamerAFPHypoTool)
@@ -108,7 +109,8 @@ def AFPTrkRecoHypoSequence(flags):
                                    InputJetCollection = 'HLT_AntiKt4EMTopoJets_nojcalib')
     
 
-    return MenuSequence(Sequence = AFPSequenceHypo,
+    return MenuSequence(flags,
+                        Sequence = AFPSequenceHypo,
                         Maker    = AFPInputMakerHypo,
                         Hypo     = hypoAlg,
                         HypoToolGen = TestTrigAFPDijetHypoToolGen)
@@ -150,7 +152,8 @@ def AFPGlobalSequenceCfg(flags):
                                       AFPVertexContainer = 'HLT_AFPVertexContainer',
                                       VertexContainer = 'HLT_IDVertex_FS')
         
-    return MenuSequence(Sequence = seq,
+    return MenuSequence(flags,
+                        Sequence = seq,
                         Maker    = inputMaker,
                         Hypo     = hypoAlg,
                         HypoToolGen = AFPTOFHypoToolGen)
