@@ -19,6 +19,7 @@
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/TrackFinding/MeasurementSelector.hpp"
+#include "Acts/EventData/VectorTrackContainer.hpp"
 
 // PACKAGE
 #include "ActsTrkToolInterfaces/ITrackFindingTool.h"
@@ -77,7 +78,8 @@ namespace ActsTrk
     size_t
     makeTracks(const EventContext &ctx,
                Acts::GeometryContext &tgContext,
-               const Acts::CombinatorialKalmanFilterResult<traj_Type> &fitResult,
+	       Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>& tracks,
+	       std::vector< typename  Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>::TrackProxy >& fitOutput,
                ::TrackCollection &tracksContainer) const;
 
     std::unique_ptr<const Trk::MeasurementBase>

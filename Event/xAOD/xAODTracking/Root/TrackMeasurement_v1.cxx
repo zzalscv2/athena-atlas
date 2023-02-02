@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODCore/AuxStoreAccessorMacros.h"
 #include "xAODTracking/versions/TrackMeasurement_v1.h"
@@ -40,5 +40,9 @@ namespace xAOD {
     void TrackMeasurement_v1::resize(size_t sz) {
         measAcc(*this).resize(sz);
         covMatrixAcc(*this).resize(sz * sz);
+    }
+
+    size_t TrackMeasurement_v1::size() const {
+      return measAcc(*this).size();
     }
 }

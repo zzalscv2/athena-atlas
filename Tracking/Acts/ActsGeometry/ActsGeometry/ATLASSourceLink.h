@@ -1,4 +1,3 @@
-
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
@@ -10,7 +9,6 @@
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 
 #include "Acts/EventData/Measurement.hpp"
-#include "Acts/EventData/SourceLink.hpp"
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 #include "Acts/Surfaces/Surface.hpp"
@@ -28,36 +26,35 @@
 ///
 /// @todo Allow multiple truth hits e.g. for merged hits.
 template <typename measurement_t>
-class ATLASSourceLinkGeneric : public Acts::SourceLink
+class ATLASSourceLinkGeneric final
 {
+  enum ElementType : std::int8_t {MEASUREMENT=0, LOC, COV, TYPE};
+
 public:
   using Measurement = measurement_t;
 
-  ATLASSourceLinkGeneric(const Acts::Surface &surface, const measurement_t &atlasHit,
-                         size_t dim, Acts::BoundVector values, Acts::BoundMatrix cov)
-      : Acts::SourceLink{surface.geometryId()},
-        m_values(values),
-        m_cov(cov),
-        m_dim(dim),
-        m_atlasHit(&atlasHit) {}
-
+  ATLASSourceLinkGeneric(const Acts::Surface &surface,
+			 std::tuple<const measurement_t*, Acts::BoundVector, Acts::BoundMatrix, std::size_t>& elements)
+    : m_geometryId(surface.geometryId()),
+    m_elements(&elements)
+      {}
+  
   /// Must be default_constructible to satisfy SourceLinkConcept.
-  ATLASSourceLinkGeneric(ATLASSourceLinkGeneric &&) = default;
+  ATLASSourceLinkGeneric(ATLASSourceLinkGeneric &&) noexcept = default;
   ATLASSourceLinkGeneric(const ATLASSourceLinkGeneric &) = default;
-  ATLASSourceLinkGeneric &operator=(ATLASSourceLinkGeneric &&) = default;
+  ATLASSourceLinkGeneric &operator=(ATLASSourceLinkGeneric &&) noexcept = default;
   ATLASSourceLinkGeneric &operator=(const ATLASSourceLinkGeneric &) = default;
+  
+  const Acts::BoundVector& values() const { return std::get<ElementType::LOC>(*m_elements); }
+  const Acts::BoundMatrix& cov() const { return std::get<ElementType::COV>(*m_elements); }
+  constexpr size_t dim() const { return std::get<ElementType::TYPE>(*m_elements); }
 
-  Acts::BoundVector values() const { return m_values; }
-  Acts::BoundMatrix cov() const { return m_cov; }
-  constexpr size_t dim() const { return m_dim; }
-  constexpr const measurement_t &atlasHit() const { return *m_atlasHit; }
+  constexpr const measurement_t& atlasHit() const { return *std::get<ElementType::MEASUREMENT>(*m_elements); }
+  Acts::GeometryIdentifier geometryId() const { return m_geometryId; }
 
-private:
-  Acts::BoundVector m_values;
-  Acts::BoundMatrix m_cov;
-  size_t m_dim = 0u;
-  // need to store pointers to make the object copyable
-  const measurement_t *m_atlasHit;
+ private:
+  Acts::GeometryIdentifier m_geometryId{};
+  std::tuple<const measurement_t*, Acts::BoundVector, Acts::BoundMatrix, std::size_t>* m_elements;
 
   friend constexpr bool operator==(const ATLASSourceLinkGeneric &lhs,
                                    const ATLASSourceLinkGeneric &rhs)
@@ -88,21 +85,17 @@ struct ATLASSourceLinkCalibrator final
 };
 
 template <typename trajectory_t, typename sourceLink_t>
-void ATLASSourceLinkCalibrator::calibrate(const Acts::GeometryContext & /*gctx*/,
-                                          typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy trackState)
-{
-  const auto &sourceLink = static_cast<const sourceLink_t &>(trackState.uncalibrated());
+void ATLASSourceLinkCalibrator::calibrate(const Acts::GeometryContext& /*gctx*/,
+					  typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy trackState) {
+  const auto& sourceLink = trackState.uncalibratedSourceLink().template get<sourceLink_t>();
   trackState.allocateCalibrated(sourceLink.dim());
   if (sourceLink.dim() == 0)
   {
     throw std::runtime_error("Cannot create dim 0 measurement");
-  }
-  else if (sourceLink.dim() == 1)
-  {
-    // return Acts::makeMeasurement(sourceLink, sourceLink.values().head<1>(), sourceLink.cov().topLeftCorner<1, 1>(), Acts::eBoundLoc0);
+  } else if (sourceLink.dim() == 1) {
+    trackState.allocateCalibrated(sourceLink.dim());
     trackState.template calibrated<1>() = sourceLink.values().template head<1>();
     trackState.template calibratedCovariance<1>() = sourceLink.cov().template topLeftCorner<1, 1>();
-    trackState.calibratedSize() = sourceLink.dim();
     // Create a 1D projection matrix
     Acts::ActsMatrix<Acts::MultiTrajectory<trajectory_t>::MeasurementSizeMax, 1> proj;
     proj.setZero();
@@ -110,18 +103,17 @@ void ATLASSourceLinkCalibrator::calibrate(const Acts::GeometryContext & /*gctx*/
     trackState.setProjector(proj);
   }
   else if (sourceLink.dim() == 2)
-  {
-    // return Acts::makeMeasurement(sourceLink, sourceLink.values().head<2>(), sourceLink.cov().topLeftCorner<2, 2>(), Acts::eBoundLoc0, Acts::eBoundLoc1);
-    trackState.template calibrated<2>() = sourceLink.values().template head<2>();
-    trackState.template calibratedCovariance<2>() = sourceLink.cov().template topLeftCorner<2, 2>();
-    trackState.calibratedSize() = sourceLink.dim();
-    // Create a 2D projection matrix
-    Acts::ActsMatrix<Acts::MultiTrajectory<trajectory_t>::MeasurementSizeMax, 2> proj;
-    proj.setZero();
-    proj(Acts::eBoundLoc0, Acts::eBoundLoc0) = 1;
-    proj(Acts::eBoundLoc1, Acts::eBoundLoc1) = 1;
-    trackState.setProjector(proj);
-  }
+    {
+      trackState.allocateCalibrated(sourceLink.dim());
+      trackState.template calibrated<2>() = sourceLink.values().template head<2>();
+      trackState.template calibratedCovariance<2>() = sourceLink.cov().template topLeftCorner<2, 2>();
+      // Create a 2D projection matrix
+      Acts::ActsMatrix<Acts::MultiTrajectory<trajectory_t>::MeasurementSizeMax, 2> proj;
+      proj.setZero();
+      proj(Acts::eBoundLoc0, Acts::eBoundLoc0) = 1;
+      proj(Acts::eBoundLoc1, Acts::eBoundLoc1) = 1;
+      trackState.setProjector(proj);
+    }
   else
   {
     throw std::runtime_error("Dim " + std::to_string(sourceLink.dim()) +

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKSEEDINGTOOL_SEEDINGTOOL_H
@@ -66,17 +66,13 @@ namespace ActsTrk {
 		   const Acts::Vector3& bField,
 		   std::vector< seed_type >& seeds) const;
     
-    const std::pair< 
-      Acts::SpacePointGridConfig, 
-      Acts::SeedFinderConfig< value_type >
-      > 
-      prepareConfiguration(const Acts::Vector2& beamPos, 
-			   const Acts::Vector3& bField) const;
-    
+    StatusCode prepareConfiguration();
+
     // *********************************************************************
     // *********************************************************************
 
   protected:
+    Acts::SeedFinderConfig< value_type > m_finderCfg;
 
     // Properties to set SpacePointGridConfig
     Gaudi::Property< float > m_minPt {this, "minPt", 900. * Acts::UnitConstants::MeV,
@@ -100,8 +96,6 @@ namespace ActsTrk {
       "phi min for space point grid formation"};
     Gaudi::Property< float > m_gridPhiMax {this, "gridPhiMax", 2*M_PI,
       "phi max for space point grid formation"};
-    Gaudi::Property< float > m_bFieldInZ {this, "bFieldInZ", 2. * Acts::UnitConstants::T,
-      "z component of magnetic field to be used in grid building"};
     Gaudi::Property< int > m_phiBinDeflectionCoverage {this, "phiBinDeflectionCoverage", 3,
       "sets of consecutive phi bins to cover full deflection of minimum pT particle"};
 

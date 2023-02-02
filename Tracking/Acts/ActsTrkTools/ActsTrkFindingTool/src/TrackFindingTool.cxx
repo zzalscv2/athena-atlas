@@ -166,18 +166,29 @@ namespace
 
   /// Adapted from Acts Examples/Framework/include/ActsExamples/EventData/IndexSourceLink.hpp
 
-  /// Container of index source links.
+  /// Container of uncalibrated source links.
   ///
   /// Since the source links provide a `.geometryId()` accessor, they can be
   /// stored in an ordered geometry container.
   using UncalibSourceLinkMultiset =
-      GeometryIdMultiset<std::reference_wrapper<const ATLASUncalibSourceLink>>;
+    GeometryIdMultiset<ATLASUncalibSourceLink>;
+
   /// Accessor for the above source link container
   ///
   /// It wraps up a few lookup methods to be used in the Combinatorial Kalman
   /// Filter
-  using UncalibSourceLinkAccessor =
-      GeometryIdMultisetAccessor<std::reference_wrapper<const ATLASUncalibSourceLink>>;
+  struct UncalibSourceLinkAccessor 
+    : GeometryIdMultisetAccessor<ATLASUncalibSourceLink> { 
+    using BaseIterator = GeometryIdMultisetAccessor<ATLASUncalibSourceLink>::Iterator; 
+    using Iterator = Acts::SourceLinkAdapterIterator<BaseIterator>;
+
+    // get the range of elements with requested geoId
+    std::pair<Iterator, Iterator> range(const  Acts::Surface &surface) const {
+      assert(container != nullptr);
+      auto [begin, end] = container->equal_range(surface.geometryId());
+      return {Iterator{begin}, Iterator{end}};
+    }
+  };
 
   /// Adapted from Acts Examples/Algorithms/TrackFinding/src/TrackFindingAlgorithmFunction.cpp
 
@@ -199,9 +210,10 @@ namespace ActsTrk
   TrackFindingTool::TrackFindingTool(const std::string &type,
                                      const std::string &name,
                                      const IInterface *parent)
-      : base_class(type, name, parent) {}
+      : base_class(type, name, parent) 
+  {}
 
-  TrackFindingTool::~TrackFindingTool() {}
+  TrackFindingTool::~TrackFindingTool() = default;
 
   StatusCode TrackFindingTool::initialize()
   {
@@ -307,36 +319,36 @@ namespace ActsTrk
                                calContext,
                                slAccessorDelegate,
                                m_ckfExtensions,
-                               Acts::LoggerWrapper{logger()},
                                m_pOptions,
                                &(*pSurface));
 
     // Perform the track finding for all initial parameters
     ATH_MSG_DEBUG("Invoke track finding with " << initialParameters.size() << " seeds.");
 
-    auto results = m_trackFinder->findTracks(initialParameters, options);
+    Acts::TrackContainer tc {Acts::VectorTrackContainer{},
+	Acts::VectorMultiTrajectory{}};
 
     m_nTotalSeeds += initialParameters.size();
+    
+    for (std::size_t iseed = 0; iseed < initialParameters.size(); ++iseed) {
+      // Get the Acts tracks, given this seed
+      // Result here contains a vector of TrackProxy objects
 
-    // Loop over the track finding results for all initial parameters
-    for (std::size_t iseed = 0; iseed < initialParameters.size(); ++iseed)
-    {
+      auto result = m_trackFinder->findTracks(initialParameters[iseed], options, tc);
+
       // The result for this seed
-      auto &result = results[iseed];
-      if (result.ok())
-      {
-        // Get the track finding output and add to tracksContainer
-        size_t ntracks = makeTracks(ctx, tgContext, result.value(), tracksContainer);
-        if (ntracks == 0)
-        {
-          ATH_MSG_WARNING("Track finding found no track candidates for seed " << iseed);
-          m_nFailedSeeds++;
-        }
-      }
-      else
-      {
-        ATH_MSG_WARNING("Track finding failed for seed " << iseed << " with error" << result.error());
+      if (not result.ok()) {
+	ATH_MSG_WARNING("Track finding failed for seed " << iseed << " with error" << result.error());
         m_nFailedSeeds++;
+	continue;
+      }
+      
+      // Get the track finding output and add to tracksContainer
+      size_t ntracks = makeTracks(ctx, tgContext, tc, result.value(), tracksContainer);
+
+      if (ntracks == 0) {
+	ATH_MSG_WARNING("Track finding found no track candidates for seed " << iseed);
+	m_nFailedSeeds++;
       }
     }
 
@@ -349,17 +361,14 @@ namespace ActsTrk
   size_t
   TrackFindingTool::makeTracks(const EventContext &ctx,
                                Acts::GeometryContext &tgContext,
-                               const Acts::CombinatorialKalmanFilterResult<traj_Type> &trackFindingOutput,
+			       Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>& tracks,
+			       std::vector< typename  Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>::TrackProxy>& fitResult,
                                ::TrackCollection &tracksContainer) const
   {
     size_t ntracks = 0;
-    for (const auto lastMeasurementIndex : trackFindingOutput.lastMeasurementIndices)
-    {
-      if (trackFindingOutput.fittedParameters.count(lastMeasurementIndex) <= 0)
-      {
-        continue;
-      }
-
+    for (auto& track : fitResult) {
+      const auto lastMeasurementIndex = track.tipIndex();
+      
       auto finalTrajectory = DataVector<const Trk::TrackStateOnSurface>();
       // initialise the number of dead Pixel and Acts strip
       int numberOfDeadPixel = 0;
@@ -367,15 +376,16 @@ namespace ActsTrk
 
       std::vector<std::unique_ptr<const Acts::BoundTrackParameters>> actsSmoothedParam;
       // Loop over all the output state to create track state
-      trackFindingOutput.fittedStates->visitBackwards(
+      tracks.trackStateContainer().visitBackwards(
           lastMeasurementIndex,
-          [&](const auto &state)
+          [&] (const auto &state) -> void
           {
             // First only consider states with an associated detector element
             if (!state.referenceSurface().associatedDetectorElement())
             {
               return;
             }
+
             // We need to determine the type of state
             auto flag = state.typeFlags();
             std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
@@ -442,13 +452,15 @@ namespace ActsTrk
               parm = m_ATLASConverterTool->ActsTrackParameterToATLAS(actsParam, tgContext);
               typePattern.set(Trk::TrackStateOnSurface::Measurement);
             }
+
             std::unique_ptr<const Trk::MeasurementBase> measState;
-            if (state.hasUncalibrated())
+            if (state.hasUncalibratedSourceLink())
             {
-              const auto &sl = static_cast<const ATLASUncalibSourceLink &>(state.uncalibrated());
+              const auto &sl = state.uncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
               const xAOD::UncalibratedMeasurement &uncalibMeas = sl.atlasHit();
               measState = makeRIO_OnTrack(uncalibMeas, parm.get());
             }
+
             double nDoF = state.calibratedSize();
             auto quality = Trk::FitQualityOnSurface(state.chi2(), nDoF);
             auto perState = new Trk::TrackStateOnSurface(quality,
@@ -456,23 +468,24 @@ namespace ActsTrk
                                                          std::move(parm),
                                                          nullptr,
                                                          typePattern);
+
             // If a state was succesfully created add it to the trajectory
             finalTrajectory.insert(finalTrajectory.begin(), perState);
           });
 
       // Convert the perigee state and add it to the trajectory - TODO: check this is the right TS
-      auto actsPerIt = trackFindingOutput.fittedParameters.find(lastMeasurementIndex);
-      if (actsPerIt != trackFindingOutput.fittedParameters.end())
-      {
-        auto per = m_ATLASConverterTool->ActsTrackParameterToATLAS(actsPerIt->second, tgContext);
-        std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
-        typePattern.set(Trk::TrackStateOnSurface::Perigee);
-        auto perState = new Trk::TrackStateOnSurface(nullptr,
-                                                     std::move(per),
-                                                     nullptr,
-                                                     typePattern);
-        finalTrajectory.insert(finalTrajectory.begin(), perState);
-      }
+      const Acts::BoundTrackParameters actsPer(track.referenceSurface().getSharedPtr(), 
+					       track.parameters(), 
+					       track.covariance());
+
+      std::unique_ptr<const Trk::TrackParameters> per = m_ATLASConverterTool->ActsTrackParameterToATLAS(actsPer, tgContext);
+      std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
+      typePattern.set(Trk::TrackStateOnSurface::Perigee);
+      auto perState = new Trk::TrackStateOnSurface(nullptr,
+						   std::move(per),
+						   nullptr,
+						   typePattern);
+      finalTrajectory.insert(finalTrajectory.begin(), perState);
 
       // Create the track using the states
       Trk::TrackInfo newInfo(Trk::TrackInfo::TrackFitter::KalmanFitter, Trk::noHypothesis);
@@ -491,6 +504,7 @@ namespace ActsTrk
       tracksContainer.push_back(std::move(newtrack));
       ++ntracks;
     }
+
     return ntracks;
   }
 

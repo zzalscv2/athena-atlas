@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsExtrapolationTool.h"
@@ -100,7 +100,8 @@ ActsExtrapolationTool::initialize()
 
     auto stepper = Stepper(std::move(bField));
     auto propagator = Acts::Propagator<Stepper, Acts::Navigator>(std::move(stepper),
-                                                                 std::move(navigator));
+                                                                 std::move(navigator),
+								 logger().cloneWithSuffix("Prop"));
     m_varProp = std::make_unique<VariantPropagator>(propagator);
   }
   else if (m_fieldMode == "Constant") {
@@ -157,7 +158,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
 
   using Options = Acts::DenseStepperPropagatorOptions<ActionList, AbortConditions>;
 
-  Options options(anygctx, mctx, Acts::LoggerWrapper{*m_logger});
+  Options options(anygctx, mctx);
   options.pathLimit = pathLimit;
 
   options.loopProtection
@@ -235,7 +236,7 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
   using AbortConditions = Acts::AbortList<EndOfWorld>;
   using Options = Acts::DenseStepperPropagatorOptions<ActionList, AbortConditions>;
 
-  Options options(anygctx, mctx, Acts::LoggerWrapper{*m_logger});
+  Options options(anygctx, mctx);
   options.pathLimit = pathLimit;
 
   options.loopProtection
@@ -290,7 +291,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
   using AbortConditions = Acts::AbortList<EndOfWorld>;
   using Options = Acts::DenseStepperPropagatorOptions<ActionList, AbortConditions>;
 
-  Options options(anygctx, mctx, Acts::LoggerWrapper{*m_logger});
+  Options options(anygctx, mctx);
   options.pathLimit = pathLimit;
 
   options.loopProtection
@@ -361,7 +362,7 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
   using AbortConditions = Acts::AbortList<EndOfWorld>;
   using Options = Acts::DenseStepperPropagatorOptions<ActionList, AbortConditions>;
 
-  Options options(anygctx, mctx, Acts::LoggerWrapper{*m_logger});
+  Options options(anygctx, mctx);
   options.pathLimit = pathLimit;
 
   options.loopProtection

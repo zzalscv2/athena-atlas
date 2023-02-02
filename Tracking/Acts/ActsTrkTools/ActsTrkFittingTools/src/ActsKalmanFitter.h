@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSKALMANFITTER_H
@@ -20,6 +20,8 @@
 #include "Acts/MagneticField/MagneticFieldProvider.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
 #include "Acts/Propagator/Propagator.hpp"
+#include "Acts/EventData/Track.hpp"
+#include "Acts/EventData/VectorTrackContainer.hpp"
 
 // PACKAGE
 
@@ -39,12 +41,12 @@ namespace Trk{
   class Track;
 }
 
-class ActsKalmanFitter : virtual public Trk::ITrackFitter, public AthAlgTool {
+class ActsKalmanFitter : public extends<AthAlgTool, Trk::ITrackFitter> { 
 public:
   using traj_Type = Acts::VectorMultiTrajectory;
 
   ActsKalmanFitter(const std::string&,const std::string&,const IInterface*);
-  virtual ~ActsKalmanFitter();
+  virtual ~ActsKalmanFitter() = default;
 
   // standard Athena methods
   virtual StatusCode initialize() override;
@@ -181,25 +183,31 @@ private:
       Acts::MultiTrajectory<trajectory_t>& trajectory, size_t entryIndex, Acts::LoggerWrapper logger);
 
   // Create a track from the fitter result
-  template<typename trajectory_t>
-  std::unique_ptr<Trk::Track> makeTrack(const EventContext& ctx, Acts::GeometryContext& tgContext, TrackFitterResult<trajectory_t>& fitResult) const;
+  template<typename track_container_t, typename traj_t,
+           template <typename> class holder_t>
+  std::unique_ptr<Trk::Track> makeTrack(const EventContext& ctx, 
+					Acts::GeometryContext& tgContext, 
+					Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>& tracks,
+					Acts::Result<typename  Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>::TrackProxy, std::error_code>& fitResult) const;
 
   ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "ActsExtrapolationTool"};
   ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
   ToolHandle<IActsATLASConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", "ActsATLASConverterTool"};
-  ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool;
+  ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool {this, "SummaryTool", "", "ToolHandle for track summary tool"};
   ToolHandle<Trk::IBoundaryCheckTool> m_boundaryCheckTool {this, 
                                                            "BoundaryCheckTool", 
                                                            "InDet::InDetBoundaryCheckTool", 
                                                            "Boundary checking tool for detector sensitivities"};
 
     // the settable job options
-    double m_option_outlierChi2Cut;
-    double m_option_ReverseFilteringPt;
-    int    m_option_maxPropagationStep;
-    double m_option_seedCovarianceScale;
-
-
+  Gaudi::Property< double > m_option_outlierChi2Cut {this, "OutlierChi2Cut", 12.5, 
+      "Chi2 cut used by the outlier finder" };
+  Gaudi::Property< double > m_option_ReverseFilteringPt {this, "ReverseFilteringPt", 1.0, 
+      "Pt cut used for the ReverseFiltering logic"};
+  Gaudi::Property< int > m_option_maxPropagationStep {this, "MaxPropagationStep", 5000, 
+      "Maximum number of steps for one propagate call"};
+  Gaudi::Property< double > m_option_seedCovarianceScale {this, "SeedCovarianceScale", 100.,
+      "Scale factor for the input seed covariance when doing refitting"};
 
   /// Type erased track fitter function.
     using Fitter = Acts::KalmanFitter<Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>, traj_Type>;
@@ -221,7 +229,7 @@ private:
 
 }; // end of namespace
 
-#include "ActsKalmanFitter.ipp"
+#include "ActsKalmanFitter.icc"
 
 #endif
 
