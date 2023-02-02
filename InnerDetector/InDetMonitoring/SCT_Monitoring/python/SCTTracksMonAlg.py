@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 '''@file SCTTracksMonAlg.py
 @author Ken Kreul
@@ -7,7 +7,7 @@
 @brief Based on AthenaMonitoring/ExampleMonitorAlgorithm.py
 '''
 
-def SCTTracksMonAlgConfig(inputFlags):
+def SCTTracksMonAlgConfig(flags):
     '''Function to configures some algorithms in the monitoring system.'''
     ### STEP 1 ###
     # Define one top-level monitoring algorithm. The new configuration 
@@ -18,26 +18,26 @@ def SCTTracksMonAlgConfig(inputFlags):
     # The following class will make a sequence, configure algorithms, and link
     # them to GenericMonitoringTools
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags, 'SCTTracksMonCfg')
+    helper = AthMonitorCfgHelper(flags, 'SCTTracksMonCfg')
 
 
     ### STEP 2 ###
     # Adding an algorithm to the helper. Here, we will use the example 
     # algorithm in the AthenaMonitoring package. Just pass the type to the 
     # helper. Then, the helper will instantiate an instance and set up the 
-    # base class configuration following the inputFlags. The returned object 
+    # base class configuration following the flags. The returned object 
     # is the algorithm.
     from AthenaConfiguration.ComponentFactory import CompFactory
     myMonAlg = helper.addAlgorithm(CompFactory.SCTTracksMonAlg, 'SCTTracksMonAlg')
 
     from AthenaConfiguration.Enums import BeamType
-    if inputFlags.Beam.Type is BeamType.Collisions:
+    if flags.Beam.Type is BeamType.Collisions:
         from AthenaMonitoring.FilledBunchFilterToolConfig import FilledBunchFilterToolCfg
-        myMonAlg.FilterTools += [result.popToolsAndMerge(FilledBunchFilterToolCfg(inputFlags))]
+        myMonAlg.FilterTools += [result.popToolsAndMerge(FilledBunchFilterToolCfg(flags))]
 
     doTrigger = False
-    if not inputFlags.Input.isMC:
-        if inputFlags.Trigger.doHLT:
+    if not flags.Input.isMC:
+        if flags.Trigger.doHLT:
             doTrigger = True
     myMonAlg.doTrigger = doTrigger
 
@@ -53,15 +53,11 @@ def SCTTracksMonAlgConfig(inputFlags):
     # myMonAlg.RandomHist = True
 
     from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-    myMonAlg.TrackSummaryTool = result.popToolsAndMerge(InDetTrackSummaryToolCfg(inputFlags))
+    myMonAlg.TrackSummaryTool = result.popToolsAndMerge(InDetTrackSummaryToolCfg(flags))
 
     ### STEP 4 ###
     # Add some tools. N.B. Do not use your own trigger decion tool. Use the
     # standard one that is included with AthMonitorAlgorithm.
-
-    # set up geometry / conditions
-    from InDetConfig.InDetGeometryConfig import InDetGeometryCfg
-    result.merge(InDetGeometryCfg(inputFlags))
 
     # # Then, add a tool that doesn't have its own configuration function. In
     # # this example, no accumulator is returned, so no merge is necessary.
@@ -187,7 +183,6 @@ if __name__ == "__main__":
     cfg = MainServicesCfg(ConfigFlags)
     cfg.merge(PoolReadCfg(ConfigFlags))
 
-    sctTracksMonAcc = SCTTracksMonAlgConfig(ConfigFlags)
-    cfg.merge(sctTracksMonAcc)
+    cfg.merge(SCTTracksMonAlgConfig(ConfigFlags))
 
     cfg.run()
