@@ -27,7 +27,7 @@
 #include "TileConditions/TileEMScale.h"
 #include "TileConditions/TileCablingSvc.h"
 #include "TileConditions/TileDCSState.h"
-#include "TileConditions/ITileBadChanTool.h"
+#include "TileConditions/TileBadChannels.h"
 #include "TileEvent/TileDQstatus.h"
 #include "TileEvent/TileDigitsContainer.h"
 
@@ -68,9 +68,9 @@ class TileTimeBCOffsetFilter: public extends<AthAlgTool, ITileRawChannelTool> {
   private:
 
     int find_partner(int ros, int channel) const;
-    bool drawer_ok(const int drawerIndex, std::vector<int> & channel_time_ok,
-                   std::vector<int> & bad_dmu) const;
-    bool ch_masked_or_empty(int ros, int drawer, int channel, int gain,
+    bool drawer_ok(int ros, int drawer, const TileBadChannels* badChannels,
+                   std::vector<int> & channel_time_ok, std::vector<int> & bad_dmu) const;
+    bool ch_masked_or_empty(int ros, int drawer, int channel, int gain, const TileBchStatus& chStatus,
                             const TileDQstatus* DQstatus, const TileDCSState* dcsState) const;
     float ref_digits_maxmindiff(int ros, int drawer, int ref_channel) const;
 
@@ -93,8 +93,11 @@ class TileTimeBCOffsetFilter: public extends<AthAlgTool, ITileRawChannelTool> {
     SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
         "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
-    ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
-        "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};
+    /**
+     * @brief Name of TileBadChannels in condition store
+     */
+    SG::ReadCondHandleKey<TileBadChannels> m_badChannelsKey{this,
+        "TileBadChannels", "TileBadChannels", "Input Tile bad channel status"};
 
     // name of TDS container with TileDigits
     SG::ReadHandleKey<TileDigitsContainer> m_digitsContainerKey{this,"TileDigitsContainer","TileDigitsCnt",

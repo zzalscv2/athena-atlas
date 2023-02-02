@@ -79,8 +79,7 @@ StatusCode TileTimeBCOffsetFilter::initialize() {
 
   ATH_CHECK( m_emScaleKey.initialize() );
 
-  //=== get TileBadChanTool
-  ATH_CHECK( m_tileBadChanTool.retrieve() );
+  ATH_CHECK( m_badChannelsKey.initialize() );
 
   ATH_CHECK( m_DCSStateKey.initialize(m_checkDCS) );
 
@@ -110,6 +109,9 @@ TileTimeBCOffsetFilter::process (TileMutableRawChannelContainer& rchCont, const 
   SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
   ATH_CHECK( emScale.isValid() );
 
+  SG::ReadCondHandle<TileBadChannels> badChannels(m_badChannelsKey, ctx);
+  ATH_CHECK( badChannels.isValid() );
+
   const char * part[5] = {"AUX","LBA","LBC","EBA","EBC"};
   const int nchan_dmu = 3; // number of channels in a single DMU
 
@@ -131,7 +133,7 @@ TileTimeBCOffsetFilter::process (TileMutableRawChannelContainer& rchCont, const 
     unsigned int drawerIdx = TileCalibUtils::getDrawerIdx(ros, drawer);
     std::vector<int> channel_time_ok(TileCalibUtils::MAX_CHAN,0);
     std::vector<int> bad_dmu;
-    if (drawer_ok(drawerIdx,channel_time_ok,bad_dmu)) continue;
+    if (drawer_ok(ros, drawer, *badChannels, channel_time_ok, bad_dmu)) continue;
     if (msgLvl(MSG::VERBOSE)) {
       for (unsigned int ch=0; ch<TileCalibUtils::MAX_CHAN; ++ch) {
         if (channel_time_ok[ch]!=0) {
@@ -175,8 +177,9 @@ TileTimeBCOffsetFilter::process (TileMutableRawChannelContainer& rchCont, const 
             continue;
           }
           int gain = m_tileHWID->adc(adc_id);
+          TileBchStatus chStatus = badChannels->getAdcStatus(adc_id);
           if (channel_time_ok[ch_p_tmp]==0 &&
-              (! ch_masked_or_empty(ros, drawer, ch_p_tmp, gain, DQstatus, dcsState))) {
+              (! ch_masked_or_empty(ros, drawer, ch_p_tmp, gain, chStatus, DQstatus, dcsState))) {
             float amp = rch->amplitude();
             if (rchUnit != TileRawChannelUnit::OnlineMegaElectronVolts) {
               amp = emScale->calibrateChannel(drawerIdx, ch_p_tmp, gain, amp, rchUnit, TileRawChannelUnit::MegaElectronVolts);
@@ -218,7 +221,8 @@ TileTimeBCOffsetFilter::process (TileMutableRawChannelContainer& rchCont, const 
           continue;
         }
         int gain = m_tileHWID->adc(adc_id);
-        if (ch_masked_or_empty(ros, drawer, ch, gain, DQstatus, dcsState)) {
+        TileBchStatus chStatus = badChannels->getAdcStatus(adc_id);
+        if (ch_masked_or_empty(ros, drawer, ch, gain, chStatus, DQstatus, dcsState)) {
           ch_number[i] = -10;
           ch_amp[i] = 0;
           ch_time[i] = 0;
@@ -344,7 +348,8 @@ TileTimeBCOffsetFilter::process (TileMutableRawChannelContainer& rchCont, const 
   return StatusCode::SUCCESS;
 }
 
-bool TileTimeBCOffsetFilter::drawer_ok(int drawerIdx,
+bool TileTimeBCOffsetFilter::drawer_ok(int ros, int drawer,
+                                       const TileBadChannels* badChannels,
                                        std::vector<int> & channel_time_ok,
                                        std::vector<int> & bad_dmu) const {
   /* checks whether the whole drawer is ok, i.e. none of its channel
@@ -355,7 +360,8 @@ bool TileTimeBCOffsetFilter::drawer_ok(int drawerIdx,
   int last_dmu = -1;
   const int nchan_dmu = 3; // number of channels in a single DMU
   for (unsigned int ch=0; ch<TileCalibUtils::MAX_CHAN; ++ch) {
-    TileBchStatus chStatus = m_tileBadChanTool->getAdcStatus(drawerIdx, ch, 0);
+    HWIdentifier adc_id = m_tileHWID->adc_id(ros, drawer, ch, 0);
+    TileBchStatus chStatus = badChannels->getAdcStatus(adc_id);
     if (chStatus.isTimingDmuBcOffset()) { // channel timing is not stable
       int dmu = ch/nchan_dmu;
       if (dmu!=last_dmu) {
@@ -374,6 +380,7 @@ bool TileTimeBCOffsetFilter::drawer_ok(int drawerIdx,
 }
 
 bool TileTimeBCOffsetFilter::ch_masked_or_empty(int ros, int drawer, int channel, int gain,
+                                                const TileBchStatus& chStatus,
                                                 const TileDQstatus* DQstatus,
                                                 const TileDCSState* dcsState) const {
   // check if channel is connected
@@ -382,8 +389,6 @@ bool TileTimeBCOffsetFilter::ch_masked_or_empty(int ros, int drawer, int channel
   if (index < 0) return true; // disconnected or MBTS
 
   // DB status
-  int drawerIdx = TileCalibUtils::getDrawerIdx(ros, drawer);
-  TileBchStatus chStatus = m_tileBadChanTool->getAdcStatus(drawerIdx, channel, gain);
   if (chStatus.isBad()) return true;
 
   // check DQstatus or DCS now

@@ -61,8 +61,7 @@ StatusCode TileRawChannelNoiseFilter::initialize() {
   //=== get TileCondToolNoiseSample
   ATH_CHECK( m_tileToolNoiseSample.retrieve() );
 
-  //=== get TileBadChanTool
-  ATH_CHECK( m_tileBadChanTool.retrieve() );
+  ATH_CHECK( m_badChannelsKey.initialize() );
 
   //=== get TileInfo
   CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
@@ -102,6 +101,9 @@ TileRawChannelNoiseFilter::process (TileMutableRawChannelContainer& rchCont, con
 
   SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
   ATH_CHECK( emScale.isValid() );
+
+   SG::ReadCondHandle<TileBadChannels> badChannels(m_badChannelsKey, ctx);
+  ATH_CHECK( badChannels.isValid() );
 
   for (IdentifierHash hash : rchCont.GetAllCurrentHashes()) {
     TileRawChannelCollection* coll = rchCont.indexFindPtr (hash);
@@ -147,7 +149,7 @@ TileRawChannelNoiseFilter::process (TileMutableRawChannelContainer& rchCont, con
       // use only good channel
       float ped=rch->pedestal();
       if (empty || ped > 59500. || (ped > m_ADCmaskValueMinusEps && ped < 39500.) // all bad patterns, ped=m_tileInfo->ADCmaskValue(), underflow, overflow (see TileRawChannelMaker.cxx for the logic)
-          || m_tileBadChanTool->getAdcStatus(drawerIdx, chan, gain).isBad()
+          || badChannels->getAdcStatus(adc_id).isBad()
           || (!DQstatus->isAdcDQgood(ros, drawer, chan, gain))) continue;
 
 
