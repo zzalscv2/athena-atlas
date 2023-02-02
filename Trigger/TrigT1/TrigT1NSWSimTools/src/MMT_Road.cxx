@@ -29,22 +29,13 @@ void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
     int bo = hit_i->getPlane();
     bool has_hit = false;
     if( this->containsNeighbors(hit_i.get()) ) {
-      for (const auto &hit_j : m_road_hits) {
-        if (hit_j->getPlane() == bo) {
-          has_hit = true;
-          break;
+      auto it = std::find_if(m_road_hits.begin(), m_road_hits.end(), [&bo](const auto &hit) { return (hit->getPlane() == bo); });
+      if (it != m_road_hits.end()) {
+        has_hit = true;
+        if (!hit_i->isNoise() && (*it)->isNoise()) {
+          m_road_hits.erase(it);
+          has_hit = false;
         }
-      }
-      if (hit_i->isNoise() == false) {
-        int erase_me = -1;
-        for (unsigned int j = 0; j < m_road_hits.size(); j++) {
-          if (m_road_hits[j]->getPlane() == bo && m_road_hits[j]->isNoise()) {
-            erase_me = j;
-            has_hit = false;
-            break;
-          }
-        }
-        if (erase_me > -1) m_road_hits.erase(m_road_hits.begin() + erase_me);
       }
 
       if (has_hit) continue;
