@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Package : MMRawDataMonAlg
@@ -27,6 +27,7 @@
 #include "AthenaMonitoring/AthenaMonManager.h"
 #include "MuonPrepRawData/MMPrepData.h"
 #include "MuonSegment/MuonSegment.h"
+#include <stdexcept>
 
 
 namespace {
@@ -695,6 +696,10 @@ void MMRawDataMonAlg::MMEfficiency( const xAOD::TrackParticleContainer*  muonCon
 					} else {// 3 gaps, the fourth is inefficient                                                                                                                                                  
 					  int ref_gap = missing_gap+1;
 					  if(missing_gap==3) ref_gap=0;
+					  if (ref_gap>3){
+					    ATH_MSG_FATAL("ref_gap is out of range in MMRawDataMonAlg::MMEfficiency");
+					    return;
+					  }
 					  int ref_pcb=effPlots[s][e][p][m][ref_gap].num.at(0);
 					  auto traversed_pcb = Monitored::Scalar<int>("pcb_eta"+std::to_string(e+1)+"_"+MM_Side[s]+"_phi"+std::to_string(p)+"_multiplet"+std::to_string(m+1)+"_gas_gap"+std::to_string(missing_gap+1), ref_pcb);
 					  auto isHit = 0;
