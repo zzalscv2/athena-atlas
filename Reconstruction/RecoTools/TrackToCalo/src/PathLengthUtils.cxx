@@ -10,22 +10,15 @@
 
 //=================================
 PathLengthUtils::PathLengthUtils() {
-    //=================================
 }
 
 //==================================
 PathLengthUtils::~PathLengthUtils() {
-    //==================================
 }
 
 //=========================================================================================================================
 double PathLengthUtils::get3DPathLength(const CaloCell& cell, const Amg::Vector3D& entrance, const Amg::Vector3D& exit, double drFix,
                                         double dzFix) {
-    //=========================================================================================================================
-
-    int debugLevel = 0;
-
-    if (debugLevel >= 1) std::cout << std::endl;
 
     double dmin = 10.;
     double dphimin = dmin / cell.caloDDE()->r();
@@ -59,40 +52,6 @@ double PathLengthUtils::get3DPathLength(const CaloCell& cell, const Amg::Vector3
     double CellRmin = cell.caloDDE()->r() - dr * 0.5;
     double CellRmax = cell.caloDDE()->r() + dr * 0.5;
 
-    // fix cells with zero R or Z width
-
-    //    if(cell.caloDDE()->dr() == 0){
-    //        // V = dr*dphi*r*dz
-    //        double CellVolume = cell.caloDDE()->volume();
-    //        double product = cell.caloDDE()->dphi() * cell.caloDDE()->r() * cell.caloDDE()->dz();
-    //        double drFormula = dmin;
-    //        if(product!=0){
-    //            drFormula = CellVolume / product;
-    //        }
-    //        if(drFormula<dmin) drFormula = dmin;
-    //        CellRmin = cell.caloDDE()->r() - drFormula*0.5;
-    //        CellRmax = cell.caloDDE()->r() + drFormula*0.5;
-    //        dr = drFormula;
-    //        if(debugLevel>=2) std::cout << "drFormula " << drFormula << " new CellRmin " << CellRmin << " new CellRmax " << CellRmax <<
-    //        std::endl;
-    //    }
-
-    //    if(cell.caloDDE()->dz() == 0){
-    //        // V = dr*dphi*r*dz
-    //        double CellVolume = cell.caloDDE()->volume();
-    //        double product = cell.caloDDE()->dphi() * cell.caloDDE()->r() * cell.caloDDE()->dr();
-    //        double dzFormula = dmin;
-    //        if(product!=0){
-    //            dzFormula = CellVolume / product;
-    //        }
-    //        if(dzFormula<dmin) dzFormula = dmin;
-    //        CellZmin = cell.caloDDE()->z() - isign*dzFormula*0.5;
-    //        CellZmax = cell.caloDDE()->z() + isign*dzFormula*0.5;
-    //        dz = dzFormula;
-    //        if(debugLevel>=2) std::cout << "dzFormula " << dzFormula << " new CellZmin " << CellZmin << " new CellZmax " << CellZmax <<
-    //        std::endl;
-    //    }
-    //
     // For CPU reason do a fast check on crossing
     //
     // track direction
@@ -112,10 +71,6 @@ double PathLengthUtils::get3DPathLength(const CaloCell& cell, const Amg::Vector3
     double rz0 = (entrance.perp() - cell.caloDDE()->r()) * cos(dir.theta()) - (entrance.z() - cell.caloDDE()->z()) * sin(dir.theta());
     if (fabs(rz0) > sqrt(dr * dr + dz * dz)) crossing = false;
 
-    if (debugLevel >= 2 && crossing) {
-        std::cout << " get3DPathMatch distance xy " << r0 << " distance rz " << rz0 << std::endl;
-        std::cout << std::endl;
-    }
 
     if (!crossing) return 0.;
 
@@ -130,26 +85,6 @@ double PathLengthUtils::get3DPathLength(const CaloCell& cell, const Amg::Vector3
     Amg::Vector3D Corner5(CellRmax * cos(CellPhimax), CellRmax * sin(CellPhimax), CellZmin);
     Amg::Vector3D Corner6(CellRmax * cos(CellPhimin), CellRmax * sin(CellPhimin), CellZmax);
     Amg::Vector3D Corner7(CellRmax * cos(CellPhimax), CellRmax * sin(CellPhimax), CellZmax);
-
-    if (debugLevel >= 1) {
-        double volume_ratio =
-            cell.caloDDE()->dr() * cell.caloDDE()->r() * cell.caloDDE()->dphi() * cell.caloDDE()->dz() / (cell.caloDDE()->volume() + 1.);
-        std::cout << " sampling " << cell.caloDDE()->getSampling() << " CellPhimin " << CellPhimin << " CellPhimax " << CellPhimax
-                  << " CellZmin " << CellZmin << " CellZmax " << CellZmax << " CellRmin " << CellRmin << " CellRmax " << CellRmax
-                  << " cell.caloDDE()->dz() " << cell.caloDDE()->dz() << " cell.caloDDE()->dr() " << cell.caloDDE()->dr()
-                  << " cell.caloDDE()->dx() " << cell.caloDDE()->dx() << " cell.caloDDE()->dy() " << cell.caloDDE()->dy()
-                  << " volume_ratio " << volume_ratio << std::endl;
-    }
-    if (debugLevel >= 2) {
-        std::cout << " Corner0 x " << Corner0.x() << " y " << Corner0.y() << " z " << Corner0.z() << std::endl;
-        std::cout << " Corner1 x " << Corner1.x() << " y " << Corner1.y() << " z " << Corner1.z() << std::endl;
-        std::cout << " Corner2 x " << Corner2.x() << " y " << Corner2.y() << " z " << Corner2.z() << std::endl;
-        std::cout << " Corner3 x " << Corner3.x() << " y " << Corner3.y() << " z " << Corner3.z() << std::endl;
-        std::cout << " Corner4 x " << Corner4.x() << " y " << Corner4.y() << " z " << Corner4.z() << std::endl;
-        std::cout << " Corner5 x " << Corner5.x() << " y " << Corner5.y() << " z " << Corner5.z() << std::endl;
-        std::cout << " Corner6 x " << Corner6.x() << " y " << Corner6.y() << " z " << Corner6.z() << std::endl;
-        std::cout << " Corner7 x " << Corner7.x() << " y " << Corner7.y() << " z " << Corner7.z() << std::endl;
-    }
 
     // Entry plane vectors through Corner0
 
@@ -171,86 +106,63 @@ double PathLengthUtils::get3DPathLength(const CaloCell& cell, const Amg::Vector3
     Amg::Vector3D dirT = exit - entrance;
     dirT = -dirT;
 
-    // check positions
 
-    if (debugLevel >= 2) {
-        if (entrance.perp() > Corner0.perp()) { std::cout << " PROBLEM radius entrance larger than cell corner " << std::endl; }
-        if (entrance.mag() > Corner0.mag() || fabs(exit.z()) < fabs(Corner0.z())) {
-            std::cout << " PROBLEM 3D or z distance to IP entrance larger than cell corner " << std::endl;
-        }
-
-        if (exit.perp() < Corner6.perp()) { std::cout << " PROBLEM radius exit small than cell corner " << std::endl; }
-        if (entrance.mag() > Corner6.mag() || fabs(exit.z()) < fabs(Corner6.z())) {
-            std::cout << " PROBLEM 3D or Z distance to IP exit smaller than cell corner " << std::endl;
-        }
-    }
 
     // dot products of track with plane vectors
-
-    if (debugLevel >= 2) {
-        std::cout << " dir01 " << dir01.x() << " y " << dir01.y() << " z " << dir01.z() << " mag " << dir01.mag() << std::endl;
-        std::cout << " dir02 " << dir02.x() << " y " << dir02.y() << " z " << dir02.z() << " mag " << dir02.mag() << std::endl;
-        std::cout << " dir04 " << dir04.x() << " y " << dir04.y() << " z " << dir04.z() << " mag " << dir04.mag() << std::endl;
-    }
-
     double dotp1 = fabs(dirT.dot(dir01) / dir01.mag() / dirT.mag());
     double dotp2 = fabs(dirT.dot(dir02) / dir02.mag() / dirT.mag());
     double dotp4 = fabs(dirT.dot(dir04) / dir04.mag() / dirT.mag());
     //
     // order planes according to dotproduct and calculate Matrices
-    //        mEntry matrix
-    //               column(0) vector for first plane  e.g. dir01
-    //               column(1) second vector for first plane e.g. dir02
-    //               column(2) = minus track direction
-    //               type = 124 here plane made by 1 and 2  = dir01 and dir02
-    //                          later also plane made by 14 = dir01 and dir04 can be tried (second try)
-    //                          or                       24 = dir02 and dir04 (third try)
+    //mEntry matrix
+    // column(0) vector for first plane  e.g. dir01
+    // column(1) second vector for first plane e.g. dir02
+    // column(2) = minus track direction
+    // type = 124 here plane made by 1 and 2  = dir01 and dir02
+    //            later also plane made by 14 = dir01 and dir04
+    //            can be tried (second try) or 24 = dir02 and
+    //            dir04 (third try)
     //
-    Amg::MatrixX mEntry(3, 3);
+    AmgMatrix(3,3) mEntry;
+    AmgMatrix(3,3) mExit;
+    mEntry.setZero();
+    mExit.setZero();
     mEntry.col(2) = dirT;
-    Amg::MatrixX mExit(3, 3);
     mExit.col(2) = dirT;
 
     int type = 0;
-    double dotmax = 0.;
     if (dotp1 <= dotp2 && dotp2 <= dotp4) {
         type = 124;
-        dotmax = dotp4;
         mEntry.col(0) = dir01;
         mEntry.col(1) = dir02;
         mExit.col(0) = dir67;
         mExit.col(1) = dir64;
     } else if (dotp1 <= dotp4 && dotp4 <= dotp2) {
         type = 142;
-        dotmax = dotp2;
         mEntry.col(0) = dir01;
         mEntry.col(1) = dir04;
         mExit.col(0) = dir67;
         mExit.col(1) = dir62;
     } else if (dotp2 <= dotp1 && dotp1 <= dotp4) {
         type = 214;
-        dotmax = dotp4;
         mEntry.col(0) = dir02;
         mEntry.col(1) = dir01;
         mExit.col(0) = dir64;
         mExit.col(1) = dir67;
     } else if (dotp2 <= dotp4 && dotp4 <= dotp1) {
         type = 241;
-        dotmax = dotp1;
         mEntry.col(0) = dir02;
         mEntry.col(1) = dir04;
         mExit.col(0) = dir64;
         mExit.col(1) = dir62;
     } else if (dotp4 <= dotp2 && dotp2 <= dotp1) {
         type = 421;
-        dotmax = dotp1;
         mEntry.col(0) = dir04;
         mEntry.col(1) = dir02;
         mExit.col(0) = dir62;
         mExit.col(1) = dir64;
     } else if (dotp4 <= dotp1 && dotp1 <= dotp2) {
         type = 412;
-        dotmax = dotp2;
         mEntry.col(0) = dir04;
         mEntry.col(1) = dir01;
         mExit.col(0) = dir62;
@@ -286,27 +198,13 @@ double PathLengthUtils::get3DPathLength(const CaloCell& cell, const Amg::Vector3
         posEx += Corner2 / 2.;
     }
 
-    if (debugLevel >= 2) {
-        std::cout << " not normalized direction track " << dirT.x() << " y " << dirT.y() << " z " << dirT.z() << " eta " << dirT.eta()
-                  << " type " << type << " dotmax " << dotmax << std::endl;
-        std::cout << " dotp1 " << dotp1 << " dotp2 " << dotp2 << " dotp4 " << dotp4 << std::endl;
-        std::cout << " entry position " << entrance.x() << " y " << entrance.y() << " z " << entrance.z() << std::endl;
-        std::cout << " mEntry Matrix " << std::endl;
-        std::cout << mEntry << std::endl;
-        std::cout << " exit position " << exit.x() << " y " << exit.y() << " z " << exit.z() << std::endl;
-        std::cout << " mExit Matrix " << std::endl;
-        std::cout << mExit << std::endl;
-    }
 
     // cross with entry plane
     int typeCheck = type0;
 
     Amg::Vector3D pathEn;
-    if (debugLevel >= 2) std::cout << " Try crossing Entry first try for type " << type << std::endl;
     bool crossingEn = crossingMatrix(mEntry, posEn, pathEn);
     // if dotmax near to 1 Matrix is singular (track is parallel to the plane)
-    if (debugLevel >= 2 && crossingEn)
-        std::cout << " Succesfull crossing Entry first try for type " << type << " type 0 " << type0 << std::endl;
     if (!crossingEn) {
         int type1 = int((type - 100 * int(type / 100)) / 10);
         int type2 = int(type / 100);
@@ -325,10 +223,8 @@ double PathLengthUtils::get3DPathLength(const CaloCell& cell, const Amg::Vector3
             mEntry.col(1) = dir04;
             posEn -= Corner4 / 2.;
         }
-        if (debugLevel >= 2) std::cout << " Try crossing Entry second try for type " << type << std::endl;
         crossingEn = crossingMatrix(mEntry, posEn, pathEn);
         typeCheck = type1;
-        if (debugLevel >= 2 && crossingEn) std::cout << " Succesfull crossing Entry second try for type " << type << std::endl;
         if (!crossingEn) {
             if (type2 == 1) posEn += Corner1 / 2.;
             if (type2 == 2) posEn += Corner2 / 2.;
@@ -345,11 +241,8 @@ double PathLengthUtils::get3DPathLength(const CaloCell& cell, const Amg::Vector3
                 mEntry.col(0) = dir04;
                 posEn -= Corner4 / 2.;
             }
-            if (debugLevel >= 2) std::cout << " Try crossing Entry third try for type " << type << std::endl;
             crossingEn = crossingMatrix(mEntry, posEn, pathEn);
             typeCheck = type2;
-            if (debugLevel >= 2 && crossingEn) std::cout << " Succesfull crossing Entry third try for type " << type << std::endl;
-            if (debugLevel >= 2 && !crossingEn) std::cout << " No crossing Entry third try for type " << type << std::endl;
         }
     }
 
@@ -360,32 +253,15 @@ double PathLengthUtils::get3DPathLength(const CaloCell& cell, const Amg::Vector3
             double dphiCheck =
                 acos(cos(posXEn.phi()) * cos((CellPhimax + CellPhimin) / 2.) + sin(posXEn.phi()) * sin((CellPhimax + CellPhimin) / 2.));
             if (dphiCheck > fabs(CellPhimax - CellPhimin)) { crossingEn = false; }
-            if (debugLevel >= 1 && !crossingEn)
-                std::cout << " check crossing in phi " << crossingEn << " dphiCheck " << dphiCheck << " CellPhimin " << CellPhimin
-                          << " CellPhimax " << CellPhimax << " position crossing phi " << posXEn.phi() << std::endl;
         }
         if (typeCheck == 2) {
             if (posXEn.perp() < CellRmin) crossingEn = false;
             if (posXEn.perp() > CellRmax) crossingEn = false;
-            if (debugLevel >= 1 && !crossingEn)
-                std::cout << " check crossing in R " << crossingEn << " CellRmin " << CellRmin << " CellRmax " << CellRmax
-                          << " position crossing R " << posXEn.perp() << std::endl;
         }
         if (typeCheck == 4) {
             if (isign * posXEn.z() < isign * CellZmin) crossingEn = false;
             if (isign * posXEn.z() > isign * CellZmax) crossingEn = false;
-            if (debugLevel >= 1 && !crossingEn)
-                std::cout << " check crossing in Z " << crossingEn << " CellZmin " << CellZmin << " CellZmax " << CellZmax
-                          << " position crossing Z " << posXEn.z() << std::endl;
         }
-    }
-
-    if (debugLevel >= 2) {
-        std::cout << " Entry pathE solution " << pathEn.x() << " y " << pathEn.y() << " z " << pathEn.z() << " crossing " << crossingEn
-                  << std::endl;
-        std::cout << " crossing entrance plane with bounds " << posXEn.x() << " y " << posXEn.y() << " z " << posXEn.z() << std::endl;
-        Amg::Vector3D check = entrance - dirT * pathEn.z();
-        std::cout << " crossing entrance plane check " << check.x() << " y " << check.y() << " z " << check.z() << std::endl;
     }
 
     if (!crossingEn) return 0.;
@@ -393,9 +269,7 @@ double PathLengthUtils::get3DPathLength(const CaloCell& cell, const Amg::Vector3
     // cross with exit plane
 
     Amg::Vector3D pathEx;
-    if (debugLevel >= 2) std::cout << " Try crossing Exit first try for type " << type << std::endl;
     bool crossingEx = crossingMatrix(mExit, posEx, pathEx);
-    if (debugLevel >= 2 && crossingEx) std::cout << " Succesfull crossing Exit first try for type " << type << " type0 " << std::endl;
     typeCheck = type0;
     if (!crossingEx) {
         int type1 = int((type - 100 * int(type / 100)) / 10);
@@ -415,10 +289,8 @@ double PathLengthUtils::get3DPathLength(const CaloCell& cell, const Amg::Vector3
             mExit.col(1) = dir62;
             posEx -= Corner2 / 2.;
         }
-        if (debugLevel >= 2) std::cout << " Try crossing Exit second try for type " << type << std::endl;
         crossingEx = crossingMatrix(mExit, posEx, pathEx);
         typeCheck = type1;
-        if (debugLevel >= 2 && crossingEx) std::cout << " Succesfull crossing Exit second try for type " << type << std::endl;
         if (!crossingEx) {
             if (type2 == 1) posEx += Corner7 / 2.;
             if (type2 == 2) posEx += Corner4 / 2.;
@@ -435,10 +307,8 @@ double PathLengthUtils::get3DPathLength(const CaloCell& cell, const Amg::Vector3
                 mExit.col(0) = dir62;
                 posEx -= Corner2 / 2.;
             }
-            if (debugLevel >= 2) std::cout << " Try crossing Exit third try for type " << type << std::endl;
             crossingEx = crossingMatrix(mExit, posEx, pathEx);
             typeCheck = type2;
-            if (debugLevel >= 2 && crossingEx) std::cout << " Succesfull crossing Exit third try for type " << type << std::endl;
         }
     }
 
@@ -449,65 +319,29 @@ double PathLengthUtils::get3DPathLength(const CaloCell& cell, const Amg::Vector3
             double dphiCheck =
                 acos(cos(posXEx.phi()) * cos((CellPhimax + CellPhimin) / 2.) + sin(posXEx.phi()) * sin((CellPhimax + CellPhimin) / 2.));
             if (dphiCheck > fabs(CellPhimax - CellPhimin)) { crossingEx = false; }
-            if (debugLevel >= 1 && !crossingEx)
-                std::cout << " check crossing in phi " << crossingEx << " dphiCheck " << dphiCheck << " CellPhimin " << CellPhimin
-                          << " CellPhimax " << CellPhimax << " position crossing phi " << posXEx.phi() << std::endl;
         }
         if (typeCheck == 2) {
             if (posXEx.perp() < CellRmin) crossingEx = false;
             if (posXEx.perp() > CellRmax) crossingEx = false;
-            if (debugLevel >= 1 && !crossingEx)
-                std::cout << " check crossing in R " << crossingEx << " CellRmin " << CellRmin << " CellRmax " << CellRmax
-                          << " position crossing R " << posXEx.perp() << std::endl;
         }
         if (typeCheck == 4) {
             if (isign * posXEx.z() < isign * CellZmin) crossingEx = false;
             if (isign * posXEx.z() > isign * CellZmax) crossingEx = false;
-            if (debugLevel >= 1 && !crossingEx)
-                std::cout << " check crossing in Z " << crossingEx << " CellZmin " << CellZmin << " CellZmax " << CellZmax
-                          << " position crossing Z " << posXEx.z() << std::endl;
         }
     }
-
-    if (debugLevel >= 2) {
-        std::cout << " Exit pathEx solution " << pathEx.x() << " y " << pathEx.y() << " z " << pathEx.z() << " crossing " << crossingEx
-                  << std::endl;
-        std::cout << " crossing exit plane with bounds " << posXEx.x() << " y " << posXEx.y() << " z " << posXEx.z() << std::endl;
-        Amg::Vector3D check = entrance - dirT * pathEx.z();
-        std::cout << " crossing exit plane check " << check.x() << " y " << check.y() << " z " << check.z() << std::endl;
-    }
-
-    double pathT = (entrance - exit).mag();
     double path = 0.;
     if (crossingEn && crossingEx) {
         path = (posXEx - posXEn).mag();
-        if (debugLevel >= 1) {
-            std::cout << std::endl;
-            std::cout << " pathT " << pathT << " path " << path << std::endl;
-            std::cout << " entrance position                   " << entrance.x() << " y " << entrance.y() << " z " << entrance.z()
-                      << std::endl;
-            std::cout << " crossing entrance plane with bounds " << posXEn.x() << " y " << posXEn.y() << " z " << posXEn.z() << std::endl;
-            std::cout << " exit position                       " << exit.x() << " y " << exit.y() << " z " << exit.z() << std::endl;
-            std::cout << " crossing exit plane with bounds     " << posXEx.x() << " y " << posXEx.y() << " z " << posXEx.z() << std::endl;
-        }
     }
-    if (debugLevel >= 2) { std::cout << " pathT " << pathT << " path " << path << std::endl; }
 
     return path;
 }
-bool PathLengthUtils::crossingMatrix(const Amg::MatrixX& Matrix, const Amg::Vector3D& entry, Amg::Vector3D& path) {
-    //    std::cout << " Matrix determinant " << Matrix.determinant() << std::endl;
-    //    std::cout << " Matrix " << std::endl;
-    //    std::cout << Matrix << std::endl;
+bool PathLengthUtils::crossingMatrix(const AmgMatrix(3,3)& Matrix, const Amg::Vector3D& entry, Amg::Vector3D& path) {
 
     if (Matrix.determinant() == 0) {
-        //      std::cout << " PathLengthUtils::crossingMatrix Matrix determinant ZERO " << std::endl;
         return false;
     }
-    Amg::MatrixX Minv = Matrix.inverse();
-
-    //    std::cout << " inverse Matrix " << std::endl;
-    //    std::cout << Minv << std::endl;
+    AmgMatrix(3,3) Minv = Matrix.inverse();
 
     path = Minv * entry;
 
@@ -525,10 +359,10 @@ double PathLengthUtils::getPathLengthInTile(const CaloCell& cell, const Amg::Vec
     // OBTAIN LAYER INDICES FOR LINEAR INTERPOLATION
     unsigned int SampleID = cell.caloDDE()->getSampling();
 
-    double CellZB[9] = {141.495, 424.49, 707.485, 999.605, 1300.855, 1615.8, 1949., 2300.46, 2651.52};
-    double CellDZB[9] = {282.99, 283., 282.99, 301.25, 301.25, 328.64, 337.76, 365.16, 336.96};
-    double CellZC[9] = {159.755, 483.83, 812.465, 1150.23, 1497.125, 1857.71, 2241.12, 2628.695, 0};
-    double CellDZC[9] = {319.51, 328.64, 328.63, 346.9, 346.89, 374.28, 392.54, 382.61, 0};
+    constexpr double CellZB[9] = {141.495, 424.49, 707.485, 999.605, 1300.855, 1615.8, 1949., 2300.46, 2651.52};
+    constexpr double CellDZB[9] = {282.99, 283., 282.99, 301.25, 301.25, 328.64, 337.76, 365.16, 336.96};
+    constexpr double CellZC[9] = {159.755, 483.83, 812.465, 1150.23, 1497.125, 1857.71, 2241.12, 2628.695, 0};
+    constexpr double CellDZC[9] = {319.51, 328.64, 328.63, 346.9, 346.89, 374.28, 392.54, 382.61, 0};
 
     // SPECIAL CASE: BC9
     bool isBC9 = false;
