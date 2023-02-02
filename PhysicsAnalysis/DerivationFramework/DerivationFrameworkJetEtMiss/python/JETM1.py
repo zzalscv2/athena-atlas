@@ -18,8 +18,10 @@ def JETM1SkimmingToolCfg(ConfigFlags):
     # Trigger API doesn't currently return all triggers used in Run-3
     # Adding all jets triggers via explicit list for the moment
     triggers += ["HLT_j0_pf_ftf_L1RD0_FILLED",
+                 "HLT_j0_perf_pf_subjesgscIS_ftf_L1RD0_FILLED",
                  "HLT_j15_pf_ftf_L1RD0_FILLED",
                  "HLT_j25_pf_ftf_L1RD0_FILLED",
+                 "HLT_j25_pf_subjesgscIS_ftf_L1RD0_FILLED",
                  "HLT_j35_pf_ftf_L1RD0_FILLED",
                  "HLT_j45_pf_ftf_preselj20_L1RD0_FILLED",
                  "HLT_j45_pf_ftf_preselj20_L1J15",
