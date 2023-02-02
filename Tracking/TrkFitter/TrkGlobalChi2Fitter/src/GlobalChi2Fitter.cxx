@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrkFitterUtils/TrackFitInputPreparator.h"
 #include "TrkGlobalChi2Fitter/GlobalChi2Fitter.h"
@@ -5226,7 +5226,7 @@ namespace Trk {
         
         double *errors = state->measurementErrors();
 
-        std::vector<double> residuals;
+        std::array<double,5> residuals;
         m_residualPullCalculator->residuals(residuals, measbase, currenttrackpar, ResidualPull::Biased, hittype);
         
         for (int i = 0; i < 5; i++) {

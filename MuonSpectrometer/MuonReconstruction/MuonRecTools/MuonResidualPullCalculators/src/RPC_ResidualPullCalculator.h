@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRPC_RESIDUALPULLCALCULATOR_H
@@ -54,7 +54,7 @@ namespace Muon
      * filled with the residuals.
      */
     virtual void residuals(
-        std::vector<double>& residuals,
+        std::array<double,5>& residuals,
         const Trk::MeasurementBase* measurement,
         const Trk::TrackParameters* trkPar,
         const Trk::ResidualPull::ResidualType,

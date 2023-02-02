@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -83,11 +83,11 @@ public:
                           const std::vector<const Trk::AlignmentEffectsOnTrack*>& ) const override final;
 
     /** This function is a light-weight version of the function above, designed for track fitters
-     * where speed is critical. The user has to provide a std::vector of size 5, which gets
+     * where speed is critical. The user has to provide a std::array of size 5, which gets
      * filled with the residuals.
      */
     virtual void residuals(
-                        std::vector<double>&,
+                        std::array<double,5>&,
                         const Trk::MeasurementBase* measurement,
                         const Trk::TrackParameters* trkPar,
                         const Trk::ResidualPull::ResidualType resType,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TGC_ResidualPullCalculator.h"
@@ -27,13 +27,12 @@ StatusCode Muon::TGC_ResidualPullCalculator::initialize()
 
 //================ calculate residuals for TGC ==================================
 void Muon::TGC_ResidualPullCalculator::residuals(
-    std::vector<double>& residuals,
+    std::array<double,5>& residuals,
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkPar,
     const Trk::ResidualPull::ResidualType /*resType*/,
     const Trk::TrackState::MeasurementType) const {
 
-  if (residuals.size()<1) residuals.resize(1);
   const Trk::RIO_OnTrack* rot = dynamic_cast<const Trk::RIO_OnTrack*>(measurement);
   if (!rot) {
     const Muon::CompetingMuonClustersOnTrack* muonCompClusters =
