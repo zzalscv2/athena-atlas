@@ -320,6 +320,7 @@ if __name__ == '__main__':
       muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(name="L1MuonBSDecoderTool",flags=flags,writeBS=False))
       decoderTools += [muonRoiTool]
       outputEDM += addEDM('xAOD::MuonRoIContainer'     , '*')
+      outputEDM += ['LVL1::MuCTPIL1Topo#*']
       maybeMissingRobs += muonRoiTool.ROBIDs
 
   if 'jFex' in subsystem:
@@ -384,9 +385,6 @@ if __name__ == '__main__':
                                                          DecoderTools=decoderTools,
                                                          MaybeMissingROBs=maybeMissingRobs,
                                                          OutputLevel=algLogLevel)
-  
-  from TrigT1ResultByteStream.TrigT1ResultByteStreamMonitoring import L1TriggerByteStreamDecoderMonitoring
-  decoderAlg.MonTool = L1TriggerByteStreamDecoderMonitoring(decoderAlg.getName(), flags, decoderTools)
   
   acc.addEventAlgo(decoderAlg, sequenceName='AthAlgSeq')
   

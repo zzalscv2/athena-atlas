@@ -33,4 +33,7 @@
   <class name="LVL1::Range" />
   <class name="std::map<int,LVL1::TrigT1CaloDefs::ClusterAlgorithm>" />
 
+  <!-- MUCTPI for L1Topo input -->
+  <class name="LVL1::MuCTPIL1Topo" />
+
 </lcgdict>

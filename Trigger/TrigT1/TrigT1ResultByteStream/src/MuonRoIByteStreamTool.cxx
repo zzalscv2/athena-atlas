@@ -6,6 +6,7 @@
 #include "MuonRoIByteStreamTool.h"
 
 // Trigger includes
+#include "TrigConfData/L1Menu.h"
 #include "TrigT1MuctpiBits/HelpersPhase1.h"
 #include "xAODTrigger/MuonRoI.h"
 #include "xAODTrigger/MuonRoIAuxContainer.h"
@@ -497,6 +498,12 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
   //in case something is found to not be correctly decoded by the L1Topo group - can clean this extra-debug printouts later if wished
   constexpr static bool local_topo_debug{false};
 
+  const TrigConf::L1Menu * l1menu = nullptr;
+  ATH_CHECK( detStore()->retrieve(l1menu) );
+ 
+  const auto & exMU = l1menu->thrExtraInfo().MU();
+  auto tgcPtValues = exMU.knownTgcPtValues();
+
   //the cand usage should be optimised!
   LVL1::MuCTPIL1TopoCandidate cand;
 
@@ -572,7 +579,7 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
                                 topobcidOffset,
                                 0,//ptThresholdID
                                 0,//ptCode,       removed Run3
-                                topoheader.pt,
+                                tgcPtValues[topoheader.pt],
                                 eta_barrel,
                                 phi_barrel,
                                 0,//etacode,      removed Run3
@@ -611,7 +618,7 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
                               topobcidOffset,
                               0,//ptThresholdID,
                               0,//ptCode,       removed Run3
-                              topoheader.pt,
+                              tgcPtValues[topoheader.pt],
                               coord.eta,
                               coord.phi,
                               0,//etacode,      removed Run3
