@@ -3,16 +3,7 @@
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.TestDefaults import defaultTestFiles
 flags = initConfigFlags()
-flags.Input.Files = defaultTestFiles.EVNT
-
-# Load Detector flags if available
-flagsAvailableDetector = True
-try:
-    import DetDescrCnvSvc # noqa: F401
-except ImportError:
-    flagsAvailableDetector = False
-if flagsAvailableDetector:
-    flags._loadDynaFlags("Detector")
+flags.Input.Files = defaultTestFiles.AOD_RUN3_MC
 
 # Load Sim flags if available
 flagsAvailableSim = True
@@ -22,6 +13,9 @@ except ImportError:
     flagsAvailableSim = False
 if flagsAvailableSim:
     flags._loadDynaFlags("Sim")
+
+# Load GeoModel flags
+flags._loadDynaFlags("GeoModel")
 
 # Init and print
 flags.initAll()

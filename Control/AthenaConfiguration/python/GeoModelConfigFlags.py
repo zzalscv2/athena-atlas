@@ -1,17 +1,44 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.AutoConfigFlags import GetFileMD, DetDescrInfo
 from AthenaConfiguration.Enums import LHCPeriod, ProductionStep, Project
 
-def createGeoModelConfigFlags():
+def createGeoModelConfigFlags(analysis=False):
     gcf=AthConfigFlags()
-
-    gcf.addFlag('GeoModel.Layout', 'atlas') # replaces global.GeoLayout
 
     gcf.addFlag("GeoModel.AtlasVersion",
                 lambda prevFlags : (GetFileMD(prevFlags.Input.Files).get("GeoAtlas", None)
                                     or "ATLAS-R2-2016-01-00-01"))
+
+    # Special handling of analysis releases where we only want AtlasVersion and Run
+    if analysis:
+        def _deduct_LHCPeriod(prevFlags):
+            import logging
+            log = logging.getLogger("GeoModelConfigFlags")
+            log.info('Deducing LHC Run period from the geometry tag name "%s" as database access is not available in analysis releases', prevFlags.GeoModel.AtlasVersion)
+
+            if prevFlags.GeoModel.AtlasVersion.startswith("ATLAS-R1"):
+                period = LHCPeriod.Run1
+            elif prevFlags.GeoModel.AtlasVersion.startswith("ATLAS-R2"):
+                period = LHCPeriod.Run2
+            elif prevFlags.GeoModel.AtlasVersion.startswith("ATLAS-R3"):
+                period = LHCPeriod.Run3
+            else:
+                raise ValueError(f'Can not deduct LHC Run period from "{prevFlags.GeoModel.AtlasVersion}", please set "flags.GeoModel.Run" manually.')
+
+            log.info('Using LHC Run period "%s"', period.value)
+            return period
+
+        gcf.addFlag("GeoModel.Run",  # Run deducted from other metadata
+                    _deduct_LHCPeriod, enum=LHCPeriod)
+        return gcf
+
+    gcf.addFlag("GeoModel.Run",  # Run from the geometry database
+                lambda prevFlags : LHCPeriod(DetDescrInfo(prevFlags.GeoModel.AtlasVersion)['Common']['Run']),
+                enum=LHCPeriod)
+
+    gcf.addFlag('GeoModel.Layout', 'atlas') # replaces global.GeoLayout
 
     gcf.addFlag("GeoModel.Align.Dynamic",
                 lambda prevFlags : not prevFlags.Input.isMC and prevFlags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.Overlay])
@@ -19,11 +46,6 @@ def createGeoModelConfigFlags():
     gcf.addFlag("GeoModel.Align.LegacyConditionsAccess",
                 lambda prevFlags : prevFlags.Common.Project is Project.AthSimulation or prevFlags.Common.ProductionStep is ProductionStep.Simulation)
                 # Mainly for G4 which still loads alignment on initialize
-
-    gcf.addFlag("GeoModel.Run",
-                lambda prevFlags : LHCPeriod(DetDescrInfo(prevFlags.GeoModel.AtlasVersion)['Common']['Run']),
-                enum=LHCPeriod)
-                # Based on CommonGeometryFlags.Run
 
     gcf.addFlag("GeoModel.Type",
                 lambda prevFlags : DetDescrInfo(prevFlags.GeoModel.AtlasVersion)['Common']['GeoType'])

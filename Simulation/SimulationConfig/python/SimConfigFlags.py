@@ -86,7 +86,7 @@ def createSimConfigFlags():
         if not version:
             from os import environ
             version = str(environ.get("G4VERS", ""))
-        if isGaudiEnv() and not version:
+        if prevFlags.Input.isMC and isGaudiEnv() and not version:
             raise ValueError("Unknown G4 version")
         return version
 

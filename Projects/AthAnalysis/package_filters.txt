@@ -144,6 +144,8 @@
 # Core Athena (would like to reduce) :
 + Control/AthAllocators
 + Control/AthenaConfiguration
++ Control/AthenaExamples/AthExHelloWorld
++ Control/AthenaExamples/AthExHive
 + Control/AthenaServices
 + Control/StoreGate
 + Control/SGComps

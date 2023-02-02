@@ -4,17 +4,17 @@ from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.TestDefaults import defaultTestFiles
 flags = initConfigFlags()
 flags.Input.Files = defaultTestFiles.HITS_RUN2
+
+# Load Detector flags
 flags._loadDynaFlags("Detector")
 
-# Don't fail just because G4AtlasApps isn't present in this build.
-havesim = True
-try:
-    import G4AtlasApps # noqa: F401
-except ImportError:
-    havesim = False
-if havesim:
-    flags._loadDynaFlags("Sim")
+# Load Sim flags
+flags._loadDynaFlags("Sim")
 
+# Load GeoModel flags
+flags._loadDynaFlags("GeoModel")
+
+# Init and print
 flags.initAll()
 flags.lock()
 flags.dump()
