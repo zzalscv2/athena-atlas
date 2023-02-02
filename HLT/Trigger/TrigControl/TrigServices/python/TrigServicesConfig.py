@@ -7,47 +7,43 @@ from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigServicesConfig')
 
-# old-JO style function
-def setupMessageSvc():
-   from AthenaCommon.AppMgr import theApp
-   from AthenaCommon.AppMgr import ServiceMgr as svcMgr
+
+def getMessageSvc(flags, msgSvcType="TrigMessageSvc"):
    from AthenaCommon.Constants import DEBUG, WARNING
 
-   svcMgr.MessageSvc = theApp.service( "MessageSvc" )     # already instantiated
-   MessageSvc = svcMgr.MessageSvc
-   MessageSvc.OutputLevel = theApp.OutputLevel
-
-   MessageSvc.Format       = "%t  % F%40W%C%4W%R%e%s%8W%R%T %0W%M"
-   MessageSvc.ErsFormat    = "%S: %M"
-   MessageSvc.printEventIDLevel = WARNING
-
-   # Message suppression
-   MessageSvc.enableSuppression    = False
-   MessageSvc.suppressRunningOnly  = True
-
-   # 0 = no suppression, negative = log-suppression, positive = normal suppression
-   # Do not rely on the defaultLimit property, always set each limit separately
-   MessageSvc.defaultLimit = -100
-   MessageSvc.verboseLimit = MessageSvc.defaultLimit
-   MessageSvc.debugLimit   = MessageSvc.defaultLimit
-   MessageSvc.infoLimit    = MessageSvc.defaultLimit
-   MessageSvc.warningLimit = MessageSvc.defaultLimit
-   MessageSvc.errorLimit   = 0
-   MessageSvc.fatalLimit   = 0
-
-   # Message forwarding to ERS
-   MessageSvc.useErsError = ['*']
-   MessageSvc.useErsFatal = ['*']
-   MessageSvc.ersPerEventLimit = 2  # ATR-25214
-
    # set message limit to unlimited when general DEBUG is requested
-   if MessageSvc.OutputLevel<=DEBUG :
-      MessageSvc.defaultLimit = 0
-      MessageSvc.enableSuppression = False
+   msgLimit = -100 if flags.Exec.OutputLevel>DEBUG else 0
 
-   # show summary statistics of messages in finalize
-   MessageSvc.showStats = True
-   MessageSvc.statLevel = WARNING
+   msgsvc = CompFactory.getComp(msgSvcType)(
+      "MessageSvc",
+      OutputLevel = flags.Exec.OutputLevel,
+      Format    = "%t  % F%40W%C%4W%R%e%s%8W%R%T %0W%M",
+      ErsFormat = "%S: %M",
+      printEventIDLevel = WARNING,
+
+      # Message suppression
+      enableSuppression    = False,
+      suppressRunningOnly  = True,
+      # 0 = no suppression, negative = log-suppression, positive = normal suppression
+      # Do not rely on the defaultLimit property, always set each limit separately
+      defaultLimit = msgLimit,
+      verboseLimit = msgLimit,
+      debugLimit   = msgLimit,
+      infoLimit    = msgLimit,
+      warningLimit = msgLimit,
+      errorLimit   = 0,
+      fatalLimit   = 0,
+
+      # Message forwarding to ERS
+      useErsError = ['*'],
+      useErsFatal = ['*'],
+      ersPerEventLimit = 2,  # ATR-25214
+
+      # show summary statistics of messages in finalize
+      showStats = True,
+      statLevel = WARNING
+   )
+   return msgsvc
 
 
 def getTHistSvc():
@@ -187,6 +183,7 @@ def getHltEventLoopMgr(flags, name='HltEventLoopMgr'):
 def TrigServicesCfg(flags):
    acc = ComponentAccumulator()
 
+   acc.addService( getMessageSvc(flags) )
    acc.addService( getTHistSvc() )
    acc.addService( getHltROBDataProviderSvc(flags) )
 
