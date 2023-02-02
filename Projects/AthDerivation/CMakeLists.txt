@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.18 )
@@ -41,6 +41,7 @@ find_package( tdaq-common REQUIRED )
 find_package( Frontier_Client )
 find_package( VDT )
 find_package( libffi )
+find_package( gl2ps )
 
 # Set up where to find the AthenaPoolUtilitiesTest CMake code.
 set( AthenaPoolUtilitiesTest_DIR

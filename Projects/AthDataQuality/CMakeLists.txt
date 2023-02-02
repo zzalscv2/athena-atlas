@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.6 )
@@ -37,6 +37,7 @@ find_package( PNG )
 find_package( TBB )
 find_package( TIFF )
 find_package( libffi )
+find_package( gl2ps )
 
 # Disable flake8.
 set( ATLAS_FLAKE8 true   # <- this is the shell builtin `true`

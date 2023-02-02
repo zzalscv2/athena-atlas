@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.10 )
@@ -34,6 +34,7 @@ find_package( tdaq-common REQUIRED )
 # Find some auxiliary packages:
 find_package( XercesC )
 find_package( libffi )
+find_package( gl2ps )
 
 # Set up the build/runtime environment:
 set( DetCommonReleaseEnvironment_DIR ${CMAKE_SOURCE_DIR}/cmake CACHE PATH
