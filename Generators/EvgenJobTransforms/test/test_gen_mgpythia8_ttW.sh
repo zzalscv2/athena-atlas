@@ -1,7 +1,7 @@
 #!/bin/bash
 # art-description: Generation test MG+Py8 ttW 
 # art-include: master/AthGeneration
-# art-include: master--HepMC3/Athena
+# art-include: master--HepMC2/Athena
 # art-include: 22.0/Athena
 # art-type: build
 # art-output: *.root
