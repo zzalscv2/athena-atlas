@@ -2,7 +2,7 @@
 # art-description: Standalone Rivet run test 
 # art-type: build
 # art-include: master/AthGeneration
-# art-include: master--HepMC3/Athena
+# art-include: master--HepMC2/Athena
 # art-include: 22.0/Athena
 # art-output: *.yoda.gz
 # art-output: log.generate
