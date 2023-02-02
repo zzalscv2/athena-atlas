@@ -25,4 +25,6 @@
 #include "TrigT1Interfaces/Range.h"
 #include "TrigT1Interfaces/TrigT1CaloDefs.h"
 
+#include "TrigT1Interfaces/MuCTPIL1Topo.h"
+
 #endif // TRIGT1INTERFACES_TRIGT1INTERFACESDICT_H

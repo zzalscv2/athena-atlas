@@ -8,6 +8,7 @@ atlas_add_poolcnv_library( TrigT1EventAthenaPoolPoolCnv
    src/*.h src/*.cxx
    FILES TrigT1Result/RoIBResult.h TrigT1Result/MuCTPI_RDO.h
          TrigT1Result/CTP_RDO.h TrigT1CaloEvent/TriggerTowerCollection.h
+         TrigT1Interfaces/MuCTPIL1Topo.h
          TrigT1CaloEvent/JetElementCollection.h
          TrigT1CaloEvent/CPMTowerCollection.h
          TrigT1CaloEvent/CPMTobRoICollection.h
@@ -36,6 +37,7 @@ atlas_add_poolcnv_library( TrigT1EventAthenaPoolPoolCnv
                         LVL1::CMMEtSumsCollection LVL1::CMMRoI
                         LVL1::JEMHitsCollection LVL1::JEMRoICollection
                         LVL1::RODHeaderCollection
+			LVL1::MuCTPIL1Topo
    LINK_LIBRARIES AthenaPoolUtilities GaudiKernel AthenaPoolCnvSvcLib
                   TrigT1CaloEventLib TrigT1EventTPCnv TrigT1Interfaces
                   TrigT1Result )

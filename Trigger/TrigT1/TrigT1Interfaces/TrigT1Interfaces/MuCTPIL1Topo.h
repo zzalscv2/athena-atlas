@@ -43,7 +43,7 @@ namespace LVL1 {
      void clearCandidates();
 
      void setBcidOffset(int bcidOffset){m_bcidOffset = bcidOffset;}
-     int getBcidOffset(){ return m_bcidOffset;}
+     int getBcidOffset() const { return m_bcidOffset;}
 
      /// Assignment operators
      MuCTPIL1Topo & operator= ( const MuCTPIL1Topo & );
@@ -64,4 +64,5 @@ namespace LVL1 {
 
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF( LVL1::MuCTPIL1Topo, 6175, 0 )
- #endif // TRIGT1INTERFACES_MUCTPIL1TOPO_H
+
+#endif // TRIGT1INTERFACES_MUCTPIL1TOPO_H
