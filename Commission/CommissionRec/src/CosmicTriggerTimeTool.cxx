@@ -1,14 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CommissionUtils/CosmicTriggerTimeTool.h"
+#include "CosmicTriggerTimeTool.h"
 #include "CommissionEvent/ComTime.h"
 #include "GaudiKernel/IIncidentSvc.h"
 
-// #include "TrackRecord/TimedTrackRecordCollection.h" 
-// #include "TrackRecord/TimedTrackRecord.h" 
-#include "TrackRecord/TrackRecordCollection.h" 
+#include "TrackRecord/TrackRecordCollection.h"
 #include "TrackRecord/TrackRecord.h" 
 
 #include "LArSimEvent/LArHitContainer.h" 
