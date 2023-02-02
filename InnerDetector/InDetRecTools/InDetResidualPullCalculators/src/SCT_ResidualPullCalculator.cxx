@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -137,7 +137,7 @@ std::unique_ptr<Trk::ResidualPull> InDet::SCT_ResidualPullCalculator::residualPu
 /// calc residuals for SCT measurements
 /////////////////////////////////
 void InDet::SCT_ResidualPullCalculator::residuals(
-    std::vector<double>& residuals,
+    std::array<double,5>& residuals,
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkPar,
     const Trk::ResidualPull::ResidualType,
@@ -147,7 +147,6 @@ void InDet::SCT_ResidualPullCalculator::residuals(
     const InDet::SCT_ClusterOnTrack *sctROT = dynamic_cast<const InDet::SCT_ClusterOnTrack*>(measurement);
     if (!sctROT) return;
     if (!trkPar) return;
-    if (residuals.size() < 5) residuals.resize(5); // 5 is convention for the interface
     double sinAlpha = 0.0;
 
     // check if we have a 2-dim SCT cluster

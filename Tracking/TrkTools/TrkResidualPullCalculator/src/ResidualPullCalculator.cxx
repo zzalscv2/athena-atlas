@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -88,13 +88,12 @@ StatusCode Trk::ResidualPullCalculator::finalize() {
 //  calc residuals with determination of detector/MBase type
 ////////////////////////////////////////////////////////////////////////////////
 void Trk::ResidualPullCalculator::residuals(
-    std::vector<double>& residuals,
+    std::array<double,5>& residuals,
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkPar,
     const Trk::ResidualPull::ResidualType resType,
     const Trk::TrackState::MeasurementType detType) const {
 
-    if (residuals.size()<5) residuals.resize(5);
     residuals[0]=residuals[1]=residuals[2]=residuals[3]=residuals[4]=-999;
     Trk::TrackState::MeasurementType measType = detType;
     if (detType == Trk::TrackState::unidentified) {
