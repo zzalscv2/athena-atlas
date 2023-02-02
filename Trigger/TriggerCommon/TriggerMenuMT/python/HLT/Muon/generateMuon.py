@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, ChainStep, Chain, EmptyMenuSequence, SelectionCA, InViewRecoCA
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -271,7 +271,7 @@ def _muEFSAStepSeq(flags, name='RoI'):
     #Reco
     recoMS.mergeReco( MooSegmentFinderAlgCfg(flags,name="TrigMooSegmentFinder_"+name,UseTGCNextBC=False, UseTGCPriorBC=False))
 
-    recoMS.mergeReco(MuPatTrackBuilderCfg(flags, name="TrigMuPatTrackBuilder_"+name, MonTool = MuPatTrackBuilderMonitoring("MuPatTrackBuilderMonitoringSA_"+name)))
+    recoMS.mergeReco(MuPatTrackBuilderCfg(flags, name="TrigMuPatTrackBuilder_"+name, MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name)))
     from xAODTrackingCnv.xAODTrackingCnvConfig import MuonTrackParticleCnvCfg
     recoMS.mergeReco(MuonTrackParticleCnvCfg(flags, name = "TrigMuonTrackParticleCnvAlg_"+name))
     recoMS.mergeReco(MuonCombinedMuonCandidateAlgCfg(flags, name = "TrigMuonCandidateAlg_"+name))

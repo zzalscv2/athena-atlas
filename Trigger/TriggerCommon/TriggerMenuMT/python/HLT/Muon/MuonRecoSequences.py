@@ -448,10 +448,10 @@ def muEFSARecoSequence( flags, RoIs, name ):
   from MuonSegmentTrackMaker.MuonTrackMakerAlgsMonitoring import MuPatTrackBuilderMonitoring
 
   if flags.Muon.runCommissioningChain:
-    TrackBuilder = algorithmCAToGlobalWrapper(EMEO_MuPatTrackBuilderCfg, flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring("MuPatTrackBuilderMonitoringSA_"+name), SpectrometerTrackOutputLocation="MuonSpectrometerTracks") 
+    TrackBuilder = algorithmCAToGlobalWrapper(EMEO_MuPatTrackBuilderCfg, flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name), SpectrometerTrackOutputLocation="MuonSpectrometerTracks")
 
   else:
-    TrackBuilder = algorithmCAToGlobalWrapper(MuPatTrackBuilderCfg, flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring("MuPatTrackBuilderMonitoringSA_"+name)) 
+    TrackBuilder = algorithmCAToGlobalWrapper(MuPatTrackBuilderCfg, flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name))
 
   xAODTrackParticleCnvAlg = MuonStandaloneTrackParticleCnvAlg("TrigMuonStandaloneTrackParticleCnvAlg_"+name)
   theMuonCandidateAlg=MuonCombinedMuonCandidateAlg("TrigMuonCandidateAlg_"+name)
