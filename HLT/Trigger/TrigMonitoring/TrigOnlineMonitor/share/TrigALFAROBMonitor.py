@@ -7,6 +7,10 @@ from AthenaCommon.Constants import *
 from AthenaCommon import CfgMgr
 ALFAROBMonitor = CfgMgr.TrigALFAROBMonitor("ALFAROBMonitor")
 
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+flags = initConfigFlags()
+flags.lock()
+
 #--------------------------------------------------------------
 # Add the algorithm to the topSequence
 # (in L2 it should be running after steering, so that the ROB
@@ -15,7 +19,7 @@ ALFAROBMonitor = CfgMgr.TrigALFAROBMonitor("ALFAROBMonitor")
 from AthenaCommon.AlgSequence import AlgSequence 
 topSequence = AlgSequence()
 from TrigOnlineMonitor.TrigOnlineMonitorConfig import TrigALFAROBMonitor
-topSequence += TrigALFAROBMonitor()
+topSequence += TrigALFAROBMonitor(flags)
 
 #monTool1 = GenericMonitoringTool('MonTool1')
 #monTool1.HistPath="ALFAROBMonitor/python_kk_background"
