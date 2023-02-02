@@ -58,7 +58,7 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
     # TODO: need to find the new flags equivalent for the missing settings below, then we can
     # drop these kwargs and do everything via the ConfigFlags
     acc.merge(InDetCommonCfg(ConfigFlags,
-                             DoVertexFinding = ConfigFlags.InDet.PriVertex.doVertexFinding if ConfigFlags.GeoModel.Run<=LHCPeriod.Run3 else ConfigFlags.ITk.PriVertex.doVertexFinding,
+                             DoVertexFinding = ConfigFlags.Tracking.doVertexFinding,
                              AddPseudoTracks = ConfigFlags.InDet.Tracking.doPseudoTracking and ConfigFlags.GeoModel.Run<=LHCPeriod.Run3,
                              DecoLRTTTVA = False,
                              DoR3LargeD0 = ConfigFlags.Tracking.doLargeD0,

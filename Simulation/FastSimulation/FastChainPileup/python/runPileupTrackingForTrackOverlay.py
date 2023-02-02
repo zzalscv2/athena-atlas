@@ -39,7 +39,7 @@ flags.InDet.Tracking.doCaloSeededAmbi = False
 flags.InDet.Tracking.doTIDE_Ambi = True
 flags.InDet.Tracking.doCaloSeededBrem = True
 flags.InDet.Tracking.doBackTracking = True
-flags.InDet.PriVertex.doVertexFinding = False # from VertexFindingFlags.py
+flags.Tracking.doVertexFinding = False # from VertexFindingFlags.py
 
 # Updated for Monitoring from DQConfigFlags.py
 # Missing? doMonitoringPrimaryVertexingEnhanced

@@ -1,7 +1,7 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import AthenaCommon.SystemOfUnits as Units
-from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum
+from AthenaConfiguration.Enums import LHCPeriod, FlagEnum
 
 class VertexSortingSetup(FlagEnum):
     SumPt2Sorting = 'SumPt2Sorting'
@@ -170,22 +170,12 @@ def createPriVertexingFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     flags = AthConfigFlags()
 
-    # Turn on the primary vertex reconstruction
-    flags.addFlag("doVertexFinding", lambda prevFlags: prevFlags.Beam.Type is not BeamType.Cosmics)
     flags.addFlag("maxAbsEta", 9999.0)
-    flags.addFlag("maxD0", 4.0 * Units.mm)
+    flags.addFlag("minNTrtHits", 0)
     flags.addFlag("maxNPixelHoles", 1)
-    flags.addFlag("maxSigmaD0", 5.0 * Units.mm)
-    flags.addFlag("maxSigmaZ0SinTheta", 10.0 * Units.mm)
     flags.addFlag("maxZ0", 1000.0 * Units.mm)
     flags.addFlag("maxZ0SinTheta", 1000.0 * Units.mm)
     flags.addFlag("minNInnermostLayerHits", 0)
-    flags.addFlag("minNPixelHits", 1)
-    flags.addFlag("minNSctHits", 4)
-    flags.addFlag("minNSiHits", 6)
-    flags.addFlag("minNTrtHits", 0)
-    flags.addFlag("minPt", 500.0 * Units.MeV)
-    flags.addFlag("maxZinterval", 3)
     # MaxTracks cuts are specific to the IterativeFinding config
     flags.addFlag("doMaxTracksCut", True)
     flags.addFlag("MaxTracks", 3000)
@@ -195,20 +185,28 @@ def createPriVertexingFlags():
     flags.addFlag("sortingSetup", VertexSortingSetup.SumPt2Sorting, enum=VertexSortingSetup)
     flags.addFlag("useBeamConstraint", True)
 
-    return flags
+    idflags = { "minPt"              : 500.0 * Units.MeV,
+                "maxD0"              : 4.0 * Units.mm,
+                "maxSigmaD0"         : 5.0 * Units.mm,
+                "maxSigmaZ0SinTheta" : 10.0 * Units.mm,
+                "minNPixelHits"      : 1,
+                "minNSctHits"        : 4,
+                "minNSiHits"         : 6,
+                "maxZinterval"       : 3}
 
+    itkflags = {"minPt"              : 900.0 * Units.MeV,
+                "maxD0"              : 1.0 * Units.mm,
+                "maxSigmaD0"         : 0.35 * Units.mm,
+                "maxSigmaZ0SinTheta" : 2.5 * Units.mm,
+                "minNPixelHits"      : 3,
+                "minNSctHits"        : 0,
+                "minNSiHits"         : 7,
+                "maxZinterval"       : 0.5}
 
-def createITkPriVertexingFlags():
-    flags = createPriVertexingFlags()
-
-    flags.minNTrtHits = 0
-    flags.minPt = 900.0 * Units.MeV
-    flags.maxD0 = 1.0 * Units.mm
-    flags.maxSigmaD0 = 0.35 * Units.mm
-    flags.maxSigmaZ0SinTheta = 2.5 * Units.mm
-    flags.minNPixelHits = 3
-    flags.minNSctHits = 0
-    flags.minNSiHits = 7
-    flags.maxZinterval = 0.5
+    for k in idflags:
+        # Need to use default arguments in lambda function to keep them set
+        # despite the loop
+        flags.addFlag(k, lambda prevFlags, a=idflags[k], b=itkflags[k]:
+                      a if prevFlags.Detector.GeometryID else b)
 
     return flags

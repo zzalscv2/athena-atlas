@@ -2,7 +2,7 @@
 # Configuration of InDetPriVxFinderTool package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from InDetConfig.VertexFindingFlags import VertexSetup
+from TrkConfig.VertexFindingFlags import VertexSetup
 
 def AdaptiveMultiFindingBaseCfg(flags, name="InDetAdaptiveMultiPriVxFinderTool",
                                 **kwargs):
@@ -25,13 +25,13 @@ def AdaptiveMultiFindingBaseCfg(flags, name="InDetAdaptiveMultiPriVxFinderTool",
         kwargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(
             AdaptiveMultiVertexFitterCfg(flags)))
 
-    vtxFlags = flags.ITk.PriVertex if flags.Detector.GeometryITk \
-               else flags.InDet.PriVertex
-
-    kwargs.setdefault("useBeamConstraint", vtxFlags.useBeamConstraint)
+    kwargs.setdefault("useBeamConstraint",
+                      flags.Tracking.PriVertex.useBeamConstraint)
     kwargs.setdefault("selectiontype", 0)
-    kwargs.setdefault("TracksMaxZinterval", vtxFlags.maxZinterval)
-    kwargs.setdefault("do3dSplitting", not vtxFlags.useBeamConstraint)
+    kwargs.setdefault("TracksMaxZinterval",
+                      flags.Tracking.PriVertex.maxZinterval)
+    kwargs.setdefault("do3dSplitting",
+                      not flags.Tracking.PriVertex.useBeamConstraint)
     kwargs.setdefault("useSeedConstraint", False)
 
     acc.setPrivateTools(
@@ -105,17 +105,14 @@ def IterativeFindingBaseCfg(flags, name="InDetIterativePriVxFinderTool", **kwarg
             AdaptiveVertexFitterCfg(flags, SeedFinder=kwargs["SeedFinder"],
                                     LinearizedTrackFactory=kwargs["LinearizedTrackFactory"],
                                     ImpactPoint3dEstimator=kwargs["ImpactPoint3dEstimator"])))
-                                    
 
-    vtxFlags = flags.ITk.PriVertex if flags.Detector.GeometryITk \
-               else flags.InDet.PriVertex
-
-    kwargs.setdefault("useBeamConstraint", vtxFlags.useBeamConstraint)
+    kwargs.setdefault("useBeamConstraint",
+                      flags.Tracking.PriVertex.useBeamConstraint)
     kwargs.setdefault("significanceCutSeeding", 12)
     kwargs.setdefault("maximumChi2cutForSeeding", 49)
     kwargs.setdefault("maxVertices", 200)
-    kwargs.setdefault("doMaxTracksCut", vtxFlags.doMaxTracksCut)
-    kwargs.setdefault("MaxTracks", vtxFlags.MaxTracks)
+    kwargs.setdefault("doMaxTracksCut", flags.Tracking.PriVertex.doMaxTracksCut)
+    kwargs.setdefault("MaxTracks", flags.Tracking.PriVertex.MaxTracks)
 
     acc.setPrivateTools(
         CompFactory.InDet.InDetIterativePriVxFinderTool(name, **kwargs))
@@ -180,12 +177,12 @@ def ActsGaussAdaptiveMultiFindingBaseCfg(flags, name="ActsAdaptiveMultiPriVtxFin
         kwargs.setdefault("ExtrapolationTool", acc.getPrimaryAndMerge(
             ActsExtrapolationToolCfg(flags)))
 
-    vtxFlags = flags.ITk.PriVertex if flags.Detector.GeometryITk \
-               else flags.InDet.PriVertex
-
-    kwargs.setdefault("useBeamConstraint", vtxFlags.useBeamConstraint)
-    kwargs.setdefault("tracksMaxZinterval", vtxFlags.maxZinterval)
-    kwargs.setdefault("do3dSplitting", not vtxFlags.useBeamConstraint)
+    kwargs.setdefault("useBeamConstraint",
+                      flags.Tracking.PriVertex.useBeamConstraint)
+    kwargs.setdefault("tracksMaxZinterval",
+                      flags.Tracking.PriVertex.maxZinterval)
+    kwargs.setdefault("do3dSplitting",
+                      not flags.Tracking.PriVertex.useBeamConstraint)
 
     acc.setPrivateTools(
         CompFactory.ActsTrk.AdaptiveMultiPriVtxFinderTool(name, **kwargs))
@@ -193,16 +190,13 @@ def ActsGaussAdaptiveMultiFindingBaseCfg(flags, name="ActsAdaptiveMultiPriVtxFin
 
 def VertexFinderToolCfg(flags, **kwargs):
 
-    vtxFlags = flags.ITk.PriVertex if flags.Detector.GeometryITk \
-               else flags.InDet.PriVertex     
-
-    if vtxFlags.setup == VertexSetup.GaussAMVF:
+    if flags.Tracking.PriVertex.setup == VertexSetup.GaussAMVF:
         return GaussAdaptiveMultiFindingCfg(flags)
-    elif vtxFlags.setup == VertexSetup.AMVF:
+    elif flags.Tracking.PriVertex.setup == VertexSetup.AMVF:
         return AdaptiveMultiFindingBaseCfg(flags)
-    elif vtxFlags.setup == VertexSetup.GaussIVF:
+    elif flags.Tracking.PriVertex.setup == VertexSetup.GaussIVF:
         return GaussIterativeFindingCfg(flags)
-    elif vtxFlags.setup == VertexSetup.IVF:
+    elif flags.Tracking.PriVertex.setup == VertexSetup.IVF:
         return IterativeFindingBaseCfg(flags)
-    elif vtxFlags.setup == VertexSetup.ActsGaussAMVF:
+    elif flags.Tracking.PriVertex.setup == VertexSetup.ActsGaussAMVF:
         return ActsGaussAdaptiveMultiFindingBaseCfg(flags)

@@ -2,7 +2,7 @@
 # Configuration of TrkVertexTools package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from InDetConfig.VertexFindingFlags import VertexSortingSetup
+from TrkConfig.VertexFindingFlags import VertexSortingSetup
 
 def SumPt2VertexCollectionSortingToolCfg(flags, name="SumPt2VertexCollectionSortingTool", **kwargs):
     acc = ComponentAccumulator()
@@ -34,11 +34,10 @@ def SumPtVertexCollectionSortingToolCfg(flags, name="SumPtVertexCollectionSortin
         CompFactory.Trk.VertexCollectionSortingTool(name,**kwargs))
     return acc
 
-def VertexCollectionSortingToolCfg(flags, name="VertexCollectionSortingTool", **kwargs):
-    vtxFlags = flags.ITk.PriVertex if flags.Detector.GeometryITk \
-               else flags.InDet.PriVertex
-
-    if vtxFlags.sortingSetup == VertexSortingSetup.SumPt2Sorting:
-        return SumPt2VertexCollectionSortingToolCfg(flags)
-    elif vtxFlags.sortingSetup == VertexSortingSetup.SumPtSorting:
-        return SumPtVertexCollectionSortingToolCfg(flags)
+def VertexCollectionSortingToolCfg(flags, **kwargs):
+    if flags.Tracking.PriVertex.sortingSetup == \
+       VertexSortingSetup.SumPt2Sorting:
+        return SumPt2VertexCollectionSortingToolCfg(flags, **kwargs)
+    elif flags.Tracking.PriVertex.sortingSetup == \
+         VertexSortingSetup.SumPtSorting:
+        return SumPtVertexCollectionSortingToolCfg(flags, **kwargs)
