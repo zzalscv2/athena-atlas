@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-# Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble) - 2017 - 2022
+# Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble) - 2017 - 2023
 # Python 3 migration by Miaoran Lu (University of Iowa)- 2022
 #
 # Display the year stats
@@ -21,7 +21,7 @@ gROOT.SetBatch(False)
 
 sys.path.append("/afs/cern.ch/user/l/larmon/public/prod/Misc")
 
-from DeMoLib import strLumi, plotStack, initialize, MakeTH1,SetXLabel,MakeTProfile
+from DeMoLib import strLumi,plotStack,initializeMonitoredDefects,retrieveYearTagProperties,MakeTH1,SetXLabel,MakeTProfile
 
 global debug
 debug = False
@@ -72,8 +72,8 @@ from argparse import RawTextHelpFormatter,ArgumentParser
 from ROOT import gROOT
 
 parser = ArgumentParser(description='',formatter_class=RawTextHelpFormatter)
-parser.add_argument('-y','--year',dest='parser_year',default = ["2018"],nargs='*',help='Year [Default: 2018]',action='store')
-parser.add_argument('-t','--tag',dest='parser_tag',default = ["Tier0_2018"],nargs='*',help='Defect tag [Default: "Tier0_2018"]',action='store')
+parser.add_argument('-y','--year',dest='parser_year',default = ["2022"],nargs='*',help='Year [Default: 2022]',action='store')
+parser.add_argument('-t','--tag',dest='parser_tag',default = ["AtlasReady"],nargs='*',help='Defect tag [Default: "AtlasReady"]',action='store')
 parser.add_argument('-s','--system',dest='parser_system',default="LAr",help='System: LAr, CaloCP [Default: "LAr"]',action='store')
 parser.add_argument('-d','--directory',dest='parser_directory',default="./",help='Directory to display',action='store')
 parser.add_argument('-b','--batch',dest='parser_batchMode',help='Batch mode',action='store_true')
@@ -92,13 +92,13 @@ parser.print_help()
 if args.parser_batchMode:
   gROOT.SetBatch(True)
 
-yearTagProperties = {}
+ytp = {}
 partitions = {}
 defects = {}
 defectVeto = {}
 veto = {}
 signOff = {}
-initialize(args.parser_system,yearTagProperties,partitions,defects,defectVeto,veto,signOff,args.parser_year[0],args.parser_tag[0])
+initializeMonitoredDefects(args.parser_system,partitions,defects,defectVeto,veto,signOff,args.parser_year[0],args.parser_tag[0])
 
 yearTagList = []
 yearTagDir = {}
@@ -106,7 +106,8 @@ for iYear in args.parser_year:
   for iTag in args.parser_tag:
     directory = "%s/YearStats-%s/%s/%s"%(args.parser_directory,args.parser_system,iYear,iTag)
     if os.path.exists(directory):
-      yearTag = "%s%s"%(iYear,yearTagProperties["description"][iTag])
+      ytp = retrieveYearTagProperties(iYear,iTag)
+      yearTag = "%s/%s"%(iYear,ytp["Description"])
       yearTagList.append(yearTag)
       yearTagDir[yearTag] = directory
 

@@ -9,14 +9,22 @@
 # The user has to run it interactively in an atlasdqm lxplus console.
 # 
 # Arguments:
-# -$1 : directory when to run the daemon (a priori ~atlasdqm/w1/DeMo)
-# -$2 : DeMo year
-# -$3 : DeMo tag (a priori GRL_[year])
+# - $1 : directory when to run the daemon (a priori ~atlasdqm/w1/DeMo)
+# - $2 : DeMo year
+# - $3 : DeMo tag
+# - $4 (optional) : if chosen as resetYS, reset the year stats
 ##################################################################
 
 rundir=$1
 year=$2
 tag=$3
+
+if [ "$#" == "4" ];
+then
+    option=$4
+else
+    option="NoOption"
+fi
 
 date=`date`
 echo "Date is ${date}"
@@ -25,7 +33,15 @@ echo "Now in ${rundir}"
 export AtlasSetup=/afs/cern.ch/atlas/software/dist/AtlasSetup
 source $AtlasSetup/scripts/asetup.sh Athena,22.0.81
 
-systems='LAr Pixel SCT TRT Tile MDT TGC RPC Trig_L1 Trig_HLT Lumi Global ALFA LUCID ZDC IDGlobal BTag CaloCP MuonCP '
+systems='Pixel SCT TRT LAr Tile MDT TGC RPC Trig_L1 Trig_HLT Lumi Global ALFA LUCID ZDC IDGlobal BTag CaloCP MuonCP '
+
+if [ $option == "resetYS" ];
+then
+    echo "Warning : I am reseting the year stats"
+else
+    echo "I am updating the year stats"
+fi
+
 
 for system in $systems
 do
@@ -37,9 +53,12 @@ do
     
 
     # Script for updating the year stats
-    # If you want to reset the year stats, use the first command line with --resetYearStats (not recommanded as much longer)
-    #cmd="python DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --resetYearStats --updateYearStats"
-    cmd="python DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --skipAlreadyUpdated --updateYearStats"
+    if [ $option == "resetYS" ];
+    then
+	cmd="python DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --resetYearStats --updateYearStats"
+    else
+	cmd="python DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --skipAlreadyUpdated --updateYearStats"
+    fi
     log="YearStats-${system}/${year}/${tag}/daemon-grl.out"
     echo "** ${cmd} **"
     eval "rm -f ${log}"
@@ -61,6 +80,10 @@ do
     
 done
 
+echo "Derive ATLAS data loss"
+cmd="python $ScriptPath/DeMoAtlasDataLoss.py -b -y ${year} -t ${tag}"
 eval ${cmd}
+
+echo "Generate webpage"
 cmd="python /afs/cern.ch/user/a/atlasdqm/w1/DeMo/DeMoGenerateWWW.py"
 eval ${cmd}
