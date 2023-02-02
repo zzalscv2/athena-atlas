@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM4.py
@@ -13,7 +13,7 @@ def JETM4SkimmingToolCfg(ConfigFlags):
     acc = ComponentAccumulator()
 
     from DerivationFrameworkJetEtMiss import TriggerLists
-    triggerlist = TriggerLists.single_photon_Trig()
+    triggerlist = TriggerLists.single_photon_Trig(ConfigFlags)
 
     triggers = '||'.join(triggerlist)
 

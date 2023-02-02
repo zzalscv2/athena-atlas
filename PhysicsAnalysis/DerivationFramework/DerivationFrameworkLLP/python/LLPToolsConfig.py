@@ -41,6 +41,7 @@ def LLP1TriggerSkimmingToolCfg(ConfigFlags, name, **kwargs):
     from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod, TriggerType
 
     allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
+    TriggerAPI.setConfigFlags(ConfigFlags)
     trig_el  = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.el,  livefraction=0.8)
     trig_mu  = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.mu,  livefraction=0.8)
     trig_g   = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.g,   livefraction=0.8)

@@ -24,6 +24,7 @@ def read_trig_list_file(fname):
 class TriggerListsHelper:
     def __init__(self, flags):
         self.flags = flags
+        TriggerAPI.setConfigFlags(flags)
         self.Run2TriggerNamesTau = []
         self.Run2TriggerNamesNoTau = []
         self.Run3TriggerNames = []

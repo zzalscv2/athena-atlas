@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # TRIG8.py
@@ -112,6 +112,7 @@ def TRIG8KernelCfg(ConfigFlags, name='TRIG8Kernel', **kwargs):
     from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod
 
     allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
+    TriggerAPI.setConfigFlags(ConfigFlags)
     trig_all = TriggerAPI.getAllHLT(allperiods)
     
     # Pieces of trigger names to keep

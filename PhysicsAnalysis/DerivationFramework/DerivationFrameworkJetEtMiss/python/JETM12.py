@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM12.py
@@ -13,8 +13,8 @@ def JETM12SkimmingToolCfg(ConfigFlags):
     acc = ComponentAccumulator()
 
     from DerivationFrameworkJetEtMiss import TriggerLists
-    metTriggers = TriggerLists.MET_Trig()
-    muTriggers = TriggerLists.single_mu_Trig()
+    metTriggers = TriggerLists.MET_Trig(ConfigFlags)
+    muTriggers = TriggerLists.single_mu_Trig(ConfigFlags)
     orstr  = ' || '
     andstr = ' && '
     trackRequirements = '(InDetTrackParticles.pt > 10.*GeV && InDetTrackParticles.TrkIsoPt1000_ptcone20 < 0.12*InDetTrackParticles.pt && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV) < 5.0*mm )'

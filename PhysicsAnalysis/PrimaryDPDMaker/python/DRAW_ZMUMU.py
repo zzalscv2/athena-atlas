@@ -55,6 +55,7 @@ def DRAW_ZmumuKernelCfg(flags, name="DRAW_ZMUMUKernel", **kwargs):
     from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
     from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod, TriggerType
     periods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future
+    TriggerAPI.setConfigFlags(flags)
     allUnprescaledTriggers = TriggerAPI.getLowestUnprescaledAnyPeriod(
         periods, TriggerType.mu) + ["HLT_noalg_L1MU14FCH", "L1_MU14FCH"]
     print("DRAW_ZMUMU: will skim on an OR of the following muon triggers (list provided at run-time by the TriggerAPI):")

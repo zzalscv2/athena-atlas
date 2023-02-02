@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # PhysCommonTrigger.py
@@ -7,6 +7,8 @@
 # In principle it can also be used by other formats who want to take
 # advantage of PHYS/PHYSLITE containers
 #====================================================================
+from AthenaConfiguration.AutoConfigFlags import GetFileMD
+from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
 from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod, TriggerType
 from DerivationFrameworkTrigger.TriggerMatchingHelper import TriggerMatchingHelper
@@ -34,6 +36,7 @@ def read_trig_list_file(fname):
 ## Get single and multi mu, e, photon triggers
 ## Jet, tau, multi-object triggers not available in the matching code
 allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
+TriggerAPI.setConfigFlags(ConfigFlags)
 trig_el  = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.el,  livefraction=0.8)
 trig_mu  = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.mu,  livefraction=0.8)
 trig_g   = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.g,   livefraction=0.8)
@@ -55,8 +58,6 @@ trigger_names_full_tau = list(set(trig_tau+trig_txe+extra_tau))
 ## Now reduce the list...
 trigger_names_notau = []
 trigger_names_tau = []
-from AthenaConfiguration.AutoConfigFlags import GetFileMD
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
 if ConfigFlags.Trigger.EDMVersion == 3:
    r_tau = re.compile("HLT_.*tau.*")
