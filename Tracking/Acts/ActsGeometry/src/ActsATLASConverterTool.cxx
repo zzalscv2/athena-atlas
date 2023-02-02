@@ -99,7 +99,8 @@ ActsATLASConverterTool::ATLASSurfaceToActs(const Trk::Surface &atlasSurface) con
 const ATLASSourceLink
 ActsATLASConverterTool::ATLASMeasurementToSourceLink(
     const Acts::GeometryContext& gctx, 
-    const Trk::MeasurementBase *measurement) const {
+    const Trk::MeasurementBase *measurement,
+    std::vector<std::tuple<const Trk::MeasurementBase*, Acts::BoundVector, Acts::BoundMatrix, std::size_t> >& externalCollection) const {
 
   const Acts::Surface& surface = ATLASSurfaceToActs(measurement->associatedSurface());
   Acts::BoundVector loc = Acts::BoundVector::Zero();
@@ -206,13 +207,15 @@ ActsATLASConverterTool::ATLASMeasurementToSourceLink(
     }
   }
 
-  return ATLASSourceLink(surface, *measurement, dim, loc, cov);
+  externalCollection.push_back( std::make_tuple(measurement, loc, cov, dim) );
+  return ATLASSourceLink(surface, externalCollection.back() );
 }
 
 const ATLASUncalibSourceLink
 ActsATLASConverterTool::UncalibratedMeasurementToSourceLink(
     const InDetDD::SiDetectorElementCollection &detectorElements,
-    const xAOD::UncalibratedMeasurement *measurement) const
+    const xAOD::UncalibratedMeasurement *measurement,
+    std::vector<std::tuple<const xAOD::UncalibratedMeasurement*, Acts::BoundVector, Acts::BoundMatrix, std::size_t> >& externalCollection) const
 {
   const InDetDD::SiDetectorElement *elem = detectorElements.getDetectorElement(measurement->identifierHash());
   if (!elem)
@@ -223,43 +226,47 @@ ActsATLASConverterTool::UncalibratedMeasurementToSourceLink(
   Acts::BoundVector loc = Acts::BoundVector::Zero();
   Acts::BoundMatrix cov = Acts::BoundMatrix::Zero();
   xAOD::UncalibMeasType typ = measurement->type();
-  size_t dim;
-  if (typ == xAOD::UncalibMeasType::StripClusterType)
-  {
+
+  std::size_t dim = 0;
+  switch(typ) {
+  case(xAOD::UncalibMeasType::StripClusterType):
     dim = 1;
     loc[Acts::eBoundLoc0] = measurement->localPosition<1>()[Trk::locX];
     cov.topLeftCorner<1, 1>() = measurement->localCovariance<1>().cast<Acts::ActsScalar>();
-  }
-  else if (typ == xAOD::UncalibMeasType::PixelClusterType)
-  {
+    break;
+  case(xAOD::UncalibMeasType::PixelClusterType):
     dim = 2;
     loc[Acts::eBoundLoc0] = measurement->localPosition<2>()[Trk::locX];
     loc[Acts::eBoundLoc1] = measurement->localPosition<2>()[Trk::locY];
     cov.topLeftCorner<2, 2>() = measurement->localCovariance<2>().cast<Acts::ActsScalar>();
-  }
-  else
-  {
+    break;
+  default:
     throw std::domain_error("Can only handle measurement type pixel or strip");
-  }
-
-  return ATLASUncalibSourceLink(surface, *measurement, dim, loc, cov);
+  };
+  
+  externalCollection.push_back( std::make_tuple(measurement, loc, cov, dim) );
+  return ATLASUncalibSourceLink(surface,
+				externalCollection.back());
 }
 
-
 const std::vector<ATLASSourceLink>
-ActsATLASConverterTool::ATLASTrackToSourceLink(const Acts::GeometryContext& gctx, const Trk::Track &track) const {
-  
+ActsATLASConverterTool::ATLASTrackToSourceLink(const Acts::GeometryContext& gctx, 
+					       const Trk::Track &track,
+					       std::vector< std::tuple<const Trk::MeasurementBase*, Acts::BoundVector, Acts::BoundMatrix, std::size_t> >& collection) const 
+{  
   auto hits = track.measurementsOnTrack();   
   auto outliers = track.outliersOnTrack();  
 
   std::vector<ATLASSourceLink> sourceLinks;
   sourceLinks.reserve(hits->size()+outliers->size());
 
+  collection.reserve(hits->size()+outliers->size());
+
   for (auto it = hits->begin(); it != hits->end(); ++it){
-    sourceLinks.push_back(ATLASMeasurementToSourceLink(gctx, *it));
+    sourceLinks.push_back(ATLASMeasurementToSourceLink(gctx, *it, collection));
   }
   for (auto it = outliers->begin(); it != outliers->end(); ++it){
-    sourceLinks.push_back(ATLASMeasurementToSourceLink(gctx, *it));
+    sourceLinks.push_back(ATLASMeasurementToSourceLink(gctx, *it, collection));
   }
   return sourceLinks;
 }

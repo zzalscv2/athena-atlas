@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRK_ORTHOGONALSEEDINGTOOL_SEEDINGTOOL_H
@@ -11,12 +11,14 @@
 
 // ACTS CORE
 #include "Acts/Utilities/KDTree.hpp"
+#include "Acts/Geometry/Extent.hpp"
 #include "Acts/Seeding/Seed.hpp"
 #include "Acts/Seeding/SeedFilter.hpp"
 #include "Acts/Seeding/SeedFinderOrthogonal.hpp"
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Seeding/SeedFinderOrthogonalConfig.hpp"
 #include "Acts/Seeding/SeedFinderOrthogonal.hpp"
+#include "Acts/Seeding/SeedFinderConfig.hpp"
 #include "Acts/Seeding/SeedFilterConfig.hpp"
 #include "Acts/Seeding/SeedFilter.hpp"
 
@@ -46,11 +48,8 @@ namespace ActsTrk {
 		  ActsTrk::SeedContainer& seedContainer ) const override;
     
   private:
-
-
     const Acts::SeedFinderOrthogonalConfig<value_type>
-      prepareConfiguration(const Acts::Vector2& beamPos,
-			   const Acts::Vector3& bField) const;
+      prepareConfiguration(const Acts::SeedFinderOptions& finderOpts) const;
     
     // *********************************************************************
     // *********************************************************************

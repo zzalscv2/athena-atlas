@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ActsTrkEvent_MultiTrajectory_h
 #define ActsTrkEvent_MultiTrajectory_h
@@ -8,6 +8,7 @@
 #include "Acts/EventData/TrackStatePropMask.hpp"
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/Utilities/HashedString.hpp"
+#include "Acts/EventData/SourceLink.hpp"
 #include "CxxUtils/concepts.h"
 
 #include "xAODTracking/TrackJacobianContainer.h"
@@ -15,8 +16,6 @@
 #include "xAODTracking/TrackMeasurementContainer.h"
 #include "xAODTracking/TrackParametersContainer.h"
 #include "xAODTracking/TrackStateContainer.h"
-
-#include "ActsTrkEvent/SourceLink.h"
 
 namespace ActsTrk {
 template <bool RWState>
@@ -32,10 +31,10 @@ constexpr static bool IsReadWrite = false;
 
 namespace Acts {
 template <>
-struct isReadOnlyMultiTrajectory<ActsTrk::MultiTrajectory<ActsTrk::IsReadOnly>>
+struct IsReadOnlyMultiTrajectory<ActsTrk::MultiTrajectory<ActsTrk::IsReadOnly>>
     : std::true_type {};
 template <>
-struct isReadOnlyMultiTrajectory<ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite>>
+struct IsReadOnlyMultiTrajectory<ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite>>
     : std::false_type {};
 }  // namespace Acts
 
@@ -272,6 +271,15 @@ class MultiTrajectory final
     // resize the calibrated measurement to the size measdim
     const auto& trackStates = *m_trackStates;
     trackMeasurements().at(trackStates[istate]->calibrated())->resize(measdim);
+  }
+
+  /**
+   * Implementation of calibrated size
+   */ 
+  IndexType calibratedSize_impl(IndexType istate) const {
+    // Retrieve the calibrated measurement size
+    const auto& trackStates = *m_trackStates;
+    return trackMeasurements().at(trackStates[istate]->calibrated())->size();
   }
 
 

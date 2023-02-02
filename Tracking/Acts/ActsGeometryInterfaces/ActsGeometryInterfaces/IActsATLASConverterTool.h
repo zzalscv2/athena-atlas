@@ -47,15 +47,21 @@ class IActsATLASConverterTool : virtual public IAlgTool {
 
   virtual 
   const ATLASSourceLink
-  ATLASMeasurementToSourceLink(const Acts::GeometryContext& gctx, const Trk::MeasurementBase *measurement) const = 0;
+  ATLASMeasurementToSourceLink(const Acts::GeometryContext& gctx, 
+			       const Trk::MeasurementBase *measurement,
+			       std::vector<std::tuple<const Trk::MeasurementBase*, Acts::BoundVector, Acts::BoundMatrix, std::size_t> >& Collection) const = 0;
 
-  virtual 
+  virtual
   const ATLASUncalibSourceLink
-  UncalibratedMeasurementToSourceLink(const InDetDD::SiDetectorElementCollection &detectorElements, const xAOD::UncalibratedMeasurement *measurement) const = 0;
+  UncalibratedMeasurementToSourceLink(const InDetDD::SiDetectorElementCollection &detectorElements, 
+				      const xAOD::UncalibratedMeasurement *measurement,
+				      std::vector<std::tuple<const xAOD::UncalibratedMeasurement*, Acts::BoundVector, Acts::BoundMatrix, std::size_t>>& Collection) const = 0;
 
   virtual
   const std::vector<ATLASSourceLink>
-  ATLASTrackToSourceLink(const Acts::GeometryContext& gctx, const Trk::Track &track) const = 0;
+  ATLASTrackToSourceLink(const Acts::GeometryContext& gctx, 
+			 const Trk::Track &track,
+			 std::vector< std::tuple<const Trk::MeasurementBase*, Acts::BoundVector, Acts::BoundMatrix, std::size_t> >& collection) const = 0;
 
   virtual
   const Acts::BoundTrackParameters

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_ACTSTOOLS_ACTSFATRASSIMTOOL_H
@@ -135,7 +135,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
       using PropagatorOptions = Acts::DenseStepperPropagatorOptions<Actions, Abort>;
 
       // Construct per-call options.
-      PropagatorOptions options(geoCtx, magCtx, Acts::LoggerWrapper{*localLogger});
+      PropagatorOptions options(geoCtx, magCtx);
       // setup the interactor as part of the propagator options
       auto &actor = options.actionList.template get<Actor>();
       actor.generator = &generator;

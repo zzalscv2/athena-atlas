@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/OrthogonalSeedingTool.h"
@@ -95,9 +95,19 @@ namespace ActsTrk {
 				     const Acts::Vector3& bField,
 				     ActsTrk::SeedContainer& seedContainer ) const
   {
-    auto finderCfg = prepareConfiguration(Acts::Vector2(beamSpotPos[Amg::x], beamSpotPos[Amg::y]),
-					  bField);
-    Acts::SeedFinderOrthogonal<value_type> finder(finderCfg);
+    // Seed Finder Options
+    Acts::SeedFinderOptions finderOpts;
+    finderOpts.beamPos = Acts::Vector2(beamSpotPos[Amg::x],
+                                       beamSpotPos[Amg::y]);
+    finderOpts.bFieldInZ = bField[2];
+
+    // Seed Finder Config
+    auto finderCfg = prepareConfiguration(finderOpts);
+
+    // The SeedFinderOrthogonal already call internally toInternalUnits() for both
+    // finderCfg and finderOpts
+    Acts::SeedFinderOrthogonal<value_type> finder(finderCfg, 
+						  finderOpts);
 
     // Compute seeds
     auto groupSeeds = finder.createSeeds(spContainer);
@@ -113,8 +123,7 @@ namespace ActsTrk {
   }
 
   const Acts::SeedFinderOrthogonalConfig< typename OrthogonalSeedingTool::value_type >
-  OrthogonalSeedingTool::prepareConfiguration(const Acts::Vector2& beamPos,
-					      const Acts::Vector3& bField) const
+  OrthogonalSeedingTool::prepareConfiguration(const Acts::SeedFinderOptions& finderOpts) const 
   {
     // Configuration for Acts::SeedFilter
     Acts::SeedFilterConfig filterCfg;
@@ -148,11 +157,10 @@ namespace ActsTrk {
     filterCfg.forwardSeedConfirmationRange.seedConfMinBottomRadius = m_seedConfForwardMinBottomRadius;
     filterCfg.forwardSeedConfirmationRange.seedConfMaxZOrigin = m_seedConfForwardMaxZOrigin;
     filterCfg.forwardSeedConfirmationRange.minImpactSeedConf = m_seedConfForwardMinImpact;
-
+    
     // Configuration Acts::SeedFinderOrthogonal
     Acts::SeedFinderOrthogonalConfig<value_type> finderCfg;
-    finderCfg.seedFilter =  std::make_shared<Acts::SeedFilter<value_type>>(filterCfg); 
-    finderCfg.minPt = m_minPt;
+    finderCfg.seedFilter = std::make_shared<Acts::SeedFilter<value_type>>(filterCfg.toInternalUnits()); 
     finderCfg.cotThetaMax = m_cotThetaMax;
     finderCfg.deltaRMinTopSP = m_deltaRMinTopSP;
     finderCfg.deltaRMaxTopSP = m_deltaRMaxTopSP;
@@ -173,8 +181,6 @@ namespace ActsTrk {
     finderCfg.rMinMiddle = m_rMinMiddle;
     finderCfg.rMaxMiddle = m_rMaxMiddle;
     finderCfg.deltaPhiMax = m_deltaPhiMax;
-    finderCfg.bFieldInZ = bField[2];
-    finderCfg.beamPos = beamPos;
     finderCfg.deltaZMax = m_deltaZMax;
     finderCfg.interactionPointCut = m_interactionPointCut;
     finderCfg.seedConfirmation = m_seedConfirmation;
@@ -183,15 +189,20 @@ namespace ActsTrk {
     finderCfg.skipPreviousTopSP = m_skipPreviousTopSP;
     finderCfg.radLengthPerSeed = m_radLengthPerSeed;
 
+    // POSSIBLE OPTIMIZATION
+    // These variables have to be moved to the Orthogonal Options since they change
+    // for every event.
+    // Having these here is preventing us from setting the finder config in the initialize
     finderCfg.highland = 13.6 * std::sqrt(finderCfg.radLengthPerSeed) *
       (1 + 0.038 * std::log(finderCfg.radLengthPerSeed));
     float maxScatteringAngle = finderCfg.highland / finderCfg.minPt;
     finderCfg.maxScatteringAngle2 = maxScatteringAngle * maxScatteringAngle;
-    finderCfg.pTPerHelixRadius = 300. * finderCfg.bFieldInZ;
+    finderCfg.pTPerHelixRadius = 300. * finderOpts.bFieldInZ;
     finderCfg.minHelixDiameter2 = std::pow(finderCfg.minPt * 2 /
 					   finderCfg.pTPerHelixRadius,
 					   2);
     finderCfg.pT2perRadius = std::pow(finderCfg.highland / finderCfg.pTPerHelixRadius, 2);
+    
     return finderCfg;
   }
 
