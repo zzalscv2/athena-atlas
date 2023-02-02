@@ -198,11 +198,14 @@ def ITkTrackRecoOutputCfg(flags):
         ]
 
     if flags.Tracking.doLargeD0 and flags.Tracking.storeSeparateLargeD0Container:
-        toAOD.append(
+        toAOD += [
             'xAOD::TrackParticleContainer#InDet{}TrackParticles'.format(
                 flags.ITk.Tracking.LargeD0Pass.extension
+            ),
+            'xAOD::TrackParticleAuxContainer#InDet{}TrackParticlesAux.'.format(
+                flags.ITk.Tracking.LargeD0Pass.extension
             )
-        )
+        ]
     if flags.ITk.Tracking.doStoreTrackSeeds:
         toAOD += [
             "xAOD::TrackParticleContainer#SiSPSeedSegmentsTrackParticles",
