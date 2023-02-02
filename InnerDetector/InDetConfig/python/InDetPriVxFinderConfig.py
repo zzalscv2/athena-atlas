@@ -61,7 +61,7 @@ def InDetTrigPriVxFinderCfg(flags, name="InDetTrigPriVxFinder",
     if "PriVxMonTool" not in kwargs:
         from InDetPriVxFinder.InDetPriVxFinderMonitoring import (
             InDetPriVxFinderMonitoringTool)
-        kwargs.setdefault("PriVxMonTool", InDetPriVxFinderMonitoringTool())
+        kwargs.setdefault("PriVxMonTool", InDetPriVxFinderMonitoringTool(flags))
 
     kwargs.setdefault("doVertexSorting", True)
 

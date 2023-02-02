@@ -199,7 +199,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
   InDetPixelClusterization.RegSelTool = makeRegSelTool_Pixel()
 
   from InDetPrepRawDataFormation.MonitoringTool import PixelClusterization_MonitoringTool
-  InDetPixelClusterization.MonTool = PixelClusterization_MonitoringTool()
+  InDetPixelClusterization.MonTool = PixelClusterization_MonitoringTool(ConfigFlags)
 
   viewAlgs.append(InDetPixelClusterization)
 
@@ -273,7 +273,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
   InDetSCT_Clusterization.RegSelTool = makeRegSelTool_SCT()
   
   from InDetPrepRawDataFormation.MonitoringTool import SCT_Clusterization_MonitoringTool
-  InDetSCT_Clusterization.MonTool = SCT_Clusterization_MonitoringTool()
+  InDetSCT_Clusterization.MonTool = SCT_Clusterization_MonitoringTool(ConfigFlags)
   
 
   viewAlgs.append(InDetSCT_Clusterization)
@@ -299,7 +299,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
                                                                     ProcessOverlaps        = DetFlags.haveRIO.SCT_on(),
                                                                     SpacePointCacheSCT     = InDetCacheNames.SpacePointCacheSCT,
                                                                     SpacePointCachePix     = InDetCacheNames.SpacePointCachePix,
-                                                                    monTool                = InDetMonitoringTool())
+                                                                    monTool                = InDetMonitoringTool(ConfigFlags))
 
   viewAlgs.append(InDetSiTrackerSpacePointFinder)
 

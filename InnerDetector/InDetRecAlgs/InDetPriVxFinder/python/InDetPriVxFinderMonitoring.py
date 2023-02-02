@@ -1,8 +1,8 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def InDetPriVxFinderMonitoringTool():
-    newMonTool = GenericMonitoringTool("PriVxMonTool")
+def InDetPriVxFinderMonitoringTool(flags):
+    newMonTool = GenericMonitoringTool(flags, "PriVxMonTool")
 
     newMonTool.defineHistogram('allVertexNTracks'   , type='TH1I',path='EXPERT',title="N of Input Tracks of all vertices"    , xbins=50, xmin=0., xmax=50)
     newMonTool.defineHistogram('primVertexNTracks'  , type='TH1I',path='EXPERT',title="N of Input Tracks of primary vertices", xbins=50, xmin=0., xmax=50)
