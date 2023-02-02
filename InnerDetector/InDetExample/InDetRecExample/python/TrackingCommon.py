@@ -750,11 +750,8 @@ def getInDetPixelConditionsSummaryTool(name = "PixelConditionsSummaryTool",**kwa
                                                                                UseByteStreamFEI4=has_bytestream_errors,
                                                                                UseByteStreamFEI3=has_bytestream_errors) )
     if InDetFlags.usePixelDCS():
-        pixelConditionsSummaryToolSetup.IsActiveStates  = [ 'READY', 'ON', 'UNKNOWN', 'TRANSITION', 'UNDEFINED' ]
-        pixelConditionsSummaryToolSetup.IsActiveStates += [ 'DISABLED', 'LOCKED_OUT' , 'OFF' ] # to be compatible with run2
-                                                                                               # reprocessing in 22.0-mc20
-
-        pixelConditionsSummaryToolSetup.IsActiveStatus  = [ 'OK', 'WARNING', 'ERROR', 'FATAL' ]
+        pixelConditionsSummaryToolSetup.IsActiveStates  = [ 'READY', 'ON' ]   # 'UNKNOWN', 'TRANSITION', 'UNDEFINED', 'DISABLED', 'LOCKED_OUT' , 'OFF' should be masked.
+        pixelConditionsSummaryToolSetup.IsActiveStatus  = [ 'OK', 'WARNING', 'ERROR', 'FATAL' ]   # they are already used in ActiveStatus, thus accept all.
 
     return pixelConditionsSummaryToolSetup
 
