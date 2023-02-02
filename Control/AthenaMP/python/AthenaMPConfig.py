@@ -202,6 +202,13 @@ def getChunkSize(flags) -> int:
         else:
             msg.warning('Invalid ChunkSize, Chunk Size set to default (%i)', chunk_size)
 
+    if flags.Exec.MaxEvents < flags.Concurrency.NumProcs * chunk_size:
+        msg.warning(
+            f"Overwriting chunk size (set explicitly or to auto flush) to 1 (using single event dispatching), "
+            f"because {flags.Exec.MaxEvents=} is lower than {flags.Concurrency.NumProcs=} x {chunk_size=} "
+        )
+        chunk_size = 1
+
     return chunk_size
 
 
