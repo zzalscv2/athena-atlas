@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaServices/python/SummarySvc.py
 # Author: Charles Leggett
@@ -41,7 +41,7 @@ def useAthenaSummarySvc():
   from AthenaCommon.AppMgr import ServiceMgr as svcMgr
   theApp.CreateSvc += ["AthenaSummarySvc"]
 
-  from AthenaCommon.OldStyleConfig import  Service
-  svcMgr += Service("AthenaSummarySvc")
+  from AthenaServices.AthenaServicesConf import AthenaSummarySvc
+  svcMgr += AthenaSummarySvc()
 
   useMessageLogger()
