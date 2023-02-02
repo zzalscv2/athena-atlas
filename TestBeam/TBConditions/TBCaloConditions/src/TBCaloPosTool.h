@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBCALOCONDITIONS_TBCALOPOSTOOL
@@ -11,6 +11,7 @@
 
 #include "StoreGate/DataHandle.h"
 #include "CondDBObjects/GenericDbTableClassDef.h"
+#include "CxxUtils/checker_macros.h"
 
 /** 
  ** Class TBCaloPosTool
@@ -21,7 +22,7 @@
 	
  **/
  
-class TBCaloPosTool : public AthAlgTool,
+class ATLAS_NOT_THREAD_SAFE TBCaloPosTool : public AthAlgTool,
       virtual public ITBCaloPosTool, public IIncidentListener
 {
 public:
@@ -53,7 +54,7 @@ public:
 
 private: 
 
-    bool initHandles() ; 
+    bool initHandles ATLAS_NOT_THREAD_SAFE () ;
 
     const DataHandle<GenericDbTable> m_etaTable; 
     const DataHandle<GenericDbTable> m_thetaTable; 
