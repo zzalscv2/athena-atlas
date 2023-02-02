@@ -98,7 +98,7 @@ from AthenaConfiguration.TestDefaults import defaultTestFiles
 flags = initConfigFlags()
 flags.LAr.doAlign = False
 flags.Detector.GeometryTile = False
-flags.Input.Files = defaultTestFiles.AOD_MC
+flags.Input.Files = defaultTestFiles.AOD_RUN2_MC
 flags.lock()
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg 

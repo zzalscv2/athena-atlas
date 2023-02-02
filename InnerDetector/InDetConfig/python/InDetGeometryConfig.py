@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -56,7 +56,7 @@ if __name__ == "__main__":
   flags.GeoModel.Align.Dynamic = False
   # Provide data input
   # from AthenaConfiguration.TestDefaults import defaultTestFiles
-  # flags.Input.Files = defaultTestFiles.AOD
+  # flags.Input.Files = defaultTestFiles.AOD_RUN2_MC
   # flags.GeoModel.Align.Dynamic = True
   flags.lock()
   # Construct ComponentAccumulator

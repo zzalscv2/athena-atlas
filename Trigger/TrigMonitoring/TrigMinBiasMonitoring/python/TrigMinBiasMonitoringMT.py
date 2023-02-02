@@ -32,7 +32,7 @@ if __name__ == "__main__":
     flags.Output.HISTFileName = 'TestMinBiasMonitorOutput.root'
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
-    flags.Input.Files = defaultTestFiles.AOD
+    flags.Input.Files = defaultTestFiles.AOD_RUN3_DATA
     flags.Exec.MaxEvents = -1
     # flags.Common.doExpressProcessing=True # enable for express stream data processing
     flags.fillFromArgs()

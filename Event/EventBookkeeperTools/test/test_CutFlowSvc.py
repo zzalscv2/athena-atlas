@@ -35,7 +35,7 @@ if args.input:
 elif args.data:
   flags.Input.Files = defaultTestFiles.RAW
 else:
-  flags.Input.Files = defaultTestFiles.AOD_MC
+  flags.Input.Files = defaultTestFiles.AOD_RUN2_MC
 
 # Flags relating to multithreaded execution
 threads = args.threads

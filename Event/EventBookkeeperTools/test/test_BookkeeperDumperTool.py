@@ -23,7 +23,7 @@ flags = initConfigFlags()
 if args.input:
     flags.Input.Files = [args.input]
 else:
-    flags.Input.Files = defaultTestFiles.AOD_MC
+    flags.Input.Files = defaultTestFiles.AOD_RUN2_MC
 flags.lock()
 
 # Setup tools

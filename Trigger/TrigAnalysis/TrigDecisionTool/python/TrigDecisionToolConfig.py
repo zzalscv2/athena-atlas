@@ -99,7 +99,7 @@ if __name__ == '__main__':
     if '--RAWRUN2' in sys.argv:
         flags.Input.Files = defaultTestFiles.RAW
     else:
-        flags.Input.Files = defaultTestFiles.AOD
+        flags.Input.Files = defaultTestFiles.AOD_RUN2_DATA
         #TODO expand the test scope Run3 AODs and RAWs
 
     flags.lock()
