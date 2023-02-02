@@ -512,24 +512,15 @@ def MuonTrackBuildingCfg(flags, name = "MuPatTrackBuilder", **kwargs):
 if __name__=="__main__":
     # To run this, do e.g. 
     # python -m MuonConfig.MuonTrackBuildingConfig --run --threads=
-    from MuonConfig.MuonConfigUtils import SetupMuonStandaloneArguments, SetupMuonStandaloneConfigFlags, SetupMuonStandaloneOutput, SetupMuonStandaloneCA
-
-    args = SetupMuonStandaloneArguments()
-    flags = SetupMuonStandaloneConfigFlags(args)
-    cfg = SetupMuonStandaloneCA(args,flags)
-          
-    # Run the actual test.
-    acc = MuonTrackBuildingCfg(flags)
-    cfg.merge(acc)
+    from MuonConfig.MuonConfigUtils import SetupMuonStandaloneConfigFlags, SetupMuonStandaloneOutput, SetupMuonStandaloneCA
     
-    if args.threads>1 and args.forceclone:
-        from AthenaCommon.Logging import log
-        log.info('Forcing track building cardinality to be equal to '+str(args.threads))
-        # We want to force the algorithms to run in parallel (eventually the algorithm will be marked as cloneable in the source code)
-        AlgResourcePool=CompFactory.AlgResourcePool
-        cfg.addService(AlgResourcePool( OverrideUnClonable=True ) )
-        track_builder = acc.getPrimary()
-        track_builder.Cardinality=args.threads
+    args, flags = SetupMuonStandaloneConfigFlags()
+    cfg = SetupMuonStandaloneCA(flags)
+
+    # Run the actual test.
+    acc = MuonTrackBuildingCfg(args, flags)
+    cfg.merge(acc)
+
             
     # This is a temporary fix - it should go someplace central as it replaces the functionality of addInputRename from here:
     # https://gitlab.cern.ch/atlas/athena/blob/master/Control/SGComps/python/AddressRemappingSvc.py
@@ -551,7 +542,7 @@ if __name__=="__main__":
     cfg.store(f)
     f.close()
     
-    if args.run:
+    if not args.config_only:
         sc = cfg.run(20)
         if not sc.isSuccess():
             import sys

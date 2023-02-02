@@ -740,44 +740,32 @@ if __name__ == "__main__":
     # To run this, do e.g.
     # python -m MuonCombinedConfig.MuonCombinedReconstructionConfig --run --threads=1
 
-    from MuonConfig.MuonConfigUtils import SetupMuonStandaloneArguments, SetupMuonStandaloneCA
-
-    args = SetupMuonStandaloneArguments()
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from MuonConfig.MuonConfigUtils import SetupMuonStandaloneCA
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    args = flags.fillFromArgs()
 
     # Keep this commented in for now until ATLASRECTS-6858 is fixed
     # only once !51435 is accepted.
-    ConfigFlags.Input.Files = [
+    flags.Input.Files = [
         '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonCombinedConfig/myESD_q445_unslimmedTracks.pool.root']
     # ConfigFlags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q221/21.0/v2/myESD.pool.root']
 
-    ConfigFlags.Concurrency.NumThreads = args.threads
-    # Might change this later, but good enough for the moment.
-    ConfigFlags.Concurrency.NumConcurrentEvents = args.threads
-    ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-07"
+    flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-07"
 
-    ConfigFlags.Output.ESDFileName = args.output
-    ConfigFlags.Tracking.doLargeD0 = False  # Not working with this input
-    ConfigFlags.Muon.useTGCPriorNextBC = False
-    ConfigFlags.MuonCombined.doMuGirlLowBeta = False # This fails due to "Hough data per sector vector not found"
+    flags.Muon.useTGCPriorNextBC = False
+    flags.MuonCombined.doMuGirlLowBeta = False # This fails due to "Hough data per sector vector not found"
 
-    if args.debug:
-        from AthenaCommon.Debugging import DbgStage
-        if args.debug not in DbgStage.allowed_values:
-            raise ValueError("Unknown debug stage, allowed values {}".format
-                             (DbgStage.allowed_values))
-        ConfigFlags.Exec.DebugStage = args.debug
+    flags.lock()
+    flags.dump()
 
-    ConfigFlags.lock()
-    ConfigFlags.dump()
-
-    cfg = SetupMuonStandaloneCA(args, ConfigFlags)
+    cfg = SetupMuonStandaloneCA(args, flags)
     from MuonConfig.MuonPrepDataConvConfig import MuonPrepDataConvCfg
-    cfg.merge(MuonPrepDataConvCfg(ConfigFlags))
+    cfg.merge(MuonPrepDataConvCfg(flags))
 
     # "Fixes" to get this working standalone i.e. from ESD
     # Configure topocluster algorithms, and associated conditions
-    acc = MuonCombinedReconstructionCfg(ConfigFlags)
+    acc = MuonCombinedReconstructionCfg(flags)
     cfg.merge(acc)
 
     # This causes a stall due to missing HoughDataPerSectorVec
@@ -796,15 +784,6 @@ if __name__ == "__main__":
     # tmp = cfg.getService("StoreGateSvc")
     # tmp.OutpuDumptLevel=True
 
-    if args.threads > 1 and args.forceclone:
-        from AthenaCommon.Logging import log
-        log.info(
-            'Forcing track building cardinality to be equal to '+str(args.threads))
-        # We want to force the algorithms to run in parallel (eventually the algorithm will be marked as cloneable in the source code)
-        AlgResourcePool = CompFactory.AlgResourcePool
-        cfg.addService(AlgResourcePool(OverrideUnClonable=True))
-        track_builder = acc.getPrimary()
-        track_builder.Cardinality = args.threads
 
     # Need to make it possible to write Muons ... so rename read containers
     from SGComps.AddressRemappingConfig import AddressRemappingCfg
@@ -826,7 +805,7 @@ if __name__ == "__main__":
     # cfg.store(f)
     # f.close()
 
-    if args.run:
+    if not args.config_only:
         sc = cfg.run(20)
         if not sc.isSuccess():
             import sys

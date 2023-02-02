@@ -13,26 +13,26 @@ def TruthCategoriesDecoratorCfg(ConfigFlags, name="TruthCategoriesDecorator", **
     return acc
 
 if __name__ == "__main__":
-    from MuonConfig.MuonConfigUtils import SetupMuonStandaloneArguments
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    args = SetupMuonStandaloneArguments()
-    ConfigFlags.Input.Files = args.input    
-    ConfigFlags.Concurrency.NumThreads=args.threads
-    ConfigFlags.Concurrency.NumConcurrentEvents=args.threads
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    args = flags.fillFromArgs()
+    flags.Input.Files = args.input    
+    flags.Concurrency.NumThreads=args.threads
+    flags.Concurrency.NumConcurrentEvents=args.threads
     from AthenaCommon.Constants import DEBUG
     
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.lock()
+    flags.dump()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
     msgService = cfg.getService('MessageSvc')
     msgService.Format = "S:%s E:%e % F%128W%S%7W%R%T  %0W%M"
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg.merge(PoolReadCfg(ConfigFlags))
-    cfg.merge(TruthCategoriesDecoratorCfg(ConfigFlags, OutputLevel = DEBUG))
+    cfg.merge(PoolReadCfg(flags))
+    cfg.merge(TruthCategoriesDecoratorCfg(flags, OutputLevel = DEBUG))
 
-    sc = cfg.run(ConfigFlags.Exec.MaxEvents)
+    sc = cfg.run(flags.Exec.MaxEvents)
     if not sc.isSuccess():
         exit(1)
