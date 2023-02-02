@@ -207,5 +207,17 @@ def getChunkSize() -> int :
             msg.info('Chunk size set to auto flush (%i)', chunk_size)
         else:
             msg.warning('Invalid ChunkSize, Chunk Size set to default (%i)', chunk_size)
+    else:
+        msg.warning('Chunk Size set to default (%i)', chunk_size)
+
+    from AthenaCommon.ConcurrencyFlags import jobproperties
+    from AthenaCommon.AppMgr import theApp
+
+    if theApp._opts.evtMax < jobproperties.ConcurrencyFlags.NumProcs() * chunk_size:
+        msg.warning(
+            f"Overwriting chunk size (set explicitly or to auto flush) to 1 (using single event dispatching), "
+            f"because {theApp._opts.evtMax} is lower than {jobproperties.ConcurrencyFlags.NumProcs()=} x {chunk_size=}"
+        )
+        chunk_size = 1
 
     return chunk_size
