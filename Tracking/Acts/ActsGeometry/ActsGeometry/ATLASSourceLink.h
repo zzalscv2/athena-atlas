@@ -45,12 +45,28 @@ public:
   ATLASSourceLinkGeneric &operator=(ATLASSourceLinkGeneric &&) noexcept = default;
   ATLASSourceLinkGeneric &operator=(const ATLASSourceLinkGeneric &) = default;
   
-  const Acts::BoundVector& values() const { return std::get<ElementType::LOC>(*m_elements); }
-  const Acts::BoundMatrix& cov() const { return std::get<ElementType::COV>(*m_elements); }
-  constexpr size_t dim() const { return std::get<ElementType::TYPE>(*m_elements); }
+  const Acts::BoundVector& values() const { 
+    const auto& elements = this->collection();
+    return std::get<ElementType::LOC>(elements); 
+  }
+  const Acts::BoundMatrix& cov() const { 
+    const auto& elements = this->collection();
+    return std::get<ElementType::COV>(elements); 
+  }
+  size_t dim() const { 
+    const auto& elements = this->collection();
+    return std::get<ElementType::TYPE>(elements); 
+  }
 
-  constexpr const measurement_t& atlasHit() const { return *std::get<ElementType::MEASUREMENT>(*m_elements); }
+  const measurement_t& atlasHit() const { 
+    const auto& elements = this->collection();
+    return *std::get<ElementType::MEASUREMENT>(elements); 
+  }
   Acts::GeometryIdentifier geometryId() const { return m_geometryId; }
+
+ private:
+  const std::tuple<const measurement_t*, Acts::BoundVector, Acts::BoundMatrix, std::size_t>& collection() const 
+  { return *m_elements; }
 
  private:
   Acts::GeometryIdentifier m_geometryId{};
