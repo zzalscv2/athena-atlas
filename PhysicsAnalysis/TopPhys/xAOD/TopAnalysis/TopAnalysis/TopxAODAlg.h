@@ -81,9 +81,7 @@ private:
                                                        // re-calculation of the sum
   unsigned int m_entry = 0u;
   unsigned int m_firstEvent = 0u;
-  unsigned int m_totalYield = 0u;
   unsigned int m_totalYieldSoFar = 0u;
-  unsigned int m_skippedEventsSoFar = 0u;
   unsigned int m_eventSavedReco = 0u;
   unsigned int m_eventSavedRecoLoose = 0u;
   unsigned int m_eventSavedTruth = 0u;

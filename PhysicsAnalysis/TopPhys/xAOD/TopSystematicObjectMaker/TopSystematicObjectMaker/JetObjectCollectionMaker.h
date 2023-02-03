@@ -119,7 +119,6 @@ namespace top {
     bool m_isMC;
     bool m_doMultipleJES;
     bool m_do_fjvt = false;
-    bool m_JERisPseudoData;
 
     std::list<CP::SystematicSet> m_specifiedSystematics;
     std::list<CP::SystematicSet> m_specifiedSystematicsLargeR;
