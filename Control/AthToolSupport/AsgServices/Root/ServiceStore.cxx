@@ -103,7 +103,8 @@ namespace asg
       if (myservice)
       {
         auto& myproperties = properties[service.first];
-        myproperties[""] = std::string (typeid(*myservice).name()) + "/" + service.first;
+        asg::IAsgService *myservicePtr = myservice.get(); // avoid Wpotentially-evaluated-expression from typeid
+        myproperties[""] = std::string (typeid(*myservicePtr).name()) + "/" + service.first;
         for (auto& property : dynamic_cast<const AsgService*>(myservice.get())->getPropertyMgr()->getProperties())
         {
           std::string asString;
