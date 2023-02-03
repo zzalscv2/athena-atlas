@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
   */
 
 ///////////////////////////////////////////////////////////////////
@@ -3389,6 +3389,7 @@ const InDet::SiSpacePointsSeed *SiSpacePointsSeedMaker::next(const EventContext 
         /// For run-3 offline, this will not do anything.
         findNext(data);
         /// if no new seeds were found, exit
+        //cppcheck-suppress identicalInnerCondition
         if (data.i_ITkSeed == data.i_ITkSeedEnd)
           return nullptr;
       }
@@ -3404,6 +3405,7 @@ const InDet::SiSpacePointsSeed *SiSpacePointsSeedMaker::next(const EventContext 
     if (data.i_ITkSeed == data.i_ITkSeedEnd)
     {
       findNext(data);
+      //cppcheck-suppress identicalInnerCondition
       if (data.i_ITkSeed == data.i_ITkSeedEnd)
         return nullptr;
     }

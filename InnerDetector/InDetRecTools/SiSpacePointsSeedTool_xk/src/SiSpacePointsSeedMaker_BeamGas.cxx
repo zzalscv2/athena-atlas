@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -1109,6 +1109,7 @@ const InDet::SiSpacePointsSeed* InDet::SiSpacePointsSeedMaker_BeamGas::next(cons
 
   if (data.i_seed==data.i_seede) {
     findNext(data);
+    //cppcheck-suppress identicalInnerCondition
     if (data.i_seed==data.i_seede) return nullptr;
   } 
   return &(*data.i_seed++);
