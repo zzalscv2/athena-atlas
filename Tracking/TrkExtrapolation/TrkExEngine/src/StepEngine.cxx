@@ -308,20 +308,17 @@ void Trk::StepEngine::evaluateDistance(Trk::TargetSurface& tt, const Amg::Vector
 // handle extrapolation step
 Trk::ExtrapolationCode Trk::StepEngine::handleIntersection(ExCellCharged& ecCharged, 
 							   Trk::TargetSurfaceVector& solutions) const
-{
-  std::vector<Trk::TargetSurface>::iterator is=solutions.begin();
-  while ( is!=solutions.end() ) {
-
+{ 
+  for (const auto & thisSurface : solutions){
     // destination
-    if ( (*is).sfType == Trk::SurfNavigType::Target )  return Trk::ExtrapolationCode::SuccessDestination;   
-                           
+    if ( thisSurface.sfType == Trk::SurfNavigType::Target ){
+      return Trk::ExtrapolationCode::SuccessDestination;
+    } 
     // frame boundary : update of target surfaces
-    if ( (*is).sfType == Trk::SurfNavigType::BoundaryFrame ) {
-      return resolveFrameBoundaryT(ecCharged,ecCharged.leadParameters->position(),(*is).index);  
-    }
-
-    is++;
+    if ( thisSurface.sfType == Trk::SurfNavigType::BoundaryFrame ) {
+      return resolveFrameBoundaryT(ecCharged,ecCharged.leadParameters->position(),
+                                   thisSurface.index);  
+    }                       
   }
-
   return Trk::ExtrapolationCode::InProgress;   
 }
