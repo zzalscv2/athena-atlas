@@ -36,15 +36,16 @@ def TPCnvTest(infile, keys, useGeoModelSvc=False, useIOVDbSvc=False, doPixel=Fal
     # Provide MC input
     flags = initConfigFlags()
     flags.Input.Files = [infile]
-    flags.GeoModel.AtlasVersion = 'ATLAS-R1-2012-03-01-00'
-    flags.GeoModel.Align.Dynamic = False
     flags.GeoModel.Run = LHCPeriod.Run1
-    flags.Detector.GeometryPixel = doPixel
-    flags.Detector.GeometrySCT = doSCT
-    flags.Detector.GeometryTRT = doTRT
-    flags.Detector.GeometryLAr = doLAr
-    flags.Detector.GeometryTile = doTile
-    flags.Detector.GeometryMuon = doMuon
+    flags.GeoModel.AtlasVersion = 'ATLAS-R1-2012-03-01-00'
+    if useGeoModelSvc:
+        flags.GeoModel.Align.Dynamic = False
+        flags.Detector.GeometryPixel = doPixel
+        flags.Detector.GeometrySCT = doSCT
+        flags.Detector.GeometryTRT = doTRT
+        flags.Detector.GeometryLAr = doLAr
+        flags.Detector.GeometryTile = doTile
+        flags.Detector.GeometryMuon = doMuon
     flags.lock()
 
     # Construct ComponentAccumulator
