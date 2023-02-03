@@ -14,7 +14,7 @@ def ALFAPerfSequence(flags):
     inputMakerAlg = InputMakerForRoI("IM_ALFAPerf", RoITool = ViewCreatorInitialROITool() )
 #        inputMaker.RoIs="TimeBurnerInputRoIs"
 
-    reco = parOR("ALFAPerfReco", [TrigALFAROBMonitor()])
+    reco = parOR("ALFAPerfReco", [TrigALFAROBMonitor(flags)])
     hypoAlg = TrigStreamerHypoAlg("ALFAPerfHypo")
     hypoAlg.RuntimeValidation = False 
     def alwaysRejectHypoToolGen(chainDict):
