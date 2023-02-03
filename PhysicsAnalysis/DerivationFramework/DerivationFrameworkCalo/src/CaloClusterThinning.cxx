@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -389,16 +389,14 @@ DerivationFramework::CaloClusterThinning::particleCluster(
       return StatusCode::FAILURE;
     }
     xAOD::JetConstituentVector vec = tau->jet()->getConstituents();
-    xAOD::JetConstituentVector::iterator it = vec.begin();
-    xAOD::JetConstituentVector::iterator itE = vec.end();
     TLorentzVector LC_P4 = tau->p4(xAOD::TauJetParameters::DetectorAxis);
-    for (; it != itE; it++) {
+    for (const auto * pJetConstituent : vec) {
       TLorentzVector cluster_P4;
-      cluster_P4.SetPtEtaPhiM(1, (*it)->Eta(), (*it)->Phi(), 1);
+      cluster_P4.SetPtEtaPhiM(1, pJetConstituent->Eta(), pJetConstituent->Phi(), 1);
       if (LC_P4.DeltaR(cluster_P4) > 0.2)
         continue;
       const xAOD::CaloCluster* cl =
-        dynamic_cast<const xAOD::CaloCluster*>((*it)->rawConstituent());
+        dynamic_cast<const xAOD::CaloCluster*>(pJetConstituent->rawConstituent());
       auto it_cps = std::find(cps->begin(), cps->end(), cl);
       if (it_cps != cps->end()) {
         int ItsCluster = std::distance(cps->begin(), it_cps);
