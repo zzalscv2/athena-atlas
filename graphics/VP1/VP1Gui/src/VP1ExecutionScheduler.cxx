@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -86,7 +86,7 @@
 std::vector<std::string> qstringlistToVecString(QStringList list)
 {
 	std::vector<std::string> vec;
-	foreach(QString str, list) {
+	for (QString str :  list) {
 		vec.push_back(str.toStdString());
 	}
 	return vec;
@@ -440,7 +440,7 @@ VP1ExecutionScheduler* VP1ExecutionScheduler::init( StoreGateSvc* eventStore,
 		//scheduler->m_d->mainwindow->tabManager()->addNewTab("My Tab");
 	} else {
         qDebug() << "config files: " << joboptions; // DEBUG
-		foreach(QString opt,joboptions)
+		for (QString opt : joboptions)
     		  scheduler->m_d->mainwindow->loadConfigurationFromFile(opt);
 
 		if ( scheduler->m_d->batchMode ) {
@@ -689,7 +689,7 @@ bool VP1ExecutionScheduler::executeNewEvent(const int& runnumber, const unsigned
 
 	VP1Msg::messageDebug("Erasing systems...");
 	assert(!m_d->currentsystemrefreshing);
-	foreach(IVP1System*s,m_d->prioritiser->getSystemsToEraseByPriority()) {
+	for (IVP1System*s : m_d->prioritiser->getSystemsToEraseByPriority()) {
 		qApp->processEvents(QEventLoop::ExcludeUserInputEvents|QEventLoop::ExcludeSocketNotifiers);
 		eraseSystem(s);
 	}
@@ -698,7 +698,7 @@ bool VP1ExecutionScheduler::executeNewEvent(const int& runnumber, const unsigned
 	VP1Msg::messageDebug("event processed. " + QString::number(m_d->eventsProcessed) + " events processed so far.");
 
 	//Let channels know we are going to the next event now:
-	foreach(IVP1ChannelWidget*cw, m_d->mainwindow->tabManager()->allChannels()) {
+	for (IVP1ChannelWidget*cw :  m_d->mainwindow->tabManager()->allChannels()) {
 		cw->goingToNextEvent();
 	}
 
@@ -1160,11 +1160,11 @@ void VP1ExecutionScheduler::Imp::warnIfWidgetsAlive()
         QSet<QWidget*> wl = QApplication::allWidgets().toSet();
 #endif
 	w_ignore<<qApp->desktop();
-	foreach (QObject*o,qApp->children()) {
+	for (QObject*o : qApp->children()) {
 		if (o->isWidgetType())
 			w_ignore << static_cast<QWidget*>(o);
 	}
-	foreach (QWidget * w, wl) {
+	for (QWidget * w :  wl) {
 		if (w->objectName().startsWith("internal clipboard"))
 			w_ignore << w;
 		if (w->objectName()=="empty_widget")
@@ -1175,7 +1175,7 @@ void VP1ExecutionScheduler::Imp::warnIfWidgetsAlive()
 		std::cout<<std::endl;
 		std::cout<<"VP1 WARNING: "<<wl.count()<< " widget"<<(wl.count()>1?"s":"")<<" left at end of job:"<<std::endl;
 		int i(0);
-		foreach(QWidget*w,wl) {
+		for (QWidget*w : wl) {
 			std::cout<<++i<<") Address="<<w<<", ObjectName="<<w->objectName().toStdString()<<", ClassName="<<w->metaObject()->className()<<std::endl;
 		}
 		std::cout<<std::endl;
@@ -1213,7 +1213,7 @@ bool VP1ExecutionScheduler::hasAllActiveSystemsRefreshed( IVP1ChannelWidget* cw 
 //___________________________________________________________________
 bool VP1ExecutionScheduler::Imp::allVisibleRefreshed() const
 {
-	foreach(IVP1ChannelWidget*cw,mainwindow->tabManager()->visibleChannels())
+	for (IVP1ChannelWidget*cw : mainwindow->tabManager()->visibleChannels())
     		if (!scheduler->hasAllActiveSystemsRefreshed(cw))
     			return false;
 	return true;
@@ -1222,7 +1222,7 @@ bool VP1ExecutionScheduler::Imp::allVisibleRefreshed() const
 //___________________________________________________________________
 bool VP1ExecutionScheduler::Imp::allSoonVisibleRefreshed() const
 {
-	foreach(IVP1ChannelWidget*cw,mainwindow->tabManager()->soonVisibleChannels())
+	for (IVP1ChannelWidget*cw : mainwindow->tabManager()->soonVisibleChannels())
     		if (!scheduler->hasAllActiveSystemsRefreshed(cw))
     			return false;
 	return true;
