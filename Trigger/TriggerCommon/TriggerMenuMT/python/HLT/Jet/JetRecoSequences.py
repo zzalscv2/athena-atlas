@@ -136,7 +136,7 @@ def standardJetBuildSequence( configFlags, dataSource, clustersKey, **jetRecoDic
         # Then we need a constituent modifier sequence. 
         # Get online monitoring jet rec tool
         from JetRecTools import OnlineMon                                                  
-        monJetRecTool = OnlineMon.getMonTool_Algorithm("HLTJets/"+jetsFullName+"/")
+        monJetRecTool = OnlineMon.getMonTool_Algorithm(configFlags, "HLTJets/"+jetsFullName+"/")
 
         # get the alg from the standard jet config helper :
         constitModAlg = JetRecConfig.getConstitModAlg(jetDef, jetDef.inputdef, monTool=monJetRecTool)
@@ -166,7 +166,7 @@ def standardJetBuildSequence( configFlags, dataSource, clustersKey, **jetRecoDic
             
     # Get online monitoring tool
     from JetRec import JetOnlineMon
-    monTool = JetOnlineMon.getMonTool_TrigJetAlgorithm("HLTJets/"+jetsFullName+"/")
+    monTool = JetOnlineMon.getMonTool_TrigJetAlgorithm(configFlags, "HLTJets/"+jetsFullName+"/")
 
     # finally get the JetRecAlg :
     jetRecAlg = JetRecConfig.getJetRecAlg(jetDef, monTool=monTool)
@@ -231,7 +231,7 @@ def standardJetRecoSequence( configFlags, dataSource, clustersKey, **jetRecoDict
 
     # Get online monitoring tool
     from JetRec import JetOnlineMon
-    monTool = JetOnlineMon.getMonTool_TrigJetAlgorithm("HLTJets/"+jetDef.fullname()+"/")
+    monTool = JetOnlineMon.getMonTool_TrigJetAlgorithm(configFlags, "HLTJets/"+jetDef.fullname()+"/")
     copyCalibAlg = JetRecConfig.getJetCopyAlg(jetsin=jetsNoCalib,jetsoutdef=jetDef,decorations=decorList,monTool=monTool)
     recoSeq += copyCalibAlg
 
@@ -439,7 +439,7 @@ def groomedJetRecoSequence( configFlags, dataSource, clustersKey, **jetRecoDict 
 
     # Get online monitoring tool
     from JetRec import JetOnlineMon
-    monTool = JetOnlineMon.getMonTool_TrigJetAlgorithm("HLTJets/"+groomedJetsFullName+"/")
+    monTool = JetOnlineMon.getMonTool_TrigJetAlgorithm(configFlags, "HLTJets/"+groomedJetsFullName+"/")
 
     groomDef = solveGroomingDependencies(groomDef)
     groomalg = JetRecConfig.getJetRecGroomAlg(groomDef,monTool)
@@ -477,7 +477,7 @@ def reclusteredJetRecoSequence( configFlags, dataSource, clustersKey, **jetRecoD
 
     # Get online monitoring tool
     from JetRec import JetOnlineMon
-    monTool = JetOnlineMon.getMonTool_TrigJetAlgorithm("HLTJets/"+rcJetDef.fullname()+"/")
+    monTool = JetOnlineMon.getMonTool_TrigJetAlgorithm(configFlags, "HLTJets/"+rcJetDef.fullname()+"/")
 
     rcJetDef._internalAtt['finalPJContainer'] = rcConstitPJKey
     # Depending on whether running the trackings step
@@ -500,7 +500,7 @@ def VRJetRecoSequence(configFlags, trkopt):
     finalpjs = str(constitPJAlg.OutputContainer)
     VRTrackJetDef._internalAtt['finalPJContainer'] = finalpjs
     from JetRec import JetOnlineMon
-    monTool = JetOnlineMon.getMonTool_TrigJetAlgorithm("HLTJets/"+VRTrackJetName+"/")
+    monTool = JetOnlineMon.getMonTool_TrigJetAlgorithm(configFlags, "HLTJets/"+VRTrackJetName+"/")
     VRTrackJetRecAlg = JetRecConfig.getJetRecAlg(VRTrackJetDef,  monTool)
     recoSeq += conf2toConfigurable(VRTrackJetRecAlg)
     jetsOut = recordable(VRTrackJetName)
