@@ -87,12 +87,6 @@ namespace InDet {
       createRingLayers(const EventContext& ctx,
                        SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const;
 
-    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCT_ReadKey{
-        this, "SCT_ReadKey", "SCT_DetectorElementCollection",
-        "Key of output SiDetectorElementCollection for SCT"};
-    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_PixelReadKey{
-        this, "PixelReadKey", "PixelDetectorElementCollection",
-        "Key of output SiDetectorElementCollection for Pixel"};
   };
 
   inline std::unique_ptr<const std::vector<Trk::PlaneLayer*> >
