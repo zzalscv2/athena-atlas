@@ -42,13 +42,13 @@ namespace CP
     //////////////////////////////////////////////////////////////////
     // Check if electron passes ID
     //////////////////////////////////////////////////////////////////
-    bool ElectronLRTOverlapRemovalTool::electronPassesID(const xAOD::Electron *electron) const
+    bool ElectronLRTOverlapRemovalTool::electronPassesID(const xAOD::Electron *electron, std::string IDWorkingPoint) const
     {
 
         if (m_isDAOD)
         {
-            SG::AuxElement::ConstAccessor<char> DFCommonElectronsLHVeryLooseNoPix("DFCommonElectronsLHVeryLooseNoPix");
-            return bool(DFCommonElectronsLHVeryLooseNoPix(*electron) );
+            SG::AuxElement::ConstAccessor<char> DFCommonElectronsWP(IDWorkingPoint);
+            return bool(DFCommonElectronsWP(*electron) );
         } else
         {
             return bool(m_electronLLHTool->accept(electron));
@@ -68,10 +68,18 @@ namespace CP
 
         // Loop over lrt electrons to remove those that do not pass ID.
         // Needed in case there are no prompt electrons passing ID
-        for (const xAOD::Electron *LRTElectron : LRTElectronCol)
-        {
-            if (!electronPassesID(LRTElectron))  ElectronsToRemove.insert(LRTElectron);
+        if (m_strategy == CP::IElectronLRTOverlapRemovalTool::promptStrategy){
+            ATH_MSG_DEBUG("Implementing overlap removal strategy 0");
+            for (const xAOD::Electron *LRTElectron : LRTElectronCol)
+            {
+                if (!electronPassesID(LRTElectron,"DFCommonElectronsLHVeryLooseNoPix"))  ElectronsToRemove.insert(LRTElectron);
+            }
         }
+        else if (m_strategy == CP::IElectronLRTOverlapRemovalTool::passThrough){
+            ATH_MSG_DEBUG("Implementing overlap removal strategy 2");
+            ATH_MSG_DEBUG("Electrons with overlapping clusters will be kept");
+        }
+
 
         // loop over prompt electrons
         for (const xAOD::Electron *promptElectron : promptElectronCol)
@@ -80,11 +88,13 @@ namespace CP
             const xAOD::CaloCluster_v1 *prompt_cluster = (*promptClusterLink);
 
             // Skip electrons that do not pass ID threshold
-            if (!electronPassesID(promptElectron))
-            {
-                ElectronsToRemove.insert(promptElectron);
-                continue;
-            }        
+            if (m_strategy == CP::IElectronLRTOverlapRemovalTool::promptStrategy){
+                if (!electronPassesID(promptElectron,m_IDWorkingPoint))
+                {
+                    ElectronsToRemove.insert(promptElectron);
+                    continue;
+                }  
+            }      
 
             // loop over lrt electrons
             for (const xAOD::Electron *LRTElectron : LRTElectronCol)
@@ -93,8 +103,9 @@ namespace CP
                 const xAOD::CaloCluster_v1 *lrt_cluster = (*LRTClusterLink);
 
                 // Skip LRT electrons that do not pass ID threshold
-                if (!electronPassesID(LRTElectron)) continue;
-
+                if (m_strategy == CP::IElectronLRTOverlapRemovalTool::promptStrategy){
+                    if (!electronPassesID(LRTElectron,m_IDWorkingPoint)) continue;
+                }
                 // check that clusters exist (necessary? copied from MuonSpec overlap, but all electrons have clusters...)
                 // TODO: This should then fall back to delta R if clusters are missing
                 if (!lrt_cluster and !prompt_cluster)
@@ -111,11 +122,38 @@ namespace CP
 
                 if (prompt_elEta0 == lrt_elEta0 && prompt_elPhi0 == lrt_elPhi0) 
                 {
-                    ATH_MSG_DEBUG("Found a Calo cluster shared by LRT electron and prompt electron !");
-
-                    // Save pointer to LRT electrons failing overlap
-                    // This removes the LRT electron in favor of prompt
-                    ElectronsToRemove.insert(LRTElectron);
+                    if (m_strategy == CP::IElectronLRTOverlapRemovalTool::promptStrategy){
+                        ATH_MSG_DEBUG("Found a Calo cluster shared by LRT electron and prompt electron !");
+                        ATH_MSG_DEBUG("Removing LRT Electron");
+                        // Save pointer to LRT electrons failing overlap
+                        // This removes the LRT electron in favor of prompt
+                        ElectronsToRemove.insert(LRTElectron);
+                    }
+                    else if (m_strategy == CP::IElectronLRTOverlapRemovalTool::defaultStrategy){ //use tighter electron, if both equally tight use std collection
+                    
+                        ATH_MSG_DEBUG("Removing Electron with looser WP");
+                        if (electronPassesID(promptElectron,"DFCommonElectronsLHTightNoPix")){
+                            ElectronsToRemove.insert(LRTElectron);
+                        }
+                        else if (electronPassesID(promptElectron,"DFCommonElectronsLHMediumNoPix") ) {
+                            if (electronPassesID(LRTElectron,"DFCommonElectronsLHTightNoPix") ){
+                                ElectronsToRemove.insert(promptElectron);
+                            }
+                            else ElectronsToRemove.insert(LRTElectron);
+                        }
+                        else if (electronPassesID(promptElectron,"DFCommonElectronsLHLooseNoPix") ) {
+                            if (electronPassesID(LRTElectron,"DFCommonElectronsLHMediumNoPix") ){
+                                ElectronsToRemove.insert(promptElectron);
+                            }
+                            else ElectronsToRemove.insert(LRTElectron);
+                        }
+                        else if (electronPassesID(promptElectron,"DFCommonElectronsLHVeryLooseNoPix") ) {
+                            if (electronPassesID(LRTElectron,"DFCommonElectronsLHLooseNoPix") ){
+                                ElectronsToRemove.insert(promptElectron);
+                            }
+                            else ElectronsToRemove.insert(LRTElectron);
+                        }
+                    }
                 }
             } // end lrt loop
         }   // end prompt loop
