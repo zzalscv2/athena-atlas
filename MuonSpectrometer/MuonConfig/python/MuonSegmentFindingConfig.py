@@ -731,7 +731,8 @@ def MuonSegmentFindingCfg(flags, cardinality=1):
     if flags.Muon.runCommissioningChain:
         result.merge(MuonSegmentFilterAlgCfg(flags))
 
-    result.addEventAlgo(CompFactory.xAODMaker.MuonSegmentCnvAlg("MuonSegmentCnvAlg"))
+    # Main MuonSegmentCnvAlg is moved to MuonCombinedReconstructionConfig because of its data dependencies
+
     if flags.Detector.EnableCSC:
         result.merge(MooSegmentFinderAlg_NCBCfg(flags))
         result.addEventAlgo(CompFactory.xAODMaker.MuonSegmentCnvAlg("MuonSegmentCnvAlg_NCB",
