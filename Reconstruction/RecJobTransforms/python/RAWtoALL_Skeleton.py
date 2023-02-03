@@ -173,6 +173,25 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.Utils import setupLoggingLevels
     setupLoggingLevels(ConfigFlags, cfg)
 
+    # Write some metadata into TagInfo
+    from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
+    cfg.merge(
+        TagInfoMgrCfg(
+            ConfigFlags,
+            tagValuePairs={
+                "beam_type": ConfigFlags.Beam.Type.value,
+                "beam_energy": str(ConfigFlags.Beam.Energy),
+                "triggerStreamOfFile": ""
+                if ConfigFlags.Input.isMC
+                else ConfigFlags.Input.TriggerStream,
+                "project_name": "IS_SIMULATION"
+                if ConfigFlags.Input.isMC
+                else ConfigFlags.Input.ProjectName,
+                f"AtlasRelease_{runArgs.trfSubstepName}": ConfigFlags.Input.Release or "n/a",
+            },
+        )
+    )
+
     # Write AMI tag into in-file metadata
     from PyUtils.AMITagHelperConfig import AMITagCfg
     cfg.merge(AMITagCfg(ConfigFlags, runArgs))
