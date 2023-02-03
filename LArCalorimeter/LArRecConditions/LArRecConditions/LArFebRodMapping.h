@@ -22,7 +22,7 @@ class LArFebRodMapping {
   LArFebRodMapping()=delete;
   LArFebRodMapping(const LArOnlineID* onlineId);
 
-  HWIdentifier getReadoutModuleID(const HWIdentifier id) const;
+  HWIdentifier getReadoutModuleID(const HWIdentifier& id) const;
   HWIdentifier getReadoutModuleIDFromHash(const IdentifierHash h) const;
   
   /**

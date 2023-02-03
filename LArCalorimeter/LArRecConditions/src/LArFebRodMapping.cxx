@@ -12,7 +12,7 @@ LArFebRodMapping::LArFebRodMapping(const LArOnlineID* onlineId) :
 
 {}
 
-HWIdentifier LArFebRodMapping::getReadoutModuleID(const HWIdentifier febId) const {
-  const IdentifierHash fHash=m_onlineId->feb_Hash(febId);
+HWIdentifier LArFebRodMapping::getReadoutModuleID(const HWIdentifier& febId) const {
+  const IdentifierHash& fHash=m_onlineId->feb_Hash(febId);
   return getReadoutModuleIDFromHash(fHash);
 }

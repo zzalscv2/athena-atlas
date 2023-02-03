@@ -1550,7 +1550,6 @@ HWIdentifier LArOnlineID_Base::feb_Id(IdentifierHash febHashId) const
 IdentifierHash LArOnlineID_Base::feb_Hash (HWIdentifier febId) const
 /*=============================================================================== */
 {
-    MsgStream log(m_msgSvc, "LArOnlineID_Base" );
     // Get the hash caculator for the febs
     const HashCalcFeb& hc = m_feb_hash_calcs[m_bec_ft_impl.unpack(febId)];
     // Two cases: 
@@ -1564,6 +1563,7 @@ IdentifierHash LArOnlineID_Base::feb_Hash (HWIdentifier febId) const
         for (int i = 0; (unsigned int)i < hc.m_slot_values.size(); ++i) {
             if (slotValue == hc.m_slot_values[i]) return (hc.m_hash + i);
         }
+        MsgStream log(m_msgSvc, "LArOnlineID_Base" );
         if(m_msgSvc) {
           log << MSG::WARNING << "LArOnlineID_Base::feb_Hash - ***** WARNING: could not match slot value for has calculation " << endmsg;
         } else {
