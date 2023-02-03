@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CxxUtils )
@@ -145,7 +145,7 @@ foreach( test sincos_test ArrayScanner_test Arrayrep_test
       vec_int_test vec_float_test vec_fb_int_test vec_fb_float_test
       ConcurrentHashmapImpl_test SimpleUpdater_test hexdump_test
       FPControl_test LockedPointer_test nodiscard_test span_test
-      reverse_wrapper_test )
+      reverse_wrapper_test atomic_bounded_decrement_test )
    atlas_add_test( ${test}
       SOURCES test/${test}.cxx
       LINK_LIBRARIES CxxUtils TestTools )
