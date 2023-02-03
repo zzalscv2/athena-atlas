@@ -149,12 +149,6 @@ def RecoSteering(flags):
     if flags.Reco.EnableJet:
         from JetRecConfig.JetRecoSteering import JetRecoSteeringCfg
         acc.merge(JetRecoSteeringCfg(flags))
-        # We also need to build links between the newly
-        # created jet constituents (GlobalFE)
-        # and electrons,photons,muons and taus
-        from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
-        acc.merge(PFGlobalFlowElementLinkingCfg(flags))
-        log.info("---------- Configured jets")
 
     # btagging
     acc.flagPerfmonDomain('FTag')
@@ -174,6 +168,16 @@ def RecoSteering(flags):
             from eflowRec.PFRun3Config import PFTauFELinkCfg
             acc.merge(PFTauFELinkCfg(flags))
             log.info("---------- Configured particle flow tau FE linking")
+    
+    acc.flagPerfmonDomain('Jets')
+    if flags.Reco.EnableJet and flags.Reco.EnableTau and flags.Reco.EnablePFlow\
+       and flags.Reco.EnableEgamma and flags.Reco.EnableCombinedMuon:
+        # We also need to build links between the newly
+        # created jet constituents (GlobalFE)
+        # and electrons,photons,muons and taus
+        from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
+        acc.merge(PFGlobalFlowElementLinkingCfg(flags))
+
 
     # MET
     acc.flagPerfmonDomain('MET')

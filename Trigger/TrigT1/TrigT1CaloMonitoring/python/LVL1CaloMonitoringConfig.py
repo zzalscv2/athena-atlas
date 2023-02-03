@@ -36,6 +36,8 @@ def LVL1CaloMonitoringConfig(flags):
         from AthenaConfiguration.AutoConfigFlags import GetFileMD
         md = GetFileMD(flags.Input.Files)
         inputContainsRun3FormatConfigMetadata = ("metadata_items" in md and any(('TriggerMenuJson' in key) for key in md["metadata_items"].keys()))
+        result.merge(PprMonitoringConfig(flags))
+        result.merge(JepJemMonitoringConfig(flags))
         if flags.Input.Format is not Format.POOL or inputContainsRun3FormatConfigMetadata:
             # L1 menu available in the POOL file
             from TrigT1CaloMonitoring.CpmMonitorAlgorithm import CpmMonitoringConfig
@@ -55,9 +57,6 @@ def LVL1CaloMonitoringConfig(flags):
             if  flags.Input.TriggerStream == "physics_Mistimed":
                 from TrigT1CaloMonitoring.MistimedStreamMonitorAlgorithm import MistimedStreamMonitorConfig
                 result.merge(MistimedStreamMonitorConfig(flags))
-
-        result.merge(PprMonitoringConfig(flags))
-        result.merge(JepJemMonitoringConfig(flags))
 
         # For running on bytestream data
         if flags.Input.Format is Format.BS:
