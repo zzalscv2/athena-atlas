@@ -108,9 +108,6 @@ def setupCommonServicesEnd():
     # Set default properties for some important services after all user job options
     log.info('Configure core services for online running')
 
-    from TrigServices.TrigServicesConfig import setupMessageSvc
-    setupMessageSvc()
-
     from TrigServices.TrigServicesConfig import enableCOOLFolderUpdates
     enableCOOLFolderUpdates()
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ###############################################################
 ## @file   TrigPSCPythonSetup.py
@@ -45,9 +45,10 @@ else:
    theApp.JobOptionsSvcType = PscConfig.optmap["JOBOPTIONSSVCTYPE"]
 
    ## add the MessageSvc and the JobOptionsSvc to the ServiceMgr
-   from AthenaCommon.ConfigurableDb import getConfigurable
-   ServiceMgr += getConfigurable(theApp.JobOptionsSvcType)("JobOptionsSvc")
-   ServiceMgr += getConfigurable(theApp.MessageSvcType   )("MessageSvc"   )
+   from AthenaConfiguration.ComponentFactory import CompFactory
+   from TrigServices.TrigServicesConfig import getMessageSvc
+   ServiceMgr += CompFactory.getComp(theApp.JobOptionsSvcType)("JobOptionsSvc")
+   ServiceMgr += getMessageSvc(flags, theApp.MessageSvcType)
 
    ## set OutputLevel
    logLevel = PscConfig.optmap['LOGLEVEL'].upper().split(',')
