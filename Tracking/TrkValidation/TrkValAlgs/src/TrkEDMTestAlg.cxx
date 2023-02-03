@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //<<<<<< INCLUDES                                                       >>>>>>
@@ -53,14 +53,13 @@ TrkEDMTestAlg::finalize()
 
   if (m_dumpSummaryToFile) m_summaryFileOutput  <<"Summary"<<std::endl<<"-------"<<std::endl;
 
-  std::map<std::string, unsigned int>::const_iterator it=m_numContsFound.begin(),itEnd=m_numContsFound.end();
-  for (;it!=itEnd;it++) {
-    ATH_MSG_INFO("Found :"<<it->second<<" \t at "<<it->first<<", with "<<m_numConstObjsFound[it->first]
-		 <<" total contained objects.");
-    if (m_dumpSummaryToFile) m_summaryFileOutput <<"Found :"<<it->second<<" \t at "<<it->first<<", with "<<m_numConstObjsFound[it->first]
-						 <<" total contained objects."<<std::endl;
+  for (const auto & [SGKey, objCount] : m_numContsFound ) {
+    const int numberOfObjects = m_numConstObjsFound[SGKey];
+    ATH_MSG_INFO("Found :"<<objCount<<" \t at "<<SGKey<<", with "<<numberOfObjects<<" total contained objects.");
+    if (m_dumpSummaryToFile){
+      m_summaryFileOutput <<"Found :"<<objCount<<" \t at "<<SGKey<<", with "<<numberOfObjects<<" total contained objects."<<std::endl;
+    } 
   }
-
   if (m_dumpSummaryToFile){
     if (m_doDetailedChecks) m_summaryFileOutput<<"Detailed tests found : "<<m_numDetailedWarnings<<" problems.";
     m_summaryFileOutput.close();
