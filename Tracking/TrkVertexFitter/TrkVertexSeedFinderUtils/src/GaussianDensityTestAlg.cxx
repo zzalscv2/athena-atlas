@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // GaussianDensityTestAlg.cxx 
@@ -189,7 +189,10 @@ GaussianDensityTestAlg::findTruth(double mode,
       for (const xAOD::TruthEventBase* evt : *signalEvents)
       {
 	const xAOD::TruthVertex* vLink = *(evt->truthVertexLink(0));
-	if (vLink == nullptr) ATH_MSG_ERROR("Invalid truthVertexLink from signalEvents");
+	if (vLink == nullptr){
+	  ATH_MSG_ERROR("Invalid truthVertexLink from signalEvents in GaussianDensityTestAlg::findTruth");
+	  return StatusCode::FAILURE;
+	}
 	Amg::Vector3D vTruth(vLink->x(),vLink->y(),vLink->z());
 	int nGoodTracks = 0;
 	for (auto *trk : trackVector)
@@ -252,7 +255,10 @@ GaussianDensityTestAlg::findTruth(double mode,
       for (const xAOD::TruthEventBase* evt : *pileupEvents)
       {
 	const xAOD::TruthVertex* vLink = *(evt->truthVertexLink(0));
-	if (vLink == nullptr) ATH_MSG_ERROR("Invalid truthVertexLink from pileupEvents");
+	if (vLink == nullptr) {
+	  ATH_MSG_ERROR("Invalid truthVertexLink from pileupEvents");
+	  return StatusCode::FAILURE;
+	}
 	Amg::Vector3D vTruth(vLink->x(),vLink->y(),vLink->z());
 	int nGoodTracks = 0;
 	for (auto *trk : trackVector)

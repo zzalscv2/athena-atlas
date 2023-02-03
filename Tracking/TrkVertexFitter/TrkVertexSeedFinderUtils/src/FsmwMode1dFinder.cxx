@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*********************************************************************
@@ -82,7 +82,7 @@ namespace Trk
       std::vector<DoubleAndWeight>::const_iterator i=begin;
       if (step>0) {
         std::vector<DoubleAndWeight>::const_iterator j_end=i+step-1;
-      for (std::vector<DoubleAndWeight>::const_iterator j=i;j!=j_end;j++) {
+      for (std::vector<DoubleAndWeight>::const_iterator j=i;j!=j_end;++j) {
 #ifdef FSMWMODE1DFINDER_DEBUG
 	if(msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "In the single interval, the component number unknown, value: " << j->first << " weight " 
 	<< j->second << endmsg;
@@ -162,7 +162,7 @@ namespace Trk
     if (best_end-best_begin==2)
     {
       std::vector<DoubleAndWeight>::const_iterator medium=begin;
-      medium++;
+      ++medium;
       return (begin->first*begin->second+medium->first*medium->second+end->first*end->second)/(begin->second+medium->second+end->second);
     }
     
@@ -248,7 +248,7 @@ namespace Trk
     if (best_end-best_begin==2)
     {
       std::vector<double>::const_iterator medium=begin;
-      medium++;
+      ++medium;
       return (*begin+*medium+*end)/3.;
     }
 
