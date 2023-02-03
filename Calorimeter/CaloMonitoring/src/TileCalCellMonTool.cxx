@@ -58,7 +58,7 @@ StatusCode TileCalCellMonTool::initialize() {
   //Initialize read handle key
   ATH_CHECK( m_cellContainerName.initialize() );
 
-  ATH_CHECK( CaloMonToolBase::initialize() );
+  ATH_CHECK( ManagedMonitorToolBase::initialize() );
   ATH_CHECK( CaloMonToolBase::initialize() );
 
   ATH_MSG_DEBUG("TileCalCellMonTool::initialize() is done!");
