@@ -13,7 +13,8 @@ def MC21a(flags):
     LArConfigRun3PileUp(flags)
 
     # radiation damage
-    flags.Digitization.DoPixelPlanarRadiationDamage = True
+    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
+    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
     # pile-up
     # These numbers are based upon a relative XS scaling of the high-pt slice
@@ -50,7 +51,8 @@ def MC21LowMu(flags):
     LArConfigRun3PileUp(flags)
 
     # radiation damage
-    flags.Digitization.DoPixelPlanarRadiationDamage = True
+    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
+    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
     # pile-up
     # These numbers are based upon a relative XS scaling of the high-pt slice
@@ -74,7 +76,8 @@ def MC21NoPileUp(flags):
     LArConfigRun3NoPileUp(flags)
 
     # radiation damage
-    flags.Digitization.DoPixelPlanarRadiationDamage = True
+    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
+    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
 
 def BeamspotSplitMC21a():

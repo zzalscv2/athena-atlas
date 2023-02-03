@@ -125,7 +125,7 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
   auto particleLink = HepMcParticleLink(phit->trackNumber(), phit.eventId(), evColl, idxFlag, ctx);
   const double pHitTime = hitTime(phit);
 
-  if (m_doRadDamage) {
+  if (m_radiationDamageSimulationType != RadiationDamageSimulationType::NO_RADIATION_DAMAGE) {
     const bool doChunkCorrection = m_doChunkCorrection.value();
     //**************************************//
     //*** Now diffuse charges to surface *** //

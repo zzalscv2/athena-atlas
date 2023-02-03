@@ -21,7 +21,6 @@
 
 // Data member classes
 #include "InDetSimEvent/SiTotalCharge.h"
-#include "InDetSimEvent/SiTrackDistance.h"
 #include "ReadoutGeometryBase/SiCellId.h"
 #include "ReadoutGeometryBase/SiReadoutCellId.h"
 
@@ -90,8 +89,6 @@ private:
   InDetDD::SiReadoutCellId m_readoutCell; //Readout cell associated to this diode
   int m_word;   // a flag for noise etc etc as in InDetSimData
   SiChargedDiode * m_nextInCluster; //the next strip to navigate to - allows traversing clusters since the SiChargedDiodeCollection is not guaranteed to be contiguous
-  float m_maxCharge{}; // maximum deposited charge
-  SiTrackDistance m_trackDistance{}; // track parameters for the maximum deposited charge
 };
 
 ///////////////////////////////////////////////////////////////////

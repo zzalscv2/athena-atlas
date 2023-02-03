@@ -2,6 +2,7 @@
 
 from AthenaCommon import CfgMgr
 from Digitization.DigitizationFlags import digitizationFlags
+from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
         
 # The earliest bunch crossing time for which interactions will be sent
 # to the Pixel Digitization code.
@@ -53,15 +54,15 @@ def SensorSimPlanarTool(name="SensorSimPlanarTool", **kwargs):
     from AthenaCommon.AppMgr import ToolSvc
     kwargs.setdefault("SiPropertiesTool", ToolSvc.PixelSiPropertiesTool)
     kwargs.setdefault("LorentzAngleTool", ToolSvc.PixelLorentzAngleTool)
-    kwargs.setdefault("doRadDamage", digitizationFlags.doPixelPlanarRadiationDamage.get_Value())
-    kwargs.setdefault("doRadDamageTemplate", digitizationFlags.doPixelPlanarRadiationDamageTemplate.get_Value())
+    kwargs.setdefault("RadiationDamageSimulationType", digitizationFlags.pixelPlanarRadiationDamageSimulationType.get_Value())
+    kwargs.setdefault("IsITk", False)
     return CfgMgr.SensorSimPlanarTool(name, **kwargs)
 
 def SensorSim3DTool(name="SensorSim3DTool", **kwargs):
     from AthenaCommon.AppMgr import ToolSvc
     kwargs.setdefault("SiPropertiesTool", ToolSvc.PixelSiPropertiesTool)
-    kwargs.setdefault("doRadDamage", digitizationFlags.doPixel3DRadiationDamage.get_Value())
-    kwargs.setdefault("doRadDamageTemplate", digitizationFlags.doPixel3DRadiationDamageTemplate.get_Value())
+    kwargs.setdefault("RadiationDamageSimulationType", digitizationFlags.pixel3DRadiationDamageSimulationType.get_Value())
+    kwargs.setdefault("IsITk", False)
     return CfgMgr.SensorSim3DTool(name, **kwargs)
 
 def SensorSimTool(name="SensorSimTool", **kwargs):
@@ -179,7 +180,7 @@ def BasicPixelDigitizationTool(name="PixelDigitizationTool", **kwargs):
     if not hasattr(condSeq, 'PixelConfigCondAlg'):
         condSeq += PixelConfigCondAlg_MC()
 
-    if digitizationFlags.doPixelPlanarRadiationDamage.get_Value() or digitizationFlags.doPixel3DRadiationDamage.get_Value():
+    if digitizationFlags.pixelPlanarRadiationDamageSimulationType.get_Value() != PixelRadiationDamageSimulationType.NoRadiationDamage.value:
         from PixelConditionsAlgorithms.PixelConditionsAlgorithmsConf import PixelRadSimFluenceMapAlg
         condSeq += PixelRadSimFluenceMapAlg()
 

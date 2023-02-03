@@ -19,6 +19,7 @@ from PLRGeoModelXml.PLR_GeoModelConfig import PLR_ReadoutGeometryCfg
 from PixelReadoutGeometry.PixelReadoutGeometryConfig import PLR_ReadoutManagerCfg
 from SiLorentzAngleTool.PLR_LorentzAngleConfig import PLR_LorentzAngleToolCfg
 from SiPropertiesTool.PLR_SiPropertiesConfig import PLR_SiPropertiesToolCfg
+from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
 
 
 # The earliest and last bunch crossing times for which interactions will be sent
@@ -71,9 +72,9 @@ def PLR_SensorSimPlanarToolCfg(flags, name="PLR_SensorSimPlanarTool", **kwargs):
     kwargs.setdefault("SiPropertiesTool", acc.popToolsAndMerge(PLR_SiPropertiesToolCfg(flags)))
     kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(PLR_LorentzAngleToolCfg(flags)))
     kwargs.setdefault("PixelModuleData", "PLR_ModuleData")
-    kwargs.setdefault("doRadDamage", flags.Digitization.DoPixelPlanarRadiationDamage)
-    kwargs.setdefault("doRadDamageTemplate", flags.Digitization.DoPixelPlanarRadiationDamageTemplate)
-    if flags.Digitization.DoPixelPlanarRadiationDamage:
+    kwargs.setdefault("RadiationDamageSimulationType", flags.Digitization.PixelPlanarRadiationDamageSimulationType.value)
+    kwargs.setdefault("IsITk", True)
+    if flags.Digitization.PixelPlanarRadiationDamageSimulationType is not PixelRadiationDamageSimulationType.NoRadiationDamage:
         # acc.merge(PLR_RadSimFluenceMapAlgCfg(flags))  # TODO: not supported yet
         pass
     acc.setPrivateTools(CompFactory.SensorSimPlanarTool(name, **kwargs))
@@ -85,9 +86,9 @@ def PLR_SensorSim3DToolCfg(flags, name="PLR_SensorSim3DTool", **kwargs):
     acc = PLR_ConfigCondAlgCfg(flags)
     kwargs.setdefault("SiPropertiesTool", acc.popToolsAndMerge(PLR_SiPropertiesToolCfg(flags)))
     kwargs.setdefault("PixelModuleData", "PLR_ModuleData")
-    kwargs.setdefault("doRadDamage", flags.Digitization.DoPixel3DRadiationDamage)
-    kwargs.setdefault("doRadDamageTemplate", flags.Digitization.DoPixel3DRadiationDamageTemplate)
-    if flags.Digitization.DoPixel3DRadiationDamage:
+    kwargs.setdefault("RadiationDamageSimulationType", flags.Digitization.Pixel3DRadiationDamageSimulationType.value)
+    kwargs.setdefault("IsITk", True)
+    if flags.Digitization.Pixel3DRadiationDamageSimulationType is not PixelRadiationDamageSimulationType.NoRadiationDamage:
         # acc.merge(PLR_RadSimFluenceMapAlgCfg(flags))  # TODO: not supported yet
         pass
     acc.setPrivateTools(CompFactory.SensorSim3DTool(name, **kwargs))

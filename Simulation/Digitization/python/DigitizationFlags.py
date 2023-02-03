@@ -18,6 +18,7 @@ __doc__="Digitization job properties "
 from AthenaCommon.JobProperties import JobProperty, JobPropertyContainer
 from AthenaCommon.JobProperties import jobproperties
 from AthenaCommon.ConfigurableDb import getConfigurable
+from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
 
 # In here I set some AthenaCommon properties
 from AthenaCommon.AthenaCommonFlags import jobproperties  # noqa: F811
@@ -172,36 +173,20 @@ class doFwdNoise(JobProperty):
     StoredValue=True
 
 #
-class doPixelPlanarRadiationDamage(JobProperty):
-    """ Include radiation damage simulation for pixel planar sensors where possible?
+class pixelPlanarRadiationDamageSimulationType(JobProperty):
+    """ Type of the radiation damage simulation for pixel planar sensors
     """
     statusOn=True
-    allowedTypes=['bool']
-    StoredValue=False
+    allowedTypes=['int']
+    StoredValue=PixelRadiationDamageSimulationType.NoRadiationDamage.value
 
 #
-class doPixelPlanarRadiationDamageTemplate(JobProperty):
-    """ Include radiation damage simulation using the templates for pixel planar sensors where possible?
+class pixel3DRadiationDamageSimulationType(JobProperty):
+    """ Type of the radiation damage simulation for pixel 3D sensors
     """
     statusOn=True
-    allowedTypes=['bool']
-    StoredValue=False
-
-#
-class doPixel3DRadiationDamage(JobProperty):
-    """ Include radiation damage simulation for pixel planar sensors where possible?
-    """
-    statusOn=True
-    allowedTypes=['bool']
-    StoredValue=False
-
-#
-class doPixel3DRadiationDamageTemplate(JobProperty):
-    """ Include radiation damage simulation using the templates for pixel planar sensors where possible?
-    """
-    statusOn=True
-    allowedTypes=['bool']
-    StoredValue=False
+    allowedTypes=['int']
+    StoredValue=PixelRadiationDamageSimulationType.NoRadiationDamage.value
 
 #
 class overrideMetadata(JobProperty):
@@ -839,7 +824,7 @@ jobproperties.add_Container(Digitization)
 
 # We want always the following flags in the container
 list_jobproperties=[doInDetNoise,doCaloNoise,doMuonNoise,doFwdNoise,\
-                    doPixelPlanarRadiationDamage,doPixel3DRadiationDamage,doPixelPlanarRadiationDamageTemplate,doPixel3DRadiationDamageTemplate,\
+                    pixelPlanarRadiationDamageSimulationType,pixel3DRadiationDamageSimulationType,\
                     rndmSvc,rndmSeedList,rndmSeedOffset1,rndmSeedOffset2,readSeedsFromFile,\
                     rndmSeedInputFile,physicsList,overrideMetadata,doBichselSimulation,\
                     IOVDbGlobalTag,SimG4VersionUsed,numberOfCollisions,\

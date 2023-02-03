@@ -126,9 +126,7 @@ StatusCode PixelDigitizationTool::digitizeEvent(const EventContext& ctx) {
 
   std::unique_ptr<SiChargedDiodeCollection> chargedDiodes = std::make_unique<SiChargedDiodeCollection>();
   std::vector<std::pair<double, double> > trfHitRecord;
-  trfHitRecord.clear();
   std::vector<double> initialConditions;
-  initialConditions.clear();
 
   std::vector<bool> processedElements;
   processedElements.resize(m_detID->wafer_hash_max(), false);
