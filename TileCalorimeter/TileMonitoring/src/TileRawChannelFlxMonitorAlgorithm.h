@@ -29,7 +29,7 @@ class TileRawChannelFlxMonitorAlgorithm : public AthMonitorAlgorithm {
         "TileDigitsContainer", "TileDigitsCnt", "Tile digits container"};
 
     SG::ReadHandleKey<TileRawChannelContainer> m_rawChannelContainerKeyFlx{this,
-        "TileRawChannelContainerFlx", "TileRawChannelOpt2", "Tile raw channel container"};
+        "TileRawChannelContainerFlx", "TileRawChannelFlxFit", "Tile raw channel container"};
 
     SG::ReadHandleKey<TileRawChannelContainer> m_rawChannelContainerKeyLegacy{this,
         "TileRawChannelContainerLegacy", "TileRawChannelFit", "Tile raw channel container"};
@@ -40,8 +40,9 @@ class TileRawChannelFlxMonitorAlgorithm : public AthMonitorAlgorithm {
     Gaudi::Property<int> m_lastSample{this, "LastSample", 16, "Last sample to put into histogram"}; 
 
     Gaudi::Property<std::vector<int>> m_fragIDsToCompare{this,
-    "TileFragIDsToCompare", {0x203, 0x403}, "Tile Frag IDs of modules to compare."};
-
+    "TileFragIDsToCompare", {0x201, 0x403}, "Tile Frag IDs of modules to compare."};
+ 
+    Gaudi::Property<int> m_felixScale{this, "FelixScale", 1, "Scale factor between Felix and Legacy ADC counts"};
 
 };
 #endif // TILEMONITORING_TILERAWCHANNELFLXALGORITHM_H

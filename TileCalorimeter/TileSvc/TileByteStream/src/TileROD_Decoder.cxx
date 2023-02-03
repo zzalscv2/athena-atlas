@@ -1166,7 +1166,6 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
         
         // check trailer
         const uint32_t* trailer = data + paramsSize + 3 + fragSize; // 2 = (BCID + L1ID)
-
         if ((trailer + 1) <= end_data // 3 = (trailer size)
             && *trailer == 0x87654321
             ) {
@@ -4326,7 +4325,7 @@ while (data < end_data) { // iterator over all words for a robid
     if ((*data) == 0xff1234ff) {
       uint32_t count = *(data + 1); // first word is frag size
       uint32_t idAndType = *(data + 2); // second word is frag ID and frag type
-      int frag = (idAndType &  0xFFFF);
+      int frag = (idAndType &  0x0FFF); // remove the offset
       int type = (idAndType>>16)& 0xFF; // note special mask, we ignore one digit, keep only 0x10, 0x20, 0x30, ...
       if (type == 0x06 &&  (frag == coll.identify())) {
         ++data;

@@ -84,13 +84,13 @@ StatusCode TileRawChannelFlxMonitorAlgorithm::fillHistograms( const EventContext
       
 
       std::string Summary_name_Legacy = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_Summary_Legacy";
-      auto Summary_sample_Legacy = Monitored::Scalar<float>(Summary_name_Legacy, amplitude[channel][gain]);
-      fill("TileRawChannelLegacySummary", monitoredChannel, Summary_sample_Legacy);
+      auto SummaryRawChannel_Legacy = Monitored::Scalar<float>(Summary_name_Legacy, amplitude[channel][gain]);
+      fill("TileRawChannelLegacySummary", monitoredChannel, SummaryRawChannel_Legacy);
 
   
     }
  
-    // Felix (Opt2) amplitude calcualtion
+    // Felix (FIT) amplitude calcualtion
     const TileRawChannelCollection* rawChannelCollectionFlx = rawChannelContainerFlx->indexFindPtr(hash);
     for (const TileRawChannel* rawChannel : *rawChannelCollectionFlx) {
   
@@ -104,8 +104,8 @@ StatusCode TileRawChannelFlxMonitorAlgorithm::fillHistograms( const EventContext
       amplitudeFlx[channel][gain] = rawChannel->amplitude();
      
       std::string Summary_name_Felix = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_Summary_Felix";
-      auto Summary_sample_Felix = Monitored::Scalar<float>(Summary_name_Felix, amplitudeFlx[channel][gain]);
-      fill("TileRawChannelFlxSummary", monitoredChannel, Summary_sample_Felix);
+      auto SummaryRawChannel_Felix = Monitored::Scalar<float>(Summary_name_Felix, amplitudeFlx[channel][gain]);   
+      fill("TileRawChannelFlxSummary", monitoredChannel, SummaryRawChannel_Felix);
 
     }
 
@@ -117,35 +117,23 @@ StatusCode TileRawChannelFlxMonitorAlgorithm::fillHistograms( const EventContext
       std::string channelName = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[i] + "_channel";
       auto monitoredChannel = Monitored::Scalar<float>(channelName, j);
 
-      double diff_abs = amplitude[j][i]-amplitudeFlx[j][i];
-
-
+      double diff_abs = ((amplitude[j][i])*m_felixScale)-amplitudeFlx[j][i];
+ 
       std::string Diff_name = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[i] + "_Diff";
-      auto Diff_sample = Monitored::Scalar<float>(Diff_name, diff_abs);
+      auto Diff_RawChannel = Monitored::Scalar<float>(Diff_name, diff_abs);
       
 
       std::string Legacy_name = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[i] + "_Legacy";
-      auto Legacy_sample = Monitored::Scalar<float>(Legacy_name, amplitude[j][i]);
+      auto Legacy_RawChannel = Monitored::Scalar<float>(Legacy_name, amplitude[j][i]);
 
-      fill("TileRawChannelDiffLegacyFlx", monitoredChannel, Diff_sample);
+      fill("TileRawChannelDiffLegacyFlx", monitoredChannel, Diff_RawChannel);
 
-      fill("TileRawChannelDiffLegacyFlx_Legacy", Legacy_sample, Diff_sample);
+      fill("TileRawChannelDiffLegacyFlx_Legacy", Legacy_RawChannel, Diff_RawChannel);
     }
 
   }
 
-
-
-
-
-
-
   }
-
-
-
-
-
   
   fill("TileDigitsFlxMonExecuteTime", timer);
     
