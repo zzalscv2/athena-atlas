@@ -238,7 +238,8 @@ def InDetTrackRecoCfg(flags):
 
     for current_flags in flags_set:
 
-        extension = current_flags.InDet.Tracking.ActiveConfig.extension
+        extension = "" if isPrimaryPass else \
+                    current_flags.InDet.Tracking.ActiveConfig.extension
 
         if flags.InDet.Tracking.doTRTStandalone and extension=="TRTStandalone":
             TRTTrackContainer = "TRTStandaloneTracks"
@@ -334,7 +335,8 @@ def InDetTrackRecoCfg(flags):
                                                         AssociationMapName = AssociationMapName))
 
         else:
-            ClusterSplitProbContainer = "InDetAmbiguityProcessorSplitProb" + extension
+            ClusterSplitProbContainer = "InDetAmbiguityProcessorSplitProb" + \
+                                        current_flags.InDet.Tracking.ActiveConfig.extension
             InputCombinedInDetTracks += [TrackContainer]
 
         InputExtendedInDetTracks += [TrackContainer]
