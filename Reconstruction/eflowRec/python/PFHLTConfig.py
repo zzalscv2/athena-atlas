@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -180,7 +180,7 @@ def HLTPFTrackSelectorCfg(inputFlags,tracktype,tracksin,verticesin,clustersin,ce
             tracksName=tracksin,
             VertexContainer=verticesin,
             eflowRecTracksOutputName=f"eflowRecTracks_{tracktype}",
-            MonTool = PFOnlineMon.getMonTool_PFTrackSelector(),
+            MonTool = PFOnlineMon.getMonTool_PFTrackSelector(inputFlags),
         ),
         primary=True,
     )
@@ -252,7 +252,7 @@ def PFCfg(inputFlags, tracktype="", clustersin=None, calclustersin=None, tracksi
 
     # Add monitoring tool
     from eflowRec import PFOnlineMon
-    monTool = PFOnlineMon.getMonTool_PFTrackSelector()
+    monTool = PFOnlineMon.getMonTool_PFTrackSelector(inputFlags)
     PFTrackSelector.MonTool = monTool
 
     result.merge( selcfg )
@@ -285,7 +285,7 @@ def PFCfg(inputFlags, tracktype="", clustersin=None, calclustersin=None, tracksi
             BaseToolList = [
                 result.popToolsAndMerge(getHLTPFMomentCalculatorTool(inputFlags)),
             ],
-            MonTool = PFOnlineMon.getMonTool_PFAlgorithm(),
+            MonTool = PFOnlineMon.getMonTool_PFAlgorithm(inputFlags),
             eflowRecTracksInputName = PFTrackSelector.eflowRecTracksOutputName,
             eflowRecClustersOutputName = f"eflowRecClusters_{tracktype}",
             PFCaloClustersOutputName = f"PFCaloCluster_{tracktype}",

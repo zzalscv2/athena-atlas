@@ -1,8 +1,8 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-def getMonTool_eflowTrackCaloExtensionTool():
+def getMonTool_eflowTrackCaloExtensionTool(flags):
   from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-  monTool = GenericMonitoringTool('MonTool_TrackCaloExtension')
+  monTool = GenericMonitoringTool(flags, 'MonTool_TrackCaloExtension')
 
   monTool.defineHistogram( 'TIME_execute', path='EXPERT', type='TH1F', title='Extension tool - execution time; Execution time [us]; Counts',
                              xbins=100, xmin=0., xmax=50. )
@@ -13,9 +13,9 @@ def getMonTool_eflowTrackCaloExtensionTool():
   return monTool
 
 
-def getMonTool_PFTrackSelector():
+def getMonTool_PFTrackSelector(flags):
   from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-  monTool = GenericMonitoringTool('MonTool')
+  monTool = GenericMonitoringTool(flags, 'MonTool')
 
   monTool.defineHistogram( 'TIME_execute', path='EXPERT', type='TH1F', title='Track selector - execution time; Execution time [ms]; Counts',
                            xbins=60, xmin=0., xmax=20. )
@@ -34,9 +34,9 @@ def getMonTool_PFTrackSelector():
                            xbins=25, xmin=0., xmax=15., ybins=50, ymin=0., ymax=50. )
   return monTool
 
-def getMonTool_PFTrackClusterMatching():
+def getMonTool_PFTrackClusterMatching(flags):
   from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-  monTool = GenericMonitoringTool('MonTool_ClusterMatching')
+  monTool = GenericMonitoringTool(flags, 'MonTool_ClusterMatching')
 
   monTool.defineHistogram( 'matched_tracks_pt', path='EXPERT', type='TH1F', title='Number of matched tracks with given p_{T}; p_{T} [GeV]; Counts',
                           xbins=40, xmin=0., xmax=20. )
@@ -49,9 +49,9 @@ def getMonTool_PFTrackClusterMatching():
 
   return monTool
 
-def getMonTool_PFAlgorithm():
+def getMonTool_PFAlgorithm(flags):
   from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-  monTool = GenericMonitoringTool('MonTool')
+  monTool = GenericMonitoringTool(flags, 'MonTool')
 
   monTool.defineHistogram( 'TIME_execute', path='EXPERT', type='TH1F', title='PFlow algorithm - execution time; Time [ms]; Counts',
                            xbins=100, xmin=0., xmax=500. )
