@@ -112,7 +112,7 @@ StatusCode TilePulseForTileMuonReceiver::initialize() {
   ATH_CHECK( m_muRcvRawChannelContainerKey.initialize(m_runPeriod != 0) );
   ATH_CHECK( m_inputDigitContainerKey.initialize(!m_onlyUseContainerName && m_rndmEvtOverlay && m_runPeriod != 0) );
   ATH_CHECK( m_samplingFractionKey.initialize(m_runPeriod != 0) );
-  ATH_CHECK( m_emScaleKey.initialize() );
+  ATH_CHECK( m_emScaleKey.initialize(m_runPeriod != 0) );
 
   if ( m_runPeriod == 0) {
     ATH_MSG_INFO("TilePulseForTileMuonReceiver should not be used for RUN1 simulations");
@@ -171,11 +171,7 @@ StatusCode TilePulseForTileMuonReceiver::initialize() {
     m_tileToolPulseShape.disable();
   }
 
-  if (m_maskBadChannels) {
-    CHECK(m_tileBadChanTool.retrieve());
-  } else {
-    m_tileBadChanTool.disable();
-  }
+  ATH_CHECK( m_badChannelsKey.initialize((m_runPeriod != 0) && m_maskBadChannels) );
 
   ATH_MSG_INFO( "Integer digits: \t" << ((m_integerDigits)?"true":"false"));
   ATH_MSG_INFO( "Tile Pedestal: \t" << ((m_tilePedestal)?"true":"false"));
@@ -255,6 +251,13 @@ StatusCode TilePulseForTileMuonReceiver::execute() {
 
   SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
   ATH_CHECK( emScale.isValid() );
+
+  const TileBadChannels* badChannels = nullptr;
+  if (m_maskBadChannels) {
+    SG::ReadCondHandle<TileBadChannels> badChannelsHandle(m_badChannelsKey, ctx);
+    ATH_CHECK( badChannelsHandle.isValid() );
+    badChannels = *badChannelsHandle;
+  }
 
   // Get hit container from TES
   //
@@ -755,7 +758,7 @@ StatusCode TilePulseForTileMuonReceiver::execute() {
       bool chanIsBad = false;
 
       if (m_maskBadChannels) {
-        TileBchStatus status = m_tileBadChanTool->getAdcStatus(drawerIdx, TILEchan, TileID::LOWGAIN);
+        TileBchStatus status = badChannels->getAdcStatus( m_tileHWID->adc_id(drawer_id, TILEchan, TileID::LOWGAIN) );
         chanIsBad = status.isBad();
       }
 
