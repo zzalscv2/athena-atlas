@@ -15,10 +15,9 @@ def StandaloneMuonOutputCfg(flags):
     result = ComponentAccumulator()
 
     # FIXME! Fix for ATLASRECTS-5151. Remove when better solution found.
-    Trk__EventCnvSuperTool = CompFactory.Trk.EventCnvSuperTool
-    cnvTool = Trk__EventCnvSuperTool(name='EventCnvSuperTool')
-    cnvTool.MuonCnvTool.FixTGCs = True
-    result.addPublicTool(cnvTool)
+    from TrkEventCnvTools.TrkEventCnvToolsConfigCA import (
+        MuonTrkEventCnvSuperToolCfg)
+    result.merge(MuonTrkEventCnvSuperToolCfg(flags))
 
     aod_items = []
     if flags.Detector.EnableMM or flags.Detector.EnablesTGC:

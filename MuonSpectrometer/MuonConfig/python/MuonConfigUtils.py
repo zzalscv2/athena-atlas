@@ -2,7 +2,6 @@
 
 # This file is just for shared functions etc used by this package.
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
     
 def SetupMuonStandaloneConfigFlags( default_input = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/ESD.16747874._000011_100events.pool.root']):
     """
@@ -63,7 +62,7 @@ def SetupMuonStandaloneOutput(cfg, flags, itemsToRecord):
     outstream.ForceRead = True
 
     # Fix for ATLASRECTS-5151
-    Trk__EventCnvSuperTool = CompFactory.Trk.EventCnvSuperTool
-    cnvTool = Trk__EventCnvSuperTool(name = 'EventCnvSuperTool')
-    cnvTool.MuonCnvTool.FixTGCs = True 
-    cfg.addPublicTool(cnvTool)
+    from TrkEventCnvTools.TrkEventCnvToolsConfigCA import (
+        MuonTrkEventCnvSuperToolCfg)
+    cfg.merge(MuonTrkEventCnvSuperToolCfg(flags))
+

@@ -1,10 +1,14 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def CaloExtensionBuilderAlgCfg(flags, name="CaloExtensionBuilderAlg", **kwargs):
-    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg    
-    result = AtlasExtrapolatorCfg(flags)
-    kwargs.setdefault("LastCaloExtentionTool", CompFactory.Trk.ParticleCaloExtensionTool(Extrapolator=result.popPrivateTools()))
+    result = ComponentAccumulator()
+
+    if "LastCaloExtentionTool" not in kwargs:
+        from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
+        kwargs.setdefault("LastCaloExtentionTool", result.popToolsAndMerge(
+            ParticleCaloExtensionToolCfg(flags)))
 
     # P->T conversion extra dependencies
     if flags.Detector.GeometryITk:

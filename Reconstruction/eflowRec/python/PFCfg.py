@@ -7,10 +7,10 @@ def PFTrackSelectorAlgCfg(inputFlags,algName,useCaching=True):
     PFTrackSelectorFactory=CompFactory.PFTrackSelector
     PFTrackSelector=PFTrackSelectorFactory(algName)
 
-    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    Trk__ParticleCaloExtensionToolFactory=CompFactory.Trk.ParticleCaloExtensionTool
-    result = AtlasExtrapolatorCfg(inputFlags)
-    pcExtensionTool = Trk__ParticleCaloExtensionToolFactory(Extrapolator = result.popPrivateTools())
+    result = ComponentAccumulator()
+
+    from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
+    pcExtensionTool = result.popToolsAndMerge(ParticleCaloExtensionToolCfg(inputFlags))
 
     eflowTrackCaloExtensionTool=CompFactory.eflowTrackCaloExtensionTool
     TrackCaloExtensionTool=eflowTrackCaloExtensionTool(TrackCaloExtensionTool=pcExtensionTool)
