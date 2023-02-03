@@ -125,7 +125,6 @@ if DQMonFlags.doMonitoring():
             # give all the tools the trigger translator
             if DQMonFlags.useTrigger():
                tool.TrigDecisionTool = getattr(ToolSvc, DQMonFlags.nameTrigDecTool())
-               tool.TriggerTranslatorTool = getattr(ToolSvc, DQMonFlags.nameTrigTransTool())
 
             if DQMonFlags.monToolPostExec():
                postprocfunc = eval(DQMonFlags.monToolPostExec())

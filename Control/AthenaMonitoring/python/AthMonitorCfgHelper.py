@@ -226,7 +226,6 @@ class AthMonitorCfgHelperOld(object):
                     not set up trigger in monitoring", self.dqflags.nameTrigDecTool())
             else:
                 algObj.TrigDecisionTool = getattr(ToolSvc, self.dqflags.nameTrigDecTool())
-                algObj.TriggerTranslatorTool = getattr(ToolSvc, self.dqflags.nameTrigTransTool())
         from AthenaCommon.GlobalFlags import globalflags
         if globalflags.DataSource() != 'geant4' and self.dqflags.enableLumiAccess():
             algObj.EnableLumi = True
