@@ -21,7 +21,7 @@ public:
    : m_msg(msg), m_name(name) {}
 
   void
-  flush(const Acts::Logging::Level& lvl, const std::string& input);
+  flush(const Acts::Logging::Level& lvl, const std::string& input) override;
 
   virtual 
     const std::string& 
@@ -42,7 +42,7 @@ public:
 
   //~AthenaFilterPolicy() = default;
 
-  bool doPrint(const Acts::Logging::Level& lvl) const;
+  bool doPrint(const Acts::Logging::Level& lvl) const override;
 
   virtual 
     Acts::Logging::Level 
