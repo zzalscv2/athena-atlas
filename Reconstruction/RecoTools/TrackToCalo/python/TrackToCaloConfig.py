@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = "Tool configuration for the track to calo tools."
 
@@ -6,31 +6,53 @@ __doc__ = "Tool configuration for the track to calo tools."
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-
 def ParticleCaloExtensionToolCfg(flags, name='ParticleCaloExtensionTool', **kwargs):
     acc=ComponentAccumulator()
 
     if "Extrapolator" not in kwargs:
-        kwargs["Extrapolator"] = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
+        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+        kwargs["Extrapolator"] = acc.popToolsAndMerge(
+            AtlasExtrapolatorCfg(flags))
 
-    caloExtensionTool = CompFactory.Trk.ParticleCaloExtensionTool(name, **kwargs)
+    acc.setPrivateTools(
+        CompFactory.Trk.ParticleCaloExtensionTool(name, **kwargs))
+    return acc
 
-    acc.setPrivateTools(caloExtensionTool)
+def HLTPF_ParticleCaloExtensionToolCfg(flags, name='HLTPF_ParticleCaloExtension', **kwargs):
+    acc=ComponentAccumulator()
+
+    if "Extrapolator" not in kwargs:
+        from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+        kwargs["Extrapolator"] = acc.popToolsAndMerge(
+            InDetExtrapolatorCfg(flags))
+
+    acc.setPrivateTools(
+        CompFactory.Trk.ParticleCaloExtensionTool(name, **kwargs))
     return acc
 
 def ParticleCaloCellAssociationToolCfg(flags, name='ParticleCaloCellAssociationTool', **kwargs):
     acc=ComponentAccumulator()
 
     if "ParticleCaloExtensionTool" not in kwargs:
-        pcExtrapToolAcc = ParticleCaloExtensionToolCfg(flags)
-        kwargs["ParticleCaloExtensionTool"] = acc.popToolsAndMerge(pcExtrapToolAcc)
+        kwargs["ParticleCaloExtensionTool"] = acc.popToolsAndMerge(
+            ParticleCaloExtensionToolCfg(flags))
 
     # should this be a more global flag? It depends on whether you are in AOD
     kwargs.setdefault("CaloCellContainer", flags.Egamma.Keys.Input.CaloCells)
 
-    cellAssocTool = CompFactory.Rec.ParticleCaloCellAssociationTool(name, **kwargs)
-
-    acc.setPrivateTools(cellAssocTool)
+    acc.setPrivateTools(
+        CompFactory.Rec.ParticleCaloCellAssociationTool(name, **kwargs))
     return acc
 
+def HLTPF_ParticleCaloCellAssociationToolCfg(flags, name='HLTPF_ParticleCaloCellAssociationTool', **kwargs):
+    acc=ComponentAccumulator()
+
+    if "ParticleCaloExtensionTool" not in kwargs:
+        kwargs["ParticleCaloExtensionTool"] = acc.popToolsAndMerge(
+            HLTPF_ParticleCaloExtensionToolCfg(flags))
+
+    kwargs.setdefault("CaloCellContainer", "")
+
+    acc.setPrivateTools(
+        CompFactory.Rec.ParticleCaloCellAssociationTool(name, **kwargs))
+    return acc

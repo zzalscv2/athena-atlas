@@ -41,10 +41,9 @@ def TRTMonitoringRun3ESD_AlgConfig(flags):
     algTRTMonitoringRun3ESD.TrackSummaryTool = result.popToolsAndMerge(InDetTrackSummaryToolCfg(flags))
 
 #     # To run job only with ID
-#    if hasattr(flags, "Detector") and hasattr(flags.Detector, "GeometryMuon") and hasattr(flags.Detector, "GeometryID"):
-#        TrkEventCnvSuperTool = CompFactory.Trk.EventCnvSuperTool(name = "EventCnvSuperTool",
-#                                                                 DoMuons = flags.Detector.GeometryMuon,
-#                                                                 DoID = flags.Detector.GeometryID)
+#    if hasattr(inputFlags, "Detector") and hasattr(inputFlags.Detector, "GeometryMuon") and hasattr(inputFlags.Detector, "GeometryID"):
+#        from TrkEventCnvTools.TrkEventCnvToolsConfigCA import TrkEventCnvSuperToolCfg
+#        TrkEventCnvSuperTool = result.getPrimaryAndMerge(TrkEventCnvSuperToolCfg(inputFlags))
 #        result.addPublicTool(TrkEventCnvSuperTool)
 
     barrelOrEndcap     = ('Barrel', 'EndCap')

@@ -29,18 +29,6 @@ def CaloGeoAndNoiseCfg(inputFlags):
 
     return result
 
-def PFExtrapolatorCfg(flags):
-    from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-    result = ComponentAccumulator()
-    extrapolator = result.popToolsAndMerge(InDetExtrapolatorCfg(flags, "InDetTrigExtrapolator"))
-    result.setPrivateTools(
-        CompFactory.Trk.ParticleCaloExtensionTool(
-            "HLTPF_ParticleCaloExtension",
-            Extrapolator=extrapolator,
-        )
-    )
-    return result
-
 def PFTrackExtensionCfg(flags, tracktype, tracksin):
     """ Get the track-to-calo extension after a preselection
 
@@ -57,9 +45,12 @@ def PFTrackExtensionCfg(flags, tracktype, tracksin):
         OutputTracks=pretracks_name,
         TrackSelTool=result.popToolsAndMerge(PFTrackSelectionToolCfg(flags))
     ))
+
+    from TrackToCalo.TrackToCaloConfig import HLTPF_ParticleCaloExtensionToolCfg
     result.addEventAlgo(CompFactory.Trk.PreselCaloExtensionBuilderAlg(
         f"HLTPFTrackExtension_{tracktype}",
-        ParticleCaloExtensionTool=result.popToolsAndMerge(PFExtrapolatorCfg(flags)),
+        ParticleCaloExtensionTool=result.popToolsAndMerge(
+            HLTPF_ParticleCaloExtensionToolCfg(flags)),
         InputTracks=pretracks_name,
         OutputCache=cache_name,
     ))
@@ -76,6 +67,10 @@ def MuonCaloTagCfg(flags, tracktype, tracksin, extcache, cellsin):
     extrapolator = result.popToolsAndMerge(InDetExtrapolatorCfg(flags, "InDetTrigExtrapolator"))
     output_tracks = f"PFMuonCaloTagTracks_{tracktype}"
 
+    from TrackToCalo.TrackToCaloConfig import (
+        HLTPF_ParticleCaloExtensionToolCfg,
+        HLTPF_ParticleCaloCellAssociationToolCfg)
+
     result.addEventAlgo(
         CompFactory.PFTrackMuonCaloTaggingAlg(
             f"PFTrackMuonCaloTaggingAlg_{tracktype}",
@@ -86,20 +81,17 @@ def MuonCaloTagCfg(flags, tracktype, tracksin, extcache, cellsin):
             MinPt = flags.Trigger.FSHad.PFOMuonRemovalMinPt,
             MuonScoreTool = CompFactory.CaloMuonScoreTool(
                 CaloMuonEtaCut=3,
-                ParticleCaloCellAssociationTool = CompFactory.Rec.ParticleCaloCellAssociationTool(
-                    ParticleCaloExtensionTool = result.popToolsAndMerge(PFExtrapolatorCfg(flags)),
-                    CaloCellContainer="",
-                )
+                ParticleCaloCellAssociationTool = result.popToolsAndMerge(
+                    HLTPF_ParticleCaloCellAssociationToolCfg(flags))
             ),
             LooseTagTool=CompFactory.CaloMuonTag("LooseCaloMuonTag", TagMode="Loose"),
             TightTagTool=CompFactory.CaloMuonTag("TightCaloMuonTag", TagMode="Tight"),
             DepositInCaloTool=CompFactory.TrackDepositInCaloTool(
                 ExtrapolatorHandle=extrapolator,
-                ParticleCaloCellAssociationTool=CompFactory.Rec.ParticleCaloCellAssociationTool(
-                    ParticleCaloExtensionTool=result.popToolsAndMerge(PFExtrapolatorCfg(flags)),
-                    CaloCellContainer=""
-                ),
-                ParticleCaloExtensionTool=result.popToolsAndMerge(PFExtrapolatorCfg(flags)),
+                ParticleCaloCellAssociationTool = result.popToolsAndMerge(
+                    HLTPF_ParticleCaloCellAssociationToolCfg(flags)),
+                ParticleCaloExtensionTool=result.popToolsAndMerge(
+                    HLTPF_ParticleCaloExtensionToolCfg(flags))
             )
         ),
         primary=True,
@@ -113,6 +105,9 @@ def MuonIsoTagCfg(flags, tracktype, tracksin, verticesin, extcache, clustersin):
     """
     result = ComponentAccumulator()
     output_tracks = f"PFMuonIsoTagTracks_{tracktype}"
+
+    from TrackToCalo.TrackToCaloConfig import HLTPF_ParticleCaloExtensionToolCfg
+
     result.addEventAlgo(
         CompFactory.PFTrackMuonIsoTaggingAlg(
             f"PFTrackMuonIsoTaggingalg_{tracktype}",
@@ -126,7 +121,8 @@ def MuonIsoTagCfg(flags, tracktype, tracksin, verticesin, extcache, clustersin):
                 VertexLocation="",
             ),
             CaloIsoTool = CompFactory.xAOD.CaloIsolationTool(
-                ParticleCaloExtensionTool=result.popToolsAndMerge(PFExtrapolatorCfg(flags)),
+                ParticleCaloExtensionTool=result.popToolsAndMerge(
+                    HLTPF_ParticleCaloExtensionToolCfg(flags)),
                 InputCaloExtension=extcache,
                 ParticleCaloCellAssociationTool="",
                 saveOnlyRequestedCorrections=True,
@@ -166,12 +162,15 @@ def HLTPFTrackSelectorCfg(inputFlags,tracktype,tracksin,verticesin,clustersin,ce
         result.merge(tag_acc)
 
     from InDetConfig.InDetTrackSelectionToolConfig import PFTrackSelectionToolCfg
+    from TrackToCalo.TrackToCaloConfig import HLTPF_ParticleCaloExtensionToolCfg
+
     result.addEventAlgo(
         CompFactory.PFTrackSelector(
             f"PFTrackSelector_{tracktype}",
             trackExtrapolatorTool = CompFactory.eflowTrackCaloExtensionTool(
                 "HLTPF_eflowTrkCaloExt",
-                TrackCaloExtensionTool=result.popToolsAndMerge(PFExtrapolatorCfg(inputFlags)),
+                TrackCaloExtensionTool=result.popToolsAndMerge(
+                    HLTPF_ParticleCaloExtensionToolCfg(inputFlags)),
                 PFParticleCache = extension_cache,
             ),
             trackSelectionTool = result.popToolsAndMerge(PFTrackSelectionToolCfg(inputFlags)),

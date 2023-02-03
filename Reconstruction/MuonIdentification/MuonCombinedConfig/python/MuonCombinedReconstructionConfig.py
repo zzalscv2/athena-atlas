@@ -513,10 +513,9 @@ def CombinedMuonOutputCfg(flags):
     result = ComponentAccumulator()
 
     # FIXME! Fix for ATLASRECTS-5151. Remove when better solution found.
-    Trk__EventCnvSuperTool = CompFactory.Trk.EventCnvSuperTool
-    cnvTool = Trk__EventCnvSuperTool(name='EventCnvSuperTool')
-    cnvTool.MuonCnvTool.FixTGCs = True
-    result.addPublicTool(cnvTool)
+    from TrkEventCnvTools.TrkEventCnvToolsConfigCA import (
+        MuonTrkEventCnvSuperToolCfg)
+    result.merge(MuonTrkEventCnvSuperToolCfg(flags))
 
     # Avoid old-style import from from IsolationAlgs.IsoUpdatedTrackCones import iso_vars
     # But shouldn't be here.

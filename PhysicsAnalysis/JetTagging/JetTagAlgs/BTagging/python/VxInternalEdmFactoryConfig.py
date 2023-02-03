@@ -1,9 +1,7 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from BTagging.JetFitterFullLinearizedTrackFactoryConfig import JetFitterFullLinearizedTrackFactoryCfg
-
 
 def VxInternalEdmFactoryCfg(flags, name, useBTagFlagsDefaults = True, **options):
     """Sets up a VxInternalEdmFactory tool and returns it.
@@ -16,11 +14,13 @@ def VxInternalEdmFactoryCfg(flags, name, useBTagFlagsDefaults = True, **options)
     output: The actual tool, which can then by added to ToolSvc via ToolSvc += output."""
     acc = ComponentAccumulator()
     if useBTagFlagsDefaults:
-        jetFitterFullLinearizedTrackFactory = acc.popToolsAndMerge(JetFitterFullLinearizedTrackFactoryCfg(flags, 'JetFitterFullLinearizedTrkFactory'))
+        from TrkConfig.TrkVertexFitterUtilsConfig import AtlasFullLinearizedTrackFactoryCfg
+        jetFitterFullLinearizedTrackFactory = acc.popToolsAndMerge(AtlasFullLinearizedTrackFactoryCfg(flags, 'JetFitterFullLinearizedTrkFactory'))
         defaults = {
                      'LinearizedTrackFactory'  : jetFitterFullLinearizedTrackFactory, }
         for option in defaults:
             options.setdefault(option, defaults[option])
+
     options['name'] = name
     acc.setPrivateTools(CompFactory.Trk.VxCandidateXAODVertex(**options))
 
