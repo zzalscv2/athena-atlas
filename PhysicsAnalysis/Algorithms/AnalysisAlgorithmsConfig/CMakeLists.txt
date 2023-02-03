@@ -12,93 +12,82 @@ if( XAOD_STANDALONE )
 
    atlas_install_scripts( share/*_eljob.py )
 
-   atlas_add_test( testJobData
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type data --unit-test --direct-driver
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
-   atlas_add_test( testJobFullSim
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type mc --unit-test --direct-driver
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
-   atlas_add_test( testJobFastSim
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type afii --unit-test --direct-driver
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
+   function( add_test_job NAME DATA_TYPE )
 
-   atlas_add_test( testJobDataConfig
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type data --unit-test --direct-driver --block-config
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
-   atlas_add_test( testJobFullSimConfig
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type mc --unit-test --direct-driver --block-config
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
-   atlas_add_test( testJobFastSimConfig
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type afii --unit-test --direct-driver --block-config
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
+      atlas_add_test( ${NAME}
+         SCRIPT FullCPAlgorithmsTest_eljob.py --data-type ${DATA_TYPE} --direct-driver --submission-dir submitDir-${NAME} ${ARGN}
+         POST_EXEC_SCRIPT nopost.sh
+         PROPERTIES TIMEOUT 900 )
+      
+   endfunction()
 
-   atlas_add_test( testJobDataLite
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type data --unit-test --direct-driver --physlite --no-physlite-broken
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
-   atlas_add_test( testJobFullSimLite
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type mc --unit-test --direct-driver --physlite --no-physlite-broken
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
-   atlas_add_test( testJobFastSimLite
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type afii --unit-test --direct-driver --physlite --no-physlite-broken
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
+   function( add_test_compare NAME DATA_TYPE NAME1 NAME2 )
 
-   atlas_add_test( testJobDataConfigLite
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type data --unit-test --direct-driver --block-config --physlite --no-physlite-broken
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
-   # FIX ME: this currently fails on the muons
-   # atlas_add_test( testJobFullSimConfigLite
-   #    SCRIPT FullCPAlgorithmsTest_eljob.py --data-type mc --unit-test --direct-driver --block-config --physlite --no-physlite-broken
-   #    POST_EXEC_SCRIPT nopost.sh
-   #    PROPERTIES TIMEOUT 600 )
-   atlas_add_test( testJobFastSimConfigLite
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type afii --unit-test --direct-driver --block-config --physlite --no-physlite-broken
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
+      atlas_add_test( ${NAME}
+         SCRIPT compareFlatTrees analysis submitDir-${NAME1}/data-ANALYSIS/${DATA_TYPE}.root submitDir-${NAME2}/data-ANALYSIS/${DATA_TYPE}.root
+         POST_EXEC_SCRIPT nopost.sh
+         PROPERTIES TIMEOUT 900
+         DEPENDS ${NAME1} ${NAME2})
+
+   endfunction()
 
 else()
 
    atlas_install_joboptions( share/*_jobOptions.py )
 
-   atlas_add_test( testJobDataCompare
-      SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/BlockConfigurationAthenaTest.sh data
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 1800 )
+   function( add_test_job NAME DATA_TYPE )
 
-   atlas_add_test( testJobFullSimCompare
-      SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/BlockConfigurationAthenaTest.sh mc
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 1800 )
+      atlas_add_test( ${NAME}
+         SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py --evtMax=500 - --force-output TestJobOutput-${NAME}.hist.root --data-type ${DATA_TYPE} ${ARGN}
+         POST_EXEC_SCRIPT nopost.sh
+         PROPERTIES TIMEOUT 900 )
+      
+   endfunction()
 
-   atlas_add_test( testJobFastSimCompare
-      SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/BlockConfigurationAthenaTest.sh afii
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 1800 )
+   function( add_test_compare NAME DATA_TYPE NAME1 NAME2 )
 
-   # FIXME: there are currently no configuration blocks that work on
-   # PHYSLITE, reenable this when there are
-   # atlas_add_test( testJobDataCompareLite
-   #    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/BlockConfigurationAthenaTest.sh data --physlite
-   #    POST_EXEC_SCRIPT nopost.sh
-   #    PROPERTIES TIMEOUT 600 )
+      atlas_add_test( ${NAME}
+         SCRIPT acmd.py diff-root --error-mode resilient -t analysis TestJobOutput-${NAME1}.hist.root TestJobOutput-${NAME2}.hist.root
+         POST_EXEC_SCRIPT nopost.sh
+         PROPERTIES TIMEOUT 900
+         DEPENDS ${NAME1} ${NAME2})
 
-   #  atlas_add_test( testJobFullSimCompareLite
-   #    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/BlockConfigurationAthenaTest.sh mc --physlite
-   #    POST_EXEC_SCRIPT nopost.sh
-   #    PROPERTIES TIMEOUT 600 )
+   endfunction()
 
-   # atlas_add_test( testJobFastSimCompareLite
-   #    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/BlockConfigurationAthenaTest.sh afii --physlite
-   #    POST_EXEC_SCRIPT nopost.sh
-   #    PROPERTIES TIMEOUT 600 )
+endif()
+
+
+
+add_test_job( TestJobDataSequence data --for-compare --no-systematics )
+add_test_job( TestJobDataConfig   data --for-compare --block-config --no-systematics )
+add_test_compare( TestJobDataCompare data TestJobDataSequence TestJobDataConfig )
+
+add_test_job( TestJobFullSimSequence mc --for-compare )
+add_test_job( TestJobFullSimConfig   mc --for-compare --block-config )
+add_test_compare( TestJobFullSimCompare mc TestJobFullSimSequence TestJobFullSimConfig )
+
+add_test_job( TestJobFastSimSequence afii --for-compare )
+add_test_job( TestJobFastSimConfig   afii --for-compare --block-config )
+add_test_compare( TestJobFastSimCompare afii TestJobFastSimSequence TestJobFastSimConfig )
+
+
+
+# FIX ME: There are some issues with the PHYSLITE tests that need to
+# be investigated, but until that happens I run some tests only in
+# AnalysisBase, and disable comparisons alltogether.
+
+add_test_job( TestJobDataSequenceLite data --for-compare --physlite --no-physlite-broken --no-systematics )
+add_test_job( TestJobDataConfigLite   data --for-compare --block-config --physlite --no-physlite-broken --no-systematics )
+#add_test_compare( TestJobDataCompareLite data TestJobDataSequenceLite TestJobDataConfigLite )
+
+if( XAOD_STANDALONE )
+
+add_test_job( TestJobFullSimSequenceLite mc --for-compare --physlite --no-physlite-broken )
+add_test_job( TestJobFullSimConfigLite   mc --for-compare --block-config --physlite --no-physlite-broken )
+#add_test_compare( TestJobFullSimCompareLite mc TestJobFullSimSequenceLite TestJobFullSimConfigLite )
+
+add_test_job( TestJobFastSimSequenceLite afii --for-compare --physlite --no-physlite-broken )
+add_test_job( TestJobFastSimConfigLite   afii --for-compare --block-config --physlite --no-physlite-broken )
+#add_test_compare( TestJobFastSimCompareLite afii TestJobFastSimSequenceLite TestJobFastSimConfigLite )
 
 endif()

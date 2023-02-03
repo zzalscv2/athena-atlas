@@ -81,7 +81,7 @@ if not blockConfig :
 else :
     outputFile = "ANALYSIS DATAFILE='FullCPAlgorithmsConfigTest." + dataType + ".hist.root' OPT='RECREATE'"
 if athArgs.force_output :
-    outputFile = athArgs.force_output
+    outputFile = "ANALYSIS DATAFILE='" + athArgs.force_output + "' OPT='RECREATE'"
 ServiceMgr.THistSvc.Output += [ outputFile ]
 
 # Reduce the printout from Athena:
