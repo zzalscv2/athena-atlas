@@ -8,7 +8,7 @@ from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ..CommonSequences.FullScanDefs import  trkFSRoI
 from TrigEDMConfig.TriggerEDMRun3 import recordable
-from .JetRecoCommon import jetRecoDictToString
+from .JetRecoCommon import jetRecoDictToString, isPFlow
 from .JetRecoSequences import jetClusterSequence, jetCaloRecoSequences, jetTrackingRecoSequences, jetHICaloRecoSequences, JetRoITrackJetTagSequence, getJetViewAlg, getFastFtaggedJetCopyAlg, eventinfoRecordSequence
 
 # Hypo tool generators
@@ -207,7 +207,7 @@ def jetHICaloHypoMenuSequence(flags, isPerf, **jetRecoDict):
 # As this does not run topoclustering, the cluster collection
 # name needs to be passed in
 # Event variable info (NPV, avg mu, pile-up density rho) is
-# recorded in this hypo case for monitoring and
+# recorded for smallR pflow jets in this hypo case for monitoring and
 # online-derived pflow jet calibration
 def jetFSTrackingHypoMenuSequence(flags, clustersKey, isPerf, **jetRecoDict):
     InputMakerAlg = getTrackingInputMaker(jetRecoDict['trkopt'])
@@ -218,13 +218,17 @@ def jetFSTrackingHypoMenuSequence(flags, clustersKey, isPerf, **jetRecoDict):
     jetDefString = jetRecoDictToString(jetRecoDict)
     jetAthRecoSeq = parOR(f"jetFSTrackingHypo_{jetDefString}_RecoSequence", jetRecoSequences)
 
-    pvKey = getInDetTrigConfig('jet').vertex_jet
-    evtInfoRecordSeq = RecoFragmentsPool.retrieve(
-        eventinfoRecordSequence,
-        flags, suffix='jet', pvKey=pvKey)
+    jetAthMenuSeqList = [InputMakerAlg,jetAthRecoSeq]
+
+    if isPFlow(jetRecoDict) and jetRecoDict['recoAlg'] == 'a4':
+        pvKey = getInDetTrigConfig('jet').vertex_jet
+        evtInfoRecordSeq = RecoFragmentsPool.retrieve(
+            eventinfoRecordSequence,
+            flags, suffix='jet', pvKey=pvKey)
+        jetAthMenuSeqList+=[evtInfoRecordSeq]
 
     log.debug("Generating jet tracking hypo menu sequence for reco %s",jetDefString)
-    jetAthMenuSeq = seqAND(f"jetFSTrackingHypo_{jetDefString}_MenuSequence",[InputMakerAlg,jetAthRecoSeq, evtInfoRecordSeq])
+    jetAthMenuSeq = seqAND(f"jetFSTrackingHypo_{jetDefString}_MenuSequence",jetAthMenuSeqList)
 
     hypoType = JetHypoAlgType.STANDARD
     if isPerf: hypoType = JetHypoAlgType.PASSTHROUGH

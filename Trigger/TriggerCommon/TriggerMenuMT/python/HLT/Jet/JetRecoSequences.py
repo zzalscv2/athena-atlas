@@ -411,7 +411,7 @@ def eventinfoRecordSequence(configFlags, suffix, pvKey, rhoKey_PFlow = 'HLT_Kt4E
     eventInfoRecorderAlg.primaryVertexInputName = pvKey
     eventInfoRecorderAlg.RhoKey_PFlow = rhoKey_PFlow
     eventInfoRecorderAlg.RhoKey_EMTopo = rhoKey_EMTopo
-    recordSeq = parOR("TrigEventInfoRecorderSeq_{suffix}", [eventInfoRecorderAlg])
+    recordSeq = parOR(f"TrigEventInfoRecorderSeq_{suffix}", [eventInfoRecorderAlg])
     return recordSeq 
 
 # Grooming needs the ungroomed jets to be built first,
