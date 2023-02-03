@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*********************************************************************
@@ -358,8 +358,10 @@ namespace Trk
       ATH_MSG_WARNING( " ImpactPoint3dEstimator failed to find minimum distance between track and vertex seed: " << err.p  );
       return nullptr;
     }
-    if(!theSurfaceAtIP) ATH_MSG_WARNING( " ImpactPoint3dEstimator failed to find minimum distance and returned 0 " );
-
+    if(!theSurfaceAtIP){
+      ATH_MSG_WARNING( " ImpactPoint3dEstimator failed to find minimum distance and returned 0 " );
+      return nullptr;
+    } 
 #ifdef ImpactPoint3dAtaPlaneFactory_DEBUG
     ATH_MSG_VERBOSE( "Original neutral perigee was: " << *initNeutPerigee  );
     ATH_MSG_VERBOSE( "The resulting surface is: " << *theSurfaceAtIP  );
