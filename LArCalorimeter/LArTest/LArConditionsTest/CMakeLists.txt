@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArConditionsTest )
@@ -34,13 +34,3 @@ endfunction (larconditions_run_test)
 larconditions_run_test (LArConditionsTest)
 larconditions_run_test (LArConditionsTestWriteNoReg)
 larconditions_run_test (LArConditionsTestReadNoReg DEPENDS LArConditionsTestWriteNoReg)
-
-# Remaining tests have been disabled since forever.
-# LArConditionsTestReadAndReg
-# LArConditionsTestReadTwoStep
-# LArConditionsTestWriteNoCorr
-# LArConditionsTestReadNoCorr
-# LArConditionsTestWriteCorr
-# LArConditionsTestReadCorr
-# LArConditionsTestWriteOneStep
-# LArConditionsTestReadOneStep
