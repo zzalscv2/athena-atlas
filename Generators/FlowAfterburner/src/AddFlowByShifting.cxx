@@ -211,7 +211,7 @@ StatusCode AddFlowByShifting::execute() {
     m_particles_processed = 0;
     for ( auto parent: mainvtx->particles_out())
 #else
-    auto mainvtx=*((*itr)->vertices_const_begin());
+    auto mainvtx=*((*itr)->vertices_begin());
     if(m_flow_fluctuations) Set_EbE_Fluctuation_Multipliers(mainvtx,hijing_pars->get_b(),rndmEngine);
       int particles_in_event = (*itr)->particles_size();
     m_particles_processed = 0;
