@@ -51,19 +51,29 @@ def addOutputCopyAlgorithms (algSeq, postfix, inputContainer, outputContainer, s
     algSeq += copyalg
 
 
-def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken) :
+def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken, autoconfigFromFlags=None) :
 
     vars = []
     metVars = []
 
     # Include, and then set up the pileup analysis sequence:
-    prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
-
     if not isPhyslite :
+        campaign, files, prwfiles, lumicalcfiles = None, None, None, None
+        useDefaultConfig = False
+        if autoconfigFromFlags is not None:
+            campaign = autoconfigFromFlags.Input.MCCampaign
+            files = autoconfigFromFlags.Input.Files
+            useDefaultConfig = True 
+        else:
+            prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
+
         from AsgAnalysisAlgorithms.PileupAnalysisSequence import \
             makePileupAnalysisSequence
         pileupSequence = makePileupAnalysisSequence(
             dataType,
+            campaign=campaign,
+            files=files,
+            useDefaultConfig=useDefaultConfig,
             userPileupConfigs=prwfiles,
             userLumicalcFiles=lumicalcfiles,
         )
@@ -478,7 +488,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken)
 
 
 
-def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken) :
+def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken, autoconfigFromFlags=None) :
 
     vars = []
     metVars = []
@@ -500,12 +510,21 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
                         'met_': 'AnaMET'}
 
     if not isPhyslite :
-        # Include, and then set up the pileup analysis sequence:
-        prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
+        campaign, files, prwfiles, lumicalcfiles = None, None, None, None
+        useDefaultConfig = False
+        if autoconfigFromFlags is not None:
+            campaign = autoconfigFromFlags.Input.MCCampaign
+            files = autoconfigFromFlags.Input.Files
+            useDefaultConfig = True 
+        else:
+            prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
 
         configSeq += makeConfig ('Event.PileupReweighting', None)
-        configSeq.setOptionValue ('.userPileupConfigs', prwfiles)
-        configSeq.setOptionValue ('.userLumicalcFiles', lumicalcfiles)
+        configSeq.setOptionValue ('.campaign', campaign, noneAction='ignore')
+        configSeq.setOptionValue ('.files', files, noneAction='ignore')
+        configSeq.setOptionValue ('.useDefaultConfig', useDefaultConfig)
+        configSeq.setOptionValue ('.userPileupConfigs', prwfiles, noneAction='ignore')
+        configSeq.setOptionValue ('.userLumicalcFiles', lumicalcfiles, noneAction='ignore')
 
     vars += [ 'EventInfo.runNumber     -> runNumber',
               'EventInfo.eventNumber   -> eventNumber', ]
@@ -579,13 +598,18 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
 
 
     # set up the muon analysis algorithm sequence:
+    from AthenaConfiguration.Enums import LHCPeriod
+    run3Muons = autoconfigFromFlags is not None and autoconfigFromFlags.GeoModel.Run >= LHCPeriod.Run3
+
     configSeq += makeConfig ('Muons', 'AnaMuons')
     configSeq += makeConfig ('Muons.Selection', 'AnaMuons.medium')
     configSeq.setOptionValue ('.quality', 'Medium')
     configSeq.setOptionValue ('.isolation', 'Iso')
+    configSeq.setOptionValue ('.isRun3Geo', run3Muons)
     configSeq += makeConfig ('Muons.Selection', 'AnaMuons.tight')
     configSeq.setOptionValue ('.quality', 'Tight')
     configSeq.setOptionValue ('.isolation', 'Iso')
+    configSeq.setOptionValue ('.isRun3Geo', run3Muons)
 
 
     # Include, and then set up the tau analysis algorithm sequence:
@@ -713,7 +737,7 @@ def printSequenceAlgs (sequence) :
         print (sequence)
 
 
-def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = False, isPhyslite = False, noPhysliteBroken = False) :
+def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = False, isPhyslite = False, noPhysliteBroken = False, autoconfigFromFlags = None) :
 
     # do some harder cuts on all object types, this is mostly used for
     # benchmarking
@@ -749,9 +773,11 @@ def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = Fal
 
     if not useBlocks :
         makeSequenceOld (dataType, algSeq, forCompare=forCompare,
-                         isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken)
+                         isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
+                         autoconfigFromFlags=autoconfigFromFlags)
     else :
         makeSequenceBlocks (dataType, algSeq, forCompare=forCompare,
-                            isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken)
+                            isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
+                            autoconfigFromFlags=autoconfigFromFlags)
 
     return algSeq
