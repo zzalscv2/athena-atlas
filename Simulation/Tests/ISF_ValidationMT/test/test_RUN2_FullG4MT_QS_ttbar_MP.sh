@@ -25,7 +25,7 @@ Sim_tf.py \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationNoIoV' \
     --DataRunNumber 284500 \
     --geometryVersion 'default:ATLAS-R2-2016-01-02-01' \
-    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/CampaignInputs/mc20/EVNT/mc15_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.evgen.EVNT.e6337/EVNT.12458444._006026.pool.root.1" \
+    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc20/EVNT/mc15_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.evgen.EVNT.e6337/EVNT.12458444._006026.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents 50 \
     --postExec 'EVNTtoHITS:with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
@@ -46,7 +46,7 @@ Sim_tf.py \
     --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationNoIoV.py' \
     --DataRunNumber 284500 \
     --geometryVersion 'default:ATLAS-R2-2016-01-02-01' \
-    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/CampaignInputs/mc20/EVNT/mc15_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.evgen.EVNT.e6337/EVNT.12458444._006026.pool.root.1" \
+    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc20/EVNT/mc15_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.evgen.EVNT.e6337/EVNT.12458444._006026.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents 50 \
     --imf False \
@@ -60,7 +60,7 @@ Sim_tf.py \
     --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationNoIoV.py' \
     --DataRunNumber 284500 \
     --geometryVersion 'default:ATLAS-R2-2016-01-02-01' \
-    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/CampaignInputs/mc20/EVNT/mc15_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.evgen.EVNT.e6337/EVNT.12458444._006026.pool.root.1" \
+    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc20/EVNT/mc15_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.evgen.EVNT.e6337/EVNT.12458444._006026.pool.root.1" \
     --outputHITSFile "test.CG.HITS.pool.root" \
     --maxEvents 50 \
     --imf False
