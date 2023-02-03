@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -178,7 +178,7 @@ void VP1AODSystem::systemcreate(StoreGateSvc* /*detstore*/)
   availTools.addMonitoredType(tooltype);
   QStringList existingExtrapolators =  availTools.availableTools();
 
-  foreach (QString value, existingExtrapolators)
+  for (QString value :  existingExtrapolators)
     messageVerbose(value);
 
   VP1ToolAccessHelper toolaccess(this);
@@ -271,7 +271,7 @@ void VP1AODSystem::buildEventSceneGraph(StoreGateSvc* /*sg*/, SoSeparator *root)
   m_d->common->controller()->collWidget()->setCollections(m_d->createCollections());
 
   //Add collections to event scenegraph:
-  foreach (VP1StdCollection* col,m_d->common->controller()->collWidget()->collections<VP1StdCollection>()){
+  for (VP1StdCollection* col : m_d->common->controller()->collWidget()->collections<VP1StdCollection>()){
     // std::cout<<"Add collswitch="<<col->collSwitch()<< " to EventSceneGraph"<<std::endl;
     m_d->selObjects->addChild(col->collSwitch());
   }
@@ -495,7 +495,7 @@ void VP1AODSystem::userSelectedSingleNode( SoCooperativeSelection* sel, SoNode* 
   // //If at least one of the track measurements is unselected, we
   // //select them all. Otherwise we deselect them.
   //       bool oneunselected(false);
-  //       foreach(AODHandleBase* meas,trackmeas) {
+  //       for (AODHandleBase* meas : trackmeas) {
   //         if (!currentsel.contains(meas)) {
   //           oneunselected = true;
   //           break;
@@ -507,7 +507,7 @@ void VP1AODSystem::userSelectedSingleNode( SoCooperativeSelection* sel, SoNode* 
   //         m_d->ascObjSelManager->ensureSelected(trackmeas);
   //
   //         // Add PRDs. Need to be careful as they might not exist.
-  //         foreach(AODHandleBase* meas,trackmeas) {
+  //         for (AODHandleBase* meas : trackmeas) {
   //           AscObj_TSOS* tsosAsc = dynamic_cast<AscObj_TSOS*>(meas);
   //           if (tsosAsc && tsosAsc->rioOnTrack() && tsosAsc->rioOnTrack()->prepRawData()) prdSet.append(tsosAsc->rioOnTrack()->prepRawData());
   //         }
@@ -702,7 +702,7 @@ void VP1AODSystem::updateAssociatedObjects(const QList<const xAOD::TrackParticle
   m_d->common->controller()->collWidget()->addCollections(newcolls);
   std::cout<<"EJWM addChild "<<std::endl;
 
-  foreach (IParticleCollHandle_TrackParticle* col,newcolls) {
+  for (IParticleCollHandle_TrackParticle* col : newcolls) {
     m_d->selObjects->addChild(col->collSwitch());
     col->setVisible(true);
   }
