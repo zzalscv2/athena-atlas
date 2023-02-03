@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -226,12 +226,12 @@ void IVP13DSystemSimple::warnOnDisabledNotifications() const
   m_d->getNodesWithDisabledNotifications(m_d->rootE, nodesE);
   if (!nodesR.isEmpty()) {
     message("WARNING: Found "+str(nodesR.count())+" node"+QString(nodesR.count()>1?"s":0)+" with disabled notifications in permanent scenegraph:");
-    foreach (SoNode * node, nodesR)
+    for (SoNode * node : nodesR)
       message("  => Node ("+str(node)+") of type "+QString(node->getTypeId().getName().getString())+", named "+QString(node->getName().getString()));
   }
   if (!nodesE.isEmpty()) {
     message("WARNING: Found "+str(nodesE.count())+" node"+QString(nodesE.count()>1?"s":0)+" with disabled notifications in event scenegraph:");
-    foreach (SoNode * node, nodesE)
+    for  (SoNode * node : nodesE)
       message("  => Node ("+str(node)+") of type "+QString(node->getTypeId().getName().getString())+", named "+QString(node->getName().getString()));
   }
 }

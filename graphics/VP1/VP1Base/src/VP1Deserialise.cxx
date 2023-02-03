@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -719,6 +719,6 @@ void VP1Deserialise::warnUnrestored(QObject* object)
     }
   }
   //Call recursively on all "children":
-  foreach(QObject* o, object->children())
+  for (QObject* o : object->children())
     warnUnrestored(static_cast<QWidget*>(o));
 }

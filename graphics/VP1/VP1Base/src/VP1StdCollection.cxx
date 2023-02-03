@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -120,7 +120,7 @@ VP1StdCollection::~VP1StdCollection()
 {
   delete m_d->checkBox;
   delete m_d->matButton;
-  foreach (QWidget*w,m_d->extraWidgets)
+  for (QWidget*w : m_d->extraWidgets)
     delete w;
   m_d->material->unref();
   m_d->collsep->unref();
@@ -175,7 +175,7 @@ void VP1StdCollection::setVisible(bool b)
       m_d->checkBox->blockSignals(true);
       m_d->checkBox->setChecked(false);
       m_d->checkBox->setToolTip("Problems encountered during attempt to load this collection");
-      foreach (QWidget*w,widgetsForGuiRow())
+      for (QWidget*w : widgetsForGuiRow())
 	w->setEnabled(false);
       message("Problems loading "+text());
       return;
