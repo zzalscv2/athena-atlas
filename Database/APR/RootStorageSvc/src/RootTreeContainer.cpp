@@ -329,6 +329,12 @@ DbStatus
 RootTreeContainer::loadObject(void** obj_p, ShapeH /*shape*/, Token::OID_t& oid)
 {
   long long evt_id = oid.second;
+  if( evt_id >= size() ) {
+     // OID is unsigned, so -1 from index is also covered by this case
+     *obj_p = nullptr;
+     // do not return Error to avoid printouts in case someone just tries to iterate over OIDs
+     return Success;
+  }
   // lock access to this DB for MT safety
   std::lock_guard<std::recursive_mutex>     lock( m_rootDb->ioMutex() );
   try {
