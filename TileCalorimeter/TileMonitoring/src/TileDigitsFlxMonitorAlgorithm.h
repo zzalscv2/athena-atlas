@@ -24,14 +24,18 @@ class TileDigitsFlxMonitorAlgorithm : public AthMonitorAlgorithm {
     virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
   private:
 
-    SG::ReadHandleKey<TileDigitsContainer> m_digitsContainerKey{this,
-        "TileDigitsContainer", "TileDigitsCnt", "Tile digits container"};
+    SG::ReadHandleKey<TileDigitsContainer> m_digitsContainerKeyLegacy{this,
+        "TileDigitsContainerLegacy", "TileDigitsCnt", "Tile digits container"};
+    SG::ReadHandleKey<TileDigitsContainer> m_digitsContainerKeyFlx{this,
+        "TileDigitsContainerFlx", "TileDigitsFlxCnt", "Tile digits container"};
 
     const TileHWID* m_tileHWID{nullptr};
 
     Gaudi::Property<int> m_firstSample{this, "FirstSample", 0, "First sample to put into histogram"};
     Gaudi::Property<int> m_lastSample{this, "LastSample", 16, "Last sample to put into histogram"}; 
     Gaudi::Property<std::vector<int>> m_fragIDs{this, "FragIDs", {}, "Tile Frag IDs of modules to be monitored. Empty=ALL"};
+    Gaudi::Property<std::vector<int>> m_fragIDsToCompare{this, "TileFragIDsToCompare", {0x201,0x402}, "Tile Frag IDs of modules to compare."};
+    Gaudi::Property<int> m_felixScale{this, "FelixScale", 1, "Scale factor between Felix and Legacy ADC counts"}; // 1 for  pedestal run  
 
 };
 #endif // TILEMONITORING_TILEDIGITSFLXALGORITHM_H

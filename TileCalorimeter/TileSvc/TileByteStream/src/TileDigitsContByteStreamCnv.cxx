@@ -108,6 +108,8 @@ StatusCode TileDigitsContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, Da
     // find ROB
     if (isTMDB) {
       newrob = m_hid2re->getRobFromTileMuRcvFragID(collID);
+    } else if (isFELIX) {
+      newrob = m_hid2re->getRobFromFragID(collID + 0x1000);
     } else {
       newrob = m_hid2re->getRobFromFragID(collID);
     }
