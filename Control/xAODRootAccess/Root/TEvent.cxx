@@ -1640,7 +1640,7 @@ namespace xAOD {
             const TObject * obj = in->At(index);
             if ( ! obj ) continue;
             const TBranch * element = dynamic_cast<const TBranch*>(obj);
-            if (!obj) {
+            if (!element) {
                ::Error("xAOD::TEvent::getNames", "Failure inspecting input objects");
                break;
             }
@@ -1692,7 +1692,7 @@ namespace xAOD {
             const TObject * obj = out->At(index);
             if ( ! obj ) continue;
             const TBranch * element = dynamic_cast<const TBranch*>(obj);
-            if (!obj) {
+            if (!element) {
                ::Error("xAOD::TEvent::getNames", "Failure inspecting input objects");
                break;
             }
