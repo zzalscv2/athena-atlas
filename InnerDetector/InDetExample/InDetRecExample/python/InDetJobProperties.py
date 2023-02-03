@@ -1617,7 +1617,7 @@ class InDetJobProperties(JobPropertyContainer):
         self.checkThenSet(self.doTrackSegmentsDisappearing, False)
 
     if rec.doExpressProcessing() :
-       self.checkThenSet(self.useBeamConstraint,False)
+       self.checkThenSet(self.useBeamConstraint, True)
 
     # --- Setup correct mu for TRT mu-scaling
     if not rec.doRDOTrigger():
