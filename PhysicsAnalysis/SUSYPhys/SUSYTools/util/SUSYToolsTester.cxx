@@ -1279,6 +1279,7 @@ int main( int argc, char* argv[] ) {
       } // cosmics
 
       ANA_MSG_DEBUG("Lepton SF done");
+      ANA_MSG_DEBUG("Final event weight = " << event_weight);
 
       // Clean up the systematics copies
       if (sysInfo.affectsKinematics) {
