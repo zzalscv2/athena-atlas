@@ -127,7 +127,7 @@ def StandardJetBuildCfg(flags, dataSource, clustersKey, trkcolls=None, **jetReco
     ):
         alg = JetRecConfig.getConstitModAlg(
             jetDef, jetDef.inputdef,
-            monTool=OnlineMon.getMonTool_Algorithm(f"HLTJets/{jetsOut}/"),
+            monTool=OnlineMon.getMonTool_Algorithm(flags, f"HLTJets/{jetsOut}/"),
         )
         # getConstitModAlg will return None if there's nothing for it to do
         if alg is not None:
@@ -154,7 +154,7 @@ def StandardJetBuildCfg(flags, dataSource, clustersKey, trkcolls=None, **jetReco
 
     acc.addEventAlgo(
         JetRecConfig.getJetRecAlg(
-            jetDef, JetOnlineMon.getMonTool_TrigJetAlgorithm(f"HLTJets/{jetsOut}/")
+            jetDef, JetOnlineMon.getMonTool_TrigJetAlgorithm(flags, f"HLTJets/{jetsOut}/")
         ),
         primary=True,
     )
@@ -221,7 +221,7 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, trkcolls=None, **jetRecoD
             jetsin=jetsNoCalib,
             jetsoutdef=jetDef,
             decorations=decorList,
-            monTool=JetOnlineMon.getMonTool_TrigJetAlgorithm(
+            monTool=JetOnlineMon.getMonTool_TrigJetAlgorithm(flags,
                 "HLTJets/{}/".format(jetDef.fullname())
             ),
         )
@@ -279,7 +279,7 @@ def GroomedJetRecoCfg(flags, dataSource, clustersKey, trkcolls=None, **jetRecoDi
     acc.addEventAlgo(
         JetRecConfig.getJetGroomAlg(
             groomDef,
-            JetOnlineMon.getMonTool_TrigJetAlgorithm(f"HLTJets/{jetsOut}/"),
+            JetOnlineMon.getMonTool_TrigJetAlgorithm(flags, f"HLTJets/{jetsOut}/"),
         )
     )
     return acc, jetsOut, groomDef
@@ -330,7 +330,7 @@ def ReclusteredJetRecoCfg(flags, dataSource, clustersKey, trkcolls=None, **jetRe
     acc.addEventAlgo(
         JetRecConfig.getJetRecAlg(
             rcJetDef,
-            JetOnlineMon.getMonTool_TrigJetAlgorithm(
+            JetOnlineMon.getMonTool_TrigJetAlgorithm(flags,
                 "HLTJets/{}/".format(rcJetDef.fullname())
             ),
         )

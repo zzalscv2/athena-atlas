@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaCommon.CFElements import parOR
@@ -157,7 +157,7 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     ## Get online monitoring tool
     from JetRec import JetOnlineMon
-    monTool = JetOnlineMon.getMonTool_TrigJetAlgorithm("HLTJets/AntiKt4HI/")
+    monTool = JetOnlineMon.getMonTool_TrigJetAlgorithm(configFlags, "HLTJets/AntiKt4HI/")
 
     # Reconstruction 
     jetRecAlg = getHIJetRecAlg(jetDef, jetsFullName_Unsub, monTool=monTool)
@@ -444,7 +444,7 @@ def JetHICfg(flags, clustersKey, **jetRecoDict):
     from JetRec import JetOnlineMon
     acc.addEventAlgo(
         JetRecConfig.getJetRecAlg(
-            jetDef, JetOnlineMon.getMonTool_TrigJetAlgorithm(f"HLTJets/{jetsOut}/")
+            jetDef, JetOnlineMon.getMonTool_TrigJetAlgorithm(flags, f"HLTJets/{jetsOut}/")
         ),
         primary=True,
     )
