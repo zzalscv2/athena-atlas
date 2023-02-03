@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMonitoring/AthenaMonManager.h"
@@ -27,6 +27,7 @@
 #include "AthenaMonitoring/IMonitorToolBase.h"
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
+#include "CxxUtils/checker_macros.h"
 
 #include "TrigNavTools/TrigNavigationThinningSvcMutex.h"
 
@@ -35,7 +36,6 @@
 #include <limits.h>
 #include <vector>
 
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;    // legacy (serial) DQ monitoring framework
 
 class AthenaMonManager::Imp {
 public:
@@ -175,40 +175,25 @@ public:
     // The data are set from the corresponding m_* properties of the first AthenaMonManager
     // in the Athena algorithm chain (this manager sets s_staticDataAreInit to true).
 
-    static ISvcLocator*    s_svcLocator;
+    inline static std::atomic<ISvcLocator*> s_svcLocator{nullptr};
 
-    static bool            s_staticDataAreInit;
+    inline static std::atomic<bool> s_staticDataAreInit{false};
 
-    static std::string     s_dataTypeStr;
-    static std::string     s_environmentStr;
-    static DataType_t      s_dataType;
-    static Environment_t   s_environment;
+    inline static std::string     s_dataTypeStr ATLAS_THREAD_SAFE {"userDefined"};
+    inline static std::string     s_environmentStr ATLAS_THREAD_SAFE {"user"};
+    inline static DataType_t      s_dataType ATLAS_THREAD_SAFE {userDefined};
+    inline static Environment_t   s_environment ATLAS_THREAD_SAFE {user};
 
-    static bool         s_runLBOverridden;
-    static unsigned int s_lumiBlock;
-    static unsigned int s_run;
-    static unsigned int s_fill;
-    static unsigned int s_LBsLowStat;
-    static unsigned int s_LBsMedStat;
-    static unsigned int s_LBsHigStat;
+    inline static bool         s_runLBOverridden ATLAS_THREAD_SAFE {false};
+    inline static unsigned int s_lumiBlock ATLAS_THREAD_SAFE {0};
+    inline static unsigned int s_run ATLAS_THREAD_SAFE {0};
+    inline static unsigned int s_fill ATLAS_THREAD_SAFE {0};
+    inline static unsigned int s_LBsLowStat ATLAS_THREAD_SAFE {0};
+    inline static unsigned int s_LBsMedStat ATLAS_THREAD_SAFE {0};
+    inline static unsigned int s_LBsHigStat ATLAS_THREAD_SAFE {0};
 };
 
-ISvcLocator* AthenaMonManager::Imp::s_svcLocator(0);
 
-bool AthenaMonManager::Imp::s_staticDataAreInit(false);
-
-std::string                      AthenaMonManager::Imp::s_dataTypeStr("userDefined");
-std::string                      AthenaMonManager::Imp::s_environmentStr("user");
-AthenaMonManager::DataType_t     AthenaMonManager::Imp::s_dataType(userDefined);
-AthenaMonManager::Environment_t  AthenaMonManager::Imp::s_environment(user);
-
-bool          AthenaMonManager::Imp::s_runLBOverridden(false);
-unsigned int  AthenaMonManager::Imp::s_lumiBlock(0);
-unsigned int  AthenaMonManager::Imp::s_run(0);
-unsigned int  AthenaMonManager::Imp::s_fill(0);
-unsigned int  AthenaMonManager::Imp::s_LBsLowStat(0);
-unsigned int  AthenaMonManager::Imp::s_LBsMedStat(0);
-unsigned int  AthenaMonManager::Imp::s_LBsHigStat(0);
 namespace {
 
 std::string strToLower( const std::string& str );
@@ -240,7 +225,7 @@ AthenaMonManager( const std::string& name, ISvcLocator* pSvcLocator )
     declareProperty( "LumiBlock", m_d->m_lumiBlockProp );
     declareProperty( "ROOTBackend", m_d->m_rootBackend );
 
-    if( Imp::s_svcLocator==0 )
+    if( !Imp::s_svcLocator )
         Imp::s_svcLocator = pSvcLocator;
 }
 
@@ -286,9 +271,9 @@ envStringToEnum( const std::string& str )
     else if( lcstr == "altprod" )
         return altprod;
 
-    if( Imp::s_svcLocator!=0 ) {
+    if( Imp::s_svcLocator ) {
         IMessageSvc* ms(0);
-        StatusCode sc = Imp::s_svcLocator->service( "MessageSvc", ms, true );
+        StatusCode sc = Imp::s_svcLocator.load()->service( "MessageSvc", ms, true );
         if( sc.isSuccess() ) {
             MsgStream log( ms, "AthenaMonManager::envStringToEnum()" );
             log << MSG::WARNING << "Unknown AthenaMonManager::Environment_t \""
@@ -317,9 +302,9 @@ dataTypeStringToEnum( const std::string& str )
     else if( lcstr == "heavyioncollisions" )
         return heavyIonCollisions;
 
-    if( Imp::s_svcLocator!=0 ) {
+    if( Imp::s_svcLocator ) {
         IMessageSvc* ms(0);
-        StatusCode sc = Imp::s_svcLocator->service( "MessageSvc", ms, true );
+        StatusCode sc = Imp::s_svcLocator.load()->service( "MessageSvc", ms, true );
         if( sc.isSuccess() ) {
             MsgStream log( ms, "AthenaMonManager::dataTypeStringToEnum()" );
             log << MSG::WARNING << "Unknown AthenaMonManager::DataType_t \""
@@ -405,7 +390,7 @@ initialize()
 
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "AthenaMonManager::initialize():" << endmsg;
 
-    if (Imp::s_svcLocator->service("SGAudSvc", m_d->m_sgAudSvc, false/*do not create*/).isFailure())
+    if (Imp::s_svcLocator.load()->service("SGAudSvc", m_d->m_sgAudSvc, false/*do not create*/).isFailure())
         m_d->m_sgAudSvc=0;
 
 
