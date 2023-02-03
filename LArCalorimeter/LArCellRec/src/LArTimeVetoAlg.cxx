@@ -14,6 +14,7 @@ StatusCode LArTimeVetoAlg::initialize()
   {
     ATH_MSG_INFO("LArTimeVetoAlg initialize()"  );
     ATH_CHECK( m_eventInfoKey.initialize() );
+    ATH_CHECK( m_eventInfoDecorKey.initialize() );
     ATH_CHECK( m_eventVetoKey.initialize() );
     return StatusCode::SUCCESS; 
 
@@ -47,7 +48,7 @@ StatusCode LArTimeVetoAlg::execute( const EventContext& ctx ) const
     m_nevtMasked++;
 
     // retrieve EventInfo
-    SG::WriteDecorHandle<xAOD::EventInfo,uint32_t> eventInfo (m_eventInfoKey, ctx);
+    SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
     if (!eventInfo->updateErrorState(xAOD::EventInfo::LAr,xAOD::EventInfo::Error)) {
       ATH_MSG_WARNING( " cannot set error state for LAr "  );
     }

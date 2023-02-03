@@ -18,7 +18,7 @@
 
 #include "LArCollisionTimeMonAlg.h"
 #include "StoreGate/ReadDecorHandle.h"
-
+#include "LArRecEvent/LArEventBitInfo.h"
 
 /*---------------------------------------------------------*/
 LArCollisionTimeMonAlg::LArCollisionTimeMonAlg( const std::string& name, ISvcLocator* pSvcLocator )
@@ -36,7 +36,7 @@ LArCollisionTimeMonAlg::initialize() {
   //init handlers
   ATH_CHECK( m_LArCollisionTimeKey.initialize() );
   ATH_CHECK( m_bunchCrossingKey.initialize());
-  ATH_CHECK( m_eventInfoKey.initialize() );
+  ATH_CHECK( m_eventInfoDecorKey.initialize() );
   return AthMonitorAlgorithm::initialize();
 }
 
@@ -65,7 +65,8 @@ LArCollisionTimeMonAlg::fillHistograms( const EventContext& ctx ) const
   auto bunch_crossing_id = Monitored::Scalar<unsigned int>("bunch_crossing_id",0);
   auto weight = Monitored::Scalar<float>("weight",1.);
 
-  SG::ReadDecorHandle<xAOD::EventInfo,uint32_t> thisEvent(m_eventInfoKey, ctx);
+  SG::ReadHandle<xAOD::EventInfo> thisEvent(GetEventInfo(ctx));
+  ATH_CHECK(thisEvent.isValid());
   // bunch crossing ID:
   bunch_crossing_id = thisEvent->bcid();
 
@@ -97,7 +98,7 @@ LArCollisionTimeMonAlg::fillHistograms( const EventContext& ctx ) const
     ATH_MSG_DEBUG( "LArCollisionTime successfully retrieved from event store" );
   }
   
-  if(!thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,3)) { // Do not fill histo if noise burst suspected
+  if(!thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO)) { // Do not fill histo if noise burst suspected
 
     // Calculate the time diff between ECC and ECA
     ecTimeDiff = (larTime->timeC() - larTime->timeA())/m_timeUnit;

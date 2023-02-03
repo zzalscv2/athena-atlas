@@ -33,7 +33,7 @@ StatusCode HLTCalo_L2CaloEMClustersMonitor::initialize() {
   ATH_CHECK(m_HLT_cont_key.initialize());
   ATH_CHECK(m_OFF_cont_key.initialize());
   ATH_CHECK( m_bunchCrossingKey.initialize());
-  ATH_CHECK( m_eventInfoKey.initialize() );
+  ATH_CHECK( m_eventInfoDecorKey.initialize() );
   return AthMonitorAlgorithm::initialize();
 }
 
@@ -42,7 +42,8 @@ StatusCode HLTCalo_L2CaloEMClustersMonitor::fillHistograms( const EventContext& 
   using namespace Monitored;
 
   // Protect against noise bursts
-  SG::ReadDecorHandle<xAOD::EventInfo,uint32_t> thisEvent(m_eventInfoKey, ctx);
+  SG::ReadHandle<xAOD::EventInfo> thisEvent(GetEventInfo(ctx));
+  ATH_CHECK(thisEvent.isValid());
   if ( thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO)) 
         return StatusCode::SUCCESS;
 

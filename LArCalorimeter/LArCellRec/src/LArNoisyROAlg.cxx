@@ -13,6 +13,7 @@
 #include "LArIdentifier/LArOnlineID.h" 
 #include "LArRecEvent/LArEventBitInfo.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 #include <cmath>
 
@@ -28,6 +29,7 @@ StatusCode LArNoisyROAlg::initialize() {
   ATH_CHECK(m_CaloCellContainerName.initialize());
   ATH_CHECK(m_outputKey.initialize());
   ATH_CHECK(m_eventInfoKey.initialize());
+  ATH_CHECK(m_eventInfoDecorKey.initialize());
   ATH_CHECK(m_knownBadFEBsVecKey.initialize(!m_isMC) );
   ATH_CHECK(m_knownMNBFEBsVecKey.initialize(!m_isMC) );
 
@@ -85,11 +87,10 @@ StatusCode LArNoisyROAlg::execute (const EventContext& ctx) const
   bool MNBTightCut=noisyRO->MNBTightFlaggedPartitions();
   bool MNBTight_PsVetoCut=noisyRO->MNBTight_PsVetoFlaggedPartitions();
   
+  SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
   if ( badFEBFlag || badFEBFlag_W || badSaturatedTightCut || MNBLooseCut || MNBTightCut || MNBTight_PsVetoCut) 
   {
     // retrieve EventInfo
-    SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx); 
-
     bool failSetWARN=false;
     bool failSetWARNREASON=false;
     // set warning flag except if the error flag has been already set
@@ -131,7 +132,6 @@ StatusCode LArNoisyROAlg::execute (const EventContext& ctx) const
     if (failSetWARNREASON) ATH_MSG_WARNING( "Failure during setEventFlagBit(EventInfo::LAr,...)"  );
   
   }
-
   return StatusCode::SUCCESS;
 }
 

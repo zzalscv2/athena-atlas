@@ -62,7 +62,7 @@ private:
   SG::ReadCondHandleKey<LArBadFebCont> m_MNBFebKey{this,"KonwnMNBFebKey","LArKnownMNBFEBs","Key of known MNB-Feb object"};
 
   //To get the data-dependency right ... 
-  SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "LArStatusFlag", "EventInfo.larFlag", "Key for EventInfo object"};
+  SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "LArStatusFlag", "EventInfo.larFlags", "Key for EventInfo object"};
 
   struct CandidateMNBStruct
   {

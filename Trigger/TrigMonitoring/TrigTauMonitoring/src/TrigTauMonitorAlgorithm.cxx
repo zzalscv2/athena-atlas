@@ -31,7 +31,7 @@ StatusCode TrigTauMonitorAlgorithm::initialize() {
   ATH_CHECK( m_hltTauJetCaloMVAOnlyKey.initialize() );
   ATH_CHECK( m_trigDecTool.retrieve() );
   ATH_CHECK( m_truthParticleKey.initialize(m_isMC) );
-  ATH_CHECK( m_eventInfoKey.initialize() );
+  ATH_CHECK( m_eventInfoDecorKey.initialize() );
 
   for(const auto& trigName:m_trigInputList)
   {
@@ -59,7 +59,8 @@ StatusCode TrigTauMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
  
 
   // Protect against noise bursts
-  SG::ReadDecorHandle<xAOD::EventInfo,uint32_t> currEvent(m_eventInfoKey, ctx);
+  SG::ReadHandle<xAOD::EventInfo> currEvent(GetEventInfo(ctx));
+  ATH_CHECK(currEvent.isValid());
   if ( currEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO)) 
     return StatusCode::SUCCESS;
 
