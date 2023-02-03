@@ -1155,9 +1155,6 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv() {
   m_iang1low = 0;
   m_iang1high = 0;
 
-  int nsuccesses = 0;
-  int isol = 0;
-
   //   double Mvis=(tau_vec1+tau_vec2).M();
   //   TLorentzVector met4vec(0.0,0.0,0.0,0.0);
   //   met4vec.SetPxPyPzE(met_vec.X(),met_vec.Y(),0.0,met_vec.Mod());
@@ -1249,7 +1246,7 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv() {
           if (solution < 1)
             continue;
           ++m_iter1;
-          ++isol;
+
           // if fast sin cos, result to not match exactly nupsolutionv2, so skip
           // test
           // SpeedUp no nested loop to compute individual probability
@@ -1317,7 +1314,6 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv() {
             continue;
           m_iter2 += 1;
 
-          ++nsuccesses;
           m_iter3 += 1;
         }
       }
@@ -1398,7 +1394,7 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv() {
         if (solution < 1)
           continue;
         ++m_iter1;
-        ++isol;
+
         // if fast sin cos, result to not match exactly nupsolutionv2, so skip
         // test
         // SpeedUp no nested loop to compute individual probability
@@ -1471,7 +1467,6 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv() {
           continue;
         m_iter2 += 1;
 
-        ++nsuccesses;
         m_iter3 += 1;
       }
     }
