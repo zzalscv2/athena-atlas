@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: MC23-style RUN3 simulation using ALTFAST3MT_QS in AthenaMP
+# art-description: MC23-style RUN3 simulation using ATLFAST3MT_QS in AthenaMP
 # art-include: 23.0/Athena
 # art-include: master/Athena
 # art-type: grid
@@ -18,7 +18,7 @@ Sim_tf.py \
     --CA \
     --multiprocess \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
-    --simulator 'ALTFAST3MT_QS' \
+    --simulator 'ATLFAST3MT_QS' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationMultipleIoV' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
@@ -39,7 +39,7 @@ rc2=-9999
 Sim_tf.py \
     --multiprocess \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
-    --simulator 'ALTFAST3MT_QS' \
+    --simulator 'ATLFAST3MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationMultipleIoV.py' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
@@ -53,7 +53,7 @@ Sim_tf.py \
 Sim_tf.py \
     --multiprocess \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
-    --simulator 'ALTFAST3MT_QS' \
+    --simulator 'ATLFAST3MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationMultipleIoV.py' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
