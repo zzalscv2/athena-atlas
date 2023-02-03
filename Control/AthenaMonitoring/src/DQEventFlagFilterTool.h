@@ -33,7 +33,7 @@ class DQEventFlagFilterTool :  public AthAlgTool, virtual public IDQFilterTool  
   Gaudi::Property<bool> m_doCore{this, "doCore", true};
   SG::ReadHandleKey<xAOD::EventInfo> m_EventInfoKey{this, "EventInfoKey", "EventInfo"};
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_TileStatusKey{this, "TileStatusKey", "EventInfo.TileStatus"};
-  SG::ReadDecorHandleKey<xAOD::EventInfo> m_larFlag{this, "LArStatusFlag", "EventInfo.larFlag"};
+  SG::ReadDecorHandleKey<xAOD::EventInfo> m_larFlag{this, "LArStatusFlag", "EventInfo.larFlags"};
 };
 
 #endif //DQEVENTFLAGFILTERTOOL_H

@@ -76,6 +76,7 @@ StatusCode LArFebErrorSummaryMaker::initialize()
   ATH_CHECK( m_writeKey.initialize() );
   ATH_CHECK( m_bfKey.initialize());
   ATH_CHECK(m_eventInfoKey.initialize());  
+  ATH_CHECK(m_eventInfoDecorKey.initialize());  
 
   //Set error counters to 0
   for (unsigned int i=0;i<LArFebErrorSummary::N_LArFebErrorType;++i){
@@ -102,7 +103,8 @@ StatusCode LArFebErrorSummaryMaker::execute(const EventContext& ctx) const
   const LArBadFebCont* badFebs{*h_bf};
 
   //  EventInfo
-  SG::WriteDecorHandle<xAOD::EventInfo,uint32_t> eventInfo (m_eventInfoKey, ctx);
+  SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
+  ATH_CHECK(eventInfo.isValid());
 
   unsigned int nbSamplesFirst=0;
   uint32_t eventTypeFirst = 999;

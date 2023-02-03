@@ -25,6 +25,7 @@ PURPOSE:
 #include "LArRecConditions/LArBadFeb.h"
 #include "LArRecEvent/LArEventBitInfo.h"
 #include "GaudiKernel/ThreadLocalContext.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 /////////////////////////////////////////////////////////////////////
 // INITIALIZE:
@@ -58,6 +59,7 @@ StatusCode LArBadFebMaskingTool::initialize()
   ATH_CHECK( m_badFebKey.initialize());
   ATH_CHECK( m_cablingKey.initialize());
   ATH_CHECK(m_eventInfoKey.initialize());
+  ATH_CHECK(m_eventInfoDecorKey.initialize());
 
   // retrieve identifier helpers
   ATH_CHECK( detStore()->retrieve(m_onlineID, "LArOnlineID") );
@@ -170,7 +172,6 @@ StatusCode LArBadFebMaskingTool::process (CaloCellContainer* theCont,
       }       // toMask
 
   }       // loop over Febs in error
-
 
   return StatusCode::SUCCESS;
 }

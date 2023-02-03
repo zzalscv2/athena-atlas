@@ -28,6 +28,7 @@ StatusCode LArSC2Ntuple::initialize() {
 
   ATH_CHECK( m_cablingKeyAdditional.initialize(m_fillRawChan));
   ATH_CHECK( m_eventInfoKey.initialize() );
+  ATH_CHECK( m_eventInfoDecorKey.initialize() );
 
   StatusCode sc=m_nt->addItem("latomeChannel",m_latomeChannel);
   if (sc.isFailure()) {
@@ -176,6 +177,8 @@ StatusCode LArSC2Ntuple::execute()
   ATH_MSG_DEBUG( "LArSC2Ntuple in execute" ); 
 
   SG::ReadHandle<xAOD::EventInfo>evt (m_eventInfoKey, ctx);
+  ATH_CHECK(evt.isValid());
+
   unsigned long long thisevent	  = evt->eventNumber();
   unsigned short thislb           = evt->lumiBlock();
 

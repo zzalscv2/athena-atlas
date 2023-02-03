@@ -81,7 +81,8 @@ class LArFebErrorSummaryMaker : public AthReentrantAlgorithm
 
   SG::ReadCondHandleKey<LArBadFebCont> m_bfKey{this,"BFKey","LArBadFeb","Key of the BadFebContainer in the conditions store"};
   SG::ReadHandleKey<LArFebHeaderContainer> m_readKey{this,"ReadKey","LArFebHeader"};
-  SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey","EventInfo.larFlag"};
+  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey","EventInfo"};
+  SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this,"EventInfoDecorKey","EventInfo.larFlags"};
   SG::WriteHandleKey<LArFebErrorSummary> m_writeKey{this,"WriteKey","LArFebErrorSummary"};
 
   // methods:

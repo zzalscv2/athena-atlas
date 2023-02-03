@@ -23,6 +23,7 @@
 
 #include "CaloInterface/ICaloCellMakerTool.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "LArRecConditions/LArBadChannelCont.h"
@@ -85,7 +86,7 @@ public:
 
   SG::ReadHandleKey<LArFebErrorSummary> m_larFebErrorSummaryKey{this,"FebErrorSummaryKey","LArFebErrorSummary"};
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey","EventInfo"};
-
+  SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this,"EventInfoDecorKey","EventInfo.larFlags"};
   /** compute bit mask of errors to mask
   */
   uint16_t m_errorToMask=0;

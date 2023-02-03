@@ -54,7 +54,7 @@ private:
 
   Gaudi::Property<std::string> m_monGroupName  {this, "MonGroup", "FEBMon", "LArLARFEBMonGroup"};
   //To get the data-dependency right ... 
-  SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "LArStatusFlag", "EventInfo.larFlag", "Key for EventInfo object"};
+  SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "LArStatusFlag", "EventInfo.larFlags", "Key for EventInfo object"};
 
   /* Histogram grouping (part) */
   std::vector<std::map<std::string,int> > m_histoGroups;

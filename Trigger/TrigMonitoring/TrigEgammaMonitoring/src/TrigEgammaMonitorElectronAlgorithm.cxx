@@ -23,7 +23,7 @@ StatusCode TrigEgammaMonitorElectronAlgorithm::initialize()
   ATH_CHECK(TrigEgammaMonitorAnalysisAlgorithm::initialize());
 
   ATH_CHECK(m_offElectronKey.initialize());
-  ATH_CHECK( m_eventInfoKey.initialize() );
+  ATH_CHECK( m_eventInfoDecorKey.initialize() );
   
   for(auto& trigName : m_trigInputList)
   {
@@ -52,7 +52,8 @@ StatusCode TrigEgammaMonitorElectronAlgorithm::fillHistograms( const EventContex
     }
 
     // Noise burst protection 
-    SG::ReadDecorHandle<xAOD::EventInfo,uint32_t> thisEvent(m_eventInfoKey, ctx);
+    SG::ReadHandle<xAOD::EventInfo> thisEvent(GetEventInfo(ctx));
+    ATH_CHECK(thisEvent.isValid());
     if ( thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO)) {
         ATH_MSG_DEBUG("LAr Noise Burst Veto, skip trigger analysis");
         return StatusCode::SUCCESS;

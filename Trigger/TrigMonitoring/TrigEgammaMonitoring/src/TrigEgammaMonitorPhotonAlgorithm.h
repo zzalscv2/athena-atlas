@@ -55,7 +55,7 @@ class TrigEgammaMonitorPhotonAlgorithm: public TrigEgammaMonitorAnalysisAlgorith
     SG::ReadHandleKey<xAOD::PhotonContainer> m_offPhotonKey{ this, "PhotonKey", "Photons", ""};
     /*! Ensure offline photon isolation decoration is retrieved after being created */
     SG::ReadDecorHandleKeyArray<xAOD::PhotonContainer> m_offPhotonIsolationKeys {this, "PhotonIsolationKeys", {"Photons.topoetcone20", "Photons.topoetcone40"} };
-    SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "LArStatusFlag", "EventInfo.larFlag", "Key for EventInfo object"};
+   SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "LArStatusFlag", "EventInfo.larFlags", "Key for EventInfo object"}; //To get data-dependencies right
 };
 
 #endif

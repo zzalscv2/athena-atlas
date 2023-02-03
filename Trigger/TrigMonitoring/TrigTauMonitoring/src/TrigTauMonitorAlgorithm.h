@@ -147,7 +147,7 @@ class TrigTauMonitorAlgorithm : public AthMonitorAlgorithm {
     }
   };
 
-  SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "LArStatusFlag", "EventInfo.larFlag", "Key for EventInfo object"};
+  SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "LArStatusFlag", "EventInfo.larFlags", "Key for EventInfo object"}; //To get data-dependencies right
   SG::ReadHandleKey< xAOD::TauJetContainer> m_offlineTauJetKey { this, "offlineTauJetKey", "TauJets", "Offline taujet container key" };
   SG::ReadHandleKey<xAOD::ElectronContainer> m_offlineElectronKey{ this, "offlineElectronKey", "Electrons", "Offline Electron key for tau-e chains"};
   SG::ReadHandleKey<xAOD::MuonContainer> m_offlineMuonKey{ this, "offlineMuonKey", "Muons", "Offline Muon key for tau-mu chains"};
