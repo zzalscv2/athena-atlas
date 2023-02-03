@@ -43,7 +43,7 @@
 #include "TileConditions/TileCondToolPulseShape.h"
 #include "TileConditions/TileEMScale.h"
 #include "TileConditions/TileCondToolNoiseSample.h"
-#include "TileConditions/ITileBadChanTool.h"
+#include "TileConditions/TileBadChannels.h"
 #include "TileConditions/TileCablingSvc.h"
 #include "TileConditions/TileSamplingFraction.h"
 #include "TileRecUtils/TileRawChannelBuilderMF.h"
@@ -129,8 +129,11 @@ class TilePulseForTileMuonReceiver: public AthAlgorithm {
     ToolHandle<TileCondToolPulseShape> m_tileToolPulseShape{this,
         "TileCondToolPulseShape", "TileCondToolPulseShape", "Tile pulse shape tool"};
 
-    ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
-        "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};
+    /**
+     * @brief Name of TileBadChannels in condition store
+     */
+    SG::ReadCondHandleKey<TileBadChannels> m_badChannelsKey{this,
+        "TileBadChannels", "TileBadChannels", "Input Tile bad channel status"};
 
     ToolHandle<TileRawChannelBuilderMF> m_MuRcvBuildTool{this,
         "TileRawChannelBuilderMF", "TileRawChannelBuilderMF", "Reconstruction tool, default: the Matched Filter"};

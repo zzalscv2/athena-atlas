@@ -31,7 +31,7 @@
 #include "TileEvent/TileHitContainer.h"
 #include "TileEvent/TileTTL1Container.h"
 #include "TileConditions/TileEMScale.h"
-#include "TileConditions/ITileBadChanTool.h"
+#include "TileConditions/TileBadChannels.h"
 #include "TileConditions/TileCablingSvc.h"
 #include "TileConditions/TileSamplingFraction.h"
 
@@ -146,8 +146,11 @@ class TileHitToTTL1: public AthReentrantAlgorithm {
     SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
         "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
-    ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
-        "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};
+    /**
+     * @brief Name of TileBadChannels in condition store
+     */
+    SG::ReadCondHandleKey<TileBadChannels> m_badChannelsKey{this,
+        "TileBadChannels", "TileBadChannels", "Input Tile bad channel status"};
 
 };
 

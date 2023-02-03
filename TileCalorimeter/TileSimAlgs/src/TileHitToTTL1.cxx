@@ -77,8 +77,7 @@ StatusCode TileHitToTTL1::initialize() {
   //=== Get Tile Info
   ATH_CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
 
-  //=== Get Tile Bad channel tool
-  ATH_CHECK( m_tileBadChanTool.retrieve() );
+  ATH_CHECK( m_badChannelsKey.initialize(m_maskBadChannels) );
 
   ATH_CHECK( m_emScaleKey.initialize() );
 
@@ -188,6 +187,13 @@ StatusCode TileHitToTTL1::execute(const EventContext &ctx) const {
 
   SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
   ATH_CHECK( emScale.isValid() );
+
+  const TileBadChannels* badChannels = nullptr;
+  if (m_maskBadChannels) {
+    SG::ReadCondHandle<TileBadChannels> badChannelsHandle(m_badChannelsKey, ctx);
+    ATH_CHECK( badChannelsHandle.isValid() );
+    badChannels = *badChannelsHandle;
+  }
 
   /*........................................................................*/
   // Get hit container from TES and create TTL1 and MBTS container
@@ -333,7 +339,8 @@ StatusCode TileHitToTTL1::execute(const EventContext &ctx) const {
       // determine if the channel is good from the channel status DB
       bool is_good = true;
       if (m_maskBadChannels) {
-        TileBchStatus status = m_tileBadChanTool->getAdcStatus(drawerIdx, channel, TileID::LOWGAIN);
+        HWIdentifier adc_id = m_tileHWID->adc_id(pmt_HWid, TileID::LOWGAIN);
+        TileBchStatus status = badChannels->getAdcStatus(adc_id);
 
         // if channel is bad, set qfactor to zero
         if (status.isNoGainL1()) {

@@ -45,12 +45,8 @@ def TilePulseForTileMuonReceiverCfg(flags, **kwargs):
     acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     if kwargs['MaskBadChannels']:
-        if 'TileBadChanTool' not in kwargs:
-            from TileConditions.TileBadChannelsConfig import TileBadChanToolCfg
-            badChannelsTool = acc.popToolsAndMerge( TileBadChanToolCfg(flags) )
-            kwargs['TileBadChanTool'] = badChannelsTool
-    else:
-        kwargs['TileBadChanTool'] = None
+        from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
+        acc.merge( TileBadChannelsCondAlgCfg(flags) )
 
     if 'TileCondToolPulseShape' not in kwargs:
         from TileConditions.TilePulseShapeConfig import TileCondToolMuRcvPulseShapeCfg

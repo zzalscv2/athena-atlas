@@ -17,6 +17,7 @@ def TileHitToTTL1Cfg(flags, **kwargs):
 
     kwargs.setdefault('name', 'TileHitToTTL1')
     kwargs.setdefault('TileHitContainer', 'TileHitCnt')
+    kwargs.setdefault('maskBadChannels', True)
 
     acc = TileHitVecToCntCfg(flags)
 
@@ -33,10 +34,9 @@ def TileHitToTTL1Cfg(flags, **kwargs):
         from RngComps.RandomServices import AthRNGSvcCfg
         kwargs['RndmSvc'] = acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name
 
-    if 'TileBadChanTool' not in kwargs:
-        from TileConditions.TileBadChannelsConfig import TileBadChanToolCfg
-        badChannelsTool = acc.popToolsAndMerge( TileBadChanToolCfg(flags) )
-        kwargs['TileBadChanTool'] = badChannelsTool
+    if kwargs['maskBadChannels']:
+        from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
+        acc.merge( TileBadChannelsCondAlgCfg(flags) )
 
     from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
     acc.merge( TileEMScaleCondAlgCfg(flags) )
