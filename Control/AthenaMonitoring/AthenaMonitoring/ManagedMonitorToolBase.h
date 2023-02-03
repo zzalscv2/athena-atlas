@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ManagedMonitorToolBase_H
@@ -62,8 +62,6 @@ class IDQFilterTool;
 #include "AthenaMonitoring/IDQFilterTool.h"
 #include "GaudiKernel/ITHistSvc.h"
 
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;    // legacy (serial) DQ monitoring framework
 
 /**
  * Provides functionality for users to implement
