@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __author__ =   "Mark Sutton and Lukas Novotny"
 __doc__    =   "vertexFinder_builder"
@@ -283,9 +283,11 @@ def vertexSortingTool_builder( signature, config ) :
     return vertexSortingTool
     
 # create online vertex monitoring histograms
-def vertexMonitoringTool_builder( signature, config ) : 
+def vertexMonitoringTool_builder( signature, config ) :
+    # TODO: flags need to be passed into function
+    from AthenaConfiguration.AllConfigFlags import ConfigFlags
     from InDetPriVxFinder.InDetPriVxFinderMonitoring import InDetPriVxFinderMonitoringTool
-    return  InDetPriVxFinderMonitoringTool()
+    return InDetPriVxFinderMonitoringTool(ConfigFlags)
 
 
 
