@@ -97,6 +97,9 @@ namespace InDet{
       void setMultiTracks(const int,double);
       void setBremNoise  (bool,bool);
       void setHeavyIon   (bool);
+      void setFastTracking (bool);
+      void setITkGeometry  (bool);
+
       const std::vector<bool> *pixelStatus() const { return m_pixelDetElStatus ? &m_pixelDetElStatus->getElementStatus() : nullptr; }
       const std::vector<bool> *sctStatus()   const { return m_sctDetElStatus ? &m_sctDetElStatus->getElementStatus() : nullptr; }
 
@@ -248,6 +251,17 @@ namespace InDet{
   {
     m_heavyion = HI;
   }
+
+  inline void SiTools_xk::setFastTracking (bool doFastTracking)
+  {
+    m_doFastTracking = doFastTracking;
+  }
+
+  inline void SiTools_xk::setITkGeometry(bool isITk)
+  {
+    m_ITkGeometry = isITk;
+  }
+
 
 } // end of name space
 
