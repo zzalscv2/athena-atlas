@@ -166,23 +166,24 @@ if __name__ == "__main__":
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc16_13TeV.361022.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ2W.recon.ESD.e3668_s3170_r10572_homeMade.pool.root"]
-    ConfigFlags.Input.isMC = True
-    ConfigFlags.Output.HISTFileName = 'SCTTracksMonOutput.root'
-    ConfigFlags.GeoModel.Align.Dynamic = False
-    ConfigFlags.Detector.GeometryID = True
-    ConfigFlags.Detector.GeometryPixel = True
-    ConfigFlags.Detector.GeometrySCT = True
-    ConfigFlags.Detector.GeometryTRT = True
-    ConfigFlags.lock()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc16_13TeV.361022.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ2W.recon.ESD.e3668_s3170_r10572_homeMade.pool.root"]
+    flags.Input.isMC = True
+    flags.Output.HISTFileName = 'SCTTracksMonOutput.root'
+    flags.GeoModel.Align.Dynamic = False
+    flags.Detector.GeometryID = True
+    flags.Detector.GeometryPixel = True
+    flags.Detector.GeometrySCT = True
+    flags.Detector.GeometryTRT = True
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    cfg.merge(SCTTracksMonAlgConfig(ConfigFlags))
+    cfg.merge(SCTTracksMonAlgConfig(flags))
 
     cfg.run()

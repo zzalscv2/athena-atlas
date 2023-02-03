@@ -1,6 +1,6 @@
 """Define functions to configure Pixel conditions algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -416,8 +416,8 @@ def PixelDetectorElementStatusAlgActiveOnlyCfg(flags, name = "PixelDetectorEleme
 
 if __name__ == '__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
-
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     flags.fillFromArgs()
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles

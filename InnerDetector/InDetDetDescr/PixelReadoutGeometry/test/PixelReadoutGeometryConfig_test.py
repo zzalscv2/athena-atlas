@@ -1,19 +1,20 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaCommon.Logging import log
 from AthenaCommon.Constants import DEBUG
 from PixelReadoutGeometry.PixelReadoutGeometryConfig import PixelReadoutManagerCfg, ITkPixelReadoutManagerCfg
 
 # test setup
 log.setLevel(DEBUG)
-ConfigFlags.Input.Files = []
+flags = initConfigFlags()
+flags.Input.Files = []
 # test
-PixelReadoutManagerAcc = PixelReadoutManagerCfg(ConfigFlags, name="PixelReadoutManagerTest")
+PixelReadoutManagerAcc = PixelReadoutManagerCfg(flags, name="PixelReadoutManagerTest")
 # prevent raise on __del__
 PixelReadoutManagerAcc.wasMerged()
 
 # test ITk
-ITkPixelReadoutManagerAcc = ITkPixelReadoutManagerCfg(ConfigFlags, name="ITkPixelReadoutManagerTest")
+ITkPixelReadoutManagerAcc = ITkPixelReadoutManagerCfg(flags, name="ITkPixelReadoutManagerTest")
 # prevent raise on __del__
 ITkPixelReadoutManagerAcc.wasMerged()
