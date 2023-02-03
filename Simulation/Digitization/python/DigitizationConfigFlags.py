@@ -5,6 +5,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import ProductionStep
+from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
 
 
 def constBunchSpacingPattern(constBunchSpacing):
@@ -71,14 +72,10 @@ def createDigitizationCfgFlags():
     # Beam spot reweighting (-1 disables it)
     flags.addFlag("Digitization.InputBeamSigmaZ", -1)
 
-    # Run radiation damage simulation for pixel planar sensors
-    flags.addFlag("Digitization.DoPixelPlanarRadiationDamage", False)
-    # Run the template version of the radiation damage
-    flags.addFlag("Digitization.DoPixelPlanarRadiationDamageTemplate", False)
-    # Run radiation damage simulation for pixel 3D sensors
-    flags.addFlag("Digitization.DoPixel3DRadiationDamage", False)
-    # Run the template version of the radiation damage
-    flags.addFlag("Digitization.DoPixel3DRadiationDamageTemplate", False)
+    # Set the type of the radiation damage simulation type for pixel planar sensors
+    flags.addFlag("Digitization.PixelPlanarRadiationDamageSimulationType", PixelRadiationDamageSimulationType.NoRadiationDamage, enum=PixelRadiationDamageSimulationType)
+    # Set the type of the radiation damage simulation type for 3D planar sensors
+    flags.addFlag("Digitization.Pixel3DRadiationDamageSimulationType", PixelRadiationDamageSimulationType.NoRadiationDamage, enum=PixelRadiationDamageSimulationType)
 
     # for PileUp digitization
     # Bunch structure configuration

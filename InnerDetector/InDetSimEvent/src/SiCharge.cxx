@@ -20,8 +20,7 @@ SiCharge::SiCharge(const double& charge,const double& time,
   m_charge(charge),
   m_time(time),
   m_processType(processType),
-  m_partLink(PL),
-  m_trackDistance()
+  m_partLink(PL)
 {}
 
 SiCharge::SiCharge(const double& charge,const double& time,
@@ -29,21 +28,7 @@ SiCharge::SiCharge(const double& charge,const double& time,
   m_charge(charge),
   m_time(time),
   m_processType(processType),
-  m_partLink(),
-  m_trackDistance()
-{}
-
-// Constructor with parameters:
-SiCharge::SiCharge(const double& charge,
-                   const double& time,
-                   const Process& processType,
-                   const HepMcParticleLink& PL,
-                   const SiTrackDistance& trackDistance) :
-  m_charge(charge),
-  m_time(time),
-  m_processType(processType),
-  m_partLink(PL),
-  m_trackDistance(trackDistance)
+  m_partLink()
 {}
 
 // add another charge, if the process and track are the same:

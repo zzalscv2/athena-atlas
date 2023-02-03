@@ -33,6 +33,10 @@ class LArParameterization(FlagEnum):
     FrozenShowersFCalOnly = 3
     FastCaloSim = 4
 
+class PixelRadiationDamageSimulationType(FlagEnum):
+    NoRadiationDamage = 0
+    RamoPotential = 1
+    TemplateCorrection = 2
 
 class SimulationFlavour(FlagEnum):
     Unknown = 'Unknown'
