@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -24,7 +24,7 @@
 
 
 
-VP1BatchUtilities::VP1BatchUtilities(std::vector<std::string> files) :
+VP1BatchUtilities::VP1BatchUtilities(const std::vector<std::string>& files) :
   m_files(files),
   m_indexFile(0),
   m_lastIndexFile(0)
