@@ -1060,9 +1060,12 @@ void InDet::SiCombinatorialTrackFinder_xk::initializeCombinatorialData(const Eve
      data.setSCTDetectorElementStatus( sctDetElStatus.cptr() );
   }
 
+  // Set the ITk Geometry setup
   data.isITkGeometry() = m_ITkGeometry;
+  data.tools().setITkGeometry(m_ITkGeometry);
+  // Set the ITk Fast Tracking setup
   data.useFastTracking() = m_doFastTracking;
-
+  data.tools().setFastTracking(m_doFastTracking);
 }
 
 void InDet::SiCombinatorialTrackFinder_xk::fillStatistic(SiCombinatorialTrackFinderData_xk& data, std::array<bool,6>& information) const
