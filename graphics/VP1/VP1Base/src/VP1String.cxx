@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -50,7 +50,8 @@ QString VP1String::str(const void * p)
   if (p) {
     std::ostringstream s;
     s << p;
-    return s.str().c_str();
+    // Explicitly naming QString here avoids a cppcheck warning.
+    return QString (s.str().c_str());
   } else {
     return "NULL";
   }

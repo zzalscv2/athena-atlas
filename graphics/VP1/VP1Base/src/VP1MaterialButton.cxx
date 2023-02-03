@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -468,7 +468,7 @@ bool VP1MaterialButton::stopHandlingMaterial( SoMaterial * m )
 //____________________________________________________________________
 void VP1MaterialButton::clearHandledMaterials()
 {
-  foreach (SoMaterial * m,m_d->handledmaterials)
+  for (SoMaterial * m : m_d->handledmaterials)
     m->unref();
   m_d->handledmaterials.clear();
 }
@@ -632,7 +632,7 @@ void VP1MaterialButton::Imp::updateApplyResetButtons()
 void VP1MaterialButton::apply()
 {
   m_d->setLastAppliedFromCurrent();
-  foreach (SoMaterial * m, m_d->handledmaterials)
+  for (SoMaterial * m :  m_d->handledmaterials)
     m_d->applyValuesToMaterial(m);
   updateButton();
 }

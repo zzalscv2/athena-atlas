@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -89,7 +89,7 @@ VP1Controller::VP1Controller(IVP1System * sys, const QString& classname )
 //____________________________________________________________________
 VP1Controller::~VP1Controller()
 {
-  foreach (Imp::DialogInfo* di,m_d->dialogs)
+  for (Imp::DialogInfo* di : m_d->dialogs)
     delete di;
   if (m_d->fallBackMaterial)
     m_d->fallBackMaterial->unref();
@@ -157,9 +157,9 @@ void VP1Controller::initDialog(QWidget * dialog, QPushButton* launchButton, QPus
 
   //To avoid an extra call in the code we do this a few times more than necessary (fixme: put in initLastVars!!):
   int maxwidth(0);
-  foreach (Imp::DialogInfo* di,m_d->dialogs)
+  for (Imp::DialogInfo* di : m_d->dialogs)
     maxwidth = std::max(maxwidth,di->launchButton->sizeHint().width());
-  foreach (Imp::DialogInfo* di,m_d->dialogs)
+  for (Imp::DialogInfo* di : m_d->dialogs)
     di->launchButton->setMinimumWidth(maxwidth);
 }
 
@@ -167,7 +167,7 @@ void VP1Controller::initDialog(QWidget * dialog, QPushButton* launchButton, QPus
 void VP1Controller::enabledButtonStateChanged()
 {
   Imp::DialogInfo * di(0);
-  foreach (Imp::DialogInfo* di2,m_d->dialogs) {
+  for (Imp::DialogInfo* di2 : m_d->dialogs) {
     if (di2->enabledButton==sender()) {
       di = di2;
       break;
@@ -194,7 +194,7 @@ void VP1Controller::enabledButtonStateChanged()
 void VP1Controller::toggleDialogState(QObject* widget)
 {
   Imp::DialogInfo * di(0);
-  foreach (Imp::DialogInfo* di2,m_d->dialogs) {
+  for (Imp::DialogInfo* di2 : m_d->dialogs) {
     if (di2->launchButton==sender() || (widget && di2->dialogWidget==widget)) {
       di = di2;
       break;
@@ -300,14 +300,14 @@ QButtonGroup * VP1Controller::defineRadioButtonGroup( QRadioButton * rb0, QRadio
 QButtonGroup * VP1Controller::defineRadioButtonGroup( QList<QRadioButton *> l )
 {
   QRadioButton * rb_checked(0);
-  foreach(QRadioButton *rb,l) {
+  for (QRadioButton *rb : l) {
     if (rb->isChecked()) {
       rb_checked = rb;
       break;
     }
   }
   QButtonGroup * radiogroup = new QButtonGroup(this);
-  foreach(QRadioButton *rb,l)
+  for (QRadioButton *rb : l)
     radiogroup->addButton(rb);
   if (rb_checked)
     rb_checked->setChecked(true);
@@ -395,7 +395,7 @@ void VP1Controller::restoreSettings(QByteArray ba)
   if (m_d->collWidget)
     s.ignoreWidget(m_d->collWidget);
   s.warnUnrestored((QWidget*)(this));
-  foreach (Imp::DialogInfo* di,m_d->dialogs)
+  for (Imp::DialogInfo* di : m_d->dialogs)
     s.warnUnrestored(di->dialogWidget);
 
   QTimer::singleShot(0, this, SLOT(testForChanges()));
@@ -416,7 +416,7 @@ QByteArray VP1Controller::saveSettings() const
     s.ignoreWidget(m_d->collWidget);
 
   s.warnUnsaved((QWidget*)(this));
-  foreach (Imp::DialogInfo* di,m_d->dialogs)
+  for (Imp::DialogInfo* di : m_d->dialogs)
     s.warnUnsaved(di->dialogWidget);
 
   return s.result();
