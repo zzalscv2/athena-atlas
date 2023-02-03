@@ -81,7 +81,7 @@ def initConfigFlags():
         return GetFileMD(inputFile).get("metadata_items", {})
 
     acf.addFlag('Input.MetadataItems', lambda prevFlags : _metadataItems(prevFlags.Input.Files) )
-    acf.addFlag('Input.Release',  lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("AtlasRelease", None))
+    acf.addFlag('Input.Release',  lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("AtlasRelease", ""))
     acf.addFlag('Input.AODFixesDone', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("AODFixVersion", ""))
 
     acf.addFlag('Concurrency.NumProcs', 0)
