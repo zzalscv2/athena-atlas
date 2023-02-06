@@ -295,6 +295,7 @@ def createTriggerRecoFlags():
         muonflags.Muon.MuonTrigger=True
         muonflags.Muon.SAMuonTrigger=True
         muonflags.Muon.runCommissioningChain=False
+        muonflags.Muon.enableErrorTuning=False
         return muonflags
 
     def __muon():
