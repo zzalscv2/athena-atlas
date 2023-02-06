@@ -335,17 +335,17 @@ bool scanPhaseSpace(Config& cfg, map_t& affected_bins)
     if (multi_np) {
       std::string w("several uncorrelated NPs seem to affect the bin at "
         + dom.str() + ".");
-      Warning(MSGSOURCE, w.c_str());
+      Warning(MSGSOURCE, "%s", w.c_str());
     } else if (nonzero_uncorr.count() > 1) {
       std::string w{"the binning used for the scan is unadapted at " + 
         dom.str() + " (too coarse?)."};
-      Warning(MSGSOURCE, w.c_str());
+      Warning(MSGSOURCE, "%s", w.c_str());
     }
     if ((zero_uncorr & nonzero_uncorr).any() ||  
         (zero_corr & nonzero_corr).any()) {
       std::string w("the binning used for the scan is unadapted at " + 
         dom.str() + " (wrong boundaries?).");
-      Warning(MSGSOURCE, w.c_str());
+      Warning(MSGSOURCE, "%s", w.c_str());
     }
     if ((nonzero_uncorr!=expected_uncorr) && nonzero_uncorr.any()) {
       std::string snz, se;
@@ -393,9 +393,9 @@ bool displayFindings(const Config& cfg, const map_t& affected_bins)
     if (holes) txt += "subdomain of ";
     txt += bounds.str(abs_eta) + '.';
     if (!holes) {
-      Info(MSGSOURCE, txt.c_str());
+      Info(MSGSOURCE, "%s", txt.c_str());
     } else {
-      Warning(MSGSOURCE, txt.c_str());
+      Warning(MSGSOURCE, "%s", txt.c_str());
     }
   }
   return true;
@@ -429,7 +429,7 @@ bool displayFindings_analysis(const Config& cfg, const map_t& affected_bins)
     std::string s("   ++ " + std::get<std::string>(x));
     const int i{std::get<int>(x)};
     if (i >= 0) s += " to " + std::to_string(i);
-    Info(MSGSOURCE, s.c_str());
+    Info(MSGSOURCE, "%s", s.c_str());
   }
   return true;
 }

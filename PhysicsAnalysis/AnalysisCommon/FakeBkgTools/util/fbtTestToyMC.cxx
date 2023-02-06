@@ -398,9 +398,6 @@ StatusCode Loop(fbtTestToyMC_config config){
 
 	  float nlep_frac = 1./(config.maxnbaseline-config.minnbaseline+1);
 	  Int_t nlep_select = config.minnbaseline+rand.Uniform()/nlep_frac;
- 
-	  Int_t nReal(0);
-	  Int_t nTight(0);
 	
 	  float extraweight(1.0);
 	
@@ -426,7 +423,6 @@ StatusCode Loop(fbtTestToyMC_config config){
 	    bool isReal(false);
 	    if (rand.Uniform() > fake_lep_frac) {
 	      isReal = true;
-	      nReal++;
 	    } else {
 	      isReal = false;
 	    }
@@ -445,14 +441,12 @@ StatusCode Loop(fbtTestToyMC_config config){
 	    if (isReal) {
 	      if (rand.Uniform() < lepton_data.real_efficiency.nominal) {
 		lepton->auxdata<char>("Tight") = true;
-		nTight++;
 	      } else {
 		lepton->auxdata<char>("Tight") = false;
 	      }
 	    } else {
 	      if (rand.Uniform() < lepton_data.fake_efficiency.nominal) {
 		lepton->auxdata<char>("Tight") = true;
-		nTight++;
 	      } else {
 		lepton->auxdata<char>("Tight") = false;
 	      }
