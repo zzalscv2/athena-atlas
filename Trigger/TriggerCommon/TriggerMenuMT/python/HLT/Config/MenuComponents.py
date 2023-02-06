@@ -27,6 +27,7 @@ from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
 from collections.abc import MutableSequence
 import collections.abc
+import inspect
 import re
 
 from AthenaCommon.Logging import logging
@@ -134,6 +135,8 @@ class AlgNode(Node):
 class HypoToolConf(object):
     """ Class to group info on hypotools for ChainDict"""
     def __init__(self, hypoToolGen):
+        # Check if the generator function takes flags:
+        self.hasFlags = 'flags' in inspect.signature(hypoToolGen).parameters
         self.hypoToolGen = hypoToolGen
         self.name=hypoToolGen.__name__
 
@@ -142,14 +145,17 @@ class HypoToolConf(object):
             raise RuntimeError("Configuring hypo with %s, not good anymore, use chainDict" % str(chainDict) )
         self.chainDict = chainDict
 
-    def create(self):
+    def create(self, flags):
         """creates instance of the hypo tool"""
-        return self.hypoToolGen( self.chainDict )
-    
-    def confAndCreate(self, chainDict):
+        if self.hasFlags:
+            return self.hypoToolGen( flags, self.chainDict )
+        else:
+            return self.hypoToolGen( self.chainDict )
+
+    def confAndCreate(self, flags, chainDict):
         """sets the configuration and creates instance of the hypo tool"""
         self.setConf(chainDict)
-        return self.create()
+        return self.create(flags)
 
 
 class HypoAlgNode(AlgNode):
@@ -171,10 +177,10 @@ class HypoAlgNode(AlgNode):
                       self.name, outputs[0])
 
 
-    def addHypoTool (self, hypoToolConf):
+    def addHypoTool (self, flags, hypoToolConf):
         log.debug("Adding HypoTool %s for chain %s to %s", hypoToolConf.name, hypoToolConf.chainDict['chainName'], self.Alg.getName())        
         try:
-            self.Alg.HypoTools = self.Alg.HypoTools + [hypoToolConf.create()]  # see ATEAM-773
+            self.Alg.HypoTools = self.Alg.HypoTools + [hypoToolConf.create(flags)]  # see ATEAM-773
             if isComponentAccumulatorCfg():
                 assert isinstance(self.Alg.HypoTools[-1], GaudiConfig2._configurables.Configurable), "The Hypo Tool for {} is not Configurable2".format(hypoToolConf.chainDict['chainName'])
 
@@ -280,7 +286,7 @@ class ComboMaker(AlgNode):
         return cval.keys()
 
 
-    def createComboHypoTools(self, chainDict, comboToolConfs):
+    def createComboHypoTools(self, flags, chainDict, comboToolConfs):
          """Created the ComboHypoTools"""
          if not len(comboToolConfs):
              return
@@ -289,7 +295,7 @@ class ComboMaker(AlgNode):
          for conf in confs:
              log.debug("ComboMaker.createComboHypoTools adding %s", conf)
              tools = self.Alg.ComboHypoTools
-             self.Alg.ComboHypoTools = tools + [ conf.confAndCreate( chainDict ) ]
+             self.Alg.ComboHypoTools = tools + [ conf.confAndCreate( flags, chainDict ) ]
  
 
 ##########################################################
@@ -508,15 +514,15 @@ class MenuSequence(object):
         self._maker.addInput(outfilter)        
     
   
-    def createHypoTools(self, chainDict):
+    def createHypoTools(self, flags, chainDict):
         if type(self._hypoToolConf) is list:
             log.warning ("This sequence %s has %d multiple HypoTools ",self.sequence.name, len(self.hypoToolConf))
             for hypo, hypoToolConf in zip(self._hypo, self._hypoToolConf):
                 hypoToolConf.setConf( chainDict )
-                hypo.addHypoTool(self._hypoToolConf)
+                hypo.addHypoTool(flags, self._hypoToolConf)
         else:
             self._hypoToolConf.setConf( chainDict )
-            self._hypo.addHypoTool(self._hypoToolConf) #this creates the HypoTools 
+            self._hypo.addHypoTool(flags, self._hypoToolConf) #this creates the HypoTools
             
     def getHypoToolConf(self) :
         return self._hypoToolConf
@@ -724,7 +730,7 @@ class Chain(object):
         for step in self.steps:
             step.setSeedsToSequences()
     
-    def createHypoTools(self):
+    def createHypoTools(self, flags):
         """ This is extrapolating the hypotool configuration from the chain name"""
         log.debug("createHypoTools for chain %s", self.name)        
         
@@ -737,9 +743,9 @@ class Chain(object):
             for seq, onePartChainDict in zip(step.sequences, step.stepDicts):
                 log.debug('    seq: %s, onePartChainDict:', seq.name)
                 log.debug('    %s', onePartChainDict)
-                seq.createHypoTools( onePartChainDict )
+                seq.createHypoTools( flags, onePartChainDict )
             
-            step.createComboHypoTools(self.name) 
+            step.createComboHypoTools(flags, self.name)
 
     # Receives a pair with the topo config function and an identifier string,
     # optionally also a target step name
@@ -891,9 +897,9 @@ class ChainStep(object):
         self.combo = _ComboHypoPool[key]
         
 
-    def createComboHypoTools(self, chainName):      
+    def createComboHypoTools(self, flags, chainName):
         chainDict = HLTMenuConfig.getChainDictFromChainName(chainName)
-        self.combo.createComboHypoTools(chainDict, self.comboToolConfs)
+        self.combo.createComboHypoTools(flags, chainDict, self.comboToolConfs)
             
     def getChainLegs(self):
         """ This is extrapolating the chain legs from the step dictionaries"""       

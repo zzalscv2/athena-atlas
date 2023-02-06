@@ -33,9 +33,9 @@ def fastPhotonCaloSequenceCfg( flags, doRinger = False ):
 def fastPhotonSequenceCfg( flags ):    
     return fastPhotonMenuSequence( flags )
 
-def _diPhotonComboHypoToolFromDict(chainDict, lowermass=80000,uppermass=-999,dphi=1.5,applymass=False,applydphi=False): 
+def _diPhotonComboHypoToolFromDict(flags, chainDict, lowermass=80000,uppermass=-999,dphi=1.5,applymass=False,applydphi=False):
     name = chainDict['chainName']
-    monTool = GenericMonitoringTool("MonTool_"+name,
+    monTool = GenericMonitoringTool(flags, "MonTool_"+name,
                                     HistPath = 'EgammaMassHypo/'+name)
     monTool.defineHistogram('DphiOfAccepted', type='TH1F', path='EXPERT', title="PrecisionCalo Hypo entries per Phi;Phi", xbins=128, xmin=-3.2, xmax=3.2)
     monTool.defineHistogram('MassOfAccepted', type='TH1F', path='EXPERT', title="Mass in accepted combinations [MeV]", xbins=75, xmin=0, xmax=150000)
@@ -50,11 +50,11 @@ def _diPhotonComboHypoToolFromDict(chainDict, lowermass=80000,uppermass=-999,dph
                                  MonTool = monTool)
     return tool
 
-def diphotonDPhiHypoToolFromDict(chainDict):
-    return _diPhotonComboHypoToolFromDict(chainDict,lowermass=80000,uppermass=-999,dphi=1.5,applymass=False,applydphi=True)
+def diphotonDPhiHypoToolFromDict(flags, chainDict):
+    return _diPhotonComboHypoToolFromDict(flags,chainDict,lowermass=80000,uppermass=-999,dphi=1.5,applymass=False,applydphi=True)
 
-def diphotonDPhiMassHypoToolFromDict(chainDict):
-    return _diPhotonComboHypoToolFromDict(chainDict,lowermass=80000,uppermass=-999,dphi=1.5,applymass=True,applydphi=True)
+def diphotonDPhiMassHypoToolFromDict(flags, chainDict):
+    return _diPhotonComboHypoToolFromDict(flags,chainDict,lowermass=80000,uppermass=-999,dphi=1.5,applymass=True,applydphi=True)
 
 
 #----------------------------------------------------------------

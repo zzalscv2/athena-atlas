@@ -36,12 +36,12 @@ def MinBiasMbtsEmptySequenceCfg(flags):
 def MinBiasZFindEmptySequenceCfg(flags):
     return EmptyMenuSequence("EmptyZFind")
 
-def TrigAFPDijetComboHypoToolCfg(chainDict):
+def TrigAFPDijetComboHypoToolCfg(flags, chainDict):
     from TrigAFPHypo.TrigAFPHypoConf import TrigAFPDijetComboHypoTool
     name = chainDict['chainName']
     tool = TrigAFPDijetComboHypoTool(name)
 
-    monTool = GenericMonitoringTool("MonTool_"+name,
+    monTool = GenericMonitoringTool(flags, "MonTool_"+name,
                                     HistPath = 'AFPComboHypo/'+tool.getName())
     monTool.defineHistogram('DijetMass', type='TH1F', path='EXPERT', title="Dijet mass", xbins=100, xmin=0, xmax=2000)
     monTool.defineHistogram('DijetRapidity', type='TH1F', path='EXPERT', title="Dijet rapidity", xbins=100, xmin=-5, xmax=5)

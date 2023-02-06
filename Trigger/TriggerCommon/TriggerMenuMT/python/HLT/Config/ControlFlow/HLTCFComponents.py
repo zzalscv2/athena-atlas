@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.MenuComponents import AlgNode
 from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
@@ -155,7 +155,7 @@ class CFSequence(object):
             log.debug("CFSequence.connectCombo: adding output to  %s: %s",  self.combo.Alg.getName(), combo_output)
 
     
-    def createHypoTools(self, chain, newstep):       
+    def createHypoTools(self, flags, chain, newstep):
         """ set and create HypoTools accumulated on the self.step from an input step configuration
         """
         if self.step.combo is None:
@@ -174,9 +174,9 @@ class CFSequence(object):
             hypoToolConf=seq.getHypoToolConf()
             if hypoToolConf is not None: # avoid empty sequences
                 hypoToolConf.setConf( onePartChainDict )
-                myseq.hypo.addHypoTool(hypoToolConf) #this creates the HypoTools            
+                myseq.hypo.addHypoTool(flags, hypoToolConf) #this creates the HypoTools
         chainDict = HLTMenuConfig.getChainDictFromChainName(chain)
-        self.combo.createComboHypoTools(chainDict, newstep.comboToolConfs)
+        self.combo.createComboHypoTools(flags, chainDict, newstep.comboToolConfs)
 
     def __repr__(self):
         return "--- CFSequence ---\n + Filter: %s \n + decisions: %s\n +  %s \n"%(\
@@ -211,5 +211,3 @@ class CFSequenceCA(CFSequence):
     @lru_cache(None)
     def findComboHypoAlg(self):
         return findAlgorithmByPredicate(self.seq, lambda alg: compName(alg) == self.step.Alg.getName() and isComboHypoAlg(alg))
-        
-    
