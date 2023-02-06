@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -348,7 +348,8 @@ namespace ISFTesting {
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
     EXPECT_CALL(ti, parentParticle())
-      .Times(2)
+      .Times(3)
+      .WillOnce(::testing::Return(inParticle3))
       .WillOnce(::testing::Return(inParticle3))
       .WillOnce(::testing::Return(inParticle3));
 #ifdef HEPMC3
@@ -627,7 +628,8 @@ namespace ISFTesting {
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
     EXPECT_CALL(ti, parentParticle())
-      .Times(2)
+      .Times(3)
+      .WillOnce(::testing::Return(inParticle3))
       .WillOnce(::testing::Return(inParticle3))
       .WillOnce(::testing::Return(inParticle3));
 #ifdef HEPMC3

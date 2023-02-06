@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_SERVICES_TRUTHSVC_H
@@ -16,6 +16,7 @@
 // ISF include
 #include "ISF_Interfaces/ITruthSvc.h"
 #include "ISF_HepMC_Interfaces/ITruthStrategy.h"
+#include "ISF_Event/ITruthIncident.h"
 
 // DetectorDescription
 #include "AtlasDetDescr/AtlasRegion.h"
@@ -92,6 +93,9 @@ namespace ISF {
 
     /** Helper function to determine the largest vertex barcode set by the generator */
     int maxGeneratedVertexBarcode(HepMC::GenEvent *genEvent) const;
+
+    /** Helper function to classify existing GenVertex objects */
+    ISF::InteractionClass_t interactionClassification(HepMC::GenVertexPtr& vtx) const;
 
     ServiceHandle<Barcode::IBarcodeSvc> m_barcodeSvc{this, "BarcodeSvc", "", ""};           //!< The Barcode service
 
