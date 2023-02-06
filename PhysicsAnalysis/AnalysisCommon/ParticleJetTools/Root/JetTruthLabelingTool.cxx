@@ -692,7 +692,7 @@ int JetTruthLabelingTool::getLabel( const xAOD::Jet &jet, bool matchH, bool matc
     isHbb = ( nMatchB > 1 );
     isTop = ( matchTop && matchW && nMatchB > 0 && jet.m() / 1000. > m_mLowTop && (*acc_Split23)(jet) / 1000. > getTopSplit23Cut( jet.pt() / 1000. ) );
     isW = matchW && nMatchB == 0 && jet.m() / 1000. > m_mLowW && (*acc_Split12)(jet) / 1000. > getWZSplit12Cut( jet.pt() / 1000. );
-    isZ = matchZ && jet.m() / 1000. > m_mLowZ;
+    isZ = matchZ && jet.m() / 1000. > m_mLowZ && (*acc_Split12)(jet) / 1000. > getWZSplit12Cut( jet.pt() / 1000. );
   }
 
   /// This method can be expanded to include custom label priorities
