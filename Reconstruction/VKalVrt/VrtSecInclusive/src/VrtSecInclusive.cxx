@@ -9,6 +9,9 @@
 #include "VxVertex/VxTrackAtVertex.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 
+// FrameWork include(s):
+#include "StoreGate/WriteDecorHandle.h"
+
 // ROOT Classes
 #include "TMath.h"
 #include "TH1F.h"
@@ -243,6 +246,16 @@ namespace VKalVrtAthena {
       ATH_CHECK( setupNtuple() );
       
     }
+
+    // initialize keys
+    ATH_CHECK(m_eventInfoKey.initialize());
+
+    // Instantiate and initialize our event info decorator write
+    m_vertexingStatusKey = SG::WriteDecorHandleKey<xAOD::EventInfo>(m_eventInfoKey.key() + "." + "VrtSecInclusive_"+ m_jp.secondaryVerticesContainerName + m_jp.augVerString + "_status");
+    this->declare(m_vertexingStatusKey);
+    m_vertexingStatusKey.setOwner(&(*this));
+    ATH_CHECK(m_vertexingStatusKey.initialize());
+
     // 
     ATH_MSG_INFO("initialize: Exit VrtSecInclusive::initialize()");
     return StatusCode::SUCCESS; 
@@ -282,10 +295,21 @@ namespace VKalVrtAthena {
     //
     ATH_MSG_DEBUG("VrtSecInclusive execute()");
 
+    m_vertexingStatus = -1;
+
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
+    if (!eventInfo.isValid()) {
+      ATH_MSG_ERROR ("Could not retrieve EventInfo");
+      return StatusCode::FAILURE;
+    }
+
+    SG::WriteDecorHandle<xAOD::EventInfo,int> vertexingStatusDecor(m_vertexingStatusKey);
+
     // clear ntuple variables
     StatusCode sc = this->initEvent();
     if(sc.isFailure()) {
       ATH_MSG_WARNING("Problem in initEvent ");
+      vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
       return StatusCode::SUCCESS;
     }
     
@@ -294,10 +318,10 @@ namespace VKalVrtAthena {
 
     if (sc.isFailure() ) {
       ATH_MSG_WARNING("Failure in getEventInfo() ");
+      vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
       return StatusCode::SUCCESS;
     }
 
-    m_vertexingStatus = 0;
     
     ///////////////////////////////////////////////////////////////////////////
     //
@@ -369,6 +393,7 @@ namespace VKalVrtAthena {
     if( sc.isFailure() or !m_thePV ) {
       
       ATH_MSG_WARNING("processPrimaryVertices() failed");
+      vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
       return StatusCode::SUCCESS;
     }    
 
@@ -383,6 +408,7 @@ namespace VKalVrtAthena {
       
       ATH_MSG_WARNING( " > " << __FUNCTION__ << ": some other error is detected in the track selection scope."  );
       
+      vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
       return StatusCode::SUCCESS;
       
     }
@@ -399,12 +425,14 @@ namespace VKalVrtAthena {
     if( m_selectedTracks->size() < 2 ) {
       ATH_MSG_DEBUG( "execute: Too few (<2) selected reco tracks. Terminated reconstruction." );
       m_vertexingStatus = 1;
+      vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
       return StatusCode::SUCCESS;   
     }
       
     if( m_selectedTracks->size() > m_jp.SelTrkMaxCutoff ) {
       ATH_MSG_INFO( "execute: Too many selected reco tracks. Terminated reconstruction." );
       m_vertexingStatus = 2;
+      vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
       return StatusCode::SUCCESS;   
     }
       
@@ -457,17 +485,13 @@ namespace VKalVrtAthena {
       ATH_MSG_WARNING( " > " << __FUNCTION__ << ": exception detected in the vertexing scope: " << e.what() );
       m_vertexingStatus = 4;
             
+      vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
       return StatusCode::SUCCESS;
       
     }
     
-    const xAOD::EventInfo* eventInfo { nullptr };
-    sc = evtStore()->retrieve(eventInfo, "EventInfo");
-    if( sc.isFailure() ) { 
-      ATH_MSG_WARNING("Failure to retrieve EventInfo ");
-      return StatusCode::SUCCESS;
-    }
-    eventInfo->auxdecor<int>("VrtSecInclusive_"+ m_jp.secondaryVerticesContainerName + m_jp.augVerString + "_status")=m_vertexingStatus;
+    m_vertexingStatus = 0;
+    vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
     
     // Fill AANT
     if( m_jp.FillNtuple ) {
