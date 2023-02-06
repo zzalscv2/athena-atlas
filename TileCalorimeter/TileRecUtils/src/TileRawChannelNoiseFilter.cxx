@@ -14,6 +14,8 @@
 // Atlas includes
 #include "AthenaKernel/errorcheck.h"
 #include "Identifier/Identifier.h"
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/ReadCondHandle.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
 
@@ -58,8 +60,7 @@ StatusCode TileRawChannelNoiseFilter::initialize() {
 
   ATH_CHECK( m_emScaleKey.initialize() );
 
-  //=== get TileCondToolNoiseSample
-  ATH_CHECK( m_tileToolNoiseSample.retrieve() );
+  ATH_CHECK( m_sampleNoiseKey.initialize() );
 
   ATH_CHECK( m_badChannelsKey.initialize() );
 
@@ -102,8 +103,11 @@ TileRawChannelNoiseFilter::process (TileMutableRawChannelContainer& rchCont, con
   SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
   ATH_CHECK( emScale.isValid() );
 
-   SG::ReadCondHandle<TileBadChannels> badChannels(m_badChannelsKey, ctx);
+  SG::ReadCondHandle<TileBadChannels> badChannels(m_badChannelsKey, ctx);
   ATH_CHECK( badChannels.isValid() );
+
+  SG::ReadCondHandle<TileSampleNoise> sampleNoise(m_sampleNoiseKey, ctx);
+  ATH_CHECK( sampleNoise.isValid() );
 
   for (IdentifierHash hash : rchCont.GetAllCurrentHashes()) {
     TileRawChannelCollection* coll = rchCont.indexFindPtr (hash);
@@ -184,7 +188,7 @@ TileRawChannelNoiseFilter::process (TileMutableRawChannelContainer& rchCont, con
           // noise_sigma = ...
         } else {
           // take single gauss noise sigma from DB (high frequency noise)
-          noise_sigma = m_tileToolNoiseSample->getHfn(drawerIdx, chan, gain, TileRawChannelUnit::ADCcounts, ctx);
+          noise_sigma = sampleNoise->getHfn(drawerIdx, chan, gain);
         }
         
         float significance = 999.999;

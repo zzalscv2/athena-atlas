@@ -12,7 +12,7 @@
 #include "TileRecUtils/ITileRawChannelTool.h"
 #include "TileEvent/TileDigitsContainer.h"
 #include "TileConditions/ITileCondToolDspThreshold.h"
-#include "TileConditions/TileCondToolNoiseSample.h"
+#include "TileConditions/TileSampleNoise.h"
 #include "TileConditions/TileCondToolOfc.h"
 #include "TileConditions/TileCondToolTiming.h"
 #include "TileConditions/TileEMScale.h"
@@ -58,8 +58,16 @@ class TileRawChannelOF1Corrector: public extends<AthAlgTool, ITileRawChannelTool
 
     const TileHWID* m_tileHWID; //!< Pointer to TileHWID
 
-    ToolHandle<TileCondToolNoiseSample> m_tileToolNoiseSample{this,
-        "TileCondToolNoiseSample", "TileCondToolNoiseSample", "Tile noise sample tool"};
+    /**
+     * @brief Name of TileSampleNoise in condition store
+     */
+    SG::ReadCondHandleKey<TileSampleNoise> m_sampleNoiseKey{this,
+        "TileSampleNoise", "TileSampleNoise", "Input Tile sample noise"};
+    /**
+     * @brief Name of online TileSampleNoise in condition store
+     */
+    SG::ReadCondHandleKey<TileSampleNoise> m_onlineSampleNoiseKey{this,
+        "TileOnlineSampleNoise", "TileOnlineSampleNoise", "Input online Tile sample noise"};
 
     ToolHandle<ITileCondToolOfc> m_tileCondToolOfc{this,
         "TileCondToolOfc", "TileCondToolOfcCoolOF1", "Tile OFC tool"};

@@ -15,12 +15,13 @@
 #include "TileRecUtils/ITileRawChannelTool.h"
 #include "TileConditions/TileEMScale.h"
 #include "TileConditions/TileBadChannels.h"
-#include "TileConditions/TileCondToolNoiseSample.h"
+#include "TileConditions/TileSampleNoise.h"
 #include "TileEvent/TileDQstatus.h"
 
 // Atlas includes
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadCondHandleKey.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 
@@ -65,8 +66,11 @@ class TileRawChannelNoiseFilter: public extends<AthAlgTool, ITileRawChannelTool>
      SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
          "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
-    ToolHandle<TileCondToolNoiseSample> m_tileToolNoiseSample{this,
-        "TileCondToolNoiseSample", "TileCondToolNoiseSample", "Tile noise sample tool"};
+    /**
+     * @brief Name of TileSampleNoise in condition store
+     */
+    SG::ReadCondHandleKey<TileSampleNoise> m_sampleNoiseKey{this,
+        "TileSampleNoise", "TileSampleNoise", "Input Tile sample noise"};
 
     /**
      * @brief Name of TileBadChannels in condition store
