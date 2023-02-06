@@ -77,13 +77,11 @@ if rec.doESD() and recAlgs.doTrackParticleCellAssociation() and DetFlags.ID_on()
     caloCellAssociationTool = Rec__ParticleCaloCellAssociationTool(ParticleCaloExtensionTool = pcExtensionTool)
 
     topSequence += CfgMgr.TrackParticleCellAssociationAlg("TrackParticleCellAssociationAlg",
-                                                          PtCut=10000,
                                                           ParticleCaloCellAssociationTool=caloCellAssociationTool)
 
     from InDetRecExample.InDetJobProperties import InDetFlags
     if InDetFlags.doR3LargeD0() and InDetFlags.storeSeparateLargeD0Container():
         topSequence += CfgMgr.TrackParticleCellAssociationAlg("LargeD0TrackParticleCellAssociationAlg",
-                                                              PtCut=10000,
                                                               TrackParticleContainerName="InDetLargeD0TrackParticles",
                                                               ClusterContainerName="InDetLargeD0TrackParticlesAssociatedClusters",
                                                               CaloClusterCellLinkName="InDetLargeD0TrackParticlesAssociatedClusters_links",
