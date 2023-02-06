@@ -8,18 +8,6 @@
 
 // InDet
 #include "InDetTrackingGeometry/RobustTrackingGeometryBuilderImpl.h"
-// Trk interfaces
-// Trk Geometry stuff
-#include "TrkDetDescrUtils/BinnedArray.h"
-#include "TrkVolumes/VolumeBounds.h"
-#include "TrkVolumes/CylinderVolumeBounds.h"
-#include "TrkGeometry/TrackingVolume.h"
-#include "TrkGeometry/TrackingGeometry.h"
-#include "TrkGeometry/Material.h"
-#include "TrkGeometry/Layer.h"
-#include "TrkGeometry/CylinderLayer.h"
-#include "TrkGeometry/DiscLayer.h"
-#include "TrkSurfaces/DiscBounds.h"
 // Athena
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "CxxUtils/checker_macros.h"
