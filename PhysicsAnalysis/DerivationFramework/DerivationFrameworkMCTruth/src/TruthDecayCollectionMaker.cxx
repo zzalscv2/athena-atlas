@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -8,6 +8,9 @@
 // Based on TruthCollectionMaker (but simpler)
 
 #include "DerivationFrameworkMCTruth/TruthDecayCollectionMaker.h"
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteHandle.h"
+#include "StoreGate/WriteDecorHandle.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
 #include "xAODTruth/TruthVertexContainer.h"
@@ -46,20 +49,34 @@ StatusCode DerivationFramework::TruthDecayCollectionMaker::initialize()
 {
     ATH_MSG_VERBOSE("initialize() ...");
 
-    if (m_particlesKey.empty()) {
-        ATH_MSG_FATAL("No truth particle collection provided to use as a basis for new collections");
-        return StatusCode::FAILURE;
-    } else {ATH_MSG_INFO("Using " << m_particlesKey << " as the source collections for new truth collections");}
+    // Input truth particles
+    ATH_CHECK( m_particlesKey.initialize() );
+    ATH_MSG_INFO("Using " << m_particlesKey.key() << " as the input truth container key");
 
+    // Output particle/vertex containers
     if (m_collectionName.empty()) {
-        ATH_MSG_FATAL("No key provided for the new truth particle collections");
+        ATH_MSG_FATAL("No base name provided for the new truth particle/vertex containers");
         return StatusCode::FAILURE;
-    } else {ATH_MSG_INFO("New truth particle collection key: " << m_collectionName );}
+    } else {ATH_MSG_INFO("Base name for new truth particle/vertex containers: " << m_collectionName );}
+    m_outputParticlesKey = m_collectionName + "Particles";
+    ATH_CHECK(m_outputParticlesKey.initialize());
+    ATH_MSG_INFO("New truth particles container key: " << m_outputParticlesKey.key() );
+    m_outputVerticesKey = m_collectionName + "Vertices"; 
+    ATH_CHECK(m_outputVerticesKey.initialize());
+    ATH_MSG_INFO("New truth vertices container key: " << m_outputVerticesKey.key() );
 
     if (m_pdgIdsToKeep.empty() && !m_keepBHadrons && !m_keepCHadrons && !m_keepBSM) {
         ATH_MSG_FATAL("No PDG IDs provided, not keeping b- or c-hadrons or BSM particles -- what do you want?");
         return StatusCode::FAILURE;
     }
+
+    // Decorators
+    ATH_CHECK(m_originDecoratorKey.initialize());
+    ATH_CHECK(m_typeDecoratorKey.initialize());
+    ATH_CHECK(m_outcomeDecoratorKey.initialize());
+    ATH_CHECK(m_classificationDecoratorKey.initialize());
+    ATH_CHECK(m_motherIDDecoratorKey.initialize());
+    ATH_CHECK(m_daughterIDDecoratorKey.initialize());
 
     return StatusCode::SUCCESS;
 }
@@ -68,44 +85,45 @@ StatusCode DerivationFramework::TruthDecayCollectionMaker::initialize()
 // Selection and collection creation
 StatusCode DerivationFramework::TruthDecayCollectionMaker::addBranches() const
 {
+    // Event context for AthenaMT
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+     
     // Retrieve truth collections
-    const xAOD::TruthParticleContainer* importedTruthParticles(nullptr);
-    if (evtStore()->retrieve(importedTruthParticles,m_particlesKey).isFailure()) {
-        ATH_MSG_ERROR("No TruthParticle collection with name " << m_particlesKey << " found in StoreGate!");
+    SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);
+    if (!truthParticles.isValid()) {
+        ATH_MSG_ERROR("Couldn't retrieve TruthParticle collection with name " << m_particlesKey);
         return StatusCode::FAILURE;
     }
 
-    // Create the new particle containers
-    xAOD::TruthParticleContainer* newParticleCollection = new xAOD::TruthParticleContainer();
-    CHECK( evtStore()->record( newParticleCollection, m_collectionName + "Particles" ) );
-    xAOD::TruthParticleAuxContainer* newParticleAuxCollection = new xAOD::TruthParticleAuxContainer();
-    CHECK( evtStore()->record( newParticleAuxCollection, m_collectionName + "ParticlesAux." ) );
-    newParticleCollection->setStore( newParticleAuxCollection );
-    ATH_MSG_DEBUG( "Recorded new TruthParticleContainer with key: " << (m_collectionName+"Particles"));
-    // Create the new vertex containers
-    xAOD::TruthVertexContainer* newVertexCollection = new xAOD::TruthVertexContainer();
-    CHECK( evtStore()->record( newVertexCollection, m_collectionName + "Vertices" ) );
-    xAOD::TruthVertexAuxContainer* newVertexAuxCollection = new xAOD::TruthVertexAuxContainer();
-    CHECK( evtStore()->record( newVertexAuxCollection, m_collectionName + "VerticesAux." ) );
-    newVertexCollection->setStore( newVertexAuxCollection );
-    ATH_MSG_DEBUG( "Recorded new TruthVertexContainer with key: " << (m_collectionName+"Vertices"));
+    // Create the new particle containers and WriteHandles
+    SG::WriteHandle<xAOD::TruthParticleContainer> newParticlesWriteHandle(m_outputParticlesKey, ctx);
+    ATH_CHECK(newParticlesWriteHandle.record(std::make_unique<xAOD::TruthParticleContainer>(),
+                                             std::make_unique<xAOD::TruthParticleAuxContainer>()));
+    ATH_MSG_DEBUG( "Recorded new TruthParticleContainer with key: " << (m_outputParticlesKey.key()));
+    // Create the new vertex containers and WriteHandles
+    SG::WriteHandle<xAOD::TruthVertexContainer> newVerticesWriteHandle(m_outputVerticesKey, ctx);
+    ATH_CHECK(newVerticesWriteHandle.record(std::make_unique<xAOD::TruthVertexContainer>(),
+                                            std::make_unique<xAOD::TruthVertexAuxContainer>()));
+    ATH_MSG_DEBUG( "Recorded new TruthVertexContainer with key: " << (m_outputVerticesKey.key()));
 
     // List of barcodes for particles in our collection already.  Because of the way we recurse,
     // adding more particles as we go, there should be no need to add (or help from adding) the
     // barcodes of particles that we are *not* going to keep
     std::vector<int> seen_particles;
     // Go through that list of particles!
-    for (const auto * part : *importedTruthParticles){
+    for (const auto * part : *truthParticles){
         // If this passes my cuts, keep it
         if (id_ok(*part)){
-            addTruthParticle( *part, newParticleCollection, newVertexCollection, seen_particles , m_generations );
+            addTruthParticle( *part, newParticlesWriteHandle.ptr(), newVerticesWriteHandle.ptr(), seen_particles , m_generations );
         }
     } // Loop over the initial truth particle collection
     return StatusCode::SUCCESS;
 }
 
-int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const xAOD::TruthParticle& old_part, xAOD::TruthParticleContainer* part_cont, 
-                                                                      xAOD::TruthVertexContainer* vert_cont, std::vector<int>& seen_particles,
+int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const xAOD::TruthParticle& old_part, 
+                                                                      xAOD::TruthParticleContainer* part_cont, 
+                                                                      xAOD::TruthVertexContainer* vert_cont, 
+                                                                      std::vector<int>& seen_particles,
                                                                       const int generations) const {
     // See if we've seen it - note, could also do this with a unary function on the container itself
     if (std::find(seen_particles.begin(),seen_particles.end(),old_part.barcode())!=seen_particles.end()){
@@ -117,12 +135,12 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const xAOD
     // Now we have seen it
     seen_particles.push_back(old_part.barcode());
     // Set up decorators
-    const static SG::AuxElement::Decorator< unsigned int > originDecorator("classifierParticleOrigin");
-    const static SG::AuxElement::Decorator< unsigned int > typeDecorator("classifierParticleType");
-    const static SG::AuxElement::Decorator< unsigned int > outcomeDecorator("classifierParticleOutCome");
-    const static SG::AuxElement::Decorator< unsigned int > classificationDecorator("Classification");
-    const static SG::AuxElement::Decorator< int > motherIDDecorator("motherID");
-    const static SG::AuxElement::Decorator< int > daughterIDDecorator("daughterID");
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > originDecorator(m_originDecoratorKey);  
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > typeDecorator(m_typeDecoratorKey);
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > outcomeDecorator(m_outcomeDecoratorKey);
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationDecorator(m_classificationDecoratorKey);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > motherIDDecorator(m_motherIDDecoratorKey);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > daughterIDDecorator(m_daughterIDDecoratorKey);
     // Make a truth particle and add it to the container
     xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
     part_cont->push_back( xTruthParticle );
@@ -167,8 +185,10 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const xAOD
     return my_index;
 }
 
-int DerivationFramework::TruthDecayCollectionMaker::addTruthVertex( const xAOD::TruthVertex& old_vert, xAOD::TruthParticleContainer* part_cont, 
-                                                                    xAOD::TruthVertexContainer* vert_cont, std::vector<int>& seen_particles,
+int DerivationFramework::TruthDecayCollectionMaker::addTruthVertex( const xAOD::TruthVertex& old_vert, 
+                                                                    xAOD::TruthParticleContainer* part_cont, 
+                                                                    xAOD::TruthVertexContainer* vert_cont, 
+                                                                    std::vector<int>& seen_particles,
                                                                     const int generations) const {
     // Make a new vertex and add it to the container
     xAOD::TruthVertex* xTruthVertex = new xAOD::TruthVertex();
