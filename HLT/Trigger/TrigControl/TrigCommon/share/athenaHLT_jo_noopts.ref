@@ -12,6 +12,7 @@
         <fileOffset>-1</fileOffset>
         <library>DFDcmEmuBackend</library>
         <loopOverFiles>False</loopOverFiles>
+        <maxEventRateHz>-1.0</maxEventRateHz>
         <maxInputFullEventSizeMb>5</maxInputFullEventSizeMb>
         <numEvents>-1</numEvents>
         <preload>False</preload>
