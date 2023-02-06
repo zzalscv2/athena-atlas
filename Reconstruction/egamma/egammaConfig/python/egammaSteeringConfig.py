@@ -13,19 +13,12 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
 def EGammaSteeringCfg(flags,
-                      name="EGammaSteering",
-                      doAllUpstream=False):
+                      name="EGammaSteering"):
 
     mlog = logging.getLogger(name)
     mlog.info('Starting EGamma Steering')
 
     acc = ComponentAccumulator()
-
-    # upstream the main egamma reconstruction
-    from egammaConfig.egammaUpstreamConfig import (
-        egammaUpstreamCfg)
-    acc.merge(egammaUpstreamCfg(flags,
-                                doAll=doAllUpstream))
 
     # e/gamma main Reconstruction
     from egammaConfig.egammaReconstructionConfig import (
