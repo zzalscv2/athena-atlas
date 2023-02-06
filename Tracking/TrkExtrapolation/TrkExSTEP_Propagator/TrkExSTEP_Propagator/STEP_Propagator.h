@@ -357,9 +357,8 @@ public:
     bool m_detailedElossFlag{ true };
     bool m_straggling{ true };
     bool m_solenoid{ false };
-    bool m_matPropOK{
-      true
-    }; //!< Switch for turning off material effects temporarily
+    //!< Switch for turning off material effects temporarily
+    bool m_matPropOK{ true };
     bool m_brem{ false };
     bool m_includeBgradients{ true };
     bool m_includeGgradient{ false };
@@ -399,10 +398,7 @@ public:
 
     const Trk::BinnedMaterial* m_binMat{ nullptr };
     //!< cache of TrackStateOnSurfaces
-    std::vector<const Trk::TrackStateOnSurface*>* m_matstates{
-      nullptr
-    }; //!< cache of TrackStateOnSurfaces
-
+    std::vector<const Trk::TrackStateOnSurface*>* m_matstates{ nullptr };
     //!< cache of intersections
     std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>*
       m_identifiedParameters{ nullptr };
@@ -426,7 +422,7 @@ public:
     CLHEP::HepRandomEngine* m_randomEngine { nullptr };
     const EventContext& m_ctx;
 
-    Cache (const EventContext& ctx) : m_ctx (ctx) { m_currentDist.reserve(100); }
+    Cache (const EventContext& ctx) : m_ctx (ctx) {}
   };
 
 private:
