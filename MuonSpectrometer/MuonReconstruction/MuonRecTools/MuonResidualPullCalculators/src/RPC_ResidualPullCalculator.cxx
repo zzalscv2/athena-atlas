@@ -25,15 +25,16 @@ StatusCode Muon::RPC_ResidualPullCalculator::initialize()
 }
 
 //================ calculate residuals for RPC ==================================
-void Muon::RPC_ResidualPullCalculator::residuals(
-    std::array<double,5> &residuals,
+std::array<double,5>
+Muon::RPC_ResidualPullCalculator::residuals(
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkPar,
     const Trk::ResidualPull::ResidualType /*resType*/,
     const Trk::TrackState::MeasurementType) const {
-
-  if (!trkPar || !measurement) return;
+  std::array<double, 5> residuals{};
+  if (!trkPar || !measurement) return residuals;
   Identifier ID = Trk::IdentifierExtractor::extract(measurement);
+  
   if( ID.is_valid() && m_idHelperSvc->isRpc(ID) ) {
 
     if (measurement->localParameters().parameterKey() == 1) {
@@ -43,13 +44,14 @@ void Muon::RPC_ResidualPullCalculator::residuals(
     } else {
       ATH_MSG_WARNING ( "RPC ClusterOnTrack does not carry the expected "
                         << "LocalParameters structure!" );
-      return;
+      return residuals;
     }
     
   } else {
     ATH_MSG_DEBUG ( "Input problem measurement is not RPC." );
-    return;
+    return residuals;
   }
+  return residuals;
 }
 
 //================ calculate residuals and pulls for RPC ==================================

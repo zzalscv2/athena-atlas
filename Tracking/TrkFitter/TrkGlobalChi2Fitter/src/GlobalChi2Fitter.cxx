@@ -5226,8 +5226,7 @@ namespace Trk {
         
         double *errors = state->measurementErrors();
 
-        std::array<double,5> residuals;
-        m_residualPullCalculator->residuals(residuals, measbase, currenttrackpar, ResidualPull::Biased, hittype);
+        std::array<double,5> residuals = m_residualPullCalculator->residuals(measbase, currenttrackpar, ResidualPull::Biased, hittype);
         
         for (int i = 0; i < 5; i++) {
           if (
