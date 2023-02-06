@@ -113,10 +113,12 @@ StatusCode ClusterDumper::execute() {
       }
     }
     
-
-    (*m_out) << "Bad Channel data: " << std::endl;
-    for (const auto& bc : cluster.badChannelList()) {
-      (*m_out) << "   eta=" << bc.eta() << ", phi=" << bc.phi() << ", layer=" << bc.layer() << ", word=" << bc.badChannel() << std::endl;
+    SG::AuxElement::Accessor< xAOD::CaloClusterBadChannelList > a("BadChannelList");
+    if (a.isAvailable(cluster)) {
+      (*m_out) << "Bad Channel data: " << std::endl;
+      for (const auto& bc : cluster.badChannelList()) {
+	(*m_out) << "   eta=" << bc.eta() << ", phi=" << bc.phi() << ", layer=" << bc.layer() << ", word=" << bc.badChannel() << std::endl;
+      }
     }
 
     (*m_out) << "Cell-links:" << std::endl;
