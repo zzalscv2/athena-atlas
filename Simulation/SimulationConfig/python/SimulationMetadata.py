@@ -13,7 +13,7 @@ def fillAtlasMetadata(flags, dbFiller):
     #todo - only add certain ones?
     #in future this should be a ConfigFlags method...?
     for flag in sorted(flags._flagdict): #only sim
-        if "Sim" in flag:
+        if flag.startswith("Sim."):
             if "GenerationConfiguration" in flag:
                 # This flag is only temporarily defined in the SimConfigFlags module
                 continue
