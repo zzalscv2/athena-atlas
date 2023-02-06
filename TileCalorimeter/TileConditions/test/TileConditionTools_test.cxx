@@ -13,6 +13,7 @@
 #include "TileCalibBlobObjs/TileCalibDrawerFlt.h"
 #include "TileConditions/TileCalibData.h"
 #include "TileConditions/TilePulse.h"
+#include "TileConditions/TileTiming.h"
 
 #include "TestTools/FLOATassert.h"
 #include "TestTools/initGaudi.h"
@@ -40,6 +41,7 @@
 static const std::string TILE_JO_NAME("jobOptions_TileCondToolsTest.py");
 static const std::string TILE_TEST_CONDITION("TileTest");
 static const std::string TILE_PULSE_TEST_CONDITION("TilePulseTest");
+static const std::string TILE_TIMING_TEST_CONDITION("TileTimingTest");
 static const unsigned int OBJ_VERSION(0);
 static const unsigned int PULSE_OBJ_VERSION(200);
 static const unsigned int DEF_DRAWER_IDX(0);
@@ -155,6 +157,19 @@ void initTilePulseTestCondtions(const std::string& conditionName, unsigned int v
   assert(pulse.record(EVENT_RANGE, pulseData.release()).isSuccess());
 }
 
+template<class CONDDATA>
+void initTileTestCondData(const std::string& conditionName, unsigned int version, const EventContext& ctx) {
+
+  SG::WriteCondHandleKey<CONDDATA> conditionsKey{conditionName};
+  assert(conditionsKey.initialize().isSuccess());
+
+  SG::WriteCondHandle<CONDDATA> conditions{conditionsKey, ctx};
+
+  std::unique_ptr<TileCalibDataFlt> data = getTileTestCondtions(version);
+  auto pulseData = std::make_unique<CONDDATA>(std::move(data));
+  assert(conditions.record(EVENT_RANGE, pulseData.release()).isSuccess());
+}
+
 
 void testTileCondToolTiming(ISvcLocator* svcLoc) {
 
@@ -168,7 +183,7 @@ void testTileCondToolTiming(ISvcLocator* svcLoc) {
                                                                                   alg.get());
   tool->addRef();
 
-  assert(tool->setProperty("TileTiming", TILE_TEST_CONDITION));
+  assert(tool->setProperty("TileTiming", TILE_TIMING_TEST_CONDITION));
   assert(tool->initialize().isSuccess());
 
   unsigned int defaultDrawerIdx(200);
@@ -408,6 +423,8 @@ int main() {
 
   initTileTestCondtions(TILE_TEST_CONDITION, OBJ_VERSION, ctx);
   initTilePulseTestCondtions(TILE_PULSE_TEST_CONDITION, PULSE_OBJ_VERSION, ctx);
+
+  initTileTestCondData<TileTiming>(TILE_TIMING_TEST_CONDITION, OBJ_VERSION, ctx);
 
   testTileCondToolTiming(svcLoc);
   testTileCondToolAutoCr(svcLoc);

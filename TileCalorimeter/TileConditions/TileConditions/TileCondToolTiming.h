@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILECONDTOOLTIMING_H
 #define TILECONDITIONS_TILECONDTOOLTIMING_H
 
 // Tile includes
-#include "TileConditions/TileCalibData.h"
+#include "TileConditions/TileTiming.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -31,7 +31,7 @@ class TileCondToolTiming : public AthAlgTool {
 
   private:
 
-    SG::ReadCondHandleKey<TileCalibDataFlt> m_calibTimingKey{this,
+    SG::ReadCondHandleKey<TileTiming> m_timingKey{this,
         "TileTiming", "TileTiming", "Input Tile timing calibration constants"};
 
 };

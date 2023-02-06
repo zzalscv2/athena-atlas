@@ -56,4 +56,7 @@ typedef TileCondAlg<TilePulse,TileCalibDrawerFlt> TilePulseShapeCondAlg;
 #include "TileConditions/TileSampleNoise.h"
 typedef TileCondAlg<TileSampleNoise,TileCalibDrawerFlt> TileSampleNoiseCondAlg;
 
+#include "TileConditions/TileTiming.h"
+typedef TileCondAlg<TileTiming,TileCalibDrawerFlt> TileTimingCondAlg;
+
 #endif // TILECONDITIONS_TILECONDALG_H
