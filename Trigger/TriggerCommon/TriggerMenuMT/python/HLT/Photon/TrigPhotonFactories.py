@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = "ToolFactories to configure egammaAlgs to be used at the HLT" 
 __author__ = "Fernando Monticelli"
@@ -85,11 +85,11 @@ TrigTopoEgammaPhotons = AlgFactory( egammaAlgsConf.xAODEgammaBuilder,
         doElectrons = False,
         )
 
-def PrecisionPhotonCaloIsoMonitorCfg(name = 'PrecisionPhotonCaloIsoMonitoring'):
+def PrecisionPhotonCaloIsoMonitorCfg(flags, name = 'PrecisionPhotonCaloIsoMonitoring'):
     
     from TrigEgammaMonitoring import TrigEgammaMonitoringConf
     from TrigEgammaMonitoring.egammaMonitorPrecisionConfig import egammaMonitorPrecisionCfg
-    monTool = egammaMonitorPrecisionCfg(name)
+    monTool = egammaMonitorPrecisionCfg(flags, name)
 
     PrecisionPhotonCaloIsoMonitor = AlgFactory( TrigEgammaMonitoringConf.egammaMonitorPhotonAlgorithm,
             name = name,
@@ -100,11 +100,11 @@ def PrecisionPhotonCaloIsoMonitorCfg(name = 'PrecisionPhotonCaloIsoMonitoring'):
 
     return PrecisionPhotonCaloIsoMonitor()
 
-def PrecisionPhotonTopoMonitorCfg(name = 'PrecisionPhotonTopoMonitoring'):
+def PrecisionPhotonTopoMonitorCfg(flags, name = 'PrecisionPhotonTopoMonitoring'):
     
     from TrigEgammaMonitoring import TrigEgammaMonitoringConf
     from TrigEgammaMonitoring.egammaMonitorPrecisionConfig import egammaMonitorPrecisionCfg
-    monTool = egammaMonitorPrecisionCfg(name)
+    monTool = egammaMonitorPrecisionCfg(flags, name)
 
     PrecisionPhotonTopoMonitor = AlgFactory( TrigEgammaMonitoringConf.egammaMonitorPhotonAlgorithm,
             name = name,
@@ -115,11 +115,11 @@ def PrecisionPhotonTopoMonitorCfg(name = 'PrecisionPhotonTopoMonitoring'):
 
     return PrecisionPhotonTopoMonitor()
 
-def PrecisionPhotonSuperClusterMonitorCfg(name = 'PrecisionPhotonSuperClusterMonitoring'):
+def PrecisionPhotonSuperClusterMonitorCfg(flags, name = 'PrecisionPhotonSuperClusterMonitoring'):
     
     from TrigEgammaMonitoring import TrigEgammaMonitoringConf
     from TrigEgammaMonitoring.egammaMonitorPrecisionConfig import egammaMonitorSuperClusterCfg
-    monTool = egammaMonitorSuperClusterCfg(name)
+    monTool = egammaMonitorSuperClusterCfg(flags, name)
 
     PrecisionPhotonSuperClusterMonitor = AlgFactory( TrigEgammaMonitoringConf.egammaMonitorSuperClusterAlgorithm,
             name = name,

@@ -137,7 +137,7 @@ def precisionElectronRecoSequence(flags, RoIs, ion=False, doGSF=True, doLRT=Fals
     
     #online monitoring for topoEgammaBuilder_GSF
     from TriggerMenuMT.HLT.Electron.TrigElectronFactories import PrecisionElectronTopoMonitorCfg
-    PrecisionElectronRecoMonAlgo_GSF = PrecisionElectronTopoMonitorCfg("PrecisionElectronTopoMonitoring"+tag)
+    PrecisionElectronRecoMonAlgo_GSF = PrecisionElectronTopoMonitorCfg(flags, "PrecisionElectronTopoMonitoring"+tag)
     PrecisionElectronRecoMonAlgo_GSF.ElectronKey = TrigTopoEgammaAlgo_GSF.ElectronOutputName
     PrecisionElectronRecoMonAlgo_GSF.IsoVarKeys = [ '%s.ptcone20' % TrigTopoEgammaAlgo_GSF.ElectronOutputName,
                                                     '%s.ptvarcone20' % TrigTopoEgammaAlgo_GSF.ElectronOutputName,
@@ -147,7 +147,7 @@ def precisionElectronRecoSequence(flags, RoIs, ion=False, doGSF=True, doLRT=Fals
 
     #online monitoring for TrigElectronSuperClusterBuilder_GSF
     from TriggerMenuMT.HLT.Electron.TrigElectronFactories import PrecisionElectronSuperClusterMonitorCfg
-    PrecisionElectronSuperClusterMonAlgo_GSF = PrecisionElectronSuperClusterMonitorCfg("PrecisionElectronSuperClusterBuilder"+tag)
+    PrecisionElectronSuperClusterMonAlgo_GSF = PrecisionElectronSuperClusterMonitorCfg(flags, "PrecisionElectronSuperClusterBuilder"+tag)
     PrecisionElectronSuperClusterMonAlgo_GSF.InputEgammaRecContainerName = TrigSuperElectronAlgo_GSF.SuperElectronRecCollectionName
     thesequence_GSF += PrecisionElectronSuperClusterMonAlgo_GSF
 

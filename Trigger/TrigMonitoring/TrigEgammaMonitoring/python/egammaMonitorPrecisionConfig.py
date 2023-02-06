@@ -6,12 +6,12 @@ from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger("TrigEgammaMonitoring.egammaMonitorPrecisionConfig") 
 
-def egammaMonitorPrecisionCfg(name):
+def egammaMonitorPrecisionCfg(flags, name):
 
 
     if ('Electron' in name): 
         from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-        monTool = GenericMonitoringTool("MonTool_"+name)
+        monTool = GenericMonitoringTool(flags, "MonTool_"+name)
         #track variables monitoring
         monTool.defineHistogram('deltaEta0',title='Precision#Delta#eta0', path='EXPERT',xbins=40, xmin=-0.01,xmax=0.01)
         monTool.defineHistogram('deltaEta1',title='Precision#Delta#eta1', path='EXPERT',xbins=40, xmin=-0.01,xmax=0.01)
@@ -55,7 +55,7 @@ def egammaMonitorPrecisionCfg(name):
         return monTool
     else:
         from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-        monTool = GenericMonitoringTool("MonTool_"+name)
+        monTool = GenericMonitoringTool(flags, "MonTool_"+name)
 
         #Shower Shapes variables monitoring
         monTool.defineHistogram('Reta', type='TH1F', path='EXPERT',title="Reta",xbins=15, xmin=0.4, xmax=1.2)
@@ -84,12 +84,12 @@ def egammaMonitorPrecisionCfg(name):
         return monTool
 
 
-def egammaMonitorSuperClusterCfg(name):
+def egammaMonitorSuperClusterCfg(flags, name):
 
      from math import pi
     
      from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-     monTool = GenericMonitoringTool("MonTool_"+name)
+     monTool = GenericMonitoringTool(flags, "MonTool_"+name)
 
      #calo cluster variables monitoring
      monTool.defineHistogram('et',             type='TH1D', path='EXPERT', title="E_{T};              E_{T} [GeV];        Entries", xbins= 150, xmin= 0.0, xmax= 200.0)
