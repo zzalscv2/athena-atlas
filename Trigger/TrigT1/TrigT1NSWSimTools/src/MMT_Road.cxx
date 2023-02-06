@@ -26,55 +26,51 @@ MMT_Road::MMT_Road(const char sector, const int roadSize, const int UpX, const i
 
 void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
   for (const auto &hit_i : hits) {
-    int bo = hit_i->getPlane();
-    bool has_hit = false;
-    if( this->containsNeighbors(hit_i.get()) ) {
-      auto it = std::find_if(m_road_hits.begin(), m_road_hits.end(), [&bo](const auto &hit) { return (hit->getPlane() == bo); });
-      if (it != m_road_hits.end()) {
-        has_hit = true;
-        if (!hit_i->isNoise() && (*it)->isNoise()) {
-          m_road_hits.erase(it);
-          has_hit = false;
-        }
-      }
+    if (m_sector != hit_i->getSector()) continue;
 
-      if (has_hit) continue;
-      auto hit = std::make_unique<MMT_Hit>(hit_i.get());
-      m_road_hits.push_back(std::move(hit));
-      m_road_hits.back()->setAge(0);
+    int iroad = 0;
+    unsigned short int olow = 0, ohigh = 0;
+    if (hit_i->isX()) {
+      iroad = m_iroadx;
+      olow  = m_roadSizeDownX;
+      ohigh = m_roadSizeUpX;
     }
+    else if (hit_i->isU()) {
+      iroad = m_iroadu;
+      olow  = m_roadSizeDownUV;
+      ohigh = m_roadSizeUpUV;
+    }
+    else if (hit_i->isV()) {
+      iroad = m_iroadv;
+      olow  = m_roadSizeDownUV;
+      ohigh = m_roadSizeUpUV;
+    }
+    else continue;
+
+    double val = (std::abs(hit_i->getStationEta()) == 1) ? m_innerRadiusEta1 : m_innerRadiusEta2;
+    double slow  = (val + (m_roadSize*iroad     + 0.5 - olow )*m_pitch + hit_i->getShift())*hit_i->getOneOverZ();
+    double shigh = (val + (m_roadSize*(iroad+1) + 0.5 + ohigh)*m_pitch + hit_i->getShift())*hit_i->getOneOverZ();
+
+    val = hit_i->getRZSlope();
+    bool has_hit = (val > 0.) ? (val > slow && val < shigh) : (val > shigh && val < slow);
+    if (!has_hit) continue;
+
+    has_hit = false;
+    unsigned short int bo = hit_i->getPlane();
+    auto it = std::find_if(m_road_hits.begin(), m_road_hits.end(), [&bo](const auto &hit) { return (hit->getPlane() == bo); });
+    if (it != m_road_hits.end()) {
+      has_hit = true;
+      if (!hit_i->isNoise() && (*it)->isNoise()) {
+        m_road_hits.erase(it);
+        has_hit = false;
+      }
+    }
+
+    if (has_hit) continue;
+    auto hit = std::make_unique<MMT_Hit>(hit_i.get());
+    m_road_hits.push_back(std::move(hit));
+    m_road_hits.back()->setAge(0);
   }
-}
-
-bool MMT_Road::containsNeighbors(const MMT_Hit* hit) const {
-
-  if (m_sector != hit->getSector()) return false;
-
-  int iroad = 0;
-  unsigned short int olow = 0, ohigh = 0;
-  if (hit->isX()) {
-    iroad = m_iroadx;
-    olow  = m_roadSizeDownX;
-    ohigh = m_roadSizeUpX;
-  }
-  else if (hit->isU()) {
-    iroad = m_iroadu;
-    olow  = m_roadSizeDownUV;
-    ohigh = m_roadSizeUpUV;
-  }
-  else if (hit->isV()) {
-    iroad = m_iroadv;
-    olow  = m_roadSizeDownUV;
-    ohigh = m_roadSizeUpUV;
-  }
-  else return false;
-
-  double R = (std::abs(hit->getStationEta()) == 1) ? m_innerRadiusEta1 : m_innerRadiusEta2;
-  double slow  = (R + (m_roadSize*iroad     + 0.5 - olow )*m_pitch + hit->getShift())*hit->getOneOverZ();
-  double shigh = (R + (m_roadSize*(iroad+1) + 0.5 + ohigh)*m_pitch + hit->getShift())*hit->getOneOverZ();
-
-  if (hit->getRZSlope() > 0.) return (hit->getRZSlope() >= slow && hit->getRZSlope() < shigh);
-  else return (hit->getRZSlope() >= shigh && hit->getRZSlope() < slow);
 }
 
 double MMT_Road::avgSofX() const {

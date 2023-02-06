@@ -20,7 +20,6 @@ class MMT_Road {
     double avgSofUV(const int uv1, const int uv2) const;
     double avgZofUV(const int uv1, const int uv2) const;
     bool checkCoincidences(const int &bcwind) const;
-    bool containsNeighbors(const MMT_Hit* hit) const;
     unsigned int countHits() const { return m_road_hits.size(); }
     unsigned int countRealHits() const;
     unsigned int countUVHits(bool flag) const;
