@@ -24,9 +24,9 @@ StatusCode EfexMonitorAlgorithm::initialize() {
   ATH_CHECK( m_eFexEMTobKeyList.initialize() );
   ATH_CHECK( m_eFexTauTobKeyList.initialize() );
 
-  StatusCode initResult = AthMonitorAlgorithm::initialize();
+  ATH_CHECK( AthMonitorAlgorithm::initialize() );
 
-  return initResult;
+  return StatusCode::SUCCESS;
 }
 
 StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const {
