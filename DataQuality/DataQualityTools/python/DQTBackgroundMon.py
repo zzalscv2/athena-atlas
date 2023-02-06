@@ -174,11 +174,15 @@ def DQTBackgroundMonAlgConfig(flags, isOld=False):
     group.defineHistogram('nVertex;nVertex_unpairNonIso', title=pVertexT+unpairNonIsoT,
                           weight='unpairNonIso', xbins=50, xmin=0, xmax=50)
 
-    acc = helper.result()
 
-    # need background objects
     if not isOld:
+        # need background objects
+        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+        acc = ComponentAccumulator()
         from RecBackgroundAlgs.BackgroundAlgsConfig import BackgroundAlgsCfg
         acc.merge(BackgroundAlgsCfg(flags))
+        acc.merge(helper.result())
+    else:
+        acc = helper.result()
 
     return acc
