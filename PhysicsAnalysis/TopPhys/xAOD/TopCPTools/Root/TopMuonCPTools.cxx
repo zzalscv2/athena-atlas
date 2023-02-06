@@ -333,6 +333,7 @@ namespace top {
         top::check(asg::setProperty(tool, "calibMode", CP::MuonCalibTool::CalibMode::correctData_IDMS), "Failed to set calibrationMode for " + name + " tool");
       else if (m_config->muonCalibMode() == "notCorrectData_IDMS")
         top::check(asg::setProperty(tool, "calibMode", CP::MuonCalibTool::CalibMode::notCorrectData_IDMS), "Failed to set calibrationMode for " + name + " tool");
+      top::check(asg::setProperty(tool, "systematicScheme", m_config->muonSmearingSystematicModel()), "Failed to set systematicScheme for " + name + " tool");
       top::check(tool->initialize(),
                  "Failed to set initialize " + name);
     }
