@@ -376,7 +376,7 @@ def decisionTreeFromChains(flags, HLTNode, chains, allDicts, newJO):
         return ([], acc)
     
 
-    (finalDecisions, CFseq_list) = createDataFlow(chains, allDicts)
+    (finalDecisions, CFseq_list) = createDataFlow(flags, chains, allDicts)
     acc = createControlFlow(flags, HLTNode, CFseq_list)
     
 
@@ -396,7 +396,7 @@ def decisionTreeFromChains(flags, HLTNode, chains, allDicts, newJO):
     return (finalDecisions,acc)
 
 
-def createDataFlow(chains, allDicts):
+def createDataFlow(flags, chains, allDicts):
     """ Creates the filters and connect them to the menu sequences"""
 
     # find tot nsteps
@@ -482,7 +482,7 @@ def createDataFlow(chains, allDicts):
                 log.debug("Combo not implemented if it's empty step")
 
             # add HypoTools to this step (cumulating all same steps)
-            lastCFseq.createHypoTools(chain.name,chainStep)
+            lastCFseq.createHypoTools(flags,chain.name,chainStep)
 
             if len(chain.steps) == nstep+1:
                 log.debug("Adding finalDecisions for chain %s at step %d:", chain.name, nstep+1)

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from functools import lru_cache
 from AthenaCommon.CFElements import findAllAlgorithms, parOR, seqOR, seqAND, isSequence
 from AthenaCommon.Logging import logging
@@ -454,7 +454,7 @@ def generateDecisionTree(flags, HLTMenuConfig):
 
                 for sequence, chainLegDict in chainDictForSequence(chain.name, step.sequences):
                     if not isinstance(sequence, EmptyMenuSequence):
-                        hypoTool = sequence._hypoToolConf.confAndCreate( chainLegDict )
+                        hypoTool = sequence._hypoToolConf.confAndCreate( flags, chainLegDict )
                         assert isinstance(hypoTool, GaudiConfig2._configurables.Configurable), "The Hypo Tool for {} is not Configurable2".format(chain.name)
                         sequence.hypo.Alg.HypoTools.append( hypoTool )
                         # # if the chain requires special combo tools
