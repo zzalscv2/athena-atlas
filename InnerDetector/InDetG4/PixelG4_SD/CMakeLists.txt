@@ -13,8 +13,8 @@ atlas_add_library( PixelG4_SDLib
                    src/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
-                   INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} G4AtlasToolsLib InDetSimEvent MCTruth StoreGateLib )
+                   INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
+                   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} ${GEOMODEL_LIBRARIES} G4AtlasToolsLib InDetSimEvent MCTruth StoreGateLib GeoModelInterfaces GeoPrimitives)
 
 atlas_add_library( PixelG4_SD
                    src/components/*.cxx

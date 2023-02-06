@@ -12,6 +12,8 @@
 #include "SctSensorSD.h"
 #include "SctSensorGmxSD.h"
 
+#include <GeoModelRead/ReadGeoModel.h>
+
 // STL includes
 #include <exception>
 
@@ -28,9 +30,18 @@ SctSensorSDTool::SctSensorSDTool(const std::string& type, const std::string& nam
 G4VSensitiveDetector* SctSensorSDTool::makeSD() const
 {
   ATH_MSG_DEBUG( "Initializing SD" );
+  GeoModelIO::ReadGeoModel* sqlreader = nullptr;
+  StatusCode sc = m_geoDbTagSvc.retrieve();
+  if (sc.isFailure()) {
+    msg(MSG::ERROR) << "Could not locate GeoDbTagSvc" << endmsg;
+    }
+  else {
+      sqlreader = m_geoDbTagSvc->getSqliteReader();
+  }
+
   if(m_isGmxSensor)
     {
-      return new SctSensorGmxSD(name(), m_outputCollectionNames[0]);
+      return new SctSensorGmxSD(name(), m_outputCollectionNames[0],sqlreader);
     }
   else
     {

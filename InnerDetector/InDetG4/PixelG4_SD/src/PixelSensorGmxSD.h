@@ -21,6 +21,10 @@
 class G4Step;
 class G4HCofThisEvent;
 
+namespace GeoModelIO{
+  class ReadGeoModel;
+}
+
 class PixelSensorGmxSD : public G4VSensitiveDetector
 {
  FRIEND_TEST( PixelSensorGmxSDtest, Initialize );
@@ -28,7 +32,7 @@ class PixelSensorGmxSD : public G4VSensitiveDetector
  FRIEND_TEST( PixelSensorGmxSDtest, AddHit );
  public:
   // Constructor
-  PixelSensorGmxSD(const std::string& name, const std::string& hitCollectionName);
+  PixelSensorGmxSD(const std::string& name, const std::string& hitCollectionName, GeoModelIO::ReadGeoModel * sqlreader=nullptr);
 
   // Destructor
   virtual ~PixelSensorGmxSD() { /* I don't own myHitColl if all has gone well */ }
@@ -47,6 +51,8 @@ class PixelSensorGmxSD : public G4VSensitiveDetector
  private:
   // The hits collection
   SG::WriteHandle<SiHitCollection> m_HitColl;
+  GeoModelIO::ReadGeoModel * m_sqlreader;
+
 };
 
 #endif //PIXEL_G4_SD_PIXELSENSORGMXSD_H

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -25,14 +25,20 @@
 #include "CLHEP/Geometry/Transform3D.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 
+#include <GeoModelKernel/GeoFullPhysVol.h>
+#include <GeoModelRead/ReadGeoModel.h>
+
+#include <InDetSimEvent/SiHitIdHelper.h>
+
 // For make unique
 #include <memory>
 
 
-PixelSensorGmxSD::PixelSensorGmxSD(const std::string& name, const std::string& hitCollectionName)
+PixelSensorGmxSD::PixelSensorGmxSD(const std::string& name, const std::string& hitCollectionName,GeoModelIO::ReadGeoModel * sqlreader)
   : G4VSensitiveDetector( name )
   , m_HitColl( hitCollectionName )
 {
+    m_sqlreader = sqlreader;
 }
 
 // Initialize from G4 - necessary to new the write handle for now
@@ -93,11 +99,29 @@ G4bool PixelSensorGmxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist
   lP2[SiHit::xPhi] = localPosition2[1]*CLHEP::mm;
   lP2[SiHit::xDep] = localPosition2[0]*CLHEP::mm;
 
-  // For the XML-based Pixel geometry, the identifier is equivalent
-  // to the copy number of our volume.
+  TrackHelper trHelp(aStep->GetTrack());
+
+    if(m_sqlreader){
+        //if sqlite inputs, Identifier indices come from PhysVol Name  
+        std::string physVolName = myTouch->GetVolume(0)->GetName();
+
+        int hitIdOfWafer = SiHitIdHelper::GetHelper()->buildHitIdFromStringITk(0,physVolName);
+                                                           
+ 
+        m_HitColl->Emplace(lP1,
+                     lP2,
+                     edep,
+                     aStep->GetPreStepPoint()->GetGlobalTime(),//use the global time. i.e. the time from the beginning of the event
+                     trHelp.GetParticleLink(),
+                     hitIdOfWafer);
+        return true;
+        
+    }
+    // if not from SQLite, we assume that the Identifier has already been written in as the copy number 
+  // (it should have done if GeoModel building ran within Athena)
+
   int id = myTouch->GetVolume()->GetCopyNo();
 
-  TrackHelper trHelp(aStep->GetTrack());
   m_HitColl->Emplace(lP1,
                      lP2,
                      edep,
