@@ -404,11 +404,11 @@ def muEFSARecoSequence( flags, RoIs, name ):
 
   from AthenaCommon import CfgMgr
   from AthenaCommon.CFElements import parOR
-  from MuonRecExample.MuonStandalone import MuonStandaloneTrackParticleCnvAlg, MuonStationsInterSectAlg
-  from MuonCombinedRecExample.MuonCombinedAlgs import MuonCombinedMuonCandidateAlg, MuonCreatorAlg
   from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
   from MuonConfig.MuonSegmentFindingConfig import MooSegmentFinderAlgCfg, MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg, MuonSegmentFilterAlgCfg
   from MuonConfig.MuonTrackBuildingConfig import MuPatTrackBuilderCfg, EMEO_MuPatTrackBuilderCfg
+  from xAODTrackingCnv.xAODTrackingCnvConfig import MuonStandaloneTrackParticleCnvAlgCfg
+  from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCombinedMuonCandidateAlgCfg, MuonCreatorAlgCfg
 
   muEFSARecoSequence = parOR("efmsViewNode_"+name)
 
@@ -419,17 +419,6 @@ def muEFSARecoSequence( flags, RoIs, name ):
 
   muEFSARecoSequence+= EFMuonViewDataVerifier
 
-  #need MdtCondDbAlg for the MuonStationIntersectSvc (required by segment and track finding)
-  from AthenaCommon.AlgSequence import AthSequencer
-  from MuonCondAlg.MuonTopCondAlgConfigRUN2 import MdtCondDbAlg
-  if not athenaCommonFlags.isOnline:
-    condSequence = AthSequencer("AthCondSeq")
-    if not hasattr(condSequence,"MdtCondDbAlg"):
-      condSequence += MdtCondDbAlg("MdtCondDbAlg")
-    # Sets up and configures the muon alignment:
-    from MuonRecExample import MuonAlignConfig # noqa: F401
-
-  MuonStationsInterSectAlg()
   if (MuonGeometryFlags.hasSTGC() and MuonGeometryFlags.hasMM()):
       theMuonLayerHough = algorithmCAToGlobalWrapper(MuonLayerHoughAlgCfg, flags, "TrigMuonLayerHoughAlg")
       muEFSARecoSequence+=theMuonLayerHough
@@ -453,14 +442,14 @@ def muEFSARecoSequence( flags, RoIs, name ):
   else:
     TrackBuilder = algorithmCAToGlobalWrapper(MuPatTrackBuilderCfg, flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name))
 
-  xAODTrackParticleCnvAlg = MuonStandaloneTrackParticleCnvAlg("TrigMuonStandaloneTrackParticleCnvAlg_"+name)
-  theMuonCandidateAlg=MuonCombinedMuonCandidateAlg("TrigMuonCandidateAlg_"+name)
+  xAODTrackParticleCnvAlg = algorithmCAToGlobalWrapper(MuonStandaloneTrackParticleCnvAlgCfg,flags, name = "TrigMuonStandaloneTrackParticleCnvAlg_"+name)
+  theMuonCandidateAlg=algorithmCAToGlobalWrapper(MuonCombinedMuonCandidateAlgCfg, flags, name="TrigMuonCandidateAlg_"+name)
 
   msMuonName = muNames.EFSAName
   if 'FS' in name:
     msMuonName = muNamesFS.EFSAName
 
-  themuoncreatoralg = MuonCreatorAlg("TrigMuonCreatorAlg_"+name, CreateSAmuons=True, TagMaps=[], MuonContainerLocation=msMuonName,
+  themuoncreatoralg = algorithmCAToGlobalWrapper(MuonCreatorAlgCfg, flags, name="TrigMuonCreatorAlg_"+name, CreateSAmuons=True, TagMaps=[], MuonContainerLocation=msMuonName,
                                      ExtrapolatedLocation = "HLT_MSExtrapolatedMuons_"+name, MSOnlyExtrapolatedLocation = "HLT_MSOnlyExtrapolatedMuons_"+name,
                                      MuonCreatorTool = CfgGetter.getPrivateToolClone("TrigMuonCreatorToolSA", "MuonCreatorTool", TrackSummaryTool = CfgGetter.getPublicTool("MuonTrackSummaryTool")),
                                      MonTool = MuonCreatorAlgMonitoring("MuonCreatorAlgSA_"+name))
@@ -476,7 +465,7 @@ def muEFSARecoSequence( flags, RoIs, name ):
   muEFSARecoSequence+=themuoncreatoralg
 
 
-  sequenceOut = themuoncreatoralg.MuonContainerLocation
+  sequenceOut = msMuonName
 
   return muEFSARecoSequence, sequenceOut
 
