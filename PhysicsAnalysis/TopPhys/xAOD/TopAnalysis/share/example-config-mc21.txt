@@ -81,7 +81,7 @@ MuonIsolationWPs PflowTight_VarRad PflowLoose_VarRad Tight_VarRad Loose_VarRad
 MuonIsolation Tight_VarRad
 MuonIsolationSF None
 MuonIsolationLoose None
-MuonForceTrigger HLT_mu26_ivarmedium_L1MU14FCH_OR_HLT_mu50_L1MU14FCH
+MuonForceTrigger HLT_mu24_ivarmedium_OR_HLT_mu50
 
 ### Jet configuration
 JetPt 25000
