@@ -1,5 +1,4 @@
-
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 This module defines the standard JetModifier tools used in jet reco
 
@@ -27,7 +26,6 @@ from .Utilities import ldict
 from AthenaConfiguration.ComponentFactory import CompFactory
 from JetRecConfig.JetConfigFlags import jetInternalFlags
 
-
 stdJetModifiers = ldict()
 
 ########################################################################
@@ -41,7 +39,11 @@ stdJetModifiers.update(
                          ),
     Filter_ifnotESD = JetModifier("JetFilterTool","jetptfilter_{modspec}",
                                  PtMin = lambda _,modspec: 1 if jetInternalFlags.isRecoJob else int(modspec),
-                                 )
+                                 ),
+    # Filter that can be easily turned off via pre-exec for e.g. PHYSVAL
+    Filter_calibThreshold = JetModifier("JetFilterTool","jetptfilter_{modspec}",
+                                        PtMin = lambda jetdef,modspec: 1 if not jetdef._cflags.Jet.useCalibJetThreshold else int(modspec),
+                                       )
 )
 
 ########################################################################

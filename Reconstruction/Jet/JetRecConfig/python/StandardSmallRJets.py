@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from JetRecConfig.StandardJetConstits import stdConstitDic as cst
 from JetRecConfig.JetRecConfig import registerAsInputConstit
@@ -76,17 +76,9 @@ AntiKt4PV0Track = JetDefinition("AntiKt", 0.4, cst.PV0Track,
 # Standard small R reco jet definitions
 # *********************************************************
 
-# Configurable filter for PhysVal
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-filterPF = ("Filter:10000",)
-filterEM = ("Filter:15000",)
-if not ConfigFlags.Jet.useCalibJetThreshold:
-    filterPF = ("Filter:1",)
-    filterEM = ("Filter:1",)
-
 AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods+filterPF+truthmods+standardmods+("JetGhostLabel","LArHVCorr"),
+                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr"),
                                lock = True
 )
 
@@ -103,7 +95,7 @@ AntiKt4LCTopo = JetDefinition("AntiKt",0.4,cst.LCTopoOrigin,
 
 AntiKt4EMTopo = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
                               ghostdefs = standardghosts+["TrackLRT"]+flavourghosts,
-                              modifiers = calibmods+filterEM+truthmods+standardmods+clustermods+("LArHVCorr",),
+                              modifiers = calibmods+truthmods+standardmods+clustermods+("Filter_calibThreshold:15000","LArHVCorr",),
                               lock = True,
 )
 
