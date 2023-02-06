@@ -285,7 +285,11 @@ namespace VKalVrtAthena {
     std::unique_ptr< SG::AuxElement::Decorator< char > > m_decor_isAssociated;
     std::unique_ptr< SG::AuxElement::Decorator< char > > m_decor_is_svtrk_final;
     std::map< unsigned, SG::AuxElement::Decorator<float> > m_trkDecors;
-    
+
+    /** Read/Write Handle Keys **/
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey", "EventInfo", "EventInfo name"};
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_vertexingStatusKey;
+
     using IPDecoratorType = SG::AuxElement::Decorator< std::vector< std::vector<float> > >;
     std::unique_ptr< IPDecoratorType > m_decor_d0_wrtSVs;
     std::unique_ptr< IPDecoratorType > m_decor_z0_wrtSVs;
