@@ -71,11 +71,11 @@ def TrigTopoEgammaElectronCfg(name='topoEgammaBuilder_TrigElectrons'):
             )
     return TrigTopoEgammaElectron()
 
-def PrecisionElectronTopoMonitorCfg(name = 'PrecisionElectronTopoMonitoring'):
+def PrecisionElectronTopoMonitorCfg(flags, name = 'PrecisionElectronTopoMonitoring'):
     
     from TrigEgammaMonitoring import TrigEgammaMonitoringConf
     from TrigEgammaMonitoring.egammaMonitorPrecisionConfig import egammaMonitorPrecisionCfg
-    monTool = egammaMonitorPrecisionCfg(name)
+    monTool = egammaMonitorPrecisionCfg(flags, name)
 
     PrecisionElectronTopoMonitor = AlgFactory( TrigEgammaMonitoringConf.egammaMonitorElectronAlgorithm,
             name = name,
@@ -86,11 +86,11 @@ def PrecisionElectronTopoMonitorCfg(name = 'PrecisionElectronTopoMonitoring'):
 
     return PrecisionElectronTopoMonitor()
 
-def PrecisionElectronSuperClusterMonitorCfg(name = 'PrecisionElectronSuperClusterMonitoring'):
+def PrecisionElectronSuperClusterMonitorCfg(flags, name = 'PrecisionElectronSuperClusterMonitoring'):
     
     from TrigEgammaMonitoring import TrigEgammaMonitoringConf
     from TrigEgammaMonitoring.egammaMonitorPrecisionConfig import egammaMonitorSuperClusterCfg
-    monTool = egammaMonitorSuperClusterCfg(name)
+    monTool = egammaMonitorSuperClusterCfg(flags, name)
 
     PrecisionElectronSuperClusterMonitor = AlgFactory( TrigEgammaMonitoringConf.egammaMonitorSuperClusterAlgorithm,
             name = name,

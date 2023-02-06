@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CFElements import parOR
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 
 
-def precisionPhotonRecoSequence(RoIs, ion=False):
+def precisionPhotonRecoSequence(flags, RoIs, ion=False):
     """ With this function we will setup the sequence of offline EgammaAlgorithms so to make a photon for TrigEgamma 
 
     Sequence of algorithms is the following:
@@ -68,14 +68,14 @@ def precisionPhotonRecoSequence(RoIs, ion=False):
 
     #online monitoring for topoEgammaBuilder
     from TriggerMenuMT.HLT.Photon.TrigPhotonFactories import PrecisionPhotonTopoMonitorCfg
-    PrecisionPhotonRecoMonAlgo = PrecisionPhotonTopoMonitorCfg('PrecisionPhotonTopoEgammaBuilder' + tag)
+    PrecisionPhotonRecoMonAlgo = PrecisionPhotonTopoMonitorCfg(flags, 'PrecisionPhotonTopoEgammaBuilder' + tag)
     PrecisionPhotonRecoMonAlgo.PhotonKey = trigTopoEgammaAlgo.PhotonOutputName
     #PrecisionPhotonRecoMonAlgo.IsoVarKeys = [ '%s.topoetcone20' % trigTopoEgammaAlgo.PhotonOutputName, '%s.topoetcone40' % trigTopoEgammaAlgo.PhotonOutputName]
     thesequence += PrecisionPhotonRecoMonAlgo
 
     #online monitoring for TrigPhotonSuperClusterBuilder
     from TriggerMenuMT.HLT.Photon.TrigPhotonFactories import PrecisionPhotonSuperClusterMonitorCfg
-    PrecisionPhotonSuperClusterMonAlgo = PrecisionPhotonSuperClusterMonitorCfg('PrecisionPhotonSuperClusterBuilder' + tag)
+    PrecisionPhotonSuperClusterMonAlgo = PrecisionPhotonSuperClusterMonitorCfg(flags, 'PrecisionPhotonSuperClusterBuilder' + tag)
     PrecisionPhotonSuperClusterMonAlgo.InputEgammaRecContainerName = TrigEgammaKeys.precisionPhotonSuperClusterCollection
     thesequence += PrecisionPhotonSuperClusterMonAlgo
 
