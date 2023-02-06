@@ -124,7 +124,7 @@ AntiKt4EMPFlowCSSK = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
 # *********************************************************
 AntiKt4UFOCSSK = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods_noCut+("Filter:1","EMScaleMom","JetPtAssociation",)+truthmods+standardmods,
+                               modifiers = calibmods_noCut+("Filter:1","EMScaleMom","JetPtAssociation","CaloEnergiesClus",)+truthmods+standardmods,
                                ptmin = 2000,
                                lock = True
 )
@@ -135,7 +135,7 @@ AntiKt4UFOCSSK = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
 AntiKt4UFOCSSKNoPtCut = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
                                       infix = "NoPtCut",
                                       ghostdefs = standardghosts+flavourghosts,
-                                      modifiers = calibmods_noCut+("Filter:1","EMScaleMom","JetPtAssociation",)+truthmods+standardmods,
+                                      modifiers = calibmods_noCut+("Filter:1","EMScaleMom","JetPtAssociation","CaloEnergiesClus",)+truthmods+standardmods,
                                       ptmin = 1,
                                       lock = True
 )
@@ -151,7 +151,7 @@ AntiKt4EMPFlowCSSKNoPtCut = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
 AntiKt4EMPFlowNoPtCut = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                       infix = "NoPtCut",
                                       ghostdefs = standardghosts+flavourghosts,
-                                      modifiers = calibmods_lowCut+("Filter:1",)+truthmods+standardmods+("JetPtAssociation",),
+                                      modifiers = calibmods_lowCut+("Filter:1",)+truthmods+standardmods+("JetPtAssociation","CaloEnergiesClus"),
                                       ptmin = 1,
                                       lock = True
 )
