@@ -69,7 +69,7 @@ double DiTauMassTools::fixPhiRange  (const double & phi)
 }
 
 // fast approximate calculation of sin and cos
-// approximation good to 1 per mill. s²+c²=1 strictly exact though
+// approximation good to 1 per mill. c^2+s^2=1 strictly exact though
 // it is like using slightly different values of phi1 and phi2
 void DiTauMassTools::fastSinCos (const double & phiInput, double & sinPhi, double & cosPhi)
 {
@@ -96,7 +96,7 @@ void DiTauMassTools::fastSinCos (const double & phiInput, double & sinPhi, doubl
   sinPhi=y*(fastP*std::abs(y)+fastQ);
 
 
-  //note that one could use cos(phi)=sin(phi+pi/2), however then one would not have c²+s²=1 (would get it only within 1 per mille)
+  //note that one could use cos(phi)=sin(phi+pi/2), however then one would not have c^2+s^2=1 (would get it only within 1 per mille)
   // the choice here is to keep c^2+s^2=1 so everything is as one would compute c and s from a slightly (1 per mille) different angle
   cosPhi=sqrt(1-std::pow(sinPhi,2));
   if (std::abs(phi)>TMath::PiOver2()) cosPhi=-cosPhi;

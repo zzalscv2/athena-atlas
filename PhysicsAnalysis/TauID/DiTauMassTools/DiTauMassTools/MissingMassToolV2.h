@@ -76,7 +76,6 @@ class MissingMassToolV2 : virtual public IMissingMassTool, virtual public asg::A
  private:
 
   MissingMassCalculatorV2* m_MMC;
-  int m_alg_version;
   double m_n_sigma_met;
   int m_tail_cleanup;
   int m_use_verbose;
