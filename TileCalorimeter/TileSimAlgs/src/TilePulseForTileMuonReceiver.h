@@ -40,9 +40,9 @@
 #include "TileEvent/TileHitContainer.h"
 #include "TileEvent/TileDigitsContainer.h"
 #include "TileEvent/TileRawChannelContainer.h"
-#include "TileConditions/TileCondToolPulseShape.h"
+#include "TileConditions/TilePulse.h"
 #include "TileConditions/TileEMScale.h"
-#include "TileConditions/TileCondToolNoiseSample.h"
+#include "TileConditions/TileSampleNoise.h"
 #include "TileConditions/TileBadChannels.h"
 #include "TileConditions/TileCablingSvc.h"
 #include "TileConditions/TileSamplingFraction.h"
@@ -117,8 +117,11 @@ class TilePulseForTileMuonReceiver: public AthAlgorithm {
     /// Random Stream Name
     Gaudi::Property<std::string> m_randomStreamName{this, "RandomStreamName", "Tile_PulseForTileMuonReceiver", ""};
 
-    ToolHandle<TileCondToolNoiseSample> m_tileToolNoiseSample{this,
-        "TileCondToolNoiseSample", "TileCondToolNoiseSample", "Tile sample noise tool"};
+    /**
+     * @brief Name of TileSampleNoise in condition store
+     */
+    SG::ReadCondHandleKey<TileSampleNoise> m_sampleNoiseKey{this,
+        "TileSampleNoise", "TileSampleNoise", "Input Tile sample noise"};
 
    /**
      * @brief Name of TileEMScale in condition store
@@ -126,8 +129,11 @@ class TilePulseForTileMuonReceiver: public AthAlgorithm {
     SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
         "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
-    ToolHandle<TileCondToolPulseShape> m_tileToolPulseShape{this,
-        "TileCondToolPulseShape", "TileCondToolPulseShape", "Tile pulse shape tool"};
+    /**
+     * @brief Name of TilePulseShape in condition store
+     */
+    SG::ReadCondHandleKey<TilePulse> m_pulseShapeKey{this,
+        "TilePulseShape", "TileMuRcvPulseShape", "Input Tile Muon Receiver pulse shape"};
 
     /**
      * @brief Name of TileBadChannels in condition store
