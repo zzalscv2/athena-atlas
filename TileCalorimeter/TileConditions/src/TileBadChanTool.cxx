@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -237,22 +237,7 @@ TileBadChanTool::getAdcStatus(unsigned int drawerIdx, unsigned int channel, unsi
 
 
 uint32_t TileBadChanTool::encodeStatus(const TileBchStatus& status) const {
-
-  uint32_t bad;
-
-  if (status.isGood())
-    bad = 0;
-  else if (status.isBad())
-    bad = 3;
-  else if (status.isNoisy())
-    bad = 1;
-  else if (status.isAffected())
-    bad = 2;
-  else
-    bad = 4;
-
-  return bad;
-
+  return TileBadChannels::encodeStatus(status);
 }
 
 const std::vector<float>& TileBadChanTool::getTripsProbabilities(unsigned int ros, const EventContext& ctx) const {
