@@ -72,7 +72,7 @@ Sim_tf.py \
 
 mv log.EVNTtoHITS log.EVNTtoHITS.ST
 rc2=$?
-if [ $staus -eq 0 ]
+if [ $status -eq 0 ]
 then
     status=$rc2
 fi
@@ -84,8 +84,7 @@ then
     acmd.py diff-root test.MT.HITS.pool.root test.ST.HITS.pool.root \
         --error-mode resilient \
         --mode=semi-detailed \
-        --order-trees \
-        --ignore-leaves RecoTimingObj_p1_EVNTtoHITS_timings index_ref
+        --order-trees
     rc3=$?
     status=$rc3
 fi
