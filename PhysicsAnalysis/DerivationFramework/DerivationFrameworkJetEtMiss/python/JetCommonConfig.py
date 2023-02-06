@@ -38,7 +38,7 @@ def StandardJetsInDerivCfg(ConfigFlags):
     )
 
     AntiKt4EMPFlow_deriv = AntiKt4EMPFlow.clone(
-        modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","QGTagging","fJVT","NNJVT")
+        modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","QGTagging","fJVT","NNJVT","CaloEnergiesClus")
     )
 
     jetList = [AntiKt4EMTopo_deriv, AntiKt4EMPFlow_deriv,

@@ -95,6 +95,12 @@ try:
         CaloEnergies =    JetModifier("JetCaloEnergies", "jetens", 
                                       prereqs=["mod:EMScaleMom"], JetContainer = _jetname,
                                       ),
+
+        # CaloEnergiesClus is only relevant for FE-based jet collections
+        CaloEnergiesClus = JetModifier("JetCaloEnergies", "jetensclus",
+                                       prereqs=["mod:EMScaleMom"], JetContainer = _jetname,
+                                       calcClusterBasedVars = True),
+
         CaloQuality =     JetModifier("JetCaloQualityTool", "caloqual",
                                       TimingCuts = [5,10],
                                       Calculations = ["LArQuality", "N90Constituents", "FracSamplingMax",  "NegativeE", "Timing", "HECQuality", "Centroid", "AverageLArQF", "BchCorrCell"],JetContainer = _jetname),
