@@ -1,11 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <map>
+
 
 #include "TGeoManager.h"
 #include "TCanvas.h"
@@ -17,7 +14,12 @@
 #include "TGLLogicalShape.h"
 #include "TH2F.h"
 
-#define pi 3.1415926535897932384626433832795
+
+#include <string>
+#include <map>
+#include <cmath>
+#include <stdexcept>
+
 
 /********************************* constants **********************************/
 
@@ -100,18 +102,11 @@ float min_value   = 0.0;
 
 /****************************** auxiliary functions ***************************/
 
-string int2str(const int value)
-{
-	std::stringstream ss;
-	ss << value;
-
-	return ss.str();
-}
 
 Double_t eta2rad(Double_t eta)
 {
 	//return pi/2.0 - acos(tanh(eta));
-	return pi/2.0 - 2.0*atan(exp(-eta));
+	return M_PI_2 - 2.0*std::atan(std::exp(-eta));
 }
 
 void cart2polar(Float_t x1, Float_t y1, Float_t x2, Float_t y2,
@@ -119,7 +114,7 @@ void cart2polar(Float_t x1, Float_t y1, Float_t x2, Float_t y2,
 {
 	if (x1 == x2)
 	{
-		raio = fabs(x1);
+		raio = std::abs(x1);
 		
 		if (x1 > 0)
 		{
@@ -127,7 +122,7 @@ void cart2polar(Float_t x1, Float_t y1, Float_t x2, Float_t y2,
 		}
 		else
 		{
-			angu = pi;
+			angu = M_PI;
 		}
 		
 		return;	
@@ -136,23 +131,23 @@ void cart2polar(Float_t x1, Float_t y1, Float_t x2, Float_t y2,
 	Double_t a = (y1-y2)/(x1-x2);
 	Double_t b = y1 - a*x1;
 		
-	raio   = fabs(b)/sqrt(a*a + 1);
+	raio   = std::abs(b)/std::sqrt(a*a + 1.);
 	
 	if      (a < 0 && b > 0)
-		angu = atan(a) + pi/2;
+		angu = std::atan(a) + M_PI_2;
 	else if (a > 0 && b < 0)
-		angu = atan(a) - pi/2;
+		angu = std::atan(a) - M_PI_2;
 	else if (a < 0 && b < 0)
-		angu = atan(a) - pi/2;
+		angu = std::atan(a) - M_PI_2;
 	else
-		angu = atan(a) + pi/2;
+		angu = std::atan(a) + M_PI_2;
 	
-	if (angu < 0) angu = 2*pi + angu;
+	if (angu < 0) angu = 2*M_PI + angu;
 }
 
 Double_t mod(Double_t x1, Double_t y1, Double_t x2, Double_t y2)
 {
-	return sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+	return std::sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
 }
 
 void GetGeoVolumes()
@@ -640,20 +635,27 @@ bool tgGetSelected(int &sector, int &drawer, int &pmt1, int &pmt2, string *sec_n
 		cell_index = sel%39;
 
 		if (cell_index < 10)
-			*cell_name = "A"  + int2str(cell_index+1);
+			*cell_name = "A"  + std::to_string(cell_index+1);
 		else if (cell_index == 18)
 			*cell_name = "B9";
 		else if (cell_index < 31)
-			*cell_name = "D"  + int2str(cell_index-27);
+			*cell_name = "D"  + std::to_string(cell_index-27);
 		else
-			*cell_name = "BC" + int2str(cell_index-30);
+			*cell_name = "BC" + std::to_string(cell_index-30);
 
 		pmt1 = cell2pmt1[cell_index];
 		
-		if (cell_index == 27)
+		if (cell_index == 27){
 			pmt2 = 1;
-		else
+		}else{
+		  if ((cell_index <0) or (cell_index >38)){
+		    throw std::runtime_error("cell_index out of range in tgGetSelected");
+		  }
+		  if (int sameCellIdx=cell2pmt1[cell_index]-1; (sameCellIdx<0) or (sameCellIdx>47)){
+		    throw std::runtime_error("sameCellIdx out of range in tgGetSelected");
+		  }
 			pmt2 = same_cell[cell2pmt1[cell_index]-1];
+		}
 	}
 	else if (sel < 39*64 + 38*64)
 	{
@@ -663,13 +665,13 @@ bool tgGetSelected(int &sector, int &drawer, int &pmt1, int &pmt2, string *sec_n
 		cell_index = (sel-39*64)%38;
 
 		if (cell_index < 10)
-			*cell_name = "A"  + int2str(cell_index+1);
+			*cell_name = "A"  + std::to_string(cell_index+1);
 		else if (cell_index == 18)
 			*cell_name = "B9";
 		else if (cell_index < 30)
-			*cell_name = "D"  + int2str(cell_index-26);
+			*cell_name = "D"  + std::to_string(cell_index-26);
 		else
-			*cell_name = "BC" + int2str(cell_index-29);
+			*cell_name = "BC" + std::to_string(cell_index-29);
 
 		pmt1 = cell2pmt2[cell_index];
 		
@@ -686,13 +688,13 @@ bool tgGetSelected(int &sector, int &drawer, int &pmt1, int &pmt2, string *sec_n
 		cell_index = (sel-(39*64 + 38*64))%18;
 
 		if (cell_index < 5)
-			*cell_name = "A" + int2str(cell_index+12);
+			*cell_name = "A" + std::to_string(cell_index+12);
 		else if (cell_index < 10)
-			*cell_name = "B" + int2str(cell_index+6);
+			*cell_name = "B" + std::to_string(cell_index+6);
 		else if (cell_index == 10)
 			*cell_name = "C10";
 		else if (cell_index < 14)
-			*cell_name = "D" + int2str(cell_index-7);
+			*cell_name = "D" + std::to_string(cell_index-7);
 		else if (cell_index == 14)
 			*cell_name = "Gap scintilator";
 		else if (cell_index == 15)
@@ -713,13 +715,13 @@ bool tgGetSelected(int &sector, int &drawer, int &pmt1, int &pmt2, string *sec_n
 		cell_index = (sel-(39*64 + 38*64 + 18*64))%18;
 
 		if (cell_index < 5)
-			*cell_name = "A" + int2str(cell_index+12);
+			*cell_name = "A" + std::to_string(cell_index+12);
 		else if (cell_index < 10)
-			*cell_name = "B" + int2str(cell_index+6);
+			*cell_name = "B" + std::to_string(cell_index+6);
 		else if (cell_index == 10)
 			*cell_name = "C10";
 		else if (cell_index < 14)
-			*cell_name = "D" + int2str(cell_index-7);
+			*cell_name = "D" + std::to_string(cell_index-7);
 		else if (cell_index == 14)
 			*cell_name = "Gap scintilator";
 		else if (cell_index == 15)
@@ -882,11 +884,11 @@ void tgComputeHough(vector<int> *lba, vector<int> *lbc, vector<int> *eba, vector
 				}
 
 				// compute phi
-				phi = (drw-1)*2*pi/64.0 + 2*pi/128.0;
-				if (phi > pi) phi = phi - 2*pi;
+				phi = (drw-1)*2*M_PI/64.0 + 2*M_PI/128.0;
+				if (phi > M_PI) phi = phi - 2*M_PI;
 				
-				xval = -r*cos(pi - phi);
-				yval =  r*sin(pi - phi);
+				xval = -r*std::cos(M_PI - phi);
+				yval =  r*std::sin(M_PI - phi);
 				
 				if (i < 2)
 					zval =   abs_z[  pmt2line[k] -1][  pmt2cell[k] -1];
@@ -939,7 +941,7 @@ void tgComputeHough(vector<int> *lba, vector<int> *lbc, vector<int> *eba, vector
 
 	// variables initialization
 
-	amin = 0.0; amax = 2*pi;
+	amin = 0.0; amax = 2*M_PI;
 	rmin = 0.0; rmax = maxr;
 
 	NPoints = me1.size();
@@ -1015,7 +1017,7 @@ void tgComputeHough(vector<int> *lba, vector<int> *lbc, vector<int> *eba, vector
 
 	// variables initialization
 
-	amin = 0.0; amax = 2*pi;
+	amin = 0.0; amax = 2*M_PI;
 	rmin = 0.0; rmax = maxr;
 
 	NPoints = me2.size();
