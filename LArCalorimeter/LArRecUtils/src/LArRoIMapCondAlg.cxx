@@ -90,7 +90,7 @@ StatusCode LArRoIMapCondAlg::addEntry (LArRoIMap& m,
     return StatusCode::FAILURE;
   }
   HWIdentifier febId = m_onlineID->feb_Id(sigId);
-  HWIdentifier robId = febRod.getReadoutModuleID (febId); 
+  const HWIdentifier& robId = febRod.getReadoutModuleID (febId);
   m.addEntry (id, sigId, robId, hashid);
   return StatusCode::SUCCESS;
 }
