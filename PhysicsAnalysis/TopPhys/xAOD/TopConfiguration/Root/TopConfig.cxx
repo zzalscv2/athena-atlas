@@ -240,6 +240,7 @@ namespace top {
     m_muon_d0SigCut(3.0),
     m_muon_delta_z0(0.5),
     m_muonCalibMode("SetMe"),
+    m_muonSmearingSystematicModel("SetMe"),
     m_muonMuonDoSmearing2stationHighPt(true),
     m_muonMuonDoExtraSmearingHighPt(false),
     m_muonBreakDownSystematics(false),
@@ -1264,6 +1265,7 @@ namespace top {
     remove_duplicates(m_muonIsolationWPs);
     
     m_muonCalibMode = settings->value("MuonCalibrationMode");
+    m_muonSmearingSystematicModel = settings->value("MuonSmearingSystematicModel");
     bool muonDoSmearing2stationHighPt = false;
     settings->retrieve("MuonDoSmearing2stationHighPt", muonDoSmearing2stationHighPt);
     if (settings->value("MuonQuality") != "HighPt" ) muonDoSmearing2stationHighPt = false;
