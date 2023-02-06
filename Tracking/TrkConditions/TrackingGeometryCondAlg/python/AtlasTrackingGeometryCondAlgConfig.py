@@ -90,7 +90,7 @@ def GeometryBuilderCfg(flags, name='AtlasGeometryBuilder',
                 ITkTrackingGeometryBuilderCfg(flags, useCond=useCond)))
 
     ### The HGTD geometry is not available for the soon deprecated TrackingGeometrySvcConfig
-    if flags.Detector.GeometryHGTD and not useCond:
+    if flags.Detector.GeometryHGTD and useCond:
        from TrackingGeometryCondAlg.HGTD_TrackingGeometryConfig import (
             HGTD_TrackingGeometryBuilderCfg)
        kwargs.setdefault(
