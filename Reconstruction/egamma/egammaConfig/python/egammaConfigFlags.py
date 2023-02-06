@@ -1,6 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
-
-# this is based on MuonConfigFlags as a guide
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import unittest
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -155,7 +153,7 @@ def createEgammaConfigFlags():
     egcf.addFlag("Egamma.Keys.Output.EgammaLargeFWDClusters",
                  'egamma66FWDClusters')
     egcf.addFlag("Egamma.Keys.Output.EgammaLargeFWDClustersSuppESD", '')
-    
+
     return egcf
 
 
