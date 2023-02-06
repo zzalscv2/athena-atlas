@@ -72,7 +72,7 @@ Sim_tf.py \
 
 mv log.EVNTtoHITS log.EVNTtoHITS.ST
 rc2=$?
-if [ $staus -eq 0 ]
+if [ $status -eq 0 ]
 then
     status=$rc2
 fi
@@ -95,8 +95,7 @@ then
     acmd.py diff-root test.MP.HITS.pool.root test.ST.HITS.pool.root \
         --error-mode resilient \
         --mode=semi-detailed \
-        --order-trees \
-        --ignore-leaves RecoTimingObj_p1_EVNTtoHITS_timings index_ref
+        --order-trees
     rc4=$?
     status=$rc4
 fi
@@ -107,7 +106,7 @@ if [ $rc3 -eq 0 ]
 then
     ArtPackage=$1
     ArtJobName=$2
-    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --file=test.ST.HITS.pool.root
+    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --order-trees --mode=semi-detailed --file=test.ST.HITS.pool.root
     rc5=$?
     status=$rc5
 fi
