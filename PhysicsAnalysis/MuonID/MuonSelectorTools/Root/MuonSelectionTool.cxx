@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSelectorTools/MuonSelectionTool.h"
@@ -1422,7 +1422,7 @@ namespace CP {
             MS_track = mu.trackParticle(xAOD::Muon::CombinedTrackParticle);
         }
 
-        if (!MS_track || !CB_track || !MS_track) return ResolutionCategory::unclassified;
+        if (!MS_track || !CB_track) return ResolutionCategory::unclassified;
         const float etaMS = MS_track->eta();
         const float etaCB = CB_track->eta();
         const float phiMS = MS_track->phi();
