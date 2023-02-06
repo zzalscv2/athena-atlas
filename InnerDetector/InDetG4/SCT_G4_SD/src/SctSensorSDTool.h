@@ -12,6 +12,8 @@
 // Base class
 #include "G4AtlasTools/SensitiveDetectorBase.h"
 
+#include "GeoModelInterfaces/IGeoDbTagSvc.h"
+
 // STL headers
 #include <string>
 
@@ -32,6 +34,9 @@ protected:
   // Make me an SD!
   G4VSensitiveDetector* makeSD() const override final;
   bool m_isGmxSensor;
+  ServiceHandle<IGeoDbTagSvc> m_geoDbTagSvc{this, "GeoDbTagSvc", "GeoDbTagSvc", ""};
+  
+
 };
 
 #endif //SCT_G4_SD_SCTSENSORSDTOOL_H
