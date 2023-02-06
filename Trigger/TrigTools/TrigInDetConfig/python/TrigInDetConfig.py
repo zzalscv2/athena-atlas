@@ -235,9 +235,15 @@ def ftfCfg(flags, roisKey, signature, signatureName):
                                          MinHits                  = 5,
                                          useGPU                   = False,
                                          DoubletDR_Max            = 270,
+                                         LRT_Mode                 = flags.InDet.Tracking.ActiveConfig.isLRT,
                                          MonTool = monTool)
-  acc.addEventAlgo( ftf, primary=True )
 
+  if flags.InDet.Tracking.ActiveConfig.LRTD0Min is not None:
+    ftf.LRT_D0Min = flags.InDet.Tracking.ActiveConfig.LRTD0Min
+  if flags.InDet.Tracking.ActiveConfig.LRTHardPtMin is not None:
+    ftf.LRT_HardMinPt = flags.InDet.Tracking.ActiveConfig.LRTHardPtMin
+
+  acc.addEventAlgo( ftf, primary=True )
 
   return acc
 
