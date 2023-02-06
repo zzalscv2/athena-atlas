@@ -72,8 +72,7 @@ public:
       * where speed is critical. The user has to provide a std::array of size 5, which gets 
       * filled with the residuals.
       */ 
-    virtual void residuals
-      (std::array<double,5>&,
+    virtual  std::array<double,5> residuals(
        const Trk::MeasurementBase*,
        const Trk::TrackParameters*,
        const Trk::ResidualPull::ResidualType residualType,
