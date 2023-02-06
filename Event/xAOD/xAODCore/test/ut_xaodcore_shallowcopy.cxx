@@ -8,11 +8,18 @@
 
 // EDM include(s):
 #ifdef XAOD_STANDALONE
+#ifdef __clang__
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wkeyword-macro"
+#endif
 #define private public
 #define protected public
 #   include "AthLinks/DataLink.h"
 #undef protected
 #undef private
+#ifdef __clang__
+# pragma clang diagnostic pop
+#endif
 #else
 # include "AthLinks/DataLink.h"
 #endif

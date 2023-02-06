@@ -70,11 +70,11 @@ public:
 // some dummz definitions to test TEvent::keys
 namespace xAOD {
    // a test for metadata
-   class FileMetaData_v1 { int m_a, m_e; };
+   class FileMetaData_v1 { };
    typedef FileMetaData_v1 FileMetaData;
 
    // a test for event payload
-   class TrackParticle_v1 { int m_a, m_e; };
+   class TrackParticle_v1 { };
    typedef TrackParticle_v1 TrackParticle;
 }
 
