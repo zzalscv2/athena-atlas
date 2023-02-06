@@ -2987,6 +2987,65 @@ HLT_g25_tight_icaloloose_j35_0eta290_020jvt_bdl1d77_3j35a_j0_DJMASS700j35_pf_ftf
     5: 3
 HLT_g25_tight_icaloloose_j35_0eta290_020jvt_bdl1d77_3j35a_j0_DJMASS700j35_pf_ftf_presela20b85XX3a20_L1eEM26M:
   eventCount: 0
+HLT_g25_tight_icaloloose_xe40_cell_xe50_tcpufit_80mTAC_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 5
+    1: 3
+    2: 3
+    3: 1
+    4: 1
+  stepFeatures:
+    0: 5
+    1: 3
+    2: 3
+    3: 1
+    4: 1
+HLT_g25_tight_icaloloose_xe40_cell_xe50_tcpufit_xe60_nn_80mTAC_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 5
+    1: 3
+    2: 3
+    3: 1
+    4: 1
+  stepFeatures:
+    0: 5
+    1: 3
+    2: 3
+    3: 1
+    4: 1
+    5: 1
+HLT_g25_tight_icaloloose_xe40_cell_xe50_tcpufit_xe70_nn_80mTAC_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 5
+    1: 3
+    2: 3
+    3: 1
+    4: 1
+  stepFeatures:
+    0: 5
+    1: 3
+    2: 3
+    3: 1
+    4: 1
+    5: 1
+HLT_g25_tight_icaloloose_xe40_cell_xe50_tcpufit_xe80_nn_80mTAC_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 5
+    1: 3
+    2: 3
+    3: 1
+    4: 1
+  stepFeatures:
+    0: 5
+    1: 3
+    2: 3
+    3: 1
+    4: 1
+    5: 1
 HLT_g25_tight_icalomedium_L1EM20VH:
   eventCount: 1
   stepCounts:
@@ -3955,6 +4014,42 @@ HLT_g50_tight_3j25_pf_ftf_PhysicsTLA_L1EM22VHI:
   stepFeatures:
     0: 1
 HLT_g50_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 1
+HLT_g50_tight_xe40_cell_xe50_pfopufit_80mTAC_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 1
+HLT_g50_tight_xe40_cell_xe50_pfopufit_xe60_nn_80mTAC_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 1
+HLT_g50_tight_xe40_cell_xe50_pfopufit_xe70_nn_80mTAC_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 1
+HLT_g50_tight_xe40_cell_xe50_pfopufit_xe80_nn_80mTAC_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 1
+HLT_g50_tight_xe40_cell_xe60_pfopufit_80mTAC_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 1
+HLT_g50_tight_xe40_cell_xe70_pfopufit_80mTAC_L1EM22VHI:
   eventCount: 0
   stepCounts:
     0: 1
