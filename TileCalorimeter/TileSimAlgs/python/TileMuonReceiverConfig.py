@@ -19,6 +19,8 @@ def TilePulseForTileMuonReceiverCfg(flags, **kwargs):
     kwargs.setdefault('MaskBadChannels', False)
     kwargs.setdefault('UseCoolPulseShapes', True)
     kwargs.setdefault('UseCoolPedestal', False)
+    kwargs.setdefault('UseCoolNoise', False)
+    kwargs.setdefault('TilePulseShape', 'TileMuRcvPulseShape')
 
     acc = TileHitVecToCntCfg(flags)
 
@@ -37,9 +39,9 @@ def TilePulseForTileMuonReceiverCfg(flags, **kwargs):
         from RngComps.RandomServices import AthRNGSvcCfg
         kwargs['RndmSvc'] = acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name
 
-    if 'TileCondToolNoiseSample' not in kwargs:
-        from TileConditions.TileSampleNoiseConfig import TileCondToolNoiseSampleCfg
-        kwargs['TileCondToolNoiseSample'] = acc.popToolsAndMerge(TileCondToolNoiseSampleCfg(flags))
+    if kwargs['UseCoolNoise'] or kwargs['UseCoolPedestal']:
+        from TileConditions.TileSampleNoiseConfig import TileSampleNoiseCondAlgCfg
+        acc.merge( TileSampleNoiseCondAlgCfg(flags) )
 
     from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
     acc.merge( TileEMScaleCondAlgCfg(flags) )
@@ -48,17 +50,14 @@ def TilePulseForTileMuonReceiverCfg(flags, **kwargs):
         from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
         acc.merge( TileBadChannelsCondAlgCfg(flags) )
 
-    if 'TileCondToolPulseShape' not in kwargs:
-        from TileConditions.TilePulseShapeConfig import TileCondToolMuRcvPulseShapeCfg
-        pulseShapeTool = acc.popToolsAndMerge( TileCondToolMuRcvPulseShapeCfg(flags) )
-        if kwargs['UseCoolPulseShapes']:
-            kwargs['TileCondToolPulseShape'] = pulseShapeTool
-        else:
-            kwargs['TileCondToolPulseShape'] = None
-    else:
-        pulseShapeTool = kwargs['TileCondToolPulseShape']
+    if kwargs['UseCoolPulseShapes']:
+        from TileConditions.TilePulseShapeConfig import TilePulseShapeCondAlgCfg
+        acc.merge( TilePulseShapeCondAlgCfg(flags, Source='FILE', TilePulseShape=kwargs['TilePulseShape'], PulseType='MURCV') )
 
     if 'TileRawChannelBuilderMF' not in kwargs:
+        from TileConditions.TilePulseShapeConfig import TileCondToolMuRcvPulseShapeCfg
+        pulseShapeTool = acc.popToolsAndMerge( TileCondToolMuRcvPulseShapeCfg(flags) )
+
         from TileConditions.TileOFCConfig import TileCondToolOfcCfg
         ofcTool = acc.popToolsAndMerge( TileCondToolOfcCfg(flags,
                                                            OptFilterDeltaCorrelation = True,
