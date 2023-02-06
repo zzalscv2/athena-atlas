@@ -88,9 +88,9 @@ def precisionElectronSequenceCfg_lrt( flags, is_probe_leg=False):
 from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaTopoHypoTool
 
 
-def _diElectronMassComboHypoToolFromDict(chainDict, mass_range): 
+def _diElectronMassComboHypoToolFromDict(flags, chainDict, mass_range):
     name = chainDict['chainName']
-    monTool = GenericMonitoringTool("MonTool_"+name,
+    monTool = GenericMonitoringTool(flags, "MonTool_"+name,
                                     HistPath = 'EgammaMassHypo/'+name)
     monTool.defineHistogram('DphiOfProcessed', type='TH1F', path='EXPERT', title="PrecisionCalo Hypo entries per Phi;Phi", xbins=128, xmin=-3.2, xmax=3.2)
     monTool.defineHistogram('MassOfProcessed', type='TH1F', path='EXPERT', title="Mass in accepted combinations [MeV]", xbins=75, xmin=0, xmax=150000)
@@ -106,14 +106,14 @@ def _diElectronMassComboHypoToolFromDict(chainDict, mass_range):
     return tool
 
 
-def diElectronZeeMassComboHypoToolFromDict(chainDict):
-    return _diElectronMassComboHypoToolFromDict(chainDict, (50000, 130000))
+def diElectronZeeMassComboHypoToolFromDict(flags, chainDict):
+    return _diElectronMassComboHypoToolFromDict(flags, chainDict, (50000, 130000))
 
-def diElectronJpsieeMassComboHypoToolFromDict(chainDict):
-    return _diElectronMassComboHypoToolFromDict(chainDict, (1000, 5000))
+def diElectronJpsieeMassComboHypoToolFromDict(flags, chainDict):
+    return _diElectronMassComboHypoToolFromDict(flags, chainDict, (1000, 5000))
 
-def diEgammaHegMassComboHypoToolFromDict(chainDict):
-    return _diElectronMassComboHypoToolFromDict(chainDict, (90000, 1400000))
+def diEgammaHegMassComboHypoToolFromDict(flags, chainDict):
+    return _diElectronMassComboHypoToolFromDict(flags, chainDict, (90000, 1400000))
 
 def electronFastCaloCfg_fwd( flags, is_probe_leg=False ):
     return fastCaloMenuSequence_FWD(flags, "Electron", is_probe_leg=is_probe_leg)

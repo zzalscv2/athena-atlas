@@ -53,7 +53,7 @@ allowed_obs = {
 from TriggerMenuMT.HLT.MinBias.MinBiasChainConfiguration import TrigAFPDijetComboHypoToolCfg
 from TriggerMenuMT.HLT.Muon.MuonChainConfiguration import TrigMuonEFIdtpInvMassHypoToolCfg
 
-def TrigComboHypoToolFromDict(chainDict):
+def TrigComboHypoToolFromDict(flags, chainDict):
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
     chainName = chainDict['chainName']
@@ -146,7 +146,7 @@ def TrigComboHypoToolFromDict(chainDict):
         else:
             monToolName = f"MonTool_{chainName}_{chainDict['extraComboHypos'][iTopo]}"
         histNameTag = var
-        monTool = GenericMonitoringTool(monToolName)
+        monTool = GenericMonitoringTool(flags, monToolName)
         monTool.defineHistogram(histNameTag+'OfAccepted', type='TH1F', path='EXPERT',
                                 title=var+" in accepted combinations; {}".format(var),
                                 xbins=allowed_obs[var]['hist_nbins'],

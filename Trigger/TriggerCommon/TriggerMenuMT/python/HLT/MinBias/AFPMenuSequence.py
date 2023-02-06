@@ -58,12 +58,12 @@ def AFPTrkSequenceCfg(flags):
                         Hypo     = hypoAlg,
                         HypoToolGen = trigStreamerAFPHypoTool)
 
-def TestTrigAFPDijetHypoToolGen(chainDict):
+def TestTrigAFPDijetHypoToolGen(flags, chainDict):
     from TrigAFPHypo.TrigAFPHypoConf import TestTrigAFPDijetHypoTool
     hypo = TestTrigAFPDijetHypoTool(chainDict["chainName"])
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool("MonTool_AFP_Hypo")
+    monTool = GenericMonitoringTool(flags, "MonTool_AFP_Hypo")
     monTool.defineHistogram('DijetMass', type='TH1F', path='EXPERT', title="Dijet mass", xbins=100, xmin=0, xmax=2000)
     monTool.defineHistogram('DijetRapidity', type='TH1F', path='EXPERT', title="Dijet rapidity", xbins=100, xmin=-5, xmax=5)
 
