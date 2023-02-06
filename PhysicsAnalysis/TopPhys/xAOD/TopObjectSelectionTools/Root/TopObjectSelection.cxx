@@ -670,17 +670,11 @@ void TopObjectSelection::applySelectionPreOverlapRemovalJetGhostTracks() {
       const xAOD::Vertex* primaryVertex = (it_pv == vertices->cend()) ? nullptr : *it_pv;
       if (primaryVertex == nullptr) ATH_MSG_WARNING("TopObjectSelection. No primary vertex found." );
 
-
-      int counter = 0;
-
       for (auto trackPtr : *tracks) {
 
         //trackPtr -> auxdecor<char>(m_passPreORSelection) = m_trackSelection->passSelection(*trackPtr, *primaryVertex);
         trackPtr->auxdecor<char>(m_passPreORSelection) = '0';
         trackPtr -> auxdecor<char>(m_ORToolDecoration)   = trackPtr->auxdataConst<char>(m_passPreORSelection) * 2;
-
-        counter++;
-
 
       }
     }
