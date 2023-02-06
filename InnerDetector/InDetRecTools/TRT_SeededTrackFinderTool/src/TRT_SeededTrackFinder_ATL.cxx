@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,9 +11,7 @@
 // Version 10 04/12/2006 Thomas Koffas
 ///////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <iomanip>
-#include <utility>
+
 #include "GaudiKernel/MsgStream.h"
 
 #include "CLHEP/Vector/ThreeVector.h"
@@ -58,7 +56,29 @@
 //ReadHandle
 #include "StoreGate/ReadHandle.h"
 
-using namespace std;
+#include <cmath>
+#include <iostream>
+#include <iomanip>
+#include <utility>
+
+namespace{
+  double
+  getRadius(const Trk::SpacePoint* pPoint){
+    return pPoint->globalPosition().perp();
+  }
+  double
+  getZ(const Trk::SpacePoint* pPoint){
+    return pPoint->globalPosition().z();
+  }
+  
+  double 
+  thetaFromSpacePoints(const Trk::SpacePoint* pPoint0, const Trk::SpacePoint* pPoint1 ){
+    const double deltaR = getRadius(pPoint1) - getRadius(pPoint0);
+    const double deltaZ = getZ(pPoint1) - getZ(pPoint0);
+    return std::atan2(deltaR,deltaZ);
+  }
+  
+}
 
 ///////////////////////////////////////////////////////////////////
 // Constructor
@@ -85,11 +105,7 @@ InDet::TRT_SeededTrackFinder_ATL::TRT_SeededTrackFinder_ATL
   m_bremCorrect  = false            ;   //Repeat seed search after brem correction
   m_propR        = false            ;   //Clean-up seeds by propagating to the first endcap hit
   m_useassoTool  = false            ;   //Use prd-track association tool during combinatorial track finding
-  m_errorScale.push_back(1.)        ;   //Error scaling vector
-  m_errorScale.push_back(1.)        ;
-  m_errorScale.push_back(1.)        ;
-  m_errorScale.push_back(1.)        ;
-  m_errorScale.push_back(1.)        ;
+  m_errorScale   = {1., 1., 1., 1., 1.};
   m_outlierCut   = 25.              ;
   m_searchInCaloROI   = false       ;
   m_phiWidth     = .3                 ;
@@ -496,7 +512,7 @@ std::list<Trk::Track*> InDet::TRT_SeededTrackFinder_ATL::findTrack
 
     std::list<Trk::Track*>         aTracks   ; // List of tracks found per seed
     std::list<Trk::Track*>         cTracks   ; // List of cleaned tracks found per seed
-    event_data.noise().initiate();  //Initiate the noise production tool at the beginning of each seed
+    event_data.noise().reset();  //Initiate the noise production tool at the beginning of each seed
 
     //
     // --------------- filter SP to improve prediction, scale errors
@@ -543,7 +559,7 @@ std::list<Trk::Track*> InDet::TRT_SeededTrackFinder_ATL::findTrack
     // ----------------Get new better track parameters using the SP seed
     //
     if(msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Get better track parameters using the seed" << endmsg;
-    double newTheta = getNewTheta(SpVec);
+    double newTheta = thetaFromSpacePoints(SpVec[0], SpVec[1]);
 
     const AmgVector(5)& iv = initTP->parameters();
 
@@ -785,7 +801,7 @@ InDet::TRT_SeededTrackFinder_ATL::getTP(MagField::AtlasFieldCache& fieldCache, c
       //Keep as a measurement only if fit chi2 less than 25.Otherwise outlier
       float outlierCut = m_outlierCut;
       if(!fieldCache.solenoidOn()) outlierCut = 1000000.; // Increase the outlier chi2 cut if solenoid field is OFF
-      if( sct_fitChi2->chiSquared() < outlierCut && fabs(uTP->parameters()[Trk::theta]) > 0.17 ){
+      if( sct_fitChi2->chiSquared() < outlierCut && std::abs(uTP->parameters()[Trk::theta]) > 0.17 ){
 	if(msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)<<"Update worked, will update return track parameters, chi2: "<<(sct_fitChi2->chiSquared())<<endmsg;
 	event_data.noise().production(-1,1,*uTP);
 	double covAzim=event_data.noise().covarianceAzim();
@@ -794,7 +810,7 @@ InDet::TRT_SeededTrackFinder_ATL::getTP(MagField::AtlasFieldCache& fieldCache, c
 	double corIMom=event_data.noise().correctionIMom();
 	iTP = addNoise(covAzim,covPola,covIMom,corIMom,uTP,0);
       }else{
-	if(msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)<<"Outlier, did not satisfy cuts, chi2: "<<(sct_fitChi2->chiSquared())<<" "<<fabs(uTP->parameters()[Trk::theta])<<endmsg;
+	if(msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)<<"Outlier, did not satisfy cuts, chi2: "<<(sct_fitChi2->chiSquared())<<" "<<std::abs(uTP->parameters()[Trk::theta])<<endmsg;
 	event_data.noise().production(-1,1,*eTP);
 	double covAzim=event_data.noise().covarianceAzim();
 	double covPola=event_data.noise().covariancePola();
@@ -852,32 +868,7 @@ const Trk::TrackParameters* InDet::TRT_SeededTrackFinder_ATL::addNoise
   return noiseTP;
 }
 
-///////////////////////////////////////////////////////////////////
-// Get new theta estimate using the SPs from the seed
-///////////////////////////////////////////////////////////////////
 
-double
-InDet::TRT_SeededTrackFinder_ATL::getNewTheta(std::vector<const Trk::SpacePoint*>& vsp)
-{
-  double theta = 0.;
-  std::vector<double> rad;
-  std::vector<double> zl;
-
-  std::vector<const Trk::SpacePoint*>::const_iterator isp=vsp.begin(), ispe=vsp.end();
-  const std::size_t ispMax=std::distance(isp,ispe);
-  rad.reserve(ispMax);
-  zl.reserve(ispMax);
-  for(; isp!=ispe; ++isp){
-    double r = (*isp)->globalPosition().perp();
-    rad.push_back(r);
-    double z = (*isp)->globalPosition().z();
-    zl.push_back(z);
-  }
-
-  theta = atan2((rad[1]-rad[0]),(zl[1]-zl[0]));
-
-  return theta;
-}
 
 ///////////////////////////////////////////////////////////////////
 // Get new theta estimate using the SPs from the seed
@@ -893,7 +884,7 @@ bool InDet::TRT_SeededTrackFinder_ATL::checkSeed
   const AmgVector(5)& pTS=tP->parameters();
 
   ///Process only if endcap-transition region
-  if(fabs(log(tan(pTS[3]/2.)))>0.8){
+  if(std::abs(std::log(std::tan(pTS[3]/2.)))>0.8){
 
     ///Find the global z position of first endcap hit on TRT segment
     for(int it=0; it<int(tS.numberOfMeasurementBases()); it++){
@@ -910,29 +901,14 @@ bool InDet::TRT_SeededTrackFinder_ATL::checkSeed
         }
       }
     }
-
-    ///Get theta from the space points of the seed
-    double theta = 0.;
-    std::vector<double> rad;
-    std::vector<double> zl;
-    std::vector<const Trk::SpacePoint*>::const_iterator isp=vsp.begin(), ispe=vsp.end();
-    const std::size_t ispMax=std::distance(isp,ispe);
-    rad.reserve(ispMax);
-    zl.reserve(ispMax);
-    for(; isp!=ispe; ++isp){
-      double r = (*isp)->globalPosition().perp();
-      rad.push_back(r);
-      double z = (*isp)->globalPosition().z();
-      zl.push_back(z);
-    }
-    theta = atan2((rad[1]-rad[0]),(zl[1]-zl[0]));
+    double tanTheta = std::tan(thetaFromSpacePoints(vsp[0], vsp[1]));
 
     ///Propagate at the z position of 1st endcap hit on TRT segment
-    double propR = rad[1] + (gz-zl[1])*tan(theta);
+    double propR = getRadius(vsp[1]) + (gz-getZ(vsp[1]))*tanTheta;
 
     if(propR<620. || propR>1010.) isGood=false;
 
-    double zIn = gz-propR/tan(theta);
+    double zIn = gz-propR/tanTheta;
     if(zIn>300.) isGood = false;
   }
 
@@ -957,7 +933,7 @@ InDet::TRT_SeededTrackFinder_ATL::modifyTrackParameters(const Trk::TrackParamete
   double ip[5] = {pV[0], pV[1], pV[2], pV[3], pV[4]};
 
   ///Correct inverse momentum and covariance. Inverse momentum halfed, i.e. momentum doubled
-  double q = fabs(ip[4]);
+  double q = std::abs(ip[4]);
   correctionIMom = .5;
   covarianceIMom = (correctionIMom-1.)*(correctionIMom-1.)*q*q;
   ip[4] *= correctionIMom;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -15,10 +15,6 @@
 #define TRT_SeededTrackFinder_ATL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-
-#include <list>
-#include <vector>
-#include <map>
 
 //Tool Handler
 //
@@ -53,6 +49,11 @@
 //
 #include "StoreGate/ReadHandleKey.h"
 
+#include <list>
+#include <vector>
+#include <map>
+#include <iosfwd>
+
 class MsgStream;
 class TRT_ID   ;
 
@@ -74,22 +75,15 @@ namespace InDet{
   @author Thomas.Koffas@cern.ch
   */
 
-  class TRT_SeededTrackFinder_ATL :
-
-    virtual public ITRT_SeededTrackFinder, public AthAlgTool
-    {
-      ///////////////////////////////////////////////////////////////////
-      // Public methods:
-      ///////////////////////////////////////////////////////////////////
-
+  class TRT_SeededTrackFinder_ATL :virtual public ITRT_SeededTrackFinder, public AthAlgTool{
+     
     public:
 
       ///////////////////////////////////////////////////////////////////
       /** Standard tool methods                                        */
       ///////////////////////////////////////////////////////////////////
 
-      TRT_SeededTrackFinder_ATL
-	(const std::string&,const std::string&,const IInterface*);
+      TRT_SeededTrackFinder_ATL(const std::string&,const std::string&,const IInterface*);
       virtual ~TRT_SeededTrackFinder_ATL();
       virtual StatusCode initialize() override;
       virtual StatusCode finalize  () override;
@@ -99,17 +93,19 @@ namespace InDet{
       ///////////////////////////////////////////////////////////////////
 
       /** Main method. Calls private methods and returns a list of Si tracks */
-      virtual std::list<Trk::Track*> getTrack (const EventContext& ctx, InDet::ITRT_SeededTrackFinder::IEventData &event_data,
-                                               const Trk::TrackSegment&) const override;
+      virtual std::list<Trk::Track*> 
+        getTrack (const EventContext& ctx, InDet::ITRT_SeededTrackFinder::IEventData &event_data,
+                const Trk::TrackSegment&) const override;
       /** New event initialization */
       virtual std::unique_ptr<InDet::ITRT_SeededTrackFinder::IEventData>
-         newEvent(const EventContext& ctx, SiCombinatorialTrackFinderData_xk& combinatorialData) const override;
+        newEvent(const EventContext& ctx, SiCombinatorialTrackFinderData_xk& combinatorialData) const override;
       /** New region intialization */
       virtual std::unique_ptr<InDet::ITRT_SeededTrackFinder::IEventData>
          newRegion(const EventContext& ctx, SiCombinatorialTrackFinderData_xk& combinatorialData,
                    const std::vector<IdentifierHash>&,const std::vector<IdentifierHash>&) const override;
       /** End of event tasks       */
-      virtual void endEvent(InDet::ITRT_SeededTrackFinder::IEventData &event_data) const override;
+      virtual void 
+        endEvent(InDet::ITRT_SeededTrackFinder::IEventData &event_data) const override;
 
       ///////////////////////////////////////////////////////////////////
       /** Print internal tool parameters and status                    */
@@ -176,7 +172,7 @@ namespace InDet{
         "fieldCondObj", "Name of the Magnetic Field conditions object key"};
 
       /**ID TRT helper*/
-      const TRT_ID* m_trtId;
+      const TRT_ID* m_trtId{};
 
       /** Track quality cuts to be passed to the combinatorial track finder */
       double                                                   m_xi2max        ; /** max Xi2 for updators */
@@ -218,8 +214,6 @@ namespace InDet{
       /** Add material effects   */
       const Trk::TrackParameters*                            addNoise(double,double,double,double,const Trk::TrackParameters*,int) const;
 
-      /** Get better track theta initial estimate using the SPs from the seed */
-      static double                                                 getNewTheta(std::vector<const Trk::SpacePoint*>&) ;
 
       /** Check consistency of seed and TRT track segment */
       bool                                                   checkSeed(std::vector<const Trk::SpacePoint*>&,const Trk::TrackSegment&,const Trk::TrackParameters*) const;
@@ -252,8 +246,8 @@ namespace InDet{
 
       /** aalonso: Only propagete to the Si if the TRT segment is compatible with a calo measurement */
       bool isCaloCompatible(const Trk::TrackParameters&, const InDet::TRT_SeededTrackFinder_ATL::EventData &event_data) const;
-      double m_phiWidth                              ;
-      double m_etaWidth                              ;
+      double m_phiWidth{}                             ;
+      double m_etaWidth{}                              ;
 
       MsgStream&    dumpconditions(MsgStream&    out) const;
 
