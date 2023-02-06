@@ -28,7 +28,7 @@ def HGTD_TrackingGeometryBuilderCfg(flags,
         HGTD_LayerBuilderCondCfg(flags))
     result.addPublicTool(HGTD_LayerBuilder)
     
-    from TrkConfig.TrkDetDescrToolsConfig import HGTD_CylinderVolumeCreatorCfg
+    from TrackingGeometryCondAlg.TrkDetDescrToolsConfig import HGTD_CylinderVolumeCreatorCfg
     cylinderVolumeCreator = result.popToolsAndMerge(
         HGTD_CylinderVolumeCreatorCfg(flags))
     result.addPublicTool(cylinderVolumeCreator)
