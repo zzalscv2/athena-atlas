@@ -87,7 +87,7 @@ def sTGC_OverlayDigitizationToolCfg(flags, name="STGC_OverlayDigitizationTool", 
     # Operating voltage in the sTGC in kV. Sets the gas gain from electron avalance
     # Every 100V increase roughly doubles the total electric charge per hit
     kwargs.setdefault("operatingHVinkV", 2.8)
-
+    kwargs.setdefault("MergeSvc", '')
     kwargs.setdefault("OnlyUseContainerName", False)
     if 'sTGCSimHitCollection#sTGCSensitiveDetector' in flags.Input.SecondaryTypedCollections:
         kwargs.setdefault("InputObjectName", "sTGCSensitiveDetector")

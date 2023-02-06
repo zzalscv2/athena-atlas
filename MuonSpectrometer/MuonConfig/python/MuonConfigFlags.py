@@ -121,7 +121,7 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.SAMuonTrigger", False) 
 
     mcf.addFlag("Muon.enableAlignment",lambda flags: (flags.Common.Project is not Project.AthSimulation \
-                                                      and (flags.Common.ProductionStep != ProductionStep.Simulation or flags.Overlay.DataOverlay)))
+                                                      and (flags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain] or flags.Overlay.DataOverlay)))
 
     # TODO - add configuration for above    
         
