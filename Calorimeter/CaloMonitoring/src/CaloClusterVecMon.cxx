@@ -174,6 +174,7 @@ StatusCode CaloClusterVecMon::initialize() {
     return sc;
   }
 
+  ATH_CHECK( ManagedMonitorToolBase::initialize() );
   ATH_CHECK( CaloMonToolBase::initialize() );
 
   return sc;

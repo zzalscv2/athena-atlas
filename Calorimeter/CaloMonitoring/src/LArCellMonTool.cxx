@@ -181,7 +181,7 @@ StatusCode LArCellMonTool::initialize() {
   ATH_CHECK( m_cellContainerName.initialize() );
 
   //Call base-call initialize methods
-  ATH_CHECK( CaloMonToolBase::initialize() );
+  ATH_CHECK( ManagedMonitorToolBase::initialize() );
   ATH_CHECK( CaloMonToolBase::initialize() );
 
   ATH_MSG_DEBUG("LArCellMonTool::initialize() is done!");
