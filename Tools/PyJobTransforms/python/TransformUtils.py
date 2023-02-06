@@ -53,6 +53,7 @@ def processPostExec(runArgs, flags, cfg):
 
     if hasattr(runArgs, 'postExec') and runArgs.postExec and runArgs.postExec != 'NONE':
         ConfigFlags = flags  # noqa: F841
+        from AthenaConfiguration.ComponentFactory import CompFactory # noqa: F401
         for cmd in runArgs.postExec:
             exec(cmd)
 
