@@ -1883,15 +1883,15 @@ propagateRungeKuttaImpl(Cache& cache,
         const Amg::Vector3D& origin = trackIntersection->position();
         const Amg::Vector3D& direction = trackIntersection->direction();
 
-        PerigeeSurface* perigeeSurface = new PerigeeSurface(origin);
+        auto perigeeSurface = PerigeeSurface(origin);
         auto trackParameters =
-          perigeeSurface->createUniqueTrackParameters(0., 0., direction.phi(), direction.theta(), qOverP, std::nullopt);
+            Trk::Perigee(0., 0., direction.phi(), direction.theta(), qOverP,
+                         perigeeSurface, std::nullopt);
 
         const Trk::IntersectionSolution* solution =
-          qOverP == 0 ? intersect(ctx, *trackParameters, surface, Trk::MagneticFieldProperties(Trk::NoField), particle)
-                      : intersect(ctx, *trackParameters, surface, mft, particle, nullptr);
+          qOverP == 0 ? intersect(ctx, trackParameters, surface, Trk::MagneticFieldProperties(Trk::NoField), particle)
+                      : intersect(ctx, trackParameters, surface, mft, particle, nullptr);
 
-        delete perigeeSurface;
         if (!solution)
           return nullptr;
 
