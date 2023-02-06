@@ -1436,11 +1436,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         jetcollBTag = "AntiKt4EMTopoJets";
       } 
 
-      if (jetcollBTag == "AntiKt4EMTopoJets" && (MCshowerID == "421152" || MCshowerID == "700122")) { // Sherpa 2.2.8, 2.2.10 isn't available
-        ATH_MSG_WARNING ("MC/MC SFs for AntiKt4EMTopoJets are not available yet! Falling back to Sherpa 2.2.1 for the SFs.");
-        MCshowerID == "410250";
-      }
-
       toolName = "BTagSF_" + jetcollBTag + m_BtagTagger + m_BtagWP;
       m_btagEffTool.setTypeAndName("BTaggingEfficiencyTool/"+toolName);
       ATH_CHECK( m_btagEffTool.setProperty("TaggerName",     m_BtagTagger ) );
