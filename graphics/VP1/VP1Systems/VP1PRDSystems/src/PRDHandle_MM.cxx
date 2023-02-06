@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -109,7 +109,7 @@ QStringList PRDHandle_MM::clicked() const
     Identifier id = m_prd->identify();
 
     os << "MMPrepData with Identifier ["<<id.get_compact()  ;
-    os << "] = [" << (idhelper->print_to_string(id)).c_str()  ;
+    os << "] = [" << (idhelper->print_to_string(id))  ;
     os << "]\n at global position = [" << m_prd->globalPosition()<<"], local position = ["<<m_prd->localPosition()<<"].";
     // os <<"ADC: "<<m_prd->adc();
     // os <<", TDC: "<<m_prd->tdc();
