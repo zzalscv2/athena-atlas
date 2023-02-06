@@ -14,7 +14,7 @@ TrackParticleCellAssociationAlg::TrackParticleCellAssociationAlg(const std::stri
   m_caloCellAssociationTool("Rec::ParticleCaloCellAssociationTool/ParticleCaloCellAssociationTool", this) {
 
   declareProperty("ParticleCaloCellAssociationTool",m_caloCellAssociationTool);
-  declareProperty("PtCut", m_ptCut = 25000. );
+  declareProperty("PtCut", m_ptCut = 10000. );
 }
 
 TrackParticleCellAssociationAlg::~TrackParticleCellAssociationAlg()
