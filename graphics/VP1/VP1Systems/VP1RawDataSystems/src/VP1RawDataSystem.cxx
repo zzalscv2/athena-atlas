@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -41,7 +41,7 @@ public:
   template <class T>
   QList<VP1RawDataCollBase*> createSpecificCollections() {
     QList<VP1RawDataCollBase*> l;
-    foreach (QString name, T::availableCollections(theclass)) {
+    for (QString name : T::availableCollections(theclass)) {
       ensureInitCommonData();
       T * col = new T(common,name);
       col->init();
@@ -111,7 +111,7 @@ void VP1RawDataSystem::buildEventSceneGraph(StoreGateSvc*, SoSeparator *root)
   m_d->controller->collWidget()->setCollections(m_d->createCollections());
 
   //Add collections to event scenegraph:
-  foreach (VP1StdCollection* col,m_d->controller->collWidget()->collections<VP1StdCollection>())
+  for (VP1StdCollection* col : m_d->controller->collWidget()->collections<VP1StdCollection>())
     root->addChild(col->collSwitch());
 }
 

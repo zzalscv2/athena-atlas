@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -43,7 +43,7 @@
 QList<VP1StdCollection*> VP1TruthVertexCollection::createCollections(VertexSysController*controller)
 {
   QList<VP1StdCollection*> l;
-  foreach (QString key, VP1SGContentsHelper(controller->systemBase()).getKeys<McEventCollection>()) {
+  for (QString key : VP1SGContentsHelper(controller->systemBase()).getKeys<McEventCollection>()) {
     VP1TruthVertexCollection * col = new VP1TruthVertexCollection(controller,key);
     col->init();
     l << col;
@@ -170,7 +170,7 @@ public:
 
       //We handle phi cut last:
       double phi(m_vertex->position().phi());
-      foreach(VP1Interval i,m_d->controller->truthCutAllowedPhi()) {
+      for (VP1Interval i : m_d->controller->truthCutAllowedPhi()) {
 	if (i.contains(phi)||i.contains(phi+2*M_PI)||i.contains(phi-2*M_PI))
 	  return true;
       }
@@ -203,7 +203,7 @@ VP1TruthVertexCollection::VP1TruthVertexCollection(VertexSysController*controlle
 //____________________________________________________________________
 VP1TruthVertexCollection::~VP1TruthVertexCollection()
 {
-  foreach(Imp::VertexHandle*vh,m_d->vertices)
+  for (Imp::VertexHandle*vh : m_d->vertices)
     delete vh;
   delete m_d;
 }
@@ -280,7 +280,7 @@ QStringList VP1TruthVertexCollection::infoOnClicked(SoPath* pickedPath)
   SoNode * pickedNode = (pickedPath ? (pickedPath->getLength()>0?pickedPath->getNodeFromTail(0):0): 0);
 
   Imp::VertexHandle* vertexHandle(0);
-  foreach(Imp::VertexHandle* vh,m_d->vertices) {
+  for (Imp::VertexHandle* vh : m_d->vertices) {
     if (vh->line()==pickedNode) {
       vertexHandle = vh;
       break;
@@ -348,7 +348,7 @@ void VP1TruthVertexCollection::recheckAllCuts()
 {
   static_cast<IVP13DSystem*>(systemBase())->deselectAll();
   largeChangesBegin();
-  foreach(Imp::VertexHandle* vh,m_d->vertices)
+  for (Imp::VertexHandle* vh : m_d->vertices)
     vh->recheckCutStatus();
   largeChangesEnd();
 }
@@ -357,7 +357,7 @@ void VP1TruthVertexCollection::recheckAllCuts()
 void VP1TruthVertexCollection::updateAllShapes()
 {
   largeChangesBegin();
-  foreach(Imp::VertexHandle* vh,m_d->vertices)
+  for (Imp::VertexHandle* vh : m_d->vertices)
     vh->updateShape();
   largeChangesEnd();
 }
