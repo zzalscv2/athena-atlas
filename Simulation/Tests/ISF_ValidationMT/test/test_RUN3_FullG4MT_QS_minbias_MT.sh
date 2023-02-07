@@ -162,7 +162,7 @@ if [ $rc6 -eq 0 ]
 then
     ArtPackage=$1
     ArtJobName=$2
-    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName}  --order-trees --diff-root --mode=semi-detailed --file=filt.CG.HITS.pool.root
+    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName}  --order-trees --mode=semi-detailed --diff-root --file=filt.CG.HITS.pool.root
     rc8=$?
     status=$rc8
 fi
