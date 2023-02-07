@@ -528,7 +528,8 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = [], cu
             if len(step.sequences) > 1:
                 log.debug("[makeCombinedStep] combining in an already combined chain")
 
-            if comboHypo is None or step.comboHypoCfg.__name__ != "ComboHypoCfg":
+            if ( comboHypo is None or
+                 (hasattr(step.comboHypoCfg, '__name__') and step.comboHypoCfg.__name__ != "ComboHypoCfg") ):
                 comboHypo = step.comboHypoCfg
             currentStepName = step.name
             #remove redundant instances of StepN_ and merged_ (happens when merging already merged chains)

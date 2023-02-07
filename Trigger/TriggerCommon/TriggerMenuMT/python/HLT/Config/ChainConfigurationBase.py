@@ -5,6 +5,8 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
 import abc
+import inspect
+import functools
 from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, RecoFragmentsPool
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
@@ -59,7 +61,10 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
                     raise
 
         if (len(seqArray)>0):
-            return ChainStep(stepName, seqArray, [self.mult], [self.dict], comboHypoCfg=comboHypoCfg, comboToolConfs=comboTools)
+            # Bind flags to comboHypo generator if needed
+            if 'flags' in inspect.signature(comboHypoCfg).parameters:
+                comboHypoCfg = functools.partial(comboHypoCfg, flags)
+            return ChainStep(stepName, seqArray, [self.mult], [self.dict], comboHypoCfg, comboTools)
 
         try:
             if isComponentAccumulatorCfg():
