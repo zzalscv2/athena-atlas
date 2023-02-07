@@ -209,6 +209,10 @@ def fromRunArgs(runArgs):
     from PyUtils.AMITagHelperConfig import AMITagCfg
     cfg.merge(AMITagCfg(ConfigFlags, runArgs))
 
+    # Print PerfMon domain information when running detailed monitoring
+    if ConfigFlags.PerfMon.doFullMonMT:
+        cfg.printPerfmonDomains()
+
     timeConfig = time.time()
     log.info("configured in %d seconds", timeConfig - timeStart)
 

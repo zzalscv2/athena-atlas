@@ -259,7 +259,6 @@ def RecoSteering(flags):
         from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
         acc.merge(PerfMonMTSvcCfg(flags))
         log.info("---------- Configured PerfMon")
-        acc.printPerfmonDomains()
 
     return acc
 
