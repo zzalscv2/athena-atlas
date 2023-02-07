@@ -30,6 +30,8 @@ class FailedOrPassedCheck(WorkflowCheck):
                             warnings.append(line[9:].strip())
                         elif '"successful run"' in line:
                             counter += 1
+                        elif step == "DQHistogramMerge" and "Writing file: myHIST.root" in line:  # DQ merge hack
+                            counter += 1
 
             if warnings:
                 self.logger.info(f"{step} validation test step WARNINGS")
@@ -48,6 +50,13 @@ class FailedOrPassedCheck(WorkflowCheck):
 
             if counter:
                 self.logger.info(f"{step} validation test step successful")
+
+                if step == "DQHistogramMerge":
+                    self.logger.info(f"Full {step} step log:")
+                    with log.open() as file:
+                        for line in file:
+                            self.logger.print(f"  {line.strip()}")
+                    self.logger.info("-----------------------------------------------------")
             else:
                 result = False
                 if log.exists():

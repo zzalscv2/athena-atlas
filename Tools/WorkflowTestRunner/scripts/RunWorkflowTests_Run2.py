@@ -52,7 +52,7 @@ def main():
             else:
                 tests_to_run.append(QTest("q443", run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoALL"], setup, options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.DataReco:
-            tests_to_run.append(QTest("q442", run, WorkflowType.DataReco, ["RAWtoALL"], setup, options.extra_args))
+            tests_to_run.append(QTest("q442", run, WorkflowType.DataReco, ["RAWtoALL", "DQHistogramMerge"], setup, options.extra_args))
 
     # Define which perfomance checks to run
     performance_checks = get_standard_performance_checks(setup)
