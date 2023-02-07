@@ -704,7 +704,7 @@ int JetTruthLabelingTool::getLabel( const xAOD::Jet &jet, bool matchH, bool matc
     is_bb = ( nMatchB > 1 );
     isTop = ( matchTop && matchW && nMatchB > 0 && jet.m() / 1000. > m_mLowTop && split23Handle(jet) / 1000. > getTopSplit23Cut( jet.pt() / 1000. ) );
     isW = matchW && nMatchB == 0 && jet.m() / 1000. > m_mLowW && split12Handle(jet) / 1000. > getWZSplit12Cut( jet.pt() / 1000. );
-    isZ = matchZ && jet.m() / 1000. > m_mLowZ;
+    isZ = matchZ && jet.m() / 1000. > m_mLowZ && split12Handle(jet) / 1000. > getWZSplit12Cut( jet.pt() / 1000. );
   }
 
   // Use R10TruthLabel_R22v1 definition
