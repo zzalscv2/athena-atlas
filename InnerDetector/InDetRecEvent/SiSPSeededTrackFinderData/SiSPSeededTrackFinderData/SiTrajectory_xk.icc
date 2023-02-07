@@ -63,13 +63,14 @@ inline InDet::SiTrajectory_xk& InDet::SiTrajectory_xk::operator =
   return(*this);
 }
 
-inline bool InDet::SiTrajectory_xk::isLastPixel()
+inline bool InDet::SiTrajectory_xk::isLastPixel() const
 {
   if (m_elements[m_elementsMap[m_lastElement]].ndf()==2) return true;
   return false;
 } 
 
-inline const Trk::PatternTrackParameters *InDet::SiTrajectory_xk::firstParameters() {
+inline const Trk::PatternTrackParameters *InDet::SiTrajectory_xk::firstParameters() const
+{
   return m_elements[m_elementsMap[m_firstElement]].parameters();
 }
 

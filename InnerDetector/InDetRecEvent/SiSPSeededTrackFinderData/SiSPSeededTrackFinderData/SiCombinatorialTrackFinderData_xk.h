@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +141,7 @@ namespace InDet {
      * @name Getter methods using references
      */
     //@{
-    SiTrajectory_xk& trajectory();
+    SiTrajectory_xk& trajectory() {return m_trajectory;}
     Trk::TrackInfo& trackinfo();
     InDet::SiTools_xk& tools();
     std::list<Trk::Track*>& tracks();
