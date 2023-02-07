@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -19,6 +19,7 @@
 #include <AsgAnalysisAlgorithms/AsgxAODNTupleMakerAlg.h>
 #include <AsgAnalysisAlgorithms/AsgxAODMetNTupleMakerAlg.h>
 #include <AsgAnalysisAlgorithms/EventFlagSelectionAlg.h>
+#include <AsgAnalysisAlgorithms/EventStatusSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/EventSelectionByObjectFlagAlg.h>
 #include <AsgAnalysisAlgorithms/IsolationCloseByCorrectionAlg.h>
 #include <AsgAnalysisAlgorithms/KinematicHistAlg.h>
@@ -45,6 +46,7 @@ DECLARE_COMPONENT (CP::AsgViewFromSelectionAlg)
 DECLARE_COMPONENT (CP::AsgxAODNTupleMakerAlg)
 DECLARE_COMPONENT (CP::AsgxAODMetNTupleMakerAlg)
 DECLARE_COMPONENT (CP::EventFlagSelectionAlg)
+DECLARE_COMPONENT (CP::EventStatusSelectionAlg)
 DECLARE_COMPONENT (CP::EventSelectionByObjectFlagAlg)
 DECLARE_COMPONENT (CP::IsolationCloseByCorrectionAlg)
 DECLARE_COMPONENT (CP::KinematicHistAlg)

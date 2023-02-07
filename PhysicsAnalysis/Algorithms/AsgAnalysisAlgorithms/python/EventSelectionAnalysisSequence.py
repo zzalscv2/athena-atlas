@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # @author Tadej Novak
 
@@ -47,7 +47,14 @@ def makeEventSelectionAnalysisSequence( dataType,
 
     # Set up the event cleaning selection:
     if runEventCleaning:
-        alg = createAlgorithm( 'CP::EventFlagSelectionAlg', 'EventFlagSelectorAlg' )
+        if dataType == 'data':
+            alg = createAlgorithm( 'CP::EventStatusSelectionAlg', 'EventStatusSelectionAlg' )
+            alg.FilterKey = 'EventErrorState'
+            alg.FilterDescription = 'selecting events without any error state set'
+
+            seq.append( alg, inputPropName = None )
+
+        alg = createAlgorithm( 'CP::EventFlagSelectionAlg', 'EventFlagSelectionAlg' )
         alg.FilterKey = 'JetCleaning'
         alg.FilterDescription = 'selecting events passing DFCommonJets_eventClean_LooseBad'
         alg.selectionFlags = ['DFCommonJets_eventClean_LooseBad,as_char']
