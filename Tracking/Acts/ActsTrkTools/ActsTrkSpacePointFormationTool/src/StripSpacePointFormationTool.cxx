@@ -216,9 +216,9 @@ namespace ActsTrk {
     }
 
     void StripSpacePointFormationTool::fillStripSpacePoints(
-        std::array<const InDetDD::SiDetectorElement*, nNeighbours> elements,
-        std::array<std::vector<std::pair<const xAOD::StripCluster*, size_t>>, nNeighbours> clusters,
-        std::array<double, 14> overlapExtents,
+        const std::array<const InDetDD::SiDetectorElement*, nNeighbours>& elements,
+        const std::array<std::vector<std::pair<const xAOD::StripCluster*, size_t>>, nNeighbours>& clusters,
+        const std::array<double, 14>& overlapExtents,
         const Amg::Vector3D& beamSpotVertex,
         ActsTrk::SpacePointContainer& spacePoints,
         ActsTrk::SpacePointData& spacePointData,
@@ -277,7 +277,7 @@ namespace ActsTrk {
             auto ends = getStripEnds(cluster_index.first, element, stripIndex);
             const auto& localPos = cluster_index.first->localPosition<1>();
             StripInformationHelper stripInfo(ends.first, ends.second, beamSpotVertex, localPos(0, 0), cluster_index.second, stripIndex);
-            stripInfos.push_back(stripInfo);
+            stripInfos.push_back( std::move(stripInfo) );
         }
 
         double  limit  = 1. + m_stripLengthTolerance;
@@ -347,7 +347,8 @@ namespace ActsTrk {
                 double min = overlapExtents[4*currentIndex-10];
                 double max = overlapExtents[4*currentIndex- 9];
 
-                size_t minStrip, maxStrip = 0;
+                std::size_t minStrip = 0;
+                std::size_t maxStrip = 0;
 
                 if (m_stripGapParameter != 0.) {
                     updateRange(element, currentElement, slimit, min, max);

@@ -65,9 +65,9 @@ namespace ActsTrk {
 
         /// @name Production of space points
         //@{
-        void fillStripSpacePoints(std::array<const InDetDD::SiDetectorElement*, nNeighbours> neighbourElements,
-                                  std::array<std::vector<std::pair<const xAOD::StripCluster*, size_t>>, nNeighbours> neighbourClusters,
-                                  std::array<double, 14> overlapExtents,
+        void fillStripSpacePoints(const std::array<const InDetDD::SiDetectorElement*, nNeighbours>& neighbourElements,
+                                  const std::array<std::vector<std::pair<const xAOD::StripCluster*, size_t>>, nNeighbours>& neighbourClusters,
+                                  const std::array<double, 14>& overlapExtents,
                                   const Amg::Vector3D& beamSpotVertex,
                                   ActsTrk::SpacePointContainer& spacePoints,
                                   ActsTrk::SpacePointData& spacePointData,
