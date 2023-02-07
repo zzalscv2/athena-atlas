@@ -21,6 +21,8 @@ include("DerivationFrameworkBPhys/configureVertexing.py")
 BPHY23_VertexTools = BPHYVertexTools("BPHY23")
 
 # mass bounds and constants used in the following
+X_hi = 141000.0
+
 Jpsi_lo = 2600.0
 Jpsi_hi = 3500.0
 Zc_lo = 3650.0
@@ -618,7 +620,7 @@ for i in range(len(list_2trk0trk_obj)):
     list_2trk0trk_obj[i].PsiVertices              = list_2trk0trk_psiInput[i]
     list_2trk0trk_obj[i].NumberOfPsiDaughters     = 4
     list_2trk0trk_obj[i].MassLowerCut             = 0.
-    list_2trk0trk_obj[i].MassUpperCut             = 31000.
+    list_2trk0trk_obj[i].MassUpperCut             = X_hi
     list_2trk0trk_obj[i].Chi2Cut                  = 30.
     list_2trk0trk_obj[i].MaxPsiCandidates         = 15
     list_2trk0trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
@@ -676,7 +678,7 @@ for i in range(len(list_1trk0trk_obj)):
     list_1trk0trk_obj[i].PsiVertices              = list_1trk0trk_psiInput[i]
     list_1trk0trk_obj[i].NumberOfPsiDaughters     = 3
     list_1trk0trk_obj[i].MassLowerCut             = 0.
-    list_1trk0trk_obj[i].MassUpperCut             = 31000.
+    list_1trk0trk_obj[i].MassUpperCut             = X_hi
     list_1trk0trk_obj[i].Chi2Cut                  = 30.
     list_1trk0trk_obj[i].MaxPsiCandidates         = 15
     list_1trk0trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
@@ -742,7 +744,7 @@ for i in range(len(list_1trk1trk_obj)):
     list_1trk1trk_obj[i].NumberOfPsi1Daughters    = 3
     list_1trk1trk_obj[i].NumberOfPsi2Daughters    = 3
     list_1trk1trk_obj[i].MassLowerCut             = 0.
-    list_1trk1trk_obj[i].MassUpperCut             = 31000.
+    list_1trk1trk_obj[i].MassUpperCut             = X_hi
     list_1trk1trk_obj[i].Chi2CutPsi1              = 12.
     list_1trk1trk_obj[i].Chi2CutPsi2              = 12.
     list_1trk1trk_obj[i].Chi2Cut                  = 30.
@@ -827,7 +829,7 @@ for i in range(len(list_2trk1trk_obj)):
     list_2trk1trk_obj[i].NumberOfPsi1Daughters    = 4
     list_2trk1trk_obj[i].NumberOfPsi2Daughters    = 3
     list_2trk1trk_obj[i].MassLowerCut             = 0.
-    list_2trk1trk_obj[i].MassUpperCut             = 31000.
+    list_2trk1trk_obj[i].MassUpperCut             = X_hi
     list_2trk1trk_obj[i].Chi2CutPsi1              = 10.
     list_2trk1trk_obj[i].Chi2CutPsi2              = 12.
     list_2trk1trk_obj[i].Chi2Cut                  = 30.
@@ -909,7 +911,7 @@ for i in range(len(list_2trk2trk_obj)):
     list_2trk2trk_obj[i].NumberOfPsi1Daughters    = 4
     list_2trk2trk_obj[i].NumberOfPsi2Daughters    = 4
     list_2trk2trk_obj[i].MassLowerCut             = 0.
-    list_2trk2trk_obj[i].MassUpperCut             = 31000.
+    list_2trk2trk_obj[i].MassUpperCut             = X_hi
     list_2trk2trk_obj[i].Chi2CutPsi1              = 10.
     list_2trk2trk_obj[i].Chi2CutPsi2              = 10.
     list_2trk2trk_obj[i].Chi2Cut                  = 30.
