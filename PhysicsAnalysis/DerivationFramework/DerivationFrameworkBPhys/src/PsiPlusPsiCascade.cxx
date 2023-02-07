@@ -489,8 +489,8 @@ namespace DerivationFramework {
     if(selectedPsi2Candidates.size()<1) return StatusCode::SUCCESS;
 
     std::sort( selectedPsi2Candidates.begin(), selectedPsi2Candidates.end(), [](const xAOD::Vertex* a, const xAOD::Vertex* b) { return a->chiSquared()/a->numberDoF() < b->chiSquared()/b->numberDoF(); } );
-    if(m_maxPsi1Candidates>0 && selectedPsi2Candidates.size()>m_maxPsi1Candidates) {
-      selectedPsi2Candidates.erase(selectedPsi2Candidates.begin()+m_maxPsi1Candidates, selectedPsi2Candidates.end());
+    if(m_maxPsi2Candidates>0 && selectedPsi2Candidates.size()>m_maxPsi2Candidates) {
+      selectedPsi2Candidates.erase(selectedPsi2Candidates.begin()+m_maxPsi2Candidates, selectedPsi2Candidates.end());
     }
 
     // Select the Psi1 candidates before calling cascade fit
