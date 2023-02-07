@@ -33,23 +33,17 @@ if (NOT SIMULATIONBASE)
         SCRIPT python -m InDetConfig.ITkTrackRecoConfig --norun
         POST_EXEC_SCRIPT nopost.sh)
 
-    atlas_add_test( VertexFindingConfigGaussAgaptive_test
-        SCRIPT python -m InDetConfig.InDetPriVxFinderConfig  GaussAdaptiveMultiFinding
-        POST_EXEC_SCRIPT nopost.sh)
-
     atlas_add_test( VertexFindingConfigActsGaussAgaptive_test
         SCRIPT python -m InDetConfig.InDetPriVxFinderConfig ActsGaussAdaptiveMultiFinding
         POST_EXEC_SCRIPT nopost.sh)
-
-        atlas_add_test( VertexFindingConfigAdaptive_test
-        SCRIPT python -m InDetConfig.InDetPriVxFinderConfig AdaptiveMultiFinding
-        POST_EXEC_SCRIPT nopost.sh) 
 
     atlas_add_test( VertexFindingConfigIterative_test
         SCRIPT python -m InDetConfig.InDetPriVxFinderConfig IterativeFinding
         POST_EXEC_SCRIPT nopost.sh)
 
-    atlas_add_test( VertexFindingConfigGaussIterative_test
-        SCRIPT python -m InDetConfig.InDetPriVxFinderConfig GaussIterativeFinding
-        POST_EXEC_SCRIPT nopost.sh)
+    atlas_add_test( VertexFindingConfigFastIterative_test
+        SCRIPT python -m InDetConfig.InDetPriVxFinderConfig FastIterativeFinding
+	POST_EXEC_SCRIPT nopost.sh)
+
+
 endif()

@@ -101,12 +101,8 @@ if __name__ == "__main__":
         flags.Tracking.PriVertex.setup = VertexSetup.ActsGaussAMVF
     elif "IterativeFinding" in sys.argv:
         flags.Tracking.PriVertex.setup = VertexSetup.IVF
-    elif "GaussIterativeFinding" in sys.argv:
-        flags.Tracking.PriVertex.setup = VertexSetup.GaussIVF
-    elif "AdaptiveMultiFinding" in sys.argv:
-        flags.Tracking.PriVertex.setup = VertexSetup.AMVF
-    elif "GaussAdaptiveMultiFinding" in sys.argv:
-        flags.Tracking.PriVertex.setup = VertexSetup.GaussAMVF
+    elif "FastIterativeFinding" in sys.argv:
+        flags.Tracking.PriVertex.setup = VertexSetup.FastIVF
     flags.lock()
 
     acc = MainServicesCfg(flags)
