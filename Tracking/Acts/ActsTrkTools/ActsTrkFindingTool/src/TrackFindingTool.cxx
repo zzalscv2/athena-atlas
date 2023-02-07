@@ -59,7 +59,7 @@ namespace
   gainMatrixUpdate(const Acts::GeometryContext &gctx,
                    typename Acts::MultiTrajectory<ActsTrk::TrackFindingTool::traj_Type>::TrackStateProxy trackState,
                    Acts::NavigationDirection direction,
-                   Acts::LoggerWrapper logger)
+                   const Acts::Logger& logger)
   {
     Acts::GainMatrixUpdater updater;
     return updater.template operator()<ActsTrk::TrackFindingTool::traj_Type>(gctx, trackState, direction, logger);
@@ -69,7 +69,7 @@ namespace
   gainMatrixSmoother(const Acts::GeometryContext &gctx,
                      Acts::MultiTrajectory<ActsTrk::TrackFindingTool::traj_Type> &trajectory,
                      size_t entryIndex,
-                     Acts::LoggerWrapper logger)
+                     const Acts::Logger& logger)
   {
     Acts::GainMatrixSmoother smoother;
     return smoother.template operator()<ActsTrk::TrackFindingTool::traj_Type>(gctx, trajectory, entryIndex, logger);

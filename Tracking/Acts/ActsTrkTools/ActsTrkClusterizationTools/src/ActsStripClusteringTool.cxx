@@ -126,7 +126,7 @@ StripClusteringTool::clusterize(const InDetRawDataCollection<StripRDORawData>& R
 
     auto& [cells, badStripOnModule] = *unpckd;
 
-    Acts::Ccl::labelClusters<CellCollection, StripConnect>(cells);
+    Acts::Ccl::labelClusters<CellCollection, 1, StripConnect>(cells);
     ClusterCollection clusters = mergeClusters(cells, badStripOnModule);
 
     double lorentzShift

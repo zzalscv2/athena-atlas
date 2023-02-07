@@ -19,6 +19,7 @@
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Surfaces/Surface.hpp"
+#include "Acts/Geometry/GeometryIdentifier.hpp"
 
 // STL
 #include <string>

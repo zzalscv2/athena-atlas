@@ -76,8 +76,8 @@ ActsStrawLayerBuilder::centralLayers(const Acts::GeometryContext& gctx) const
     ext.range(Acts::binPhi).setMin( -M_PI );
     ext.range(Acts::binPhi).setMax( M_PI );
 
-    pl.envelope[Acts::binZ] = std::make_pair(1_mm, 1_mm);
-    pl.envelope[Acts::binR] = std::make_pair(0_mm, 0_mm);
+    pl.envelope[Acts::binZ] = {1_mm, 1_mm};
+    pl.envelope[Acts::binR] = {0_mm, 0_mm};
 
     double fudge = 0_mm;
     // RING in TRT speak is translated to Layer in ACTS speak
@@ -139,7 +139,7 @@ ActsStrawLayerBuilder::centralLayers(const Acts::GeometryContext& gctx) const
     if(iring > 0) {
       // match outer radius of previous ring
       const Acts::ProtoLayer &prev = protoLayers.at(iring-1);
-      ext.range(Acts::binR).setMin( prev.extent.max(Acts::binR) + prev.envelope[Acts::binR].second + pl.envelope[Acts::binR].first + fudge );
+      ext.range(Acts::binR).setMin( prev.extent.max(Acts::binR) + prev.envelope[Acts::binR][1] + pl.envelope[Acts::binR][0] + fudge );
     }
 
     std::shared_ptr<Acts::Layer> layer
@@ -186,7 +186,7 @@ ActsStrawLayerBuilder::endcapLayers(const Acts::GeometryContext& gctx, int side)
       ext.range(Acts::binZ).setMax( std::numeric_limits<double>::lowest() );
       ext.range(Acts::binPhi).setMin( -M_PI );
       ext.range(Acts::binPhi).setMax( M_PI );
-      pl.envelope[Acts::binR] = std::make_pair(0_mm, 0_mm);
+      pl.envelope[Acts::binR] = {0_mm, 0_mm};
 
       for (unsigned int iphisec=0; iphisec<nEndcapPhiSectors; ++iphisec) {
 
@@ -225,7 +225,7 @@ ActsStrawLayerBuilder::endcapLayers(const Acts::GeometryContext& gctx, int side)
               ext.range(Acts::binZ).setMin( std::min(ext.min(Acts::binZ), ctr.z() - radius) );
 	      ext.range(Acts::binR).setMax( std::max(ext.max(Acts::binR), ctr.perp() + length) );
               ext.range(Acts::binR).setMin( std::min(ext.min(Acts::binR), ctr.perp() - length) );
-	      pl.envelope[Acts::binZ] = std::make_pair(radius/2., radius/2.);
+	      pl.envelope[Acts::binZ] = {radius/2., radius/2.};
 
               wheelSurfaces.push_back(straw->getSharedPtr());
             }

@@ -85,6 +85,8 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_seedConfForwardMaxZOrigin);
     ATH_MSG_DEBUG("   " << m_seedConfForwardMinImpact);
 
+    ATH_CHECK( prepareConfiguration() );
+
     return StatusCode::SUCCESS;
   }
 
@@ -100,17 +102,18 @@ namespace ActsTrk {
     finderOpts.beamPos = Acts::Vector2(beamSpotPos[Amg::x],
                                        beamSpotPos[Amg::y]);
     finderOpts.bFieldInZ = bField[2];
+    finderOpts = finderOpts.toInternalUnits().calculateDerivedQuantities(m_finderCfg);
 
-    // Seed Finder Config
-    auto finderCfg = prepareConfiguration(finderOpts);
-
-    // The SeedFinderOrthogonal already call internally toInternalUnits() for both
-    // finderCfg and finderOpts
-    Acts::SeedFinderOrthogonal<value_type> finder(finderCfg, 
-						  finderOpts);
-
+    std::function<std::pair<Acts::Vector3, Acts::Vector2>(const ActsTrk::SpacePoint *sp)>
+      create_coordinates = [](const ActsTrk::SpacePoint *sp) {
+      Acts::Vector3 position(sp->x(), sp->y(), sp->z());
+      Acts::Vector2 variance(sp->varianceR(), sp->varianceZ());
+      return std::make_pair(position, variance);
+    };
+    
     // Compute seeds
-    auto groupSeeds = finder.createSeeds(spContainer);
+    auto groupSeeds = m_finder.createSeeds(finderOpts, spContainer,
+					   create_coordinates);
 
     // Store seeds
     seedContainer.reserve(groupSeeds.size());
@@ -122,8 +125,8 @@ namespace ActsTrk {
     return StatusCode::SUCCESS;
   }
 
-  const Acts::SeedFinderOrthogonalConfig< typename OrthogonalSeedingTool::value_type >
-  OrthogonalSeedingTool::prepareConfiguration(const Acts::SeedFinderOptions& finderOpts) const 
+  StatusCode
+  OrthogonalSeedingTool::prepareConfiguration()
   {
     // Configuration for Acts::SeedFilter
     Acts::SeedFilterConfig filterCfg;
@@ -159,51 +162,39 @@ namespace ActsTrk {
     filterCfg.forwardSeedConfirmationRange.minImpactSeedConf = m_seedConfForwardMinImpact;
     
     // Configuration Acts::SeedFinderOrthogonal
-    Acts::SeedFinderOrthogonalConfig<value_type> finderCfg;
-    finderCfg.seedFilter = std::make_shared<Acts::SeedFilter<value_type>>(filterCfg.toInternalUnits()); 
-    finderCfg.cotThetaMax = m_cotThetaMax;
-    finderCfg.deltaRMinTopSP = m_deltaRMinTopSP;
-    finderCfg.deltaRMaxTopSP = m_deltaRMaxTopSP;
-    finderCfg.deltaRMinBottomSP = m_deltaRMinBottomSP;
-    finderCfg.deltaRMaxBottomSP = m_deltaRMaxBottomSP;
-    finderCfg.impactMax = m_impactMax;
-    finderCfg.sigmaScattering = m_sigmaScattering;
-    finderCfg.maxPtScattering = m_maxPtScattering;
-    finderCfg.maxSeedsPerSpM = m_maxSeedsPerSpM;
-    finderCfg.collisionRegionMin = m_collisionRegionMin;
-    finderCfg.collisionRegionMax = m_collisionRegionMax;
-    finderCfg.phiMin = m_phiMin;
-    finderCfg.phiMax = m_phiMax;
-    finderCfg.zMin = m_zMin;
-    finderCfg.zMax = m_zMax;
-    finderCfg.rMax = m_rMax;
-    finderCfg.rMin = m_rMin;
-    finderCfg.rMinMiddle = m_rMinMiddle;
-    finderCfg.rMaxMiddle = m_rMaxMiddle;
-    finderCfg.deltaPhiMax = m_deltaPhiMax;
-    finderCfg.deltaZMax = m_deltaZMax;
-    finderCfg.interactionPointCut = m_interactionPointCut;
-    finderCfg.seedConfirmation = m_seedConfirmation;
-    finderCfg.centralSeedConfirmationRange = filterCfg.centralSeedConfirmationRange;
-    finderCfg.forwardSeedConfirmationRange = filterCfg.forwardSeedConfirmationRange;
-    finderCfg.skipPreviousTopSP = m_skipPreviousTopSP;
-    finderCfg.radLengthPerSeed = m_radLengthPerSeed;
+    m_finderCfg.seedFilter = std::make_shared<Acts::SeedFilter<value_type>>(filterCfg.toInternalUnits()); 
+    m_finderCfg.cotThetaMax = m_cotThetaMax;
+    m_finderCfg.deltaRMinTopSP = m_deltaRMinTopSP;
+    m_finderCfg.deltaRMaxTopSP = m_deltaRMaxTopSP;
+    m_finderCfg.deltaRMinBottomSP = m_deltaRMinBottomSP;
+    m_finderCfg.deltaRMaxBottomSP = m_deltaRMaxBottomSP;
+    m_finderCfg.impactMax = m_impactMax;
+    m_finderCfg.sigmaScattering = m_sigmaScattering;
+    m_finderCfg.maxPtScattering = m_maxPtScattering;
+    m_finderCfg.maxSeedsPerSpM = m_maxSeedsPerSpM;
+    m_finderCfg.collisionRegionMin = m_collisionRegionMin;
+    m_finderCfg.collisionRegionMax = m_collisionRegionMax;
+    m_finderCfg.phiMin = m_phiMin;
+    m_finderCfg.phiMax = m_phiMax;
+    m_finderCfg.zMin = m_zMin;
+    m_finderCfg.zMax = m_zMax;
+    m_finderCfg.rMax = m_rMax;
+    m_finderCfg.rMin = m_rMin;
+    m_finderCfg.rMinMiddle = m_rMinMiddle;
+    m_finderCfg.rMaxMiddle = m_rMaxMiddle;
+    m_finderCfg.deltaPhiMax = m_deltaPhiMax;
+    m_finderCfg.deltaZMax = m_deltaZMax;
+    m_finderCfg.interactionPointCut = m_interactionPointCut;
+    m_finderCfg.seedConfirmation = m_seedConfirmation;
+    m_finderCfg.centralSeedConfirmationRange = filterCfg.centralSeedConfirmationRange;
+    m_finderCfg.forwardSeedConfirmationRange = filterCfg.forwardSeedConfirmationRange;
+    m_finderCfg.skipPreviousTopSP = m_skipPreviousTopSP;
+    m_finderCfg.radLengthPerSeed = m_radLengthPerSeed;
+    m_finderCfg = m_finderCfg.toInternalUnits();
 
-    // POSSIBLE OPTIMIZATION
-    // These variables have to be moved to the Orthogonal Options since they change
-    // for every event.
-    // Having these here is preventing us from setting the finder config in the initialize
-    finderCfg.highland = 13.6 * std::sqrt(finderCfg.radLengthPerSeed) *
-      (1 + 0.038 * std::log(finderCfg.radLengthPerSeed));
-    float maxScatteringAngle = finderCfg.highland / finderCfg.minPt;
-    finderCfg.maxScatteringAngle2 = maxScatteringAngle * maxScatteringAngle;
-    finderCfg.pTPerHelixRadius = 300. * finderOpts.bFieldInZ;
-    finderCfg.minHelixDiameter2 = std::pow(finderCfg.minPt * 2 /
-					   finderCfg.pTPerHelixRadius,
-					   2);
-    finderCfg.pT2perRadius = std::pow(finderCfg.highland / finderCfg.pTPerHelixRadius, 2);
-    
-    return finderCfg;
+    m_finder = Acts::SeedFinderOrthogonal<value_type>(m_finderCfg);
+
+    return StatusCode::SUCCESS;
   }
 
 } // namespace ActsTrk

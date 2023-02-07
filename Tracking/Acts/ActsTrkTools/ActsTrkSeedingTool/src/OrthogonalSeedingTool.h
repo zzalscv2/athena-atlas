@@ -48,11 +48,14 @@ namespace ActsTrk {
 		  ActsTrk::SeedContainer& seedContainer ) const override;
     
   private:
-    const Acts::SeedFinderOrthogonalConfig<value_type>
-      prepareConfiguration(const Acts::SeedFinderOptions& finderOpts) const;
+    StatusCode prepareConfiguration();
     
     // *********************************************************************
     // *********************************************************************
+
+  private:
+    Acts::SeedFinderOrthogonal<value_type> m_finder;
+    Acts::SeedFinderOrthogonalConfig<value_type> m_finderCfg;
 
   private:
     // Used by Seed Finder Orthogonal Config
