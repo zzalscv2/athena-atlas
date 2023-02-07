@@ -72,6 +72,7 @@ def MM_DigitizationToolCfg(flags, name="MM_DigitizationTool", **kwargs):
 def MM_OverlayDigitizationToolCfg(flags, name="MM_OverlayDigitizationTool", **kwargs):
     """Return ComponentAccumulator with MM_DigitizationTool configured for Overlay"""
     acc = AtlasFieldCacheCondAlgCfg(flags)
+    kwargs.setdefault("MergeSvc", '')
     kwargs.setdefault("CheckSimHits", True)
     kwargs.setdefault("OnlyUseContainerName", False)
     if 'MMSimHitCollection#MicromegasSensitiveDetector' in flags.Input.SecondaryTypedCollections:
