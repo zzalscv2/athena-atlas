@@ -48,19 +48,21 @@ else:
    from AthenaConfiguration.ComponentFactory import CompFactory
    from TrigServices.TrigServicesConfig import getMessageSvc
    ServiceMgr += CompFactory.getComp(theApp.JobOptionsSvcType)("JobOptionsSvc")
-   ServiceMgr += getMessageSvc(flags, theApp.MessageSvcType)
 
    ## set OutputLevel
    logLevel = PscConfig.optmap['LOGLEVEL'].upper().split(',')
 
    if len(logLevel) > 0:
       from AthenaCommon import Constants
-      theApp.setOutputLevel(getattr(Constants, logLevel[0]))
+      flags.Exec.OutputLevel = getattr(Constants, logLevel[0])
 
    if 'POOL_OUTMSG_LEVEL' not in os.environ and len(logLevel)>1:
       os.environ['POOL_OUTMSG_LEVEL'] = logLevel[1]
 
    del logLevel
+
+   ServiceMgr += getMessageSvc(flags, theApp.MessageSvcType)
+   theApp.setOutputLevel(flags.Exec.OutputLevel)
 
    from AthenaCommon.Logging import logging
    psclog = logging.getLogger('TrigPSCPythonSetup')
