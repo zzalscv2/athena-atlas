@@ -45,7 +45,7 @@ echo "art-result: $rc digiCA"
 if command -v art.py >/dev/null 2>&1; then
   rc2=-9999
   if [ $rc -eq 0 ]; then
-    art.py compare grid --entries 10 "${1}" "${2}" --mode=semi-detailed --file="$DigiOutFileName"
+    art.py compare grid --entries 10 "${1}" "${2}" --mode=semi-detailed --order-trees --diff-root --file="$DigiOutFileName"
     rc2=$?
     status=$rc2
   fi

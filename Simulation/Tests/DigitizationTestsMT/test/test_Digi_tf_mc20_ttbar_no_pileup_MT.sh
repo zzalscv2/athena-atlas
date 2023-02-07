@@ -67,7 +67,7 @@ echo "art-result: $rc3 comparison"
 rc4=-9999
 if [ $status -eq 0 ]
 then
-    art.py compare grid --entries 10 "$1" "$2" --mode=semi-detailed --order-trees
+    art.py compare grid --entries 10 "$1" "$2" --mode=semi-detailed --order-trees --diff-root --file=mc20_nopileup_ttbar.MT.RDO.pool.root
     rc4=$?
     status=$rc4
 fi
