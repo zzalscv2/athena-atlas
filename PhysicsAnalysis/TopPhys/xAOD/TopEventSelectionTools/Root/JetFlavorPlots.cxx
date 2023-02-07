@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TopEventSelectionTools/JetFlavorPlots.h"
@@ -18,6 +18,8 @@
 
 // Systematic include(s):
 #include "PATInterfaces/SystematicSet.h"
+
+#include "xAODEventInfo/EventInfo.h"
 
 #include "TopEventSelectionTools/MsgCategory.h"
 using namespace TopEventSelectionTools;
@@ -180,19 +182,19 @@ namespace top {
     if (m_doRadHigh || m_doRadHighNoVar3c) {
       // 2 different names are acceptable
       double scaleWeight = 1.;
-      if (m_PMGTruthWeights->hasWeight(" muR = 0.5, muF = 0.5 ")) scaleWeight = m_PMGTruthWeights->getWeight(" muR = 0.5, muF = 0.5 ");
-      else if (m_PMGTruthWeights->hasWeight(" muR = 0.50, muF = 0.50 ")) scaleWeight = m_PMGTruthWeights->getWeight(" muR = 0.50, muF = 0.50 ");
-      else if (m_PMGTruthWeights->hasWeight("MUR0.5_MUF0.5_PDF261000")) scaleWeight = m_PMGTruthWeights->getWeight("MUR0.5_MUF0.5_PDF261000"); // for e.g. Sherpa Z+jets
-      else if (m_PMGTruthWeights->hasWeight(" muR=0.50000E+00 muF=0.50000E+00 ")) scaleWeight = m_PMGTruthWeights->getWeight(" muR=0.50000E+00 muF=0.50000E+00 "); // for e.g. ttZ DSID 410218
-      else if (m_PMGTruthWeights->hasWeight(" dyn=   0 muR=0.50000E+00 muF=0.50000E+00 ")) scaleWeight = m_PMGTruthWeights->getWeight(" dyn=   0 muR=0.50000E+00 muF=0.50000E+00 "); // for e.g. tWZ 412118
-      else if (m_PMGTruthWeights->hasWeight("1009")) scaleWeight = m_PMGTruthWeights->getWeight("1009"); // for e.g. tZ 412063
-      else if (m_PMGTruthWeights->hasWeight(" dyn=  -1 muR=0.50000E+00 muF=0.50000E+00 ")) scaleWeight = m_PMGTruthWeights->getWeight(" dyn=  -1 muR=0.50000E+00 muF=0.50000E+00 "); // for e.g. ttZ 504330
-      else if (m_PMGTruthWeights->hasWeight("muR=05,muF=05")) scaleWeight = m_PMGTruthWeights->getWeight("muR=05,muF=05"); // for some other generator setups
+      if (m_PMGTruthWeights->hasWeight(" muR = 0.5, muF = 0.5 ")) scaleWeight = m_PMGTruthWeights->getWeight(event.m_info," muR = 0.5, muF = 0.5 ");
+      else if (m_PMGTruthWeights->hasWeight(" muR = 0.50, muF = 0.50 ")) scaleWeight = m_PMGTruthWeights->getWeight(event.m_info," muR = 0.50, muF = 0.50 ");
+      else if (m_PMGTruthWeights->hasWeight("MUR0.5_MUF0.5_PDF261000")) scaleWeight = m_PMGTruthWeights->getWeight(event.m_info,"MUR0.5_MUF0.5_PDF261000"); // for e.g. Sherpa Z+jets
+      else if (m_PMGTruthWeights->hasWeight(" muR=0.50000E+00 muF=0.50000E+00 ")) scaleWeight = m_PMGTruthWeights->getWeight(event.m_info," muR=0.50000E+00 muF=0.50000E+00 "); // for e.g. ttZ DSID 410218
+      else if (m_PMGTruthWeights->hasWeight(" dyn=   0 muR=0.50000E+00 muF=0.50000E+00 ")) scaleWeight = m_PMGTruthWeights->getWeight(event.m_info," dyn=   0 muR=0.50000E+00 muF=0.50000E+00 "); // for e.g. tWZ 412118
+      else if (m_PMGTruthWeights->hasWeight("1009")) scaleWeight = m_PMGTruthWeights->getWeight(event.m_info,"1009"); // for e.g. tZ 412063
+      else if (m_PMGTruthWeights->hasWeight(" dyn=  -1 muR=0.50000E+00 muF=0.50000E+00 ")) scaleWeight = m_PMGTruthWeights->getWeight(event.m_info," dyn=  -1 muR=0.50000E+00 muF=0.50000E+00 "); // for e.g. ttZ 504330
+      else if (m_PMGTruthWeights->hasWeight("muR=05,muF=05")) scaleWeight = m_PMGTruthWeights->getWeight(event.m_info,"muR=05,muF=05"); // for some other generator setups
       else top::check(m_PMGTruthWeights->hasWeight(" muR = 0.5, muF = 0.5 "), "JetFlavorPlots::apply(): Weight \" muR = 0.5, muF = 0.5 \" not found. Please report this message!");
       double eventWeight = scaleWeight;
       if (!m_doRadHighNoVar3c) {
         top::check(m_PMGTruthWeights->hasWeight("Var3cUp"), "JetFlavorPlots::apply(): Weight \"Var3cUp\" not found. Please report this message!");
-        eventWeight *= m_PMGTruthWeights->getWeight("Var3cUp") / nominalWeight;
+        eventWeight *= m_PMGTruthWeights->getWeight(event.m_info,"Var3cUp") / nominalWeight;
         if (event.m_isLoose) FillHistograms(m_hists_RadHigh_Loose, eventWeight, event);
         else FillHistograms(m_hists_RadHigh, eventWeight, event);
       } // finish if (!m_doRadHighNoVar3c) 
@@ -204,19 +206,19 @@ namespace top {
     if (m_doRadLow || m_doRadLowNoVar3c) {
       //2 different names are acceptable
       double scaleWeight = 1.;
-      if (m_PMGTruthWeights->hasWeight(" muR = 2.0, muF = 2.0 ")) scaleWeight = m_PMGTruthWeights->getWeight(" muR = 2.0, muF = 2.0 ");
-      else if (m_PMGTruthWeights->hasWeight(" muR = 2.00, muF = 2.00 ")) scaleWeight = m_PMGTruthWeights->getWeight(" muR = 2.00, muF = 2.00 ");
-      else if (m_PMGTruthWeights->hasWeight("MUR2_MUF2_PDF261000")) scaleWeight = m_PMGTruthWeights->getWeight("MUR2_MUF2_PDF261000"); // for e.g. Sherpa Z+jets
-      else if (m_PMGTruthWeights->hasWeight(" muR=0.20000E+01 muF=0.20000E+01 ")) scaleWeight = m_PMGTruthWeights->getWeight(" muR=0.20000E+01 muF=0.20000E+01 "); // for e.g. ttZ DSID 410218
-      else if (m_PMGTruthWeights->hasWeight(" dyn=   0 muR=0.20000E+01 muF=0.20000E+01 ")) scaleWeight = m_PMGTruthWeights->getWeight(" dyn=   0 muR=0.20000E+01 muF=0.20000E+01 "); // for e.g. tWZ 412118
-      else if (m_PMGTruthWeights->hasWeight("1005")) scaleWeight = m_PMGTruthWeights->getWeight("1005"); // for e.g. tZ 412063
-      else if (m_PMGTruthWeights->hasWeight(" dyn=  -1 muR=0.20000E+01 muF=0.20000E+01 ")) scaleWeight = m_PMGTruthWeights->getWeight(" dyn=  -1 muR=0.20000E+01 muF=0.20000E+01 "); // for e.g. ttZ 504330
-      else if (m_PMGTruthWeights->hasWeight("muR=20,muF=20")) scaleWeight = m_PMGTruthWeights->getWeight("muR=20,muF=20"); // for some other generator setups
+      if (m_PMGTruthWeights->hasWeight(" muR = 2.0, muF = 2.0 ")) scaleWeight = m_PMGTruthWeights->getWeight(event.m_info," muR = 2.0, muF = 2.0 ");
+      else if (m_PMGTruthWeights->hasWeight(" muR = 2.00, muF = 2.00 ")) scaleWeight = m_PMGTruthWeights->getWeight(event.m_info," muR = 2.00, muF = 2.00 ");
+      else if (m_PMGTruthWeights->hasWeight("MUR2_MUF2_PDF261000")) scaleWeight = m_PMGTruthWeights->getWeight(event.m_info,"MUR2_MUF2_PDF261000"); // for e.g. Sherpa Z+jets
+      else if (m_PMGTruthWeights->hasWeight(" muR=0.20000E+01 muF=0.20000E+01 ")) scaleWeight = m_PMGTruthWeights->getWeight(event.m_info," muR=0.20000E+01 muF=0.20000E+01 "); // for e.g. ttZ DSID 410218
+      else if (m_PMGTruthWeights->hasWeight(" dyn=   0 muR=0.20000E+01 muF=0.20000E+01 ")) scaleWeight = m_PMGTruthWeights->getWeight(event.m_info," dyn=   0 muR=0.20000E+01 muF=0.20000E+01 "); // for e.g. tWZ 412118
+      else if (m_PMGTruthWeights->hasWeight("1005")) scaleWeight = m_PMGTruthWeights->getWeight(event.m_info,"1005"); // for e.g. tZ 412063
+      else if (m_PMGTruthWeights->hasWeight(" dyn=  -1 muR=0.20000E+01 muF=0.20000E+01 ")) scaleWeight = m_PMGTruthWeights->getWeight(event.m_info," dyn=  -1 muR=0.20000E+01 muF=0.20000E+01 "); // for e.g. ttZ 504330
+      else if (m_PMGTruthWeights->hasWeight("muR=20,muF=20")) scaleWeight = m_PMGTruthWeights->getWeight(event.m_info,"muR=20,muF=20"); // for some other generator setups
       else top::check(m_PMGTruthWeights->hasWeight(" muR = 2.0, muF = 2.0 "), "JetFlavorPlots::apply(): Weight \" muR = 2.0, muF = 2.0 \" not found. Please report this message!");
       double eventWeight = scaleWeight;
       if (!m_doRadLowNoVar3c) {
         top::check(m_PMGTruthWeights->hasWeight("Var3cDown"), "JetFlavorPlots::apply(): Weight \"Var3cDown\" not found. Please report this message!");
-        eventWeight *= m_PMGTruthWeights->getWeight("Var3cDown") / nominalWeight;
+        eventWeight *= m_PMGTruthWeights->getWeight(event.m_info,"Var3cDown") / nominalWeight;
         if (event.m_isLoose) FillHistograms(m_hists_RadLow_Loose, eventWeight, event);
         else FillHistograms(m_hists_RadLow, eventWeight, event);
       } // finish if (!m_doRadLowNoVar3c) {

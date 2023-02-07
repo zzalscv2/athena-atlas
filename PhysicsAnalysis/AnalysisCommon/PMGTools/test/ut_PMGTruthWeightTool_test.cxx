@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// Example standalone executable using TEvent (from POOL or xAODRootAccess) to read an xAOD
@@ -13,6 +13,7 @@
 
 // Project dependent include(s)
 #ifdef XAOD_STANDALONE
+#include "xAODEventInfo/EventInfo.h"
 #include "xAODRootAccess/Init.h"
 #include "xAODRootAccess/TEvent.h"
 #else
@@ -87,6 +88,9 @@ int main(int argc, char *argv[])
   // Hack to load the file
   event.getEntries();
 
+  // EventInfo object needed for using the truth weight tool
+  const xAOD::EventInfo* evtInfo(nullptr);
+
   // Create the truth weight tool:
   ANA_MSG_INFO("Creating PMGTruthWeightTool...");
   asg::StandaloneToolHandle< PMGTools::IPMGTruthWeightTool > weightTool("PMGTools::PMGTruthWeightTool/PMGTruthWeightTool");
@@ -97,6 +101,7 @@ int main(int argc, char *argv[])
   const Long64_t nEntries = 5;
   for(Long64_t entry = 0; entry < nEntries; ++entry) {
     if (event.getEntry(entry) < 0) { ANA_MSG_ERROR("Failed to read event " << entry); continue; }
+    ANA_CHECK( event.retrieve(evtInfo, "EventInfo") );
 
     auto weightNames = weightTool->getWeightNames();
     ANA_MSG_INFO("Event #" << entry << ": found " << weightNames.size() << " weights for this event");
@@ -104,7 +109,7 @@ int main(int argc, char *argv[])
     // Print out the first weight for every event
     if (weightNames.size() > 1) {
       static std::string weight_name_to_test = weightNames.at(1);
-      ANA_MSG_INFO("Event #" << entry << ": weight called '" << weight_name_to_test << "' = " << weightTool->getWeight(weight_name_to_test));
+      ANA_MSG_INFO("Event #" << entry << ": weight called '" << weight_name_to_test << "' = " << weightTool->getWeight(evtInfo,weight_name_to_test));
     }
 
     // Full print out for some of the events
@@ -113,7 +118,7 @@ int main(int argc, char *argv[])
       ANA_MSG_INFO("Printing all " << weightNames.size() << " weights for this event...");
       unsigned int idx(0);
       for (auto weight : weightNames) {
-        ANA_MSG_INFO("... weight " << idx++ << " has name \"" << weight << "\" and value " << weightTool->getWeight(weight));
+        ANA_MSG_INFO("... weight " << idx++ << " has name \"" << weight << "\" and value " << weightTool->getWeight(evtInfo,weight));
       }
 
       // Give feedback about where we are
@@ -127,7 +132,7 @@ int main(int argc, char *argv[])
       static std::string weight_name_to_test = weightNames.back();
       auto start = std::chrono::steady_clock::now();
       for (int i = 0; i < nWeightCalls; ++i) {
-        weightTool->getWeight(weight_name_to_test);
+        weightTool->getWeight(evtInfo,weight_name_to_test);
       }
       auto elapsed = std::chrono::steady_clock::now() - start;
       double retrievalTimeNanoSeconds = std::chrono::duration <double, std::nano> (elapsed).count() / nWeightCalls;
@@ -136,7 +141,7 @@ int main(int argc, char *argv[])
 
     // Check that retrieving a non-existent weight throws an exception
     ANA_MSG_INFO("Check that retrieving a non-existent weight throws an exception");
-    EXPECT_THROW(weightTool->getWeight("non-existent-name"), "Weight \"non-existent-name\" could not be found");
+    EXPECT_THROW(weightTool->getWeight(evtInfo,"non-existent-name"), "Weight \"non-existent-name\" could not be found");
 
     // Check that asking for a non-existent weight returns false
     ANA_MSG_INFO("Check that asking for a non-existent weight returns false");

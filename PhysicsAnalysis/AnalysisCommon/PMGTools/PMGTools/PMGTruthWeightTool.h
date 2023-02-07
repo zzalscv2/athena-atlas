@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PMGTOOLS_PMGTRUTHWEIGHTTOOL_H
@@ -13,6 +13,7 @@
 
 // Interface include(s):
 #include "PMGAnalysisInterfaces/IPMGTruthWeightTool.h"
+#include "PATInterfaces/SystematicsCache.h"
 
 
 namespace PMGTools
@@ -24,7 +25,7 @@ namespace PMGTools
   class PMGTruthWeightTool : public virtual IPMGTruthWeightTool, public asg::AsgMetadataTool
   {
     /// Create a proper constructor for Athena
-    ASG_TOOL_CLASS(PMGTruthWeightTool, PMGTools::IPMGTruthWeightTool)
+    ASG_TOOL_CLASS2(PMGTruthWeightTool, PMGTools::IPMGTruthWeightTool, IReentrantSystematicsTool)
 
   public:
     /// Create a constructor for standalone usage
@@ -45,16 +46,16 @@ namespace PMGTools
     virtual const std::vector<std::string>& getWeightNames() const override;
 
     /// Implements interface from IPMGTruthWeightTool
-    virtual float getWeight(const std::string& weightName) const override;
+    virtual float getWeight(const xAOD::EventInfo* evtInfo, const std::string& weightName) const override;
 
     /// Implements interface from IPMGTruthWeightTool
     virtual bool hasWeight(const std::string& weightName) const override;
 
     /// Implements interface from IPMGTruthWeightTool
-    virtual float getSysWeight() const override;
+    virtual float getSysWeight(const xAOD::EventInfo* evtInfo, const CP::SystematicSet& sys) const override;
 
     /// Implements interface from IPMGTruthWeightTool
-    virtual size_t getSysWeightIndex() const override;
+    virtual size_t getSysWeightIndex(const CP::SystematicSet& sys) const override;
 
     /// @}
 
@@ -62,16 +63,10 @@ namespace PMGTools
     /// @{
 
     /// Implements interface from ISystematicsTool
-    virtual bool isAffectedBySystematic(const CP::SystematicVariation& systematic) const override;
-
-    /// Implements interface from ISystematicsTool
     virtual CP::SystematicSet affectingSystematics() const override;
 
     /// Implements interface from ISystematicsTool
     virtual CP::SystematicSet recommendedSystematics() const override;
-
-    /// Implements interface from ISystematicsTool
-    virtual StatusCode applySystematicVariation(const CP::SystematicSet& systConfig) override;
 
     /// @}
 
@@ -82,10 +77,10 @@ namespace PMGTools
     /// Function called when a new input file is opened
     virtual StatusCode beginInputFile() override;
 
-    /// Function called when a new event is loaded
-    virtual StatusCode beginEvent() override;
-
     /// @}
+
+    /// Helper function for retrieving MC channel number from file metadata
+    StatusCode getMCChannelNumber(uint32_t &mcChannelNumber);
 
     /// Loads weight information from xAOD::TruthMetaDataContainer
     StatusCode loadMetaData();
@@ -105,9 +100,6 @@ namespace PMGTools
     /// Current MC channel number
     uint32_t m_mcChannelNumber{};
 
-    /// Systematics set of the weight systematics
-    CP::SystematicSet m_systematicsSet;
-
     /// Ptr to the meta data container for this file
     const xAOD::TruthMetaDataContainer* m_metaDataContainer{nullptr};
 
@@ -117,27 +109,11 @@ namespace PMGTools
     /// Available weight names for this file
     std::vector<std::string> m_weightNames;
 
-    /// Indices of available weights in this file
+    /// Weight names to indices of available weights in this file
     std::unordered_map<std::string, size_t> m_weightIndices;
 
-    /// Indices of available weights in this file
-    std::unordered_map<std::string, size_t> m_weightIndicesSys;
-
-    /// Values of weights in this event
-    std::vector<float> m_weights;
-
-    /// Weight data cache helper struct
-    struct WeightData
-    {
-      float weight;
-      std::size_t index;
-    };
-
-    /// Systematics cache of available weights in this file
-    std::unordered_map<CP::SystematicSet, WeightData> m_weightData;
-
-    /// Current systematics weight
-    WeightData *m_currentWeightData {nullptr};
+    /// Systematics to indices of available weights
+    CP::SystematicsCache<std::size_t> m_calibCache {this};
   };
 } // namespace PMGTools
 
