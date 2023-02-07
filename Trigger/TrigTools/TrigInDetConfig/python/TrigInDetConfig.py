@@ -38,16 +38,6 @@ def InDetIDCCacheCreatorCfg(flags):
   acc.addEventAlgo( InDetCacheCreatorTrig )
   return acc
 
-
-def geoModelCfg(flags):
-  acc = ComponentAccumulator()
-  from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
-  acc.merge( BeamPipeGeometryCfg( flags ) )
-  from InDetConfig.InDetGeometryConfig import InDetGeometryCfg
-  acc.merge( InDetGeometryCfg( flags ) )
-
-  return acc
-
 def trtCondCfg(flags):
   acc = ComponentAccumulator()
   from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline, addFolders
@@ -57,15 +47,6 @@ def trtCondCfg(flags):
   acc.merge(addFoldersSplitOnline(flags, "TRT","/TRT/Onl/Calib/RT","/TRT/Calib/RT",className="TRTCond::RtRelationMultChanContainer"))
   acc.merge(addFoldersSplitOnline(flags, "TRT","/TRT/Onl/Calib/T0","/TRT/Calib/T0",className="TRTCond::StrawT0MultChanContainer"))
   acc.merge(addFoldersSplitOnline (flags, "TRT","/TRT/Onl/Calib/errors","/TRT/Calib/errors",className="TRTCond::RtRelationMultChanContainer"))
-
-  return acc
-
-def magFieldCfgCfg(flags):
-  acc = ComponentAccumulator()
-
-  acc.merge(geoModelCfg(flags))
-  from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-  acc.merge( AtlasFieldCacheCondAlgCfg(flags) )
 
   return acc
 
@@ -276,12 +257,6 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
   signature =  ("_" + signatureName if signatureName else '').lower()
 
   acc = ComponentAccumulator()
-  acc.merge(magFieldCfgCfg(flags))
-
-  # TODO merge it to the component needing it
-  from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
-  acc.merge(BeamSpotCondAlgCfg(flags))
-
 
   if in_view:
     verifier = CompFactory.AthViews.ViewDataVerifier( name = 'VDVInDetFTF'+signature,
