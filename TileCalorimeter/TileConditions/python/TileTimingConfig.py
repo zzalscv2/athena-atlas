@@ -69,10 +69,10 @@ def TileTimingCondAlgCfg(flags, **kwargs):
     else:
         raise(Exception("Invalid source: %s" % source))
 
-    TileCalibFltCondAlg=CompFactory.getComp("TileCalibCondAlg<TileCalibDrawerFlt>")
-    timingCondAlg = TileCalibFltCondAlg( name = name,
-                                         ConditionsProxy = timingProxy,
-                                         TileCalibData = timing)
+    TileTimingCondAlg = CompFactory.getComp("TileCondAlg<TileTiming,TileCalibDrawerFlt>")
+    timingCondAlg = TileTimingCondAlg( name = name,
+                                       ConditionsProxy = timingProxy,
+                                       TileCondData = timing)
 
     acc.addCondAlgo(timingCondAlg)
 

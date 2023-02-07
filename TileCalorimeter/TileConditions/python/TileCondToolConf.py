@@ -339,7 +339,8 @@ def getTileCondToolTiming(source = 'FILE', runType = 'PHY', online = False, name
         else:
             raise(Exception("Invalid source: %s" %source ))
 
-    bookTileCalibCondAlg(timing, adcOffsetProxy)
+    from TileConditions.TileConditionsConf import TileCondAlg_TileTiming_TileCalibDrawerFlt_ as TileTimingCondAlg
+    bookTileCondAlg(TileTimingCondAlg, timing, adcOffsetProxy)
     tool = TileCondToolTiming(name, TileTiming = timing)
 
     #=== set the arguments passed and return tool
