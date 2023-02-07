@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TOPEVENTSELECTIONTOOLS_JETFTAGEFFPLOTS_H_
@@ -116,7 +116,7 @@ namespace top {
     void FillHistograms(std::shared_ptr<PlotManager> h_ptr, double w_event, const top::Event& event) const;
 
     /// A helper function to get the correct truth weight
-    float GetPMGTruthWeight(WEIGHTTYPE type) const;
+    float GetPMGTruthWeight(const xAOD::EventInfo* evtInfo, WEIGHTTYPE type) const;
   };
 }  // namespace top
 

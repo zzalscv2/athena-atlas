@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -52,11 +52,10 @@ namespace CP
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
-      ANA_CHECK (m_truthWeightTool->applySystematicVariation (sys));
       const xAOD::EventInfo *eventInfo = nullptr;
       ANA_CHECK (m_eventInfoHandle.retrieve (eventInfo, sys));
 
-      m_decoration.set (*eventInfo, m_truthWeightTool->getSysWeight (), sys);
+      m_decoration.set (*eventInfo, m_truthWeightTool->getSysWeight(eventInfo,sys), sys);
     }
 
     return StatusCode::SUCCESS;
