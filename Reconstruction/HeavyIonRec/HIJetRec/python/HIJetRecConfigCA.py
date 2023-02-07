@@ -222,7 +222,7 @@ def HIJetRecCfg(flags):
     )
 
 
-    #COnfigure final jets
+    #Configure final jets
     jetDefList_final = []
     jetNameList_final = []
     for i in range(len(jetRlist)):
