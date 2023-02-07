@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # File: LumiBlockComps/python/LuminosityCondAlgDefault.py
 # Created: May 2019, sss, from existing LuminosityToolDefault.
@@ -7,8 +7,8 @@
 
 from AthenaCommon.Logging import logging
 from AthenaCommon.AlgSequence import AthSequencer
+from AthenaCommon.AppMgr import ServiceMgr as svcMgr
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-
 
 _isOnline = False
 
@@ -192,10 +192,11 @@ def configureOnlineLuminosityCondAlg (name):
         conddb.addFolder('TRIGGER_ONL', folder,
                          className = 'CondAttrListCollection')
       
-    elif conddb.dbdata == "CONDBR2": # Run2
+    elif conddb.dbdata == "CONDBR2": # Run2+
         folder  = "/TRIGGER/LUMI/HLTPrefLumi"
         conddb.addFolder('TRIGGER_ONL', folder,
-                         className = 'CondAttrListCollection')
+                         className = 'CondAttrListCollection',
+                         extensible = hasattr(svcMgr, 'HltEventLoopMgr'))
 
     else: #  Run 2
         mlog.warning("LuminosityCondAlgDefault can't resolve conddb.dbdata = %s, assume Run2!", conddb.dbdata)
