@@ -14290,6 +14290,13 @@ HLT_mu24_ivarmedium_mu14_idperf_probe_50invmAB130_L1MU14FCH:
     3: 5
     4: 4
     5: 4
+HLT_mu24_ivarmedium_mu14_idtp_idZmumu_L1MU14FCH:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 11
+    1: 2
 HLT_mu24_ivarmedium_mu14_ivarloose_probe_L1MU14FCH:
   eventCount: 0
   stepCounts:
@@ -15293,6 +15300,20 @@ HLT_mu26_ivarmedium_mu14_idperf_probe_50invmAB130_L1MU18VFCH:
     3: 5
     4: 4
     5: 4
+HLT_mu26_ivarmedium_mu14_idtp_idZmumu_L1MU14FCH:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 12
+    1: 2
+HLT_mu26_ivarmedium_mu14_idtp_idZmumu_L1MU18VFCH:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 12
+    1: 2
 HLT_mu26_ivarmedium_mu14_ivarloose_probe_L1MU14FCH:
   eventCount: 0
   stepCounts:
