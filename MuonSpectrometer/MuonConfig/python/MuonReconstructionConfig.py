@@ -193,7 +193,8 @@ def MuonReconstructionCfg(flags):
         # Check if we're making PRDs, i.e. DetFlags.makeRIO.Muon_on(): in old config
         # FIXME - I think we can remove this flag if we shift this to where PRDs are being created. However, this will involve some refactoring, so temporary fix is this.
         if flags.Muon.makePRDs:
-            result.addEventAlgo(CompFactory.MuonPRD_MultiTruthMaker())
+            from MuonConfig.MuonRdoDecodeConfig import MuonPRD_MultiTruthMakerCfg
+            result.merge(MuonPRD_MultiTruthMakerCfg(flags))
 
             from MuonConfig.MuonTruthAlgsConfig import MuonTruthDecorationAlgCfg
             result.merge(MuonTruthDecorationAlgCfg(flags))
