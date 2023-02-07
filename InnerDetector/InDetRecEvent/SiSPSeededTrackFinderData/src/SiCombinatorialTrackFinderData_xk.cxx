@@ -81,10 +81,6 @@ namespace InDet {
     return m_initialized;
   }
 
-  SiTrajectory_xk& SiCombinatorialTrackFinderData_xk::trajectory() {
-    return m_trajectory;
-  }
-
   Trk::TrackInfo& SiCombinatorialTrackFinderData_xk::trackinfo() {
     return m_trackinfo;
   }
