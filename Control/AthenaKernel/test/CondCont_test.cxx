@@ -1211,7 +1211,17 @@ void testThread_MixedIterator::operator()()
     for (const EventIDRange& r : rvec) {
       const BM* obj;
       if (m_map.find (r.start(), obj)) {
-        assert (obj->m_x == static_cast<int>(r.start().lumi_block() + r.start().time_stamp()));
+        if (obj->m_x != static_cast<int> (r.start().lumi_block() + r.start().time_stamp()))
+        {
+          std::cerr << "testThread_MixedIterator: Bad payload! " <<
+            obj->m_x << " r " << r << "\n";
+          std::cerr << "  rvec\n";
+          for (const EventIDRange& rr : rvec) {
+            std::cerr << "    " << rr << "\n";
+          }
+          m_map.print();
+          std::abort();
+        }
       }
     }
 
@@ -1274,6 +1284,7 @@ void testThread_MixedReader::operator()()
         for (const EventIDRange& r : rvec) {
           std::cerr << "    " << r << "\n";
         }
+        m_map.print();
         std::abort();
       }
     }
