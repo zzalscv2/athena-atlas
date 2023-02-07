@@ -153,7 +153,6 @@ def InDetTrackRecoCfg(flags):
     result.merge(InDetRecPreProcessingSiliconCfg(flags))
 
     ClusterSplitProbContainer=''
-    InputCombinedInDetTracks = []
 
     from InDetConfig.TrackingSiPatternConfig import TrackingSiPatternCfg
     from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
@@ -230,6 +229,8 @@ def InDetTrackRecoCfg(flags):
     InputCombinedInDetTracks = [] # Tracks to be ultimately merged in InDetTrackParticle collection
     InputExtendedInDetTracks = [] # Includes also tracks which end in standalone TrackParticle collections
     ClusterSplitProbContainer = ""
+    StatTrackCollections = [] # To be passed to the InDetRecStatistics alg
+    StatTrackTruthCollections = []
     isPrimaryPass = True
 
     if flags.Beam.Type is BeamType.Cosmics:
@@ -247,6 +248,8 @@ def InDetTrackRecoCfg(flags):
                                           InputCollections = InputCombinedInDetTracks))
             InputCombinedInDetTracks += [TRTTrackContainer]
             InputExtendedInDetTracks += [TRTTrackContainer]
+            StatTrackCollections += [TRTTrackContainer]
+            StatTrackTruthCollections += [TRTTrackContainer+"TruthCollection"]
 
             if flags.InDet.Tracking.doTrackSegmentsTRT:
                 result.merge(TrackParticleCnvAlgNoPIDCfg(flags,
@@ -265,15 +268,18 @@ def InDetTrackRecoCfg(flags):
             ResolvedTracks = "ResolvedLargeD0Tracks"
             if flags.Overlay.doTrackOverlay:
                 ResolvedTracks = flags.Overlay.sigPrefix + "ResolvedLargeD0Tracks"
-        SiSPSeededTracks = "SiSPSeeded" + extension + "Tracks" # Old config had inconsistent "SiSPSeeded" vs "SiSpSeeded" keys
 
         # --- do the Si pattern if not done in the cosmic preprocessing
         if not(isPrimaryPass and flags.Beam.Type is BeamType.Cosmics):
+            SiSPSeededTracks = "SiSPSeeded" + extension + "Tracks" # Old config had inconsistent "SiSPSeeded" vs "SiSpSeeded" keys
             result.merge(TrackingSiPatternCfg(current_flags,
                                               InputCollections = InputExtendedInDetTracks,
                                               ResolvedTrackCollectionKey = ResolvedTracks,
                                               SiSPSeededTrackCollectionKey = SiSPSeededTracks,
                                               ClusterSplitProbContainer = ClusterSplitProbContainer))
+            StatTrackCollections += [SiSPSeededTracks, ResolvedTracks]
+            StatTrackTruthCollections += [SiSPSeededTracks+"TruthCollection",
+                                          ResolvedTracks+"TruthCollection"]
 
         TrackContainer = ResolvedTracks
         if flags.Overlay.doTrackOverlay and current_flags.InDet.Tracking.ActiveConfig.storeSeparateContainer:
@@ -296,6 +302,8 @@ def InDetTrackRecoCfg(flags):
                                                     ExtendedTracksMap = ExtendedTracksMap))
 
             TrackContainer = ExtendedTracks
+            StatTrackCollections += [ExtendedTracks]
+            StatTrackTruthCollections += [ExtendedTracks+"TruthCollection"]
 
         if current_flags.InDet.Tracking.ActiveConfig.storeSeparateContainer:
             # Dummy Merger to fill additional info for PRD-associated pixel tracklets
@@ -320,6 +328,7 @@ def InDetTrackRecoCfg(flags):
                                                          InputCombinedTracks = InputTracks,
                                                          OutputCombinedTracks = "Resolved" + extension + "Tracks",
                                                          AssociationMapName = AssociationMapName))
+
             if flags.InDet.doTruth:
                 result.merge(InDetTrackTruthCfg(current_flags,
                                                 Tracks = TrackContainer,
@@ -355,8 +364,14 @@ def InDetTrackRecoCfg(flags):
                                              InputCollections = InputCombinedInDetTracks,
                                              ClusterSplitProbContainer = ClusterSplitProbContainer))
                 ClusterSplitProbContainer = "InDetTRT_SeededAmbiguityProcessorSplitProb" + current_flags.InDet.Tracking.ActiveConfig.extension
-                InputCombinedInDetTracks += ["ResolvedTRTSeededTracks"]
-                InputExtendedInDetTracks += ["ResolvedTRTSeededTracks"]
+                TRTSeededTracks = "TRTSeededTracks"
+                ResolvedTRTSeededTracks = "ResolvedTRTSeededTracks"
+                InputCombinedInDetTracks += [ResolvedTRTSeededTracks]
+                InputExtendedInDetTracks += [ResolvedTRTSeededTracks]
+                StatTrackCollections += [TRTSeededTracks,
+                                         ResolvedTRTSeededTracks]
+                StatTrackTruthCollections += [TRTSeededTracks+"TruthCollection",
+                                              ResolvedTRTSeededTracks+"TruthCollection"]
 
             if flags.InDet.doTruth and (flags.InDet.Tracking.doPseudoTracking or flags.InDet.Tracking.doIdealPseudoTracking): ## Do we need the dotruth flags...?
                 from TrkConfig.TrkTruthTrackAlgsConfig import TruthTrackingCfg
@@ -381,10 +396,21 @@ def InDetTrackRecoCfg(flags):
                                              OutputCombinedTracks = "CombinedInDetTracks",
                                              AssociationMapName = "PRDtoTrackMapCombinedInDetTracks"))
 
+    if flags.InDet.doTruth:
+        from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
+        result.merge(InDetTrackTruthCfg(
+            flags,
+            Tracks = "CombinedInDetTracks",
+            DetailedTruth = "CombinedInDetTracksDetailedTruth",
+            TracksTruth = "CombinedInDetTracksTruthCollection"))
+
+    StatTrackCollections += ["CombinedInDetTracks"]
+    StatTrackTruthCollections += ["CombinedInDetTracksTruthCollection"]
+
     if flags.InDet.doSlimming:
         from TrkConfig.TrkTrackSlimmerConfig import TrackSlimmerCfg
         result.merge(TrackSlimmerCfg(flags,
-                                    TrackLocation = ["CombinedInDetTracks"]))
+                                     TrackLocation = ["CombinedInDetTracks"]))
 
     if flags.InDet.doTruth:
         from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
@@ -426,6 +452,15 @@ def InDetTrackRecoCfg(flags):
     if flags.Tracking.doVertexFinding:
         from InDetConfig.InDetPriVxFinderConfig import primaryVertexFindingCfg
         result.merge(primaryVertexFindingCfg(flags))
+
+    if flags.Tracking.doStats:
+        from InDetConfig.InDetRecStatisticsConfig import (
+            InDetRecStatisticsAlgCfg)
+        result.merge(InDetRecStatisticsAlgCfg(
+            flags,
+            TrackCollectionKeys = StatTrackCollections,
+            TrackTruthCollectionKeys = \
+            StatTrackTruthCollections if flags.InDet.doTruth else []))
 
     if flags.InDet.Tracking.writeExtendedPRDInfo:
         if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring or flags.InDet.Tracking.doPseudoTracking:

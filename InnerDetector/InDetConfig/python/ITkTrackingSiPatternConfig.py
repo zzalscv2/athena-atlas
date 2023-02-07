@@ -58,6 +58,14 @@ def ITkTrackingSiPatternCfg(flags,
         else: # send output TrackCollection to Athena ambiguity scorer etc
             acc.merge(ActsTrkFindingCfg(flags, TracksLocation=SiSPSeededTrackCollectionKey))
 
+    from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
+    if flags.ITk.Tracking.doTruth:
+        acc.merge(ITkTrackTruthCfg(
+            flags,
+            Tracks = SiSPSeededTrackCollectionKey,
+            DetailedTruth = SiSPSeededTrackCollectionKey+"DetailedTruth",
+            TracksTruth = SiSPSeededTrackCollectionKey+"TruthCollection"))
+
     # ------------------------------------------------------------
     #
     # ---------- Ambiguity solving
@@ -77,6 +85,13 @@ def ITkTrackingSiPatternCfg(flags,
 
         acc.merge(ITkTrkAmbiguitySolverCfg(flags,
                                            ResolvedTrackCollectionKey = ResolvedTrackCollectionKey))
+
+    if flags.ITk.Tracking.doTruth:
+        acc.merge(ITkTrackTruthCfg(
+            flags,
+            Tracks = ResolvedTrackCollectionKey,
+            DetailedTruth = ResolvedTrackCollectionKey+"DetailedTruth",
+            TracksTruth = ResolvedTrackCollectionKey+"TruthCollection"))
 
     return acc
 

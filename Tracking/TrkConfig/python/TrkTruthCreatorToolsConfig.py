@@ -26,7 +26,9 @@ def TruthToTrackToolCfg(flags, name="TruthToTrack", **kwargs):
     acc = ComponentAccumulator()
 
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    Extrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
+    acc.addPublicTool(Extrapolator)
+    kwargs.setdefault("Extrapolator", Extrapolator)
 
     acc.setPrivateTools(CompFactory.Trk.TruthToTrack(name, **kwargs))
     return acc

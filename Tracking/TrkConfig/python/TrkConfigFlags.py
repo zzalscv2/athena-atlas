@@ -32,6 +32,8 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doVtxLumi", False)
     # Special reconstruction for vertex beamspot measurement
     icf.addFlag("Tracking.doVtxBeamSpot", False)
+    # Turn on InDetRecStatistics
+    icf.addFlag("Tracking.doStats", True)
 
     # Vertexing flags
     from TrkConfig.VertexFindingFlags import (
