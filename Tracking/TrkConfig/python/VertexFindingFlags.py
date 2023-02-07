@@ -8,12 +8,9 @@ class VertexSortingSetup(FlagEnum):
     SumPtSorting = 'SumPtSorting'
 
 class VertexSetup(FlagEnum):
-    GaussAMVF = 'GaussAdaptiveMultiFinding'
-    AMVF = 'AdaptiveMultiFinding'
-    GaussIVF = 'GaussIterativeFinding'
     IVF = 'IterativeFinding'
+    FastIVF = 'FastIterativeFinding'
     ActsGaussAMVF = 'ActsGaussAdaptiveMultiFinding'
-
 
 def createSecVertexingFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -177,28 +174,87 @@ def createPriVertexingFlags():
     flags.addFlag("maxZ0SinTheta", 1000.0 * Units.mm)
     flags.addFlag("minNInnermostLayerHits", 0)
     # MaxTracks cuts are specific to the IterativeFinding config
-    flags.addFlag("doMaxTracksCut", True)
-    flags.addFlag("MaxTracks", 3000)
+    flags.addFlag("doMaxTracksCut", lambda pcf:
+                  not(pcf.Tracking.PriVertex.useBeamConstraint \
+                      or pcf.Reco.EnableHI))
+    flags.addFlag("maxTracks", 3000)
+    flags.addFlag("maxVertices", lambda pcf: 1 if pcf.Reco.EnableHI else 200)
     # string to store the setup for primary vertexing.
-    flags.addFlag("setup", VertexSetup.ActsGaussAMVF, enum=VertexSetup)
+
+    def vertexSetup(pcf):
+        if pcf.Reco.EnableHI:
+            return VertexSetup.FastIVF
+        elif pcf.Tracking.doHighPileup or \
+             pcf.InDet.Tracking.doMinBias or \
+             pcf.InDet.Tracking.doLowMu or \
+             pcf.InDet.Tracking.doRobustReco or \
+             pcf.Tracking.doVtxLumi or \
+             pcf.Tracking.doVtxBeamSpot:
+            return VertexSetup.IVF
+        else: # Default
+            return VertexSetup.ActsGaussAMVF
+
+    flags.addFlag("setup", vertexSetup, enum=VertexSetup)
+
     # string to store the type of sorting algorithm to separate signal and pile-up vertices.
     flags.addFlag("sortingSetup", VertexSortingSetup.SumPt2Sorting, enum=VertexSortingSetup)
-    flags.addFlag("useBeamConstraint", True)
+    flags.addFlag("useBeamConstraint", lambda pcf:
+                  not(pcf.Tracking.doVtxLumi \
+                      or pcf.Tracking.doVtxBeamSpot \
+                      or pcf.InDet.Tracking.doRobustReco))
 
-    idflags = { "minPt"              : 500.0 * Units.MeV,
-                "maxD0"              : 4.0 * Units.mm,
-                "maxSigmaD0"         : 5.0 * Units.mm,
-                "maxSigmaZ0SinTheta" : 10.0 * Units.mm,
-                "minNPixelHits"      : 1,
+    def maxD0(pcf):
+        if pcf.Detector.GeometryITk:
+            return 1.0 * Units.mm
+        else:
+            if not pcf.Tracking.PriVertex.useBeamConstraint:
+                return 10.0 * Units.mm
+            else:  # Default ID
+                return 4.0 * Units.mm
+
+    flags.addFlag("maxD0", maxD0)
+
+    def minNPixelHits(pcf):
+        if pcf.Detector.GeometryITk:
+            return 3
+        else:
+            if pcf.InDet.Tracking.doRobustReco:
+                return 0
+            else: # Default ID
+                return 1
+
+    flags.addFlag("minNPixelHits", minNPixelHits)
+
+    def minPt(pcf):
+        if pcf.Detector.GeometryITk:
+            return 900.0 * Units.MeV
+        else:
+            if pcf.InDet.Tracking.doMinBias or pcf.InDet.Tracking.doLowPt:
+                return 100.0 * Units.MeV
+            elif pcf.Reco.EnableHI or pcf.InDet.Tracking.doLowMu:
+                return 400.0 * Units.MeV
+            else: # Default ID
+                return 500.0 * Units.MeV
+
+    flags.addFlag("minPt", minPt)
+
+    def maxSigmaD0(pcf):
+        if pcf.Detector.GeometryITk:
+            return 0.35 * Units.mm
+        else:
+            if pcf.InDet.Tracking.doLowPt:
+                return 0.9 * Units.mm
+            else: # Default ID
+                return 5.0 * Units.mm
+
+    flags.addFlag("maxSigmaD0", maxSigmaD0)
+
+    idflags = { "maxSigmaZ0SinTheta" : 10.0 * Units.mm,
                 "minNSctHits"        : 4,
                 "minNSiHits"         : 6,
                 "maxZinterval"       : 3}
 
-    itkflags = {"minPt"              : 900.0 * Units.MeV,
-                "maxD0"              : 1.0 * Units.mm,
-                "maxSigmaD0"         : 0.35 * Units.mm,
-                "maxSigmaZ0SinTheta" : 2.5 * Units.mm,
-                "minNPixelHits"      : 3,
+    itkflags = {"maxSigmaZ0SinTheta" : 2.5 * Units.mm,
                 "minNSctHits"        : 0,
                 "minNSiHits"         : 7,
                 "maxZinterval"       : 0.5}
@@ -206,7 +262,7 @@ def createPriVertexingFlags():
     for k in idflags:
         # Need to use default arguments in lambda function to keep them set
         # despite the loop
-        flags.addFlag(k, lambda prevFlags, a=idflags[k], b=itkflags[k]:
-                      a if prevFlags.Detector.GeometryID else b)
+        flags.addFlag(k, lambda pcf, a=idflags[k], b=itkflags[k]:
+                      a if pcf.Detector.GeometryID else b)
 
     return flags

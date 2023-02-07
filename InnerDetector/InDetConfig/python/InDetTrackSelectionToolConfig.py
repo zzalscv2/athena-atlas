@@ -99,7 +99,18 @@ def VtxInDetTrackSelectionCfg(flags, name="VertexInDetTrackSelectionTool", **kwa
         kwargs.setdefault(key, getattr(flags.Tracking.PriVertex, key))
 
     kwargs.setdefault("UseTrkTrackTools", False)
-    return InDetTrackSelectionTool_TightPrimary_Cfg(flags, name, **kwargs)
+
+    # Cut level = NoCut for a few modes
+    if flags.Reco.EnableHI or \
+       flags.InDet.Tracking.doMinBias or \
+       flags.InDet.Tracking.doLowMu:
+        acc = ComponentAccumulator()
+        acc.setPrivateTools(CompFactory.InDet.InDetTrackSelectionTool(name, **kwargs))
+        return acc
+
+    # Default is TightPrimary
+    else:
+        return InDetTrackSelectionTool_TightPrimary_Cfg(flags, name, **kwargs)
 
 
 def TrigVtxInDetTrackSelectionCfg(flags, name="InDetTrigDetailedTrackSelectionTool", **kwargs):
