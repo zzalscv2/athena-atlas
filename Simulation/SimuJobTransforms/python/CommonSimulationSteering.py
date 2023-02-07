@@ -103,6 +103,9 @@ def CommonSimulationCfg(flags, log):
             #Case 3: xAOD::EventInfo#EventInfo will have already been created
             pass
 
+    if flags.Beam.Type is BeamType.TestBeam:
+        from TBDetDescrAlg.TBDetDescrAlgConfig import TBDetDescrLoaderCfg
+        cfg.merge(TBDetDescrLoaderCfg(flags))
     AcceptAlgNames=[]
     if flags.Sim.ISFRun:
         # add the ISF_MainConfig

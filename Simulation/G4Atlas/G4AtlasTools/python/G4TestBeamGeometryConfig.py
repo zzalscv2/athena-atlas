@@ -103,26 +103,26 @@ def TileTB_CALOEnvelopeCfg(flags, name="TileTB_CALO", **kwargs):
     kwargs.setdefault("OuterRadii", [5145.*mm,5145.*mm,5145.*mm])
     kwargs.setdefault("ZSurfaces",  [-3400.*mm,-1050.*mm,6600.*mm])
     # Check the consistency of the flags
-    if flags.TestBeam.Eta is not None and (flags.TestBeam.Theta is not None or flags.TestBeam.Z is not None):
+    if flags.TestBeam.Eta != 'NONE' and (flags.TestBeam.Theta != 'NONE' or flags.TestBeam.Z != 'NONE'):
         raise ValueError('THE ETA PARAMETER CAN NOT BE SET TOGETHER WITH THETA AND Z')
-    elif (flags.TestBeam.Theta is None or flags.TestBeam.Z is None) and flags.TestBeam.Eta is None:
+    elif (flags.TestBeam.Theta == 'NONE' or flags.TestBeam.Z == 'NONE') and flags.TestBeam.Eta == 'NONE':
         raise ValueError('THETA AND Z ARE NOT SET')
     import math
     from AthenaCommon import PhysicalConstants
     DeltaY=0.0
-    if flags.TestBeam.Y is not None :
+    if flags.TestBeam.Y != 'NONE' :
         DeltaY=-flags.TestBeam.Y
     PhiZ=0.0
-    if flags.TestBeam.Phi is not None:
+    if flags.TestBeam.Phi != 'NONE':
         PhiZ=-math.radians(flags.TestBeam.Phi)
-    if flags.TestBeam.Eta is not None:
+    if flags.TestBeam.Eta != 'NONE':
         # Mode 1 -> User enters only eta
         eta=flags.TestBeam.Eta
         ThetaY=-(PhysicalConstants.pi*0.5)+2*math.atan(math.exp(-eta))
         DeltaX=float(2298-6208)/math.cosh(eta)+6208
         DeltaF=0.0
         DeltaZ=0.0
-    elif not (flags.TestBeam.Theta is None or flags.TestBeam.Z is None):
+    elif not (flags.TestBeam.Theta == 'NONE' or flags.TestBeam.Z == 'NONE'):
         theta=flags.TestBeam.Theta
         z=flags.TestBeam.Z
         eta=0.0
@@ -158,7 +158,7 @@ def TileTB_CALOEnvelopeCfg(flags, name="TileTB_CALO", **kwargs):
         from G4AtlasTools.G4GeometryToolConfig import TileGeoDetectorToolCfg
         toolTile = result.popToolsAndMerge(TileGeoDetectorToolCfg(flags))
         SubDetectorList += [ toolTile ]
-    from MuonWall.WuonWallConfig import MuonWallTileTBCfg
+    from MuonWall.MuonWallConfig import MuonWallTileTBCfg
     muonWallTool = result.popToolsAndMerge(MuonWallTileTBCfg(flags))
     SubDetectorList += [muonWallTool]
     kwargs.setdefault("SubDetectors", SubDetectorList)

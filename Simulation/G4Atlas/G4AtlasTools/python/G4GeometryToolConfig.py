@@ -16,14 +16,12 @@ from G4AtlasTools.G4FieldConfig import ATLASFieldManagerToolCfg, TightMuonsATLAS
 
 from G4AtlasTools.G4AtlasToolsConfig import SensitiveDetectorMasterToolCfg
 
-GeoDetectorTool=CompFactory.GeoDetectorTool
 CylindricalEnvelope, PolyconicalEnvelope, MaterialDescriptionTool,VoxelDensityTool,G4AtlasDetectorConstructionTool,BoxEnvelope=CompFactory.getComps("CylindricalEnvelope","PolyconicalEnvelope","MaterialDescriptionTool","VoxelDensityTool","G4AtlasDetectorConstructionTool","BoxEnvelope")
 
 from AthenaCommon.SystemOfUnits import mm, cm, m
 
 #ToDo - finish migrating this
 #from ForwardRegionProperties.ForwardRegionPropertiesToolConfig import ForwardRegionPropertiesCfg
-
 
 #put it here to avoid circular import?
 def G4GeometryNotifierSvcCfg(flags, name="G4GeometryNotifierSvc", **kwargs):
@@ -34,14 +32,22 @@ def G4GeometryNotifierSvcCfg(flags, name="G4GeometryNotifierSvc", **kwargs):
     return result
 
 
+def GeoDetectorToolCfg(flags, name='GeoDetectorTool', **kwargs):
+    result = ComponentAccumulator()
+    from Geo2G4.Geo2G4Config import Geo2G4SvcCfg
+    kwargs.setdefault("Geo2G4Svc", result.getPrimaryAndMerge(Geo2G4SvcCfg(flags)).name)
+    #add the GeometryNotifierSvc
+    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
+    result.setPrivateTools(CompFactory.GeoDetectorTool(name, **kwargs))
+    return result
+
+
 def BeamPipeGeoDetectorToolCfg(flags, name='BeamPipe', **kwargs):
     #set up geometry
     from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
     result = BeamPipeGeometryCfg(flags)
     kwargs.setdefault("DetectorName", "BeamPipe")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
 
@@ -50,9 +56,7 @@ def PixelGeoDetectorToolCfg(flags, name='Pixel', **kwargs):
     from PixelGeoModel.PixelGeoModelConfig import PixelSimulationGeometryCfg
     result = PixelSimulationGeometryCfg(flags)
     kwargs.setdefault("DetectorName", "Pixel")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
 
@@ -61,29 +65,25 @@ def SCTGeoDetectorToolCfg(flags, name='SCT', **kwargs):
     from SCT_GeoModel.SCT_GeoModelConfig import SCT_SimulationGeometryCfg
     result = SCT_SimulationGeometryCfg(flags)
     kwargs.setdefault("DetectorName", "SCT")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
+
 
 def PLRGeoDetectorToolCfg(flags, name='PLR', **kwargs):
     #set up geometry
     from PLRGeoModelXml.PLR_GeoModelConfig import PLR_GeometryCfg
     result = PLR_GeometryCfg(flags)
     kwargs.setdefault("DetectorName", "PLR")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
+
 
 def ITkPixelGeoDetectorToolCfg(flags, name='ITkPixel', **kwargs):
     #set up geometry
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelSimulationGeometryCfg
     result = ITkPixelSimulationGeometryCfg(flags)
     kwargs.setdefault("DetectorName", "ITkPixel")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
 
@@ -92,9 +92,7 @@ def ITkStripGeoDetectorToolCfg(flags, name='ITkStrip', **kwargs):
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripSimulationGeometryCfg
     result = ITkStripSimulationGeometryCfg(flags)
     kwargs.setdefault("DetectorName", "ITkStrip")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
 
@@ -107,29 +105,25 @@ def HGTDGeoDetectorToolCfg(flags, name='HGTD', **kwargs):
 
     result = HGTD_SimulationGeometryCfg(flags)
     kwargs.setdefault("DetectorName", "HGTD")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
+
 
 def HGTDServiceToolCfg(flags, name='HGTDServices', **kwargs):
     #set up geometry
     from HGTD_GeoModelXml.HGTDServiceGeoModelConfig import HGTDServiceGeoModelCfg
     result = HGTDServiceGeoModelCfg(flags)
     kwargs.setdefault("DetectorName", "HGTDServices")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
+
 
 def TRTGeoDetectorToolCfg(flags, name='TRT', **kwargs):
     #set up geometry
     from TRT_GeoModel.TRT_GeoModelConfig import TRT_SimulationGeometryCfg
     result = TRT_SimulationGeometryCfg(flags)
     kwargs.setdefault("DetectorName", "TRT")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
 
@@ -138,9 +132,7 @@ def IDetServicesMatGeoDetectorToolCfg(flags, name='IDetServicesMat', **kwargs):
     from InDetServMatGeoModel.InDetServMatGeoModelConfig import InDetServiceMaterialCfg
     result = InDetServiceMaterialCfg(flags)
     kwargs.setdefault("DetectorName", "InDetServMat")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
 
@@ -149,9 +141,7 @@ def LArMgrGeoDetectorToolCfg(flags, name='LArMgr', **kwargs):
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     result = LArGMCfg(flags)
     kwargs.setdefault("DetectorName", "LArMgr")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
 
@@ -160,9 +150,7 @@ def TileGeoDetectorToolCfg(flags, name='Tile', **kwargs):
     from TileGeoModel.TileGMConfig import TileGMCfg
     result = TileGMCfg(flags)
     kwargs.setdefault("DetectorName", "Tile")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
 
@@ -171,9 +159,7 @@ def LucidGeoDetectorToolCfg(flags, name='Lucid', **kwargs):
     from AtlasGeoModel.ForDetGeoModelConfig import ForDetGeometryCfg
     result=ForDetGeometryCfg(flags)
     kwargs.setdefault("DetectorName", "LUCID")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
 
@@ -182,9 +168,7 @@ def ALFAGeoDetectorToolCfg(flags, name='ALFA', **kwargs):
     from AtlasGeoModel.ForDetGeoModelConfig import ForDetGeometryCfg
     result = ForDetGeometryCfg(flags)
     kwargs.setdefault("DetectorName", "ALFA")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
 
@@ -193,9 +177,7 @@ def ZDCGeoDetectorToolCfg(flags, name='ZDC', **kwargs):
     from AtlasGeoModel.ForDetGeoModelConfig import ForDetGeometryCfg
     result = ForDetGeometryCfg(flags)
     kwargs.setdefault("DetectorName", "ZDC")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
 
@@ -205,9 +187,7 @@ def AFPGeoDetectorToolCfg(flags, name='AFP', **kwargs):
     result = ForDetGeometryCfg(flags)
     kwargs.setdefault("DetectorName", "AFP")
     kwargs.setdefault("GeoDetectorName", "AFP_GeoModel")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
 
@@ -217,9 +197,7 @@ def FwdRegionGeoDetectorToolCfg(flags, name='FwdRegion', **kwargs):
     result = ForDetGeometryCfg(flags)
     kwargs.setdefault("DetectorName", "FwdRegion")
     kwargs.setdefault("GeoDetectorName", "ForwardRegionGeoModel")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
 
@@ -228,9 +206,7 @@ def MuonGeoDetectorToolCfg(flags, name='Muon', **kwargs):
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     result = MuonGeoModelCfg(flags)
     kwargs.setdefault("DetectorName", "Muon")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
 
@@ -264,6 +240,7 @@ def ITKEnvelopeCfg(flags, name="ITK", **kwargs):
     kwargs.setdefault("SubDetectors", SubDetectorList)
     result.setPrivateTools(CylindricalEnvelope(name, **kwargs))
     return result
+
 
 def IDETEnvelopeCfg(flags, name="IDET", **kwargs):
     result = ComponentAccumulator()
@@ -344,7 +321,7 @@ def ForwardRegionEnvelopeCfg(flags, name='ForwardRegion', **kwargs):
         SubDetectorList += [ toolAFP ]
     kwargs.setdefault("SubDetectors", SubDetectorList)
     ##FIXME Should this really be a GeoDetectorTool???
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
 
@@ -494,6 +471,7 @@ def ATLASEnvelopeCfg(flags, name="Atlas", **kwargs):
 def MaterialDescriptionToolCfg(flags, name="MaterialDescriptionTool", **kwargs):
     ## kwargs.setdefault("SomeProperty", aValue)
     result = ComponentAccumulator()
+    kwargs.setdefault("TestBeam", flags.Beam.Type is BeamType.TestBeam)
     result.setPrivateTools(MaterialDescriptionTool(name, **kwargs))
     return result
 
@@ -773,9 +751,7 @@ def CavernInfraGeoDetectorToolCfg(flags, name='CavernInfra', **kwargs):
     from AtlasGeoModel.CavernGMConfig import CavernGeometryCfg
     result = CavernGeometryCfg(flags)
     kwargs.setdefault("DetectorName", "CavernInfra")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
 

@@ -38,7 +38,7 @@ def GenParticleFiltersToolCfg(flags):
     acc = ParticleFinalStateFilterCfg(flags)
     genParticleFilterList += [result.popToolsAndMerge(acc)]
     if "ATLAS" in flags.GeoModel.Layout or "atlas" in flags.GeoModel.Layout:
-        if flags.Beam.Type is not BeamType.Cosmics:
+        if flags.Beam.Type not in [BeamType.Cosmics, BeamType.TestBeam]:
             acc = ParticlePositionFilterDynamicCfg(flags)
             genParticleFilterList += [result.popToolsAndMerge(acc)]
             if not (flags.Detector.GeometryAFP or flags.Detector.GeometryALFA or flags.Detector.GeometryFwdRegion) \

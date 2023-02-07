@@ -179,7 +179,7 @@ def initConfigFlags():
     def __testbeam():
         from SimulationConfig.TestBeamConfigFlags import createTestBeamConfigFlags
         return createTestBeamConfigFlags()
-    _addFlagsCategory (acf, "TestBeam", __testbeam, 'TestBeamConfig' )
+    _addFlagsCategory (acf, "TestBeam", __testbeam, 'SimulationConfig' )
 
 #Digitization Flags:
     def __digitization():

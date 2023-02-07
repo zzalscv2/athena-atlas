@@ -6,11 +6,18 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 def createTestBeamConfigFlags():
     tbcf = AthConfigFlags()
-    tbcf.addFlag("TestBeam.Eta", None)
-    tbcf.addFlag("TestBeam.Theta", None)
-    tbcf.addFlag("TestBeam.Phi", None)
-    tbcf.addFlag("TestBeam.Y", None)
-    tbcf.addFlag("TestBeam.Z", None)
+    print ("In createTestBeamConfigFlags()")
+    tbcf.addFlag("TestBeam.Eta", 'NONE')
+    tbcf.addFlag("TestBeam.Theta", 'NONE')
+    tbcf.addFlag("TestBeam.Phi", 'NONE')
+    tbcf.addFlag("TestBeam.Y", 'NONE')
+    tbcf.addFlag("TestBeam.Z", 'NONE')
+    tbcf.addFlag("TestBeam.Layout", 'tb_Tile2000_2003_5B')
+    # Test Beam beam properties
+    tbcf.addFlag("TestBeam.BeamPID", 11)
+    tbcf.addFlag("TestBeam.BeamEnergy", 100000) # Just use Beam.Energy?
+    tbcf.addFlag("TestBeam.Ybeam", [-20,20])
+    tbcf.addFlag("TestBeam.Zbeam", [-15,15])
 
     return tbcf
 
