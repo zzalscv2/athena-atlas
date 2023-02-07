@@ -1,5 +1,5 @@
 <!--
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  -->
 
 <lcgdict>
@@ -8,8 +8,11 @@
    <class name="asg::AsgComponentConfig" />
    <class name="asg::AsgToolConfig" />
 
-   <class name="tuple<asg::AsgToolConfig,string>" />
-   <class name="std::map<std::string,std::tuple<asg::AsgToolConfig,std::string>>" />
-   <class name="std::map<std::string,std::vector<std::string>>" />
+   <class name="std::tuple<asg::AsgComponentConfig, std::string>" />
+   <class name="std::pair<std::string, std::tuple<asg::AsgComponentConfig, std::string> >" />
+   <class name="std::map<std::string, std::tuple<asg::AsgComponentConfig, std::string> >" />
+
+   <class name="std::pair<std::string, std::vector<std::string> >" />
+   <class name="std::map<std::string, std::vector<std::string> >" />
 
 </lcgdict>

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -149,7 +149,7 @@ namespace asg
   createPrivateTool (const std::string& name,
                      const std::string& toolType)
   {
-    return addPrivateTool (name, AsgToolConfig (toolType + "/" + name));
+    return addPrivateTool (name, AsgComponentConfig(toolType + "/" + name));
   }
 
 
@@ -158,14 +158,14 @@ namespace asg
   createPrivateToolInArray (const std::string& name,
                             const std::string& toolType)
   {
-    return addPrivateToolInArray (name, AsgToolConfig (toolType + "/" + name));
+    return addPrivateToolInArray (name, AsgComponentConfig(toolType + "/" + name));
   }
 
 
 
   StatusCode AsgComponentConfig ::
   addPrivateTool (const std::string& name,
-                  AsgToolConfig toolConfig)
+                  AsgComponentConfig toolConfig)
   {
     using namespace msgComponentConfig;
 
@@ -186,7 +186,7 @@ namespace asg
 
   std::string AsgComponentConfig ::
   addPrivateToolInArray (const std::string& name,
-                         AsgToolConfig toolConfig)
+                         AsgComponentConfig toolConfig)
   {
     using namespace msgComponentConfig;
 
@@ -304,7 +304,7 @@ namespace asg
     {
       ToolHandle<AsgTool> th (toolInfo.first, component.get());
       std::shared_ptr<void> mycleanup;
-      if (std::get<0>(toolInfo.second).makeTool (th, mycleanup).isFailure())
+      if (AsgToolConfig(std::get<0>(toolInfo.second)).makeTool (th, mycleanup).isFailure())
       {
         ANA_MSG_ERROR ("failed to create subtool \"" << toolInfo.first << "\" on component \"" << component->name() << "\"");
         return StatusCode::FAILURE;
