@@ -121,13 +121,13 @@ def RecoSteering(flags):
     if flags.Reco.EnableTrackCellAssociation:
         from TrackParticleAssociationAlgs.TrackParticleAssociationAlgsConfig import (
             TrackParticleCellAssociationAlgCfg)
-        acc.merge(TrackParticleCellAssociationAlgCfg(flags, PtCut=10000))
+        acc.merge(TrackParticleCellAssociationAlgCfg(flags))
 
         if (flags.Tracking.storeSeparateLargeD0Container and \
             flags.Tracking.doLargeD0):
             from TrackParticleAssociationAlgs.TrackParticleAssociationAlgsConfig import (
                 LargeD0TrackParticleCellAssociationAlgCfg)
-            acc.merge(LargeD0TrackParticleCellAssociationAlgCfg(flags, PtCut=10000))
+            acc.merge(LargeD0TrackParticleCellAssociationAlgCfg(flags))
         log.info("---------- Configured track particle-cell association")
 
     # PFlow
