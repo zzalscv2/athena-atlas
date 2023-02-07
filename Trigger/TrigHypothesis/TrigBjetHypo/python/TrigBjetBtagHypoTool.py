@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import re
 from TrigBjetHypo.TrigBjetMonitoringConfig import TrigBjetBtagHypoToolMonitoring
@@ -59,7 +59,7 @@ bbTaggingWP = \
 
 
 ####################################################################################################
-def TrigBjetBtagHypoToolFromDict( chainDict ):
+def TrigBjetBtagHypoToolFromDict( flags, chainDict ):
 
     chainPart = chainDict['chainParts'][0]
     conf_dict = { 'threshold'    : chainPart['threshold'],
@@ -74,7 +74,7 @@ def TrigBjetBtagHypoToolFromDict( chainDict ):
     MonTool = None
     nolegname = re.sub("(^leg.*?_)", "", name)
     if 'bJetMon:online' in chainDict['monGroups']:
-        MonTool = TrigBjetBtagHypoToolMonitoring(f'TrigBjetOnlineMonitoring/{nolegname}')
+        MonTool = TrigBjetBtagHypoToolMonitoring(flags, f'TrigBjetOnlineMonitoring/{nolegname}')
     tool = getBjetBtagHypoConfiguration( name,conf_dict, MonTool )
 
     return tool

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -47,15 +47,15 @@ def extractPreselection(fullChainDict):
 # Translate the preselection expression in the main jet chainDict into a temporary chainDict
 # that is only seen by the standard hypo tool generator, and used to return a configured
 # hypo tool for the preselection step
-def caloPreselJetHypoToolFromDict(mainChainDict):
-    return _preselJetHypoToolFromDict(mainChainDict)
+def caloPreselJetHypoToolFromDict(flags, mainChainDict):
+    return _preselJetHypoToolFromDict(flags, mainChainDict)
     
 
-def roiPreselJetHypoToolFromDict(mainChainDict):
-    return _preselJetHypoToolFromDict(mainChainDict,doBJetSel=True)
+def roiPreselJetHypoToolFromDict(flags, mainChainDict):
+    return _preselJetHypoToolFromDict(flags, mainChainDict,doBJetSel=True)
 
 
-def _preselJetHypoToolFromDict(mainChainDict, doBJetSel=False):
+def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
 
     preselChainDict = dict(mainChainDict)
     preselChainDict['chainParts']=[]
@@ -139,7 +139,7 @@ def _preselJetHypoToolFromDict(mainChainDict, doBJetSel=False):
 
     assert(len(preselChainDict['chainParts'])==len(mainChainDict['chainParts']))
     try:
-        return trigJetHypoToolFromDict(preselChainDict)
+        return trigJetHypoToolFromDict(flags, preselChainDict)
     except NoHypoToolCreated as nohypo:
         raise nohypo # We only generate the hypo tool for the first jet leg
     except Exception as e:

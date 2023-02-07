@@ -38,7 +38,7 @@ def TLAMuonMenuSequence( flags, muChainPart):
     hypo = TrigMuonTLAHypoAlg("TrigMuonTLAHypoAlg_"+muonsIn)  
 
     hypo.TLAOutputName = sequenceOut  
-    hypo.MonTool = TrigMuonTLAHypoMonitoring("TrigMuonTLAHypoAlg/")
+    hypo.MonTool = TrigMuonTLAHypoMonitoring(flags, "TrigMuonTLAHypoAlg/")
 
     return MenuSequence( flags,
                          Sequence  = tlaMuonAthSequence,

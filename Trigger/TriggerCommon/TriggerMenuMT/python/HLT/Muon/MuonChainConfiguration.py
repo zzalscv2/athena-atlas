@@ -280,8 +280,8 @@ class MuonChainConfiguration(ChainConfigurationBase):
         return self.getStep(flags,1,'muRoiClu',[muRoiClusterSequenceCfg])
 
 
-def TrigMuonEFIdtpInvMassHypoToolCfg(chainDict):
-    tool = TrigMuonEFIdtpInvMassHypoToolFromDict(chainDict)
+def TrigMuonEFIdtpInvMassHypoToolCfg(flags, chainDict):
+    tool = TrigMuonEFIdtpInvMassHypoToolFromDict(flags, chainDict)
     return tool
 
 

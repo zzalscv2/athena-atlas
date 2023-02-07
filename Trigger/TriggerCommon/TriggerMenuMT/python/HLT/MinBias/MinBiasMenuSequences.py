@@ -62,7 +62,7 @@ def TrackCountHypoToolGen(chainDict):
         # will set here cuts
     return hypo
 
-def MbtsHypoToolGen(chainDict):
+def MbtsHypoToolGen(flags, chainDict):
     from TrigMinBias.TrigMinBiasConf import MbtsHypoTool
     hypo = MbtsHypoTool(chainDict["chainName"]) # to now no additional settings
     if chainDict["chainParts"][0]["extra"] in ["vetombts2in", "vetospmbts2in"]:
@@ -72,7 +72,7 @@ def MbtsHypoToolGen(chainDict):
     if '_all_' in chainDict["chainName"]:
         hypo.AcceptAll = True
         if "mbMon:online" in chainDict["monGroups"]:
-            hypo.MonTool = MbtsHypoToolMonitoring()
+            hypo.MonTool = MbtsHypoToolMonitoring(flags)
     else:  #default, one counter on each side
         hypo.MbtsCounters=1
     return hypo
@@ -93,7 +93,7 @@ def SPCounterRecoAlgCfg(flags):
     acc = ComponentAccumulator()
     from TrigMinBias.TrigMinBiasMonitoring import SpCountMonitoring
     alg = CompFactory.TrigCountSpacePoints( SpacePointsKey = recordable("HLT_SpacePointCounts"), 
-                                            MonTool = SpCountMonitoring() ) 
+                                            MonTool = SpCountMonitoring(flags) )
     acc.addEventAlgo(alg)
     return acc
     
@@ -193,7 +193,7 @@ def MinBiasTrkSequence(flags):
 
         #TODO move a complete configuration of the algs to TrigMinBias package
         from TrigMinBias.TrigMinBiasMonitoring import TrackCountMonitoring
-        trackCountHypo.MonTool = TrackCountMonitoring(trackCountHypo) # monitoring tool configures itself using config of the hypo alg
+        trackCountHypo.MonTool = TrackCountMonitoring(flags, trackCountHypo) # monitoring tool configures itself using config of the hypo alg
 
         trkRecoSeq = parOR("TrkRecoSeq", algs)
         trkSequence = seqAND("TrkSequence", [trkInputMakerAlg, trkRecoSeq])
@@ -208,7 +208,7 @@ def MinBiasTrkSequence(flags):
 def MinBiasMbtsSequence(flags):
     from TrigMinBias.TrigMinBiasConf import MbtsHypoAlg
     from TrigMinBias.MbtsConfig import MbtsFexCfg
-    fex = MbtsFexCfg(MbtsBitsKey=recordable("HLT_MbtsBitsContainer"))
+    fex = MbtsFexCfg(flags, MbtsBitsKey=recordable("HLT_MbtsBitsContainer"))
     MbtsRecoSeq = parOR("MbtsRecoSeq", [fex])
 
     from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorInitialROITool

@@ -31,7 +31,7 @@ def CosmicsTrkSequence(flags):
 
     #TODO move a complete configuration of the algs to TrigMinBias package
     from TrigMinBias.TrigMinBiasMonitoring import TrackCountMonitoring
-    trackCountHypo.MonTool = TrackCountMonitoring(trackCountHypo) # monitoring tool configures itself using config of the hypo alg
+    trackCountHypo.MonTool = TrackCountMonitoring(flags, trackCountHypo) # monitoring tool configures itself using config of the hypo alg
 
     trkRecoSeq = parOR("CosmicTrkRecoSeq", idTrackingAlgs)
     trkSequence = seqAND("CosmicTrkSequence", [trkInputMakerAlg, trkRecoSeq])
