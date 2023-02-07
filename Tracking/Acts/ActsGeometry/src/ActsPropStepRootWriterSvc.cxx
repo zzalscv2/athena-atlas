@@ -7,7 +7,7 @@
 
 #include "Acts/Propagator/detail/SteppingLogger.hpp"
 #include "Acts/Geometry/TrackingVolume.hpp"
-
+#include "Acts/Geometry/GeometryIdentifier.hpp"
 
 #include <vector>
 #include <deque>

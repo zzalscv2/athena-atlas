@@ -96,8 +96,6 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
     double pathLimit = 100.0; // lenght in cm
     double ptLoopers = 300.0; // pT in MeV
 
-    /// Wrapped logger for debug output.
-    Acts::LoggerWrapper loggerWrapper = Acts::getDummyLogger();
     /// Local logger for debug output.
     std::shared_ptr<const Acts::Logger> localLogger = nullptr;
 

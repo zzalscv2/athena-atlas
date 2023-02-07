@@ -209,25 +209,10 @@ namespace ActsTrk {
     if (spBegin == spEnd)
       return StatusCode::SUCCESS;
 
-    // TODO POSSIBLE OPTIMISATION
-    // come back here: do not create for each call SpacePointGridConfig
-    // Separate Config and Option (only b-field) for grid as well
-
-    // Space Point Grid Config
-    Acts::SpacePointGridConfig gridCfg;
-    gridCfg.minPt = m_minPt;
-    gridCfg.cotThetaMax = m_cotThetaMax;
-    gridCfg.impactMax = m_impactMax;
-    gridCfg.zMin = m_zMin;
-    gridCfg.zMax = m_zMax;
-    gridCfg.phiMin = m_gridPhiMin;
-    gridCfg.phiMax = m_gridPhiMax;
-    gridCfg.zBinEdges = m_zBinEdges;
-    gridCfg.deltaRMax = m_deltaRMax;
-    gridCfg.rMax = m_gridRMax;
-    gridCfg.bFieldInZ = bField[2]; // <<< only one supposed to change
-    gridCfg.phiBinDeflectionCoverage = m_phiBinDeflectionCoverage;
-    gridCfg = gridCfg.toInternalUnits();
+    // Space Point Grid Options
+    Acts::SpacePointGridOptions gridOpts;
+    gridOpts.bFieldInZ = bField[2];
+    gridOpts = gridOpts.toInternalUnits();
     
     // Seed Finder Options
     Acts::SeedFinderOptions finderOpts;
@@ -258,26 +243,24 @@ namespace ActsTrk {
       std::make_shared< Acts::BinFinder< value_type > >(m_zBinNeighborsTop, m_numPhiNeighbors);
     
     std::unique_ptr< Acts::SpacePointGrid< value_type > > grid =
-      Acts::SpacePointGridCreator::createGrid< value_type >(gridCfg);
+      Acts::SpacePointGridCreator::createGrid< value_type >(m_gridCfg, gridOpts);
     Acts::BinnedSPGroup< value_type > spacePointsGrouping(spBegin, spEnd, extractCovariance,								     
       bottomBinFinder, topBinFinder, std::move(grid), rRangeSPExtent, m_finderCfg, finderOpts);
     
-    Acts::SeedFinder< value_type > finder(m_finderCfg);
-
     // variable middle SP radial region of interest
     const Acts::Range1D<float> rMiddleSPRange(std::floor(rRangeSPExtent.min(Acts::binR) / 2) * 2 +
 					      m_finderCfg.deltaRMiddleMinSPRange,
 					      std::floor(rRangeSPExtent.max(Acts::binR) / 2) * 2 -
 					      m_finderCfg.deltaRMiddleMaxSPRange);
-
+    
     //TODO POSSIBLE OPTIMISATION come back here: see MR !52399 ( i.e. use static thread_local)
-    typename decltype(finder)::SeedingState state;
+    typename decltype(m_finder)::SeedingState state;
 
     auto group = spacePointsGrouping.begin();
     auto groupEnd = spacePointsGrouping.end();
     for (; group != groupEnd; ++group) {
-      finder.createSeedsForGroup(finderOpts, state, std::back_inserter(seeds), group.bottom(),
-				 group.middle(), group.top(), rMiddleSPRange);
+      m_finder.createSeedsForGroup(finderOpts, state, std::back_inserter(seeds), group.bottom(),
+				   group.middle(), group.top(), rMiddleSPRange);
     }
 
     return StatusCode::SUCCESS;
@@ -393,6 +376,23 @@ namespace ActsTrk {
 
     m_finderCfg = m_finderCfg.toInternalUnits().calculateDerivedQuantities();
 
+    // Grid Configuration
+    m_gridCfg.minPt = m_minPt;
+    m_gridCfg.cotThetaMax = m_cotThetaMax;
+    m_gridCfg.impactMax = m_impactMax;
+    m_gridCfg.zMin = m_zMin;
+    m_gridCfg.zMax = m_zMax;
+    m_gridCfg.phiMin = m_gridPhiMin;
+    m_gridCfg.phiMax = m_gridPhiMax;
+    m_gridCfg.zBinEdges = m_zBinEdges;
+    m_gridCfg.deltaRMax = m_deltaRMax;
+    m_gridCfg.rMax = m_gridRMax;
+    m_gridCfg.phiBinDeflectionCoverage = m_phiBinDeflectionCoverage;
+    m_gridCfg = m_gridCfg.toInternalUnits();
+
+    // Seed Finder
+    m_finder = Acts::SeedFinder< value_type >(m_finderCfg);
+ 
     return StatusCode::SUCCESS;
   }
 

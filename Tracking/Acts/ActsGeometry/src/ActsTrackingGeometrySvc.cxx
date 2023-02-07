@@ -144,7 +144,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
   ActsGeometryContext constructionContext;
   constructionContext.construction = true;
 
-  std::pair sctECEnvelopeZ{20_mm, 20_mm};
+  std::array<double, 2> sctECEnvelopeZ{20_mm, 20_mm};
 
   try {
     // BeamPipe

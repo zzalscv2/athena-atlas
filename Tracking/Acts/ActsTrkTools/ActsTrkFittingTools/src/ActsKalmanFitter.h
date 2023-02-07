@@ -22,6 +22,7 @@
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/EventData/Track.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
+#include "Acts/Geometry/GeometryIdentifier.hpp"
 
 // PACKAGE
 
@@ -176,11 +177,15 @@ private:
 
   template<typename trajectory_t>
   static Acts::Result<void> gainMatrixUpdate(const Acts::GeometryContext& gctx,
-      typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy trackState, Acts::NavigationDirection direction, Acts::LoggerWrapper logger);
+					     typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy trackState, 
+					     Acts::NavigationDirection direction, 
+					     const Acts::Logger& logger = Acts::getDummyLogger()); 
 
   template<typename trajectory_t>
   static Acts::Result<void> gainMatrixSmoother(const Acts::GeometryContext& gctx,
-      Acts::MultiTrajectory<trajectory_t>& trajectory, size_t entryIndex, Acts::LoggerWrapper logger);
+					       Acts::MultiTrajectory<trajectory_t>& trajectory, 
+					       size_t entryIndex, 
+					       const Acts::Logger& logger = Acts::getDummyLogger());
 
   // Create a track from the fitter result
   template<typename track_container_t, typename traj_t,

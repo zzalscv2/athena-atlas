@@ -20,6 +20,7 @@
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/TrackFinding/MeasurementSelector.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
+#include "Acts/Geometry/GeometryIdentifier.hpp"
 
 // PACKAGE
 #include "ActsTrkToolInterfaces/ITrackFindingTool.h"

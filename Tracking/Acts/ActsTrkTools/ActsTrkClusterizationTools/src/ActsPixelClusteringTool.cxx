@@ -137,8 +137,8 @@ PixelClusteringTool::clusterize(const InDetRawDataCollection<PixelRDORawData>& R
 	m_pixelRDOTool->getUnpackedPixelRDOs(RDOs, pixelID, element, ctx);
 
     ClusterCollection clusters =
-	Acts::Ccl::createClusters<CellCollection, ClusterCollection>
-	(cells, Acts::Ccl::DefaultConnect<Cell>(m_addCorners));
+      Acts::Ccl::createClusters<CellCollection, ClusterCollection, 2>
+      (cells, Acts::Ccl::DefaultConnect<Cell, 2>(m_addCorners));
 
     for (const Cluster& cluster : clusters)
 	ATH_CHECK(makeCluster(cluster, pixelID, element, container));

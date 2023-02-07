@@ -72,7 +72,9 @@ namespace ActsTrk {
     // *********************************************************************
 
   protected:
+    Acts::SeedFinder< value_type > m_finder;
     Acts::SeedFinderConfig< value_type > m_finderCfg;
+    Acts::SpacePointGridConfig m_gridCfg;
 
     // Properties to set SpacePointGridConfig
     Gaudi::Property< float > m_minPt {this, "minPt", 900. * Acts::UnitConstants::MeV,
