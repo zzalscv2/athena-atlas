@@ -754,7 +754,7 @@
   <y title="Efficiency" lo="0.0" hi="2.0"/>
 </h>
 <h id="efficiency_vs_pt_low" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="p_{T} [GeV]" n="60" lo="0" hi="3"/>
+  <x title="p_{T} [GeV]" n="99" lo="0.01" hi="1"/>
   <y title="Efficiency" lo="0.0" hi="2.0"/>
 </h>
 <h id="efficiency_vs_pt_log" type="TEfficiency" title="Fraction of reco-matched truth track">
@@ -1587,6 +1587,10 @@
   <x title="reco_{p_{T}} - truth_{p_{T}} [MeV]" n="100" lo="-100.0" hi="100.0"/>
   <y title="Number of Entries"/>
 </h>
+<h id="res_lowpt" type="TH1F" title="reco_{p_{T}} - truth_{p_{T}} [MeV]">
+  <x title="reco_{p_{T}} - truth_{p_{T}} [MeV]" n="100" lo="-100.0" hi="100.0"/>
+  <y title="Number of Entries"/>
+</h>
 <h id="res_z0sin" type="TH1F" title="reco_{z_{0} #times sin} - truth_{z_{0} #times sin}">
   <x title="reco_{z_{0} #times sin} - truth_{z_{0} #times sin}" n="100" lo="-&Z0SINRES;" hi="&Z0SINRES;"/>
   <y title="Number of Entries"/>
@@ -1617,6 +1621,10 @@
   <y title="Number of Entries"/>
 </h>
 <h id="sigma_pt" type="TH1F" title="#sigma_pt}">
+  <x title="#sigma_pt" n="100" lo="0" hi="100.0"/>
+  <y title="Number of Entries"/>
+</h>
+<h id="sigma_lowpt" type="TH1F" title="#sigma_pt}">
   <x title="#sigma_pt" n="100" lo="0" hi="100.0"/>
   <y title="Number of Entries"/>
 </h>
@@ -1671,8 +1679,18 @@
   <y title="reco_{d_{0}} - truth_{d_{0}} [mm]" n="1000" lo="-&D0RES;" hi="&D0RES;"/>
 </h>
 
+<h id="resHelper_lowpt_d0" type="TH2F" title="residual vs p_{T} for d_{0}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="reco_{d_{0}} - truth_{d_{0}} [mm]" n="1000" lo="-&D0RES;" hi="&D0RES;"/>
+</h>
+
 <h id="resHelper_pt_z0" type="TH2F" title="residual vs p_{T} for z_{0}">
   <x title="p_{T} [GeV]" n="100" lo="0." hi="100"/>
+  <y title="reco_{z_{0}} - truth_{z_{0}} [mm]" n="2000" lo="-&Z0RES;" hi="&Z0RES;"/>
+</h>
+
+<h id="resHelper_lowpt_z0" type="TH2F" title="residual vs p_{T} for z_{0}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
   <y title="reco_{z_{0}} - truth_{z_{0}} [mm]" n="2000" lo="-&Z0RES;" hi="&Z0RES;"/>
 </h>
 
@@ -1681,8 +1699,18 @@
   <y title="reco_{qoverp} - truth_{qoverp} [MeV^{-1}]" n="2000" lo="-2.5e-5" hi="2.5e-5"/>
 </h>
 
+<h id="resHelper_lowpt_qoverp" type="TH2F" title="residual vs pT for qoverp, low pt ">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="reco_{qoverp} - truth_{qoverp} [MeV^{-1}]" n="2000" lo="-2.5e-5" hi="2.5e-5"/>
+</h>
+
 <h id="resHelper_pt_ptqopt" type="TH2F" title="residual vs p_{T} for p_{T} #times q/p_{T}">
   <x title="p_{T} [GeV]" n="100" lo="0." hi="100"/>
+  <y title="reco_{pT #times q/pT} - truth_{pT #times q/pT}" n="2000" lo="-&PTQOPTRES;" hi="&PTQOPTRES;"/>
+</h>
+
+<h id="resHelper_lowpt_ptqopt" type="TH2F" title="residual vs p_{T} for p_{T} #times q/p_{T}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
   <y title="reco_{pT #times q/pT} - truth_{pT #times q/pT}" n="2000" lo="-&PTQOPTRES;" hi="&PTQOPTRES;"/>
 </h>
 
@@ -1691,8 +1719,18 @@
   <y title="reco_{#theta} - truth_{#theta} [rads]" n="1000" lo="-&THETARES;" hi="&THETARES;"/>
 </h>
 
+<h id="resHelper_lowpt_theta" type="TH2F" title="residual vs p_{T} for #theta, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="reco_{#theta} - truth_{#theta} [rads]" n="1000" lo="-&THETARES;" hi="&THETARES;"/>
+</h>
+
 <h id="resHelper_pt_phi" type="TH2F" title="residual vs p_{T} for #phi">
   <x title="p_{T} [GeV]" n="100" lo="0." hi="100"/>
+  <y title="reco_{#phi} - truth_{#phi} [rads]" n="1000" lo="-&PHIRES;" hi="&PHIRES;"/>
+</h>
+
+<h id="resHelper_lowpt_phi" type="TH2F" title="residual vs p_{T} for #phi, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
   <y title="reco_{#phi} - truth_{#phi} [rads]" n="1000" lo="-&PHIRES;" hi="&PHIRES;"/>
 </h>
 
@@ -1701,8 +1739,18 @@
   <y title="reco_{pt} - truth_{pt} [GeV]" n="1000" lo="-100.0" hi="100.0"/>
 </h>
 
+<h id="resHelper_lowpt_pt" type="TH2F" title="residual vs pT for low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="reco_{pt} - truth_{pt} [GeV]" n="1000" lo="-100.0" hi="100.0"/>
+</h>
+
 <h id="resHelper_pt_z0sin" type="TH2F" title="residual vs p_{T} for z_{0} #times sin">
   <x title="p_{T} [GeV]" n="100" lo="0." hi="100"/>
+  <y title="reco_{z_{0} #times sin} - truth_{z_{0} #times sin} [mm]" n="1000" lo="-&Z0SINRES;" hi="&Z0SINRES;"/>
+</h>
+
+<h id="resHelper_lowpt_z0sin" type="TH2F" title="residual vs p_{T} for z_{0} #times sin, low">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
   <y title="reco_{z_{0} #times sin} - truth_{z_{0} #times sin} [mm]" n="1000" lo="-&Z0SINRES;" hi="&Z0SINRES;"/>
 </h>
 
@@ -1784,6 +1832,47 @@
 
 <h id="pullHelper_pt_z0sin" type="TH2F" title="pull vs p_{T} for z_{0} #times sin">
   <x title="p_{T} [GeV]" n="100" lo="0." hi="100"/>
+  <y title="(reco_{z_{0} #times sin} - truth_{z_{0} #times sin}) / #sigma(z_{0} #times sin)" n="100" lo="-10.0" hi="10.0"/>
+</h>
+
+
+<h id="pullHelper_lowpt_d0" type="TH2F" title="pull  vs p_{T} for d_{0}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="(reco_{d_{0}} - truth_{d_{0}}) / #sigma(d_{0})" n="100" lo="-10.0" hi="10.0"/>
+</h>
+
+<h id="pullHelper_lowpt_z0" type="TH2F" title="pull  vs p_{T} for z_{0}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="(reco_{z_{0}} - truth_{z_{0}}) / #sigma(z_{0})" n="100" lo="-10.0" hi="10.0"/>
+</h>
+
+<h id="pullHelper_lowpt_qoverp" type="TH2F" title="pull  vs pT for qoverp, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="(reco_{qoverp} - truth_{qoverp}) / #sigma(qoverp)" n="100" lo="-10.0" hi="10.0"/>
+</h>
+
+<h id="pullHelper_lowpt_ptqopt" type="TH2F" title="pull  vs p_{T} for p_{T} #times q/p_{T}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="(reco_{q/p_{T}} - truth_{q/p_{T}}) / #sigma(q/p_{T})" n="100" lo="-10.0" hi="10.0"/>
+</h>
+
+<h id="pullHelper_lowpt_theta" type="TH2F" title="pull vs p_{T} for #theta, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="(reco_{#theta} - truth_{#theta}) / #sigma(#theta)" n="100" lo="-10.0" hi="10.0"/>
+</h>
+
+<h id="pullHelper_lowpt_phi" type="TH2F" title="pull vs p_{T} for #phi, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="(reco_{#phi} - truth_{#phi}) / #sigma(#phi)" n="100" lo="-10.0" hi="10.0"/>
+</h>
+
+<h id="pullHelper_lowpt_pt" type="TH2F" title="pull vs pT for pt, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="(reco_{pt} - truth_{pt}) / #sigma(pt)" n="100" lo="-10.0" hi="10.0"/>
+</h>
+
+<h id="pullHelper_lowpt_z0sin" type="TH2F" title="pull vs p_{T} for z_{0} #times sin, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
   <y title="(reco_{z_{0} #times sin} - truth_{z_{0} #times sin}) / #sigma(z_{0} #times sin)" n="100" lo="-10.0" hi="10.0"/>
 </h>
 
@@ -1909,6 +1998,46 @@
   <y title="width of resolution for z_{0} #times sin"/>
 </h>
 
+<h id="resolution_vs_lowpt_d0" type="TH1F" title="resolution vs p_{T} for d_{0}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="width of resolution for d_{0}"/>
+</h>
+
+<h id="resolution_vs_lowpt_z0" type="TH1F" title="resolution vs p_{T} for z_{0}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="width of resolution for z0"/>
+</h>
+
+<h id="resolution_vs_lowpt_qoverp" type="TH1F" title="resolution vs pT for qoverp, low pt">
+  <x title="p_{T}" n="100" lo="0." hi="1"/>
+  <y title="qoverp resolution"/>
+</h>
+
+<h id="resolution_vs_lowpt_ptqopt" type="TH1F" title="resolution vs p_{T} for p_{T} #times q/p_{T}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="width of resolution for p_{T} #times q/p_{T}"/>
+</h>
+
+<h id="resolution_vs_lowpt_pt" type="TH1F" title="resolution vs pT for pt, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="pt resolution"/>
+</h>
+
+<h id="resolution_vs_lowpt_theta" type="TH1F" title="resolution vs p_{T} for #theta, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="width of resolution for #theta"/>
+</h>
+
+<h id="resolution_vs_lowpt_phi" type="TH1F" title="resolution vs p_{T} for #phi, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="width of resolution for #phi"/>
+</h>
+
+<h id="resolution_vs_lowpt_z0sin" type="TH1F" title="resolution vs p_{T} for z_{0} #times sin, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="width of resolution for z_{0} #times sin"/>
+</h>
+
 
 <h id="resmean_vs_pt_d0" type="TH1F" title="mean of resolution vs p_{T} for d_{0}">
   <x title="p_{T} [GeV]" n="100" lo="0." hi="100"/>
@@ -1947,6 +2076,46 @@
 
 <h id="resmean_vs_pt_z0sin" type="TH1F" title="mean of resolution vs p_{T} for z_{0} #times sin">
   <x title="p_{T} [GeV]" n="100" lo="0." hi="100"/>
+  <y title="mean of resolution for z_{0} #times sin"/>
+</h>
+
+<h id="resmean_vs_lowpt_d0" type="TH1F" title="mean of resolution vs p_{T} for d_{0}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="mean of resolution for d_{0}"/>
+</h>
+
+<h id="resmean_vs_lowpt_z0" type="TH1F" title="mean of resolution vs p_{T} for z_{0}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="mean of resolution for z_{0}"/>
+</h>
+
+<h id="resmean_vs_lowpt_qoverp" type="TH1F" title="mean of resolution vs pT for qoverp, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="qoverp mean of resolution"/>
+</h>
+
+<h id="resmean_vs_lowpt_ptqopt" type="TH1F" title="mean of resolution vs p_{T} for p_{T} #times q/p_{T}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="mean of resolution for p_{T} #times q/p_{T}"/>
+</h>
+
+<h id="resmean_vs_lowpt_pt" type="TH1F" title="mean of resolution vs pT for pt, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="pt mean of resolution"/>
+</h>
+
+<h id="resmean_vs_lowpt_theta" type="TH1F" title="mean of resolution vs p_{T} for #theta, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="mean of resolution for #theta"/>
+</h>
+
+<h id="resmean_vs_lowpt_phi" type="TH1F" title="mean of resolution vs p_{T} for #phi, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="mean of resolution for #phi"/>
+</h>
+
+<h id="resmean_vs_lowpt_z0sin" type="TH1F" title="mean of resolution vs p_{T} for z_{0} #times sin, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
   <y title="mean of resolution for z_{0} #times sin"/>
 </h>
 
@@ -2073,6 +2242,45 @@
   <y title="width of pull for z_{0} #times sin"/>
 </h>
 
+<h id="pullwidth_vs_lowpt_d0" type="TH1F" title="pull vs p_{T} for d_{0}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="width of pull for d_{0}"/>
+</h>
+
+<h id="pullwidth_vs_lowpt_z0" type="TH1F" title="pull vs p_{T} for z_{0}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="width of pull for z_{0}"/>
+</h>
+
+<h id="pullwidth_vs_lowpt_qoverp" type="TH1F" title="pull vs pT for qoverp, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="qoverp pull"/>
+</h>
+
+<h id="pullwidth_vs_lowpt_ptqopt" type="TH1F" title="pull vs p_{T} for p_{T} #times q/p_{T}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="width of pull for p_{T} #times q/p_{T}"/>
+</h>
+
+<h id="pullwidth_vs_lowpt_pt" type="TH1F" title="pull vs pT for pt, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="pt pull"/>
+</h>
+
+<h id="pullwidth_vs_lowpt_theta" type="TH1F" title="pull vs p_{T} for #theta, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="width of pull for #theta"/>
+</h>
+
+<h id="pullwidth_vs_lowpt_phi" type="TH1F" title="pull vs p_{T} for #phi, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="width of pull for #phi"/>
+</h>
+
+<h id="pullwidth_vs_lowpt_z0sin" type="TH1F" title="pull vs p_{T} for z_{0} #times sin, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="width of pull for z_{0} #times sin"/>
+</h>
 
 <h id="pullmean_vs_pt_d0" type="TH1F" title="mean of pull vs p_{T} for d_{0}">
   <x title="p_{T} [GeV]" n="100" lo="0." hi="100"/>
@@ -2111,6 +2319,46 @@
 
 <h id="pullmean_vs_pt_z0sin" type="TH1F" title="mean of pull vs p_{T} for z_{0} #times sin">
   <x title="p_{T} [GeV]" n="100" lo="0." hi="100"/>
+  <y title="mean of pull z_{0} #times sin"/>
+</h>
+
+<h id="pullmean_vs_lowpt_d0" type="TH1F" title="mean of pull vs p_{T} for d_{0}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="mean of pull d_{0} [mm]"/>
+</h>
+
+<h id="pullmean_vs_lowpt_z0" type="TH1F" title="mean of pull vs p_{T} for z_{0}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="mean of pull for z_{0} [mm]"/>
+</h>
+
+<h id="pullmean_vs_lowpt_qoverp" type="TH1F" title="mean of pull vs p_{T} for qoverp, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="qoverp mean of pull"/>
+</h>
+
+<h id="pullmean_vs_lowpt_ptqopt" type="TH1F" title="mean of pull vs p_{T} for p_{T} #times q/p_{T}, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="mean of pull for p_{T} #times q/p_{T}"/>
+</h>
+
+<h id="pullmean_vs_lowpt_pt" type="TH1F" title="mean of pull vs pT for pt, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="pt mean of pull"/>
+</h>
+
+<h id="pullmean_vs_lowpt_theta" type="TH1F" title="mean of pull vs p_{T} for #theta, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="mean of pull for #theta"/>
+</h>
+
+<h id="pullmean_vs_lowpt_phi" type="TH1F" title="mean of pull vs p_{T} for #phi, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="mean of pull for #phi"/>
+</h>
+
+<h id="pullmean_vs_lowpt_z0sin" type="TH1F" title="mean of pull vs p_{T} for z_{0} #times sin, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
   <y title="mean of pull z_{0} #times sin"/>
 </h>
 
@@ -2191,6 +2439,46 @@
 
 <h id="sigma_vs_pt_z0sin" type="TProfile" title="#sigma(z_{0} #times sin) vs p_{T}">
   <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="100"/>
+  <y title="#sigma(z_{0} #times sin)" lo="-0.2" hi="0.2"/>
+</h>
+
+<h id="sigma_vs_lowpt_d0" type="TProfile" title="#sigma(d_{0}) vs p_{T}, low pt">
+  <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="1"/>
+  <y title="#sigma(d_{0}) [mm]" lo="-1.5" hi="1.5"/>
+</h>
+
+<h id="sigma_vs_lowpt_z0" type="TProfile" title="#sigma(z_{0}) vs p_{T}, low pt">
+  <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="1"/>
+  <y title="#sigma(z_{0}) [mm]" lo="-10.0" hi="10.0"/>
+</h>
+
+<h id="sigma_vs_lowpt_qoverp" type="TProfile" title="#sigma_{qoverp} vs pT, low pt">
+  <x title="p_{T} [GeV]"  n="&NETA;" lo="0.0" hi="1"/>
+  <y title="#sigma_{qoverp}" lo="-2.5e-5" hi="2.5e-5"/>
+</h>
+
+<h id="sigma_vs_lowpt_ptqopt" type="TProfile" title="p_{T} #times #sigma(q/p_{T}} vs p_{T}, low pt">
+  <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="1"/>
+  <y title="p_{T} #times #sigma(q/p_{T})" lo="-15.0" hi="15.0"/>
+</h>
+
+<h id="sigma_vs_lowpt_pt" type="TProfile" title="#sigma_{pt} vs pT, low pt">
+  <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="1"/>
+  <y title="#sigma_{pt}" lo="-100.0" hi="100.0"/>
+</h>
+
+<h id="sigma_vs_lowpt_theta" type="TProfile" title="#sigma(#theta) vs p_{T}, low pt">
+  <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="1"/>
+  <y title="#sigma(#theta) [rads]" lo="-0.01" hi="0.01" />
+</h>
+
+<h id="sigma_vs_lowpt_phi" type="TProfile" title="#sigma(phi) vs p_{T}, low pt">
+  <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="1"/>
+  <y title="#sigma(#phi) [rads]" lo="-0.01" hi="0.01"/>
+</h>
+
+<h id="sigma_vs_lowpt_z0sin" type="TProfile" title="#sigma(z_{0} #times sin) vs p_{T}, low pt">
+  <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="1"/>
   <y title="#sigma(z_{0} #times sin)" lo="-0.2" hi="0.2"/>
 </h>
 
