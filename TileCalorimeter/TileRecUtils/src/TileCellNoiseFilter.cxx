@@ -58,17 +58,15 @@ StatusCode TileCellNoiseFilter::initialize() {
 
   ATH_CHECK( m_emScaleKey.initialize() );
 
-  if (m_caloNoiseKey.empty()) {
-    //=== get TileCondToolNoiseSample
-    ATH_CHECK( m_tileToolNoiseSample.retrieve());
+  ATH_CHECK( m_sampleNoiseKey.initialize(m_caloNoiseKey.empty()) );
 
+  if (m_caloNoiseKey.empty()) {
     //=== get TileBadChanTool
     ATH_CHECK( m_tileBadChanTool.retrieve() );
 
   } else {
     ATH_CHECK( m_caloNoiseKey.initialize());
 
-    m_tileToolNoiseSample.disable();
     m_tileBadChanTool.disable();
   }
 
@@ -89,9 +87,14 @@ StatusCode TileCellNoiseFilter::process (CaloCellContainer* cellcoll,
   }
 
   const CaloNoise* caloNoise = nullptr;
+  const TileSampleNoise* sampleNoise = nullptr;
   if (!m_caloNoiseKey.empty()) {
     SG::ReadCondHandle<CaloNoise> noiseH (m_caloNoiseKey, ctx);
     caloNoise = noiseH.cptr();
+  } else {
+    SG::ReadCondHandle<TileSampleNoise> sampleNoiseHandle(m_sampleNoiseKey, ctx);
+    ATH_CHECK( sampleNoiseHandle.isValid() );
+    sampleNoise = sampleNoiseHandle.cptr();
   }
 
   SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
@@ -100,7 +103,7 @@ StatusCode TileCellNoiseFilter::process (CaloCellContainer* cellcoll,
   // common-mode shift calculation
   ATH_MSG_DEBUG("Calculating common-mode shift...");
   cmdata_t commonMode = {{{0}}};
-  int ncorr = this->calcCM(caloNoise, *emScale, cellcoll, commonMode, ctx);
+  int ncorr = this->calcCM(caloNoise, sampleNoise, *emScale, cellcoll, commonMode);
   if (ncorr <= 0) {
     ATH_MSG_DEBUG( "Failed to calculate common-mode shift - no corrections applied");
     return StatusCode::SUCCESS;
@@ -191,10 +194,10 @@ void TileCellNoiseFilter::setCMSEnergy(const TileEMScale* emScale,
 // ============================================================================
 // calculate correction
 int TileCellNoiseFilter::calcCM(const CaloNoise* caloNoise,
+                                const TileSampleNoise* sampleNoise,
                                 const TileEMScale* emScale,
                                 const CaloCellContainer* cellcoll,
-                                cmdata_t& commonMode,
-                                const EventContext& ctx) const
+                                cmdata_t& commonMode) const
 {
   int nEmptyChan[s_maxPartition][s_maxDrawer][s_maxMOB] = {{{0}}};
   int nGoodChan[s_maxPartition][s_maxDrawer][s_maxMOB] = {{{0}}};
@@ -262,7 +265,7 @@ int TileCellNoiseFilter::calcCM(const CaloNoise* caloNoise,
           if (m_useTwoGaussNoise) {
             // nothing for the moment - keep 1.5 ADC counts
           } else {
-            noise_sigma = m_tileToolNoiseSample->getHfn(drawerIdx, chan, gain1, TileRawChannelUnit::ADCcounts, ctx);
+            noise_sigma = sampleNoise->getHfn(drawerIdx, chan, gain1);
           }
           
           significance = 999.999;
@@ -315,7 +318,7 @@ int TileCellNoiseFilter::calcCM(const CaloNoise* caloNoise,
           if (m_useTwoGaussNoise) {
             // nothing for the moment - keep 1.5 ADC counts
           } else {
-            noise_sigma = m_tileToolNoiseSample->getHfn(drawerIdx, chan, gain2, TileRawChannelUnit::ADCcounts, ctx);
+            noise_sigma = sampleNoise->getHfn(drawerIdx, chan, gain2);
           }
 
           // use only empty channels with less significance

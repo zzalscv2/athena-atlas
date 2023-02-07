@@ -32,9 +32,8 @@ def TileCellNoiseFilterCfg(flags, **kwargs):
         acc.merge( CaloNoiseCondAlgCfg(flags, 'electronicNoise') )
         tileCellNoiseFilter.CaloNoise = 'electronicNoise'
     else:
-        from TileConditions.TileSampleNoiseConfig import TileCondToolNoiseSampleCfg
-        sampleNoiseTool = acc.popToolsAndMerge( TileCondToolNoiseSampleCfg(flags) )
-        tileCellNoiseFilter.TileCondToolNoiseSample = sampleNoiseTool
+        from TileConditions.TileSampleNoiseConfig import TileSampleNoiseCondAlgCfg
+        acc.merge( TileSampleNoiseCondAlgCfg(flags) )
 
         from TileConditions.TileBadChannelsConfig import TileBadChanToolCfg
         badChanTool = acc.popToolsAndMerge( TileBadChanToolCfg(flags) )
