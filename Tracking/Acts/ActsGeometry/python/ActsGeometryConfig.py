@@ -10,20 +10,30 @@ def ActsTrackingGeometrySvcCfg(flags, name = "ActsTrackingGeometrySvc", **kwargs
   if flags.Detector.GeometryBpipe:
     from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
     result.merge(BeamPipeGeometryCfg(flags))
+    kwargs.setdefault("BuildBeamPipe", True)
+
   if flags.Detector.GeometryPixel:
     subDetectors += ["Pixel"]
+    from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
+    result.merge(PixelReadoutGeometryCfg(flags))
+
   if flags.Detector.GeometrySCT:
     subDetectors += ["SCT"]
+    from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
+    result.merge(SCT_ReadoutGeometryCfg(flags))
+
   if flags.Detector.GeometryTRT:
     # Commented out because TRT is not production ready yet and we don't 
     # want to turn it on even if the global flag is set
     #  subDetectors += ["TRT"]
-    pass
+    from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
+    result.merge(TRT_ReadoutGeometryCfg(flags))
 
   if flags.Detector.GeometryCalo:
     # Commented out because Calo is not production ready yet and we don't 
     # want to turn it on even if the global flag is set
     #  subDetectors += ["Calo"]
+    #  kwargs.setdefault("CaloVolumeBuilder", CompFactory.ActsCaloTrackingVolumeBuilder())
 
     # need to configure calo geometry, otherwise we get a crash
     # Do this even though it's not production ready yet, so the service can
@@ -35,24 +45,13 @@ def ActsTrackingGeometrySvcCfg(flags, name = "ActsTrackingGeometrySvc", **kwargs
 
   if flags.Detector.GeometryITkPixel:
     subDetectors += ["ITkPixel"]
+    from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
+    result.merge(ITkPixelReadoutGeometryCfg(flags))
+
   if flags.Detector.GeometryITkStrip:
     subDetectors += ["ITkStrip"]
-
-  if flags.Detector.GeometryBpipe:
-    from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
-    result.merge(BeamPipeGeometryCfg(flags))
-    kwargs.setdefault("BuildBeamPipe", True)
-
-
-  idSub = [sd in subDetectors for sd in ("Pixel", "SCT", "TRT", "ITkPixel", "ITkStrip")]
-  if any(idSub):
-    # ANY of the ID subdetectors are on => we require GM sources
-    from InDetConfig.InDetGeometryConfig import InDetGeometryCfg
-    result.merge(InDetGeometryCfg(flags))
-
-  if "Calo" in subDetectors:
-    # in case Calo is enabled, we need this tool
-    kwargs.setdefault("CaloVolumeBuilder", CompFactory.ActsCaloTrackingVolumeBuilder())
+    from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
+    result.merge(ITkStripReadoutGeometryCfg(flags))
 
   actsTrackingGeometrySvc = CompFactory.ActsTrackingGeometrySvc(name,
                                                                 BuildSubDetectors=subDetectors,

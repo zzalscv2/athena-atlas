@@ -89,9 +89,6 @@ def ITktrigInDetFastTrackingCfg( inflags, roisKey, signatureName, in_view ):
 
     acc = ComponentAccumulator()
 
-    from TrigInDetConfig.TrigInDetConfig import magFieldCfgCfg
-    acc.merge(magFieldCfgCfg(flags))
-
     if in_view:
         from TrigInDetConfig.TrigInDetConfig import InDetCacheNames
         verifier = CompFactory.AthViews.ViewDataVerifier( name = 'VDVInDetFTF'+signature,
