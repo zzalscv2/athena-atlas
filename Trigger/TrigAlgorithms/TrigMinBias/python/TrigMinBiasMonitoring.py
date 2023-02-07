@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-def SpCountMonitoring():
+def SpCountMonitoring(flags):
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool('MonTool')
+    monTool = GenericMonitoringTool(flags, 'MonTool')
     monTool.defineHistogram('pixCL_1', path='EXPERT', type='TH1I', title='pixCL_1',xbins=100, xmin=0, xmax=6000)
     monTool.defineHistogram('pixCLBeforeCuts', path='EXPERT', type='TH1I', title='totPixBeforeCuts', xbins = 250, xmin=0, xmax=6000)
     monTool.defineHistogram('pixCL_2', path='EXPERT', type='TH1I', title='pixCL_2',xbins=100, xmin=0, xmax=6000)
@@ -23,9 +23,9 @@ def SpCountMonitoring():
     return monTool
 
 __MBTSXTitle="channel (0-15 A side, 16-31 C side)"
-def MbtsFexMonitoring():
+def MbtsFexMonitoring(flags):
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool('MonTool')
+    monTool = GenericMonitoringTool(flags,'MonTool')
     monTool.defineHistogram('triggerEnergies', path='EXPERT', type='TH1D', title='triggerEnergies',xbins=50, xmin=-5, xmax=45)
     monTool.defineHistogram('triggerTimes', path='EXPERT', type='TH1I', title='triggerTimes',xbins=100, xmin=-50, xmax=50)
     monTool.defineHistogram('channelID, triggerEnergies', path='EXPERT', title=f'signal per channel;{__MBTSXTitle}; energy[pC]', type='TH2F', xbins=32, xmin=-0.5, xmax=31.5, ybins=20, ymin=-5,ymax=45)
@@ -36,16 +36,16 @@ def MbtsFexMonitoring():
 
     return monTool
 
-def MbtsHypoToolMonitoring():
+def MbtsHypoToolMonitoring(flags):
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool('MonTool')
+    monTool = GenericMonitoringTool(flags, 'MonTool')
     monTool.defineHistogram('Counts', path='EXPERT', title=f'MBTS counts per channel;{__MBTSXTitle};counts', type='TH1F', xbins=32, xmin=-0.5, xmax=31.5)
     
     return monTool
 
-def TrackCountMonitoring(hypoAlg):
+def TrackCountMonitoring(flags, hypoAlg):
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool('MonTool')
+    monTool = GenericMonitoringTool(flags, 'MonTool')
     monTool.defineHistogram('ntrks', path='EXPERT', type='TH1I', title='ntrks', xbins=200, xmin=0, xmax=200)
     for i in range(len(hypoAlg.minPt)):
         monTool.defineHistogram('countsSelection{}'.format(i),

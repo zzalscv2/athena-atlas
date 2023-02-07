@@ -37,7 +37,7 @@ def CaloOffsetCorrectionCfg(flags):
     from LArRecUtils.LArRecUtilsConfig import LArMCSymCondAlgCfg
     acc.merge( LArMCSymCondAlgCfg( flags ) )
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool('MonTool')
+    monTool = GenericMonitoringTool(flags, 'MonTool')
     monTool.defineHistogram('TIME_exec', path='EXPERT', type='TH1F', title="CaloBCIDAvgAlg execution time; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=4000)
     acc.getEventAlgo("CaloBCIDAvgAlg").MonTool = monTool
     return acc
@@ -120,7 +120,7 @@ if __name__ == "__main__":
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     import math
-    mon = GenericMonitoringTool("TrigCaloDataAccessSvcMon")
+    mon = GenericMonitoringTool(flags, "TrigCaloDataAccessSvcMon")
     mon.defineHistogram("TIME_locking_LAr_RoI",
                         path="EXPERT",
                         title="Time spent in unlocking the LAr collection",

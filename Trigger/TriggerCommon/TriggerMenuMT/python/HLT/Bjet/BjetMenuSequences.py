@@ -118,7 +118,7 @@ def getBJetSequence(flags, jc_name=None):
         # links for navigation
         BTaggingLink = BTagName.replace( "HLT_","" ),
         PrmVtxLink = InputMakerAlg.RoITool.PrmVtxLink,
-        MonTool = TrigBjetOnlineMonitoring()
+        MonTool = TrigBjetOnlineMonitoring(flags)
     )
 
     from TrigBjetHypo.TrigBjetBtagHypoTool import TrigBjetBtagHypoToolFromDict

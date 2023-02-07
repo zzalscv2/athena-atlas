@@ -44,7 +44,7 @@ def DVRecoFragment(flags):
 
     from TrigEDMConfig.TriggerEDMRun3 import recordable
     from TrigVrtSecInclusive.TrigVrtSecInclusiveConfig import TrigVrtSecInclusiveCfg
-    vertexingAlgs = TrigVrtSecInclusiveCfg( "TrigVrtSecInclusive_TrigDV",
+    vertexingAlgs = TrigVrtSecInclusiveCfg( flags, "TrigVrtSecInclusive_TrigDV",
                                             FirstPassTracksName = FSConfig.tracks_FTF(),
                                             SecondPassTracksName = LRTConfig.tracks_FTF(),
                                             PrimaryVertexInputName = FSConfig.vertex,

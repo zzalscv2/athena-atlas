@@ -1,13 +1,13 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigTauRec.TrigTauRecConf import TrigTauRecMerged
 from TrigTauRec.TrigTauRecMonitoring import tauMonitoringCaloOnlyMVA,  tauMonitoringPrecisionMVA
 
 class TrigTauRecMerged_TauCaloOnlyMVA (TrigTauRecMerged) :
 
-        def __init__(self, name = "TrigTauRecMerged_TauCaloOnlyMVA"):
+        def __init__(self, flags, name = "TrigTauRecMerged_TauCaloOnlyMVA"):
             super( TrigTauRecMerged_TauCaloOnlyMVA , self ).__init__( name )
-            self.MonTool = tauMonitoringCaloOnlyMVA()
+            self.MonTool = tauMonitoringCaloOnlyMVA(flags)
             self._mytools = [] 
 
             import TrigTauRec.TrigTauAlgorithmsHolder as taualgs
@@ -30,19 +30,18 @@ class TrigTauRecMerged_TauCaloOnlyMVA (TrigTauRecMerged) :
             tools.append(taualgs.getMvaTESVariableDecorator())
             tools.append(taualgs.getMvaTESEvaluator())
 
-            from AthenaConfiguration.AllConfigFlags import ConfigFlags
             for tool in tools:
                 tool.inTrigger = True
-                tool.calibFolder = ConfigFlags.Trigger.Offline.Tau.tauRecToolsCVMFSPath
+                tool.calibFolder = flags.Trigger.Offline.Tau.tauRecToolsCVMFSPath
 
             self.Tools = tools
 
 class TrigTauRecMerged_TauPrecisionMVA (TrigTauRecMerged) :
 
-        def __init__(self, name = "TrigTauRecMerged_TauPrecisionMVA", doTrackBDT=False, doLLP=False):
+        def __init__(self, flags, name = "TrigTauRecMerged_TauPrecisionMVA", doTrackBDT=False, doLLP=False):
         
             super( TrigTauRecMerged_TauPrecisionMVA , self ).__init__( name )
-            self.MonTool = tauMonitoringPrecisionMVA()
+            self.MonTool = tauMonitoringPrecisionMVA(flags)
 
             import TrigTauRec.TrigTauAlgorithmsHolder as taualgs
             tools = []
@@ -90,10 +89,9 @@ class TrigTauRecMerged_TauPrecisionMVA (TrigTauRecMerged) :
             # flattened RNN score and WP
             tools.append(taualgs.getTauWPDecoratorJetRNN(LLP = doLLP))
 
-            from AthenaConfiguration.AllConfigFlags import ConfigFlags
             for tool in tools:
                 tool.inTrigger = True
-                tool.calibFolder = ConfigFlags.Trigger.Offline.Tau.tauRecToolsCVMFSPath
+                tool.calibFolder = flags.Trigger.Offline.Tau.tauRecToolsCVMFSPath
 
             self.Tools = tools
 
@@ -161,8 +159,9 @@ def TrigTauRecMergedOnlyMVACfg(flags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
+    flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW
     flags.lock()
 

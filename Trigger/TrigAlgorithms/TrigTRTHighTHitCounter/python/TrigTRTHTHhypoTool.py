@@ -3,9 +3,9 @@
 from TrigTRTHighTHitCounter.TrigTRTHighTHitCounterConf import TrigTRTHTHhypoTool
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def _IncTool(name):
+def _IncTool(flags, name):
     
-    monTool = GenericMonitoringTool("MonTool_"+name,
+    monTool = GenericMonitoringTool(flags, "MonTool_"+name,
                                     HistPath = 'TrigTRTHTHhypo/'+name)
     monTool.defineHistogram('HTRatioRoad', type='TH1F', path='EXPERT', title="TrigTRTHTH Hypo HTRatioRoad", xbins=10, xmin=0.0, xmax=1.0)
     monTool.defineHistogram('HTRatioWedge', type='TH1F', path='EXPERT', title="TrigTRTHTH Hypo HTRatioWedge", xbins=10, xmin=0.0, xmax=1.0)
@@ -23,8 +23,7 @@ def _IncTool(name):
                                MonTool = monTool )
     return tool
 
-def TrigTRTHTHhypoToolFromDict( d ):
+def TrigTRTHTHhypoToolFromDict( flags, chainDict ):
     """ Use menu decoded chain dictionary to configure the tool """
-    name = d['chainName'] 
-    return _IncTool( name ) 
-
+    name = chainDict['chainName']
+    return _IncTool( flags, name )
