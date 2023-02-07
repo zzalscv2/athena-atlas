@@ -1,9 +1,9 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-def BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName):
+def BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName, **kwargs):
     from TrkConfig.TrkVKalVrtFitterConfig import BPHY_TrkVKalVrtFitterCfg \
         as TrkVKalVrtFitterCfg
-    return TrkVKalVrtFitterCfg(flags, name=BPHYDerivationName+"_VKalVrtFitter")
+    return TrkVKalVrtFitterCfg(flags, name=BPHYDerivationName+"_VKalVrtFitter", **kwargs)
 
 def BPHY_V0ToolCfg(flags, BPHYDerivationName):
     from TrkConfig.TrkVertexAnalysisUtilsConfig import V0ToolsNoExtrapCfg
