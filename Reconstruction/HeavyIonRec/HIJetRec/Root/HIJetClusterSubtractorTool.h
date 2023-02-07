@@ -57,9 +57,9 @@ public:
   float getWeightPhi(float eta, float phi, int sample) const;
   void updateSlice(xAOD::HIEventShape* slice, float ET, float phi0, float area_cluster) const;
 
-  Gaudi::Property< std::string > m_inputFile { this, "InputFile", "cluster.geo.root", "File containing cluster geometric moments." };
+  Gaudi::Property< std::string > m_inputFile { this, "InputFile", "cluster.geo.HIJING_2018.root", "File containing cluster geometric moments." };
 
-  Gaudi::Property< std::string > m_configDir { this, "ConfigDir", "HIEventUtils/", "Directory containing configuration file." };
+  Gaudi::Property< std::string > m_configDir { this, "ConfigDir", "HIJetCorrection/", "Directory containing configuration file." };
 
   TH3F* m_h3W;
   TH3F* m_h3Eta;
