@@ -55,7 +55,7 @@ Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
   , m_approachDescriptor(ades)
 {
   DiscSurface::associateLayer(*this);
-  if (!ades && surfaceArray) buildApproachDescriptor();
+  if (!ades && m_surfaceArray) buildApproachDescriptor();
   // register the layer
   if (ades) m_approachDescriptor->registerLayer(*this);
 }
@@ -73,7 +73,7 @@ Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
   , m_approachDescriptor(ades)
 {
   DiscSurface::associateLayer(*this);
-  if (!ades && surfaceArray)
+  if (!ades && m_surfaceArray)
     buildApproachDescriptor();
   // register the layer
   if (ades)

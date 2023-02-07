@@ -58,7 +58,7 @@ Trk::CylinderLayer::CylinderLayer(const Amg::Transform3D& transform,
   , m_approachDescriptor(ades)
 {
   CylinderSurface::associateLayer(*this);
-  if (!ades && surfaceArray)
+  if (!ades && m_surfaceArray)
     buildApproachDescriptor();
   // register the layer
   if (ades)
@@ -79,7 +79,7 @@ Trk::CylinderLayer::CylinderLayer(
   , m_approachDescriptor(ades)
 {
   CylinderSurface::associateLayer(*this);
-  if (!ades && surfaceArray)
+  if (!ades && m_surfaceArray)
     buildApproachDescriptor();
   // register the layer
   if (ades)
@@ -105,7 +105,7 @@ Trk::CylinderLayer::CylinderLayer(Trk::CylinderBounds* cbounds,
       Layer(std::move(surfaceArray), thickness, std::move(olap), laytyp),
       m_approachDescriptor(ades) {
   CylinderSurface::associateLayer(*this);
-  if (!ades && surfaceArray) buildApproachDescriptor();
+  if (!ades && m_surfaceArray) buildApproachDescriptor();
   // register the layer
   if (ades) m_approachDescriptor->registerLayer(*this);
 }
@@ -118,7 +118,7 @@ Trk::CylinderLayer::CylinderLayer(
       Layer(std::move(surfaceArray), laymatprop, thickness, std::move(olap), laytyp),
       m_approachDescriptor(ades) {
   CylinderSurface::associateLayer(*this);
-  if (!ades && surfaceArray) buildApproachDescriptor();
+  if (!ades && m_surfaceArray) buildApproachDescriptor();
   // register the layer
   if (ades) m_approachDescriptor->registerLayer(*this);
 }
