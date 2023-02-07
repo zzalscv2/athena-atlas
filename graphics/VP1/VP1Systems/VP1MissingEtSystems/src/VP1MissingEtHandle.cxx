@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -48,13 +48,13 @@ QList<VP1StdCollection*> VP1MissingEtHandle::createCollections(IVP1System*sys)
   //Get list of keys (only those that are not MissingEtTruth/MissingEtCalo as well):
   VP1SGContentsHelper sg(sys);
   QStringList keys = sg.getKeys<MissingET>();
-  foreach (QString key,sg.getKeys<MissingEtTruth>())
+  for (QString key : sg.getKeys<MissingEtTruth>())
     keys.removeAll(key);
-  foreach (QString key,sg.getKeys<MissingEtCalo>())
+  for (QString key : sg.getKeys<MissingEtCalo>())
     keys.removeAll(key);
 
   QList<VP1StdCollection*> l;
-  foreach (QString key, keys) {
+  for (QString key : keys) {
     //updated: for prevent loading zero length system
     met = 0;
 	if(!VP1SGAccessHelper(sys).retrieve(met, key))

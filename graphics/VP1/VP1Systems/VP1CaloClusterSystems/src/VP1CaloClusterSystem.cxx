@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -63,7 +63,7 @@ void VP1CaloClusterSystem::buildEventSceneGraph(StoreGateSvc*, SoSeparator *root
   m_d->controller->collWidget()->setCollections(VP1CaloClusterCollection::createCollections(this,m_d->controller));
 
   //Add collections to event scenegraph:
-  foreach (VP1StdCollection* col,m_d->controller->collWidget()->collections<VP1StdCollection>())
+  for (VP1StdCollection* col : m_d->controller->collWidget()->collections<VP1StdCollection>())
     root->addChild(col->collSwitch());
 }
 
@@ -77,7 +77,7 @@ QWidget * VP1CaloClusterSystem::buildController()
 //_____________________________________________________________________________________
 void VP1CaloClusterSystem::userPickedNode(SoNode*, SoPath * pickedPath) {
 
-  foreach (VP1CaloClusterCollection* col,m_d->controller->collWidget()->collections<VP1CaloClusterCollection>()) {
+  for (VP1CaloClusterCollection* col : m_d->controller->collWidget()->collections<VP1CaloClusterCollection>()) {
     if (col->visible()&&pickedPath->containsNode(col->collSep())) {
       message(col->infoOnClicked(pickedPath));
       return;
