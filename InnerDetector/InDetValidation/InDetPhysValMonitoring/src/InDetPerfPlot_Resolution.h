@@ -64,6 +64,13 @@ private:
   const double  m_ptMax = 1000.0;
 
   float m_PtBins[m_nPtBins + 1]{};
+
+// Settings for detailed log-linear binning in low pt region
+  static const int m_nLowPtBins = 99;
+  const double  m_lowPtMin = 0.01;
+  const double  m_lowPtMax = 1.0;
+
+  float m_LowPtBins[m_nLowPtBins + 1]{};
    
   std::string m_paramProp[NPARAMS] = { "d0", "z0", "ptqopt", "theta", "phi", "pt", "z0sin" }; 
  
@@ -97,41 +104,56 @@ private:
 
   TH2* m_resHelpereta[NPARAMS];
   TH2* m_resHelperpt[NPARAMS];
+  TH2* m_resHelperlowpt[NPARAMS];
   TH2* m_pullHelpereta[NPARAMS]; 
   TH2* m_pullHelperpt[NPARAMS]; 
+  TH2* m_pullHelperlowpt[NPARAMS]; 
 
   TH1* m_reswidth_vs_eta[NPARAMS];
   TH1* m_resmean_vs_eta[NPARAMS];
   TH1* m_reswidth_vs_pt[NPARAMS];
   TH1* m_resmean_vs_pt[NPARAMS];
+  TH1* m_reswidth_vs_lowpt[NPARAMS];
+  TH1* m_resmean_vs_lowpt[NPARAMS];
 
   TH1* m_pullwidth_vs_eta[NPARAMS];
   TH1* m_pullmean_vs_eta[NPARAMS];
   TH1* m_pullwidth_vs_pt[NPARAMS];
   TH1* m_pullmean_vs_pt[NPARAMS];
+  TH1* m_pullwidth_vs_lowpt[NPARAMS];
+  TH1* m_pullmean_vs_lowpt[NPARAMS];
 
   TH2* m_resHelpereta_pos[NPARAMS];
   TH2* m_resHelpereta_neg[NPARAMS];
   TH2* m_resHelperpt_pos[NPARAMS]; 
   TH2* m_resHelperpt_neg[NPARAMS];
+  TH2* m_resHelperlowpt_pos[NPARAMS]; 
+  TH2* m_resHelperlowpt_neg[NPARAMS];
 
   TH1* m_reswidth_vs_eta_pos[NPARAMS];
   TH1* m_resmean_vs_eta_pos[NPARAMS];
   TH1* m_reswidth_vs_pt_pos[NPARAMS];
   TH1* m_resmean_vs_pt_pos[NPARAMS];
+  TH1* m_reswidth_vs_lowpt_pos[NPARAMS];
+  TH1* m_resmean_vs_lowpt_pos[NPARAMS];
 
   TH1* m_reswidth_vs_eta_neg[NPARAMS];
   TH1* m_resmean_vs_eta_neg[NPARAMS];
   TH1* m_reswidth_vs_pt_neg[NPARAMS];
   TH1* m_resmean_vs_pt_neg[NPARAMS];
+  TH1* m_reswidth_vs_lowpt_neg[NPARAMS];
+  TH1* m_resmean_vs_lowpt_neg[NPARAMS];
 
   TH1* m_pullProjections_vs_pt[NPARAMS][m_nPtBins];
+  TH1* m_pullProjections_vs_lowpt[NPARAMS][m_nLowPtBins];
   TH1* m_pullProjections_vs_eta[NPARAMS][m_nEtaBins];
   TH1* m_resProjections_vs_pt[NPARAMS][m_nPtBins];
+  TH1* m_resProjections_vs_lowpt[NPARAMS][m_nLowPtBins];
   TH1* m_resProjections_vs_eta[NPARAMS][m_nEtaBins];
 
   TProfile* m_sigma_vs_eta[NPARAMS];
   TProfile* m_sigma_vs_pt[NPARAMS];
+  TProfile* m_sigma_vs_lowpt[NPARAMS];
 
 };
 

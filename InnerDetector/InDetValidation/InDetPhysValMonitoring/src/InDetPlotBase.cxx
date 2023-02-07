@@ -144,7 +144,7 @@ InDetPlotBase::fillHisto(TEfficiency* pTeff,  const float value, const bool acce
 void
 InDetPlotBase::fillHisto(TEfficiency* eff2d, const float xvalue, const float yvalue, const bool accepted, const float weight) {
   if (eff2d and validArguments(xvalue, yvalue)) {
-    if(weight==1.) eff2d->Fill(accepted, weight, xvalue, yvalue);
+    if(weight==1.) eff2d->Fill(accepted, xvalue, yvalue);
     else eff2d->FillWeighted(accepted, weight, xvalue, yvalue);
   }
 }
