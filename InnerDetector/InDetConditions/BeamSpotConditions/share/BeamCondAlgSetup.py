@@ -1,6 +1,7 @@
 # jobOptions for BeamCondSvc - just define conditions data access
 
 include.block("BeamSpotConditions/BeamCondAlgSetup.py")
+
 from IOVDbSvc.CondDB import conddb
 try:
     from RecExConfig.RecFlags import rec
@@ -8,7 +9,8 @@ try:
     if(rec.doExpressProcessing()):
         conddb.addFolder('INDET_ONL','/Indet/Onl/Beampos <key>/Indet/Beampos</key>', className='AthenaAttributeList')
     else:
-        conddb.addFolderSplitOnline("INDET","/Indet/Onl/Beampos","/Indet/Beampos", className='AthenaAttributeList')
+        conddb.addFolderSplitOnline("INDET","/Indet/Onl/Beampos","/Indet/Beampos", className='AthenaAttributeList',
+                                    extensible=hasattr(svcMgr,'HltEventLoopMgr'))
 except ImportError:
     # Protection for AthSimulationBase release which does not contain RecExConfig
     conddb.addFolderSplitOnline("INDET","/Indet/Onl/Beampos","/Indet/Beampos", className='AthenaAttributeList')
