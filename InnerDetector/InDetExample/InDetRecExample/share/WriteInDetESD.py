@@ -134,6 +134,9 @@ if InDetFlags.doxAOD():
 
   excludedAuxData = "-caloExtension.-cellAssociation.-clusterAssociation.-TTVA_AMVFVertices_forReco.-TTVA_AMVFWeights_forReco"
 
+  # remove track decorations used internally by FTAG software
+  excludedAuxData += '.-'.join([''] + FTAG_AUXDATA)
+
   if not (InDetFlags.KeepFirstParameters() or InDetFlags.keepAdditionalHitsOnTrackParticle()):
     excludedAuxData += '.-trackParameterCovarianceMatrices.-parameterX.-parameterY.-parameterZ.-parameterPX.-parameterPY.-parameterPZ.-parameterPosition'
 
