@@ -58,11 +58,6 @@ def egammaTrkRefitterToolCfg(flags,
         from TrkConfig.TrkGaussianSumFilterConfig import EMGSFTrackFitterCfg
         kwargs["FitterTool"] = acc.popToolsAndMerge(
             EMGSFTrackFitterCfg(flags, name="GSFTrackFitter"), **kwargs)
-    kwargs.setdefault("useBeamSpot", False)
-    kwargs.setdefault("ReintegrateOutliers", True)
-    if "Extrapolator" not in kwargs:
-        kwargs["Extrapolator"] = acc.getPrimaryAndMerge(
-            AtlasExtrapolatorCfg(flags))
     tool = CompFactory.egammaTrkRefitterTool(name, **kwargs)
     acc.setPrivateTools(tool)
     return acc

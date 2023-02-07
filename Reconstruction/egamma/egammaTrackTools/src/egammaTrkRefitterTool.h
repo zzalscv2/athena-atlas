@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMATRACKTOOLS_EGAMMATRKREFITTERTOOL_H
@@ -15,28 +15,22 @@
   @author C. Anastopouls
 */
 
+#include "egammaInterfaces/IegammaTrkRefitterTool.h"
+
+#include "egammaInterfaces/ICaloCluster_OnTrackBuilder.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 
-#include "BeamSpotConditionsData/BeamSpotData.h"
-#include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkTrack/Track.h"
-#include "egammaInterfaces/ICaloCluster_OnTrackBuilder.h"
-#include "egammaInterfaces/IegammaTrkRefitterTool.h"
-#include "xAODEgamma/ElectronFwd.h"
-#include "xAODTracking/TrackParticleFwd.h"
 
 #include <memory>
 
 class AtlasDetectorID;
-namespace Trk {
-class VertexOnTrack;
-}
 
 class egammaTrkRefitterTool final
   : virtual public IegammaTrkRefitterTool
@@ -50,7 +44,7 @@ public:
                         const IInterface*);
 
   /** @brief Destructor */
-  ~egammaTrkRefitterTool();
+  virtual ~egammaTrkRefitterTool() = default; 
 
   /** @brief AlgTool initialise method */
   virtual StatusCode initialize() override;
@@ -70,11 +64,6 @@ private:
   std::vector<const Trk::MeasurementBase*> getIDHits(
     const Trk::Track* track) const;
 
-  /** Provide Vertex on track from the beam spot*/
-  const Trk::VertexOnTrack* provideVotFromBeamspot(
-    const EventContext& ctx,
-    const Trk::Track* track) const;
-
   struct MeasurementsAndTrash
   {
     /*
@@ -91,14 +80,6 @@ private:
     const Trk::Track* track,
     const xAOD::Electron* eg = nullptr) const;
 
-  /** @brief Handle for BeamSpotData*/
-  SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{
-    this,
-    "BeamSpotKey",
-    "BeamSpotData",
-    "SG key for beam spot"
-  };
-
   /** @brief The track refitter */
   ToolHandle<Trk::ITrackFitter> m_ITrackFitter{
     this,
@@ -107,24 +88,8 @@ private:
     "ToolHandle for track fitter implementation"
   };
 
-  /** @brief track extrapolator */
-  ToolHandle<Trk::IExtrapolator> m_extrapolator{
-    this,
-    "Extrapolator",
-    "Trk::Extrapolator/AtlasExtrapolator",
-    "Track extrapolator"
-  };
-
   ToolHandle<ICaloCluster_OnTrackBuilder>
     m_CCOTBuilder{ this, "CCOTBuilder", "CaloCluster_OnTrackBuilder", "" };
-
-  /** @brief Run outlier removal when doing the track refit*/
-  Gaudi::Property<Trk::RunOutlierRemoval> m_runOutlier{
-    this,
-    "runOutlier",
-    false,
-    "Switch to control outlier finding in track fit"
-  };
 
   /** @brief type of material interaction in extrapolation*/
   Gaudi::Property<int> m_matEffects{
@@ -138,22 +103,6 @@ private:
   Trk::ParticleHypothesis m_ParticleHypothesis;
 
   const AtlasDetectorID* m_idHelper;
-
-  /** @brief Add outlier to track hits into vector of hits*/
-  Gaudi::Property<bool> m_reintegrateOutliers{
-    this,
-    "ReintegrateOutliers",
-    false,
-    "Switch to control addition of  outliers back for track fit"
-  };
-
-  /** @brief Option to use very simplistic beam spot constraint*/
-  Gaudi::Property<bool> m_useBeamSpot{
-    this,
-    "useBeamSpot",
-    false,
-    "Switch to control use of Beam Spot Measurement"
-  };
 
   Gaudi::Property<bool> m_useClusterPosition{
     this,
