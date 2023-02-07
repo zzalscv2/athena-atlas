@@ -90,3 +90,32 @@ def ParticleGun_ZDC_SingleParticleCfg(flags):
     pg.OutputLevel = INFO
     result.addEventAlgo(pg)
     return result
+
+
+def ParticleGun_TestBeam_SingleParticleCfg(flags):
+    result = ComponentAccumulator()
+    import ParticleGun as PG
+    pg = PG.ParticleGun(randomStream = "SINGLE", randomSeed = flags.Random.SeedOffset)
+    # 50 GeV pions
+    #pg.sampler.pid = 211
+    #pg.sampler.pos = PG.PosSampler(x=-27500, y=[-10,15], z=[-15,15], t=-27500)
+    #pg.sampler.mom = PG.EEtaMPhiSampler(energy=50000, eta=0, phi=0)
+
+    # 100 GeV electrons - use for sampling faction calculation
+    #pg.sampler.pid = 11
+    #pg.sampler.pos = PG.PosSampler(x=-27500, y=[-20,20], z=[-15,15], t=-27500)
+    #pg.sampler.mom = PG.EEtaMPhiSampler(energy=100000, eta=0, phi=0)
+
+    pg.sampler.pid = flags.TestBeam.BeamPID
+    pg.sampler.pos = PG.PosSampler(
+        x=-27500,
+        y=flags.TestBeam.Ybeam,
+        z=flags.TestBeam.Zbeam,
+        t=-27500)
+    pg.sampler.mom = PG.EEtaMPhiSampler(
+        energy=flags.TestBeam.BeamEnergy,
+        eta=0,
+        phi=0)
+    pg.OutputLevel = INFO
+    result.addEventAlgo(pg)
+    return result

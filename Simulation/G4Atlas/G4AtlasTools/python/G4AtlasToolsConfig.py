@@ -254,22 +254,26 @@ def SensitiveDetectorListCfg(flags):
     return result
 
 
-def TestBeamSensitiveDetectorListCfg(flags):
+def TileTestBeamSensitiveDetectorListCfg(flags):
     result = ComponentAccumulator()
     tools = []
 
-    if "tb_Tile2000_2003" in flags.GeoModel.AtlasVersion:
-        if flags.Detector.EnableTile:
-            if flags.Sim.CalibrationRun in [CalibrationRun.Tile, CalibrationRun.LArTile]:
-                from TileGeoG4Calib.TileGeoG4CalibConfig import TileCTBGeoG4CalibSDCfg
-                tools += [ result.popToolsAndMerge(TileCTBGeoG4CalibSDCfg(flags)) ] # mode 1 : With CaloCalibrationHits
-            else:
-                from TileGeoG4SD.TileGeoG4SDToolConfig import TileCTBGeoG4SDCfg
-                tools += [ result.popToolsAndMerge(TileCTBGeoG4SDCfg(flags)) ]      # mode 0 : No CaloCalibrationHits
-                tools += [ 'MuonWallSD' ]
-        result.setPrivateTools(tools)
-        return result
+    if flags.Detector.EnableTile:
+        if flags.Sim.CalibrationRun in [CalibrationRun.Tile, CalibrationRun.LArTile]:
+            from TileGeoG4Calib.TileGeoG4CalibConfig import TileCTBGeoG4CalibSDCfg
+            tools += [ result.popToolsAndMerge(TileCTBGeoG4CalibSDCfg(flags)) ] # mode 1 : With CaloCalibrationHits
+        else:
+            from TileGeoG4SD.TileGeoG4SDToolConfig import TileCTBGeoG4SDCfg
+            tools += [ result.popToolsAndMerge(TileCTBGeoG4SDCfg(flags)) ]      # mode 0 : No CaloCalibrationHits
+            from MuonWall.MuonWallConfig import MuonWallSDCfg
+            tools += [ result.popToolsAndMerge(MuonWallSDCfg(flags)) ]
+    result.setPrivateTools(tools)
+    return result
 
+
+def CombinedTestBeamSensitiveDetectorListCfg(flags):
+    result = ComponentAccumulator()
+    tools = []
     if flags.Detector.EnablePixel:
         from PixelG4_SD.PixelG4_SDToolConfig import PixelSensor_CTBCfg
         tools += [ result.popToolsAndMerge(PixelSensor_CTBCfg(flags)) ]
@@ -302,14 +306,16 @@ def TestBeamSensitiveDetectorListCfg(flags):
 
 def SensitiveDetectorMasterToolCfg(flags, name="SensitiveDetectorMasterTool", **kwargs):
     result = ComponentAccumulator()
-    if "ATLAS" in flags.GeoModel.AtlasVersion:
+    # NB Currently only supporting the standard ATLAS dector and the Tile Test Beam
+    print("BEAM TYPE IS", flags.Beam.Type)
+    if flags.Beam.Type is BeamType.TestBeam:
+        kwargs.setdefault("SensitiveDetectors", result.popToolsAndMerge(TileTestBeamSensitiveDetectorListCfg(flags)))
+    elif "ATLAS" in flags.GeoModel.AtlasVersion:
         kwargs.setdefault("SensitiveDetectors", result.popToolsAndMerge(SensitiveDetectorListCfg(flags)))
-    elif "tb_Tile2000_2003" in flags.GeoModel.AtlasVersion:
-        kwargs.setdefault("SensitiveDetectors", result.popToolsAndMerge(TestBeamSensitiveDetectorListCfg(flags)))
     elif "tb_LArH6" in flags.GeoModel.AtlasVersion:
         pass
     elif "ctbh8" in flags.GeoModel.AtlasVersion:
-        kwargs.setdefault("SensitiveDetectors", result.popToolsAndMerge(TestBeamSensitiveDetectorListCfg(flags)))
+        kwargs.setdefault("SensitiveDetectors", result.popToolsAndMerge(CombinedTestBeamSensitiveDetectorListCfg(flags)))
 
     result.setPrivateTools(CompFactory.SensitiveDetectorMasterTool(name, **kwargs))
     return result

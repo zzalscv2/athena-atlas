@@ -27,3 +27,5 @@ atlas_add_library( Geo2G4
                    NO_PUBLIC_HEADERS
                    PRIVATE_LINK_LIBRARIES Geo2G4Lib ) 
 
+# Install files from the package:
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

@@ -42,18 +42,18 @@ def MuonWallToolCfg(flags, name="MuonWall", **kwargs):
 
 def MuonWallTileTBCfg(flags, name="MuonWallTileTB", **kwargs):
     # Check the consistency of the flags
-    if flags.TestBeam.Eta is not None and (flags.TestBeam.Theta is not None or flags.TestBeam.Z is not None):
+    if flags.TestBeam.Eta != 'NONE' and (flags.TestBeam.Theta != 'NONE' or flags.TestBeam.Z != 'NONE'):
         raise ValueError('THE ETA PARAMETER CAN NOT BE SET TOGETHER WITH THETA AND Z')
-    elif (flags.TestBeam.Theta is None or flags.TestBeam.Z is None) and flags.TestBeam.Eta is None:
+    elif (flags.TestBeam.Theta == 'NONE' or flags.TestBeam.Z == 'NONE') and flags.TestBeam.Eta == 'NONE':
         raise ValueError('THETA AND Z ARE NOT SET')
     import math
     from AthenaCommon import PhysicalConstants
-    if flags.TestBeam.Eta is not None:
+    if flags.TestBeam.Eta != 'NONE':
         # Mode 1 -> User enters only eta
         eta=flags.TestBeam.Eta
         ThetaY=-(PhysicalConstants.pi*0.5)+2*math.atan(math.exp(-eta))
         DeltaF=0.0
-    elif not (flags.TestBeam.Theta is None or flags.TestBeam.Z is None):
+    elif not (flags.TestBeam.Theta == 'NONE' or flags.TestBeam.Z == 'NONE'):
         theta=flags.TestBeam.Theta
         z=flags.TestBeam.Z
         eta=0.0
@@ -89,5 +89,5 @@ def MuonWallTileTBCfg(flags, name="MuonWallTileTB", **kwargs):
     kwargs.setdefault("OffsetX", r)
     kwargs.setdefault("OffsetY", 0.0)
     kwargs.setdefault("OffsetZ", z)
-    return MuonWallToolCfg(name, **kwargs)
+    return MuonWallToolCfg(flags, name, **kwargs)
 
