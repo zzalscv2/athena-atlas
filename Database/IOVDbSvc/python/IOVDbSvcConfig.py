@@ -38,6 +38,12 @@ def IOVDbSvcCfg(flags, **kwargs):
     if 'FRONTIER_SERVER' in os.environ.keys() and os.environ['FRONTIER_SERVER'] != '':
         kwargs.setdefault('CacheAlign', 3)
 
+    # Very important cache settings for use of CoralProxy at P1 (ATR-4646)
+    if flags.Common.isOnline and flags.Trigger.Online.isPartition:
+        kwargs['CacheAlign'] = 0
+        kwargs['CacheRun'] = 0
+        kwargs['CacheTime'] = 0
+
     kwargs.setdefault('GlobalTag', flags.IOVDb.GlobalTag)
     if 'Folders' in kwargs:
         kwargs['Folders'] = ['/TagInfo<metaOnly/>'] + kwargs['Folders']
