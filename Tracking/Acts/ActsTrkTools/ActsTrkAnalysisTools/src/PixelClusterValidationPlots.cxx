@@ -78,7 +78,7 @@ namespace ActsTrk {
     int pixLayerDisk = pixelID->layer_disk(id);
 
 
-    bool isBarrel = pixBrlEc == 0;
+    bool isBarrel = (pixBrlEc == 0);
 
     m_barrelEndcap->Fill(pixBrlEc, beamSpotWeight);
 
@@ -91,8 +91,8 @@ namespace ActsTrk {
       m_layerDisk_barrel->Fill(pixLayerDisk, beamSpotWeight);
       m_phiModule_barrel->Fill(pixelID->phi_module(id), beamSpotWeight);
       m_etaModule_barrel->Fill(pixelID->eta_module(id), beamSpotWeight);
-      m_isInnermost_barrel->Fill(int(pixLayerDisk==0), beamSpotWeight);
-      m_isNextToInnermost_barrel->Fill(int((pixLayerDisk==1) or (pixBrlEc!=0 and pixLayerDisk==2)), beamSpotWeight);
+      m_isInnermost_barrel->Fill(static_cast<int>(pixLayerDisk==0), beamSpotWeight);
+      m_isNextToInnermost_barrel->Fill(static_cast<int>(pixLayerDisk==1), beamSpotWeight);
 
       m_eta_barrel->Fill(globalPosition.eta(), beamSpotWeight);
       m_perp_barrel->Fill(globalPosition.perp(), beamSpotWeight);
@@ -116,8 +116,8 @@ namespace ActsTrk {
       m_layerDisk_endcap->Fill(pixLayerDisk, beamSpotWeight);
       m_phiModule_endcap->Fill(pixelID->phi_module(id), beamSpotWeight);
       m_etaModule_endcap->Fill(pixelID->eta_module(id), beamSpotWeight);
-      m_isInnermost_endcap->Fill(int(pixLayerDisk==0), beamSpotWeight);
-      m_isNextToInnermost_endcap->Fill(int((pixLayerDisk==1) or (pixBrlEc!=0 and pixLayerDisk==2)), beamSpotWeight);
+      m_isInnermost_endcap->Fill(static_cast<int>(pixLayerDisk==0), beamSpotWeight);
+      m_isNextToInnermost_endcap->Fill(static_cast<int>(pixLayerDisk==1 or pixLayerDisk==2), beamSpotWeight);
 
       m_eta_endcap->Fill(globalPosition.eta(), beamSpotWeight);
       m_perp_endcap->Fill(globalPosition.perp(), beamSpotWeight);
