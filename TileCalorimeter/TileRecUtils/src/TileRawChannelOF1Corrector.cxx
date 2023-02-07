@@ -34,23 +34,21 @@ StatusCode TileRawChannelOF1Corrector::initialize() {
 
   ATH_CHECK( detStore()->retrieve(m_tileHWID) );
 
+  ATH_CHECK( m_sampleNoiseKey.initialize(m_correctPedestalDifference) );
+  ATH_CHECK( m_onlineSampleNoiseKey.initialize(m_correctPedestalDifference) );
 
   if (m_correctPedestalDifference) {
     //=== get TileCondToolOfc
     ATH_CHECK( m_tileCondToolOfc.retrieve() );
 
-    //=== get TileCondToolNoiseSample
-    ATH_CHECK( m_tileToolNoiseSample.retrieve() );
-
     //=== get TileToolTiming
     ATH_CHECK( m_tileToolTiming.retrieve() );
   } else {
     m_tileCondToolOfc.disable();
-    m_tileToolNoiseSample.disable();
     m_tileToolTiming.disable();
   }
 
-  ATH_CHECK( m_emScaleKey.initialize(m_zeroAmplitudeWithoutDigits) );
+  ATH_CHECK( m_emScaleKey.initialize(m_zeroAmplitudeWithoutDigits || m_correctPedestalDifference) );
 
   if (m_zeroAmplitudeWithoutDigits) {
     //=== get TileToolTiming
@@ -90,14 +88,29 @@ TileRawChannelOF1Corrector::process (TileMutableRawChannelContainer& rchCont, co
     const TileEMScale* emScale{nullptr};
     const TileDigitsContainer* digitsContainer(nullptr);
 
-    if (m_zeroAmplitudeWithoutDigits) {
+    if (m_zeroAmplitudeWithoutDigits || m_correctPedestalDifference) {
       SG::ReadCondHandle<TileEMScale> emScaleHandle(m_emScaleKey, ctx);
       ATH_CHECK( emScaleHandle.isValid() );
       emScale = emScaleHandle.cptr();
 
-      SG::ReadHandle<TileDigitsContainer> allDigits(m_digitsContainerKey, ctx);
-      digitsContainer = allDigits.cptr();
+      if (m_zeroAmplitudeWithoutDigits) {
+        SG::ReadHandle<TileDigitsContainer> allDigits(m_digitsContainerKey, ctx);
+        digitsContainer = allDigits.cptr();
+      }
     }
+
+    const TileSampleNoise* sampleNoise = nullptr;
+    const TileSampleNoise* onlineSampleNoise = nullptr;
+    if (m_correctPedestalDifference) {
+      SG::ReadCondHandle<TileSampleNoise> sampleNoiseHandle(m_sampleNoiseKey, ctx);
+      ATH_CHECK( sampleNoiseHandle.isValid() );
+      sampleNoise = sampleNoiseHandle.retrieve();
+
+      SG::ReadCondHandle<TileSampleNoise> onlineSampleNoiseHandle(m_onlineSampleNoiseKey, ctx);
+      ATH_CHECK( onlineSampleNoiseHandle.isValid() );
+      onlineSampleNoise = onlineSampleNoiseHandle.retrieve();
+    }
+
 
     for (IdentifierHash hash : rchCont.GetAllCurrentHashes()) {
       TileRawChannelCollection* rawChannelCollection = rchCont.indexFindPtr (hash);
@@ -132,7 +145,9 @@ TileRawChannelOF1Corrector::process (TileMutableRawChannelContainer& rchCont, co
 
         if (m_correctPedestalDifference) {
 
-          float onlinePedestalDifference = m_tileToolNoiseSample->getOnlinePedestalDifference(drawerIdx, channel, gain, rawChannelUnit, ctx);
+          float pedestal = sampleNoise->getPed(drawerIdx, channel, gain);
+          float onlinePedestal = onlineSampleNoise->getPed(drawerIdx, channel, gain);
+          float onlinePedestalDifference = emScale->calibrateOnlineChannel(drawerIdx, channel, gain, (onlinePedestal - pedestal), rawChannelUnit);
           float phase = -m_tileToolTiming->getSignalPhase(drawerIdx, channel, gain);
           TileOfcWeightsStruct weights;
           ATH_CHECK( m_tileCondToolOfc->getOfcWeights(drawerIdx, channel, gain, phase, false, weights, ctx) );

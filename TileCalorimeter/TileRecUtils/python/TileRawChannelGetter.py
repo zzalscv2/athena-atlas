@@ -147,7 +147,6 @@ class TileRawChannelGetter ( Configured)  :
                             toolOnlineTiming = getTileCondToolTiming('COOL', TilePulse, True, 'TileCondToolOnlineTiming')
                             theTileRawChannelOF1Corrector.TileCondToolTiming = toolOnlineTiming
                             theTileRawChannelOF1Corrector.TileCondToolOfc = toolOfcCoolOF1
-                            theTileRawChannelOF1Corrector.TileCondToolNoiseSample.TileOnlineSampleNoise = 'TileOnlineSampleNoise'
                         else:
                             theTileRawChannelOF1Corrector.TileCondToolTiming = None
                             theTileRawChannelOF1Corrector.TileCondToolOfc = None

@@ -19,12 +19,9 @@ def TileRawChannelOF1CorrectorCfg(flags, **kwargs):
     kwargs.setdefault('TileDigitsContainer', 'TileDigitsCnt')
 
     if kwargs['CorrectPedestalDifference']:
-        if 'TileCondToolNoiseSample' not in kwargs:
-            from TileConditions.TileSampleNoiseConfig import TileCondToolNoiseSampleCfg
-            sampleNoiseAcc = TileCondToolNoiseSampleCfg(flags, TileSampleNoise = 'TileSampleNoise',
-                                                        TileOnlineSampleNoise = 'TileOnlineSampleNoise')
-
-            kwargs['TileCondToolNoiseSample'] = acc.popToolsAndMerge( sampleNoiseAcc )
+        from TileConditions.TileSampleNoiseConfig import TileSampleNoiseCondAlgCfg
+        acc.merge( TileSampleNoiseCondAlgCfg(flags, TileSampleNoise="TileSampleNoise") )
+        acc.merge( TileSampleNoiseCondAlgCfg(flags, ForceOnline=True, TileSampleNoise="TileOnlineSampleNoise") )
 
         if 'TileCondToolTiming' not in kwargs:
             from TileConditions.TileTimingConfig import TileCondToolOnlineTimingCfg
@@ -40,6 +37,7 @@ def TileRawChannelOF1CorrectorCfg(flags, **kwargs):
             from TileConditions.TileDSPThresholdConfig import TileCondToolDspThresholdCfg
             kwargs['TileCondToolDspThreshold'] = acc.popToolsAndMerge( TileCondToolDspThresholdCfg(flags) )
 
+    if kwargs['CorrectPedestalDifference'] or kwargs['ZeroAmplitudeWithoutDigits']:
         from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
         acc.merge( TileEMScaleCondAlgCfg(flags) )
 
@@ -68,10 +66,8 @@ def TileRawChannelNoiseFilterCfg(flags, **kwargs):
     from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
     acc.merge( TileEMScaleCondAlgCfg(flags) )
 
-    if 'TileCondToolNoiseSample' not in kwargs:
-        from TileConditions.TileSampleNoiseConfig import TileCondToolNoiseSampleCfg
-        sampleNoiseTool = acc.popToolsAndMerge( TileCondToolNoiseSampleCfg(flags) )
-        kwargs['TileCondToolNoiseSample'] = sampleNoiseTool
+    from TileConditions.TileSampleNoiseConfig import TileSampleNoiseCondAlgCfg
+    acc.merge( TileSampleNoiseCondAlgCfg(flags) )
 
     from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
     acc.merge( TileBadChannelsCondAlgCfg(flags) )
