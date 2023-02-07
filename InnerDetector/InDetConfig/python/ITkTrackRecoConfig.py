@@ -60,6 +60,8 @@ def ITkTrackRecoCfg(flags):
     InputCombinedITkTracks = [] # Tracks to be ultimately merged in InDetTrackParticle collection
     InputExtendedITkTracks = [] # Includes also tracks which end in standalone TrackParticle collections
     ClusterSplitProbContainer = ""
+    StatTrackCollections = [] # To be passed to the InDetRecStatistics alg
+    StatTrackTruthCollections = []
 
     from InDetConfig.ITkTrackingSiPatternConfig import ITkTrackingSiPatternCfg
     from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
@@ -76,6 +78,9 @@ def ITkTrackRecoCfg(flags):
                                              ResolvedTrackCollectionKey = TrackContainer,
                                              SiSPSeededTrackCollectionKey = SiSPSeededTracks,
                                              ClusterSplitProbContainer = ClusterSplitProbContainer))
+        StatTrackCollections += [SiSPSeededTracks, TrackContainer]
+        StatTrackTruthCollections += [SiSPSeededTracks+"TruthCollection",
+                                      TrackContainer+"TruthCollection"]
 
         if current_flags.ITk.Tracking.ActiveConfig.storeSeparateContainer:
             if flags.ITk.Tracking.doTruth:
@@ -103,9 +108,21 @@ def ITkTrackRecoCfg(flags):
                                                 AssociationMapName = "PRDtoTrackMapCombinedITkTracks" \
                                                 if not flags.ITk.Tracking.doFastTracking else ""))
 
-    from TrkConfig.TrkTrackSlimmerConfig import TrackSlimmerCfg
-    result.merge(TrackSlimmerCfg(flags,
-                                 TrackLocation = ["CombinedITkTracks"]))
+    if flags.ITk.Tracking.doTruth:
+        from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
+        result.merge(ITkTrackTruthCfg(
+            flags,
+            Tracks = "CombinedITkTracks",
+            DetailedTruth = "CombinedITkTracksDetailedTruth",
+            TracksTruth = "CombinedITkTracksTruthCollection"))
+
+    StatTrackCollections += ["CombinedITkTracks"]
+    StatTrackTruthCollections += ["CombinedITkTracksTruthCollection"]
+
+    if flags.ITk.Tracking.doSlimming:
+        from TrkConfig.TrkTrackSlimmerConfig import TrackSlimmerCfg
+        result.merge(TrackSlimmerCfg(flags,
+                                     TrackLocation = ["CombinedITkTracks"]))
 
     if flags.ITk.Tracking.doTruth:
         result.merge(ITkTrackTruthCfg(flags))
@@ -119,6 +136,15 @@ def ITkTrackRecoCfg(flags):
     if flags.Tracking.doVertexFinding:
         from InDetConfig.InDetPriVxFinderConfig import primaryVertexFindingCfg
         result.merge(primaryVertexFindingCfg(flags))
+
+    if flags.Tracking.doStats:
+        from InDetConfig.InDetRecStatisticsConfig import (
+            InDetRecStatisticsAlgCfg)
+        result.merge(InDetRecStatisticsAlgCfg(
+            flags,
+            TrackCollectionKeys = StatTrackCollections,
+            TrackTruthCollectionKeys = \
+            StatTrackTruthCollections if flags.InDet.doTruth else []))
 
     if flags.ITk.Tracking.writeExtendedPRDInfo:
         from InDetConfig.InDetPrepRawDataToxAODConfig import ITkPixelPrepDataToxAODCfg, ITkStripPrepDataToxAODCfg
@@ -160,6 +186,9 @@ def ITkTrackRecoOutputCfg(flags):
     # remove track decorations used internally by FTAG software
     excludedAuxData += '.-'.join([''] + FTAG_AUXDATA)
 
+    # exclude TTVA decorations
+    excludedAuxData += '.-TTVA_AMVFVertices.-TTVA_AMVFWeights'
+
     # exclude IDTIDE/IDTRKVALID decorations
     excludedAuxData += '.-TrkBLX.-TrkBLY.-TrkBLZ.-TrkIBLX.-TrkIBLY.-TrkIBLZ.-TrkL1X.-TrkL1Y.-TrkL1Z.-TrkL2X.-TrkL2Y.-TrkL2Z'
     if not flags.ITk.Tracking.writeExtendedPRDInfo:
@@ -174,11 +203,15 @@ def ITkTrackRecoOutputCfg(flags):
     ]
     toESD += ["Trk::ClusterSplitProbabilityContainer#" + ITkClusterSplitProbabilityContainerName(flags)]
 
+    # Save (Detailed) Track Truth
+    if flags.ITk.Tracking.doTruth:
+        toESD += ["TrackTruthCollection#TrackTruthCollection"]
+        toESD += ["DetailedTrackTruthCollection#DetailedTrackTruth"]
+
     # add tracks
     if flags.ITk.Tracking.doStoreTrackSeeds:
         toESD += ["TrackCollection#SiSPSeedSegments"]
 
-    toESD += ["TrackCollection#SiSPSeededTracks"]
     toESD += ["TrackCollection#CombinedITkTracks"]
 
     ##### AOD #####

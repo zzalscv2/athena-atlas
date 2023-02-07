@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //  file:   InDetRecStatisticsAlg.cxx
@@ -704,14 +704,8 @@ void InDet :: InDetRecStatisticsAlg :: printStatistics() {
   MsgStream &out = msg(MSG::INFO);
   {
   RestoreStream<MsgStream> restore(out);
-  for (std::vector <class TrackStatHelper *>::const_iterator collection =
-	 m_SignalCounters.begin();
-       collection !=  m_SignalCounters.end(); ++collection) {
-     if ((*collection)->key()=="CombinedInDetTracks"){
-         out << "\n" << s_linestr2 << "\n";
-         (*collection)->print(out);
-     }
-  }
+  out << "\n" << s_linestr2 << "\n";
+  m_SignalCounters.back()->print(out);
 
   if (m_UseTrackSummary) {
     std::string track_stummary_type_header = TrackStatHelper::getSummaryTypeHeader();
@@ -759,14 +753,9 @@ void InDet :: InDetRecStatisticsAlg :: printStatistics() {
            << " |z| > "  << m_minZEndSecondary << "mm";
     ATH_MSG_INFO(outstr.str());
     outstr.str("");
-    for (std::vector <class TrackStatHelper *>::const_iterator collection =
-	   m_SignalCounters.begin();
-	 collection !=  m_SignalCounters.end(); ++collection) {
-     if ((*collection)->key()=="CombinedInDetTracks"){
-         out << "\n" << s_linestr2 << "\n";
-         (*collection)->printSecondary(out);
-     }
-    }
+    out << "\n" << s_linestr2 << "\n";
+    m_SignalCounters.back()->printSecondary(out);
+
   }
   }
   out << endmsg;
@@ -779,37 +768,21 @@ void InDet :: InDetRecStatisticsAlg :: printStatistics() {
 
 void InDet :: InDetRecStatisticsAlg ::printTrackSummary (MsgStream &out, enum eta_region eta_reg)
 {
-  bool printed = false;
-  for (std::vector <class TrackStatHelper *>::const_iterator collection =
-	 m_SignalCounters.begin();
-       collection !=  m_SignalCounters.end(); ++collection) {
-     if ((*collection)->key()=="CombinedInDetTracks"){
-         printed = (*collection)->printTrackSummaryRegion(out, TRACK_ALL, eta_reg) || printed;
-     }
-  }
+  bool printed = m_SignalCounters.back()->printTrackSummaryRegion(out, TRACK_ALL, eta_reg);
+
   if (printed) {
      out <<  "\n"
          << "----------------------------------------------------------------------------------------------------------------------------------------------" << "\n";
   }
-  printed = false;
-  for (std::vector <class TrackStatHelper *>::const_iterator collection =
-	 m_SignalCounters.begin();
-       collection !=  m_SignalCounters.end(); ++collection) {
-     if ((*collection)->key()=="CombinedInDetTracks"){
-         printed = (*collection)->printTrackSummaryRegion(out, TRACK_LOWTRUTHPROB, eta_reg) || printed;
-     }
-  }
+
+  printed = m_SignalCounters.back()->printTrackSummaryRegion(out, TRACK_LOWTRUTHPROB, eta_reg);
   if (printed) {
      out << "\n"
          << "----------------------------------------------------------------------------------------------------------------------------------------------" << "\n";
   }
-  for (std::vector <class TrackStatHelper *>::const_iterator collection =
-	 m_SignalCounters.begin();
-       collection !=  m_SignalCounters.end(); ++collection) {
-     if ((*collection)->key()=="CombinedInDetTracks"){
-         (*collection)->printTrackSummaryRegion(out, TRACK_LOWTRUTHPROB2, eta_reg);
-     }
-  }
+
+  m_SignalCounters.back()->printTrackSummaryRegion(out, TRACK_LOWTRUTHPROB2, eta_reg);
+
 }
 
 // =================================================================================================================

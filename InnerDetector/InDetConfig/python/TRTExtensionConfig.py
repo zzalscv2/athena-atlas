@@ -26,6 +26,15 @@ def NewTrackingTRTExtensionCfg(flags,
                                          NewTrackName = ExtendedTrackCollection,
                                          ExtensionMap = ExtendedTracksMap))
 
+    if flags.InDet.doTruth:
+        from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
+        acc.merge(InDetTrackTruthCfg(
+            flags,
+            Tracks = ExtendedTrackCollection,
+            DetailedTruth = ExtendedTrackCollection+"DetailedTruth",
+            TracksTruth = ExtendedTrackCollection+"TruthCollection"))
+
+
     return acc
 
 def NewTrackingTRTExtensionPhaseCfg(flags,

@@ -31,6 +31,14 @@ def TrackingSiPatternCfg(flags,
     acc.merge(SiSPSeededTrackFinderCfg(flags,
                                        TracksLocation = SiSPSeededTrackCollectionKey))
 
+    from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
+    if flags.InDet.doTruth:
+        acc.merge(InDetTrackTruthCfg(
+            flags,
+            Tracks = SiSPSeededTrackCollectionKey,
+            DetailedTruth = SiSPSeededTrackCollectionKey+"DetailedTruth",
+            TracksTruth = SiSPSeededTrackCollectionKey+"TruthCollection"))
+
     # ------------------------------------------------------------
     #
     # ---------- Ambiguity solving
@@ -45,6 +53,13 @@ def TrackingSiPatternCfg(flags,
     acc.merge(TrkAmbiguitySolverCfg(flags,
                                     ResolvedTrackCollectionKey = ResolvedTrackCollectionKey,
                                     ClusterSplitProbContainer = ClusterSplitProbContainer))
+
+    if flags.InDet.doTruth:
+        acc.merge(InDetTrackTruthCfg(
+            flags,
+            Tracks = ResolvedTrackCollectionKey,
+            DetailedTruth = ResolvedTrackCollectionKey+"DetailedTruth",
+            TracksTruth = ResolvedTrackCollectionKey+"TruthCollection"))
 
     return acc
 

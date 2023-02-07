@@ -8,8 +8,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 # ------------------------------------------------------------
 
 def BackTrackingCfg(flags, InputCollections = None,
-                    TrackCollectionKeys=[] ,
-                    TrackCollectionTruthKeys=[],
                     ClusterSplitProbContainer=''):
     acc = ComponentAccumulator()
     # ------------------------------------------------------------
@@ -21,6 +19,15 @@ def BackTrackingCfg(flags, InputCollections = None,
     from InDetConfig.TRT_SeededTrackFinderConfig import TRT_SeededTrackFinderCfg
     acc.merge(TRT_SeededTrackFinderCfg(flags,
                                        InputCollections = InputCollections))
+
+    from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
+    if flags.InDet.doTruth:
+        acc.merge(InDetTrackTruthCfg(
+            flags,
+            Tracks = "TRTSeededTracks",
+            DetailedTruth = "TRTSeededTracksDetailedTruth",
+            TracksTruth = "TRTSeededTracksTruthCollection"))
+
     # ------------------------------------------------------------
     #
     # --- Resolve back tracking tracks
@@ -30,6 +37,13 @@ def BackTrackingCfg(flags, InputCollections = None,
     acc.merge(TrkAmbiguityScore_TRT_Cfg(flags))
     acc.merge(TrkAmbiguitySolver_TRT_Cfg(flags,
                                          ClusterSplitProbContainer = ClusterSplitProbContainer))
+
+    if flags.InDet.doTruth:
+        acc.merge(InDetTrackTruthCfg(
+            flags,
+            Tracks = "ResolvedTRTSeededTracks",
+            DetailedTruth = "ResolvedTRTSeededTracksDetailedTruth",
+            TracksTruth = "ResolvedTRTSeededTracksTruthCollection"))
 
     return acc
 

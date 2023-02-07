@@ -58,6 +58,7 @@ def createITkConfigFlags():
   itkcf.addFlag("ITk.Tracking.doHadCaloSeededSSS", False) # Use Recover SSS to Calo ROIs
   itkcf.addFlag("ITk.Tracking.doCaloSeededAmbi", lambda prevFlags: prevFlags.Detector.EnableCalo) # Use Calo ROIs to seed specific cuts for the ambi
   itkcf.addFlag("ITk.Tracking.doTruth", lambda f: f.Input.isMC) # Turn running of truth matching on and off (by default on for MC off for data)
+  itkcf.addFlag("ITk.Tracking.doSlimming", True) # Toggle track slimming
   itkcf.addFlag("ITk.Tracking.kalmanUpdator", "smatrix") # control which updator to load for KalmanFitter ("None"/"fast"/"smatrix"/"weight"/"amg
   itkcf.addFlag("ITk.Tracking.doPixelClusterSplitting", True) # Try to split pixel clusters
   itkcf.addFlag("ITk.Tracking.pixelClusterSplittingType", "Truth") # choose splitter type: NeuralNet, AnalogClus or Truth
