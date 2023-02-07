@@ -90,11 +90,18 @@ def fromRunArgs(runArgs):
         ConfigFlags.addFlag(flagString, runArgs.outputDRAW_ZMUMUFile)
         ConfigFlags.Output.doWriteBS = True
         log.info("---------- Configured DRAW ZMUMU output")
+
     if hasattr(runArgs, 'outputDRAW_EGZFile'):
         flagString = 'Output.DRAW_EGZFileName'
         ConfigFlags.addFlag(flagString, runArgs.outputDRAW_EGZFile)
         ConfigFlags.Output.doWriteBS = True
         log.info("---------- Configured DRAW_EGZ output")
+
+    if hasattr(runArgs, 'outputDESDM_PHOJETFile'):
+        flagString = 'Output.DESDM_PHOJETFileName'
+        ConfigFlags.addFlag(flagString, runArgs.outputDESDM_PHOJETFile)
+        ConfigFlags.Output.doWriteDAOD = True
+        log.info("---------- Configured DESDM_PHOJET output")
 
     from AthenaConfiguration.Enums import ProductionStep
     ConfigFlags.Common.ProductionStep=ProductionStep.Reconstruction
@@ -159,6 +166,12 @@ def fromRunArgs(runArgs):
         from PrimaryDPDMaker.DRAW_EGZ import DRAW_EGZCfg
         cfg.merge(DRAW_EGZCfg(ConfigFlags))
         log.info("---------- Configured DRAW_EGZ perfDPD")
+
+    # DESDM PHOJET
+    for flag in [key for key in ConfigFlags._flagdict.keys() if ("Output.DESDM_PHOJETFileName" in key)]:
+        from PrimaryDPDMaker.DESDM_PHOJET import DESDM_PHOJETCfg
+        cfg.merge(DESDM_PHOJETCfg(ConfigFlags))
+        log.info("---------- Configured PHOJET perfDPD")
 
     # Special message service configuration
     from Digitization.DigitizationSteering import DigitizationMessageSvcCfg
