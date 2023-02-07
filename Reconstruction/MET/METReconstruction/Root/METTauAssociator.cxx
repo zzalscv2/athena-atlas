@@ -126,6 +126,10 @@ namespace met {
   {
     const TauJet* tau = static_cast<const TauJet*>(obj);
     for( const xAOD::TauTrack* tauTrk : tau->tracks(xAOD::TauJetParameters::coreTrack) ){//all tracks dR<0.2 regardless of quality
+      if(tauTrk->trackLinks().empty() || !tauTrk->trackLinks().at(0).isValid()){
+        ATH_MSG_DEBUG("Skipping absent tau track, probably thinned");
+        continue;
+      }
       const TrackParticle* trk = tauTrk->track();
       if(acceptTrack(trk,constits.pv) && isGoodEoverP(trk) ){
         ATH_MSG_VERBOSE("Accept tau track " << trk << " px, py = " << trk->p4().Px() << ", " << trk->p4().Py());
@@ -156,9 +160,8 @@ namespace met {
       else {
         const TrackParticle* pfotrk = pfo->track(0);
         for( const xAOD::TauTrack* ttrk : tau->tracks(xAOD::TauJetParameters::coreTrack) ){//all tracks <0.2, no quality
-          static const SG::AuxElement::Accessor< xAOD::TauTrack::TrackParticleLinks_t > trackAcc( "trackLinks" );
-          if (!(trackAcc(*ttrk)[0])){
-            ATH_MSG_DEBUG("skipping thinned track");
+          if(ttrk->trackLinks().empty() || !ttrk->trackLinks().at(0).isValid()){
+            ATH_MSG_DEBUG("Skipping absent tau track, probably thinned");
             continue;
           }
           const TrackParticle* tautrk = ttrk->track();
@@ -210,32 +213,30 @@ namespace met {
 
     // Charged FEs
     for (const FELink_t& feLink : cFELinks) {
-      if (feLink.isValid()){
-	const xAOD::FlowElement* fe_init = *feLink;
-	for (const auto *const fe : *constits.feCont){
-	  if (fe->index() == fe_init->index() && fe->isCharged()){ //index-based match between JetETmiss and CHSFlowElements collections
-	    const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
-	    if(  fe->isCharged() && PVMatchedAcc(*fe)&& ( !m_cleanChargedPFO || isGoodEoverP(static_cast<const xAOD::TrackParticle*>(fe->chargedObject(0))) ) ) {
-	      ATH_MSG_DEBUG("Accept cFE with pt " << fe->pt() << ", e " << fe->e() << ", eta " << fe->eta() << ", phi " << fe->phi() );
-	      felist.push_back(fe); 
-	    } 
-	  }
-	}
+      if (!feLink.isValid()) continue;
+      const xAOD::FlowElement* fe_init = *feLink;
+      for (const auto *const fe : *constits.feCont){
+        if (fe->index() == fe_init->index() && fe->isCharged()){ //index-based match between JetETmiss and CHSFlowElements collections
+          const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
+          if(  fe->isCharged() && PVMatchedAcc(*fe)&& ( !m_cleanChargedPFO || isGoodEoverP(static_cast<const xAOD::TrackParticle*>(fe->chargedObject(0))) ) ) {
+            ATH_MSG_DEBUG("Accept cFE with pt " << fe->pt() << ", e " << fe->e() << ", eta " << fe->eta() << ", phi " << fe->phi() );
+            felist.push_back(fe); 
+          } 
+        }
       }
     } // end cFE loop
 
     // Neutral FEs
     for (const FELink_t& feLink : nFELinks) {
-      if (feLink.isValid()){
-        const xAOD::FlowElement* fe_init = *feLink;
-	for (const auto *const fe : *constits.feCont){
-	  if (fe->index() == fe_init->index() && !fe->isCharged()){ //index-based match between JetETmiss and CHSFlowElements collections
-	    if( ( !fe->isCharged()&& fe->e() > FLT_MIN ) ){ 
-	      ATH_MSG_DEBUG("Accept nFE with pt " << fe->pt() << ", e " << fe->e() << ", eta " << fe->eta() << ", phi " << fe->phi() << " in sum.");
-	      felist.push_back(fe);
-	    }   
-	  }
-	}
+      if (!feLink.isValid()) continue;
+      const xAOD::FlowElement* fe_init = *feLink;
+      for (const auto *const fe : *constits.feCont){
+        if (fe->index() == fe_init->index() && !fe->isCharged()){ //index-based match between JetETmiss and CHSFlowElements collections
+          if( ( !fe->isCharged()&& fe->e() > FLT_MIN ) ){ 
+            ATH_MSG_DEBUG("Accept nFE with pt " << fe->pt() << ", e " << fe->e() << ", eta " << fe->eta() << ", phi " << fe->phi() << " in sum.");
+            felist.push_back(fe);
+          }   
+        }
       }
     } // end nFE links loop
 
@@ -267,6 +268,10 @@ namespace met {
       else {
         const TrackParticle* pfotrk = static_cast<const xAOD::TrackParticle*>(pfo->chargedObject(0));
         for( const xAOD::TauTrack* ttrk : tau->tracks(xAOD::TauJetParameters::coreTrack) ){//all tracks <0.2, no quality
+          if(ttrk->trackLinks().empty() || !ttrk->trackLinks().at(0).isValid()){
+            ATH_MSG_DEBUG("Skipping absent tau track, probably thinned");
+            continue;
+          }
           const TrackParticle* tautrk = ttrk->track();
           if(tautrk==pfotrk) {
             ATH_MSG_VERBOSE("Found cPFO with dR " << seedjet->p4().DeltaR(ttrk->p4())); 

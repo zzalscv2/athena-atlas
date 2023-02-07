@@ -110,7 +110,12 @@ namespace met {
       static const SG::AuxElement::ConstAccessor<std::vector<ElementLink<CaloClusterContainer> > > tcLinkAcc("constituentClusterLinks");
       // Fill a vector of vectors
       for(const auto& el : tcLinkAcc(*swclus)) {
-        inputTC.push_back(*el);
+        if(el.isValid())
+          inputTC.push_back(*el);
+        else{
+          ATH_MSG_ERROR("Invalid constituentClusterLinks on input electron/photon!");
+          return StatusCode::FAILURE;
+        }
       }
       ATH_MSG_VERBOSE("Found " << inputTC.size() << " linked topoclusters");
     } else {
@@ -180,21 +185,16 @@ namespace met {
 
     // Charged PFOs
     for (const PFOLink_t& pfoLink : cPFOLinks) {
-      if (pfoLink.isValid()){
-	const xAOD::PFO* pfo_init = *pfoLink;
-	for (const auto *const pfo : *constits.pfoCont){
-	  if (pfo->index() == pfo_init->index() && pfo->isCharged()){ //index-based match between JetETmiss and CHSParticleFlow collections
-	    const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
-	    if(  pfo->isCharged() && PVMatchedAcc(*pfo)&& ( !m_cleanChargedPFO || isGoodEoverP(pfo->track(0)) ) ) {
-	      ATH_MSG_DEBUG("Accept cPFO with pt " << pfo->pt() << ", e " << pfo->e() << ", eta " << pfo->eta() << ", phi " << pfo->phi() );
-	      if (!m_checkUnmatched) {pfolist.push_back(pfo);} 
-	      else {
-	        bool has_unmatched=hasUnmatchedClusters(eg,pfo_init);
-	        if (!has_unmatched) {pfolist.push_back(pfo);} 
-	      }
-	    } 
-	  }
-	}
+      if (!pfoLink.isValid()) continue;
+      const xAOD::PFO* pfo_init = *pfoLink;
+      for (const auto *const pfo : *constits.pfoCont){
+        if (pfo->index() == pfo_init->index() && pfo->isCharged()){ //index-based match between JetETmiss and CHSParticleFlow collections
+          const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
+          if(  pfo->isCharged() && PVMatchedAcc(*pfo)&& ( !m_cleanChargedPFO || isGoodEoverP(pfo->track(0)) ) ) {
+            ATH_MSG_DEBUG("Accept cPFO with pt " << pfo->pt() << ", e " << pfo->e() << ", eta " << pfo->eta() << ", phi " << pfo->phi() );
+            if (!m_checkUnmatched || !hasUnmatchedClusters(eg,pfo_init)) pfolist.push_back(pfo); 
+          }
+        } 
       }
     } // end cPFO loop
 
@@ -203,20 +203,19 @@ namespace met {
     double sumE_pfo = 0.;
 
     for (const PFOLink_t& pfoLink : nPFOLinks) {
-      if (pfoLink.isValid()){
-        const xAOD::PFO* pfo_init = *pfoLink;
-	for (const auto *const pfo : *constits.pfoCont){
-	  if (pfo->index() == pfo_init->index() && !pfo->isCharged()){ //index-based match between JetETmiss and CHSParticleFlow collections
-	    double pfo_e = pfo->eEM();
-	    if( ( !pfo->isCharged()&& pfo->e() > FLT_MIN ) ){   
-	      sumE_pfo += pfo_e;
-	      ATH_MSG_DEBUG("E match with new nPFO: " << fabs(sumE_pfo+pfo_e - eg_cl_e) / eg_cl_e);
-	      ATH_MSG_DEBUG("Accept nPFO with pt " << pfo->pt() << ", e " << pfo->e() << ", eta " << pfo->eta() << ", phi " << pfo->phi() << " in sum.");
-	      ATH_MSG_DEBUG("Energy ratio of nPFO to eg: " << pfo_e / eg_cl_e);
-	      pfolist.push_back(pfo);
-	    }   
-	  }
-	}
+      if (!pfoLink.isValid()) continue;
+      const xAOD::PFO* pfo_init = *pfoLink;
+      for (const auto *const pfo : *constits.pfoCont){
+        if (pfo->index() == pfo_init->index() && !pfo->isCharged()){ //index-based match between JetETmiss and CHSParticleFlow collections
+          double pfo_e = pfo->eEM();
+          if( ( !pfo->isCharged()&& pfo->e() > FLT_MIN ) ){   
+            sumE_pfo += pfo_e;
+            ATH_MSG_DEBUG("E match with new nPFO: " << fabs(sumE_pfo+pfo_e - eg_cl_e) / eg_cl_e);
+            ATH_MSG_DEBUG("Accept nPFO with pt " << pfo->pt() << ", e " << pfo->e() << ", eta " << pfo->eta() << ", phi " << pfo->phi() << " in sum.");
+            ATH_MSG_DEBUG("Energy ratio of nPFO to eg: " << pfo_e / eg_cl_e);
+            pfolist.push_back(pfo);
+          }   
+        }
       }
     } // end nPFO links loop
 
@@ -344,17 +343,16 @@ namespace met {
 
     // Charged FEs
     for (const FELink_t& feLink : cFELinks) {
-      if (feLink.isValid()){
-	const xAOD::FlowElement* fe_init = *feLink;
-	for (const auto *const fe : *constits.feCont){
-	  if (fe->index() == fe_init->index() && fe->isCharged()){ //index-based match between JetETmiss and CHSFlowElements collections
-	    const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
-	    if(  fe->isCharged() && PVMatchedAcc(*fe)&& ( !m_cleanChargedPFO || isGoodEoverP(static_cast<const xAOD::TrackParticle*>(fe->chargedObject(0))) ) ) {
-	      ATH_MSG_DEBUG("Accept cFE with pt " << fe->pt() << ", e " << fe->e() << ", eta " << fe->eta() << ", phi " << fe->phi() );
-	      felist.push_back(fe);
-	    } 
-	  }
-	}
+      if (!feLink.isValid()) continue;
+      const xAOD::FlowElement* fe_init = *feLink;
+      for (const auto *const fe : *constits.feCont){
+        if (fe->index() == fe_init->index() && fe->isCharged()){ //index-based match between JetETmiss and CHSFlowElements collections
+          const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
+          if(  fe->isCharged() && PVMatchedAcc(*fe)&& ( !m_cleanChargedPFO || isGoodEoverP(static_cast<const xAOD::TrackParticle*>(fe->chargedObject(0))) ) ) {
+            ATH_MSG_DEBUG("Accept cFE with pt " << fe->pt() << ", e " << fe->e() << ", eta " << fe->eta() << ", phi " << fe->phi() );
+            felist.push_back(fe);
+          } 
+        }
       }
     } // end cFE loop
 
@@ -363,20 +361,19 @@ namespace met {
     double sumE_fe = 0.;
 
     for (const FELink_t& feLink : nFELinks) {
-      if (feLink.isValid()){
-        const xAOD::FlowElement* fe_init = *feLink;
-	for (const auto *const fe : *constits.feCont){
-	  if (fe->index() == fe_init->index() && !fe->isCharged()){ //index-based match between JetETmiss and CHSFlowElements collections
-	    double fe_e = fe->e();
-	    if( ( !fe->isCharged()&& fe->e() > FLT_MIN ) ){   
-	      sumE_fe += fe_e;
-	      ATH_MSG_DEBUG("E match with new nFE: " << fabs(sumE_fe+fe_e - eg_cl_e) / eg_cl_e);
-	      ATH_MSG_DEBUG("Accept nFE with pt " << fe->pt() << ", e " << fe->e() << ", eta " << fe->eta() << ", phi " << fe->phi() << " in sum.");
-	      ATH_MSG_DEBUG("Energy ratio of nFE to eg: " << fe_e / eg_cl_e);
-	      felist.push_back(fe);
-	    }   
-	  }
-	}
+      if (!feLink.isValid()) continue;
+      const xAOD::FlowElement* fe_init = *feLink;
+      for (const auto *const fe : *constits.feCont){
+        if (fe->index() == fe_init->index() && !fe->isCharged()){ //index-based match between JetETmiss and CHSFlowElements collections
+          double fe_e = fe->e();
+          if( ( !fe->isCharged()&& fe->e() > FLT_MIN ) ){   
+            sumE_fe += fe_e;
+            ATH_MSG_DEBUG("E match with new nFE: " << fabs(sumE_fe+fe_e - eg_cl_e) / eg_cl_e);
+            ATH_MSG_DEBUG("Accept nFE with pt " << fe->pt() << ", e " << fe->e() << ", eta " << fe->eta() << ", phi " << fe->phi() << " in sum.");
+            ATH_MSG_DEBUG("Energy ratio of nFE to eg: " << fe_e / eg_cl_e);
+            felist.push_back(fe);
+          }   
+        }
       }
     } // end nFE links loop
 
