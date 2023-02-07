@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_ITILERAWCHANNELBUILDER_H
@@ -72,53 +72,27 @@ class TileRawChannelBuilder: public AthAlgTool {
      * Create container in SG with name given by
      * parameter (m_rawChannelContainerKey)
      */
-    virtual StatusCode createContainer();
+    virtual StatusCode createContainer(const EventContext& ctx);
 
     /**
      * Builder virtual method to be implemented by subclasses
      * @param digits Pointer to TileDigitsContainer
      *
      */
-    virtual TileRawChannel* rawChannel(const TileDigits* digits);
+    virtual TileRawChannel* rawChannel(const TileDigits* digits, const EventContext& ctx);
 
     /**
      * Commit RawChannelContiner in SG and make const
      */
-    virtual StatusCode commitContainer();
+    virtual StatusCode commitContainer(const EventContext& ctx);
 
-    void initLog();
+    void initLog(const EventContext& ctx);
     void endLog();
 
-    // process one digit and store result in internal container
-    StatusCode build (const TileDigits* digits) {
-      ATH_CHECK( m_rawChannelCnt->push_back(std::unique_ptr<TileRawChannel>(rawChannel(digits))) );
-      return StatusCode::SUCCESS;
-    }
-
     // process all digits from one collection and store results in internal container
-    StatusCode build (const TileDigitsCollection* collection);
+    StatusCode build (const TileDigitsCollection* collection, const EventContext& ctx);
 
-    // process digits from a given vector and store results in internal container
-    template<class ITERATOR>
-    StatusCode build (const ITERATOR & begin, const ITERATOR & end) {
-      for (ITERATOR rawItr = begin; rawItr != end; ++rawItr) {
-        ATH_CHECK( m_rawChannelCnt->push_back(rawChannel((*rawItr))) );
-      }
-      return StatusCode::SUCCESS;
-    }
-
-    // process digits from a given vector and store results in collection
-    template<class ITERATOR, class COLLECTION>
-    StatusCode build (const ITERATOR & begin, const ITERATOR & end, COLLECTION * coll) {
-      initLog();
-      for (ITERATOR rawItr = begin; rawItr != end; ++rawItr) {
-        ATH_CHECK( coll->push_back(rawChannel((*rawItr))) );
-      }
-      endLog();
-      return StatusCode::SUCCESS;
-    }
-
-    /**
+   /**
      * AlgTool InterfaceID
      */
     static const InterfaceID& interfaceID();

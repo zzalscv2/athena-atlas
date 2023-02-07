@@ -785,7 +785,7 @@ StatusCode TilePulseForTileMuonReceiver::execute() {
       ATH_MSG_VERBOSE( "++ Changed to TMDB adc_id: " << m_tileHWID->to_string(adc_id) << " and save a TileDigits object into a container." );
       std::unique_ptr<TileDigits> muonReceiverDigits = std::make_unique<TileDigits>(adc_id, digitsBuffer);
       ATH_MSG_VERBOSE( "++ Create a TileRawChannelObject object and set it into a container " );
-      TileRawChannel* muRcvRawChannel = m_MuRcvBuildTool->rawChannel(muonReceiverDigits.get());
+      TileRawChannel* muRcvRawChannel = m_MuRcvBuildTool->rawChannel(muonReceiverDigits.get(), ctx);
       ATH_CHECK( muRcvDigitsContainer->push_back(std::move(muonReceiverDigits)) );
       ATH_CHECK( muRcvRawChannelContainer->push_back(muRcvRawChannel) );
       if (msgLvl(MSG::DEBUG)){

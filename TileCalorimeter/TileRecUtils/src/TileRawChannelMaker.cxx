@@ -79,8 +79,10 @@ StatusCode TileRawChannelMaker::initialize() {
  */
 StatusCode TileRawChannelMaker::execute() {
 
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
   // get named TileDigitsContaner from TES
-  SG::ReadHandle<TileDigitsContainer> digitsContaner(m_digitsContainerKey);
+  SG::ReadHandle<TileDigitsContainer> digitsContaner(m_digitsContainerKey, ctx);
 
   if (!digitsContaner.isValid()) {
     ATH_MSG_WARNING( "Can't retrieve TileDigitsContainer '"
@@ -93,7 +95,7 @@ StatusCode TileRawChannelMaker::execute() {
 
   // create  RawChannel Containers for all sub-algs
   for (ToolHandle<TileRawChannelBuilder>& rawChannelBuilder : m_tileRawChannelBuilderList) {
-    ATH_CHECK( rawChannelBuilder->createContainer() );
+    ATH_CHECK( rawChannelBuilder->createContainer(ctx) );
     rawChannelBuilder->resetDrawer();
   }
 
@@ -110,19 +112,19 @@ StatusCode TileRawChannelMaker::execute() {
     // Iterate over all sub-algs
     for (ToolHandle<TileRawChannelBuilder>& rawChannelBuilder : m_tileRawChannelBuilderList) {
       // reconstruct all channels in one drawer
-      ATH_CHECK( rawChannelBuilder->build(digitsCollection) );
+      ATH_CHECK( rawChannelBuilder->build(digitsCollection, ctx) );
     }
 
   }
 
   if (m_fitOverflow
       && !(*m_tileRawChannelBuilderList.begin())->getOverflowedChannels().empty()) {
-    fitOverflowedChannels();
+    fitOverflowedChannels(ctx);
   }
 
   // commit RawChannel Containers for all sub-algs
   for (ToolHandle<TileRawChannelBuilder>& rawChannelBuilder : m_tileRawChannelBuilderList) {
-    ATH_CHECK( rawChannelBuilder->commitContainer() );
+    ATH_CHECK( rawChannelBuilder->commitContainer(ctx) );
   }
 
   ATH_MSG_DEBUG( "execute completed successfully" );
@@ -140,7 +142,7 @@ StatusCode TileRawChannelMaker::finalize() {
   return StatusCode::SUCCESS;
 }
 
-void TileRawChannelMaker::fitOverflowedChannels() {
+void TileRawChannelMaker::fitOverflowedChannels(const EventContext& ctx) {
 
   for (ToolHandle<TileRawChannelBuilder> rawChannelBuilder : m_tileRawChannelBuilderList) {
 
@@ -151,7 +153,7 @@ void TileRawChannelMaker::fitOverflowedChannels() {
       TileRawChannel* rwCh = overflow.first;
       const TileDigits* pDigits = overflow.second;
 
-      TileRawChannel* fittedRwCh = m_tileRawChannelBuilderFitOverflow->rawChannel(pDigits);
+      TileRawChannel* fittedRwCh = m_tileRawChannelBuilderFitOverflow->rawChannel(pDigits, ctx);
 
       bool fitOK = ( ( fabs(fittedRwCh->time()) < m_overflowReplaceTimeCut     ) &&
                      ( fittedRwCh->pedestal()   < m_overflowReplacePedestalCut ) && 

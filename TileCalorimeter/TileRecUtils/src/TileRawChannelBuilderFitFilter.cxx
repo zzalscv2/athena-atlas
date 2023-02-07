@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -182,11 +182,7 @@ StatusCode TileRawChannelBuilderFitFilter::finalize() {
   return StatusCode::SUCCESS;
 }
 
-TileRawChannel* TileRawChannelBuilderFitFilter::rawChannel(const TileDigits* digits) {
-
-  // ATH_MSG_ALWAYS((std::string) *digits);
-
-  const EventContext &ctx = Gaudi::Hive::currentContext();
+TileRawChannel* TileRawChannelBuilderFitFilter::rawChannel(const TileDigits* digits, const EventContext& ctx) {
 
   ++m_chCounter;
 
