@@ -65,7 +65,8 @@ def createRecoConfigFlags():
                   prevFlags.Reco.EnableTracking)
 
     # This flags enables trigger data decoding (not trigger simulation)
-    # EDMVersion > 0 check prevents this flag being true in jobs before the trigger has executed, or where it was not executed.
+    # EDMVersion > 0 check prevents this flag being true in jobs before
+    # the trigger has executed, or where it was not executed.
     flags.addFlag("Reco.EnableTrigger",
                   lambda prevFlags: prevFlags.Trigger.EDMVersion > 0)
 
@@ -79,6 +80,11 @@ def createRecoConfigFlags():
 
     # common thinning and other post-processing
     flags.addFlag("Reco.EnablePostProcessing", True)
+    flags.addFlag("Reco.PostProcessing.ThinNegativeClusters",
+                  lambda prevFlags: prevFlags.Reco.EnablePostProcessing and
+                  prevFlags.Detector.EnableCalo and
+                  prevFlags.Output.doWriteAOD and
+                  prevFlags.Calo.Thin.NegativeEnergyCaloClusters)
     flags.addFlag("Reco.PostProcessing.TRTAloneThinning",
                   lambda prevFlags: prevFlags.Reco.EnablePostProcessing and
                   prevFlags.Reco.EnableTracking and

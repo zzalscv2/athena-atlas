@@ -45,8 +45,10 @@ def RecoSteering(flags):
         acc.merge(GEN_AOD2xAODCfg(flags))
         log.info("---------- Configured AODtoxAOD Truth Conversion")
 
-        # We always want to write pileup truth jets to AOD, irrespective of whether we write jets to AOD in general
-        # This is because we cannot rebuild jets from pileup truth particles from the AOD
+        # We always want to write pileup truth jets to AOD,
+        # irrespective of whether we write jets to AOD in general
+        # This is because we cannot rebuild jets from pileup truth
+        # particles from the AOD
         from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg
         acc.merge(addTruthPileupJetsToOutputCfg(flags))
         log.info("---------- Configured Truth pileup jet writing")
@@ -63,12 +65,6 @@ def RecoSteering(flags):
     if flags.Detector.EnableCalo:
         from CaloRec.CaloRecoConfig import CaloRecoCfg
         acc.merge(CaloRecoCfg(flags))
-        # configure xAOD thinning
-        if (flags.Output.doWriteAOD and
-                flags.Calo.Thin.NegativeEnergyCaloClusters):
-            from ThinningUtils.ThinNegativeEnergyCaloClustersConfig import (
-                ThinNegativeEnergyCaloClustersCfg)
-            acc.merge(ThinNegativeEnergyCaloClustersCfg(flags))
         log.info("---------- Configured calorimeter reconstruction")
 
     # ID / ITk
@@ -116,18 +112,13 @@ def RecoSteering(flags):
         acc.merge(MuonCombinedReconstructionCfg(flags))
         log.info("---------- Configured combined muon reconstruction")
 
-    # TrackParticleCellAssociation = add cells crossed by high pt ID tracks
+    # TrackParticleCellAssociation
+    # add cells crossed by high pt ID tracks
     acc.flagPerfmonDomain('TrackCellAssociation')
     if flags.Reco.EnableTrackCellAssociation:
         from TrackParticleAssociationAlgs.TrackParticleAssociationAlgsConfig import (
-            TrackParticleCellAssociationAlgCfg)
-        acc.merge(TrackParticleCellAssociationAlgCfg(flags))
-
-        if (flags.Tracking.storeSeparateLargeD0Container and \
-            flags.Tracking.doLargeD0):
-            from TrackParticleAssociationAlgs.TrackParticleAssociationAlgsConfig import (
-                LargeD0TrackParticleCellAssociationAlgCfg)
-            acc.merge(LargeD0TrackParticleCellAssociationAlgCfg(flags))
+            TrackParticleCellAssociationCfg)
+        acc.merge(TrackParticleCellAssociationCfg(flags))
         log.info("---------- Configured track particle-cell association")
 
     # PFlow
@@ -149,6 +140,7 @@ def RecoSteering(flags):
     if flags.Reco.EnableJet:
         from JetRecConfig.JetRecoSteering import JetRecoSteeringCfg
         acc.merge(JetRecoSteeringCfg(flags))
+        log.info("---------- Configured Jets")
 
     # btagging
     acc.flagPerfmonDomain('FTag')
@@ -177,7 +169,7 @@ def RecoSteering(flags):
         # and electrons,photons,muons and taus
         from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
         acc.merge(PFGlobalFlowElementLinkingCfg(flags))
-
+        log.info("---------- Configured particle flow global linking")
 
     # MET
     acc.flagPerfmonDomain('MET')
@@ -266,6 +258,10 @@ def RecoSteering(flags):
 
 def RecoPostProcessingCfg(flags):
     acc = ComponentAccumulator()
+    if flags.Reco.PostProcessing.ThinNegativeClusters:
+        from ThinningUtils.ThinNegativeEnergyCaloClustersConfig import (
+            ThinNegativeEnergyCaloClustersCfg)
+        acc.merge(ThinNegativeEnergyCaloClustersCfg(flags))
     if flags.Reco.PostProcessing.TRTAloneThinning:
         from ThinningUtils.ThinTRTStandaloneConfig import (
             ThinTRTStandaloneCfg)
