@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,7 +16,7 @@
 #include "TrkEventPrimitives/LocalParameters.h"
 #include "TRT_DriftFunctionTool/ITRT_DriftFunctionTool.h"
 #include "TRT_ReadoutGeometry/TRT_EndcapElement.h"
-#include "TrkRIO_OnTrack/check_cast.h"
+#include "TrkRIO_OnTrack/ErrorScalingCast.h"
 
 
 ///////////////////////////////////////////////////////////////////
@@ -144,9 +144,9 @@ const Trk::RIO_OnTrack* InDet::TRT_DriftCircleOnTrackRecalibrateTool::correct
 
       bool endcap = false;
       if(dynamic_cast<const InDetDD::TRT_EndcapElement*>(pE)) endcap = true;
-      // SG::ReadCondHandle<TRTRIO_OnTrackErrorScaling> error_scaling( m_trtErrorScalingKey );
       SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_trtErrorScalingKey,ctx);
-      cov = check_cast<TRTRIO_OnTrackErrorScaling>(*error_scaling)->getScaledCovariance( cov, endcap, mu);
+      cov = Trk::ErrorScalingCast<TRTRIO_OnTrackErrorScaling>(*error_scaling)
+                ->getScaledCovariance(std::move(cov), endcap, mu);
     }
 
     Trk::DefinedParameter  radius(sign*driftradius,Trk::locX);

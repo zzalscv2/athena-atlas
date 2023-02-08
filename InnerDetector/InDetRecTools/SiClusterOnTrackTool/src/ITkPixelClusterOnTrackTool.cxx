@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -20,7 +20,7 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 
 #include <cmath>
-#include "TrkRIO_OnTrack/check_cast.h"
+#include "TrkRIO_OnTrack/ErrorScalingCast.h"
 
 //clustermap is most likely to be removed at later date
 #define __clustermap
@@ -341,7 +341,9 @@ PixelClusterOnTrackTool::correctDefault
   // create new copy of error matrix
   if (!m_pixelErrorScalingKey.key().empty()) {
     SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_pixelErrorScalingKey );
-    cov = check_cast<PixelRIO_OnTrackErrorScaling>(*error_scaling)->getScaledCovariance( cov,  *m_pixelid, element->identify() );
+    cov = Trk::ErrorScalingCast<PixelRIO_OnTrackErrorScaling>(*error_scaling)
+              ->getScaledCovariance(std::move(cov), *m_pixelid,
+                                    element->identify());
   }
   bool isbroad = m_errorStrategy == 0;
   return new InDet::PixelClusterOnTrack(pix, locpar, cov, iH, glob, pix->gangedPixel(), isbroad);
@@ -428,7 +430,9 @@ PixelClusterOnTrackTool::correctNN
   // create new copy of error matrix
   if (!m_pixelErrorScalingKey.key().empty()) {
     SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_pixelErrorScalingKey );
-    cov = check_cast<PixelRIO_OnTrackErrorScaling>(*error_scaling)->getScaledCovariance( cov,  *m_pixelid, element->identify() );
+    cov = Trk::ErrorScalingCast<PixelRIO_OnTrackErrorScaling>(*error_scaling)
+              ->getScaledCovariance(std::move(cov), *m_pixelid,
+                                    element->identify());
   }
 
   InDetDD::SiLocalPosition centroid = InDetDD::SiLocalPosition(finalposition[1],

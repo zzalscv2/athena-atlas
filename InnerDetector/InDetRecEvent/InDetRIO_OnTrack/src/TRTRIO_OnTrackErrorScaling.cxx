@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "InDetRIO_OnTrack/TRTRIO_OnTrackErrorScaling.h"
 #include <iostream>
@@ -45,18 +45,17 @@ bool TRTRIO_OnTrackErrorScaling::postProcess() {
   return true;
 }
 
-Amg::MatrixX TRTRIO_OnTrackErrorScaling::getScaledCovariance(const Amg::MatrixX& cov_input,
+Amg::MatrixX TRTRIO_OnTrackErrorScaling::getScaledCovariance(Amg::MatrixX&& cov_input,
                                                              bool is_endcap,
                                                              double mu) const
 {
-  Amg::MatrixX newCov(cov_input);
+  Amg::MatrixX newCov = std::move(cov_input);
   double a = (is_endcap) ? params()[kEndcap][0] : params()[kBarrel][0];
   double b = (is_endcap) ? params()[kEndcap][1] : params()[kBarrel][1];
   double c = (is_endcap) ? params()[kEndcap][2] : params()[kBarrel][2];
   newCov(0,0) *= square(a);
   newCov(0,0) += square(b);
   newCov(0,0) *= (1. + mu * c);
-  // std::cout << "DEBUG createScaledTrtCovariance endcap:" << is_endcap << " mu=" << mu  << " " << cov_input << " -> " << newCov << std::endl;
   return newCov;
 }
 
