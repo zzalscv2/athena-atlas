@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Gaudi/Property.h"
@@ -52,12 +52,14 @@ StatusCode TriggerSummaryAlg::execute(const EventContext& context) const
       ATH_MSG_DEBUG( "Missing decisions for " << input.key() << " which may be perfectly correct" );
     }
   }
-  
-  ATH_MSG_DEBUG( "In summary " << allPassingIDs.size() << " chains passed:" );
-  for ( TrigCompositeUtils::DecisionID id : allPassingIDs ) {
-    ATH_MSG_DEBUG( " +++ " << HLT::Identifier( id ) );
-  }  
-  
+
+  if ( msgLvl( MSG::DEBUG ) ){
+    ATH_MSG_DEBUG( "In summary " << allPassingIDs.size() << " chains passed:" );
+    for ( TrigCompositeUtils::DecisionID id : allPassingIDs ) {
+      ATH_MSG_DEBUG( " +++ " << HLT::Identifier( id ) );
+    }
+  }
+
   for ( auto& tool: m_outputTools ) {
     ATH_CHECK( tool->createOutput( context ) );
   }
