@@ -61,7 +61,7 @@ class TriggerListsHelper:
         trigger_names_tau = []
         from AthenaConfiguration.AutoConfigFlags import GetFileMD
 
-        if self.flags.Reco.EnableTrigger or self.flags.Trigger.InputContainsConfigMetadata:
+        if self.flags.Reco.EnableTrigger or self.flags.Trigger.triggerConfig == 'INFILE':
 
             if self.flags.Trigger.EDMVersion == 3:
                 r_tau = re.compile("HLT_.*tau.*")

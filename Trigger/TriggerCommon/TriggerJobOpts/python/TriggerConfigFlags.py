@@ -150,16 +150,6 @@ def createTriggerFlags(doTriggerRecoFlags):
     # Flag to control the scheduling of offline Run 3 trigger navigation slimming in RAWtoALL, RAWtoAOD or AODtoDAOD transforms.
     flags.addFlag('Trigger.doNavigationSlimming', True)
 
-    # True if we have at least one input file, it is a POOL file, it has a metadata store, and the store has xAOD trigger configuration data
-    # in either the run-2 or run-3 formats.
-    def __trigConfMeta(flags):
-        from AthenaConfiguration.AutoConfigFlags import GetFileMD
-        md = GetFileMD(flags.Input.Files)
-        return ("metadata_items" in md and any(('TriggerMenu' in key) for key in md["metadata_items"].keys()))
-
-    # Flag to sense if trigger configuration POOL metadata is available on the job's input
-    flags.addFlag('Trigger.InputContainsConfigMetadata', lambda prevFlags: __trigConfMeta(prevFlags))
-
     # Enables collection and export of detailed monitoring data of the HLT execution
     flags.addFlag('Trigger.CostMonitoring.doCostMonitoring', False)
     flags.addFlag('Trigger.CostMonitoring.chain', 'HLT_noalg_CostMonDS_L1All')
@@ -236,12 +226,12 @@ def createTriggerFlags(doTriggerRecoFlags):
                      (['HLT'] if 'HLTPSK' in keys else []) )
         # POOL: metadata (do not distinguish L1/HLT yet, see discussions on GitLab commit f83ae2bc)
         else:
-            return systems if flags.Trigger.InputContainsConfigMetadata else []
+            return systems if flags.Trigger.triggerConfig == 'INFILE' else []
 
     # list of enabled trigger sub-systems in reconstruction: ['L1,'HLT']
     flags.addFlag('Trigger.availableRecoMetadata', lambda flags: __availableRecoMetadata(flags))
 
-    # Offline flag, determins if the HLT trigger decision and the HLT result should be decoded in reconstruction in jobs with Reco.EnableTrigger
+    # Offline flag, determines if the HLT trigger decision and the HLT result should be decoded in reconstruction in jobs with Reco.EnableTrigger
     flags.addFlag("Trigger.DecodeHLT", True)
 
     # Offline flag, controls the scheduling of the validation algorithm which performs consistency checks on the T0 extracted trigger decision data (recommended).
@@ -249,9 +239,56 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag("Trigger.DecisionMakerValidation.Execute", True)
     flags.addFlag("Trigger.DecisionMakerValidation.ErrorMode", True)
 
+    # Auto configure most probable choice for trigger configuration source based on job setup
+    def __triggerConfig(flags):
+        _log = logging.getLogger('TriggerConfigFlags.triggerConfig')
+        if flags.Common.isOnline and not flags.Trigger.doHLT:
+            # When running reconstruction at P1 (e.g. global monitoring, event display, etc.)
+            _log.debug("Autoconfigured default value for running reconstruction inside Point 1: 'DB'")
+            return 'DB'
+        elif flags.Input.Format is Format.BS:
+            from glob import glob
+            hasLocal = True if (glob("HLTMenu*.json") and glob("L1Menu*.json") and glob("HLTPrescales*.json") and glob("L1Prescales*.json") and glob("HLTMonitoring*.json") and glob("BunchGroupSet*.json")) else False
+            if flags.Trigger.doHLT:
+                # When running the Run 3 trigger on data, data the default config source is from the JSON created by compiling the menu in the job config phase
+                _log.debug("Autoconfigured default value for running the trigger on data: 'FILE'")
+                return 'FILE'
+            elif hasLocal:
+                # When running reco (doHLT == False) from RAW in a directory which already has a full suite of JSONs, assume that the user has just run the trigger manually
+                # and now wants to reconstruct the output using the menu files created when the trigger was executed, rather than reading the DB configuration for the run.
+                # A number of ART tests chain trigger then reco like this. 
+                _log.debug("Autoconfigured default value for running reconstruction with a pre-supplied set of trigger configuration JSON files: 'FILE'")
+                return 'FILE' 
+            elif flags.GeoModel.Run >= LHCPeriod.Run3:
+                # When reconstructing Run 3 data the default config source is the database
+                _log.debug("Autoconfigured default value for reconstruction of Run 3 data: 'DB'")
+                return 'DB'
+            else:
+                # When reconstructing Run 2 or Run 1 data, a stand-alone database converter will be called from python. We then need to load the converted JSON from disk
+                _log.debug("Autoconfigured default value for reconstruction of Run 1 or Run 2 data: 'FILE'")
+                return 'FILE'
+        else: # Format.POOL
+            from AthenaConfiguration.AutoConfigFlags import GetFileMD
+            md = GetFileMD(flags.Input.Files)
+            # Note: the following comprehension will detect both Run 2 and Run 3 in-file metadata formats.
+            # As of 2023, the Run 2 metadata format is still in production use for Run 2 MC AODs, DAODs produced with the Release 21 Run 2 trigger.
+            hasTrigMeta = ("metadata_items" in md and any(('TriggerMenu' in key) for key in md["metadata_items"].keys()))
+            if hasTrigMeta:
+                # When running over a file which already has metadata content (RDO_TRIG, ESD, AOD, DAOD), then read this from within the file's meta store
+                _log.debug("Autoconfigured default value to read trigger configuration data from the input file: 'INFILE'")
+                return 'INFILE'
+            else:
+                # MC production, read the menu JSON generated during the trigger job configuration
+                _log.debug("Autoconfigured default value to read trigger configuration data from disk for MC production: 'FILE'")
+                return 'FILE'
+
     # the configuration source
     # see https://twiki.cern.ch/twiki/bin/view/Atlas/TriggerConfigFlag
-    flags.addFlag('Trigger.triggerConfig', lambda flags: 'INFILE' if flags.Trigger.InputContainsConfigMetadata else 'FILE')
+    flags.addFlag('Trigger.triggerConfig', lambda flags: __triggerConfig(flags))
+
+    # Deprecated. With the expanded auto-configuration of triggerConfig, the InputContainsConfigMetadata is redundant.
+    # To be removed some time after all clients are updated.
+    flags.addFlag('Trigger.InputContainsConfigMetadata', lambda prevFlags: prevFlags.Trigger.triggerConfig == 'INFILE')
 
     # name of the trigger menu
     flags.addFlag('Trigger.triggerMenuSetup', 'MC_pp_run3_v1_BulkMCProd_prescale')
