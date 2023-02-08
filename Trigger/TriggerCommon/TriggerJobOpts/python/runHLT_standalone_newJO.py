@@ -1,15 +1,20 @@
 #!/usr/bin/env python
 
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaCommon.Logging import logging
 log = logging.getLogger('runHLT_standalone_newJO')
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+from AthenaConfiguration.AllConfigFlags import ConfigFlags, initConfigFlags
 from AthenaConfiguration.ComponentAccumulator import CompFactory
 from AthenaConfiguration.Enums import Format
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+
+# Make sure nobody uses deprecated global ConfigFlags
+del ConfigFlags
+
+flags = initConfigFlags()
 
 # Output configuration - currently testing offline workflow
 flags.Trigger.writeBS = False
