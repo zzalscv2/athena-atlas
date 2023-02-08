@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -41,9 +41,9 @@ public:
 private:
 
   ServiceHandle<IROBDataProviderSvc>   m_robDataProvider;
-  ToolHandle<BCM_RawDataProviderTool>  m_rawDataTool;
+  ToolHandle<BCM_RawDataProviderTool>  m_rawDataTool{this,"ProviderTool","BCM_RawDataProviderTool"};
   SG::WriteHandleKey<BCM_RDO_Container> m_RDO_Key
-  { this, "RDOKey", "BDM_RDOs", "" };
+  { this, "RDOKey", "BCM_RDOs", "" };
 };
 
 #endif

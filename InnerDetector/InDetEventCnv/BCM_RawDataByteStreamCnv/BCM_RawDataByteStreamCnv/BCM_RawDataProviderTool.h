@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BCM_RAWDATABYTESTREAMCNV_BCM_RAWDATAPROVIDERTOOL_H
@@ -8,12 +8,9 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "ByteStreamData/RawEvent.h" 
-
+#include "BCM_RawDataByteStreamCnv/BCM_RodDecoder.h"
 #include <inttypes.h>
 #include <atomic>
-
-class BCM_RDO_Container;
-class BCM_RodDecoder;
 
 // the tool to decode a ROB fragment
 
@@ -42,7 +39,7 @@ class BCM_RawDataProviderTool : public AthAlgTool
 
 private:
   mutable std::atomic<int> m_DecodeErrCount{};
-  ToolHandle<BCM_RodDecoder>  m_decoder;
+  ToolHandle<BCM_RodDecoder>  m_decoder{this,"Decoder","BCM_RodDecoder"};
 };
 
 #endif

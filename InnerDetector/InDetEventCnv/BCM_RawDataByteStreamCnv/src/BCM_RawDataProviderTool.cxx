@@ -1,13 +1,10 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
  /////////////////////////////////////////////////////////////////// 	 
 // BCM_RawDataProviderTool.cxx 	 
 //   Implementation file for class BCM_RawDataProviderTool 	 
-/////////////////////////////////////////////////////////////////// 	 
-// (c) ATLAS BCM Detector software 	 
-/////////////////////////////////////////////////////////////////// 	 
 /////////////////////////////////////////////////////////////////// 	 
 //  Version 00-00-01 12/05/2008 Daniel Dobos 	 
 //  Version 00-00-02 19/05/2008 Daniel Dobos 	 
@@ -17,7 +14,6 @@
 #include "BCM_RawDataByteStreamCnv/BCM_RawDataProviderTool.h"
 
 #include "InDetBCM_RawData/BCM_RDO_Container.h"
-#include "BCM_RawDataByteStreamCnv/BCM_RodDecoder.h"
 
 static const InterfaceID IID_IBCM_RawCollByteStreamTool("BCM_RawDataProviderTool", 1, 0);
 const InterfaceID& BCM_RawDataProviderTool::interfaceID( )
@@ -28,10 +24,8 @@ const InterfaceID& BCM_RawDataProviderTool::interfaceID( )
 ////////////////////////
 BCM_RawDataProviderTool::BCM_RawDataProviderTool
 ( const std::string& type, const std::string& name,const IInterface* parent )
-  :  AthAlgTool(type,name,parent),
-     m_decoder("BCM_RodDecoder")
+  :  AthAlgTool(type,name,parent)
 {
-  declareProperty ("Decoder", m_decoder);
   declareInterface<BCM_RawDataProviderTool>(this);   
   m_DecodeErrCount =0;
 }

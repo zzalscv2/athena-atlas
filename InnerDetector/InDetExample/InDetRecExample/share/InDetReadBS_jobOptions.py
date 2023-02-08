@@ -116,7 +116,6 @@ if DetFlags.readRDOBS.TRT_on():
 if DetFlags.readRDOBS.BCM_on():
   from BCM_RawDataByteStreamCnv.BCM_RawDataByteStreamCnvConf import BCM_RodDecoder
   InDetBCMRodDecoder = BCM_RodDecoder(name = "InDetBCMRodDecoder")
-  ToolSvc += InDetBCMRodDecoder
   if (InDetFlags.doPrintConfigurables()):
     printfunc      (InDetBCMRodDecoder)
   #InDetBCMRodDecoder.OutputLevel = VERBOSE
@@ -124,7 +123,6 @@ if DetFlags.readRDOBS.BCM_on():
   from BCM_RawDataByteStreamCnv.BCM_RawDataByteStreamCnvConf import BCM_RawDataProviderTool
   InDetBCMRawDataProviderTool = BCM_RawDataProviderTool(name    = "InDetBCMRawDataProviderTool",
                                                         Decoder = InDetBCMRodDecoder)
-  ToolSvc += InDetBCMRawDataProviderTool
   if (InDetFlags.doPrintConfigurables()):
     printfunc      (InDetBCMRawDataProviderTool)
   #InDetBCMRawDataProviderTool.OutputLevel = VERBOSE
