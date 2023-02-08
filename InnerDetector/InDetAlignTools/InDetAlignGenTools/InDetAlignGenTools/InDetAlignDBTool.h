@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNGENTOOLS_ALIGNDBTOOL_H
@@ -37,6 +37,8 @@
 #include "InDetAlignGenTools/IInDetAlignDBTool.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "CxxUtils/checker_macros.h"
+#include "AthenaKernel/IAthenaOutputStreamTool.h"
+#include "GaudiKernel/ToolHandle.h"
 
 class PixelID;
 class SCT_ID;
@@ -156,7 +158,7 @@ virtual public IInDetAlignDBTool, public AthAlgTool {
                                  ) const ;
 
   // write the transforms to outputstream
-  virtual StatusCode outputObjs() const;
+  virtual StatusCode outputObjs();
 
   // write the transform IOVs to IOVDB
   virtual void fillDB(const std::string tag, 
@@ -174,7 +176,6 @@ virtual public IInDetAlignDBTool, public AthAlgTool {
                              double& alpha, double& beta, double &gamma) const; 
   
  private:
-  ServiceHandle < IToolSvc > p_toolsvc;
 
   const PixelID* m_pixid;
   const SCT_ID* m_sctid;
@@ -189,10 +190,10 @@ virtual public IInDetAlignDBTool, public AthAlgTool {
   bool m_par_newdb; // create database using new (collection) format
   bool m_par_scttwoside; // create structures with separated SCT module sides
   int m_par_fake; // set to 1 to fake full ATLAS geom, 2 to fake CTB geom
-  std::string m_par_condstream; // name of conditions stream
+  ToolHandle<IAthenaOutputStreamTool> m_par_condstream;
   /** name of the root folder for constants, which can be set via 
       the <key> syntax. Default: /Indet/Align. */
-  std::string m_par_dbroot;
+  Gaudi::Property<std::string> m_par_dbroot{ this, "AlignmentRootFolder", "/Indet/Align", "Root folder for alignment" };
   /** the base part of the key for loading AlignableTransform objects
       from the Transient Data Store. Default: /Indet/Align */
   std::string m_par_dbkey;

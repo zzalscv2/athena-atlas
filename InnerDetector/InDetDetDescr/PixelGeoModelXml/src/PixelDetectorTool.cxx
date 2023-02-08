@@ -66,6 +66,20 @@ StatusCode PixelDetectorTool::create()
   auto *manager = new InDetDD::PixelDetectorManager(&*detStore(), m_detectorName, "PixelID");
   manager->addFolder(m_alignmentFolderName);
 
+  if (m_alignable) {
+    manager->addChannel("/Indet/Align/ID",     2, InDetDD::global);
+    manager->addChannel("/Indet/Align/PIX",    1, InDetDD::global);
+    manager->addChannel("/Indet/Align/PIXB1",  0, InDetDD::local);
+    manager->addChannel("/Indet/Align/PIXB2",  0, InDetDD::local);
+    manager->addChannel("/Indet/Align/PIXB3",  0, InDetDD::local);
+    manager->addChannel("/Indet/Align/PIXB4",  0, InDetDD::local);
+    manager->addChannel("/Indet/Align/PIXEA1", 0, InDetDD::local);
+    manager->addChannel("/Indet/Align/PIXEA2", 0, InDetDD::local);
+    manager->addChannel("/Indet/Align/PIXEA3", 0, InDetDD::local);
+    manager->addChannel("/Indet/Align/PIXEC1", 0, InDetDD::local);
+    manager->addChannel("/Indet/Align/PIXEC2", 0, InDetDD::local);
+    manager->addChannel("/Indet/Align/PIXEC3", 0, InDetDD::local);
+  }
   InDetDD::ITk::PixelGmxInterface gmxInterface(manager, m_commonItems.get(), &m_moduleTree);
 
   // Load the geometry, create the volume, 
@@ -233,3 +247,4 @@ void PixelDetectorTool::doNumerology(InDetDD::PixelDetectorManager * manager)
 }
 
 } // namespace ITk
+

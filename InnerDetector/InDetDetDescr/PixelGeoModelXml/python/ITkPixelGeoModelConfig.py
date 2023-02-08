@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-def ITkPixelGeoModelCfg(flags):
+def ITkPixelGeoModelCfg(flags,setGeometryAlignable=False):
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
     acc = GeoModelCfg(flags)
     geoModelSvc = acc.getPrimary()
@@ -8,7 +8,7 @@ def ITkPixelGeoModelCfg(flags):
     from AthenaConfiguration.ComponentFactory import CompFactory
     ITkPixelDetectorTool = CompFactory.ITk.PixelDetectorTool()
     # ITkPixelDetectorTool.useDynamicAlignFolders = flags.GeoModel.Align.Dynamic
-    ITkPixelDetectorTool.Alignable = False # make this a flag? Set true as soon as decided on folder structure
+    ITkPixelDetectorTool.Alignable = setGeometryAlignable # make this a flag? Set true as soon as decided on folder structure
     ITkPixelDetectorTool.DetectorName = "ITkPixel"
     if flags.ITk.Geometry.PixelLocal:
         # Setting this filename triggers reading from local file rather than DB

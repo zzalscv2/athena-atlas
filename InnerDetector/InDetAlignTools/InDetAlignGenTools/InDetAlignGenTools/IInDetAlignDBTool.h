@@ -58,7 +58,7 @@ class IInDetAlignDBTool: virtual public IAlgTool {
                                             ) const=0 ;
   virtual Amg::Transform3D getTransL123( const Identifier& ident ) const=0 ;
   virtual Amg::Transform3D getTrans(const Identifier&, const int) const=0;
-  virtual StatusCode outputObjs() const=0;
+  virtual StatusCode outputObjs() =0;
   virtual void fillDB(const std::string, const unsigned int,const unsigned int,
                       const unsigned  int, const unsigned int) const=0;
   virtual void printDB(const int) const=0;
