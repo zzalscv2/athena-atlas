@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsCaloTrackingVolumeBuilder.h"
@@ -114,6 +114,10 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
   std::shared_ptr<Acts::TrackingVolume> mutInsideVolume
     = std::const_pointer_cast<Acts::TrackingVolume>(insideVolume);
   auto idBounds = dynamic_cast<const Acts::CylinderVolumeBounds*>(&insideVolume->volumeBounds());
+  if (idBounds == nullptr) { // protection against nullptr
+    ATH_MSG_ERROR("Unable to dynamic cast volume bounds to Acts::CylinderVolumeBounds");
+    throw std::runtime_error("Error casting to CylinderVolumeBounds");
+  }
 
   // we want gap volumes at pos and neg xy face, and at outer cyl cover
   // which will include the solenoid area
@@ -400,6 +404,10 @@ ActsCaloTrackingVolumeBuilder::makeCaloVolumeBounds(const std::vector<std::uniqu
   // Assuming the wrapping volume is a cylinder.
   auto idCylBds
     = dynamic_cast<const Acts::CylinderVolumeBounds*>(&insideVolume->volumeBounds());
+  if (idCylBds == nullptr) { // protection against nullptr
+    ATH_MSG_ERROR("Unable to dynamic cast volume bounds to Acts::CylinderVolumeBounds");
+    throw std::runtime_error("Error casting to CylinderVolumeBounds");
+  }
 
   double idRMax = idCylBds->get(CVBBV::eMaxR);
   double idRMin = idCylBds->get(CVBBV::eMinR);
