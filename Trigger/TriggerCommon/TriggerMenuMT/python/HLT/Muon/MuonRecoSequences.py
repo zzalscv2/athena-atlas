@@ -452,7 +452,7 @@ def muEFSARecoSequence( flags, RoIs, name ):
   themuoncreatoralg = algorithmCAToGlobalWrapper(MuonCreatorAlgCfg, flags, name="TrigMuonCreatorAlg_"+name, CreateSAmuons=True, TagMaps=[], MuonContainerLocation=msMuonName,
                                      ExtrapolatedLocation = "HLT_MSExtrapolatedMuons_"+name, MSOnlyExtrapolatedLocation = "HLT_MSOnlyExtrapolatedMuons_"+name,
                                      MuonCreatorTool = CfgGetter.getPrivateToolClone("TrigMuonCreatorToolSA", "MuonCreatorTool", TrackSummaryTool = CfgGetter.getPublicTool("MuonTrackSummaryTool")),
-                                     MonTool = MuonCreatorAlgMonitoring("MuonCreatorAlgSA_"+name))
+                                     MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgSA_"+name))
 
 
   #Algorithms to views
@@ -472,7 +472,7 @@ def muEFSARecoSequence( flags, RoIs, name ):
 
 
 
-def muEFCBRecoSequence( RoIs, name ):
+def muEFCBRecoSequence( flags, RoIs, name ):
 
 
   from AthenaCommon import CfgMgr
@@ -610,7 +610,7 @@ def muEFCBRecoSequence( RoIs, name ):
   themuoncbcreatoralg = MuonCreatorAlg("TrigMuonCreatorAlgCB_"+name, MuonCandidateLocation=[candidatesName], TagMaps=["muidcoTagMap"], InDetCandidateLocation="InDetCandidates_"+name,
                                        MuonContainerLocation = cbMuonName, ExtrapolatedLocation = "CBExtrapolatedMuons",
                                        MSOnlyExtrapolatedLocation = "CBMSonlyExtrapolatedMuons", CombinedLocation = "HLT_CBCombinedMuon_"+name,
-                                       MonTool = MuonCreatorAlgMonitoring("MuonCreatorAlgCB_"+name))
+                                       MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgCB_"+name))
 
   #Add all algorithms
   muEFCBRecoSequence+=theIndetCandidateAlg
@@ -743,7 +743,7 @@ def muEFInsideOutRecoSequence(flags, RoIs, name):
     theInsideOutRecoAlg = MuonInsideOutRecoAlg("TrigMuonInsideOutRecoAlg_"+name,InDetCandidateLocation="InDetCandidatesSystemExtended_"+name)
     insideoutcreatoralg = MuonCreatorAlg("TrigMuonCreatorAlgInsideOut_"+name,  MuonCandidateLocation={candidatesName}, TagMaps=["muGirlTagMap"],InDetCandidateLocation="InDetCandidates_"+name,
                                          MuonContainerLocation = cbMuonName, ExtrapolatedLocation = "InsideOutCBExtrapolatedMuons",
-                                         MSOnlyExtrapolatedLocation = "InsideOutCBMSOnlyExtrapolatedMuons", CombinedLocation = "InsideOutCBCombinedMuon", MonTool = MuonCreatorAlgMonitoring("MuonCreatorAlgInsideOut_"+name))
+                                         MSOnlyExtrapolatedLocation = "InsideOutCBMSOnlyExtrapolatedMuons", CombinedLocation = "InsideOutCBCombinedMuon", MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgInsideOut_"+name))
     efmuInsideOutRecoSequence+=inDetExtensionAlg
 
   efmuInsideOutRecoSequence+=theInsideOutRecoAlg
