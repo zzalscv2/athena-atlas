@@ -6,7 +6,7 @@
 # art-include: master/Athena
 
 # Full chain with special flags
-# ATLAS-R3S-2021-02-00-00 and OFLCOND-MC21-SDR-RUN3-03
+# ATLAS-R3S-2021-03-01-00 and OFLCOND-MC21-SDR-RUN3-03
 Sim_tf.py --simulator 'FullG4MT'  \
 --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-03' \
 --physicsList 'FTFP_BERT_ATL_VALIDATION' \
@@ -16,7 +16,7 @@ Sim_tf.py --simulator 'FullG4MT'  \
 --preInclude 'EVNTtoHITS:SimulationJobOptions/preInclude.BeamPipeKill.py,ISF_FastCaloSimParametrization/ISF_FastCaloSimParametrization_SimPreInclude.py' \
 --postExec "topSeq.BeamEffectsAlg.GenEventManipulators = [getPublicTool(\"GenEventValidityChecker\")];from AthenaCommon.CfgGetter import getPublicTool;validTruthStrat=getPublicTool(\"ISF_ValidationTruthStrategy\");validTruthStrat.Regions=[3];validTruthStrat.ParentMinP=150;ServiceMgr.ISF_MC15aPlusTruthService.TruthStrategies = [ validTruthStrat ];from AthenaCommon.AppMgr import ToolSvc;ToolSvc.ISF_EntryLayerToolMT.ParticleFilters=[]" \
 --DataRunNumber '410000' \
---geometryVersion 'default:ATLAS-R3S-2021-02-00-00_VALIDATION' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-01-00_VALIDATION' \
 --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc15_13TeV.431004.ParticleGun_pid22_E65536_disj_eta_m25_m20_20_25_zv_0.evgen.EVNT.e6556.EVNT.13283012._000001.pool.root.1" \
 --outputHITSFile "Hits.pool.root" \
 --maxEvents=2 \
@@ -26,7 +26,7 @@ echo  "art-result: $? simulation"
 Reco_tf.py --inputHITSFile "Hits.pool.root" \
 --outputESDFile ESD.pool.root \
 --conditionsTag "default:OFLCOND-MC21-SDR-RUN3-03" \
---geometryVersion 'default:ATLAS-R3S-2021-02-00-00' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
 --DataRunNumber='410000' \
 --postExec 'HITtoRDO:ToolSvc.LArPileUpTool.CrossTalk=False' 'all:CfgMgr.MessageSvc().setError+=["HepMcParticleLink"]' 'all:conddb.addOverride("/LAR/BadChannels/BadChannels", "LARBadChannelsBadChannels-MC-empty")' 'all:conddb.addOverride("/TILE/OFL02/STATUS/ADC", "TileOfl02StatusAdc-EmptyBCh")' 'RAWtoESD:StreamESD.ItemList+=["ISF_FCS_Parametrization::FCS_StepInfoCollection#MergedEventSteps","LArHitContainer#*","TileHitVector#*", "TrackRecordCollection#CaloEntryLayer", "TrackRecordCollection#MuonEntryLayer"]' \
 --postInclude "all:PyJobTransforms/UseFrontier.py" "HITtoRDO:ISF_FastCaloSimParametrization/ISF_FastCaloSimParametrization_DigiTilePostInclude.py" "HITtoRDO:ISF_FastCaloSimParametrization/ISF_FastCaloSimParametrization_DigiPostInclude.py" \

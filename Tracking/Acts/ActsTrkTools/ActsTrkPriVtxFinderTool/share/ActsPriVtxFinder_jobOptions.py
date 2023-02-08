@@ -124,7 +124,7 @@ DetFlags.Print()
 import MagFieldServices.SetupField
 
 from AthenaCommon.GlobalFlags import globalflags
-globalflags.DetDescrVersion = "ATLAS-R2-2016-00-01-00"
+globalflags.DetDescrVersion = "ATLAS-R2-2016-01-00-01"
 
 # --- setup InDetJobProperties
 from InDetRecExample.InDetJobProperties import InDetFlags

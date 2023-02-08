@@ -60,7 +60,7 @@ if not globals().get ('noID',False):
 
 from AthenaCommon.JobProperties import jobproperties
 if jobproperties.Global.DetDescrVersion.isDefault():
-    jobproperties.Global.DetDescrVersion = 'ATLAS-R1-2012-03-01-00'
+    jobproperties.Global.DetDescrVersion = 'ATLAS-R1-2012-03-02-00'
 have_atlas_geo = moduleExists ('AtlasGeoModel')
 if have_atlas_geo:
     import AtlasGeoModel.GeoModelInit

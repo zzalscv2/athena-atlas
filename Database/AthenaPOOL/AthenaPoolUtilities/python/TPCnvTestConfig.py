@@ -37,7 +37,7 @@ def TPCnvTest(infile, keys, useGeoModelSvc=False, useIOVDbSvc=False, doPixel=Fal
     flags = initConfigFlags()
     flags.Input.Files = [infile]
     flags.GeoModel.Run = LHCPeriod.Run1
-    flags.GeoModel.AtlasVersion = 'ATLAS-R1-2012-03-01-00'
+    flags.GeoModel.AtlasVersion = 'ATLAS-R1-2012-03-02-00'
     if useGeoModelSvc:
         flags.GeoModel.Align.Dynamic = False
         flags.Detector.GeometryPixel = doPixel

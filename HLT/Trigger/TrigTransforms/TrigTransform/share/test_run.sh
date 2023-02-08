@@ -394,7 +394,7 @@ Trig_reco_tf.py \
 --asetup r2c:AtlasProduction,20.1.4.8 r2e:AtlasProduction,20.1.4.8 e2a:AtlasProduction,20.1.4.8 \
 --outputNTUP_TRIGCOSTFile="NTUP_TRIGCOST.04854087._000852.root.1" \
 --outputNTUP_TRIGRATEFile="NTUP_TRIGRATE.04854087._000852.root.1" \
---geometryVersion 'ATLAS-R1-2012-02-00-00' --conditionsTag 'COMCOND-BLKPA-RUN1-07' --beamType 'collisions' --autoConfiguration 'everything' \
+--geometryVersion 'ATLAS-R1-2012-03-02-00' --conditionsTag 'COMCOND-BLKPA-RUN1-07' --beamType 'collisions' --autoConfiguration 'everything' \
 --preExec "RAWtoESD:from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Trigger.EDMVersion=2;DQMonFlags.doStreamAwareMon=False;DQMonFlags.enableLumiAccess=False;from JetRec.JetRecFlags import jetFlags;jetFlags.useTracks=False;DQMonFlags.doLVL1CaloMon=False;DQMonFlags.doCTPMon=False" "ESDtoAOD:DQMonFlags.doStreamAwareMon=False;DQMonFlags.enableLumiAccess=False;from JetRec.JetRecFlags import jetFlags;jetFlags.useTracks=False;DQMonFlags.doLVL1CaloMon=False;DQMonFlags.doCTPMon=False" \
 --outputBSFile="RAW.05530098._000001.pool.root.1" \
 --outputESDFile='thetestESD.pool.root' \

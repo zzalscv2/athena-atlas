@@ -19,7 +19,7 @@ Sim_tf.py \
 --simulator 'FullG4' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py' \
---geometryVersion 'default:ATLAS-R3S-2021-02-00-00_VALIDATION' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-01-00_VALIDATION' \
 --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc12_valid.110401.PowhegPythia_P2012_ttbar_nonallhad.evgen.EVNT.e3099.01517252._000001.pool.root.1' \
 --outputHITSFile 'hitsFull.ttbar.pool.root' \
 --maxEvents '10' \
@@ -33,7 +33,7 @@ Sim_tf.py \
 --simulator 'FullG4' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py' \
---geometryVersion 'default:ATLAS-R3S-2021-02-00-00_VALIDATION' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-01-00_VALIDATION' \
 --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc12_valid.110401.PowhegPythia_P2012_ttbar_nonallhad.evgen.EVNT.e3099.01517252._000001.pool.root.1' \
 --outputHITSFile 'hitsHalf1.ttbar.pool.root' \
 --maxEvents '5' \
@@ -47,7 +47,7 @@ Sim_tf.py \
 --simulator 'FullG4' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py' \
---geometryVersion 'default:ATLAS-R3S-2021-02-00-00_VALIDATION' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-01-00_VALIDATION' \
 --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc12_valid.110401.PowhegPythia_P2012_ttbar_nonallhad.evgen.EVNT.e3099.01517252._000001.pool.root.1' \
 --outputHITSFile 'hitsHalf2.ttbar.pool.root' \
 --maxEvents '5' \

@@ -733,11 +733,11 @@ if ReadPool:
     # Set Geometry version
     if not 'DetDescrVersion' in dir():
         if RUN3:
-            DetDescrVersion = 'ATLAS-R3S-2021-02-00-00'
+            DetDescrVersion = 'ATLAS-R3S-2021-03-01-00'
         elif RUN2:
             DetDescrVersion = 'ATLAS-R2-2016-01-00-01'
         else:
-            DetDescrVersion = 'ATLAS-R1-2012-02-00-00'
+            DetDescrVersion = 'ATLAS-R1-2012-03-02-00'
 else:
     # - ByteStream input 
     svcMgr.EventSelector.Input = FileNameVec
@@ -758,11 +758,11 @@ else:
     # Set Geometry version
     if not 'DetDescrVersion' in dir():
         if RUN3:
-            DetDescrVersion = 'ATLAS-R3S-2021-02-00-00'
+            DetDescrVersion = 'ATLAS-R3S-2021-03-01-00'
         elif RUN2:
             DetDescrVersion = 'ATLAS-R2-2016-01-00-01'
         else:
-            DetDescrVersion = 'ATLAS-R1-2012-02-00-00'
+            DetDescrVersion = 'ATLAS-R1-2012-03-02-00'
 jobproperties.Global.DetDescrVersion = DetDescrVersion 
 log.info( "DetDescrVersion = %s" % (jobproperties.Global.DetDescrVersion()) )
 

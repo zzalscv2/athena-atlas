@@ -15,7 +15,7 @@ from AthenaCommon.AlgSequence import AlgSequence
 job = AlgSequence()
 
 # build GeoModel
-DetDescrVersion = 'ATLAS-R1-2012-02-01-00'
+DetDescrVersion = 'ATLAS-R1-2012-03-02-00'
 from AtlasGeoModel import SetGeometryVersion 
 from AtlasGeoModel import GeoModelInit 
 

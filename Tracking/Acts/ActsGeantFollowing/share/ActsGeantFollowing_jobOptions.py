@@ -56,7 +56,7 @@ if 'myPt' not in dir() :
     myPt = 'pt'  # values are 'p' or 'pt'
 
 if 'myGeo' not in dir() :
-    myGeo = 'ATLAS-R2-2016-00-00-00'
+    myGeo = 'ATLAS-R2-2016-01-00-01'
 
 
 # Set everything to ATLAS

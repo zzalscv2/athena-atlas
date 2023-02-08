@@ -45,7 +45,7 @@ from AthenaCommon.JobProperties import jobproperties
 #--- see https://atlas-geometry-db.web.cern.ch/atlas-geometry-db/
 #--- for the geometry updates
 if RUN2: jobproperties.Global.DetDescrVersion = "ATLAS-R2-2015-04-00-00"
-else:    jobproperties.Global.DetDescrVersion = "ATLAS-R1-2012-03-01-00"
+else:    jobproperties.Global.DetDescrVersion = "ATLAS-R1-2012-03-02-00"
 from AtlasGeoModel import SetGeometryVersion
 from AtlasGeoModel import GeoModelInit
 

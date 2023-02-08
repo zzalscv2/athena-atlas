@@ -160,7 +160,7 @@ from AthenaCommon.GlobalFlags import globalflags
 ##DetDescrVersion = 'ATLAS-R2-2015-01-01-00' 
 #DetDescrVersion = 'ATLAS-R2-2015-03-01-00' 
 #--->>>######DetDescrVersion = 'ATLAS-R2-2015-03-01-00'
-#DetDescrVersion = 'ATLAS-R2-2016-00-01-00'
+#DetDescrVersion = 'ATLAS-R2-2016-01-00-01'
 
 #doPixelOnlyMon   = False
 

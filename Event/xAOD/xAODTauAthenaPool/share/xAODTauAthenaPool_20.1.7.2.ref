@@ -140,7 +140,7 @@ GeoModelSvc::RD...WARNING  Getting PixTBMatComponents with default tag
 GeoModelSvc::RD...WARNING  Getting PixTBMaterials with default tag
 GeoModelSvc::RD...WARNING  Getting InDetMatComponents with default tag
 GeoModelSvc::RD...WARNING  Getting InDetMaterials with default tag
-GeoModelSvc.Pix...   INFO Building Pixel Detector with Version Tag: ATLAS-R1-2012-03-01-00 at Node: ATLAS
+GeoModelSvc.Pix...   INFO Building Pixel Detector with Version Tag: ATLAS-R1-2012-03-02-00 at Node: ATLAS
 GeoModelSvc.Pix...   INFO Pixel Version: Pixel-GEO-13  Package Version: PixelGeoModel-00-00-00
 EventPersistenc...   INFO Added successfully Conversion service:DetDescrCnvSvc
 PixelIDDetDescrCnv   INFO in createObj: creating a PixelID helper object in the detector store
@@ -193,7 +193,7 @@ GeoModelSvc.Pix...   INFO BCM_GeoModel tool retrieved: BCM_Tool = PrivateToolHan
 GeoModelSvc.Pix...   INFO BLM_GeoModel tool retrieved: BLM_Tool = PrivateToolHandle('InDetDD::BLM_Builder/InDetDD::BLM_Builder')
 GeoModelSvc.Pix...   INFO Service builder tool not specified.
 PixelGeoModel        INFO Retrieving Record Sets from database ...
-PixelGeoModel        INFO Key = ATLAS-R1-2012-03-01-00 Node = ATLAS
+PixelGeoModel        INFO Key = ATLAS-R1-2012-03-02-00 Node = ATLAS
 PixelGeoModel        INFO ... Record Sets retrieved.
 PixelGeoModel        INFO DBM switch = SetDBMFlag: 0
 PixelGeoModel        INFO Building Pixel Detector
@@ -208,9 +208,9 @@ PixelGeoModel        INFO Layer 1 in/out radius 83.7078  102.132
 PixelGeoModel        INFO *** LAYER 2  planar/3D modules : 0 0
 PixelGeoModel        INFO Layer 2 in/out radius 117.51  136.132
 Warning in material CabCoolEcD3. Mass fractions sum to 0.9999; renormalizing to 1.0
-GeoModelSvc.Pix...   INFO Building BCM with Version Tag: ATLAS-R1-2012-03-01-00 at Node: ATLAS
+GeoModelSvc.Pix...   INFO Building BCM with Version Tag: ATLAS-R1-2012-03-02-00 at Node: ATLAS
 GeoModelSvc.Pix...   INFO BCM Version: BCM-00  Package Version: BCM_GeoModel-00-00-00
-GeoModelSvc.Pix...   INFO Building BLM with Version Tag: ATLAS-R1-2012-03-01-00 at Node: ATLAS
+GeoModelSvc.Pix...   INFO Building BLM with Version Tag: ATLAS-R1-2012-03-02-00 at Node: ATLAS
 GeoModelSvc.Pix...   INFO BLM Version: BLM-00  Package Version: BLM_GeoModel-00-00-00
 PixelDetectorMa...   INFO Registering alignment channel with key /Indet/Align/ID, level 2, with frame global.
 PixelDetectorMa...   INFO Registering alignment channel with key /Indet/Align/PIX, level 1, with frame global.
@@ -225,7 +225,7 @@ PixelDetectorMa...   INFO Registering alignment channel with key /Indet/Align/PI
 PixelDetectorMa...   INFO Registering alignment channel with key /Indet/Align/PIXEC2, level 0, with frame local.
 PixelDetectorMa...   INFO Registering alignment channel with key /Indet/Align/PIXEC3, level 0, with frame local.
 GeoModelSvc          INFO GeoModelSvc.PixelDetectorTool	 SZ= 2204Kb 	 Time = 0.29S
-GeoModelSvc.SCT...   INFO Building SCT with Version Tag: ATLAS-R1-2012-03-01-00 at Node: ATLAS
+GeoModelSvc.SCT...   INFO Building SCT with Version Tag: ATLAS-R1-2012-03-02-00 at Node: ATLAS
 GeoModelSvc.SCT...   INFO SCT Version: SCT-GEO-01  Package Version: SCT_GeoModel-00-00-00
 SCT_IDDetDescrCnv    INFO in createObj: creating a SCT_ID helper object in the detector store
 SCT_ID               INFO Initialize from dictionary
@@ -267,7 +267,7 @@ SCTDetectorManager   INFO Registering alignment channel with key /Indet/Align/SC
 SCTDetectorManager   INFO Registering alignment channel with key /Indet/Align/SCTEC8, level 1, with frame local.
 SCTDetectorManager   INFO Registering alignment channel with key /Indet/Align/SCTEC9, level 1, with frame local.
 GeoModelSvc          INFO GeoModelSvc.SCT_DetectorTool	 SZ= 16164Kb 	 Time = 0.23S
-GeoModelSvc.TRT...   INFO Building TRT with Version Tag: ATLAS-R1-2012-03-01-00 at Node: ATLAS
+GeoModelSvc.TRT...   INFO Building TRT with Version Tag: ATLAS-R1-2012-03-02-00 at Node: ATLAS
 GeoModelSvc.TRT...   INFO TRT Version: TRT-GEO-00  Package Version: TRT_GeoModel-00-00-00
 GeoModelSvc.TRT...   INFO Creating the TRT
 GeoModelSvc.TRT...   INFO TRT Geometry Options:
@@ -298,9 +298,9 @@ GeoModelSvc.InD...   INFO InDetServMat Package Version: InDetServMatGeoModel-00-
 GeoModelSvc.InD...   INFO Building Inner Detector Service Material. Version: CSC
 GeoModelSvc          INFO GeoModelSvc.InDetServMatTool	 SZ= 0Kb 	 Time = 0.11S
 GeoModelSvc.Muo...   INFO create MuonDetectorTool - package version = MuonGeoModel-00-00-00
-GeoModelSvc.Muo...   INFO (from GeoModelSvc)    AtlasVersion = <ATLAS-R1-2012-03-01-00>  MuonVersion = <>
-GeoModelSvc.Muo...   INFO Keys for Muon Switches are  (key) ATLAS-R1-2012-03-01-00 (node) ATLAS
-GeoModelSvc.Muo...   INFO (from GeoModelSvc) in AtlasVersion = <ATLAS-R1-2012-03-01-00>  default MuonVersion is <MuonSpectrometer-R.06.04>
+GeoModelSvc.Muo...   INFO (from GeoModelSvc)    AtlasVersion = <ATLAS-R1-2012-03-02-00>  MuonVersion = <>
+GeoModelSvc.Muo...   INFO Keys for Muon Switches are  (key) ATLAS-R1-2012-03-02-00 (node) ATLAS
+GeoModelSvc.Muo...   INFO (from GeoModelSvc) in AtlasVersion = <ATLAS-R1-2012-03-02-00>  default MuonVersion is <MuonSpectrometer-R.06.04>
 GeoModelSvc.Muo...   INFO Properties have been set as follows: 
 GeoModelSvc.Muo...   INFO     LayoutName                     R
 GeoModelSvc.Muo...   INFO     IncludeCutouts                 0
@@ -392,7 +392,7 @@ AtlasDetectorID::initLevelsFromDict - there are no MM entries in the dictionary!
 MuGM:MuonFactory     INFO MMIDHELPER retrieved from DetStore
 MuGM:MuonFactory     INFO  **************** MuonDetectorFactory001 ************************
 MuGM:MuonFactory     INFO  *** Start building the Muon Geometry Tree **********************
-MuGM:RDBReadAtlas    INFO Start retriving dbObjects with tag = <ATLAS-R1-2012-03-01-00> node <ATLAS>
+MuGM:RDBReadAtlas    INFO Start retriving dbObjects with tag = <ATLAS-R1-2012-03-02-00> node <ATLAS>
 RDBAccessSvc      WARNING Could not get the tag for XtomoData node. Returning 0 pointer to IRDBQuery
 MuGM:RDBReadAtlas    INFO After getQuery XtomoData
 In DblQ00Xtomo(data)
@@ -422,7 +422,7 @@ MuGM:RDBReadAtlas    INFO  ProcessTGCreadout - version 7 wirespacing 1.8
 MGM::MuonDetect...   INFO Creating now the CscInternalAlignmentMapContainer
 MuGM:RDBReadAtlas    INFO Intermediate Objects built from primary numbers
 MuGM:MuonFactory     INFO  theMaterialManager retrieven successfully from the DetStore
-MuGM:MuonFactory     INFO MuonSystem description from OracleTag=<ATLAS-R1-2012-03-01-00> and node=<ATLAS>
+MuGM:MuonFactory     INFO MuonSystem description from OracleTag=<ATLAS-R1-2012-03-02-00> and node=<ATLAS>
 MuGM:MuonFactory     INFO  TreeTop added to the Manager
 MuGM:MuonFactory     INFO  Muon Layout R.06.04
 MuGM:MuonFactory     INFO Fine Clash Fixing disabled: (should be ON/OFF for Simulation/Reconstruction)
@@ -515,7 +515,7 @@ Domain[ROOT_All]     INFO                           /home/sss/atlas/DBRelease/cu
 RootDatabase.open    INFO /home/sss/atlas/DBRelease/current/poolcond/cond09_mc.000019.gen.COND/cond09_mc.000019.gen.COND._0010.pool.root File version:52200
 GeoModelSvc       WARNING *** *** Geometry configured through jobOptions does not match TagInfo tags! *** ***
 GeoModelSvc          INFO ** Job Option configuration: 
-GeoModelSvc          INFO * ATLAS tag: ATLAS-R1-2012-03-01-00
+GeoModelSvc          INFO * ATLAS tag: ATLAS-R1-2012-03-02-00
 GeoModelSvc          INFO * InDet tag: 
 GeoModelSvc          INFO * Pixel tag: 
 GeoModelSvc          INFO * SCT   tag: 

@@ -11,7 +11,7 @@ export TNS_ADMIN=/cvmfs/atlas.cern.ch/repo/sw/database/DBRelease/current/oracle-
 
 Reco_tf.py  \
 --conditionsTag=CONDBR2-ES1PA-2022-06 \
---geometryVersion=ATLAS-R3S-2021-02-00-00 \
+--geometryVersion=ATLAS-R3S-2021-03-01-00 \
 --autoConfiguration=everything \
 --maxEvents=-1 \
 --preExec="all:from RecExConfig.RecFlags import rec; rec.doExpressProcessing.set_Value_and_Lock(True); rec.doZdc.set_Value_and_Lock(False); from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Common.doExpressProcessing=True; ConfigFlags.Trigger.triggerConfig= 'DB'; ConfigFlags.Trigger.enableL1MuonPhase1=True; ConfigFlags.Trigger.enableL1CaloPhase1=False; DQMonFlags.useTrigger=False; DQMonFlags.doHLTMon=False;" \

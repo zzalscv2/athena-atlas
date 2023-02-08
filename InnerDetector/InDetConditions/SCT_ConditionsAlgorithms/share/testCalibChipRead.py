@@ -44,7 +44,7 @@ theApp.AuditAlgorithms=True
 # Load Geometry
 #--------------------------------------------------------------
 from AthenaCommon.GlobalFlags import globalflags
-globalflags.DetDescrVersion="ATLAS-R1-2012-03-00-00"
+globalflags.DetDescrVersion="ATLAS-R1-2012-03-02-00"
 globalflags.ConditionsTag="COMCOND-BLKPA-RUN1-09"
 globalflags.DetGeo="atlas"
 globalflags.InputFormat="pool"

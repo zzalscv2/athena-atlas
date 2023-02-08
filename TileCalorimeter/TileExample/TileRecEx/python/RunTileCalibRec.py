@@ -201,13 +201,13 @@ if __name__=='__main__':
     if flags.Input.Format is Format.BS:
         if args.run3:
             condDbTag = 'CONDBR2-BLKPA-RUN2-09' if args.upd4 else 'CONDBR2-ES1PA-2022-01'
-            detDescrVersion = 'ATLAS-R3S-2021-02-00-00'
+            detDescrVersion = 'ATLAS-R3S-2021-03-01-00'
         elif args.run2:
             condDbTag = 'CONDBR2-BLKPA-2018-13' if args.upd4 else 'CONDBR2-ES1PA-2018-05'
             detDescrVersion = 'ATLAS-R2-2016-01-00-01'
         else:
             condDbTag = 'COMCOND-BLKPA-RUN1-06' if (args.upd4 and runNumber > 141066) else 'COMCOND-ES1PA-006-05'
-            detDescrVersion = 'ATLAS-R1-2012-02-00-00'
+            detDescrVersion = 'ATLAS-R1-2012-03-02-00'
 
         flags.IOVDb.GlobalTag = condDbTag
         flags.GeoModel.AtlasVersion = detDescrVersion
