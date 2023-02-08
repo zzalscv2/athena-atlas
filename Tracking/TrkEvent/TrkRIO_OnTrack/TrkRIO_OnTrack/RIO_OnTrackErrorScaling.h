@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /* Dear emacs, this is -*-c++-*- */
 #ifndef _RIO_OnTrackErrorScaling_H_
@@ -13,16 +13,24 @@
 class RIO_OnTrackErrorScaling
 {
 public:
-  RIO_OnTrackErrorScaling();
-  virtual ~RIO_OnTrackErrorScaling();
+ enum Type {
+   Pixel = 0,
+   SCT = 1,
+   TRT = 2,
+   Unknown = 99
+ };
+ RIO_OnTrackErrorScaling();
+ virtual ~RIO_OnTrackErrorScaling();
 
-  // CLID of the actual implementation
-  virtual CLID clid() const;
+ // CLID of the actual implementation
+ virtual CLID clid() const;
 
-  std::vector<std::vector<double> >       &params()       { return m_params; }
-  const std::vector<std::vector<double> > &params() const { return m_params; }
+ std::vector<std::vector<double> > &params() { return m_params; }
+ const std::vector<std::vector<double> > &params() const { return m_params; }
 
-  virtual bool postProcess()  {return true; }
+ virtual bool postProcess() { return true; }
+ 
+ virtual Type type() const {return Unknown;}
 
 protected :
   /// Convenience function to check whether the number of parameters is correct.

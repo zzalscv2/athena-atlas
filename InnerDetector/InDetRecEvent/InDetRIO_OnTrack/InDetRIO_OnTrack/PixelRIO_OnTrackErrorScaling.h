@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _PixelRIO_OnTrackErrorScaling_H_
 #define _PixelRIO_OnTrackErrorScaling_H_
@@ -11,9 +11,10 @@ class Identifier;
 class PixelRIO_OnTrackErrorScaling final : public RIO_OnTrackErrorScaling
 {
 public:
+  static constexpr RIO_OnTrackErrorScaling::Type s_type = RIO_OnTrackErrorScaling::Pixel;
   virtual CLID clid() const override final;
 
-  Amg::MatrixX getScaledCovariance(const Amg::MatrixX& cov_input,
+  Amg::MatrixX getScaledCovariance(Amg::MatrixX&& cov_input,
                                    const PixelID& pixel_id,
                                    const Identifier& id) const;
 
@@ -31,6 +32,7 @@ public:
   static const char* const* paramNames() { return s_names; }
   virtual bool postProcess() override final;
 
+  virtual Type type() const override final {return s_type;}
 protected:
   static const char* const s_names[kNParamTypes];
 };

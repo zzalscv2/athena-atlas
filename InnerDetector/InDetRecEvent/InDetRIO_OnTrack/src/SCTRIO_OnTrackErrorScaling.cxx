@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "InDetRIO_OnTrack/SCTRIO_OnTrackErrorScaling.h"
 #include <iostream>
@@ -22,11 +22,11 @@ bool SCTRIO_OnTrackErrorScaling::postProcess() {
   return true;
 }
 
-Amg::MatrixX SCTRIO_OnTrackErrorScaling::getScaledCovariance(const Amg::MatrixX& cov_input,
+Amg::MatrixX SCTRIO_OnTrackErrorScaling::getScaledCovariance(Amg::MatrixX&& cov_input,
                                                              bool is_endcap,
                                                              double sinLocalAngle) const
 {
-  Amg::MatrixX newCov(cov_input);
+  Amg::MatrixX newCov = std::move(cov_input);
   if (is_endcap && newCov.rows() > 1) {
     double Sn      = sinLocalAngle;
     double Sn2     = square(Sn);
