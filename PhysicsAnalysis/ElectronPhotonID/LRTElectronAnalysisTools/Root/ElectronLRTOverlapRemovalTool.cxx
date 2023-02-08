@@ -153,6 +153,12 @@ namespace CP
                             }
                             else ElectronsToRemove.insert(LRTElectron);
                         }
+                        else { 
+                            if (electronPassesID(LRTElectron,"DFCommonElectronsLHVeryLooseNoPix") ) {
+                                ElectronsToRemove.insert(promptElectron);
+                            }
+                            else ElectronsToRemove.insert(LRTElectron);
+                        }
                     }
                 }
             } // end lrt loop
