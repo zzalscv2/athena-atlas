@@ -31,7 +31,7 @@ checkstep () {
 
 file=test_full_chain_mu0.sh
 script="`basename \"$0\"`"
-number_of_events=10
+number_of_events=4000
 
 #References for producing the output dcube pages
 lastref_dir=last_results
