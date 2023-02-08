@@ -246,6 +246,11 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::Ta
     if (!m_sWP.empty()) sHistName+="_"+m_sWP;
     sHistName += sMode + sMu + sMCCampaign;
 
+    // filter unwanted combinations
+    if( (sHistName.find("3P") != std::string::npos && sHistName.find("1p") != std::string::npos) ||
+        (sHistName.find("1P") != std::string::npos && sHistName.find("3p") != std::string::npos)) 
+        continue;
+
     // get the uncertainty from the histogram
     tmpCorrectionCode = getValue(sHistName,
                                  xTau,
@@ -682,8 +687,9 @@ void CommonEfficiencyTool::generateSystematicSets()
 
     // skip nominal scale factors
     if (sNP == "sf") continue;
+
     // skip if 3p histogram to avoid duplications (TODO: come up with a better solution)
-    if (mSF.first.find("_3p") != std::string::npos) continue;
+    //if (mSF.first.find("_3p") != std::string::npos) continue;
 
     // test if NP starts with a capital letter indicating that this should be recommended
     bool bIsRecommended = false;
@@ -693,7 +699,7 @@ void CommonEfficiencyTool::generateSystematicSets()
     // make sNP uppercase and build final NP entry name
     std::transform(sNPUppercase.begin(), sNPUppercase.end(), sNPUppercase.begin(), toupper);
     std::string sSystematicString = sSystematicBaseString+sNPUppercase;
-
+  
     // add all found systematics to the AffectingSystematics
     m_sAffectingSystematics.insert(CP::SystematicVariation (sSystematicString, 1));
     m_sAffectingSystematics.insert(CP::SystematicVariation (sSystematicString, -1));
