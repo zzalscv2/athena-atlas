@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILERAWCHANNELBUILDERWIENERFILTER_H
@@ -53,12 +53,11 @@ class TileRawChannelBuilderWienerFilter: public TileRawChannelBuilder {
     ~TileRawChannelBuilderWienerFilter(); //!< Destructor
 
     // virtual methods
-    virtual StatusCode initialize(); //!< Initialize method
-    //virtual StatusCode execute();
-    virtual StatusCode finalize(); //!< Finalize method
+    virtual StatusCode initialize() override; //!< Initialize method
+    virtual StatusCode finalize() override; //!< Finalize method
 
     // Inherited from TileRawChannelBuilder
-    virtual TileRawChannel* rawChannel(const TileDigits* digits);
+    virtual TileRawChannel* rawChannel(const TileDigits* digits, const EventContext& ctx) override;
 
     /**
      * AlgTool InterfaceID

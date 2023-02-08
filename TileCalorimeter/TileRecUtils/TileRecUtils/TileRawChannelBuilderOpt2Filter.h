@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILERAWCHANNELBUILDEROPT2FILTER_H
@@ -57,7 +57,7 @@ class TileRawChannelBuilderOpt2Filter: public TileRawChannelBuilder {
     virtual StatusCode finalize(); //!< Finalize method
 
     // Inherited from TileRawChannelBuilder
-    virtual TileRawChannel* rawChannel(const TileDigits* digits);
+    virtual TileRawChannel* rawChannel(const TileDigits* digits, const EventContext& ctx);
 
     /**
      * AlgTool InterfaceID

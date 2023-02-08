@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // small hack to enable datapool usage
@@ -142,8 +142,7 @@ StatusCode TileRawChannelBuilderManyAmps::finalize() {
   return StatusCode::SUCCESS;
 }
 
-TileRawChannel* TileRawChannelBuilderManyAmps::rawChannel(const TileDigits* tiledigits) {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+TileRawChannel* TileRawChannelBuilderManyAmps::rawChannel(const TileDigits* tiledigits, const EventContext& ctx) {
 
   ++m_chCounter;
 

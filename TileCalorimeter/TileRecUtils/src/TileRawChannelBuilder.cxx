@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -208,8 +208,8 @@ StatusCode TileRawChannelBuilder::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TileRawChannelBuilder::createContainer() {
-  initLog();
+StatusCode TileRawChannelBuilder::createContainer(const EventContext& ctx) {
+  initLog(ctx);
 
   // create TRC container
   m_rawChannelCnt = std::make_unique<TileMutableRawChannelContainer>(true, m_rChType, m_rChUnit, SG::VIEW_ELEMENTS);
@@ -221,9 +221,8 @@ StatusCode TileRawChannelBuilder::createContainer() {
   return StatusCode::SUCCESS;
 }
 
-void TileRawChannelBuilder::initLog() {
+void TileRawChannelBuilder::initLog(const EventContext& ctx) {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   const TileDQstatus* DQstatus = SG::makeHandle (m_DQstatusKey, ctx).get();
 
   // update only if there is new event
@@ -267,7 +266,7 @@ void TileRawChannelBuilder::initLog() {
   }
 }
 
-TileRawChannel* TileRawChannelBuilder::rawChannel(const TileDigits* digits) {
+TileRawChannel* TileRawChannelBuilder::rawChannel(const TileDigits* digits, const EventContext& /*ctx*/) {
   ++m_chCounter;
   ATH_MSG_WARNING( "Default constructor for rawChannel!" );
   DataPool<TileRawChannel> tileRchPool (100);
@@ -468,9 +467,9 @@ const char * TileRawChannelBuilder::BadPatternName(float ped) {
 }
 
     
-StatusCode TileRawChannelBuilder::build(const TileDigitsCollection* coll)
+StatusCode TileRawChannelBuilder::build(const TileDigitsCollection* coll, const EventContext& ctx)
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+
   int frag = coll->identify();
 
   // make sure that error array is up-to-date
@@ -484,7 +483,7 @@ StatusCode TileRawChannelBuilder::build(const TileDigitsCollection* coll)
 
   for (; digitItr != lastDigit; ++digitItr) {
 
-    TileRawChannel* rch = rawChannel((*digitItr));
+    TileRawChannel* rch = rawChannel((*digitItr), ctx);
 
     if (m_notUpgradeCabling) {
 
@@ -520,9 +519,9 @@ StatusCode TileRawChannelBuilder::build(const TileDigitsCollection* coll)
   return StatusCode::SUCCESS;
 }
 
-StatusCode TileRawChannelBuilder::commitContainer()
+StatusCode TileRawChannelBuilder::commitContainer(const EventContext& ctx)
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+
   const TileDQstatus* DQstatus = SG::makeHandle (m_DQstatusKey, ctx).get();
 
   ToolHandleArray<ITileRawChannelTool>::iterator itrTool = m_noiseFilterTools.begin();
@@ -607,7 +606,7 @@ StatusCode TileRawChannelBuilder::commitContainer()
                 << " nChH/L=" << m_nChH << "/" << m_nChL
                 << " RChSumH/L=" << m_RChSumH << "/" << m_RChSumL );
 
-  SG::WriteHandle<TileRawChannelContainer> rawChannelsContainer(m_rawChannelContainerKey);
+  SG::WriteHandle<TileRawChannelContainer> rawChannelsContainer(m_rawChannelContainerKey, ctx);
   ATH_CHECK( rawChannelsContainer.record(std::move(m_rawChannelCnt)) );
 
   endLog();

@@ -21,7 +21,7 @@
  *
  */
 TileRawChannel*
-TileRawChannelBuilderTest::rawChannel (const TileDigits* digits)
+TileRawChannelBuilderTest::rawChannel (const TileDigits* digits, const EventContext& /*ctx*/)
 {
   const std::vector<float>& samples = digits->samples();
   float amp  = samples.size() > 0 ? samples[0] : 0;
