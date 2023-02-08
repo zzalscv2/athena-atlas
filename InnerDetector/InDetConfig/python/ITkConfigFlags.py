@@ -69,13 +69,18 @@ def createITkConfigFlags():
   itkcf.addFlag("ITk.Tracking.materialInteractions", True)
   itkcf.addFlag("ITk.Tracking.writeSeedValNtuple", False) # Turn writing of seed validation ntuple on and off
   itkcf.addFlag("ITk.Tracking.writeExtendedPRDInfo", False)
+  # Special configuration for low-mu runs
+  itkcf.addFlag("ITk.Tracking.doLowMu", False)
+  # Turn running of doLowPt second pass on and off
+  itkcf.addFlag("ITk.Tracking.doLowPt", False)
+
   
   # config flags for tracking geometry configuration
   from InDetConfig.TrackingGeometryFlags import createITkTrackingGeometryFlags
   itkcf.addFlagsCategory ("ITk.trackingGeometry", createITkTrackingGeometryFlags, prefix=True)
 
   # config flags for tracking cuts
-  from InDetConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkLargeD0TrackingPassFlags, createITkConversionFindingTrackingPassFlags, createITkFastTrackingPassFlags, createITkLargeD0FastTrackingPassFlags, createITkFTFPassFlags
+  from InDetConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkLargeD0TrackingPassFlags, createITkConversionFindingTrackingPassFlags, createITkFastTrackingPassFlags, createITkLargeD0FastTrackingPassFlags, createITkFTFPassFlags, createITkLowPtTrackingPassFlags
 
   itkcf.addFlagsCategory ("ITk.Tracking.MainPass", createITkTrackingPassFlags, prefix=True)
   itkcf.addFlagsCategory ("ITk.Tracking.LargeD0Pass", createITkLargeD0TrackingPassFlags, prefix=True)
@@ -83,6 +88,7 @@ def createITkConfigFlags():
   itkcf.addFlagsCategory ("ITk.Tracking.FastPass", createITkFastTrackingPassFlags, prefix=True)
   itkcf.addFlagsCategory ("ITk.Tracking.LargeD0FastPass", createITkLargeD0FastTrackingPassFlags, prefix=True)
   itkcf.addFlagsCategory ("ITk.Tracking.FTFPass", createITkFTFPassFlags, prefix=True)
+  itkcf.addFlagsCategory ("ITk.Tracking.LowPt", createITkLowPtTrackingPassFlags, prefix=True)
 
   # enable reco steps 
   itkcf.addFlag("ITk.Tracking.recoChain", [TrackingComponent.AthenaChain])

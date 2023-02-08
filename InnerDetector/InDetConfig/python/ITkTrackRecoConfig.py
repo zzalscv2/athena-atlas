@@ -40,6 +40,12 @@ def CombinedTrackingPassFlagSets(flags):
                                           "ITk.Tracking.ConversionFindingPass")
         flags_set += [flagsConv]
 
+    # LowPt
+    if flags.ITk.Tracking.doLowPt:
+        flagsLowPt = flags.cloneAndReplace("ITk.Tracking.ActiveConfig",
+                                           "ITk.Tracking.LowPt")
+        flags_set += [flagsLowPt]
+
     _flags_set = flags_set # Put into cache 
 
     return flags_set
