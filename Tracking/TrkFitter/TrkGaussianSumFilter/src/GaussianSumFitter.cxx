@@ -143,8 +143,7 @@ StatusCode
 Trk::GaussianSumFitter::finalize()
 {
   ATH_MSG_INFO(
-      "-----------------------------------------------"
-      << '\n'
+      '\n'
       << "            Some Brief GSF Statistics          " << '\n'
       << "-----------------------------------------------" << '\n'
       << "Number of Fit PrepRawData Calls:          " << m_FitPRD << '\n'
@@ -152,8 +151,7 @@ Trk::GaussianSumFitter::finalize()
       << '\n'
       << "Number of successful fits:                " << m_fitSuccess << '\n'
       << '\n'
-      << "-----------------------------------------------" << '\n'
-      << "Finalisation of " << name() << " was successful");
+      << "-----------------------------------------------" << '\n');
   return StatusCode::SUCCESS;
 }
 

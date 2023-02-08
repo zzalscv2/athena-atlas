@@ -57,9 +57,6 @@ public:
   /** AlgTool initialise method */
   virtual StatusCode initialize() override final;
 
-  /** AlgTool finalise method */
-  virtual StatusCode finalize() override final;
-
   /** Configured AlgTool extrapolation method (1) */
   virtual MultiComponentState extrapolate(
     const EventContext& ctx,
