@@ -17,6 +17,7 @@ def ActsTrkFindingToolCfg(flags, **kwargs) -> ComponentAccumulator:
     kwargs.setdefault("etaBins", [])
     kwargs.setdefault("chi2CutOff", [15.0])
     kwargs.setdefault("numMeasurementsCutOff", [10])
+    kwargs.setdefault("doPrintTrackStates", flags.Acts.doPrintTrackStates)
 
     kwargs.setdefault(
         "TrackingGeometryTool",
@@ -39,23 +40,30 @@ def ActsTrkFindingToolCfg(flags, **kwargs) -> ComponentAccumulator:
     if flags.Detector.GeometryITk:
         from InDetConfig.InDetBoundaryCheckToolConfig import ITkBoundaryCheckToolCfg
 
-        boundaryCheckToolCfg = ITkBoundaryCheckToolCfg(flags)
+        BoundaryCheckToolCfg = ITkBoundaryCheckToolCfg
     else:
         from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
 
-        boundaryCheckToolCfg = InDetBoundaryCheckToolCfg(flags)
+        BoundaryCheckToolCfg = InDetBoundaryCheckToolCfg
 
     kwargs.setdefault(
         "BoundaryCheckTool",
-        acc.popToolsAndMerge(boundaryCheckToolCfg),
+        acc.popToolsAndMerge(BoundaryCheckToolCfg(flags)),
     )
 
     if flags.Acts.doRotCorrection:
-        from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
+        if flags.Detector.GeometryITk:
+            from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
+
+            RotCreatorCfg = ITkRotCreatorCfg
+        else:
+            from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorCfg
+
+            RotCreatorCfg = InDetRotCreatorCfg
 
         kwargs.setdefault(
             "RotCreatorTool",
-            acc.popToolsAndMerge(ITkRotCreatorCfg(flags, name="ActsRotCreatorTool")),
+            acc.popToolsAndMerge(RotCreatorCfg(flags, name="ActsRotCreatorTool")),
         )
 
     acc.setPrivateTools(

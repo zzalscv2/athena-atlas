@@ -30,5 +30,6 @@ def createActsConfigFlags():
 
     # Track finding
     actscf.addFlag('Acts.doRotCorrection', True)
+    actscf.addFlag('Acts.doPrintTrackStates', False)
 
     return actscf
