@@ -61,13 +61,19 @@ def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
 
 
     rs=FolderTagResolver()
-    OFCTag=rs.getFolderTag(flags.LArCalib.OFCPhys.Folder+folderSuffix)
+    if nColl > 0:
+       tagstr=rs.getFolderTag(flags.LArCalib.OFCPhys.Folder+folderSuffix)
+       tagpref=tagstr[0:tagstr.find(folderSuffix)+len(folderSuffix)]
+       tagpost=tagstr[tagstr.find(folderSuffix)+len(folderSuffix):]
+       nc=int(nColl)
+       OFCTag=f'{tagpref}-mu-{nc}{tagpost}'   
+    else:
+       OFCTag=rs.getFolderTag(flags.LArCalib.OFCPhys.Folder+folderSuffix)
     ShapeTag=rs.getFolderTag(flags.LArCalib.Shape.Folder+folderSuffix)
     del rs #Close database
-    
 
     from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
-    result.merge(OutputConditionsAlgCfg(flags,
+    result.merge(OutputConditionsAlgCfg(flags,name="OutCondAlg"+postfix,
                                         outputFile=flags.LArCalib.Output.POOLFile,
                                         ObjectList=["LArOFCComplete#LArOFC_"+postfix+"#"+flags.LArCalib.OFCPhys.Folder+folderSuffix,
                                                     "LArShapeComplete#LArShape_"+postfix+"#"+flags.LArCalib.Shape.Folder+folderSuffix],
@@ -115,11 +121,11 @@ def LArOFCPhysCfg(flags,loadPhysAC=True):
     #def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
     result.merge(_ofcAlg(flags,"3ns","%isamples3bins17phases"%flags.LArCalib.OFC.Nsamples,nPhases=8,dPhases=3,nDelays=24,nColl=0))
 
-    result.merge(_ofcAlg(flags,"3ns_mu","%isamples3bins17phases_mu20"%flags.LArCalib.OFC.Nsamples,nPhases=8,dPhases=3,nDelays=24,nColl=nColl))
+    result.merge(_ofcAlg(flags,"3ns_mu","%isamples3bins17phases"%flags.LArCalib.OFC.Nsamples,nPhases=8,dPhases=3,nDelays=24,nColl=nColl))
 
     result.merge(_ofcAlg(flags,"1ns","%isamples"%flags.LArCalib.OFC.Nsamples,nPhases=24,dPhases=1,nDelays=24,nColl=0))
 
-    result.merge(_ofcAlg(flags,"1ns_mu","%isamples_mu20"%flags.LArCalib.OFC.Nsamples,nPhases=24,dPhases=1,nDelays=24,nColl=nColl))
+    result.merge(_ofcAlg(flags,"1ns_mu","%isamples"%flags.LArCalib.OFC.Nsamples,nPhases=24,dPhases=1,nDelays=24,nColl=nColl))
 
 
     #RegistrationSvc    

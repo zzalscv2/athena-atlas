@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__=='__main__':
@@ -14,13 +14,12 @@ if __name__=='__main__':
    parser.add_argument('-r','--run', dest='run', default='00408920', help='Run number string as in input filename', type=str)
    parser.add_argument('-g','--gain', dest='gain', default="MEDIUM", help='Gain string', type=str)
    parser.add_argument('-p','--partition', dest='partition', default="Em", help='Data taking partition string', type=str)
-   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data22_calib", help='File prefix string', type=str)
+   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data23_calib", help='File prefix string', type=str)
    parser.add_argument('-i','--indirprefix', dest='dprefix', default="/eos/atlas/atlastier0/rucio/", help='Input directory prefix string', type=str)
    parser.add_argument('-d','--indir', dest='indir', default="", help='Full input dir string', type=str)
    parser.add_argument('-t','--trigger', dest='trig', default='calibration_', help='Trigger string in filename', type=str)
-   #parser.add_argument('-o','--outrwaveprefix', dest='outrwaveprefix', default="LArCaliWave", help='Prefix of CaliWave output root filename', type=str)
-   parser.add_argument('-a','--outrprefix', dest='outrprefix', default="LArRamp", help='Prefix of output ramp root filename', type=str)
-   parser.add_argument('-b','--outpprefix', dest='outpprefix', default="LArRamp", help='Prefix of output ramp pool filename', type=str)
+   parser.add_argument('-o','--outrprefix', dest='outrprefix', default="LArRamp", help='Prefix of output ramp root filename', type=str)
+   parser.add_argument('-j','--outpprefix', dest='outpprefix', default="LArRamp", help='Prefix of output ramp pool filename', type=str)
    parser.add_argument('-e','--outrdir', dest='outrdir', default="/eos/atlas/atlascerngroupdisk/det-larg/Temp/Weekly/ntuples", help='Output root file directory', type=str)
    parser.add_argument('-k','--outpdir', dest='outpdir', default="/eos/atlas/atlascerngroupdisk/det-larg/Temp/Weekly/poolFiles", help='Output pool file directory', type=str)
    parser.add_argument('-u','--inpsqlite', dest='inpsql', default="mysql.db", help='Input sqlite file with pedestals, in pool output dir.', type=str)
@@ -29,6 +28,8 @@ if __name__=='__main__':
    parser.add_argument('-m','--subdet', dest='subdet', default="EMB", help='Subdetector, EMB, EMEC, HEC or FCAL', type=str)
    parser.add_argument('-s','--side', dest='side', default="C", help='Detector side empty (means both), C or A', type=str)
    parser.add_argument('-c','--isSC', dest='supercells', default=False, help='is SC data ?', type=bool)
+   parser.add_argument('-a','--isRawdata', dest='rawdata', default=False, help='is raw data ?', type=bool)
+   parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Output sqlite file, in pool output dir.', type=str)
 
    args = parser.parse_args()
    if help in args and args.help is not None and args.help:
@@ -62,9 +63,6 @@ if __name__=='__main__':
    from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
    addLArCalibFlags(ConfigFlags)
    
-   #This allows set flags from the command-line (not strictly required for the AP) 
-   ConfigFlags.fillFromArgs()
-   
    #Now we set the flags as required for this particular job:
    #The following flags help finding the input bytestream files: 
    ConfigFlags.LArCalib.Input.Dir = InputDir
@@ -91,7 +89,7 @@ if __name__=='__main__':
       else:   
          ConfigFlags.LArCalib.Input.SubDet=args.subdet
  
-      if args.side == "":   
+      if not args.side:   
          ConfigFlags.LArCalib.Preselection.Side = [0,1]
       elif args.side == "C":
          ConfigFlags.LArCalib.Preselection.Side = [0]
@@ -113,7 +111,7 @@ if __name__=='__main__':
    
    #Configure the Bad-Channel database we are reading 
    #(the AP typically uses a snapshot in an sqlite file
-   ConfigFlags.LArCalib.BadChannelDB = "LAR_OFL"
+   ConfigFlags.LArCalib.BadChannelDB = args.outpdir + "/" + args.badsql
    ConfigFlags.LArCalib.BadChannelTag = "-RUN2-UPD3-00"
    
    #Output of this job:

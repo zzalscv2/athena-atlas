@@ -52,7 +52,7 @@ def LArPileUpAutoCorrCfg(flags):
     result.merge(LArElecCalibDbCfg(flags,requiredConditions))
     result.addCondAlgo(CompFactory.LArADC2MeVCondAlg(UseFEBGainTresholds=False))
     theLArAutoCorrTotalCondAlg=CompFactory.LArAutoCorrTotalCondAlg()
-    theLArAutoCorrTotalCondAlg.Nsamples=5 #Hardcoded ... 
+    theLArAutoCorrTotalCondAlg.Nsamples=flags.LArCalib.OFC.Nsamples  
     from AthenaCommon.SystemOfUnits import ns
     theLArAutoCorrTotalCondAlg.deltaBunch=int(flags.Beam.BunchSpacing/( 25.*ns)+0.5)
     theLArAutoCorrTotalCondAlg.isSuperCell=flags.LArCalib.isSC

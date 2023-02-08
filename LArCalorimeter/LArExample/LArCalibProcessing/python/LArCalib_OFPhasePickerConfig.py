@@ -5,15 +5,26 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from LArCalibProcessing.utils import FolderTagResolver
 from IOVDbSvc.IOVDbSvcConfig import addFolders
 
-def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix=""):
+def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix="",nColl=0):
 
     result=ComponentAccumulator()
     FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
     rs=FolderTagResolver()
-    inputOFCTag=rs.getFolderTag(flags.LArCalib.OFCPhys.Folder+inputSuffix)
-    inputShapeTag=rs.getFolderTag(flags.LArCalib.Shape.Folder+inputSuffix)
+    if nColl > 0:
+       tagstr=rs.getFolderTag(flags.LArCalib.OFCPhys.Folder+inputSuffix)
+       tagpref=tagstr[0:tagstr.find(inputSuffix)+len(inputSuffix)]
+       tagpost=tagstr[tagstr.find(inputSuffix)+len(inputSuffix):]
+       nc=int(nColl)
+       inputOFCTag=f'{tagpref}-mu-{nc}{tagpost}'
+       tagstr=rs.getFolderTag(flags.LArCalib.OFCPhys.Folder+outputSuffix)
+       tagpref=tagstr[0:tagstr.find(outputSuffix)+len(outputSuffix)]
+       tagpost=tagstr[tagstr.find(outputSuffix)+len(outputSuffix):]
+       outputOFCTag=f'{tagpref}-mu-{nc}{tagpost}'   
+    else:
+       inputOFCTag=rs.getFolderTag(flags.LArCalib.OFCPhys.Folder+inputSuffix)
+       outputOFCTag=rs.getFolderTag(flags.LArCalib.OFCPhys.Folder+outputSuffix)
 
-    outputOFCTag=rs.getFolderTag(flags.LArCalib.OFCPhys.Folder+outputSuffix)
+    inputShapeTag=rs.getFolderTag(flags.LArCalib.Shape.Folder+inputSuffix)
     outputShapeTag=rs.getFolderTag(flags.LArCalib.Shape.Folder+outputSuffix)
 
 
@@ -59,9 +70,13 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
 
     rootfile=flags.LArCalib.Output.ROOTFile
     if rootfile != "":
-        OFC2Ntup=CompFactory.LArOFC2Ntuple("LArOFC2Ntuple"+keySuffix)
+        if nColl > 0:
+           muSuffix="_mu"
+        else:   
+           muSuffix=""
+        OFC2Ntup=CompFactory.LArOFC2Ntuple("LArOFC2Ntuple"+keySuffix+muSuffix)
         OFC2Ntup.ContainerKey = "LArOFC"+keySuffix
-        OFC2Ntup.NtupleName   = "OFC"+keySuffix
+        OFC2Ntup.NtupleName   = "OFC"+keySuffix+muSuffix
         OFC2Ntup.AddFEBTempInfo   = False   
         OFC2Ntup.isSC = flags.LArCalib.isSC
         result.addEventAlgo(OFC2Ntup)
@@ -82,7 +97,9 @@ def LArOFPhasePickerCfg(flags):
     from LArCalibProcessing.LArCalibBaseConfig import LArCalibBaseCfg
     result=LArCalibBaseCfg(flags)
 
-    result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix=""))
+    result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix="", nColl=0))
+    if flags.LArCalib.OFC.Ncoll > 0:
+       result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix="", nColl=flags.LArCalib.OFC.Ncoll))
     
 
     #RegistrationSvc    

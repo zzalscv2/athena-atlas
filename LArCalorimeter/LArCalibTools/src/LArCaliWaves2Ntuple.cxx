@@ -124,8 +124,6 @@ StatusCode LArCaliWaves2Ntuple::stop ATLAS_NOT_THREAD_SAFE ()
   }
 
   
-  //SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapKey};
-  //const LArCalibLineMapping *clCont {*clHdl};
   const LArCalibLineMapping *clCont=0;
   if(m_isSC) {
     ATH_MSG_DEBUG( "LArCaliWaves2Ntuple: using SC calib map" );
