@@ -2,7 +2,7 @@
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.Enums import FlagEnum, ProductionStep
+from AthenaConfiguration.Enums import FlagEnum
 from AthenaKernel.EventIdOverrideConfig import getMinMaxRunNumbers
 
 folderName = "/Digitization/Parameters"
@@ -85,13 +85,12 @@ def writeDigitizationMetadata(flags):
 def readDigitizationParameters(flags):
     """Read digitization parameters metadata"""
     from IOVDbSvc.IOVDbSvcConfig import addFolders
-    if flags.Common.ProductionStep not in [ProductionStep.Digitization, ProductionStep.PileUpPresampling, ProductionStep.Overlay, ProductionStep.FastChain]:
-        return addFolders(flags, folderName, className="AthenaAttributeList", tag="HEAD")
-
-    # Here we are in a job which runs digitization, so the
-    # /Digitization/Parameters metadata is not present in the
-    # input file and will be created during the job
-    return addFolders(flags, folderName, detDb="DigitParams.db", db="DIGPARAM", className="AthenaAttributeList")
+    if flags.Digitization.ReadParametersFromDB:
+        # Here we are in a job which runs digitization, so the
+        # /Digitization/Parameters metadata is not present in the
+        # input file and will be created during the job
+        return addFolders(flags, folderName, detDb="DigitParams.db", db="DIGPARAM", className="AthenaAttributeList")
+    return addFolders(flags, folderName, className="AthenaAttributeList", tag="HEAD")
 
 
 def writeDigitizationParameters(flags):
