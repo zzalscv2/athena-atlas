@@ -625,10 +625,6 @@ class ComponentAccumulator:
         self.merge(other)
         return comp
 
-
-    def __call__(self):
-        return self.getPrimary()
-
     def __getOne(self, allcomps, name=None, typename="???"):
         selcomps = allcomps if name is None else [ t for t in allcomps if t.name == name ]
         if len( selcomps ) == 0:
