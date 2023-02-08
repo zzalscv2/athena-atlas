@@ -483,7 +483,13 @@ class GenerateMenuMT(object, metaclass=Singleton):
         if len(empty_step_indices) == 0:
             return chainConfigs
         
-        if len(self.availableSignatures) != 1 and not (self.chainFilter and hasattr(self.chainFilter,'selectChains') and self.chainFilter.selectChains):
+        special_test_menu = self.chainFilter and (  getattr(self.chainFilter, "selectChains", False) or \
+                                                    getattr(self.chainFilter, "disableChains", False) or \
+                                                    getattr(self.chainFilter, "disabledSignatures", False) or \
+                                                    getattr(self.chainFilter, "enabledSignatures", False) )
+                                                
+        
+        if len(self.availableSignatures) != 1 and not special_test_menu:                
             raise Exception("[resolveEmptySteps] Please find the reason for this empty step and resolve it / remove it from the menu: %s", emptySteps)  
 
         log.info("Will now delete steps %s (indexed from zero)",empty_step_indices)
