@@ -60,19 +60,20 @@ def LArBadFebCfg(configFlags, tag=None):
 
 if __name__=="__main__":
     
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.isMC = False
-    ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data17_13TeV.00330470.physics_Main.daq.RAW._lb0310._SFO-1._0001.data"]
-    ConfigFlags.lock()
+    flags=initConfigFlags()
+    flags.Input.isMC = False
+    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data17_13TeV.00330470.physics_Main.daq.RAW._lb0310._SFO-1._0001.data"]
+    flags.lock()
 
     cfg=ComponentAccumulator()
     
-    cfg.merge(LArBadChannelCfg(ConfigFlags))
-    cfg.merge(LArBadFebCfg(ConfigFlags))
+    cfg.merge(LArBadChannelCfg(flags))
+    cfg.merge(LArBadFebCfg(flags))
     f=open("LArBCCondAlgos.pkl","wb")
     cfg.store(f)
     f.close()
