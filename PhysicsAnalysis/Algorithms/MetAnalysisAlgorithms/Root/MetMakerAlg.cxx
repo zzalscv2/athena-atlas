@@ -151,6 +151,9 @@ namespace CP
           return StatusCode::FAILURE;
         }
 
+        // Set the seed for reproducibility
+        m_systematicsTool->setRandomSeed(static_cast<int>(1e6 * softTerm->phi()));
+
         // This returns a `CorrectionCode`, so in principle this could
         // return an `OutOfValidity` result, but I have no idea what
         // that would mean or how to handle it, so I'm implicitly
