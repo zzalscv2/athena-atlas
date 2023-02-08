@@ -5,33 +5,7 @@ include.block ("InDetRecExample/InDetRecConditionsAccess.py")
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 from AthenaCommon.DetFlags import DetFlags
 
-isData = (globalflags.DataSource == 'data')
-
-if not ('conddb' in dir()):
-    IOVDbSvc = Service("IOVDbSvc")
-    from IOVDbSvc.CondDB import conddb
-
-#
-# --- Setup BeamSpot data
-#
-try:
-   # If express processing, point beam spot to online folder results
-   from RecExConfig.RecFlags import rec
-   if (rec.doExpressProcessing()):
-        conddb.addFolder('INDET_ONL', '/Indet/Onl/Beampos <key>/Indet/Beampos</key>', className="AthenaAttributeList")
-   else:
-        conddb.addFolderSplitOnline("INDET", "/Indet/Onl/Beampos", "/Indet/Beampos", className="AthenaAttributeList")
-
-except ImportError:
-    # Protection for AthSimulationBase release which does not contain RecExConfig
-    conddb.addFolderSplitOnline("INDET", "/Indet/Onl/Beampos", "/Indet/Beampos", className="AthenaAttributeList")
-
-# Conditions sequence for Athena MT
-from AthenaCommon.AlgSequence import AthSequencer
-condSeq = AthSequencer("AthCondSeq")
-if not hasattr(condSeq, "BeamSpotCondAlg"):
-   from BeamSpotConditions.BeamSpotConditionsConf import BeamSpotCondAlg
-   condSeq += BeamSpotCondAlg( "BeamSpotCondAlg" )
+include("BeamSpotConditions/BeamCondAlgSetup.py")
 
 #
 # --- Load PixelConditionsTools
