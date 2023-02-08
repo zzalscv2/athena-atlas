@@ -17,6 +17,9 @@ def InDetRecPreProcessingSiliconCfg(flags, **kwargs):
     # --- Slim BCM RDOs by zero-suppressing
     #   
     if flags.Detector.EnableBCM:
+        if flags.Input.Format is Format.BS:
+            from BCM_RawDataByteStreamCnv.BCM_RawDataByteStreamCnvConfig import BCM_RawDataProviderAlgCfg
+            acc.merge(BCM_RawDataProviderAlgCfg(flags))
         from InDetConfig.BCM_ZeroSuppressionConfig import BCM_ZeroSuppressionCfg
         acc.merge(BCM_ZeroSuppressionCfg(flags))
     
