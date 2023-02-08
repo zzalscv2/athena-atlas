@@ -1361,30 +1361,46 @@ bool
 InDet::SiTrajectoryElement_xk::propagate(Trk::PatternTrackParameters  & startingParameters,
                                          Trk::PatternTrackParameters  & outputParameters,
                                          double & StepLength ) {
-  bool useJac = (startingParameters.iscovariance()); 
-  double globalParameters[64];    /// helper field to store global frame parameters
-                                  /// Convention: 
-                                  /// 0-2: Position
-                                  /// 3-5: Direction 
-                                  /// 6: qoverp
-                                  /// 7 - 41: jacobian 
-                                  /// 42-44: extension of jacobian for dA/ds
-                                  /// 45: step length 
+  if (Trk::SurfaceType::Plane == m_surface->type() and
+    Trk::SurfaceType::Plane == startingParameters.associatedSurface().type()) {
+    bool useJac = (startingParameters.iscovariance());
+    double globalParameters[64];    /// helper field to store global frame parameters
+                                    /// Convention:
+                                    /// 0-2: Position
+                                    /// 3-5: Direction
+                                    /// 6: qoverp
+                                    /// 7 - 41: jacobian
+                                    /// 42-44: extension of jacobian for dA/ds
+                                    /// 45: step length
 
-  /// transform starting parameters to global, write into globalParameters 
-  if(!transformPlaneToGlobal(useJac,startingParameters,globalParameters)) return false;
-  /// if running with field, use Runge Kutta. Will update globalParameters to the result in global coordinates
-  if( m_fieldMode) {
-    if(!rungeKuttaToPlane      (useJac,globalParameters)) return false;
+    /// transform starting parameters to global, write into globalParameters
+    if(!transformPlaneToGlobal(useJac,startingParameters,globalParameters)) return false;
+    /// if running with field, use Runge Kutta. Will update globalParameters to the result in global coordinates
+    if( m_fieldMode) {
+      if(!rungeKuttaToPlane      (useJac,globalParameters)) return false;
+    }
+    /// otherwise, we can use the straight line
+    else {
+      if(!straightLineStepToPlane(useJac,globalParameters)) return false;
+    }
+    /// Update step length
+    StepLength = globalParameters[45];
+    /// and finally transform from global back to local, and write into the output parameters.
+    return transformGlobalToPlane(useJac,globalParameters,startingParameters,outputParameters);
+  } else {
+    if (!m_proptool->propagate (Gaudi::Hive::currentContext(),
+                                startingParameters, *m_surface, outputParameters,
+                                Trk::anyDirection, m_tools->fieldTool(), StepLength, Trk::pion))
+      return false;
+
+    double sinPhi,cosPhi,sinTheta,cosTheta;
+    sincos(outputParameters.parameters()[2],&sinPhi,&cosPhi);
+    sincos(outputParameters.parameters()[3],&sinTheta,&cosTheta);
+    m_localDir[0] = cosPhi*sinTheta;
+    m_localDir[1] = sinPhi*sinTheta;
+    m_localDir[2] =    cosTheta;
+    return true;
   }
-  /// otherwise, we can use the straight line 
-  else{
-    if(!straightLineStepToPlane(useJac,globalParameters)) return false;
-  } 
-  /// Update step length 
-  StepLength = globalParameters[45]; 
-  /// and finally transform from global back to local, and write into the output parameters.  
-  return transformGlobalToPlane(useJac,globalParameters,startingParameters,outputParameters);
 }
 
 /////////////////////////////////////////////////////////////////////////////////
