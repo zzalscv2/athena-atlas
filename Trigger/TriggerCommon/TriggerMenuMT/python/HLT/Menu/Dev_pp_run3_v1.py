@@ -498,18 +498,18 @@ def setupMenu():
         # LRT tau dev ATR-23787
         # [ATR-26377] Remove NoHLTRepro groups in order to include chains in reprocessings to get cost/rate information
         ChainProp(name="HLT_tau25_looseRNN_trackLRT_L1TAU12IM", groups=DevGroup),
-        ChainProp(name="HLT_tau25_mediumRNN_trackLRT_L1TAU12IM", groups=DevGroup),
+        ChainProp(name="HLT_tau25_mediumRNN_trackLRT_L1TAU12IM", groups=DevGroup, monGroups=['tauMon:t0']),
         ChainProp(name="HLT_tau25_tightRNN_trackLRT_L1TAU12IM", groups=DevGroup),
         ChainProp(name="HLT_tau25_mediumRNN_trackLRT_L1cTAU20M", groups=DevGroup),
         ChainProp(name="HLT_tau25_mediumRNN_trackLRT_L1eTAU20", groups=DevGroup),
-        ChainProp(name="HLT_tau80_mediumRNN_trackLRT_L1TAU60", groups=DevGroup),
+        ChainProp(name="HLT_tau80_mediumRNN_trackLRT_L1TAU60", groups=DevGroup, monGroups=['tauMon:t0']),
         ChainProp(name="HLT_tau80_mediumRNN_trackLRT_L1eTAU80", groups=DevGroup),
-        ChainProp(name="HLT_tau160_mediumRNN_trackLRT_L1TAU100", groups=DevGroup),
+        ChainProp(name="HLT_tau160_mediumRNN_trackLRT_L1TAU100", groups=DevGroup, monGroups=['tauMon:t0']),
         ChainProp(name="HLT_tau160_mediumRNN_trackLRT_L1eTAU140", groups=DevGroup),
-        ChainProp(name="HLT_tau25_idperf_trackLRT_L1TAU12IM", groups=DevGroup),
+        ChainProp(name="HLT_tau25_idperf_trackLRT_L1TAU12IM", groups=DevGroup, monGroups=['tauMon:t0']),
         ChainProp(name="HLT_tau25_idperf_tracktwoLLP_L1TAU12IM", groups=DevGroup),
-        ChainProp(name="HLT_tau80_idperf_trackLRT_L1TAU60", groups=DevGroup),
-        ChainProp(name="HLT_tau160_idperf_trackLRT_L1TAU100", groups=DevGroup), 
+        ChainProp(name="HLT_tau80_idperf_trackLRT_L1TAU60", groups=DevGroup, monGroups=['tauMon:t0']),
+        ChainProp(name="HLT_tau160_idperf_trackLRT_L1TAU100", groups=DevGroup, monGroups=['tauMon:t0']), 
 
         
         # [ATR-26629 ] Request of adding support tau20_idperf/perf chains

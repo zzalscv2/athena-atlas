@@ -127,7 +127,9 @@ StatusCode TrigTauMonitorAlgorithm::executeNavigation( const EventContext& ctx,
   std::string tauContainerName = "HLT_TrigTauRecMerged_MVA";
   if(trigItem.find("LLP_") != std::string::npos){
      tauContainerName="HLT_TrigTauRecMerged_LLP";
-  }else if(trigItem.find("ptonly") != std::string::npos) 
+  } else if(trigItem.find("LRT_") != std::string::npos){
+     tauContainerName="HLT_TrigTauRecMerged_LRT";
+  } else if(trigItem.find("ptonly") != std::string::npos) 
      tauContainerName="HLT_TrigTauRecMerged_CaloMVAOnly";
 
   auto vec =  m_trigDecTool->features<xAOD::TauJetContainer>(trigItem,TrigDefs::Physics , tauContainerName );
@@ -206,18 +208,22 @@ void TrigTauMonitorAlgorithm::fillDistributions(const EventContext& ctx, const s
   std::string tauContainerName = "HLT_TrigTauRecMerged_MVA";
   if(trigger.find("LLP_") != std::string::npos){
      tauContainerName="HLT_TrigTauRecMerged_LLP";
-  }else if(trigger.find("ptonly") != std::string::npos) 
+  } else if (trigger.find("LRT_") != std::string::npos){
+     tauContainerName="HLT_TrigTauRecMerged_LRT";
+  } else if(trigger.find("ptonly") != std::string::npos) 
      tauContainerName="HLT_TrigTauRecMerged_CaloMVAOnly";
 
   ATH_MSG_DEBUG("Tau ContainerName is: " << tauContainerName);
 
   auto vec =  m_trigDecTool->features<xAOD::TauJetContainer>(trigger,TrigDefs::Physics , tauContainerName );
   for( auto &featLinkInfo : vec ){
+
     const auto *feat = *(featLinkInfo.link);
     if(!feat) continue;
     // If not pass, continue
     int nTracks=-1;
     feat->detail(xAOD::TauJetParameters::nChargedTracks, nTracks);
+
     ATH_MSG_DEBUG("NTracks Online: " << nTracks);
     online_tau_vec_all.push_back(feat);online_tau_vec.push_back(feat->p4());
     if(nTracks==0){
