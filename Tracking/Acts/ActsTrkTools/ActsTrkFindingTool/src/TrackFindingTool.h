@@ -30,11 +30,6 @@
 // Other
 #include <atomic>
 
-namespace InDetDD
-{
-  class SiDetectorElement;
-}
-
 namespace ActsTrk
 {
   class TrackFindingTool : public extends<AthAlgTool, ActsTrk::ITrackFindingTool>
@@ -73,20 +68,19 @@ namespace ActsTrk
     Gaudi::Property<std::vector<double>> m_etaBins{this, "etaBins", {}, "MeasurementSelector: bins in |eta| to specify variable selections"};
     Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {std::numeric_limits<double>::max()}, "MeasurementSelector: maximum local chi2 contribution"};
     Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {1}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
+    Gaudi::Property<bool> m_doPrintTrackStates{this, "doPrintTrackStates", false, "Print tables of input measurements/seeds and output track parameters/states"};
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
     size_t
     makeTracks(const EventContext &ctx,
-               Acts::GeometryContext &tgContext,
-	       Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>& tracks,
-	       std::vector< typename  Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>::TrackProxy >& fitOutput,
+               const Acts::GeometryContext &tgContext,
+               const Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder> &tracks,
+               const std::vector<typename Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>::TrackProxy> &fitOutput,
                ::TrackCollection &tracksContainer) const;
 
     std::unique_ptr<const Trk::MeasurementBase>
     makeRIO_OnTrack(const xAOD::UncalibratedMeasurement &uncalibMeas,
                     const Trk::TrackParameters *parm) const;
-
-    static const InDetDD::SiDetectorElement *ActsToDetElem(const Acts::Surface &surface);
 
     // Access Acts::CombinatorialKalmanFilter using "pointer to implementation"
     // so we don't have to instantiate the heavily templated class in the header.

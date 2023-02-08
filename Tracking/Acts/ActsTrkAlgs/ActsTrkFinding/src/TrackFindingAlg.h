@@ -34,7 +34,6 @@ namespace ActsTrk
 
   class TrackFindingAlg : public AthReentrantAlgorithm
   {
-
   public:
     using Measurement = xAOD::UncalibratedMeasurement;
 

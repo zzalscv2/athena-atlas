@@ -29,6 +29,14 @@
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/TrackFitting/GainMatrixSmoother.hpp"
 #include "Acts/TrackFitting/GainMatrixUpdater.hpp"
+#include "Acts/EventData/detail/TransformationFreeToBound.hpp"
+#include "Acts/EventData/MultiTrajectory.hpp"
+#include "Acts/Surfaces/AnnulusBounds.hpp"
+#include "Acts/Surfaces/DiscTrapezoidBounds.hpp"
+#include "Acts/Surfaces/RadialBounds.hpp"
+#include "Acts/Surfaces/RectangleBounds.hpp"
+#include "Acts/Surfaces/SurfaceBounds.hpp"
+#include "Acts/Surfaces/TrapezoidBounds.hpp"
 
 // PACKAGE
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
@@ -40,8 +48,10 @@
 // Other
 #include <boost/container/flat_map.hpp>
 #include <boost/container/flat_set.hpp>
+#include <sstream>
 #include <functional>
 #include <vector>
+#include <tuple>
 
 namespace
 {
@@ -171,19 +181,21 @@ namespace
   /// Since the source links provide a `.geometryId()` accessor, they can be
   /// stored in an ordered geometry container.
   using UncalibSourceLinkMultiset =
-    GeometryIdMultiset<ATLASUncalibSourceLink>;
+      GeometryIdMultiset<ATLASUncalibSourceLink>;
 
   /// Accessor for the above source link container
   ///
   /// It wraps up a few lookup methods to be used in the Combinatorial Kalman
   /// Filter
-  struct UncalibSourceLinkAccessor 
-    : GeometryIdMultisetAccessor<ATLASUncalibSourceLink> { 
-    using BaseIterator = GeometryIdMultisetAccessor<ATLASUncalibSourceLink>::Iterator; 
+  struct UncalibSourceLinkAccessor
+      : GeometryIdMultisetAccessor<ATLASUncalibSourceLink>
+  {
+    using BaseIterator = GeometryIdMultisetAccessor<ATLASUncalibSourceLink>::Iterator;
     using Iterator = Acts::SourceLinkAdapterIterator<BaseIterator>;
 
     // get the range of elements with requested geoId
-    std::pair<Iterator, Iterator> range(const  Acts::Surface &surface) const {
+    std::pair<Iterator, Iterator> range(const Acts::Surface &surface) const
+    {
       assert(container != nullptr);
       auto [begin, end] = container->equal_range(surface.geometryId());
       return {Iterator{begin}, Iterator{end}};
@@ -196,6 +208,322 @@ namespace
   using Navigator = Acts::Navigator;
   using Propagator = Acts::Propagator<Stepper, Navigator>;
   using CKF = Acts::CombinatorialKalmanFilter<Propagator, ActsTrk::TrackFindingTool::traj_Type>;
+
+  // get Athena SiDetectorElement from Acts surface
+  static const InDetDD::SiDetectorElement *actsToDetElem(const Acts::Surface &surface)
+  {
+    const auto *actsElement = dynamic_cast<const ActsDetectorElement *>(surface.associatedDetectorElement());
+    if (!actsElement)
+    {
+      return nullptr;
+    }
+    return dynamic_cast<const InDetDD::SiDetectorElement *>(actsElement->upstreamDetectorElement());
+  }
+
+  /// =========================================================================
+  /// Debug printout routines
+  /// This is only required by code in this file, so we keep it in the anonymous namespace.
+  /// The actual TrackFindingTool class definition comes later.
+  /// =========================================================================
+
+  /// format all arguments and return as a string.
+  /// Used here to apply std::setw() to the combination of values.
+  template <typename... Types>
+  static std::string to_string(Types &&...values)
+  {
+    std::ostringstream os;
+    (os << ... << values);
+    return os.str();
+  }
+
+  static std::string trackStateName(Acts::TrackStateType trackState)
+  {
+    static constexpr std::array<std::tuple<bool, Acts::TrackStateFlag, char>, Acts::TrackStateFlag::NumTrackStateFlags> trackStateNames{{
+        {false, Acts::TrackStateFlag::ParameterFlag, '-'},
+        {true, Acts::TrackStateFlag::MeasurementFlag, 'M'},
+        {true, Acts::TrackStateFlag::OutlierFlag, 'O'},
+        {true, Acts::TrackStateFlag::HoleFlag, 'H'},
+        {true, Acts::TrackStateFlag::MaterialFlag, 'm'},
+        {true, Acts::TrackStateFlag::SharedHitFlag, 'S'},
+    }};
+    std::string s;
+    for (auto [b, f, c] : trackStateNames)
+    {
+      if (trackState[f] == b)
+        s += c;
+    }
+    return s;
+  }
+
+  // compact surface/boundary name
+  static std::string surfaceName(const Acts::Surface &surface)
+  {
+    std::string name = surface.name();
+    if (name.compare(0, 6, "Acts::") == 0)
+    {
+      name.erase(0, 6);
+    }
+    if (name.size() > 7 && name.compare(name.size() - 7, 7, "Surface") == 0)
+    {
+      name.erase(name.size() - 7, 7);
+    }
+    static const std::map<Acts::SurfaceBounds::BoundsType, const char *> boundsNames{{
+        {Acts::SurfaceBounds::BoundsType::eCone, "Cone"},
+        {Acts::SurfaceBounds::BoundsType::eCylinder, "Cylinder"},
+        {Acts::SurfaceBounds::BoundsType::eDiamond, "Diamond"},
+        {Acts::SurfaceBounds::BoundsType::eDisc, "Disc"},
+        {Acts::SurfaceBounds::BoundsType::eEllipse, "Ellipse"},
+        {Acts::SurfaceBounds::BoundsType::eLine, "Line"},
+        {Acts::SurfaceBounds::BoundsType::eRectangle, "Rectangle"},
+        {Acts::SurfaceBounds::BoundsType::eTrapezoid, "Trapezoid"},
+        {Acts::SurfaceBounds::BoundsType::eTriangle, "Triangle"},
+        {Acts::SurfaceBounds::BoundsType::eDiscTrapezoid, "DiscTrapezoid"},
+        {Acts::SurfaceBounds::BoundsType::eConvexPolygon, "ConvexPolygon"},
+        {Acts::SurfaceBounds::BoundsType::eAnnulus, "Annulus"},
+        {Acts::SurfaceBounds::BoundsType::eBoundless, "Boundless"},
+        {Acts::SurfaceBounds::BoundsType::eOther, "Other"},
+    }};
+    if (auto it = boundsNames.find(surface.bounds().type());
+        it != boundsNames.end() && it->second != name)
+    {
+      name += ' ';
+      name += it->second;
+    }
+    return name;
+  }
+
+  static void printHeader(bool isMeasurement = false)
+  {
+    std::cout << std::left
+              << std::setw(5) << "Index" << ' '
+              << std::setw(4) << "Type" << ' '
+              << std::setw(21) << "Surface" << ' '
+              << std::setw(21) << "Stats/GeometryId" << ' '
+              << std::right
+              << std::setw(9) << "loc0" << ' '
+              << std::setw(9) << (isMeasurement ? "loc1-" : "loc1") << ' '
+              << std::setw(6) << "Pos R" << ' '
+              << std::setw(6) << "phid" << ' '
+              << std::setw(7) << "eta" << ' ';
+    if (isMeasurement)
+    {
+      std::cout << std::setw(9) << "loc1+" << ' '
+                << std::setw(6) << "Pos R" << ' '
+                << std::setw(6) << "phid" << ' '
+                << std::setw(7) << "eta" << '\n';
+      return;
+    }
+    std::cout << std::setw(9) << "q*pT" << ' '
+              << std::setw(6) << "phid" << ' '
+              << std::setw(7) << "eta" << ' '
+              << std::setw(6) << "TrkLen" << ' '
+              << std::setw(5) << "chi2" << ' '
+              << std::setw(6) << "Flags" << '\n';
+  }
+
+  // Return local position of the ends of the 1D strips in its 2nd coordinate.
+  static std::array<Acts::ActsScalar, 2>
+  localPos1(const Acts::SurfaceBounds &bounds)
+  {
+    auto b = bounds.values();
+    switch (bounds.type())
+    {
+    case Acts::SurfaceBounds::eRectangle:
+    {
+      return {b[Acts::RectangleBounds::eMinY], b[Acts::RectangleBounds::eMaxY]};
+    }
+    case Acts::SurfaceBounds::eTrapezoid:
+    {
+      auto halfLengthY = b[Acts::TrapezoidBounds::eHalfLengthY];
+      return {-halfLengthY, halfLengthY};
+    }
+    case Acts::SurfaceBounds::eAnnulus:
+    {
+      auto averagePhi = b[Acts::AnnulusBounds::eAveragePhi];
+      return {averagePhi - b[Acts::AnnulusBounds::eMinPhiRel], averagePhi + b[Acts::AnnulusBounds::eMaxPhiRel]};
+    }
+    case Acts::SurfaceBounds::eDiscTrapezoid:
+    {
+      auto averagePhi = b[Acts::DiscTrapezoidBounds::eAveragePhi];
+      auto alphaMinR = std::atan2(b[Acts::DiscTrapezoidBounds::eMinR], b[Acts::DiscTrapezoidBounds::eHalfLengthXminR]);
+      auto alphaMaxR = std::atan2(b[Acts::DiscTrapezoidBounds::eMaxR], b[Acts::DiscTrapezoidBounds::eHalfLengthXmaxR]);
+      auto alpha = std::max(alphaMinR, alphaMaxR);
+      return {averagePhi - alpha, averagePhi + alpha};
+    }
+    case Acts::SurfaceBounds::eDisc:
+    {
+      auto averagePhi = b[Acts::RadialBounds::eAveragePhi];
+      auto halfPhiSector = b[Acts::RadialBounds::eHalfPhiSector];
+      return {averagePhi - halfPhiSector, averagePhi + halfPhiSector};
+    }
+    default:
+    {
+      return {0.0, 0.0};
+    }
+    }
+  }
+
+  static void
+  printMeasurement(const Acts::GeometryContext &tgContext, const Acts::Surface &surface, const Acts::Vector2 &loc, bool noLoc0 = false)
+  {
+    auto p = surface.localToGlobal(tgContext, loc, Acts::Vector3{0.0, 0.0, 0.0});
+    std::cout << ' ';
+    if (!noLoc0)
+    {
+      std::cout << std::setw(9) << std::setprecision(3) << loc[0] << ' ';
+    }
+    std::cout << std::setw(9) << std::setprecision(3) << loc[1] << ' '
+              << std::setw(6) << std::setprecision(1) << p.head<2>().norm() << ' '
+              << std::setw(6) << std::setprecision(1) << std::atan2(p[1], p[0]) / Acts::UnitConstants::degree << ' '
+              << std::setw(7) << std::setprecision(3) << std::atanh(p[2] / p.norm());
+  }
+
+  static void
+  printSourceLink(const Acts::GeometryContext &tgContext,
+                  const Acts::TrackingGeometry &trackingGeometry,
+                  const ATLASUncalibSourceLink &sl,
+                  size_t index)
+  {
+    std::cout << std::setw(5) << index << ' '
+              << std::setw(3) << sl.dim() << "D ";
+    auto surface = trackingGeometry.findSurface(sl.geometryId());
+    if (!surface)
+    {
+      std::cout << "*** no surface ***\n";
+      return;
+    }
+    std::cout << std::left
+              << std::setw(21) << surfaceName(*surface) << ' '
+              << std::setw(21) << to_string(surface->geometryId())
+              << std::right << std::defaultfloat << std::fixed;
+    Acts::Vector2 loc{sl.values().head<2>()};
+    if (sl.dim() != 1)
+    {
+      printMeasurement(tgContext, *surface, loc);
+    }
+    else
+    {
+      auto ends = localPos1(surface->bounds());
+      loc[1] = ends[0];
+      printMeasurement(tgContext, *surface, loc);
+      if (ends[0] == ends[1])
+      {
+        std::cout << " *** zero strip length ***";
+      }
+      else
+      {
+        loc[1] = ends[1];
+        printMeasurement(tgContext, *surface, loc, true);
+      }
+    }
+    std::cout << '\n'
+              << std::defaultfloat;
+  }
+
+  static void printParameters(const Acts::Surface &surface, const Acts::GeometryContext &tgContext, const Acts::BoundVector &bound)
+  {
+    auto p = Acts::detail::transformBoundToFreeParameters(surface, tgContext, bound);
+    std::cout << std::defaultfloat << std::fixed
+              << std::setw(9) << std::setprecision(3) << bound[Acts::eBoundLoc0] << ' '
+              << std::setw(9) << std::setprecision(3) << bound[Acts::eBoundLoc1] << ' '
+              << std::setw(6) << std::setprecision(1) << p.segment<2>(Acts::eFreePos0).norm() << ' '
+              << std::setw(6) << std::setprecision(1) << std::atan2(p[Acts::eFreePos1], p[Acts::eFreePos0]) / Acts::UnitConstants::degree << ' '
+              << std::setw(7) << std::setprecision(3) << std::atanh(p[Acts::eFreePos2] / p.segment<3>(Acts::eFreePos0).norm()) << ' '
+              << std::setw(9) << std::setprecision(3) << p.segment<2>(Acts::eFreeDir0).norm() / p[Acts::eFreeQOverP] << ' '
+              << std::setw(6) << std::setprecision(1) << std::atan2(p[Acts::eFreeDir1], p[Acts::eFreeDir0]) / Acts::UnitConstants::degree << ' '
+              << std::setw(7) << std::setprecision(2) << std::atanh(p[Acts::eFreeDir2])
+              << std::defaultfloat;
+  }
+
+  static void
+  printTrackState(const Acts::GeometryContext &tgContext,
+                  const Acts::MultiTrajectory<ActsTrk::TrackFindingTool::traj_Type>::ConstTrackStateProxy &state)
+  {
+    std::cout << std::defaultfloat << std::fixed
+              << std::setw(5) << state.index() << ' ';
+    if (state.hasCalibrated())
+    {
+      std::cout << std::setw(3) << state.calibratedSize() << 'D';
+    }
+    else if (state.typeFlags()[Acts::TrackStateFlag::HoleFlag])
+    {
+      std::cout << std::setw(4) << "hole";
+    }
+    else
+    {
+      std::cout << std::setw(4) << " ";
+    }
+    std::cout << ' '
+              << std::left
+              << std::setw(21) << surfaceName(state.referenceSurface()) << ' '
+              << std::setw(21) << to_string(state.referenceSurface().geometryId()) << ' '
+              << std::right;
+    printParameters(state.referenceSurface(), tgContext, state.parameters());
+    std::cout << std::defaultfloat << std::fixed << ' '
+              << std::setw(6) << std::setprecision(1) << state.pathLength() << ' '
+              << std::setw(5) << std::setprecision(1) << state.chi2() << ' '
+              << std::defaultfloat
+              << std::setw(Acts::TrackStateFlag::NumTrackStateFlags) << trackStateName(state.typeFlags()) << '\n';
+  }
+
+  static void
+  printTracks(const Acts::GeometryContext &tgContext,
+              const Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder> &tracks,
+              const std::vector<typename Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>::TrackProxy> &fitResult,
+              const Acts::BoundTrackParameters &seed,
+              size_t iseed,
+              size_t ntracks)
+  {
+    printHeader();
+    std::cout << std::setw(5) << iseed << ' '
+              << std::left
+              << std::setw(4) << "seed" << ' '
+              << std::setw(21) << surfaceName(seed.referenceSurface()) << ' '
+              << std::setw(21) << to_string("#traj=", fitResult.size(), ", #trk=", ntracks) << ' '
+              << std::right;
+    printParameters(seed.referenceSurface(), tgContext, seed.parameters());
+    std::cout << '\n';
+
+    for (auto &track : fitResult)
+    {
+      const auto lastMeasurementIndex = track.tipIndex();
+      // to print track states from inside outward, we need to reverse the order of visitBackwards().
+      std::vector<Acts::MultiTrajectory<ActsTrk::TrackFindingTool::traj_Type>::ConstTrackStateProxy> states;
+      states.reserve(lastMeasurementIndex + 1); // could be an overestimate
+      size_t npixel = 0, nstrip = 0;
+      tracks.trackStateContainer().visitBackwards(
+          lastMeasurementIndex,
+          [&](const Acts::VectorMultiTrajectory::ConstTrackStateProxy &state) -> void
+          {
+            if (state.hasCalibrated())
+            {
+              if (state.calibratedSize() == 1)
+                ++nstrip;
+              else if (state.calibratedSize() == 2)
+                ++npixel;
+            }
+            states.push_back(state);
+          });
+
+      const Acts::BoundTrackParameters per(track.referenceSurface().getSharedPtr(),
+                                           track.parameters(),
+                                           track.covariance());
+      std::cout << std::setw(5) << lastMeasurementIndex << ' '
+                << std::left
+                << std::setw(4) << "parm" << ' '
+                << std::setw(21) << surfaceName(per.referenceSurface()) << ' '
+                << std::setw(21) << to_string("#pix=", npixel, ", #strip=", nstrip) << ' '
+                << std::right;
+      printParameters(per.referenceSurface(), tgContext, per.parameters());
+      std::cout << '\n';
+
+      for (auto i = states.size(); i > 0;)
+      {
+        printTrackState(tgContext, states[--i]);
+      }
+    }
+    std::cout << std::defaultfloat << std::flush;
+  }
 
 } // anonymous namespace
 
@@ -210,8 +538,9 @@ namespace ActsTrk
   TrackFindingTool::TrackFindingTool(const std::string &type,
                                      const std::string &name,
                                      const IInterface *parent)
-      : base_class(type, name, parent) 
-  {}
+      : base_class(type, name, parent)
+  {
+  }
 
   TrackFindingTool::~TrackFindingTool() = default;
 
@@ -223,6 +552,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_etaBins);
     ATH_MSG_DEBUG("   " << m_chi2CutOff);
     ATH_MSG_DEBUG("   " << m_numMeasurementsCutOff);
+    ATH_MSG_DEBUG("   " << m_doPrintTrackStates);
 
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     ATH_CHECK(m_extrapolationTool.retrieve());
@@ -235,6 +565,8 @@ namespace ActsTrk
       ATH_CHECK(m_RotCreatorTool.retrieve());
     }
 
+    m_logger = makeActsAthenaLogger(this, "Acts");
+
     auto magneticField = std::make_unique<ATLASMagneticFieldWrapper>();
     auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
 
@@ -244,8 +576,8 @@ namespace ActsTrk
     cfg.resolveMaterial = true;
     cfg.resolveSensitive = true;
     Navigator navigator(cfg);
-    Propagator propagator(std::move(stepper), std::move(navigator));
-    m_trackFinder.reset(new CKF_pimpl(std::move(propagator)));
+    Propagator propagator(std::move(stepper), std::move(navigator), logger().cloneWithSuffix("Prop"));
+    m_trackFinder.reset(new CKF_pimpl(std::move(propagator), logger().cloneWithSuffix("CKF")));
 
     m_pOptions.maxSteps = m_maxPropagationStep;
 
@@ -257,8 +589,6 @@ namespace ActsTrk
     m_ckfExtensions.smoother.connect<&gainMatrixSmoother>();
     m_ckfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<traj_Type, ATLASUncalibSourceLink>>();
     m_ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<traj_Type>>(m_measurementSelector.get());
-
-    m_logger = makeActsAthenaLogger(this, "Acts");
 
     return StatusCode::SUCCESS;
   }
@@ -325,30 +655,51 @@ namespace ActsTrk
     // Perform the track finding for all initial parameters
     ATH_MSG_DEBUG("Invoke track finding with " << initialParameters.size() << " seeds.");
 
-    Acts::TrackContainer tc {Acts::VectorTrackContainer{},
-	Acts::VectorMultiTrajectory{}};
+    Acts::TrackContainer tc{Acts::VectorTrackContainer{},
+                            Acts::VectorMultiTrajectory{}};
 
     m_nTotalSeeds += initialParameters.size();
-    
-    for (std::size_t iseed = 0; iseed < initialParameters.size(); ++iseed) {
+
+    auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+    // Loop over the track finding results for all initial parameters
+    for (std::size_t iseed = 0; iseed < initialParameters.size(); ++iseed)
+    {
       // Get the Acts tracks, given this seed
       // Result here contains a vector of TrackProxy objects
 
       auto result = m_trackFinder->findTracks(initialParameters[iseed], options, tc);
 
       // The result for this seed
-      if (not result.ok()) {
-	ATH_MSG_WARNING("Track finding failed for seed " << iseed << " with error" << result.error());
+      if (not result.ok())
+      {
+        ATH_MSG_WARNING("Track finding failed for seed " << iseed << " with error" << result.error());
         m_nFailedSeeds++;
-	continue;
+        continue;
       }
-      
       // Get the track finding output and add to tracksContainer
       size_t ntracks = makeTracks(ctx, tgContext, tc, result.value(), tracksContainer);
 
-      if (ntracks == 0) {
-	ATH_MSG_WARNING("Track finding found no track candidates for seed " << iseed);
-	m_nFailedSeeds++;
+      if (m_doPrintTrackStates)
+      {
+        if (iseed == 0)
+        {
+          ATH_MSG_INFO("CKF input hits:");
+          printHeader(true);
+          size_t index = 0;
+          for (auto &sourceLink : uncalibSourceLinks)
+          {
+            printSourceLink(tgContext, *trackingGeometry, sourceLink, index++);
+          }
+          std::cout << std::defaultfloat << std::flush;
+          ATH_MSG_INFO("CKF results for " << initialParameters.size() << " seeds:");
+        }
+        printTracks(tgContext, tc, result.value(), initialParameters[iseed], iseed, ntracks);
+      }
+
+      if (ntracks == 0)
+      {
+        ATH_MSG_WARNING("Track finding found no track candidates for seed " << iseed);
+        m_nFailedSeeds++;
       }
     }
 
@@ -360,15 +711,16 @@ namespace ActsTrk
   /// based on Tracking/Acts/ActsTrkTools/ActsTrkFittingTools/src/ActsKalmanFitter.ipp
   size_t
   TrackFindingTool::makeTracks(const EventContext &ctx,
-                               Acts::GeometryContext &tgContext,
-			       Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>& tracks,
-			       std::vector< typename  Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>::TrackProxy>& fitResult,
+                               const Acts::GeometryContext &tgContext,
+                               const Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder> &tracks,
+                               const std::vector<typename Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>::TrackProxy> &fitResult,
                                ::TrackCollection &tracksContainer) const
   {
     size_t ntracks = 0;
-    for (auto& track : fitResult) {
+    for (auto &track : fitResult)
+    {
       const auto lastMeasurementIndex = track.tipIndex();
-      
+
       auto finalTrajectory = DataVector<const Trk::TrackStateOnSurface>();
       // initialise the number of dead Pixel and Acts strip
       int numberOfDeadPixel = 0;
@@ -378,7 +730,7 @@ namespace ActsTrk
       // Loop over all the output state to create track state
       tracks.trackStateContainer().visitBackwards(
           lastMeasurementIndex,
-          [&] (const auto &state) -> void
+          [&](const Acts::VectorMultiTrajectory::ConstTrackStateProxy &state) -> void
           {
             // First only consider states with an associated detector element
             if (!state.referenceSurface().associatedDetectorElement())
@@ -403,7 +755,7 @@ namespace ActsTrk
               // Check if this is a hole, a dead sensors or a state outside the sensor boundary
               if (boundaryCheck == Trk::BoundaryCheckResult::DeadElement)
               {
-                auto *detElem = ActsToDetElem(state.referenceSurface());
+                auto *detElem = actsToDetElem(state.referenceSurface());
                 if (!detElem)
                 {
                   return;
@@ -428,10 +780,10 @@ namespace ActsTrk
             }
             // The state was tagged as an outlier or (TODO!) was missed in the reverse filtering, use filtered parameters
             else if (flag[Acts::TrackStateFlag::OutlierFlag]
-                     //  || (trackFindingOutput.reversed &&     // TODO!
-                     //      std::find(trackFindingOutput.passedAgainSurfaces.begin(),
-                     //                trackFindingOutput.passedAgainSurfaces.end(),
-                     //                state.referenceSurface().getSharedPtr().get()) == trackFindingOutput.passedAgainSurfaces.end())
+                     //  || (fitResult.reversed &&     // TODO!
+                     //      std::find(fitResult.passedAgainSurfaces.begin(),
+                     //                fitResult.passedAgainSurfaces.end(),
+                     //                state.referenceSurface().getSharedPtr().get()) == fitResult.passedAgainSurfaces.end())
             )
             {
               const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
@@ -473,24 +825,26 @@ namespace ActsTrk
             finalTrajectory.insert(finalTrajectory.begin(), perState);
           });
 
-      // Convert the perigee state and add it to the trajectory - TODO: check this is the right TS
-      const Acts::BoundTrackParameters actsPer(track.referenceSurface().getSharedPtr(), 
-					       track.parameters(), 
-					       track.covariance());
+      // Convert the perigee state and add it to the trajectory
+      const Acts::BoundTrackParameters actsPer(track.referenceSurface().getSharedPtr(),
+                                               track.parameters(),
+                                               track.covariance());
 
       std::unique_ptr<const Trk::TrackParameters> per = m_ATLASConverterTool->ActsTrackParameterToATLAS(actsPer, tgContext);
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
       auto perState = new Trk::TrackStateOnSurface(nullptr,
-						   std::move(per),
-						   nullptr,
-						   typePattern);
+                                                   std::move(per),
+                                                   nullptr,
+                                                   typePattern);
       finalTrajectory.insert(finalTrajectory.begin(), perState);
 
-      // Create the track using the states
+      // Create the track using Athena TrackFitter::KalmanFitter and TrackPatternRecoInfo::SiSPSeededFinder algorithm enums
       Trk::TrackInfo newInfo(Trk::TrackInfo::TrackFitter::KalmanFitter, Trk::noHypothesis);
-      newInfo.setTrackFitter(Trk::TrackInfo::TrackFitter::KalmanFitter); // Mark the fitter as KalmanFitter
+      newInfo.setPatternRecognitionInfo(Trk::TrackInfo::TrackPatternRecoInfo::SiSPSeededFinder);
+
       auto newtrack = std::make_unique<Trk::Track>(newInfo, std::move(finalTrajectory), nullptr);
+      // TODO: use TrackSummaryTool to create trackSummary?
       if (!newtrack->trackSummary())
       {
         newtrack->setTrackSummary(std::make_unique<Trk::TrackSummary>());
@@ -506,17 +860,6 @@ namespace ActsTrk
     }
 
     return ntracks;
-  }
-
-  const InDetDD::SiDetectorElement *
-  TrackFindingTool::ActsToDetElem(const Acts::Surface &surface)
-  {
-    const auto *actsElement = dynamic_cast<const ActsDetectorElement *>(surface.associatedDetectorElement());
-    if (!actsElement)
-    {
-      return nullptr;
-    }
-    return dynamic_cast<const InDetDD::SiDetectorElement *>(actsElement->upstreamDetectorElement());
   }
 
   std::unique_ptr<const Trk::MeasurementBase>

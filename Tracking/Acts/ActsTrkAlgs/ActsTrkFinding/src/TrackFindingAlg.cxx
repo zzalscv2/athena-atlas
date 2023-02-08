@@ -112,23 +112,21 @@ namespace ActsTrk
     std::vector<ATLASUncalibSourceLink> uncalibSourceLinks;
     uncalibSourceLinks.reserve(pixelClusterContainer->size() + stripClusterContainer->size());
 
-    using element_type = std::tuple<const xAOD::UncalibratedMeasurement*, Acts::BoundVector, Acts::BoundMatrix, std::size_t>;
+    using element_type = std::tuple<const xAOD::UncalibratedMeasurement *, Acts::BoundVector, Acts::BoundMatrix, std::size_t>;
     std::vector<element_type> elementsCollection;
     elementsCollection.reserve(pixelClusterContainer->size() + stripClusterContainer->size());
 
     for (auto meas : *pixelClusterContainer)
     {
-      uncalibSourceLinks.push_back( m_ATLASConverterTool->UncalibratedMeasurementToSourceLink(*pixelDetEleColl, 
-											      meas,
-											      elementsCollection)
-				    );
+      uncalibSourceLinks.push_back(m_ATLASConverterTool->UncalibratedMeasurementToSourceLink(*pixelDetEleColl,
+                                                                                             meas,
+                                                                                             elementsCollection));
     }
     for (auto meas : *stripClusterContainer)
     {
-      uncalibSourceLinks.push_back( m_ATLASConverterTool->UncalibratedMeasurementToSourceLink(*stripDetEleColl,
-                                                                                              meas,
-											      elementsCollection)
-                                    );
+      uncalibSourceLinks.push_back(m_ATLASConverterTool->UncalibratedMeasurementToSourceLink(*stripDetEleColl,
+                                                                                             meas,
+                                                                                             elementsCollection));
     }
 
     ATH_CHECK(m_trackFindingTool->findTracks(ctx,
