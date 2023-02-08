@@ -72,12 +72,28 @@ def AtlasTrackToVertexIPEstimatorCfg(flags, name='AtlasTrackToVertexIPEstimator'
     return acc
 
 def ImpactPoint3dEstimatorCfg(flags, name='ImpactPoint3dEstimator', **kwargs):
-    acc = ComponentAccumulator()
+    from MagFieldServices.MagFieldServicesConfig import (
+        AtlasFieldCacheCondAlgCfg)
+    acc = AtlasFieldCacheCondAlgCfg(flags) # To produce AtlasFieldCacheCondObj
 
     if "Extrapolator" not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
-            InDetExtrapolatorCfg(flags)))
+        Extrapolator = acc.popToolsAndMerge(InDetExtrapolatorCfg(flags))
+        acc.addPublicTool(Extrapolator)
+        kwargs.setdefault("Extrapolator", Extrapolator)
 
     acc.setPrivateTools(CompFactory.Trk.ImpactPoint3dEstimator(name, **kwargs))
+    return acc
+
+def AtlasImpactPoint3dEstimatorCfg(flags, name='AtlasImpactPoint3dEstimator', **kwargs):
+    acc = ComponentAccumulator()
+
+    if "Extrapolator" not in kwargs:
+        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+        Extrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
+        acc.addPublicTool(Extrapolator)
+        kwargs.setdefault("Extrapolator", Extrapolator)
+
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        ImpactPoint3dEstimatorCfg(flags, name, **kwargs)))
     return acc

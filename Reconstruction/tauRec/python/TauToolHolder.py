@@ -596,73 +596,6 @@ def TauCaloClusterBadChannelCfg(flags):
     result.setPrivateTools(BadChannelListCorrForTaus)
     return result
 
-########################################################################
-########################################################################
-# Tracking Tools
-########################################################################
-
-########################################################################
-# Tools for Adaptive Vertex Finder
-def TauNewtonTrkDistanceFinderCfg(flags):
-    result = ComponentAccumulator()
-
-    Trk__SeedNewtonTrkDistanceFinder = CompFactory.Trk.SeedNewtonTrkDistanceFinder
-    TauNewtonTrkDistanceFinder = Trk__SeedNewtonTrkDistanceFinder( name = flags.Tau.ActiveConfig.prefix+'TauSeedNewtonTrkDistanceFinder')
-
-    result.setPrivateTools(TauNewtonTrkDistanceFinder)
-    return result
-
-def CrossDistancesSeedFinderCfg(flags):
-    result = ComponentAccumulator()
-    _name = 'TauCrossDistancesSeedFinder'
-    
-    Trk__CrossDistancesSeedFinder = CompFactory.Trk.CrossDistancesSeedFinder
-    TauCrossDistancesSeedFinder = Trk__CrossDistancesSeedFinder( name = _name, TrkDistanceFinder=result.popToolsAndMerge(TauNewtonTrkDistanceFinderCfg(flags)) )
-    
-    result.setPrivateTools(TauCrossDistancesSeedFinder)
-    return result
-    
-def ImpactPoint3dEstimatorCfg(flags):
-    result = ComponentAccumulator()
-
-    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    Trk__ImpactPoint3dEstimator = CompFactory.Trk.ImpactPoint3dEstimator
-    AtlasExtrapolator = result.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
-    #This is a public tool, so we explicitly must add it to the ToolSvc
-    result.addPublicTool(AtlasExtrapolator) 
-    TauInDetImpactPoint3dEstimator = Trk__ImpactPoint3dEstimator(name = flags.Tau.ActiveConfig.prefix+'TauTrkImpactPoint3dEstimator', Extrapolator = AtlasExtrapolator   )
-
-    result.setPrivateTools(TauInDetImpactPoint3dEstimator)
-    return result
-
-def SequentialVertexSmootherCfg(flags):
-    result = ComponentAccumulator()
-
-    Trk__SequentialVertexSmoother = CompFactory.Trk.SequentialVertexSmoother
-    TauSequentialVertexSmoother = Trk__SequentialVertexSmoother(name = flags.Tau.ActiveConfig.prefix+'TauSequentialVertexSmoother')
-
-    result.setPrivateTools(TauSequentialVertexSmoother)
-    return result
-
-########################################################################
-# TauAdaptiveVertexFitter
-def TauAdaptiveVertexFitterCfg(flags):
-    result = ComponentAccumulator()
-    _name = flags.Tau.ActiveConfig.prefix + 'TauAdaptiveVertexFitter'
-
-    from TrkConfig.TrkVertexFitterUtilsConfig import TauDetAnnealingMakerCfg, AtlasFullLinearizedTrackFactoryCfg
-
-    Trk__AdaptiveVertexFitter = CompFactory.Trk.AdaptiveVertexFitter
-    TauAdaptiveVertexFitter = Trk__AdaptiveVertexFitter(name = _name,
-                                                        SeedFinder=result.popToolsAndMerge(CrossDistancesSeedFinderCfg(flags)),
-                                                        ImpactPoint3dEstimator=result.popToolsAndMerge(ImpactPoint3dEstimatorCfg(flags)),
-                                                        VertexSmoother=result.popToolsAndMerge(SequentialVertexSmootherCfg(flags)),
-                                                        AnnealingMaker=result.popToolsAndMerge(TauDetAnnealingMakerCfg(flags)),
-                                                        LinearizedTrackFactory=result.popToolsAndMerge(AtlasFullLinearizedTrackFactoryCfg(flags)) )
-
-    result.setPrivateTools(TauAdaptiveVertexFitter)
-    return result
-
 #####################
 # create Pi0 clusters
 def Pi0ClusterCreatorCfg(flags):
@@ -720,6 +653,10 @@ def Pi0SelectorCfg(flags):
 def TauVertexVariablesCfg(flags):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauVertexVariables'
+
+    from TrkConfig.TrkVertexFittersConfig import TauAdaptiveVertexFitterCfg
+    from TrkConfig.TrkVertexSeedFinderToolsConfig import (
+        CrossDistancesSeedFinderCfg)
 
     TauVertexVariables = CompFactory.getComp("TauVertexVariables")
     TauVertexVariables = TauVertexVariables(  name = _name,

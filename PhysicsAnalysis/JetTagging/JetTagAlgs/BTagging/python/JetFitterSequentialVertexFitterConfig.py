@@ -17,8 +17,8 @@ def JetFitterSequentialVertexFitterCfg(flags, name, useBTagFlagsDefaults = True,
         from TrkConfig.TrkVertexFitterUtilsConfig import AtlasFullLinearizedTrackFactoryCfg
         jetFitterFullLinearizedTrackFactory = acc.popToolsAndMerge(AtlasFullLinearizedTrackFactoryCfg(flags, 'JFFullLinearizedTrackFactory'))
 
-        from BTagging.JetFitterSequentialVertexSmootherConfig import JetFitterSequentialVertexSmootherCfg
-        jetFitterSequentialVertexSmoother = acc.popToolsAndMerge(JetFitterSequentialVertexSmootherCfg(flags, 'JFSequentialVertexSmoother'))
+        from TrkConfig.TrkVertexFittersConfig import SequentialVertexSmootherCfg
+        jetFitterSequentialVertexSmoother = acc.popToolsAndMerge(SequentialVertexSmootherCfg(flags, 'JFSequentialVertexSmoother'))
 
         defaults = { 'LinearizedTrackFactory' : jetFitterFullLinearizedTrackFactory,
                      'VertexSmoother'         : jetFitterSequentialVertexSmoother, }
