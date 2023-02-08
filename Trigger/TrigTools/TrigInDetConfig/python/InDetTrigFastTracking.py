@@ -29,7 +29,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
   from TrigInDetConfig.TrigInDetConfig import InDetCacheNames
   from AthenaCommon.GlobalFlags import globalflags
 
-  from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolDecorator
+  from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
   from AthenaConfiguration.AllConfigFlags import ConfigFlags
   from InDetTrigRecExample import InDetTrigCA
   
@@ -317,10 +317,10 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
   if doFTF:
     
       from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
-      trackSummaryTool = CAtoLegacyPublicToolDecorator(InDetTrigTrackSummaryToolCfg)
+      trackSummaryTool = CAtoLegacyPublicToolWrapper(InDetTrigTrackSummaryToolCfg)
 
       from TrkConfig.TrkParticleCreatorConfig import InDetTrigParticleCreatorToolFTFCfg
-      InDetTrigParticleCreatorToolFTF = CAtoLegacyPublicToolDecorator(InDetTrigParticleCreatorToolFTFCfg)
+      InDetTrigParticleCreatorToolFTF = CAtoLegacyPublicToolWrapper(InDetTrigParticleCreatorToolFTFCfg)
       
       if config is None:
             raise ValueError('makeInDetTrigFastTracking() No signature config specified')

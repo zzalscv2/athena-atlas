@@ -16,8 +16,8 @@ def SCT_LorentzAngleToolCfg(flags, name="SCTLorentzAngleTool", **kwargs):
     acc.setPrivateTools(CompFactory.SiLorentzAngleTool(name, **kwargs))
     return acc
 
-def SCT_LorentzAngleCondAlgCfg(flags, name="SCTSiLorentzAngleCondAlg",
-                               forceUseGeoModel=False, **kwargs):
+def SCT_LorentzAngleCondAlgCfg(flags, name="SCTSiLorentzAngleCondAlg", **kwargs):
+                                      
     # Condition algorithm
     # construct with field services
     acc = AtlasFieldCacheCondAlgCfg(flags)
@@ -25,6 +25,7 @@ def SCT_LorentzAngleCondAlgCfg(flags, name="SCTSiLorentzAngleCondAlg",
     # in SCTSiLorentzAngleCondAlg and SiLorentzAngleTool
     acc.merge(SCT_ReadoutGeometryCfg(flags))
     # set up SCTSiLorentzAngleCondAlg
+    forceUseGeoModel = kwargs.get("forceUseGeoModel",not (flags.InDet.useSctDCS or flags.Common.isOnline))
     algkwargs = {}
     algkwargs["UseMagFieldCache"] = kwargs.get("UseMagFieldCache", True)
     algkwargs["UseMagFieldDcs"] = kwargs.get("UseMagFieldDcs", not flags.Common.isOnline)

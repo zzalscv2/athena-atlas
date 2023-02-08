@@ -23,7 +23,7 @@ InDetTrigTRTStrawStatusSummaryTool = TRT_StrawStatusSummaryTool(name = "InDetTri
 
 
 
-def CAtoLegacyPublicToolDecorator(func,**kwargs):
+def CAtoLegacyPublicToolWrapper(func,**kwargs):
 
   from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper, conf2toConfigurable
   from InDetTrigRecExample import InDetTrigCA

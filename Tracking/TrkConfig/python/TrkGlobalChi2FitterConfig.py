@@ -423,6 +423,16 @@ def InDetTrigGlobalChi2FitterCfg(flags, name='InDetTrigTrackFitter', **kwargs):
     acc.setPrivateTools(GlobalChi2Fitter)
     return acc
 
+def InDetTrigGlobalChi2FitterCosmicsCfg(flags, name='InDetTrigTrackFitterCosmics', **kwargs):
+
+    kwargs.setdefault("Acceleration", False)
+    kwargs.setdefault("OutlierCut", 10)
+    kwargs.setdefault("TrackChi2PerNDFCut", 20)
+    kwargs.setdefault("MaxOutliers", 99)
+    kwargs.setdefault("TRTExtensionCuts", False)
+
+    return InDetTrigGlobalChi2FitterCfg(flags, **kwargs)
+
 
 #########################
 # ITk configs

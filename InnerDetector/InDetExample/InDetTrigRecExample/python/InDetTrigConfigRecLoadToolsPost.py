@@ -17,11 +17,11 @@ from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
 from InDetTrigRecExample.ConfiguredNewTrackingTrigCuts import EFIDTrackingCuts
 InDetTrigCutValues = EFIDTrackingCuts
 
-from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolDecorator
+from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
 
 from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTestPixelLayerToolInner
 from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
-InDetTrigTrackSummaryTool = CAtoLegacyPublicToolDecorator(InDetTrigTrackSummaryToolCfg)
+InDetTrigTrackSummaryTool = CAtoLegacyPublicToolWrapper(InDetTrigTrackSummaryToolCfg)
 
 
 # Shared hit computation in the TrackParticleCreatorTool is disabled for consistency with the previous 2022 config

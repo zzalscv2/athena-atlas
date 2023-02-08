@@ -7,7 +7,7 @@ from __future__ import print_function
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("InDetTrigPrecisionTracking")
 
-from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolDecorator
+from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
 
 
 def makeInDetTrigPrecisionTracking( config=None, verifier=False, rois='EMViewRoIs', prefix="InDetTrigMT" ) :      
@@ -25,7 +25,7 @@ def makeInDetTrigPrecisionTracking( config=None, verifier=False, rois='EMViewRoI
     InDetTrigCA.InDetTrigConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
     
     from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
-    summaryTool = CAtoLegacyPublicToolDecorator(InDetTrigTrackSummaryToolCfg)
+    summaryTool = CAtoLegacyPublicToolWrapper(InDetTrigTrackSummaryToolCfg)
 
     doTRT = config.doTRT
 
@@ -313,7 +313,7 @@ def scoringTool_builder( signature, config, summaryTool, prefix=None, SiOnly=Tru
     kwargs = setDefaults(kwargs, minTRTonTrk = config.minTRTonTrk)
 
   from InDetConfig.InDetTrackScoringToolsConfig import InDetAmbiScoringToolCfg
-  scoringTool = CAtoLegacyPublicToolDecorator(InDetAmbiScoringToolCfg, **kwargs)
+  scoringTool = CAtoLegacyPublicToolWrapper(InDetAmbiScoringToolCfg, **kwargs)
   return scoringTool
 
 

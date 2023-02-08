@@ -20,15 +20,12 @@ from AthenaCommon.DetFlags import DetFlags
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("InDetTrigConfigRecLoadTools.py")
 
-from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolDecorator
+from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
 
 from InDetTrigRecExample.InDetTrigConditionsAccess import PixelConditionsSetup, SCT_ConditionsSetup
 from AthenaCommon.CfgGetter import getPublicTool,getPrivateTool
 TrigPixelLorentzAngleTool = getPublicTool("PixelLorentzAngleTool")
 TrigSCTLorentzAngleTool = getPrivateTool("SCTLorentzAngleTool") 
-
-from SiLorentzAngleTool.SCTLorentzAngleToolSetup import SCTLorentzAngleToolSetup
-sctLorentzAngleToolSetup = SCTLorentzAngleToolSetup()
 
 
 #
@@ -237,192 +234,34 @@ if InDetTrigFlags.loadUpdator():
 if InDetTrigFlags.loadExtrapolator():
 
   
-  #
   # get propagator
-  #
-  from TrkExSTEP_Propagator.TrkExSTEP_PropagatorConf import Trk__STEP_Propagator
-  InDetTrigStepPropagator = Trk__STEP_Propagator(name = 'InDetTrigStepPropagator')
-  ToolSvc += InDetTrigStepPropagator
-  
-  from TrkExRungeKuttaPropagator.TrkExRungeKuttaPropagatorConf import Trk__RungeKuttaPropagator
-  InDetTrigRKPropagator = Trk__RungeKuttaPropagator(name = 'InDetTrigRKPropagator')
-  ToolSvc += InDetTrigRKPropagator
-  
-  if InDetTrigFlags.propagatorType() == "STEP":
-    InDetTrigPropagator = InDetTrigStepPropagator
-  else:
-    InDetTrigPropagator = InDetTrigRKPropagator
+  from TrkConfig.TrkExRungeKuttaPropagatorConfig import RungeKuttaPropagatorCfg
+  InDetTrigPropagator = CAtoLegacyPublicToolWrapper(RungeKuttaPropagatorCfg,
+                                                      name="InDetTrigRKPropagator")
     
-  if (InDetTrigFlags.doPrintConfigurables()):
-    print (     InDetTrigPropagator      )
+  from TrkConfig.AtlasExtrapolatorToolsConfig import AtlasNavigatorCfg,AtlasMaterialEffectsUpdatorCfg
+  InDetTrigNavigator = CAtoLegacyPublicToolWrapper(AtlasNavigatorCfg, 
+                                                     name="InDetTrigNavigator")
 
-  #
-  # Setup the Navigator (default, could be removed)
-  #
-  from InDetRecExample import TrackingCommon
-  InDetTrigNavigator = TrackingCommon.getInDetNavigator('InDetTrigNavigator')
-
-  ToolSvc += InDetTrigNavigator
-  if (InDetTrigFlags.doPrintConfigurables()):
-    print (     InDetTrigNavigator)
-
-  #
   # Setup the MaterialEffectsUpdator
-  #
-  from TrkExTools.TrkExToolsConf import Trk__MaterialEffectsUpdator
-  InDetTrigMaterialUpdator = Trk__MaterialEffectsUpdator(name = "InDetTrigMaterialEffectsUpdator")
+  InDetTrigMaterialUpdator = CAtoLegacyPublicToolWrapper(AtlasMaterialEffectsUpdatorCfg, 
+                                                           name ="InDetTrigMaterialEffectsUpdator")
 
-  ToolSvc += InDetTrigMaterialUpdator
-  if (InDetTrigFlags.doPrintConfigurables()):
-    print (     InDetTrigMaterialUpdator)
-
-  
   from TrkConfig.TrkExRungeKuttaPropagatorConfig import InDetPropagatorCfg
-  InDetTrigPropagator = CAtoLegacyPublicToolDecorator(InDetPropagatorCfg, name = "InDetTrigPropagator")
+  InDetTrigPropagator = CAtoLegacyPublicToolWrapper(InDetPropagatorCfg, name = "InDetTrigPropagator")
   
   from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-  InDetTrigExtrapolator = CAtoLegacyPublicToolDecorator(InDetExtrapolatorCfg, name="InDetTrigExtrapolator")
+  InDetTrigExtrapolator = CAtoLegacyPublicToolWrapper(InDetExtrapolatorCfg, name="InDetTrigExtrapolator")
   
 #
 # ----------- control loading of fitters
 #
-if InDetTrigFlags.loadFitter():
-    
-  if InDetTrigFlags.trackFitterType() == 'DistributedKalmanFilter' :
-   
-    from TrkDistributedKalmanFilter.TrkDistributedKalmanFilterConf import Trk__DistributedKalmanFilter
-    InDetTrigTrackFitter = Trk__DistributedKalmanFilter(name             = 'InDetTrigTrackFitter',
-                                                        ExtrapolatorTool = InDetTrigExtrapolator,
-                                                        ROTcreator       = InDetTrigRotCreator
-                                                        #sortingReferencePoint = ???
-                                                        )
-   
-  elif InDetTrigFlags.trackFitterType() == 'GlobalChi2Fitter' :
-    from InDetRecExample import TrackingCommon
-    cond_alg = TrackingCommon.createAndAddCondAlg(TrackingCommon.getTrackingGeometryCondAlg, "AtlasTrackingGeometryCondAlg", name="AtlasTrackingGeometryCondAlg")
 
-    from TrkGlobalChi2Fitter.TrkGlobalChi2FitterConf import Trk__GlobalChi2Fitter
-    InDetTrigTrackFitter = Trk__GlobalChi2Fitter(name                  = 'InDetTrigTrackFitter',
-                                                 ExtrapolationTool     = InDetTrigExtrapolator,
-                                                 NavigatorTool         = InDetTrigNavigator,
-                                                 PropagatorTool        = InDetTrigPropagator,		
-                                                 RotCreatorTool        = InDetTrigRefitRotCreator,
-                                                 BroadRotCreatorTool   = InDetTrigBroadInDetRotCreator,
-                                                 MeasurementUpdateTool = InDetTrigUpdator,
-                                                 MaterialUpdateTool    = InDetTrigMaterialUpdator,
-                                                 StraightLine          = not InDetTrigFlags.solenoidOn(),
-                                                 OutlierCut            = 4,
-                                                 SignedDriftRadius     = True,
-                                                 RecalibrateSilicon    = True,
-                                                 RecalibrateTRT        = True,
-                                                 ReintegrateOutliers   = True,
-                                                 TrackChi2PerNDFCut    = 9,
-                                                 TRTExtensionCuts      = True, 
-                                                 MaxIterations         = 40,
-                                                 Acceleration          = True,
-                                                 #Momentum=1000.,
-                                                 Momentum=0.,
-                                                 TrackingGeometryReadKey=cond_alg.TrackingGeometryWriteKey)
-    if InDetTrigFlags.useBroadClusterErrors():
-      InDetTrigTrackFitter.RecalibrateSilicon = False
+from InDetRecExample import TrackingCommon
 
-    if InDetTrigFlags.doRefit():
-      InDetTrigTrackFitter.BroadRotCreatorTool = None
-      InDetTrigTrackFitter.RecalibrateSilicon = False
-      InDetTrigTrackFitter.RecalibrateTRT     = False
-      InDetTrigTrackFitter.ReintegrateOutliers= False
-
-
-    if InDetTrigFlags.doRobustReco():
-      InDetTrigTrackFitter.OutlierCut         = 10.0
-      InDetTrigTrackFitter.TrackChi2PerNDFCut = 20
-      InDetTrigTrackFitter.MaxOutliers        = 99
-      #only switch off for cosmics InDetTrigTrackFitter.Acceleration       = False
-      
-    InDetTrigTrackFitterLowPt = Trk__GlobalChi2Fitter(name                  = 'InDetTrigTrackFitterLowPt',
-                                                      ExtrapolationTool     = InDetTrigExtrapolator,
-                                                      NavigatorTool         = InDetTrigNavigator,
-                                                      PropagatorTool        = InDetTrigPropagator,		
-                                                      RotCreatorTool        = InDetTrigRefitRotCreator,
-                                                      BroadRotCreatorTool   = InDetTrigBroadInDetRotCreator,
-                                                      MeasurementUpdateTool = InDetTrigUpdator,
-                                                      StraightLine          = not InDetTrigFlags.solenoidOn(),
-                                                      OutlierCut            = 5.0,
-                                                      SignedDriftRadius     = True,
-                                                      RecalibrateSilicon    = True,
-                                                      RecalibrateTRT        = True,
-                                                      ReintegrateOutliers   = True,
-                                                      TrackChi2PerNDFCut    = 10,
-                                                      TRTExtensionCuts      = True, 
-                                                      MaxIterations         = 40,
-                                                      Momentum=0.,
-                                                      TrackingGeometryReadKey=cond_alg.TrackingGeometryWriteKey)
-    ToolSvc += InDetTrigTrackFitterLowPt
-
-
-
-    #for cosmics
-    InDetTrigTrackFitterCosmics = \
-        Trk__GlobalChi2Fitter(name = 'InDetTrigTrackFitterCosmics',
-                              ExtrapolationTool     = InDetTrigExtrapolator,
-                              NavigatorTool         = InDetTrigNavigator,
-                              PropagatorTool        = InDetTrigPropagator,		
-                              RotCreatorTool        = InDetTrigRefitRotCreator,
-                              BroadRotCreatorTool   = InDetTrigBroadInDetRotCreator,
-                              MeasurementUpdateTool = InDetTrigUpdator,
-                              StraightLine          = not InDetTrigFlags.solenoidOn(),
-                              OutlierCut            = 10.0,
-                              SignedDriftRadius     = True,
-                              RecalibrateTRT        = True,
-                              ReintegrateOutliers   = True,
-                              TrackChi2PerNDFCut    = 20,
-                              TRTExtensionCuts      = False, 
-                              MaxIterations         = 40,
-                              MaxOutliers           = 99,
-                              RecalculateDerivatives = True,
-                              Momentum=1000,
-                              TrackingGeometryReadKey=cond_alg.TrackingGeometryWriteKey)
-    InDetTrigTrackFitterCosmics.Acceleration       = False
-    ToolSvc += InDetTrigTrackFitterCosmics
-
-    #TRT
-    InDetTrigTrackFitterTRT = Trk__GlobalChi2Fitter(name                  = 'InDetTrigTrackFitterTRT',
-                                                    ExtrapolationTool     = InDetTrigExtrapolator,
-                                                    NavigatorTool         = InDetTrigNavigator,
-                                                    PropagatorTool        = InDetTrigPropagator,
-                                                    RotCreatorTool        = InDetTrigRefitRotCreator,
-                                                    MeasurementUpdateTool = InDetTrigUpdator,
-                                                    StraightLine          = not InDetTrigFlags.solenoidOn(),
-                                                    ReintegrateOutliers   = False,
-                                                    MaxIterations         = 30,
-                                                    #MaxOutliers           = 99,
-                                                    RecalculateDerivatives= True,
-                                                    TrackChi2PerNDFCut    = 999999,
-                                                    Momentum=0.,
-                                                    TrackingGeometryReadKey=cond_alg.TrackingGeometryWriteKey)
-    if InDetTrigFlags.doRobustReco():
-      InDetTrigTrackFitterTRT.MaxOutliers=99
-            
-  elif InDetTrigFlags.trackFitterType() == 'GaussianSumFilter' :
-    import egammaRec.EMCommonRefitter
-    GSFTrackFitter = egammaRec.EMCommonRefitter.getGSFTrackFitter(name = 'InDetTrigTrackFitter')
-    
-   # --- end of fitter loading
-  ToolSvc += InDetTrigTrackFitter
-  if (InDetTrigFlags.doPrintConfigurables()):
-    print (     InDetTrigTrackFitter)
-    
-  if InDetTrigFlags.trackFitterType() != 'GlobalChi2Fitter' :
-    InDetTrigTrackFitterTRT=InDetTrigTrackFitter
-    InDetTrigTrackFitterLowPt=InDetTrigTrackFitter
-    ToolSvc += InDetTrigTrackFitterLowPt
-    InDetTrigTrackFitterCosmics=InDetTrigTrackFitter
-    
-  ToolSvc += InDetTrigTrackFitterTRT
-  if (InDetTrigFlags.doPrintConfigurables()):
-    print (     InDetTrigTrackFitterTRT)
-
-
+from TrkConfig.TrkGlobalChi2FitterConfig import InDetTrigGlobalChi2FitterCfg,InDetTrigGlobalChi2FitterCosmicsCfg
+InDetTrigTrackFitter = CAtoLegacyPublicToolWrapper(InDetTrigGlobalChi2FitterCfg)
+InDetTrigTrackFitterCosmics = CAtoLegacyPublicToolWrapper(InDetTrigGlobalChi2FitterCosmicsCfg)
 
 InDetTrigPixelConditionsSummaryTool = PixelConditionsSetup.summaryTool
 
@@ -486,10 +325,9 @@ if InDetTrigFlags.loadSummaryTool():
   #
 
   from InDetConfig.InDetTrackHoleSearchConfig import TrigHoleSearchToolCfg
-  InDetTrigHoleSearchTool = CAtoLegacyPublicToolDecorator(TrigHoleSearchToolCfg)
+  InDetTrigHoleSearchTool = CAtoLegacyPublicToolWrapper(TrigHoleSearchToolCfg)
   
   #Load inner Pixel layer tool
-  from InDetRecExample import TrackingCommon
   InDetTrigTestPixelLayerToolInner = TrackingCommon.getInDetTrigTestPixelLayerToolInner()
   ToolSvc += InDetTrigTestPixelLayerToolInner
   if (InDetTrigFlags.doPrintConfigurables()):
