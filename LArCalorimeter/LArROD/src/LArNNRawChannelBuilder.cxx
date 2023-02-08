@@ -20,10 +20,6 @@
 
 
 
-LArNNRawChannelBuilder::LArNNRawChannelBuilder(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name, pSvcLocator) {
-}
-
 StatusCode LArNNRawChannelBuilder::initialize() {
   ATH_CHECK(m_digitKey.initialize());
   ATH_CHECK(m_rawChannelKey.initialize());

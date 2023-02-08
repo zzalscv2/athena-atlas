@@ -36,7 +36,7 @@ class LArOnlineID;
 class LArNNRawChannelBuilder : public AthReentrantAlgorithm {
 
 public:
-LArNNRawChannelBuilder(const std::string& name, ISvcLocator* pSvcLocator);
+using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
 StatusCode initialize() override;
 StatusCode execute(const EventContext& ctx) const override;

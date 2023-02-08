@@ -11,8 +11,6 @@
 #include "AthAllocators/DataPool.h"
 #include <cmath>
 
-LArRawChannelBuilderSCAlg::LArRawChannelBuilderSCAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  AthReentrantAlgorithm(name, pSvcLocator) {}
   
 StatusCode LArRawChannelBuilderSCAlg::initialize() {
   ATH_CHECK(m_digitKey.initialize());	 

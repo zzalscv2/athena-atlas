@@ -29,7 +29,7 @@ class LArOnlineID;
 class LArRawChannelBuilderIterAlg : public AthReentrantAlgorithm {
 
  public:
-  LArRawChannelBuilderIterAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   StatusCode initialize() override;
   StatusCode execute(const EventContext& ctx) const override;

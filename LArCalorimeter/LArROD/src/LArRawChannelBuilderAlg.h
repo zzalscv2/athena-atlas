@@ -1,6 +1,6 @@
 //Dear emacs, this is -*-c++-*- 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARROD_LARRAWCHANNELBUILDERALG_H
@@ -28,7 +28,8 @@ class LArOnlineID;
 class LArRawChannelBuilderAlg : public AthReentrantAlgorithm {
 
  public:
-  LArRawChannelBuilderAlg(const std::string& name, ISvcLocator* pSvcLocator);
+
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   StatusCode initialize() override;
   StatusCode execute(const EventContext& ctx) const override;
