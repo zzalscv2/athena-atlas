@@ -89,7 +89,7 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
     acc.merge(METCommonCfg(ConfigFlags))
 
     # Trigger matching
-    if ConfigFlags.Reco.EnableTrigger or ConfigFlags.Trigger.InputContainsConfigMetadata:
+    if ConfigFlags.Reco.EnableTrigger or ConfigFlags.Trigger.triggerConfig == 'INFILE':
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun2Cfg
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun3Cfg
         # requires some wrangling due to the difference between run 2 and 3

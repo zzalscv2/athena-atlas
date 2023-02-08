@@ -24,7 +24,7 @@ def TriggerConfigGetter(flags=None):
     _log.info('Creating the Trigger Configuration Services')
     _log.info("flags.Trigger.EDMVersion: %i", flags.Trigger.EDMVersion)
     if flags.Trigger.EDMVersion >= 3:
-        if flags.Trigger.InputContainsConfigMetadata:
+        if flags.Trigger.triggerConfig == 'INFILE':
             if not hasattr(svcMgr, 'xAODConfigSvc'):
                 from TrigConfxAOD.TrigConfxAODConf import TrigConf__xAODConfigSvc
                 svcMgr += TrigConf__xAODConfigSvc('xAODConfigSvc')
@@ -33,7 +33,7 @@ def TriggerConfigGetter(flags=None):
             from TrigConfigSvc.TrigConfigSvcCfg import TrigConfigSvcCfg
             CAtoGlobalWrapper(TrigConfigSvcCfg,flags)
 
-    if not flags.Trigger.InputContainsConfigMetadata:
+    if flags.Trigger.triggerConfig != 'INFILE':
         setupxAODWriting(flags)
     else:
         _log.info("Input file already has xAOD trigger metadata. Will not re-create it.")

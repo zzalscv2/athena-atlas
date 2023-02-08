@@ -107,7 +107,7 @@ def TriggerMetadataWriterCfg(flags):
     """Sets up access to HLT, L1, BGRP, Monitoring, HLT PS and L1 PS JSON files from 'FILE' or 'DB', writes JSON to metaStore and keys to eventStore"""
     acc = ComponentAccumulator()
     keyWriterOutput = ""
-    if not flags.Trigger.InputContainsConfigMetadata:
+    if flags.Trigger.triggerConfig != 'INFILE':
         acc.merge( TrigConfigSvcCfg(flags) )
         acc.merge( L1PrescaleCondAlgCfg(flags) )
         acc.merge( HLTPrescaleCondAlgCfg(flags) )

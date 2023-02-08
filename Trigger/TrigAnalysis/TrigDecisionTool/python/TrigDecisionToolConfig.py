@@ -59,7 +59,7 @@ def TrigDecisionToolCfg(flags):
     acc.addPublicTool(tdt, primary=True)
 
     msg.info('Configuring the TrigDecisionTool and xAODConfigSvc to use ConfigSource: %s, Run3NavigationFormat: %s, Run3NavigationSummaryCollection: %s',
-        'InFileMetadata' if flags.Trigger.InputContainsConfigMetadata else 'ConditionsAndDetStore',
+        'InFileMetadata' if flags.Trigger.triggerConfig == 'INFILE' else 'ConditionsAndDetStore',
         str(use_run3_format),
         tdt.HLTSummary)
 

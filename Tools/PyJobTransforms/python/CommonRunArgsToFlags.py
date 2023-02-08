@@ -23,6 +23,9 @@ def commonRunArgsToFlags(runArgs,configFlags):
     if hasattr(runArgs,"geometryVersion"): 
         configFlags.GeoModel.AtlasVersion=runArgs.geometryVersion
 
+    if hasattr(runArgs,"triggerConfig"): 
+        configFlags.Trigger.triggerConfig=runArgs.triggerConfig
+
     if hasattr(runArgs,"beamType"):
         from AthenaConfiguration.Enums import BeamType
         configFlags.Beam.Type=BeamType(runArgs.beamType)
