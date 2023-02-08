@@ -179,13 +179,6 @@ Trk::GsfExtrapolator::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode
-Trk::GsfExtrapolator::finalize()
-{
-  ATH_MSG_INFO("Finalisation of " << name() << " was successful");
-  return StatusCode::SUCCESS;
-}
-
 /************************************************************/
 /*
  * Implement the public extrapolate methods
