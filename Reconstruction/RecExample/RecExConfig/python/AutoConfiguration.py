@@ -340,7 +340,7 @@ def ConfigureGeo():
         geo="ATLAS-R2-2016-01-01-01" 
         project=GetProjectName()
         if "data12" in project:
-            geo="ATLAS-R1-2012-03-00-00"
+            geo="ATLAS-R1-2012-03-02-00"
         if "data11" in project:
             geo="ATLAS-R1-2011-02-00-00"  
         if "data10" in project or "data09" in project or "data08" in project:

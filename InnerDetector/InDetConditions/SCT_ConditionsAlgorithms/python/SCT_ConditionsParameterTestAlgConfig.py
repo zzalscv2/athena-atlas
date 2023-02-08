@@ -27,7 +27,7 @@ if __name__=="__main__":
     flags.Input.TimeStamp = 1354748400 # LB 469 of run 215643, 2012-12-05 @ 11:00pm (UTC)
     flags.IOVDb.GlobalTag = "COMCOND-BLKPA-RUN1-09"
     flags.IOVDb.DatabaseInstance = "COMP200"
-    flags.GeoModel.AtlasVersion = "ATLAS-R1-2012-03-00-00"
+    flags.GeoModel.AtlasVersion = "ATLAS-R1-2012-03-02-00"
     flags.Detector.GeometrySCT = True
     flags.lock()
 

@@ -208,7 +208,7 @@ if __name__=='__main__':
             flags.Input.Files = defaultTestFiles.RAW
 
     runNumber = flags.Input.RunNumber[0]
-    flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-02-00-00' if not flags.Input.isMC and runNumber >= 411938 else 'ATLAS-R2-2016-01-00-01'
+    flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-01-00' if not flags.Input.isMC and runNumber >= 411938 else 'ATLAS-R2-2016-01-00-01'
 
     if not flags.Output.HISTFileName:
         flags.Output.HISTFileName = 'tilemon_{}.root'.format(runNumber)

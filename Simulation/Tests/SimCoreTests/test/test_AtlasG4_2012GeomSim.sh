@@ -15,7 +15,7 @@ AtlasG4_tf.py \
 --physicsList 'FTFP_BERT' \
 --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
 --DataRunNumber '212272' \
---geometryVersion 'ATLAS-R1-2012-03-00-00' \
+--geometryVersion 'ATLAS-R1-2012-03-02-00' \
 --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/mu_E200_eta0-25.evgen.pool.root' \
 --outputHITSFile 'test.CA.HITS.pool.root' \
 --maxEvents '10' \
@@ -34,7 +34,7 @@ AtlasG4_tf.py \
 --physicsList 'FTFP_BERT' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --DataRunNumber '212272' \
---geometryVersion 'ATLAS-R1-2012-03-00-00' \
+--geometryVersion 'ATLAS-R1-2012-03-02-00' \
 --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/mu_E200_eta0-25.evgen.pool.root' \
 --outputHITSFile 'test.CA.HITS.pool.root' \
 --maxEvents '10' \
@@ -49,7 +49,7 @@ AtlasG4_tf.py \
 --physicsList 'FTFP_BERT' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --DataRunNumber '212272' \
---geometryVersion 'ATLAS-R1-2012-03-00-00' \
+--geometryVersion 'ATLAS-R1-2012-03-02-00' \
 --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/mu_E200_eta0-25.evgen.pool.root' \
 --outputHITSFile 'test.HITS.pool.root' \
 --maxEvents '10' \

@@ -16,7 +16,7 @@ Sim_tf.py \
 --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
 --preInclude 'EVNTtoHITS:Campaigns.MC21Simulation,SimuJobTransforms.SimulationHelpers.enableFrozenShowersFCalOnly' \
 --DataRunNumber '330000' \
---geometryVersion 'default:ATLAS-R3S-2021-02-00-00' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
 --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1' \
 --outputHITSFile 'test.CA.HITS.pool.root' \
 --maxEvents '10' \
@@ -33,7 +33,7 @@ Sim_tf.py \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
 --DataRunNumber '330000' \
---geometryVersion 'default:ATLAS-R3S-2021-02-00-00' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
 --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1' \
 --outputHITSFile 'test.CA.HITS.pool.root' \
 --maxEvents '10' \
@@ -46,7 +46,7 @@ Sim_tf.py \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
 --DataRunNumber '330000' \
---geometryVersion 'default:ATLAS-R3S-2021-02-00-00' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
 --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1' \
 --outputHITSFile 'test.HITS.pool.root' \
 --maxEvents '10' \

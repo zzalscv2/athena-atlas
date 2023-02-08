@@ -65,7 +65,7 @@ if __name__ == '__main__':
         flags.IOVDb.GlobalTag = flags.Trigger.OnlineCondTag
 
     if not flags.Input.isMC and flags.Input.RunNumber[0] > 400000:
-        flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-02-00-00'
+        flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-01-00'
 
     # Enable only calo for this test
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList

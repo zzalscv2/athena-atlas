@@ -65,12 +65,12 @@ if 'myGeo' not in dir() :
 # release 20
     myGeo = 'ATLAS-R2-2015-03-01-00'
 #   this is release 19 like
-#     myGeo = 'ATLAS-R1-2012-02-00-00'
+#     myGeo = 'ATLAS-R1-2012-03-02-00'
 #    myGeo = 'ATLAS-GEO-20-00-01'
 #   this is release 17 from Jochen
 #    myGeo = 'ATLAS-GEO-18-01-03'
 #    myGeo = 'ATLAS-GEO-18-01-00'
-#    myGEO = 'ATLAS-R1-2012-02-01-00'
+#    myGEO = 'ATLAS-R1-2012-03-02-00'
 
 # Set everything to ATLAS
 DetFlags.ID_setOn()

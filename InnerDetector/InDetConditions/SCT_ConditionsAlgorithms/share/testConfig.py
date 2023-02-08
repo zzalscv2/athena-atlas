@@ -34,7 +34,7 @@ theApp.AuditAlgorithms=True
 #--------------------------------------------------------------
 from AthenaCommon.GlobalFlags import globalflags
 if test=="run1MC":
-  globalflags.DetDescrVersion = "ATLAS-R1-2012-03-00-00"
+  globalflags.DetDescrVersion = "ATLAS-R1-2012-03-02-00"
   globalflags.DataSource="geant4"
 elif test=="run2MC":
   globalflags.DetDescrVersion = "ATLAS-R2-2016-01-00-01"

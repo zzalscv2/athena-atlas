@@ -279,7 +279,7 @@ DetFlags.Print()
 
 from AthenaCommon.GlobalFlags import jobproperties
 if RUN2: jobproperties.Global.DetDescrVersion = "ATLAS-R2-2016-01-00-01"
-else:    jobproperties.Global.DetDescrVersion = "ATLAS-R1-2012-02-00-00"
+else:    jobproperties.Global.DetDescrVersion = "ATLAS-R1-2012-03-02-00"
 tbstat_log.info( "DetDescrVersion = %s" % (jobproperties.Global.DetDescrVersion()) )
 
 from AtlasGeoModel import SetGeometryVersion

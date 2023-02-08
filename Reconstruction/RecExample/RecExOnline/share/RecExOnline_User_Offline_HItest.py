@@ -84,7 +84,7 @@ ConditionsTag     = 'CONDBR2-BLKPA-2016-18'  ### 2016-09-15
 ### DetDescrVersion   = 'ATLAS-R2-2015-02-00-00'
 DetDescrVersion   = 'ATLAS-R2-2015-03-01-00'
 ### DetDescrVersion = 'ATLAS-GEO-18-01-01'
-### DetDescrVersion = 'ATLAS-R1-2012-02-00-00' 
+### DetDescrVersion = 'ATLAS-R1-2012-03-02-00' 
 
 
 

@@ -208,7 +208,7 @@ if __name__ == '__main__':
     # TODO 1: Reverse this into a special setting for Run-2 data input when the default geo tag is changed to Run-3
     # TODO 2: Any better way of figuring this out than run number?
     if not flags.Input.isMC and flags.Input.RunNumber[0] > 400000:
-        flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-02-00-00'
+        flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-01-00'
 
     # Enable only calo for this test
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
