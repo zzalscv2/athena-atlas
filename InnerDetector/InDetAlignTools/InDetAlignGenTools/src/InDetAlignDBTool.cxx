@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // InDetAlignDBTool.cxx
@@ -25,7 +25,6 @@
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
-#include "AthenaKernel/IAthenaOutputStreamTool.h"
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
@@ -64,7 +63,6 @@ NTuple::Item<float> nt_gamma;
 InDetAlignDBTool::InDetAlignDBTool(const std::string& type,
            const std::string& name, const IInterface* parent)
   : AthAlgTool(type,name,parent),
-    p_toolsvc("ToolSvc",name),
     m_pixid(nullptr),
     m_sctid(nullptr),
     m_pixman(nullptr),
@@ -73,7 +71,7 @@ InDetAlignDBTool::InDetAlignDBTool(const std::string& type,
     m_par_newdb(true),
     m_par_scttwoside(false),
     m_par_fake(0),
-    m_par_condstream("CondStream1"),
+    m_par_condstream("AthenaOutputStreamTool/AthenaOutputStreamTool", this),
     m_par_dbroot( IND_ALIGN ),
     m_par_dbkey( IND_ALIGN ),
     m_par_oldTextFile(false),
@@ -81,7 +79,6 @@ InDetAlignDBTool::InDetAlignDBTool(const std::string& type,
     m_forceUserDBConfig(false)
 {
   declareInterface<IInDetAlignDBTool>(this);
-  declareProperty("IToolSvc",    p_toolsvc);
   declareProperty("NewDB",       m_par_newdb);     //Take out at some point; New is misleading!! Very old developments!
   declareProperty("SCTTwoSide",  m_par_scttwoside);
   declareProperty("FakeDB",      m_par_fake);
@@ -105,11 +102,11 @@ StatusCode InDetAlignDBTool::initialize()
     ATH_MSG_FATAL("Detector store not found");
   }
 
-  if ( p_toolsvc.retrieve().isFailure() ) {
-    ATH_MSG_FATAL( "Failed to retrieve service " << p_toolsvc );
+  if ( m_par_condstream.retrieve().isFailure() ) {
+    ATH_MSG_FATAL( "Failed to retrieve AthenaOutputStreamTool");
     return StatusCode::FAILURE;
   } else 
-    ATH_MSG_DEBUG( "Retrieved service " << p_toolsvc );
+    ATH_MSG_DEBUG( "Retrieved AthenaOutputStreamTool with name" << m_par_condstream.name());
 
   // attempt to get ID helpers from detector store 
   // (relying on GeoModel to put them)
@@ -135,7 +132,6 @@ StatusCode InDetAlignDBTool::initialize()
     ATH_MSG_FATAL("Pixel and SCT Managers have different alignfolder type registered --> Check ");
   
   if (m_pixman->m_alignfoldertype == InDetDD::static_run1 && !m_forceUserDBConfig){
-    m_par_dbroot = "/Indet/Align";
     m_dynamicDB = false;
   }
   if (m_pixman->m_alignfoldertype == InDetDD::timedependent_run2 && !m_forceUserDBConfig){
@@ -1251,20 +1247,16 @@ Amg::Transform3D InDetAlignDBTool::getTrans(const Identifier& ident,
   return result;
 }
 
-StatusCode InDetAlignDBTool::outputObjs() const {
+StatusCode InDetAlignDBTool::outputObjs() {
   
   ATH_MSG_DEBUG( "Output AlignableTranform objects to stream" << m_par_condstream );
   // get the AthenaOutputStream tool
-  IAthenaOutputStreamTool* optool;
-
-  if (StatusCode::SUCCESS!=p_toolsvc->retrieveTool("AthenaOutputStreamTool",m_par_condstream,optool)) {
-    ATH_MSG_ERROR("Cannot get AthenaPoolOutputStream tool" );
-    return StatusCode::FAILURE;
-  }
   
-  if (StatusCode::SUCCESS!=optool->connectOutput()) {
+  if (StatusCode::SUCCESS!=m_par_condstream->connectOutput()) {
     ATH_MSG_ERROR("Could not connect stream to output" );
     return StatusCode::FAILURE;
+  }else{
+    ATH_MSG_DEBUG("Stream is connected to output" );
   }
   // construct list of objects to be written out, either 
   // AlignableTransformContainer or several of AlignableTransforms
@@ -1287,9 +1279,11 @@ StatusCode InDetAlignDBTool::outputObjs() const {
     }
   }
   // write objects to stream
-  if (StatusCode::SUCCESS!=optool->streamObjects(typekeys)) {
+  if (StatusCode::SUCCESS!=m_par_condstream->streamObjects(typekeys)) {
     ATH_MSG_ERROR("Could not stream output objects" );
     return StatusCode::FAILURE;
+  }else{
+    ATH_MSG_DEBUG("Streamed output objects" );
   }
 
   {
@@ -1300,15 +1294,17 @@ StatusCode InDetAlignDBTool::outputObjs() const {
     typekeys_IBLDist[0] = pair;
     
     // write objects to stream                                                                                                                  
-    if (StatusCode::SUCCESS!=optool->streamObjects(typekeys_IBLDist)) {
+    if (StatusCode::SUCCESS!=m_par_condstream->streamObjects(typekeys_IBLDist)) {
       ATH_MSG_ERROR("Could not stream output IBLDist objects" );
       return StatusCode::FAILURE;
+    }else{
+      ATH_MSG_DEBUG("Streamed output IBLDist objects" );
     }
 
   }
 
   // commit output
-  if (StatusCode::SUCCESS!=optool->commitOutput()) {
+  if (StatusCode::SUCCESS!=m_par_condstream->commitOutput()) {
     ATH_MSG_ERROR("Could not commit output" );
   }
   ATH_MSG_DEBUG( "Written " << typekeys.size() << " objects to stream " << m_par_condstream);
