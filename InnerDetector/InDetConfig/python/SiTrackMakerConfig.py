@@ -187,6 +187,10 @@ def ITkSiTrackMaker_xkCfg(flags, name="ITkSiTrackMaker", **kwargs):
     elif flags.ITk.Tracking.ActiveConfig.extension == "LargeD0":
         kwargs.setdefault("TrackPatternRecoInfo", 'SiSpacePointsSeedMaker_LargeD0')
 
+    elif flags.ITk.Tracking.ActiveConfig.extension == "LowPt":
+        kwargs.setdefault("TrackPatternRecoInfo",
+                          'SiSpacePointsSeedMaker_LowMomentum')
+
     else:
         kwargs.setdefault("TrackPatternRecoInfo", 'SiSPSeededFinder')
 

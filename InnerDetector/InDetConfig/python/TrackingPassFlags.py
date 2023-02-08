@@ -388,16 +388,22 @@ def createITkTrackingPassFlags():
     # Maximum bin set to 9999 instead of four to prevent out of bounds lookups
     icf.addFlag("etaBins"                   , [-1.0, 2.0, 2.6, 9999.0])
     icf.addFlag("maxEta"                    , 4.0)
-    icf.addFlag("minPT"                     , [0.9 * Units.GeV, 0.4 * Units.GeV, 0.4 * Units.GeV])
+    icf.addFlag("minPT"                     , lambda pcf :
+                [0.2 * Units.GeV] if pcf.ITk.Tracking.doLowMu
+                else [0.9 * Units.GeV, 0.4 * Units.GeV, 0.4 * Units.GeV])
 
-    icf.addFlag("minPTSeed"                 , 0.9 * Units.GeV)
+    icf.addFlag("minPTSeed"                 , lambda pcf :
+                0.2 * Units.GeV if pcf.ITk.Tracking.doLowMu
+                else 0.9 * Units.GeV)
     icf.addFlag("maxPrimaryImpactSeed"      , 2.0 * Units.mm)
     icf.addFlag("maxZImpactSeed"            , 200.0 * Units.mm)
     icf.addFlag("seedFilterLevel"           , 2)
 
     # --- cluster cuts
-    icf.addFlag("minClusters"             , [9, 8, 7])
-    icf.addFlag("minSiNotShared"          , [7, 6, 5])
+    icf.addFlag("minClusters"             , lambda pcf :
+                [6, 5, 4] if pcf.ITk.Tracking.doLowMu else [9, 8, 7])
+    icf.addFlag("minSiNotShared"          , lambda pcf :
+                [6, 5, 4] if pcf.ITk.Tracking.doLowMu else [7, 6, 5])
     icf.addFlag("maxShared"               , [2])
     icf.addFlag("minPixel"                , [1])
     icf.addFlag("maxHoles"                , [2])
@@ -520,6 +526,16 @@ def createITkLargeD0FastTrackingPassFlags():
     icf.maxZImpact         = [200 * Units.mm]
     icf.maxZImpactSeed     = 200. * Units.mm
     icf.radMax             = 400. * Units.mm
+
+    return icf
+
+### ITk LowPt mode ####################
+def createITkLowPtTrackingPassFlags():
+
+    icf = createITkTrackingPassFlags()
+    icf.extension          = "LowPt"
+    icf.minPT              = [0.4 * Units.GeV]
+    icf.minPTSeed          = 0.4 * Units.GeV
 
     return icf
 
