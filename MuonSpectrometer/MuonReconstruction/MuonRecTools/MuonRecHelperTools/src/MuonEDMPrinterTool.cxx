@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRecHelperTools/MuonEDMPrinterTool.h"
@@ -28,7 +28,7 @@
 #include "TrkTrack/Track.h"
 #include "TrkTrackSummary/MuonTrackSummary.h"
 #include "TrkTrackSummary/TrackSummary.h"
-
+#include "TrkMaterialOnTrack/MaterialEffectsOnTrack.h"
 namespace Muon {
 
 
@@ -292,6 +292,17 @@ MuonEDMPrinterTool::print(const Trk::Track& track) const
     } else {
         sout << " no perigee ";
     }
+    sout <<std::endl;
+    sout<<"-----  Track states -------"<<std::endl;
+    unsigned int n{1};
+    for (const Trk::TrackStateOnSurface* tsos : *track.trackStateOnSurfaces()) {
+        if (tsos->measurementOnTrack())      sout<<" **** "<<std::setw(3)<<n<<" Measurement: "<<print(*tsos->measurementOnTrack())<<std::endl;
+        if (tsos->materialEffectsOnTrack())  sout<<" **** "<<std::setw(3)<<n<<" Material:    "<<print(*tsos->materialEffectsOnTrack())<<std::endl;
+        if (tsos->alignmentEffectsOnTrack()) sout<<" **** "<<std::setw(3)<<n<<" AEOT:        "<<print(*tsos->alignmentEffectsOnTrack())<<std::endl;
+        if (tsos->trackParameters())         sout<<" **** "<<std::setw(3)<<n<<" Parameters:  "<<print(*tsos->trackParameters())<<std::endl;        
+        ++n;
+    }
+    sout<<"-----------------------------"<<std::endl;
 
     return sout.str();
 }
@@ -864,13 +875,13 @@ MuonEDMPrinterTool::print(const Trk::TrackParameters& pars) const
     std::ostringstream sout;
     sout << "r " << std::fixed << std::setprecision(0) << std::setw(5)
          << pars.position().perp()
-         //<< " phi " << std::fixed << std::setprecision(3) << std::setw(6) << pars.position().phi()
          << " z " << std::fixed << std::setprecision(0) << std::setw(6) << pars.position().z() << " theta "
-         << std::fixed << std::setprecision(5) << std::setw(7) << pars.momentum().theta() << " phi " << std::fixed
+         << std::fixed << std::setprecision(5) << std::setw(7) << pars.momentum().theta()<< " eta "
+         << std::fixed << std::setprecision(5) << std::setw(7) << pars.momentum().eta() << " phi " << std::fixed
          << std::setprecision(3) << std::setw(6) << pars.momentum().phi() << " q*p(GeV) " << std::scientific
-         << std::setprecision(3) << std::setw(10) << pars.momentum().mag() * pars.charge() * 1e-3 << " pt(Gev) "
+         << std::setprecision(3) << std::setw(10) << pars.momentum().mag() * pars.charge() * 1e-3 << " pT(GeV) "
          << std::scientific << std::setprecision(3) << std::setw(9) << pars.momentum().perp() * 1e-3;
-
+    
     return sout.str();
 }
 
@@ -981,5 +992,47 @@ MuonEDMPrinterTool::printId(const Trk::MeasurementBase& measurement) const
     }
 
     return idStr;
+}
+
+std::string MuonEDMPrinterTool::print(const Trk::MaterialEffectsBase& mat) const {
+    std::stringstream mat_string{};
+    const Trk::MaterialEffectsOnTrack* matOnTrk = dynamic_cast<const Trk::MaterialEffectsOnTrack*>(&mat);
+    if (matOnTrk) {
+        const Trk::ScatteringAngles* scatAng = matOnTrk->scatteringAngles();            
+        if (scatAng) {
+            mat_string<<" dPhi: "<<scatAng->deltaPhi()<<" +- "<<scatAng->sigmaDeltaPhi()<< " / ";
+            mat_string<<" dTheta: "<<scatAng->deltaTheta()<<" +- "<<scatAng->sigmaDeltaTheta()<<"   ";
+        }
+        const Trk::EnergyLoss* eloss = matOnTrk->energyLoss();
+        if (eloss) {
+            mat_string<<" deltaE: "<<eloss->deltaE();
+            if (std::abs(std::abs(eloss->sigmaMinusDeltaE()) - std::abs(eloss->sigmaPlusDeltaE())) > std::numeric_limits<float>::epsilon()) {
+                mat_string<<" +/- "<<eloss->sigmaPlusDeltaE()<<"/"<<eloss->sigmaMinusDeltaE();
+            } else {
+                mat_string<<" +- "<<eloss->sigmaDeltaE();
+            }
+            mat_string<<" Ion: "<<eloss->meanIoni()<<" +- "<<eloss->sigmaIoni();
+            mat_string<<" Rad: "<<eloss->meanRad()<<"  +- "<<eloss->sigmaRad();
+            mat_string<<" Length "<<eloss->length();
+        }
+        mat_string<<" ";
+        
+    }
+    return mat_string.str();
+}
+std::string MuonEDMPrinterTool::print(const Trk::AlignmentEffectsOnTrack& aeot) const {
+    std::stringstream aeot_string;
+    aeot_string<<"dTrans: "<<aeot.deltaTranslation()<<" +- "<<aeot.sigmaDeltaTranslation();
+    aeot_string<<" dAngle: "<<aeot.deltaAngle()<<" +- "<<aeot.sigmaDeltaAngle();
+    return aeot_string.str();
+}
+    
+std::string MuonEDMPrinterTool::print(const Trk::TrackStateOnSurface& tsos) const {
+   std::stringstream tsos_str{};
+   if (tsos.measurementOnTrack()) tsos_str<<"Measurement: "<<print(*tsos.measurementOnTrack())<<"\t";
+   if (tsos.materialEffectsOnTrack()) tsos_str<<"Material "<<print(*tsos.materialEffectsOnTrack())<<"\t";
+   if (tsos.trackParameters()) tsos_str<<"Parameters: "<<print(*tsos.trackParameters())<<"\t";
+   
+   return tsos_str.str(); 
 }
 }  // namespace Muon

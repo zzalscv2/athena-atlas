@@ -1,12 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRECHELPERTOOLS_H
 #define MUONRECHELPERTOOLS_H
-
-
-#include <string>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/AlgTool.h"
@@ -22,9 +19,6 @@
 #include "TrkParameters/TrackParameters.h"
 #include "TrkToolInterfaces/IResidualPullCalculator.h"
 
-static const InterfaceID IID_MuonEDMPrinterTool("Muon::MuonEDMPrinterTool", 1, 0);
-
-class MsgStream;
 
 namespace Trk {
 class Track;
@@ -32,6 +26,8 @@ class MuonTrackSummary;
 class ResidualPull;
 class MeasurementBase;
 class PrepRawData;
+class MaterialEffectsBase;
+class TrackStateOnSurface;
 }  // namespace Trk
 
 namespace Muon {
@@ -50,7 +46,7 @@ class MuonEDMPrinterTool : public AthAlgTool {
     MuonEDMPrinterTool(const std::string&, const std::string&, const IInterface*);
 
     /** @brief destructor */
-    ~MuonEDMPrinterTool(){};
+    ~MuonEDMPrinterTool()= default;
 
     /** @brief AlgTool initilize */
     StatusCode initialize();
@@ -58,6 +54,7 @@ class MuonEDMPrinterTool : public AthAlgTool {
     /** @brief access to tool interface */
     static const InterfaceID& interfaceID()
     {
+        static const InterfaceID IID_MuonEDMPrinterTool("Muon::MuonEDMPrinterTool", 1, 0);
         return IID_MuonEDMPrinterTool;
     }
 
@@ -119,9 +116,17 @@ class MuonEDMPrinterTool : public AthAlgTool {
     /** @brief  print ResidualPull object to string*/
     std::string print(const Trk::ResidualPull& resPull) const;
 
+    /** @brief print the material effects object to the string */
+    std::string print(const Trk::MaterialEffectsBase& mat) const;
+    /** @brief print the alignment effects on track object to the string*/
+    std::string print(const Trk::AlignmentEffectsOnTrack& aeot) const;
+    
+    /** @brief print the track state on surface to the string */
+    std::string print(const Trk::TrackStateOnSurface& tsos) const;
+
     /** @brief print measurements on track to string */
     std::string printMeasurements(const Trk::Track& track) const;
-
+    
     /** @brief print data part of Muon MeasurementBase to string */
     std::string printData(const Trk::MeasurementBase& measurement) const;
 
