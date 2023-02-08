@@ -19,3 +19,15 @@ def ZScanSeedFinderCfg(flags, name="ZScanSeedFinder", **kwargs):
 
     acc.setPrivateTools(CompFactory.Trk.ZScanSeedFinder(name, **kwargs))
     return acc
+
+def CrossDistancesSeedFinderCfg(flags, name="CrossDistancesSeedFinder", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "TrkDistanceFinder" not in kwargs:
+        from TrkConfig.TrkVertexSeedFinderUtilsConfig import (
+            SeedNewtonTrkDistanceFinderCfg)
+        kwargs.setdefault("TrkDistanceFinder", acc.popToolsAndMerge(
+            SeedNewtonTrkDistanceFinderCfg(flags)))
+
+    acc.setPrivateTools(CompFactory.Trk.CrossDistancesSeedFinder(name, **kwargs))
+    return acc

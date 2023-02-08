@@ -64,3 +64,36 @@ def AdaptiveVertexFitterCfg(flags, name="AdaptiveVertexFitter", **kwargs):
 
     acc.setPrivateTools(CompFactory.Trk.AdaptiveVertexFitter(name, **kwargs))
     return acc
+
+def TauAdaptiveVertexFitterCfg(flags, name="TauAdaptiveVertexFitter", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "SeedFinder" not in kwargs:
+        from TrkConfig.TrkVertexSeedFinderToolsConfig import (
+            CrossDistancesSeedFinderCfg)
+        kwargs.setdefault("SeedFinder", acc.popToolsAndMerge(
+            CrossDistancesSeedFinderCfg(flags)))
+
+    if "LinearizedTrackFactory" not in kwargs:
+        from TrkConfig.TrkVertexFitterUtilsConfig import (
+            AtlasFullLinearizedTrackFactoryCfg)
+        kwargs.setdefault("LinearizedTrackFactory", acc.popToolsAndMerge(
+            AtlasFullLinearizedTrackFactoryCfg(flags)))
+
+    if "ImpactPoint3dEstimator" not in kwargs:
+        from TrkConfig.TrkVertexFitterUtilsConfig import (
+            AtlasImpactPoint3dEstimatorCfg)
+        kwargs.setdefault("ImpactPoint3dEstimator", acc.popToolsAndMerge(
+            AtlasImpactPoint3dEstimatorCfg(flags)))
+
+    if "AnnealingMaker" not in kwargs:
+        from TrkConfig.TrkVertexFitterUtilsConfig import TauDetAnnealingMakerCfg
+        kwargs.setdefault("AnnealingMaker", acc.popToolsAndMerge(
+            TauDetAnnealingMakerCfg(flags)))
+
+    if "VertexSmoother" not in kwargs:
+        kwargs.setdefault("VertexSmoother", acc.popToolsAndMerge(
+            SequentialVertexSmootherCfg(flags)))
+
+    acc.setPrivateTools(CompFactory.Trk.AdaptiveVertexFitter(name, **kwargs))
+    return acc
