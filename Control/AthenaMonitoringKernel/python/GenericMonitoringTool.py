@@ -22,44 +22,29 @@ def _isOnline(flags):
         return athenaCommonFlags.isOnline()
 
 
-def GenericMonitoringTool(*args, **kwargs):
+def GenericMonitoringTool(flags, name='GenericMonitoringTool', **kwargs):
     '''Create GenericMonitoringTool'''
 
-    # TODO: currently we need to use *args for backwards compatibility until
-    # all instances of GenericMonitoringTool properly pass configuration flags
-    # as the first argument. *args parsing can be removed at that point
-    tool_name = 'GenericMonitoringTool'
-    flags = None
-
-    arg_list = list(args)
-    if arg_list:
-        tmp = arg_list.pop(0)
-        if tmp is None and arg_list: # empty flags passed
-            tmp = arg_list.pop(0)
-        if isinstance(tmp, AthConfigFlags):
-            flags = tmp
-            if arg_list:
-                tmp = arg_list.pop(0)
-        if isinstance(tmp, str):
-            tool_name = tmp
-
-    if flags is None:
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        flags = ConfigFlags
+    # For legacy config we allow flags=None:
+    if flags is not None and not isinstance(flags, AthConfigFlags):
+        raise RuntimeError("Flags need to be passed as first argument to GenericMonitoringTool but received: %s" % flags)
 
     if isComponentAccumulatorCfg():
-        return GenericMonitoringTool_v2(flags, tool_name, **kwargs)
+        gmt = GenericMonitoringTool_v2(name, **kwargs)
     else:
-        instance = GenericMonitoringTool_v1(tool_name, **kwargs)
-        instance.flags = flags
-        return instance
+        gmt = GenericMonitoringTool_v1(name, **kwargs)
+
+    # We pass the flags this way because the legacy Configurable class does not play
+    # nicely with additional arguments in its constructor:
+    gmt._configFlags = flags
+    return gmt
 
 
 class GenericMonitoringToolMixin:
     '''Mixin class for GenericMonitoringTool'''
 
-    def __init__(self, flags, **kwargs):
-        self.flags = flags
+    def __init__(self, **kwargs):
+        self._configFlags = None
         self._convention = ''
         self._defaultDuration = kwargs.pop('defaultDuration', None)
 
@@ -90,7 +75,7 @@ class GenericMonitoringToolMixin:
         # if an overall path for tool is specified, can leave path argument empty
         if getattr(self, 'HistPath', '') != '':
             kwargs.setdefault('path', '')
-        toadd = deffunc(self.flags, *args, **kwargs)
+        toadd = deffunc(self._configFlags, *args, **kwargs)
         if toadd:
             self.Histograms.append(toadd)
 
@@ -106,14 +91,14 @@ class GenericMonitoringTool_v1(_GMT1, GenericMonitoringToolMixin):
     def __init__(self, name='GenericMonitoringTool', **kwargs):
         # cannot use super() because configurable base classes don't use it either
         _GMT1.__init__(self, name, **kwargs)
-        GenericMonitoringToolMixin.__init__(self, None, **kwargs)
+        GenericMonitoringToolMixin.__init__(self, **kwargs)
 
 
 class GenericMonitoringTool_v2(_GMT2, GenericMonitoringToolMixin):
     '''GaudiConfig2 Configurable'''
-    def __init__(self, flags, name='GenericMonitoringTool', **kwargs):
+    def __init__(self, name='GenericMonitoringTool', **kwargs):
         _GMT2.__init__(self, name, **kwargs)
-        GenericMonitoringToolMixin.__init__(self, flags, **kwargs)
+        GenericMonitoringToolMixin.__init__(self, **kwargs)
 
 
 class GenericMonitoringArray:
