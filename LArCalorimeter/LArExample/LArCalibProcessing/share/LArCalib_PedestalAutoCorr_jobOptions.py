@@ -655,14 +655,14 @@ if ( doMonitoring ) :
       svcMgr.IOVDbSvc.Folders.append("<db>COOLONL_LAR/CONDBR2</db>/LAR/ElecCalibFlat/Pedestal")
       from AthenaCommon.AlgSequence import AthSequencer
       condSeq = AthSequencer("AthCondSeq")
-      condSeq+=LArPedestalCondAlg(ReadKey="/LAR/ElecCalibFlat/Pedestal",WriteKey="Pedestal2")
+      condSeq+=LArPedestalCondAlg(ReadKey="/LAR/ElecCalibFlat/Pedestal",WriteKey="LArPedestal")
       condSeq.CondInputLoader.Load.append(("CondAttrListCollection","/LAR/ElecCalibFlat/Pedestal"))
 
       ## Coherent noise plots
       include("LArMonTools/LArNoiseCorrelationMon_jobOptions.py")    
       for item in topSequence.LArMon.AthenaMonTools:
           if item.getName()=='LArNoiseCorrelationMon':
-            item.LArPedestalKey="Pedestal2"
+            item.LArPedestalKey="LArPedestal"
             item.IsCalibrationRun=True
             item.LArDigitContainerKey=Gain_forCoherentNoise
             item.TriggerChain=""

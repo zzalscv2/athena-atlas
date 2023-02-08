@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__=='__main__':
@@ -14,14 +14,13 @@ if __name__=='__main__':
    parser.add_argument('-r','--run', dest='run', default='00408918', help='Run number string as in input filename', type=str)
    parser.add_argument('-g','--gain', dest='gain', default="MEDIUM", help='Gain string', type=str)
    parser.add_argument('-p','--partition', dest='partition', default="Em", help='Data taking partition string', type=str)
-   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data22_calib", help='File prefix string', type=str)
+   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data23_calib", help='File prefix string', type=str)
    parser.add_argument('-i','--indirprefix', dest='dprefix', default="/eos/atlas/atlastier0/rucio/", help='Input directory prefix string', type=str)
    parser.add_argument('-d','--indir', dest='indir', default="", help='Full input dir string', type=str)
    parser.add_argument('-t','--trigger', dest='trig', default='calibration_', help='Trigger string in filename', type=str)
    parser.add_argument('-o','--outrwaveprefix', dest='outrwaveprefix', default="LArCaliWave", help='Prefix of CaliWave output root filename', type=str)
-   parser.add_argument('-l','--outppwaverefix', dest='outpwaveprefix', default="LArCaliWave", help='Prefix of CaliWave output pool filename', type=str)
-   parser.add_argument('-a','--outrofcprefix', dest='outrofcprefix', default="LArOFCCali", help='Prefix of output Cali OFC root filename', type=str)
-   parser.add_argument('-b','--outpofcprefix', dest='outpofcprefix', default="LArOFCCali", help='Prefix of output Cali OFC pool filename', type=str)
+   parser.add_argument('-l','--outpprefix', dest='outpprefix', default="LArCaliWave_OFC_Cali", help='Prefix of  output pool filename', type=str)
+   parser.add_argument('-j','--outrofcprefix', dest='outrofcprefix', default="LArOFCCali", help='Prefix of output Cali OFC root filename', type=str)
    parser.add_argument('-e','--outrdir', dest='outrdir', default="/eos/atlas/atlascerngroupdisk/det-larg/Temp/Weekly/ntuples", help='Output root file directory', type=str)
    parser.add_argument('-k','--outpdir', dest='outpdir', default="/eos/atlas/atlascerngroupdisk/det-larg/Temp/Weekly/poolFiles", help='Output pool file directory', type=str)
    parser.add_argument('-u','--insqlite', dest='insql', default="mysql.db", help='Input sqlite file with pedestals, in pool output dir.', type=str)
@@ -29,6 +28,8 @@ if __name__=='__main__':
    parser.add_argument('-m','--subdet', dest='subdet', default="EMB", help='Subdetector, EMB, EMEC, HEC or FCAL', type=str)
    parser.add_argument('-s','--side', dest='side', default="C", help='Detector side empty (means both), C or A', type=str)
    parser.add_argument('-c','--isSC', dest='supercells', default=False, help='is SC data ?', type=bool)
+   parser.add_argument('-a','--isRawdata', dest='rawdata', default=False, help='is raw data ?', type=bool)
+   parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Output sqlite file, in pool output dir.', type=str)
 
    args = parser.parse_args()
    if help in args and args.help is not None and args.help:
@@ -44,7 +45,10 @@ if __name__=='__main__':
       InputDir = args.indir
    else:
       gain=args.gain.lower().capitalize()
-      InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Delay-32s-"+gain+"-"+args.partition+"/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Delay-32s-"+gain+"-"+args.partition+".daq.RAW/"
+      if not args.supercells:
+         InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Delay-32s-"+gain+"-"+args.partition+"/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Delay-32s-"+gain+"-"+args.partition+".daq.RAW/"
+      else:   
+         InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Delay-32s-"+gain+"-"+args.partition+"-DT-RawData/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Delay-32s-"+gain+"-"+args.partition+"-DT-RawData.daq.RAW/"
 
    # move start IOVC slightly back
    #IOVBegin = int(args.run)-200
@@ -61,15 +65,15 @@ if __name__=='__main__':
    from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
    addLArCalibFlags(ConfigFlags)
    
-   #This allows set flags from the command-line (not strictly required for the AP) 
-   ConfigFlags.fillFromArgs()
-   
    #Now we set the flags as required for this particular job:
    #The following flags help finding the input bytestream files: 
    ConfigFlags.LArCalib.Input.Dir = InputDir
    ConfigFlags.LArCalib.Input.Type = args.trig
    ConfigFlags.LArCalib.Input.RunNumbers = [int(args.run),]
    ConfigFlags.LArCalib.Input.Database = args.outpdir + "/" +args.insql
+   gainNumMap={"HIGH":0,"MEDIUM":1,"LOW":2}
+   ConfigFlags.LArCalib.Gain=gainNumMap[args.gain.upper()]
+
 
    # Input files
    ConfigFlags.Input.Files=ConfigFlags.LArCalib.Input.Files
@@ -89,7 +93,7 @@ if __name__=='__main__':
       else:   
          ConfigFlags.LArCalib.Input.SubDet=args.subdet
  
-      if args.side == "":   
+      if not args.side:   
          ConfigFlags.LArCalib.Preselection.Side = [0,1]
       elif args.side == "C":
          ConfigFlags.LArCalib.Preselection.Side = [0]
@@ -111,34 +115,29 @@ if __name__=='__main__':
    
    #Configure the Bad-Channel database we are reading 
    #(the AP typically uses a snapshot in an sqlite file
-   ConfigFlags.LArCalib.BadChannelDB = "LAR_OFL"
    ConfigFlags.LArCalib.BadChannelTag = "-RUN2-UPD3-00"
+   ConfigFlags.LArCalib.BadChannelDB = args.outpdir + "/" + args.badsql
    
    #Output of this job:
    OutputCaliWaveRootFileName = args.outrwaveprefix + "_" + args.run
-   OutputCaliWavePoolFileName = args.outpwaveprefix + "_" + args.run
+   OutputPoolFileName = args.outpprefix + "_" + args.run
    OutputOFCCaliRootFileName = args.outrofcprefix + "_" + args.run
-   OutputOFCCaliPoolFileName = args.outpofcprefix + "_" + args.run
    OutputCaliWaveRootFileName += "_"+args.subdet
-   OutputCaliWavePoolFileName += "_"+args.subdet
+   OutputPoolFileName += "_"+args.subdet
    OutputOFCCaliRootFileName += "_"+args.subdet
-   OutputOFCCaliPoolFileName += "_"+args.subdet
 
    if ConfigFlags.LArCalib.Input.SubDet=="EM":
       OutputCaliWaveRootFileName +=  args.side
-      OutputCaliWavePoolFileName +=  args.side
+      OutputPoolFileName +=  args.side
       OutputOFCCaliRootFileName += args.side
-      OutputOFCCaliPoolFileName += args.side
 
    OutputCaliWaveRootFileName += ".root"
-   OutputCaliWavePoolFileName += ".pool.root"
+   OutputPoolFileName += ".pool.root"
    OutputOFCCaliRootFileName +=  ".root"
-   OutputOFCCaliPoolFileName += ".pool.root"
 
    ConfigFlags.LArCalib.Output.ROOTFile = args.outrdir + "/" + OutputCaliWaveRootFileName
-   ConfigFlags.LArCalib.Output.POOLFile = args.outpdir + "/" + OutputCaliWavePoolFileName
+   ConfigFlags.LArCalib.Output.POOLFile = args.outpdir + "/" + OutputPoolFileName
    ConfigFlags.LArCalib.Output.ROOTFile2 = args.outrdir + "/" + OutputOFCCaliRootFileName
-   ConfigFlags.LArCalib.Output.POOLFile2 = args.outpdir + "/" + OutputOFCCaliPoolFileName
    ConfigFlags.IOVDb.DBConnection="sqlite://;schema="+args.outpdir + "/" + args.outsql +";dbname=CONDBR2"
 
    #The global tag we are working with

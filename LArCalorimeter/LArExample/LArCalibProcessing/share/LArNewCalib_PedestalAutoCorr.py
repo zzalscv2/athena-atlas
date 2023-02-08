@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__=='__main__':
@@ -20,7 +20,7 @@ if __name__=='__main__':
    parser.add_argument('-r','--run', dest='run', default='00408913', help='Run number string as in input filename', type=str)
    parser.add_argument('-g','--gain', dest='gain', default="MEDIUM", help='Gain string', type=str)
    parser.add_argument('-p','--partition', dest='partition', default="All", help='Partition string', type=str)
-   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data22_calib", help='File prefix string', type=str)
+   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data23_calib", help='File prefix string', type=str)
    parser.add_argument('-i','--indirprefix', dest='dprefix', default="/eos/atlas/atlastier0/rucio/", help='Input directory prefix string', type=str)
    parser.add_argument('-d','--indir', dest='indir', default="", help='Full input dir string', type=str)
    parser.add_argument('-t','--trigger', dest='trig', default='calibration_', help='Trigger string in filename', type=str)
@@ -33,7 +33,7 @@ if __name__=='__main__':
    parser.add_argument('-s','--side', dest='side', default="C", help='Detector side empty (means both), C or A', type=str)
    parser.add_argument('-c','--isSC', dest='supercells', default=False, help='is SC data ?', type=bool)
    parser.add_argument('-a','--isRawdata', dest='rawdata', default=False, help='is raw data ?', type=bool)
-   parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Output sqlite file, in pool output dir.', type=str)
+   parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Input sqlite file with bad chans.', type=str)
 
    args = parser.parse_args()
    if help in args and args.help is not None and args.help:
@@ -50,11 +50,10 @@ if __name__=='__main__':
    else:
       gain=args.gain.lower().capitalize()
       if not args.supercells:
-         InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Pedestal-32s-"+gain+"-"+args.partition+"-DT-RawData/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Pedestal-32s-"+gain+"-"+args.partition+"-DT-RawData.daq.RAW/"
+         InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Pedestal-32s-"+gain+"-"+args.partition+"/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Pedestal-32s-"+gain+"-"+args.partition+".daq.RAW/"
       else:   
          InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Pedestal-32s-"+gain+"-"+args.partition+"-DT-RawData/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Pedestal-32s-"+gain+"-"+args.partition+"-DT-RawData.daq.RAW/"
 
-   
    # move start IOVC slightly back
    #IOVBegin = int(args.run)-200
    IOVBegin = int(args.run)
@@ -118,11 +117,12 @@ if __name__=='__main__':
    OutputPedAutoCorrRootFileName = args.outrprefix + "_" + args.run
    OutputPedAutoCorrPoolFileName = args.outpprefix + "_" + args.run
       
-   OutputPedAutoCorrRootFileName = OutputPedAutoCorrRootFileName + "_"+args.subdet
-   OutputPedAutoCorrPoolFileName = OutputPedAutoCorrPoolFileName + "_"+args.subdet
-   if ConfigFlags.LArCalib.Input.SubDet=="EM":
-      OutputPedAutoCorrRootFileName = OutputPedAutoCorrRootFileName + args.side
-      OutputPedAutoCorrPoolFileName = OutputPedAutoCorrPoolFileName + args.side
+   if args.subdet != "":
+      OutputPedAutoCorrRootFileName = OutputPedAutoCorrRootFileName + "_"+args.subdet
+      OutputPedAutoCorrPoolFileName = OutputPedAutoCorrPoolFileName + "_"+args.subdet
+      if ConfigFlags.LArCalib.Input.SubDet=="EM":
+         OutputPedAutoCorrRootFileName = OutputPedAutoCorrRootFileName + args.side
+         OutputPedAutoCorrPoolFileName = OutputPedAutoCorrPoolFileName + args.side
    OutputPedAutoCorrRootFileName = OutputPedAutoCorrRootFileName + ".root"
    OutputPedAutoCorrPoolFileName = OutputPedAutoCorrPoolFileName + ".pool.root"
 
