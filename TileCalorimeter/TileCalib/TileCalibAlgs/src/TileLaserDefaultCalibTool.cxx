@@ -462,13 +462,19 @@ StatusCode TileLaserDefaultCalibTool::execute(){
 	    }	   
 	  }
 
-	  for (int pmt=0; pmt<NPMTS; pmt++ ) {
-	    for ( int gain=0; gain<NGAINS; gain++ ) {
-	      m_PMT_Ped_LASERII[pmt][gain]   = laserObj->getMean(pmt, gain, TileLaserObject::calibType::Pedestal0);
-	      m_PMT_Ped_S_LASERII[pmt][gain] = laserObj->getSigma(pmt, gain, TileLaserObject::calibType::Pedestal0);	
-	    }
+	  // PMT0 is in position 10
+	  for ( int gain=0; gain<NGAINS; gain++ ) {
+	    m_PMT_Ped_LASERII[0][gain]   = laserObj->getMean(10, gain, TileLaserObject::calibType::Pedestal0);
+	    m_PMT_Ped_S_LASERII[0][gain] = laserObj->getSigma(10, gain, TileLaserObject::calibType::Pedestal0);	
 	  }
-	  // PHOCAL 
+	
+	  // PMT1 is in position 14
+	  for ( int gain=0; gain<NGAINS; gain++ ) {
+	    m_PMT_Ped_LASERII[1][gain]   = laserObj->getMean(14, gain, TileLaserObject::calibType::Pedestal0);
+	    m_PMT_Ped_S_LASERII[1][gain] = laserObj->getSigma(14, gain, TileLaserObject::calibType::Pedestal0);	
+	  }
+	
+	  // PHOCAL is in position 13
 	  for ( int gain=0; gain<NGAINS; gain++ ) {
 	    m_diode_Ped_LASERII[NDIODES][gain]   = laserObj->getMean(13, gain, TileLaserObject::calibType::Pedestal0);
 	    m_diode_Ped_S_LASERII[NDIODES][gain] = laserObj->getSigma(13, gain, TileLaserObject::calibType::Pedestal0);	     
