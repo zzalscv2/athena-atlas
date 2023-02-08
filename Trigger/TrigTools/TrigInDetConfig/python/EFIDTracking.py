@@ -10,7 +10,7 @@ include("InDetTrigRecExample/InDetTrigRec_jobOptions.py") # this is needed to ge
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("EFIDTracking")
 
-from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolDecorator
+from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
 
 #Create a view verifier for necessary data collections
 def get_idtrig_view_verifier(name):
@@ -105,7 +105,7 @@ def makeInDetPatternRecognition( config, verifier = 'IDTrigViewDataVerifier'  ):
       InDetTrigCA.InDetTrigConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
 
       from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
-      summaryTool = CAtoLegacyPublicToolDecorator(InDetTrigTrackSummaryToolCfg)
+      summaryTool = CAtoLegacyPublicToolWrapper(InDetTrigTrackSummaryToolCfg)
       
       # --- decide if use the association tool
       usePrdAssociationTool = False 

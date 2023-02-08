@@ -442,17 +442,18 @@ def SCT_SiliconConditionsCfg(flags, name="SCT_Silicon", **kwargs):
     # Condition algorithms
     algkwargs = {}
 
-    useDCS = kwargs.get("useDCS", True)
+    useDCS = kwargs.get("useDCS", flags.InDet.useSctDCS or flags.Common.isOnline)
     toolkwargs = {}
     if  useDCS:
       DCSConditionsTool = kwargs.get("DCSConditionsTool")
       if DCSConditionsTool:
-        algkwargs["UseState"] = DCSConditionsTool.ReadAllDBFolders
         algkwargs["DCSConditionsTool"] = DCSConditionsTool
       else:
-        algkwargs["UseState"] = not flags.Common.isOnline
-        algkwargs["DCSConditionsTool"] = acc.popToolsAndMerge(SCT_DCSConditionsCfg(flags))
-        
+        DCSConditionsTool = acc.popToolsAndMerge(SCT_DCSConditionsCfg(flags))
+        algkwargs["DCSConditionsTool"] = DCSConditionsTool
+
+      algkwargs["UseState"] = DCSConditionsTool.ReadAllDBFolders
+
       acc.addCondAlgo(CompFactory.SCT_SiliconHVCondAlg(name=f"{name}HVCondAlg", **algkwargs))
       acc.addCondAlgo(CompFactory.SCT_SiliconTempCondAlg(name=f"{name}TempCondAlg", **algkwargs))
 
