@@ -71,9 +71,7 @@ StatusCode TileL2Builder::initialize() {
   ATH_CHECK( detStore()->retrieve(m_tileHWID) );
 
   ATH_CHECK( m_emScaleKey.initialize() );
-
-  // get TileBadChanTool
-  ATH_CHECK( m_tileBadChanTool.retrieve() );
+  ATH_CHECK( m_badChannelsKey.initialize() );
 
   // Initialize
   this->m_hashFunc.initialize(m_tileHWID);
@@ -175,6 +173,9 @@ StatusCode TileL2Builder::process(int fragmin, int fragmax, TileL2Container *l2C
   SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
   ATH_CHECK( emScale.isValid() );
 
+  SG::ReadCondHandle<TileBadChannels> badChannels(m_badChannelsKey, ctx);
+  ATH_CHECK( badChannels.isValid() );
+
   // Get TileRawChannels
   SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_rawChannelContainerKey, ctx);
   ATH_CHECK( rawChannelContainer.isValid() );
@@ -227,7 +228,7 @@ StatusCode TileL2Builder::process(int fragmin, int fragmax, TileL2Container *l2C
         if (dspCont) {
           bad[channel] = rawChannel->quality() > 15.99;
         } else {
-          bad[channel] = m_tileBadChanTool->getAdcStatus(drawerIdx, channel, adc).isBad();
+          bad[channel] = badChannels->getAdcStatus(adc_id).isBad();
         }
         gain[channel] = adc;
       }
