@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // This file was largely imported from the Acts testing framework
@@ -140,6 +140,10 @@ Acts::ObjSurfaceWriter::write(const Acts::GeometryContext &gctx,
     else if(cylinderBounds) {
       
       auto cylinderSurface = dynamic_cast<const Acts::CylinderSurface*>(&surface);
+      if (cylinderSurface == nullptr) { // protection against nullptr
+	ACTS_ERROR("Unable to dynamic cast surface to Acts::CylinderSurface");
+	return;
+      }
 
       Acts::Polyhedron ph =
           cylinderSurface->polyhedronRepresentation(gctx, 10);
