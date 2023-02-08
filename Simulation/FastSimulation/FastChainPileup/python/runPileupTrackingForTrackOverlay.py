@@ -7,8 +7,12 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg, MessageSvcCf
 from AthenaConfiguration.Enums import Format, BeamType
 
 flags = initConfigFlags()
-flags.Input.Files = ['../RDO.29616558._005525.pool.root.1']
+flags.Input.Files = ['../RDO.31293587._000001.pool.root.1']
 flags.Input.isMC = True
+
+import sys
+flags.Exec.SkipEvents = int(sys.argv[1])*100
+flags.Exec.MaxEvents = 100
 #see MainServicesConfig.py
 flags.Concurrency.NumThreads = 1
 flags.Input.Format = Format.POOL
@@ -59,6 +63,7 @@ flags.LAr.ROD.NumberOfCollisions = 60 # default is 0, but Run-3 default is 60
 # Updates are based DigitizationConfigFlags.py
 flags.Digitization.HighGainEMECIW = False #default is True, but the LArConfigRun3.py sets this to False
 flags.Digitization.HighGainFCal = False # default is False
+flags.Digitization.ReadParametersFromDB = False
 # Updates are  based on TileConfigFlags.py
 flags.Tile.RunType = 'PHY' # physics run type. # Tile run types: UNDEFINED, PHY, PED, LAS, BILAS, CIS, MONOCIS
 flags.Tile.doOpt2 = False  # disable optimal filter with iterations
@@ -70,6 +75,7 @@ flags.Tile.BestPhaseFromCOOL = True # use best phase stored in DB
 from AthenaConfiguration.Enums import ProductionStep
 flags.Common.ProductionStep = ProductionStep.PileUpPresampling
 
+
 flags.lock()
 flags.dump()
 acc = MainServicesCfg(flags)
@@ -80,12 +86,12 @@ acc.merge(IOVDbSvcCfg(flags))
 # ----------------------------------------------------------------
 # Pool input
 # ----------------------------------------------------------------
-print("ConfigFlags.Input.Format", flags.Input.Format)
-print("ConfigFlags.Trigger.Online.isPartition", flags.Trigger.Online.isPartition)
+print("flags.Input.Format", flags.Input.Format)
+print("flags.Trigger.Online.isPartition", flags.Trigger.Online.isPartition)
 
 # Load input collection list from POOL metadata
 from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-acc.merge(SGInputLoaderCfg(flags, Load=[( 'xAOD::EventInfo' , 'StoreGateSvc+Bkg_EventInfo' )]))
+acc.merge(SGInputLoaderCfg( flags, Load=[( 'xAOD::EventInfo' , 'StoreGateSvc+Bkg_EventInfo' )]))
 
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 acc.merge(PoolReadCfg(flags))
@@ -101,8 +107,10 @@ from TileRecAlgs.TileDigitsFilterConfig import TileDigitsFilterCfg
 acc.merge(TileDigitsFilterCfg(flags))
 acc.getEventAlgo('TileDigitsFilter').InputDigitsContainer="Bkg_TileDigitsCnt"
 from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
-acc.merge(LArRawChannelBuilderAlgCfg(flags, LArDigitKey = "Bkg_LArDigitContainer_MC"))
-
+acc.merge(LArRawChannelBuilderAlgCfg(flags,  LArDigitKey = "Bkg_LArDigitContainer_MC"))
+from LArCellRec.LArNoisyROSummaryConfig import LArNoisyROSummaryCfg
+acc.merge(LArNoisyROSummaryCfg(flags))
+acc.getEventAlgo('LArNoisyROAlg').eventInfoKey="Bkg_EventInfo"
 #RuntimeError: Attempt to modify locked flag container
 # from LArConfiguration.LArConfigRun3 import LArConfigRun3PileUp
 # acc.merge(LArConfigRun3PileUp(flags))
@@ -128,9 +136,9 @@ acc.getCondAlgo('LuminosityCondAlg').actualMuKey="Bkg_EventInfo.actualInteractio
 acc.getCondAlgo('LuminosityCondAlg').averageMuKey="Bkg_EventInfo.averageInteractionsPerCrossing"
 
 # See TRTStandaloneConfig.py
-from InDetConfig.TRTStandaloneConfig import InDetTrtTrackScoringToolCfg
-flagsTRT = flags.cloneAndReplace("InDet.Tracking.ActivePass", "InDet.Tracking.TRTStandalonePass")
-InDetTRT_StandaloneScoringTool = acc.popToolsAndMerge(InDetTrtTrackScoringToolCfg(flagsTRT))
+from InDetConfig.InDetTrackScoringToolsConfig import InDetTRT_StandaloneScoringToolCfg
+flagsTRT = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "InDet.Tracking.TRTStandalonePass")
+InDetTRT_StandaloneScoringTool = acc.popToolsAndMerge(InDetTRT_StandaloneScoringToolCfg(flagsTRT))
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.EventInfoKey="Bkg_EventInfo"
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.actualInteractionsPerCrossingKey="Bkg_EventInfo.actualInteractionsPerCrossing"
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.averageInteractionsPerCrossingKey="Bkg_EventInfo.averageInteractionsPerCrossing"
@@ -153,7 +161,7 @@ itemsToRecord = ['TrackCollection#CombinedInDetTracks', 'TrackCollection#Disappe
                  'InDet::TRT_DriftCircleContainer#TRT_DriftCircles', "InDet::PixelClusterContainer#PixelClusters", "InDet::SCT_ClusterContainer#SCT_Clusters"]
 
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-acc.merge(OutputStreamCfg(flags, "RDO", ItemList=itemsToRecord))
+acc.merge(OutputStreamCfg(flags,"RDO", ItemList=itemsToRecord))
 acc.getEventAlgo("EventInfoTagBuilder").EventInfoKey="Bkg_EventInfo" # see OutputStreamConfig.py
 
 # Keep input RDO objects in the output file
