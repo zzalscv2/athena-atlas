@@ -2,9 +2,7 @@
 #
 
 # menu components
-from AthenaCommon.CFElements import seqAND, findAllAlgorithms
-from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable, appendCAtoAthena
-from AthenaCommon.Configurable import ConfigurableCABehavior
+from AthenaCommon.CFElements import seqAND
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
@@ -67,36 +65,18 @@ def getBJetSequence(flags, jc_name=None):
         inputJets=InputMakerAlg.InViewJets
     )
 
-    with ConfigurableCABehavior():
-        # Flavour Tagging
-        from TriggerMenuMT.HLT.Bjet.BjetFlavourTaggingConfiguration import getFlavourTagging
-        acc_flavourTaggingAlgs = getFlavourTagging(flags,
-            inputJets=str(InputMakerAlg.InViewJets),
-            inputVertex=prmVtxKey,
-            inputTracks=PTTrackParticles[0],
-            BTagName=BTagName,
-            inputMuons=None
-        )
-
-    # Conversion of flavour-tagging algorithms from new to old-style
-    # 1) We need to do the algorithms manually and then remove them from the CA
-    #
-    # Please see the discussion on
-    # https://gitlab.cern.ch/atlas/athena/-/merge_requests/46951#note_4854474
-    # and the description in that merge request.
-    flavourTaggingAlgs = [conf2toConfigurable(alg)
-                          for alg in findAllAlgorithms(acc_flavourTaggingAlgs._sequence)]
+    from TriggerMenuMT.HLT.Bjet.BjetFlavourTaggingConfiguration import getFlavourTagging
+    flavourTaggingAlgs = algorithmCAToGlobalWrapper(
+        getFlavourTagging,
+        flags,
+        inputJets=str(InputMakerAlg.InViewJets),
+        inputVertex=prmVtxKey,
+        inputTracks=PTTrackParticles[0],
+        BTagName=BTagName,
+        inputMuons=None
+    )
     bJetBtagSequence = seqAND( f"bJetBtagSequence_{jc_name}", secondStageAlgs + flavourTaggingAlgs )
 
-    # you can't use accumulator.wasMerged() here because the above
-    # code only merged the algorithms. Instead we rely on this hacky
-    # looking construct.
-    acc_flavourTaggingAlgs._sequence = []
-
-    # 2) the rest is done by the generic helper
-    # this part is needed to accomodate parts of flavor tagging that
-    # aren't algorithms, e.g. JetTagCalibration.
-    appendCAtoAthena(acc_flavourTaggingAlgs)
 
     InputMakerAlg.ViewNodeName = f"bJetBtagSequence_{jc_name}"
 
