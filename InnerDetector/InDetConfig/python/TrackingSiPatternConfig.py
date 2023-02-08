@@ -16,10 +16,13 @@ def TrackingSiPatternCfg(flags,
     # --- get list of already associated hits (always do this, even if no other tracking ran before)
     #
     if flags.InDet.Tracking.ActiveConfig.usePrdAssociationTool:
-        from InDetConfig.InDetTrackPRD_AssociationConfig import InDetTrackPRD_AssociationCfg
-        acc.merge(InDetTrackPRD_AssociationCfg(flags,
-                                               name = 'InDetTrackPRD_Association' + flags.InDet.Tracking.ActiveConfig.extension,
-                                               TracksName = list(InputCollections)))
+        from InDetConfig.InDetTrackPRD_AssociationConfig import (
+            InDetTrackPRD_AssociationCfg)
+        acc.merge(InDetTrackPRD_AssociationCfg(
+            flags,
+            name = 'InDetTrackPRD_Association' + \
+            flags.InDet.Tracking.ActiveConfig.extension,
+            TracksName = list(InputCollections)))
 
     # ------------------------------------------------------------
     #
@@ -27,9 +30,11 @@ def TrackingSiPatternCfg(flags,
     #
     # ------------------------------------------------------------
 
-    from InDetConfig.SiSPSeededTrackFinderConfig import SiSPSeededTrackFinderCfg
-    acc.merge(SiSPSeededTrackFinderCfg(flags,
-                                       TracksLocation = SiSPSeededTrackCollectionKey))
+    from InDetConfig.SiSPSeededTrackFinderConfig import (
+        SiSPSeededTrackFinderCfg)
+    acc.merge(SiSPSeededTrackFinderCfg(
+        flags,
+        TracksLocation = SiSPSeededTrackCollectionKey))
 
     from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
     if flags.InDet.doTruth:
@@ -45,14 +50,17 @@ def TrackingSiPatternCfg(flags,
     #
     # ------------------------------------------------------------
 
-    from TrkConfig.TrkAmbiguitySolverConfig import TrkAmbiguityScoreCfg, TrkAmbiguitySolverCfg
-    acc.merge(TrkAmbiguityScoreCfg(flags,
-                                   SiSPSeededTrackCollectionKey = SiSPSeededTrackCollectionKey,
-                                   ClusterSplitProbContainer = ClusterSplitProbContainer))
+    from TrkConfig.TrkAmbiguitySolverConfig import (
+        TrkAmbiguityScoreCfg, TrkAmbiguitySolverCfg)
+    acc.merge(TrkAmbiguityScoreCfg(
+        flags,
+        SiSPSeededTrackCollectionKey = SiSPSeededTrackCollectionKey,
+        ClusterSplitProbContainer = ClusterSplitProbContainer))
 
-    acc.merge(TrkAmbiguitySolverCfg(flags,
-                                    ResolvedTrackCollectionKey = ResolvedTrackCollectionKey,
-                                    ClusterSplitProbContainer = ClusterSplitProbContainer))
+    acc.merge(TrkAmbiguitySolverCfg(
+        flags,
+        ResolvedTrackCollectionKey = ResolvedTrackCollectionKey,
+        ClusterSplitProbContainer = ClusterSplitProbContainer))
 
     if flags.InDet.doTruth:
         acc.merge(InDetTrackTruthCfg(

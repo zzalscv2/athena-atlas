@@ -16,10 +16,13 @@ def ITkTrackingSiPatternCfg(flags,
     # --- get list of already associated hits (always do this, even if no other tracking ran before)
     #
     if flags.ITk.Tracking.ActiveConfig.usePrdAssociationTool:
-        from InDetConfig.InDetTrackPRD_AssociationConfig import ITkTrackPRD_AssociationCfg
-        acc.merge(ITkTrackPRD_AssociationCfg(flags,
-                                             name = 'ITkTrackPRD_Association' + flags.ITk.Tracking.ActiveConfig.extension,
-                                             TracksName = list(InputCollections)))
+        from InDetConfig.InDetTrackPRD_AssociationConfig import (
+            ITkTrackPRD_AssociationCfg)
+        acc.merge(ITkTrackPRD_AssociationCfg(
+            flags,
+            name = 'ITkTrackPRD_Association' + \
+            flags.ITk.Tracking.ActiveConfig.extension,
+            TracksName = list(InputCollections)))
 
     # ------------------------------------------------------------
     #
@@ -30,20 +33,29 @@ def ITkTrackingSiPatternCfg(flags,
     #
     # --- Deducing configuration from the flags 
     #
-    from ActsInterop.TrackingComponentConfigurer import TrackingComponentConfigurer
+    from ActsInterop.TrackingComponentConfigurer import (
+        TrackingComponentConfigurer)
     configuration_settings = TrackingComponentConfigurer(flags)
 
+    # Athena Track
     if configuration_settings.doAthenaTrack:
-        from InDetConfig.SiSPSeededTrackFinderConfig import ITkSiSPSeededTrackFinderCfg
+
+        from InDetConfig.SiSPSeededTrackFinderConfig import (
+            ITkSiSPSeededTrackFinderCfg)
         SiSPSeededTrackFinderCfg = ITkSiSPSeededTrackFinderCfg
         if flags.ITk.Tracking.ActiveConfig.extension == "ConversionFinding":
             from InDetConfig.SiSPSeededTrackFinderConfig import ITkSiSPSeededTrackFinderROIConvCfg
             SiSPSeededTrackFinderCfg = ITkSiSPSeededTrackFinderROIConvCfg
-        acc.merge(SiSPSeededTrackFinderCfg(flags,
-                                           TracksLocation = SiSPSeededTrackCollectionKey))
 
+        acc.merge(SiSPSeededTrackFinderCfg(
+            flags,
+            TracksLocation = SiSPSeededTrackCollectionKey))
+
+    # ACTS seed
     if configuration_settings.doActsSeed:
-        from ActsTrkSeeding.ActsTrkSeedingConfig import ActsTrkSeedingFromAthenaCfg
+
+        from ActsTrkSeeding.ActsTrkSeedingConfig import (
+            ActsTrkSeedingFromAthenaCfg)
         acc.merge(ActsTrkSeedingFromAthenaCfg(flags))
         
         if flags.ITk.Tracking.ActiveConfig.extension == "ConversionFinding":
@@ -51,12 +63,16 @@ def ITkTrackingSiPatternCfg(flags,
             log = logging.getLogger( 'ITkTrackingSiPattern' )
             log.warning('ROI-based track-finding is not available yet in ACTS, so the default one is used')
 
+    # ACTS track
     if configuration_settings.doActsTrack:
+
         from ActsTrkFinding.ActsTrkFindingConfig import ActsTrkFindingCfg
         if configuration_settings.doAthenaTrack:
             acc.merge(ActsTrkFindingCfg(flags))
         else: # send output TrackCollection to Athena ambiguity scorer etc
-            acc.merge(ActsTrkFindingCfg(flags, TracksLocation=SiSPSeededTrackCollectionKey))
+            acc.merge(ActsTrkFindingCfg(
+                flags,
+                TracksLocation=SiSPSeededTrackCollectionKey))
 
     from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
     if flags.ITk.Tracking.doTruth:
@@ -71,20 +87,28 @@ def ITkTrackingSiPatternCfg(flags,
     # ---------- Ambiguity solving
     #
     # ------------------------------------------------------------
+
     if flags.ITk.Tracking.doFastTracking:
+
         from TrkConfig.TrkCollectionAliasAlgConfig import CopyAlgForAmbiCfg
-        acc.merge(CopyAlgForAmbiCfg(flags, "ITkCopyAlgForAmbi"+flags.ITk.Tracking.ActiveConfig.extension,
-                                    CollectionName = SiSPSeededTrackCollectionKey, # Input
-                                    AliasName = ResolvedTrackCollectionKey))       # Output
+        acc.merge(CopyAlgForAmbiCfg(
+            flags,
+            "ITkCopyAlgForAmbi"+flags.ITk.Tracking.ActiveConfig.extension,
+            CollectionName = SiSPSeededTrackCollectionKey, # Input
+            AliasName = ResolvedTrackCollectionKey))       # Output
 
     else:
-        from TrkConfig.TrkAmbiguitySolverConfig import ITkTrkAmbiguityScoreCfg, ITkTrkAmbiguitySolverCfg
-        acc.merge(ITkTrkAmbiguityScoreCfg(flags,
-                                          SiSPSeededTrackCollectionKey = SiSPSeededTrackCollectionKey,
-                                          ClusterSplitProbContainer = ClusterSplitProbContainer))
 
-        acc.merge(ITkTrkAmbiguitySolverCfg(flags,
-                                           ResolvedTrackCollectionKey = ResolvedTrackCollectionKey))
+        from TrkConfig.TrkAmbiguitySolverConfig import (
+            ITkTrkAmbiguityScoreCfg, ITkTrkAmbiguitySolverCfg)
+        acc.merge(ITkTrkAmbiguityScoreCfg(
+            flags,
+            SiSPSeededTrackCollectionKey = SiSPSeededTrackCollectionKey,
+            ClusterSplitProbContainer = ClusterSplitProbContainer))
+
+        acc.merge(ITkTrkAmbiguitySolverCfg(
+            flags,
+            ResolvedTrackCollectionKey = ResolvedTrackCollectionKey))
 
     if flags.ITk.Tracking.doTruth:
         acc.merge(ITkTrackTruthCfg(
