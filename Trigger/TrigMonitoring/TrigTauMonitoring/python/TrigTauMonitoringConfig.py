@@ -189,6 +189,13 @@ class TrigTauMonAlgBuilder:
        # Tag and probe
        'HLT_e26_lhtight_ivarloose_tau20_mediumRNN_tracktwoMVA_03dRAB_L1EM22VHI',
        'HLT_mu26_ivarmedium_tau20_mediumRNN_tracktwoMVA_03dRAB_L1MU14FCH',
+       # LRT 
+       'HLT_tau25_idperf_trackLRT_L1TAU12IM',
+       'HLT_tau80_idperf_trackLRT_L1TAU60',
+       'HLT_tau160_idperf_trackLRT_L1TAU100',
+       'HLT_tau25_mediumRNN_trackLRT_L1TAU12IM', 
+       'HLT_tau80_mediumRNN_trackLRT_L1TAU60',
+       'HLT_tau160_mediumRNN_trackLRT_L1TAU100',
        # Phase-I
        'HLT_tau25_idperf_tracktwoMVA_L1eTAU20',
        'HLT_tau25_perf_tracktwoMVA_L1eTAU20', 
