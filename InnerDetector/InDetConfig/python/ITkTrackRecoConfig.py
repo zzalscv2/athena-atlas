@@ -196,7 +196,7 @@ def ITkTrackRecoCfg(flags):
                 InDetPhysHitDecoratorAlgCfg)
             result.merge(InDetPhysHitDecoratorAlgCfg(flags))
     
-    if flags.ITk.Tracking.doStoreTrackSeeds:
+    if flags.Tracking.doStoreTrackSeeds:
         TrackContainer = "SiSPSeedSegments"
         result.merge(ITkTrackTruthCfg(
             flags,
@@ -250,7 +250,7 @@ def ITkTrackRecoOutputCfg(flags):
         toESD += ["DetailedTrackTruthCollection#DetailedTrackTruth"]
 
     # add tracks
-    if flags.ITk.Tracking.doStoreTrackSeeds:
+    if flags.Tracking.doStoreTrackSeeds:
         toESD += ["TrackCollection#SiSPSeedSegments"]
 
     toESD += ["TrackCollection#CombinedITkTracks"]
@@ -282,7 +282,7 @@ def ITkTrackRecoOutputCfg(flags):
             )
         ]
 
-    if flags.ITk.Tracking.doStoreTrackSeeds:
+    if flags.Tracking.doStoreTrackSeeds:
         toAOD += [
             "xAOD::TrackParticleContainer#SiSPSeedSegmentsTrackParticles",
             "xAOD::TrackParticleAuxContainer#SiSPSeedSegmentsTrackParticlesAux."

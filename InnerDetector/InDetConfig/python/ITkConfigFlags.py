@@ -48,7 +48,6 @@ def createITkConfigFlags():
   itkcf.addFlag("ITk.checkDeadPixelsOnTrack", True) # Enable check for dead modules and FEs
   itkcf.addFlag("ITk.selectStripIntimeHits", lambda prevFlags: not(prevFlags.Beam.Type is BeamType.Cosmics) ) # defines if the X1X mode is used for the offline or not
 
-  itkcf.addFlag("ITk.Tracking.doStoreTrackSeeds", False) # Turn on to save the Track Seeds in a xAOD track collecting for development studies
   itkcf.addFlag("ITk.Tracking.doDigitalClustering", False)
   itkcf.addFlag("ITk.Tracking.trackFitterType", TrackFitterType.GlobalChi2Fitter) # control which fitter to be used: 'DistributedKalmanFilter', 'GlobalChi2Fitter', 'GaussianSumFilter'
   itkcf.addFlag("ITk.Tracking.doFastTracking", False) # Turn running of ITk FastTracking on and off
@@ -66,7 +65,6 @@ def createITkConfigFlags():
   itkcf.addFlag("ITk.Tracking.pixelClusterSplitProb2", 0.45) # Cut value for splitting clusters into three parts
   itkcf.addFlag("ITk.Tracking.perigeeExpression", "BeamLine"   ) # Express track parameters wrt. to : 'BeamLine','BeamSpot','Vertex' (first primary vertex)
   itkcf.addFlag("ITk.Tracking.doSharedHits", True) # control if the shared hits are recorded in TrackParticles
-  itkcf.addFlag("ITk.Tracking.materialInteractions", True)
   itkcf.addFlag("ITk.Tracking.writeSeedValNtuple", False) # Turn writing of seed validation ntuple on and off
   itkcf.addFlag("ITk.Tracking.writeExtendedPRDInfo", False)
   

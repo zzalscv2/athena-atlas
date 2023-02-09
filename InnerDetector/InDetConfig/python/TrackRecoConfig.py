@@ -602,7 +602,7 @@ def InDetTrackRecoCfg(flags):
             ObserverTrackParticleCnvAlgCfg)
         result.merge(ObserverTrackParticleCnvAlgCfg(flags))
 
-    if flags.InDet.Tracking.doStoreTrackSeeds:
+    if flags.Tracking.doStoreTrackSeeds:
         from xAODTrackingCnv.xAODTrackingCnvConfig import (
             TrackParticleCnvAlgNoPIDCfg)
         TrackContainer = "SiSPSeedSegments"
@@ -794,7 +794,7 @@ def InDetTrackRecoOutputCfg(flags):
               ClusterSplitProbabilityContainerName(flags)]
 
     # add tracks
-    if flags.InDet.Tracking.doStoreTrackSeeds:
+    if flags.Tracking.doStoreTrackSeeds:
         toESD += ["TrackCollection#SiSPSeedSegments"]
 
     if flags.InDet.Tracking.doTrackSegmentsPixel:
@@ -900,7 +900,7 @@ def InDetTrackRecoOutputCfg(flags):
             toAOD += ["TrackTruthCollection#InDetObservedTrackTruthCollection"]
             toAOD += ["DetailedTrackTruthCollection#ObservedDetailedTracksTruth"]
 
-    if flags.InDet.Tracking.doStoreTrackSeeds:
+    if flags.Tracking.doStoreTrackSeeds:
         toAOD += [
             "xAOD::TrackParticleContainer#SiSPSeedSegmentsTrackParticles",
             "xAOD::TrackParticleAuxContainer#SiSPSeedSegmentsTrackParticlesAux."

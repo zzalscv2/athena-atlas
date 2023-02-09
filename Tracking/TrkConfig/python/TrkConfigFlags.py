@@ -6,6 +6,13 @@ from AthenaConfiguration.Enums import BeamType, LHCPeriod
 def createTrackingConfigFlags():
     icf = AthConfigFlags()
 
+    icf.addFlag("Tracking.materialInteractions", lambda prevFlags:
+                prevFlags.Beam.Type is not BeamType.SingleBeam)
+    # Control which type of particle hypothesis to use for the material interactions
+    # 0=non-interacting,1=electron,2=muon,3=pion,4=kaon,5=proton. See ParticleHypothesis.h for full definition.
+    icf.addFlag("Tracking.materialInteractionsType", lambda prevFlags:
+                2 if prevFlags.Beam.Type is BeamType.Cosmics else 3)
+
     def doLargeD0(flags):
         if flags.GeoModel.Run<=LHCPeriod.Run3:
            return not(flags.Beam.Type in [BeamType.SingleBeam, \
@@ -17,9 +24,11 @@ def createTrackingConfigFlags():
         else: # LRT disabled by default for Run4 for now
             return False
 
-
     icf.addFlag("Tracking.doLargeD0", doLargeD0)
     icf.addFlag("Tracking.storeSeparateLargeD0Container", True)
+
+    # Turn on to save the Track Seeds in a xAOD track collecting for development studies
+    icf.addFlag("Tracking.doStoreTrackSeeds", False)
 
     # The following flags are only used in InDet configurations for now
     # No corresponding ITk config is available yet
