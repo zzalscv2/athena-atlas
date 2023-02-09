@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //======================================================
@@ -87,9 +87,9 @@ StatusCode InDet::TRT_SegmentsToTrack::initialize()
 
   // Initialize handle keys
   ATH_CHECK(m_inputSegmentCollectionName.initialize());
-  ATH_CHECK(m_multiTruthCollectionTRTName.initialize());
-  ATH_CHECK(m_barrelSegments.initialize());
-  ATH_CHECK(m_endcapSegments.initialize());
+  ATH_CHECK(m_multiTruthCollectionTRTName.initialize(!m_multiTruthCollectionTRTName.empty()));
+  ATH_CHECK(m_barrelSegments.initialize(m_combineSegments));
+  ATH_CHECK(m_endcapSegments.initialize(m_combineSegments));
   ATH_CHECK(m_outputTrackCollectionName.initialize());
   ATH_CHECK(m_BECCollectionName.initialize());
 
@@ -102,9 +102,9 @@ StatusCode InDet::TRT_SegmentsToTrack::initialize()
 
   CHECK(m_extrapolator.retrieve());
   ATH_CHECK(m_trkSummaryTool.retrieve( DisableTool{ m_trkSummaryTool.empty() } ));
-  ATH_CHECK(m_assoTool.retrieve( DisableTool{ m_assoTool.empty() || (m_trkSummaryTool.empty() && m_assoMapName.key().empty()) } ));
-  ATH_CHECK(m_inputAssoMapName.initialize( !m_inputAssoMapName.key().empty() && m_assoTool.isEnabled()));
-  ATH_CHECK(m_assoMapName.initialize( !m_assoMapName.key().empty() && m_assoTool.isEnabled()));
+  ATH_CHECK(m_assoTool.retrieve( DisableTool{ m_assoTool.empty() || (m_trkSummaryTool.empty() && m_assoMapName.empty()) } ));
+  ATH_CHECK(m_inputAssoMapName.initialize( !m_inputAssoMapName.empty() && m_assoTool.isEnabled()));
+  ATH_CHECK(m_assoMapName.initialize( !m_assoMapName.empty() && m_assoTool.isEnabled()));
   return StatusCode::SUCCESS;
 }
 
@@ -166,14 +166,14 @@ StatusCode InDet::TRT_SegmentsToTrack::execute()
   std::vector<std::unique_ptr<Trk::Track> > output_track_collection;
   //try to get truth information
 
-  SG::ReadHandle<PRD_MultiTruthCollection> truthCollectionTRT(m_multiTruthCollectionTRTName,ctx);
+  if(not m_multiTruthCollectionTRTName.empty()){
+    SG::ReadHandle<PRD_MultiTruthCollection> truthCollectionTRT(m_multiTruthCollectionTRTName,ctx);
 
-  if (!truthCollectionTRT.isValid()){
-    ATH_MSG_INFO("Could not open PRD_MultiTruthCollection : " <<  m_multiTruthCollectionTRTName.key());
-    sc=StatusCode::SUCCESS; // not having truth information is not a failure
+    if (!truthCollectionTRT.isValid()){
+      ATH_MSG_FATAL("Could not open PRD_MultiTruthCollection : " <<  m_multiTruthCollectionTRTName.key());
+      return StatusCode::FAILURE;
+    }
   }
-
-
 
   Trk::SegmentCollection::const_iterator iseg = inputSegments->begin();
   Trk::SegmentCollection::const_iterator isegEnd = inputSegments->end();
@@ -427,12 +427,16 @@ int InDet::TRT_SegmentsToTrack::getNumberReal(const InDet::TRT_DriftCircle* drif
   int numBarcodes = 0;
   using iter = PRD_MultiTruthCollection::const_iterator;
 
-  SG::ReadHandle<PRD_MultiTruthCollection> truthCollectionTRT(m_multiTruthCollectionTRTName,ctx);
+  if(m_multiTruthCollectionTRTName.empty()) return 0;
 
-  if(!truthCollectionTRT.isValid()) return 0;
-  std::pair<iter,iter> range = truthCollectionTRT->equal_range(driftcircle->identify());
-  for(iter i = range.first; i != range.second; ++i){
-    numBarcodes++;
+  else{
+    SG::ReadHandle<PRD_MultiTruthCollection> truthCollectionTRT(m_multiTruthCollectionTRTName,ctx);
+    if(truthCollectionTRT.isValid()){
+      std::pair<iter,iter> range = truthCollectionTRT->equal_range(driftcircle->identify());
+      for(iter i = range.first; i != range.second; ++i){
+	numBarcodes++;
+      }
+    }
   }
   return numBarcodes;
 }
