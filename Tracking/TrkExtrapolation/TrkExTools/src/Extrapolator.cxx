@@ -2370,13 +2370,15 @@ Trk::Extrapolator::extrapolateImpl(const EventContext& ctx,
   // and for oscillation protection ----------------------------------------------------
   const Trk::TrackingVolume* previousVolume = nullptr;
   // -----------------------------------------------------------------------------------
-  std::string startVolumeName = (nextVolume) ? nextVolume->volumeName() : "Unknown (ERROR)";
-  std::string destVolumeName =
-    destVolume ? destVolume->volumeName() : "Unknown (blind extrapolation)";
 
-  ATH_MSG_VERBOSE("  [" << cache.m_methodSequence << "] extrapolate() " << startVolumeName
-                        << " ->  " << destVolumeName);
-  ATH_MSG_VERBOSE("  [+] Starting position determined - at " << positionOutput(parm->position()));
+  ATH_MSG_VERBOSE(
+      "  [" << cache.m_methodSequence << "] extrapolate() "
+            << ((nextVolume) ? nextVolume->volumeName() : "Unknown (ERROR)")
+            << " ->  "
+            << (destVolume ? destVolume->volumeName()
+                           : "Unknown (blind extrapolation)"));
+  ATH_MSG_VERBOSE("  [+] Starting position determined - at "
+                  << positionOutput(parm->position()));
   if (nextLayer) {
     ATH_MSG_VERBOSE("  [+] Starting layer determined  - with " << layerRZoutput(*nextLayer));
   }
