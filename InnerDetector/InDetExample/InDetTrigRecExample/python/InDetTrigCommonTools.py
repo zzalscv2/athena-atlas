@@ -9,10 +9,6 @@
 
 """
 
-from AthenaCommon.Logging import logging
-log = logging.getLogger('InDetTrigCommonTools')
-
-
 from AthenaCommon.GlobalFlags import globalflags
 
 

@@ -271,17 +271,6 @@ def ambiguityScoringTool_builder(name, config, trackSummaryTool ):
                           minTRTonTrk         = 0 )
                          
 
-    #Change some of the parameters in case of beamgas signature
-    if config.name == 'beamgas':
-        from InDetTrigRecExample.ConfiguredNewTrackingTrigCuts import EFIDTrackingCutsBeamGas
-        kwargs = setDefaults( kwargs,
-                              minPt          = EFIDTrackingCutsBeamGas.minPT(),
-                              maxRPhiImp     = EFIDTrackingCutsBeamGas.maxPrimaryImpact(),
-                              maxZImp        = EFIDTrackingCutsBeamGas.maxZImpact(),
-                              minSiClusters  = EFIDTrackingCutsBeamGas.minClusters(),
-                              maxSiHoles     = EFIDTrackingCutsBeamGas.maxHoles(),
-                              useSigmaChi2   = True )
-        
     from InDetTrackScoringTools.InDetTrackScoringToolsConf import InDet__InDetAmbiScoringTool
 
     scoringTool = InDet__InDetAmbiScoringTool(name=name, **kwargs )
@@ -314,11 +303,7 @@ def trackFitterTool_getter(config):
 def trackSelectionTool_getter(config):
       #TODO this might need to be revisited!
 
-      if config.name == 'beamgas':
-        from InDetTrigRecExample.InDetTrigConfigRecLoadToolsBeamGas import InDetTrigAmbiTrackSelectionToolBeamGas
-        return InDetTrigAmbiTrackSelectionToolBeamGas
-
-      elif config.name == 'cosmics':
+      if config.name == 'cosmics':
         from InDetTrigRecExample.InDetTrigConfigRecLoadToolsCosmics import  InDetTrigAmbiTrackSelectionToolCosmicsN
         return InDetTrigAmbiTrackSelectionToolCosmicsN
 
