@@ -61,6 +61,10 @@ else:
 
    del logLevel
 
+   ## Now clone and use locked flags for services configuration
+   flags = flags.clone()
+   flags.lock()
+
    ServiceMgr += getMessageSvc(flags, theApp.MessageSvcType)
    theApp.setOutputLevel(flags.Exec.OutputLevel)
 
