@@ -6,12 +6,12 @@
 # art-include: master/Athena
 # art-include: 23.0/Athena
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, PyStep
 
 ##################################################
 # Helper functions to build the test steps
 ##################################################
-from TrigP1Test.TrigP1TestSteps import filterBS, decodeBS
+from TrigP1Test.TrigP1TestSteps import filterBS, decodeBS, check_hlt_properties
 
 ##################################################
 # Test definition
@@ -34,10 +34,14 @@ filterCost = filterBS("CostMonitoring")
 decodeCost = decodeBS("CostMonitoring")
 decodeCost.args += ' -c "ModuleID=1"'
 
+# Check a few important job options
+checkProperties = PyStep.PyStep(check_hlt_properties, name="CheckProperties")
+checkProperties.required = True
+
 test = Test.Test()
 test.art_type = 'build'
 test.exec_steps = [ex, filterMain, decodeMain, filterCost, decodeCost]
-test.check_steps = CheckSteps.default_check_steps(test)
+test.check_steps = CheckSteps.default_check_steps(test) + [checkProperties]
 
 import sys
 sys.exit(test.run())
