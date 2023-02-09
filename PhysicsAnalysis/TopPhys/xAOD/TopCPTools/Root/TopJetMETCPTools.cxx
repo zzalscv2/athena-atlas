@@ -58,11 +58,11 @@ namespace top {
     m_jetAntiKt4_MCAFII_PFlow_ConfigFile("JES_MC16Recommendation_AFII_PFlow_Apr2019_Rel21.config"),
     m_jetAntiKt4_MCAFII_PFlow_CalibSequence("JetArea_Residual_EtaJES_GSC_Smear"),
 
-    m_jetAntiKt4_Data_PFlow_ConfigFile("JES_MC16Recommendation_Consolidated_PFlow_Apr2019_Rel21.config"),
+    m_jetAntiKt4_Data_PFlow_ConfigFile("JES_MC20PreRecommendation_PFlow_Dec2022_Rel22.config"),
     m_jetAntiKt4_Data_PFlow_CalibSequence("JetArea_Residual_EtaJES_GSC_Insitu"),
 
-    m_jetAntiKt4_PFlow_MCFS_ConfigFile("JES_MC16Recommendation_Consolidated_PFlow_Apr2019_Rel21.config"),
-    m_jetAntiKt4_PFlow_MCFS_CalibSequence("JetArea_Residual_EtaJES_GSC_Smear"),
+    m_jetAntiKt4_PFlow_MCFS_ConfigFile("JES_MC20PreRecommendation_PFlow_Dec2022_Rel22.config"),
+    m_jetAntiKt4_PFlow_MCFS_CalibSequence("JetArea_Residual_EtaJES_GSC"),
 
     m_jetAntiKt4_Data_PFlow_JMS_ConfigFile("JES_JMS_MC16Recommendation_Consolidated_data_only_PFlow_July2019_Rel21.config"),
     m_jetAntiKt4_Data_PFlow_JMS_CalibSequence("JetArea_Residual_EtaJES_GSC_JMS_Insitu"),
@@ -267,11 +267,11 @@ namespace top {
 
     // Uncertainties
     // Is our MC full or fast simulation?
-    std::string MC_type = (m_config->isAFII()) ? "AFII" : "MC16";
+    std::string MC_type = (m_config->isAFII()) ? "AFII" : "MC20";
 
     // Moriond2018 - AF2 JES
     // Summer2019 - JES/JER update
-    std::string conference = "Summer2019";
+    std::string conference = "Winter2023_PreRec";
 
     // By setting calib_area to "None" we pick up the default from the JES group
     std::string calib_area = "None";
@@ -315,7 +315,7 @@ namespace top {
                                                          jetCalibrationName,
                                                          MC_type,
                                                          m_config->isMC(),
-                                                         "rel21/" + conference
+                                                         "rel22/" + conference
                                                          + "/R4_" + m_config->jetUncertainties_NPModel()
                                                          + JERSmearModel
                                                          + JMSOption
@@ -330,7 +330,7 @@ namespace top {
                                                                      jetCalibrationName,
                                                                      MC_type,
                                                                      false, // treat MC as data
-                                                                     "rel21/" + conference
+                                                                     "rel22/" + conference
                                                                      + "/R4_" + m_config->jetUncertainties_NPModel()
                                                                      + JERSmearModel
                                                                      + JMSOption
