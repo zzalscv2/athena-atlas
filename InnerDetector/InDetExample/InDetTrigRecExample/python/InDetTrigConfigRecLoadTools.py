@@ -333,11 +333,6 @@ if InDetTrigFlags.loadSummaryTool():
   if (InDetTrigFlags.doPrintConfigurables()):
     print ( InDetTrigTestPixelLayerToolInner)
 
-  #prevent loading of the pixel dE/dx tool  
-  InDetTrigPixelToTPIDTool = None
-  if (InDetTrigFlags.doPrintConfigurables()):
-    print (    'InDetTrigPixelToTPIDTool ', InDetTrigPixelToTPIDTool)
-
   #
   # Configrable version of loading the InDetTrackSummaryHelperTool
   #
@@ -357,17 +352,6 @@ if InDetTrigFlags.loadSummaryTool():
   if (InDetTrigFlags.doPrintConfigurables()):
     print (     InDetTrigTrackSummaryHelperTool)
 
-  InDetTrigTrackSummaryHelperToolSi = InDet__InDetTrackSummaryHelperTool(name          = "InDetTrigSummaryHelperSi",
-                                                                         HoleSearch    = InDetTrigHoleSearchTool,
-                                                                         TRTStrawSummarySvc=None,
-                                                                         usePixel      = DetFlags.haveRIO.pixel_on(),
-                                                                         useSCT        = DetFlags.haveRIO.SCT_on(),
-                                                                         useTRT        = False)
-
-  ToolSvc += InDetTrigTrackSummaryHelperToolSi
-  if (InDetTrigFlags.doPrintConfigurables()):
-    print (     InDetTrigTrackSummaryHelperToolSi)
-    
   #
   # Configurable version of TRT_ElectronPidTools
   #
@@ -446,26 +430,7 @@ ToolSvc += InDetTrigTRTDriftCircleCut
 if (InDetTrigFlags.doPrintConfigurables()):
   print (  InDetTrigTRTDriftCircleCut)
 
-InDetTrigTRTDriftCircleCutForPatt = InDet__InDetTrtDriftCircleCutTool(
-  name             = 'InDetTrigTRTDriftCircleCutForPatt',
-  MinOffsetDCs     = 5,
-  UseNewParameterization = InDetTrigCutValues.useNewParameterizationTRT(),
-  UseActiveFractionSvc   = True #DetFlags.haveRIO.TRT_on()  # Use Thomas's new parameterization by default
-  )
-
-ToolSvc += InDetTrigTRTDriftCircleCut
-if (InDetTrigFlags.doPrintConfigurables()):
-  print (  InDetTrigTRTDriftCircleCut)
-
-
-
-
-    #default
-
-# from here if InDetTrigFlags.doSiSPSeededTrackFinder():
-# was unable to import with this condition from L2 TRTSegMaker
-
-#if InDetTrigFlags.doSiSPSeededTrackFinder():
+  
 if InDetTrigFlags.doNewTracking():
   # SCT and Pixel detector elements road builder
   #
@@ -675,23 +640,3 @@ InDetTrigTRT_DriftCircleTool = InDet__TRT_DriftCircleTool( name = "InDetTrigTRT_
 
 ToolSvc += InDetTrigTRT_DriftCircleTool
   
-
-
-# TRT_RodDecoder
-from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConf import TRT_RodDecoder
-
-InDetTrigTRTRodDecoder = TRT_RodDecoder(name = "InDetTrigTRTRodDecoder",
-                                        LoadCompressTableDB = (globalflags.DataSource() != 'geant4'))
-ToolSvc += InDetTrigTRTRodDecoder
-
-
-from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigHoleSearchTool
-InDetTrigTrackSummaryToolWithHoleSearch = Trk__TrackSummaryTool(name = "InDetTrigTrackSummaryToolWithHoleSearch",
-                                                                InDetSummaryHelperTool = InDetTrigTrackSummaryHelperToolSi,
-                                                                doHolesInDet           = True
-                                                      )
-ToolSvc += InDetTrigTrackSummaryToolWithHoleSearch
-if (InDetTrigFlags.doPrintConfigurables()):
-    print      (InDetTrigTrackSummaryToolWithHoleSearch)
-
-

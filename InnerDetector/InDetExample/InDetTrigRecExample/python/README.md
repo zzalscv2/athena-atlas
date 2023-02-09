@@ -16,11 +16,11 @@
 * [InDetTrigConfigRecLoadToolsPost](InDetTrigConfigRecLoadToolsPost.py)     
   * Creates and configures postprocessing tools (particle creation, vertexing)
 * [InDetTrigConfigRecLoadToolsBack](BackInDetTrigConfigRecLoadToolsBack.py)
-  * **not used** configures tools for TRT backtracking
+  * **removed** configures tools for TRT backtracking
 * [InDetTrigConfigRecLoadToolsLowPt](InDetTrigConfigRecLoadToolsLowPt.py)
   * configures lowPt versions of tracking tools
 * [InDetTrigConfigRecLoadToolsBeamGas](InDetTrigConfigRecLoadToolsBeamGas.py)  
-  * **not used** configures BeamGas versions of tracking tools
+  * **removed** configures BeamGas versions of tracking tools
 * [InDetTrigCommonTools](InDetTrigCommonTools.py)           
   * Creates and configures common tools between fast and precision tracking
 * [InDetTrigConfigRecLoadToolsCosmics](InDetTrigConfigRecLoadToolsCosmics.py)  
