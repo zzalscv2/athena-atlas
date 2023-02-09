@@ -57,14 +57,6 @@ def createInDetConfigFlags():
 
     # Tracking parameters
 
-    # Turn on to save the Track Seeds in a xAOD track collecting for development studies
-    icf.addFlag("InDet.Tracking.doStoreTrackSeeds", False)
-    icf.addFlag("InDet.Tracking.materialInteractions",
-                lambda prevFlags: prevFlags.Beam.Type is not BeamType.SingleBeam)
-    # Control which type of particle hypothesis to use for the material interactions
-    # 0=non-interacting,1=electron,2=muon,3=pion,4=kaon,5=proton. See ParticleHypothesis.h for full definition.
-    icf.addFlag("InDet.Tracking.materialInteractionsType",
-                lambda prevFlags: 2 if prevFlags.Beam.Type is BeamType.Cosmics else 3)
     # use PixelClusterOnTrackToolDigital during ROT creation to save CPU
     icf.addFlag("InDet.Tracking.doDigitalROTCreation", False)
     icf.addFlag("InDet.Tracking.holeSearchInGX2Fit", True)

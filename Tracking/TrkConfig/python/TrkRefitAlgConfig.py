@@ -25,14 +25,16 @@ def ReFitTrackAlgCfg(flags, name="InDetRefitTrack", **kwargs):
             InDetTrackSummaryToolCfg(flags)))
 
     if "AssociationTool" not in kwargs:
-        from InDetConfig.InDetAssociationToolsConfig import InDetPRDtoTrackMapToolGangedPixelsCfg
+        from InDetConfig.InDetAssociationToolsConfig import (
+            InDetPRDtoTrackMapToolGangedPixelsCfg)
         kwargs.setdefault("AssociationTool", result.popToolsAndMerge(
             InDetPRDtoTrackMapToolGangedPixelsCfg(flags)))
 
     kwargs.setdefault("TrackName", "CombinedInDetTracks")
     kwargs.setdefault("NewTrackName", "RefittedTracks")
     kwargs.setdefault("useParticleHypothesisFromTrack", True)
-    kwargs.setdefault("matEffects", flags.InDet.Tracking.materialInteractionsType if flags.InDet.Tracking.materialInteractions else 0)
+    kwargs.setdefault("matEffects", flags.Tracking.materialInteractionsType \
+                      if flags.Tracking.materialInteractions else 0)
 
     result.addEventAlgo(CompFactory.Trk.ReFitTrack(name, **kwargs))
     return result
