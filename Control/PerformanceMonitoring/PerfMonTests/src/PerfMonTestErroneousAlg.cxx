@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // PerfMonTestErroneousAlg.cxx 
@@ -79,6 +79,7 @@ bool ErroneousAlg::jumpOnUninitializedValue()
   
   for ( unsigned int i=0; i<64*maximum; ++i )
     // cppcheck-suppress uninitvar; this is meant to be uninitialized
+    // cppcheck-suppress legacyUninitvar; this is meant to be uninitialized
     if ( this->shouldIJump(someConditions[i]) )
       yesNo[0]++;
     else
@@ -100,6 +101,8 @@ bool ErroneousAlg::invalidRead()
     //cppcheck-suppress arrayIndexOutOfBounds
     invalidReadPointer[i] = double(i);
   }
+  //intentional out-of-bounds access
+  //cppcheck-suppress arrayIndexOutOfBounds
   ATH_MSG_INFO ( "Found, that last element contains " << invalidReadPointer[maximum] ) ;
   
   // and delete
@@ -109,6 +112,8 @@ bool ErroneousAlg::invalidRead()
   delete [] invalidReadPointer;
   
   // and print out element 10 !
+  //intentional out-of-bounds access
+  //cppcheck-suppress arrayIndexOutOfBounds
   ATH_MSG_INFO ( "Found, that last element contains " << invalidReadPointer[maximum] ) ;
   
   return true;
