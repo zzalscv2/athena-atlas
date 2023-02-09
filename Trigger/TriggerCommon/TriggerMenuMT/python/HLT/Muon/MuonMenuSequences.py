@@ -517,7 +517,7 @@ def muEFCBAlgSequence(flags):
     efcbViewsMaker.mergeUsingFeature = True
 
     #outside-in reco sequence
-    muEFCBRecoSequence, sequenceOutCB = muEFCBRecoSequence( efcbViewsMaker.InViewRoIs, "RoI" )
+    muEFCBRecoSequence, sequenceOutCB = muEFCBRecoSequence( flags, efcbViewsMaker.InViewRoIs, "RoI" )
 
     #Algorithm to filter events with no muons
     muonFilter = MuonFilterAlg("FilterZeroMuons")
@@ -621,7 +621,7 @@ def muEFCBLRTAlgSequence(flags):
     efcbViewsMaker.mergeUsingFeature = True
 
     #outside-in reco sequence
-    muEFCBRecoSequence, sequenceOut = muEFCBRecoSequence( efcbViewsMaker.InViewRoIs, "LRT" )
+    muEFCBRecoSequence, sequenceOut = muEFCBRecoSequence( flags, efcbViewsMaker.InViewRoIs, "LRT" )
 
     #Final sequence running in view
     efcbViewsMaker.ViewNodeName = muEFCBRecoSequence.name()
@@ -742,7 +742,7 @@ def muEFCBFSAlgSequence(flags):
     from TrigMuonEF.TrigMuonEFConf import MuonFilterAlg, MergeEFMuonsAlg
     from .MuonRecoSequences import muEFCBRecoSequence, muEFInsideOutRecoSequence 
     #outside-in reco sequence
-    muEFCBFSRecoSequence, sequenceOutCB = muEFCBRecoSequence( efcbfsInputMaker.InViewRoIs, "FS" )
+    muEFCBFSRecoSequence, sequenceOutCB = muEFCBRecoSequence( flags, efcbfsInputMaker.InViewRoIs, "FS" )
     
     #Alg fitltering for no muon events
     muonFilter =  MuonFilterAlg("FilterZeroMuonsEFCBFS")
