@@ -71,7 +71,7 @@ class TileRawChannelBuilderFitFilterCool: public TileRawChannelBuilder
      */
     static const InterfaceID& interfaceID();
 
-    virtual void handle(const Incident&);
+    virtual void handle(const Incident&) override;
 
   private:
 
