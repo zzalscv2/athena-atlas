@@ -1989,8 +1989,6 @@ namespace top {
     inline bool isRun3() const {return m_isRun3;}
     inline void setIsRun3(const bool isRun3) {m_isRun3 = isRun3;}
 
-    inline const std::string& muonTriggerSF() const {return m_muon_trigger_SF;}
-
     inline bool demandPriVtx() const {return m_demandPriVtx;}
 
     // Where the sum of event weights
@@ -2799,10 +2797,6 @@ namespace top {
       // Name of the underlying photon tools, to be accessed and passes CP::SystematicSet
       std::vector<std::string> photon_trigger_tool_names;
     } m_trigGlobalConfiguration;
-
-    // Muon Trigger SF configuration
-    std::string m_muon_trigger_SF;
-
 
     // Selections
     std::shared_ptr<std::vector<std::string> > m_allSelectionNames;

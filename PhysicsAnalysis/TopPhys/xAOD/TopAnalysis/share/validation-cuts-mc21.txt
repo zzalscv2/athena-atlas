@@ -83,7 +83,6 @@ MuonIsolationLoose None
 MuonDoExtraSmearingHighPt False
 MuonDoSmearing2stationHighPt False
 MuonCalibrationMode correctData_IDMS
-MuonForceTrigger HLT_mu24_ivarmedium_OR_HLT_mu50
 
 ### Tau configuration
 TauPt 25000
