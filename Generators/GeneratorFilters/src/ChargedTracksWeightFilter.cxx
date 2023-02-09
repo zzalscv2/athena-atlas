@@ -87,7 +87,7 @@ StatusCode ChargedTracksWeightFilter::filterEvent() {
     const HepMC::GenEvent* genEvt = *itr;
 
     // Loop over all particles in event
-    for (auto part: *genEvt){
+    for (const auto& part: *genEvt){
 
       // We only care about stable particles
       if (!MC::isGenStable(part)) continue;

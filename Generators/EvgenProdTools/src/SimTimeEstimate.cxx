@@ -28,7 +28,7 @@ StatusCode SimTimeEstimate::execute()
         m_particleEtas.clear();       
         m_particleEnergies.clear();       
         // Check particles
-        for (auto part: *itr)
+        for (const auto& part: *itr)
          { 
             // Only use stable particles
             if (part->status()!=1) continue;

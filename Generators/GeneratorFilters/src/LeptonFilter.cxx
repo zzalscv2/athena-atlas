@@ -34,7 +34,7 @@ StatusCode LeptonFilter::filterEvent() {
     const HepMC::GenEvent* genEvt = *itr;
 
     // Loop over all particles in event
-    for (auto part: *genEvt) {
+    for (const auto& part: *genEvt) {
 
       // We're only interested in stable (status == 1) particles
       if ( part->status() != 1) continue;
