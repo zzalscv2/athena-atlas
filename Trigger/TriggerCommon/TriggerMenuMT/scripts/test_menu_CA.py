@@ -5,41 +5,43 @@
 test of Dev menu with CA migrated menu code, reproducing runHLT_standalone_newJO
 """
 from AthenaCommon.Logging import logging
-log = logging.getLogger('runHLT_standalone_newJO')
+log = logging.getLogger('test_menu_CA')
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags 
+from AthenaConfiguration.AllConfigFlags import ConfigFlags, initConfigFlags
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorDecorator
-from AthenaCommon.Configurable import Configurable
-Configurable.configurableRun3Behavior = 1
 
+# Make sure nobody uses deprecated global ConfigFlags
+del ConfigFlags
+
+flags = initConfigFlags()
 
 # select chains, as in runHLT_standalone
-ConfigFlags.addFlag("Trigger.enabledSignatures",[])  
-ConfigFlags.addFlag("Trigger.disabledSignatures",[]) 
-ConfigFlags.addFlag("Trigger.selectChains",[])       
-ConfigFlags.addFlag("Trigger.disableChains",[]) 
-ConfigFlags.Trigger.enabledSignatures = ['Muon', 'Photon','Electron']
+flags.addFlag("Trigger.enabledSignatures",[])
+flags.addFlag("Trigger.disabledSignatures",[])
+flags.addFlag("Trigger.selectChains",[])
+flags.addFlag("Trigger.disableChains",[])
+flags.Trigger.enabledSignatures = ['Muon', 'Photon','Electron']
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-ConfigFlags.Trigger.generateMenuDiagnostics = True
+flags.Trigger.generateMenuDiagnostics = True
 
 from AthenaConfiguration.TestDefaults import defaultTestFiles
-ConfigFlags.Input.Files = defaultTestFiles.RAW
-ConfigFlags.Trigger.triggerMenuSetup="Dev_pp_run3_v1"
+flags.Input.Files = defaultTestFiles.RAW
+flags.Trigger.triggerMenuSetup="Dev_pp_run3_v1"
 
-ConfigFlags.Trigger.EDMVersion=3
-ConfigFlags.lock()
-ConfigFlags.dump()
+flags.Trigger.EDMVersion=3
+flags.lock()
+flags.dump()
 
 
 acc = ComponentAccumulator()
 from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg
-acc.merge(L1ConfigSvcCfg(ConfigFlags))
+acc.merge(L1ConfigSvcCfg(flags))
 
 from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import generateMenuMT 
-menu = generateMenuMT( ConfigFlags)
+menu = generateMenuMT(flags)
 acc.merge(menu)
+
 acc.printConfig()
 AccumulatorDecorator.printStats()
 
