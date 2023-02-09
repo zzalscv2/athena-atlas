@@ -226,7 +226,8 @@ void JetCaloEnergies::fillEperSamplingFE(const xAOD::Jet& jet, std::vector<float
   float eTot = 0.;
   size_t numConstit = jet.numConstituents();    
 
-  std::vector<int> clusterIndices;
+  std::vector<int> indicesNeutralFE;
+  std::vector<int> indicesChargedFE;
 
   for ( size_t i=0; i<numConstit; i++ ) {
     if(jet.rawConstituent(i)->type()!=xAOD::Type::FlowElement) {
@@ -302,15 +303,26 @@ void JetCaloEnergies::fillEperSamplingFE(const xAOD::Jet& jet, std::vector<float
 	psTot += (neutralEPerSampling[CaloSampling::PreSamplerB] + neutralEPerSampling[CaloSampling::PreSamplerE]);
       }
       else if(constit->signalType() == xAOD::FlowElement::Combined){
-	// For the combined UFOs, otherObjects are neutral FEs
+	// For the combined UFOs, otherObjects are neutral or charged FEs
+	// matched to this tracks (via track-to-cluster extrapolation)
 	for (size_t n = 0; n < constit->otherObjects().size(); ++n) {
 	  if(! constit->otherObject(n)) continue;
-	  const xAOD::FlowElement* nFE_from_combined = static_cast<const xAOD::FlowElement*>(constit->otherObject(n));
+	  const xAOD::FlowElement* FE_from_combined = static_cast<const xAOD::FlowElement*>(constit->otherObject(n));
+
+	  //Charged FE (add energy to total energy only)
+	  if(FE_from_combined->isCharged()){
+	    if(std::find(indicesChargedFE.begin(), indicesChargedFE.end(), FE_from_combined->index()) == indicesChargedFE.end()){
+	      eTot += FE_from_combined->e();
+	      indicesChargedFE.push_back(FE_from_combined->index());
+	    }
+	    continue;
+	  }
+	  //Neutral FE:
 	  //One neutral FE can be matched to various tracks and therefore be used for several UFOs
 	  //We do not want to double count the energy and only add it once
-	  if(std::find(clusterIndices.begin(), clusterIndices.end(), nFE_from_combined->index()) == clusterIndices.end()){
-	    eTot += nFE_from_combined->e();
-	    std::vector<float> neutralFromCombEPerSampling = FEHelpers::getEnergiesPerSampling(*nFE_from_combined);
+	  if(std::find(indicesNeutralFE.begin(), indicesNeutralFE.end(), FE_from_combined->index()) == indicesNeutralFE.end()){
+	    eTot += FE_from_combined->e();
+	    std::vector<float> neutralFromCombEPerSampling = FEHelpers::getEnergiesPerSampling(*FE_from_combined);
 	    for ( size_t s = CaloSampling::PreSamplerB; s < CaloSampling::Unknown; s++ ) {
 	      ePerSampling[s] += neutralFromCombEPerSampling[s];
 	    }
@@ -325,7 +337,7 @@ void JetCaloEnergies::fillEperSamplingFE(const xAOD::Jet& jet, std::vector<float
 
 	    psTot += (neutralFromCombEPerSampling[CaloSampling::PreSamplerB] + neutralFromCombEPerSampling[CaloSampling::PreSamplerE]);
 
-	    clusterIndices.push_back(nFE_from_combined->index());
+	    indicesNeutralFE.push_back(FE_from_combined->index());
 	  }
 	}
       }

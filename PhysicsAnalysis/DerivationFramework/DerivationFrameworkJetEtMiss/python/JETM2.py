@@ -126,6 +126,7 @@ def JETM2Cfg(ConfigFlags):
     JETM2SlimmingHelper.AllVariables = ["CaloCalTopoClusters", "CaloCalFwdTopoTowers",
                                         "GlobalChargedParticleFlowObjects", "GlobalNeutralParticleFlowObjects",
                                         "CHSGChargedParticleFlowObjects","CHSGNeutralParticleFlowObjects",
+                                        "CSSKGChargedParticleFlowObjects","CSSKGNeutralParticleFlowObjects",
                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape",
                                         "Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape"]
 
@@ -137,13 +138,15 @@ def JETM2Cfg(ConfigFlags):
                                           "GSFTrackParticles.particleHypothesis.vx.vy.vz",
                                           "PrimaryVertices.x.y.z.covariance.trackWeights",
                                           "TauJets.clusterLinks",
-                                          "Muons.energyLossType.EnergyLoss.ParamEnergyLoss.MeasEnergyLoss.EnergyLossSigma.MeasEnergyLossSigma.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus.clusterLinks.FSR_CandidateEnergy",
-                                          "MuonSegments.x.y.z.px.py.pz",
-                                          "CSSKGChargedParticleFlowObjects.pt.eta.phi.m.matchedToPV.originalObjectLink",
-                                          "CSSKGNeutralParticleFlowObjects.pt.eta.phi.m.originalObjectLink"]
+                                          "Electrons.neutralGlobalFELinks.chargedGlobalFELinks",
+                                          "Photons.neutralGlobalFELinks",
+                                          "Muons.energyLossType.EnergyLoss.ParamEnergyLoss.MeasEnergyLoss.EnergyLossSigma.MeasEnergyLossSigma.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus.clusterLinks.FSR_CandidateEnergy.neutralGlobalFELinks.chargedGlobalFELinks",
+                                          "MuonSegments.x.y.z.px.py.pz"]
 
     JETM2SlimmingHelper.AppendToDictionary.update({'CSSKGNeutralParticleFlowObjects': 'xAOD::FlowElementContainer',
                                                    'CSSKGNeutralParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',
+                                                   'CSSKGChargedParticleFlowObjects': 'xAOD::FlowElementContainer',
+                                                   'CSSKGChargedParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',
                                                    'UFO': 'xAOD::FlowElementContainer',
                                                    'UFOAux': 'xAOD::FlowElementAuxContainer',
                                                    'Kt4UFOCSSKEventShape': 'xAOD::EventShape',
