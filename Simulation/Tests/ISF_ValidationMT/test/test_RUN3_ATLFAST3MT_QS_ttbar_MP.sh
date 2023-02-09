@@ -20,7 +20,7 @@ Sim_tf.py \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'ATLFAST3MT_QS' \
     --postInclude 'PyJobTransforms.UseFrontier' \
-    --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationMultipleIoV' \
+    --preInclude 'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
@@ -41,7 +41,7 @@ Sim_tf.py \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'ATLFAST3MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationMultipleIoV.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
@@ -55,7 +55,7 @@ Sim_tf.py \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'ATLFAST3MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationMultipleIoV.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
     --outputHITSFile "test.CG.HITS.pool.root" \
