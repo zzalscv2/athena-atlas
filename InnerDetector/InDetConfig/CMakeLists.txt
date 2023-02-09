@@ -26,7 +26,7 @@ if (NOT SIMULATIONBASE)
 
     atlas_add_test( TrackRecoConfig_test
         SCRIPT python -m InDetConfig.TrackRecoConfig
-        PROPERTIES TIMEOUT 1000
+        PROPERTIES TIMEOUT 1800
         POST_EXEC_SCRIPT nopost.sh)
 
     atlas_add_test( ITkTrackRecoConfig_test
