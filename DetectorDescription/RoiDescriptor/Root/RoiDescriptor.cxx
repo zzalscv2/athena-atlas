@@ -20,6 +20,9 @@
 // #include <exception>
 #include <stdexcept>
 
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
+
+
 #ifndef M_2PI
 static const double M_2PI = 2*M_PI;
 #endif
@@ -28,12 +31,23 @@ static const double M_2PI = 2*M_PI;
 static const float  M_PIF = float(M_PI);
 #endif
 
+static const int RoiVersion = 4;
 
 /// This should be set by some static class function during the 
 /// overall configuration - perhaps by an RoiBuilder class  
-const double RoiDescriptor::s_zedWidthDefault = 225;
+double RoiDescriptor::s_zedWidthDefault = 225;
 
-static const int RoiVersion = 4;
+
+//  ATLAS_THREAD_SAFE;
+
+std::mutex RoiDescriptor::s_mutex;
+std::mutex RoiDescriptor::s_mutex_inc;
+
+void (*RoiDescriptor::zedWidthDefault_set)(double) ATLAS_THREAD_SAFE = RoiDescriptor::zedWidthDefault_0;
+
+void (*RoiDescriptor::increment)() ATLAS_THREAD_SAFE = RoiDescriptor::increment_0;
+
+
 
 RoiDescriptor::RoiDescriptor( bool fullscan )
   : m_phi(0), m_eta(0), m_zed(0), 
@@ -154,6 +168,9 @@ void RoiDescriptor::construct(double eta_, double etaMinus_, double etaPlus_,
 			      double phi_, double phiMinus_, double phiPlus_, 
 			      double zed_, double zedMinus_, double zedPlus_)
 { 
+ 
+  increment();
+
   m_eta = eta_;
   m_phi = phi_;
   m_zed = zed_;

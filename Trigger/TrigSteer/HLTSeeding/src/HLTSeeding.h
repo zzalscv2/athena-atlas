@@ -66,6 +66,9 @@ private:
     "Name of the chain which should enable HLT cost monitoring."};
   /// @}
 
+  Gaudi::Property<float> m_roiZedWidthDefault{
+    this, "RoiZedWidthDefault", 0, "default Roi z width"};
+
   /// @name Tools and Services
   /// @{
   ServiceHandle<ITrigCostSvc> m_trigCostSvcHandle {
