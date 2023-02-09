@@ -172,6 +172,9 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     AthIncFirerAlg=CompFactory.AthIncFirerAlg
     IncidentProcAlg=CompFactory.IncidentProcAlg
 
+    previousPerfmonDomain = cfg.getCurrentPerfmonDomain()
+    cfg.flagPerfmonDomain('Incidents')
+
     cfg.addEventAlgo(AthIncFirerAlg("BeginIncFiringAlg",FireSerial=False,Incidents=['BeginEvent']),sequenceName='AthBeginSeq')
     cfg.addEventAlgo(IncidentProcAlg('IncidentProcAlg1'),sequenceName='AthBeginSeq')
 
@@ -181,6 +184,8 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     # Should be after all other algorithms.
     cfg.addEventAlgo(AthIncFirerAlg('EndAlgorithmsFiringAlg',FireSerial=False,Incidents=['EndAlgorithms']), sequenceName="AthMasterSeq")
     cfg.addEventAlgo(IncidentProcAlg('IncidentProcAlg3'),sequenceName="AthMasterSeq")
+
+    cfg.flagPerfmonDomain(previousPerfmonDomain)
 
     #Basic services:
     ClassIDSvc=CompFactory.ClassIDSvc

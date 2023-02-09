@@ -383,6 +383,10 @@ class ComponentAccumulator:
         self.merge(other)
         return tool
 
+    def getCurrentPerfmonDomain(self):
+        """ Get the current PerfMon domain. """
+        return self._currentDomain
+
     def flagPerfmonDomain(self, name):
         """ Mark the beginning of a new PerfMon domain. """
         self._msg.debug(f"Toggling the current algorithm domain to {name}")
