@@ -347,7 +347,6 @@ private:
   /// if true, ignore out-of-extrapolation range errors (i.e., return CorrectionCode::Ok if these are encountered)
   bool m_ignoreOutOfValidityRange;
   /// if false, suppress any non-error/warning printout from the underlying tool
-  bool m_verboseCDITool;
   /// 1D tagging only: define wether the cuts refer to b-tagging or c-tagging
   bool m_useCTag = false;
   /// if this string is empty, the onnx tool won't be created
