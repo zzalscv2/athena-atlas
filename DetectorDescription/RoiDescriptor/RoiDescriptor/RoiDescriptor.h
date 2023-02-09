@@ -17,10 +17,14 @@
 #define ROIDESCRIPTOR_ROIDESCRIPTOR_H
 
 #include <iostream>
+#include <mutex>
 
 #include "IRegionSelector/IRoiDescriptor.h"
 #include "IRegionSelector/RoiUtil.h"
 
+#include "CxxUtils/checker_macros.h"
+
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 /**
  * @brief Describes the Region of Ineterest geometry
@@ -179,7 +183,46 @@ public:
 
 public:
 
-  static double zedWidthDefault() { return s_zedWidthDefault; } 
+  static double zedWidthDefault() { return s_zedWidthDefault; }
+
+  static void  (*zedWidthDefault_set)( double d ) ATLAS_THREAD_SAFE;
+
+  /// wrapper to circumvent the erroneous cpp warningvs for the static function pointer  
+  static void circumvent_cppchecker( double d ) { zedWidthDefault_set( d ); } 
+
+private:
+ 
+  static void  zedWidthDefault_0( double d ) {
+    std::lock_guard<std::mutex> lock(s_mutex); 
+    /// does this lock get released when ity goes out of scope ?
+    if ( increment==increment_0 )  s_zedWidthDefault = d;
+    increment();
+  }
+
+  static void  zedWidthDefault_1( double ) { }
+
+
+  /// increment checker to ensure that the static method to set the 
+  /// Roi width can only ever be called before the first RoiDescriptor 
+  /// is created - for thread safety the increment is protected by a
+  /// mutex, but to avoid pointless resource hungry mutex locking to 
+  /// check all subsequent RoiDescriptor calls, the increment mnethod
+  /// is replaced by an emtpy method for all subsequent calls so there 
+  /// will be no performance overhead    
+   
+  static void increment_0() { 
+    std::lock_guard<std::mutex> lock(s_mutex_inc);
+    zedWidthDefault_set = zedWidthDefault_1;
+    increment = increment_1;
+  }
+
+  static void increment_1() { }
+
+public:
+
+  /// can't have this private, or the cpp checker complains
+  
+  static void (*increment)() ATLAS_THREAD_SAFE; /// flawed atlas coding convention - a function pointer should not be treated the same as a standard member variable by the cpp checker 
 
 protected:
 
@@ -199,7 +242,11 @@ protected:
 protected:
 
   /// default parameters - there may be better ways, but this will do
-  static const double s_zedWidthDefault;
+  static double s_zedWidthDefault ATLAS_THREAD_SAFE;
+
+  /// Mutex to protect setting of the default z width.
+  static std::mutex s_mutex; 
+  static std::mutex s_mutex_inc; 
 
 protected:
 

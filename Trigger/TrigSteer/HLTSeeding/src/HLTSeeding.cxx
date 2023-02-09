@@ -11,6 +11,7 @@
 #include "StoreGate/WriteHandle.h"
 #include "GaudiKernel/EventContext.h"
 
+#include "RoiDescriptor/RoiDescriptor.h"
 
 HLTSeeding::HLTSeeding(const std::string& name, ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator) {}
@@ -45,6 +46,11 @@ StatusCode HLTSeeding::initialize() {
 
   if (m_doCostMonitoring) {
     ATH_CHECK( m_trigCostSvcHandle.retrieve() );
+  }
+
+  if ( m_roiZedWidthDefault!=0 ) { 
+    ATH_MSG_INFO( "CHANGING THE DEFAULT ROI Z WIDTH: " << m_roiZedWidthDefault );
+    RoiDescriptor::circumvent_cppchecker( m_roiZedWidthDefault );
   }
 
   return StatusCode::SUCCESS;
