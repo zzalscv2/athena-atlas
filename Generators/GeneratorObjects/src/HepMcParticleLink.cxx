@@ -211,14 +211,16 @@ HepMC::ConstGenParticlePtr HepMcParticleLink::cptr() const
       }
 
       if (nullptr != pEvt) {
-        p = HepMC::barcode_to_particle(pEvt,barcode());
         // Be sure to update m_extBarcode before m_ptrs;
         // otherwise, the logic in eventIndex() won't work correctly.
         if (position != ExtendedBarCode::UNDEFINED) {
           m_extBarcode.makeIndex (pEvt->event_number(), position);
         }
-        if (p) {
-          m_ptr.set (p);
+        if (barcode() != 0) {
+          p = HepMC::barcode_to_particle(pEvt,barcode());
+          if (p) {
+            m_ptr.set (p);
+          }
         }
       } else {
         MsgStream log (Athena::getMessageSvc(), "HepMcParticleLink");
@@ -262,7 +264,6 @@ HepMcParticleLink::index_type HepMcParticleLink::eventIndex() const
       }
       if (pEvt) {
         const int event_number = pEvt->event_number();
-        HepMC::ConstGenParticlePtr pp = HepMC::barcode_to_particle(pEvt,barcode());
         // Be sure to update m_extBarcode before m_ptrs.
         // Otherwise, if two threads run this method simultaneously,
         // one thread could see index == UNDEFINED, but where m_ptr
@@ -272,8 +273,11 @@ HepMcParticleLink::index_type HepMcParticleLink::eventIndex() const
           m_extBarcode.makeIndex (index, position);
           return index;
         }
-        if (pp) {
-          m_ptr.set (pp);
+        if (barcode() != 0) {
+          HepMC::ConstGenParticlePtr pp = HepMC::barcode_to_particle(pEvt, barcode());
+          if (pp) {
+            m_ptr.set (pp);
+          }
         }
       }
     }
