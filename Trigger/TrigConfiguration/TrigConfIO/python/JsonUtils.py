@@ -6,31 +6,40 @@
 import pickle
 import json
 
-def create_joboptions_json(pkl_file, json_file):
+def create_joboptions_json(pkl_file, json_file, createDBJson = True):
    """Create the configuration JSON file from the properties in `pkl_file`
-   and save it into `json_file`.
-   """
+   and save it into `json_file`. If `createDBJson` then also create the
+   JSON file for database upload at P1."""
+
+   from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
    with open(pkl_file, "rb") as f:
-      jocat = pickle.load(f)   # basic job properties
-      jocfg = pickle.load(f)   # some specialized services
-      jocat.update(jocfg)       # merge the two dictionaries
+      cfg = pickle.load(f)
+      props = {}
+      if isinstance(cfg, ComponentAccumulator):  # CA-based configuration
+         app_props, msg_props, comp_props = cfg.gatherProps()
+         props["ApplicationMgr"] = app_props
+         props["MessageSvc"] = msg_props
+         props.update( {comp : {name : value} for comp, name, value in comp_props} )
+      else:                                      # legacy job options
+         svc = pickle.load(f)   # some specialized services (only in legacy config)
+         props = cfg
+         props.update(svc)      # merge the two dictionaries
 
       hlt_json = {'filetype' : 'joboptions'}
-      hlt_json['properties'] = jocat
+      hlt_json['properties'] = props
 
-
+   # write JSON file
    with open(json_file, "w") as f:
       json.dump(hlt_json, f, indent=4, sort_keys=True, ensure_ascii=True)
 
+   if createDBJson:
+      # also create a configuration JSON file that can be uploaded
+      # to the triggerdb for running at P1
+      assert json_file[-5:] == ".json"
+      db_file = json_file.replace(".json", ".db.json")
 
-   """ also create a configuration JSON file that can be uploaded
-   to the triggerdb for running at P1
-   """
-   assert json_file[-5:] == ".json"
-   db_file = json_file.replace(".json", ".db.json")
-
-   modifyConfigForP1(json_file, db_file)
+      modifyConfigForP1(json_file, db_file)
 
 
 def modifyConfigForP1(json_file, db_file):
@@ -67,19 +76,22 @@ def modifyConfigForP1(json_file, db_file):
 
 
 if __name__ == "__main__":
-   # this is to test the modification of the JO
-   import sys
-   if len(sys.argv)<2:
-      print("Please run\n%s <HLTJobOptions.json>" % sys.argv[0].split("/")[-1])
+   import os, sys
+   if len(sys.argv)!=2:
+      print("Syntax: %s HLTJobOptions.[pkl,json]" % sys.argv[0].split("/")[-1])
+      print("   .pkl: convert to JSON and DB JSON")
+      print("  .json: convert to DB JSON")
       sys.exit(1)
-   with open(sys.argv[1]) as fh:
-      hlt_json = json.load( fh )
-      properties = hlt_json["properties"]
 
-   modifyConfigForP1(sys.argv[1], sys.argv[1].replace("json", "db.json"))
-
-   outfn = sys.argv[1].replace(".json",".test.json")
-   with open(outfn,'w') as f:
-      hlt_json['properties'] = properties
-      json.dump(hlt_json, f, indent=2, sort_keys=True, ensure_ascii=True)
-      print("Wrote %s" % outfn)
+   fname = sys.argv[1]
+   ext = os.path.splitext(fname)[1]
+   if ext == '.json':
+      with open(fname) as fh:
+         hlt_json = json.load( fh )
+         properties = hlt_json["properties"]
+         modifyConfigForP1(fname, fname.replace("json", "db.json"))
+   elif ext == '.pkl':
+      create_joboptions_json(fname, fname.replace("pkl","json"))
+   else:
+      print("Unkown file format")
+      sys.exit(1)
