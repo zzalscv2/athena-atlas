@@ -562,7 +562,7 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
       ATH_MSG_INFO("initializing gain tool for run2 final precision recommendations");
       ATH_MSG_WARNING("Gain corrections required but Zee scales are derived without Gain, will cause inconsistency!");
       std::string gain_tool_run_2_filename =
-	PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/gain_uncertainty_specialRun.root");
+	PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v28/gain_uncertainty_specialRun.root");
       m_gain_tool_run2.reset(new egGain::GainUncertainty(gain_tool_run_2_filename,"GainCorrection"));
       m_gain_tool_run2->msg().setLevel(this->msg().level());
       if(m_useGainInterpolation == AUTO || m_useGainInterpolation == 1){
@@ -597,7 +597,7 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
     if (m_useCaloDistPhiUnifCorrection == AUTO || m_useCaloDistPhiUnifCorrection == 1) {
       m_useCaloDistPhiUnifCorrection = 1;
       std::string phiUnifCorrfileName =
-	PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v27/egammaEnergyCorrectionData.root");
+	PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v28/egammaEnergyCorrectionData.root");
       std::unique_ptr<TFile> fCorr(TFile::Open(phiUnifCorrfileName.c_str(), "READ"));
       m_caloDistPhiUnifCorr.reset(
 	dynamic_cast<TH2*>(fCorr->Get("CaloDistortionPhiUniformityCorrection/es2022_R21_Precision/h2DcorrPhiUnif")));
