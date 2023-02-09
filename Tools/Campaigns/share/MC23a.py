@@ -7,7 +7,8 @@ from AthenaCommon.BeamFlags import jobproperties as bf
 bf.Beam.numberOfCollisions.set_Value_and_Lock(60.0)
 
 from Digitization.DigitizationFlags import digitizationFlags
-digitizationFlags.doPixelPlanarRadiationDamage.set_Value_and_Lock(True)
+from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
+digitizationFlags.pixelPlanarRadiationDamageSimulationType.set_Value_and_Lock(PixelRadiationDamageSimulationType.RamoPotential.value)
 
 from AthenaCommon.Resilience import protectedInclude
 protectedInclude('LArConfiguration/LArConfigRun3Old.py')
