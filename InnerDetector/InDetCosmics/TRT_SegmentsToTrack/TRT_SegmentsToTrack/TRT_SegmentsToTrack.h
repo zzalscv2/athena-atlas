@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_SEGMENTSTOTRACK_H
@@ -104,7 +104,7 @@ namespace InDet
     const TRT_ID* m_trtid ;
     
 
-    SG::ReadHandleKey<PRD_MultiTruthCollection> m_multiTruthCollectionTRTName{this,"PRDTruthCollectionTRT","PRD_MultiTruthTRT","RHK to retrieve TRT turth info"}; //!< Name of the TRT MultiTruthCollection 
+    SG::ReadHandleKey<PRD_MultiTruthCollection> m_multiTruthCollectionTRTName{this,"PRDTruthCollectionTRT","","RHK to retrieve TRT turth info"}; //!< Name of the TRT MultiTruthCollection 
 
     int m_nTracksReal;                        //!< Counter for real reconstructed Tracks
     int m_nTracksFake;                        //!< Counter for fake reconstructed Track
