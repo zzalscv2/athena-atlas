@@ -170,8 +170,9 @@ TFCSGANEtaSlice::NetworkOutputs TFCSGANEtaSlice::GetNetworkOutputs(const TFCSTru
 
   int p_min = std::pow(2,minExp);
   int p_max = std::pow(2,maxExp);
-  double Ekin_min = std::sqrt(std::pow(p_min,2)+std::pow(truth->M(),2))-truth->M()+truth->Ekin_off();
-  double Ekin_max = std::sqrt(std::pow(p_max,2)+std::pow(truth->M(),2))-truth->M()+truth->Ekin_off();
+  //Keep min and max without mass offset as we do not train on antiparticles
+  double Ekin_min = std::sqrt(std::pow(p_min,2)+std::pow(truth->M(),2))-truth->M();
+  double Ekin_max = std::sqrt(std::pow(p_max,2)+std::pow(truth->M(),2))-truth->M();
 
   for (int i = 0; i< m_param.GetLatentSpaceSize(); i ++)
   {
