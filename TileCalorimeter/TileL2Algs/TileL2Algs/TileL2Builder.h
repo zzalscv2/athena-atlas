@@ -24,7 +24,7 @@
 #include "TileEvent/TileRawChannelContainer.h"
 #include "TileIdentifier/TileFragHash.h"
 #include "TileConditions/TileEMScale.h"
-#include "TileConditions/ITileBadChanTool.h"
+#include "TileConditions/TileBadChannels.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -195,9 +195,11 @@ class TileL2Builder: public AthAlgTool {
     SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
         "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
-    /** Handle to Tile bad channel tool */
-    ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
-        "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};
+    /**
+     * @brief Name of TileBadChannels in condition store
+     */
+    SG::ReadCondHandleKey<TileBadChannels> m_badChannelsKey{this,
+        "TileBadChannels", "TileBadChannels", "Input Tile bad channel status"};
 
 
     TileFragHash m_hashFunc;
