@@ -5,8 +5,8 @@ from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, pr
 def fromRunArgs(runArgs):
 
     from AthenaCommon.Logging import logging
-    log = logging.getLogger('RAWtoTLA_AOD')
-    log.info('****************** STARTING TLA RAW Decoding (RAWtoTLA_AOD) *****************')
+    log = logging.getLogger('RAWtoDAOD_TLA')
+    log.info('****************** STARTING TLA RAW Decoding (RAWtoDAOD_TLA) *****************')
 
     log.info('**** Transformation run arguments')
     log.info(str(runArgs))
@@ -25,9 +25,9 @@ def fromRunArgs(runArgs):
         ConfigFlags.Input.Files = runArgs.inputBSFile
 
     # Output 
-    if hasattr(runArgs, 'outputTLA_AODFile'):
-        ConfigFlags.Output.AODFileName = runArgs.outputTLA_AODFile
-        log.info("---------- Configured TLA AOD output")
+    if hasattr(runArgs, 'outputDAOD_TLAFile'):
+        ConfigFlags.Output.AODFileName = runArgs.outputDAOD_TLAFile
+        log.info("---------- Configured DAOD_TLA output")
 
 
     # Set non-default flags 
@@ -57,7 +57,7 @@ def fromRunArgs(runArgs):
     # Run the final accumulator
     sc = cfg.run()
     timeFinal = time.time()
-    log.info("Run RAWtoTLA_AOD_skeleton in %d seconds", timeFinal - timeStart)
+    log.info("Run RAWtoDAOD_TLA_skeleton in %d seconds", timeFinal - timeStart)
 
     import sys
     sys.exit(not sc.isSuccess())
