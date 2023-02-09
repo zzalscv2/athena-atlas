@@ -123,15 +123,15 @@ def InDetCosmicsTrackRecoPreProcessingCfg(flags):
     result.merge(TrackingSiPatternCfg(
         flags,
         InputCollections = [],
-        ResolvedTrackCollectionKey = "ResolvedCosmicsTracks",
+        ResolvedTrackCollectionKey = "ResolvedTracks",
         SiSPSeededTrackCollectionKey = "SiSPSeededTracks"))
 
     from InDetConfig.TRTExtensionConfig import NewTrackingTRTExtensionPhaseCfg
     result.merge(NewTrackingTRTExtensionPhaseCfg(
         flags,
-        SiTrackCollection = "ResolvedCosmicsTracks",
-        ExtendedTrackCollection = "ExtendedTracks",
-        ExtendedTracksMap = "ExtendedTracksMap"))
+        SiTrackCollection = "ResolvedTracks",
+        ExtendedTrackCollection = "ExtendedTracksPhase",
+        ExtendedTracksMap = "ExtendedTracksMapPhase"))
 
     from InDetConfig.TRTSegmentFindingConfig import TRTSegmentFinding_Phase_Cfg
     result.merge(TRTSegmentFinding_Phase_Cfg(flags))
