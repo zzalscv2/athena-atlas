@@ -142,7 +142,7 @@ def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modif
     return result
 
 
-def addFoldersSplitOnline(flags, detDb, onlineFolders, offlineFolders, className=None, addMCString='_OFL', splitMC=False, tag=None, forceDb=None, modifiers=''):
+def addFoldersSplitOnline(flags, detDb, onlineFolders, offlineFolders, className=None, extensible=False, addMCString='_OFL', splitMC=False, tag=None, forceDb=None, modifiers=''):
     """Add access to given folder, using either online_folder  or offline_folder. For MC, add addMCString as a postfix (default is _OFL)"""
 
     if flags.Common.isOnline and not flags.Input.isMC:
@@ -154,7 +154,7 @@ def addFoldersSplitOnline(flags, detDb, onlineFolders, offlineFolders, className
         detDb = detDb + addMCString
         folders = offlineFolders
 
-    return addFolders(flags, folders, detDb, className, tag=tag, db=forceDb, modifiers=modifiers)
+    return addFolders(flags, folders, detDb, className, extensible, tag=tag, db=forceDb, modifiers=modifiers)
 
 
 _dblist = {
