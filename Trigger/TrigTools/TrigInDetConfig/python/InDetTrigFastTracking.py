@@ -34,6 +34,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
   from InDetTrigRecExample import InDetTrigCA
   
   InDetTrigCA.InDetTrigConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
+  flags = InDetTrigCA.InDetTrigConfigFlags
   
   # Load RDOs if we aren't loading bytestream                                                                                       
   from AthenaCommon.AlgSequence import AlgSequence
@@ -364,7 +365,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
 
         from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderBase
         #TODO: eventually adapt IDTrigConfig also in FTF configuration (pass as additional param)
-        theFTF = TrigFastTrackFinderBase("TrigFastTrackFinder_" + signature, config.input_name,
+        theFTF = TrigFastTrackFinderBase(flags, "TrigFastTrackFinder_" + signature, config.input_name,
                                         conditionsTool = InDetSCT_ConditionsSummaryToolWithoutFlagged )
         theFTF.RoIs           = rois
 
@@ -387,7 +388,11 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
 
         if secondStageConfig is not None:
           #have been supplied with a second stage config, create another instance of FTF
-          theFTF2 = TrigFastTrackFinderBase("TrigFastTrackFinder_" + secondStageConfig.input_name, secondStageConfig.input_name,
+          
+          from AthenaConfiguration.AllConfigFlags import ConfigFlags
+          flags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+secondStageConfig.name)
+
+          theFTF2 = TrigFastTrackFinderBase(flags, "TrigFastTrackFinder_" + secondStageConfig.input_name, secondStageConfig.input_name,
                                             conditionsTool = InDetSCT_ConditionsSummaryToolWithoutFlagged )
           theFTF2.RoIs           = rois
           theFTF2.inputTracksName = config.trkTracks_FTF()
