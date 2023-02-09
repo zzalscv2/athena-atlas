@@ -628,8 +628,6 @@ namespace top {
                       "False",
                       {"True", "False"});
 
-    registerParameter("MuonTriggerSF", "Muon trigger SFs to calculate", "HLT_mu20_iloose_L1MU15_OR_HLT_mu50");
-
     registerParameter("KLFitterTransferFunctionsPath", "Select the transfer functions to use", "mc12a/akt4_LCtopo_PP6");
     registerParameter("KLFitterOutput", "Select the KLFitter output (FULL, FITTEDTOPS_ONLY, JETPERM_ONLY)", "FULL");
     registerParameter("KLFitterJetSelectionMode",

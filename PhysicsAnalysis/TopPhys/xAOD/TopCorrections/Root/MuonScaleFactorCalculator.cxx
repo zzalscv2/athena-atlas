@@ -321,10 +321,12 @@ namespace top {
       else if (runNumber > 284484 && runNumber < 324320) {
         m_muon_trigger_sf_config = "HLT_mu26_ivarmedium_OR_HLT_mu50";
       }
-      // 2017+ (324320+)
-      else {
+      // 2017+18
+      else if (runNumber >= 324320 && runNumber < 364485) {
         m_muon_trigger_sf_config = "HLT_mu26_ivarmedium_OR_HLT_mu50";
-      }
+      } else if (runNumber >= 410000) { // 2022+
+        m_muon_trigger_sf_config = "HLT_mu24_ivarmedium_OR_HLT_mu50";
+			}
 
       if (m_config->muonForceTrigger() != " "){ 
         m_muon_trigger_sf_config = m_config->muonForceTrigger();
@@ -333,7 +335,7 @@ namespace top {
       ATH_MSG_DEBUG("Muon trigger scale factor config is : " + m_muon_trigger_sf_config);
       ATH_MSG_DEBUG("RunNumber (0 < 2015 < 284484 < 2016 < 324320 < 2017) : ");
       ATH_MSG_DEBUG(runNumber);
-    }//end of if (m_config->doPileupReweighting())
+    }
 
     ///-- Loop over all muon collections --///
     for (auto currentSystematic : *m_config->systSgKeyMapMuons()) {

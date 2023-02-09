@@ -1825,8 +1825,6 @@ namespace top {
     const std::string isRun3 = settings->value("IsRun3");
     this->setIsRun3(isRun3 == "True");
 
-    m_muon_trigger_SF = settings->value("MuonTriggerSF");
-
     m_trigMatchElemRelink = settings->retrieve("TriggerMatchingElementRelinking");
 
     if (settings->value("DemandPrimaryVertex") == "False")
@@ -3523,7 +3521,6 @@ namespace top {
 
     out->m_fwdElectronID = m_fwdElectronID;
 
-    out->m_muon_trigger_SF = m_muon_trigger_SF;
     out->m_muonQuality = m_muonQuality;
     out->m_muonQualityLoose = m_muonQualityLoose;
     out->m_muonIsolation = m_muonIsolation;
@@ -3688,7 +3685,6 @@ namespace top {
 
     m_fwdElectronID = settings->m_fwdElectronID;
 
-    m_muon_trigger_SF = settings->m_muon_trigger_SF;
     m_muonQuality = settings->m_muonQuality;
     m_muonQualityLoose = settings->m_muonQualityLoose;
     m_muonIsolation = settings->m_muonIsolation;
