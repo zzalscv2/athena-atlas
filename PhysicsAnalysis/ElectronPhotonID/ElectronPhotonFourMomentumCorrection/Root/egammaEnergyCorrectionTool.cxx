@@ -65,7 +65,7 @@ namespace AtlasRoot {
     m_esmodel(egEnergyCorr::UNDEFINED)
   {
 
-    m_rootFileName = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v27/egammaEnergyCorrectionData.root");
+    m_rootFileName = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v28/egammaEnergyCorrectionData.root");
     
     if (m_rootFileName.empty()) {
       ATH_MSG_FATAL("cannot find configuration file");
@@ -969,7 +969,7 @@ namespace AtlasRoot {
         gain_tool_run_2_filename = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v11/gain_uncertainty_specialRun.root"); 
       }
       else if (m_esmodel == egEnergyCorr::es2022_R21_Precision) {
-	      gain_tool_run_2_filename = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v27/gain_uncertainty_specialRun.root");
+	      gain_tool_run_2_filename = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v28/gain_uncertainty_specialRun.root");
       }
       else
       {
@@ -1116,7 +1116,7 @@ namespace AtlasRoot {
 
       m_s12ElectronEtaBins.reset( dynamic_cast< TAxis* >( m_rootFile->Get("S2Recalibration/ElectronAxis")));
       m_s12ElectronGraphs.reset( dynamic_cast< TList* >( m_rootFile->Get("S2Recalibration/ElectronBiasS2")));m_s12ElectronGraphs->SetOwner();
-      m_s12UnconvertedEtaBins.reset( dynamic_cast< TAxis* >( m_rootFile->Get("S1Recalibration/UnconvertedAxis")));
+      m_s12UnconvertedEtaBins.reset( dynamic_cast< TAxis* >( m_rootFile->Get("S2Recalibration/UnconvertedAxis")));
       m_s12UnconvertedGraphs.reset( dynamic_cast< TList* >( m_rootFile->Get("S2Recalibration/UnconvertedBiasS2")));m_s12UnconvertedGraphs->SetOwner();
       m_s12ConvertedEtaBins.reset( dynamic_cast< TAxis* >( m_rootFile->Get("S2Recalibration/ConvertedAxis")));
       m_s12ConvertedGraphs.reset( dynamic_cast< TList* >( m_rootFile->Get("S2Recalibration/ConvertedBiasS2")));m_s12ConvertedGraphs->SetOwner();
@@ -1834,6 +1834,7 @@ namespace AtlasRoot {
   double egammaEnergyCorrectionTool::getZeeMeanET(double  cl_eta) const {
     if(m_esmodel != egEnergyCorr::es2022_R21_Precision) return 40000.; 
     else {
+      if(std::abs(cl_eta)>=2.47) cl_eta=2.46;
       return m_meanZeeProfile->GetBinContent(m_meanZeeProfile->FindBin(std::abs(cl_eta)))*1000;
     }
   }
@@ -2669,7 +2670,8 @@ namespace AtlasRoot {
     if (var == egEnergyCorr::Scale::Nominal) return value;
 
     // nearest eta outside of crack (for PS scale values and uncertainties)
-    double nearestEta = nearestEtaBEC(cl_eta);
+    double  nearestEta = cl_eta;
+    if (m_esmodel != egEnergyCorr::es2022_R21_Precision) nearestEta = nearestEtaBEC(cl_eta);
 
     if( iLayer==0 ) { // use nearestEta
 
@@ -2821,6 +2823,8 @@ namespace AtlasRoot {
 							   PATCore::ParticleType::Type ptype ) const {
 
     double value = 0;
+    // Accordion histogram specicif condition
+    if( iLayer==6 && std::abs(cl_eta)>=2.47) cl_eta=2.46;
     double aeta = std::abs(cl_eta);
     double ET = energy/std::cosh(cl_eta);
 
