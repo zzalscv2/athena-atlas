@@ -65,7 +65,7 @@ namespace Muon {
         // retrieve MuonDetectorManager
         ATH_CHECK(m_DetectorManagerKey.initialize());
         ATH_CHECK(m_mdtCreator.retrieve());
-        ATH_CHECK(m_mdtCreatorT0.retrieve());
+        if (!m_mdtCreatorT0.empty()) ATH_CHECK(m_mdtCreatorT0.retrieve());
         ATH_CHECK(m_clusterCreator.retrieve());
         ATH_CHECK(m_compClusterCreator.retrieve());
         ATH_CHECK(m_idHelperSvc.retrieve());
@@ -1235,9 +1235,10 @@ namespace Muon {
 
             std::unique_ptr<MdtDriftCircleOnTrack> nonconstDC;
             bool hasT0 = segment.hasT0Shift();
-            if (!hasT0) {
+            if (!hasT0 || m_mdtCreatorT0.empty()) {
                 // ATH_MSG_VERBOSE(" recalibrate MDT hit");
                 nonconstDC.reset(m_mdtCreator->createRIO_OnTrack(*riodc->prepRawData(), mdtGP, &gdir));
+                if (hasT0) ATH_MSG_WARNING("Attempted to change t0 without a properly configured MDT creator tool. ");
             } else {
                 ATH_MSG_VERBOSE(" recalibrate MDT hit with shift " << segment.t0Shift());
                 nonconstDC.reset(m_mdtCreatorT0->createRIO_OnTrack(*riodc->prepRawData(), mdtGP, &gdir, segment.t0Shift()));
