@@ -186,6 +186,20 @@ def TrigMuonEFIdtpInvMassHypoMonitoring(flags, histPath):
     montool.defineHistogram('FTF_effi_pt1_eta2', type='TH1F', path='EXPERT', title="FTF track efficiency for p_{T} > 20 GeV, |#eta|>2; PT found wrt MStrack; N entries",
                             xbins=2, xmin=0, xmax=2)
 
+    # test
+    montool.defineHistogram('probePhiEfficiency, FTFfound', type='TProfile', path='EXPERT', title="FTF Efficiency Profile wrt Probe SA muon Phi; probe SA muon #phi",
+                            xbins=9, xmin=-3.14, xmax=3.14, ymin=-0.1, ymax=1.1)
+    montool.defineHistogram('probeEtaEfficiency, FTFfound', type='TProfile', path='EXPERT', title="FTF Efficiency Profile wrt Probe SA muon Eta; probe SA muon #eta",
+                            xbins=15, xmin=-3, xmax=3, ymin=-0.1, ymax=1.1)
+    montool.defineHistogram('probePhiEfficiency, PTfound', type='TProfile', path='EXPERT', title="PT Efficiency Profile wrt Probe SA muon Phi; probe SA muon #phi",
+                            xbins=9, xmin=-3.14, xmax=3.14, ymin=-0.1, ymax=1.1)
+    montool.defineHistogram('probeEtaEfficiency, PTfound', type='TProfile', path='EXPERT', title="PT Efficiency Profile wrt Probe SA muon Eta; probe SA muon #eta",
+                            xbins=15, xmin=-3, xmax=3, ymin=-0.1, ymax=1.1)
+    montool.defineHistogram('PTphi, PTpixelFound', type='TProfile', path='EXPERT', title="Expected && Found hit (IBL) for PT vs phi; #phi",
+                            xbins=14, xmin=-3.14, xmax=3.14, ymin=-0.1, ymax=1.1)
+    montool.defineHistogram('PTphi, PTpixelNextToFound', type='TProfile', path='EXPERT', title="Next to innermost layer of detector - Expected && Found hit (L0) for PT vs phi; #phi",
+                            xbins=22, xmin=-3.14, xmax=3.14, ymin=-0.1, ymax=1.1)
+
     return montool
 
 
