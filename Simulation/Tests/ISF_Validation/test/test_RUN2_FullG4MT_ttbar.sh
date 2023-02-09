@@ -62,7 +62,7 @@ mv log.EVNTtoHITS log.EVNTtoHITS_OLD
 echo "art-result: $rc2 simOLD"
 if [ $status -eq 0 ]
 then
-    status = $rc2
+    status=$rc2
 fi
 
 rc3=-9999
