@@ -62,8 +62,8 @@ bool TrigMuonEFIdtpInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecis
 
    // monitored variables
    std::vector<float>  mnt_invMass;
-   auto mon_invMass    = Monitored::Collection("Mass", mnt_invMass);
-   auto monitorIt      = Monitored::Group(m_monTool, mon_invMass);
+   auto mon_invMass   = Monitored::Collection("Mass", mnt_invMass);
+   auto monitorIt     = Monitored::Group(m_monTool, mon_invMass);
 
    // retrieve muon and tracks
    std::vector<const xAOD::TrackParticle*> tracks_pt;
@@ -167,11 +167,18 @@ StatusCode TrigMuonEFIdtpInvMassHypoTool::doTPIdperf(const xAOD::TrackParticle* 
    // monitored variables
    std::vector<float>  mnt_PT_dr,  mnt_PT_qovp;
    std::vector<float>  mnt_FTF_dr, mnt_FTF_qovp;
-   auto mon_PT_dr    = Monitored::Collection("PT_dr",    mnt_PT_dr);
-   auto mon_PT_qovp  = Monitored::Collection("PT_qovp",  mnt_PT_qovp);
-   auto mon_FTF_dr   = Monitored::Collection("FTF_dr",   mnt_FTF_dr);
-   auto mon_FTF_qovp = Monitored::Collection("FTF_qovp", mnt_FTF_qovp);
-   auto monitorIt    = Monitored::Group(m_monTool, mon_PT_dr, mon_PT_qovp, mon_FTF_dr, mon_FTF_qovp);
+   auto mon_PT_dr     = Monitored::Collection("PT_dr",    mnt_PT_dr);
+   auto mon_PT_qovp   = Monitored::Collection("PT_qovp",  mnt_PT_qovp);
+   auto mon_FTF_dr    = Monitored::Collection("FTF_dr",   mnt_FTF_dr);
+   auto mon_FTF_qovp  = Monitored::Collection("FTF_qovp", mnt_FTF_qovp);
+   auto mon_phi_effi  = Monitored::Scalar<float>("probePhiEfficiency", -999.0);
+   auto mon_eta_effi  = Monitored::Scalar<float>("probeEtaEfficiency", -999.0);
+   auto mon_pt_found  = Monitored::Scalar<float>("PTfoundCombined",  -1);
+   auto mon_ftf_found = Monitored::Scalar<float>("FTFfound", -1);
+   auto mon_pt_phi    = Monitored::Scalar<float>("PTphi", -999.0);
+   auto mon_pt_pix    = Monitored::Scalar<float>("PTpixelFound", -1);
+   auto mon_pt_pixnext= Monitored::Scalar<float>("PTpixelNextToFound", -1);
+   auto monitorIt     = Monitored::Group(m_monTool, mon_PT_dr, mon_PT_qovp, mon_FTF_dr, mon_FTF_qovp, mon_phi_effi, mon_eta_effi, mon_pt_found, mon_ftf_found, mon_pt_phi, mon_pt_pix, mon_pt_pixnext);
 
    // probe values
    auto mnt_probe_pt  = Monitored::Scalar<float>("probe_pt",  0);
@@ -185,6 +192,11 @@ StatusCode TrigMuonEFIdtpInvMassHypoTool::doTPIdperf(const xAOD::TrackParticle* 
    const float PT_QOVP_CUT = 2.0;
    ATH_MSG_VERBOSE("PT: n size="<<tracks_pt.size());
    int n_pt_matched = 0;
+   float min_dr_pt_matched = 999;
+   uint8_t pt_expectInnermost=0;
+   uint8_t pt_numberInnermost=0;
+   uint8_t pt_expectNextToInnermost=0;
+   uint8_t pt_numberNextToInnermost=0;
    for(auto idtrack : tracks_pt) {
       float dr_pt   = xAOD::P4Helpers::deltaR(metrack,idtrack);
       float qovp_pt = TrigMuonEFIdtpCommon::qOverPMatching(metrack,idtrack);
@@ -195,6 +207,14 @@ StatusCode TrigMuonEFIdtpInvMassHypoTool::doTPIdperf(const xAOD::TrackParticle* 
       if( dr_pt > PT_DR_CUT ) continue;
       if( qovp_pt > PT_QOVP_CUT ) continue;
       ++n_pt_matched;
+      if( dr_pt < min_dr_pt_matched ) {
+	 min_dr_pt_matched = dr_pt;
+	 mon_pt_phi = idtrack->phi();
+	 idtrack->summaryValue(pt_expectInnermost,xAOD::expectInnermostPixelLayerHit);
+	 idtrack->summaryValue(pt_numberInnermost,xAOD::numberOfInnermostPixelLayerHits);
+	 idtrack->summaryValue(pt_expectNextToInnermost,xAOD::expectNextToInnermostPixelLayerHit);
+	 idtrack->summaryValue(pt_numberNextToInnermost,xAOD::numberOfNextToInnermostPixelLayerHits);	 
+      }
    }
    if( n_pt_matched > 1 ) n_pt_matched=1;
 
@@ -218,6 +238,7 @@ StatusCode TrigMuonEFIdtpInvMassHypoTool::doTPIdperf(const xAOD::TrackParticle* 
    
    // efficiency
    float me_eta    = metrack->eta();
+   float me_phi    = metrack->phi();
    float me_pt_gev = metrack->pt()/Gaudi::Units::GeV;
 
    int eta_nr = 0;
@@ -235,6 +256,28 @@ StatusCode TrigMuonEFIdtpInvMassHypoTool::doTPIdperf(const xAOD::TrackParticle* 
    auto monEffi = Monitored::Group(m_monTool, mnt_PT_effi, mnt_FTF_effi);
    mnt_PT_effi  = n_pt_matched;
    mnt_FTF_effi = n_ftf_matched;
+
+   // TnP monitoring
+   mon_phi_effi  = me_phi;
+   mon_eta_effi  = me_eta;
+   mon_pt_found  = n_pt_matched;
+   mon_ftf_found = n_ftf_matched;
+   if( n_pt_matched != 0 ) {
+      if( pt_expectInnermost == 1 ) {
+	 if( pt_numberInnermost>0 ) {
+	    mon_pt_pix=1;
+	 } else {
+	    mon_pt_pix=0;
+	 }
+      }
+      if( pt_expectNextToInnermost == 1 ) {
+	 if( pt_numberNextToInnermost>0 ) {
+	    mon_pt_pixnext=1;
+	 } else {
+	    mon_pt_pixnext=0;
+	 }
+      }
+   }
 
    //
    return StatusCode::SUCCESS;
