@@ -146,7 +146,9 @@ def DCMathSegmentMakerCfg(flags,
     # ToolHandle<IDCSLFitProvider>              m_dcslFitProvider;
 
     result=ComponentAccumulator()
-        
+    # Won't explicitly configure MuonIdHelperSvc
+    from MuonConfig.MuonRecToolsConfig import MuonEDMHelperSvcCfg
+    kwargs.setdefault("edmHelper", result.getPrimaryAndMerge(MuonEDMHelperSvcCfg(flags)))
     kwargs.setdefault("RefitSegment", True)
     kwargs.setdefault("AssumePointingPhi", flags.Beam.Type is not BeamType.Cosmics)
     kwargs.setdefault("OutputFittedT0", True)
@@ -188,6 +190,7 @@ def DCMathSegmentMakerCfg(flags,
         kwargs.setdefault("MdtCreatorT0", result.getPrimaryAndMerge(mdt_dcot_CA)) 
         kwargs.setdefault("MdtSegmentFinder", result.getPrimaryAndMerge(MdtMathSegmentFinderCfg(flags, name='MdtMathT0FitSegmentFinder', doSegmentT0Fit=True)))
     else:
+        kwargs.setdefault("MdtCreatorT0", "") 
         kwargs.setdefault("MdtSegmentFinder", result.getPrimaryAndMerge(MdtMathSegmentFinderCfg(flags)) )
 
     kwargs.setdefault("SegmentFitter", result.getPrimaryAndMerge(MuonSegmentFittingToolCfg(flags, name="MuonSegmentFittingTool")))
