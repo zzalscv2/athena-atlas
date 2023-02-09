@@ -66,6 +66,9 @@ namespace {
     }
   }
 
+  // When changing the values in the enum make sure
+  // corresponding values in `data/ELG_jediState.py` script
+  // are changed accordingly
   namespace Status {
     //static const int NSTATES = 3;
     enum Enum { DONE=0, PENDING=1, FAIL=2 };
@@ -215,26 +218,24 @@ static Status::Enum checkPandaTask(SH::Sample* const sample)
 
   static bool loaded = false;
   if (not loaded) {
-    // TString path = "$ROOTCOREBIN/python/EventLoopGrid/ELG_jediState.py";
-    // gSystem->ExpandPathName(path);
-    // TPython::LoadMacro(path.Data());
     std::string path = PathResolverFindCalibFile("EventLoopGrid/ELG_jediState.py");
     TPython::LoadMacro(path.c_str());
     loaded = true;
   }
 
-  TPython::Bind(dynamic_cast<TObject*>(sample), "ELG_SAMPLE"); 
-  std::string ret = (const char*) TPython::Eval("ELG_jediState(ELG_SAMPLE)");
-  TPython::Bind(0, "ELG_SAMPLE");   
+  TPython::Bind(dynamic_cast<TObject*>(sample), "ELG_SAMPLE");
+  int ret =  TPython::Eval("ELG_jediState(ELG_SAMPLE)");
+  TPython::Bind(0, "ELG_SAMPLE");
 
-  if (ret == "done")  return Status::DONE;
-  if (ret == "failed") return Status::FAIL;
-  if (ret == "finished") return Status::FAIL;
+  if (ret == Status::DONE) return Status::DONE;
+  if (ret == Status::FAIL) return Status::FAIL;
 
-  if (ret != "running") { sample->meta()->setString("nc_ELG_state_details", ret); }
-  if (ret.empty()) { 
-    sample->meta()->setString("nc_ELG_state_details", 
-                              "problem checking jedi task status"); 
+  // Value 90 corresponds to `running` state of the job
+  if (ret != 90) { sample->meta()->setString("nc_ELG_state_details", "task status other than done/finished/failed/running"); }
+  // Value 99 is returned if there is error in the script (import, missing ID)
+  if (ret == 99) {
+    sample->meta()->setString("nc_ELG_state_details",
+                              "problem checking jedi task status");
   }
 
   return Status::PENDING;
