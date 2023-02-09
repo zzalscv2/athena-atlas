@@ -39,9 +39,9 @@ void TrackPlots::initializePlots(){
   deta    = Book1D("deta", "#Delta#eta_{1} of "+m_sParticleType+";#Delta#eta_{1};Electrons", 100,-0.01, 0.01);           
   dphi    = Book1D("dphi", "#Delta#varphi_{2} of "+m_sParticleType+";#Delta#varphi_{2};Electrons", 100,-0.01, 0.01);
   dphirescaled = Book1D("dphirescaled", "#Delta#varphiRescaled_{2} of "+m_sParticleType+";#Delta#varphiRescaled_{2};Electrons",100,-0.01,0.01);
-  d0           = Book1D("d0", "d0 of "+m_sParticleType+"; d0;Electrons", 200, -100, 100);
-  z0           = Book1D("z0", "z0 of "+m_sParticleType+"; z0;Electrons", 200, -100, 100);
-  d0significance = Book1D("d0significance", "d0significance of "+m_sParticleType+"; d0significance;Electrons", 50, -25, 25);
+  d0           = Book1D("d0", "d0 of "+m_sParticleType+"; d0;Electrons", m_d0_nBins, m_d0Range[0], m_d0Range[1]);
+  z0           = Book1D("z0", "z0 of "+m_sParticleType+"; z0;Electrons", m_z0_nBins, m_z0Range[0], m_z0Range[1]);
+  d0significance = Book1D("d0significance", "d0significance of "+m_sParticleType+"; d0significance;Electrons", m_d0sig_nBins, m_d0sigRange[0], m_d0sigRange[1]);
   blayer  = Book1D("blayer", "#blayer hits of "+m_sParticleType+";# blayer hits;Electrons", 5,0, 5);
   pixel   = Book1D("pixel", "#pixel hits of "+m_sParticleType+";# pixel hits;Electrons", 10, 0, 10);
   sct     = Book1D("sct", "#sct hits of "+m_sParticleType+";# sct hits;Electrons", 25, 0, 25);
@@ -58,6 +58,36 @@ void TrackPlots::initializePlots(){
   trtvseta = Book2D("trtvseta", "#trt hits vs eta of"+m_sParticleType+";#eta; #trt hits", 50, -2.5, 2.5,50,0.,50.);
   trthtvseta = Book2D("trthtvseta", "#HT trt hits vs eta of"+m_sParticleType+";#eta; #HT trt hits", 50, -2.5, 2.5,50,0.,50.);
 }
+
+  void TrackPlots::Set_d0_nBins(unsigned d0_nBins)
+  {
+    m_d0_nBins = d0_nBins;
+  }
+  void TrackPlots::Set_d0sig_nBins(unsigned d0sig_nBins)
+  {
+    m_d0sig_nBins = d0sig_nBins;
+  }
+
+  void TrackPlots::Set_z0_nBins(unsigned z0_nBins)
+  {
+    m_z0_nBins = z0_nBins;
+  }
+
+  void TrackPlots::Set_d0_Bins(const std::vector<double> &d0Range)
+  {
+    m_d0Range = d0Range;
+  }
+  void TrackPlots::Set_d0sig_Bins(const std::vector<double> &d0sigRange)
+  {
+    m_d0sigRange = d0sigRange;
+  }
+
+  void TrackPlots::Set_z0_Bins(const std::vector<double> &z0Range)
+  {
+    m_z0Range = z0Range;
+  }
+
+  
 
 
   void TrackPlots::fill(const xAOD::Electron& electron, const xAOD::EventInfo& eventInfo) {

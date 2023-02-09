@@ -51,7 +51,8 @@ EgammaPhysValMonitoringTool::EgammaPhysValMonitoringTool( const std::string& typ
 							  const IInterface* parent ):
   ManagedMonitorToolBase( type, name, parent ),
   m_oElectronValidationPlots(nullptr, "Electron/"),
-  m_oPhotonValidationPlots(nullptr, "Photon/")
+  m_oPhotonValidationPlots(nullptr, "Photon/"),
+  m_oLRTElectronValidationPlots(nullptr, "LRTElectron/")
 {    
 }
 
@@ -70,6 +71,7 @@ StatusCode EgammaPhysValMonitoringTool::initialize()
   ATH_CHECK(m_EventInfoContainerKey.initialize());
   ATH_CHECK(m_photonContainerKey.initialize());
   ATH_CHECK(m_electronContainerKey.initialize());
+  ATH_CHECK(m_lrtelectronContainerKey.initialize());
   ATH_CHECK(m_electronContainerFrwdKey.initialize());
   ATH_CHECK(m_truthParticleContainerKey.initialize(m_isMC));
   ATH_CHECK(m_egammaTruthContainerKey.initialize(m_isMC));
@@ -97,7 +99,12 @@ StatusCode EgammaPhysValMonitoringTool::bookHistograms()
     ATH_CHECK(regHist(hist.first,hist.second,all));
   }
 
-
+  m_oLRTElectronValidationPlots.initialize();
+  hists = m_oLRTElectronValidationPlots.retrieveBookedHistograms();
+  for (auto &hist : hists){
+    ATH_MSG_INFO ("Initializing " << hist.first << " " << hist.first->GetName() << " " << hist.second << "...");
+    ATH_CHECK(regHist(hist.first,hist.second,all));
+  }
 
   return StatusCode::SUCCESS;      
 }
@@ -109,20 +116,19 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
 {
   ATH_MSG_DEBUG("Filling hists " << name() << "...");
 
-  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_EventInfoContainerKey);
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_EventInfoContainerKey, ctx);
   if (!eventInfo.isValid()) {
     ATH_MSG_ERROR("Couldn't retrieve EventInfo container with key: "
                   << m_EventInfoContainerKey.key());
     return StatusCode::FAILURE;
   }
 
-  float weight = 1.;
-  weight = eventInfo->beamSpotWeight();
+  float weight = eventInfo->beamSpotWeight();
 
   if (m_isMC) {
-
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles =
-      SG::ReadHandle<xAOD::TruthParticleContainer>(m_egammaTruthContainerKey);
+      SG::ReadHandle<xAOD::TruthParticleContainer>(m_egammaTruthContainerKey, ctx);
 
     // filling truth iso (prompt) particles from egammaTruthParticles container
     // (containing only iso particles)
@@ -226,7 +232,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
     // filling all truth particles from TruthParticles container (possibly will
     // be deleted, also possibly to fill only prompt particles)
     SG::ReadHandle<xAOD::TruthParticleContainer> truthallParticles(
-      m_truthParticleContainerKey);
+      m_truthParticleContainerKey, ctx);
     if (!truthallParticles.isValid()) {
       ATH_MSG_ERROR("Couldn't retrieve Truth container with key: "
                     << m_truthParticleContainerKey.key());
@@ -341,6 +347,14 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
                                                              << "...");
       return StatusCode::FAILURE;
     }
+
+    //---------LRTElectrons----------------------
+    if (!fillLRTElecHistograms(truthParticles.ptr(), eventInfo.ptr())) {
+      ATH_MSG_ERROR("Filling lrt elecectron hists  failed " << name()
+                                                             << "...");
+      return StatusCode::FAILURE;
+    }
+
     //---------Frwd Electrons----------------------
     if (!fillRecoFrwdElecHistograms(truthParticles.ptr(), eventInfo.ptr())) {
       ATH_MSG_ERROR("Filling reco frwd elecectron hists  failed " << name()
@@ -363,7 +377,8 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoElecHistograms(const xAOD::Truth
 {
   ATH_MSG_DEBUG ("Filling reco electron hists " << name() << "...");
   
-  SG::ReadHandle<xAOD::ElectronContainer> Electrons( m_electronContainerKey );
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  SG::ReadHandle<xAOD::ElectronContainer> Electrons( m_electronContainerKey, ctx);
   if (!Electrons.isValid()) {
     ATH_MSG_ERROR ("Couldn't retrieve Electron container with key: " << m_electronContainerKey.key());
     return StatusCode::FAILURE;
@@ -371,8 +386,7 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoElecHistograms(const xAOD::Truth
   
   int numofele=0;
 
-  float weight=1.;
-  weight = eventInfo->beamSpotWeight();
+  float weight = eventInfo->beamSpotWeight();
   
   for(const auto *const electron : *Electrons){
     bool isElecPrompt=false;
@@ -381,25 +395,25 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoElecHistograms(const xAOD::Truth
 
     if(electron->isAvailable <int>("truthType")) {
       MCTruthPartClassifier::ParticleType type = (MCTruthPartClassifier::ParticleType) electron->auxdata<int>("truthType");
-      if(type==MCTruthPartClassifier::IsoElectron) {isElecPrompt=true;
-	//fill energy scale
-	const xAOD::TruthParticle* thePart = xAOD::TruthHelpers::getTruthParticle(*electron); // 20.7.X.Y.I
-//	const xAOD::TruthParticle* thePart = xAOD::EgammaHelpers::getTruthParticle(electron);
-	  if(thePart) {
-            float EtLin = (electron->pt()-thePart->pt())/thePart->pt();
-	    m_oElectronValidationPlots.res_et->Fill(thePart->pt()/GeV,EtLin,weight);
-	    m_oElectronValidationPlots.res_eta->Fill(thePart->eta(),EtLin,weight);
+      if(type==MCTruthPartClassifier::IsoElectron) {
+        isElecPrompt=true;
+	      //fill energy scale
+      	const xAOD::TruthParticle* thePart = xAOD::TruthHelpers::getTruthParticle(*electron); // 20.7.X.Y.I
+	      if(thePart) {
+          float EtLin = (electron->pt()-thePart->pt())/thePart->pt();
+          m_oElectronValidationPlots.res_et->Fill(thePart->pt()/GeV,EtLin,weight);
+          m_oElectronValidationPlots.res_eta->Fill(thePart->eta(),EtLin,weight);
           if (thePart->pt()/GeV>20.) {
               m_oElectronValidationPlots.res_et_cut->Fill(thePart->pt()/GeV,EtLin,weight);
               m_oElectronValidationPlots.res_eta_cut->Fill(thePart->eta(),EtLin,weight);
               m_oElectronValidationPlots.res_et_cut_pt_20->Fill(thePart->pt()/GeV,EtLin,weight);
               m_oElectronValidationPlots.res_eta_cut_pt_20->Fill(thePart->eta(),EtLin,weight);
           }
-	    m_oElectronValidationPlots.matrix->Fill(electron->pt()/GeV,thePart->pt()/GeV);
-           }else {
-	cout<<"Truth particle associated not in egamma truth collection"<<endl;
-             }
-	}
+	        m_oElectronValidationPlots.matrix->Fill(electron->pt()/GeV,thePart->pt()/GeV);
+        } else {
+	        ATH_MSG_INFO ("Truth particle associated not in egamma truth collection");
+        }
+	  } 
       
     } else if(m_isMC){ if(Match(electron,11, truthParticles)!=nullptr ) isElecPrompt=true;}
     
@@ -418,21 +432,83 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoElecHistograms(const xAOD::Truth
   
   return StatusCode::SUCCESS;
 }
+
+//-------------------------------------------------------------------
+StatusCode EgammaPhysValMonitoringTool::fillLRTElecHistograms(const xAOD::TruthParticleContainer* truthParticles, const xAOD::EventInfo* eventInfo)
+//-------------------------------------------------------------------
+{
+  ATH_MSG_DEBUG ("Filling lrt electron hists " << name() << "...");
+  
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  SG::ReadHandle<xAOD::ElectronContainer> LRTElectrons( m_lrtelectronContainerKey, ctx);
+  if (!LRTElectrons.isValid()) {
+    ATH_MSG_ERROR ("Couldn't retrieve Electron container with key: " << m_lrtelectronContainerKey.key());
+    return StatusCode::FAILURE;
+  } 
+  
+  int numofele=0;
+
+  float weight = eventInfo->beamSpotWeight();
+  
+  for(const auto *const electron : *LRTElectrons){
+    bool isElecPrompt=false;
+
+    if(!(electron->isGoodOQ (xAOD::EgammaParameters::BADCLUSELECTRON))) continue;
+
+    if(electron->isAvailable <int>("truthType")) {
+      MCTruthPartClassifier::ParticleType type = (MCTruthPartClassifier::ParticleType) electron->auxdata<int>("truthType");
+      if(type==MCTruthPartClassifier::IsoElectron) {
+        isElecPrompt=true;
+	      //fill energy scale
+	      const xAOD::TruthParticle* thePart = xAOD::TruthHelpers::getTruthParticle(*electron); // 20.7.X.Y.I
+	      if(thePart) {
+          float EtLin = (electron->pt()-thePart->pt())/thePart->pt();
+	        m_oLRTElectronValidationPlots.res_et->Fill(thePart->pt()/GeV,EtLin,weight);
+	        m_oLRTElectronValidationPlots.res_eta->Fill(thePart->eta(),EtLin,weight);
+          if (thePart->pt()/GeV>20.) {
+            m_oLRTElectronValidationPlots.res_et_cut->Fill(thePart->pt()/GeV,EtLin,weight);
+            m_oLRTElectronValidationPlots.res_eta_cut->Fill(thePart->eta(),EtLin,weight);
+            m_oLRTElectronValidationPlots.res_et_cut_pt_20->Fill(thePart->pt()/GeV,EtLin,weight);
+            m_oLRTElectronValidationPlots.res_eta_cut_pt_20->Fill(thePart->eta(),EtLin,weight);
+          }
+	        m_oLRTElectronValidationPlots.matrix->Fill(electron->pt()/GeV,thePart->pt()/GeV);
+        }else {
+	        ATH_MSG_INFO ("Truth particle associated not in egamma truth collection");
+        }
+	    }  
+    } else if(m_isMC){ if(Match(electron,11, truthParticles)!=nullptr ) isElecPrompt=true;}
+    
+    
+    m_oLRTElectronValidationPlots.fill(*electron,*eventInfo,isElecPrompt);
+    if(electron->author()&xAOD::EgammaParameters::AuthorElectron||
+       electron->author()&xAOD::EgammaParameters::AuthorAmbiguous)   numofele++;
+    
+  } 
+  
+  m_oLRTElectronValidationPlots.m_oCentralElecPlots.nParticles->Fill(numofele);
+  m_oLRTElectronValidationPlots.m_oCentralElecPlots.nParticles_weighted->Fill(numofele,weight);
+  
+  m_oLRTElectronValidationPlots.mu_average->Fill(eventInfo->averageInteractionsPerCrossing(), weight);
+  m_oLRTElectronValidationPlots.mu_actual->Fill(eventInfo->actualInteractionsPerCrossing(), weight);
+  
+  return StatusCode::SUCCESS;
+}
+
 //-------------------------------------------------------------------
 StatusCode EgammaPhysValMonitoringTool::fillRecoFrwdElecHistograms(const xAOD::TruthParticleContainer* truthParticles, const xAOD::EventInfo* eventInfo)
 //-------------------------------------------------------------------
 {
   ATH_MSG_DEBUG ("Filling reco frwd electron hists " << name() << "...");
 
-  SG::ReadHandle<xAOD::ElectronContainer> ElectronsFrwd( m_electronContainerFrwdKey );
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  SG::ReadHandle<xAOD::ElectronContainer> ElectronsFrwd( m_electronContainerFrwdKey, ctx);
   if(!ElectronsFrwd.isValid() ) {
     ATH_MSG_ERROR ("Couldn't retrieve Forward Electrons container with key: " << m_electronContainerFrwdKey.key());
     return StatusCode::FAILURE;
   }
   
   int numoffrwdele=0;
-  float weight=1.;
-  weight = eventInfo->beamSpotWeight();
+  float weight = eventInfo->beamSpotWeight();
   
   for(const auto *const frwdelectron : *ElectronsFrwd){
     if(!(frwdelectron->isGoodOQ (xAOD::EgammaParameters::BADCLUSELECTRON))) continue;
@@ -456,7 +532,8 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoPhotHistograms(const xAOD::Truth
 {
   ATH_MSG_DEBUG ("Filling reco photon  hists " << name() << "...");
  
-  SG::ReadHandle<xAOD::PhotonContainer> Photons( m_photonContainerKey );
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  SG::ReadHandle<xAOD::PhotonContainer> Photons( m_photonContainerKey, ctx);
   if (!Photons.isValid()) {
     ATH_MSG_ERROR ("Couldn't retrieve Photons container with key: " << m_photonContainerKey.key());
     return StatusCode::FAILURE;
@@ -467,32 +544,31 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoPhotHistograms(const xAOD::Truth
   int numofAmb=0; 
   int numPhotAll=0; 
   int numofCnv=0;
-  float weight=1.;
-  weight = eventInfo->beamSpotWeight();
+  float weight = eventInfo->beamSpotWeight();
 
   for(const auto *photon : *Photons){
     bool isPhotPrompt=false;
     if (photon->author()&xAOD::EgammaParameters::AuthorCaloTopo35) continue;//21.0.>7
     if(!(photon->isGoodOQ (xAOD::EgammaParameters::BADCLUSPHOTON))) continue;
       if(photon->isAvailable <int>("truthType")) {
-      MCTruthPartClassifier::ParticleType type = (MCTruthPartClassifier::ParticleType) photon->auxdata<int>("truthType");
-      if(type==MCTruthPartClassifier::IsoPhoton) {isPhotPrompt=true;
-	
-	//fill energy scale
- 	const xAOD::TruthParticle* thePart = xAOD::TruthHelpers::getTruthParticle(*photon);//20.7.X.Y.I
-	//	const xAOD::TruthParticle* thePart = xAOD::EgammaHelpers::getTruthParticle(photon);
-	if(thePart&&thePart->pt()/GeV>20.) {
-	  float EtLin = (photon->pt()-thePart->pt())/thePart->pt();
-	  m_oPhotonValidationPlots.res_et->Fill(thePart->pt()/GeV,EtLin,weight);
-	  m_oPhotonValidationPlots.res_eta->Fill(thePart->eta(),EtLin,weight);
-	  if (std::abs(EtLin)<0.2){
-	    m_oPhotonValidationPlots.res_et_cut->Fill(thePart->pt()/GeV,EtLin,weight);
-	    m_oPhotonValidationPlots.res_eta_cut->Fill(thePart->eta(),EtLin,weight);
-	  }
-	}else {
-	  cout<<"Truth particle associated not in egamma truth collection"<<endl;
+        MCTruthPartClassifier::ParticleType type = (MCTruthPartClassifier::ParticleType) photon->auxdata<int>("truthType");
+        if(type==MCTruthPartClassifier::IsoPhoton) {
+          isPhotPrompt=true;	
+          //fill energy scale
+          const xAOD::TruthParticle* thePart = xAOD::TruthHelpers::getTruthParticle(*photon);//20.7.X.Y.I
+          //	const xAOD::TruthParticle* thePart = xAOD::EgammaHelpers::getTruthParticle(photon);
+          if(thePart&&thePart->pt()/GeV>20.) {
+            float EtLin = (photon->pt()-thePart->pt())/thePart->pt();
+            m_oPhotonValidationPlots.res_et->Fill(thePart->pt()/GeV,EtLin,weight);
+            m_oPhotonValidationPlots.res_eta->Fill(thePart->eta(),EtLin,weight);
+            if (std::abs(EtLin)<0.2){
+              m_oPhotonValidationPlots.res_et_cut->Fill(thePart->pt()/GeV,EtLin,weight);
+              m_oPhotonValidationPlots.res_eta_cut->Fill(thePart->eta(),EtLin,weight);
+            }
+          }else {
+            cout<<"Truth particle associated not in egamma truth collection"<<endl;
           }
-      }
+        }
       
       } else if(m_isMC){if(Match(photon,22, truthParticles)!=nullptr ) isPhotPrompt=true;}    
       

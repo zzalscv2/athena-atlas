@@ -30,7 +30,7 @@ ElectronValidationPlots::ElectronValidationPlots(PlotBase* pParent, const std::s
 void ElectronValidationPlots::initializePlots(){
 
   author       = Book1D("author", "Electron  Author ; author;Events", 20, -0.5, 19.5);
-  mu_average  = Book1D("mu_averadge", "#mu average interactions per crossing ; #mu averadge;Events", 100, -0.5, 99.5);
+  mu_average  = Book1D("mu_average", "#mu average interactions per crossing ; #mu average;Events", 100, -0.5, 99.5);
   mu_actual    = Book1D("mu_actual", "#mu actual interactions per crossing ; #mu_actual;Events", 100, -0.5, 99.5);
   res_et       = BookTProfile("res_et"," IsoElectron;E_{T}^{Truth}, [GeV];(E_{T} - E_{T}^{Truth})/E_{T}^{Truth}",100, 0., 200.);
   res_eta      = BookTProfile("res_eta"," IsoElectron;#eta;(E_{T} - E_{T}^{Truth})/E_{T}^{Truth}",50, -2.5, 2.5);

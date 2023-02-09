@@ -42,6 +42,28 @@ class TrackPlots:public PlotBase {
       TH2* trtvseta;
       TH2* trthtvseta;
 
+      unsigned m_d0_nBins = 200;
+      unsigned m_d0sig_nBins = 50;
+      unsigned m_z0_nBins = 200;
+      std::vector<double> m_d0Range = {-100.0,100.0};
+      std::vector<double> m_d0sigRange = {-25.0,25.0};
+      std::vector<double> m_z0Range = {-100.0,100.0};
+      
+      void Set_d0_nBins(unsigned d0_nBins);
+      void Set_d0sig_nBins(unsigned d0sig_nBins);
+      void Set_z0_nBins(unsigned z0_nBins);
+      void Set_d0_Bins(const std::vector<double> &d0Range);
+      void Set_d0sig_Bins(const std::vector<double> &d0sigRange);
+      void Set_z0_Bins(const std::vector<double> &z0Range);
+
+      unsigned Get_d0_nBins(){ return m_d0_nBins; };
+      unsigned Get_d0sig_nBins(){ return m_d0sig_nBins; };
+      unsigned Get_z0_nBins(){ return m_z0_nBins; };
+      const std::vector<double>& Get_d0_Bins(){ return m_d0Range; };
+      const std::vector<double>& Get_d0sig_Bins(){ return m_d0sigRange; };
+      const std::vector<double>& Get_z0_Bins(){ return m_z0Range; };
+
+
     private:
       virtual void initializePlots();
       
