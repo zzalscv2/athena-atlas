@@ -475,9 +475,12 @@ def pileupMetaDataCheck(pileuptype, pileupfile, simdict):
             switchedOffSubDetectors=[]
             for subdet in simdict['SimulatedDetectors']:
                 if subdet not in metadatadict['SimulatedDetectors']:
-                    if subdet == 'MM':
+                    if subdet == 'pixel':
+                        if 'Pixel' not in metadatadict['SimulatedDetectors']:
+                            switchedOffSubDetectors+=[subdet]
+                    elif subdet == 'MM':
                         if 'Micromegas' not in metadatadict['SimulatedDetectors']:
-                            switchedOffSubDetectors+=[subdet]    
+                            switchedOffSubDetectors+=[subdet]
                     else:
                         switchedOffSubDetectors+=[subdet]
             if switchedOffSubDetectors:
