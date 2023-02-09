@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef IDPERFMON_MUONSELECTOR_H
@@ -36,6 +36,8 @@ class MuonSelector : public EventAnalysis
   MuonSelector();
   ~MuonSelector();
 
+  MuonSelector (const MuonSelector&) = delete;
+  MuonSelector& operator= (const MuonSelector&) = delete;
 
   // for some cases one may need ATLAS_NOT_REENTRANT 
   bool passSelection ( const xAOD::Muon* pxMuon );

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDPERFMON_ZMUMUEVENT_H
@@ -89,7 +89,7 @@ class ZmumuEvent : public EventAnalysis
   inline void                        SetMaxLumiBlock (int newlumiblock)   { m_maxGoodLumiBlock = newlumiblock; }
   inline void                        SetMinLumiBlock (int newlumiblock)   { m_minGoodLumiBlock = newlumiblock; }
   inline void                        SetMuonPtCut (double newvalue)       { m_xMuonID.SetPtCut(newvalue); }
-  inline void                        SetMuonQuality (std::string newname) { m_xMuonID.SetMuonQualityRequirement(newname); }
+  inline void                        SetMuonQuality (const std::string& newname) { m_xMuonID.SetMuonQualityRequirement(newname); }
 
   inline void                        SetMassWindowLow (double newvalue)   { m_MassWindowLow = newvalue; }
   inline void                        SetMassWindowHigh (double newvalue)  { m_MassWindowHigh = newvalue; }

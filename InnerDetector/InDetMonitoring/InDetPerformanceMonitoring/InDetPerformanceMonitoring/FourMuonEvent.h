@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDPERFMON_FOURMUONEVENT_H
@@ -36,6 +36,9 @@ class FourMuonEvent : public EventAnalysis
  public:
   FourMuonEvent();
   virtual ~FourMuonEvent();
+
+  FourMuonEvent (const FourMuonEvent&) = delete;
+  FourMuonEvent& operator= (const FourMuonEvent&) = delete;
 
   enum
   {
