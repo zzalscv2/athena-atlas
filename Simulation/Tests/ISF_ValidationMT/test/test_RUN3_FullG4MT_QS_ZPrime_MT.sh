@@ -23,7 +23,7 @@ Sim_tf.py \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'PyJobTransforms.UseFrontier' \
-    --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationMultipleIoV' \
+    --preInclude 'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/EVNT.04607198._000001.pool.root.1' \
     --outputHITSFile 'test.CA.HITS.pool.root' \
@@ -42,7 +42,7 @@ Sim_tf.py \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationMultipleIoV.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/EVNT.04607198._000001.pool.root.1' \
     --outputHITSFile 'test.CA.HITS.pool.root' \
@@ -56,7 +56,7 @@ Sim_tf.py \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationMultipleIoV.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/EVNT.04607198._000001.pool.root.1' \
     --outputHITSFile 'test.CG.HITS.pool.root' \

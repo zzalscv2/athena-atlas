@@ -117,7 +117,7 @@ def MC23SimulationSingleIoV(flags):
     flags.Input.LumiBlockNumber = [1] # dummy value
 
 
-def MC23SimulationMultipleIoV(flags):
+def MC23aSimulationMultipleIoV(flags):
     """MC23 flags for simulation"""
     MC23SimulationNoIoV(flags)
 
@@ -136,9 +136,9 @@ def MC23SimulationSingleIoVCalibrationHits(flags):
     ParticleID(flags)
 
 
-def MC23SimulationMultipleIoVCalibrationHits(flags):
+def MC23aSimulationMultipleIoVCalibrationHits(flags):
     """MC23 flags for simulation with CalibrationHits"""
-    MC23SimulationMultipleIoV(flags)
+    MC23aSimulationMultipleIoV(flags)
     from SimuJobTransforms import CalHits, ParticleID
     CalHits(flags)
     ParticleID(flags)
