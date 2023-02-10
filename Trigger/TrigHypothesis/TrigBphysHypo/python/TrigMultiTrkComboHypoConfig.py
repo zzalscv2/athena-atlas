@@ -1,8 +1,10 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigBphysHypo.TrigMultiTrkComboHypoMonitoringConfig import TrigMultiTrkComboHypoMonitoring, TrigMultiTrkComboHypoToolMonitoring
-
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigMultiTrkComboHypoConfig')
 
@@ -31,286 +33,277 @@ trigMultiTrkComboHypoToolDict = {
 }
 
 
-def StreamerDimuL2ComboHypoCfg(name):
+def StreamerDimuL2ComboHypoCfg(flags, name):
     log.debug('DimuL2ComboHypoCfg.name = %s ', name)
+    kwargs = {"isStreamer" : True,
+        "trigSequenceName" : 'Dimu',
+        "trigLevel" : 'L2',
+        "TrackCollectionKey" : 'HLT_IDTrack_Muon_FTF'}
+    if not isComponentAccumulatorCfg():
+        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
+    else:
+        return ConfigurationComboHypo(flags, **kwargs)
 
-    config = TrigMultiTrkComboHypoConfig()
-    hypo = config.ConfigurationComboHypo(
-        isStreamer = True,
-        trigSequenceName = 'Dimu',
-        trigLevel = 'L2',
-        trackCollection='HLT_IDTrack_Muon_FTF')
-    return hypo
-
-def StreamerDimuL2IOComboHypoCfg(name):
+def StreamerDimuL2IOComboHypoCfg(flags, name):
     log.debug('DimuL2IOComboHypoCfg.name = %s ', name)
+    kwargs = {"isStreamer" : True,
+        "trigSequenceName" : 'Dimu',
+        "trigLevel" : 'L2IO'   }
+    if not isComponentAccumulatorCfg():
+        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
+    else:
+        return ConfigurationComboHypo(flags, **kwargs)
 
-    config = TrigMultiTrkComboHypoConfig()
-    hypo = config.ConfigurationComboHypo(
-        isStreamer = True,
-        trigSequenceName = 'Dimu',
-        trigLevel = 'L2IO')
-    return hypo
-
-def StreamerDimuL2MTComboHypoCfg(name):
+def StreamerDimuL2MTComboHypoCfg(flags, name):
     log.debug('DimuL2MTComboHypoCfg.name = %s ', name)
+    kwargs = { "isStreamer" : True,
+        "trigSequenceName" : 'Dimu',
+        "trigLevel" : 'L2MT' }
+    if not isComponentAccumulatorCfg():
+        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
+    else:
+        return ConfigurationComboHypo(flags, **kwargs)
 
-    config = TrigMultiTrkComboHypoConfig()
-    hypo = config.ConfigurationComboHypo(
-        isStreamer = True,
-        trigSequenceName = 'Dimu',
-        trigLevel = 'L2MT')
-    return hypo
-
-def DimuEFComboHypoCfg(name):
+def DimuEFComboHypoCfg(flags, name):
     log.debug('DimuEFComboHypoCfg.name = %s ', name)
+    kwargs = {"isStreamer" : False,
+        "trigSequenceName" : 'Dimu',
+        "trigLevel" : 'EF',
+        "TrigBphysCollectionKey" : 'HLT_DimuEF'}
+    if not isComponentAccumulatorCfg():
+        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
+    else:
+        return ConfigurationComboHypo(flags, **kwargs)
 
-    config = TrigMultiTrkComboHypoConfig()
-    hypo = config.ConfigurationComboHypo(
-        isStreamer = False,
-        trigSequenceName = 'Dimu',
-        trigLevel = 'EF',
-        outputTrigBphysCollection = 'HLT_DimuEF')
-    return hypo
-
-def StreamerDimuEFComboHypoCfg(name):
+def StreamerDimuEFComboHypoCfg(flags, name):
     log.debug('StreamerDimuEFComboHypoCfg.name = %s ', name)
+    kwargs = {"isStreamer" : True,
+        "trigSequenceName" : 'StreamerDimu',
+        "nTracks" : [ 2 ],
+        "chi2" : 20.,
+        "massRange" : [ (100., 6000.) ],
+        "trackPtThresholds" : [ [ 100., 100. ] ],
+        "trigLevel" : 'EF'}
+    if not isComponentAccumulatorCfg():
+        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
+    else:
+        return ConfigurationComboHypo(flags, **kwargs)
 
-    config = TrigMultiTrkComboHypoConfig()
-    hypo = config.ConfigurationComboHypo(
-        isStreamer = True,
-        trigSequenceName = 'StreamerDimu',
-        trigLevel = 'EF')
-    hypo.chi2 = 20.
-    hypo.nTracks = [ 2 ]
-    hypo.massRange = [ (100., 6000.) ]
-    hypo.trackPtThresholds = [ [ 100., 100. ] ]
-    return hypo
-
-def StreamerDiElecFastComboHypoCfg(name):
+def StreamerDiElecFastComboHypoCfg(flags, name):
     log.debug('StreamerDiElecFastComboHypoCfg.name = %s ', name)
+    kwargs = {"isStreamer" : True,
+        "trigSequenceName" : 'DiElecFast',
+        "trigLevel" : 'L2',
+        "doElectrons" : True,
+        "TrackCollectionKey" : 'HLT_IDTrack_Electron_FTF'}
+    if not isComponentAccumulatorCfg():
+        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
+    else:
+        return ConfigurationComboHypo(flags, **kwargs)
 
-    config = TrigMultiTrkComboHypoConfig()
-    hypo = config.ConfigurationComboHypo(
-        isStreamer = True,
-        trigSequenceName = 'DiElecFast',
-        trigLevel = 'L2',
-        doElectrons = True,
-        trackCollection='HLT_IDTrack_Electron_FTF')
-    return hypo
-
-def StreamerNoMuonDiElecFastComboHypoCfg(name):
+def StreamerNoMuonDiElecFastComboHypoCfg(flags, name):
     log.debug('StreamerNoMuonDiElecFastComboHypoCfg.name = %s ', name)
+    kwargs = {"isStreamer" : True,
+        "trigSequenceName" : 'NoMuonDiElecFast',
+        "trigLevel" : 'L2',
+        "doElectrons" : True,
+        "TrackCollectionKey" : 'HLT_IDTrack_Electron_FTF'}
+    if not isComponentAccumulatorCfg():
+        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
+    else:
+        return ConfigurationComboHypo(flags, **kwargs)
 
-    config = TrigMultiTrkComboHypoConfig()
-    hypo = config.ConfigurationComboHypo(
-        isStreamer = True,
-        trigSequenceName = 'NoMuonDiElecFast',
-        trigLevel = 'L2',
-        doElectrons = True,
-        trackCollection='HLT_IDTrack_Electron_FTF')
-    return hypo
-
-def DiElecPrecisionComboHypoCfg(name):
+def DiElecPrecisionComboHypoCfg(flags, name):
     log.debug('DiElecPrecisionComboHypoCfg.name = %s ', name)
+    kwargs = {"isStreamer" : False,
+        "trigSequenceName" : 'DiElecPrecision',
+        "trigLevel" : 'EF',
+        "doElectrons" : True,
+        "mergedElectronChains" : [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000_L1EM22VHI', 'HLT_e5_lhvloose_bBeeM6000_L14J15', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled', 'HLT_e5_lhvloose_bBeeM6000_L1All' ],
+        "TrigBphysCollectionKey" : 'HLT_DiElecPrecision'}
+    if not isComponentAccumulatorCfg():
+        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
+    else:
+        return ConfigurationComboHypo(flags, **kwargs)
 
-    config = TrigMultiTrkComboHypoConfig()
-    hypo = config.ConfigurationComboHypo(
-        isStreamer = False,
-        trigSequenceName = 'DiElecPrecision',
-        trigLevel = 'EF',
-        doElectrons = True,
-        outputTrigBphysCollection = 'HLT_DiElecPrecision')
-    hypo.mergedElectronChains = [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000_L1EM22VHI', 'HLT_e5_lhvloose_bBeeM6000_L14J15', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled', 'HLT_e5_lhvloose_bBeeM6000_L1All' ]
-    return hypo
-
-def NoMuonDiElecPrecisionComboHypoCfg(name):
+def NoMuonDiElecPrecisionComboHypoCfg(flags, name):
     log.debug('NoMuonDiElecPrecisionComboHypoCfg.name = %s ', name)
+    kwargs = {"isStreamer" : False,
+        "trigSequenceName" : 'NoMuonDiElecPrecision',
+        "trigLevel" : 'EF',
+        "doElectrons" : True,
+        "mergedElectronChains" : [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000_L1EM22VHI', 'HLT_e5_lhvloose_bBeeM6000_L14J15', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled', 'HLT_e5_lhvloose_bBeeM6000_L1All' ],
+        "TrigBphysCollectionKey" : 'HLT_NoMuonDiElecPrecision'}
+    if not isComponentAccumulatorCfg():
+        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
+    else:
+        return ConfigurationComboHypo(flags, **kwargs)
 
-    config = TrigMultiTrkComboHypoConfig()
-    hypo = config.ConfigurationComboHypo(
-        isStreamer = False,
-        trigSequenceName = 'NoMuonDiElecPrecision',
-        trigLevel = 'EF',
-        doElectrons = True,
-        outputTrigBphysCollection = 'HLT_NoMuonDiElecPrecision')
-    hypo.mergedElectronChains = [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000_L1EM22VHI', 'HLT_e5_lhvloose_bBeeM6000_L14J15', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled', 'HLT_e5_lhvloose_bBeeM6000_L1All' ]
-    return hypo
-
-def DiElecPrecisionGSFComboHypoCfg(name):
+def DiElecPrecisionGSFComboHypoCfg(flags, name):
     log.debug('DiElecPrecisionGSFComboHypoCfg.name = %s ', name)
+    kwargs = {"isStreamer" : False,
+        "trigSequenceName" : 'DiElecPrecisionGSF',
+        "trigLevel" : 'EF',
+        "doElectrons" : True,
+        "mergedElectronChains" : [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000_L1EM22VHI', 'HLT_e5_lhvloose_bBeeM6000_L14J15', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled', 'HLT_e5_lhvloose_bBeeM6000_L1All' ],
+        "TrigBphysCollectionKey" : 'HLT_DiElecPrecisionGSF'}
+    if not isComponentAccumulatorCfg():
+        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
+    else:
+        return ConfigurationComboHypo(flags, **kwargs)
 
-    config = TrigMultiTrkComboHypoConfig()
-    hypo = config.ConfigurationComboHypo(
-        isStreamer = False,
-        trigSequenceName = 'DiElecPrecisionGSF',
-        trigLevel = 'EF',
-        doElectrons = True,
-        outputTrigBphysCollection = 'HLT_DiElecPrecisionGSF')
-    hypo.mergedElectronChains = [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000_L1EM22VHI', 'HLT_e5_lhvloose_bBeeM6000_L14J15', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled', 'HLT_e5_lhvloose_bBeeM6000_L1All' ]
-    return hypo
-
-def NoMuonDiElecPrecisionGSFComboHypoCfg(name):
+def NoMuonDiElecPrecisionGSFComboHypoCfg(flags, name):
     log.debug('NoMuonDiElecPrecisionGSFComboHypoCfg.name = %s ', name)
+    kwargs = {"isStreamer" : False,
+        "trigSequenceName" : 'NoMuonDiElecPrecisionGSF',
+        "trigLevel" : 'EF',
+        "mergedElectronChains" : [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000_L1EM22VHI', 'HLT_e5_lhvloose_bBeeM6000_L14J15', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled', 'HLT_e5_lhvloose_bBeeM6000_L1All' ],
+        "doElectrons" : True,
+        "TrigBphysCollectionKey" : 'HLT_NoMuonDiElecPrecisionGSF' }
+    if not isComponentAccumulatorCfg():
+        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
+    else:
+        return ConfigurationComboHypo(flags, **kwargs)
 
-    config = TrigMultiTrkComboHypoConfig()
-    hypo = config.ConfigurationComboHypo(
-        isStreamer = False,
-        trigSequenceName = 'NoMuonDiElecPrecisionGSF',
-        trigLevel = 'EF',
-        doElectrons = True,
-        outputTrigBphysCollection = 'HLT_NoMuonDiElecPrecisionGSF')
-    hypo.mergedElectronChains = [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000_L1EM22VHI', 'HLT_e5_lhvloose_bBeeM6000_L14J15', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled', 'HLT_e5_lhvloose_bBeeM6000_L1All' ]
-    return hypo
-
-def BmutrkComboHypoCfg(name):
+def BmutrkComboHypoCfg(flags, name):
     log.debug('BmutrkComboHypoCfg.name = %s ', name)
+    kwargs = {"isStreamer" : False,
+        "trigSequenceName" : 'Bmutrk',
+        "trigLevel" : 'EF',
+        "TrackCollectionKey" : 'HLT_IDTrack_Bmumux_IDTrig',
+        "isMuTrkMode" : True,
+        "chi2" : 20.,
+        "nTracks" : [ 2 ],
+        "totalCharge" : [ 0 ],
+        "massRange" : [ (2500., 4400.) ],
+        "trackPtThresholds" : [ [ 10000., 2000. ] ],
+        "TrigBphysCollectionKey" : 'HLT_Bmutrk'}
+    if not isComponentAccumulatorCfg():
+        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
+    else:
+        return ConfigurationComboHypo(flags, **kwargs)
 
-    config = TrigMultiTrkComboHypoConfig()
-    hypo = config.ConfigurationComboHypo(
-        isStreamer = False,
-        trigSequenceName = 'Bmutrk',
-        trigLevel = 'EF',
-        trackCollection='HLT_IDTrack_Bmumux_IDTrig',
-        outputTrigBphysCollection = 'HLT_Bmutrk')
-    hypo.isMuTrkMode = True
-    hypo.chi2 = 20.
-    hypo.nTracks = [ 2 ]
-    hypo.totalCharge = [ 0 ]
-    hypo.massRange = [ (2500., 4400.) ]
-    hypo.trackPtThresholds = [ [ 10000., 2000. ] ]
-    return hypo
-
-def DrellYanComboHypoCfg(name):
+def DrellYanComboHypoCfg(flags, name):
     log.debug('DrellYanComboHypoCfg.name = %s ', name)
-
-    config = TrigMultiTrkComboHypoConfig()
-    hypo = config.ConfigurationComboHypo(
-        isStreamer = False,
-        trigSequenceName = 'DrellYan',
-        trigLevel = 'EF',
-        outputTrigBphysCollection = 'HLT_DrellYan')
-    hypo.nTracks = [ 2 ]
-    hypo.totalCharge = [ -1 ]
-    hypo.massRange = [ (7000., 60000.) ]
-    hypo.trackPtThresholds = [ [ 100., 100. ] ]
-    hypo.chi2 = 20.
-    hypo.combineInputDecisionCollections = True
-    hypo.applyOverlapRemoval = False
-    hypo.useLeptonMomentum = True
-    return hypo
+    kwargs = {"isStreamer" : False,
+        "trigSequenceName" : 'DrellYan',
+        "trigLevel" : 'EF',
+        "nTracks" : [ 2 ],
+        "totalCharge" : [ -1 ],
+        "massRange" : [ (7000., 60000.) ],
+        "trackPtThresholds" : [ [ 100., 100. ] ],
+        "chi2" : 20.,
+        "combineInputDecisionCollections" : True,
+        "applyOverlapRemoval" : False,
+        "useLeptonMomentum" : True,
+        "TrigBphysCollectionKey" : 'HLT_DrellYan'}
+    if not isComponentAccumulatorCfg():
+        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
+    else:
+        return ConfigurationComboHypo(flags, **kwargs)
 
 def TrigMultiTrkComboHypoToolFromDict(chainDict):
-    config = TrigMultiTrkComboHypoConfig()
-    tool = config.ConfigurationComboHypoTool(chainDict)
-    return tool
+    return ConfigurationComboHypoTool(chainDict)
 
-class TrigMultiTrkComboHypoConfig(object):
 
-    def ConfigurationComboHypo(self, isStreamer='False', trigSequenceName='Dimu', trigLevel='L2', trackCollection='', outputTrigBphysCollection='TrigBphysContainer', doElectrons = False):
+def ConfigurationComboHypo(flags, trigSequenceName = 'Dimu', **kwargs):
 
-        trigLevelDict = {'L2':0, 'L2IO':1, 'L2MT':2, 'EF':3}
+   kwargs.setdefault("isStreamer", False)
+   kwargs.setdefault("trigLevel", 'L2')
+   kwargs.setdefault("TrackCollectionKey", '')
+   kwargs.setdefault("TrigBphysCollectionKey", 'TrigBphysContainer')
+   kwargs.setdefault("CheckMultiplicityMap", False)
+   kwargs.setdefault("doElectrons", False)
+   trigLevel = kwargs['trigLevel']
+   acc = ComponentAccumulator()
+   trigLevelDict = {'L2':0, 'L2IO':1, 'L2MT':2, 'EF':3}
+   try:
+       value = trigLevelDict[trigLevel]
+       log.debug('TrigMultiTrkComboHypo.trigLevel = %s ', value)
+   except KeyError:
+       raise Exception('TrigMultiTrkComboHypo.trigLevel should be L2, L2IO, L2MT or EF, but %s provided.', trigLevel)
 
-        try:
-            value = trigLevelDict[trigLevel]
-            log.debug('TrigMultiTrkComboHypo.trigLevel = %s ', value)
-        except KeyError:
-            raise Exception('TrigMultiTrkComboHypo.trigLevel should be L2, L2IO, L2MT or EF, but %s provided.', trigLevel)
+   baseName = 'Streamer'+trigSequenceName+trigLevel if kwargs['isStreamer'] else trigSequenceName+trigLevel
 
-        baseName = 'Streamer'+trigSequenceName+trigLevel if isStreamer else trigSequenceName+trigLevel
+   from TrigBphysHypo.TrigBPhyCommonConfig import TrigBPHY_TrkVKalVrtFitterCfg
+   from InDetConfig.InDetConversionFinderToolsConfig import BPHY_VertexPointEstimatorCfg
+   if kwargs["doElectrons"]:
+       kwargs.setdefault("nTracks",  [ 2 ])
+       kwargs.setdefault("trackPtThresholds",  [ [ 4000., 4000. ] ])
+       kwargs.setdefault("massRange",   [ (100., 20000.) ])
+       alg = CompFactory.TrigMultiTrkComboHypo(
+         name = baseName+'ComboHypo',
+         VertexFitter = acc.popToolsAndMerge(TrigBPHY_TrkVKalVrtFitterCfg(flags, baseName)),
+         VertexPointEstimator = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, 'VertexPointEstimator_'+baseName)),
+         MonTool = TrigMultiTrkComboHypoMonitoring('TrigMultiTrkComboHypoMonitoring_'+baseName),
+         **kwargs)
+       acc.addEventAlgo(alg, primary=True)
+       return acc
+   else:
+       kwargs.setdefault("nTracks",  [ 2, 3 ])
+       kwargs.setdefault("trackPtThresholds", [ [ 3650., 3650. ], [ 3650., 3650., 3650. ] ])
+       kwargs.setdefault("massRange", [ (100., 20000.), (0., 11000.) ])
+       alg = CompFactory.TrigMultiTrkComboHypo(
+           name = baseName+'ComboHypo',
+           VertexFitter = acc.popToolsAndMerge(TrigBPHY_TrkVKalVrtFitterCfg(flags, baseName)),
+           VertexPointEstimator = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, 'VertexPointEstimator_'+baseName)),
+           MonTool = TrigMultiTrkComboHypoMonitoring('TrigMultiTrkComboHypoMonitoring_'+baseName),
+           **kwargs)
+    
+       acc.addEventAlgo(alg, primary=True)
+       return acc
 
-        from TrkExTools.AtlasExtrapolator import AtlasExtrapolator
-        VertexFitter = CompFactory.Trk__TrkVKalVrtFitter(
-            name = 'TrigBphysFitter_'+baseName,
-            FirstMeasuredPoint = False,
-            MakeExtendedVertex = False,
-            Extrapolator = AtlasExtrapolator())
+def ConfigurationComboHypoTool(chainDict):
+   
+   tool = CompFactory.TrigMultiTrkComboHypoTool(chainDict['chainName'])
 
-        VertexPointEstimator = CompFactory.InDet__VertexPointEstimator(
-            name = 'VertexPointEstimator_'+baseName,
-            MinDeltaR = [-10000., -10000., -10000.],
-            MaxDeltaR = [ 10000.,  10000.,  10000.],
-            MaxPhi    = [ 10000.,  10000.,  10000.],
-            MaxChi2OfVtxEstimation = 2000.)
+   try:
+       topo = chainDict['topo'][0]
+       value = trigMultiTrkComboHypoToolDict[topo]
+       tool.massRange = value['massRange']
+       tool.chi2 = value['chi2']
+       tool.nTrk = value['nTrk'] if 'nTrk' in value else 2
+       tool.totalCharge = value['charge'] if 'charge' in value else 0
+       if 'deltaRMin' in value:
+          tool.deltaRMin = value['deltaRMin']
+       if 'deltaRMax' in value:
+          tool.deltaRMax = value['deltaRMax']
+   except LookupError:
+       raise Exception('TrigMultiTrkComboHypo misconfigured for \'%s\': topo \'%s\' is not supported.', chainDict['chainName'], topo)
 
-        if doElectrons:
-            tool = CompFactory.TrigMultiTrkComboHypo(
-              name = baseName+'ComboHypo',
-              isStreamer = isStreamer,
-              doElectrons = True,
-              trigLevel = trigLevel,
-              nTracks = [ 2 ],
-              massRange = [ (100., 20000.) ],
-              trackPtThresholds = [ [ 4000., 4000. ] ],
-              TrackCollectionKey = trackCollection,
-              TrigBphysCollectionKey = outputTrigBphysCollection,
-              VertexFitter = VertexFitter,
-              VertexPointEstimator = VertexPointEstimator,
-              CheckMultiplicityMap = False,
-              MonTool = TrigMultiTrkComboHypoMonitoring('TrigMultiTrkComboHypoMonitoring_'+baseName))
-            return tool
+   if 'nocut' in chainDict['topo']:
+       tool.AcceptAll = True
 
-        tool = CompFactory.TrigMultiTrkComboHypo(
-            name = baseName+'ComboHypo',
-            isStreamer = isStreamer,
-            trigLevel = trigLevel,
-            nTracks = [ 2, 3 ],
-            massRange = [ (100., 20000.), (0., 11000.) ],
-            trackPtThresholds = [ [ 3650., 3650. ], [ 3650., 3650., 3650. ] ],
-            TrackCollectionKey = trackCollection,
-            TrigBphysCollectionKey = outputTrigBphysCollection,
-            VertexFitter = VertexFitter,
-            VertexPointEstimator = VertexPointEstimator,
-            CheckMultiplicityMap = False,
-            MonTool = TrigMultiTrkComboHypoMonitoring('TrigMultiTrkComboHypoMonitoring_'+baseName))
+   if 'noos' in chainDict['topo']:
+       tool.totalCharge = -100 # negative number to indicate no charge cut
 
+   if 'Lxy0' in chainDict['topo']:
+       tool.LxyCut = 0.0
+
+   electronMultiplicity = [int(chainPart['multiplicity']) for chainPart in chainDict['chainParts'] if chainPart['signature']=='Electron']
+   if len(electronMultiplicity) == 1 and electronMultiplicity[0] == 1:
+       tool.isMergedElectronChain = True
+
+   if 'bJpsimutrk' in chainDict['topo']:
+       tool.isMuonTrkPEB = True
+       tool.totalCharge = 0
+       tool.trackPtThresholds = [-1., 2000.] if 'lowpt' in chainDict['topo'] else  [-1., 3000.]
+
+   if 'bTau' in chainDict['topo']:
+       tool.nTrk = sum(int(chainPart['multiplicity']) for chainPart in chainDict['chainParts'])
+       tool.totalCharge = 1 if tool.nTrk == 3 else -1
+
+   signatures = chainDict['signatures']
+   tool.isCombinedChain = (signatures.count(signatures[0]) != len(signatures))
+   tool.legMultiplicities = chainDict['chainMultiplicities']
+
+   monGroups = ['bphysMon:online']
+   if any(group in monGroups for group in chainDict['monGroups']):
+        tool.MonTool = TrigMultiTrkComboHypoToolMonitoring('MonTool')   
+   if isComponentAccumulatorCfg():
+        acc = ComponentAccumulator()
+        acc.setPrivateTools(tool)
+        return acc
+   else:
         return tool
 
-    def ConfigurationComboHypoTool(self, chainDict):
-
-        tool = CompFactory.TrigMultiTrkComboHypoTool(chainDict['chainName'])
-
-        try:
-            topo = chainDict['topo'][0]
-            value = trigMultiTrkComboHypoToolDict[topo]
-            tool.massRange = value['massRange']
-            tool.chi2 = value['chi2']
-            tool.nTrk = value['nTrk'] if 'nTrk' in value else 2
-            tool.totalCharge = value['charge'] if 'charge' in value else 0
-            if 'deltaRMin' in value:
-               tool.deltaRMin = value['deltaRMin']
-            if 'deltaRMax' in value:
-               tool.deltaRMax = value['deltaRMax']
-        except LookupError:
-            raise Exception('TrigMultiTrkComboHypo misconfigured for \'%s\': topo \'%s\' is not supported.', chainDict['chainName'], topo)
-
-        if 'nocut' in chainDict['topo']:
-            tool.AcceptAll = True
-
-        if 'noos' in chainDict['topo']:
-            tool.totalCharge = -100 # negative number to indicate no charge cut
-
-        if 'Lxy0' in chainDict['topo']:
-            tool.LxyCut = 0.0
-
-        electronMultiplicity = [int(chainPart['multiplicity']) for chainPart in chainDict['chainParts'] if chainPart['signature']=='Electron']
-        if len(electronMultiplicity) == 1 and electronMultiplicity[0] == 1:
-            tool.isMergedElectronChain = True
-
-        if 'bJpsimutrk' in chainDict['topo']:
-            tool.isMuonTrkPEB = True
-            tool.totalCharge = 0
-            tool.trackPtThresholds = [-1., 2000.] if 'lowpt' in chainDict['topo'] else  [-1., 3000.]
-
-        if 'bTau' in chainDict['topo']:
-            tool.nTrk = sum(int(chainPart['multiplicity']) for chainPart in chainDict['chainParts'])
-            tool.totalCharge = 1 if tool.nTrk == 3 else -1
-
-        signatures = chainDict['signatures']
-        tool.isCombinedChain = (signatures.count(signatures[0]) != len(signatures))
-        tool.legMultiplicities = chainDict['chainMultiplicities']
-
-        monGroups = ['bphysMon:online']
-        if any(group in monGroups for group in chainDict['monGroups']):
-            tool.MonTool = TrigMultiTrkComboHypoToolMonitoring('MonTool')
-        return tool

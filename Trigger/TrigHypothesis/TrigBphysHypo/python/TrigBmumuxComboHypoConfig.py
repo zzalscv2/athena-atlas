@@ -1,38 +1,26 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigBphysHypo.TrigBmumuxComboHypoMonitoringConfig import TrigBmumuxComboHypoMonitoring, TrigBmumuxComboHypoToolMonitoring
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigBmumuxComboHypoConfig')
 
-def BmumuxComboHypoCfg(name):
-    log.debug('BmumuxComboHypoCfg.name = %s ', name)
+def BmumuxComboHypoInternalCfg(flags):
     suffix = 'Bmumux'
-
-    from TrkExTools.AtlasExtrapolator import AtlasExtrapolator
-    vertexFitter = CompFactory.Trk__TrkVKalVrtFitter(
-        name = 'TrigBphysFitter_'+suffix,
-        FirstMeasuredPoint = False,
-        MakeExtendedVertex = False,
-        Extrapolator = AtlasExtrapolator())
-
-    vertexPointEstimator = CompFactory.InDet__VertexPointEstimator(
-        name = 'VertexPointEstimator_'+suffix,
-        MinDeltaR = [-10000., -10000., -10000.],
-        MaxDeltaR = [ 10000.,  10000.,  10000.],
-        MaxPhi    = [ 10000.,  10000.,  10000.],
-        MaxChi2OfVtxEstimation = 2000.)
-
-    trackToVertexTool = CompFactory.Reco__TrackToVertex(
-        name = 'TrackToVertexTool_'+suffix,
-        Extrapolator = AtlasExtrapolator())
+    acc = ComponentAccumulator()
+    from TrigBphysHypo.TrigBPhyCommonConfig import TrigBPHY_TrkVKalVrtFitterCfg
+    from InDetConfig.InDetConversionFinderToolsConfig import BPHY_VertexPointEstimatorCfg
+    from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
 
     hypo = CompFactory.TrigBmumuxComboHypo(
         name = 'BmumuxComboHypo',
-        VertexFitter = vertexFitter,
-        VertexPointEstimator = vertexPointEstimator,
-        TrackToVertexTool = trackToVertexTool,
+        VertexFitter = acc.popToolsAndMerge(TrigBPHY_TrkVKalVrtFitterCfg(flags, suffix)),
+        VertexPointEstimator = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, 'VertexPointEstimator_'+suffix)),
+        TrackToVertexTool = acc.popToolsAndMerge(TrackToVertexCfg(flags,'TrackToVertexTool_'+suffix)),
         CheckMultiplicityMap = False,
         TrigBphysCollectionKey = 'HLT_Bmumux',
         MuonCollectionKey = 'HLT_Muons_Bmumux',
@@ -111,43 +99,45 @@ def BmumuxComboHypoCfg(name):
         BcToDstarMuMu_chi2 = 60.,
         MonTool = TrigBmumuxComboHypoMonitoring('TrigBmumuxComboHypoMonitoring'))
 
-    return hypo
+    acc.addEventAlgo(hypo)
+    return acc
+
+def BmumuxComboHypoCfg(flags, name):
+    log.debug('BmumuxComboHypoCfg.name = %s ', name)
+    if not isComponentAccumulatorCfg():
+        return algorithmCAToGlobalWrapper(BmumuxComboHypoInternalCfg, flags)[0]
+    else :
+        return BmumuxComboHypoInternalCfg(flags)
 
 
 def TrigBmumuxComboHypoToolFromDict(chainDict):
-    config = TrigBmumuxComboHypoConfig()
-    tool = config.ConfigurationComboHypoTool(chainDict)
-    return tool
-
-
-class TrigBmumuxComboHypoConfig(object):
-    def ConfigurationComboHypoTool(self, chainDict):
-        topoAlgs = chainDict['chainName']
-        log.debug("Set for algorithm %s", topoAlgs)
-
-        tool = CompFactory.TrigBmumuxComboHypoTool(topoAlgs)
-        decay = chainDict['topo'][-1]
-        trigDecayDict = {             # xAOD::TrigBphys::pType
-            'BpmumuKp':           7,  # BKMUMU
-            'BcmumuPi':          21,  # BCPIMUMU
-            'BsmumuPhi':          9,  # BSPHIMUMU
-            'BdmumuKst':          8,  # BDKSTMUMU
-            'LbPqKm':            22,  # LBPQMUMU
-            'BcmumuDploose' :    13,  # BCDPMUMU
-            'BcmumuDsloose' :    11,  # BCDSMUMU
-            'BcmumuD0Xloose' :   19,  # DZKPI
-            'BcmumuDstarloose' : 14,  # BCDSTMUMU
-            'BpmuD0X' :          23,  # B2D0MUX
-            'BdmuDpX' :          24,  # BD2DMMUX
-            'BdmuDstarX' :       25,  # BD2DSTMUX
-            'BsmuDsX' :          26,  # BS2DSMUX
-            'LbmuLcX' :          27   # LB2LCMUX
-        }
-
-        tool.Decay = trigDecayDict[decay]
-
-        monGroups = ['bphysMon:online']
-        if any(group in monGroups for group in chainDict['monGroups']):
-            tool.MonTool = TrigBmumuxComboHypoToolMonitoring('MonTool')
-
-        return tool
+    
+    topoAlgs = chainDict['chainName']
+    log.debug("Set for algorithm %s", topoAlgs)
+    tool = CompFactory.TrigBmumuxComboHypoTool(topoAlgs)
+    decay = chainDict['topo'][-1]
+    trigDecayDict = {             # xAOD::TrigBphys::pType
+        'BpmumuKp':           7,  # BKMUMU
+        'BcmumuPi':          21,  # BCPIMUMU
+        'BsmumuPhi':          9,  # BSPHIMUMU
+        'BdmumuKst':          8,  # BDKSTMUMU
+        'LbPqKm':            22,  # LBPQMUMU
+        'BcmumuDploose' :    13,  # BCDPMUMU
+        'BcmumuDsloose' :    11,  # BCDSMUMU
+        'BcmumuD0Xloose' :   19,  # DZKPI
+        'BcmumuDstarloose' : 14,  # BCDSTMUMU
+        'BpmuD0X' :          23,  # B2D0MUX
+        'BdmuDpX' :          24,  # BD2DMMUX
+        'BdmuDstarX' :       25,  # BD2DSTMUX
+        'BsmuDsX' :          26,  # BS2DSMUX
+        'LbmuLcX' :          27   # LB2LCMUX
+    }
+    tool.Decay = trigDecayDict[decay]
+    monGroups = ['bphysMon:online']
+    if any(group in monGroups for group in chainDict['monGroups']):
+        tool.MonTool = TrigBmumuxComboHypoToolMonitoring('MonTool')
+    if isComponentAccumulatorCfg():
+        acc = ComponentAccumulator()
+        acc.setPrivateTools(tool)
+        return acc
+    else:  return tool

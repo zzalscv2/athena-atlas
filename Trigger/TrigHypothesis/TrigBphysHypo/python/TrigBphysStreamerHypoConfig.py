@@ -2,6 +2,6 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def TrigBphysStreamerHypoToolFromDict(chainDict):
+def TrigBphysStreamerHypoToolFromDict(flags, chainDict):
     tool = CompFactory.TrigBphysStreamerHypoTool(chainDict['chainName'])
     return tool
