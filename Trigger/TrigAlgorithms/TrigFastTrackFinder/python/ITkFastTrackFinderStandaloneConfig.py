@@ -5,15 +5,18 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def ITkFastTrackFinderStandaloneCfg(flags):
     acc = ComponentAccumulator()
 
-    newflags = flags.cloneAndReplace("ITk.Tracking.ActiveConfig", "ITk.Tracking.FTFPass")
-
+    if flags.ITk.Tracking.doFastTracking:
+        newflags = flags.cloneAndReplace("ITk.Tracking.ActiveConfig", "ITk.Tracking.FastPass")
+    else:
+        newflags = flags.cloneAndReplace("ITk.Tracking.ActiveConfig", "ITk.Tracking.FTFPass")
+    
     ResolvedTrackCollectionKey = 'TrigFastTrackFinder_IDTrig_Tracks'
     SiSPSeededTrackCollectionKey = 'TrigFastTrackFinder_FTF_Tracks'
 
     from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolCfg
-    ITkTrackSummaryTool = acc.popToolsAndMerge(ITkTrackSummaryToolCfg(newflags))
+    ITkTrackSummaryTool = acc.popToolsAndMerge(ITkTrackSummaryToolCfg(newflags, name = "ITkTrackSummaryTool_FTF", doHolesInDet = False))
     acc.addPublicTool(ITkTrackSummaryTool)
-
+    
     from InDetConfig.SiTrackMakerConfig import ITkSiTrackMaker_xkCfg
     ITkSiTrackMakerTool = acc.popToolsAndMerge( ITkSiTrackMaker_xkCfg( newflags, name = "ITkTrigSiTrackMaker_FTF" ) )
     acc.addPublicTool(ITkSiTrackMakerTool)
@@ -55,7 +58,7 @@ def ITkFastTrackFinderStandaloneCfg(flags):
                                             TripletDoPSS             = False,
                                             Triplet_D0Max            = 4,
                                             Triplet_D0_PPS_Max       = 1.7,
-                                            Triplet_MaxBufferLength  = 3,
+                                            Triplet_MaxBufferLength  = 1,
                                             Triplet_MinPtFrac        = 0.7,
                                             Triplet_nMaxPhiSlice     = 53,
                                             doCloneRemoval           = True,
@@ -64,12 +67,13 @@ def ITkFastTrackFinderStandaloneCfg(flags):
                                             doSeedRedundancyCheck    = True,
                                             pTmin                    = 1000.0,
                                             useNewLayerNumberScheme  = True,
-                                            UseEtaBinning            = False,
+                                            UseEtaBinning            = True,
                                             MinHits                  = 5,
                                             useGPU                   = False,
                                             DoubletDR_Max            = 270,
                                             ITkMode                  = True, # Allows ftf to use the new TrigTrackSeedGenerator for ITk
                                             StandaloneMode           = True,
+                                            doTrackRefit             = False,
                                             MonTool                  = monTool) # Allows ftf to be run as an offline algorithm with reco_tf
 
     acc.addEventAlgo( ftf, primary=True )
@@ -94,6 +98,7 @@ def ITkFastTrackFinderStandaloneCfg(flags):
     # ------------------------------------------------------------
     
     from TrkConfig.TrkAmbiguitySolverConfig import ITkTrkAmbiguityScoreCfg
+
     acc.merge(ITkTrkAmbiguityScoreCfg( newflags,
                                        name = "ITkTrkAmbiguityScore_FTF",
                                        SiSPSeededTrackCollectionKey = SiSPSeededTrackCollectionKey))

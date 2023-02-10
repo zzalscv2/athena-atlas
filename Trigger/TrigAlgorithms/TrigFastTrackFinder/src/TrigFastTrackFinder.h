@@ -173,7 +173,6 @@ protected:
 
   // Control flags
 
-  bool m_doCloneRemoval;
   bool m_useBeamSpot;
 
   bool m_vertexSeededMode;
@@ -289,6 +288,11 @@ protected:
   // Phase II
   bool m_ITkMode;
   bool m_standaloneMode;
+
+  Gaudi::Property<bool> m_useEtaBinning {this, "UseEtaBinning",   true, "Split layers into eta bins"};
+  Gaudi::Property<bool> m_doCloneRemoval{this,  "doCloneRemoval", true, "Remove tracks sharing too many hits"};
+  Gaudi::Property<bool> m_doTrackRefit  {this, "doTrackRefit",    true, "Refit tracks after the combinatorial track following"};
+  
 };
 
 

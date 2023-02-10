@@ -176,12 +176,12 @@ bool TrigFTF_GNN_Layer::verifyBin(const TrigFTF_GNN_Layer* pL, int b1, int b2, f
     float z0_min = 0.0;
     
     if(z2 > 0) { 
-      z0_max = (z1max*r2max - z2*r1)/(r2max-r1);//
+      z0_max = (z1max*r2max - z2*r1)/(r2max-r1);
       z0_min = (z1min*r2min - z2*r1)/(r2min-r1);
     }
     else {
       z0_max = (z1max*r2min - z2*r1)/(r2min-r1);
-      z0_min = (z1min*r2max - z2*r1)/(r2max-r1);//
+      z0_min = (z1min*r2max - z2*r1)/(r2max-r1);
     }
 
     if(z0_max < min_z0-tol || z0_min > max_z0+tol) return false;

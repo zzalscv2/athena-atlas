@@ -70,6 +70,12 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
   const float min_z0            = roiDescriptor->zedMinus();
   const float max_z0            = roiDescriptor->zedPlus();
 
+  const float maxOuterRadius    = 550.0;
+  const float cut_zMinU = min_z0 + maxOuterRadius*roiDescriptor->dzdrMinus();
+  const float cut_zMaxU = max_z0 + maxOuterRadius*roiDescriptor->dzdrPlus();
+
+  const float maxKappa          = 0.8/m_minR_squ;
+
   //1. loop over stages
 
   int currentStage = 0;
@@ -121,7 +127,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
 	for(int b2=0;b2<nSrcBins;b2++) {//loop over bins in Layer 2
 	  
-	  if(m_settings.m_useEtaBinning) {
+	  if(m_settings.m_useEtaBinning && (nSrcBins+nDstBins > 2)) {
 	    if(!pL1->verifyBin(pL2, b1, b2, min_z0, max_z0)) continue;
 	  }
 	  
@@ -189,7 +195,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
 	      float dz = z2 - z1;
 	      float tau = dz/dr;
-	      float ftau = fabs(tau);
+	      float ftau = std::fabs(tau);
 	      if (ftau > 36.0) {
 		
 		continue;
@@ -200,16 +206,17 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 	      if(ftau > n1.m_maxCutOnTau) continue;
 	      if(ftau > n2.m_maxCutOnTau) continue;
 	      
-	      
-	      
-	      float z0 = z1 - r1*tau;
-	      
 	      if (m_settings.m_doubletFilterRZ) {
-				
-		if (!RoiUtil::contains( *roiDescriptor, z0, tau)) {
-		  continue;
-		}
+
+		float z0 = z1 - r1*tau;
+
+		if(z0 < min_z0 || z0 > max_z0) continue;
+
+		float zouter = z0 + maxOuterRadius*tau;
+
+		if(zouter < cut_zMinU || zouter > cut_zMaxU) continue;                
 	      }
+	      
 
 	      float dx = n2.m_sp.x() - x1;
 	      float dy = n2.m_sp.y() - y1;
@@ -220,11 +227,11 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
 	      float kappa = D*D*L2; 
 	      
-	      if(kappa > 0.8/m_minR_squ) {// was 0.4
+	      if(kappa > maxKappa) {
 		continue;
 	      }
 
-	      float curv = D*sqrt(L2);//curvature
+	      float curv = D*std::sqrt(L2);//curvature
 
 	      float df = curv*r2;
 	      float df2 = df*df;
