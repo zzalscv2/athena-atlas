@@ -24,14 +24,11 @@ InDet::SiNoise_bt::reset(){
 void InDet::SiNoise_bt::production
 (int Dir,int Model,const Trk::TrackParameters& Tp)
 {
-  m_model = 0; if(Model < 1 || Model > 2) return; m_model = Model;
+  reset(); 
+  if(Model < 1 || Model > 2) return; 
+  m_model = Model;
   double radlength = 0.03;
   double energylose = 0.4;
-  m_covariancePola = 0.;
-  m_covarianceAzim = 0.;
-  m_covarianceIMom = 0;
-  m_correctionIMom = 1.;
-
 
   const Amg::Transform3D& T  = Tp.associatedSurface().transform();
   const AmgVector(5)&     Vp = Tp.parameters(); 
