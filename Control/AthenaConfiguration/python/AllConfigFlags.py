@@ -9,9 +9,11 @@ from PyUtils.moduleExists import moduleExists
 
 
 def _addFlagsCategory (acf, name, generator, modName = None):
+    """Add flags category and return True/False on success/failure"""
     if moduleExists (modName):
-        return acf.addFlagsCategory (name, generator)
-    return None
+        acf.addFlagsCategory (name, generator)
+        return True
+    return False
 
 
 def initConfigFlags():
@@ -249,7 +251,12 @@ def initConfigFlags():
         from TriggerJobOpts.TriggerConfigFlags import createTriggerFlags
         return createTriggerFlags(acf.Common.Project is not Project.AthAnalysis)
     if isGaudiEnv():
-        _addFlagsCategory(acf, "Trigger", __trigger, 'TriggerJobOpts' )
+        added = _addFlagsCategory(acf, "Trigger", __trigger, 'TriggerJobOpts' )
+        if not added:
+            # If TriggerJobOpts is not available, we add at least these basic flags
+            # to indicate Trigger is not available:
+            acf.addFlag('Trigger.doLVL1', False)
+            acf.addFlag('Trigger.doHLT', False)
 
     def __indet():
         from InDetConfig.InDetConfigFlags import createInDetConfigFlags
