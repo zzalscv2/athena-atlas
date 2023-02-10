@@ -6,19 +6,14 @@
 #define L1TopoSimulation_EMTauInputProvider
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaMonitoringKernel/Monitored.h"
 #include "L1TopoSimulation/IInputTOBConverter.h"
-#include "GaudiKernel/IIncidentListener.h"
 #include "GaudiKernel/LockedHandle.h"
 #include "TrigT1CaloEvent/CPCMXTopoData.h"
 
-#include "TH1.h"
-#include "TH2.h"
-
-class ITHistSvc;
-
 namespace LVL1 {
 
-   class EMTauInputProvider : public extends2<AthAlgTool, IInputTOBConverter, IIncidentListener> {
+   class EMTauInputProvider : public extends<AthAlgTool, IInputTOBConverter> {
    public:
       EMTauInputProvider(const std::string& type, const std::string& name, 
                          const IInterface* parent);
@@ -29,25 +24,14 @@ namespace LVL1 {
 
       virtual StatusCode fillTopoInputEvent(TCS::TopoInputEvent& ) const; 
 
-      virtual void handle(const Incident&);
-
    private:
 
       /** \brief calculates eta and phi from roiWord*/
       void CalculateCoordinates(int32_t roiWord, double & eta, double & phi) const;
 
-      ServiceHandle<ITHistSvc> m_histSvc;
+      ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "", "Monitoring tool to create online histograms"};
 
       SG::ReadHandleKey<DataVector<LVL1::CPCMXTopoData>> m_emTauLocation;    //!<  EMTAU ROI SG key
-
-      mutable LockedHandle<TH1> m_hEMEt ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hEMPhiEta ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hEMEtEta ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hEMEtPhi ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH1> m_hTauEt ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hTauPhiEta ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hTauEtEta ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hTauEtPhi ATLAS_THREAD_SAFE;
 
    };
 }

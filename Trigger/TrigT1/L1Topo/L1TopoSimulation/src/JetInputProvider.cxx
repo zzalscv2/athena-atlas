@@ -4,13 +4,10 @@
 
 #include <math.h>
 
-#include "GaudiKernel/ITHistSvc.h"
-
 #include "JetInputProvider.h"
 #include "TrigT1CaloEvent/JetROI_ClassDEF.h"
 #include "L1TopoEvent/ClusterTOB.h"
 #include "L1TopoEvent/TopoInputEvent.h"
-
 
 using namespace std;
 using namespace LVL1;
@@ -18,7 +15,6 @@ using namespace LVL1;
 JetInputProvider::JetInputProvider(const std::string& type, const std::string& name, 
                                    const IInterface* parent) :
    base_class(type, name, parent),
-   m_histSvc("THistSvc", name),
    m_jetLocation(TrigT1CaloDefs::JetTopoTobLocation)
 {
    declareInterface<LVL1::IInputTOBConverter>( this );
@@ -31,61 +27,12 @@ JetInputProvider::~JetInputProvider()
 StatusCode
 JetInputProvider::initialize() {
 
-   CHECK(m_histSvc.retrieve());
-
-   ServiceHandle<IIncidentSvc> incidentSvc("IncidentSvc", "EnergyInputProvider");
-   CHECK(incidentSvc.retrieve());
-   incidentSvc->addListener(this,"BeginRun", 100);
-   incidentSvc.release().ignore();
-
    CHECK(m_jetLocation.initialize()); 
+
+   if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
 
    return StatusCode::SUCCESS;
 }
-
-
-void
-JetInputProvider::handle(const Incident& incident) {
-   if (incident.type()!="BeginRun") return;
-   ATH_MSG_DEBUG( "In BeginRun incident");
-
-   string histPath = "/EXPERT/" + name() + "/";
-   replace( histPath.begin(), histPath.end(), '.', '/'); 
-
-   auto hPt1 = std::make_unique<TH1I>( "TOBPt1", "Jet TOB Pt 1", 200, 0, 1000);
-   hPt1->SetXTitle("p_{T} [GeV]");
-
-   auto hPt2 = std::make_unique<TH1I>( "TOBPt2", "Jet TOB Pt 2", 200, 0, 400);
-   hPt2->SetXTitle("p_{T} [GeV]");
-
-   auto hPhiEta = std::make_unique<TH2I>( "TOBPhiEta", "Jet TOB Location", 200, -50, 50, 128, 0, 64);
-   hPhiEta->SetXTitle("#eta#times10");
-   hPhiEta->SetYTitle("#phi#times10");
-
-
-   if (m_histSvc->regShared( histPath + "TOBPt1", std::move(hPt1), m_hPt1 ).isSuccess()){
-     ATH_MSG_DEBUG("TOBPt1 histogram has been registered successfully for JetProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register TOBPt1 histogram for JetProvider");
-   }
-
-   if (m_histSvc->regShared( histPath + "TOBPt2", std::move(hPt2), m_hPt2 ).isSuccess()){
-     ATH_MSG_DEBUG("TOBPt2 histogram has been registered successfully for JetProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register TOBPt2 histogram for JetProvider");
-   }
-   if (m_histSvc->regShared( histPath + "TOBPhiEta", std::move(hPhiEta), m_hPhiEta ).isSuccess()){
-     ATH_MSG_DEBUG("TOBPhiEta histogram has been registered successfully for JetProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register TOBPhiEta histogram for JetProvider");
-   }
-
-}
-
-
 
 StatusCode
 JetInputProvider::fillTopoInputEvent(TCS::TopoInputEvent& inputEvent) const {
@@ -121,9 +68,11 @@ JetInputProvider::fillTopoInputEvent(TCS::TopoInputEvent& inputEvent) const {
          jet.setEtaDouble( tob.eta() );
          jet.setPhiDouble( tob.phi() );
          inputEvent.addJet( jet );
-         m_hPt1->Fill(jet.Et1());
-         m_hPt2->Fill(jet.Et2());
-         m_hPhiEta->Fill(jet.eta(),jet.phi());
+         auto mon_hPt1 = Monitored::Scalar("TOBPt1", jet.Et1());
+         auto mon_hPt2 = Monitored::Scalar("TOBPt2", jet.Et2());
+         auto mon_hPhi = Monitored::Scalar("TOBPhi", jet.phi());
+         auto mon_hEta = Monitored::Scalar("TOBEta", jet.eta());
+         Monitored::Group(m_monTool, mon_hPt1, mon_hPt2, mon_hPhi, mon_hEta);
       }
       if(topoData->overflow()){
           inputEvent.setOverflowFromJetInput(true);

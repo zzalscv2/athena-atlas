@@ -4,8 +4,6 @@
 
 #include <math.h> /* atan2 */
 
-#include "GaudiKernel/ITHistSvc.h"
-
 #include "EnergyInputProvider.h"
 #include "TrigT1CaloEvent/EnergyRoI_ClassDEF.h"
 #include "TrigT1Interfaces/TrigT1CaloDefs.h"
@@ -20,7 +18,6 @@ using namespace LVL1;
 EnergyInputProvider::EnergyInputProvider(const std::string& type, const std::string& name, 
                                          const IInterface* parent) :
    base_class(type, name, parent),
-   m_histSvc("THistSvc", name),
    m_energyLocation(TrigT1CaloDefs::EnergyTopoDataLocation)
 {
    declareInterface<LVL1::IInputTOBConverter>( this );
@@ -34,48 +31,12 @@ EnergyInputProvider::~EnergyInputProvider()
 StatusCode
 EnergyInputProvider::initialize() {
 
-   CHECK(m_histSvc.retrieve());
-
-   ServiceHandle<IIncidentSvc> incidentSvc("IncidentSvc", "EnergyInputProvider");
-   CHECK(incidentSvc.retrieve());
-   incidentSvc->addListener(this,"BeginRun", 100);
-   incidentSvc.release().ignore();
-
    CHECK(m_energyLocation.initialize());  
+
+   if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
 
    return StatusCode::SUCCESS;
 }
-
-
-void
-EnergyInputProvider::handle(const Incident& incident) {
-   if (incident.type()!="BeginRun") return;
-   ATH_MSG_DEBUG( "In BeginRun incident");
-
-   string histPath = "/EXPERT/" + name() + "/";
-   replace( histPath.begin(), histPath.end(), '.', '/'); 
-
-   auto hPt = std::make_unique<TH1I>( "MET", "Missing ET TOB", 200, 0, 2000);
-   hPt->SetXTitle("p_{T} [GeV]");
-
-   auto hPhi = std::make_unique<TH1I>( "METPhi", "MET TOB Phi", 64, -3.2, 3.2);
-   hPhi->SetXTitle("#phi");
-
-   if (m_histSvc->regShared( histPath + "MET", std::move(hPt), m_hPt ).isSuccess()){
-     ATH_MSG_DEBUG("MET histogram has been registered successfully for EnergyProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register MET histogram for EnergyProvider");
-   }
-   if (m_histSvc->regShared( histPath + "METPhi", std::move(hPhi), m_hPhi ).isSuccess()){
-     ATH_MSG_DEBUG("METPhi histogram has been registered successfully for EnergyProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register METPhi histogram for EnergyProvider");
-   }
-
-}
-
 
 StatusCode
 EnergyInputProvider::fillTopoInputEvent(TCS::TopoInputEvent& inputEvent) const {
@@ -126,8 +87,9 @@ EnergyInputProvider::fillTopoInputEvent(TCS::TopoInputEvent& inputEvent) const {
           inputEvent.setOverflowFromEnergyInput(true);
           ATH_MSG_DEBUG("setOverflowFromEnergyInput : true");
    }
-   m_hPt->Fill(met.Et());
-   m_hPhi->Fill( atan2(met.Ey(),met.Ex()) );
+   auto mon_hPt = Monitored::Scalar("MET", met.Et());
+   auto mon_hPhi = Monitored::Scalar("METPhi", atan2(met.Ey(),met.Ex()));
+   Monitored::Group(m_monTool, mon_hPt, mon_hPhi);
 
    return StatusCode::SUCCESS;
 }
