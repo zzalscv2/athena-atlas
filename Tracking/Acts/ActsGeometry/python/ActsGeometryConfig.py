@@ -53,6 +53,11 @@ def ActsTrackingGeometrySvcCfg(flags, name = "ActsTrackingGeometrySvc", **kwargs
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
     result.merge(ITkStripReadoutGeometryCfg(flags))
 
+  if flags.Detector.GeometryHGTD:
+    subDetectors += ["HGTD"]
+    from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+    result.merge(HGTD_ReadoutGeometryCfg(flags))
+
   actsTrackingGeometrySvc = CompFactory.ActsTrackingGeometrySvc(name,
                                                                 BuildSubDetectors=subDetectors,
                                                                 **kwargs)
@@ -194,6 +199,8 @@ def ActsWriteTrackingGeometryCfg(flags, name="ActsWriteTrackingGeometry", **kwar
       subDetectors += ["SCT"]
     if flags.Detector.GeometryITkStrip:
       subDetectors += ["ITkStrip"]
+    if flags.Detector.GeometryHGTD:
+      subDetectors += ["HGTD"]
 
     kwargs["ObjWriterTool"] = \
       result.getPrimaryAndMerge(ActsObjWriterToolCfg(flags,

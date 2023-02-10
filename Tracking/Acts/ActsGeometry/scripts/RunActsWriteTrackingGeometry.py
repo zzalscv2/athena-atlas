@@ -50,7 +50,7 @@ if args.localgeo:
   flags.ITk.Geometry.AllLocal = True
 
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-detectors = args.detectors if 'detectors' in args and args.detectors else ['ITkPixel', 'ITkStrip']
+detectors = args.detectors if 'detectors' in args and args.detectors else ['ITkPixel', 'ITkStrip', 'HGTD']
 detectors.append('Bpipe')  # always run with beam pipe
 setupDetectorsFromList(flags, detectors, toggle_geometry=True)
 
@@ -65,6 +65,8 @@ flags.Detector.GeometryMuon  = False
 # This should run serially for the moment.
 flags.Concurrency.NumThreads = 1
 flags.Concurrency.NumConcurrentEvents = 1
+
+flags.dump()
 
 log.debug('Lock config flags now.')
 flags.lock()

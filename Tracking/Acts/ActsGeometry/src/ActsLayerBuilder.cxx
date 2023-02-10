@@ -556,6 +556,7 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
 
     size_t nBinsPhi = nModPhi;
     size_t nBinsR = nModR;
+
     if(!isITk) {
       // In the ID, the modules in the innermost r-rings are exactly shifted by
       // one half module width since it's the same number of modules, this gives
