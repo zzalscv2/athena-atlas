@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHLINKS_ASSOCIATIONMAP_H
@@ -137,6 +137,7 @@ class AssociationMap
 
   /// \brief finding an object with allocation
   object_iterator findObject(const object_type* theObject) const
+    // cppcheck-suppress returnDanglingLifetime; false positive
     { return object_iterator(m_associationMap).find(theObject); }
 
   /// \brief testing if object is in store
