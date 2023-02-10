@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef L1TopoSimulation_MuonInputProvider
 #define L1TopoSimulation_MuonInputProvider
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaMonitoringKernel/Monitored.h"
 #include "L1TopoSimulation/IInputTOBConverter.h"
-#include "GaudiKernel/IIncidentListener.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/LockedHandle.h"
 #include "TrigT1Interfaces/MuCTPIL1Topo.h"
@@ -16,14 +16,9 @@
 #include "TrigT1Interfaces/TrigT1StoreGateKeys.h"
 #include "TrigT1Interfaces/ITrigT1MuonRecRoiTool.h"
 
- #include "xAODTrigger/MuonRoI.h"
-
-#include "TH1.h"
-#include "TH2.h"
+#include "xAODTrigger/MuonRoI.h"
 
 #include <vector>
-
-class ITHistSvc;
 
 namespace TrigConf
 {
@@ -39,7 +34,7 @@ namespace LVL1 {
 
    class MuCTPIL1TopoCandidate;
 
-   class MuonInputProvider : public extends2<AthAlgTool, IInputTOBConverter, IIncidentListener> {
+   class MuonInputProvider : public extends<AthAlgTool, IInputTOBConverter> {
    public:
       MuonInputProvider(const std::string& type, const std::string& name, 
                          const IInterface* parent);
@@ -47,8 +42,6 @@ namespace LVL1 {
       virtual StatusCode initialize() override;
 
       virtual StatusCode fillTopoInputEvent(TCS::TopoInputEvent& ) const override;
-
-      virtual void handle(const Incident&) override;
 
    private:
       TCS::MuonTOB createMuonTOB(const xAOD::MuonRoI & muonRoI, const std::vector<unsigned int> & rpcPtValues, const std::vector<unsigned int> & tgcPtValues) const;
@@ -81,10 +74,9 @@ namespace LVL1 {
       */
       int topoFlag(bool flag) const;
 
-      ServiceHandle<ITHistSvc> m_histSvc;
-
       ToolHandle<LVL1::ITrigT1MuonRecRoiTool> m_recRPCRoiTool{this, "RecRpcRoiTool", "LVL1::TrigT1RPCRecRoiTool/TrigT1RPCRecRoiTool", "RPC RoI reconstruction tool"};
       ToolHandle<LVL1::ITrigT1MuonRecRoiTool> m_recTGCRoiTool{this, "RecTgcRoiTool", "LVL1::TrigT1TGCRecRoiTool/TrigT1TGCRecRoiTool", "TGC RoI reconstruction tool"};
+      ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "", "Monitoring tool to create online histograms"};
 
       SG::ReadHandleKey<L1MUINT::MuCTPIToRoIBSLink> m_muonROILocation { this, "MuonROILocation", LVL1MUCTPI::DEFAULT_MuonRoIBLocation, "Storegate key for the Muon ROIs" };
       SG::ReadHandleKey<ROIB::RoIBResult> m_roibLocation{ this, "ROIBResultLocation", ROIB::DEFAULT_RoIBRDOLocation, "Storegate key for the reading the ROIBResult" };
@@ -92,31 +84,6 @@ namespace LVL1 {
       SG::ReadHandleKey<LVL1::MuCTPIL1Topo> m_MuCTPItoL1TopoLocationPlusOne { this, "locationMuCTPItoL1Topo1", LVL1MUCTPI::DEFAULT_MuonL1TopoLocation, "Storegate key for MuCTPItoL1TopoPlusOne"};
       Gaudi::Property<uint16_t> m_MuonEncoding {this, "MuonEncoding", 0, "0=full granularity Mu ROIs, 1=MuCTPiToTopo granularity"};
       Gaudi::Property<std::string> m_MuonL1RoIKey {this, "MuonL1RoIKey", "", "Empty=Use Muctpi, LVL1MuonRoIs=Use reading from xAOD L1 RoI"};
-
-
-      mutable LockedHandle<TH1> m_hPt ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH1> m_hPtTGC ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH1> m_hPtRPC ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hPtEta ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hPhiEta ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hBW2or3Eta ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hInnerCoinEta ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hGoodMFEta ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hChargeEta ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hIs2candEta ATLAS_THREAD_SAFE; 
-      mutable LockedHandle<TH2> m_hIsTGCEta ATLAS_THREAD_SAFE;
-
-      mutable LockedHandle<TH1> m_hLateMuonPt ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH1> m_hLateMuonPtTGC ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH1> m_hLateMuonPtRPC ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hLateMuonPtEta ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hLateMuonPhiEta ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hLateMuonBW2or3Eta ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hLateMuonInnerCoinEta ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hLateMuonGoodMFEta ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hLateMuonChargeEta ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hLateMuonIs2candEta ATLAS_THREAD_SAFE; 
-      mutable LockedHandle<TH2> m_hLateMuonIsTGCEta ATLAS_THREAD_SAFE;
  
    };
 }

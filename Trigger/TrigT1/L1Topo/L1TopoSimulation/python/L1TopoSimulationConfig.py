@@ -3,6 +3,7 @@
 from L1TopoSimulation.L1TopoSimulationConf import LVL1__L1TopoSimulation, LVL1__RoiB2TopoInputDataCnv
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, appendCAtoAthena
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 class L1TopoSimulation ( LVL1__L1TopoSimulation ):
 
@@ -25,15 +26,29 @@ def L1LegacyTopoSimulationCfg(flags):
     
     acc = ComponentAccumulator()
     
+    from L1TopoSimulation.L1TopoInputHistograms import configureEMTauInputProviderHistograms, configureEnergyInputProviderHistograms, configureJetInputProviderHistograms
     emtauProvider = CompFactory.LVL1.EMTauInputProvider("EMTauInputProvider")
+    emtauProvider.MonTool = GenericMonitoringTool(flags, 'MonTool')
+    emtauProvider.MonTool.HistPath = 'L1LegacyTopoSimulation/EMTauInputProvider'
+    configureEMTauInputProviderHistograms(emtauProvider, flags)
+    energyProvider = CompFactory.LVL1.EnergyInputProvider("EnergyInputProvider")
+    energyProvider.MonTool = GenericMonitoringTool(flags, 'MonTool')
+    energyProvider.MonTool.HistPath = 'L1LegacyTopoSimulation/EnergyInputProvider'
+    configureEnergyInputProviderHistograms(energyProvider, flags)
+    jetProvider = CompFactory.LVL1.JetInputProvider("JetInputProvider")
+    jetProvider.MonTool = GenericMonitoringTool(flags, 'MonTool')
+    jetProvider.MonTool.HistPath = 'L1LegacyTopoSimulation/JetInputProvider'
+    configureJetInputProviderHistograms(jetProvider, flags)
 
     topoSimAlg = CompFactory.LVL1.L1TopoSimulation("L1LegacyTopoSimulation",
                                                     EMTAUInputProvider = emtauProvider,
+                                                    JetInputProvider = jetProvider,
+                                                    EnergyInputProvider = energyProvider,
                                                     IsLegacyTopo = True,
                                                     InputDumpFile = "inputdump_legacy.txt",
                                                     EnableInputDump = flags.Trigger.enableL1TopoDump,
                                                     UseBitwise = flags.Trigger.enableL1TopoBWSimulation,
-                                                    MonHistBaseDir = "L1/L1LegacyTopoAlgorithms"
+                                                    #MonHistBaseDir = "L1/L1LegacyTopoAlgorithms"
                                                    )
 
     # No muon inputs to legacy Topo
@@ -143,7 +158,9 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False):
     efex_provider_attr = ['eFexEMRoI','eFexTauRoI']
     jfex_provider_attr = ['jFexSRJetRoI','jFexLRJetRoI','jFexEMRoI','jFexTauRoI','jFexXERoI','jFexTERoI']
     gfex_provider_attr = ['gFexSRJetRoI','gFexLRJetRoI','gFexXEJWOJRoI','gFexXENCRoI','gFexXERHORoI','gFexMHTRoI','gFexTERoI']
-   
+
+    from L1TopoSimulation.L1TopoInputHistograms import configureMuonInputProviderHistograms, configureeFexInputProviderHistograms, configurejFexInputProviderHistograms, configuregFexInputProviderHistograms
+
     #Configure the MuonInputProvider
     muProvider=""
     if doMuons:
@@ -156,11 +173,23 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False):
         from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg
         muProvider.RecRpcRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags))
         muProvider.RecTgcRoiTool = acc.popToolsAndMerge(TGCRecRoiToolCfg(flags))
+        muProvider.MonTool = GenericMonitoringTool(flags, 'MonTool')
+        muProvider.MonTool.HistPath = 'L1TopoSimulation/MuonInputProvider'
+        configureMuonInputProviderHistograms(muProvider, flags)
 
 
     efexProvider = CompFactory.LVL1.eFexInputProvider("eFexInputProvider")
+    efexProvider.MonTool = GenericMonitoringTool(flags, 'MonTool')
+    efexProvider.MonTool.HistPath = 'L1TopoSimulation/eFexInputProvider'
+    configureeFexInputProviderHistograms(efexProvider, flags)
     jfexProvider = CompFactory.LVL1.jFexInputProvider("jFexInputProvider")
+    jfexProvider.MonTool = GenericMonitoringTool(flags, 'MonTool')
+    jfexProvider.MonTool.HistPath = 'L1TopoSimulation/jFexInputProvider'
+    configurejFexInputProviderHistograms(jfexProvider, flags)
     gfexProvider = CompFactory.LVL1.gFexInputProvider("gFexInputProvider")
+    gfexProvider.MonTool = GenericMonitoringTool(flags, 'MonTool')
+    gfexProvider.MonTool.HistPath = 'L1TopoSimulation/gFexInputProvider'
+    configuregFexInputProviderHistograms(gfexProvider, flags)
 
     for attr in efex_provider_attr:
         res = [x for x in outputEDM if attr in x]
@@ -202,7 +231,6 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False):
     acc.addEventAlgo(topoSimAlg)
     
     return acc
-
 
 if __name__ == '__main__':
   from AthenaConfiguration.AllConfigFlags import initConfigFlags

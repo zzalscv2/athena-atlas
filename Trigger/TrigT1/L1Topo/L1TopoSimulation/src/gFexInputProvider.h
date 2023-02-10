@@ -1,27 +1,22 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef L1TOPOSIMULATION_GFEXINPUTPROVIDER_H
 #define L1TOPOSIMULATION_GFEXINPUTPROVIDER_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaMonitoringKernel/Monitored.h"
 #include "L1TopoSimulation/IInputTOBConverter.h"
-#include "GaudiKernel/IIncidentListener.h"
 #include "GaudiKernel/LockedHandle.h"
 
 // gFEX EDMs
 #include "xAODTrigger/gFexJetRoIContainer.h"
 #include "xAODTrigger/gFexGlobalRoIContainer.h"
 
-#include "TH1.h"
-#include "TH2.h"
-
-class ITHistSvc;
-
 namespace LVL1 {
 
-   class gFexInputProvider : public extends2<AthAlgTool, IInputTOBConverter, IIncidentListener> {
+   class gFexInputProvider : public extends<AthAlgTool, IInputTOBConverter> {
    public:
       gFexInputProvider(const std::string& type, const std::string& name, const IInterface* parent);
       
@@ -29,8 +24,6 @@ namespace LVL1 {
 
       virtual StatusCode initialize() override final;
       virtual StatusCode fillTopoInputEvent(TCS::TopoInputEvent& ) const override final;
-
-      virtual void handle(const Incident&) override final;
 
    private:
 
@@ -44,7 +37,7 @@ namespace LVL1 {
 
       StatusCode fillTE(TCS::TopoInputEvent& inputEvent) const;
 
-      ServiceHandle<ITHistSvc> m_histSvc;
+      ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "", "Monitoring tool to create online histograms"};
 
       SG::ReadHandleKey<xAOD::gFexJetRoIContainer> m_gJet_EDMKey {this, "gFexSRJetRoIKey", "L1_gFexSRJetRoI", "gFEX Jet EDM"};
       SG::ReadHandleKey<xAOD::gFexJetRoIContainer> m_gLJet_EDMKey {this, "gFexLRJetRoIKey", "L1_gFexLRJetRoI", "gFEX LJet EDM"};
@@ -55,24 +48,6 @@ namespace LVL1 {
       SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gXERHO_EDMKey {this, "gFexXERHORoIKey", "L1_gMETComponentsRms", "gFEX XERHO EDM"};
 
       SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gTE_EDMKey {this, "gFexTERoIKey", "L1_gScalarEJwoj", "gFEX TE EDM"};
-
-      mutable LockedHandle<TH1> m_h_gJet_Pt ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_h_gJet_PhiEta ATLAS_THREAD_SAFE;
-
-      mutable LockedHandle<TH1> m_h_gLJet_Pt ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_h_gLJet_PhiEta ATLAS_THREAD_SAFE;
-
-      mutable LockedHandle<TH1> m_h_gXEJWOJ_Pt ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH1> m_h_gXEJWOJ_Phi ATLAS_THREAD_SAFE;
-
-      mutable LockedHandle<TH1> m_h_gMHT_Pt ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH1> m_h_gMHT_Phi ATLAS_THREAD_SAFE;
-
-      mutable LockedHandle<TH1> m_h_gXENC_Pt ATLAS_THREAD_SAFE;
-
-      mutable LockedHandle<TH1> m_h_gXERHO_Pt ATLAS_THREAD_SAFE;
-
-      mutable LockedHandle<TH1> m_h_gTE_sumEt ATLAS_THREAD_SAFE;
 
       // gFex to L1Topo conversion factors
       static const int m_EtJet_conversion;
