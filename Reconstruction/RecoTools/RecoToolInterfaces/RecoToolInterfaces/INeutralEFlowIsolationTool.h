@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -38,7 +38,7 @@ namespace xAOD {
     */    
     virtual bool neutralEflowIsolation(CaloIsolation& result, const IParticle& tp, 
 				       const std::vector<Iso::IsolationType>& cones, 
-				       CaloCorrection corrections) const = 0; 
+				       const CaloCorrection& corrections) const = 0; 
 
   };
  
