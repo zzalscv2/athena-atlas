@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RadiationMapsMaker.h"
@@ -92,6 +92,10 @@ namespace G4UA{
     if ( m_tgnSiB ) {
       m_tgnSiB->Delete();
       m_tgnSiB = 0;
+    }
+    if ( m_tgnSiC ) {
+      m_tgnSiC->Delete();
+      m_tgnSiC = 0;
     }
     if ( m_tgpiSi ) { 
       m_tgpiSi->Delete();
@@ -393,25 +397,28 @@ namespace G4UA{
     /// changed. To prevent modification of the damage factors by accident
     /// the file names are not configurable
     ///
-    std::string fpSiA = PathResolver::find_file("protons_Si_Gunnar_Summers.dat"   ,"DATAPATH");//E_kin < 15   MeV
-    std::string fpSiB = PathResolver::find_file("protons_Si_Gunnar_Huhtinen.dat"  ,"DATAPATH");//E_kin > 15   MeV
-    std::string fnSiA = PathResolver::find_file("neutrons_Si_Gunnar_Griffin.dat"  ,"DATAPATH");//E_kin < 20   MeV
-    std::string fnSiB = PathResolver::find_file("neutrons_Si_Gunnar_Konobeyev.dat","DATAPATH");//E_kin > 20   MeV
-    std::string fpiSi = PathResolver::find_file("pions_Si_Gunnar_Huhtinen.dat"    ,"DATAPATH");//E_kin > 15   MeV
-    std::string feSi  = PathResolver::find_file("electrons_Si_Summers.dat"        ,"DATAPATH");//E_kin >  0.1 MeV 
+    std::string fpSiA = PathResolver::find_file("protons_Si_Gunnar_Summers.dat"   ,"DATAPATH");//E_kin <  15   MeV
+    std::string fpSiB = PathResolver::find_file("protons_Si_Gunnar_Huhtinen.dat"  ,"DATAPATH");//E_kin >  15   MeV
+    std::string fnSiA = PathResolver::find_file("neutrons_Si_Gunnar_Griffin.dat"  ,"DATAPATH");//E_kin <  20   MeV
+    std::string fnSiB = PathResolver::find_file("neutrons_Si_Gunnar_Konobeyev.dat","DATAPATH");//20 MeV < E_kin < 800 MeV
+    std::string fnSiC = PathResolver::find_file("neutrons_Si_Gunnar_Huhtinen.dat" ,"DATAPATH");//E_kin > 800   MeV
+    std::string fpiSi = PathResolver::find_file("pions_Si_Gunnar_Huhtinen.dat"    ,"DATAPATH");//E_kin >  15   MeV
+    std::string feSi  = PathResolver::find_file("electrons_Si_Summers.dat"        ,"DATAPATH");//E_kin >   0.1 MeV 
 
     if ( !m_tgpSiA ) 
-      m_tgpSiA = new TGraph(fpSiA.c_str()); //E_kin < 15   MeV
+      m_tgpSiA = new TGraph(fpSiA.c_str()); //E_kin <  15   MeV
     if ( !m_tgpSiB ) 
-      m_tgpSiB = new TGraph(fpSiB.c_str()); //E_kin > 15   MeV
+      m_tgpSiB = new TGraph(fpSiB.c_str()); //E_kin >  15   MeV
     if ( !m_tgnSiA ) 
-      m_tgnSiA = new TGraph(fnSiA.c_str()); //E_kin < 20   MeV
+      m_tgnSiA = new TGraph(fnSiA.c_str()); //E_kin <  20   MeV
     if ( !m_tgnSiB ) 
-      m_tgnSiB = new TGraph(fnSiB.c_str()); //E_kin > 20   MeV
+      m_tgnSiB = new TGraph(fnSiB.c_str()); //20 MeV < E_kin < 800 MeV
+    if ( !m_tgnSiC ) 
+      m_tgnSiC = new TGraph(fnSiC.c_str()); //E_kin > 800   MeV
     if ( !m_tgpiSi ) 
-      m_tgpiSi = new TGraph(fpiSi.c_str()); //E_kin > 15   MeV
+      m_tgpiSi = new TGraph(fpiSi.c_str()); //E_kin >  15   MeV
     if ( !m_tgeSi ) 
-      m_tgeSi = new TGraph(feSi.c_str());   //E_kin >  0.1 MeV
+      m_tgeSi = new TGraph(feSi.c_str());   //E_kin >   0.1 MeV
     
     /// 
     /// data files for effective dose in Humans from ICRP 116
@@ -685,8 +692,11 @@ namespace G4UA{
 	if ( eKin < 20 ) {
 	  weight = m_tgnSiA->Eval(eKin);
 	}
-	else {
+	else if ( eKin < 800 ) {
 	  weight = m_tgnSiB->Eval(eKin);
+	}
+	else {
+	  weight = m_tgnSiC->Eval(eKin);
 	}
       }
       else if ( pdgid == 4 || pdgid == 5 ) {
