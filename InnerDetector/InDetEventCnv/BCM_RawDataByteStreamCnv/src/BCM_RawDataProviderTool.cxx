@@ -20,17 +20,6 @@ const InterfaceID& BCM_RawDataProviderTool::interfaceID( )
 { return IID_IBCM_RawCollByteStreamTool; }
 
 ////////////////////////
-// constructor
-////////////////////////
-BCM_RawDataProviderTool::BCM_RawDataProviderTool
-( const std::string& type, const std::string& name,const IInterface* parent )
-  :  AthAlgTool(type,name,parent)
-{
-  declareInterface<BCM_RawDataProviderTool>(this);   
-  m_DecodeErrCount =0;
-}
-
-////////////////////////
 // destructor 
 ////////////////////////
 BCM_RawDataProviderTool::~BCM_RawDataProviderTool()
@@ -71,12 +60,12 @@ StatusCode BCM_RawDataProviderTool::convert( std::vector<const OFFLINE_FRAGMENTS
 
     StatusCode sc = m_decoder->fillCollection(&**rob_it, rdoCont);
     if (sc != StatusCode::SUCCESS) {
-       if (m_DecodeErrCount < 100) {
+       if (m_decodeErrCount < 100) {
           ATH_MSG_INFO( "Problem with BCM ByteStream Decoding!" );
-       } else if (100 == m_DecodeErrCount) {
+       } else if (100 == m_decodeErrCount) {
           ATH_MSG_INFO( "Too many Problems with BCM Decoding. Turning message off." );
        }
-        m_DecodeErrCount++;
+        m_decodeErrCount++;
       }
   }
 

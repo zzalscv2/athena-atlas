@@ -22,8 +22,8 @@ class BCM_RawDataProviderTool : public AthAlgTool
   //! AthAlgTool InterfaceID
   static const InterfaceID& interfaceID();
   
-  //! constructor
-  BCM_RawDataProviderTool(const std::string& type, const std::string& name, const IInterface* parent);
+  //! delegate constructor
+  using AthAlgTool::AthAlgTool;
 
   //! destructor 
   virtual ~BCM_RawDataProviderTool();
@@ -38,7 +38,7 @@ class BCM_RawDataProviderTool : public AthAlgTool
   StatusCode convert(std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs, BCM_RDO_Container* rdoCont) const;
 
 private:
-  mutable std::atomic<int> m_DecodeErrCount{};
+  mutable std::atomic<unsigned> m_decodeErrCount{0};
   ToolHandle<BCM_RodDecoder>  m_decoder{this,"Decoder","BCM_RodDecoder"};
 };
 
