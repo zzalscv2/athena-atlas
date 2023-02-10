@@ -63,7 +63,6 @@ ToolSvc.TauEffTool_MediumWARNING Could not determine MC campaign from run number
 ToolSvc.TauEffTool_MediumWARNING TauEfficiency callibrations from 2022-prerec are not recommended for Run2 MC. Will only print this warning once.
 Info in <CP::TPileupReweighting::GetLumiBlockMu>: Initializing the subtool..
 Warning in <SUSYToolsTester>: No PV found for this event! Skipping...
-Warning in <SUSYToolsTester>: No PV found for this event! Skipping...
 Info in <SUSYToolsTester>: Time per event:          (CPU / WALL)
 		CalibrationDataInterfaceROOT object out-of-bounds summary:
 			No issues found

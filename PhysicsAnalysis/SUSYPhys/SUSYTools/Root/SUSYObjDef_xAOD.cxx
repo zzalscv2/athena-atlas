@@ -1441,7 +1441,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_ToptagConfig, "Jet.ToptaggerConfig", rEnv, "DNNTagger_AntiKt10UFOSD_TopInclusive80_Oct30.dat");
   configFromFile(m_JetTruthLabelName, "Jet.JetTruthLabelName", rEnv, "R10TruthLabel_R21Precision_2022v1");
   configFromFile(m_TopTaggerCalibArea, "Jet.TopTaggerCalibArea", rEnv, "JSSWTopTaggerDNN/Rel21/February2022/");
-  configFromFile(m_jesConfig, "Jet.JESConfig", rEnv, "JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21.config");
+  configFromFile(m_jesConfig, "Jet.JESConfig", rEnv, "JES_MC20PreRecommendation_PFlow_Dec2022_Rel22.config");
   configFromFile(m_jesConfigAFII, "Jet.JESConfigAFII", rEnv, "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config");
   configFromFile(m_jesConfigJMS, "Jet.JESConfigJMS", rEnv, "JES_JMS_MC16Recommendation_Consolidated_MC_only_EMTopo_July2019_Rel21.config");
   configFromFile(m_jesConfigJMSData, "Jet.JESConfigJMSData", rEnv, "JES_JMS_MC16Recommendation_Consolidated_data_only_EMTopo_Sep2019_Rel21.config");

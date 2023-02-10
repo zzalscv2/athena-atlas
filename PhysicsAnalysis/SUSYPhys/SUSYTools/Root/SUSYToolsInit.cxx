@@ -161,46 +161,34 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       m_jetCalibTool.setTypeAndName("JetCalibrationTool/"+toolName);
       std::string JES_config_file, calibseq;
   
-      if (m_jetInputType != xAOD::JetInput::EMTopo && m_jetInputType != xAOD::JetInput::EMPFlow) {
+      if (m_jetInputType != xAOD::JetInput::EMPFlow) {
         ATH_MSG_ERROR("Unknown (unsupported) jet collection is used, (m_jetInputType = " << m_jetInputType << ")");
         return StatusCode::FAILURE;
       }
   
       std::string JESconfig = isAtlfast() ? m_jesConfigAFII : m_jesConfig;
-      calibseq = m_jesCalibSeq;
-  
-      JES_config_file = JESconfig;
-      if (m_jetInputType == xAOD::JetInput::EMPFlow) {
-        JES_config_file = TString(JESconfig).ReplaceAll("_EMTopo_","_PFlow_").Data();
+      if(isAtlfast()) {
+        ATH_MSG_WARNING("Jet rec currently not available for fast sim, temporary fallback to full sim version");
+        JESconfig = m_jesConfig;
       }
+            
+      calibseq = m_jesCalibSeq;
+      JES_config_file = JESconfig;
   
-      // remove Insitu if it's in the string if not data, and add _Smear
+      // remove Insitu if it's in the string if not data
       if (!isData()) {
         std::string insitu("_Insitu");
         auto found = calibseq.find(insitu);
         if(found != std::string::npos){
           calibseq.erase(found, insitu.length());
-          calibseq.append("_Smear");
         }
       }
   
       // JMS calibration (if requested)
       if (m_JMScalib){ 
-        if (isAtlfast()) {
-          ATH_MSG_ERROR("JMS calibration is not supported for AF-II samples. Please modify your settings.");
+          ATH_MSG_ERROR("JMS calibration is not supported yet for R22. Please modify your settings.");
           return StatusCode::FAILURE;
         }
-  
-        std::string JMSconfig = isData() ? m_jesConfigJMSData : m_jesConfigJMS;
-        JES_config_file = JMSconfig;
-        if (m_jetInputType == xAOD::JetInput::EMPFlow) {  
-          JES_config_file = TString(JMSconfig).ReplaceAll("_EMTopo_","_PFlow_").Data();
-        }
-  
-        calibseq = m_jesCalibSeqJMS;
-        if (isData()) calibseq.append("_JMS_Insitu");
-        else calibseq.append("_Smear_JMS");
-      }
   
       // now instantiate the tool
       ATH_CHECK( m_jetCalibTool.setProperty("JetCollection", jetname) );
@@ -299,15 +287,15 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise jet uncertainty tool
-    // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
+    // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel22
     ATH_MSG_INFO("Set up Jet Uncertainty tool...");
 
     if (!m_jetUncertaintiesTool.isUserConfigured()) {
       std::string jetdef("AntiKt4" + xAOD::JetInput::typeName(xAOD::JetInput::Type(m_jetInputType)));
 
-      if(jetdef != "AntiKt4EMTopo" && jetdef !="AntiKt4EMPFlow"){
-        ATH_MSG_WARNING("Jet Uncertaintes recommendations only exist for EMTopo and PFlow jets, falling back to AntiKt4EMTopo");
-        jetdef = "AntiKt4EMTopo";
+      if(jetdef !="AntiKt4EMPFlow"){
+        ATH_MSG_WARNING("Jet Uncertaintes recommendations only exist for PFlow jets, falling back to AntiKt4EMPFlow");
+        jetdef = "AntiKt4EMPFlow";
       }
       toolName = "JetUncertaintiesTool_" + jetdef;
 
@@ -315,7 +303,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
 
       ATH_CHECK( m_jetUncertaintiesTool.setProperty("JetDefinition", jetdef) );
-      ATH_CHECK( m_jetUncertaintiesTool.setProperty("MCType", isAtlfast() ? "AFII" : "MC16") );
+      ATH_CHECK( m_jetUncertaintiesTool.setProperty("MCType", m_isRun3 ? "MC21" : "MC20") );
       ATH_CHECK( m_jetUncertaintiesTool.setProperty("IsData", false) ); // Never use the PDSmearing for the nominal tool.
       ATH_CHECK( m_jetUncertaintiesTool.setProperty("ConfigFile", m_jetUncertaintiesConfig) );
       if(m_jetUncertaintiesAnalysisFile!="default") ATH_CHECK( m_jetUncertaintiesTool.setProperty("AnalysisFile", m_jetUncertaintiesAnalysisFile) );
@@ -329,9 +317,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     if (!m_jetUncertaintiesPDSmearTool.isUserConfigured() && m_jetUncertaintiesPDsmearing == true) {
       std::string jetdef("AntiKt4" + xAOD::JetInput::typeName(xAOD::JetInput::Type(m_jetInputType)));
 
-      if(jetdef != "AntiKt4EMTopo" && jetdef !="AntiKt4EMPFlow"){
-        ATH_MSG_WARNING("Jet Uncertaintes recommendations only exist for EMTopo and PFlow jets, falling back to AntiKt4EMTopo");
-        jetdef = "AntiKt4EMTopo";
+      if(jetdef !="AntiKt4EMPFlow"){
+        ATH_MSG_WARNING("Jet Uncertaintes recommendations only exist for PFlow jets, falling back to AntiKt4EMPFlow");
+        jetdef = "AntiKt4EMPFlow";
       }
       toolName = "JetUncertaintiesPDSmearTool_" + jetdef;
 
@@ -344,7 +332,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         return StatusCode::FAILURE;
       }
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("JetDefinition", jetdef) );
-      ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("MCType", isAtlfast() ? "AFII" : "MC16") );
+      ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("MCType", m_isRun3 ? "MC21" : "MC20") );
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("IsData", true) ); // Set to True by default for PDSmear-named tool.
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("ConfigFile", m_jetUncertaintiesConfig) );
       if (m_jetUncertaintiesCalibArea != "default") ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("CalibArea", m_jetUncertaintiesCalibArea) );
