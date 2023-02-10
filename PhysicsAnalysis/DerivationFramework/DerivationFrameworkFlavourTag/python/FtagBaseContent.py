@@ -45,10 +45,8 @@ def add_static_content_to_SlimmingHelper(SlimmingHelper, extra_StaticContent=[])
 
 def add_truth_to_SlimmingHelper(SlimmingHelper):
     from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
-    for _cont in PHYSVAL_FTAG1_FTAG2_mc_AppendToDictionary:
-        _type = PHYSVAL_FTAG1_FTAG2_mc_AppendToDictionary[_cont]
-        if _cont not in SlimmingHelper.AppendToDictionary:
-            SlimmingHelper.AppendToDictionary[_cont] = _type
+    if len(PHYSVAL_FTAG1_FTAG2_mc_AppendToDictionary)>0:
+        SlimmingHelper.AppendToDictionary.update(PHYSVAL_FTAG1_FTAG2_mc_AppendToDictionary)
     addTruth3ContentToSlimmerTool(SlimmingHelper)
     SlimmingHelper.AllVariables += ['TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
 
