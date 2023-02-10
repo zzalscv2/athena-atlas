@@ -10,11 +10,7 @@ ATLAS_PROJECT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 ATLAS_EXT_PROJECT_NAME="AthDerivationExternals"
 ATLAS_BUILDTYPE="RelWithDebInfo"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=102
-                        -DLCG_VERSION_POSTFIX="b_ATLAS_11"
-                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v36r9.000/Gaudi-v36r9.000.tar.gz;URL_MD5;b8e6bfdf2a997a5b50ae5b1c1df5aa52"
-                        -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/archive/refs/tags/v20.3.0.tar.gz;URL_MD5;2f4d7c2b04495ec5f4ea2ed30c419770"
-                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/4.4.3/GeoModel-4.4.3.tar.bz2;URL_MD5;593a9eda9974e73d30b60d4d670b6940"
-                        -DATLAS_CLHEP_SOURCE="URL;https://gitlab.cern.ch/atlas-sw-git/CLHEP/-/archive/CLHEP_2_4_1_3_atl04/CLHEP-CLHEP_2_4_1_3_atl04.tar.gz;URL_MD5;d2f9ea9f3368d2dd0321457a222c3f7e")
+                        -DLCG_VERSION_POSTFIX="b_ATLAS_11")
 ATLAS_EXTRA_MAKE_ARGS=()
 
 # Let "the common script" do all the heavy lifting.
