@@ -55,6 +55,7 @@ fatjetcontexts = {
     "TrigUngroomed": ("JES_Full2012dataset_Rscan_June2014.config","00-04-77","JetArea_EtaJES"),
     "TrigTrimmed":   ("JES_MC15recommendation_FatJet_June2015_PtFrac4.config","00-04-82","EtaJES_JMS"),
     "TrigSoftDrop":  ("JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config","00-04-82","EtaJES_JMS"),
+    "LargeRDNN":     ("JES_JMS_MC20dnnc_R10_UFO_CSSK_SoftDrop_Feb2023.config","00-04-82","LargeRDNN"),
 }
 
 # List AFII config files separately, to avoid needing to specify a different context
@@ -135,7 +136,7 @@ def getJetCalibTool(jetdef, context, data_type, calibseq = "", rhoname = "", pvn
         if context == "T0":
             _data_type = "data"
         _pvname = ""
-        if "Residual" in _calibseq or "GSC" in _calibseq and gscdepth!="EM3":
+        if "Residual" in _calibseq or "GSC" in _calibseq and gscdepth!="EM3" or "LargeRDNN" in _calibseq:
             _pvname = pvname
         # HACK: For testing while we don't have finalised calibrations for trigger PF jets
         _jetcollection = jetcollection
@@ -189,6 +190,10 @@ def getJetCalibToolPrereqs(modspec,jetdef):
                         "ghost:MuonSegment"]
     if "CombinedMass" in calibcontext:
         prereqs += ["mod:TrackSumMoments"]
+    if "LargeRDNN" in calibseq:
+        prereqs += ["mod:CaloEnergiesLargeR","mod:ConstitFrac","mod:groomMRatio","mod:Width",
+                    "mod:nsubjettiness","mod:nsubjettinessR","mod:ktsplitter","mod:ecorr",
+                    "mod:ecorrR","mod:qw"]
     jetcaliblog.debug("Prereqs for calibseq '{0}': {1}".format(calibseq,str(prereqs)))
     return prereqs
 

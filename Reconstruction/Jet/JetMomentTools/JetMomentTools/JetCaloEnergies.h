@@ -10,10 +10,7 @@
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/PropertyWrapper.h"
 #include "JetInterface/IJetDecorator.h"
-#include "AsgDataHandles/ReadDecorHandleKey.h"
-#include "AsgDataHandles/ReadDecorHandle.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
-#include "AsgDataHandles/WriteDecorHandle.h"
 #include "xAODJet/JetContainer.h"
 #include <vector>
 
@@ -32,8 +29,10 @@ protected:
   void fillEperSamplingPFO(const xAOD::Jet &jet, std::vector<float> & ePerSampling ) const ;
   void fillEperSamplingFE(const xAOD::Jet &jet, std::vector<float> & ePerSampling ) const ;
   void fillEperSamplingFEClusterBased(const xAOD::Jet &jet, std::vector<float> & ePerSampling ) const ;
+  bool isInVector(const std::string key, const std::vector<std::string> calculations);
 
 private:
+  Gaudi::Property<std::vector<std::string> > m_calculationNames{this, "Calculations", {}, "Name of calo quantities to compute and add as decorations"};
   Gaudi::Property<std::string> m_jetContainerName{this, "JetContainer", "", "SG key for the input jet container"};
   Gaudi::Property<bool> m_calcClusterBasedVars{this, "calcClusterBasedVars", false, "SG key to decide if cluster-based variables will be calculated for FE-based jets"};
 
@@ -41,12 +40,18 @@ private:
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_emFracKey{this, "EMFracName", "EMFrac", "SG key for the EMFrac attribute"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_hecFracKey{this, "HECFracName", "HECFrac", "SG key for the HECFrac attribute"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_psFracKey{this, "PSFracName", "PSFrac", "SG key for the PSFrac attribute"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_em3FracKey{this, "EM3FracName", "EM3Frac", "SG key for the EM3Frac attribute"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_tile0FracKey{this, "Tile0FracName", "Tile0Frac", "SG key for the Tile0Frac attribute"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_effNClustsFracKey{this, "EffNClustsName", "EffNClusts", "SG key for the EffNClusts attribute"};
   
   // Variables for FE-based jet collection using the underlying cluster rather than energy-subtracted FE for calculations
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_ePerSamplingClusterKey{this, "EPerSamplingClusterName", "EnergyPerSamplingCaloBased", "SG key for the EnergyPerSampling attribute"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_emFracClusterKey{this, "EMFracClusterName", "EMFracCaloBased", "SG key for the EMFrac attribute"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_hecFracClusterKey{this, "HECFracClusterName", "HECFracCaloBased", "SG key for the HECFrac attribute"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_psFracClusterKey{this, "PSFracClusterName", "PSFracCaloBased", "SG key for the PSFrac attribute"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_em3FracClusterKey{this, "EM3FracClusterName", "EM3FracCaloBased", "SG key for the EM3Frac attribute"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_tile0FracClusterKey{this, "Tile0FracClusterName", "Tile0FracCaloBased", "SG key for the Tile0Frac attribute"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_effNClustsFracClusterKey{this, "EffNClustsClusterName", "EffNClustsCaloBased", "SG key for the EffNClusts attribute"};
 
 };
 

@@ -5,6 +5,7 @@
 #include "JetMomentTools/JetCaloEnergies.h"
 
 #include "xAODJet/JetAccessorMap.h"
+#include "AsgDataHandles/WriteDecorHandle.h"
 
 #include "JetUtils/JetCaloQualityUtils.h"
 #include "PFlowUtils/FEHelpers.h"
@@ -22,6 +23,19 @@ JetCaloEnergies::JetCaloEnergies(const std::string& name)
 
 //**********************************************************************
 
+bool JetCaloEnergies::isInVector(const std::string key, const std::vector<std::string> calculations) {
+  // Split key to get back the actual handle key 
+  std::vector<std::string> split;
+  std::string sub_string;
+  std::istringstream tokenStream(key);
+  while (std::getline(tokenStream, sub_string, '.'))
+  {
+    split.push_back(sub_string);
+  }
+  // Return true if handle key in list of calculations
+  return std::find(calculations.begin(), calculations.end(), split[1]) != calculations.end();
+}
+
 StatusCode JetCaloEnergies::initialize() {
   ATH_MSG_INFO("Initializing JetCaloEnergies " << name());
   
@@ -29,29 +43,43 @@ StatusCode JetCaloEnergies::initialize() {
     ATH_MSG_ERROR("JetCaloEnergies needs to have its input jet container configured!");
     return StatusCode::FAILURE;
   }
-  
+
   m_ePerSamplingKey = m_jetContainerName + "." + m_ePerSamplingKey.key();
   m_emFracKey = m_jetContainerName + "." + m_emFracKey.key();
   m_hecFracKey = m_jetContainerName + "." + m_hecFracKey.key();
   m_psFracKey = m_jetContainerName + "." + m_psFracKey.key();
-
+  m_em3FracKey = m_jetContainerName + "." + m_em3FracKey.key();
+  m_tile0FracKey = m_jetContainerName + "." + m_tile0FracKey.key();
+  m_effNClustsFracKey = m_jetContainerName + "." + m_effNClustsFracKey.key();
+  
   if(m_calcClusterBasedVars){
     m_ePerSamplingClusterKey = m_jetContainerName + "." + m_ePerSamplingClusterKey.key();
     m_emFracClusterKey = m_jetContainerName + "." + m_emFracClusterKey.key();
     m_hecFracClusterKey = m_jetContainerName + "." + m_hecFracClusterKey.key();
     m_psFracClusterKey = m_jetContainerName + "." + m_psFracClusterKey.key();
+    m_em3FracClusterKey = m_jetContainerName + "." + m_em3FracClusterKey.key();
+    m_tile0FracClusterKey = m_jetContainerName + "." + m_tile0FracClusterKey.key();
+    m_effNClustsFracClusterKey = m_jetContainerName + "." + m_effNClustsFracClusterKey.key();
   }
 
+  // Init calo based variables if necessary
+  ATH_CHECK(m_ePerSamplingClusterKey.initialize( m_calcClusterBasedVars ));
+  ATH_CHECK(m_emFracClusterKey.initialize( m_calcClusterBasedVars && isInVector(m_emFracKey.key(), m_calculationNames) ));
+  ATH_CHECK(m_hecFracClusterKey.initialize( m_calcClusterBasedVars && isInVector(m_hecFracKey.key(), m_calculationNames) ));
+  ATH_CHECK(m_psFracClusterKey.initialize( m_calcClusterBasedVars && isInVector(m_psFracKey.key(), m_calculationNames) ));
+  ATH_CHECK(m_em3FracClusterKey.initialize( m_calcClusterBasedVars && isInVector(m_em3FracKey.key(), m_calculationNames) ));
+  ATH_CHECK(m_tile0FracClusterKey.initialize( m_calcClusterBasedVars && isInVector(m_tile0FracKey.key(), m_calculationNames) ));
+  ATH_CHECK(m_effNClustsFracClusterKey.initialize( m_calcClusterBasedVars && isInVector(m_effNClustsFracKey.key(), m_calculationNames) ));
+  
+  // Init standard variables if necessary
   ATH_CHECK(m_ePerSamplingKey.initialize());
-  ATH_CHECK(m_emFracKey.initialize());
-  ATH_CHECK(m_hecFracKey.initialize());
-  ATH_CHECK(m_psFracKey.initialize());
-
-  ATH_CHECK(m_ePerSamplingClusterKey.initialize(m_calcClusterBasedVars));
-  ATH_CHECK(m_emFracClusterKey.initialize(m_calcClusterBasedVars));
-  ATH_CHECK(m_hecFracClusterKey.initialize(m_calcClusterBasedVars));
-  ATH_CHECK(m_psFracClusterKey.initialize(m_calcClusterBasedVars));
-
+  ATH_CHECK(m_emFracKey.initialize( isInVector(m_emFracKey.key(), m_calculationNames) ));
+  ATH_CHECK(m_hecFracKey.initialize( isInVector(m_hecFracKey.key(), m_calculationNames) ));
+  ATH_CHECK(m_psFracKey.initialize( isInVector(m_psFracKey.key(), m_calculationNames) ));
+  ATH_CHECK(m_em3FracKey.initialize( isInVector(m_em3FracKey.key(), m_calculationNames) ));
+  ATH_CHECK(m_tile0FracKey.initialize( isInVector(m_tile0FracKey.key(), m_calculationNames) ));
+  ATH_CHECK(m_effNClustsFracKey.initialize( isInVector(m_effNClustsFracKey.key(), m_calculationNames) ));
+  
   return StatusCode::SUCCESS;
 }
 
@@ -88,14 +116,14 @@ StatusCode JetCaloEnergies::decorate(const xAOD::JetContainer& jets) const {
       // In addition, calculate variables using the underlying cluster rather than
       // the energy-subtracted FlowElements (improved implementation)
       if(m_calcClusterBasedVars){
-	ATH_MSG_VERBOSE("  Constituents are FlowElements - Additional calculation");
+        ATH_MSG_VERBOSE("  Constituents are FlowElements - Additional calculation");
 
-	SG::WriteDecorHandle<xAOD::JetContainer, std::vector<float> > ePerSamplingClusterHandle(m_ePerSamplingClusterKey);
-	ePerSamplingClusterHandle(*jet) = std::vector<float>(CaloSampling::Unknown, 0.);
-	std::vector<float>& ePerSamplingCluster = ePerSamplingClusterHandle(*jet);
-	for ( float& e : ePerSamplingCluster ) e = 0.0; // re-initialize
+        SG::WriteDecorHandle<xAOD::JetContainer, std::vector<float> > ePerSamplingClusterHandle(m_ePerSamplingClusterKey);
+        ePerSamplingClusterHandle(*jet) = std::vector<float>(CaloSampling::Unknown, 0.);
+        std::vector<float>& ePerSamplingCluster = ePerSamplingClusterHandle(*jet);
+        for ( float& e : ePerSamplingCluster ) e = 0.0; // re-initialize
 
-	fillEperSamplingFEClusterBased(*jet, ePerSamplingCluster);
+        fillEperSamplingFEClusterBased(*jet, ePerSamplingCluster);
       }
 
     }else {
@@ -221,9 +249,12 @@ void JetCaloEnergies::fillEperSamplingPFO(const xAOD::Jet & jet, std::vector<flo
 // In R21, the link from PFOs to clusters was broken and thus energy after charged subtraction was used
 void JetCaloEnergies::fillEperSamplingFE(const xAOD::Jet& jet, std::vector<float> & ePerSampling ) const {
   float emTot = 0.;
+  float em3Tot = 0.;
   float hecTot = 0.;
   float psTot = 0.;
+  float tile0Tot = 0.;
   float eTot = 0.;
+  float e2Tot = 0.;
   size_t numConstit = jet.numConstituents();    
 
   std::vector<int> indicesNeutralFE;
@@ -245,26 +276,32 @@ void JetCaloEnergies::fillEperSamplingFE(const xAOD::Jet& jet, std::vector<float
 
       //Charged FlowElements:
       if(constit->isCharged()){
-	eTot += constit->chargedObject(0)->e();
+	      eTot += constit->chargedObject(0)->e();
+        e2Tot += constit->chargedObject(0)->e()*constit->chargedObject(0)->e();
       }
       //Neutral FlowElements
       else{
-	eTot += constit->e();
-	//Get the energy-per-layer information from the FE, not the underlying cluster (i.e. after subtraction)
-	std::vector<float> constitEPerSampling = FEHelpers::getEnergiesPerSampling(*constit);
-	for ( size_t s = CaloSampling::PreSamplerB; s < CaloSampling::Unknown; s++ ) {
-	  ePerSampling[s] += constitEPerSampling[s];
-	}
-	emTot += (constitEPerSampling[CaloSampling::PreSamplerB] + constitEPerSampling[CaloSampling::EMB1]
-		   + constitEPerSampling[CaloSampling::EMB2]        + constitEPerSampling[CaloSampling::EMB3]
-		   + constitEPerSampling[CaloSampling::PreSamplerE] + constitEPerSampling[CaloSampling::EME1]
-		   + constitEPerSampling[CaloSampling::EME2]        + constitEPerSampling[CaloSampling::EME3]
-		   + constitEPerSampling[CaloSampling::FCAL0]);
+        eTot += constit->e();
+        e2Tot += constit->e()*constit->e();
+        //Get the energy-per-layer information from the FE, not the underlying cluster (i.e. after subtraction)
+        std::vector<float> constitEPerSampling = FEHelpers::getEnergiesPerSampling(*constit);
+        for ( size_t s = CaloSampling::PreSamplerB; s < CaloSampling::Unknown; s++ ) {
+          ePerSampling[s] += constitEPerSampling[s];
+        }
+        emTot += (constitEPerSampling[CaloSampling::PreSamplerB] + constitEPerSampling[CaloSampling::EMB1]
+            + constitEPerSampling[CaloSampling::EMB2]        + constitEPerSampling[CaloSampling::EMB3]
+            + constitEPerSampling[CaloSampling::PreSamplerE] + constitEPerSampling[CaloSampling::EME1]
+            + constitEPerSampling[CaloSampling::EME2]        + constitEPerSampling[CaloSampling::EME3]
+            + constitEPerSampling[CaloSampling::FCAL0]);
 
-	hecTot += (constitEPerSampling[CaloSampling::HEC0] + constitEPerSampling[CaloSampling::HEC1]
-		   + constitEPerSampling[CaloSampling::HEC2] + constitEPerSampling[CaloSampling::HEC3]);
+        hecTot += (constitEPerSampling[CaloSampling::HEC0] + constitEPerSampling[CaloSampling::HEC1]
+            + constitEPerSampling[CaloSampling::HEC2] + constitEPerSampling[CaloSampling::HEC3]);
 
-	psTot += (constitEPerSampling[CaloSampling::PreSamplerB] + constitEPerSampling[CaloSampling::PreSamplerE]);
+        psTot += (constitEPerSampling[CaloSampling::PreSamplerB] + constitEPerSampling[CaloSampling::PreSamplerE]);
+
+        em3Tot += (constitEPerSampling[CaloSampling::EMB3] + constitEPerSampling[CaloSampling::EME3]);
+
+        tile0Tot += (constitEPerSampling[CaloSampling::TileBar0] + constitEPerSampling[CaloSampling::TileExt0]);
       }
     }
     else{
@@ -272,96 +309,124 @@ void JetCaloEnergies::fillEperSamplingFE(const xAOD::Jet& jet, std::vector<float
 
       // UFO is simply a charged FlowElement
       if(constit->signalType() == xAOD::FlowElement::Charged){
-	eTot += constit->chargedObject(0)->e();
+	      eTot += constit->chargedObject(0)->e();
+        e2Tot += constit->chargedObject(0)->e()*constit->chargedObject(0)->e();
       }
       //UFO is simply a neutral Flowelement
       else if(constit->signalType() == xAOD::FlowElement::Neutral){
-	// For neutral UFOs, there is only one "other object" stored which is the neutral FE
-	// Protection in case there is something wrong with this FE
-	if(constit->otherObjects().size() != 1 || !constit->otherObject(0)){
-	  continue;
-	}
+        // For neutral UFOs, there is only one "other object" stored which is the neutral FE
+        // Protection in case there is something wrong with this FE
+        if(constit->otherObjects().size() != 1 || !constit->otherObject(0)){
+          continue;
+        }
 
-	// Cast other object as FlowElement
-	const xAOD::FlowElement* nFE = static_cast<const xAOD::FlowElement*>(constit->otherObject(0));
+        // Cast other object as FlowElement
+        const xAOD::FlowElement* nFE = static_cast<const xAOD::FlowElement*>(constit->otherObject(0));
 
-	eTot += nFE->e();
+        eTot += nFE->e();
+        e2Tot += nFE->e()*nFE->e();
 
-	std::vector<float> neutralEPerSampling = FEHelpers::getEnergiesPerSampling(*nFE);
+        std::vector<float> neutralEPerSampling = FEHelpers::getEnergiesPerSampling(*nFE);
         for ( size_t s = CaloSampling::PreSamplerB; s < CaloSampling::Unknown; s++ ) {
           ePerSampling[s] += neutralEPerSampling[s];
-	}
+        }
         emTot += (neutralEPerSampling[CaloSampling::PreSamplerB] + neutralEPerSampling[CaloSampling::EMB1]
-                   + neutralEPerSampling[CaloSampling::EMB2]        + neutralEPerSampling[CaloSampling::EMB3]
-                   + neutralEPerSampling[CaloSampling::PreSamplerE] + neutralEPerSampling[CaloSampling::EME1]
-                   + neutralEPerSampling[CaloSampling::EME2]        + neutralEPerSampling[CaloSampling::EME3]
-                   + neutralEPerSampling[CaloSampling::FCAL0]);
+                  + neutralEPerSampling[CaloSampling::EMB2]        + neutralEPerSampling[CaloSampling::EMB3]
+                  + neutralEPerSampling[CaloSampling::PreSamplerE] + neutralEPerSampling[CaloSampling::EME1]
+                  + neutralEPerSampling[CaloSampling::EME2]        + neutralEPerSampling[CaloSampling::EME3]
+                  + neutralEPerSampling[CaloSampling::FCAL0]);
 
         hecTot += (neutralEPerSampling[CaloSampling::HEC0] + neutralEPerSampling[CaloSampling::HEC1]
-                   + neutralEPerSampling[CaloSampling::HEC2] + neutralEPerSampling[CaloSampling::HEC3]);
+                  + neutralEPerSampling[CaloSampling::HEC2] + neutralEPerSampling[CaloSampling::HEC3]);
 
-	psTot += (neutralEPerSampling[CaloSampling::PreSamplerB] + neutralEPerSampling[CaloSampling::PreSamplerE]);
+        psTot += (neutralEPerSampling[CaloSampling::PreSamplerB] + neutralEPerSampling[CaloSampling::PreSamplerE]);
+
+        em3Tot += (neutralEPerSampling[CaloSampling::EMB3] + neutralEPerSampling[CaloSampling::EME3]);
+
+        tile0Tot += (neutralEPerSampling[CaloSampling::TileBar0] + neutralEPerSampling[CaloSampling::TileExt0]);
       }
       else if(constit->signalType() == xAOD::FlowElement::Combined){
-	// For the combined UFOs, otherObjects are neutral or charged FEs
-	// matched to this tracks (via track-to-cluster extrapolation)
-	for (size_t n = 0; n < constit->otherObjects().size(); ++n) {
-	  if(! constit->otherObject(n)) continue;
-	  const xAOD::FlowElement* FE_from_combined = static_cast<const xAOD::FlowElement*>(constit->otherObject(n));
+        // For the combined UFOs, otherObjects are neutral or charged FEs
+        // matched to this tracks (via track-to-cluster extrapolation)
+        for (size_t n = 0; n < constit->otherObjects().size(); ++n) {
+          if(! constit->otherObject(n)) continue;
+          const xAOD::FlowElement* FE_from_combined = static_cast<const xAOD::FlowElement*>(constit->otherObject(n));
 
-	  //Charged FE (add energy to total energy only)
-	  if(FE_from_combined->isCharged()){
-	    if(std::find(indicesChargedFE.begin(), indicesChargedFE.end(), FE_from_combined->index()) == indicesChargedFE.end()){
-	      eTot += FE_from_combined->e();
-	      indicesChargedFE.push_back(FE_from_combined->index());
-	    }
-	    continue;
-	  }
-	  //Neutral FE:
-	  //One neutral FE can be matched to various tracks and therefore be used for several UFOs
-	  //We do not want to double count the energy and only add it once
-	  if(std::find(indicesNeutralFE.begin(), indicesNeutralFE.end(), FE_from_combined->index()) == indicesNeutralFE.end()){
-	    eTot += FE_from_combined->e();
-	    std::vector<float> neutralFromCombEPerSampling = FEHelpers::getEnergiesPerSampling(*FE_from_combined);
-	    for ( size_t s = CaloSampling::PreSamplerB; s < CaloSampling::Unknown; s++ ) {
-	      ePerSampling[s] += neutralFromCombEPerSampling[s];
-	    }
-	    emTot += (neutralFromCombEPerSampling[CaloSampling::PreSamplerB] + neutralFromCombEPerSampling[CaloSampling::EMB1]
-		      + neutralFromCombEPerSampling[CaloSampling::EMB2]        + neutralFromCombEPerSampling[CaloSampling::EMB3]
-		      + neutralFromCombEPerSampling[CaloSampling::PreSamplerE] + neutralFromCombEPerSampling[CaloSampling::EME1]
-		      + neutralFromCombEPerSampling[CaloSampling::EME2]        + neutralFromCombEPerSampling[CaloSampling::EME3]
-		      + neutralFromCombEPerSampling[CaloSampling::FCAL0]);
+          //Charged FE (add energy to total energy only)
+          if(FE_from_combined->isCharged()){
+            if(std::find(indicesChargedFE.begin(), indicesChargedFE.end(), FE_from_combined->index()) == indicesChargedFE.end()){
+              eTot += FE_from_combined->e();
+              e2Tot += FE_from_combined->e()*FE_from_combined->e();
+              indicesChargedFE.push_back(FE_from_combined->index());
+            }
+            continue;
+          }
+          //Neutral FE:
+          //One neutral FE can be matched to various tracks and therefore be used for several UFOs
+          //We do not want to double count the energy and only add it once
+          if(std::find(indicesNeutralFE.begin(), indicesNeutralFE.end(), FE_from_combined->index()) == indicesNeutralFE.end()){
+            eTot += FE_from_combined->e();
+            e2Tot += FE_from_combined->e()*FE_from_combined->e();
+            std::vector<float> neutralFromCombEPerSampling = FEHelpers::getEnergiesPerSampling(*FE_from_combined);
+            for ( size_t s = CaloSampling::PreSamplerB; s < CaloSampling::Unknown; s++ ) {
+              ePerSampling[s] += neutralFromCombEPerSampling[s];
+            }
+            emTot += (neutralFromCombEPerSampling[CaloSampling::PreSamplerB] + neutralFromCombEPerSampling[CaloSampling::EMB1]
+                + neutralFromCombEPerSampling[CaloSampling::EMB2]        + neutralFromCombEPerSampling[CaloSampling::EMB3]
+                + neutralFromCombEPerSampling[CaloSampling::PreSamplerE] + neutralFromCombEPerSampling[CaloSampling::EME1]
+                + neutralFromCombEPerSampling[CaloSampling::EME2]        + neutralFromCombEPerSampling[CaloSampling::EME3]
+                + neutralFromCombEPerSampling[CaloSampling::FCAL0]);
 
-	    hecTot += (neutralFromCombEPerSampling[CaloSampling::HEC0] + neutralFromCombEPerSampling[CaloSampling::HEC1]
-		       + neutralFromCombEPerSampling[CaloSampling::HEC2] + neutralFromCombEPerSampling[CaloSampling::HEC3]);
+            hecTot += (neutralFromCombEPerSampling[CaloSampling::HEC0] + neutralFromCombEPerSampling[CaloSampling::HEC1]
+                + neutralFromCombEPerSampling[CaloSampling::HEC2] + neutralFromCombEPerSampling[CaloSampling::HEC3]);
 
-	    psTot += (neutralFromCombEPerSampling[CaloSampling::PreSamplerB] + neutralFromCombEPerSampling[CaloSampling::PreSamplerE]);
+            psTot += (neutralFromCombEPerSampling[CaloSampling::PreSamplerB] + neutralFromCombEPerSampling[CaloSampling::PreSamplerE]);
 
-	    indicesNeutralFE.push_back(FE_from_combined->index());
-	  }
-	}
+            em3Tot += (neutralFromCombEPerSampling[CaloSampling::EMB3] + neutralFromCombEPerSampling[CaloSampling::EME3]);
+
+            tile0Tot += (neutralFromCombEPerSampling[CaloSampling::TileBar0] + neutralFromCombEPerSampling[CaloSampling::TileExt0]);
+
+            indicesNeutralFE.push_back(FE_from_combined->index());
+          }
+        }
       }
     }
   }
 
-  SG::WriteDecorHandle<xAOD::JetContainer, float> emFracHandle(m_emFracKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, float> hecFracHandle(m_hecFracKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, float> psFracHandle(m_psFracKey);
-  
-  emFracHandle(jet)  = eTot != 0. ? emTot/eTot  : 0.;
-  hecFracHandle(jet) = eTot != 0. ? hecTot/eTot : 0.;
-  psFracHandle(jet)  = eTot != 0. ? psTot/eTot  : 0.;
+  for( const std::string & calcN : m_calculationNames){
+    if ( calcN == "EMFrac" ) {
+      SG::WriteDecorHandle<xAOD::JetContainer, float> emFracHandle(m_emFracKey);
+      emFracHandle(jet)  = eTot != 0. ? emTot/eTot  : 0.;
+    } else if ( calcN == "HECFrac" ) {
+      SG::WriteDecorHandle<xAOD::JetContainer, float> hecFracHandle(m_hecFracKey);
+      hecFracHandle(jet) = eTot != 0. ? hecTot/eTot : 0.;
+    } else if ( calcN == "PSFrac" ) {
+      SG::WriteDecorHandle<xAOD::JetContainer, float> psFracHandle(m_psFracKey);
+      psFracHandle(jet)  = eTot != 0. ? psTot/eTot  : 0.;
+    } else if ( calcN == "EM3Frac" ) {
+      SG::WriteDecorHandle<xAOD::JetContainer, float> em3FracHandle(m_em3FracKey);
+      em3FracHandle(jet)  = eTot != 0. ? em3Tot/eTot  : 0.;
+    } else if ( calcN == "Tile0Frac" ) {
+      SG::WriteDecorHandle<xAOD::JetContainer, float> tile0FracHandle(m_tile0FracKey);
+      tile0FracHandle(jet)  = eTot != 0. ? tile0Tot/eTot  : 0.;
+    } else if ( calcN == "EffNClusts" ) {
+      SG::WriteDecorHandle<xAOD::JetContainer, float> effNClustsFracHandle(m_effNClustsFracKey);
+      effNClustsFracHandle(jet)  = eTot != 0. ? std::sqrt(eTot*eTot/e2Tot)  : 0.;
+    }
+  }
 }
 
 
 // New way of calculating energy per layer for FE-based jets
 // The underlying cluster is used to calculate the variables rather than the energy-subtracted FE
-
 void JetCaloEnergies::fillEperSamplingFEClusterBased(const xAOD::Jet& jet, std::vector<float> & ePerSampling ) const {
   float emTot = 0.;
+  float em3Tot = 0.;
   float hecTot = 0.;
   float psTot = 0.;
+  float tile0Tot = 0.;
   float eTot = 0.;
+  float e2Tot = 0.;
   size_t numConstit = jet.numConstituents();
   std::unique_ptr<std::vector<const xAOD::CaloCluster*> > constitV_tot = std::unique_ptr<std::vector<const xAOD::CaloCluster*>>(new std::vector<const xAOD::CaloCluster*>);
 
@@ -398,6 +463,7 @@ void JetCaloEnergies::fillEperSamplingFEClusterBased(const xAOD::Jet& jet, std::
           ePerSampling[s] += cluster->eSample( (xAOD::CaloCluster::CaloSample) s );
         }
         eTot += cluster->rawE();
+        e2Tot += cluster->rawE()*cluster->rawE();
 
         emTot += (cluster->eSample( CaloSampling::PreSamplerB) + cluster->eSample( CaloSampling::EMB1)
 		  + cluster->eSample( CaloSampling::EMB2)        + cluster->eSample( CaloSampling::EMB3)
@@ -410,16 +476,35 @@ void JetCaloEnergies::fillEperSamplingFEClusterBased(const xAOD::Jet& jet, std::
 
         psTot += (cluster->eSample( CaloSampling::PreSamplerB) + cluster->eSample( CaloSampling::PreSamplerE));
 
+        em3Tot += (cluster->eSample( CaloSampling::EMB3) + cluster->eSample( CaloSampling::EME3));
+
+        tile0Tot += (cluster->eSample( CaloSampling::TileBar0) + cluster->eSample( CaloSampling::TileExt0));
+         
         constitV_tot->push_back(cluster);
       }
     }
   }
 
-  SG::WriteDecorHandle<xAOD::JetContainer, float> emFracClusterHandle(m_emFracClusterKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, float> hecFracClusterHandle(m_hecFracClusterKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, float> psFracClusterHandle(m_psFracClusterKey);
+  for( const std::string & calcN : m_calculationNames){
+    if ( calcN == "EMFrac" ) {
+      SG::WriteDecorHandle<xAOD::JetContainer, float> emFracClusterHandle(m_emFracClusterKey);
+      emFracClusterHandle(jet)  = eTot != 0. ? emTot/eTot  : 0.;
+    } else if ( calcN == "HECFrac" ) {
+      SG::WriteDecorHandle<xAOD::JetContainer, float> hecFracClusterHandle(m_hecFracClusterKey);
+      hecFracClusterHandle(jet) = eTot != 0. ? hecTot/eTot : 0.;
+    } else if ( calcN == "PSFrac" ) {
+      SG::WriteDecorHandle<xAOD::JetContainer, float> psFracClusterHandle(m_psFracClusterKey);
+      psFracClusterHandle(jet)  = eTot != 0. ? psTot/eTot  : 0.;
+    } else if ( calcN == "EM3Frac" ) {
+      SG::WriteDecorHandle<xAOD::JetContainer, float> em3FracClusterHandle(m_em3FracClusterKey);
+      em3FracClusterHandle(jet)  = eTot != 0. ? em3Tot/eTot  : 0.;
+    } else if ( calcN == "Tile0Frac" ) {
+      SG::WriteDecorHandle<xAOD::JetContainer, float> tile0FracClusterHandle(m_tile0FracClusterKey);
+      tile0FracClusterHandle(jet)  = eTot != 0. ? tile0Tot/eTot  : 0.;
+    } else if ( calcN == "EffNClusts" ) {
+      SG::WriteDecorHandle<xAOD::JetContainer, float> effNClustsFracClusterHandle(m_effNClustsFracClusterKey);
+      effNClustsFracClusterHandle(jet)  = eTot != 0. ? std::sqrt(eTot*eTot/e2Tot)  : 0.;
+    }
+  }
 
-  emFracClusterHandle(jet)  = eTot != 0. ? emTot/eTot  : 0.;
-  hecFracClusterHandle(jet) = eTot != 0. ? hecTot/eTot : 0.;
-  psFracClusterHandle(jet)  = eTot != 0. ? psTot/eTot  : 0.;
 }

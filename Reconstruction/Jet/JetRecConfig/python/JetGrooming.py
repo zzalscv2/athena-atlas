@@ -31,7 +31,7 @@ class GroomingDefinition(object):
                  ): 
 
         self._ungroomeddef = ungroomeddef.clone() # clone to avoid messing with external jetdef
-
+        self.inputdef = self._ungroomeddef.inputdef
         if lock: properties = ldict(properties) # ldict to freeze the properties
         self.properties = properties
 
