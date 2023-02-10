@@ -517,17 +517,16 @@ def muEFCBAlgSequence(flags):
     efcbViewsMaker.mergeUsingFeature = True
 
     #outside-in reco sequence
-    muEFCBRecoSequence, sequenceOutCB = muEFCBRecoSequence( flags, efcbViewsMaker.InViewRoIs, "RoI" )
+    muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')
+    muEFCBRecoSequence, sequenceOutCB = muEFCBRecoSequence(muonflagsCB, efcbViewsMaker.InViewRoIs, "RoI" )
 
     #Algorithm to filter events with no muons
     muonFilter = MuonFilterAlg("FilterZeroMuons")
     muonFilter.MuonContainerLocation = sequenceOutCB
 
     #inside-out reco sequence - runs only if filter is passed
-    #Clone and replace offline flags so we can set muon trigger specific values
-    muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
 
-    muonEFInsideOutRecoSequence, sequenceOutInsideOut = muEFInsideOutRecoSequence(muonflags, efcbViewsMaker.InViewRoIs, "RoI")
+    muonEFInsideOutRecoSequence, sequenceOutInsideOut = muEFInsideOutRecoSequence(muonflagsCB, efcbViewsMaker.InViewRoIs, "RoI")
     muonInsideOutSequence = seqAND("muonEFInsideOutSequence", [muonFilter,muonEFInsideOutRecoSequence])
 
     #combine outside-in and inside-out sequences
@@ -621,7 +620,8 @@ def muEFCBLRTAlgSequence(flags):
     efcbViewsMaker.mergeUsingFeature = True
 
     #outside-in reco sequence
-    muEFCBRecoSequence, sequenceOut = muEFCBRecoSequence( flags, efcbViewsMaker.InViewRoIs, "LRT" )
+    muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')
+    muEFCBRecoSequence, sequenceOut = muEFCBRecoSequence(muonflagsCB, efcbViewsMaker.InViewRoIs, "LRT" )
 
     #Final sequence running in view
     efcbViewsMaker.ViewNodeName = muEFCBRecoSequence.name()
@@ -742,16 +742,15 @@ def muEFCBFSAlgSequence(flags):
     from TrigMuonEF.TrigMuonEFConf import MuonFilterAlg, MergeEFMuonsAlg
     from .MuonRecoSequences import muEFCBRecoSequence, muEFInsideOutRecoSequence 
     #outside-in reco sequence
-    muEFCBFSRecoSequence, sequenceOutCB = muEFCBRecoSequence( flags, efcbfsInputMaker.InViewRoIs, "FS" )
+    muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')
+    muEFCBFSRecoSequence, sequenceOutCB = muEFCBRecoSequence(muonflagsCB, efcbfsInputMaker.InViewRoIs, "FS" )
     
     #Alg fitltering for no muon events
     muonFilter =  MuonFilterAlg("FilterZeroMuonsEFCBFS")
     muonFilter.MuonContainerLocation = sequenceOutCB
 
     #If filter passed
-    #Clone and replace offline flags so we can set muon trigger specific values
-    muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
-    muonEFInsideOutRecoSequence, sequenceOutInsideOut = muEFInsideOutRecoSequence(muonflags, efcbfsInputMaker.InViewRoIs, "FS" )
+    muonEFInsideOutRecoSequence, sequenceOutInsideOut = muEFInsideOutRecoSequence(muonflagsCB, efcbfsInputMaker.InViewRoIs, "FS" )
     muonInsideOutSequence =  seqAND("muonEFCBFSInsideOutSequence", [muonFilter,muonEFInsideOutRecoSequence])
 
     #combine O-I and I-O seqs
@@ -847,6 +846,7 @@ def efLateMuAlgSequence(flags):
     eflateViewsMaker.ViewFallThrough = True
 
     #Clone and replace offline flags so we can set muon trigger specific values
+    muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')
     muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
     #decode data in these RoIs
     viewAlgs_MuonPRD = algorithmCAToGlobalWrapper(muonDecodeCfg,muonflags,RoIs=eflateViewsMaker.InViewRoIs.path())
@@ -854,8 +854,8 @@ def efLateMuAlgSequence(flags):
     muFastIDRecoSequence = muonIDFastTrackingSequence( eflateViewsMaker.InViewRoIs,"Late" )
     #inside-out reco sequence
     #Clone and replace offline flags so we can set muon trigger specific values
-    muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
-    muonEFInsideOutRecoSequence, sequenceOut = muEFInsideOutRecoSequence(muonflags, eflateViewsMaker.InViewRoIs, "LateMu")
+    #muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
+    muonEFInsideOutRecoSequence, sequenceOut = muEFInsideOutRecoSequence(muonflagsCB, eflateViewsMaker.InViewRoIs, "LateMu")
 
     lateMuRecoSequence = parOR("lateMuonRecoSequence", [viewAlgs_MuonPRD, muFastIDRecoSequence, muonEFInsideOutRecoSequence])
 
