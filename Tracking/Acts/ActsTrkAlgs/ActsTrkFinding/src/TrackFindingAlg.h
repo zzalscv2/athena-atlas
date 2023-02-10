@@ -47,7 +47,6 @@ namespace ActsTrk
   private:
     // Tool Handles
     ToolHandle<ActsTrk::ITrackFindingTool> m_trackFindingTool{this, "TrackFindingTool", "", "Track finding tool"};
-    ToolHandle<IActsATLASConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", "ActsATLASConverterTool"};
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};
 
     // Handle Keys

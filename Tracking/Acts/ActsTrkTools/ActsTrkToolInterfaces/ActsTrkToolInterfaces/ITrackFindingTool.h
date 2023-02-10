@@ -9,16 +9,22 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/EventContext.h"
 #include "TrkFitterUtils/FitterTypes.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "TrkTrack/TrackCollection.h"
+#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
+#include "xAODInDetMeasurement/PixelClusterContainer.h"
+#include "xAODInDetMeasurement/StripClusterContainer.h"
 
 // ACTS EDM
 #include "ActsTrkEvent/TrackParameters.h"
 
 // OTHER
 #include <vector>
+#include <variant>
+
 namespace ActsTrk
 {
+  using UncalibratedMeasurementContainerPtr = std::variant<const xAOD::PixelClusterContainer *, const xAOD::StripClusterContainer *>;
+
   class ITrackFindingTool
       : virtual public IAlgTool
   {
@@ -27,7 +33,7 @@ namespace ActsTrk
 
     virtual StatusCode
     findTracks(const EventContext &ctx,
-               const std::vector<ATLASUncalibSourceLink> &uncalibSourceLinks,
+               const std::vector<std::pair<UncalibratedMeasurementContainerPtr, const InDetDD::SiDetectorElementCollection *>> &measurements,
                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
                ::TrackCollection &tracksContainer) const = 0;
   };

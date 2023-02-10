@@ -25,7 +25,6 @@ namespace ActsTrk
 
     // Retrieve seed tool
     ATH_CHECK(m_trackFindingTool.retrieve());
-    ATH_CHECK(m_ATLASConverterTool.retrieve());
 
     // Read and Write handles
     ATH_CHECK(m_pixelClusterContainerKey.initialize());
@@ -109,28 +108,9 @@ namespace ActsTrk
     // Perform the track finding for all initial parameters
     ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters->size() << " seeds.");
 
-    std::vector<ATLASUncalibSourceLink> uncalibSourceLinks;
-    uncalibSourceLinks.reserve(pixelClusterContainer->size() + stripClusterContainer->size());
-
-    using element_type = std::tuple<const xAOD::UncalibratedMeasurement *, Acts::BoundVector, Acts::BoundMatrix, std::size_t>;
-    std::vector<element_type> elementsCollection;
-    elementsCollection.reserve(pixelClusterContainer->size() + stripClusterContainer->size());
-
-    for (auto meas : *pixelClusterContainer)
-    {
-      uncalibSourceLinks.push_back(m_ATLASConverterTool->UncalibratedMeasurementToSourceLink(*pixelDetEleColl,
-                                                                                             meas,
-                                                                                             elementsCollection));
-    }
-    for (auto meas : *stripClusterContainer)
-    {
-      uncalibSourceLinks.push_back(m_ATLASConverterTool->UncalibratedMeasurementToSourceLink(*stripDetEleColl,
-                                                                                             meas,
-                                                                                             elementsCollection));
-    }
-
     ATH_CHECK(m_trackFindingTool->findTracks(ctx,
-                                             uncalibSourceLinks,
+                                             {{pixelClusterContainer, pixelDetEleColl},
+                                              {stripClusterContainer, stripDetEleColl}},
                                              *estimatedTrackParameters,
                                              *trackPtrs.get()));
     ATH_MSG_DEBUG("    \\__ Created " << trackPtrs->size() << " tracks");

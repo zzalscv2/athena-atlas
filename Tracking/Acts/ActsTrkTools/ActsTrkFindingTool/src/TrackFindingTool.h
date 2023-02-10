@@ -50,7 +50,7 @@ namespace ActsTrk
     // Interface
     virtual StatusCode
     findTracks(const EventContext &ctx,
-               const std::vector<ATLASUncalibSourceLink> &uncalibSourceLinks,
+               const std::vector<std::pair<UncalibratedMeasurementContainerPtr, const InDetDD::SiDetectorElementCollection *>> &measurements,
                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
                ::TrackCollection &tracksContainer) const override;
 

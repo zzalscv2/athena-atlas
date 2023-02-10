@@ -39,6 +39,7 @@
 #include "Acts/Surfaces/TrapezoidBounds.hpp"
 
 // PACKAGE
+#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometry/ActsATLASConverterTool.h"
 #include "ActsGeometry/ActsGeometryContext.h"
@@ -69,7 +70,7 @@ namespace
   gainMatrixUpdate(const Acts::GeometryContext &gctx,
                    typename Acts::MultiTrajectory<ActsTrk::TrackFindingTool::traj_Type>::TrackStateProxy trackState,
                    Acts::NavigationDirection direction,
-                   const Acts::Logger& logger)
+                   const Acts::Logger &logger)
   {
     Acts::GainMatrixUpdater updater;
     return updater.template operator()<ActsTrk::TrackFindingTool::traj_Type>(gctx, trackState, direction, logger);
@@ -79,7 +80,7 @@ namespace
   gainMatrixSmoother(const Acts::GeometryContext &gctx,
                      Acts::MultiTrajectory<ActsTrk::TrackFindingTool::traj_Type> &trajectory,
                      size_t entryIndex,
-                     const Acts::Logger& logger)
+                     const Acts::Logger &logger)
   {
     Acts::GainMatrixSmoother smoother;
     return smoother.template operator()<ActsTrk::TrackFindingTool::traj_Type>(gctx, trajectory, entryIndex, logger);
@@ -297,50 +298,62 @@ namespace
     std::cout << std::left
               << std::setw(5) << "Index" << ' '
               << std::setw(4) << "Type" << ' '
-              << std::setw(21) << "Surface" << ' '
-              << std::setw(21) << "Stats/GeometryId" << ' '
-              << std::right
-              << std::setw(9) << "loc0" << ' '
-              << std::setw(9) << (isMeasurement ? "loc1-" : "loc1") << ' '
-              << std::setw(6) << "Pos R" << ' '
-              << std::setw(6) << "phid" << ' '
-              << std::setw(7) << "eta" << ' ';
+              << std::setw(21) << "SurfaceBounds" << ' ';
     if (isMeasurement)
     {
-      std::cout << std::setw(9) << "loc1+" << ' '
+      std::cout << std::setw(21) << "GeometryId" << ' '
+                << std::right
+                << std::setw(9) << "loc0(-)" << ' '
+                << std::setw(9) << "loc1(-)" << ' '
+                << std::setw(6) << "Pos R" << ' '
+                << std::setw(6) << "phid" << ' '
+                << std::setw(7) << "eta" << ' '
+                << std::setw(9) << "loc0+" << ' '
+                << std::setw(9) << "loc1+" << ' '
                 << std::setw(6) << "Pos R" << ' '
                 << std::setw(6) << "phid" << ' '
                 << std::setw(7) << "eta" << '\n';
-      return;
     }
-    std::cout << std::setw(9) << "q*pT" << ' '
-              << std::setw(6) << "phid" << ' '
-              << std::setw(7) << "eta" << ' '
-              << std::setw(6) << "TrkLen" << ' '
-              << std::setw(5) << "chi2" << ' '
-              << std::setw(6) << "Flags" << '\n';
+    else
+    {
+      std::cout << std::setw(21) << "GeometryId / stats" << ' '
+                << std::right
+                << std::setw(9) << "loc0" << ' '
+                << std::setw(9) << "loc1" << ' '
+                << std::setw(6) << "Pos R" << ' '
+                << std::setw(6) << "phid" << ' '
+                << std::setw(7) << "eta" << ' '
+                << std::setw(9) << "q*pT" << ' '
+                << std::setw(6) << "phid" << ' '
+                << std::setw(7) << "eta" << ' '
+                << std::setw(6) << "TrkLen" << ' '
+                << std::setw(7) << "chi2" << ' '
+                << std::setw(6) << "Flags" << '\n';
+    }
   }
 
-  // Return local position of the ends of the 1D strips in its 2nd coordinate.
-  static std::array<Acts::ActsScalar, 2>
-  localPos1(const Acts::SurfaceBounds &bounds)
+  // Return local position of the ends of the 1D strips.
+  static std::array<Acts::Vector2, 2>
+  stripEnds(const Acts::SurfaceBounds &bounds, const Acts::Vector2 &loc)
   {
     auto b = bounds.values();
     switch (bounds.type())
     {
     case Acts::SurfaceBounds::eRectangle:
     {
-      return {b[Acts::RectangleBounds::eMinY], b[Acts::RectangleBounds::eMaxY]};
+      return {{{loc[0], b[Acts::RectangleBounds::eMinY]}, {loc[0], b[Acts::RectangleBounds::eMaxY]}}};
     }
     case Acts::SurfaceBounds::eTrapezoid:
     {
       auto halfLengthY = b[Acts::TrapezoidBounds::eHalfLengthY];
-      return {-halfLengthY, halfLengthY};
+      return {{{loc[0], -halfLengthY}, {loc[0], halfLengthY}}};
     }
     case Acts::SurfaceBounds::eAnnulus:
     {
-      auto averagePhi = b[Acts::AnnulusBounds::eAveragePhi];
-      return {averagePhi - b[Acts::AnnulusBounds::eMinPhiRel], averagePhi + b[Acts::AnnulusBounds::eMaxPhiRel]};
+      // Annulus needs measurement coordinate as loc1, but is input as 1D in loc[0].
+      // This method doesn't rotate into the strip coordinate system, so won't be exact,
+      // but surely good enough for printout.
+      return {{{b[Acts::AnnulusBounds::eMinR], loc[0]}, {b[Acts::AnnulusBounds::eMaxR], loc[0]}}};
     }
     case Acts::SurfaceBounds::eDiscTrapezoid:
     {
@@ -348,31 +361,28 @@ namespace
       auto alphaMinR = std::atan2(b[Acts::DiscTrapezoidBounds::eMinR], b[Acts::DiscTrapezoidBounds::eHalfLengthXminR]);
       auto alphaMaxR = std::atan2(b[Acts::DiscTrapezoidBounds::eMaxR], b[Acts::DiscTrapezoidBounds::eHalfLengthXmaxR]);
       auto alpha = std::max(alphaMinR, alphaMaxR);
-      return {averagePhi - alpha, averagePhi + alpha};
+      return {{{loc[0], averagePhi - alpha}, {loc[0], averagePhi + alpha}}};
     }
     case Acts::SurfaceBounds::eDisc:
     {
       auto averagePhi = b[Acts::RadialBounds::eAveragePhi];
       auto halfPhiSector = b[Acts::RadialBounds::eHalfPhiSector];
-      return {averagePhi - halfPhiSector, averagePhi + halfPhiSector};
+      return {{{loc[0], averagePhi - halfPhiSector}, {loc[0], averagePhi + halfPhiSector}}};
     }
     default:
     {
-      return {0.0, 0.0};
+      return {{loc, loc}};
     }
     }
   }
 
   static void
-  printMeasurement(const Acts::GeometryContext &tgContext, const Acts::Surface &surface, const Acts::Vector2 &loc, bool noLoc0 = false)
+  printMeasurement(const Acts::GeometryContext &tgContext, const Acts::Surface &surface, const Acts::Vector2 &loc)
   {
     auto p = surface.localToGlobal(tgContext, loc, Acts::Vector3{0.0, 0.0, 0.0});
-    std::cout << ' ';
-    if (!noLoc0)
-    {
-      std::cout << std::setw(9) << std::setprecision(3) << loc[0] << ' ';
-    }
-    std::cout << std::setw(9) << std::setprecision(3) << loc[1] << ' '
+    std::cout << ' '
+              << std::setw(9) << std::setprecision(3) << loc[0] << ' '
+              << std::setw(9) << std::setprecision(3) << loc[1] << ' '
               << std::setw(6) << std::setprecision(1) << p.head<2>().norm() << ' '
               << std::setw(6) << std::setprecision(1) << std::atan2(p[1], p[0]) / Acts::UnitConstants::degree << ' '
               << std::setw(7) << std::setprecision(3) << std::atanh(p[2] / p.norm());
@@ -403,21 +413,18 @@ namespace
     }
     else
     {
-      auto ends = localPos1(surface->bounds());
-      loc[1] = ends[0];
-      printMeasurement(tgContext, *surface, loc);
+      auto ends = stripEnds(surface->bounds(), loc);
+      printMeasurement(tgContext, *surface, ends[0]);
       if (ends[0] == ends[1])
       {
         std::cout << " *** zero strip length ***";
       }
       else
       {
-        loc[1] = ends[1];
-        printMeasurement(tgContext, *surface, loc, true);
+        printMeasurement(tgContext, *surface, ends[1]);
       }
     }
-    std::cout << '\n'
-              << std::defaultfloat;
+    std::cout << std::defaultfloat << '\n';
   }
 
   static void printParameters(const Acts::Surface &surface, const Acts::GeometryContext &tgContext, const Acts::BoundVector &bound)
@@ -461,7 +468,7 @@ namespace
     printParameters(state.referenceSurface(), tgContext, state.parameters());
     std::cout << std::defaultfloat << std::fixed << ' '
               << std::setw(6) << std::setprecision(1) << state.pathLength() << ' '
-              << std::setw(5) << std::setprecision(1) << state.chi2() << ' '
+              << std::setw(7) << std::setprecision(1) << state.chi2() << ' '
               << std::defaultfloat
               << std::setw(Acts::TrackStateFlag::NumTrackStateFlags) << trackStateName(state.typeFlags()) << '\n';
   }
@@ -605,7 +612,7 @@ namespace ActsTrk
 
   StatusCode
   TrackFindingTool::findTracks(const EventContext &ctx,
-                               const std::vector<ATLASUncalibSourceLink> &uncalibSourceLinks,
+                               const std::vector<std::pair<UncalibratedMeasurementContainerPtr, const InDetDD::SiDetectorElementCollection *>> &measurements,
                                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
                                ::TrackCollection &tracksContainer) const
   {
@@ -614,6 +621,31 @@ namespace ActsTrk
     using TrackParametersContainer = std::vector<Acts::BoundTrackParameters>;
 
     ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
+
+    auto numMeasurements = std::accumulate(measurements.begin(), measurements.end(), size_t{0u},
+                                           [](size_t n, const auto &m)
+                                           { return n + std::visit([](auto &&v) -> size_t
+                                                                   { return v->size(); },
+                                                                   m.first); });
+    ATH_MSG_DEBUG("Create " << numMeasurements << " source links");
+
+    UncalibSourceLinkMultiset sourceLinks;
+    sourceLinks.reserve(numMeasurements);
+
+    std::vector<ATLASUncalibSourceLink::ElementsType> elementsCollection;
+    elementsCollection.reserve(numMeasurements);
+
+    for (auto &[clusterContainerVar, detEleCollPtr] : measurements)
+    {
+      auto detEleColl = detEleCollPtr; // structured bindings can't be captured in C++17
+      std::visit([&](auto &&clusterContainer)
+                 {
+                   for (auto meas : *clusterContainer) {
+                     sourceLinks.insert(sourceLinks.end(),
+                                        m_ATLASConverterTool->UncalibratedMeasurementToSourceLink(*detEleColl, meas, elementsCollection));
+                   } },
+                 clusterContainerVar);
+    }
 
     TrackParametersContainer initialParameters;
     initialParameters.reserve(estimatedTrackParameters.size());
@@ -629,13 +661,6 @@ namespace ActsTrk
     Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
     // CalibrationContext converter not implemented yet.
     Acts::CalibrationContext calContext = Acts::CalibrationContext();
-
-    UncalibSourceLinkMultiset sourceLinks;
-    sourceLinks.reserve(uncalibSourceLinks.size());
-    for (auto &sourceLink : uncalibSourceLinks)
-    {
-      sourceLinks.insert(sourceLinks.end(), sourceLink);
-    }
 
     UncalibSourceLinkAccessor slAccessor;
     slAccessor.container = &sourceLinks;
@@ -686,7 +711,7 @@ namespace ActsTrk
           ATH_MSG_INFO("CKF input hits:");
           printHeader(true);
           size_t index = 0;
-          for (auto &sourceLink : uncalibSourceLinks)
+          for (auto &sourceLink : sourceLinks)
           {
             printSourceLink(tgContext, *trackingGeometry, sourceLink, index++);
           }

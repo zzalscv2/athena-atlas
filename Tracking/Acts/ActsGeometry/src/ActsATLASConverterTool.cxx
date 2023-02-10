@@ -77,18 +77,18 @@ ActsATLASConverterTool::initialize()
 
   m_trackingGeometry->visitSurfaces([&](const Acts::Surface *surface) {
     // find acts surface with the same detector element ID
-    if (surface and surface->associatedDetectorElement())
-    {
-      const auto* actsElement = dynamic_cast<const ActsDetectorElement*>(surface->associatedDetectorElement());
-      // Conversion from Acts to ATLAS surface impossible for the TRT so the TRT surface are not sure in this map
-      if(actsElement){
-        bool isTRT = (dynamic_cast<const InDetDD::TRT_BaseElement*>(actsElement->upstreamDetectorElement()) != nullptr);
-        if(!isTRT && m_actsSurfaceMap.find(actsElement->identify()) == m_actsSurfaceMap.end()){
-          m_actsSurfaceMap.insert(std::pair<Identifier, const Acts::Surface &>(actsElement->identify(), *surface));
-        }
-      }
+    if (!surface) return;
+    const auto* actsElement = dynamic_cast<const ActsDetectorElement*>(surface->associatedDetectorElement());
+    if (!actsElement) return;
+    // Conversion from Acts to ATLAS surface impossible for the TRT so the TRT surfaces are not stored in this map
+    bool isTRT = (dynamic_cast<const InDetDD::TRT_BaseElement*>(actsElement->upstreamDetectorElement()) != nullptr);
+    if (isTRT) return;
+    auto [it, ok] = m_actsSurfaceMap.insert({actsElement->identify(), surface});
+    if (!ok) {
+      ATH_MSG_WARNING("ATLAS ID " << actsElement->identify() <<
+                      " has two ACTS surfaces: " << it->second->geometryId() <<
+                      " and " << surface->geometryId());
     }
-    return;
   });  
   return StatusCode::SUCCESS;
 }
@@ -109,7 +109,7 @@ ActsATLASConverterTool::ATLASSurfaceToActs(const Trk::Surface &atlasSurface) con
   Identifier atlasID = atlasSurface.associatedDetectorElementIdentifier();
   auto it = m_actsSurfaceMap.find(atlasID);
   if (it != m_actsSurfaceMap.end()){
-    return it->second;
+    return *it->second;
   }
   throw std::domain_error("No Acts surface corresponding to the ATLAS one");
 }
@@ -118,7 +118,7 @@ const ATLASSourceLink
 ActsATLASConverterTool::ATLASMeasurementToSourceLink(
     const Acts::GeometryContext& gctx, 
     const Trk::MeasurementBase *measurement,
-    std::vector<std::tuple<const Trk::MeasurementBase*, Acts::BoundVector, Acts::BoundMatrix, std::size_t> >& externalCollection) const {
+    std::vector<ATLASSourceLink::ElementsType> &externalCollection) const {
 
   const Acts::Surface& surface = ATLASSurfaceToActs(measurement->associatedSurface());
   Acts::BoundVector loc = Acts::BoundVector::Zero();
@@ -141,7 +141,7 @@ ActsATLASConverterTool::ATLASMeasurementToSourceLink(
      // debug Annulus surface measurements
     ActsMeasurementCheck (gctx, measurement, surface, loc);
   }
-  externalCollection.push_back( std::make_tuple(measurement, loc, cov, dim) );
+  externalCollection.push_back( std::make_tuple(measurement, loc, cov, dim, surface.bounds().type()) );
   return ATLASSourceLink(surface, externalCollection.back() );
 }
 
@@ -149,7 +149,7 @@ const ATLASUncalibSourceLink
 ActsATLASConverterTool::UncalibratedMeasurementToSourceLink(
     const InDetDD::SiDetectorElementCollection &detectorElements,
     const xAOD::UncalibratedMeasurement *measurement,
-    std::vector<std::tuple<const xAOD::UncalibratedMeasurement*, Acts::BoundVector, Acts::BoundMatrix, std::size_t> >& externalCollection) const
+    std::vector<ATLASUncalibSourceLink::ElementsType> &externalCollection) const
 {
   const InDetDD::SiDetectorElement *elem = detectorElements.getDetectorElement(measurement->identifierHash());
   if (!elem)
@@ -178,7 +178,7 @@ ActsATLASConverterTool::UncalibratedMeasurementToSourceLink(
     throw std::domain_error("Can only handle measurement type pixel or strip");
   };
   
-  externalCollection.push_back( std::make_tuple(measurement, loc, cov, dim) );
+  externalCollection.push_back( std::make_tuple(measurement, loc, cov, dim, surface.bounds().type()) );
   return ATLASUncalibSourceLink(surface,
 				externalCollection.back());
 }
@@ -186,7 +186,7 @@ ActsATLASConverterTool::UncalibratedMeasurementToSourceLink(
 const std::vector<ATLASSourceLink>
 ActsATLASConverterTool::ATLASTrackToSourceLink(const Acts::GeometryContext& gctx, 
 					       const Trk::Track &track,
-					       std::vector< std::tuple<const Trk::MeasurementBase*, Acts::BoundVector, Acts::BoundMatrix, std::size_t> >& collection) const 
+					       std::vector<ATLASSourceLink::ElementsType> &collection) const 
 {  
   auto hits = track.measurementsOnTrack();   
   auto outliers = track.outliersOnTrack();  
