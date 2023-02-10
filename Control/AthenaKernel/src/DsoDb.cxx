@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // DsoDb.cxx 
@@ -44,7 +44,6 @@ namespace fs = boost::filesystem;
 namespace {
   typedef std::vector<std::string> Strings_t;
   const std::string RootMap = ".rootmap";
-  const std::string DsoMap  = ".dsomap";
   const std::string Components = ".components";
   const std::string PluginNs= "__pf__";
 
