@@ -102,5 +102,8 @@ def createBTaggingConfigFlags():
 
     # track classification tool flags
     btagcf.addFlag("BTagging.TrkClassFiveBinMode",False)
+    
+    # a flag to add V0finder 
+    btagcf.addFlag("BTagging.AddV0Finder", False)
 
     return btagcf
