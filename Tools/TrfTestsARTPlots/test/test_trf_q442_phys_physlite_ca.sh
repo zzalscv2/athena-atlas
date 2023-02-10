@@ -12,7 +12,7 @@ Reco_tf.py \
   --AMI q442 \
   --outputAODFile myAOD.pool.root \
   --athenaopts "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "AODtoDAOD:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" \
-  --postExec 'FPEAuditor.NStacktracesOnFPE=10; from DerivationFrameworkJetEtMiss.JetCommon import swapAlgsInSequence;swapAlgsInSequence(topSequence,"jetalg_ConstitModCorrectPFOCSSKCHS_GPFlowCSSK", "UFOInfoAlgCSSK" );' \
+  --postExec 'FPEAuditor.NStacktracesOnFPE=10;' \
   --maxEvents -1
 
 rc1=$?
