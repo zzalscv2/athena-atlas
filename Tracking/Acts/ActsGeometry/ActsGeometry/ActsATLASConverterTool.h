@@ -50,7 +50,7 @@ public:
   virtual 
   const ATLASSourceLink
   ATLASMeasurementToSourceLink(const Acts::GeometryContext& gctx, const Trk::MeasurementBase *measurement,
-			       std::vector<std::tuple<const Trk::MeasurementBase*, Acts::BoundVector, Acts::BoundMatrix, std::size_t> >& Collection) const override;
+			       std::vector<ATLASSourceLink::ElementsType>& Collection) const override;
 
   /// Create an SourceLink from an ATLAS uncalibrated measurment
   /// Works for 1 and 2D measurmenent.
@@ -59,7 +59,7 @@ public:
   const ATLASUncalibSourceLink
   UncalibratedMeasurementToSourceLink(const InDetDD::SiDetectorElementCollection &detectorElements, 
 				      const xAOD::UncalibratedMeasurement *measurement,
-				      std::vector<std::tuple<const xAOD::UncalibratedMeasurement*, Acts::BoundVector, Acts::BoundMatrix, std::size_t>>& Collection) const override;
+				      std::vector<ATLASUncalibSourceLink::ElementsType>& Collection) const override;
 
   /// Transform an ATLAS track into a vector of SourceLink to be use in the avts tracking
   /// Transform both measurement and outliers.
@@ -67,7 +67,7 @@ public:
   const std::vector<ATLASSourceLink>
   ATLASTrackToSourceLink(const Acts::GeometryContext& gctx, 
 			 const Trk::Track &track,
-			 std::vector< std::tuple<const Trk::MeasurementBase*, Acts::BoundVector, Acts::BoundMatrix, std::size_t> >& collection) const override;
+			 std::vector<ATLASSourceLink::ElementsType>& collection) const override;
 
   /// Create Acts TrackParameter from ATLAS one.
   /// Take care of unit conversion between the two.  
@@ -91,7 +91,7 @@ public:
 private:
   ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
   std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry;
-  std::map<Identifier, const Acts::Surface&> m_actsSurfaceMap;
+  std::map<Identifier, const Acts::Surface*> m_actsSurfaceMap;
 
   Gaudi::Property<bool> m_visualDebugOutput{this, "VisualDebugOutput", 
     false, "Print additional output for debug plots"};

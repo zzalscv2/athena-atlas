@@ -11,6 +11,7 @@
 #include "TrkParameters/TrackParameters.h" //typedef, cannot fwd declare
 #include "xAODMeasurementBase/UncalibratedMeasurement.h" //typedef, cannot fwd declare
 #include "Acts/EventData/TrackParameters.hpp"
+#include "ActsGeometry/ATLASSourceLink.h" // inner class, cannot fwd declare
 #include <memory>
 
 namespace Trk {
@@ -28,9 +29,6 @@ namespace Acts {
 }
 
 class IActsTrackingGeometryTool;
-template <typename measurement_t> class ATLASSourceLinkGeneric;
-using ATLASSourceLink = ATLASSourceLinkGeneric<Trk::MeasurementBase>;
-using ATLASUncalibSourceLink = ATLASSourceLinkGeneric<xAOD::UncalibratedMeasurement>;
 
 class IActsATLASConverterTool : virtual public IAlgTool {
   public:
@@ -49,19 +47,19 @@ class IActsATLASConverterTool : virtual public IAlgTool {
   const ATLASSourceLink
   ATLASMeasurementToSourceLink(const Acts::GeometryContext& gctx, 
 			       const Trk::MeasurementBase *measurement,
-			       std::vector<std::tuple<const Trk::MeasurementBase*, Acts::BoundVector, Acts::BoundMatrix, std::size_t> >& Collection) const = 0;
+			       std::vector<ATLASSourceLink::ElementsType>& Collection) const = 0;
 
   virtual
   const ATLASUncalibSourceLink
   UncalibratedMeasurementToSourceLink(const InDetDD::SiDetectorElementCollection &detectorElements, 
 				      const xAOD::UncalibratedMeasurement *measurement,
-				      std::vector<std::tuple<const xAOD::UncalibratedMeasurement*, Acts::BoundVector, Acts::BoundMatrix, std::size_t>>& Collection) const = 0;
+				      std::vector<ATLASUncalibSourceLink::ElementsType>& Collection) const = 0;
 
   virtual
   const std::vector<ATLASSourceLink>
   ATLASTrackToSourceLink(const Acts::GeometryContext& gctx, 
 			 const Trk::Track &track,
-			 std::vector< std::tuple<const Trk::MeasurementBase*, Acts::BoundVector, Acts::BoundMatrix, std::size_t> >& collection) const = 0;
+			 std::vector<ATLASSourceLink::ElementsType>& collection) const = 0;
 
   virtual
   const Acts::BoundTrackParameters

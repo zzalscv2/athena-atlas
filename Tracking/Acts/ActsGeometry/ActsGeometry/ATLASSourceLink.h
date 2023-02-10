@@ -28,13 +28,13 @@
 template <typename measurement_t>
 class ATLASSourceLinkGeneric final
 {
-  enum ElementType : std::int8_t {MEASUREMENT=0, LOC, COV, TYPE};
+  enum ElementType : std::int8_t {MEASUREMENT=0, LOC, COV, TYPE, BOUND};
 
 public:
   using Measurement = measurement_t;
+  using ElementsType = std::tuple<const measurement_t*, Acts::BoundVector, Acts::BoundMatrix, std::size_t, Acts::SurfaceBounds::BoundsType>;
 
-  ATLASSourceLinkGeneric(const Acts::Surface &surface,
-			 std::tuple<const measurement_t*, Acts::BoundVector, Acts::BoundMatrix, std::size_t>& elements)
+  ATLASSourceLinkGeneric(const Acts::Surface &surface, ElementsType& elements)
     : m_geometryId(surface.geometryId()),
     m_elements(&elements)
       {}
@@ -62,15 +62,20 @@ public:
     const auto& elements = this->collection();
     return *std::get<ElementType::MEASUREMENT>(elements); 
   }
+
+  Acts::SurfaceBounds::BoundsType boundsType() const { 
+    const auto& elements = this->collection();
+    return std::get<ElementType::BOUND>(elements); 
+  }
+
   Acts::GeometryIdentifier geometryId() const { return m_geometryId; }
 
  private:
-  const std::tuple<const measurement_t*, Acts::BoundVector, Acts::BoundMatrix, std::size_t>& collection() const 
-  { return *m_elements; }
+  const ElementsType& collection() const { return *m_elements; }
 
  private:
   Acts::GeometryIdentifier m_geometryId{};
-  std::tuple<const measurement_t*, Acts::BoundVector, Acts::BoundMatrix, std::size_t>* m_elements;
+  ElementsType* m_elements;
 
   friend constexpr bool operator==(const ATLASSourceLinkGeneric &lhs,
                                    const ATLASSourceLinkGeneric &rhs)
@@ -109,18 +114,20 @@ void ATLASSourceLinkCalibrator::calibrate(const Acts::GeometryContext& /*gctx*/,
   {
     throw std::runtime_error("Cannot create dim 0 measurement");
   } else if (sourceLink.dim() == 1) {
-    trackState.allocateCalibrated(sourceLink.dim());
     trackState.template calibrated<1>() = sourceLink.values().template head<1>();
     trackState.template calibratedCovariance<1>() = sourceLink.cov().template topLeftCorner<1, 1>();
-    // Create a 1D projection matrix
-    Acts::ActsMatrix<Acts::MultiTrajectory<trajectory_t>::MeasurementSizeMax, 1> proj;
+    // Create a projection matrix onto 1D measurement
+    Acts::ActsMatrix<Acts::MultiTrajectory<trajectory_t>::MeasurementSizeMax, 2> proj;
     proj.setZero();
-    proj(Acts::eBoundLoc0, Acts::eBoundLoc0) = 1;
+    if (sourceLink.boundsType() == Acts::SurfaceBounds::eAnnulus) {
+      proj(Acts::eBoundLoc0, Acts::eBoundLoc1) = 1; // transforms predicted[1] -> calibrated[0] in Acts::MeasurementSelector::calculateChi2()
+    } else {
+      proj(Acts::eBoundLoc0, Acts::eBoundLoc0) = 1;
+    }
     trackState.setProjector(proj);
   }
   else if (sourceLink.dim() == 2)
     {
-      trackState.allocateCalibrated(sourceLink.dim());
       trackState.template calibrated<2>() = sourceLink.values().template head<2>();
       trackState.template calibratedCovariance<2>() = sourceLink.cov().template topLeftCorner<2, 2>();
       // Create a 2D projection matrix

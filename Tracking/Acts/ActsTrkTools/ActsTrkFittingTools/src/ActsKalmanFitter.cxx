@@ -126,8 +126,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 		propagationOption,
                 &(*pSurface));
 
-  using element_type = std::tuple<const Trk::MeasurementBase*, Acts::BoundVector, Acts::BoundMatrix, std::size_t>;
-  std::vector<element_type> elementCollection;
+  std::vector<ATLASSourceLink::ElementsType> elementCollection;
 
   std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->ATLASTrackToSourceLink(tgContext,inputTrack,elementCollection);
   // protection against error in the conversion from Atlas masurement to Acts source link
@@ -205,8 +204,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   std::vector<ATLASSourceLink> trackSourceLinks;
   trackSourceLinks.reserve(inputMeasSet.size());
 
-  using element_type = std::tuple<const Trk::MeasurementBase*, Acts::BoundVector, Acts::BoundMatrix, std::size_t>;
-  std::vector< element_type > elementCollection;
+  std::vector< ATLASSourceLink::ElementsType > elementCollection;
   elementCollection.reserve(inputMeasSet.size());
 
   for (auto it = inputMeasSet.begin(); it != inputMeasSet.end(); ++it){
@@ -302,15 +300,13 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 		propagationOption,
                 &(*pSurface));
 
-  using element_type = std::tuple<const Trk::MeasurementBase*, Acts::BoundVector, Acts::BoundMatrix, std::size_t>;
-  std::vector<element_type> elementCollection;
+  std::vector<ATLASSourceLink::ElementsType> elementCollection;
 
   std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->ATLASTrackToSourceLink(tgContext, inputTrack, elementCollection);
   const auto& initialParams = m_ATLASConverterTool->ATLASTrackParameterToActs(inputTrack.perigeeParameters());
 
 
-  using element_type = std::tuple<const Trk::MeasurementBase*, Acts::BoundVector, Acts::BoundMatrix, std::size_t>;
-  std::vector< element_type > atlasElementCollection;
+  std::vector< ATLASSourceLink::ElementsType > atlasElementCollection;
   atlasElementCollection.reserve(addMeasColl.size());
 
   for (auto it = addMeasColl.begin(); it != addMeasColl.end(); ++it)
@@ -405,9 +401,8 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 		propagationOption,
                 &(*pSurface));
 
-  using element_type = std::tuple<const Trk::MeasurementBase*, Acts::BoundVector, Acts::BoundMatrix, std::size_t>;
-  std::vector<element_type> elementCollection1;
-  std::vector<element_type> elementCollection2;
+  std::vector<ATLASSourceLink::ElementsType> elementCollection1;
+  std::vector<ATLASSourceLink::ElementsType> elementCollection2;
 
   std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->ATLASTrackToSourceLink(tgContext, intrk1, elementCollection1);
   std::vector<ATLASSourceLink> trackSourceLinks2 = m_ATLASConverterTool->ATLASTrackToSourceLink(tgContext, intrk2, elementCollection2);
