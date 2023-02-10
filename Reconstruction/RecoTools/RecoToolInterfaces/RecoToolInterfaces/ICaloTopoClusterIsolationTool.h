@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -33,12 +33,12 @@ namespace xAOD {
        @param[in] tp        input iparticle
        @param[in] cones     vector of input cones to be used
        @param[in] corrections bitset specifying which corrections to apply to isolation
-       @param[in] container topo cluster contrainer (for trigger only)
-       @return true if the calculation was successfull
+       @param[in] container topo cluster container (for trigger only)
+       @return true if the calculation was successful
     */    
     virtual bool caloTopoClusterIsolation(CaloIsolation& result, const IParticle& tp, 
 					  const std::vector<Iso::IsolationType>& cones, 
-					  CaloCorrection corrections, 
+					  const CaloCorrection& corrections, 
 					  const CaloClusterContainer* container = 0 ) const = 0;
 
   };
