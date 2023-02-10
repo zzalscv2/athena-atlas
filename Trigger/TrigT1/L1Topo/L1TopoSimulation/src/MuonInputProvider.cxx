@@ -28,6 +28,11 @@
 using namespace LVL1;
 using namespace xAOD;
 
+//additional factor to stretch 2*pi -> 6.4 
+//with the then more readable granularity of 1/20 
+//this mapps phi to the integer range 0-127
+static constexpr float phiRescaleFactor = 3.2/M_PI; 
+
 MuonInputProvider::MuonInputProvider( const std::string& type, const std::string& name, 
                                       const IInterface* parent) :
    base_class(type, name, parent),
@@ -313,10 +318,11 @@ TCS::MuonTOB MuonInputProvider::createMuonTOB(const xAOD::MuonRoI & muonRoI, con
     }
 
    unsigned int EtTopo = et*10;
+   if (phi < 0) { phi += 2*M_PI;}
+   phi *= phiRescaleFactor; // 2pi -> 6.4
    int etaTopo = topoIndex(eta,40);
    int phiTopo = topoIndex(phi,20);
 
-   if (phiTopo < 0){ phiTopo += 128; }
    
    TCS::MuonTOB muon( EtTopo, 0, etaTopo, static_cast<unsigned int>(phiTopo), muonRoI.getRoI() );
    muon.setEtDouble(static_cast<double>(EtTopo/10.));
@@ -389,10 +395,11 @@ MuonInputProvider::createMuonTOB(const MuCTPIL1TopoCandidate & roi) const {
    float fPhi = roi.getphi();
   
    unsigned int EtTopo = roi.getptValue()*10;
+   if (fPhi < 0) { fPhi += 2*M_PI; }
+   fPhi *= phiRescaleFactor; // 2pi -> 6.4
    int etaTopo = topoIndex(fEta,40);
    int phiTopo = topoIndex(fPhi,20);
 
-   if (phiTopo < 0){ phiTopo += 128; }
    
    TCS::MuonTOB muon( EtTopo, 0, etaTopo, static_cast<unsigned int>(phiTopo), roi.getRoiID() );
    muon.setEtDouble(static_cast<double>(EtTopo/10.));
@@ -440,10 +447,13 @@ MuonInputProvider::createLateMuonTOB(const MuCTPIL1TopoCandidate & roi) const {
    ATH_MSG_DEBUG("Late Muon ROI (MuCTPiToTopo):bcid=1 thr pt = " << roi.getptThresholdID() << " eta = " << roi.geteta() << " phi = " << roi.getphi() << ", w   = " << MSG::hex << std::setw( 8 ) << roi.getRoiID() << MSG::dec);
 
    unsigned int EtTopo = roi.getptValue()*10;
+   
+   float fPhi = roi.getphi();
+   if (fPhi < 0) { fPhi += 2*M_PI; }
+   fPhi *= phiRescaleFactor; // 2pi -> 6.4
    int etaTopo = topoIndex(roi.geteta(),40);
-   int phiTopo = topoIndex(roi.getphi(),20);
+   int phiTopo = topoIndex(fPhi,20);
 
-   if (phiTopo < 0){ phiTopo += 128; }
  
    TCS::LateMuonTOB muon( EtTopo, 0, etaTopo, static_cast<unsigned int>(phiTopo), roi.getRoiID() );
 
