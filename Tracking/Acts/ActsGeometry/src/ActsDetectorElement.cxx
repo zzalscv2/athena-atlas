@@ -180,6 +180,34 @@ ActsDetectorElement::ActsDetectorElement(
   m_surface = Acts::Surface::makeShared<Acts::StrawSurface>(lineBounds, *this);
 }
 
+ActsDetectorElement::ActsDetectorElement(
+    const InDetDD::HGTD_DetectorElement &detElem, const Identifier &id) 
+  :  m_detElement (&detElem),
+     m_thickness (detElem.thickness()),
+     m_explicitIdentifier (id)
+{
+  auto boundsType = detElem.bounds().type();
+
+  if (boundsType == Trk::SurfaceBounds::Rectangle) {
+
+    const InDetDD::HGTD_ModuleDesign &design = detElem.design();
+    double hlX = design.width() / 2. * length_unit;
+    double hlY = design.length() / 2. * length_unit;
+
+    auto rectangleBounds =
+        std::make_shared<const Acts::RectangleBounds>(hlX, hlY);
+
+    m_bounds = rectangleBounds;
+
+    m_surface =
+        Acts::Surface::makeShared<Acts::PlaneSurface>(rectangleBounds, *this);
+        
+  } else {
+    throw std::domain_error(
+        "ActsDetectorElement: the surface type of HGTD is not does not Rectangle, it is wrong");
+  }
+}
+
 IdentityHelper ActsDetectorElement::identityHelper() const {
   if (const auto *detElem =
           dynamic_cast<const InDetDD::SiDetectorElement *>(m_detElement);
@@ -233,6 +261,18 @@ void ActsDetectorElement::storeTransform(ActsAlignmentStore *gas) const {
 
     trf = l2g;
   } else if (const auto *detElem =
+                dynamic_cast<const InDetDD::HGTD_DetectorElement *>(m_detElement); 
+                detElem!= nullptr) {
+    Amg::Transform3D l2g = 
+        detElem->getMaterialGeom()->getAbsoluteTransform(gas) *
+        Amg::CLHEPTransformToEigen(detElem->recoToHitTransform());
+    // need to make sure translation has correct units
+    l2g.translation() *= 1.0 / CLHEP::mm * length_unit;
+
+    l2g = l2g * m_extraTransform;
+
+    trf = l2g;
+  } else if (const auto *detElem =
                  dynamic_cast<const InDetDD::TRT_BaseElement *>(m_detElement);
              detElem != nullptr && m_defTransform.isValid())
   {
@@ -266,7 +306,19 @@ ActsDetectorElement::getDefaultTransformMutexed() const {
       l2g = l2g * m_extraTransform;
 
       m_defTransform.set (l2g);
-    } else if (const auto *detElem =
+    }  else if (const auto *detElem =
+                dynamic_cast<const InDetDD::HGTD_DetectorElement *>(m_detElement); 
+                detElem!= nullptr) {
+    Amg::Transform3D l2g = 
+            detElem->getMaterialGeom()->getDefAbsoluteTransform() *
+            Amg::CLHEPTransformToEigen(detElem->recoToHitTransform());
+    // need to make sure translation has correct units
+    l2g.translation() *= 1.0 / CLHEP::mm * length_unit;
+
+    l2g = l2g * m_extraTransform;
+
+    m_defTransform.set(l2g);
+  } else if (const auto *detElem =
                dynamic_cast<const InDetDD::TRT_BaseElement *>(m_detElement);
                detElem != nullptr) {
       throw std::logic_error{
@@ -301,6 +353,9 @@ Identifier ActsDetectorElement::identify() const {
       detElem != nullptr) {
     return detElem->identify();
   } else if (dynamic_cast<const InDetDD::TRT_BaseElement *>(m_detElement) !=
+             nullptr) {
+    return m_explicitIdentifier;
+  } else if (dynamic_cast<const InDetDD::HGTD_DetectorElement *>(m_detElement) !=
              nullptr) {
     return m_explicitIdentifier;
   } else {

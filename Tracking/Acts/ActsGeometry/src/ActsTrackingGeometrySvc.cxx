@@ -10,6 +10,7 @@
 #include "PathResolver/PathResolver.h"
 #include "InDetIdentifier/TRT_ID.h"
 #include "InDetReadoutGeometry/SiDetectorManager.h"
+#include "HGTD_ReadoutGeometry/HGTD_DetectorManager.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 #include "BeamPipeGeoModel/BeamPipeDetectorManager.h"
@@ -40,6 +41,7 @@
 #include "ActsGeometry/ActsGeometryContext.h"
 #include "ActsGeometry/ActsLayerBuilder.h"
 #include "ActsGeometry/ActsStrawLayerBuilder.h"
+#include "ActsGeometry/ActsHGTDLayerBuilder.h"
 #include "ActsInterop/IdentityHelper.h"
 #include "ActsInterop/Logger.h"
 
@@ -91,6 +93,10 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
   }
   if (buildSubdet.find("ITkStrip") != buildSubdet.end()) {
     ATH_CHECK(m_detStore->retrieve(p_ITkStripManager, "ITkStrip"));
+  }
+  if (buildSubdet.find("HGTD") != buildSubdet.end()) {
+    ATH_CHECK(m_detStore->retrieve(p_HGTDManager, "HGTD"));
+    ATH_CHECK(m_detStore->retrieve(m_HGTD_idHelper, "HGTD_ID"));
   }
 
   if(m_buildBeamPipe) {
@@ -338,6 +344,28 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
           });
     }
 
+    //HGTD
+    if(buildSubdet.count("HGTD") > 0) {
+      tgbConfig.trackingVolumeBuilders.push_back(
+          [&](const auto &gctx, const auto &inner, const auto &) {
+            auto lb = makeHGTDLayerBuilder(p_HGTDManager); //using ActsHGTDLayerBuilder
+            Acts::CylinderVolumeBuilder::Config cvbConfig;
+            cvbConfig.layerEnvelopeR = {5_mm, 5_mm};
+            cvbConfig.layerEnvelopeZ = 1_mm;
+            cvbConfig.trackingVolumeHelper = cylinderVolumeHelper;
+            cvbConfig.volumeSignature = 1;
+            cvbConfig.volumeName = "HGTD";
+            cvbConfig.layerBuilder = lb;
+            cvbConfig.buildToRadiusZero = false;
+
+            Acts::CylinderVolumeBuilder cvb(
+                cvbConfig,
+                makeActsAthenaLogger(this, "HGTDCylVolBldr", "ActsTGSvc"));
+
+            return cvb.trackingVolume(gctx, inner);
+          });
+    }
+
     // Calo
     if (buildSubdet.count("Calo") > 0) {
       tgbConfig.trackingVolumeBuilders.push_back(
@@ -414,6 +442,37 @@ ActsTrackingGeometrySvc::makeStrawLayerBuilder(
   cfg.layerCreator = layerCreator;
   cfg.idHelper = m_TRT_idHelper;
   return std::make_shared<const ActsStrawLayerBuilder>(
+      cfg, makeActsAthenaLogger(this, managerName + "GMSLayBldr", "ActsTGSvc"));
+}
+
+std::shared_ptr<const Acts::ILayerBuilder>
+ActsTrackingGeometrySvc::makeHGTDLayerBuilder(
+    const HGTD_DetectorManager *manager) {
+
+  std::string managerName = manager->getName();
+  auto matcher = [](const Acts::GeometryContext & /*gctx*/,
+                    Acts::BinningValue /*bValue*/, const Acts::Surface * /*aS*/,
+                    const Acts::Surface *
+                    /*bS*/) -> bool { return false; };
+
+  Acts::SurfaceArrayCreator::Config sacCfg;
+  sacCfg.surfaceMatcher = matcher;
+  sacCfg.doPhiBinningOptimization = false;
+
+  auto surfaceArrayCreator = std::make_shared<Acts::SurfaceArrayCreator>(
+      sacCfg,
+      makeActsAthenaLogger(this, managerName + "SrfArrCrtr", "ActsTGSvc"));
+  Acts::LayerCreator::Config lcCfg;
+  lcCfg.surfaceArrayCreator = surfaceArrayCreator;
+  auto layerCreator = std::make_shared<Acts::LayerCreator>(
+      lcCfg, makeActsAthenaLogger(this, managerName + "LayCrtr", "ActsTGSvc"));
+
+  ActsHGTDLayerBuilder::Config cfg;
+  cfg.mng = static_cast<const HGTD_DetectorManager *>(manager);
+  cfg.elementStore = m_elementStore;
+  cfg.layerCreator = layerCreator;
+  cfg.idHelper = m_HGTD_idHelper;
+  return std::make_shared<const ActsHGTDLayerBuilder>(
       cfg, makeActsAthenaLogger(this, managerName + "GMSLayBldr", "ActsTGSvc"));
 }
 

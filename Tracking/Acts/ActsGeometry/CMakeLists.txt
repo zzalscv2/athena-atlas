@@ -17,6 +17,7 @@ atlas_add_library( ActsGeometryLib
                    src/ActsDetectorElement.cxx
                    src/ActsLayerBuilder.cxx
                    src/ActsStrawLayerBuilder.cxx
+                   src/ActsHGTDLayerBuilder.cxx
                    src/ActsTrackingGeometrySvc.cxx
                    src/ATLASSourceLink.cxx
                    src/util/*.cxx
@@ -34,6 +35,8 @@ atlas_add_library( ActsGeometryLib
                    GaudiKernel
                    GeoModelUtilities
                    GeoPrimitives
+                   HGTD_Identifier
+                   HGTD_ReadoutGeometry
                    Identifier
                    InDetIdentifier
                    InDetReadoutGeometry

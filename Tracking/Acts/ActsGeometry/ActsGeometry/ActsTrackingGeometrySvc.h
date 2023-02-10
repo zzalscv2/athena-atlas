@@ -33,6 +33,8 @@ namespace InDetDD {
 class TRT_ID;
 class ActsAlignmentStore;
 class BeamPipeDetectorManager;
+class HGTD_ID;
+class HGTD_DetectorManager;
 
 class ActsDetectorElement;
 
@@ -72,7 +74,9 @@ private:
   std::shared_ptr<const Acts::ILayerBuilder>
   makeStrawLayerBuilder(const InDetDD::InDetDetectorManager* manager);
 
-
+  std::shared_ptr<const Acts::ILayerBuilder>
+  makeHGTDLayerBuilder(const HGTD_DetectorManager *manager);
+  
   std::shared_ptr<Acts::TrackingVolume>
   makeSCTTRTAssembly(const Acts::GeometryContext& gctx, const Acts::ILayerBuilder& sct_lb,
       const Acts::ILayerBuilder& trt_lb, const Acts::CylinderVolumeHelper& cvh,
@@ -88,11 +92,13 @@ private:
   const InDetDD::SiDetectorManager* p_ITkPixelManager;
   const InDetDD::SiDetectorManager* p_ITkStripManager;
   const BeamPipeDetectorManager* p_beamPipeMgr;
+  const HGTD_DetectorManager* p_HGTDManager;
 
   std::shared_ptr<ActsElementVector> m_elementStore;
   std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry;
 
   const TRT_ID *m_TRT_idHelper;
+  const HGTD_ID *m_HGTD_idHelper;
 
   std::unique_ptr<const ActsAlignmentStore> m_nominalAlignmentStore{nullptr};
 
@@ -104,7 +110,7 @@ private:
 
   Gaudi::Property<std::vector<size_t>> m_barrelMaterialBins{this, "BarrelMaterialBins", {10, 10}};
   Gaudi::Property<std::vector<size_t>> m_endcapMaterialBins{this, "EndcapMaterialBins", {5, 20}};
-  Gaudi::Property<std::vector<std::string>> m_buildSubdetectors{this, "BuildSubDetectors", {"Pixel", "SCT", "TRT", "Calo"}};
+  Gaudi::Property<std::vector<std::string>> m_buildSubdetectors{this, "BuildSubDetectors", {"Pixel", "SCT", "TRT", "Calo", "HGTD"}};
 
   ToolHandle<IActsTrackingVolumeBuilder> m_caloVolumeBuilder{this, 
       "CaloVolumeBuilder", "", "CaloVolumeBuilder"};
