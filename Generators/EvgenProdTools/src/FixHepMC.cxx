@@ -92,7 +92,7 @@ StatusCode FixHepMC::execute() {
       size_t no_endv = 0;
       size_t no_prov = 0;
       HepMC::FourVector sum(0,0,0,0);
-      for (auto part : semi_disconnected) {
+      for (const auto& part : semi_disconnected) {
         if (!part->production_vertex() || !part->production_vertex()->id()) {
           no_prov++; sum += part->momentum();
         }
