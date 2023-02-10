@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -19,13 +19,6 @@
 #   include "xAODRootAccessInterfaces/TActiveEvent.h"
 #   include "xAODRootAccess/TEvent.h"
 #endif // XAOD_STANDALONE
-
-#ifndef XAOD_STANDALONE
-namespace IncidentType {
-   /// Incident in Athena, emitted when metadata should be written out
-   static const std::string MetaDataStop = "MetaDataStop";
-} // namespace IncidentType
-#endif // not XAOD_STANDALONE
 
 namespace asg {
 
