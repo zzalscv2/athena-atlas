@@ -17,6 +17,7 @@ StatusCode EfexInputMonitorAlgorithm::initialize() {
 
   // we initialise all the containers that we need
   ATH_CHECK( m_eFexTowerContainerKey.initialize() );
+  ATH_CHECK( m_eFexTowerContainerRefKey.initialize() );
   
   return AthMonitorAlgorithm::initialize();
 }
@@ -34,7 +35,19 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
     return StatusCode::SUCCESS;
   }
 
+    // Access eFexTower ref container, if possible
+    SG::ReadHandle<xAOD::eFexTowerContainer> eFexTowerContainerRef{m_eFexTowerContainerRefKey, ctx};
+    auto etaIndex = [](float eta) { return int( eta*10 ) + ((eta<0) ? -1 : 1); };
+    auto phiIndex = [](float phi) { return int( phi*32./M_PI ) + (phi<0 ? -1 : 1); };
+    std::map<std::pair<int,int>,const xAOD::eFexTower*> refTowers;
+    if (eFexTowerContainerRef.isValid()) {
+        for (auto eTower: *eFexTowerContainerRef)
+            refTowers[std::pair(etaIndex(eTower->eta() + 0.025), phiIndex(eTower->phi() + 0.025))] = eTower;
+    }
+
   // monitored variables for histograms
+  auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",0.0);
+    evtNumber = GetEventInfo(ctx)->eventNumber();
   auto nEfexTowers = Monitored::Scalar<int>("NEfexTowers",0.0);
   auto Towereta = Monitored::Scalar<float>("TowerEta",0.0);
   auto Towerphi = Monitored::Scalar<float>("TowerPhi",0.0);
@@ -53,6 +66,11 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
   auto Toweretcount11 = Monitored::Scalar<uint16_t>("TowerEtcount11",0.0);
   auto Toweremstatus = Monitored::Scalar<uint32_t>("TowerEmstatus",0.0);
   auto Towerhadstatus = Monitored::Scalar<uint32_t>("TowerHadstatus",0.0);
+
+  auto TowerId = Monitored::Scalar<uint32_t>("TowerId",0);
+  auto TowerSlot = Monitored::Scalar<int32_t>("TowerSlot",0);
+  auto TowerCount = Monitored::Scalar<uint32_t>("TowerCount",0);
+  auto TowerRefCount = Monitored::Scalar<uint32_t>("RefTowerCount",0);
 
   ATH_MSG_DEBUG("number of efex towers = "<< eFexTowerContainer->size());
 
@@ -129,6 +147,52 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
       fill(groupName1,Toweretcount11);
     }
 
+      if(!refTowers.empty()) {
+          auto& eTower = efexTowerRoI;
+          auto& counts = Toweret_count;
+
+          TowerId = eTower->id();
+          auto itr = refTowers.find(std::pair(etaIndex(eTower->eta() + 0.025), phiIndex(eTower->phi() + 0.025)));
+          if (itr == refTowers.end()) {
+              // treat every slot in tower as mismatch to a count of -1 for ref
+              fill(m_packageName+"_RefCompare",Towereta,Towerphi);
+              TowerRefCount = -1;
+              for(size_t i=0;i<counts.size();i++) {
+                  TowerSlot = i; TowerCount = counts[i];
+                  fill(m_packageName+"_RefCompareTree",evtNumber,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount);
+              }
+              continue;
+          }
+          const xAOD::eFexTower *eeTower = itr->second;
+          auto ecounts = eeTower->et_count();
+          if (ecounts.size() != counts.size()) {
+              // flag the excess slots in the tree
+              fill(m_packageName+"_RefCompare",Towereta,Towerphi);
+              continue;
+          }
+          std::stringstream cStr;
+          std::stringstream ecStr;
+          bool mismatch = false;
+          for (size_t i = 0; i < ecounts.size(); i++) {
+              cStr << " " << counts[i];
+              ecStr << " " << ecounts[i];
+              if (eTower->disconnectedCount(i)) {
+                  cStr << "x";
+                  ecStr << " ";
+                  continue;
+              } // skip disconnected counts
+              if (counts[i] != ecounts[i]) {
+                  mismatch = true;
+                  TowerSlot = i; TowerCount = counts[i]; TowerRefCount = ecounts[i];
+                  fill(m_packageName+"_RefCompareTree",evtNumber,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount);
+              }
+          }
+          if (mismatch) {
+              ATH_MSG_DEBUG(eTower->id() << " efex:" << cStr.str());
+              ATH_MSG_DEBUG(eeTower->id() << " calo:" << ecStr.str());
+              fill(m_packageName+"_RefCompare",Towereta,Towerphi);
+          }
+      }
   }
 
   return StatusCode::SUCCESS;

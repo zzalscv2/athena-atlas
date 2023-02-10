@@ -58,6 +58,12 @@ namespace xAOD {
       void setEt_count(const std::vector<uint16_t>&); /// setter for the above
       void setEt_count(std::vector<uint16_t>&&); /// setter for the above
 
+      /// check if slot is actually connected
+      /// some slots can be disconnected entirely (will have 0 in them)
+      /// or can be pathalogically connected but not used by the module's algorithms at all (they are out of range)
+      /// These are also flagged as disconnected
+      bool disconnectedCount(size_t idx) const;
+
       /// get em status bit
       uint32_t em_status() const; /// getter for the electromagnetic status bit
       /// set em status bit
@@ -69,9 +75,7 @@ namespace xAOD {
       void setHad_status(uint32_t); /// setter for the above
       
       /// get the Simulation ID
-      uint32_t eFEXtowerID() const; /// getter for the jtower simulation ID
-      /// set the simulation ID
-      void seteFEXtowerID(uint32_t); ///setter for the above      
+      uint32_t eFEXtowerID() const; /// getter for the etower simulation ID
       
 
       void initialize(const float Eta,const float Phi);
