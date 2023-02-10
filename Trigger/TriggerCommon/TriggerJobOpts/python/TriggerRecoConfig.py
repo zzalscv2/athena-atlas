@@ -256,17 +256,16 @@ def Run1Run2BSExtractionCfg( flags ):
             extr.HLTResultKeyIn = "HLTResult_HLT_BS"
             extr.HLTResultKeyOut = "HLTResult_HLT"
         
-        # Configure DataScouting
-        from PyUtils.MetaReaderPeeker import metadata
-        if 'stream' in metadata:
-            stream_local = metadata['stream']   # e.g. calibration_DataScouting_05_Jets
-            if stream_local.startswith('calibration_DataScouting_'):
-                ds_tag = '_'.join(stream_local.split('_')[1:3])   # e.g. DataScouting_05
-                ds_id = int(stream_local.split('_')[2])           # e.g. 05
-                acc.merge(InputRenameCfg("HLT::HLTResult", ds_tag, ds_tag+"_BS"))
-                robIDMap[ds_tag+"_BS"] = efh.SourceIdentifier(efh.SubDetector.TDAQ_HLT, ds_id).code()
-                extr.DSResultKeysIn += [ ds_tag+"_BS" ]
-                extr.DSResultKeysOut += [ ds_tag ]
+        # Configure Run-2 DataScouting
+        if flags.Trigger.EDMVersion == 2:
+          stream = flags.Input.TriggerStream
+          if stream.startswith('calibration_DataScouting_'):
+              ds_tag = '_'.join(stream.split('_')[1:3])   # e.g. DataScouting_05
+              ds_id = int(stream.split('_')[2])           # e.g. 05
+              acc.merge(InputRenameCfg("HLT::HLTResult", ds_tag, ds_tag+"_BS"))
+              robIDMap[ds_tag+"_BS"] = efh.SourceIdentifier(efh.SubDetector.TDAQ_HLT, ds_id).code()
+              extr.DSResultKeysIn += [ ds_tag+"_BS" ]
+              extr.DSResultKeysOut += [ ds_tag ]
 
     else:
         log.info("Will not schedule real HLT bytestream extraction, instead EDM gap filling is running")
@@ -359,9 +358,16 @@ if __name__ == '__main__':
     flags.fillFromArgs()
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    flags.Input.Files = defaultTestFiles.RAW # need to update this depending on EDMversion
+    flags.Input.Files = defaultTestFiles.RAW_RUN3 # need to update this depending on EDMversion
     flags.Exec.MaxEvents=5
     log.info('Checking setup for EDMVersion %d', flags.Trigger.EDMVersion)
+    if flags.Trigger.EDMVersion==1:
+      flags.Input.Files = defaultTestFiles.RAW_RUN1
+    elif flags.Trigger.EDMVersion==2:
+      flags.Input.Files = defaultTestFiles.RAW
+    elif flags.Trigger.EDMVersion==3:
+      flags.Input.Files = defaultTestFiles.RAW_RUN3
+      
 
     flags.lock()
 
