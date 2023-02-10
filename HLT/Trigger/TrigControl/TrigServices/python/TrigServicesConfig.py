@@ -191,3 +191,11 @@ def TrigServicesCfg(flags):
    acc.setAppProperty("EventLoop", loop_mgr.name)
 
    return acc
+
+
+if __name__=="__main__":
+   from TrigPSC.PscDefaultFlags import defaultOnlineFlags
+   flags = defaultOnlineFlags()
+   flags.lock()
+
+   TrigServicesCfg(flags)

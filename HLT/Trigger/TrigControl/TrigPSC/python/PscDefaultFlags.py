@@ -20,6 +20,7 @@ def setDefaultOnlineFlagsNewStyle(flags):
     flags.Input.Format = Format.BS
     flags.IOVDb.GlobalTag = flags.Trigger.OnlineCondTag
     flags.Trigger.doHLT = True  # This distinguishes the HLT setup from online reco (GM, EventDisplay)
+    flags.Trigger.Online.isPartition = True  # athenaHLT and partition at P1
     flags.Scheduler.ShowDataDeps = False
     flags.Scheduler.ShowControlFlow = False
     flags.Scheduler.ShowDataFlow = False
