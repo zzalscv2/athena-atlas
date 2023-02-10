@@ -27,14 +27,15 @@ def ZeeVertexRefittingToolCfg(ConfigFlags, **kwargs):
     import AthenaCommon.SystemOfUnits as Units
 
     pvRefitter = acc.popToolsAndMerge( PrimaryVertexRefittingToolCfg(ConfigFlags, **kwargs) )
+    MCSamples = [361106, 601189]
     acc.setPrivateTools( CompFactory.DerivationFramework.ZeeVertexRefittingTool( name = "HIGG1D1_ZeeVertexRefitterTool",
                                               ObjectRequirements="(Electrons.DFCommonElectronsLHMedium) && (Electrons.pt > 19.*GeV)",
                                               LowMassCut=50*Units.GeV,
                                               RefittedPVContainerName="ZeeRefittedPrimaryVertices",                                    
                                               ElectronContainerName="Electrons",
                                               PVContainerName="PrimaryVertices",
-                                              MCSamples = [361106],
-                                              PrimaryVertexRefitterTool = pvRefitter ) ) 
+                                              MCSamples=MCSamples,
+                                              PrimaryVertexRefitterTool=pvRefitter ) ) 
     
     return acc
   
