@@ -19,4 +19,6 @@
 <class name="JetWidthTool"/>
 <class name="JetQGTaggerVariableTool"/>
 <class name="JetEMScaleMomTool"/>
+<class name="JetConstituentFrac"/>
+<class name="JetGroomMRatio"/>
 </lcgdict>

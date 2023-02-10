@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetCalibrationTool.h 
@@ -66,6 +66,8 @@ private:
   SG::ReadHandleKey<xAOD::VertexContainer> m_pvKey{this, "PrimaryVerticesContainerName", "PrimaryVertices"};
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_muKey {this, "averageInteractionsPerCrossingKey",
           "EventInfo.averageInteractionsPerCrossing","Decoration for Average Interaction Per Crossing"};
+  SG::ReadDecorHandleKey<xAOD::EventInfo> m_actualMuKey {this, "actualInteractionsPerCrossing",
+          "EventInfo.actualInteractionsPerCrossing","Decoration for Actual Number of Interactions Per Crossing"};
 
   //Variables for configuration
   std::string m_jetAlgo;
@@ -100,6 +102,7 @@ private:
   bool m_doResidual;
   bool m_doOrigin;
   bool m_doGSC;
+  bool m_doDNNCal;
 
   std::string m_gscDepth; // if not set then use the one defined in the config
 

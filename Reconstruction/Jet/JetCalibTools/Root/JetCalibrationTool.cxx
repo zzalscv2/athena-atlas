@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetCalibrationTool.cxx 
@@ -19,6 +19,7 @@
 #include "JetCalibTools/CalibrationMethods/InsituDataCorrection.h"
 #include "JetCalibTools/CalibrationMethods/JMSCorrection.h"
 #include "JetCalibTools/CalibrationMethods/JetSmearingCorrection.h"
+#include "JetCalibTools/CalibrationMethods/GlobalLargeRDNNCalibration.h"
 #include "PathResolver/PathResolver.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
 
@@ -26,9 +27,8 @@ JetCalibrationTool::JetCalibrationTool(const std::string& name)
   : asg::AsgTool( name ),
     m_jetAlgo(""), m_config(""), m_calibSeq(""), m_calibAreaTag(""), m_originScale(""), m_devMode(false),
     m_isData(true), m_timeDependentCalib(false), m_dir(""), m_eInfoName(""), m_globalConfig(nullptr),
-    m_doBcid(true), m_doJetArea(true), m_doResidual(true), m_doOrigin(true), m_doGSC(true), m_gscDepth("auto"), m_smearIndex(-1)
+    m_doBcid(true), m_doJetArea(true), m_doResidual(true), m_doOrigin(true), m_doGSC(true), m_doDNNCal(false), m_gscDepth("auto"), m_smearIndex(-1)
 { 
-
   declareProperty( "JetCollection", m_jetAlgo = "AntiKt4LCTopo" );
   declareProperty( "ConfigFile", m_config = "" );
   declareProperty( "CalibSequence", m_calibSeq = "JetArea_Offset_AbsoluteEtaJES_Insitu" );
@@ -39,7 +39,6 @@ JetCalibrationTool::JetCalibrationTool(const std::string& name)
   declareProperty( "OriginScale", m_originScale = "JetOriginConstitScaleMomentum");
   declareProperty( "CalibArea", m_calibAreaTag = "00-04-82");
   declareProperty( "GSCDepth", m_gscDepth);
-
 }
 
 JetCalibrationTool::~JetCalibrationTool() {
@@ -136,6 +135,7 @@ StatusCode JetCalibrationTool::initialize() {
   if ( !calibSeq.Contains("Origin") ) m_doOrigin = false;
   if ( !calibSeq.Contains("GSC") && !calibSeq.Contains("GNNC")) m_doGSC = false;
   if ( !calibSeq.Contains("Bcid") ) m_doBcid = false;
+  if ( calibSeq.Contains("DNN") ) m_doDNNCal = true;
 
   //Protect against the in-situ calibration being requested when isData is false
   if ( calibSeq.Contains("Insitu") && !m_isData ) {
@@ -197,6 +197,7 @@ StatusCode JetCalibrationTool::initialize() {
   // Initialise ReadHandle(s)
   ATH_CHECK( m_evtInfoKey.initialize() );
   ATH_CHECK( m_muKey.initialize() );
+  ATH_CHECK( m_actualMuKey.initialize() );
   ATH_CHECK( m_rhoKey.initialize(requireRhoInput) );
   if(m_pvKey.empty()) {
     // No PV key: -- check if it is required
@@ -319,6 +320,13 @@ StatusCode JetCalibrationTool::getCalibClass(TString calibration) {
     ATH_CHECK(jetSmearCorr->initialize());
     m_calibSteps.push_back(std::move(jetSmearCorr));
     m_smearIndex = m_calibSteps.size() - 1;
+    return StatusCode::SUCCESS;
+  }
+  else if ( calibration.EqualTo("LargeRDNN") ) {
+    std::unique_ptr<JetCalibrationStep> largeR_dnn = std::make_unique<GlobalLargeRDNNCalibration>(this->name()+"_R10DNN", m_globalConfig,calibPath,m_devMode);
+    largeR_dnn->msg().setLevel(this->msg().level());
+    ATH_CHECK(largeR_dnn->initialize());
+    m_calibSteps.push_back(std::move(largeR_dnn));
     return StatusCode::SUCCESS;
   }
   ATH_MSG_FATAL("Calibration string not recognized: " << calibration << ", aborting.");
@@ -497,6 +505,36 @@ StatusCode JetCalibrationTool::initializeEvent(JetEventInfo& jetEventInfo) const
           return StatusCode::SUCCESS; // error is recoverable, so return SUCCESS
         }
       }
+    }
+  } else if (m_doDNNCal) {
+    // retrieve mu and NPV only from eventInfo
+    static std::atomic<unsigned int> eventInfoWarningsMu = 0;
+    SG::ReadHandle<xAOD::EventInfo> rhEvtInfo(m_evtInfoKey);
+    if ( rhEvtInfo.isValid() ) {
+      SG::ReadDecorHandle<xAOD::EventInfo,float> eventInfoDecor(m_actualMuKey);
+      jetEventInfo.setMu(eventInfoDecor(0));
+    } else {
+      ++eventInfoWarningsMu;
+      if ( eventInfoWarningsMu < 20 ) ATH_MSG_WARNING("   JetCalibrationTool::initializeEvent : Failed to retrieve event information.");
+      jetEventInfo.setMu(0); //Hard coded value mu = 0 in case of failure (to prevent seg faults later).
+    }
+
+    static std::atomic<unsigned int> eventInfoWarningsPV = 0;
+    const xAOD::VertexContainer * vertices = 0;
+    SG::ReadHandle<xAOD::VertexContainer> rhPV(m_pvKey);
+    if (rhPV.isValid()) {
+      vertices = rhPV.cptr();
+      int eventNPV = 0;
+      xAOD::VertexContainer::const_iterator vtx_itr = vertices->begin();
+      xAOD::VertexContainer::const_iterator vtx_end = vertices->end(); 
+      for ( ; vtx_itr != vtx_end; ++vtx_itr ) 
+        if ( (*vtx_itr)->nTrackParticles() >= 2 ) ++eventNPV;
+
+      jetEventInfo.setNPV(eventNPV);
+    } else {
+      ++eventInfoWarningsPV;
+      if ( eventInfoWarningsPV < 20 ) ATH_MSG_WARNING("   JetCalibrationTool::initializeEvent : Failed to retrieve primary vertices.");
+      jetEventInfo.setNPV(0); //Hard coded value NPV = 0 in case of failure (to prevent seg faults later).
     }
   }
   return StatusCode::SUCCESS;

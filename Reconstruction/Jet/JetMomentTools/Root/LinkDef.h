@@ -19,6 +19,8 @@
 #include "JetMomentTools/JetWidthTool.h"
 #include "JetMomentTools/JetCaloEnergies.h"
 #include "JetMomentTools/JetQGTaggerVariableTool.h"
+#include "JetMomentTools/JetConstituentFrac.h"
+#include "JetMomentTools/JetGroomMRatio.h"
 
 #ifdef __CINT__
 
@@ -43,5 +45,7 @@
 #pragma link C++ class JetWidthTool+;
 #pragma link C++ class JetCaloEnergies+;
 #pragma link C++ class JetQGTaggerVariableTool+;
+#pragma link C++ class JetConstituentFrac+;
+#pragma link C++ class JetGroomMRatio+;
 
 #endif

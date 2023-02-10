@@ -95,12 +95,20 @@ try:
 
         # More complex cases here
         CaloEnergies =    JetModifier("JetCaloEnergies", "jetens", 
-                                      prereqs=["mod:EMScaleMom"], JetContainer = _jetname,
+                                      prereqs=["mod:EMScaleMom"], 
+                                      Calculations=["EMFrac", "HECFrac", "PSFrac"], JetContainer = _jetname,
+                                      ),
+        
+        CaloEnergiesLargeR =    JetModifier("JetCaloEnergies", "jetenslargeR", 
+                                      prereqs=["mod:EMScaleMom"], 
+                                      Calculations=["EMFrac", "HECFrac", "PSFrac", "EM3Frac", "Tile0Frac", "EffNClusts"], JetContainer = _jetname,
+                                      calcClusterBasedVars = True,
                                       ),
 
         # CaloEnergiesClus is only relevant for FE-based jet collections
         CaloEnergiesClus = JetModifier("JetCaloEnergies", "jetensclus",
-                                       prereqs=["mod:EMScaleMom"], JetContainer = _jetname,
+                                       prereqs=["mod:EMScaleMom"], 
+                                       Calculations=["EMFrac", "HECFrac", "PSFrac"], JetContainer = _jetname,
                                        calcClusterBasedVars = True),
 
         CaloQuality =     JetModifier("JetCaloQualityTool", "caloqual",
@@ -153,6 +161,14 @@ try:
                                      createfn=JetMomentToolsConfig.getPFlowbJVTTool,
                                      prereqs = ["input:EventDensity","input:PrimaryVertices"],
                                      JetContainer = _jetname),
+
+        ConstitFrac =    JetModifier("JetConstituentFrac", "constitFrac",
+                                     JetContainer = _jetname,
+                                     ),
+        
+        groomMRatio =    JetModifier("JetGroomMRatio", "groomMRatio",
+                                     JetContainer = _jetname,
+                                     ),
 
         JetPtAssociation = JetModifier("JetPtAssociationTool", "jetPtAssociation",
                                        filterfn=isMC,
