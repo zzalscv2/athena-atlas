@@ -58,13 +58,11 @@ TruthLeptonParentAssociationTool::reset (const TruthParticle& p)
     // Loop over GenEvent's.
     for (const HepMC::GenEvent* ev_in : *mcec) {
       if (!ev_in) continue;
-      for (auto Part: *ev_in){
-        if ( (Part) && HepMC::barcode(Part)==p.barcode() ){
+      auto Part = HepMC::barcode_to_particle(ev_in,p.barcode());
+      if (Part){
           // Found it!
           addLeptonParent( (Part) );
-          break;
-        }
-      } // Loop over particles
+      }
     } // Loop over events
   } // Successful retrieve
 
