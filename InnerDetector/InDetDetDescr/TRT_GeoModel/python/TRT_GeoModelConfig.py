@@ -17,7 +17,7 @@ def TRT_GeoModelCfg(flags):
     # Use default TRT active gas in geo model unless in simulation.
     from AthenaConfiguration.Enums import Project, ProductionStep
     if (flags.Common.Project is not Project.AthSimulation
-            and flags.Common.ProductionStep is not ProductionStep.Simulation):
+            and flags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain]):
         trtDetectorTool.DoXenonArgonMixture = False
         trtDetectorTool.DoKryptonMixture = False
 
