@@ -12,20 +12,8 @@
 ///////////////////////////////////////////////////////////////////
 
 #include "BCM_RawDataByteStreamCnv/BCM_RawDataProvider.h"
-
-#include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 #include "BCM_RawDataByteStreamCnv/BCM_RawDataProviderTool.h"
-
 #include "InDetBCM_RawData/BCM_RDO_Container.h"
-
-////////////////////////
-// constructor
-////////////////////////
-BCM_RawDataProvider::BCM_RawDataProvider(const std::string& name, ISvcLocator* pSvcLocator):
-  AthReentrantAlgorithm         (name, pSvcLocator),
-  m_robDataProvider ("ROBDataProviderSvc",name)
-
-{}
 
 ////////////////////////
 // destructor
@@ -49,10 +37,10 @@ StatusCode BCM_RawDataProvider::initialize() {
  
   // Get BCMRawDataProviderTool
   if (m_rawDataTool.retrieve().isFailure()) {
-    if (msgLvl(MSG::FATAL)) msg(MSG::FATAL) << "Failed to retrieve service " << m_rawDataTool << endmsg;
+    if (msgLvl(MSG::FATAL)) msg(MSG::FATAL) << "Failed to retrieve tool " << m_rawDataTool << endmsg;
     return StatusCode::FAILURE;
   } else
-    if (msgLvl(MSG::INFO)) msg(MSG::INFO) << "Retrieved service " << m_rawDataTool << endmsg;
+    if (msgLvl(MSG::INFO)) msg(MSG::INFO) << "Retrieved tool " << m_rawDataTool << endmsg;
 
   ATH_CHECK( m_RDO_Key.initialize() );
  

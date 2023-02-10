@@ -32,8 +32,8 @@ public:
   typedef BCM_RawData RDO;
   typedef BCM_RDO_Collection BCM_RawCollection; 
 
-  // constructor
-  BCM_RodDecoder(const std::string& type, const std::string& name, const IInterface* parent);
+  // delegate constructor
+  using AthAlgTool::AthAlgTool;
 
   static const InterfaceID& interfaceID();
 
