@@ -167,7 +167,7 @@ namespace LVL1{
       float                                      TileCaloQuality(const std::vector<const CaloCell*> &cells) const;      
       
       /// Tool to do the Calo cell summing
-      ToolHandle<LVL1::IL1CaloCells2TriggerTowers>          m_cells2tt;      
+      ToolHandle<LVL1::IL1CaloCells2TriggerTowers>          m_cells2tt{this, "L1CaloCells2TriggerTowers", "LVL1::L1CaloCells2TriggerTowers/L1CaloCells2TriggerTowers"};      
       /// Tool to get the Identifier of a TriggerTower
       ToolHandle<LVL1::IL1CaloTTIdTools>                    m_l1CaloTTIdTools;
       // FCAL 23 Mapping

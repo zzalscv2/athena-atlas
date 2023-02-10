@@ -19,7 +19,6 @@ namespace LVL1{
   
   L1CaloxAODOfflineTriggerTowerTools::L1CaloxAODOfflineTriggerTowerTools( const std::string& name ) :
     asg::AsgTool( name ),
-    m_cells2tt("LVL1::L1CaloCells2TriggerTowers/L1CaloCells2TriggerTowers", this),
     m_l1CaloTTIdTools("LVL1::L1CaloTTIdTools/L1CaloTTIdTools"),
     m_rxMapTool("LVL1::L1CaloFcal23Cells2RxMappingTool/L1CaloFcal23Cells2RxMappingTool"),
     m_caloMgr(nullptr),
