@@ -203,6 +203,7 @@ def TRT_LayerBuilderCfg(flags, name='TRT_LayerBuilder', useCond=True, **kwargs):
     if not useFatras:
         kwargs.setdefault("BarrelLayerBinsZ", 1)
         kwargs.setdefault("BarrelLayerBinsPhi", 1)
+        kwargs.setdefault("EndcapLayerBinsR", 1)
 
     if useCond:
         name = name+'Cond'
