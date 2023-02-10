@@ -371,7 +371,10 @@ def InDetTrigGlobalChi2FitterCfg(flags, name='InDetTrigTrackFitter', **kwargs):
         InDetExtrapolatorCfg(flags, name="InDetTrigExtrapolator"))
     InDetNavigator = acc.popToolsAndMerge(
         AtlasNavigatorCfg(flags, name="InDetTrigNavigator"))
-    ELossUpdator = acc.popToolsAndMerge(AtlasEnergyLossUpdatorCfg(flags))
+    ELossUpdator = acc.popToolsAndMerge(AtlasEnergyLossUpdatorCfg(flags,
+                                                                  UseBetheBlochForElectrons=True,    #revisit after mc23a
+                                                                  )
+                                        )
     MaterialEffectsUpdator = acc.popToolsAndMerge(
         AtlasMaterialEffectsUpdatorCfg(flags,
                                        name="InDetTrigMaterialEffectsUpdator"))
@@ -379,7 +382,11 @@ def InDetTrigGlobalChi2FitterCfg(flags, name='InDetTrigTrackFitter', **kwargs):
     from TrkConfig.TrkExRungeKuttaPropagatorConfig import (
         RungeKuttaPropagatorCfg)
     InDetTrigRKPropagator = acc.popToolsAndMerge(
-        RungeKuttaPropagatorCfg(flags, name="InDetTrigRKPropagator"))
+        RungeKuttaPropagatorCfg(flags, name="InDetTrigRKPropagator",
+                                AccuracyParameter = 0.0001,           #revisit after mc23a
+                                MaxStraightLineStep = 0.004,          #revisit after mc23a
+                                ),
+    )
     from TrkConfig.TrkMeasurementUpdatorConfig import KalmanUpdatorCfg
     InDetTrigUpdator = acc.popToolsAndMerge(
         KalmanUpdatorCfg(flags, name="InDetTrigUpdator"))
@@ -403,6 +410,7 @@ def InDetTrigGlobalChi2FitterCfg(flags, name='InDetTrigTrackFitter', **kwargs):
     kwargs.setdefault("TRTExtensionCuts", True)
     kwargs.setdefault("MaxIterations", 40)
     kwargs.setdefault("Acceleration", True)
+    kwargs.setdefault("MaxOutliers", 10)
 
     # TODO come back to these settings
     # if InDetTrigFlags.useBroadClusterErrors():
@@ -432,7 +440,7 @@ def InDetTrigGlobalChi2FitterCosmicsCfg(flags, name='InDetTrigTrackFitterCosmics
     kwargs.setdefault("MaxOutliers", 99)
     kwargs.setdefault("TRTExtensionCuts", False)
 
-    return InDetTrigGlobalChi2FitterCfg(flags, **kwargs)
+    return InDetTrigGlobalChi2FitterCfg(flags, name, **kwargs)
 
 
 #########################
