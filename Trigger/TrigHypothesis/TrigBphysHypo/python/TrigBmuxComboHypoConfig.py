@@ -1,38 +1,26 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigBphysHypo.TrigBmuxComboHypoMonitoringConfig import TrigBmuxComboHypoMonitoring
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigBmuxComboHypoConfig')
 
-def BmuxComboHypoCfg(name):
-    log.debug('BmuxComboHypoCfg.name = %s ', name)
+def BmuxComboHypoInternalCfg(flags):
     suffix = 'Bmux'
-
-    from TrkExTools.AtlasExtrapolator import AtlasExtrapolator
-    vertexFitter = CompFactory.Trk__TrkVKalVrtFitter(
-        name = 'TrigBphysFitter_'+suffix,
-        FirstMeasuredPoint = False,
-        MakeExtendedVertex = False,
-        Extrapolator = AtlasExtrapolator())
-
-    vertexPointEstimator = CompFactory.InDet__VertexPointEstimator(
-        name = 'VertexPointEstimator_'+suffix,
-        MinDeltaR = [-10000., -10000., -10000.],
-        MaxDeltaR = [ 10000.,  10000.,  10000.],
-        MaxPhi    = [ 10000.,  10000.,  10000.],
-        MaxChi2OfVtxEstimation = 2000.)
-
-    trackToVertexTool = CompFactory.Reco__TrackToVertex(
-        name = 'TrackToVertexTool_'+suffix,
-        Extrapolator = AtlasExtrapolator())
+    acc = ComponentAccumulator()
+    from TrigBphysHypo.TrigBPhyCommonConfig import TrigBPHY_TrkVKalVrtFitterCfg
+    from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
+    from InDetConfig.InDetConversionFinderToolsConfig import BPHY_VertexPointEstimatorCfg
 
     hypo = CompFactory.TrigBmuxComboHypo(
         name = 'BmuxComboHypo',
-        VertexFitter = vertexFitter,
-        VertexPointEstimator = vertexPointEstimator,
-        TrackToVertexTool = trackToVertexTool,
+        VertexFitter = acc.popToolsAndMerge(TrigBPHY_TrkVKalVrtFitterCfg(flags, suffix)),
+        VertexPointEstimator = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, 'VertexPointEstimator_'+suffix)),
+        TrackToVertexTool = acc.popToolsAndMerge(TrackToVertexCfg(flags,'TrackToVertexTool_'+suffix)),
         CheckMultiplicityMap = False,
         TrigBphysCollectionKey = 'HLT_Bmux',
         MuonCollectionKey = 'HLT_Muons_Bmumux',
@@ -92,5 +80,12 @@ def BmuxComboHypoCfg(name):
         LambdaBToLambdaC_LxyLb = 0.1,
         LambdaBToLambdaC_LxyLc = 0.02,
         MonTool = TrigBmuxComboHypoMonitoring('TrigBmuxComboHypoMonitoring'))
+    acc.addEventAlgo(hypo)
+    return acc
 
-    return hypo
+def BmuxComboHypoCfg(flags, name):
+    log.debug('BmuxComboHypoCfg.name = %s ', name)
+    if not isComponentAccumulatorCfg():
+        return algorithmCAToGlobalWrapper(BmuxComboHypoInternalCfg, flags)[0]
+    else:
+        return BmuxComboHypoInternalCfg(flags)
