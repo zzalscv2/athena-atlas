@@ -215,6 +215,9 @@ def setup(HIGG4DxName, HIGG4DxStream, HIGG4DxSlimmingHelper):
                                                "TruthPhotons"
                                                ]
 
+        if HIGG4DxName in ['HIGG4D5']:
+            HIGG4DxSlimmingHelper.AllVariables += ["HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFex", "HLT_xAOD__BTaggingContainer_HLTBjetFex"]  
+
     #trigger content
     if HIGG4DxName == 'HIGG4D1':
         HIGG4DxSlimmingHelper.IncludeMuonTriggerContent = True
@@ -230,6 +233,8 @@ def setup(HIGG4DxName, HIGG4DxStream, HIGG4DxSlimmingHelper):
         HIGG4DxSlimmingHelper.IncludeTauTriggerContent = True
     elif HIGG4DxName == "HIGG4D5":
         HIGG4DxSlimmingHelper.IncludeJetTriggerContent = True
+        HIGG4DxSlimmingHelper.IncludeBJetTriggerContent = True
+        HIGG4DxSlimmingHelper.IncludeTriggerNavigation = True
         HIGG4DxSlimmingHelper.IncludeTauTriggerContent = True
         HIGG4DxSlimmingHelper.IncludeEtMissTriggerContent = True
     elif HIGG4DxName == "HIGG4D6":
