@@ -175,21 +175,21 @@ namespace InDet{
       const TRT_ID* m_trtId{};
 
       /** Track quality cuts to be passed to the combinatorial track finder */
-      double                                                   m_xi2max        ; /** max Xi2 for updators */
-      double                                                   m_xi2maxNoAdd   ; /** max Xi2 for outliers */
-      double                                                   m_xi2maxlink    ; /** max Xi2 for clusters */
-      double                                                   m_pTmin         ; /** min pT  */
-      int                                                      m_nholesmax     ; /** Max number holes  */
-      int                                                      m_dholesmax     ; /** Max gap between holes */
-      int                                                      m_nclusmin      ; /** Min number clusters */
-      int                                                      m_nwclusmin     ; /** Min number weighted clusters */
-      bool                                                     m_bremCorrect   ; /** Optional Brem correction */
-      bool                                                     m_propR         ; /** Check seed-TRT segment consistency at large etas */
-      bool                                                     m_useassoTool   ; /** Use prd-track association tool */
-      InDet::TrackQualityCuts                                  m_trackquality  ;
-      std::vector<double>                                      m_errorScale    ; /** Optional error scaling of track parameters  */
-      double                                                   m_outlierCut    ; /** Outlier chi2 cut when propagating through the seed */
-      bool                                                     m_searchInCaloROI; /** Outlier chi2 cut when propagating through the seed */
+      double                       m_xi2max        ; /** max Xi2 for updators */
+      double                       m_xi2maxNoAdd   ; /** max Xi2 for outliers */
+      double                       m_xi2maxlink    ; /** max Xi2 for clusters */
+      double                       m_pTmin         ; /** min pT  */
+      int                          m_nholesmax     ; /** Max number holes  */
+      int                          m_dholesmax     ; /** Max gap between holes */
+      int                          m_nclusmin      ; /** Min number clusters */
+      int                          m_nwclusmin     ; /** Min number weighted clusters */
+      bool                         m_bremCorrect   ; /** Optional Brem correction */
+      bool                         m_propR         ; /** Check seed-TRT segment consistency at large etas */
+      bool                         m_useassoTool   ; /** Use prd-track association tool */
+      InDet::TrackQualityCuts      m_trackquality  ;
+      std::vector<double>          m_errorScale    ; /** Optional error scaling of track parameters  */
+      double                       m_outlierCut    ; /** Outlier chi2 cut when propagating through the seed */
+      bool                         m_searchInCaloROI; /** Outlier chi2 cut when propagating through the seed */
       SG::ReadHandleKey<ROIPhiRZContainer> m_caloClusterROIKey{this, "EMROIPhiRZContainer", ""};
 
 
@@ -201,48 +201,56 @@ namespace InDet{
       void magneticFieldInit();
 
       /** Update track parameters through space point propagation  */
-       const Trk::TrackParameters*                            getTP(MagField::AtlasFieldCache& fieldCache, const Trk::SpacePoint*,
-                                                                    const Trk::TrackParameters*,
-                                                                    bool&,
-                                                                    InDet::TRT_SeededTrackFinder_ATL::EventData &event_data) const;
+      std::unique_ptr<const Trk::TrackParameters> 
+      getTP(MagField::AtlasFieldCache& fieldCache, const Trk::SpacePoint*,
+             const Trk::TrackParameters&, bool&, 
+             InDet::TRT_SeededTrackFinder_ATL::EventData &event_data) const;
 
       /** Find the corresponding list of Si tracks  */
-      std::list<Trk::Track*>                                 findTrack(const EventContext& ctx, MagField::AtlasFieldCache& fieldCache,
-                                                                       InDet::TRT_SeededTrackFinder_ATL::EventData &event_data,
-                                                                       const Trk::TrackParameters*,const Trk::TrackSegment&) const;
+      std::list<Trk::Track*>
+      findTrack(const EventContext& ctx, MagField::AtlasFieldCache& fieldCache,
+                InDet::TRT_SeededTrackFinder_ATL::EventData &event_data,
+                const Trk::TrackParameters&,const Trk::TrackSegment&) const;
 
       /** Add material effects   */
-      const Trk::TrackParameters*                            addNoise(double,double,double,double,const Trk::TrackParameters*,int) const;
+      std::unique_ptr<const Trk::TrackParameters> 
+      addNoise(const SiNoise_bt &,const Trk::TrackParameters&,int) const;
 
 
       /** Check consistency of seed and TRT track segment */
-      bool                                                   checkSeed(std::vector<const Trk::SpacePoint*>&,const Trk::TrackSegment&,const Trk::TrackParameters*) const;
+      bool
+      checkSeed(std::vector<const Trk::SpacePoint*>&,const Trk::TrackSegment&,
+                const Trk::TrackParameters&) const;
 
       /** Modify track parameters if brem correction  */
-      static const Trk::TrackParameters*                            modifyTrackParameters(const Trk::TrackParameters&,int) ;
+      static std::unique_ptr<const Trk::TrackParameters>
+      modifyTrackParameters(const Trk::TrackParameters&,int) ;
 
       /** Set the track quality cuts for combinatorial track finding   */
-      void                                                   setTrackQualityCuts();
+      void
+      setTrackQualityCuts();
 
       /** Map PRDs-tracks */
-      static void                                                   clusterTrackMap(Trk::Track*,
-                                                                             InDet::TRT_SeededTrackFinder_ATL::EventData &event_data)
-                                                                            ;
+      static void
+      clusterTrackMap(Trk::Track*,InDet::TRT_SeededTrackFinder_ATL::EventData &event_data);
 
       /** Seed used by another track?  */
-      static bool                                                   newClusters(const std::vector<const Trk::SpacePoint*>&,
-                                                                         InDet::TRT_SeededTrackFinder_ATL::EventData &event_data) ;
+      static bool
+      newClusters(const std::vector<const Trk::SpacePoint*>&,
+                  InDet::TRT_SeededTrackFinder_ATL::EventData &event_data) ;
 
       /** Seed SPs used by other high quality tracks? */
-      static bool                                                   newSeed(const std::vector<const Trk::SpacePoint*>&,
-                                                                     InDet::TRT_SeededTrackFinder_ATL::EventData &event_data) ;
+      static bool
+      newSeed(const std::vector<const Trk::SpacePoint*>&,
+              InDet::TRT_SeededTrackFinder_ATL::EventData &event_data) ;
 
       /** Clean-up duplicate tracks  */
-      static bool                                                   isNewTrack(Trk::Track*,
-                                                                        InDet::TRT_SeededTrackFinder_ATL::EventData &event_data) ;
+      static bool
+      isNewTrack(Trk::Track*,InDet::TRT_SeededTrackFinder_ATL::EventData &event_data) ;
 
       /** Eliminate spurious Pixel clusters in track  */
-      std::list<Trk::Track*>                                 cleanTrack(std::list<Trk::Track*>) const;
+      std::list<Trk::Track*> 
+      cleanTrack(std::list<Trk::Track*>) const;
 
       /** aalonso: Only propagete to the Si if the TRT segment is compatible with a calo measurement */
       bool isCaloCompatible(const Trk::TrackParameters&, const InDet::TRT_SeededTrackFinder_ATL::EventData &event_data) const;
