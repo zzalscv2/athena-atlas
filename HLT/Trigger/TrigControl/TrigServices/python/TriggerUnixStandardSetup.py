@@ -82,41 +82,12 @@ def commonServicesCfg(flags):
 
 
 def setupCommonServicesEnd():
-    from AthenaCommon.AppMgr import ServiceMgr as svcMgr, athCondSeq
-    from AthenaCommon.Logging import logging
     from AthenaCommon.AlgSequence import AlgSequence
 
-    log = logging.getLogger( 'TriggerUnixStandardSetup::setupCommonServicesEnd:' )
     topSequence = AlgSequence()
-
-    # Make sure no THistSvc output/input stream is defined for online running
-    if _Conf.useOnlineTHistSvc:
-        svcMgr.THistSvc.Output = []
-        if len(svcMgr.THistSvc.Input)>0:
-            log.error('THistSvc.Input = %s. Input not allowed for online running. Disabling input.', svcMgr.THistSvc.Input)
-            svcMgr.THistSvc.Input = []
-
-    # For offline running make sure at least the EXPERT stream is defined
-    else:
-        if 1 not in [ o.count('EXPERT') for o in svcMgr.THistSvc.Output ]:
-            svcMgr.THistSvc.Output += ["EXPERT DATAFILE='expert-monitoring.root' OPT='RECREATE'"]
 
     # Basic operational monitoring
     from TrigOnlineMonitor.TrigOnlineMonitorConfig import TrigOpMonitor
     topSequence += TrigOpMonitor()
-
-    # Set default properties for some important services after all user job options
-    log.info('Configure core services for online running')
-
-    from TrigServices.TrigServicesConfig import enableCOOLFolderUpdates
-    enableCOOLFolderUpdates()
-
-    if hasattr(svcMgr,'IOVDbSvc'):
-        svcMgr.IOVDbSvc.CacheAlign = 0  # VERY IMPORTANT to get unique queries for folder udpates (see Savannah #81092)
-        svcMgr.IOVDbSvc.CacheRun = 0
-        svcMgr.IOVDbSvc.CacheTime = 0
-
-    if hasattr(athCondSeq, 'AtlasFieldMapCondAlg'):
-        athCondSeq.AtlasFieldMapCondAlg.LoadMapOnStart = True
 
     return

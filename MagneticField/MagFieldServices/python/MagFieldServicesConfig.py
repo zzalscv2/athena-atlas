@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -30,6 +30,8 @@ def AtlasFieldCacheCondAlgCfg(flags, **kwargs):
     if flags.Common.isOnline:
       # online does not use DCS
       afmArgs.update( UseMapsFromCOOL = False )
+      # load map on start() for HLT
+      afmArgs.update( LoadMapOnStart = flags.Trigger.doHLT and flags.Trigger.Online.isPartition )
       # consider field off if current is below these values:
       afmArgs.update( SoleMinCurrent = 160 )  # Standby current is 150A
       afmArgs.update( ToroMinCurrent = 210 )  # Standby current is 200A

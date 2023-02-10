@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # JobOption fragment to set up the magnetic field services and algorithms 
 # Valerio Ippolito - Harvard University
@@ -9,6 +9,7 @@ from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s", __name__)
 
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
+from AthenaCommon.AppMgr import ServiceMgr as svcMgr
 from AthenaCommon import CfgMgr
 
 #--------------------------------------------------------------
@@ -31,6 +32,8 @@ def AtlasFieldMapCondAlg(name="AtlasFieldMapCondAlg",**kwargs):
   if athenaCommonFlags.isOnline():
     # online does not use DCS
     kwargs.setdefault( "UseMapsFromCOOL", False )
+    # load map on start() for HLT
+    kwargs.setdefault( "LoadMapOnStart", hasattr(svcMgr, 'HltEventLoopMgr') )
     # consider field off if current is below these values:
     kwargs.setdefault( "SoleMinCurrent", 160 )  # Standby current is 150A
     kwargs.setdefault( "ToroMinCurrent", 210 )  # Standby current is 200A

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # File: LumiBlockComps/python/LuminosityCondAlgConfig.py
 # Created: May 2019, sss, from existing LuminosityToolDefault.
@@ -167,14 +167,14 @@ def luminosityCondAlgOnlineCfg (configFlags, name, result):
         result.merge (addFolders (configFlags, folder, 'TRIGGER_ONL',
                                   className = 'CondAttrListCollection'))
       
-    else: #  Run 2
+    else: # Run 2+
         if configFlags.IOVDb.DatabaseInstance != 'CONDBR2':
-            log.warning("LuminosityCondAlgOnlineCfg can't resolve DatabaseInstance = %s, assume Run2!", configFlags.IOVDb.DatabaseInstance)
-            log.info("Using Run 2 configuration")
+            log.warning("LuminosityCondAlgOnlineCfg can't resolve DatabaseInstance = %s, assuming CONDBR2!", configFlags.IOVDb.DatabaseInstance)
 
         folder  = "/TRIGGER/LUMI/HLTPrefLumi"
         result.merge (addFolders (configFlags, folder, 'TRIGGER_ONL',
-                                  className = 'CondAttrListCollection'))
+                                  className = 'CondAttrListCollection',
+                                  extensible = configFlags.Trigger.doHLT and configFlags.Trigger.Online.isPartition))
 
     kwargs['LuminosityFolderInputKey'] = folder
     log.info ("Created online %s using folder %s" % (name, folder))

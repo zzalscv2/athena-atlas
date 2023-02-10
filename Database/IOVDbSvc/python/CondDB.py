@@ -190,8 +190,10 @@ class CondDB:
 
             # enable Frontier cache alignment if it looks like Frontier will
             # be used (via FRONTIER_SERVER variable)
-            if 'FRONTIER_SERVER' in os.environ.keys() and os.environ['FRONTIER_SERVER']!="":
+            # but not for HLT (ATR-4646)
+            if 'FRONTIER_SERVER' in os.environ.keys() and os.environ['FRONTIER_SERVER']!="" and not self.isOnline:
                 self.iovdbsvc.CacheAlign=3
+
             # setup PoolSvc catalogues
             from PoolSvc.PoolSvcConf import PoolSvc
             if not hasattr (svcMgr, 'PoolSvc'):

@@ -53,49 +53,37 @@ def getTHistSvc():
       svc = CompFactory.TrigMonTHistSvc("THistSvc")
    else:
       log.debug("Using offline histogramming service (THistSvc)")
-      svc = CompFactory.THistSvc()
+      svc = CompFactory.THistSvc("THistSvc",
+         Output = ["EXPERT DATAFILE='expert-monitoring.root' OPT='RECREATE'"] )
 
    return svc
 
 
-# Finalize COOL update configuration (called from TriggerUnixStandardSetup.setupCommonServicesEnd)
-def enableCOOLFolderUpdates():
+def getTrigCOOLUpdateHelper(flags, name='TrigCOOLUpdateHelper'):
    '''Enable COOL folder updates'''
 
-   from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-   if not hasattr(svcMgr,'IOVDbSvc'):
-      return
+   acc = ComponentAccumulator()
 
-   cool_helper = svcMgr.HltEventLoopMgr.CoolUpdateTool
+   montool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
+   montool.defineHistogram('TIME_CoolFolderUpdate', path='EXPERT', type='TH1F',
+                           title='Time for conditions update;time [ms]',
+                           xbins=100, xmin=0, xmax=200)
 
-   # Add the COOL folder map to IOVDbSvc. This is done 'manually' so it
-   # works both in new and old-style configurations:
-   svcMgr.IOVDbSvc.Folders.append('<db>COOLONL_TRIGGER/CONDBR2</db> %s' % cool_helper.CoolFolderMap)
+   cool_helper = CompFactory.TrigCOOLUpdateHelper(
+      name,
+      MonTool = montool,
+      CoolFolderMap = '/TRIGGER/HLT/COOLUPDATE',
+      # List of folders that can be updated during the run:
+      Folders = ['/Indet/Onl/Beampos',
+                 '/TRIGGER/LUMI/HLTPrefLumi',
+                 '/TRIGGER/HLT/PrescaleKey'] )
 
-   # Make sure relevant folders are marked as 'extensible':
-   for i, dbf in enumerate(svcMgr.IOVDbSvc.Folders):
-      for f in cool_helper.Folders:
-         if f in dbf and '<extensible/>' not in f:
-            svcMgr.IOVDbSvc.Folders[i] += ' <extensible/>'
-            log.info('IOVDbSvc folder %s not marked as extensible. Fixing this...', f)
+   from IOVDbSvc.IOVDbSvcConfig import addFolders
+   acc.merge( addFolders(flags, cool_helper.CoolFolderMap, 'TRIGGER_ONL',
+                         className='CondAttrListCollection') )
 
-
-def getTrigCOOLUpdateHelper(flags, name='TrigCOOLUpdateHelper'):
-   cool_helper = CompFactory.TrigCOOLUpdateHelper(name)
-   cool_helper.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
-   cool_helper.MonTool.defineHistogram('TIME_CoolFolderUpdate', path='EXPERT', type='TH1F',
-                                       title='Time for conditions update;time [ms]',
-                                       xbins=100, xmin=0, xmax=200)
-
-   # Name of COOL folder map:
-   cool_helper.CoolFolderMap = '/TRIGGER/HLT/COOLUPDATE'
-
-   # List of folders that can be updated during the run:
-   cool_helper.Folders = ['/Indet/Onl/Beampos',
-                          '/TRIGGER/LUMI/HLTPrefLumi',
-                          '/TRIGGER/HLT/PrescaleKey']
-
-   return cool_helper
+   acc.setPrivateTools( cool_helper )
+   return acc
 
 
 def getHltROBDataProviderSvc(flags, name='ROBDataProviderSvc'):
@@ -186,9 +174,10 @@ def TrigServicesCfg(flags):
    acc.addService( getMessageSvc(flags) )
    acc.addService( getTHistSvc() )
    acc.addService( getHltROBDataProviderSvc(flags) )
+   cool_helper = acc.popToolsAndMerge( getTrigCOOLUpdateHelper(flags) )
 
    loop_mgr = getHltEventLoopMgr(flags)
-   loop_mgr.CoolUpdateTool = getTrigCOOLUpdateHelper(flags)
+   loop_mgr.CoolUpdateTool = cool_helper
 
    from TrigOutputHandling.TrigOutputHandlingConfig import HLTResultMTMakerCfg
    loop_mgr.ResultMaker = HLTResultMTMakerCfg(flags)
