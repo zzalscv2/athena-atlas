@@ -325,7 +325,7 @@ namespace top {
       else if (runNumber >= 324320 && runNumber < 364485) {
         m_muon_trigger_sf_config = "HLT_mu26_ivarmedium_OR_HLT_mu50";
       } else if (runNumber >= 410000) { // 2022+
-        m_muon_trigger_sf_config = "HLT_mu24_ivarmedium_OR_HLT_mu50";
+        m_muon_trigger_sf_config = "HLT_mu24_ivarmedium_L1MU14FCH_OR_HLT_mu50_L1MU14FCH";
 			}
 
       if (m_config->muonForceTrigger() != " "){ 

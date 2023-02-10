@@ -83,7 +83,7 @@ namespace CP {
               fileName = "muontrigger_sf_2017_mc16d_v03.root";
           }
           else if (year == 2018) fileName = "muontrigger_sf_2018_mc16e_v02.root";
-            else if (year == 2022) fileName = "muontrigger_sf_2022_mc21.root";
+            else if (year == 2022) fileName = "muontrigger_sf_2022_mc21_v02.root";
           else{
             ATH_MSG_WARNING("There is no SF file for year " << year << " yet");
             return StatusCode::SUCCESS;
@@ -804,6 +804,7 @@ namespace CP {
         else if (year == 2022) {
             if(runNumber >= 430536 && runNumber <= 432180) return "F";
             else if (runNumber >= 435816 && runNumber <= 439927) return "H";
+            else if (runNumber >= 440407 && runNumber <= 440613) return "J";
         }
     
       ATH_MSG_FATAL("RunNumber: " << runNumber << " not known! Will stop the code to prevent using wrong SFs.");
