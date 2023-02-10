@@ -105,14 +105,26 @@ def CombinedMuonIDHoleSearchCfg(flags, name = 'CombinedMuonIDHoleSearch', **kwar
   
   if 'BoundaryCheckTool' not in kwargs:
     from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
-    from InDetConfig.InDetTestPixelLayerConfig import InDetTestPixelLayerToolCfg
+    from InDetConfig.InDetTestPixelLayerConfig import InDetTestPixelLayerToolCfg, InDetTrigTestPixelLayerToolCfg
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
     atlasextrapolator = result.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
     result.addPublicTool(atlasextrapolator)  # TODO: migrate to private?
-    BoundaryCheckTool = result.popToolsAndMerge(
-      InDetBoundaryCheckToolCfg(flags, name='CombinedMuonIDBoundaryCheckTool', 
-      PixelLayerTool=result.popToolsAndMerge(
-        InDetTestPixelLayerToolCfg(flags, name='CombinedMuonPixelLayerToolDefault', Extrapolator=atlasextrapolator))))
+    if flags.Muon.MuonTrigger:
+      from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg
+      sctCondTool = result.popToolsAndMerge(SCT_ConditionsSummaryToolCfg(flags, withFlaggedCondTool=False, withByteStreamErrorsTool=False))
+
+      BoundaryCheckTool = result.popToolsAndMerge(
+        InDetBoundaryCheckToolCfg(flags, name='CombinedMuonIDBoundaryCheckTool', 
+                                  SCTDetElStatus="",
+                                  SctSummaryTool=sctCondTool,
+                                  PixelLayerTool=result.popToolsAndMerge(
+                                    InDetTrigTestPixelLayerToolCfg(flags, name='CombinedMuonPixelLayerToolDefault', Extrapolator=atlasextrapolator))))
+    else:
+      BoundaryCheckTool = result.popToolsAndMerge(
+        InDetBoundaryCheckToolCfg(flags, name='CombinedMuonIDBoundaryCheckTool', 
+                                  PixelLayerTool=result.popToolsAndMerge(
+                                    InDetTestPixelLayerToolCfg(flags, name='CombinedMuonPixelLayerToolDefault', Extrapolator=atlasextrapolator))))
+
     kwargs.setdefault('BoundaryCheckTool', BoundaryCheckTool)
   result.setPrivateTools(result.popToolsAndMerge(InDetTrackHoleSearchToolCfg(flags, name, **kwargs)))
   return result

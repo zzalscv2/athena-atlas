@@ -130,7 +130,7 @@ def MuonCombinedInDetDetailedTrackSelectorToolCfg(flags, name="MuonCombinedInDet
         kwargs.setdefault("nHitBLayerPlusPix", 0)
         kwargs.setdefault("nHitTrt",           0)
         kwargs.setdefault("useTrackQualityInfo", False)
-        if flags.Muon.SAMuonTrigger:
+        if flags.Muon.MuonTrigger:
             kwargs.setdefault("IPd0Max",       19999.0)
             kwargs.setdefault("IPz0Max",       19999.0)
             kwargs.setdefault("z0Max",         19999.0)
