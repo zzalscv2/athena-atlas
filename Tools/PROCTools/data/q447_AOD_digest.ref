@@ -1,6 +1,6 @@
          run       event       nTopo   nIdTracks  nTauTracks       nTaus      nMuons       nElec   nTrueElec   nFakeElec       nPhot   nTruePhot   nFakePhot
       242000       60001         572          74           2           1           2           0           0           0           1           1           0
-      242000       60002         379          44          16           4           3           4           0           4           4           3           1
+      242000       60002         391          44          19           4           3           6           2           4           5           4           1
       242000       60003         123           5           0           0           0           0           0           0           0           0           0
       242000       60004         352          22           9           3           2           3           0           3           2           0           2
       242000       60005         333          26           7           1           0           0           0           0           1           1           0
