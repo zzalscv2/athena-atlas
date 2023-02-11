@@ -87,9 +87,8 @@ TCS::MuonTOB MuonInputProvider::createMuonTOB(const xAOD::MuonRoI & muonRoI, con
    if (phi < 0) { phi += 2*M_PI;}
    phi *= phiRescaleFactor; // 2pi -> 6.4
    int etaTopo = topoIndex(eta,40);
-   int phiTopo = topoIndex(phi,20);
+   int phiTopo = topoIndex(phi,20) % 128;
 
-   
    TCS::MuonTOB muon( EtTopo, 0, etaTopo, static_cast<unsigned int>(phiTopo), muonRoI.getRoI() );
    muon.setEtDouble(static_cast<double>(EtTopo/10.));
    muon.setEtaDouble(static_cast<double>(etaTopo/40.));
@@ -168,7 +167,7 @@ MuonInputProvider::createMuonTOB(const MuCTPIL1TopoCandidate & roi) const {
    if (fPhi < 0) { fPhi += 2*M_PI; }
    fPhi *= phiRescaleFactor; // 2pi -> 6.4
    int etaTopo = topoIndex(fEta,40);
-   int phiTopo = topoIndex(fPhi,20);
+   int phiTopo = topoIndex(fPhi,20) % 128;
 
    
    TCS::MuonTOB muon( EtTopo, 0, etaTopo, static_cast<unsigned int>(phiTopo), roi.getRoiID() );
@@ -224,7 +223,7 @@ MuonInputProvider::createLateMuonTOB(const MuCTPIL1TopoCandidate & roi) const {
    if (fPhi < 0) { fPhi += 2*M_PI; }
    fPhi *= phiRescaleFactor; // 2pi -> 6.4
    int etaTopo = topoIndex(roi.geteta(),40);
-   int phiTopo = topoIndex(fPhi,20);
+   int phiTopo = topoIndex(fPhi,20) % 128;
 
  
    TCS::LateMuonTOB muon( EtTopo, 0, etaTopo, static_cast<unsigned int>(phiTopo), roi.getRoiID() );
