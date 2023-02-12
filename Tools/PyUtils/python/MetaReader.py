@@ -1066,6 +1066,7 @@ def make_peeker(meta_dict):
                 'AtlasRelease',
                 'specialConfiguration',
                 'mc_campaign',
+                'hepmc_version',
             ]
             for item in list(meta_dict[filename]['/TagInfo']):
                 if item not in keys_to_keep:
