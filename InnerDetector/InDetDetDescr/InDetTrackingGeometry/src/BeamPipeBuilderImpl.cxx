@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackingGeometry/BeamPipeBuilderImpl.h"
@@ -99,7 +99,7 @@ std::unique_ptr<const std::vector<Trk::CylinderLayer*> > InDet::BeamPipeBuilderI
 
   // binned layer material for the beam pipe possible
   Trk::CylinderLayer * pThisCylinderLayer{};
-  if (m_beamPipeBinsZ == 1) {
+  if (m_beamPipeBinsZ == 1u) {
     const auto &beamPipeLayerMaterial = Trk::HomogeneousLayerMaterial(beamPipeMaterial, 1.0);
     pThisCylinderLayer = new Trk::CylinderLayer(beamPipeTransform,
                                                 beamPipeBounds,
