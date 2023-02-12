@@ -13,7 +13,7 @@ from AthenaCommon.Logging import logging
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 @AccumulatorCache
-def LuminosityCondAlgCfg (configFlags, useOnlineLumi=None, suffix=None):
+def LuminosityCondAlgCfg (flags, useOnlineLumi=None, suffix=None):
     # This function, without the useOnlineLumi and suffix arguments,  will set up a default configuration 
     # appropriate to the job; the conditions object will be called LuminosityCondData
     # Can override whether it sets up the online lumi (but then you are strongly urged to use the suffix
@@ -27,19 +27,19 @@ def LuminosityCondAlgCfg (configFlags, useOnlineLumi=None, suffix=None):
     if useOnlineLumi is not None and suffix is None:
         log.warning('useOnlineLumi argument is provided but not a suffix for the lumi object name. Is this really intended?')
 
-    if configFlags.Input.isMC:
-        kwargs = luminosityCondAlgMCCfg (configFlags, name, result)
-    elif ((useOnlineLumi is None and configFlags.Common.useOnlineLumi)
+    if flags.Input.isMC:
+        kwargs = luminosityCondAlgMCCfg (flags, name, result)
+    elif ((useOnlineLumi is None and flags.Common.useOnlineLumi)
           or (useOnlineLumi is not None and useOnlineLumi)):
-        kwargs = luminosityCondAlgOnlineCfg (configFlags, name, result)
-    elif configFlags.IOVDb.DatabaseInstance == 'COMP200':
-        kwargs = luminosityCondAlgRun1Cfg (configFlags, name, result)
-    elif configFlags.IOVDb.DatabaseInstance == 'CONDBR2':
-        kwargs = luminosityCondAlgRun2Cfg (configFlags, name, result)
+        kwargs = luminosityCondAlgOnlineCfg (flags, name, result)
+    elif flags.IOVDb.DatabaseInstance == 'COMP200':
+        kwargs = luminosityCondAlgRun1Cfg (flags, name, result)
+    elif flags.IOVDb.DatabaseInstance == 'CONDBR2':
+        kwargs = luminosityCondAlgRun2Cfg (flags, name, result)
 
     else:
-        log.warning ("LuminosityCondAlgCfg can't resolve database instance = %s, assume Run2!" % configFlags.IOVDb.DatabaseInstance)
-        kwargs = luminosityCondAlgRun2Cfg (configFlags, name, result)
+        log.warning ("LuminosityCondAlgCfg can't resolve database instance = %s, assume Run2!" % flags.IOVDb.DatabaseInstance)
+        kwargs = luminosityCondAlgRun2Cfg (flags, name, result)
 
     LuminosityCondAlg=CompFactory.LuminosityCondAlg
 
@@ -51,9 +51,9 @@ def LuminosityCondAlgCfg (configFlags, useOnlineLumi=None, suffix=None):
     return result
 
 
-def luminosityCondAlgMCCfg (configFlags, name, result):
+def luminosityCondAlgMCCfg (flags, name, result):
     from Digitization.DigitizationParametersConfig import readDigitizationParameters
-    result.merge(readDigitizationParameters(configFlags))
+    result.merge(readDigitizationParameters(flags))
     return { 'LuminosityFolderInputKey' : '',
              'DigitizationFolderInputKey' : '/Digitization/Parameters',
              'OnlineLumiCalibrationInputKey' : '',
@@ -64,20 +64,20 @@ def luminosityCondAlgMCCfg (configFlags, name, result):
 
 
 # Configuration for offline default luminosity used in Run2
-def luminosityCondAlgRun2Cfg (configFlags, name, result):
+def luminosityCondAlgRun2Cfg (flags, name, result):
     log = logging.getLogger(name)
 
     kwargs = {}
 
     # Check if this is express stream or bulk
-    if configFlags.Common.doExpressProcessing:
+    if flags.Common.doExpressProcessing:
         lumiFolder  = "/TRIGGER/LUMI/OnlPrefLumi"
-        result.merge (addFolders (configFlags, lumiFolder, 'TRIGGER_ONL',
+        result.merge (addFolders (flags, lumiFolder, 'TRIGGER_ONL',
                                   className = 'CondAttrListCollection'))
 
     else:
         lumiFolder = "/TRIGGER/OFLLUMI/OflPrefLumi"
-        result.merge (addFolders (configFlags, lumiFolder, 'TRIGGER_OFL',
+        result.merge (addFolders (flags, lumiFolder, 'TRIGGER_OFL',
                                   className = 'CondAttrListCollection'))
 
     log.info ("luminosityCondAlgRun2Config requested %s", lumiFolder)
@@ -88,7 +88,7 @@ def luminosityCondAlgRun2Cfg (configFlags, name, result):
     # Need the calibration just to get the proper MuToLumi value
     from CoolLumiUtilities.OnlineLumiCalibrationCondAlgConfig \
         import OnlineLumiCalibrationCondAlgCfg
-    result.merge (OnlineLumiCalibrationCondAlgCfg(configFlags))
+    result.merge (OnlineLumiCalibrationCondAlgCfg(flags))
     olalg = result.getCondAlgo ('OnlineLumiCalibrationCondAlg')
     kwargs['OnlineLumiCalibrationInputKey'] = olalg.LumiCalibOutputKey
     
@@ -98,27 +98,27 @@ def luminosityCondAlgRun2Cfg (configFlags, name, result):
     kwargs['FillParamsInputKey'] = ''
 
     # if cosmics, suppress warnings.
-    if configFlags.Beam.Type is BeamType.Cosmics:
+    if flags.Beam.Type is BeamType.Cosmics:
         kwargs['ExpectInvalid'] = True
 
     return kwargs
 
 
 # Configuration for offline default luminosity used in Run1
-def luminosityCondAlgRun1Cfg (configFlags, name, result):
+def luminosityCondAlgRun1Cfg (flags, name, result):
     log = logging.getLogger(name)
 
     kwargs = {}
        
     # Check if this is express stream or bulk
-    if configFlags.Common.doExpressProcessing:
+    if flags.Common.doExpressProcessing:
         lumiFolder  = "/TRIGGER/LUMI/LBLESTONL"
-        result.merge (addFolders (configFlags, lumiFolder, 'TRIGGER_ONL',
+        result.merge (addFolders (flags, lumiFolder, 'TRIGGER_ONL',
                                   className = 'CondAttrListCollection'))
 
     else:
         lumiFolder = "/TRIGGER/OFLLUMI/LBLESTOFL"
-        result.merge (addFolders (configFlags, lumiFolder, 'TRIGGER_OFL',
+        result.merge (addFolders (flags, lumiFolder, 'TRIGGER_OFL',
                                   className = 'CondAttrListCollection'))
 
     log.info ("configureLuminosityCondAlgRun1 requested %s", lumiFolder)
@@ -127,25 +127,25 @@ def luminosityCondAlgRun1Cfg (configFlags, name, result):
     # Configure input conditions data.
     from CoolLumiUtilities.FillParamsCondAlgConfig \
         import FillParamsCondAlgCfg
-    result.merge (FillParamsCondAlgCfg (configFlags))
+    result.merge (FillParamsCondAlgCfg (flags))
     fpalg = result.getCondAlgo ('FillParamsCondAlg')
     kwargs['FillParamsInputKey'] = fpalg.FillParamsOutputKey
 
     from CoolLumiUtilities.BunchLumisCondAlgConfig \
         import BunchLumisCondAlgCfg
-    result.merge (BunchLumisCondAlgCfg (configFlags))
+    result.merge (BunchLumisCondAlgCfg (flags))
     blalg = result.getCondAlgo ('BunchLumisCondAlg')
     kwargs['BunchLumisInputKey'] = blalg.BunchLumisOutputKey
 
     from CoolLumiUtilities.BunchGroupCondAlgConfig \
         import BunchGroupCondAlgCfg
-    result.merge (BunchGroupCondAlgCfg (configFlags))
+    result.merge (BunchGroupCondAlgCfg (flags))
     bgalg = result.getCondAlgo ('BunchGroupCondAlg')
     kwargs['BunchGroupInputKey'] = bgalg.BunchGroupOutputKey
 
     from CoolLumiUtilities.OnlineLumiCalibrationCondAlgConfig \
         import OnlineLumiCalibrationCondAlgCfg
-    result.merge (OnlineLumiCalibrationCondAlgCfg (configFlags))
+    result.merge (OnlineLumiCalibrationCondAlgCfg (flags))
     olalg = result.getCondAlgo ('OnlineLumiCalibrationCondAlg')
     kwargs['OnlineLumiCalibrationInputKey'] = olalg.LumiCalibOutputKey
 
@@ -154,7 +154,7 @@ def luminosityCondAlgRun1Cfg (configFlags, name, result):
 
 
 # Configuration for online luminosity.
-def luminosityCondAlgOnlineCfg (configFlags, name, result):
+def luminosityCondAlgOnlineCfg (flags, name, result):
     log = logging.getLogger(name)
 
     kwargs = {}
@@ -162,19 +162,19 @@ def luminosityCondAlgOnlineCfg (configFlags, name, result):
     # Keep values for invalid data
     kwargs['SkipInvalid'] = False
 
-    if configFlags.IOVDb.DatabaseInstance == 'COMP200': # Run1
+    if flags.IOVDb.DatabaseInstance == 'COMP200': # Run1
         folder  = "/TRIGGER/LUMI/LBLESTONL"
-        result.merge (addFolders (configFlags, folder, 'TRIGGER_ONL',
+        result.merge (addFolders (flags, folder, 'TRIGGER_ONL',
                                   className = 'CondAttrListCollection'))
       
     else: # Run 2+
-        if configFlags.IOVDb.DatabaseInstance != 'CONDBR2':
-            log.warning("LuminosityCondAlgOnlineCfg can't resolve DatabaseInstance = %s, assuming CONDBR2!", configFlags.IOVDb.DatabaseInstance)
+        if flags.IOVDb.DatabaseInstance != 'CONDBR2':
+            log.warning("LuminosityCondAlgOnlineCfg can't resolve DatabaseInstance = %s, assuming CONDBR2!", flags.IOVDb.DatabaseInstance)
 
         folder  = "/TRIGGER/LUMI/HLTPrefLumi"
-        result.merge (addFolders (configFlags, folder, 'TRIGGER_ONL',
+        result.merge (addFolders (flags, folder, 'TRIGGER_ONL',
                                   className = 'CondAttrListCollection',
-                                  extensible = configFlags.Trigger.doHLT and configFlags.Trigger.Online.isPartition))
+                                  extensible = flags.Trigger.doHLT and flags.Trigger.Online.isPartition))
 
     kwargs['LuminosityFolderInputKey'] = folder
     log.info ("Created online %s using folder %s" % (name, folder))
@@ -182,7 +182,7 @@ def luminosityCondAlgOnlineCfg (configFlags, name, result):
     # Need the calibration just to get the proper MuToLumi value
     from CoolLumiUtilities.OnlineLumiCalibrationCondAlgConfig \
         import OnlineLumiCalibrationCondAlgCfg
-    result.merge (OnlineLumiCalibrationCondAlgCfg(configFlags))
+    result.merge (OnlineLumiCalibrationCondAlgCfg(flags))
     olalg = result.getCondAlgo ('OnlineLumiCalibrationCondAlg')
     kwargs['OnlineLumiCalibrationInputKey'] = olalg.LumiCalibOutputKey
     
@@ -195,11 +195,11 @@ def luminosityCondAlgOnlineCfg (configFlags, name, result):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     print ('--- run2')
-    flags1 = ConfigFlags.clone()
+    flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RAW
     flags1.lock()
     acc1 = LuminosityCondAlgCfg (flags1)
@@ -208,7 +208,7 @@ if __name__ == "__main__":
     acc1.wasMerged()
 
     print ('--- run2/express')
-    flags2 = ConfigFlags.clone()
+    flags2 = initConfigFlags()
     flags2.Input.Files = defaultTestFiles.RAW
     flags2.Common.doExpressProcessing = True
     flags2.lock()
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     acc2.wasMerged()
 
     print ('--- run1')
-    flags3 = ConfigFlags.clone()
+    flags3 = initConfigFlags()
     flags3.Input.Files = defaultTestFiles.RAW
     flags3.Input.ProjectName = 'data12_8TeV'
     flags3.lock()
@@ -228,7 +228,7 @@ if __name__ == "__main__":
     acc3.wasMerged()
 
     print ('--- run1/express')
-    flags4 = ConfigFlags.clone()
+    flags4 = initConfigFlags()
     flags4.Input.Files = defaultTestFiles.RAW
     flags4.Input.ProjectName = 'data12_8TeV'
     flags4.Common.doExpressProcessing = True
@@ -239,7 +239,7 @@ if __name__ == "__main__":
     acc4.wasMerged()
 
     print ('--- mc')
-    flags5 = ConfigFlags.clone()
+    flags5 = initConfigFlags()
     flags5.Input.Files = defaultTestFiles.ESD
     flags5.lock()
     acc5 = LuminosityCondAlgCfg (flags5)
@@ -247,7 +247,7 @@ if __name__ == "__main__":
     acc5.wasMerged()
 
     print ('--- online')
-    flags6 = ConfigFlags.clone()
+    flags6 = initConfigFlags()
     flags6.Input.Files = defaultTestFiles.RAW
     flags6.Common.useOnlineLumi = True
     flags6.lock()
@@ -256,7 +256,7 @@ if __name__ == "__main__":
     acc6.wasMerged()
 
     print ('--- forced online')
-    flags7 = ConfigFlags.clone()
+    flags7 = initConfigFlags()
     flags7.Input.Files = defaultTestFiles.RAW
     flags7.lock()
     acc7 = LuminosityCondAlgCfg (flags7, useOnlineLumi=True, suffix='Online')
