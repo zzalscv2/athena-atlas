@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local
@@ -747,7 +747,7 @@ QPair<bool,double> CaloClusterCollectionSettingsButton::scale() const
   //IParticleCollHandle_CaloCluster* col = dynamic_cast<IParticleCollHandle_CaloCluster*>(m_d->coll);
   if (dynamic_cast<IParticleCollHandle_CaloCluster*>(m_d->coll)) {
 	  std::cout << "col OK! " << std::endl;
-    if ( m_d->coll && highestvisibleenergy < m_d->coll->highestVisibleClusterEnergy() )
+    if ( highestvisibleenergy < m_d->coll->highestVisibleClusterEnergy() )
       highestvisibleenergy = m_d->coll->highestVisibleClusterEnergy();
   }
 
