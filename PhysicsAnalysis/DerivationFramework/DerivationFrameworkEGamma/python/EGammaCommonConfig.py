@@ -574,7 +574,7 @@ def EGammaCommonCfg(ConfigFlags):
         from JetRecConfig.StandardJetConstits import stdConstitDic as cst
 
         # Schedule PseudoJetTruth
-        constit_algs = getInputAlgs(cst.Truth, configFlags=ConfigFlags)
+        constit_algs = getInputAlgs(cst.Truth, flags=ConfigFlags)
         constit_algs = reOrderAlgs( [a for a in constit_algs if a is not None])
 
         for a in constit_algs:

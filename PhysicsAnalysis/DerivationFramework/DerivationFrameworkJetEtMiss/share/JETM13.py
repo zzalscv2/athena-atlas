@@ -71,7 +71,7 @@ from JetRecConfig.JetInputConfig import buildEventShapeAlg
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
-constit_algs = getInputAlgs(cst.UFO, configFlags=ConfigFlags)
+constit_algs = getInputAlgs(cst.UFO, flags=ConfigFlags)
 constit_algs = reOrderAlgs( [a for a in constit_algs if a is not None])
 
 for a in constit_algs:
