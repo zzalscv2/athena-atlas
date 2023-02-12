@@ -1268,7 +1268,7 @@ InDet::SiLayerBuilderImpl::barrelLayerMaterial(double r, double hz) const
   // -- material with 1D binning
   Trk::BinUtility layerBinUtilityZ(m_barrelLayerBinsZ, -hz, hz, Trk::open, Trk::binZ);
   auto & layerBinUtility(layerBinUtilityZ);
-  if (m_barrelLayerBinsPhi!=1){ // -- material with 2D binning
+  if (m_barrelLayerBinsPhi!=1u){ // -- material with 2D binning
       Trk::BinUtility layerBinUtilityRPhiZ(m_barrelLayerBinsPhi,
                                                  -r*M_PI, r*M_PI,
                                                  Trk::closed,
@@ -1286,7 +1286,7 @@ InDet::SiLayerBuilderImpl::endcapLayerMaterial(double rMin, double rMax) const
 {
   // --------------- material estimation ----------------------------------------------------------------
   Trk::BinUtility layerBinUtilityR(m_endcapLayerBinsR,rMin,rMax,Trk::open, Trk::binR);
-  if (m_endcapLayerBinsPhi!=1){ // -- material with 2D binning
+  if (m_endcapLayerBinsPhi!=1u){ // -- material with 2D binning
       Trk::BinUtility layerBinUtilityPhi(m_endcapLayerBinsPhi,-M_PI,M_PI,Trk::closed,Trk::binPhi);
       layerBinUtilityR += layerBinUtilityPhi;
   }
