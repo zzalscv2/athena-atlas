@@ -7,10 +7,6 @@ from AthenaConfiguration.Enums import Format
 def RecoSteering(flags):
     """
     Generates configuration of the reconstructions
-
-    This driver configures all reconstruction steps unconditionally.
-    The selftest available below can be used for simple jobs,
-    yet full functionality is achieved with transforms that set many flags.
     """
     from AthenaCommon.Logging import logging
     log = logging.getLogger("RecoSteering")
@@ -160,10 +156,9 @@ def RecoSteering(flags):
             from eflowRec.PFRun3Config import PFTauFELinkCfg
             acc.merge(PFTauFELinkCfg(flags))
             log.info("---------- Configured particle flow tau FE linking")
-    
+
     acc.flagPerfmonDomain('Jets')
-    if flags.Reco.EnableJet and flags.Reco.EnableTau and flags.Reco.EnablePFlow\
-       and flags.Reco.EnableEgamma and flags.Reco.EnableCombinedMuon:
+    if flags.Reco.GlobalFELinking:
         # We also need to build links between the newly
         # created jet constituents (GlobalFE)
         # and electrons,photons,muons and taus
@@ -199,7 +194,7 @@ def RecoSteering(flags):
         acc.merge(AFPRecCfg(flags))
         log.info("---------- Configured AFP reconstruction")
 
-    #Lucid
+    # Lucid
     acc.flagPerfmonDomain('Lucid')
     if flags.Detector.EnableLucid:
         from ForwardRec.LucidRecConfig import LucidRecCfg

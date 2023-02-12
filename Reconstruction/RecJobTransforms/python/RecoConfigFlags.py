@@ -63,6 +63,11 @@ def createRecoConfigFlags():
     flags.addFlag("Reco.EnableTrackCellAssociation",
                   lambda prevFlags: prevFlags.Detector.EnableCalo and
                   prevFlags.Reco.EnableTracking)
+    flags.addFlag("Reco.GlobalFELinking",
+                  lambda prevFlags: prevFlags.Reco.EnableJet and
+                  prevFlags.Reco.EnableTau and prevFlags.Reco.EnablePFlow and
+                  prevFlags.Reco.EnableEgamma and
+                  prevFlags.Reco.EnableCombinedMuon)
 
     # This flags enables trigger data decoding (not trigger simulation)
     # EDMVersion > 0 check prevents this flag being true in jobs before
