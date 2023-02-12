@@ -385,7 +385,7 @@ int main( int argc, char* argv[] ) {
   // Triggers from https://twiki.cern.ch/twiki/bin/view/Atlas/LowestUnprescaled
   std::vector<std::string> el_triggers,mu_triggers,ph_triggers,tau_triggers,emu_triggers;
   if (isRun3){
-    el_triggers = {"HLT_e26_lhtight_ivarloose_L1EM22VHI", "HLT_e60_lhmedium_L1EM22VHI", "HLT_e140_lhloose_L1EM22VHI","HLT_e300_etcut_L1EM22VHI"};
+    el_triggers = {"HLT_e26_lhtight_ivarloose_L1EM22VHI", "HLT_e60_lhmedium_L1EM22VHI", "HLT_e140_lhloose_L1EM22VHI"};//,"HLT_e300_etcut_L1EM22VHI"
     mu_triggers = {"HLT_mu24_ivarmedium_L1MU14FCH","HLT_mu50_L1MU14FCH","HLT_mu60_0eta105_msonly_L1MU14FCH","HLT_mu60_L1MU14FCH","HLT_mu80_msonly_3layersEC_L1MU14FCH"};
     ph_triggers = {"HLT_g140_loose_L1EM22VHI","HLT_g300_etcut_L1EM22VHI"};
     tau_triggers = {"HLT_tau160_mediumRNN_tracktwoMVA_L1TAU100", "HLT_tau40_mediumRNN_tracktwoMVA_tau35_mediumRNN_tracktwoMVA_03dRAB_L1TAU25IM_2TAU20IM_2J25_3J20"};
@@ -1049,12 +1049,12 @@ int main( int argc, char* argv[] ) {
       TString muTrig2015 = "HLT_mu20_iloose_L1MU15_OR_HLT_mu50"; //"HLT_mu18_mu8noL1"; //"HLT_mu20_iloose_L1MU15_OR_HLT_mu50";
       TString muTrig2016 = "HLT_mu26_ivarmedium_OR_HLT_mu50";
       TString muTrig2017 = "HLT_mu26_ivarmedium_OR_HLT_mu50";
-      TString muTrig2022 = "HLT_mu24_ivarmedium_OR_HLT_mu50";
+      TString muTrig2022 = "HLT_mu24_ivarmedium_L1MU14FCH_OR_HLT_mu50_L1MU14FCH";
 
       std::vector<std::string> muTrigs2015 = {"HLT_mu20_iloose_L1MU15","HLT_mu50"}; //"HLT_mu18_mu8noL1"; //"HLT_mu20_iloose_L1MU15_OR_HLT_mu50";
       std::vector<std::string> muTrigs2016 = {"HLT_mu26_ivarmedium","HLT_mu50"};
       std::vector<std::string> muTrigs2017 = {"HLT_mu26_ivarmedium","HLT_mu50"};
-      std::vector<std::string> muTrigs2022 = {"HLT_mu24_ivarmedium","HLT_mu50"};
+      std::vector<std::string> muTrigs2022 = {"HLT_mu24_ivarmedium_L1MU14FCH","HLT_mu50_L1MU14FCH"};
 
       if (slices["mu"]) {
         ANA_MSG_DEBUG( "Muon step - selection" );

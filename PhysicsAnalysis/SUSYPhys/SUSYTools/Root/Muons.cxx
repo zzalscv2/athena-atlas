@@ -512,12 +512,6 @@ double SUSYObjDef_xAOD::GetMuonTriggerEfficiency(const xAOD::Muon& mu, const std
 
 double SUSYObjDef_xAOD::GetTotalMuonTriggerSF(const xAOD::MuonContainer& sfmuons, const std::string& trigExpr) {
  
-  unsigned int runNumber = GetRandomRunNumber(true);
-  if(m_isRun3 && (runNumber < 430536 || runNumber > 439927)) { //to be extended when trigger SF will be provided for beyond 2022 period H
-    ATH_MSG_WARNING("Muon Trigger SF not defined for this run! returning 1" );
-    return 1.;
-  } 
-
   if (trigExpr.empty() || sfmuons.empty()) return 1.;
 
 
