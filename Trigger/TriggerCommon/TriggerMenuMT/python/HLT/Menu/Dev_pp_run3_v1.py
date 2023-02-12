@@ -51,9 +51,9 @@ from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import (PhysicsStream,
 
 DevGroup = ['Development']
 
-def setupMenu():
+def setupMenu(menu_name):
 
-    chains = mc_menu.setupMenu()
+    chains = mc_menu.setupMenu(menu_name)
 
     from AthenaCommon.Logging import logging
     log = logging.getLogger( __name__ )

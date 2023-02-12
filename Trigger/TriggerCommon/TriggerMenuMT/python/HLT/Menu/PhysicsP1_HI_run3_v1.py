@@ -40,7 +40,7 @@ LowMuGroup = ['LowMu']
 LowMuGroupPhI = ['LowMuPhaseI']
 LowMuGroupLeg = ['LowMuLegacy']
 
-def setupMenu():
+def setupMenu(menu_name):
 
     from AthenaCommon.Logging import logging
     log = logging.getLogger( __name__ )

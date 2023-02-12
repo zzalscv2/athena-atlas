@@ -80,7 +80,7 @@ Topo2Group = ['Topo2']
 Topo3Group = ['Topo3']
 LegacyTopoGroup = ['LegacyTopo']
 
-def setupMenu():
+def setupMenu(menu_name):
 
     from AthenaCommon.Logging import logging
     log = logging.getLogger( __name__ )
@@ -2727,11 +2727,7 @@ def setupMenu():
         ChainProp(name='HLT_j0_pf_ftf_presel2c20b85_beamspotVtx_BeamSpotPEB_L1J45p0ETA21_3J15p0ETA25', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['PS:Online', 'RATE:BeamSpot',  'BW:BeamSpot']+SupportLegGroup),
     ]
 
-
-
     # if menu is not for P1, remove all online chains
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    menu_name = ConfigFlags.Trigger.triggerMenuSetup
     if 'P1' not in menu_name:
         for sig in chains:
            chainsToRemove = []

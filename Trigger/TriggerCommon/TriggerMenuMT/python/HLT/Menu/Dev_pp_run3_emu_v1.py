@@ -3,7 +3,7 @@
 from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 from .SignatureDicts import ChainStore
 
-def setupMenu():
+def setupMenu(menu_name):
 
     from AthenaCommon.Logging                 import logging
     log = logging.getLogger( __name__ )

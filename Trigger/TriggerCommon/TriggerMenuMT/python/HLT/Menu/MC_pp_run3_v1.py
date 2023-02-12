@@ -219,13 +219,13 @@ def addMCSignatures(chains):
     for sig in chainsMC:
         chains[sig] += chainsMC[sig]
 
-def setupMenu():
+def setupMenu(menu_name):
 
     from AthenaCommon.Logging import logging
     log = logging.getLogger( __name__ )
     log.info('[setupMenu] going to add the MC menu chains now')
     
-    chains = physics_menu.setupMenu()
+    chains = physics_menu.setupMenu(menu_name)
 
     addMCSignatures(chains)
 
