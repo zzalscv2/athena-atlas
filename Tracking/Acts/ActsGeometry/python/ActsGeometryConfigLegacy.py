@@ -14,7 +14,7 @@ def getActsExtrapolationTool(name="ActsExtrapolationTool", **kwargs):
 def getActsTrackingGeometrySvc(name="AtlasTrackingGeometrySvc", **kwargs):
     # Configuration for ACTS Fatras running
     kwargs.setdefault("UseMaterialMap", True)
-    kwargs.setdefault("MaterialMapInputFile", "ACTS/material-maps-ATLAS-R2-2016-01-00-01_v1.json")
+    kwargs.setdefault("MaterialMapInputFile", "ACTS/material-maps-ATLAS-R2-2016-00-00-00_v1.json")
 
     from AthenaCommon.DetFlags import DetFlags
     subDetectors = []
