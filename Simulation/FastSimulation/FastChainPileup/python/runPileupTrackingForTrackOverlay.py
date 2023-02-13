@@ -35,10 +35,9 @@ flags.Detector.GeometryID = True
 flags.Detector.GeometryCalo = True
 flags.Detector.GeometryForward = False
 flags.Detector.EnableCalo = True
-flags.Reco.EnableTracking = True
 
 # InDetConfigFlags.py is based upon InDetFlags. Dropped lots of flags. 
-flags.InDet.doTruth = False #Turn running of truth matching on and off (by default on for MC off for data)
+flags.InDet.doTruth = True #Turn running of truth matching on and off (by default on for MC off for data)
 flags.InDet.Tracking.doCaloSeededAmbi = False
 flags.InDet.Tracking.doTIDE_Ambi = True
 flags.InDet.Tracking.doCaloSeededBrem = True
@@ -110,7 +109,7 @@ from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
 acc.merge(LArRawChannelBuilderAlgCfg(flags,  LArDigitKey = "Bkg_LArDigitContainer_MC"))
 from LArCellRec.LArNoisyROSummaryConfig import LArNoisyROSummaryCfg
 acc.merge(LArNoisyROSummaryCfg(flags))
-acc.getEventAlgo('LArNoisyROAlg').eventInfoKey="Bkg_EventInfo"
+acc.getEventAlgo('LArNoisyROAlg').EventInfoKey="Bkg_EventInfo"
 #RuntimeError: Attempt to modify locked flag container
 # from LArConfiguration.LArConfigRun3 import LArConfigRun3PileUp
 # acc.merge(LArConfigRun3PileUp(flags))
@@ -136,9 +135,6 @@ acc.getCondAlgo('LuminosityCondAlg').actualMuKey="Bkg_EventInfo.actualInteractio
 acc.getCondAlgo('LuminosityCondAlg').averageMuKey="Bkg_EventInfo.averageInteractionsPerCrossing"
 
 # See TRTStandaloneConfig.py
-from InDetConfig.InDetTrackScoringToolsConfig import InDetTRT_StandaloneScoringToolCfg
-flagsTRT = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "InDet.Tracking.TRTStandalonePass")
-InDetTRT_StandaloneScoringTool = acc.popToolsAndMerge(InDetTRT_StandaloneScoringToolCfg(flagsTRT))
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.EventInfoKey="Bkg_EventInfo"
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.actualInteractionsPerCrossingKey="Bkg_EventInfo.actualInteractionsPerCrossing"
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.averageInteractionsPerCrossingKey="Bkg_EventInfo.averageInteractionsPerCrossing"
@@ -146,6 +142,12 @@ acc.getEventAlgo('InDetSiSpTrackFinder').EventInfoKey="Bkg_EventInfo"
 acc.getEventAlgo('InDetSiSpTrackFinderR3LargeD0').EventInfoKey="Bkg_EventInfo"
 acc.getEventAlgo('InDetSiSpTrackFinderForward').EventInfoKey="Bkg_EventInfo"
 acc.getEventAlgo('InDetSiSpTrackFinderDisappearing').EventInfoKey="Bkg_EventInfo"
+#Set the PRD_MultiTruthMaker SDO map name
+acc.getEventAlgo("InDetTRT_PRD_MultiTruthMaker").SimDataMapNameTRT="Bkg_TRT_SDO_Map"
+from InDetConfig.InDetTruthAlgsConfig import InDetPRD_MultiTruthMakerSiCfg
+acc.merge(InDetPRD_MultiTruthMakerSiCfg(flags))
+acc.getEventAlgo("InDetPRD_MultiTruthMakerSi").SimDataMapNamePixel="Bkg_PixelSDO_Map"
+acc.getEventAlgo("InDetPRD_MultiTruthMakerSi").SimDataMapNameSCT="Bkg_SCT_SDO_Map"
 
 from CaloRec.CaloBCIDAvgAlgConfig import CaloBCIDAvgAlgCfg
 acc.merge(CaloBCIDAvgAlgCfg(flags))
@@ -157,8 +159,7 @@ acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.EventInfoKey=
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.actualInteractionsPerCrossingKey="Bkg_EventInfo.actualInteractionsPerCrossing"
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.averageInteractionsPerCrossingKey="Bkg_EventInfo.averageInteractionsPerCrossing"
 
-itemsToRecord = ['TrackCollection#CombinedInDetTracks', 'TrackCollection#DisappearingTracks', 'TrackCollection#ResolvedForwardTracks', 'TrackCollection#ResolvedLargeD0Tracks',
-                 'InDet::TRT_DriftCircleContainer#TRT_DriftCircles', "InDet::PixelClusterContainer#PixelClusters", "InDet::SCT_ClusterContainer#SCT_Clusters"]
+itemsToRecord = ['TrackCollection#CombinedInDetTracks', 'TrackCollection#DisappearingTracks', 'TrackCollection#ResolvedForwardTracks', 'TrackCollection#ExtendedLargeD0Tracks', 'InDet::TRT_DriftCircleContainer#TRT_DriftCircles', "InDet::PixelClusterContainer#PixelClusters", "InDet::SCT_ClusterContainer#SCT_Clusters"]
 
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 acc.merge(OutputStreamCfg(flags,"RDO", ItemList=itemsToRecord))

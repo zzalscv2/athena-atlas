@@ -55,6 +55,11 @@ def SCTOverlayAlgCfg(flags, name="SCTOverlay", **kwargs):
             f"SCT_RDO_Container#{flags.Overlay.SigPrefix}SCT_RDOs"
         ]))
 
+    if flags.Overlay.doTrackOverlay:
+    #for track overlay, write out the signal RDOs because reco tracking will only run on them
+            acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
+            f"SCT_RDO_Container#{flags.Overlay.SigPrefix}SCT_RDOs"]))
+
     return acc
 
 
@@ -98,12 +103,10 @@ def SCTOverlayCfg(flags):
     # Add SCT overlay digitization algorithm
     from SCT_Digitization.SCT_DigitizationConfig import SCT_OverlayDigitizationBasicCfg
     acc.merge(SCT_OverlayDigitizationBasicCfg(flags))
-    # if track overlay, don't run the standard overlay
-    if not flags.Overlay.doTrackOverlay:
-        # Add SCT overlay algorithm
-        acc.merge(SCTOverlayAlgCfg(flags))
-        # Add SCT truth overlay
-        if flags.Digitization.EnableTruth:
-            acc.merge(SCTTruthOverlayCfg(flags))
+    # Add SCT overlay algorithm
+    acc.merge(SCTOverlayAlgCfg(flags))
+    # Add SCT truth overlay
+    if flags.Digitization.EnableTruth:
+        acc.merge(SCTTruthOverlayCfg(flags))
 
     return acc
