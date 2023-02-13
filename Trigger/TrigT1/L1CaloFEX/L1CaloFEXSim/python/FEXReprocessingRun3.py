@@ -100,7 +100,7 @@ if __name__ == '__main__':
     from L1CaloFEXSim.L1CaloFEXSimCfg import ReadSCellFromByteStreamCfg,TriggerTowersInputCfg
     
     #Creates SCells
-    acc.merge(ReadSCellFromByteStreamCfg(flags,key="SCell",keyIn="SC_ET_ID"))
+    acc.merge(ReadSCellFromByteStreamCfg(flags,key="SCell",keyIn="SC_ET"))
     
     # Creates the TriggerTower container
     acc.merge(TriggerTowersInputCfg(flags))

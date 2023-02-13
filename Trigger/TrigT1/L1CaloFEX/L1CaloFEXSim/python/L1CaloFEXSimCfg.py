@@ -71,7 +71,7 @@ def L1CaloFEXSimCfg(flags):
             acc.merge(emulateSC_Cfg(flags,SCOut=sCellType))
         else:
             # Run-3+ data inputs, decode SCells from ByteStream
-            acc.merge(ReadSCellFromByteStreamCfg(flags,key=sCellType))
+            acc.merge(ReadSCellFromByteStreamCfg(flags,key=sCellType,keyIn="SC_ET"))
 
     # Need also TriggerTowers as input
     acc.merge(TriggerTowersInputCfg(flags))

@@ -72,7 +72,7 @@ public:
   /** @brief Finalize the converter*/
   virtual StatusCode finalize();
   /** @brief Converter*/
-  StatusCode convert(const RawEvent* re, const LArLATOMEMapping *map,
+  StatusCode convert(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& robFrags, const LArLATOMEMapping *map,
                      LArDigitContainer* adc_coll,
 		     LArDigitContainer* adc_bas_coll,
 		     LArRawSCContainer* et_coll,

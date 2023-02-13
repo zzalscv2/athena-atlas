@@ -23,6 +23,8 @@
 
 #include "StoreGate/StoreGateSvc.h"
 #include "AthenaKernel/CLASS_DEF.h"
+// For LATOME while no Condition alg exists
+#include "LArLATOMEROBIDs.h"
 
 // Tool 
 #include "GaudiKernel/IToolSvc.h"
@@ -120,6 +122,9 @@ LArRawScContByteStreamCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
      return StatusCode::FAILURE;
     }
 
+  // patch for the HLT usage
+  std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
+  m_rdpSvc->getROBData( LArByteStream::s_allROBIDs_LATOME, robFrags );
   const RawEvent* re = m_rdpSvc->getEvent();
   if (!re)
     {(*m_log) << MSG::ERROR << "Could not get raw event from ByteStreamInputSvc" << endmsg;
@@ -144,7 +149,7 @@ LArRawScContByteStreamCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
   StatusCode sc;
 
   //Supercell readout
-  sc=m_scTool->convert(re,nullptr,adc_coll, adc_bas_coll, et_coll, et_id_coll, header_coll);
+  sc=m_scTool->convert(robFrags,nullptr,adc_coll, adc_bas_coll, et_coll, et_id_coll, header_coll);
   if (sc!=StatusCode::SUCCESS)
     (*m_log) << MSG::WARNING << "Conversion tool returned an error. LAr SC containers might be empty." << endmsg;
   

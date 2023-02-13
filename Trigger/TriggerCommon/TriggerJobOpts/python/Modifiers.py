@@ -564,3 +564,41 @@ class doRuntimeNaviVal(_modifier):
         log.info("Enabling Runtime Trigger Navigation Validation")
         flags.Trigger.doRuntimeNaviVal = True
 
+
+class superCellNoBCID(_modifier):
+    """
+    force superCell container SC_ET to be used
+    """
+    def postSetup(self, flags):
+        log.info('superCellNoBCID Modifier trying to set the SC_ET for superCell production')
+        from AthenaCommon.AlgSequence import AlgSequence
+        from AthenaCommon.CFElements import findSubSequence,findAlgorithm
+        topSequence = AlgSequence()
+        beg = findSubSequence(topSequence,"HLTBeginSeq")
+        L1SimSeq = beg.L1SimSeq
+        L1CaloSimSeq = L1SimSeq.L1CaloSimSeq
+        algo = findAlgorithm(L1CaloSimSeq,'LArRAWtoSuperCell')
+        if algo:
+            log.info('Found Algorithm, setting the property')
+            algo.SCellContainerIn = "SC_ET"
+        else:
+            log.info('The LArRAWtoSuperCell Modifier has no effect because the algorithm was not configured to run')
+
+class superCellWithBCID(_modifier):
+    """
+    force superCell container SC_ET_ID to be used
+    """
+    def postSetup(self, flags):
+        log.info('superCellBCID Modifier trying to set the SC_ET_ID for superCell production')
+        from AthenaCommon.AlgSequence import AlgSequence
+        from AthenaCommon.CFElements import findSubSequence,findAlgorithm
+        topSequence = AlgSequence()
+        beg = findSubSequence(topSequence,"HLTBeginSeq")
+        L1SimSeq = beg.L1SimSeq
+        L1CaloSimSeq = L1SimSeq.L1CaloSimSeq
+        algo = findAlgorithm(L1CaloSimSeq,'LArRAWtoSuperCell')
+        if algo:
+            log.info('Found Algorithm, setting the property')
+            algo.SCellContainerIn = "SC_ET_ID"
+        else:
+            log.info('The LArRAWtoSuperCell Modifier has no effect because the algorithm was not configured to run')

@@ -57,36 +57,20 @@ StatusCode LArLATOMEDecoder::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArLATOMEDecoder::convert(const RawEvent* re, const LArLATOMEMapping *map,
+StatusCode LArLATOMEDecoder::convert(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& robFrags, const LArLATOMEMapping *map,
                                      LArDigitContainer* adc_coll,
 				     LArDigitContainer* adc_bas_coll,
 				     LArRawSCContainer* et_coll,
 				     LArRawSCContainer* et_id_coll,
 				     LArLATOMEHeaderContainer* header_coll) const {
   
-  bool ret = false;
   // Check fragment validity:
-  try {ret = re->check();}
-  catch (eformat::Issue& ex) {
-    msg(MSG::WARNING) << "Exception while checking eformat fragment validity: " << ex.what() << endmsg; 
-    ret = false;
-  }
-  if (!ret) {
-    msg(MSG::ERROR) << "Got invalid RawEvent fragment" << endmsg;
-    return StatusCode::FAILURE;
-  }
   //Build TOC
-  std::map<eformat::SubDetectorGroup, std::vector<const uint32_t*> > robIndex;
-  eformat::helper::build_toc(*re, robIndex );
-  for (auto mapit : robIndex) msg(MSG::DEBUG) << "Rob Index subdetgroup is " << std::hex << mapit.first << endmsg;
-  std::map<eformat::SubDetectorGroup, std::vector<const uint32_t*> >::const_iterator robIt = robIndex.find(eformat::LAR);
-  if (robIt!=robIndex.end()) {
-    const std::vector<const uint32_t*>& robs = robIt->second;
-    for (const uint32_t* pRob :robs) {
+  if (robFrags.size() > 0) {
+    for (const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* pRob :robFrags) {
       try {
-	ROBFragment robFrag(pRob);
 	if(m_protectSourceId){
-	  uint32_t latomeSourceID = robFrag.rod_source_id();
+	  uint32_t latomeSourceID = pRob->rod_source_id();
 	  if( !(latomeSourceID & 0x1000) ){
 	    msg(MSG::DEBUG) << " discarding non latome source ID " << std::hex << latomeSourceID << endmsg;
 	    continue;
@@ -94,7 +78,7 @@ StatusCode LArLATOMEDecoder::convert(const RawEvent* re, const LArLATOMEMapping 
 	  ATH_MSG_DEBUG(" found latome source ID " << std::hex << latomeSourceID);
 	}
 	EventProcess ev(this, map, adc_coll, adc_bas_coll, et_coll, et_id_coll, header_coll);
-	ev.fillCollection(&robFrag, map);
+	ev.fillCollection(pRob, map);
       }	
       catch (eformat::Issue& ex) {
 	ATH_MSG_WARNING ( " exception thrown by ROBFragment, badly corrupted event. Abort decoding " );
