@@ -5,6 +5,10 @@ from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 from SimuJobTransforms.CommonSimulationSteering import CommonSimulationCfg, specialConfigPreInclude, specialConfigPostInclude
 
+# temporarily force no global config flags
+from AthenaConfiguration import AllConfigFlags
+del AllConfigFlags.ConfigFlags
+
 
 def fromRunArgs(runArgs):
     from AthenaCommon.Logging import logging
