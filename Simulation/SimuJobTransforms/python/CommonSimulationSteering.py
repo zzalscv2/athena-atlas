@@ -126,12 +126,13 @@ def CommonSimulationCfg(flags, log):
         cfg.merge(DeadMaterialCalibrationHitMergerCfg(flags))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList
-    cfg.merge( OutputStreamCfg(flags,"HITS", ItemList=getStreamHITS_ItemList(flags), disableEventTag=False, AcceptAlgs=AcceptAlgNames) )
-    if flags.Sim.ISF.ReSimulation:
-        cfg.getEventAlgo("OutputStreamHITS").TakeItemsFromInput=False
+    if flags.Output.HITSFileName:
+        from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList
+        cfg.merge( OutputStreamCfg(flags,"HITS", ItemList=getStreamHITS_ItemList(flags), disableEventTag=False, AcceptAlgs=AcceptAlgNames) )
+        if flags.Sim.ISF.ReSimulation:
+            cfg.getEventAlgo("OutputStreamHITS").TakeItemsFromInput=False
 
-    if len(flags.Output.EVNT_TRFileName)>0:
+    if flags.Output.EVNT_TRFileName:
         from SimuJobTransforms.SimOutputConfig import getStreamEVNT_TR_ItemList
         cfg.merge( OutputStreamCfg(flags,"EVNT_TR", ItemList=getStreamEVNT_TR_ItemList(flags), disableEventTag=True, AcceptAlgs=AcceptAlgNames) )
 
