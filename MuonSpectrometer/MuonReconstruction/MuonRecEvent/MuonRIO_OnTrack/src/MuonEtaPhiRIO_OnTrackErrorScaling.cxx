@@ -22,10 +22,10 @@ bool MuonEtaPhiRIO_OnTrackErrorScaling::postProcess() {
   return true;
 }
 
-Amg::MatrixX MuonEtaPhiRIO_OnTrackErrorScaling::getScaledCovariance(const Amg::MatrixX& cov_input,
+Amg::MatrixX MuonEtaPhiRIO_OnTrackErrorScaling::getScaledCovariance(Amg::MatrixX&& cov_input,
                                                                     const Trk::ParamDefs measuredCoord) const
 {
-  Amg::MatrixX newCov(cov_input);
+  Amg::MatrixX newCov(std::move(cov_input));
   double a,b = 0.0;
   if (measuredCoord == Trk::distPhi) {
     a = params()[kPhi][0];

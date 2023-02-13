@@ -15,7 +15,7 @@
 #include "MuonRIO_OnTrack/TgcClusterOnTrack.h"
 #include "TrkEventPrimitives/LocalDirection.h"
 #include "TrkEventPrimitives/LocalParameters.h"
-#include "TrkRIO_OnTrack/check_cast.h"
+#include "TrkRIO_OnTrack/ErrorScalingCast.h"
 #include "TrkSurfaces/Surface.h"
 
 using Amg::Transform3D;
@@ -136,17 +136,23 @@ namespace Muon {
 
         if (m_doCsc && m_idHelperSvc->isCsc(RIO.identify()) && !m_cscErrorScalingKey.key().empty()) {
             SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling(m_cscErrorScalingKey);
-            loce = check_cast<MuonEtaPhiRIO_OnTrackErrorScaling>(*error_scaling)->getScaledCovariance(loce, Trk::distPhi);
+            loce = Trk::ErrorScalingCast<MuonEtaPhiRIO_OnTrackErrorScaling>(
+                       *error_scaling)
+                       ->getScaledCovariance(std::move(loce), Trk::distPhi);
             ATH_MSG_VERBOSE("CSC: new cov(0,0) is " << loce(0, 0));
         }
         if (m_doRpc && m_idHelperSvc->isRpc(RIO.identify()) && !m_rpcErrorScalingKey.key().empty()) {
             SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling(m_rpcErrorScalingKey);
-            loce = check_cast<MuonEtaPhiRIO_OnTrackErrorScaling>(*error_scaling)->getScaledCovariance(loce, Trk::distPhi);
+            loce = Trk::ErrorScalingCast<MuonEtaPhiRIO_OnTrackErrorScaling>(
+                       *error_scaling)
+                       ->getScaledCovariance(std::move(loce), Trk::distPhi);
             ATH_MSG_VERBOSE("RPC: new cov(0,0) is " << loce(0, 0));
         }
         if (m_doTgc && m_idHelperSvc->isTgc(RIO.identify()) && !m_tgcErrorScalingKey.key().empty()) {
             SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling(m_tgcErrorScalingKey);
-            loce = check_cast<MuonEtaPhiRIO_OnTrackErrorScaling>(*error_scaling)->getScaledCovariance(loce, Trk::distPhi);
+            loce = Trk::ErrorScalingCast<MuonEtaPhiRIO_OnTrackErrorScaling>(
+                       *error_scaling)
+                       ->getScaledCovariance(std::move(loce), Trk::distPhi);
             ATH_MSG_VERBOSE("TGC: new cov(1,1) is " << loce(0, 0));
         }
 
@@ -269,7 +275,9 @@ namespace Muon {
 
         if (m_doCsc && m_idHelperSvc->isCsc(RIO.identify()) && !m_cscErrorScalingKey.key().empty()) {
             SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling(m_cscErrorScalingKey);
-            loce = check_cast<MuonEtaPhiRIO_OnTrackErrorScaling>(*error_scaling)->getScaledCovariance(loce, Trk::distPhi);
+            loce = Trk::ErrorScalingCast<MuonEtaPhiRIO_OnTrackErrorScaling>(
+                       *error_scaling)
+                       ->getScaledCovariance(std::move(loce), Trk::distPhi);
             ATH_MSG_VERBOSE("CSC: new cov(0,0) is " << loce(0, 0));
         }
 
@@ -322,7 +330,10 @@ namespace Muon {
             newloce *= errorCorrected * errorCorrected;
             if (!m_cscErrorScalingKey.key().empty()) {
                 SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling(m_cscErrorScalingKey);
-                newloce = check_cast<MuonEtaPhiRIO_OnTrackErrorScaling>(*error_scaling)->getScaledCovariance(newloce, Trk::distPhi);
+                newloce =
+                    Trk::ErrorScalingCast<MuonEtaPhiRIO_OnTrackErrorScaling>(
+                        *error_scaling)
+                        ->getScaledCovariance(std::move(newloce), Trk::distPhi);
             }
 
             ATH_MSG_VERBOSE("All: new err matrix is " << newloce);
