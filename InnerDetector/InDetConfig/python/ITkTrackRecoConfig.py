@@ -169,12 +169,19 @@ def ITkTrackRecoCfg(flags):
 
     if flags.Tracking.doStats:
         from InDetConfig.InDetRecStatisticsConfig import (
-            InDetRecStatisticsAlgCfg)
-        result.merge(InDetRecStatisticsAlgCfg(
+            ITkRecStatisticsAlgCfg)
+        result.merge(ITkRecStatisticsAlgCfg(
             flags,
             TrackCollectionKeys = StatTrackCollections,
             TrackTruthCollectionKeys = \
-            StatTrackTruthCollections if flags.InDet.doTruth else []))
+            StatTrackTruthCollections if flags.ITk.Tracking.doTruth else []))
+
+        if flags.ITk.Tracking.doTruth:
+            from InDetConfig.InDetTrackClusterAssValidationConfig import (
+                ITkTrackClusterAssValidationCfg)
+            result.merge(ITkTrackClusterAssValidationCfg(
+                flags_set[0], # Use cuts from primary pass
+                TracksLocation = StatTrackCollections))
 
     if flags.ITk.Tracking.writeExtendedPRDInfo:
         from InDetConfig.InDetPrepRawDataToxAODConfig import (
