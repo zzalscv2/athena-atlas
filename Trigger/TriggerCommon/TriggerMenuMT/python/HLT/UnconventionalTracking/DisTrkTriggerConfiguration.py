@@ -12,7 +12,7 @@ def DisTrkTriggerHypoSequence(flags):
         from TrigLongLivedParticlesHypo.TrigDisappearingTrackHypoConfig import TrigDisappearingTrackHypoToolFromDict
         from TrigLongLivedParticlesHypo.TrigDisappearingTrackHypoConfig import createTrigDisappearingTrackHypoAlg
 
-        theDisTrkHypo = createTrigDisappearingTrackHypoAlg("DisTrkTrack")
+        theDisTrkHypo = createTrigDisappearingTrackHypoAlg(flags, "DisTrkTrack")
 
         from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
         from AthenaConfiguration.ComponentFactory import CompFactory

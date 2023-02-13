@@ -1,6 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-def TrigLongLivedParticlesHypoToolFromDict( chainDict ):
+from AthenaConfiguration.ComponentFactory import CompFactory
+import TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoMonitoring as HypoMon
+
+def TrigLongLivedParticlesHypoToolFromDict(flags, chainDict):
     """
     Generates the Hypo Tool from the chain dictionary
     """
@@ -8,33 +11,17 @@ def TrigLongLivedParticlesHypoToolFromDict( chainDict ):
 
     ## Initialize default-configured HypoTool as 'tool'
     from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConfig import MuonClusterHypoToolConfig
-    tool = MuonClusterHypoToolConfig(name)
-
-    return tool
+    return MuonClusterHypoToolConfig(flags, name)
 
 
-# Monitoring Tool Configuration for HypoAlg
-from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import MuonClusterHypoAlg
-
-class MuonClusterHypoAlgConfig(MuonClusterHypoAlg):
-    __slots__ = []
-    def __init__ (self, name="MuonClusterHypoAlgConfig"):
-        super(MuonClusterHypoAlgConfig, self).__init__(name)
-
-        from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoMonitoring import TrigMuonClusterHypoAlgMonitoring
-
-        self.MonTool = TrigMuonClusterHypoAlgMonitoring()
+def MuonClusterHypoAlgConfig(flags, name="MuonClusterHypoAlgConfig"):
+    """Monitoring Tool Configuration for HypoAlg"""
+    return CompFactory.MuonClusterHypoAlg(name,
+        MonTool = HypoMon.trigMuonClusterHypoAlgMonitoring(flags))
 
 
-# Monitoring Tool Configuration for HypoTool
-from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import MuonClusterHypoTool
-
-class MuonClusterHypoToolConfig(MuonClusterHypoTool):
-    __slots__ = []
-    def __init__ (self, name="MuonClusterHypoToolConfig"):
-        super(MuonClusterHypoToolConfig, self).__init__(name)
-
-        from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoMonitoring import TrigMuonClusterHypoToolMonitoring
-
-        self.MonTool = TrigMuonClusterHypoToolMonitoring()
-        self.acceptAll = False
+def MuonClusterHypoToolConfig(flags, name="MuonClusterHypoToolConfig"):
+    """Monitoring Tool Configuration for HypoTool"""
+    return CompFactory.MuonClusterHypoTool(
+        MonTool = HypoMon.trigMuonClusterHypoToolMonitoring(flags),
+        acceptAll = False)

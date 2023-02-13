@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigDJHypoTools')
@@ -62,7 +62,7 @@ def TrigDJGetConfigValue(chainDict, key):
 def TrigDJEnableMonitoring(chainDict):
     return 'idMon:online' in chainDict['monGroups']
 
-def TrigDJHypoPromptToolFromDict( chainDict ):
+def TrigDJHypoPromptToolFromDict(flags, chainDict):
     """ Use menu decoded chain dictionary to configure the tool """
 
     name = chainDict['chainName']
@@ -98,7 +98,7 @@ def TrigDJHypoPromptToolFromDict( chainDict ):
     #monitoring
     if TrigDJEnableMonitoring(chainDict):
         from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-        monTool = GenericMonitoringTool("DJPrompt_MonTool_"+name)
+        monTool = GenericMonitoringTool(flags, "DJPrompt_MonTool_"+name)
 
         monTool.defineHistogram("trk_d0sig", type='TH1F', path='EXPERT', title="Track d0sig", xbins=200, xmin=0.0, xmax=200.0)
         monTool.defineHistogram("trk_z0st", type='TH1F', path='EXPERT', title="Track z0st", xbins=200, xmin=0.0, xmax=20.0)
@@ -110,7 +110,7 @@ def TrigDJHypoPromptToolFromDict( chainDict ):
     return tool
 
 
-def TrigDJHypoDispToolFromDict( chainDict ):
+def TrigDJHypoDispToolFromDict(flags, chainDict):
     """ Use menu decoded chain dictionary to configure the tool """
 
     name = chainDict['chainName']
@@ -143,7 +143,7 @@ def TrigDJHypoDispToolFromDict( chainDict ):
     #monitoring
     if TrigDJEnableMonitoring(chainDict):
         from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-        monTool = GenericMonitoringTool("DJDisp_MonTool_"+name)
+        monTool = GenericMonitoringTool(flags, "DJDisp_MonTool_"+name)
 
         monTool.defineHistogram("trk_d0sig", type='TH1F', path='EXPERT', title="Track d0sig", xbins=200, xmin=0.0, xmax=200.0)
         monTool.defineHistogram("trk_z0st", type='TH1F', path='EXPERT', title="Track z0st", xbins=200, xmin=0.0, xmax=20.0)

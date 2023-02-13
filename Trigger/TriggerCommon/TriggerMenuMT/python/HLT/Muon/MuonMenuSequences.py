@@ -995,7 +995,7 @@ def muRoiClusterSequence(flags):
 
     muvtx_sequence = seqAND('muvtxSequence', [inputMaker, muvtxMuonClusterSequence])
 
-    hypo        = MuonClusterHypoAlgConfig('MuRoiClusterHypoAlg')
+    hypo        = MuonClusterHypoAlgConfig(flags, 'MuRoiClusterHypoAlg')
 
     return MenuSequence( flags,
                          Sequence    = muvtx_sequence,

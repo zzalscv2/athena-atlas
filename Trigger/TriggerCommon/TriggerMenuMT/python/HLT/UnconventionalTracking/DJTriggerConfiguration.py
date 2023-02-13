@@ -14,8 +14,8 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 def DJPromptStep(flags):
-    from TrigLongLivedParticlesHypo.TrigDJHypoConfig import (TrigDJHypoPromptToolFromDict)
-    from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import (DisplacedJetPromptHypoAlg)
+    from TrigLongLivedParticlesHypo.TrigDJHypoConfig import TrigDJHypoPromptToolFromDict
+    from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import DisplacedJetPromptHypoAlg
 
     hypo_alg = DisplacedJetPromptHypoAlg("DJTrigPromptHypoAlg")
 

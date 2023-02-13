@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
@@ -7,7 +7,7 @@ from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 # Default name of HitDV output
 hitDVName = "HLT_HitDV"
 
-def createTrigHitDVHypoAlg(name):
+def createTrigHitDVHypoAlg(flags, name):
     # make the Hypo
     from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import (TrigHitDVHypoAlg)
 
@@ -23,7 +23,7 @@ def createTrigHitDVHypoAlg(name):
         theHitDVHypo.isMC = False
 
     # monioring
-    monTool = GenericMonitoringTool("IM_MonTool"+name)
+    monTool = GenericMonitoringTool(flags, "IM_MonTool"+name)
     monTool.defineHistogram('jet_pt',        type='TH1F', path='EXPERT', title="p_{T}^{jet} [GeV];p_{T}^{jet} [GeV];Nevents", xbins=50, xmin=0, xmax=200)
     monTool.defineHistogram('jet_eta',       type='TH1F', path='EXPERT', title="#eta^{jet};#eta^{jet};Nevents", xbins=50, xmin=-5.0, xmax=5.0)
     #
