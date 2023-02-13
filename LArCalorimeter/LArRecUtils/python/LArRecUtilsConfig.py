@@ -202,11 +202,11 @@ def LArRoIMapCondAlgCfg (flags, name = 'LArRoIMapCondAlg', **kwargs):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     print ('--- LArOFCCondAlg 1')
-    flags1 = ConfigFlags.clone()
+    flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RDO_RUN2
     flags1.lock()
     acc1 = LArOFCCondAlgCfg (flags1)
@@ -214,7 +214,7 @@ if __name__ == "__main__":
     acc1.wasMerged()
 
     print ('--- LArAutoCorrTotalCondAlg')
-    flags4 = ConfigFlags.clone()
+    flags4 = initConfigFlags()
     flags4.Input.Files = defaultTestFiles.RDO_RUN2
     flags4.LAr.ROD.nSamples = 32
     flags4.lock()
@@ -223,7 +223,7 @@ if __name__ == "__main__":
     acc4.wasMerged()
 
     print ('--- LArRoIMapCondAlg')
-    flags5 = ConfigFlags.clone()
+    flags5 = initConfigFlags()
     flags5.Input.Files = defaultTestFiles.RDO_RUN2
     flags5.lock()
     acc5 = LArRoIMapCondAlgCfg (flags5)
