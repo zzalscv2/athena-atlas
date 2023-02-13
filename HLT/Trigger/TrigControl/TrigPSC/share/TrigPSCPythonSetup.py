@@ -142,10 +142,6 @@ else:
       theApp._exitstate = ExitCodes.UNKNOWN_EXCEPTION
       raise
 
-   ### basic job configuration after user configuration -------------------------
-   from TrigServices.TriggerUnixStandardSetup import setupCommonServicesEnd
-   setupCommonServicesEnd()
-
    ### run optional command after user job options script -----------------------
    if PscConfig.optmap['POSTCOMMAND']:
       print("\n")
