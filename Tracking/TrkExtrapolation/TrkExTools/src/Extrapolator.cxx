@@ -24,7 +24,6 @@
 #include "TrkExInterfaces/IMultipleScatteringUpdator.h"
 //
 #include "TrkExUtils/ExtrapolationCache.h"
-#include "TrkExUtils/IntersectionSolution.h"
 //
 #include "TrkGeometry/CompoundLayer.h"
 #include "TrkGeometry/AlignableTrackingVolume.h"

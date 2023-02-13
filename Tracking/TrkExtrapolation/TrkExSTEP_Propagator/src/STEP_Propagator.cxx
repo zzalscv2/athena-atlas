@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -1738,13 +1738,11 @@ propagateRungeKuttaImpl(Cache& cache,
       /////////////////////////////////////////////////////////////////////////////////
       // Function for finding the intersection point with a surface
       /////////////////////////////////////////////////////////////////////////////////
-      const Trk::IntersectionSolution* Trk::STEP_Propagator::intersect(const EventContext& ctx,
-                                                                       const Trk::TrackParameters& trackParameters,
-                                                                       const Trk::Surface& targetSurface,
-                                                                       const Trk::MagneticFieldProperties& mft,
-                                                                       ParticleHypothesis particle,
-                                                                       const Trk::TrackingVolume* tVol) const
-      {
+      Trk::IntersectionSolution Trk::STEP_Propagator::intersect(
+          const EventContext& ctx, const Trk::TrackParameters& trackParameters,
+          const Trk::Surface& targetSurface,
+          const Trk::MagneticFieldProperties& mft, ParticleHypothesis particle,
+          const Trk::TrackingVolume* tVol) const {
 
         Cache cache (ctx);
 
@@ -1770,12 +1768,14 @@ propagateRungeKuttaImpl(Cache& cache,
         mft.magneticFieldMode() == Trk::FastField ? cache.m_solenoid = true : cache.m_solenoid = false;
 
         // Check inputvalues
-        if (cache.m_tolerance <= 0.)
-          return nullptr;
-        if (cache.m_momentumCutOff < 0.)
-          return nullptr;
+        if (cache.m_tolerance <= 0.){
+          return {};
+        }
+        if (cache.m_momentumCutOff < 0.){
+          return {};
+        }
         if (std::abs(1. / trackParameters.parameters()[Trk::qOverP]) <= cache.m_momentumCutOff) {
-          return nullptr;
+          return {};
         }
 
         // Check for empty volumes. If x != x then x is not a number.
@@ -1785,8 +1785,9 @@ propagateRungeKuttaImpl(Cache& cache,
         }
 
         // double P[45];
-        if (!Trk::RungeKuttaUtils::transformLocalToGlobal(false, trackParameters, cache.m_P))
-          return nullptr;
+        if (!Trk::RungeKuttaUtils::transformLocalToGlobal(false, trackParameters, cache.m_P)){
+          return {};
+        }
         double path = 0.;
 
         const Amg::Transform3D& T = targetSurface.transform();
@@ -1808,14 +1809,15 @@ propagateRungeKuttaImpl(Cache& cache,
             s[3] = -d;
           }
           if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path))
-            return nullptr;
+            return {};
         }
 
         else if (ty == Trk::SurfaceType::Line) {
 
           double s[6] = { T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2) };
-          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path))
-            return nullptr;
+          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path)){
+            return {};
+          }
         }
 
         else if (ty == Trk::SurfaceType::Cylinder) {
@@ -1823,8 +1825,9 @@ propagateRungeKuttaImpl(Cache& cache,
           const Trk::CylinderSurface* cyl = static_cast<const Trk::CylinderSurface*>(&targetSurface);
           double s[9] = { T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2), cyl->bounds().r(), Trk::alongMomentum,
                           0. };
-          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path))
-            return nullptr;
+          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path)){
+            return {};
+          }
         }
 
         else if (ty == Trk::SurfaceType::Cone) {
@@ -1832,15 +1835,17 @@ propagateRungeKuttaImpl(Cache& cache,
           double k = static_cast<const Trk::ConeSurface*>(&targetSurface)->bounds().tanAlpha();
           k = k * k + 1.;
           double s[9] = { T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2), k, Trk::alongMomentum, 0. };
-          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path))
-            return nullptr;
+          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path)){
+            return {};
+          }
         }
 
         else if (ty == Trk::SurfaceType::Perigee) {
 
           double s[6] = { T(0, 3), T(1, 3), T(2, 3), 0., 0., 1. };
-          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path))
-            return nullptr;
+          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path)){
+            return {};
+          }
         }
 
         else { // presumably curvilinear
@@ -1859,14 +1864,15 @@ propagateRungeKuttaImpl(Cache& cache,
             s[2] = -T(2, 2);
             s[3] = -d;
           }
-          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path))
-            return nullptr;
+          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path)){
+            return {};
+          }
         }
 
         Amg::Vector3D globalPosition(cache.m_P[0], cache.m_P[1], cache.m_P[2]);
         Amg::Vector3D direction(cache.m_P[3], cache.m_P[4], cache.m_P[5]);
-        Trk::IntersectionSolution* intersectionSolution = new Trk::IntersectionSolution();
-        intersectionSolution->push_back(
+        auto intersectionSolution = Trk::IntersectionSolution();
+        intersectionSolution.push_back(
           std::make_unique<Trk::TrackSurfaceIntersection>(globalPosition, direction, path));
         return intersectionSolution;
       }
@@ -1888,20 +1894,19 @@ propagateRungeKuttaImpl(Cache& cache,
             Trk::Perigee(0., 0., direction.phi(), direction.theta(), qOverP,
                          perigeeSurface, std::nullopt);
 
-        const Trk::IntersectionSolution* solution =
+        Trk::IntersectionSolution solution =
           qOverP == 0 ? intersect(ctx, trackParameters, surface, Trk::MagneticFieldProperties(Trk::NoField), particle)
                       : intersect(ctx, trackParameters, surface, mft, particle, nullptr);
 
-        if (!solution)
+        if (solution.empty()){
           return nullptr;
+        }
 
-        Trk::IntersectionSolutionIter output_iter = solution->begin();
+        Trk::IntersectionSolutionIter output_iter = solution.begin();
         if (*output_iter) {
           Trk::TrackSurfaceIntersection* result = new Trk::TrackSurfaceIntersection(*(*output_iter));
-          delete solution;
           return result;
         }
-        delete solution;
         return nullptr;
       }
 

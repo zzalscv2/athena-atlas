@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -1976,7 +1976,7 @@ Trk::RungeKuttaPropagator::globalPositions(const ::EventContext& ctx,
 /////////////////////////////////////////////////////////////////////////////////
 //  Global position together with direction of the trajectory on the surface
 /////////////////////////////////////////////////////////////////////////////////
-const Trk::IntersectionSolution*
+Trk::IntersectionSolution
 Trk::RungeKuttaPropagator::intersect(const ::EventContext& ctx,
                                      const Trk::TrackParameters& Tp,
                                      const Trk::Surface& Su,
@@ -2003,8 +2003,9 @@ Trk::RungeKuttaPropagator::intersect(const ::EventContext& ctx,
   M.magneticFieldMode() != Trk::NoField ? cache.m_mcondition = true : cache.m_mcondition = false;
 
   double P[64];
-  if (!Trk::RungeKuttaUtils::transformLocalToGlobal(false, Tp, P))
-    return nullptr;
+  if (!Trk::RungeKuttaUtils::transformLocalToGlobal(false, Tp, P)){
+    return {};
+  }
   double Step = 0.;
 
   const Amg::Transform3D& T = Su.transform();
@@ -2026,13 +2027,15 @@ Trk::RungeKuttaPropagator::intersect(const ::EventContext& ctx,
       s[2] = -T(2, 2);
       s[3] = -d;
     }
-    if (!propagateWithJacobian(cache, nJ, 1, s, P, Step))
-      return nullptr;
+    if (!propagateWithJacobian(cache, nJ, 1, s, P, Step)){
+      return {};
+    }
   } else if (ty == Trk::SurfaceType::Line) {
 
     double s[6] = { T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2) };
-    if (!propagateWithJacobian(cache, nJ, 0, s, P, Step))
-      return nullptr;
+    if (!propagateWithJacobian(cache, nJ, 0, s, P, Step)){
+      return {};
+    }
   } else if (ty == Trk::SurfaceType::Disc) {
 
     double s[4];
@@ -2049,8 +2052,9 @@ Trk::RungeKuttaPropagator::intersect(const ::EventContext& ctx,
       s[2] = -T(2, 2);
       s[3] = -d;
     }
-    if (!propagateWithJacobian(cache, nJ, 1, s, P, Step))
-      return nullptr;
+    if (!propagateWithJacobian(cache, nJ, 1, s, P, Step)){
+      return {};
+    }
   } else if (ty == Trk::SurfaceType::Cylinder) {
 
     const Trk::CylinderSurface* cyl = static_cast<const Trk::CylinderSurface*>(su);
@@ -2060,21 +2064,23 @@ Trk::RungeKuttaPropagator::intersect(const ::EventContext& ctx,
                     T(0, 2),           T(1, 2),           T(2, 2),
                     cyl->bounds().r(), cache.m_direction, 0. };
 
-    if (!propagateWithJacobian(cache, nJ, 2, s, P, Step))
-      return nullptr;
-
+    if (!propagateWithJacobian(cache, nJ, 2, s, P, Step)){
+      return {};
+    }
     // For cylinder we do test for next cross point
     //
     if (cyl->bounds().halfPhiSector() < 3.1 && newCrossPoint(*cyl, r0, P)) {
       s[8] = 0.;
-      if (!propagateWithJacobian(cache, nJ, 2, s, P, Step))
-        return nullptr;
+      if (!propagateWithJacobian(cache, nJ, 2, s, P, Step)){
+        return {};
+      }
     }
   } else if (ty == Trk::SurfaceType::Perigee) {
 
     double s[6] = { T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2) };
-    if (!propagateWithJacobian(cache, nJ, 0, s, P, Step))
-      return nullptr;
+    if (!propagateWithJacobian(cache, nJ, 0, s, P, Step)){
+      return {};
+    }
   } else if (ty == Trk::SurfaceType::Cone) {
 
     double k = static_cast<const Trk::ConeSurface*>(su)->bounds().tanAlpha();
@@ -2082,18 +2088,21 @@ Trk::RungeKuttaPropagator::intersect(const ::EventContext& ctx,
     double s[9] = { T(0, 3), T(1, 3), T(2, 3),
                     T(0, 2), T(1, 2), T(2, 2),
                     k, cache.m_direction, 0. };
-    if (!propagateWithJacobian(cache, nJ, 3, s, P, Step))
-      return nullptr;
-  } else
-    return nullptr;
+    if (!propagateWithJacobian(cache, nJ, 3, s, P, Step)){
+      return {};
+    }
+  } else{
+    return {};
+  }
 
-  if (cache.m_maxPathLimit)
-    return nullptr;
+  if (cache.m_maxPathLimit){
+    return {};
+  }
 
   const Amg::Vector3D Glo(P[0], P[1], P[2]);
   const Amg::Vector3D Dir(P[3], P[4], P[5]);
-  Trk::IntersectionSolution* Int = new Trk::IntersectionSolution();
-  Int->push_back(std::make_unique<const Trk::TrackSurfaceIntersection>(Glo, Dir, Step));
+  auto Int = Trk::IntersectionSolution();
+  Int.push_back(std::make_unique<const Trk::TrackSurfaceIntersection>(Glo, Dir, Step));
   return Int;
 }
 

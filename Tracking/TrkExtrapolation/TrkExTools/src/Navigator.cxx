@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -374,19 +374,17 @@ Trk::Navigator::closestParameters(const EventContext& ctx,
         continue;
       }
 
-      // const Trk::IntersectionSolution* interSolutions =  propptr->intersect(**it, sf, *highestVolume);
-      const Trk::IntersectionSolution *interSolutions = propptr->intersect(ctx,**it, sf, m_fieldProperties);
-      if (!interSolutions) {
+      Trk::IntersectionSolution interSolutions = propptr->intersect(ctx,**it, sf, m_fieldProperties);
+      if (interSolutions.empty()) {
         return nullptr;
       }
-      double currentDistance = fabs(((*interSolutions)[2])->pathlength());
+      double currentDistance = std::abs((interSolutions[2])->pathlength());
       if (currentDistance < distanceToSurface) {
         // assign new distance to surface
         distanceToSurface = currentDistance;
         // set current TrackParmaters as closest
         closestTrackParameters = *it;
       }
-      delete interSolutions;
     }
     return closestTrackParameters;
   }
