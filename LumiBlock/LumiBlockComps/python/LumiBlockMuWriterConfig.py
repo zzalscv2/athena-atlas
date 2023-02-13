@@ -11,20 +11,20 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType
 
 
-def LumiBlockMuWriterCfg (configFlags, name = 'LumiBlockMuWriter', seqName="AthAlgSeq"):
+def LumiBlockMuWriterCfg (flags, name = 'LumiBlockMuWriter', seqName="AthAlgSeq"):
     result = ComponentAccumulator(seqName)
 
-    if configFlags.Beam.Type is BeamType.Cosmics or configFlags.Input.isMC:
+    if flags.Beam.Type is BeamType.Cosmics or flags.Input.isMC:
         condkey = ''
     else:
         from LumiBlockComps.LuminosityCondAlgConfig import LuminosityCondAlgCfg
-        result.merge (LuminosityCondAlgCfg (configFlags))
+        result.merge (LuminosityCondAlgCfg (flags))
         condkey = result.getCondAlgo ('LuminosityCondAlg').LuminosityOutputKey
 
     LumiBlockMuWriter = CompFactory.LumiBlockMuWriter # LumiBlockComps
     alg = LumiBlockMuWriter (name, LumiDataKey = condkey)
     #In the HLT we want to run LumiBlockMuWriter as a normal EventAlgo, but in a pre-event sequence (HLTBeginSeq)
-    if  configFlags.Trigger.doHLT:
+    if  flags.Trigger.doHLT:
          result.addEventAlgo(alg)
     #For offline and particularly serial athena, add LumiBlockMuWriter to AthCondSeq to ensure it runs first (ATR-24721)
     else:
@@ -33,12 +33,11 @@ def LumiBlockMuWriterCfg (configFlags, name = 'LumiBlockMuWriter', seqName="AthA
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = []
 
     print ('--- collisions')
-    flags1 = ConfigFlags.clone()
+    flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RAW
     flags1.lock()
     acc1 = LumiBlockMuWriterCfg (flags1)
@@ -46,7 +45,8 @@ if __name__ == "__main__":
     acc1.wasMerged()
 
     print ('--- cosmics')
-    flags2 = ConfigFlags.clone()
+    flags2 = initConfigFlags()
+    flags2.Input.Files = []
     flags2.Beam.Type = BeamType.Cosmics
     flags2.lock()
     acc2 = LumiBlockMuWriterCfg (flags2)

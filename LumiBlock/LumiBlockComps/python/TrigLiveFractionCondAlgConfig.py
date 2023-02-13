@@ -11,23 +11,23 @@ from IOVDbSvc.IOVDbSvcConfig import addFolders
 
 
 # Configuration for TrigLiveFractionCondAlg
-def TrigLiveFractionCondAlgCfg (configFlags):
+def TrigLiveFractionCondAlgCfg (flags):
     name = 'TrigLiveFractionCondAlg'
     result = ComponentAccumulator()
 
     kwargs = {}
-    if configFlags.IOVDb.DatabaseInstance == 'COMP200':
+    if flags.IOVDb.DatabaseInstance == 'COMP200':
         folder = '/TRIGGER/LUMI/PerBcidDeadtime'
 
         # Mistakenly created as multi-version folder, must specify HEAD
-        result.merge (addFolders (configFlags, folder, 'TRIGGER', tag='HEAD',
+        result.merge (addFolders (flags, folder, 'TRIGGER', tag='HEAD',
                                   className='AthenaAttributeList'))
 
         kwargs['DeadtimeFolderInputKey'] = folder
         kwargs['LuminosityInputKey'] = 'LuminosityCondData'
 
         from LumiBlockComps.LuminosityCondAlgConfig import LuminosityCondAlgCfg
-        result.merge (LuminosityCondAlgCfg (configFlags))
+        result.merge (LuminosityCondAlgCfg (flags))
 
     else:
         kwargs['DeadtimeFolderInputKey'] = ''
@@ -43,11 +43,11 @@ def TrigLiveFractionCondAlgCfg (configFlags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     print ('--- run2')
-    flags1 = ConfigFlags.clone()
+    flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RAW
     flags1.lock()
     acc1 = TrigLiveFractionCondAlgCfg (flags1)
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     acc1.wasMerged()
 
     print ('--- run1')
-    flags3 = ConfigFlags.clone()
+    flags3 = initConfigFlags()
     flags3.Input.Files = defaultTestFiles.RAW
     flags3.Input.ProjectName = 'data12_8TeV'
     flags3.lock()
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     acc3.wasMerged()
 
     print ('--- mc')
-    flags4 = ConfigFlags.clone()
+    flags4 = initConfigFlags()
     flags4.Input.Files = defaultTestFiles.ESD
     flags4.lock()
     acc4 = TrigLiveFractionCondAlgCfg (flags4)
