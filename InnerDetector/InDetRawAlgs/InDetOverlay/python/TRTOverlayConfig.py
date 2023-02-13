@@ -64,12 +64,17 @@ def TRTOverlayAlgCfg(flags, name="TRTOverlay", **kwargs):
             acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
                 "TRT_BSErrContainer#TRT_ByteStreamErrs"
             ]))
-
+  
     if flags.Output.doWriteRDO_SGNL:
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
         acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
             f"TRT_RDO_Container#{flags.Overlay.SigPrefix}TRT_RDOs"
         ]))
+
+    if flags.Overlay.doTrackOverlay:
+    #for track overlay, write out the signal RDOs because reco tracking will only run on them
+            acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
+            f"TRT_RDO_Container#{flags.Overlay.SigPrefix}TRT_RDOs"]))
 
     return acc
 
@@ -121,12 +126,10 @@ def TRTOverlayCfg(flags):
     # Add TRT overlay digitization algorithm
     from TRT_Digitization.TRT_DigitizationConfig import TRT_OverlayDigitizationBasicCfg
     acc.merge(TRT_OverlayDigitizationBasicCfg(flags))
-    # if track overlay, only run digitization on the HS input
-    if not flags.Overlay.doTrackOverlay:
-        # Add TRT overlay algorithm
-        acc.merge(TRTOverlayAlgCfg(flags))
-        # Add TRT truth overlay
-        if flags.Digitization.EnableTruth:
-            acc.merge(TRTTruthOverlayCfg(flags))
+    # Add TRT overlay algorithm
+    acc.merge(TRTOverlayAlgCfg(flags))
+    # Add TRT truth overlay
+    if flags.Digitization.EnableTruth:
+        acc.merge(TRTTruthOverlayCfg(flags))
 
     return acc

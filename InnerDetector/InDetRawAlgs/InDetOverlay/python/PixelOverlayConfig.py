@@ -52,6 +52,11 @@ def PixelOverlayAlgCfg(flags, name="PixelOverlay", **kwargs):
             f"PixelRDO_Container#{flags.Overlay.SigPrefix}PixelRDOs"
         ]))
 
+    if flags.Overlay.doTrackOverlay:
+    #for track overlay, write out the signal RDOs because reco tracking will only run on them
+            acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
+            f"PixelRDO_Container#{flags.Overlay.SigPrefix}PixelRDOs"]))
+
     return acc
 
 
@@ -95,12 +100,10 @@ def PixelOverlayCfg(flags):
     # Add Pixel overlay digitization algorithm
     from PixelDigitization.PixelDigitizationConfig import PixelOverlayDigitizationBasicCfg
     acc.merge(PixelOverlayDigitizationBasicCfg(flags))
-    # if track overlay, don't run the standard overlay
-    if not flags.Overlay.doTrackOverlay:
-        # Add Pixel overlay algorithm
-        acc.merge(PixelOverlayAlgCfg(flags))
-        # Add Pixel truth overlay
-        if flags.Digitization.EnableTruth:
-            acc.merge(PixelTruthOverlayCfg(flags))
+    # Add Pixel overlay algorithm
+    acc.merge(PixelOverlayAlgCfg(flags))
+    # Add Pixel truth overlay
+    if flags.Digitization.EnableTruth:
+        acc.merge(PixelTruthOverlayCfg(flags))
 
     return acc

@@ -349,15 +349,12 @@ def InDetTrackRecoCfg(flags):
         #for track overlay, save resolved track name
         # for final merged track collection
         if flags.Overlay.doTrackOverlay and \
-           current_flags.InDet.Tracking.ActiveConfig.storeSeparateContainer:
-            ResolvedTracks = flags.Overlay.sigPrefix + ResolvedTracks
+           current_flags.InDet.Tracking.ActiveConfig.storeSeparateContainer and not current_flags.InDet.Tracking.ActiveConfig.useTRTExtension:
+            ResolvedTracks = flags.Overlay.SigPrefix + ResolvedTracks
 
         # Tweak to match old config key
         if "LargeD0" in extension:
             ResolvedTracks = "ResolvedLargeD0Tracks"
-            if flags.Overlay.doTrackOverlay:
-                ResolvedTracks = flags.Overlay.sigPrefix + \
-                                 "ResolvedLargeD0Tracks"
 
         # Old config had inconsistent "SiSPSeeded" vs "SiSpSeeded" keys
         # Updated in new config
@@ -384,8 +381,6 @@ def InDetTrackRecoCfg(flags):
         if flags.Overlay.doTrackOverlay and \
            current_flags.InDet.Tracking.ActiveConfig.storeSeparateContainer:
             TrackContainer = "Resolved" + extension + "Tracks"
-            if "LargeD0" in extension:
-                TrackContainer = "ResolvedLargeD0Tracks"
 
 
         # ---------------------------------------
@@ -399,6 +394,8 @@ def InDetTrackRecoCfg(flags):
                 ExtendedTracks = "ExtendedTracksDisappearing"
             elif "LargeD0" in extension:
                 ExtendedTracks = "ExtendedLargeD0Tracks"
+                if flags.Overlay.doTrackOverlay:
+                    ExtendedTracks = flags.Overlay.SigPrefix+"ExtendedLargeD0Tracks"
             ExtendedTracksMap = "ExtendedTracksMap" + extension
 
             result.merge(NewTrackingTRTExtensionCfg(
@@ -408,6 +405,8 @@ def InDetTrackRecoCfg(flags):
                 ExtendedTracksMap = ExtendedTracksMap))
 
             TrackContainer = ExtendedTracks
+            if flags.Overlay.doTrackOverlay and "LargeD0" in extension:
+                TrackContainer = "ExtendedLargeD0Tracks"
             StatTrackCollections += [ExtendedTracks]
             StatTrackTruthCollections += [ExtendedTracks+"TruthCollection"]
 
@@ -428,18 +427,18 @@ def InDetTrackRecoCfg(flags):
                 if extension=="Disappearing":
                     InputTracks = [TrackContainer]
                     if flags.Overlay.doTrackOverlay:
-                        InputTracks += [flags.Overlay.bkgPrefix + extension + \
+                        InputTracks += [flags.Overlay.BkgPrefix + extension + \
                                         "Tracks"]
                     TrackContainer = extension+"Tracks"
                     AssociationMapName = "PRDtoTrackMap" + TrackContainer
                     MergerOutputTracks = TrackContainer
                 elif flags.Overlay.doTrackOverlay:
                     #schedule merger to combine signal and background tracks
-                    InputTracks = [flags.Overlay.sigPrefix+TrackContainer,
-                                   flags.Overlay.bkgPrefix+TrackContainer]
+                    InputTracks = [flags.Overlay.SigPrefix+TrackContainer,
+                                   flags.Overlay.BkgPrefix+TrackContainer]
                     AssociationMapName = "PRDtoTrackMapResolved" + extension + \
                                          "Tracks"
-                    MergerOutputTracks = "Resolved" + extension + "Tracks"
+                    MergerOutputTracks = TrackContainer
 
                 result.merge(TrackCollectionMergerAlgCfg(
                     current_flags,
@@ -548,7 +547,7 @@ def InDetTrackRecoCfg(flags):
     # ----------------------------------------------------
 
     if flags.Overlay.doTrackOverlay:
-        InputCombinedInDetTracks += [flags.Overlay.bkgPrefix+\
+        InputCombinedInDetTracks += [flags.Overlay.BkgPrefix+\
                                      "CombinedInDetTracks"]
 
     result.merge(TrackCollectionMergerAlgCfg(

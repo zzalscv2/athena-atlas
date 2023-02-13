@@ -10,12 +10,6 @@ def TrackCollectionMergerAlgCfg(flags, name="InDetTrackCollectionMerger",
                                 **kwargs):
     result = ComponentAccumulator()
 
-    if flags.Overlay.doTrackOverlay:
-        kwargs.setdefault("DoTrackOverlay",True)
-        if "Disappearing" in name:
-            InputCombinedTracks+=flags.Overlay.BkgPrefix+"DisappearingTracks"
-        else:
-            InputCombinedTracks+=flags.Overlay.BkgPrefix+"CombinedInDetTracks"
     kwargs.setdefault("TracksLocation", InputCombinedTracks)
     kwargs.setdefault("OutputTracksLocation", OutputCombinedTracks)
 
