@@ -401,6 +401,12 @@ StatusCode InDet::SiSPSeededTrackFinder::itkFastTrackingStrategy(const EventCont
   SG::WriteHandle<TrackCollection> outputTracks{m_outputTracksKey, ctx};
   ATH_CHECK(outputTracks.record(std::make_unique<TrackCollection>()));
 
+  const bool PIX = true ;
+  const bool STRIP = true ;
+  InDet::ExtendedSiTrackMakerEventData_xk trackEventData(m_prdToTrackMap);
+  /// set up the track maker
+  m_trackmaker->newTrigEvent(ctx, trackEventData, PIX, STRIP);
+
   SiSpacePointsSeedMakerEventData seedEventData;
 
   /**
@@ -417,12 +423,6 @@ StatusCode InDet::SiSPSeededTrackFinder::itkFastTrackingStrategy(const EventCont
   std::list<Trk::Vertex> vertexList;
   /// and run seeding - starting with an empty list of vertices for the first pass
   m_seedsmaker->find3Sp(ctx, seedEventData, vertexList);
-
-  const bool PIX = true ;
-  const bool SCT = true ;
-  InDet::ExtendedSiTrackMakerEventData_xk trackEventData(m_prdToTrackMap);
-  /// set up the track maker
-  m_trackmaker->newTrigEvent(ctx, trackEventData, PIX, SCT);
 
   bool ERR = false;
   Counter_t counter{};

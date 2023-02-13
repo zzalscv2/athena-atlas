@@ -610,7 +610,7 @@ bool InDet::SiTrajectory_xk::initialize
   // for ITk fast tracking configuration
   bool initDeadMaterial = not(m_tools->isITkGeometry() and m_tools->useFastTracking());
 
-  if(!initDeadMaterial && !m_surfacedead) m_surfacedead = std::make_unique<const Trk::CylinderSurface>(Rdead,5000.);
+  if(!initDeadMaterial and !m_surfacedead) m_surfacedead = std::make_unique<const Trk::CylinderSurface>(Rdead,5000.);
 
   std::list<const InDet::SiCluster*>::iterator iter_cluster;
   if (lSiCluster.size() < 2) return false;
