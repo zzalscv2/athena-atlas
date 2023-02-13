@@ -10,7 +10,7 @@ def same( val , tool):
 #
 # Create the hypo alg with all selectors
 #
-def createTrigEgammaForwardPrecisionElectronHypoAlg(name, sequenceOut):
+def createTrigEgammaForwardPrecisionElectronHypoAlg(flags, name, sequenceOut):
     # make the Hypo
     #from TriggerMenuMT.HLT.Egamma.TrigEgammaDefs import createTrigEgammaForwardPrecisionElectronLHSelectors
 
@@ -22,7 +22,7 @@ def createTrigEgammaForwardPrecisionElectronHypoAlg(name, sequenceOut):
     #thePrecisionElectronHypo.LHNames = ["lhtight", "lhmedium", "lhloose"] # just like the pidnames
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool("MonTool_"+name,
+    monTool = GenericMonitoringTool(flags, "MonTool_"+name,
                                     HistPath = 'PrecisionElectronHypo_FWD/'+name)
     monTool.defineHistogram('TIME_exec', type='TH1F', path='EXPERT', title="Precision Electron Hypo Algtime; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=8000.0)
     monTool.defineHistogram('TIME_LH_exec', type='TH1F', path='EXPERT', title="Precision Electron Hypo LH Algtime; time [ us ] ; Nruns", xbins=30, xmin=0.0, xmax=3000.0)
