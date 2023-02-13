@@ -8191,7 +8191,7 @@ HLT_tau20_perf_tracktwoMVA_L1eTAU12:
     1: 37
     2: 37
     3: 37
-    4: 22
+    4: 23
 HLT_tau25_idperf_trackLRT_L1TAU12IM:
   eventCount: 6
   stepCounts:
