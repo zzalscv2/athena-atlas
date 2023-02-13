@@ -71,6 +71,11 @@ def commonServicesCfg(flags):
         preLoadExtensibleFolders = False,  # ATR-19392
         forceResetAtBeginRun = False) )
 
+    # PerfMon
+    if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:
+        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+        cfg.merge( PerfMonMTSvcCfg(flags) )
+
     from TrigServices.TrigServicesConfig import TrigServicesCfg
     cfg.merge( TrigServicesCfg(flags) )
 
