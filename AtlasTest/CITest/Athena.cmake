@@ -99,7 +99,7 @@ atlas_add_citest( RecoRun3Data_Checks
    DEPENDS_SUCCESS RecoRun3Data )
 
 atlas_add_citest( RecoRun3Data_CAConfig
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -e '--CA --maxEvents 100' --threads 8 --no-output-checks )
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -e '--CA --maxEvents 100 --preExec pass' --threads 8 --no-output-checks )
 
 atlas_add_citest( RecoRun3Data_LegacyVsCA
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoLegacyVsCA.sh RecoRun3Data q449
