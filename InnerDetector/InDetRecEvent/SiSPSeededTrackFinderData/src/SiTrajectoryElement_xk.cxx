@@ -449,11 +449,10 @@ bool InDet::SiTrajectoryElement_xk::ForwardPropagationWithSearch
   m_cluster      =         nullptr                           ;
   m_clusterNoAdd =         nullptr                           ;  
   m_xi2Forward         =    10000.                           ;
-  /// re-evaluate if we are expected to intersect this element based on the updated prediction
-  checkBoundaries(m_parametersPredForward); 
+
   /// copy running counts from previous element
   m_nholesForward      = TE.m_nholesForward                        ;
-  m_nMissing              = TE.m_nMissing                                ;
+  m_nMissing           = TE.m_nMissing                             ;
   m_nclustersForward   = TE.m_nclustersForward                     ; 
   m_ndfForward         = TE.m_ndfForward                           ;
   m_xi2totalForward    = TE.m_xi2totalForward                      ;
@@ -464,6 +463,9 @@ bool InDet::SiTrajectoryElement_xk::ForwardPropagationWithSearch
     noiseProduction(1,m_parametersPredForward);
     return true;
   }
+
+  /// re-evaluate if we are expected to intersect this element based on the updated prediction
+  checkBoundaries(m_parametersPredForward);
   
   /// if we are not passing through this element, reset noise production and return 
   if(m_inside > 0) {
@@ -556,26 +558,26 @@ bool InDet::SiTrajectoryElement_xk::BackwardPropagationFilter
       m_dholesBackward = TE.m_dholesBackward;
     }
   }
-  m_status       =         2;
-  m_nlinksBackward      =         0;
-  m_clusterOld   = m_cluster;
-  m_cluster      =         nullptr;
-  m_clusterNoAdd =         nullptr;
-  m_xi2Backward         =    10000.;
-  checkBoundaries(m_parametersPredBackward); 
-  m_nholesBackward      = TE.m_nholesBackward                        ;
-  m_nMissing        = TE.m_nMissing                          ;
-  m_nclustersBackward   = TE.m_nclustersBackward                     ; 
-  m_npixelsBackward     = TE.m_npixelsBackward                       ;
-  m_ndfBackward         = TE.m_ndfBackward                           ;
-  m_xi2totalBackward    = TE.m_xi2totalBackward                      ;
-  m_step        += TE.m_step  ;
+  m_status              = 2;
+  m_nlinksBackward      = 0;
+  m_clusterOld          = m_cluster;
+  m_cluster             = nullptr;
+  m_clusterNoAdd        = nullptr;
+  m_xi2Backward         = 10000.;
+  m_nholesBackward      = TE.m_nholesBackward;
+  m_nMissing            = TE.m_nMissing;
+  m_nclustersBackward   = TE.m_nclustersBackward;
+  m_npixelsBackward     = TE.m_npixelsBackward;
+  m_ndfBackward         = TE.m_ndfBackward;
+  m_xi2totalBackward    = TE.m_xi2totalBackward;
+  m_step               += TE.m_step;
 
   if(m_tools->isITkGeometry() && !m_detelement) {
     setDeadRadLength(m_parametersPredBackward);
     noiseProduction(-1,m_parametersPredBackward);
     return true;
   }
+  checkBoundaries(m_parametersPredBackward);
 
   if(m_inside >0 ) {noiseInitiate(); return true;}
   
@@ -619,17 +621,28 @@ bool InDet::SiTrajectoryElement_xk::BackwardPropagationSmoother
   //
   double step;
   if(TE.m_cluster) {
-
     if(!propagate(TE.m_parametersUpdatedBackward,m_parametersPredBackward,step)) return false;
     m_dholesBackward = 0;
   }
   else             {
-
     if(!propagate(TE.m_parametersPredBackward,m_parametersPredBackward,step)) return false;
     m_dholesBackward = TE.m_dholesBackward;
   }
 
   m_parametersPredBackward.addNoise(m_noise,Trk::oppositeMomentum);
+  m_nholesBackward      = TE.m_nholesBackward;
+  m_nMissing            = TE.m_nMissing;
+  m_nclustersBackward   = TE.m_nclustersBackward;
+  m_npixelsBackward     = TE.m_npixelsBackward;
+  m_ndfBackward         = TE.m_ndfBackward;
+  m_xi2totalBackward    = TE.m_xi2totalBackward;
+
+  // remove case if you have trajectory element without actual detector element
+  // this happens if you have added a dead cylinder
+  if(!m_detelement) {
+    m_status = 2;
+    return true;
+  }
 
   // Forward-backward predict parameters
   //
@@ -639,17 +652,12 @@ bool InDet::SiTrajectoryElement_xk::BackwardPropagationSmoother
 
   double Xi2max = m_xi2max; if( isTwoSpacePointsSeed) Xi2max*=2.;
   checkBoundaries(m_parametersSM); 
-  m_nlinksBackward      =         0               ;
-  m_clusterOld    	    = m_cluster               ;
-  m_cluster       	    =         nullptr               ;
-  m_clusterNoAdd  	    =         nullptr               ;
-  m_xi2Backward         =    10000.               ;
-  m_nholesBackward      = TE.m_nholesBackward     ;
-  m_nMissing               = TE.m_nMissing              ;
-  m_nclustersBackward   = TE.m_nclustersBackward  ; 
-  m_npixelsBackward     = TE.m_npixelsBackward    ;
-  m_ndfBackward         = TE.m_ndfBackward        ; 
-  m_xi2totalBackward    = TE.m_xi2totalBackward   ;
+  m_nlinksBackward      = 0;
+  m_clusterOld          = m_cluster;
+  m_cluster             = nullptr;
+  m_clusterNoAdd        = nullptr;
+  m_xi2Backward         = 10000.;
+
   //m_step        += TE.m_step               ;
   if(m_inside> 0 ) return true;
 
@@ -966,6 +974,10 @@ Trk::TrackStateOnSurface*
 InDet::SiTrajectoryElement_xk::trackSimpleStateOnSurface 
 (bool change,bool cov,int Q)
 {
+  if(!m_detelement) {
+    return 0;
+  }
+
   std::unique_ptr<Trk::TrackParameters> tp = nullptr;
 
   if (Q) {
@@ -1048,7 +1060,7 @@ InDet::SiTrajectoryElement_xk::trackPerigeeStateOnSurface ()
 // TrackParameters production
 // Q = 0 no first or last  element of the trajectory
 // Q = 1             first element of the trajectory
-// Q = 2             last  element of the tracjectory
+// Q = 2             last  element of the trajectory
 ///////////////////////////////////////////////////////////////////
 
 std::unique_ptr<Trk::TrackParameters>
@@ -1171,7 +1183,7 @@ void  InDet::SiTrajectoryElement_xk::noiseProduction
 // TrackParameters production with new direction
 // Q = 0 no first or last  element of the trajectory
 // Q = 1             first element of the trajectory
-// Q = 2             last  element of the tracjectory
+// Q = 2             last  element of the trajectory
 ///////////////////////////////////////////////////////////////////
 
 std::unique_ptr<Trk::TrackParameters>

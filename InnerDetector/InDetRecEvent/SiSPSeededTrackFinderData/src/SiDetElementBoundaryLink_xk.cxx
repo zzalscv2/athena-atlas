@@ -26,6 +26,7 @@ InDet::SiDetElementBoundaryLink_xk::SiDetElementBoundaryLink_xk
 {
   m_ITkGeometry = isITk;
   m_detelement = nullptr;
+  m_dR = 0.;
   const Trk::PlaneSurface* pla = dynamic_cast<const Trk::PlaneSurface*>(& Si->surface());
   if(!pla) return;
   m_detelement = Si;
@@ -64,11 +65,11 @@ InDet::SiDetElementBoundaryLink_xk::SiDetElementBoundaryLink_xk
     int    k1    = i;
     int    k2    = i+1; if(k2>3) k2=0;
 
-    double x1     =  x[k1]*Ax[0]+y[k1]*Ax[1]+z[k1]*Ax[2]; 
-    double y1     =  x[k1]*Ay[0]+y[k1]*Ay[1]+z[k1]*Ay[2]; 
+    double x1     =  x[k1]*Ax[0]+y[k1]*Ax[1]+z[k1]*Ax[2];
+    double y1     =  x[k1]*Ay[0]+y[k1]*Ay[1]+z[k1]*Ay[2];
 
-    double x2     =  x[k2]*Ax[0]+y[k2]*Ax[1]+z[k2]*Ax[2]; 
-    double y2     =  x[k2]*Ay[0]+y[k2]*Ay[1]+z[k2]*Ay[2]; 
+    double x2     =  x[k2]*Ax[0]+y[k2]*Ax[1]+z[k2]*Ax[2];
+    double y2     =  x[k2]*Ay[0]+y[k2]*Ay[1]+z[k2]*Ay[2];
     double d      = (x2-x1)*(x2-x1)+(y2-y1)*(y2-y1);
     double ax     =-(y2-y1)*(y1*x2-x1*y2)/d;
     double ay     = (x2-x1)*(y1*x2-x1*y2)/d;
@@ -78,8 +79,7 @@ InDet::SiDetElementBoundaryLink_xk::SiDetElementBoundaryLink_xk
   }
   //correction for ITk strip endcap sensors which have a local coordinate system centred on the
   //beam axis, due to their annulus shape
-  m_dR = 0.;
-  const Trk::AnnulusBounds* B = dynamic_cast<const Trk::AnnulusBounds*>(&Si->design().bounds()); 
+  const Trk::AnnulusBounds* B = dynamic_cast<const Trk::AnnulusBounds*>(&Si->design().bounds());
   if(B) m_dR = (Si->design().sensorCenter())[0];
   //the above gives the radial component of the sensor centre, from (m_R, 0., 0.)
 }

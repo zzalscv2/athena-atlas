@@ -416,6 +416,13 @@ const std::list<Trk::Track*>& InDet::SiCombinatorialTrackFinder_xk::getTracks
   }
   data.trajectory().sortStep();
 
+  if(data.useFastTracking()) {
+    if(!data.trajectory().filterWithPreciseClustersError()) {
+      data.statistic()[CantFindTrk] = true;
+      return data.tracks();
+    }
+  }
+
   // Trk::Track production
   //
   Trk::Track* t = convertToTrack(data);
@@ -520,7 +527,7 @@ const std::list<Trk::Track*>&  InDet::SiCombinatorialTrackFinder_xk::getTracksWi
 
   data.trajectory().sortStep();
 
-  if(m_doFastTracking) {
+  if(data.useFastTracking()) {
     if(!data.trajectory().filterWithPreciseClustersError()) {
       data.statistic()[CantFindTrk] = true;
       return data.tracks();
