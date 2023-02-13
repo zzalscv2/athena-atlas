@@ -72,10 +72,6 @@ flags.Trigger.enabledSignatures = ['Muon', 'Photon','Electron']
 #flags.Trigger.selectChains = [ 'HLT_mu8_L1MU5VF']#'HLT_j0_perf_L1RD0_FILLED']#'HLT_mu26_ivarmedium_mu6_l2io_probe_L1MU14FCH'] #'HLT_mu0_muoncalib_L1MU14FCH', 'HLT_mu6_L1MU5VF','HLT_mu6_msonly_L1MU5VF'] #'HLT_mu0_muoncalib_L1MU14FCH',#HLT_mu6_L1MU5VF
 #--------------#
 
-# if set to True, use standalone menu generation code
-oldMenuCode=False
-
-
 flags.InDet.useSctDCS = False
 flags.InDet.usePixelDCS = False
 
@@ -120,15 +116,9 @@ acc.merge(TriggerHistSvcConfig(flags))
 
 
 
-if oldMenuCode:
-#  LoadAndGenerateMenu loads test _NewJO menu
-    from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import LoadAndGenerateMenu as generateHLTMenu
-else:
-    from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import generateMenuMT as generateHLTMenu
-
-
+from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import generateMenuMT
 from TriggerJobOpts.TriggerConfig import triggerRunCfg
-menu = triggerRunCfg(flags, menu=generateHLTMenu)
+menu = triggerRunCfg(flags, menu=generateMenuMT)
 # uncomment to obtain printout of menu (and associated components)
 # menu.printConfig(withDetails=True, summariseProps=True)
 acc.merge(menu)
