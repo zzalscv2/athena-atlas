@@ -73,18 +73,18 @@ if __name__=="__main__":
 
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import VERBOSE
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
     log.setLevel(VERBOSE)
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Input.isMC = False
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Input.isMC = False
+    flags.lock()
 
     cfg=ComponentAccumulator()
 
-    acc  = AtlasFieldCacheCondAlgCfg(ConfigFlags)
+    acc  = AtlasFieldCacheCondAlgCfg(flags)
     log.verbose(acc)
     cfg.merge(acc)
 
