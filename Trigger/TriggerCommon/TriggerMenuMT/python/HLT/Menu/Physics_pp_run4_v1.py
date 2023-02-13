@@ -85,7 +85,7 @@ Topo2Group = ['Topo2']
 Topo3Group = ['Topo3']
 LegacyTopoGroup = ['LegacyTopo']
 
-def setupMenu():
+def setupMenu(menu_name):
 
     from AthenaCommon.Logging import logging
     log = logging.getLogger( __name__ )
@@ -121,10 +121,7 @@ def setupMenu():
     chains['Beamspot'] += []
 
 
-
     # if menu is not for P1, remove all online chains
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    menu_name = ConfigFlags.Trigger.triggerMenuSetup
     if 'P1' not in menu_name:
         for sig in chains:
            chainsToRemove = []

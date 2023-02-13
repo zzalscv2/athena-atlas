@@ -318,12 +318,12 @@ def addP1Signatures(chains):
     for sig in chainsP1:
         chains[sig] += chainsP1[sig]
 
-def setupMenu():
+def setupMenu(menu_name):
 
     from AthenaCommon.Logging                 import logging
     log = logging.getLogger(__name__)
     log.info('setupMenu ...')
 
-    chains = physics_menu.setupMenu()
+    chains = physics_menu.setupMenu(menu_name)
     addP1Signatures(chains)
     return chains

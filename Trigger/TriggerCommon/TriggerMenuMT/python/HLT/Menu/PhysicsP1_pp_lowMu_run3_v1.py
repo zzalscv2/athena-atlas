@@ -30,7 +30,7 @@ LowMuGroupPhI = ['LowMuPhaseI']
 LowMuGroupLeg = ['LowMuLegacy']
 
 
-def setupMenu():
+def setupMenu(menu_name):
 
     chains = ChainStore()
 

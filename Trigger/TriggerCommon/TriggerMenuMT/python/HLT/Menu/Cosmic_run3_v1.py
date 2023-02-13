@@ -28,7 +28,7 @@ from .Physics_pp_run3_v1 import (
     SupportGroup
 )
 
-def setupMenu():
+def setupMenu(menu_name):
 
     chains = ChainStore()
     

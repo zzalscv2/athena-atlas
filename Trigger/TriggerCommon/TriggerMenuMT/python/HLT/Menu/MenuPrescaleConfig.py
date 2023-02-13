@@ -23,7 +23,7 @@ def MenuPrescaleConfig(hltMenuConfig, flags):
     except Exception as e:
         log.fatal(f'Failed to import menu module "{base_menu_name}" inferred from menu "{menu_name}"!')
         raise e
-    chains = menu_module.setupMenu()
+    chains = menu_module.setupMenu(menu_name)
 
     # Determine prescale sets from the remainder of the menu name
     # These filters become progressively less inclusive:

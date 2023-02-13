@@ -63,7 +63,7 @@ def run():
 
     # Import menu by name
     menumodule = importlib.import_module(f'TriggerMenuMT.HLT.Menu.{menu_name}')
-    menu = menumodule.setupMenu()
+    menu = menumodule.setupMenu(menu_name)
 
     # Can't do these without parsing
     if args.check_l1 or args.dump_dicts:

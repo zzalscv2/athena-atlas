@@ -36,9 +36,9 @@ from TriggerMenuMT.HLT.Menu.PhysicsP1_HI_run3_v1 import HardProbesStream,MinBias
 
 
 
-def setupMenu():
+def setupMenu(menu_name):
 
-    chains = HIp1_menu.setupMenu()
+    chains = HIp1_menu.setupMenu(menu_name)
 
     from AthenaCommon.Logging                 import logging
     log = logging.getLogger( __name__ )

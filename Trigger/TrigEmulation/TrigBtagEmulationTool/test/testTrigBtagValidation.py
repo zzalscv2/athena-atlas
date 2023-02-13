@@ -4,7 +4,21 @@
 def main():
     EvtMax = 20
     inputFiles = ['/global/homes/c/cvarni/Athena/TrigBtagEmulationToolLayout/data/TrigAnalysisTest.2022-05-09T2101.test_trigAna_RDOtoADO_v1Dev_grid.AOD.pool.root']
-    
+
+    from AthenaCommon.Configurable import ConfigurableCABehavior
+    with ConfigurableCABehavior():
+        from AthenaConfiguration.AllConfigFlags import ConfigFlags
+        ConfigFlags.Scheduler.ShowDataDeps = True
+        ConfigFlags.Scheduler.ShowDataFlow = True
+        ConfigFlags.Scheduler.ShowControlFlow = True
+        ConfigFlags.Input.Files = inputFiles 
+        ConfigFlags.Exec.MaxEvents = EvtMax
+
+        ConfigFlags.lock()
+        ConfigFlags.dump()
+
+    menu_name = ConfigFlags.Trigger.triggerMenuSetup
+
     # for validation compare the decisions of a single chain, or all the chains in the menu 
     jetcoll_name_mapping = {
         "a10sd_cssk_pf_jes_ftf": "HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf", # 0
@@ -29,7 +43,7 @@ def main():
     jetcoll_emul = list(jetcoll_name_mapping.keys())[0] # only used for Jet slice, bjet slice uses a4_pf_subresjesgscIS_ftf [10]
 
     from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import setupMenu
-    chains_phys_pp_run3_v1 = setupMenu()
+    chains_phys_pp_run3_v1 = setupMenu(menu_name)
     if validation_singlechain:
         emulatedChains = [cp for cp in chains_phys_pp_run3_v1[trigger_slice] if cp.name == validation_singlechain]
     else:
@@ -51,16 +65,6 @@ def main():
 
     from AthenaCommon.Configurable import ConfigurableCABehavior
     with ConfigurableCABehavior():
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        ConfigFlags.Scheduler.ShowDataDeps = True
-        ConfigFlags.Scheduler.ShowDataFlow = True
-        ConfigFlags.Scheduler.ShowControlFlow = True
-        ConfigFlags.Input.Files = inputFiles 
-        ConfigFlags.Exec.MaxEvents = EvtMax
-
-        ConfigFlags.lock()
-        ConfigFlags.dump()
-
         from AthenaConfiguration.MainServicesConfig import MainServicesCfg
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         acc = MainServicesCfg( ConfigFlags )
