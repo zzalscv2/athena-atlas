@@ -105,7 +105,7 @@ def fromRunArgs(runArgs):
             flags.Sim.CalibrationRun = CalibrationRun.Off
             flags.Sim.CavernBackground = CavernBackground.Write
     if not (hasattr(runArgs, 'outputHITSFile') or hasattr(runArgs, "outputEVNT_TRFile")):
-        raise RuntimeError('No outputHITSFile or outputEVNT_TRFile defined')
+        log.warning('No outputHITSFile or outputEVNT_TRFile defined')
 
     if hasattr(runArgs, 'conditionsTag'):
         flags.IOVDb.GlobalTag = runArgs.conditionsTag
