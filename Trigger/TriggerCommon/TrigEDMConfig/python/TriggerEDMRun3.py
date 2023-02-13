@@ -94,6 +94,7 @@ JetCopyVars = '.'.join(JetCopyVarsToKeep)
 
 JetFastFTagVarsToKeep = JetCopyVarsToKeep
 JetFastFTagVarsToKeep += [f'fastDips_p{x}' for x in 'cub']
+JetFastFTagVarsToKeep += [f'fastGN1_p{x}' for x in 'cub']
 JetFastFTagVars = '.'.join(JetFastFTagVarsToKeep)
 
 
