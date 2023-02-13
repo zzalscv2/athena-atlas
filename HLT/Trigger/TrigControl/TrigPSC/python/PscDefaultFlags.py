@@ -3,6 +3,8 @@
 #
 '''Functions setting default flags for generating online HLT python configuration'''
 
+_flags = None
+
 def setDefaultOnlineFlagsOldStyle():
     from AthenaCommon.AthenaCommonFlags import athenaCommonFlags as acf
     from AthenaCommon.GlobalFlags import globalflags as gf
@@ -27,9 +29,13 @@ def setDefaultOnlineFlagsNewStyle(flags):
     flags.Scheduler.EnableVerboseViews = False
 
 
-def defaultOnlineFlags(flags = None):
-    setDefaultOnlineFlagsOldStyle()
-    if not flags:
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
-    setDefaultOnlineFlagsNewStyle(flags)
-    return flags
+def defaultOnlineFlags():
+    """On first call will create ConfigFlags and return instance. This is only to be used within
+    TrigPSC/TrigServices/athenaHLT as we cannot explicitly pass flags everywhere."""
+    global _flags
+    if _flags is None:
+        setDefaultOnlineFlagsOldStyle()
+        from AthenaConfiguration.AllConfigFlags import ConfigFlags
+        _flags = ConfigFlags
+        setDefaultOnlineFlagsNewStyle(_flags)
+    return _flags

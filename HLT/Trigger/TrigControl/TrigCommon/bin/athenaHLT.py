@@ -123,9 +123,6 @@ def update_pcommands(args, cdict):
    if args.lb_number is not None:
       cdict['trigger']['precommand'].append('_lb_number=%d' % args.lb_number)
 
-   if args.perfmon:
-      cdict['trigger']['precommand'].insert(0, "include('TrigCommon/PerfMon.py')")
-
    if args.leak_check:
       doLeakCheck = [] if args.leak_check=='all' else [args.leak_check]
 
@@ -462,12 +459,16 @@ def main():
    update_pcommands(args, cdict)
 
    # Extra Psc configuration
+   from TrigPSC.PscDefaultFlags import defaultOnlineFlags
+   flags = defaultOnlineFlags()
+
    PscConfig.interactive = args.interactive
    PscConfig.dumpJobProperties = args.dump_config or args.dump_config_exit or args.dump_config_reload
    PscConfig.exitAfterDump = args.dump_config_exit
    PscConfig.reloadAfterDump = args.dump_config_reload
 
-   # Select the correct THistSvc
+   flags.PerfMon.doFastMonMT = args.perfmon
+
    from TrigServices.TriggerUnixStandardSetup import _Conf
    _Conf.useOnlineTHistSvc = args.oh_monitoring
 
