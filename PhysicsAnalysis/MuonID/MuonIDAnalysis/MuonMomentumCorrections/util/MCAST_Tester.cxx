@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -41,6 +41,9 @@ ANA_MSG_SOURCE(msgMMC, "MCASTTest")
 
 #include <MuonMomentumCorrections/CalibContainer.h>
 #include <MuonMomentumCorrections/CalibInitializer.h>
+
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 
 int main(int argc, char* argv[]) {
