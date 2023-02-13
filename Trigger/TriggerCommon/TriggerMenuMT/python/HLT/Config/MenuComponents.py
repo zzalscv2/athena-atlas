@@ -10,7 +10,7 @@ from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import (NoHypoToolCreated,
                                                              isInputMakerBase, 
                                                              isHypoAlg)
 from AthenaCommon.CFElements import parOR, seqAND, compName, getProp, hasProp, findAlgorithmByPredicate
-from AthenaCommon.Configurable import Configurable
+from AthenaCommon.Configurable import Configurable, ConfigurableCABehavior
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -20,7 +20,6 @@ import GaudiConfig2
 from GaudiKernel.DataHandle import DataHandle
 from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from TrigCompositeUtils.TrigCompositeUtils import legName
-from AthenaCommon.Configurable import ConfigurableCABehavior
 from AthenaConfiguration.ComponentAccumulator import appendCAtoAthena, conf2toConfigurable
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
@@ -1077,12 +1076,15 @@ def algorithmCAToGlobalWrapper(gen, flags, *args, **kwargs):
     with ConfigurableCABehavior():
         ca = gen(flags, *args, **kwargs)
         assert isinstance(ca, ComponentAccumulator), "Function provided does not generate ComponentAccumulator"
-    algs = ca.getEventAlgos()
-    ca._algorithms = {}
-    ca._allSequences = []
-    appendCAtoAthena(ca)
-    return [conf2toConfigurable(alg) for alg in algs]
+    return extractAlgorithmsAndAppendCA(ca)
 
+def extractAlgorithmsAndAppendCA(ca: ComponentAccumulator) -> list[Configurable]:
+    """Extract and return the algorithms from a component accumulator"""
+    algorithms = ca.getEventAlgos()
+    ca._algorithms.clear()
+    ca._allSequences.clear()
+    appendCAtoAthena(ca)
+    return list(map(conf2toConfigurable, algorithms))
 
 
 def menuSequenceCAToGlobalWrapper(gen, flags, *args, **kwargs):
