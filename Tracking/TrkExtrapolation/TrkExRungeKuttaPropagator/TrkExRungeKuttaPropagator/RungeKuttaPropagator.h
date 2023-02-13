@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -228,7 +228,7 @@ public:
 
   /** Global position together with direction of the trajectory on the surface
    */
-  virtual const IntersectionSolution* intersect(
+  virtual IntersectionSolution intersect(
     const EventContext& ctx,
     const TrackParameters&,
     const Surface&,
