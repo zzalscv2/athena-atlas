@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCPMUONOBJ_H
@@ -33,10 +33,10 @@ namespace MCP {
               year{year},
               isData{isData},
               pars{(track != nullptr) ? track->definingParameters()
-                                      : AmgVector(5)()},
+                                      : AmgVector(5)::Zero()},
               covariance{(track != nullptr)
                              ? track->definingParametersCovMatrix()
-                             : AmgSymMatrix(5)()} {}
+                             : AmgSymMatrix(5)::Zero()} {}
 
         TrackCalibObj(const xAOD::TrackParticle* track, TrackType t, int charge,
                       double eta, double phi, DataYear year, bool isData)
@@ -82,8 +82,8 @@ namespace MCP {
           charge{-999},
           year{year},
           isData{isData},
-          pars {AmgVector(5)()},
-          covariance{AmgSymMatrix(5)()}
+          pars (AmgVector(5)::Zero()),
+          covariance (AmgSymMatrix(5)::Zero())
           {}
 
 
@@ -110,9 +110,9 @@ namespace MCP {
         const bool isData{};
 
         /// Track perigee parameters.
-        const AmgVector(5) pars{};
+        const AmgVector(5) pars{AmgVector(5)::Zero()};
         /// Full track covariance matrix
-        const AmgSymMatrix(5) covariance{};
+        const AmgSymMatrix(5) covariance{AmgSymMatrix(5)::Zero()};
     };
 
 
