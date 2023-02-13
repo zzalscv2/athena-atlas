@@ -34,7 +34,7 @@ __all__ = ["JetRecCfg", "JetInputCfg"]
 #
 # Top level functions returning ComponentAccumulator out of JetDefinition 
 
-def JetRecCfg( configFlags, jetdef,  returnConfiguredDef=False):
+def JetRecCfg( flags, jetdef,  returnConfiguredDef=False):
     """Top-level function for running jet finding or grooming.
     
     This returns a ComponentAccumulator that can be merged with others
@@ -43,7 +43,7 @@ def JetRecCfg( configFlags, jetdef,  returnConfiguredDef=False):
 
     arguments : 
       - jetdef : jet or grooming definition
-      - configFlags : the AthenaConfiguration.AllConfigFlags.ConfigFlags, mainly for input file
+      - flags : the configuration flags instance, mainly for input file
     peeking such that we don't attempt to reproduce stuff that's already
     in the input file. And also to be able to invoke building of inputs outside of Jet domain during reco from RAW/RDO.
       - returnConfiguredDef : is for debugging. It will also returns the cloned JetDefinition which contains the calculated dependencies.
@@ -60,12 +60,12 @@ def JetRecCfg( configFlags, jetdef,  returnConfiguredDef=False):
 
     # call the relevant function according to jetdef_i type 
     if isinstance(jetdef, JetDefinition):
-        algs, jetdef_i = getJetDefAlgs(configFlags, jetdef , True)
+        algs, jetdef_i = getJetDefAlgs(flags, jetdef , True)
     elif isinstance(jetdef, GroomingDefinition):
-        algs, jetdef_i = getJetGroomAlgs(configFlags, jetdef, True)
+        algs, jetdef_i = getJetGroomAlgs(flags, jetdef, True)
 
     # FIXME temporarily reorder for serial running
-    if configFlags.Concurrency.NumThreads <= 0:
+    if flags.Concurrency.NumThreads <= 0:
         jetlog.info("Reordering algorithms in sequence {0}".format(sequenceName))
         algs = reOrderAlgs(algs)
 
@@ -80,7 +80,7 @@ def JetRecCfg( configFlags, jetdef,  returnConfiguredDef=False):
     return components
 
 
-def JetInputCfg(configFlags,jetOrConstitdef , context="default"):    
+def JetInputCfg(flags,jetOrConstitdef , context="default"):    
     """Returns a ComponentAccumulator containing algs needed to build inputs to jet finding as defined by jetOrConstitdef
 
     jetOrConstitdef can either be 
@@ -91,7 +91,7 @@ def JetInputCfg(configFlags,jetOrConstitdef , context="default"):
     """
     components = ComponentAccumulator()
 
-    algs = getInputAlgs(jetOrConstitdef, configFlags, context)
+    algs = getInputAlgs(jetOrConstitdef, flags, context)
 
     for a in algs:
 
@@ -119,7 +119,7 @@ def PseudoJetCfg(jetdef):
 # Mid level functions returning list of algs out of JetDefinition 
 
 
-def getJetDefAlgs(configFlags, jetdef ,  returnConfiguredDef=False, monTool=None):
+def getJetDefAlgs(flags, jetdef ,  returnConfiguredDef=False, monTool=None):
     """ Create the algorithms necessary to build the jet collection defined by jetdef.
     
     This internally finds all the dependencies declared into jetdef (through input, ghosts & modifiers) 
@@ -136,8 +136,8 @@ def getJetDefAlgs(configFlags, jetdef ,  returnConfiguredDef=False, monTool=None
     # Scan the dependencies of this jetdef, also converting all aliases it contains 
     # into config objects and returning a fully configured copy.
 
-    jetdef_i = solveDependencies(jetdef, configFlags=configFlags)
-    jetdef_i._cflags = configFlags
+    jetdef_i = solveDependencies(jetdef, flags=flags)
+    jetdef_i._cflags = flags
 
 
     # check if the conditions are compatible with the inputs & modifiers of this jetdef_i.
@@ -154,7 +154,7 @@ def getJetDefAlgs(configFlags, jetdef ,  returnConfiguredDef=False, monTool=None
     # With jetdef_i, we can now instantiate the proper c++ tools and algs.
     
     # algs needed to build the various inputs (constituents, track selection, event density, ...)
-    algs += getInputAlgs(jetdef_i, configFlags , monTool=monTool)
+    algs += getInputAlgs(jetdef_i, flags , monTool=monTool)
 
     # algs to create fastjet::PseudoJet objects out of the inputs
     algs+= getPseudoJetAlgs(jetdef_i)
@@ -169,7 +169,7 @@ def getJetDefAlgs(configFlags, jetdef ,  returnConfiguredDef=False, monTool=None
         return algs, jetdef_i
     return algs
 
-def getJetGroomAlgs(configFlags, groomdef, returnConfiguredDef=False, monTool=None):
+def getJetGroomAlgs(flags, groomdef, returnConfiguredDef=False, monTool=None):
     """Instantiate and schedule all the algorithms needed to run the grooming alg 'groomdef' and
     add them in the ComponentAccumulator 'components'
 
@@ -200,11 +200,11 @@ def getJetGroomAlgs(configFlags, groomdef, returnConfiguredDef=False, monTool=No
     # Retrieve algs needed to build the parent (ungroomed) jets
     # (we always want it even if the parent jets are already in the input file because
     #  we need to rebuild the pseudoJet)
-    algs, ungroomeddef_i = getJetDefAlgs(configFlags, groomdef_i.ungroomeddef , True)
+    algs, ungroomeddef_i = getJetDefAlgs(flags, groomdef_i.ungroomeddef , True)
     groomdef_i._ungroomeddef = ungroomeddef_i # set directly the internal members to avoid complication. This is fine, since we've been cloning definitions.
 
-    #Filter the modifiers based on the configFlags
-    removeGroomModifFailingConditions(groomdef_i, configFlags, raiseOnFailure = not jetInternalFlags.isRecoJob)
+    #Filter the modifiers based on the flags
+    removeGroomModifFailingConditions(groomdef_i, flags, raiseOnFailure = not jetInternalFlags.isRecoJob)
 
     algs += [ getJetRecGroomAlg(groomdef_i, monTool=monTool) ]
 
@@ -215,14 +215,14 @@ def getJetGroomAlgs(configFlags, groomdef, returnConfiguredDef=False, monTool=No
     return algs
 
 
-def getJetAlgs(configFlags, jetdef, returnConfiguredDef=False, monTool=None):
+def getJetAlgs(flags, jetdef, returnConfiguredDef=False, monTool=None):
     # Useful helper function For Run-II config style
     if isinstance(jetdef, JetDefinition):
         func = getJetDefAlgs
     elif isinstance(jetdef, GroomingDefinition):
         func = getJetGroomAlgs
 
-    return func(configFlags, jetdef, returnConfiguredDef, monTool)
+    return func(flags, jetdef, returnConfiguredDef, monTool)
 
 
 ########################################################################
@@ -278,7 +278,7 @@ def mergedPJId(pjList):
     return str(_mergedPJContainers.setdefault(t, currentSize))
 
 
-def getInputAlgs(jetOrConstitdef, configFlags=None, context="default", monTool=None):
+def getInputAlgs(jetOrConstitdef, flags=None, context="default", monTool=None):
     """Returns the list of configured algs needed to build inputs to jet finding as defined by jetOrConstitdef
     
     jetOrConstitdef can either be 
@@ -298,7 +298,7 @@ def getInputAlgs(jetOrConstitdef, configFlags=None, context="default", monTool=N
         # technically we need a JetDefinition, so just build an empty one only containing our JetInputConstit
         jetlog.info("Setting up jet inputs from JetInputConstit : "+jetOrConstitdef.name)
         jetdef = solveDependencies( JetDefinition('Kt', 0., jetOrConstitdef, context=context) )
-        jetdef._cflags = configFlags
+        jetdef._cflags = flags
         canrun = removeComponentFailingConditions(jetdef, raiseOnFailure = not jetInternalFlags.isRecoJob)
         if not canrun:
             return []
@@ -653,17 +653,17 @@ def getModifier(jetdef, moddef, modspec):
 
     
             
-def removeComponentFailingConditions(jetdef, configflags=None, raiseOnFailure=True):
+def removeComponentFailingConditions(jetdef, flags=None, raiseOnFailure=True):
     """Filters the lists jetdef.modifiers and jetdef.ghosts (and jetdef._prereqOrder), so only the components
-    comptatible with configflags are selected. 
-    If configflags==None : assume jetdef._cflags is properly set (this is done by higher-level functions)
+    comptatible with flags are selected. 
+    If flags==None : assume jetdef._cflags is properly set (this is done by higher-level functions)
     The compatibility is ultimately tested using the component 'filterfn' attributes.
     Internally calls the function isComponentPassingConditions() (see below) 
     """
     jetlog.info("Standard Reco mode : filtering components in "+str(jetdef))
 
     if jetdef._cflags is None:
-        jetdef._cflags = configflags
+        jetdef._cflags = flags
 
     ## TODO :
     ## do not raise an exceptin immediately. Instead collect all failure
@@ -693,15 +693,15 @@ def removeComponentFailingConditions(jetdef, configflags=None, raiseOnFailure=Tr
 
 
 
-def removeGroomModifFailingConditions(groomdef, configflags, raiseOnFailure=True):
+def removeGroomModifFailingConditions(groomdef, flags, raiseOnFailure=True):
 
-    groomdef.modifiers = filterJetDefList(groomdef, groomdef.modifiers, "mod", raiseOnFailure, configflags)
-    filterJetDefList(groomdef, list(groomdef._prereqOrder), "", raiseOnFailure, configflags)
+    groomdef.modifiers = filterJetDefList(groomdef, groomdef.modifiers, "mod", raiseOnFailure, flags)
+    filterJetDefList(groomdef, list(groomdef._prereqOrder), "", raiseOnFailure, flags)
 
 
 
 # define a helper function to filter components from jet definition
-def filterJetDefList(jetdef, inList, compType, raiseOnFailure, configFlags):
+def filterJetDefList(jetdef, inList, compType, raiseOnFailure, flags):
 
     nOut=0
     outList=[]
@@ -713,7 +713,7 @@ def filterJetDefList(jetdef, inList, compType, raiseOnFailure, configFlags):
     for comp in inList:
         fullkey = basekey+comp
         cInstance = jetdef._prereqDic[fullkey]
-        ok, reason = isComponentPassingConditions(cInstance, configFlags, jetdef._prereqDic)
+        ok, reason = isComponentPassingConditions(cInstance, flags, jetdef._prereqDic)
         if not ok :
             if raiseOnFailure:
                 raise Exception("JetDefinition {} can NOT be scheduled. Failure  of {} {}  reason={}".format(
@@ -736,19 +736,19 @@ def filterJetDefList(jetdef, inList, compType, raiseOnFailure, configFlags):
 
 
 
-def isComponentPassingConditions(component, configflags, prereqDic):
-    """Test if component is compatible with configflags.
+def isComponentPassingConditions(component, flags, prereqDic):
+    """Test if component is compatible with flags.
     This is done by calling component.filterfn AND testing all its prereqs.
     """
     for req in component.prereqs:
         if req not in prereqDic:
             return False, "prereq "+req+" not available"
         reqInstance = prereqDic[req]
-        ok, reason = isComponentPassingConditions(reqInstance, configflags, prereqDic)
+        ok, reason = isComponentPassingConditions(reqInstance, flags, prereqDic)
         if not ok :
             return False, "prereq "+str(reqInstance)+" failed because : "+reason
 
-    ok, reason = component.filterfn(configflags)
+    ok, reason = component.filterfn(flags)
     return ok, reason
 
 
@@ -816,24 +816,25 @@ def removeFromList(l, o):
     
 if __name__=="__main__":
     # Config flags steer the job at various levels
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/mc16_13TeV.410501.PowhegPythia8EvtGen_A14_ttbar_hdamp258p75_nonallhad.merge.AOD.e5458_s3126_r9364_r9315/AOD.11182705._000001.pool.root.1"]
-    ConfigFlags.Concurrency.NumThreads = 1
-    ConfigFlags.Concurrency.NumConcurrentEvents = 1
-    ConfigFlags.lock()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/mc16_13TeV.410501.PowhegPythia8EvtGen_A14_ttbar_hdamp258p75_nonallhad.merge.AOD.e5458_s3126_r9364_r9315/AOD.11182705._000001.pool.root.1"]
+    flags.Concurrency.NumThreads = 1
+    flags.Concurrency.NumConcurrentEvents = 1
+    flags.lock()
 
     # Get a ComponentAccumulator setting up the fundamental Athena job
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
-    cfg=MainServicesCfg(ConfigFlags) 
+    cfg=MainServicesCfg(flags) 
 
     # Add the components for reading in pool files
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg.merge(PoolReadCfg(flags))
 
     # Add the components from our jet reconstruction job
     from StandardSmallRJets import AntiKt4EMTopo
     AntiKt4EMTopo.modifiers = ["Calib:T0:mc","Filter:15000","Sort"] + ["JVT"] + ["PartonTruthLabel"]
-    cfg.merge(JetRecCfg(AntiKt4EMTopo,ConfigFlags,jetnameprefix="New"))
+    cfg.merge(JetRecCfg(AntiKt4EMTopo,flags,jetnameprefix="New"))
 
     cfg.printConfig(withDetails=False,summariseProps=True)
 

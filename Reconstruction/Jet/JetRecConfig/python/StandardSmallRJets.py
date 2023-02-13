@@ -216,7 +216,7 @@ AntiKt6TruthGEN   = AntiKt4TruthGEN.clone(radius=0.6)
 AntiKt6TruthGENWZ = AntiKt4TruthGENWZ.clone(radius=0.6)
 
 
-def StandardSmallRJetCfg(configFlags):
+def StandardSmallRJetCfg(flags):
     """Top-level function to schedule the smallR jets in standard reconstruction """
     from JetRecConfig.JetRecConfig import JetRecCfg
 
@@ -226,9 +226,9 @@ def StandardSmallRJetCfg(configFlags):
         AntiKt4Truth,
         ]
 
-    compacc = JetRecCfg( configFlags, standarSmallRList[0], )
+    compacc = JetRecCfg( flags, standarSmallRList[0], )
     for jetdef in standarSmallRList[1:]:
-        compacc.merge( JetRecCfg( configFlags, jetdef) )
+        compacc.merge( JetRecCfg( flags, jetdef) )
 
     return compacc
         

@@ -169,24 +169,25 @@ if __name__=='__main__':
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     import sys
     nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/'
     file = 'data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1'
-    ConfigFlags.Input.Files = [nightly+file]
-    ConfigFlags.Input.isMC = False
-    ConfigFlags.Output.HISTFileName = 'PFOMonitorOutput.root'
-    ConfigFlags.fillFromArgs(sys.argv[1:])
+    flags = initConfigFlags()
+    flags.Input.Files = [nightly+file]
+    flags.Input.isMC = False
+    flags.Output.HISTFileName = 'PFOMonitorOutput.root'
+    flags.fillFromArgs(sys.argv[1:])
     
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesThreadedCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesThreadedCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesThreadedCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    pfoMonitorAcc = PFOMonitoringConfig(ConfigFlags)
+    pfoMonitorAcc = PFOMonitoringConfig(flags)
     cfg.merge(pfoMonitorAcc)
 
     # If you want to turn on more detailed messages ...

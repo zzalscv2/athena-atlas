@@ -53,7 +53,7 @@ def JETM2ExtraContentCfg(ConfigFlags):
     # CHS R = 0.4 UFO jets
     #=======================================
 
-    algs = getInputAlgs(cst.UFO, configFlags=ConfigFlags)
+    algs = getInputAlgs(cst.UFO, flags=ConfigFlags)
     for alg in algs:
         if isinstance(alg, ComponentAccumulator):
             acc.merge(alg)

@@ -348,12 +348,12 @@ import JetRecConfig.JetRecConfig as JetRecConfig
 # For this we redefine the original JetRecConfig.JetRecCfg function. 
 
 JetRecConfig.JetRecCfg_original = JetRecConfig.JetRecCfg
-def JetRecCfg_reorder(jetdef, configFlags, returnFinalJetDef=False):
+def JetRecCfg_reorder(jetdef, flags, returnFinalJetDef=False):
     """Builds the algs with JetRecConfig.JetRecCfg and then make sure
     they are in proper order.
     Re-ordering is done manually, according to various input alg type.
     """
-    res = JetRecConfig.JetRecCfg_original(configFlags, jetdef , returnFinalJetDef)
+    res = JetRecConfig.JetRecCfg_original(flags, jetdef , returnFinalJetDef)
 
     acc , _ = res if returnFinalJetDef else (res,None)
     algs = acc.algs
@@ -381,11 +381,3 @@ def JetRecCfg_reorder(jetdef, configFlags, returnFinalJetDef=False):
     return res
 
 JetRecConfig.JetRecCfg = JetRecCfg_reorder
-
-
-#*******************************************************************
-# Some flags are not available in AnalysisBase.
-# Add them manually :
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-ConfigFlags.addFlag('Reco.EnableTracking',True)
-ConfigFlags.addFlag('Reco.EnableCombinedMuon',True)

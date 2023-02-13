@@ -2,7 +2,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from pprint import pprint
 
 #Trigger xAODType.ObjectType dict entry loading
 import cppyy
@@ -40,7 +39,7 @@ def config_CHS_CSSK_merged(inputFlags,**kwargs):
 
 
 
-def UFOConfig(inputFlags, **kwargs):
+def UFOConfig(flags, **kwargs):
     # Configure UFO reconstruction algorithm instead of TCC
     UFO_CA=ComponentAccumulator()
     #add Storegate
@@ -52,7 +51,7 @@ def UFOConfig(inputFlags, **kwargs):
     constituents=cst.GPFlowCSSK
     inputFEcontainer="CSSKGParticleFlowObjects"
     
-    UFO_reco=runUFOReconstruction(configFlags=inputFlags,constits=constituents,inputFEcontainerkey=inputFEcontainer)
+    UFO_reco=runUFOReconstruction(flags,constits=constituents,inputFEcontainerkey=inputFEcontainer)
     UFO_CA.merge(UFO_reco)
 
     return UFO_CA
@@ -60,25 +59,25 @@ def UFOConfig(inputFlags, **kwargs):
 
 
 if __name__=="__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as cfgFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.isMC=True
     
-    cfgFlags.Input.isMC=True
+    #    flags.Input.Format="AOD"
     
-    #    cfgFlags.Input.Format="AOD"
-    
-    #    cfgFlags.Input.Files=["/scratch/anthony/TEST_AOD/TCC/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3126_r10724/mc16_13TeV/AOD.14795494._007454.pool.root.1"]
-    #    cfgFlags.Input.Files=["/scratch/anthony/TEST_AOD/TCC/valid1_test/valid1/AOD.24855256._000001.pool.root.1"]
-    cfgFlags.Input.Files=["myAOD.root"]
-    cfgFlags.Output.AODFileName="output_UFO_DAOD.root"
-    cfgFlags.Exec.MaxEvents=20
-    cfgFlags.Output.doWriteAOD=True
-    #cfgFlags.Common.ProductionStep=0 # I think this is default
-    cfgFlags.dump()
-    cfgFlags.lock()
+    #    flags.Input.Files=["/scratch/anthony/TEST_AOD/TCC/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3126_r10724/mc16_13TeV/AOD.14795494._007454.pool.root.1"]
+    #    flags.Input.Files=["/scratch/anthony/TEST_AOD/TCC/valid1_test/valid1/AOD.24855256._000001.pool.root.1"]
+    flags.Input.Files=["myAOD.root"]
+    flags.Output.AODFileName="output_UFO_DAOD.root"
+    flags.Exec.MaxEvents=20
+    flags.Output.doWriteAOD=True
+    #flags.Common.ProductionStep=0 # I think this is default
+    flags.dump()
+    flags.lock()
     
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg=MainServicesCfg(cfgFlags)
+    cfg=MainServicesCfg(flags)
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     inputList=["xAOD::TrackParticleContainer#InDetTrackParticles", "xAOD::TrackParticleAuxContainer#InDetTrackParticlesAux."]
@@ -108,16 +107,16 @@ if __name__=="__main__":
     inputList.append("xAOD::TauJetAuxContainer#*")
     
     
-    cfg.merge(OutputStreamCfg(cfgFlags,"AOD",ItemList=inputList))
+    cfg.merge(OutputStreamCfg(flags,"AOD",ItemList=inputList))
     
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
     
-    cfg.merge(PoolReadCfg(cfgFlags))
+    cfg.merge(PoolReadCfg(flags))
 
-    cfg.merge(config_CHS_CSSK_merged(cfgFlags))
+    cfg.merge(config_CHS_CSSK_merged(flags))
 
-    cfg.merge(UFOConfig(cfgFlags)) 
+    cfg.merge(UFOConfig(flags)) 
 
     cfg.printConfig()
 
