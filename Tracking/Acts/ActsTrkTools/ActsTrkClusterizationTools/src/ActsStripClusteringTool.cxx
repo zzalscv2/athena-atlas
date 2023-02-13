@@ -15,14 +15,6 @@
 
 namespace ActsTrk {
 
-
-// Required by ACTS clusterization. Since strips are conceptually laid
-// out on a 1-D grid, fake one of the axes.
-int getCellRow(const StripClusteringTool::Cell&)
-{
-    return 0;
-}
-
 // Required by ACTS clusterization
 int getCellColumn(const StripClusteringTool::Cell& cell)
 {
@@ -35,16 +27,14 @@ int& getCellLabel(StripClusteringTool::Cell& cell)
     return cell.label;
 }
 
-// Connection logic for strips, used by ACTS clusterization
-Acts::Ccl::ConnectResult
-StripClusteringTool::StripConnect::operator()(const StripClusteringTool::Cell& ref,
-					      const StripClusteringTool::Cell& iter)
+// Required by ACTS clusterization
+void clusterAddCell(StripClusteringTool::Cluster& cl, const StripClusteringTool::Cell& cell)
 {
-    return std::abs(static_cast<int>(ref.index - iter.index)) == 1?
-	Acts::Ccl::ConnectResult::eConn :
-	Acts::Ccl::ConnectResult::eNoConnStop;
+    cl.ids.push_back(cell.id);
+    if (cl.ids.size() < (sizeof(cl.hitsInThirdTimeBin) * 8)) {
+	cl.hitsInThirdTimeBin |= cell.timeBits.test(0) << cl.ids.size();
+    }
 }
-
 
 StripClusteringTool::StripClusteringTool(
     const std::string& type, const std::string& name, const IInterface* parent)
@@ -81,35 +71,6 @@ StatusCode StripClusteringTool::decodeTimeBins()
     return StatusCode::SUCCESS;
 }
 
-StripClusteringTool::ClusterCollection
-mergeClusters(StripClusteringTool::CellCollection& cells, bool badStripOnModule)
-{
-    if (cells.empty())
-	return {};
-
-    StripClusteringTool::ClusterCollection outv;
-    StripClusteringTool::Cluster cl;
-    int lbl = cells.front().label;
-
-    for (StripClusteringTool::Cell& cell : cells) {
-	if (cell.label != lbl) {
-	    outv.push_back(std::move(cl));
-	    cl = StripClusteringTool::Cluster();
-	    lbl = cell.label;
-	}
-	cl.ids.push_back(cell.id);
-
-	// Bad strips on a module invalidates the hitsInThirdTimeBin word.
-	// Therefore leave it to 0 if that's the case.
-	if (!badStripOnModule and
-	    (cl.ids.size() < (sizeof(cl.hitsInThirdTimeBin) * 8))) {
-	    cl.hitsInThirdTimeBin |= cell.timeBits.test(0) << cl.ids.size();
-	}
-    }
-    outv.push_back(std::move(cl));
-    return outv;
-}
-
 StatusCode
 StripClusteringTool::clusterize(const InDetRawDataCollection<StripRDORawData>& RDOs,
 				const StripID& stripID,
@@ -126,13 +87,18 @@ StripClusteringTool::clusterize(const InDetRawDataCollection<StripRDORawData>& R
 
     auto& [cells, badStripOnModule] = *unpckd;
 
-    Acts::Ccl::labelClusters<CellCollection, 1, StripConnect>(cells);
-    ClusterCollection clusters = mergeClusters(cells, badStripOnModule);
+    ClusterCollection clusters =
+	Acts::Ccl::createClusters<CellCollection, ClusterCollection, 1>(cells);
 
     double lorentzShift
 	= m_lorentzAngleTool->getLorentzShift(element->identifyHash());
 
-    for (const Cluster& cl : clusters) {
+    for (Cluster& cl : clusters) {
+	// Bad strips on a module invalidates the hitsInThirdTimeBin word.
+	// Therefore set it to 0 if that's the case.
+	if (badStripOnModule) {
+	    cl.hitsInThirdTimeBin = 0;
+	}
 	try {
 	    ATH_CHECK(makeCluster(cl, lorentzShift, stripID, element, container));
 	} catch (const std::exception& e) {

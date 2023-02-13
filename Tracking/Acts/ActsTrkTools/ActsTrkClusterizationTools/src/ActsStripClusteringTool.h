@@ -63,10 +63,6 @@ public:
 
 private:
 
-    struct StripConnect {
-	Acts::Ccl::ConnectResult operator()(const Cell& ref, const Cell& iter);
-    };
-
     bool passTiming(const std::bitset<3>& timePattern) const;
     
     StatusCode decodeTimeBins();
