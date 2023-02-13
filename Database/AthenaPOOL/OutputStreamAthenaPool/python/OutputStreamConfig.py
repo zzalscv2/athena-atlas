@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, ConfigurationError
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -6,29 +6,29 @@ from AthenaConfiguration.Enums import ProductionStep
 from AthenaCommon.Logging import logging
 
 
-def OutputStreamCfg(configFlags, streamName, ItemList=[], MetadataItemList=[],
+def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
                     disableEventTag=False, trigNavThinningSvc=None, AcceptAlgs=[]):
    eventInfoKey = "EventInfo"
-   if configFlags.Common.ProductionStep == ProductionStep.PileUpPresampling:
-      eventInfoKey = configFlags.Overlay.BkgPrefix + "EventInfo"
+   if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+      eventInfoKey = f"{flags.Overlay.BkgPrefix}EventInfo"
 
    msg = logging.getLogger("OutputStreamCfg")
    outputStreamName = f"Stream{streamName}"
    flagName = f"Output.{streamName}FileName"
-   if configFlags.hasFlag(flagName):
-      fileName = configFlags._get(flagName)
+   if flags.hasFlag(flagName):
+      fileName = flags._get(flagName)
    else:
       fileName = f"my{streamName}.pool.root"
       msg.info("No file name predefined for stream %s. Using %s", streamName, fileName)
 
-   if fileName in configFlags.Input.Files:
+   if fileName in flags.Input.Files:
       raise ConfigurationError("Same name for input and output file %s" % fileName)
 
    result = ComponentAccumulator(sequence = CompFactory.AthSequencer("AthOutSeq", StopOverride=True))
 
    # Set up AthenaPoolCnvSvc through PoolWriteCfg
    from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
-   result.merge(PoolWriteCfg(configFlags))
+   result.merge(PoolWriteCfg(flags))
 
    # define athena output stream
    writingTool = CompFactory.AthenaOutputStreamTool(f"Stream{streamName}Tool",
@@ -37,15 +37,15 @@ def OutputStreamCfg(configFlags, streamName, ItemList=[], MetadataItemList=[],
    # If we're running in augmentation mode, configure the writing tool accordingly
    parentStream = f"Output.{streamName}ParentStream"
    childStream = f"Output.{streamName}ChildStream"
-   if configFlags.hasFlag(childStream):
+   if flags.hasFlag(childStream):
       writingTool.SaveDecisions = True
-   elif configFlags.hasFlag(parentStream):
+   elif flags.hasFlag(parentStream):
       disableEventTag = True
       writingTool.OutputCollection = f"POOLContainer_{streamName}"
       writingTool.PoolContainerPrefix = f"CollectionTree_{streamName}"
       writingTool.MetaDataOutputCollection = f"MetaDataHdr_{streamName}"
       writingTool.MetaDataPoolContainerPrefix = f"MetaData_{streamName}"
-      msg.info(f"Stream {streamName} running in augmentation mode with {configFlags._get(parentStream)} as parent")
+      msg.info("Stream %s running in augmentation mode with %s as parent", streamName, flags._get(parentStream))
 
    # In DAOD production the EventInfo is prepared specially by the SlimmingHelper to ensure it is written in AuxDyn form
    # So for derivations the ItemList from the SlimmingHelper alone is used without the extra EventInfo items
@@ -65,11 +65,11 @@ def OutputStreamCfg(configFlags, streamName, ItemList=[], MetadataItemList=[],
    )
    outputStream.AcceptAlgs += AcceptAlgs
    outputStream.ExtraOutputs += [("DataHeader", f"StoreGateSvc+{outputStreamName}")]
-   if configFlags.Concurrency.NumThreads > 0 and configFlags.Scheduler.CheckOutputUsage:
+   if flags.Concurrency.NumThreads > 0 and flags.Scheduler.CheckOutputUsage:
       outputStream.ExtraInputs = [tuple(l.split('#')) for l in finalItemList if '*' not in l and 'Aux' not in l]
       # Ignore dependencies
       from AthenaConfiguration.MainServicesConfig import OutputUsageIgnoreCfg
-      result.merge(OutputUsageIgnoreCfg(configFlags, outputStream.name))
+      result.merge(OutputUsageIgnoreCfg(flags, outputStream.name))
 
    result.addService(CompFactory.StoreGateSvc("MetaDataStore"))
    outputStream.MetadataStore = result.getService("MetaDataStore")
@@ -86,22 +86,20 @@ def OutputStreamCfg(configFlags, streamName, ItemList=[], MetadataItemList=[],
 
    # Make EventFormat object
    from xAODEventFormatCnv.EventFormatConfig import EventFormatCfg
-   result.merge(
-      EventFormatCfg(
-         flags=configFlags, stream=outputStream, streamName=outputStreamName
-      )
-   )
+   result.merge(EventFormatCfg(flags,
+                               stream=outputStream,
+                               streamName=outputStreamName))
 
    # Setup FileMetaData
    from xAODMetaDataCnv.FileMetaDataConfig import FileMetaDataCfg
-   result.merge(FileMetaDataCfg(configFlags,
+   result.merge(FileMetaDataCfg(flags,
                                 stream=outputStream,
                                 streamName=outputStreamName))
 
    # Setup additional MetaData
 
    # ======================================================
-   # TO-DO:
+   # TODO:
    # ======================================================
    # For the time being we're adding common MetaData items
    # and configure the necessary tools/services en masse.
@@ -112,25 +110,29 @@ def OutputStreamCfg(configFlags, streamName, ItemList=[], MetadataItemList=[],
       # LumiBlockMetaDataTool seems to cause crashes in MP derivation jobs
       # As done in RecExCommon_topOptions.py use the algorithm in MP jobs
       # This needs to be checked and confirmed...
-      mdToolNames = ['BookkeeperTool']
-      if configFlags.Concurrency.NumProcs > 0:
-          result.addEventAlgo(CompFactory.CreateLumiBlockCollectionFromFile())
+      mdToolNames = []
+      # Propagate cutbookkeepers
+      if 'CutBookkeepers' in flags.Input.MetadataItems:
+         mdToolNames.append('BookkeeperTool')
+      if flags.Concurrency.NumProcs > 0:
+         result.addEventAlgo(CompFactory.CreateLumiBlockCollectionFromFile())
       else:
-          mdToolNames.append('LumiBlockMetaDataTool')
+         mdToolNames.append('LumiBlockMetaDataTool')
       outputStream.MetadataItemList += ['xAOD::TriggerMenuContainer#*'
                                        ,'xAOD::TriggerMenuAuxContainer#*'
                                        ,'xAOD::TriggerMenuJsonContainer#*'
                                        ,'xAOD::TriggerMenuJsonAuxContainer#*'
                                        ,'xAOD::LumiBlockRangeContainer#*'
                                        ,'xAOD::LumiBlockRangeAuxContainer#*'
-                                       ,'xAOD::CutBookkeeperContainer#*'
-                                       ,'xAOD::CutBookkeeperAuxContainer#*'
                                        ,'ByteStreamMetadataContainer#*'
                                        ,'xAOD::TruthMetaDataContainer#TruthMetaData'
                                        ,'xAOD::TruthMetaDataAuxContainer#TruthMetaDataAux.']
+      # TODO: temporary   
+      from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowOutputList
+      outputStream.MetadataItemList += CutFlowOutputList(flags)
 
       from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
-      result.merge(MetaDataSvcCfg(configFlags,
+      result.merge(MetaDataSvcCfg(flags,
                                   tools = [CompFactory.xAODMaker.TriggerMenuMetaDataTool('TriggerMenuMetaDataTool')],
                                   toolNames = mdToolNames))
 
@@ -147,9 +149,9 @@ def OutputStreamCfg(configFlags, streamName, ItemList=[], MetadataItemList=[],
       outputStream.WritingTool.AttributeListKey=key
 
       propagateInputAttributeList = False
-      if "AthenaAttributeList#Input" in configFlags.Input.TypedCollections:
+      if "AthenaAttributeList#Input" in flags.Input.TypedCollections:
          from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-         result.merge(SGInputLoaderCfg(configFlags, ["AthenaAttributeList#Input"]))
+         result.merge(SGInputLoaderCfg(flags, ["AthenaAttributeList#Input"]))
          propagateInputAttributeList = True
 
       # build eventinfo attribute list
@@ -167,7 +169,7 @@ def OutputStreamCfg(configFlags, streamName, ItemList=[], MetadataItemList=[],
    return result
 
 
-def addToESD(configFlags, itemOrList, **kwargs):
+def addToESD(flags, itemOrList, **kwargs):
    """
    Adds items to ESD stream
 
@@ -176,19 +178,19 @@ def addToESD(configFlags, itemOrList, **kwargs):
 
    returns CA to be merged i.e.: result.merge(addToESD(flags, "xAOD::CoolObject"))
    """
-   if not configFlags.Output.doWriteESD:
+   if not flags.Output.doWriteESD:
       return ComponentAccumulator()
    items = [itemOrList] if isinstance(itemOrList, str) else itemOrList
-   return OutputStreamCfg(configFlags, "ESD", ItemList=items, **kwargs)
+   return OutputStreamCfg(flags, "ESD", ItemList=items, **kwargs)
 
 
-def addToAOD(configFlags, itemOrList, **kwargs):
+def addToAOD(flags, itemOrList, **kwargs):
    """
    Adds items to AOD stream
 
    @see add addToESD
    """
-   if not configFlags.Output.doWriteAOD:
+   if not flags.Output.doWriteAOD:
       return ComponentAccumulator()
    items = [itemOrList] if isinstance(itemOrList, str) else itemOrList
-   return OutputStreamCfg(configFlags, "AOD", ItemList=items, **kwargs)
+   return OutputStreamCfg(flags, "AOD", ItemList=items, **kwargs)
