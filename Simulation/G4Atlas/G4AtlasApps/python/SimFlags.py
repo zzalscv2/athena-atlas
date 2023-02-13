@@ -328,6 +328,7 @@ class SimLayout(JobProperty):
                      'ATLAS-R3S-2021-02-00-00', # MC21 CP tuning samples (obsolete, incorrect BIS78 positions)
                      'ATLAS-R3S-2021-03-00-00', # Used in MC21
                      'ATLAS-R3S-2021-03-01-00', # Testing for MC23
+                     'ATLAS-R3S-2021-03-02-00', # Used in MC23
                      'ctbh8_combined',
                      'ctbh8_photon',
                      'ctbh8_lar-material',

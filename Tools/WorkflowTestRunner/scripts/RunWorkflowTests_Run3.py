@@ -27,7 +27,7 @@ def main():
     elif options.simulation:
         if not options.workflow or options.workflow is WorkflowType.FullSim:
             ami_tag = "s4006" if not options.ami_tag else options.ami_tag
-            tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, options.extra_args + " --preInclude 'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV'"))
+            tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, options.extra_args + " --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' --geometryVersion 'default:ATLAS-R3S-2021-03-02-00'"))
         if options.workflow is WorkflowType.AF3:
             log.error("AF3 not supported yet")
         if options.workflow is WorkflowType.HitsMerge:
