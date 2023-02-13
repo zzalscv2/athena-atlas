@@ -27,8 +27,11 @@ if hasattr(overlayArgs, 'preExec') and overlayArgs.preExec != 'NONE':
 
 # Pre-include
 if hasattr(overlayArgs, 'preInclude'):
-    for cf in overlayArgs.preInclude:
-        include(cf)  # noqa F821
+    for fragment in overlayArgs.preInclude:
+        if '/' not in fragment:
+            logOverlay.warning('Trying to use CA-based preInclude, trying to fallback to legacy equivalent')
+            fragment = f"{fragment.replace('.', '/')}.py"
+        include(fragment)  # noqa F821
 
 # ----------------------------
 # Set flags from job options
@@ -285,6 +288,9 @@ if '_000' in overlayArgs.outputRDOFile or 'tmp.' in overlayArgs.outputRDOFile:
 # Post-include
 if hasattr(overlayArgs, 'postInclude'):
     for fragment in overlayArgs.postInclude:
+        if '/' not in fragment:
+            logOverlay.warning('Trying to use CA-based postInclude, trying to fallback to legacy equivalent')
+            fragment = f"{fragment.replace('.', '/')}.py"
         include(fragment)  # noqa F821
 
 # Post-exec

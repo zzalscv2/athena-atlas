@@ -32,16 +32,19 @@ atlas_add_citest( PileUpPresamplingRun3
    SCRIPT RunWorkflowTests_Run3.py --CI -p -w PileUpPresampling -e '--maxEvents 5' --no-output-checks )
 
 atlas_add_citest( OverlayRun2MC
-   SCRIPT RunWorkflowTests_Run2.py --CI -o -w MCOverlay )
+   SCRIPT RunWorkflowTests_Run2.py --CI -o -w MCOverlay -e '--CA True' )
+
+atlas_add_citest( OverlayRun2MC_Legacy
+   SCRIPT RunWorkflowTests_Run2.py --CI -o -w MCOverlay -e '--CA False' )
 
 atlas_add_citest( OverlayRun2Data
    SCRIPT RunWorkflowTests_Run2.py --CI -o -w DataOverlay )
 
 atlas_add_citest( OverlayRun3MC
-   SCRIPT RunWorkflowTests_Run3.py --CI -o -w MCOverlay )
-
-atlas_add_citest( OverlayRun3MC_CAConfig
    SCRIPT RunWorkflowTests_Run3.py --CI -o -w MCOverlay -e '--CA True' )
+
+atlas_add_citest( OverlayRun3MC_Legacy
+   SCRIPT RunWorkflowTests_Run3.py --CI -o -w MCOverlay -e '--CA False' )
 
 #################################################################################
 # Standard reconstruction workflows

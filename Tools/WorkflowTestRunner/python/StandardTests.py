@@ -124,7 +124,7 @@ class OverlayTest(WorkflowTest):
         self.output_checks = [
             FrozenTier0PolicyCheck(setup, "RDO", 10)
         ]
-        if "CA" not in extra_args:
+        if "CA" not in extra_args or "--CA True" in extra_args:
             self.output_checks.append(MetadataCheck(setup, "RDO"))
 
         super().__init__(ID, run, type, steps, setup)
