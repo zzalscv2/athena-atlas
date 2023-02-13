@@ -21,6 +21,8 @@
 
 #include "AthenaKernel/StorableConversions.h"
 #include "AthenaKernel/CLASS_DEF.h"
+// For LATOME while no Condition alg exists
+#include "LArLATOMEROBIDs.h"
 
 //STL-Stuff
 #include <map> 
@@ -78,11 +80,9 @@ LArDigitContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObject*& pO
     return StatusCode::FAILURE;
   }
 
-  const RawEvent* re = m_rdpSvc->getEvent();
-  if (!re) {
-    ATH_MSG_ERROR( "Could not get raw event from ByteStreamInputSvc" );
-    return StatusCode::FAILURE;
-  }
+  std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
+  m_rdpSvc->getROBData( LArByteStream::s_allROBIDs_LATOME, robFrags ); 
+  const RawEvent* re = m_rdpSvc->getEvent( ); 
   const std::string& key = *(pAddr->par()); // Get key used in the StoreGateSvc::retrieve function
   // get gain and pass to convert function.
   CaloGain::CaloGain gain=CaloGain::LARNGAIN; //At this place, LARNGAINS means Automatic gain.
@@ -121,7 +121,7 @@ LArDigitContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObject*& pO
   }
 
   //Supercell readout
-  sc=m_scTool->convert(re,nullptr,adc_coll, adc_bas_coll, et_coll, et_id_coll, header_coll);
+  sc=m_scTool->convert(robFrags,nullptr,adc_coll, adc_bas_coll, et_coll, et_id_coll, header_coll);
   if (sc!=StatusCode::SUCCESS)
     ATH_MSG_WARNING( "Conversion tool returned an error. LAr SC containers might be empty." );
 

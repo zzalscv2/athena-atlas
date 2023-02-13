@@ -8,6 +8,8 @@
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArRawSCContainer.h"
 #include "LArRawEvent/LArLATOMEHeaderContainer.h"
+// For LATOME while no Condition alg exists
+#include "LArLATOMEROBIDs.h"
 #include "eformat/Version.h"
 #include "eformat/index.h"
 
@@ -100,10 +102,12 @@ StatusCode LArRawSCDataReadingAlg::execute(const EventContext& ctx) const {
   }
 
   //Get the raw event
-  const RawEvent* rawEvent = m_robDataProviderSvc->getEvent(ctx);
+  // patch for the HLT usage
+  std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
+  m_robDataProviderSvc->getROBData( ctx, LArByteStream::s_allROBIDs_LATOME, robFrags ); 
 
   // Call the converter
-  StatusCode sc = m_latomeDecoder->convert(rawEvent, map,
+  StatusCode sc = m_latomeDecoder->convert(robFrags, map,
                                            adc_coll, adc_bas_coll, et_coll, et_id_coll, 
                                            latome_header_coll);
   if (sc != StatusCode::SUCCESS) 
