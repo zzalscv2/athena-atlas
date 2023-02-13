@@ -66,9 +66,9 @@ def RoIBResultToxAODCfg(flags):
 
 if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-
+    flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW
     flags.Exec.MaxEvents = 20
     flags.fillFromArgs()

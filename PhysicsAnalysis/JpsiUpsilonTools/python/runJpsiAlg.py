@@ -3,28 +3,28 @@
 
 if __name__ == "__main__":
     # import the flags and set them
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
-    ConfigFlags.Exec.MaxEvents = 150
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Exec.MaxEvents = 150
 
     # use one of the predefined files
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.AOD_RUN2_MC
-    ConfigFlags.Input.isMC=True
-    ConfigFlags.fillFromArgs()
+    flags.Input.Files = defaultTestFiles.AOD_RUN2_MC
+    flags.Input.isMC=True
+    flags.fillFromArgs()
 
     # lock the flags
-    ConfigFlags.lock()
-    #ConfigFlags.dump()
+    flags.lock()
+    #flags.dump()
 
     # create basic infrastructure
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
+    acc = MainServicesCfg(flags)
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    acc.merge(PoolReadCfg(ConfigFlags)) #!!!!! THIS IS IMPORTANT
+    acc.merge(PoolReadCfg(flags)) #!!!!! THIS IS IMPORTANT
     # add the algorithm to the configuration
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import JpsiAlgCfg
-    acc.merge(JpsiAlgCfg(ConfigFlags, "JpsiAlgTest"))
+    acc.merge(JpsiAlgCfg(flags, "JpsiAlgTest"))
 
     # debug printout
     acc.printConfig(withDetails=True, summariseProps=True)
