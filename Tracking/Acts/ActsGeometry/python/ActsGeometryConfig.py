@@ -55,7 +55,10 @@ def ActsTrackingGeometrySvcCfg(flags, name = "ActsTrackingGeometrySvc", **kwargs
 
   if flags.Detector.GeometryHGTD:
     subDetectors += ["HGTD"]
-    from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+    if flags.HGTD.Geometry.useGeoModelXml:
+        from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+    else:
+        from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
     result.merge(HGTD_ReadoutGeometryCfg(flags))
 
   actsTrackingGeometrySvc = CompFactory.ActsTrackingGeometrySvc(name,
