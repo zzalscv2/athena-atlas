@@ -125,7 +125,6 @@
      <TDirectory name="Efficiency">
       <graph name="efficiency_vs_eta" plotopts="" tests="KS" type="TEfficiency"/>
       <graph name="efficiency_vs_pt" plotopts="" tests="KS" type="TEfficiency"/>
-      <graph name="efficiency_vs_pt_low" plotopts="" tests="KS" type="TEfficiency"/>
       <graph name="efficiency_vs_pt_high" plotopts="" tests="KS" type="TEfficiency"/>
      </TDirectory>
     </TDirectory>
