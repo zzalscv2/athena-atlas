@@ -58,6 +58,7 @@ atlas_add_library( Pythia8_iLib
                    src/UserHooks/DecayToSUEP.cxx
                    src/UserHooks/suep_shower.cxx
                    src/UserHooks/main31.cxx
+                   src/UserHooks/main31Vincia.cxx
                    src/UserHooks/EnhanceSplittings.cxx
                    src/UserHooks/EnhanceTest.cxx
                    src/UserHooks/SettableColourReconnection.cxx
