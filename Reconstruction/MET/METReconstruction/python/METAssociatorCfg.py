@@ -4,7 +4,6 @@ from METReconstruction.METAssocCfg import AssocConfig, METAssocConfig,getMETAsso
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def METAssociatorCfg(configFlags, jetType):
-    sequencename = "METAssociation"
 
     components = ComponentAccumulator()
 
@@ -12,10 +11,6 @@ def METAssociatorCfg(configFlags, jetType):
     extrapCfg = AtlasExtrapolatorCfg(configFlags)
     extrapCfg.popPrivateTools()
     components.merge(extrapCfg)
-    
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    AthSequencer=CompFactory.AthSequencer
-    components.addSequence( AthSequencer(sequencename) )
 
     modConstKey = ""
     modClusColls = {}
