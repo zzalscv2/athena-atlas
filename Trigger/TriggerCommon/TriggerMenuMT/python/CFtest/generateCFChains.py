@@ -8,7 +8,7 @@
 # using the Control-flow framework alone
 ###########################################
 
-
+import functools
 
 def generateCFChains(opt):
     from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool
@@ -244,9 +244,9 @@ def generateCFChains(opt):
         from TrigBphysHypo.TrigMultiTrkComboHypoConfig import StreamerDimuL2ComboHypoCfg, DimuEFComboHypoCfg
         
         step1_dimufast=makeChainStep("Step1_dimuFast", [muFastSequence(flags)], multiplicity=[2])
-        step2_dimuComb=makeChainStep("Step2_dimuComb", [muCombSequence(flags)], multiplicity=[2], comboHypoCfg=StreamerDimuL2ComboHypoCfg)
+        step2_dimuComb=makeChainStep("Step2_dimuComb", [muCombSequence(flags)], multiplicity=[2], comboHypoCfg=functools.partial(StreamerDimuL2ComboHypoCfg,flags))
         step3_dimuEFSA=makeChainStep("Step3_dimuEFSA", [muEFSASequence(flags)], multiplicity=[2])
-        step4_dimuEFCB=makeChainStep("Step4_dimuEFCB", [muEFCBSequence(flags)], multiplicity=[2], comboHypoCfg=DimuEFComboHypoCfg)
+        step4_dimuEFCB=makeChainStep("Step4_dimuEFCB", [muEFCBSequence(flags)], multiplicity=[2], comboHypoCfg=functools.partial(DimuEFComboHypoCfg,flags))
         steps = [step1_dimufast, step2_dimuComb, step3_dimuEFSA, step4_dimuEFCB]
 
         menu.chainsInMenu['Bphysics'] = [
