@@ -637,6 +637,13 @@ def InDetTrackRecoCfg(flags):
             TrackTruthCollectionKeys = \
             StatTrackTruthCollections if flags.InDet.doTruth else []))
 
+        if flags.InDet.doTruth:
+            from InDetConfig.InDetTrackClusterAssValidationConfig import (
+                InDetTrackClusterAssValidationCfg)
+            result.merge(InDetTrackClusterAssValidationCfg(
+                flags_set[0], # Use cuts from primary pass
+                TracksLocation = StatTrackCollections))
+
     # ---------------------------------------
     # --- Extra optional decorations
     # ---------------------------------------
