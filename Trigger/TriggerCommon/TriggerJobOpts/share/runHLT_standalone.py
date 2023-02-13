@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 ################################################################################
 # TriggerJobOpts/runHLT_standalone.py
 #
@@ -613,6 +613,10 @@ if not hasattr(svcMgr, 'THistSvc'):
 if hasattr(svcMgr.THistSvc, "Output"):
     from TriggerJobOpts.TriggerHistSvcConfig import setTHistSvcOutput
     setTHistSvcOutput(svcMgr.THistSvc.Output)
+
+if athenaCommonFlags.isOnline():
+    from TrigOnlineMonitor.TrigOnlineMonitorConfig import trigOpMonitorCfg
+    CAtoGlobalWrapper(trigOpMonitorCfg, ConfigFlags)
 
 #-------------------------------------------------------------
 # Conditions overrides

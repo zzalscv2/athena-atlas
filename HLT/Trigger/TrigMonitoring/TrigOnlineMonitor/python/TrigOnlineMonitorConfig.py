@@ -1,25 +1,20 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from TrigOnlineMonitor.TrigOnlineMonitorConf import TrigOpMonitor as _TrigOpMonitor
-from AthenaCommon.AlgSequence import AthSequencer
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
 
-class TrigOpMonitor(_TrigOpMonitor):
-   __slots__ = ()
 
-   def __init__(self, name='TrigOpMonitor', **kwargs):
-      super(TrigOpMonitor, self).__init__(name, **kwargs)
+def trigOpMonitorCfg(flags):
+   cfg = ComponentAccumulator()
+   opmon = CompFactory.TrigOpMonitor(
+      LuminosityCondDataKey = 'LuminosityCondData',
+      AtlasFieldMapCondDataKey = 'fieldMapCondObj' )
 
-      # Only monitor lumi and field if available
-      condSeq = AthSequencer('AthCondSeq')
-      for a in condSeq:
-         if a.getType()=='LuminosityCondAlg':
-            self.LuminosityCondDataKey = a.LuminosityOutputKey
-         elif a.getType()=='MagField::AtlasFieldMapCondAlg':
-            self.AtlasFieldMapCondDataKey = a.AtlasFieldMapCondObj
+   cfg.addEventAlgo( opmon )
+   return cfg
 
 
 def TrigALFAROBMonitor(flags):
-   from AthenaConfiguration.ComponentFactory import CompFactory
    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
    monToolTrackingElast = GenericMonitoringTool(flags, 'MonTool_trackingElast', HistPath='ALFAROBMonitor'+'/MTtracking/elast/current')

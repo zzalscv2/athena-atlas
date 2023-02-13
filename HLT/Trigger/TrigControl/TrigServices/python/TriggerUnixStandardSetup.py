@@ -79,15 +79,3 @@ def commonServicesCfg(flags):
     cfg.setAppProperty('InitializationLoopCheck', False)
 
     return cfg
-
-
-def setupCommonServicesEnd():
-    from AthenaCommon.AlgSequence import AlgSequence
-
-    topSequence = AlgSequence()
-
-    # Basic operational monitoring
-    from TrigOnlineMonitor.TrigOnlineMonitorConfig import TrigOpMonitor
-    topSequence += TrigOpMonitor()
-
-    return

@@ -157,6 +157,10 @@ if flags.Overlay.doTrackOverlay:
 if log.getEffectiveLevel() <= logging.DEBUG:
     acc.printConfig(withDetails=False, summariseProps=True, printDefaults=True)
 
+if flags.Common.isOnline:
+  from TrigOnlineMonitor.TrigOnlineMonitorConfig import trigOpMonitorCfg
+  acc.merge( trigOpMonitorCfg(flags) )
+
 log.info("Running ...")
 status = acc.run()
 if status.isFailure():
