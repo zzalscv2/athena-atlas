@@ -47,7 +47,7 @@ Sim_tf.py \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents 50 \
     --imf False \
-    --athenaopts '"--config-only=ConfigSimCG.pkl"'
+    --athenaopts 'EVNTtoHITS:"--config-only=ConfigSimCG.pkl"'
 
 Sim_tf.py \
     --multiprocess \
