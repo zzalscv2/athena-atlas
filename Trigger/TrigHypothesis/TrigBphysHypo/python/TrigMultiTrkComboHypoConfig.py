@@ -202,8 +202,8 @@ def DrellYanComboHypoCfg(flags, name):
     else:
         return ConfigurationComboHypo(flags, **kwargs)
 
-def TrigMultiTrkComboHypoToolFromDict(chainDict):
-    return ConfigurationComboHypoTool(chainDict)
+def TrigMultiTrkComboHypoToolFromDict(flags, chainDict):
+    return ConfigurationComboHypoTool(flags, chainDict)
 
 
 def ConfigurationComboHypo(flags, trigSequenceName = 'Dimu', **kwargs):
@@ -235,7 +235,7 @@ def ConfigurationComboHypo(flags, trigSequenceName = 'Dimu', **kwargs):
          name = baseName+'ComboHypo',
          VertexFitter = acc.popToolsAndMerge(TrigBPHY_TrkVKalVrtFitterCfg(flags, baseName)),
          VertexPointEstimator = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, 'VertexPointEstimator_'+baseName)),
-         MonTool = TrigMultiTrkComboHypoMonitoring('TrigMultiTrkComboHypoMonitoring_'+baseName),
+         MonTool = TrigMultiTrkComboHypoMonitoring(flags, 'TrigMultiTrkComboHypoMonitoring_'+baseName),
          **kwargs)
        acc.addEventAlgo(alg, primary=True)
        return acc
@@ -247,13 +247,13 @@ def ConfigurationComboHypo(flags, trigSequenceName = 'Dimu', **kwargs):
            name = baseName+'ComboHypo',
            VertexFitter = acc.popToolsAndMerge(TrigBPHY_TrkVKalVrtFitterCfg(flags, baseName)),
            VertexPointEstimator = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, 'VertexPointEstimator_'+baseName)),
-           MonTool = TrigMultiTrkComboHypoMonitoring('TrigMultiTrkComboHypoMonitoring_'+baseName),
+           MonTool = TrigMultiTrkComboHypoMonitoring(flags, 'TrigMultiTrkComboHypoMonitoring_'+baseName),
            **kwargs)
     
        acc.addEventAlgo(alg, primary=True)
        return acc
 
-def ConfigurationComboHypoTool(chainDict):
+def ConfigurationComboHypoTool(flags, chainDict):
    
    tool = CompFactory.TrigMultiTrkComboHypoTool(chainDict['chainName'])
 
@@ -299,7 +299,7 @@ def ConfigurationComboHypoTool(chainDict):
 
    monGroups = ['bphysMon:online']
    if any(group in monGroups for group in chainDict['monGroups']):
-        tool.MonTool = TrigMultiTrkComboHypoToolMonitoring('MonTool')   
+        tool.MonTool = TrigMultiTrkComboHypoToolMonitoring(flags, 'MonTool')
    if isComponentAccumulatorCfg():
         acc = ComponentAccumulator()
         acc.setPrivateTools(tool)
