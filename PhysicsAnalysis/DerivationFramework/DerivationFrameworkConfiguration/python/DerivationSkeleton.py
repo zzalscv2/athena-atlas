@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
@@ -7,6 +7,10 @@ from AthenaConfiguration.Enums import ProductionStep
 from DerivationFrameworkConfiguration import DerivationConfigList
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
+
+# temporarily force no global config flags
+from AthenaConfiguration import AllConfigFlags
+del AllConfigFlags.ConfigFlags
 
 
 def fromRunArgs(runArgs):
@@ -18,14 +22,15 @@ def fromRunArgs(runArgs):
     logDerivation.info(str(runArgs))
 
     logDerivation.info('**** Setting-up configuration flags')
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    commonRunArgsToFlags(runArgs, ConfigFlags)
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    commonRunArgsToFlags(runArgs, flags)
 
-    ConfigFlags.Common.ProductionStep = ProductionStep.Derivation
+    flags.Common.ProductionStep = ProductionStep.Derivation
 
     # Switch on PerfMon
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
-    setPerfmonFlagsFromRunArgs(ConfigFlags, runArgs)
+    setPerfmonFlagsFromRunArgs(flags, runArgs)
 
     # Input types
     allowedInputTypes = [ 'AOD', 'DAOD_PHYS', 'EVNT' ]
@@ -33,7 +38,7 @@ def fromRunArgs(runArgs):
     if sum(availableInputTypes) != 1:
         raise ValueError('Input must be exactly one of the following types: inputAODFile, inputEVNTFile, inputDAOD_PHYSFile')
     idx = availableInputTypes.index(True)
-    ConfigFlags.Input.Files = getattr(runArgs, f'input{allowedInputTypes[idx]}File')
+    flags.Input.Files = getattr(runArgs, f'input{allowedInputTypes[idx]}File')
 
     # Augmentations
     # For the time being one parent (primary stream) can have multiple children (augmentations)
@@ -45,12 +50,12 @@ def fromRunArgs(runArgs):
                 raise ValueError('Invalid augmentation argument: {0}'.format(val))
             else:
                 child, parent = val.split(':')
-                ConfigFlags.addFlag(f'Output.DAOD_{child}ParentStream',f'DAOD_{parent}')
+                flags.addFlag(f'Output.DAOD_{child}ParentStream',f'DAOD_{parent}')
                 childStreamFlag = f'Output.DAOD_{parent}ChildStream'
-                if not ConfigFlags.hasFlag(childStreamFlag):
-                    ConfigFlags.addFlag(childStreamFlag, [f'DAOD_{child}'])
+                if not flags.hasFlag(childStreamFlag):
+                    flags.addFlag(childStreamFlag, [f'DAOD_{child}'])
                 else:
-                    ConfigFlags._set(childStreamFlag, ConfigFlags._get(childStreamFlag) + [f'DAOD_{child}'])
+                    flags._set(childStreamFlag, flags._get(childStreamFlag) + [f'DAOD_{child}'])
                 logDerivation.info('Setting up event augmentation as {0} => {1}'.format(child, parent))
 
     # Output formats
@@ -67,33 +72,33 @@ def fromRunArgs(runArgs):
         if 'output' in runArg and 'File' in runArg and 'NTUP_PHYSVAL' not in runArg:
             outputFileName = getattr(runArgs, runArg)
             flagString = f'Output.{runArg.strip("output")}Name'
-            ConfigFlags.addFlag(flagString, outputFileName)
-            ConfigFlags.Output.doWriteDAOD = True
+            flags.addFlag(flagString, outputFileName)
+            flags.Output.doWriteDAOD = True
 
     # Pre-include
-    processPreInclude(runArgs, ConfigFlags)
+    processPreInclude(runArgs, flags)
 
     # Pre-exec
-    processPreExec(runArgs, ConfigFlags)
+    processPreExec(runArgs, flags)
 
     # Lock flags
-    ConfigFlags.lock()
+    flags.lock()
 
     # The D(2)AOD building configuration
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     # Pool file reading
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg.merge(PoolReadCfg(flags))
 
     # Cut flow service
     from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
-    cfg.merge(CutFlowSvcCfg(ConfigFlags))
+    cfg.merge(CutFlowSvcCfg(flags))
 
     for formatName in formats:
         derivationConfig = getattr(DerivationConfigList, f'{formatName}Cfg')
-        cfg.merge(derivationConfig(ConfigFlags))
+        cfg.merge(derivationConfig(flags))
 
     # Pass-through mode (ignore skimming and accept all events)
     if hasattr(runArgs, 'passThrough'):
@@ -103,22 +108,22 @@ def fromRunArgs(runArgs):
                 algo.SkimmingTools = []
 
     # PerfMonSD
-    if ConfigFlags.PerfMon.doFullMonMT or ConfigFlags.PerfMon.doFastMonMT:
+    if flags.PerfMon.doFullMonMT or flags.PerfMon.doFastMonMT:
        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-       cfg.merge(PerfMonMTSvcCfg(ConfigFlags))
+       cfg.merge(PerfMonMTSvcCfg(flags))
 
     # Write AMI tag into in-file metadata
     from PyUtils.AMITagHelperConfig import AMITagCfg
-    cfg.merge(AMITagCfg(ConfigFlags, runArgs))
+    cfg.merge(AMITagCfg(flags, runArgs))
 
     # Set EventPrintoutInterval to 100 events
     cfg.getService(cfg.getAppProps()['EventLoop']).EventPrintoutInterval = 100
 
     # Post-include
-    processPostInclude(runArgs, ConfigFlags, cfg)
+    processPostInclude(runArgs, flags, cfg)
 
     # Post-exec
-    processPostExec(runArgs, ConfigFlags, cfg)
+    processPostExec(runArgs, flags, cfg)
 
     # Run the final configuration
     sc = cfg.run()
