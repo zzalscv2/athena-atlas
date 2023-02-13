@@ -148,9 +148,9 @@ class AlgConfig(ABC):
         """ The name of the algorithm made by this configuration """
         return "EFMET_{}".format(self._suffix)
 
-    def getMonTool(self):
+    def getMonTool(self, flags):
         """ Create the monitoring tool """
-        return getMETMonTool()
+        return getMETMonTool(flags)
 
     def recoAlgorithms(self, flags):
         """Get the reconstruction algorithms (split by step) without the input makers"""
@@ -162,7 +162,7 @@ class AlgConfig(ABC):
             flags, self._inputs, metFSRoIs, self.recoDict
         )
         fex = self.make_fex(flags, self.fexName, inputs)
-        fex.MonTool = self.getMonTool()
+        fex.MonTool = self.getMonTool(flags)
         fex.METContainerKey = self.outputKey
         # Add the FEX to the last list
         steps[-1] += [fex]
