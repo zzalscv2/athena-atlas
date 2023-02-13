@@ -127,6 +127,14 @@ def getFastFlavourTagging( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                     **{f'fastDIPSnoPV20220211_p{x}': f'fastDips_p{x}' for x in 'cub'},
                     'btagIp_': trackIpPrefix,
                 }
+            ],
+            [
+                'BTagging/20230130/FastGN1/antikt4empflow/fastGN1_20230130.onnx',
+                {
+                    'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
+                    **{f'GN120230130_p{x}': f'fastGN1_p{x}' for x in 'cub'},
+                    'btagIp_': trackIpPrefix,
+                }
             ]
         ]
 
@@ -136,8 +144,13 @@ def getFastFlavourTagging( flags, inputJets, inputVertex, inputTracks, isPFlow=F
     missingKeys = getStaticTrackVars(inputTracks)
 
     for nnFile, variableRemapping in dl2_configs:
-        nnAlgoKey = nnFile.replace('/','_').split('.')[0]
-
+        nnAlgo = nnFile.replace('/','_').split('.')
+        nnAlgoKey = nnAlgo[0]
+        nnAlgoext = nnAlgo[1]
+        toolDict = {
+            "json": CompFactory.FlavorTagDiscriminants.DL2Tool,
+            "onnx": CompFactory.FlavorTagDiscriminants.GNNTool
+        }
         ca.addEventAlgo(
             CompFactory.FlavorTagDiscriminants.JetTagConditionalDecoratorAlg(
                 name='_'.join([
@@ -150,7 +163,7 @@ def getFastFlavourTagging( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                 constituentContainer=inputTracks,
                 undeclaredReadDecorKeys=missingKeys,
                 tagFlag=pass_flag,
-                decorator=CompFactory.FlavorTagDiscriminants.DL2Tool(
+                decorator=toolDict[nnAlgoext](
                     name='_'.join([
                         'simpleDipsToJet',
                         nnAlgoKey,
