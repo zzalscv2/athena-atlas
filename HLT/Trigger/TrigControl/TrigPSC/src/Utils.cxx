@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -23,7 +23,7 @@
 
 bool psc::Utils::execPython (const std::string& pyCmd)
 {
-  ERS_DEBUG(1, pyCmd );  
+  ERS_DEBUG(1, pyCmd );
   if ( PyRun_SimpleString(const_cast<char*>(pyCmd.c_str())) != 0 ) {
     ERS_PSC_ERROR("Error executing " << pyCmd);
     return false;
@@ -50,6 +50,14 @@ bool psc::Utils::pyInclude (const std::string& pyFileName)
   return psc::Utils::execPython(oss.str());
 }
 
+
+bool psc::Utils::execFile (const std::string& pyFileName)
+{
+  if (pyFileName.find(".py")!=std::string::npos)
+    return pyInclude(pyFileName);
+  else
+    return psc::Utils::execPython("import " + pyFileName);
+}
 
 //--------------------------------------------------------------------------------
 // ScopeTimer class
