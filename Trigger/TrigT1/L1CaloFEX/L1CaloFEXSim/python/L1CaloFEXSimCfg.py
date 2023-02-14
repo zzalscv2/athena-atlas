@@ -41,6 +41,20 @@ def ReadSCellFromByteStreamCfg(flags, key='SCell', keyIn='SC_ET_ID',SCmask=True)
 
     return acc
 
+def eFEXTOBEtToolCfg(flags):
+    """
+    Configure the eFEX TOB Et Tool which recalculates isolation variables
+    The tool requires eTowers as inputs (add eTowerMaker algorithm)
+    """
+    acc = ComponentAccumulator()
+
+    eTowerMakerAlg = CompFactory.LVL1.eTowerMakerFromSuperCells('eTowerMakerFromSuperCells')
+    acc.addEventAlgo(eTowerMakerAlg)
+
+    eFEXTOBEtTool = CompFactory.LVL1.eFEXTOBEtTool
+    acc.setPrivateTools(eFEXTOBEtTool())
+
+    return acc
 
 def TriggerTowersInputCfg(flags):
     '''Configuration to provide TriggerTowers as input to the Fex simulation'''
