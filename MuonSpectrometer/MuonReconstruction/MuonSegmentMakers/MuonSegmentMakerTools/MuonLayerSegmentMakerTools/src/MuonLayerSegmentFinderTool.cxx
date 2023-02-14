@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonLayerSegmentFinderTool.h"
@@ -30,14 +30,14 @@ namespace Muon {
         ATH_CHECK(m_printer.retrieve());
         ATH_CHECK(m_muonPRDSelectionTool.retrieve());
         ATH_CHECK(m_segmentMaker.retrieve());
-        if (m_idHelperSvc->hasCSC() && !m_csc2dSegmentFinder.empty()) ATH_CHECK(m_csc2dSegmentFinder.retrieve());
-        if (m_idHelperSvc->hasCSC() && !m_csc4dSegmentFinder.empty()) ATH_CHECK(m_csc4dSegmentFinder.retrieve());
-        ATH_CHECK(m_clusterSegMakerNSW.retrieve());
+        ATH_CHECK(m_csc2dSegmentFinder.retrieve(DisableTool{!m_idHelperSvc->hasCSC() || m_csc2dSegmentFinder.empty()}));
+        ATH_CHECK(m_csc4dSegmentFinder.retrieve(DisableTool{!m_idHelperSvc->hasCSC() || m_csc4dSegmentFinder.empty()}));
         ATH_CHECK(m_patternSegs.initialize(!m_patternSegs.empty()));
-        if (!m_patternSegs.empty()) {
-            ATH_CHECK(m_segmentMatchingTool.retrieve());
-        }else m_segmentMatchingTool.disable();
+        ATH_CHECK(m_segmentMatchingTool.retrieve(DisableTool{m_patternSegs.empty()}));       
         ATH_CHECK(m_houghDataPerSectorVecKey.initialize(!m_houghDataPerSectorVecKey.empty()));
+        ATH_CHECK(m_clusterSegMakerNSW.retrieve(DisableTool{!(m_idHelperSvc->recoMM() || m_idHelperSvc->recosTgc()) 
+                                                            || m_clusterSegMakerNSW.empty()|| !m_patternSegs.empty()}));
+      
         return StatusCode::SUCCESS;
     }
 
@@ -121,12 +121,13 @@ namespace Muon {
         std::vector<const MuonClusterOnTrack*> clusters;
         if (!clustersSTGC.empty()) {
             ATH_MSG_DEBUG(" STGC clusters " << clustersSTGC.size());
-            clusters.insert(clusters.end(), std::make_move_iterator(clustersSTGC.begin()), std::make_move_iterator(clustersSTGC.end()));
+            clusters.insert(clusters.end(), clustersSTGC.begin(), clustersSTGC.end());
         }
         if (!clustersMM.empty()) {
             ATH_MSG_DEBUG(" MM clusters " << clustersMM.size());
-            clusters.insert(clusters.end(), std::make_move_iterator(clustersMM.begin()), std::make_move_iterator(clustersMM.end()));
+            clusters.insert(clusters.end(), clustersMM.begin(), clustersMM.end());
         }
+        if (clusters.empty()) return;
         
         
         if (!m_patternSegs.empty()) {
@@ -199,6 +200,7 @@ namespace Muon {
                                                              const MuonSystemExtension::Intersection& intersection, 
                                                              std::vector<std::shared_ptr<const Muon::MuonSegment> >& segments) const {
 
+        if(m_houghDataPerSectorVecKey.empty()) return;
         unsigned int                          nprevSegments = segments.size();  // keep track of what is already there
         int                                   sector        = intersection.layerSurface.sector;
         MuonStationIndex::DetectorRegionIndex regionIndex   = intersection.layerSurface.regionIndex;
