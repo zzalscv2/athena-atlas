@@ -18,6 +18,18 @@ def jFexEmulatedTowersCfg(  flags, name, writeKey="L1_jFexEmulatedTowers"):
 
     return acc
 
+def eFexEmulatedTowersCfg(flags, name, writeKey = "L1_eFexEmulatedTowers", verificationMode = False):
+    """
+    Config for emulating eFex input data from LATOME readout
+    """    
+    acc=ComponentAccumulator()
+    
+    emulator = CompFactory.LVL1.eFexTowerBuilder(name)
+    emulator.eFexContainerWriteKey   = writeKey
+    emulator.MappingVerificationMode = verificationMode
+    acc.addEventAlgo(emulator)
+
+    return acc
 
 
 if __name__ == '__main__':
@@ -27,16 +39,17 @@ if __name__ == '__main__':
     import sys
 
     import argparse
-    parser = argparse.ArgumentParser(prog='python -m L1CaloFEXTools.L1CaloFEXToolsConfig',
-                                   description="""Decorator tool for FEX towers athena script.\n\n
-                                   Example: python -m L1CaloFEXTools.L1CaloFEXToolsConfig --filesInput "data22*" --evtMax 10 --outputs eTOBs """)
+    parser = argparse.ArgumentParser(prog='python -m L1CaloFEXAlgos.FexEmulatedTowersConfig',
+                                   description="""Emulator tools for FEX towers athena script.\n\n
+                                   Example: python -m L1CaloFEXAlgos.FexEmulatedTowersConfig --filesInput "data22*" --evtMax 10 --outputs jTowers """)
     parser.add_argument('--evtMax',type=int,default=-1,help="number of events")
     parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
+    parser.add_argument('--outputs',nargs='+',choices={"jTowers","eTowers"},required=True, help="What data to decode and emulate")
     parser.add_argument('--outputLevel',default="WARNING",choices={ 'INFO','WARNING','DEBUG','VERBOSE'})
     args = parser.parse_args()
 
 
-    log = logging.getLogger('L1CaloFEXToolsConfig')
+    log = logging.getLogger('FexEmulatedTowersConfig')
     log.setLevel(logging.DEBUG)
 
     from AthenaCommon import Constants
@@ -65,7 +78,7 @@ if __name__ == '__main__':
         flags.IOVDb.GlobalTag = flags.Trigger.OnlineCondTag
 
     if not flags.Input.isMC and flags.Input.RunNumber[0] > 400000:
-        flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-01-00'
+        flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-02-00-00'
 
     # Enable only calo for this test
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
@@ -112,25 +125,43 @@ if __name__ == '__main__':
     ########################################
     # Emulated jFex Towers
     ########################################
-    
-    jFexEmulatedTool = jFexEmulatedTowersCfg(flags,'jFexEmulatedTowers')
-    acc.merge(jFexEmulatedTool)
-    outputEDM += addEDM('xAOD::jFexTowerContainer', 'L1_jFexEmulatedTowers')
-    
-    ########################################
-    # jFex Data Towers
-    ########################################
-    from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
-    inputjFexTool = jFexInputByteStreamToolCfg('jFexInputBSDecoder', flags)
-    for module_id in inputjFexTool.ROBIDs:
-        maybeMissingRobs.append(module_id)
+    if 'jTowers' in args.outputs:
+        jFexEmulatedTool = jFexEmulatedTowersCfg(flags,'jFexEmulatedTowers')
+        acc.merge(jFexEmulatedTool)
+        outputEDM += addEDM('xAOD::jFexTowerContainer', 'L1_jFexEmulatedTowers')
+        
+        # decode any data towers for comparison with emulated
+        from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
+        inputjFexTool = jFexInputByteStreamToolCfg('jFexInputBSDecoder', flags)
+        for module_id in inputjFexTool.ROBIDs:
+            maybeMissingRobs.append(module_id)
 
-    decoderTools += [inputjFexTool]
-    # saving/adding the jTower xAOD container
-    outputEDM += addEDM('xAOD::jFexTowerContainer', inputjFexTool.jTowersWriteKey.Path)
-    
+        decoderTools += [inputjFexTool]
+        # saving/adding the jTower xAOD container
+        outputEDM += addEDM('xAOD::jFexTowerContainer', inputjFexTool.jTowersWriteKey.Path)
+
+    ########################################
+    # Emulated eFex     
+    ########################################
+    if 'eTowers' in args.outputs:
+        eFexEmulatedTool = eFexEmulatedTowersCfg(flags,'L1_eFexEmulatedTowers')
+        acc.merge(eFexEmulatedTool)
+        outputEDM += addEDM('xAOD::eFexTowerContainer', 'L1_eFexEmulatedTowers')
+
+        # decode any data towers for comparison with emulated
+        from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import eFexByteStreamToolCfg
+        inputeFexTool = eFexByteStreamToolCfg('eFexBSDecoder', flags,TOBs=False,xTOBs=False,decodeInputs=True)
+        for module_id in inputeFexTool.ROBIDs:
+            maybeMissingRobs.append(module_id)    
+
+        decoderTools += [inputeFexTool]
+        # saving/adding the eTower xAOD container
+        outputEDM += addEDM('xAOD::eFexTowerContainer', 'L1_eFexDataTowers')
+
+    #
     decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder",
-                                                         DecoderTools=decoderTools, OutputLevel=algLogLevel, MaybeMissingROBs=maybeMissingRobs)
+                                                           DecoderTools=decoderTools, OutputLevel=algLogLevel, 
+                                                           MaybeMissingROBs=maybeMissingRobs)
 
     acc.addEventAlgo(decoderAlg, sequenceName='AthAlgSeq')
     
