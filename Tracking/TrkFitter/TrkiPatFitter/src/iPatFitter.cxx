@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 /***************************************************************************
@@ -313,6 +313,7 @@ std::unique_ptr<Track> iPatFitter::fit(
     const ParticleHypothesis particleHypothesis) const {
   auto [fittedTrack, fitState] =
       fitWithState(ctx, track, runOutlier, particleHypothesis);
+  // cppcheck-suppress returnStdMoveLocal; clang requires the move() here.
   return std::move(fittedTrack);
 }
 
@@ -571,8 +572,8 @@ void iPatFitter::addMeasurements(const EventContext& ctx,
   // extrapolation to set FittedTrajectory
   double qOverP = parameters.qOverP();
   double previousDistance = -m_orderingTolerance;
-  double previousDistanceR = -m_orderingTolerance;
-  double previousDistanceZ = -m_orderingTolerance;
+  double previousDistanceR = previousDistance;
+  double previousDistanceZ = previousDistance;
   bool reorder = false;
 
   Amg::Vector3D startDirection = parameters.direction();
@@ -675,8 +676,8 @@ bool iPatFitter::addMeasurements(
   bool haveMeasurement = false;
   int hit = measurements.size();
   double previousDistance = -m_orderingTolerance;
-  double previousDistanceR = -m_orderingTolerance;
-  double previousDistanceZ = -m_orderingTolerance;
+  double previousDistanceR = previousDistance;
+  double previousDistanceZ = previousDistance;
   bool reorder = false;
   const bool skipVertexMeasurement = !measurements.empty();
   const Amg::Vector3D startDirection = parameters.direction();
