@@ -95,8 +95,7 @@ get_one_file() {
  
   for dir in ${path_opt}; do
     if [ -d $dir ]; then
-      find $dir -mindepth 1 -maxdepth 2 -path "*/${file}" | \
-        egrep -v '~|CVS' >>${tempfile}
+      find $dir -mindepth 1 -maxdepth 2 -path "*/${file}" >> ${tempfile}
       if [ -s ${tempfile} ]; then status="FOUND"; fi
       if [[ -n "$status" && -z "$do_warn" ]]; then break; fi
     fi
