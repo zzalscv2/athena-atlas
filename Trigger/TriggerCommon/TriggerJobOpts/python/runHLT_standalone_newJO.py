@@ -6,13 +6,14 @@
 from AthenaCommon.Logging import logging
 log = logging.getLogger('runHLT_standalone_newJO')
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags, initConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentAccumulator import CompFactory
 from AthenaConfiguration.Enums import Format
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
 # Make sure nobody uses deprecated global ConfigFlags
-del ConfigFlags
+import AthenaConfiguration.AllConfigFlags
+del AthenaConfiguration.AllConfigFlags.ConfigFlags
 
 flags = initConfigFlags()
 
