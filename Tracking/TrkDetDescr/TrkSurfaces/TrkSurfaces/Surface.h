@@ -53,7 +53,8 @@ enum SurfaceOwner
 {
   noOwn = 0,
   TGOwn = 1,
-  DetElOwn = 2
+  DetElOwn = 2,
+  userOwn = 3
 };
 
 /**

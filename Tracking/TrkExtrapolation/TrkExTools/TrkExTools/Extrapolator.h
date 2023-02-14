@@ -684,7 +684,7 @@ private:
   bool m_fastField;
   Trk::MagneticFieldProperties m_fieldProperties;
   //------------Reference surface --------------
-  Surface* m_referenceSurface;
+  std::unique_ptr<Surface> m_referenceSurface;
   //-------------------------- SCREEN output steering -------------------------------------------//
   bool m_printRzOutput;
   //------------------------- VALIDATION  SECTION ------------------------------------------//
