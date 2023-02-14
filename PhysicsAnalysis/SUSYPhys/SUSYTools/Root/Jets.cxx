@@ -253,6 +253,7 @@ namespace ST {
         ATH_MSG_DEBUG("Retrieve jet collection: " << jetkey_tmp);
         ATH_CHECK( evtStore()->retrieve(jets, jetkey_tmp) );
       }
+
       std::pair<xAOD::JetContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*jets);
       copy = shallowcopy.first;
       copyaux = shallowcopy.second;
@@ -265,9 +266,15 @@ namespace ST {
       jets=copy;
     }
 
+    if(jets->size()==0) {
+        ATH_MSG_DEBUG("Large R jet collection is empty");
+        return StatusCode::SUCCESS;
+      }
+
     // Calibrate the jets - only insitu for data for now
     if (isData()) ATH_CHECK(m_jetFatCalibTool->applyCalibration(*copy));
 
+    
     if (!isData() && !m_JetTruthLabelName.empty()){ 
       ATH_MSG_DEBUG("Checking if decorator for JetTruthLabelingTool is available:");
       std::string fatjetcoll = m_fatJets;
@@ -275,8 +282,9 @@ namespace ST {
       SG::ReadDecorHandle<xAOD::JetContainer, int> labelHandle_truthKey(m_label_truthKey);
       ATH_MSG_DEBUG("Reading JetTruthLabelingTool truthKey:" << m_label_truthKey << " isAvailable " << labelHandle_truthKey.isAvailable());
       // Truth Labeling (MC only)
-      if (!labelHandle_truthKey.isAvailable()) ATH_CHECK(m_jetTruthLabelingTool->decorate(*copy));
+      if (!labelHandle_truthKey.isAvailable() && !m_isPHYSLITE) ATH_CHECK(m_jetTruthLabelingTool->decorate(*copy));
     }
+    
 
     for (const auto& jet : *copy) {
 
