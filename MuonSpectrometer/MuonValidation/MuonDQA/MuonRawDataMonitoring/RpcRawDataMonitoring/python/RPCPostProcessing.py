@@ -1,6 +1,8 @@
 #
-#Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration                                                                                           
+#Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+
 #
+# import ROOT
 
 # local
 import RpcRawDataMonitoring.RPCRawDataMonUtils as RPCRawDataMonUtils
@@ -160,7 +162,7 @@ def make_hit_rate(inputs):
     list_summary_allSectorsAndLayers  = draw_occu.GetSummary_allSectorsAndLayers([h_name, i_var])
 
     ###
-    ### "(p0|p1|chi2|predRate|meanRate)_layer[1-6]_measPhi[01]",
+    ### "(p0|p1|chi2|predRate|meanRate)_layer[1-8]_measPhi[01]",
     ###
     list_hist2d_EtaPhi_allLayer       = draw_occu.GetHist2D_EtaPhi_allLayer([h_name, i_var])
 
@@ -197,7 +199,7 @@ def make_2dhits(inputs):
   dic_histos = {}
 
   ###
-  ### "prdhits_layer[1-6]_measPhi[01]",
+  ### "prdhits_layer[1-8]_measPhi[01]",
   ###
   list_hist2d_EtaPhi_allLayer      = draw_hits.GetHist2D_EtaPhi_allLayer(config, doSetZRange = False)
   getHistNames(list_hist2d_EtaPhi_allLayer, "Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/Hits", dic_histos)
@@ -258,7 +260,7 @@ def make_detection_eff(inputs):
   draw_eff = CoreClass.Draw_DetectEfficiency(hist)
   draw_eff.SetPanelDic(DicPanels)
   
-  h_name  = "Panel_Efficiency_MuonFromZ"
+  h_name  = "Detection_Efficiency_MuonFromZ"
 
   # -----------------------------------------------------------------------
   variable   = "detEff"
@@ -278,7 +280,7 @@ def make_detection_eff(inputs):
   getHistNames(list_summary_eachSectorsAndLayers, "Muon/MuonRawDataMonitoring/RPC/TrackMatch/MuonDetectionEff/SubDetector", dic_histos)
 
   ###
-  ### "detEff_layer[1-6]_measPhi[01]",
+  ### "detEff_layer[1-8]_measPhi[01]",
   ###
   list_hist2d_EtaPhi_allLayer      = draw_eff.GetHist2D_EtaPhi_allLayer(config)
   getHistNames(list_hist2d_EtaPhi_allLayer, "Muon/MuonRawDataMonitoring/RPC/TrackMatch/MuonDetectionEff", dic_histos)
@@ -299,7 +301,7 @@ def make_detection_eff(inputs):
 
 #############################################################################
 def make_2d_nmuons_Z(inputs):
-  hist_eff = inputs[0][1][0].Clone() #"Panel_Efficiency_MuonFromZ"
+  hist_eff = inputs[0][1][0].Clone() #"Detection_Efficiency_MuonFromZ"
   DicPanels   = readElementFromXML()
 
   dic_histos = {}
@@ -315,7 +317,7 @@ def make_2d_nmuons_Z(inputs):
   variable   = "muon_Z_num"
   config     = [h_name, variable]
 
-  # "muon_Z_num_layer[1-6]_measPhi[01]",
+  # "muon_Z_num_layer[1-8]_measPhi[01]",
   list_hist2d_EtaPhi_allLayer      = draw_hits.GetHist2D_EtaPhi_allLayer(config, doSetZRange = False)
   getHistNames(list_hist2d_EtaPhi_allLayer, "Muon/MuonRawDataMonitoring/RPC/TrackMatch/NMuon", dic_histos)
 
@@ -331,7 +333,7 @@ def make_2d_nmuons_Z(inputs):
   variable   = "muon_Z_den"
   config     = [h_name, variable]
 
-  # "muon_Z_den_layer[1-6]_measPhi[01]",
+  # "muon_Z_den_layer[1-8]_measPhi[01]",
   list_hist2d_EtaPhi_allLayer      = draw_hits.GetHist2D_EtaPhi_allLayer(config, doSetZRange = False)
   getHistNames(list_hist2d_EtaPhi_allLayer, "Muon/MuonRawDataMonitoring/RPC/TrackMatch/NMuon", dic_histos)
 
@@ -339,7 +341,7 @@ def make_2d_nmuons_Z(inputs):
 
 #############################################################################
 def make_2d_nmuons_all(inputs):
-  hist_eff = inputs[0][1][0].Clone() #"Panel_Efficiency_AllMuons"
+  hist_eff = inputs[0][1][0].Clone() #"Detection_Efficiency_AllMuons"
   DicPanels   = readElementFromXML()
 
   dic_histos = {}
@@ -355,7 +357,7 @@ def make_2d_nmuons_all(inputs):
   variable   = "muon_all_num"
   config     = [h_name, variable]
 
-  # "muon_all_num_layer[1-6]_measPhi[01]",
+  # "muon_all_num_layer[1-8]_measPhi[01]",
   list_hist2d_EtaPhi_allLayer      = draw_hits.GetHist2D_EtaPhi_allLayer(config, doSetZRange = False)
   getHistNames(list_hist2d_EtaPhi_allLayer, "Muon/MuonRawDataMonitoring/RPC/TrackMatch/NMuon", dic_histos)
 
@@ -371,7 +373,7 @@ def make_2d_nmuons_all(inputs):
   variable   = "muon_all_den"
   config     = [h_name, variable]
 
-  # "muon_all_den_layer[1-6]_measPhi[01]",
+  # "muon_all_den_layer[1-8]_measPhi[01]",
   list_hist2d_EtaPhi_allLayer      = draw_hits.GetHist2D_EtaPhi_allLayer(config, doSetZRange = False)
   getHistNames(list_hist2d_EtaPhi_allLayer, "Muon/MuonRawDataMonitoring/RPC/TrackMatch/NMuon", dic_histos)
 
@@ -437,3 +439,9 @@ def getHistNames(hist_list, prefix, dic_hist):
 #############################################################################
 if __name__ ==  '__main__':
   print ("RPCPostProcessing:  Hello, World !")
+
+  # infile = ROOT.TFile("ExampleMonitorOutput.root", "READ")
+  # hist  = infile.Get("run_358615/Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/NPRDHit_Panels_All")
+  # inputs = [[0, [hist]]]
+  # dic_ = make_2dhits(inputs)
+

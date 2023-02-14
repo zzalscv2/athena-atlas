@@ -17,6 +17,7 @@
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
 #include "MuonReadoutGeometry/RpcDetectorElement.h"
 #include "PathResolver/PathResolver.h"
+#include "xAODTracking/TrackParticlexAODHelpers.h"
 
 // Boost package to read XML
 #include <boost/property_tree/ptree.hpp>
@@ -47,14 +48,18 @@ StatusCode RpcTrackAnaAlg::initialize ()
   ATH_CHECK( m_MuonRoIContainerKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_MuonContainerKey.initialize() );
   ATH_CHECK( m_rpcPrdKey.initialize() );
+  ATH_CHECK( m_PrimaryVertexContainerKey.initialize(SG::AllowEmpty));
   
   ATH_CHECK( readElIndexFromXML() );
   ATH_CHECK( initRpcPanel() );
   
   ATH_CHECK( initTrigTag() );
 
-  std::vector<std::string> sectorStr = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"};
+  std::vector<std::string> sectorStr = {"sector1", "sector2", "sector3", "sector4", "sector5", "sector6", "sector7", "sector8", "sector9", "sector10", "sector11", "sector12", "sector13", "sector14", "sector15", "sector16"};
   m_SectorGroup = Monitored::buildToolMap<int>(m_tools, "RpcTrackAnaAlg", sectorStr);
+
+  std::vector<std::string> triggerThrs = {"thr1", "thr2", "thr3", "thr4", "thr5", "thr6"};
+  m_TriggerThrGroup = Monitored::buildToolMap<int>(m_tools, "RpcTrackAnaAlg", triggerThrs);
 
   ATH_MSG_INFO(" initialize extrapolator ");
   ATH_CHECK(m_extrapolator.retrieve());
@@ -300,16 +305,34 @@ StatusCode RpcTrackAnaAlg::fillMuonExtrapolateEff(const EventContext& ctx) const
   using namespace Monitored;
   auto tool = getGroup(m_packageName);
 
-  if (!m_MuonRoIContainerKey.empty()) {
-    /* raw LVL1MuonRoIs */
-    SG::ReadHandle<xAOD::MuonRoIContainer > muonRoIs( m_MuonRoIContainerKey, ctx);
-    
-    if(!muonRoIs.isValid()){
-      ATH_MSG_ERROR("evtStore() does not contain muon L1 ROI Collection with name "<< m_MuonRoIContainerKey);
-      return StatusCode::FAILURE;
+  //
+  // read PrimaryVertex Z
+  // 
+  const xAOD::Vertex* primVertex = nullptr;
+  if(!m_PrimaryVertexContainerKey.empty()){
+    SG::ReadHandle <xAOD::VertexContainer> primVtxContainer(m_PrimaryVertexContainerKey, ctx);
+    if(primVtxContainer.isValid()){
+      for(const auto vtx : *primVtxContainer){
+	      if(vtx->vertexType() == xAOD::VxType::VertexType::PriVtx){
+	        primVertex = vtx;
+	        break;
+	      }
+      }
     }
   }
+  double primaryVertexZ = (primVertex!=nullptr)?(primVertex->z()):(-999);
+ 
+  // 
+  // read beam position sigma from eventinfo
+  // 
+  SG::ReadHandle<xAOD::EventInfo>    eventInfo(m_eventInfo, ctx);
+  const double beamPosSigmaX  = eventInfo->beamPosSigmaX();
+  const double beamPosSigmaY  = eventInfo->beamPosSigmaY();
+  const double beamPosSigmaXY = eventInfo->beamPosSigmaXY();
 
+  // 
+  // read muon
+  // 
   SG::ReadHandle<xAOD::MuonContainer> muons(m_MuonContainerKey, ctx);
   ATH_MSG_DEBUG(" muons size = "<< muons->size());
 
@@ -318,80 +341,222 @@ StatusCode RpcTrackAnaAlg::fillMuonExtrapolateEff(const EventContext& ctx) const
     return StatusCode::FAILURE; 
   }
 
-  std::vector<MyMuon> mymuons;
-
+  // 
+  // select out tag and probe muons
+  // 
+  std::vector<std::shared_ptr<MyMuon>> tagmuons;
+  std::vector<std::shared_ptr<MyMuon>> probemuons;
   for(const xAOD::Muon* muon : *muons){
-    // if(muon->muonType()!=xAOD::Muon::Combined)continue;
-    // if(!(muon->quality() <= xAOD::Muon::Medium))continue;
-    if(!(muon->quality() <= xAOD::Muon::Loose))continue;
-    if(!(muon->pt() > m_minPt)) continue;
+    if(std::abs(muon->eta()) > m_maxEta) continue;
 
-    MyMuon mymuon;
-    /* fill basic info */
-    mymuon.muon = muon;
-    mymuon.fourvec.SetPtEtaPhiM(muon->pt(),muon->eta(),muon->phi(),m_muonMass.value());
-    /* fill tag of tag-and-probe info */
-    mymuon.tagged = triggerMatching(muon,m_trigTagDefs)==StatusCode::SUCCESS;
-    //cppcheck-suppress uninitvar
-    mymuons.push_back( mymuon );
+    auto mymuon = std::make_shared<MyMuon>();
+    mymuon->muon = muon;
+    mymuon->fourvec.SetPtEtaPhiM(muon->pt(),muon->eta(),muon->phi(),m_muonMass.value());
+    mymuon->tagged = triggerMatching(muon,m_trigTagDefs)==StatusCode::SUCCESS;
+    
+    // muon quality
+    if(muon->quality() > xAOD::Muon::Medium) continue;
+
+    //
+    // calculate muon z0sin(\theta) and d0significance
+    auto track = muon->primaryTrackParticle();
+    const double z0 = track->z0() + track->vz() - primaryVertexZ;
+
+    double z0sin = z0*std::sin(track->theta());
+    double d0sig = xAOD::TrackingHelpers::d0significance( track, beamPosSigmaX, beamPosSigmaY, beamPosSigmaXY );
+
+    // select probe muons 
+    if (std::abs(z0sin) < 0.5 && std::abs(d0sig) < 3.0 ){
+      mymuon->tagProbeOK = true;
+    }
+    probemuons.push_back( mymuon );
+
+    // select tag muons 
+    if (muon->pt() > 27.0e3 && std::abs(z0sin) < 1.0 && std::abs(d0sig) < 5.0 ){
+      tagmuons.push_back( mymuon );
+    }
   }
 
+  //
+  // Z tag & probe
+  //
+  for (auto tag_muon: tagmuons){
+    if ( !(tag_muon->tagged) ) continue;
+
+    for (auto probe_muon: probemuons){
+      if (tag_muon->muon == probe_muon->muon) continue;
+
+      // probe muon
+      if (!probe_muon->tagProbeOK ) continue;
+
+      // Opposite charge
+      if(tag_muon->muon->charge() == probe_muon->muon->charge() ) continue;
+
+      // Z mass window
+      float dimuon_mass = (tag_muon->fourvec + probe_muon->fourvec).M();
+      if(dimuon_mass<m_zMass_lowLimit || dimuon_mass>m_zMass_upLimit) continue;
+
+      // angular separation
+      float dr =  (tag_muon->fourvec).DeltaR( probe_muon->fourvec );
+      if( dr < m_isolationWindow)  continue;
+
+      probe_muon->tagProbeAndZmumuOK = true;
+    }
+  }
+
+  //
+  // read rois: raw LVL1MuonRoIs
+  // 
+  std::vector<const xAOD::MuonRoI*> roisBarrel;
+  if (!m_MuonRoIContainerKey.empty()) {
+    SG::ReadHandle<xAOD::MuonRoIContainer> muonRoIs(m_MuonRoIContainerKey, ctx);
+
+    if(!muonRoIs.isValid()){
+      ATH_MSG_ERROR("evtStore() does not contain muon L1 ROI Collection with name "<< m_MuonRoIContainerKey);
+      return StatusCode::FAILURE;
+    }
+    const xAOD::MuonRoIContainer *rois = muonRoIs.cptr();
+
+    std::vector<double> roiEtaVec       = {};
+    std::vector<double> roiBarrelEtaVec = {};
+    std::vector<int>    roiBarrelThrVec = {};
+
+    roiEtaVec.reserve(muonRoIs->size());
+    roiBarrelEtaVec.reserve(muonRoIs->size());
+    roiBarrelThrVec.reserve(muonRoIs->size());
+    roisBarrel.reserve(muonRoIs->size());
+    for(const xAOD::MuonRoI *roi : *rois) {
+      roiEtaVec.push_back(roi->eta());
+      if(roi->getSource() != xAOD::MuonRoI::RoISource::Barrel) continue;
+
+      roiBarrelEtaVec.push_back(roi->eta());
+      roiBarrelThrVec.push_back(roi->getThrNumber());
+      roisBarrel.push_back(roi);
+    }
+
+    auto roiEtaCollection       = Collection("roiEta",       roiEtaVec);
+    auto roiBarrelEtaCollection = Collection("roiBarrelEta", roiBarrelEtaVec);
+    auto roiBarrelThrCollection = Collection("roiBarrelThr", roiBarrelThrVec);
+    fill(tool, roiEtaCollection);
+    fill(tool, roiBarrelEtaCollection);
+    fill(tool, roiBarrelThrCollection);
+  }
+
+  //
+  // Fill Lv1 trigger efficiency
+  // Fill muon detection efficiency
   auto i_pt_allMu  = Scalar<double>("muPt_allMu",      0.);
   auto i_eta_allMu = Scalar<double>("muEta_allMu",     0.);
   auto i_phi_allMu = Scalar<double>("muPhi_allMu",     0.);
   auto i_pt_zMu    = Scalar<double>("muPt_MuonFromZ",    0.);
   auto i_eta_zMu   = Scalar<double>("muEta_MuonFromZ",   0.);
   auto i_phi_zMu   = Scalar<double>("muPhi_MuonFromZ",   0.);
+  auto i_eta_zMu_p = Scalar<double>("muEta_p_MuonFromZ",   0.); // kine variable at the plateau of pt turn-on curve
+  auto i_phi_zMu_p = Scalar<double>("muPhi_p_MuonFromZ",   0.);// kine variable at the plateau of pt turn-on curve
+
 
   std::vector<GasGapResult> results;
-  std::vector<MyMuon>::iterator mu1_it = mymuons.begin();
-  std::vector<MyMuon>::iterator mu1_end = mymuons.end();
-  for(; mu1_it!=mu1_end; ++mu1_it){
-    std::vector<MyMuon>::iterator mu2_it = mu1_it;
-    std::vector<MyMuon>::iterator mu2_end = mu1_end;
+  int nmuon        = 0;
+  int nmuon_barrel = 0;
+  for (auto probe_muon: probemuons){
+    nmuon ++;
+    double pt  = probe_muon->muon->pt();
+    double eta = probe_muon->muon->eta();
+    double phi = probe_muon->muon->phi();
 
-    if (!(mu1_it->isolated && mu1_it->isZmumu)){
-      for(++mu2_it; mu2_it!=mu2_end; ++mu2_it){
+    // barrel muon
+    if(std::abs(eta) < m_barrelMinEta || std::abs(eta) > m_barrelMaxEta) continue;
+    nmuon_barrel ++;
 
-        float dr =  (mu2_it->fourvec).DeltaR( mu1_it->fourvec );
-        if( dr > m_isolationWindow.value() ){
-          mu1_it->isolated = true;
-          mu2_it->isolated = true;
-        }
+    // has MuonSpectrometerTrackParticle
+    const xAOD::TrackParticle* track = probe_muon->muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
+    if(track) {
+      results.clear();
 
-        // Z Muon
-        if( mu1_it->muon->charge() == mu2_it->muon->charge() ) continue;
-
-        double dimuon_mass = (mu2_it->fourvec + mu1_it->fourvec).M();
-        if(dimuon_mass>m_zMass_lowLimit && dimuon_mass<m_zMass_upLimit) {
-          mu1_it->isZmumu=true;
-          mu2_it->isZmumu=true;
-        }
-      }
+      ATH_CHECK(extrapolate2RPC(track,   Trk::anyDirection, results, BI));
+      ATH_CHECK(readHitsPerGasgap(ctx, results, AllMuon) );
     }
 
-    const xAOD::TrackParticle* track = mu1_it->muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
-    if(!track) continue;
-
-    results.clear();
-
-    ATH_CHECK(extrapolate2RPC(track,   Trk::anyDirection, results, BI));
-    ATH_CHECK(readHitsPerGasgap(ctx, results, AllMuon) );
-
-    i_pt_allMu  = mu1_it->muon->pt();
-    i_eta_allMu = mu1_it->muon->eta();
-    i_phi_allMu = mu1_it->muon->phi();
+    // fill kine variables for probe muons
+    i_pt_allMu  = pt;
+    i_eta_allMu = eta;
+    i_phi_allMu = phi;
     fill(tool, i_pt_allMu, i_eta_allMu, i_phi_allMu);
 
-    if ( mu1_it->isolated && mu1_it->isZmumu ) {
-      ATH_CHECK(readHitsPerGasgap(ctx, results, ZCand) );
+    //
+    // Probe muons with Z tag&probe method
+    // 1) Plot L1 trigger efficiency use probe muons
+    // 2) Plot muon detection efficiency use probe muons
+    if ( probe_muon->tagProbeAndZmumuOK ) {
 
-      i_pt_zMu  = mu1_it->muon->pt();
-      i_eta_zMu = mu1_it->muon->eta();
-      i_phi_zMu = mu1_it->muon->phi();
+      //
+      // do match muon with ROI 
+      std::vector<bool> isMatcheds(6, 0);
+      for(const xAOD::MuonRoI *roi : roisBarrel) {
+        const double dphi = TVector2::Phi_mpi_pi(roi->phi() - phi);
+        const double deta = roi->eta() - eta;
+        const double dr   = std::sqrt(dphi*dphi + deta*deta);
+
+        if(dr > m_l1trigMatchWindow) continue;
+
+        int thr = roi->getThrNumber();
+        for (int i_thr=1;i_thr<7;i_thr++){
+          if (i_thr <= thr){
+            isMatcheds[i_thr-1] = true;
+          } 
+        }
+      }
+
+      // 
+      // fill L1 trigger Efficiency
+      auto i_pt            = Scalar<double>("muPt_l1",           pt);
+      auto i_eta           = Scalar<double>("muEta_l1",          eta);
+      auto i_phi           = Scalar<double>("muPhi_l1",          phi);
+      auto i_passTrigger   = Scalar<bool>("passTrigger",         false);
+      auto i_passTrigger_1 = Scalar<bool>("passTrigger_plateau", false);
+
+      for (int i_thr=1;i_thr<7;i_thr++){
+        i_passTrigger   = isMatcheds[i_thr-1];
+        i_passTrigger_1 = isMatcheds[i_thr-1];
+        
+        // plot L1 trigger pt turn-on curve
+        fill(m_tools[m_TriggerThrGroup.at("thr"+std::to_string(i_thr))], i_pt, i_passTrigger);
+
+        // plot L1 trigger efficiency on the plateau of pt turn-on curve
+        if(std::abs(pt) > m_minPt ) {
+          fill(m_tools[m_TriggerThrGroup.at("thr"+std::to_string(i_thr))], i_eta, i_phi, i_passTrigger_1);
+        }
+      }
+
+      // 
+      // muon track 
+      // fill muon detection Efficiency
+      //
+      if(track) {
+        ATH_CHECK(readHitsPerGasgap(ctx, results, ZCand) );
+      }
+
+      // fill kine variables for probe muons in ZTP
+      i_pt_zMu  = pt;
+      i_eta_zMu = eta;
+      i_phi_zMu = phi;
       fill(tool, i_pt_zMu, i_eta_zMu, i_phi_zMu);
-    }
-  }
+
+      if(std::abs(pt) > m_minPt ) {
+        i_eta_zMu_p = eta;
+        i_phi_zMu_p = phi;
+        fill(tool, i_eta_zMu_p, i_phi_zMu_p);
+      }
+    } // tagProbeAndZmumuOK
+  } // probemuons
+
+  auto Nmuon               = Scalar<int>("nMu",       nmuon);
+  auto Nmuon_barrel        = Scalar<int>("nMuBarrel", nmuon_barrel);
+
+  //
+  // Fill histograms
+  //
+  fill(tool, Nmuon, Nmuon_barrel);
 
   return StatusCode::SUCCESS;
 }
@@ -506,7 +671,7 @@ StatusCode RpcTrackAnaAlg::triggerMatching(const xAOD::Muon* offline_muon, const
     if( !getTrigDecisionTool()->isPassed( tagTrig.eventTrig.Data() ) ) continue;
 
     ATH_MSG_DEBUG("tagTrig.eventTrig = "<< tagTrig.eventTrig << ";  tagTrig.tagTrig = "<< tagTrig.tagTrig );
-    ATH_MSG_DEBUG("m_MuonEFContainerName.value() = "<< m_MuonEFContainerName.value());
+    // ATH_MSG_DEBUG("m_MuonEFContainerName.value() = "<< m_MuonEFContainerName.value());
     
     std::vector< TrigCompositeUtils::LinkInfo<xAOD::MuonContainer> >  features = getTrigDecisionTool()->features<xAOD::MuonContainer>( tagTrig.tagTrig.Data() ,TrigDefs::Physics);
     
@@ -652,11 +817,11 @@ RpcTrackAnaAlg::computeTrackIntersectionWithGasGap(ExResult &                res
   }
   else if (track_particle->track()) {
     detParameters = m_extrapolator->extrapolateTrack(ctx,
-                                                     *(track_particle->track()),
-                                                     gapSurface,
-                                                     result.direction,
-                                                     true,
-                                                     Trk::muon);
+                                                    *(track_particle->track()),
+                                                    gapSurface,
+                                                    result.direction,
+                                                    true,
+                                                    Trk::muon);
   }
   else {
     return detParameters;
@@ -905,7 +1070,7 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx, std::vecto
           v_PRDHit_TrackMatched.push_back(std::make_pair(exr, rpcData));
 
           i_hitTime_sec = rpcData->time();
-          fill(m_tools[m_SectorGroup.at(std::to_string(std::abs(sector)))], i_hitTime_sec);
+          fill(m_tools[m_SectorGroup.at("sector"+std::to_string(std::abs(sector)))], i_hitTime_sec);
         }
       }
     }
@@ -976,7 +1141,7 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx, std::vecto
     const int measuresPhi = rpcIdHelper.measuresPhi(id);
 
     isOutTime = false;
-    if(fabs(i_hit.second->time()) > m_outtime){
+    if(std::abs(i_hit.second->time()) > m_outtime){
       isOutTime = true;
     }
 
@@ -996,7 +1161,7 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx, std::vecto
       int i_panel_phi = gap->RpcPanel_eta_phi.second->panel_index;
       i_panelIndex = i_panel_phi;
       fill(tool, i_panelIndex, isOutTime_prd);
-      if (fabs(trackPos_localY-hitPos_local.y()) < m_diffHitTrackPostion){
+      if (std::abs(trackPos_localY-hitPos_local.y()) < m_diffHitTrackPostion){
         i_panelIndex_onTrack = i_panel_phi;
         fill(tool, i_panelIndex_onTrack, isOutTime_onTrack);
       }
@@ -1005,7 +1170,7 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx, std::vecto
       int i_panel_eta = gap->RpcPanel_eta_phi.first->panel_index;
       i_panelIndex = i_panel_eta;
       fill(tool, i_panelIndex, isOutTime_prd);
-      if (fabs(trackPos_localZ-hitPos_local.z()) < m_diffHitTrackPostion){
+      if (std::abs(trackPos_localZ-hitPos_local.z()) < m_diffHitTrackPostion){
         i_panelIndex_onTrack = i_panel_eta;
         fill(tool, i_panelIndex_onTrack, isOutTime_onTrack);
       }
@@ -1063,7 +1228,7 @@ StatusCode RpcTrackAnaAlg::fillClusterSize(std::vector<const Muon::RpcPrepData*>
     fill(tool, i_panelIndex, i_clusterSize);
 
     auto i_cs_sec  = Scalar<int>("cs_sec",     cluster_size);
-    fill(m_tools[m_SectorGroup.at(std::to_string(std::abs(phiSector)))], i_cs_sec);
+    fill(m_tools[m_SectorGroup.at("sector"+std::to_string(std::abs(phiSector)))], i_cs_sec);
 
     if (isPhi == 1) {
       auto i_clusterSize_view = Scalar<int>("clusterSize_phi",  cluster_size);
@@ -1086,7 +1251,7 @@ bool RpcTrackAnaAlg::IsNearbyHit(const std::vector<const Muon::RpcPrepData*> &cl
   // Check whether this hit is close to any hits in the cluster
   for(const Muon::RpcPrepData* it_hit : cluster_hits) {    
     if( abs(rpcIdHelper.strip(it_hit->identify()) - rpcIdHelper.strip(hit->identify())) < 2 && 
-       fabs(it_hit->time() - hit->time()) < 6.5) {
+       std::abs(it_hit->time() - hit->time()) < 6.5) {
       return true;
     }
   }
