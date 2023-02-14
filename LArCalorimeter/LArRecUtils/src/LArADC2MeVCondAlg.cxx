@@ -140,6 +140,8 @@ StatusCode LArADC2MeVCondAlg::execute(const EventContext& ctx) const{
   //Create output object
   std::unique_ptr<LArADC2MeV> lArADC2MeVObj=std::make_unique<LArADC2MeV>(m_larOnlineID,cabling,m_nGains,rampPolyDeg);
 
+  std::vector<float> ADC2MeV; //output data, overwritten in each loop iteration (avoid re-allocation)
+
   it  = m_larOnlineID->channel_begin();
   it_e= m_larOnlineID->channel_end();
   for (;it!=it_e;++it) {
@@ -205,23 +207,22 @@ StatusCode LArADC2MeVCondAlg::execute(const EventContext& ctx) const{
 	  continue;
 	}
       
-	std::vector<float> ADC2MeV; //output data
+	ADC2MeV.resize(adc2dac.size());
 
 	//Determine if the intercept is to be used:
 	if (igain==0 || (igain==1 && febConfig && febConfig->lowerGainThreshold(chid)<5)) { 
 	  //Don't use ramp intercept in high gain and in medium gain if the no high gain is used
 	  //(eg lowerGainThreshold is ~zero)
-	  ADC2MeV.push_back(0.);
+	  ADC2MeV[0]=0;
 	}
 	else {
-	  ADC2MeV.push_back(factorGain[igain]*adc2dac[0]);
+	  ADC2MeV[0]=factorGain[igain]*adc2dac[0];
 	}
 
 	//Fill remaining polynom terms (usualy only one left)
 	for (size_t i=1;i<adc2dac.size();++i) {
-	  ADC2MeV.push_back(factorGain[igain]*adc2dac[i]);
+	  ADC2MeV[i]=factorGain[igain]*adc2dac[i];
 	}
-      
 	//Now we are done with this channel and gain. Add it to the output container
 	bool stat=lArADC2MeVObj->set(hid,igain,ADC2MeV);
 	if (!stat) { //fails only if hash or gain are out-of-range
