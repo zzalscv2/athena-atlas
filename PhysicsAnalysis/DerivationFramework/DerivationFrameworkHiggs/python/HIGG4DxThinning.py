@@ -23,8 +23,8 @@ def TriggerChains(HIGG4DxName):
         # Removing multiplepton triggers (also with asymmetric thresholds), lepton+jet, lepton+missingET, lepton-photon, b-phys, and performance triggers
         return '(^(?!.*_[0-9]*(mu|j|xe|g|b|perf|idperf))(?!HLT_e.*_[0-9]*e.*)(HLT_e.*))|(^(?!.*_[0-9]*(e|j|xe|g|b|perf|idperf))(?!HLT_mu.*_[0-9]*mu.*)(HLT_mu.*))'
     elif HIGG4DxName in ['HIGG4D3', 'HIGG4D4', 'HIGG4D5']:
-        # keeping all tau triggers as there isn't that many of them
-        return 'HLT_tau.*'
+        # keeping all tau triggers (as there isn't that many of them) and active b-jet triggers
+        return '(HLT_tau.*|HLT_2j35_bmv2c20.*|HLT_j110_gsc150_boffperf_split_2j35_gsc55_bmv2c10.*|HLT_2j35_gsc55_bmv2c10.*|HLT_j110_gsc150_boffperf_split_2j45_gsc55_bmv2c10.*|HLT_2j35_bmv2c10.*|HLT_xe100_mht_L1XE50.*)'
     elif HIGG4DxName in ['HIGG4D6']:
         return ''
     elif HIGG4DxName in ['HIGG6D1']:
