@@ -20,7 +20,8 @@ def create_joboptions_json(pkl_file, json_file, createDBJson = True):
          app_props, msg_props, comp_props = cfg.gatherProps()
          props["ApplicationMgr"] = app_props
          props["MessageSvc"] = msg_props
-         props.update( {comp : {name : value} for comp, name, value in comp_props} )
+         for comp, name, value in comp_props:
+            props.setdefault(comp, {})[name] = value
       else:                                      # legacy job options
          svc = pickle.load(f)   # some specialized services (only in legacy config)
          props = cfg
