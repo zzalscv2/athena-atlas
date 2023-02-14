@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.Utility.ChainDictTools import splitChainDict
 from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
@@ -11,7 +11,7 @@ log.info("Importing %s",__name__)
 
 
 
-def generateChainConfigs(flags,  chainDict ):
+def generateChainConfigs(flags,  chainDict, perSig_lengthOfChainConfigs):
     log.debug('dictionary is: %s\n', pprint.pformat(chainDict))
 
     
@@ -26,11 +26,11 @@ def generateChainConfigs(flags,  chainDict ):
         
 
     if len(listOfChainDefs)>1:
-        theChainDef = mergeChainDefs(listOfChainDefs, chainDict)
+        theChainDef, perSig_lengthOfChainConfigs = mergeChainDefs(listOfChainDefs, chainDict, perSig_lengthOfChainConfigs)
     else:
         theChainDef = listOfChainDefs[0]
 
-    return theChainDef
+    return theChainDef, perSig_lengthOfChainConfigs
 
 
 
