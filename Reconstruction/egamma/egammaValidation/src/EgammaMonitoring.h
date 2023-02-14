@@ -23,14 +23,13 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/xAODTruthHelpers.h"
+#include "MCTruthClassifier/IMCTruthClassifier.h"
 
 #include "AsgTools/ToolHandle.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
 #include "EgammaAnalysisInterfaces/IAsgPhotonIsEMSelector.h"
-#include "Gaudi/Property.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 
@@ -39,7 +38,6 @@
 #include "ClusterHistograms.h"
 #include "EfficiencyPlot.h"
 #include "IHistograms.h"
-#include "MCTruthClassifier/IMCTruthClassifier.h"
 #include "RecoElectronHistograms.h"
 #include "RecoPhotonHistograms.h"
 #include "ShowerShapesHistograms.h"
@@ -176,20 +174,23 @@ public:
   ~EgammaMonitoring(){};
 
   virtual StatusCode initialize();
-  virtual StatusCode beginInputFile();
-  virtual StatusCode firstExecute();
   virtual StatusCode execute();
   virtual StatusCode finalize();
 
 private:
   /// Sample name ///
   std::string m_sampleType;
+
+  /// Selector tools
+  // electron ID
   ToolHandle<IAsgElectronLikelihoodTool>
     m_LooseLH{ this, "LooseLH", "AsgElectronLikelihoodTool/LooseLH", "" };
   ToolHandle<IAsgElectronLikelihoodTool>
     m_MediumLH{ this, "MediumLH", "AsgElectronLikelihoodTool/MediumLH", "" };
   ToolHandle<IAsgElectronLikelihoodTool>
     m_TightLH{ this, "TightLH", "AsgElectronLikelihoodTool/TightLH", "" };
+
+  // photon ID
   ToolHandle<IAsgPhotonIsEMSelector> m_LooseLH_Photon{
     this,
     "Loose_Photon",
@@ -202,6 +203,8 @@ private:
     "AsgPhotonIsEMSelector/photonTightIsEMSelector",
     ""
   };
+
+  // photon isolation
   ToolHandle<CP::IIsolationSelectionTool> m_IsoFixedCutTight{
     this,
     "IsoFixedCutTight",
@@ -210,8 +213,8 @@ private:
   };
   ToolHandle<CP::IIsolationSelectionTool> m_IsoFixedCutTightCaloOnly{
     this,
-    "IsoFixedCutTightCaloOnly",
-    "CP::IsolationSelectionTool/IsoFixedCutTightCaloOnly",
+    "IsoTightCaloOnly",
+    "CP::IsolationSelectionTool/IsoTightCaloOnly",
     ""
   };
   ToolHandle<CP::IIsolationSelectionTool> m_IsoFixedCutLoose{
@@ -221,6 +224,7 @@ private:
     ""
   };
 
+  // Truth classifier
   ToolHandle<IMCTruthClassifier> m_mcTruthClassifier{
     this,
     "MCTruthClassifier",
@@ -228,43 +232,30 @@ private:
     ""
   };
 
-  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{ this,
-                                                     "EventInfoKey",
-                                                     "EventInfo",
-                                                     "" };
+  // Collections to read
+  SG::ReadHandleKey<xAOD::EventInfo>
+    m_eventInfoKey{ this, "EventInfoKey", "EventInfo", "" };
 
-  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_egTruthParticlesKey{
-    this,
-    "egammaTruthParticlesKey",
-    "egammaTruthParticles",
-    ""
-  };
+  SG::ReadHandleKey<xAOD::TruthParticleContainer>
+    m_egTruthParticlesKey{
+    this, "egammaTruthParticlesKey", "egammaTruthParticles", "" };
 
   SG::ReadHandleKey<xAOD::TruthParticleContainer>
     m_truthParticlesKey{ this, "truthParticlesKey", "TruthParticles", "" };
 
-  SG::ReadHandleKey<xAOD::ElectronContainer> m_ElectronsKey{ this,
-                                                             "ElectronsKey",
-                                                             "Electrons",
-                                                             "" };
+  SG::ReadHandleKey<xAOD::ElectronContainer>
+    m_ElectronsKey{ this, "ElectronsKey", "Electrons", "" };
 
-  SG::ReadHandleKey<xAOD::PhotonContainer> m_PhotonsKey{ this,
-                                                         "PhotonsKey",
-                                                         "Photons",
-                                                         "" };
+  SG::ReadHandleKey<xAOD::PhotonContainer>
+    m_PhotonsKey{ this, "PhotonsKey", "Photons", "" };
 
-  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_InDetTrackParticlesKey{
-    this,
-    "InDetTrackParticlesKey",
-    "InDetTrackParticles",
-    ""
-  };
-  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_GSFTrackParticlesKey{
-    this,
-    "GSFTrackParticlesKey",
-    "GSFTrackParticles",
-    ""
-  };
+  SG::ReadHandleKey<xAOD::TrackParticleContainer>
+    m_InDetTrackParticlesKey{
+    this, "InDetTrackParticlesKey", "InDetTrackParticles", "" };
+
+  SG::ReadHandleKey<xAOD::TrackParticleContainer>
+    m_GSFTrackParticlesKey{
+    this, "GSFTrackParticlesKey", "GSFTrackParticles", "" };
 
   static bool matchedToElectron(const xAOD::TrackParticle& tp);
   static bool matchedToPion(const xAOD::TrackParticle& tp);

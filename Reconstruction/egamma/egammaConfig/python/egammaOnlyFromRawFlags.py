@@ -1,5 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
-
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 def egammaOnlyFromRaw(flags):
     """egammaOnlyFromRaw flags for Reco_tf with CA"""
@@ -9,6 +8,8 @@ def egammaOnlyFromRaw(flags):
     flags.Reco.EnableTau = False
     flags.Reco.EnableJet = False
     flags.Reco.EnableBTagging = False
-    flags.Reco.PostProcessing.GeantTruthThinning = False
+    flags.Reco.EnableCaloRinger = False
+    flags.Reco.EnableTrigger = False
     flags.Egamma.doTrackThinning = False
+    flags.Reco.PostProcessing.GeantTruthThinning = False
     flags.Reco.PostProcessing.TRTAloneThinning = False

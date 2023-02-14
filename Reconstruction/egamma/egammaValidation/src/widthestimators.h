@@ -36,7 +36,7 @@ namespace widthestimators
         template <typename T>
         std::vector<double> get_cum_sum(const T &histo, bool normed = false)
         {
-            // use double since it can weighted
+            // use double since it can be weighted
             std::vector<double> cum_sum(histo->GetNbinsX() + 2);
 
             std::partial_sum(
@@ -58,7 +58,7 @@ namespace widthestimators
         template <typename T>
         std::pair<double, double> find_window(const T &histo, double prob = PROB_1SIGMA)
         {
-            if (histo->GetNbinsX() <= 3)
+	    if (histo->GetNbinsX() <= 3 || histo->Integral() == 0.)
             {
                 return std::make_pair<double>(0, 0);
             }

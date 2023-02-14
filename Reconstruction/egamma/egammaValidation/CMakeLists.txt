@@ -12,8 +12,6 @@ atlas_add_component ( egammmaValidation
 	xAODTracking xAODTruth )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-# Install JO files from the package:
-atlas_install_joboptions( share/*.py )
 # ART shell executable scripts :
 atlas_install_scripts( test/*.sh scripts/*py )
 
