@@ -122,6 +122,8 @@ def initConfigFlags():
     acf.addFlag('MP.UseParallelCompression', True)
 
     acf.addFlag('Common.MsgSourceLength',50) #Length of the source-field in the format str of MessageSvc
+    acf.addFlag('Common.ShowMsgStats',False) #Print stats about WARNINGs, etc at the end of the job
+
     acf.addFlag('Common.isOnline', False ) #  Job runs in an online environment (access only to resources available at P1) # former global.isOnline
     acf.addFlag('Common.useOnlineLumi', lambda prevFlags : prevFlags.Common.isOnline ) #  Use online version of luminosity. ??? Should just use isOnline?
     acf.addFlag('Common.isOverlay', lambda prevFlags: (prevFlags.Common.ProductionStep == ProductionStep.Overlay or

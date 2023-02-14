@@ -102,8 +102,14 @@ def AthenaHiveEventLoopMgrCfg(flags):
 
 def MessageSvcCfg(flags):
     cfg = ComponentAccumulator()
-    msgsvc = CompFactory.MessageSvc(OutputLevel = flags.Exec.OutputLevel,
-                                    Format = "% F%{:d}W%C%7W%R%T %0W%M".format(flags.Common.MsgSourceLength))
+    msgsvc = CompFactory.MessageSvc()
+    msgsvc.OutputLevel = flags.Exec.OutputLevel
+    msgsvc.Format = "% F%{:d}W%C%7W%R%T %0W%M".format(flags.Common.MsgSourceLength)
+    msgsvc.enableSuppression = True
+    if flags.Common.ShowMsgStats:
+        msgsvc.showStats = True
+        from AthenaCommon.Constants import WARNING
+        msgsvc.statLevel = WARNING
 
     from AthenaConfiguration.Enums import ProductionStep
     if flags.Common.ProductionStep not in [ProductionStep.Default, ProductionStep.Reconstruction]:
