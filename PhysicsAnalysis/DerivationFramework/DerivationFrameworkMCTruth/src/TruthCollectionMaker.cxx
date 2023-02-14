@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -12,6 +12,8 @@
 // EDM includes
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
+// Handles
+#include "StoreGate/WriteDecorHandle.h"
 // To look up which generator is being used
 #include "StoreGate/StoreGateSvc.h"
 #include "xAODTruth/TruthMetaDataContainer.h"
@@ -34,8 +36,7 @@ DerivationFramework::TruthCollectionMaker::TruthCollectionMaker(const std::strin
 {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("ParticlesKey", m_particlesKey="TruthParticles");
-    //declareProperty("VerticesKey", m_verticesKey);
-    declareProperty("NewCollectionName", m_collectionName="");
+    declareProperty("NewCollectionName", m_outputParticlesKey="");
     declareProperty("ParticleSelectionString", m_partString="");
     declareProperty("Do_Compress",m_do_compress=false);
     declareProperty("Do_Sherpa",m_do_sherpa=false);
@@ -52,15 +53,13 @@ StatusCode DerivationFramework::TruthCollectionMaker::initialize()
 {
     ATH_MSG_VERBOSE("initialize() ...");
     
-    if (m_particlesKey.empty() /*|| m_verticesKey==""*/) {
-        ATH_MSG_FATAL("No truth particle collection provided to use as a basis for new collections");
-        return StatusCode::FAILURE;
-    } else {ATH_MSG_INFO("Using " << m_particlesKey << " as the source collections for new truth collections");}
-    
-    if (m_collectionName.empty()) {
-        ATH_MSG_FATAL("No key provided for the new truth particle collection");
-        return StatusCode::FAILURE;
-    } else {ATH_MSG_INFO("New truth particle collection key: " << m_collectionName );}
+    // Input truth particles
+    ATH_CHECK( m_particlesKey.initialize() );
+    ATH_MSG_INFO("Using " << m_particlesKey.key() << " as the input truth container key");
+
+    // Output (new) truth particles
+    ATH_CHECK(m_outputParticlesKey.initialize());
+    ATH_MSG_INFO("New truth particles container key: " << m_outputParticlesKey.key() ); 
     
     if (m_partString.empty()) {
         ATH_MSG_FATAL("No selection string provided");
@@ -71,6 +70,17 @@ StatusCode DerivationFramework::TruthCollectionMaker::initialize()
     if (!m_partString.empty()) {
        ATH_CHECK( initializeParser(m_partString) );
     }
+
+    // Initialise decorator handle keys
+    ATH_CHECK(m_linkDecoratorKey.initialize());
+    ATH_CHECK(m_originDecoratorKey.initialize());
+    ATH_CHECK(m_typeDecoratorKey.initialize());
+    ATH_CHECK(m_outcomeDecoratorKey.initialize());
+    ATH_CHECK(m_classificationDecoratorKey.initialize());
+    ATH_CHECK(m_motherIDDecoratorKey.initialize());
+    ATH_CHECK(m_daughterIDDecoratorKey.initialize());
+    ATH_CHECK(m_hadronOriginDecoratorKey.initialize());
+
     return StatusCode::SUCCESS;
 }
 
@@ -86,7 +96,11 @@ StatusCode DerivationFramework::TruthCollectionMaker::finalize()
 // Selection and collection creation
 StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
 {
+    // Event context for AthenaMT
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
     // Set up for some metadata handling
+    // TODO: this isn't MT compliant. This information should go into the config level and avoid meta store
     static const bool is_sherpa = [this]() {
         bool is_sherpa = false;
         if (m_metaStore->contains<xAOD::TruthMetaDataContainer>("TruthMetaData")){
@@ -114,39 +128,31 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
     }();
 
     // Retrieve truth collections
-    const xAOD::TruthParticleContainer* importedTruthParticles;
-    if (evtStore()->retrieve(importedTruthParticles,m_particlesKey).isFailure()) {
-        ATH_MSG_ERROR("No TruthParticle collection with name " << m_particlesKey << " found in StoreGate!");
+    SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);
+    if (!truthParticles.isValid()) {
+        ATH_MSG_ERROR("Couldn't retrieve TruthParticle collection with name " << m_particlesKey);
         return StatusCode::FAILURE;
     }
-    /*const xAOD::TruthVertexContainer* importedTruthVertices;
-     if (evtStore()->retrieve(importedTruthVertices,m_verticesKey).isFailure()) {
-     ATH_MSG_ERROR("No TruthVertex collection with name " << m_verticesKey << " found in StoreGate!");
-     return StatusCode::FAILURE;
-     }*/
-    
-    // Create the new containers
-    xAOD::TruthParticleContainer* newParticleCollection = new xAOD::TruthParticleContainer();
-    CHECK( evtStore()->record( newParticleCollection, m_collectionName ) );
-    xAOD::TruthParticleAuxContainer* newParticleAuxCollection = new xAOD::TruthParticleAuxContainer();
-    CHECK( evtStore()->record( newParticleAuxCollection, m_collectionName + "Aux." ) );
-    newParticleCollection->setStore( newParticleAuxCollection );
-    ATH_MSG_DEBUG( "Recorded new TruthParticleContainer with key: " <<  m_collectionName);
-    
+
+    // Create the new particle containers and WriteHandles
+    SG::WriteHandle<xAOD::TruthParticleContainer> newParticlesWriteHandle(m_outputParticlesKey, ctx);
+    ATH_CHECK(newParticlesWriteHandle.record(std::make_unique<xAOD::TruthParticleContainer>(),
+                                             std::make_unique<xAOD::TruthParticleAuxContainer>()));
+    ATH_MSG_DEBUG( "Recorded new TruthParticleContainer with key: " << (m_outputParticlesKey.key()));
+
     // Set up a mask with the same entries as the full collections
-    unsigned int nParticles = importedTruthParticles->size();
-    //unsigned int nVertices = importedTruthVertices->size();
+    unsigned int nParticles = truthParticles->size();
     m_ntotpart += nParticles;
-    
+
     // Set up decorators
-    const static SG::AuxElement::Decorator< ElementLink<xAOD::TruthParticleContainer> > linkDecorator("originalTruthParticle");
-    const static SG::AuxElement::Decorator< unsigned int > originDecorator("classifierParticleOrigin");
-    const static SG::AuxElement::Decorator< unsigned int > typeDecorator("classifierParticleType");
-    const static SG::AuxElement::Decorator< unsigned int > outcomeDecorator("classifierParticleOutCome");
-    const static SG::AuxElement::Decorator< unsigned int > classificationDecorator("Classification");
-    const static SG::AuxElement::Decorator< int > motherIDDecorator("motherID");
-    const static SG::AuxElement::Decorator< int > daughterIDDecorator("daughterID");
-    const static SG::AuxElement::Decorator< int > HadronOriginDecorator("TopHadronOriginFlag");
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, ElementLink<xAOD::TruthParticleContainer> > linkDecorator(m_linkDecoratorKey);
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > originDecorator(m_originDecoratorKey);  
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > typeDecorator(m_typeDecoratorKey);
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > outcomeDecorator(m_outcomeDecoratorKey);
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationDecorator(m_classificationDecoratorKey);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > motherIDDecorator(m_motherIDDecoratorKey);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > daughterIDDecorator(m_daughterIDDecoratorKey);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > hadronOriginDecorator(m_hadronOriginDecoratorKey);
     
     // Execute the text parsers and update the mask
     if (!m_partString.empty()) {
@@ -184,12 +190,12 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                 std::vector<const xAOD::TruthParticle*> status20, status3;
                 for (unsigned int i=0; i<nParticles; ++i) {
                     // Nullptr check
-                    if (!importedTruthParticles->at(i)) continue;
+                    if (!truthParticles->at(i)) continue;
                     // Only collect leptons
-                    if (importedTruthParticles->at(i)->absPdgId()<11 || importedTruthParticles->at(i)->absPdgId()>16) continue;
+                    if (truthParticles->at(i)->absPdgId()<11 || truthParticles->at(i)->absPdgId()>16) continue;
                     // Gather by status
-                    if (importedTruthParticles->at(i)->status()==20) status20.push_back( importedTruthParticles->at(i) );
-                    if (importedTruthParticles->at(i)->status()== 3) status3.push_back(  importedTruthParticles->at(i) );
+                    if (truthParticles->at(i)->status()==20) status20.push_back( truthParticles->at(i) );
+                    if (truthParticles->at(i)->status()== 3) status3.push_back(  truthParticles->at(i) );
                 } // Done with loop over truth particles
                 // Make it so that we can exclusively use one vector
                 // Status 20 should have the priority -- it is the future
@@ -232,7 +238,7 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                                  (SherpaZ && pdg_id==23) ){
                                 // Make a Z or a W
                                 xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
-                                newParticleCollection->push_back( xTruthParticle );
+                                newParticlesWriteHandle->push_back( xTruthParticle );
                                 if (m_keep_navigation_info){
                                     if (boson[0]->hasProdVtx()) {
                                         if ((boson[0]->prodVtx()->nIncomingParticles() > 0) && (boson[0]->prodVtx()->incomingParticle(0)!=nullptr)) {
@@ -273,11 +279,11 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                 return StatusCode::SUCCESS;
             }
             for (unsigned int i=0; i<nParticles; ++i) {
-                ElementLink<xAOD::TruthParticleContainer> eltp(*importedTruthParticles,i);
+                ElementLink<xAOD::TruthParticleContainer> eltp(*truthParticles,i);
                 if (entries[i]==1) {
                     //In TRUTH3, we want to remove all particles but the first and last in a decay chain.  This is off in TRUTH1.  The first and last particles in the decay chain are decorated as such.
                     
-                    const xAOD::TruthParticle* theParticle = (*importedTruthParticles)[i];
+                    const xAOD::TruthParticle* theParticle = (*truthParticles)[i];
                     if (m_do_compress){
                         bool same_as_mother = false;
                         bool same_as_daughter = false;
@@ -301,7 +307,7 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                         }
                     }
                     xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
-                    newParticleCollection->push_back( xTruthParticle );
+                    newParticlesWriteHandle->push_back( xTruthParticle );
                     if (m_keep_navigation_info){
                         if (theParticle->hasProdVtx()) {
                             if ((theParticle->prodVtx()->nIncomingParticles() > 0) && (theParticle->prodVtx()->incomingParticle(0)!=nullptr)) {
@@ -336,10 +342,10 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                     if (theParticle->isAvailable<unsigned int>("Classification")) {
                         classificationDecorator(*xTruthParticle) = theParticle->auxdata< unsigned int >( "Classification" );
                     } else {classificationDecorator(*xTruthParticle) = 0;}
-                    if (m_collectionName=="TruthHFHadrons"){
+                    if (m_outputParticlesKey.key()=="TruthHFHadrons"){
                         if (theParticle->isAvailable<int>("TopHadronOriginFlag")) {
-                            HadronOriginDecorator(*xTruthParticle) = theParticle->auxdata< int >( "TopHadronOriginFlag" );
-                        } else {HadronOriginDecorator(*xTruthParticle) = 0;}
+                            hadronOriginDecorator(*xTruthParticle) = theParticle->auxdata< int >( "TopHadronOriginFlag" );
+                        } else {hadronOriginDecorator(*xTruthParticle) = 0;}
                     }
                     if(m_keep_navigation_info) linkDecorator(*xTruthParticle) = eltp;
                 }
