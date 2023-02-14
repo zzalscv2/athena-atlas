@@ -145,7 +145,8 @@ foreach( test sincos_test ArrayScanner_test Arrayrep_test
       vec_int_test vec_float_test vec_fb_int_test vec_fb_float_test
       ConcurrentHashmapImpl_test SimpleUpdater_test hexdump_test
       FPControl_test LockedPointer_test nodiscard_test span_test
-      reverse_wrapper_test atomic_bounded_decrement_test )
+      reverse_wrapper_test atomic_bounded_decrement_test
+      releasing_iterator_test)
    atlas_add_test( ${test}
       SOURCES test/${test}.cxx
       LINK_LIBRARIES CxxUtils TestTools )
