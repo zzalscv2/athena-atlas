@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def createTrigdEdxTrackHypoAlg(name):
+def createTrigdEdxTrackHypoAlg(flags, name):
 
     # make the Hypo
     from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import TrigdEdxTrackHypoAlg
@@ -16,7 +16,7 @@ def createTrigdEdxTrackHypoAlg(name):
 
     # monioring
 
-    monTool = GenericMonitoringTool("IM_MonTool"+name)
+    monTool = GenericMonitoringTool(flags, "IM_MonTool"+name)
     monTool.defineHistogram('trackPtGeV', type='TH1F', path='EXPERT', title="Hypo p_{T}^{track};p_{T}^{track} [GeV];Nevents", xbins=50, xmin=0, xmax=100) 
     monTool.defineHistogram('trackEta',   type='TH1F', path='EXPERT', title="Hypo p_{T}^{track} (after p_{T} cut);eta;Nevents", xbins=60, xmin=-3.0, xmax=3.0) 
     monTool.defineHistogram('tracka0beam',type='TH1F', path='EXPERT', title="Hypo a0beam (after eta cut);a0beam [mm];Nevents", xbins=50, xmin=-5.0, xmax=5.0) 

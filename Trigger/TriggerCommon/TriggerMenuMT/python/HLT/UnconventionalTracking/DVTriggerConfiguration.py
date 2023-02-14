@@ -85,7 +85,7 @@ def DVTriggerEDSequence(flags):
     from TrigLongLivedParticlesHypo.TrigVrtSecInclusiveHypoConfig import TrigVSIHypoToolFromDict
     from TrigLongLivedParticlesHypo.TrigVrtSecInclusiveHypoConfig import createTrigVSIHypoAlg
 
-    theHypoAlg = createTrigVSIHypoAlg("TrigDVHypoAlg")
+    theHypoAlg = createTrigVSIHypoAlg(flags, "TrigDVHypoAlg")
 
     from TrigEDMConfig.TriggerEDMRun3 import recordable
     theHypoAlg.verticesKey = vtxOutName

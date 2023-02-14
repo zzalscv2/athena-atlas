@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def createTrigDisappearingTrackHypoAlg(name):
+def createTrigDisappearingTrackHypoAlg(flags, name):
     # make the Hypo
     from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import (TrigDisappearingTrackHypoAlg)
 
@@ -14,7 +14,7 @@ def createTrigDisappearingTrackHypoAlg(name):
     theDisTrkHypo.DisTrkBDTSel = recordable("HLT_DisTrkBDTSel")
 
     # monioring
-    monTool = GenericMonitoringTool("IM_MonTool"+name)
+    monTool = GenericMonitoringTool(flags, "IM_MonTool"+name)
     monTool.defineHistogram('category',            type='TH1F', path='EXPERT', title="DisTrk Category;DisTrk Category;Nevents", xbins=5, xmin=-0.5, xmax=4.5) 
     #
     monTool.defineHistogram('pix4_sct0_pt',        type='TH1F', path='EXPERT', title="Pix4Sct0 p_{T};p_{T} [GeV];Nevents", xbins=50, xmin=0, xmax=100) 

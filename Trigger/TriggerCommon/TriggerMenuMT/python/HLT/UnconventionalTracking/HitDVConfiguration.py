@@ -53,7 +53,7 @@ def HitDVHypoSequence(flags):
         from TrigLongLivedParticlesHypo.TrigHitDVHypoConfig import TrigHitDVHypoToolFromDict
         from TrigLongLivedParticlesHypo.TrigHitDVHypoConfig import createTrigHitDVHypoAlg
 
-        theHitDVHypo = createTrigHitDVHypoAlg("HitDV")
+        theHitDVHypo = createTrigHitDVHypoAlg(flags, "HitDV")
 
         from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
         from AthenaConfiguration.ComponentFactory import CompFactory

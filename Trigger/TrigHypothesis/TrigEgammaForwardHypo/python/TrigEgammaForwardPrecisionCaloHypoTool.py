@@ -3,13 +3,13 @@
 from AthenaCommon.SystemOfUnits import GeV
 
 
-def _IncTool(name, threshold, sel):
+def _IncTool(flags, name, threshold, sel):
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     tool = CompFactory.TrigEgammaForwardPrecisionCaloHypoTool(name)
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool("MonTool_"+name)
+    monTool = GenericMonitoringTool(flags, "MonTool_"+name)
     monTool.defineHistogram('dEta', type='TH1F', path='EXPERT', title="PrecisionCalo Hypo #Delta#eta_{L2 L1}; #Delta#eta_{L2 L1}", xbins=80, xmin=-0.01, xmax=0.01)
     monTool.defineHistogram('dPhi', type='TH1F', path='EXPERT', title="PrecisionCalo Hypo #Delta#phi_{L2 L1}; #Delta#phi_{L2 L1}", xbins=80, xmin=-0.01, xmax=0.01)
     monTool.defineHistogram('Et_em', type='TH1F', path='EXPERT', title="PrecisionCalo Hypo cluster E_{T}^{EM};E_{T}^{EM} [MeV]", xbins=50, xmin=-2000, xmax=100000)
@@ -50,7 +50,7 @@ def _IncTool(name, threshold, sel):
     return tool
 
 
-def TrigEgammaForwardPrecisionCaloHypoToolFromDict( d ):
+def TrigEgammaForwardPrecisionCaloHypoToolFromDict( flags, d ):
     """ Use menu decoded chain dictionary to configure the tool """
     cparts = [i for i in d['chainParts'] if ((i['signature']=='Electron') or (i['signature']=='Photon'))]
 
@@ -62,6 +62,4 @@ def TrigEgammaForwardPrecisionCaloHypoToolFromDict( d ):
     
     name = d['chainName']
         
-    return _IncTool( name, __th( cparts[0]),  __sel( cparts[0] ) )
-                   
-    
+    return _IncTool( flags, name, __th( cparts[0]),  __sel( cparts[0] ) )

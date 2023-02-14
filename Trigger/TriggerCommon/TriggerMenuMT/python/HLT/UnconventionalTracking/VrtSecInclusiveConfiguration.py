@@ -36,7 +36,7 @@ def VrtSecInclusiveMenuSequence(flags):
 
     ( TrkSeq, im_alg, sequenceOut) = RecoFragmentsPool.retrieve(VrtSecInclusiveSequence,flags)
 
-    theHypoAlg = createTrigVSIHypoAlg("TrigVSIHypoAlg")
+    theHypoAlg = createTrigVSIHypoAlg(flags, "TrigVSIHypoAlg")
 
     from TrigEDMConfig.TriggerEDMRun3 import recordable
     theHypoAlg.verticesKey = recordable(sequenceOut)

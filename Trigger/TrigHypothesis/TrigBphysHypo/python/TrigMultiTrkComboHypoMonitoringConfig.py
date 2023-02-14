@@ -2,9 +2,9 @@
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def TrigMultiTrkComboHypoMonitoring(name):
+def TrigMultiTrkComboHypoMonitoring(flags, name):
 
-    montool = GenericMonitoringTool(name)
+    montool = GenericMonitoringTool(flags, name)
 
     if 'Streamer' in name:
         montool.defineHistogram('nAcceptedTrk', type='TH1F', path='EXPERT', title="number of selected input tracks", xbins=100, xmin=0, xmax=100)
@@ -33,9 +33,9 @@ def TrigMultiTrkComboHypoMonitoring(name):
     return montool
 
 
-def TrigMultiTrkComboHypoToolMonitoring(name):
+def TrigMultiTrkComboHypoToolMonitoring(flags, name):
 
-    montool = GenericMonitoringTool(name)
+    montool = GenericMonitoringTool(flags, name)
 
     montool.defineHistogram('totalCharge', type='TH1F', path='EXPERT', title="Total Charge of N tracks; total charge", xbins=20, xmin=-10, xmax=10)
     montool.defineHistogram('chi2', type='TH1F', path='EXPERT', title="chi2 fit of N tracks; vertex chi2", xbins=100, xmin=0, xmax=100)

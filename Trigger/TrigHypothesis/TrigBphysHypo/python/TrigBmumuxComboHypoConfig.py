@@ -97,7 +97,7 @@ def BmumuxComboHypoInternalCfg(flags):
         BcToDstarMuMu_D0MassRange = (1750., 2000.),
         BcToDstarMuMu_DstarMassRange = (-1., 2110.),
         BcToDstarMuMu_chi2 = 60.,
-        MonTool = TrigBmumuxComboHypoMonitoring('TrigBmumuxComboHypoMonitoring'))
+        MonTool = TrigBmumuxComboHypoMonitoring(flags, 'TrigBmumuxComboHypoMonitoring'))
 
     acc.addEventAlgo(hypo)
     return acc
@@ -110,7 +110,7 @@ def BmumuxComboHypoCfg(flags, name):
         return BmumuxComboHypoInternalCfg(flags)
 
 
-def TrigBmumuxComboHypoToolFromDict(chainDict):
+def TrigBmumuxComboHypoToolFromDict(flags, chainDict):
     
     topoAlgs = chainDict['chainName']
     log.debug("Set for algorithm %s", topoAlgs)
@@ -135,7 +135,7 @@ def TrigBmumuxComboHypoToolFromDict(chainDict):
     tool.Decay = trigDecayDict[decay]
     monGroups = ['bphysMon:online']
     if any(group in monGroups for group in chainDict['monGroups']):
-        tool.MonTool = TrigBmumuxComboHypoToolMonitoring('MonTool')
+        tool.MonTool = TrigBmumuxComboHypoToolMonitoring(flags, 'MonTool')
     if isComponentAccumulatorCfg():
         acc = ComponentAccumulator()
         acc.setPrivateTools(tool)

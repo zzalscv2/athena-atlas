@@ -79,7 +79,7 @@ def BmuxComboHypoInternalCfg(flags):
         LambdaBToLambdaC_chi2 = 27.,
         LambdaBToLambdaC_LxyLb = 0.1,
         LambdaBToLambdaC_LxyLc = 0.02,
-        MonTool = TrigBmuxComboHypoMonitoring('TrigBmuxComboHypoMonitoring'))
+        MonTool = TrigBmuxComboHypoMonitoring(flags, 'TrigBmuxComboHypoMonitoring'))
     acc.addEventAlgo(hypo)
     return acc
 

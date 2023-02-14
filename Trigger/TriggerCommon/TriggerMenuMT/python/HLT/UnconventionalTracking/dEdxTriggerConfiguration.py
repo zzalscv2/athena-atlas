@@ -11,7 +11,7 @@ def dEdxTriggerHypoSequence(flags):
         from TrigLongLivedParticlesHypo.TrigdEdxTrackHypoConfig import TrigdEdxTrackHypoToolFromDict
         from TrigLongLivedParticlesHypo.TrigdEdxTrackHypoConfig import createTrigdEdxTrackHypoAlg
         
-        thedEdxTrackHypo = createTrigdEdxTrackHypoAlg("dEdxTrack")
+        thedEdxTrackHypo = createTrigdEdxTrackHypoAlg(flags, "dEdxTrack")
 
         from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
         from AthenaConfiguration.ComponentFactory import CompFactory

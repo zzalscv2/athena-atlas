@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaCommon.Logging import logging
@@ -9,7 +9,7 @@ from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 log = logging.getLogger('TrigIsoHPtTrackTriggerHypoTool')
 
-def TrigIsoHPtTrackTriggerHypoToolFromDict( chainDict ):
+def TrigIsoHPtTrackTriggerHypoToolFromDict(flags, chainDict):
     """ Use menu decoded chain dictionary to configure the tool """
     cparts = [i for i in chainDict['chainParts'] if i['signature']=='UnconventionalTracking']
     thresholds = sum([ [cpart['threshold']]*int(cpart['multiplicity']) for cpart in cparts], [])
@@ -18,7 +18,7 @@ def TrigIsoHPtTrackTriggerHypoToolFromDict( chainDict ):
     from AthenaConfiguration.ComponentFactory import CompFactory
     tool = CompFactory.TrigIsoHPtTrackTriggerHypoTool(name)
 
-    monTool = GenericMonitoringTool("IM_MonTool"+name)
+    monTool = GenericMonitoringTool(flags, "IM_MonTool"+name)
     monTool.defineHistogram('CutCounter', type='TH1I', path='EXPERT', title="IsoHPtTrackTrigger Hypo Cut Counter;Cut Counter", xbins=8, xmin=-1.5, xmax=7.5, opt="kCumulative") 
     monTool.defineHistogram('trackPt', type='TH1F', path='EXPERT', title="IsoHPtTrackTrigger Hypo p_{T}^{track} [MeV];p_{T}^{track} [MeV];Nevents", xbins=30, xmin=0, xmax=300000) 
     monTool.defineHistogram('trackd0', type='TH1F', path='EXPERT', title="IsoHPtTrackTrigger Hypo d0^{track} ; d0^{track} ;Nevents", xbins=100, xmin=0, xmax=10)
