@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -51,11 +51,7 @@ using namespace SCT_CalibAlgs;
 namespace {
 enum Bec {ENDCAP_C = -2, BARREL = 0, ENDCAP_A = 2};
 // String names for the detector parts
-const std::string detectorNames[] = {"negativeEndcap", "Barrel", "positiveEndcap"};
-// String names for the detector parts
 const std::string shortNames[] = {"EndCapC", "Barrel", "EndCapA"};
-// Path names to become part of the histogram paths
-const std::string detectorPaths[] = {"SCTEC", "SCTB", "SCTEA"};
 
 bool areConsecutiveIntervals(const std::pair<int, int>& i1, const std::pair<int, int>& i2, const int withinLimits) {
    return i1.second <= (i2.first + withinLimits);
