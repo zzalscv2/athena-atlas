@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CaruanaSTgcClusterBuilderTool_h
@@ -42,26 +42,21 @@ namespace Muon
 
   private:
 
-    double m_chargeCut;
-    unsigned int m_maxHoleSize;
-    double m_addError;
-    double m_angularStripResolution;
+    Gaudi::Property<double> m_chargeCut{this, "ChargeCut", 0.};
+    Gaudi::Property<unsigned int> m_maxHoleSize{this, "maxHoleSize", 0};
+    Gaudi::Property<double> m_addError{this,"addError", 0.};
+    // The resolution parameters were obtained from tests with cosmic muons.
+    // These values are also used in the Digitization.
+    Gaudi::Property<double> m_positionStripResolution{this,"positionStripResolution", 0.0949};
+    Gaudi::Property<double> m_angularStripResolution{this, "angularStripResolution", 0.305};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_DetectorManagerKey {this, "DetectorManagerKey", "MuonDetectorManager", "Key of input MuonDetectorManager condition data"};
-
 
     /// private functions
     void dumpStrips( std::vector<Muon::sTgcPrepData>& stripsVect,
 		     std::vector<Muon::sTgcPrepData*>& clustersVect )const;
 
-    bool addStrip(const Muon::sTgcPrepData& strip,std::vector<std::set<unsigned int>> (&clustersStripNum)[2][4],
-                  std::vector<std::vector<Muon::sTgcPrepData>> (&clusters)[2][4])const;
-
-
   };
-
-
 }
 #endif
