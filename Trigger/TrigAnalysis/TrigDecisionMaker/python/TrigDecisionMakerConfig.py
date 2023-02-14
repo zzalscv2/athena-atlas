@@ -87,11 +87,14 @@ def Run1Run2DecisionMakerCfg(flags):
         doL2 = False
         doEF = False
 
+    L1ResultKey = "" if flags.Input.Format is Format.BS else "Lvl1Result"
+
     decMaker = CompFactory.TrigDec.TrigDecisionMaker( 'TrigDecMaker', 
                                                       doL1 = doL1,
                                                       doL2 = doL2,
                                                       doEF = doEF,
-                                                      doHLT = doHLT)
+                                                      doHLT = doHLT,
+                                                      L1ResultKey = L1ResultKey)
     acc.addEventAlgo(decMaker)
 
 

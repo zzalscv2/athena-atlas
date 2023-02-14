@@ -91,8 +91,8 @@ StatusCode TrigDecisionMaker::initialize()
   ATH_CHECK( m_bgKey.initialize() );
   ATH_CHECK( m_HLTMenuKey.initialize() );
   ATH_CHECK( m_trigDecisionKey.initialize() );
-  ATH_CHECK( m_l1ResultKey.initialize(m_doL1) );
-  ATH_CHECK( m_l1roibResultKey.initialize(m_doL1) );
+  ATH_CHECK( m_l1ResultKey.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_l1roibResultKey.initialize(m_doL1 && m_l1ResultKey.empty()) );
   ATH_CHECK( m_l2ResultKey.initialize(m_doL2) );
   ATH_CHECK( m_efResultKey.initialize(m_doEF) );
   ATH_CHECK( m_hltResultKey.initialize(m_doHLT) );
@@ -237,10 +237,19 @@ TrigDecisionMaker::ResultStatus TrigDecisionMaker::getL1Result(const LVL1CTP::Lv
   result = 0;
   if (!m_doL1) return NotRequested;
 
-  SG::ReadHandle<LVL1CTP::Lvl1Result> l1RH{m_l1ResultKey, ctx};
-  if (l1RH.isValid()) {
-    result = l1RH.cptr();
-    return OK;
+  if (!m_l1ResultKey.empty())
+  {
+    SG::ReadHandle<LVL1CTP::Lvl1Result> l1RH{m_l1ResultKey, ctx};
+    if (l1RH.isValid()) {
+      result = l1RH.cptr();
+      return OK;
+    }
+    else
+    {
+      result = nullptr;
+      ATH_MSG_WARNING( "Configured to retrieve L1 from LVL1CTP::Lvl1Result but this was not found");
+      return NotFound;
+    }
   }
 
   SG::ReadHandle<ROIB::RoIBResult> l1roibRH{m_l1roibResultKey, ctx};
