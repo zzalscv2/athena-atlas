@@ -34,7 +34,7 @@ namespace ActsTrk {
     ATH_CHECK( m_pixelClusterContainerKey.initialize(not m_prdTruth.empty() and m_usePixel) );
     ATH_CHECK( m_stripClusterContainerKey.initialize(not m_prdTruth.empty() and not m_usePixel) );
 
-    ATH_CHECK( m_evtKey.initialize() );
+    ATH_CHECK( m_EventInfoKey.initialize() );
 
     if (not m_prdTruth.empty()) {
       ATH_CHECK( m_paramEstimationTool.retrieve() );
@@ -179,7 +179,7 @@ namespace ActsTrk {
 						       { return params[6]; });
       
 
-    SG::ReadHandle<xAOD::EventInfo> eventInfo = SG::makeHandle(m_evtKey, ctx);
+    SG::ReadHandle<xAOD::EventInfo> eventInfo = SG::makeHandle(m_EventInfoKey, ctx);
     ATH_CHECK(eventInfo.isValid());
 
     auto monitor_event_number = Monitored::Scalar<long>("event_number", static_cast<long>(eventInfo->eventNumber()));
