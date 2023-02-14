@@ -6,7 +6,7 @@ from TrigOnlineSpacePointTool.TrigOnlineSpacePointToolConf import TrigL2LayerNum
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def TrigFastTrackFinderMonitoring(name, doResMon=False):
+def TrigFastTrackFinderMonitoring(flags, name, doResMon=False):
 
     def addSPHistograms(montool, name):
         if name in ['FS', 'JetFS', 'FullScan', 'fullScan', 'fullScanUTT', 'jet']:
@@ -193,7 +193,7 @@ def TrigFastTrackFinderMonitoring(name, doResMon=False):
         montool.defineHistogram('TIME_disappearingTrack', path='EXPERT',type='TH1F',title="Disappearing track reco time (ms)", xbins = 100, xmin=0.0, xmax=300.0)
 
 
-    montool = GenericMonitoringTool(HistPath = f"TrigFastTrackFinder_{name}")
+    montool = GenericMonitoringTool(flags, HistPath = f"TrigFastTrackFinder_{name}")
     addSPHistograms(montool, name)
     addDataErrorHistograms(montool)
     addTimingHistograms(montool, name)
@@ -276,7 +276,7 @@ class TrigFastTrackFinderBase(TrigFastTrackFinder):
         self.doResMon = config.doResMon
 
         # switch between Run-2/3 monitoring
-        self.MonTool = TrigFastTrackFinderMonitoring(slice_name, self.doResMon)
+        self.MonTool = TrigFastTrackFinderMonitoring(flags, slice_name, self.doResMon)
 
         # Spacepoint conversion
         from TrigOnlineSpacePointTool.TrigOnlineSpacePointToolConf import TrigSpacePointConversionTool

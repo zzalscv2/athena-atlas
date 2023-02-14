@@ -188,7 +188,7 @@ def ftfCfg(flags, roisKey, signature, signatureName):
   acc.merge(SiDetElementBoundaryLinksCondAlg_xk_SCT_Cfg(flags))
 
   from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderMonitoring
-  monTool = TrigFastTrackFinderMonitoring(name = "trigfasttrackfinder_" + signature, doResMon=False)
+  monTool = TrigFastTrackFinderMonitoring(flags, name = "trigfasttrackfinder_" + signature, doResMon=False)
 
   ftf = CompFactory.TrigFastTrackFinder( name = "trigfasttrackfinder_" + signature,
                                          LayerNumberTool          = acc.getPublicTool( "TrigL2LayerNumberTool_FTF" ),
