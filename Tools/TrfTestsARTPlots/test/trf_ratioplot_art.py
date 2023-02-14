@@ -92,6 +92,7 @@ def findallhistos(filename):
  
 def ratioplot(filenameref, filenametest, allhistos, campaignname, ratiotitle):
 
+  ks = 1.0
   f1 = TFile.Open(filenameref,"r")
   f2 = TFile.Open(filenametest,"r")
 
@@ -133,10 +134,16 @@ def ratioplot(filenameref, filenametest, allhistos, campaignname, ratiotitle):
     histoname = histoname.replace(" ", "_")
     c.Print("%s_%s.png" %(campaignname, histoname ))
 
+    # Kolmogorov-Smirnoff
+    res = h1.KolmogorovTest(h2)
+    print ("*** Kolmogorov-Smirnoff h1 vs. h2 = %s" %ks )
+    if res < ks:
+      ks = res
+
   f1.Close()
   f2.Close()
 
-  return
+  return ks
  
 if __name__ == "__main__":
   # Set ROOT batch mode
@@ -163,6 +170,8 @@ if __name__ == "__main__":
   print(allhistos)
 
   # Plot all the histograms to PNG files
-  ratioplot(args.reffile, args.testfile, allhistos, campaignname, ratiotitle)
+  res = ratioplot(args.reffile, args.testfile, allhistos, campaignname, ratiotitle)
+  if res < 1.0:
+    sys.exit(1)
 
   sys.exit(0)
