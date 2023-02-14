@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Run tests on G4AtlasFieldConfig
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 
 if __name__ == '__main__':
@@ -20,12 +20,11 @@ if __name__ == '__main__':
   flags = initConfigFlags()
   flags.Input.Files = defaultTestFiles.EVNT
   # Arbitrary configuration for Twiss Files
-  flags.Sim.TwissFileBeam1 = '3.5TeV/0090.00m/nominal/v02/beam1.tfs'
-  flags.Sim.TwissFileBeam2 = '3.5TeV/0090.00m/nominal/v02/beam2.tfs'
+  flags.Sim.TwissFileBeam1 = '4.0TeV/0090.00m/nominal/v01/beam1.tfs'
+  flags.Sim.TwissFileBeam2 = '4.0TeV/0090.00m/nominal/v01/beam2.tfs'
   flags.Sim.TwissFileBeta = 90000 # in mm
   flags.Sim.TwissFileNomReal = 'nominal'
-  flags.Sim.TwissFileVersion = 'v02'
-  flags.Beam.Energy = '3500000'
+  flags.Sim.TwissFileVersion = 'v01'
   # Finalize
   flags.lock()
 
