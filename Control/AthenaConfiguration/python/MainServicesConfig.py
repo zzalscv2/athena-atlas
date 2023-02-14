@@ -63,9 +63,7 @@ def AthenaHiveEventLoopMgrCfg(flags):
                                         NSlots = flags.Concurrency.NumConcurrentEvents)
     cfg.addService( hivesvc )
 
-    from AthenaCommon.Constants import INFO
-    arp = CompFactory.AlgResourcePool(OutputLevel = INFO,
-                                      TopAlg = ["AthMasterSeq"]) #this should enable control flow
+    arp = CompFactory.AlgResourcePool(TopAlg = ["AthMasterSeq"]) #this should enable control flow
     cfg.addService( arp )
 
     scheduler = cfg.getPrimaryAndMerge(AvalancheSchedulerSvcCfg(flags))
