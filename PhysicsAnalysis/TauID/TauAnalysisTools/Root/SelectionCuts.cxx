@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -321,6 +321,7 @@ SelectionCutJetIDWP::SelectionCutJetIDWP(TauSelectionTool* tTST)
 //______________________________________________________________________________
 void SelectionCutJetIDWP::fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const
 {
+  // FIXME: should this be extended to deepset ID?
   hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigLoose));
   hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigMedium)+2);
   hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigTight)+4);
@@ -357,6 +358,26 @@ bool SelectionCutJetIDWP::accept(const xAOD::TauJet& xTau,
     break;
   case JETIDRNNTIGHT:
     if (xTau.isTau(xAOD::TauJetParameters::JetRNNSigTight)) bPass = true;
+    break;
+  case JETIDDEEPSETVERYLOOSE:
+    static const SG::AuxElement::ConstAccessor<char> acc_deepSetVeryLoose("JetDeepSetVeryLoose");
+    if (!acc_deepSetVeryLoose.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "DeepSet VeryLoose WP not available" << endmsg;
+    else bPass = acc_deepSetVeryLoose(xTau);
+    break;
+  case JETIDDEEPSETLOOSE:
+    static const SG::AuxElement::ConstAccessor<char> acc_deepSetLoose("JetDeepSetLoose");
+    if (!acc_deepSetLoose.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "DeepSet Loose WP not available" << endmsg;
+    else bPass = acc_deepSetLoose(xTau);
+    break;
+  case JETIDDEEPSETMEDIUM:
+    static const SG::AuxElement::ConstAccessor<char> acc_deepSetMedium("JetDeepSetMedium");
+    if (!acc_deepSetMedium.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "DeepSet Medium WP not available" << endmsg;
+    else bPass = acc_deepSetMedium(xTau);
+    break;
+  case JETIDDEEPSETTIGHT:
+    static const SG::AuxElement::ConstAccessor<char> acc_deepSetTight("JetDeepSetTight");
+    if (!acc_deepSetTight.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "DeepSet Tight WP not available" << endmsg;
+    else bPass = acc_deepSetTight(xTau);
     break;
   default:
     m_tTST->msg() << MSG::WARNING << "The jet ID working point with the enum " << m_tTST->m_iJetIDWP << " is not available" << endmsg;
