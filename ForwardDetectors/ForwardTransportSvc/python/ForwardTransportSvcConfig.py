@@ -5,14 +5,16 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from ForwardRegionProperties.ForwardRegionPropertiesConfig import resolveTwissBeamFilePath, buildTwissFilePath
 
 def ForwardTransportSvcCfg(flags, name="ForwardTransportSvc", **kwargs):
-   # Settings of optics to be used
-    twiss_beam1 = resolveTwissBeamFilePath(flags.Sim.TwissFileBeam1)
-    twiss_beam2 = resolveTwissBeamFilePath(flags.Sim.TwissFileBeam2)
+    from AthenaCommon.Logging import logging
+    msg = logging.getLogger("ForwardTransportSvcCfg")
+    # Settings of optics to be used
+    twiss_beam1 = resolveTwissBeamFilePath(flags.Sim.TwissFileBeam1, msg)
+    twiss_beam2 = resolveTwissBeamFilePath(flags.Sim.TwissFileBeam2, msg)
     if twiss_beam1 is None or twiss_beam2 is None:
-        print("ForwardTransportSvcCfg: Attempting to build TwissFileBeam paths manually")
+        msg.info("Attempting to build TwissFileBeam paths manually")
         # Getting paths to the twiss files, momentum calculation; you can switch to local files
-        twiss_beam1 = buildTwissFilePath(flags, 'beam1.tfs')
-        twiss_beam2 = buildTwissFilePath(flags, 'beam2.tfs')
+        twiss_beam1 = buildTwissFilePath(flags, msg, 'beam1.tfs')
+        twiss_beam2 = buildTwissFilePath(flags, msg, 'beam2.tfs')
 
     # properties of the field set according to the optics settings above
     kwargs.setdefault("TwissFile1", twiss_beam1)
@@ -25,12 +27,11 @@ def ForwardTransportSvcCfg(flags, name="ForwardTransportSvc", **kwargs):
         return ALFAForwardTransportSvcCfg(name, **kwargs)
     if flags.Detector.GeometryZDC:
         return ZDCForwardTransportSvcCfg (name, **kwargs)
-    print ("ForwardTransportSvcCfg: WARNING ALFA and ZDC are deactivated.")
+    msg.warning("ALFA and ZDC are deactivated.")
     return ComponentAccumulator()
 
 
 def ALFAForwardTransportSvcCfg(name="ForwardTransportSvc", **kwargs):
-    print ("ALFAForwardTransportSvc")
     result = ComponentAccumulator()
     kwargs.setdefault("EndMarker",     236.888)
     kwargs.setdefault("TransportFlag", 1)
@@ -41,7 +42,6 @@ def ALFAForwardTransportSvcCfg(name="ForwardTransportSvc", **kwargs):
 
 
 def ZDCForwardTransportSvcCfg(name="ForwardTransportSvc", **kwargs):
-    print ("ZDCForwardTransportSvc")
     result = ComponentAccumulator()
     kwargs.setdefault("EndMarker",     141.580)
     kwargs.setdefault("TransportFlag", 0)
