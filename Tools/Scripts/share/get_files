@@ -34,6 +34,7 @@ Usage: get_files [options] [file_list] [options] [file_list] ...
   -data      : get data files from DATAPATH
   -scripts   : get scripts from PATH
   -xmls      : get XML files form XMLPATH
+  -python    : get python files from PYTHONPATH
   -copy      : switch to copying files [default]
   -symlink   : switch to symlinking files
   -keep      : keep existing files, do not overwrite [default]
@@ -64,7 +65,7 @@ get_one_file() {
   # Lookup one file according to current options.
   file=$1
   if [ -z "$options" ]; then
-    options="jo data scripts xmls"
+    options="jo data scripts xmls python"
     echo "Warning: get_files without '-jo|-data|-scripts|-xmls' is SLOW !"
   fi
   # echo "get_one_file: file $file; options=$options"
@@ -73,6 +74,8 @@ get_one_file() {
   for opt in $options; do
     if [ "$opt" == "jo" ]; then
       path_opt="./ ${JOBOPTSEARCHPATH//:/ }"
+    elif [ "$opt" == "python" ]; then
+      path_opt="./ ${PYTHONPATH//:/ }"
     elif [ "$opt" == "data" ]; then
       path_opt=${DATAPATH//:/ }
     elif [ "$opt" == "scripts" ]; then
@@ -183,6 +186,7 @@ for f in $*; do
     -data)    options=data;;
     -scripts) options=scripts;;
     -xmls)    options=xmls;;
+    -python)  options=python;;
     -copy)    do_copy=yes; copycmd=${basic_copycmd};;
     -symlink) do_copy=;    copycmd=${basic_linkcmd};;
     -keep)    do_keep=yes;;
