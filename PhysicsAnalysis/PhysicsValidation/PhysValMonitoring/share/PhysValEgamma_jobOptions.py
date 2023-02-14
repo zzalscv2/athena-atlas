@@ -8,6 +8,7 @@ tool1.PhotonContainerName = "Photons"
 tool1.ElectronContainerName = "Electrons"
 tool1.ElectronContainerFrwdName = "ForwardElectrons"
 tool1.TruthParticleContainerName = "TruthParticles"
+tool1.LRTElectronContainerName = "LRTElectrons"
 
 tool1.isMC = rec.doTruth()
 from MCTruthClassifier.MCTruthClassifierBase import MCTruthClassifierCalo

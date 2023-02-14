@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file EGammaPhysValMonitoringConfig.py
@@ -18,9 +18,15 @@ def EgammaPhysValMonitoringToolCfg(flags, **kwargs):
     kwargs.setdefault("DetailLevel", 10)
     kwargs.setdefault("isMC", flags.Input.isMC)
 
-    from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCaloTruthMatchCfg
-    kwargs.setdefault("MCTruthClassifier", acc.popToolsAndMerge(MCTruthClassifierCaloTruthMatchCfg(flags)))
+    if "MCTruthClassifier" not in kwargs:
+        from MCTruthClassifier.MCTruthClassifierConfig import (
+            MCTruthClassifierCaloTruthMatchCfg)
+        kwargs.setdefault("MCTruthClassifier", acc.popToolsAndMerge(
+            MCTruthClassifierCaloTruthMatchCfg(flags)))
 
-    tool = CompFactory.EgammaPhysValMonitoring.EgammaPhysValMonitoringTool(**kwargs)
-    acc.setPrivateTools(tool)
+    if flags.Tracking.doLargeD0:
+        kwargs.setdefault("LRTElectronContainerName", "LRTElectrons")
+
+    acc.setPrivateTools(
+        CompFactory.EgammaPhysValMonitoring.EgammaPhysValMonitoringTool(**kwargs))
     return acc

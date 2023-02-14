@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // EgammaPhysValMonitoringTool.h 
@@ -94,7 +94,7 @@ class EgammaPhysValMonitoringTool
   SG::ReadHandleKey<xAOD::ElectronContainer> m_electronContainerKey {this,
       "ElectronContainerName", "Electrons", "Input electron container"};
   SG::ReadHandleKey<xAOD::ElectronContainer> m_lrtelectronContainerKey {this,
-      "LRTElectronContainerName", "LRTElectrons", "Input LRT electron container"};
+      "LRTElectronContainerName", "", "Input LRT electron container"};
   SG::ReadHandleKey<xAOD::ElectronContainer> m_electronContainerFrwdKey {this,
       "ElectronContainerFrwdName", "ForwardElectrons", "Input forward electron container"};
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleContainerKey {this,

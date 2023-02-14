@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // EgammaPhysValMonitoringTool.cxx 
@@ -71,7 +71,7 @@ StatusCode EgammaPhysValMonitoringTool::initialize()
   ATH_CHECK(m_EventInfoContainerKey.initialize());
   ATH_CHECK(m_photonContainerKey.initialize());
   ATH_CHECK(m_electronContainerKey.initialize());
-  ATH_CHECK(m_lrtelectronContainerKey.initialize());
+  ATH_CHECK(m_lrtelectronContainerKey.initialize(!m_lrtelectronContainerKey.empty()));
   ATH_CHECK(m_electronContainerFrwdKey.initialize());
   ATH_CHECK(m_truthParticleContainerKey.initialize(m_isMC));
   ATH_CHECK(m_egammaTruthContainerKey.initialize(m_isMC));
@@ -349,10 +349,12 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
     }
 
     //---------LRTElectrons----------------------
-    if (!fillLRTElecHistograms(truthParticles.ptr(), eventInfo.ptr())) {
-      ATH_MSG_ERROR("Filling lrt elecectron hists  failed " << name()
-                                                             << "...");
-      return StatusCode::FAILURE;
+    if(!m_lrtelectronContainerKey.empty()){
+      if (!fillLRTElecHistograms(truthParticles.ptr(), eventInfo.ptr())) {
+	ATH_MSG_ERROR("Filling lrt elecectron hists  failed " << name()
+		      << "...");
+	return StatusCode::FAILURE;
+      }
     }
 
     //---------Frwd Electrons----------------------
