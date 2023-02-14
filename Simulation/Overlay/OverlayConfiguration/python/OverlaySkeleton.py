@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
@@ -7,6 +7,10 @@ from AthenaConfiguration.Enums import ProductionStep
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 from SimuJobTransforms.CommonSimulationSteering import specialConfigPreInclude, specialConfigPostInclude
+
+# temporarily force no global config flags
+from AthenaConfiguration import AllConfigFlags
+del AllConfigFlags.ConfigFlags
 
 
 def setOverlayInputFiles(runArgs, flags, log):
