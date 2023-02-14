@@ -42,12 +42,12 @@ namespace egammaMonitoring {
                  p.second->GetXaxis()->GetNbins(),
                  p.second->GetXaxis()->GetXmin(),
                  p.second->GetXaxis()->GetXmax());
+      hist68->SetStats(0);
 
       for (int bin = 1; bin <= p.second->GetXaxis()->GetNbins(); bin++) {
         TH1D *proj = p.second->ProjectionY(Form("%s_%d_projection", p.first.c_str(), bin), bin, bin+1);
 
         double s68 = binned::s68(proj);
-        hist68->SetStats(0);
         hist68->SetBinContent(bin, s68);
 
       }
