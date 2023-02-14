@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,21 +11,23 @@
 #include "xAODTracking/Vertex.h"
 #include "TauAnalysisTools/ITauTruthMatchingTool.h"
 #include "xAODTau/TauJetContainer.h"
+#include "StoreGate/ReadHandle.h"
 
 namespace DerivationFramework {
 
   TauTruthMatchingWrapper::TauTruthMatchingWrapper(const std::string& t, const std::string& n, const IInterface* p) : 
     AthAlgTool(t,n,p),
-    m_tauContainerName("TauJets"),
+    m_tauKey("TauJets"),
     m_tTauTruthMatchingTool("TauAnalysisTools::TauTruthMatchingTool")
   {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
-    declareProperty("TauContainerName", m_tauContainerName);
+    declareProperty("TauContainerName", m_tauKey);
     declareProperty("TauTruthMatchingTool", m_tTauTruthMatchingTool);
   }
 
   StatusCode TauTruthMatchingWrapper::initialize()
   {
+    ATH_CHECK(m_tauKey.initialize());
     CHECK( m_tTauTruthMatchingTool.retrieve() );
     return StatusCode::SUCCESS;
   }
@@ -37,13 +39,17 @@ namespace DerivationFramework {
 
   StatusCode TauTruthMatchingWrapper::addBranches() const
   {
-    // retrieve container
-    const xAOD::TauJetContainer* xTauContainer = evtStore()->retrieve< const xAOD::TauJetContainer >( m_tauContainerName );
-    if( ! xTauContainer ) {
-      ATH_MSG_ERROR ("Couldn't retrieve tau container with key: " << m_tauContainerName );
-      return StatusCode::FAILURE;
+    // Event context
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
+    // Read handle
+    SG::ReadHandle<xAOD::TauJetContainer> xTauContainer(m_tauKey,ctx);
+    if (!xTauContainer.isValid()) {
+        ATH_MSG_ERROR("Couldn't retrieve TauJetContainer with name " << m_tauKey);
+        return StatusCode::FAILURE;
     }
 
+    // Loop over taus
     std::unique_ptr<TauAnalysisTools::ITauTruthMatchingTool::ITruthTausEvent>
       truthTausEvent = m_tTauTruthMatchingTool->getEvent();
     for(auto xTau : *xTauContainer)
