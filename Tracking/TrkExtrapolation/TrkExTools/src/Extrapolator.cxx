@@ -229,9 +229,8 @@ StatusCode
 Trk::Extrapolator::initialize()
 {
 
-  // cppcheck-suppress publicAllocationError; false positive
-  m_referenceSurface = new Trk::PlaneSurface(Amg::Transform3D(Trk::s_idTransform), 0., 0.);
-  m_referenceSurface->setOwner(Trk::TGOwn);
+  m_referenceSurface = std::make_unique<Trk::PlaneSurface>(Amg::Transform3D(Trk::s_idTransform), 0., 0.);
+  m_referenceSurface->setOwner(Trk::userOwn); //this is owned by an instance of this class
 
   m_fieldProperties = m_fastField ? Trk::MagneticFieldProperties(Trk::FastField)
                                   : Trk::MagneticFieldProperties(Trk::FullField);
@@ -441,7 +440,6 @@ Trk::Extrapolator::finalize()
       ATH_MSG_INFO(" ------------------------------------------------------------------");
     }
   }
-  delete m_referenceSurface;
 
   if (!Trk::Cache::s_reported) {
     Trk::Cache::s_reported = true;
@@ -2715,7 +2713,7 @@ Trk::Extrapolator::extrapolateImpl(const EventContext& ctx,
 
   // ----------------- this is the exit of the extrapolateBlindly() call
   // --------------------------------------
-  if ((&sf) == (m_referenceSurface)) {
+  if ((&sf) == (m_referenceSurface.get())) {
     return {};
   }
 
@@ -4267,7 +4265,7 @@ Trk::Extrapolator::initializeNavigation(const EventContext& ctx,
   // only do it if sf is not the reference Surface
   ATH_MSG_VERBOSE("  [I] Starting with destination Volume search: -----------------------------");
 
-  if ((&sf) != (m_referenceSurface)) {
+  if ((&sf) != (m_referenceSurface.get())) {
     // (1) - TRY the association method
     destVolume = (sf.associatedLayer()) ? sf.associatedLayer()->enclosingTrackingVolume() : nullptr;
     // for the summary output
