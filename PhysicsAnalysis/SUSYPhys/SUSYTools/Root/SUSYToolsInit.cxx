@@ -203,6 +203,11 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   if (m_slices["fjet"]) {
     //same for fat groomed jets
     fatjetcoll = m_fatJets;
+
+    if(fatjetcoll == "AnalysisLargeRJets") {
+      ATH_MSG_DEBUG("Fall back to calibration for AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets, original name for AnalysisLargeRJets");
+      fatjetcoll = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets";
+    }
     if (fatjetcoll.size()>3)fatjetcoll.erase(fatjetcoll.size()-4,4); 
     if (!m_jetFatCalibTool.isUserConfigured() && !m_fatJets.empty()) {
       toolName = "JetFatCalibTool_" + m_fatJets;
@@ -228,7 +233,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     // Initialise Boson taggers: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BoostedJetTaggingRecommendationFullRun2#Higgs_taggers
     if (!m_WTaggerTool.isUserConfigured() && !m_WtagConfig.empty()) {
       m_WTaggerTool.setTypeAndName("SmoothedWZTagger/WTagger");
-      ATH_CHECK( m_WTaggerTool.setProperty("ContainerName", fatjetcoll) );
+      ATH_CHECK( m_WTaggerTool.setProperty("ContainerName", m_fatJets) );
       ATH_CHECK( m_WTaggerTool.setProperty("ConfigFile", m_WtagConfig) );
       ATH_CHECK( m_WTaggerTool.setProperty("CalibArea", m_WZTaggerCalibArea) );
       ATH_CHECK( m_WTaggerTool.setProperty("IsMC",!isData()));
@@ -240,7 +245,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
     if (!m_ZTaggerTool.isUserConfigured() && !m_ZtagConfig.empty()) {
       m_ZTaggerTool.setTypeAndName("SmoothedWZTagger/ZTagger");
-      ATH_CHECK( m_ZTaggerTool.setProperty("ContainerName", fatjetcoll) );
+      ATH_CHECK( m_ZTaggerTool.setProperty("ContainerName", m_fatJets) );
       ATH_CHECK( m_ZTaggerTool.setProperty("ConfigFile", m_ZtagConfig) );
       ATH_CHECK( m_ZTaggerTool.setProperty("CalibArea", m_WZTaggerCalibArea) );
       ATH_CHECK( m_ZTaggerTool.setProperty("IsMC",!isData()));
@@ -252,7 +257,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
     if (!m_TopTaggerTool.isUserConfigured() && !m_ToptagConfig.empty()) {
       m_TopTaggerTool.setTypeAndName("JSSWTopTaggerDNN/TopTagger");
-      ATH_CHECK( m_TopTaggerTool.setProperty("ContainerName", fatjetcoll) );
+      ATH_CHECK( m_TopTaggerTool.setProperty("ContainerName", m_fatJets) );
       ATH_CHECK( m_TopTaggerTool.setProperty("ConfigFile", m_ToptagConfig) );
       ATH_CHECK( m_TopTaggerTool.setProperty("CalibArea", m_TopTaggerCalibArea) );
       ATH_CHECK( m_TopTaggerTool.setProperty("IsMC",!isData()));
@@ -271,7 +276,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
     if (!m_jetTruthLabelingTool.isUserConfigured()) {
       m_jetTruthLabelingTool.setTypeAndName("JetTruthLabelingTool/ST_JetTruthLabelingTool");
-      ATH_CHECK( m_jetTruthLabelingTool.setProperty("RecoJetContainer", fatjetcoll) );
+      ATH_CHECK( m_jetTruthLabelingTool.setProperty("RecoJetContainer", m_fatJets) );
       ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthLabelName", m_JetTruthLabelName) );
       ATH_CHECK( m_jetTruthLabelingTool.setProperty("UseTRUTH3", m_useTRUTH3) );                 // Set this to false only if you have the FULL !TruthParticles container in your input file
       ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthParticleContainerName", "TruthParticles") );
@@ -647,9 +652,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       m_muonEfficiencyBMHighPtSFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("WorkingPoint", "BadMuonVeto_HighPt") );
       if (m_isRun3) {
-        ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("CalibrationRelease", "220817_Preliminary_r22run3") ); //BadMuonVeto_HighPt currently not available for 230123_Preliminary_r22run3
         ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("LowPtThreshold", 10) ); //very preliminary Run3 rec! to be updated
-      } 
+      }
+      ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("CalibrationRelease", m_isRun3? "220817_Preliminary_r22run3":"220725_Preliminary_r22run2") ); //BadMuonVeto_HighPt currently not available for 230123_Preliminary_r22run3
       ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.retrieve() );
     } else  ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.retrieve() );
@@ -730,7 +735,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       m_muonHighPtIsolationSFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       // Use for the low-pt WP a dedicated set of isolation scale-factors having an extra uncertainty in place
       ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("WorkingPoint", tmp_muIsoHighPt_WP + "Iso") );
-      if (m_isRun3) ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("CalibrationRelease", "220817_Preliminary_r22run3") );
+      ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "230123_Preliminary_r22run3":"220725_Preliminary_r22run2") );
       ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonHighPtIsolationSFTool.retrieve() );
   

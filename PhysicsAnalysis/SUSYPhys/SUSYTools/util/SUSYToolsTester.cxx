@@ -187,7 +187,7 @@ int main( int argc, char* argv[] ) {
     if (x.first.find("AntiKtVR30Rmax4Rmin02TrackJets")!=std::string::npos)           hasTrkJets = true;
     if (x.first.find("AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets")!=std::string::npos) hasFatJets = true;
     if (x.first.find("AnalysisElectrons")!=std::string::npos)                        isPHYSLite = true;
-
+    if (isPHYSLite && x.first.find("AnalysisLargeRJets")!=std::string::npos)         hasFatJets = true;
   }
   if (debug>0) {
     ANA_MSG_INFO("Checking file contents (containers):");
@@ -499,7 +499,6 @@ int main( int argc, char* argv[] ) {
       // No special jets when running on PHYSLITE
       if (isPHYSLite) {
          hasTrkJets = false;
-         hasFatJets = false;
       }
     }
 
@@ -656,7 +655,7 @@ int main( int argc, char* argv[] ) {
     // FatJets
     const xAOD::JetContainer* FJC = nullptr;
     if(slices["fjet"] && hasFatJets) { // stream.Contains("SUSY10") || stream.Contains("PHYSVAL")){
-      ANA_MSG_DEBUG( "Nominal Large R jet step" );
+      ANA_MSG_DEBUG( "Nominal fat jet step, collection: " <<  FatJetCollection );
       if( event.retrieve(FJC, FatJetCollection).isSuccess() ){
         ANA_CHECK( objTool.GetFatJets(fatjets_nominal, fatjets_nominal_aux, true, "", true) );
         ANA_MSG_DEBUG( fatjets_nominal->size() << " large R jets");
