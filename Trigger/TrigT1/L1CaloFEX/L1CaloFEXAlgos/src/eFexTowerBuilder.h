@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -54,15 +54,19 @@ class eFexTowerBuilder : public AthReentrantAlgorithm
   virtual StatusCode execute(const EventContext& ctx) const;
 
  private:
+    mutable std::mutex m_fillMapMutex ATLAS_THREAD_SAFE;
+    mutable std::map<unsigned long long, std::pair<std::pair<int,int>,std::pair<int,int>>> m_scMap ATLAS_THREAD_SAFE; // maps from scid -> (efex eta/phi index pair, slot pair)
 
-  SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_ddmKey{this,"CaloSuperCellDetDescrManager","CaloSuperCellDetDescrManager",""};
+    StatusCode fillTowers(const EventContext& ctx) const;
+    StatusCode fillMap(const EventContext& ctx) const;
+
+    SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_ddmKey{this,"CaloSuperCellDetDescrManager","CaloSuperCellDetDescrManager",""};
 
   SG::ReadHandleKey<CaloCellContainer> m_scellKey { this, "CaloCellContainerReadKey", "SCell", "Read handle key for the supercells"};
   SG::ReadHandleKey<xAOD::TriggerTowerContainer> m_ttKey { this, "TriggerTowerContainerReadKey", "xAODTriggerTowers", "Read handle key for the triggerTowers"};
   SG::WriteHandleKey<xAOD::eFexTowerContainer> m_outKey {this, "eFexContainerWriteKey", "L1_eFexEmulatedTowers", "Name of the output container"};
 
-    // Used during 'mapping verification'
-    Gaudi::Property<bool> m_mappingVerificationMode {this, "MappingVerificationMode", false, "if true will compare logical mapping to static mapping"};
+    Gaudi::Property<std::string> m_mappingFile {this, "MappingFile", "L1CaloFEXAlgos/scToEfexTowers.root", "PathResolver location to mapping file"};
     ToolHandle<IeFEXSuperCellTowerIdProvider> m_eFEXSuperCellTowerIdProviderTool {this, "eFEXSuperCellTowerIdProviderTool", "LVL1::eFEXSuperCellTowerIdProvider", "Tool that provides tower-FOGA mapping"};
 
 };
