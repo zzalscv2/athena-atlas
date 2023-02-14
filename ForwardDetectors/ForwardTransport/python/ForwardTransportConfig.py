@@ -5,7 +5,10 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def ForwardTransportModelCfg(flags, name="ForwardTransportModel", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("ForwardTransportSvcName", "ForwardTransportSvc")
+    from ForwardTransportSvc.ForwardTransportSvcConfig import ForwardTransportSvcCfg
+    serviceName ="ForwardTransportSvc"
+    result.merge(ForwardTransportSvcCfg(flags, serviceName, **kwargs))
+    kwargs.setdefault("ForwardTransportSvcName", serviceName) #Not a ServiceHandle
     kwargs.setdefault("RegionNames" , ["FWDBeamLine"] )
     result.setPrivateTools(CompFactory.ForwardTransportModelTool(name, **kwargs))
     return result

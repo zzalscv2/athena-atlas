@@ -4,6 +4,7 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
 from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, \
     LArParameterization, SimulationFlavour, TruthStrategy, VertexSource
+from AthenaCommon.SystemOfUnits import m
 
 #todo? add in the explanatory text from previous implementation
 
@@ -61,10 +62,10 @@ def createSimConfigFlags():
     # Forward region
     scf.addFlag("Sim.TwissFileBeam1", False)
     scf.addFlag("Sim.TwissFileBeam2", False)
-    scf.addFlag("Sim.TwissEnergy", 8000000.)
-    scf.addFlag("Sim.TwissFileBeta", 550.)
-    scf.addFlag("Sim.TwissFileNomReal", False)  # "nominal", "real" / default to one of these?!
-    scf.addFlag("Sim.TwissFileVersion", "v01")
+    scf.addFlag("Sim.TwissEnergy", lambda prevFlags : float(prevFlags.Beam.Energy)) # energy of each beam
+    scf.addFlag("Sim.TwissFileBeta", 90.*m)
+    scf.addFlag("Sim.TwissFileNomReal", 'nominal')  # "nominal", "real" / default to one of these?!
+    scf.addFlag("Sim.TwissFileVersion", "v02")
 
     # G4AtlasAlg
     scf.addFlag("Sim.ReleaseGeoModel", False)

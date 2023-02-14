@@ -60,7 +60,7 @@ AtlasG4_tf.py \
 
 rc2=$?
 mv log.AtlasG4Tf log.AtlasG4Tf_CG
-echo  "art-result: $rc simOLD"
+echo  "art-result: $rc2 simOLD"
 if [ $status -eq 0 ]
 then
     status=$rc2

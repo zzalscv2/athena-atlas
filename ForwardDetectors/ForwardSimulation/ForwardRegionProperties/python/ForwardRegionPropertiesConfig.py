@@ -19,10 +19,10 @@ def resolveTwissBeamFilePath(twiss_beam):
 
 
 def buildTwissFilePath(flags, filename, twiss_path=None):
-    twiss_energy = '%1.1fTeV'%(float(flags.Beam.Energy)*0.000001) # flags.Sim.TwissEnergy possibly obsolete?
+    twiss_energy = '%1.1fTeV'%(float(flags.Sim.TwissEnergy)*0.000001) # flags.Sim.TwissEnergy possibly obsolete?
     twiss_beta = '%07.2fm'%(0.001*flags.Sim.TwissFileBeta) # assumes flags.Sim.TwissFileBeta is in mm
     if not (flags.Sim.TwissFileNomReal and flags.Sim.TwissFileVersion):
-        print ("ForwardRegionPropertiesCfg: ERROR Need to either provide file names or set file name and file version flags.")
+        print (f"ForwardRegionPropertiesCfg: ERROR Need to either provide file names or set file name (currently {filename}) and file version flags (currently flags.Sim.TwissFileNomReal = {flags.Sim.TwissFileNomReal} and flags.Sim.TwissFileVersion = {flags.Sim.TwissFileVersion}.")
         raise Exception('Not enough information to locate Twiss files. Need to either provide file names or set file name and file version flags.')
     twiss_nomreal = flags.Sim.TwissFileNomReal
     twiss_version = flags.Sim.TwissFileVersion
@@ -33,7 +33,7 @@ def buildTwissFilePath(flags, filename, twiss_path=None):
         print("buildTwissFilePath: WARNING TwissFilePATH environment variable is empty.")
     twiss_beam = os.path.join(twiss_path, twiss_energy, twiss_beta, twiss_nomreal, twiss_version, filename)
     if not os.access(twiss_beam,os.R_OK):
-        raise Exception('Failed to find %s at %s'%(filename, twiss_beam))
+        raise Exception(f'Failed to find {filename} at {twiss_beam}')
     return twiss_beam
 
 
@@ -52,14 +52,14 @@ def ForwardRegionPropertiesCfg(flags, name="ForwardRegionProperties", **kwargs):
         twiss_beam1 = buildTwissFilePath(flags, 'beam1.tfs')
         twiss_beam2 = buildTwissFilePath(flags, 'beam2.tfs')
         import re,math
-        twiss_energy = '%1.1fTeV'%(float(flags.Beam.Energy)*0.000001) # flags.Sim.TwissEnergy possibly obsolete?
+        twiss_energy = '%1.1fTeV'%(float(flags.Sim.TwissEnergy)*0.000001)
         twiss_momentum =  math.sqrt(float(re.findall("\\d+.\\d+", twiss_energy)[0])**2 - (0.938e-3)**2)*1e3
     else:
         # Have to sort out twiss momentum based on file name
         tmp = twiss_beam1.split('TeV')[0]
         tmp_spot = len(tmp)
-        if flags.Beam.Energy:
-            twiss_energy = '%1.1fTeV'%(float(flags.Beam.Energy)*0.000001)
+        if flags.Sim.TwissEnergy:
+            twiss_energy = '%1.1fTeV'%(float(flags.Sim.TwissEnergy)*0.000001)
         else:
             while True:
                 try:

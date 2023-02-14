@@ -17,6 +17,9 @@ def fillAtlasMetadata(flags, dbFiller):
             if "GenerationConfiguration" in flag:
                 # This flag is only temporarily defined in the SimConfigFlags module
                 continue
+            if "Twiss" in flag and not flags.Detector.GeometryForward:
+                # The various Twiss flags should only be written out when Forward Detector simulation is enabled
+                continue
             key = flag.split(".")[-1] #use final part of flag as the key
             value = flags._get(flag)
             if isinstance(value, FlagEnum):
