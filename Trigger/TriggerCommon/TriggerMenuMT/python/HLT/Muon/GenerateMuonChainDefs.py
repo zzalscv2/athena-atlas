@@ -12,7 +12,7 @@ from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
 from .MuonChainConfiguration import MuonChainConfiguration
 
 
-def generateChainConfigs(flags, chainDict):
+def generateChainConfigs(flags, chainDict, perSig_lengthOfChainConfigs):
     
     listOfChainDicts = splitChainDict(chainDict)
     listOfChainDefs=[]
@@ -25,10 +25,10 @@ def generateChainConfigs(flags, chainDict):
         
 
     if len(listOfChainDefs)>1:
-        theChainDef = mergeChainDefs(listOfChainDefs, chainDict)
+        theChainDef, perSig_lengthOfChainConfigs = mergeChainDefs(listOfChainDefs, chainDict, perSig_lengthOfChainConfigs)
     else:
         theChainDef = listOfChainDefs[0]
 
-    return theChainDef
+    return theChainDef, perSig_lengthOfChainConfigs
 
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 import numpy as np
 from collections import OrderedDict
 from AthenaCommon.Logging import logging
@@ -14,11 +14,11 @@ log = logging.getLogger( __name__ )
 # chains will run in! 
 # have to use OrderedDict because ordering is not preserved in a standard dictionary!
 the_signature_grouping = OrderedDict([
-    ('Electron', 'Egamma'),
-    ('Photon' , 'Egamma'),
-    ('Muon' , 'Muon'),
-    ('Bphysics', 'Muon'),
-    ('Tau','Tau'),
+    ('Electron', 'AllTag'),
+    ('Photon' , 'AllTag'),
+    ('Muon' , 'AllTag'),
+    ('Bphysics', 'AllTag'),
+    ('Tau','AllTag'),
     ('Jet','JetMET'),
     ('MET','JetMET'),
     ('UnconventionalTracking','JetMET'),
@@ -26,13 +26,13 @@ the_signature_grouping = OrderedDict([
     ('MinBias', 'MinBias'),
     ('Beamspot', 'Beamspot'),
     ('MuonnoL1', 'MuonnoL1'),
-    ('Electronprobe', 'EgammaProbe'),
-    ('Photonprobe' , 'EgammaProbe'),
-    ('Tauprobe', 'TauProbe'),
-    ('Muonprobe' , 'MuonProbe'),
+    ('Electronprobe', 'AllProbe'),
+    ('Photonprobe' , 'AllProbe'),
+    ('Tauprobe', 'AllProbe'),
+    ('Muonprobe' , 'AllProbe'),
     ('HeavyIon' , 'HeavyIon'),
-    ])
-    
+])
+
 
 def get_alignment_group_ordering():
     seen = set()

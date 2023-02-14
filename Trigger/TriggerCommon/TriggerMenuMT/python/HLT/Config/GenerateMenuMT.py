@@ -352,7 +352,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
 
         # Loop over all chainDicts and send them off to their respective assembly code
         listOfChainConfigs = []
-        tmp_lengthOfChainConfigs = []
+        perSig_lengthOfChainConfigs = []
 
         for chainPartDict in chainDicts:
             chainPartConfig = None
@@ -367,7 +367,12 @@ class GenerateMenuMT(object, metaclass=Singleton):
             if currentSig in self.availableSignatures:
                 try:
                     log.debug("[__generateChainConfigs] Trying to get chain config for %s", currentSig)
-                    chainPartConfig = self.chainDefModule[currentSig].generateChainConfigs(flags, chainPartDict)
+                    if currentSig in ['Electron', 'Photon', 'Muon', 'Tau', 'Bphysics'] :
+                        chainPartConfig, perSig_lengthOfChainConfigs = self.chainDefModule[currentSig].generateChainConfigs(flags, chainPartDict, perSig_lengthOfChainConfigs)
+                    else:
+                        chainPartConfig = self.chainDefModule[currentSig].generateChainConfigs(flags, chainPartDict)
+                        if currentSig == 'Test' and isinstance(chainPartConfig, tuple):
+                            chainPartConfig = chainPartConfig[0]
                 except Exception:
                     log.error('[__generateChainConfigs] Problems creating ChainDef for chain %s ', chainName)
                     log.error('[__generateChainConfigs] I am in chain part\n %s ', chainPartDict)
@@ -386,18 +391,24 @@ class GenerateMenuMT(object, metaclass=Singleton):
                 log.warning(str(NoCAmigration("[__generateChainConfigs] Chain {0} removed because is incomplete".format(chainPartDict['chainName'])) ))       
             else:
                 listOfChainConfigs.append(chainPartConfig)
-                tmp_lengthOfChainConfigs.append((chainPartConfig.nSteps,chainPartConfig.alignmentGroups))
-
+                perSig_lengthOfChainConfigs.append((chainPartConfig.nSteps,chainPartConfig.alignmentGroups))
+                
         # this will be a list of lists for inter-sig combined chains and a list with one 
         # multi-element list for intra-sig combined chains
         # here, we flatten it accordingly (works for both cases!)
         lengthOfChainConfigs = []
-        for nSteps, aGrps in tmp_lengthOfChainConfigs:
-            if len(nSteps) != len(aGrps):
-                log.error("Chain part has %s steps and %s alignment groups - these don't match!",nSteps,aGrps)
-            else:
-                for a,b in zip(nSteps,aGrps):
-                    lengthOfChainConfigs.append((a,b))
+        if isComponentAccumulatorCfg() and \
+           (chainPartConfig is None or (any(["_MissingCA" in step.name for step in chainPartConfig.steps]) \
+                                        and "_MissingCA" not in chainPartConfig.steps[-1].name )):      
+            # if a MissingCA step exist and it's not the last one, do not build the chain because it's incomplete              
+            log.warning(str(NoCAmigration("[__generateChainConfigs] Chain {0} removed because is incomplete".format(chainPartDict['chainName'])) ))       
+        else:
+            for nSteps, aGrps in perSig_lengthOfChainConfigs:
+                if len(nSteps) != len(aGrps):
+                    log.error("Chain part has %s steps and %s alignment groups - these don't match!",nSteps,aGrps)
+                else:
+                    for a,b in zip(nSteps,aGrps):
+                        lengthOfChainConfigs.append((a,b))
             
         ## if log.isEnabledFor(logging.DEBUG):
         ##     import pprint
@@ -414,7 +425,14 @@ class GenerateMenuMT(object, metaclass=Singleton):
             else:
                 if len(listOfChainConfigs)>1:
                     log.debug("Merging strategy from dictionary: %s", mainChainDict["mergingStrategy"])
-                    theChainConfig = mergeChainDefs(listOfChainConfigs, mainChainDict)
+                    theChainConfig, perSig_lengthOfChainConfigs = mergeChainDefs(listOfChainConfigs, mainChainDict, perSig_lengthOfChainConfigs)
+                    lengthOfChainConfigs = [] 
+                    for nSteps, aGrps in perSig_lengthOfChainConfigs:
+                        if len(nSteps) != len(aGrps):
+                            log.error("Chain part has %s steps and %s alignment groups - these don't match!",nSteps,aGrps)
+                        else:
+                            for a,b in zip(nSteps,aGrps):
+                                lengthOfChainConfigs.append((a,b))
                 else:
                     theChainConfig = listOfChainConfigs[0]
                 
