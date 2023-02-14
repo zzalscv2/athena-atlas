@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ##############################################################
 # Modifiers.py
@@ -378,11 +378,10 @@ class enableALFAMon(_modifier):
     turn on ALFA monitoring in the HLT
     """
     def postSetup(self, flags):
-        from AthenaCommon.Include import include, IncludeError
-        try:
-            include("TrigOnlineMonitor/TrigALFAROBMonitor.py")
-        except IncludeError:
-            log.error('No ALFA ROB monitoring available.')
+        from TrigOnlineMonitor.TrigOnlineMonitorConfig import TrigALFAROBMonitor
+        from AthenaCommon.AlgSequence import AlgSequence
+        topSequence = AlgSequence()
+        topSequence += TrigALFAROBMonitor(flags)
 
 
 class nameAuditors(_modifier):
