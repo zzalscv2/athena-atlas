@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonStauRecoTool.h"
@@ -60,7 +60,7 @@ namespace MuonCombined {
         ATH_CHECK(m_insideOutRecoTool.retrieve());
         ATH_CHECK(m_updator.retrieve());
         ATH_CHECK(m_calibrationDbTool.retrieve());
-        ATH_CHECK(m_houghDataPerSectorVecKey.initialize());
+        ATH_CHECK(m_houghDataPerSectorVecKey.initialize(!m_houghDataPerSectorVecKey.empty()));
 
         if (m_doTruth) {
             // add pdgs from jobO to set
@@ -1283,6 +1283,8 @@ namespace MuonCombined {
     }
 
     void MuonStauRecoTool::associateHoughMaxima(MuonStauRecoTool::LayerData& layerData) const {
+        
+        if (m_houghDataPerSectorVecKey.empty()) return;
         // get intersection and layer identifiers
         const Muon::MuonSystemExtension::Intersection& intersection = layerData.intersection;
         int sector = intersection.layerSurface.sector;
@@ -1329,7 +1331,7 @@ namespace MuonCombined {
         float errx = Amg::error(*intersection.trackParameters->covariance(), Trk::locX);
         float x = barrelLike ? z : r;
         float y = barrelLike ? r : z;
-        float theta = atan2(y, x);
+        float theta = std::atan2(y, x);
 
         // get phi hits
         const Muon::MuonLayerHoughTool::PhiMaximumVec& phiMaxVec = houghDataPerSector.phiMaxVec[regionIndex];
@@ -1349,18 +1351,16 @@ namespace MuonCombined {
         Muon::MuonLayerHoughTool::PhiMaximumVec::const_iterator pit_end = phiMaxVec.end();
         for (; pit != pit_end; ++pit) {
             const MuonHough::MuonPhiLayerHough::Maximum& maximum = **pit;
-            MuonHough::PhiHitVec::const_iterator hit = maximum.hits.begin();
-            MuonHough::PhiHitVec::const_iterator hit_end = maximum.hits.end();
-            for (; hit != hit_end; ++hit) {
+            for (const std::shared_ptr<MuonHough::PhiHit>& hit : maximum.hits) {
                 // treat the case that the hit is a composite TGC hit
-                if ((*hit)->tgc && !(*hit)->tgc->phiCluster.hitList.empty()) {
-                    Identifier id = (*hit)->tgc->phiCluster.hitList.front()->identify();
+                if (hit->tgc && !hit->tgc->phiCluster.hitList.empty()) {
+                    Identifier id = hit->tgc->phiCluster.hitList.front()->identify();
                     if (m_idHelperSvc->layerIndex(id) != intersection.layerSurface.layerIndex) continue;
-                    for (const auto& prd : (*hit)->tgc->phiCluster.hitList) handleCluster(*prd, phiClusterOnTracks);
-                } else if ((*hit)->prd) {
-                    Identifier id = (*hit)->prd->identify();
+                    for (const Muon::MuonCluster* prd : hit->tgc->phiCluster.hitList) handleCluster(*prd, phiClusterOnTracks);
+                } else if (hit->prd && !(hit->prd->type(Trk::PrepRawDataType::sTgcPrepData) || hit->prd->type(Trk::PrepRawDataType::MMPrepData))) {
+                    const Identifier id = hit->prd->identify();
                     if (m_idHelperSvc->layerIndex(id) != intersection.layerSurface.layerIndex) continue;
-                    handleCluster(static_cast<const Muon::MuonCluster&>(*(*hit)->prd), phiClusterOnTracks);
+                    handleCluster(static_cast<const Muon::MuonCluster&>(*hit->prd), phiClusterOnTracks);
                 }
             }
         }
@@ -1374,6 +1374,9 @@ namespace MuonCombined {
         Muon::MuonLayerHoughTool::MaximumVec::const_iterator mit_end = maxVec.end();
         for (; mit != mit_end; ++mit) {
             const MuonHough::MuonLayerHough::Maximum& maximum = **mit;
+            if (std::find_if(maximum.hits.begin(),maximum.hits.end(),[](const std::shared_ptr<MuonHough::Hit>& hit){
+                return hit->prd && (hit->prd->type(Trk::PrepRawDataType::sTgcPrepData) || hit->prd->type(Trk::PrepRawDataType::MMPrepData));
+            }) != maximum.hits.end()) continue;
             float residual = maximum.pos - x;
             float residualTheta = maximum.theta - theta;
             float refPos = (maximum.hough != nullptr) ? maximum.hough->m_descriptor.referencePosition : 0;

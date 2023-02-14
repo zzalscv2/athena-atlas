@@ -1050,8 +1050,9 @@ def MuonStauRecoToolCfg(flags,  name="MuonStauRecoTool", **kwargs):
     kwargs.setdefault("MdtDriftCircleOnTrackCreatorStau", staurotcreator)
     # Now setup MuonInsideOutRecoTool property of MuonStauRecoTool. Long chain here! Could split for clarity. Another option would be to have a Stau flag on
     # shared tool functions.
-    chamberholerecoverytool = result.popToolsAndMerge(
-        MuonChamberHoleRecoveryToolCfg(flags))
+    chamberholerecoverytool = result.popToolsAndMerge(MuonChamberHoleRecoveryToolCfg(flags,
+                                                                                    sTgcPrepDataContainer = "",
+                                                                                    MMPrepDataContainer = ""))
     seededsegmentfinder = result.popToolsAndMerge(MuonSeededSegmentFinderCfg(flags, name="MuonStauSeededSegmentFinder", MdtRotCreator=staurotcreator,
                                                                              SegmentMaker=segmentmaker, SegmentMakerNoHoles=segmentmaker))
     fitter = result.popToolsAndMerge(CombinedMuonTrackBuilderFitCfg(
@@ -1059,7 +1060,7 @@ def MuonStauRecoToolCfg(flags,  name="MuonStauRecoTool", **kwargs):
     from TrkConfig.TrkTrackSummaryToolConfig import MuonCombinedTrackSummaryToolCfg
     muon_combined_track_summary = result.popToolsAndMerge(MuonCombinedTrackSummaryToolCfg(flags))
     muidsegmentregionrecovery = result.popToolsAndMerge(MuonSegmentRegionRecoveryToolCfg(flags, name="MuonStauSegmentRegionRecoveryTool", SeededSegmentFinder=seededsegmentfinder,
-                                                                                         RecoverMM = False, RecoverSTGC = False,
+                                                                                         RecoverMM = False, RecoverSTGC = False, MMRegionSelector = "", STGCRegionSelector = "",
                                                                                          ChamberHoleRecoveryTool=chamberholerecoverytool, Fitter=fitter, TrackSummaryTool=muon_combined_track_summary))
     trackbuilder = result.popToolsAndMerge(CombinedMuonTrackBuilderCfg(
         flags, name="CombinedStauTrackBuilder", MdtRotCreator=staurotcreator, MuonHoleRecovery=muidsegmentregionrecovery))

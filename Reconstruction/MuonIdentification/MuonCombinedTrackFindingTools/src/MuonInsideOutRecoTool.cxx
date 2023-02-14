@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonInsideOutRecoTool.h"
@@ -33,7 +33,7 @@ namespace MuonCombined {
         // trigger does not use primary vertex
         ATH_CHECK(m_vertexKey.initialize(!m_vertexKey.empty()));
         ATH_CHECK(m_trackSummaryTool.retrieve());
-        if (!m_recoValidationTool.empty()) ATH_CHECK(m_recoValidationTool.retrieve());
+        ATH_CHECK(m_recoValidationTool.retrieve(DisableTool{m_recoValidationTool.empty()}));
         return StatusCode::SUCCESS;
     }
 
