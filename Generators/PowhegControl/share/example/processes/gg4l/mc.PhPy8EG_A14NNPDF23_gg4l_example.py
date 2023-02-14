@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #--------------------------------------------------------------
 # This is an example joboption to generate events with Powheg
@@ -17,13 +17,20 @@ evgenConfig.contact = ["andrej.saibel@cern.ch"]
 # Load ATLAS defaults for the Powheg bblvlv process
 # -----------------------------------------------------------
 include("PowhegControl/PowhegControl_gg4l_Common.py")
-#set 0 if massiveloops = 0
+
+# set 0 if massiveloops = 0
 PowhegConfig.mass_b = 0 
-PowhegConfig.proc = "WW"		# 'ZZ' or 'WW'
-PowhegConfig.contr = "full"		# 'full', 'only_h', 'no_h' or 'interf_h'
-PowhegConfig.vdecaymodeV1 = 11 # decay mode of first vector boson
-PowhegConfig.vdecaymodeV2 = 13  # decay mode of second vector boson
-#test settings for integration
+# 'ZZ' or 'WW'
+PowhegConfig.proc = "WW"		
+# 'full', 'only_h', 'no_h' or 'interf_h'
+PowhegConfig.contr = "full"		
+# decay mode of first vector boson
+PowhegConfig.vdecaymodeV1 = 11 
+# decay mode of second vector boson
+# has to be opposite sign for WW
+PowhegConfig.vdecaymodeV2 = -13  
+
+# test settings for integration
 PowhegConfig.ncall1 = 50
 PowhegConfig.ncall1btlbrn = 50
 PowhegConfig.ncall2 = 50

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import Logging
 from ..powheg_RES import PowhegRES
@@ -26,6 +26,10 @@ class gg4l(PowhegRES):
 
         # This is a hacky fix that's needed at the moment...
         self.manually_set_openloops_gnu_paths()
+        # Adding external libraries to LD_LIBRARY_PATH for gg4l
+        self.link_external_powheg_libraries("/External/cln-1.3.6/cln_lib/lib")
+        self.link_external_powheg_libraries("/External/ginac-1.7.6.orig/ginac_lib/lib/")
+        self.link_external_powheg_libraries("/External/chaplin-1.2/lib")
 
         # Add parameter validation functions
         self.validation_functions.append("validate_process_contrib")
