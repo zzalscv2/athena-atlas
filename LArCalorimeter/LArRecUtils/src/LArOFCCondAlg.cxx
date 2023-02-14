@@ -171,7 +171,7 @@ StatusCode LArOFCCondAlg::execute() {
     std::unique_ptr<LArOFC> larOFC =
         std::make_unique<LArOFC>(larOnlineID, larOnOffIdMapping, m_nGains);
 
-
+    std::vector<float> OFCa_tmp, OFCb_tmp;
     ///////////////////////////////////////////////////
     std::vector<HWIdentifier>::const_iterator it = larOnlineID->channel_begin();
     std::vector<HWIdentifier>::const_iterator it_e = larOnlineID->channel_end();
@@ -184,8 +184,7 @@ StatusCode LArOFCCondAlg::execute() {
         if (larOnOffIdMapping->isOnlineConnected(chid)) {
             for (size_t igain = 0; igain < m_nGains; igain++) {
 
-                std::vector<float> OFCa_tmp, OFCb_tmp;
-
+             
                 //:::::::::::::::::::::::::::::::
                 //retrieve the data
                 //:::::::::::::::::::::::::::::::
@@ -303,11 +302,13 @@ StatusCode LArOFCCondAlg::execute() {
                 float DELTA=Q1*Q2-Q3*Q3;  
                 //:::::::::::::::::::::::::::::::
                 //OFCa  
+		OFCa_tmp.resize(nsamples_AC_OFC);
                 for(i=0;i<nsamples_AC_OFC;++i) 
-                    OFCa_tmp.push_back( (ACinv_PS[i]*Q2-ACinv_PSD[i]*Q3)/DELTA );
+                    OFCa_tmp[i]=(ACinv_PS[i]*Q2-ACinv_PSD[i]*Q3)/DELTA;
                 //OFCb  
+		OFCb_tmp.resize(nsamples_AC_OFC);
                 for(i=0;i<nsamples_AC_OFC;++i) 
-                    OFCb_tmp.push_back( (ACinv_PS[i]*Q3-ACinv_PSD[i]*Q1)/DELTA ); 
+                    OFCb_tmp[i]=(ACinv_PS[i]*Q3-ACinv_PSD[i]*Q1)/DELTA; 
 
                 //for debugging only
                 if(m_Dump)
