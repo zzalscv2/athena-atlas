@@ -43,13 +43,15 @@ namespace TrkDriftCircleMath {
       Gaudi::Property<int> m_minHits{this,"MinimumHits",4,"minimum number of selected hits for t0 fit. Otherwise use default"};
       Gaudi::Property<float> m_dRTol{this,"dRTolerance",0.1};
 
+      Gaudi::Property<bool> m_floatDir{this, "FloatSegDirection", false, 
+                                      "If set to true, the line of the segment is simultaenously fitted with t0"};
       // counters
-      mutable std::atomic_uint m_ntotalCalls;
-      mutable std::atomic_uint m_npassedNHits;
-      mutable std::atomic_uint m_npassedSelectionConsistency;
-      mutable std::atomic_uint m_npassedNSelectedHits;
-      mutable std::atomic_uint m_npassedMinHits;
-      mutable std::atomic_uint m_npassedMinuitFit;
+      mutable std::atomic_uint m_ntotalCalls{0};
+      mutable std::atomic_uint m_npassedNHits{0};
+      mutable std::atomic_uint m_npassedSelectionConsistency{0};
+      mutable std::atomic_uint m_npassedNSelectedHits{0};
+      mutable std::atomic_uint m_npassedMinHits{0};
+      mutable std::atomic_uint m_npassedMinuitFit{0};
 
     };
     
