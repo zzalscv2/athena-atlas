@@ -13,7 +13,7 @@ timeout 64800 Reco_tf.py --CA \
   --outputDESDM_MCPFile=myDESDM_MCP.pool.root \
   --outputDRAW_ZMUMUFile=myDRAW_ZMUMU.data \
   --outputDRAW_EGZFile=myDRAW_EGZ.data \
-  --outputDAOD_IDTIDEFile=myIDTIDE.pool.root \
+  --outputDAOD_IDTIDEFile=myDAOD_IDTIDE.pool.root \
   --multithreaded='True' \
   --preExec 'from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Trigger.triggerConfig= "DB"' \
   --autoConfiguration="everything" \
@@ -32,7 +32,7 @@ fpeStat=$?
 
 echo "art-result: ${fpeStat} FPEs in logfiles"
 
-files=( myAOD.pool.root myHIST.root myDESDM_MCP.pool.root myDRAW_EGZ.pool.root myDRAW_ZMUMU.pool.root myDAOD_IDTIDE.pool.root ) 
+files=( myAOD.pool.root myHIST.root myDESDM_MCP.pool.root myDRAW_EGZ.data myDRAW_ZMUMU.data myDAOD_IDTIDE.pool.root )
 for i in "${files[@]}"
 do
     if [ -f "$i" ]; then
