@@ -31,6 +31,8 @@ NAME:     LArFebSummaryMaker
 
 #include "CxxUtils/checker_macros.h"
 
+#include "Gaudi/Parsers/Factory.h"
+
 #include <array>
 #include <set>
 
@@ -69,9 +71,9 @@ class LArFebErrorSummaryMaker : public AthReentrantAlgorithm
   Gaudi::Property<int> m_warnLimit{ this, "warnLimit", 10, "Limit the number of warning messages for missing input" };
   Gaudi::Property<bool> m_checkAllFeb{ this, "CheckAllFEB", true, "Check all FEBS ?" };
   Gaudi::Property<std::string> m_partition{ this, "PartitionId", "", "Should contain DAQ partition (+ eventually the EventBuilder)" };
-  Gaudi::Property<std::vector<unsigned int> > m_knownEvtId{ this, "MaskFebEvtId", {}, "ignore these FEBs for EvtId" };
-  Gaudi::Property<std::vector<unsigned int> > m_knownSCACStatus{ this, "MaskFebScacStatus", {}, "ignore these FEBs for ScacStatus" };
-  Gaudi::Property<std::vector<unsigned int> > m_knownZeroSample{ this, "MaskFebZeroSample", {}, "ignore these FEBs for ZeroSample" };
+  Gaudi::Property<std::set<unsigned int> > m_knownEvtId{ this, "MaskFebEvtId", {}, "ignore these FEBs for EvtId" };
+  Gaudi::Property<std::set<unsigned int> > m_knownSCACStatus{ this, "MaskFebScacStatus", {}, "ignore these FEBs for ScacStatus" };
+  Gaudi::Property<std::set<unsigned int> > m_knownZeroSample{ this, "MaskFebZeroSample", {}, "ignore these FEBs for ZeroSample" };
 
   /**  Minimum number of FEBs in error to trigger EventInfo::LArError 
        Defined as 1 by default/bulk, 4 in online/express in CaloCellGetter (CaloRec package)
@@ -86,7 +88,7 @@ class LArFebErrorSummaryMaker : public AthReentrantAlgorithm
   SG::WriteHandleKey<LArFebErrorSummary> m_writeKey{this,"WriteKey","LArFebErrorSummary"};
 
   // methods:
-  bool masked (unsigned int hid, const std::vector<unsigned int>& v_feb) const; 
+  bool masked (unsigned int hid, const std::set<unsigned int>& v_feb) const; 
 };
 #endif
 
