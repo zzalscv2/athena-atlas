@@ -7,12 +7,15 @@
 # run with
 #
 # athena --CA runEgammaOnly.py
+# or
+# python runEgammaOnly.py
 
 import sys
 
 
 def _run():
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     # input
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags.Exec.MaxEvents = 20
