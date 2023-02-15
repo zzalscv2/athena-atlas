@@ -176,7 +176,8 @@ def MuonInDetToMuonSystemExtensionAlgCfg(flags, name="MuonInDetToMuonSystemExten
     muon_ext_tool = result.popToolsAndMerge(
         MuonSystemExtensionToolCfg(flags))
     kwargs.setdefault("MuonSystemExtensionTool", muon_ext_tool)
-    kwargs.setdefault("WriteStauCandidates", "InDetCandidatesStaus")
+    kwargs.setdefault("WriteStauCandidates", "InDetCandidatesStausPrompt" 
+                                              if flags.Tracking.doLargeD0 else "InDetCandidatesStaus")
     
     if not flags.Muon.MuonTrigger:
         from MuonConfig.MuonSegmentFindingConfig import MuonLayerHoughAlgCfg
@@ -188,7 +189,7 @@ def MuonInDetToMuonSystemExtensionAlgCfg(flags, name="MuonInDetToMuonSystemExten
 
 
 def LRT_MuonInDetToMuonSystemExtensionAlgCfg(flags, name="MuonInDetToMuonSystemExtensionAlg_LRT",  **kwargs):
-    kwargs.setdefault("WriteStauCandidates", "")
+    kwargs.setdefault("WriteStauCandidates", "InDetCandidatesStausLRT")
     kwargs.setdefault("WriteInDetCandidates",
                       "InDetCandidateLRT_SystemExtended")
     kwargs.setdefault("InputInDetCandidates", "TrackParticleCandidateLRT")
@@ -372,6 +373,14 @@ def MuonSegContainerMergerAlgCfg(flags, name = "MuonSegContainerMergerAlg", **kw
     the_alg = CompFactory.MuonSegContainerMergerAlg(name, **kwargs)
     result.addEventAlgo(the_alg)
     return result  
+
+def MuonInDetExtensionMergerAlgCfg(flags, name="MuonInDetExtensionMergerAlg", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("ToMerge", ["InDetCandidatesStausPrompt", "InDetCandidatesStausLRT"])
+    kwargs.setdefault("ToWrite", "InDetCandidatesStaus")
+    the_alg = CompFactory.MuonInDetExtensionMergerAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
 
 # Returns a pair vectors containing th names of the
 # track particle collections associated with combined muon tracks
@@ -674,6 +683,7 @@ def MuonCombinedReconstructionCfg(flags):
                                              InDetCandidateLocation="InDetCandidates"
                                              if not flags.MuonCombined.doCombinedFit else "InDetCandidatesSystemExtened"))
         if flags.MuonCombined.doMuGirlLowBeta:
+            if flags.Tracking.doLargeD0: result.merge(MuonInDetExtensionMergerAlgCfg(flags))
             # Use the InDetCandidateStaus as InDetCandidates as they've also the extensions
             # from the MuidCo tracks
             result.merge(MuGirlStauAlgCfg(flags))
