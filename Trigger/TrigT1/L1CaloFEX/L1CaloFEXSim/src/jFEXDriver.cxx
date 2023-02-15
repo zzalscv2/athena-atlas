@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -150,7 +150,7 @@ StatusCode jFEXDriver::execute() {
     ATH_CHECK(m_jSuperCellTowerMapperTool->AssignSuperCellsToTowers(local_jTowerContainerRaw));
     ATH_CHECK(m_jSuperCellTowerMapperTool->AssignTriggerTowerMapper(local_jTowerContainerRaw));
     ATH_CHECK(m_jSuperCellTowerMapperTool->AssignPileupAndNoiseValues(local_jTowerContainerRaw,m_jTowerArea_hist,m_Firmware2BitwiseID,m_BinLayer,m_EtaCoords,m_PhiCoords));
-    
+        
     //STEP 3.5 - Set up a file mapping if necessary (should only need to be done if the mapping changes, which should never happen unless major changes to the simulation are required)
     // Only used for simulation experts. Contact one of us first
     // With just one event should be enough to generate the file

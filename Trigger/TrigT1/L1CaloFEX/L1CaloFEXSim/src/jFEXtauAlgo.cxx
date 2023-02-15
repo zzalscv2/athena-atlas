@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXtauAlgo - Algorithm for Tau Algorithm in jFEX
@@ -20,6 +20,8 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "StoreGate/StoreGateSvc.h"
 
+#include <fstream>
+
 namespace LVL1{
 
 //Default Constructor
@@ -33,6 +35,11 @@ LVL1::jFEXtauAlgo::~jFEXtauAlgo() {
 
 StatusCode LVL1::jFEXtauAlgo::initialize() {
     ATH_CHECK(m_jTowerContainerKey.initialize());
+    
+    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_IsoRingStr)  , m_IsoRingMap  ));
+    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_SearchGStr)  , m_SearchGMap  ));
+    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_SearchGeStr) , m_SearchGeMap )); 
+    
     return StatusCode::SUCCESS;
 }
 
@@ -48,93 +55,98 @@ StatusCode LVL1::jFEXtauAlgo::safetyTest() {
     return StatusCode::SUCCESS;
 }
 
-void LVL1::jFEXtauAlgo::setup(int TTwindow[5][5], int seed[3][3]) {
+void LVL1::jFEXtauAlgo::setup(int seed[3][3]) {
 
     ATH_MSG_DEBUG(m_color.BLUE<<"---------------- jFEXtauAlgo::setup ----------------"<<m_color.END);
     
-    for(int phi=0; phi<5; phi++) {
-        for (int eta=0; eta<5; eta++) {
-            m_TTwindow[phi][eta] = TTwindow[4-phi][eta];
-        }
-    }
-    
     for(int phi=0; phi<3; phi++) {
         for (int eta=0; eta<3; eta++) {
-            m_SeedIDs[phi][eta] = seed[2-phi][eta];
+            m_TTwindow[phi][eta] = seed[2-phi][eta];
         }
     }
-    
-
 }
-     
-
-//this function calculates seed for a given TT
-void LVL1::jFEXtauAlgo::buildSeeds()
-{
-    ATH_MSG_DEBUG("---------------- jFEXtauAlgo::buildsSeeds ----------------");
-    m_seedSet = false;
-    
-    for(int mphi = 0; mphi<3; mphi++) {
-        for(int meta = 0; meta<3; meta++) {
-
-            int et_tmp = 0;
-            int seedTotalET = 0;
-
-            for(int iphi = -1; iphi < 2; iphi++) {
-                for(int ieta = -1; ieta < 2; ieta++) {
-                    et_tmp =  getTTowerET(m_TTwindow[(mphi+1) + iphi][(meta+1) + ieta]);
-                    seedTotalET += et_tmp;
-                }
-            }
-            m_SeedCluster_ET[mphi][meta] = seedTotalET;
-            
-            et_tmp = getTTowerET(m_TTwindow[(mphi+1)][(meta+1)]);
-            m_SeedConditions_ET[mphi][meta] = et_tmp;
-        }
-    }
-
-    m_seedSet = true;
-    ATH_MSG_DEBUG("---------------- jFEXtauAlgo::buildsSeeds finished ----------------");
-}
-
 
 //check if central TT is a local maxima
 bool LVL1::jFEXtauAlgo::isSeedLocalMaxima(){
-    m_isLocalMaxima=false;
-    m_ClusterEt = m_SeedCluster_ET[1][1];
     
-    if(m_seedSet == false) {
-        ATH_MSG_DEBUG("Local Maxima not checked due to seed not calculated.");
-    }
-    if(m_seedSet == true) {
-        ATH_MSG_DEBUG("Local Maxima checking begins.");
-        //here put the 8 conditions to determine if the [1][1] TT seed is a local maxima.
-        int central_seed = m_SeedConditions_ET[1][1];
-        for (int iphi = 0; iphi < 3; iphi++) {
-            for (int ieta = 0; ieta < 3; ieta++) {
-
-                //avoid comparing central seed to itself
-                if ((ieta == 1) && (iphi == 1)) {
-                    continue;
+    m_ClusterEt = 0;
+    int central_seed = getTTowerET(m_TTwindow[1][1]);
+    
+    for (int iphi = 0; iphi < 3; iphi++) {
+        for (int ieta = 0; ieta < 3; ieta++) {
+            
+            int ttEt = getTTowerET(m_TTwindow[iphi][ieta]);
+            m_ClusterEt += ttEt;
+            //avoid comparing central seed to itself
+            if ((ieta == 1) && (iphi == 1)) {
+                continue;
+            }
+            else if( (iphi > ieta) || (ieta==2 && iphi==2) ) { //strictly less than central
+                if(central_seed<ttEt) {
+                    return false;
                 }
-                else if( (iphi > ieta) || (ieta==2 && iphi==2) ) { //strictly less than central
-                    if(central_seed<m_SeedConditions_ET[iphi][ieta]) {
-                        return false;
-                    }
-                }
-                else if((ieta > iphi) || (ieta == 0 && iphi == 0)) { //less than or equal to central
-                    if(central_seed<=m_SeedConditions_ET[iphi][ieta]) {
-                        return false;
-                    }
+            }
+            else if((ieta > iphi) || (ieta == 0 && iphi == 0)) { //less than or equal to central
+                if(central_seed<=ttEt) {
+                    return false;
                 }
             }
         }
     }
-    m_isLocalMaxima=true;
 
-    ATH_MSG_DEBUG("Local Maxima found. with ClusterET = "<<m_ClusterEt);
+    ATH_MSG_DEBUG("Tau Local Maxima found. with ClusterET = "<<m_ClusterEt);
     return true;
 }
+
+bool LVL1::jFEXtauAlgo::isSeedLocalMaxima_fwd(unsigned int TTID){
+    
+    int centreEt = getTTowerET(TTID);
+    m_ClusterEt = centreEt;
+    //centreEt greater than ?
+    auto it_map = m_SearchGMap.find(TTID);
+    if(it_map == m_SearchGMap.end()) {
+         ATH_MSG_FATAL("Could not find TT" << TTID << " in the (greater than) file for Taus.");
+    }
+    
+    for(const auto& lTT : it_map->second){
+        int seachTTET = getTTowerET(lTT);
+        if(centreEt <= seachTTET ){
+            return false;
+        }
+        m_ClusterEt += seachTTET;
+    }     
+    
+    //centreEt greater or equal than ?
+    it_map = m_SearchGeMap.find(TTID);
+    if(it_map == m_SearchGeMap.end()) {
+        ATH_MSG_FATAL("Could not find TT" << TTID << " in the (greater or equal than) file for Taus.");
+    }
+    
+    for(const auto& lTT : it_map->second){
+        int seachTTET = getTTowerET(lTT);
+        if(centreEt < seachTTET ){
+            return false;
+        }
+        m_ClusterEt += seachTTET;
+    }     
+    
+    // If we never returned false above.. we have a local maxima!
+    //Calculating now all the Tau iso                
+    
+    m_TauIsolation = 0;
+    it_map = m_IsoRingMap.find(TTID);
+    if(it_map == m_IsoRingMap.end()) {
+        ATH_MSG_FATAL("Could not find TT" << TTID << " in the isolation file for Taus.");
+    }
+    
+    for(const auto& lTT : it_map->second){
+        m_TauIsolation += getTTowerET(lTT);
+    }   
+                         
+    return true;
+}
+
+
 
 //Gets the ET for the TT. This ET is EM + HAD
 int LVL1::jFEXtauAlgo::getTTowerET(unsigned int TTID ) {
@@ -147,28 +159,8 @@ int LVL1::jFEXtauAlgo::getTTowerET(unsigned int TTID ) {
     }
     
     //we shouldn't arrive here
+    ATH_MSG_WARNING("Trigger Tower (ID: "<<TTID <<") in jTau Algorithm not found in the Et map. Report this to the experts!");
     return 0;
-    
-}
-
-//Gets Phi of the TT
-int LVL1::jFEXtauAlgo::getRealPhi(unsigned int TTID ) {
-    if(TTID == 0) {
-        return 0;
-    }
-    
-    const LVL1::jTower * tmpTower = m_jTowerContainer->findTower(TTID);
-    return tmpTower->phi();
-}
-//Gets Eta of the TT
-int LVL1::jFEXtauAlgo::getRealEta(unsigned int TTID ) {
-    if(TTID == 0) {
-        return 0;
-    }
-    
-    const LVL1::jTower * tmpTower = m_jTowerContainer->findTower(TTID);
-    return realValue(TTID,tmpTower->eta()); //return positive ETA for even TTs ID 2XX.XXX.. etc and negative ETA for odd TTs ID 1XX.XXX.. and so on
-    //return tmpTower->eta();
 }
 
 //Gets the seed total ET
@@ -176,40 +168,76 @@ int LVL1::jFEXtauAlgo::getClusterEt() {
     return m_ClusterEt;
 }
 
-
 //Gets the Isolation/FirstEtRing of jFEX Tau
 
 void LVL1::jFEXtauAlgo::setFirstEtRing(int First_ETring[36]) {
 
-  ATH_MSG_DEBUG("Calculating the jFEXTau ISO");
-  m_TauIsolation=0;
-
-  for(int i=0;i<36;i++){
-    m_TauIsolation += getTTowerET(First_ETring[i]);
-  }
-  
+    ATH_MSG_DEBUG("Calculating the jFEXTau ISO");
+    
+    m_TauIsolation=0;
+    for(int i=0; i<36; i++) {
+        m_TauIsolation += getTTowerET(First_ETring[i]);
+    }
 }
 
 int LVL1::jFEXtauAlgo::getFirstEtRing() {
-  
-  return m_TauIsolation;
-}
-
-//Gets the seed total ET
-int LVL1::jFEXtauAlgo::getIsLocalMaxima() {
-
-    return m_isLocalMaxima;
-}
-
-int LVL1::jFEXtauAlgo::realValue(int ID, int eta){
-
-  return ((int)(ID/pow(10,5)) % 10) % 2==0 ?  eta : -eta ;
-  
+    return m_TauIsolation;
 }
 
 void LVL1::jFEXtauAlgo::setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map){
     m_map_Etvalues=et_map;
 }
+
+StatusCode LVL1::jFEXtauAlgo::ReadfromFile(const std::string & fileName, std::unordered_map<unsigned int, std::vector<unsigned int> >& fillingMap){
+    
+    std::string myline;
+    
+    //openning file with ifstream
+    std::ifstream myfile(fileName);
+    
+    if ( !myfile.is_open() ){
+        ATH_MSG_FATAL("Could not open file:" << fileName);
+        return StatusCode::FAILURE;
+    }
+    
+    //loading the mapping information
+    while ( std::getline (myfile, myline) ) {
+
+        //removing the header of the file (it is just information!)
+        if(myline[0] == '#') continue;
+        
+        //Splitting myline in different substrings
+        std::stringstream oneLine(myline);
+        
+        //reading elements
+        std::vector<unsigned int> elements;
+        std::string element;
+        while(std::getline(oneLine, element, ' '))
+        {
+            elements.push_back(std::stoi(element));
+        }
+        
+        // We should have at least two elements! Central TT and (at least) itself
+        if(elements.size() < 1){
+            ATH_MSG_ERROR("Unexpected number of elemennts (<1 expected) in file: "<< fileName);
+            return StatusCode::FAILURE;
+        }
+        
+        //Central TiggerTower
+        unsigned int TTID = elements.at(0);
+        
+        // rest of TTs that need to be check 
+        elements.erase(elements.begin());
+        
+        fillingMap[TTID] = elements;
+        
+    }
+    myfile.close();
+
+    return StatusCode::SUCCESS;
+}
+
+
 
 
 }// end of namespace LVL1

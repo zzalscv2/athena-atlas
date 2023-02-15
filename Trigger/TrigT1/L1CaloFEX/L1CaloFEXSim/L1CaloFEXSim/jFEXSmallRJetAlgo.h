@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //              jFEXSmallRJetAlgo - Algorithm for small R jet Algorithm in jFEX
@@ -38,7 +38,7 @@ namespace LVL1 {
     virtual ~jFEXSmallRJetAlgo();
 
     virtual StatusCode safetyTest() override;
-    virtual void setup(int inputTable[7][7]) override;
+    virtual void setup(int inputTable[7][7], int inputTableDisplaced[7][7]) override;
     virtual int realValue(int ID, int eta) override;
     virtual unsigned int getRealPhi(unsigned int TTID ) override;
     virtual int getRealEta(unsigned int TTID ) override;   
@@ -47,7 +47,6 @@ namespace LVL1 {
     virtual bool isSeedLocalMaxima() override; 
     virtual unsigned int getSmallClusterET() override;
     virtual unsigned int getSmallETRing() override;
-    virtual bool checkDisplacedLM() override;
     virtual unsigned int getTTIDcentre() override;
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
     
@@ -55,11 +54,16 @@ protected:
 
   private:
         SG::ReadHandleKey<LVL1::jTowerContainer> m_jTowerContainerKey {this, "MyjTowers", "jTowerContainer", "Input container for jTowers"};
-        int m_jFEXalgoTowerID[7][7];
-        int m_jFEXalgoSearchWindowSeedET[5][5];
-	bool m_seedSet;
-        bool m_LMDisplaced;
+        int m_jFEXalgoTowerID[7][7] = {{0}};
+        int m_jFEXalgoTowerID_displaced[7][7] = {{0}};
+        int m_jFEXalgoSearchWindowSeedET[5][5] = {{0}};
+        int m_jFEXalgoSearchWindowSeedET_displaced[5][5] = {{0}};
+        
+        bool m_LMDisplaced_below;
+        bool m_LMDisplaced_up;
         std::unordered_map<int,std::vector<int> > m_map_Etvalues;
+        
+        bool CalculateLM(int mymatrix[5][5]);
   };
 
 

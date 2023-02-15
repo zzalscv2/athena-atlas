@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXPileupAndNoise - Algorithm for Pileup and Noise in jFEX
@@ -353,7 +353,6 @@ std::unordered_map<int,std::vector<int> > LVL1::jFEXPileupAndNoise::Get_EM_Et_va
                 m_map_Etvalues_EM.insert(std::make_pair(TTID, v_energies));
             }
         }
-           
     }
     else{
         
@@ -383,10 +382,8 @@ std::unordered_map<int,std::vector<int> > LVL1::jFEXPileupAndNoise::Get_EM_Et_va
 
                 m_map_Etvalues_EM.insert(std::make_pair(TTID, v_energies));                
                 
-                
             }
         }
-                   
     }
 
     if(m_apply_noise2jets || m_apply_noise2met) ApplyNoiseCuts(m_map_Etvalues_EM,0);
@@ -492,13 +489,9 @@ void LVL1::jFEXPileupAndNoise::ApplyNoiseCuts(std::unordered_map<int,std::vector
         if(m_apply_noise2met && map_Etvalues[key][1]<=Met_NoiseCut){ // Et for Met
             map_Etvalues[key][1]=0.;
         }
-
     }
     
 }
-
-
-
 
 std::unordered_map<int,std::vector<int> > LVL1::jFEXPileupAndNoise::GetEt_values(){
     
