@@ -1044,8 +1044,6 @@ class ComponentAccumulator:
                     alg, PyAlg
                 ):  # Hack for py-algs deriving from old-style configurables
                     alg._properties = alg.getValuedProperties()
-                    if "OutputLevel" not in alg._properties:
-                        alg._properties["OutputLevel"] = 0
 
                 getCompsToBeAdded(alg)
 
