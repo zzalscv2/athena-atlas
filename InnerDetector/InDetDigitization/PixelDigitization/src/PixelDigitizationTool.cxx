@@ -313,8 +313,7 @@ void PixelDigitizationTool::addSDO(SiChargedDiodeCollection* collection) {
       // if the charge has already hit the Diode add it to the deposit
       if (theDeposit != depositsR_end) (*theDeposit).second += i_ListOfCharges->charge();
       else { // create a new deposit
-        InDetSimData::Deposit deposit(trkLink, i_ListOfCharges->charge());
-        deposits.push_back(deposit);
+        deposits.push_back(InDetSimData::Deposit(trkLink, i_ListOfCharges->charge()));
       }
     }
     // add the simdata object to the map:
