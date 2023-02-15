@@ -282,7 +282,7 @@ if __name__ == '__main__':
     
     # Uses SCell to decorate the jTowers
     from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloFEXDecoratorCfg
-    DecoratorAlgo = L1CaloFEXDecoratorCfg('jFexTower2SCellDecorator')   
+    DecoratorAlgo = L1CaloFEXDecoratorCfg(flags, 'jFexTower2SCellDecorator', True)
     acc.merge(DecoratorAlgo)
    
     

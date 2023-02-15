@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -1217,9 +1217,8 @@ StatusCode jSuperCellTowerMapper::AssignPileupAndNoiseValues(std::unique_ptr<jTo
         int noise = 0;  
         
         //COMMENTED FOR NOW, currently applied in the firmware at P1  
-        //setting noise for EMB, EMEC and HEC (all LAr)   
-        
-        //int noise = 0; // the noise cut depends on different regions for LAr and Tile
+        //s etting noise for EMB, EMEC and HEC (all LAr)   
+        // the noise cut depends on different regions for LAr and Tile
         //if(layer == 0 or (layer == 1 and TTid > 300000) ){
             //noise = 40*25;
         //}

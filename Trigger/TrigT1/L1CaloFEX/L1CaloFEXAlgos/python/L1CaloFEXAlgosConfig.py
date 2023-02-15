@@ -7,6 +7,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
 from AthenaConfiguration.Enums import Format
 
+
 def L1CaloFEXDecoratorCfg(flags, name, jTowersReadKey = 'L1_jFexDataTowers', ExtraInfo = False):
 
     acc=ComponentAccumulator()

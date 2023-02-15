@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -239,15 +239,15 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
         m_jFEXLargeRJetAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
         m_jFEXtauAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
         
-        for(int mphi = 8; mphi < FEXAlgoSpaceDefs::jFEX_algoSpace_height -7; mphi++) {
-            for(int meta = 8; meta < FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width -7; meta++) {
+        for(int mphi = 8; mphi < FEXAlgoSpaceDefs::jFEX_algoSpace_height-8; mphi++) {
+            for(int meta = 8; meta < FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width-8; meta++) {
                 //definition of arrays
                 int TT_seed_ID[3][3]= {{0}};
-                int TT_searchWindow_ID[5][5]= {{0}};
                 int TT_First_ETring[36]= {0};
                 int First_ETring_it = 0; 
                                
-                int SRJet_SearchWindow[7][7] = {{0}};
+                int Jet_SearchWindow[7][7] = {{0}};
+                int Jet_SearchWindowDisplaced[7][7] = {{0}};
                 int largeRCluster_IDs[15][15]= {{0}};
 
                 //filling up array to send them to the algorithms
@@ -255,14 +255,12 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
                     for(int j = -7; j< 8; j++) {
 
                         if(std::abs(i)<4 && std::abs(j)<4) {
-                            SRJet_SearchWindow[3 + i][3 + j] = m_jTowersIDs_Thin[mphi + i][meta +j];
+                            Jet_SearchWindow[3 + i][3 + j] = m_jTowersIDs_Thin[mphi + i][meta +j];
+                            Jet_SearchWindowDisplaced[3 + i][3 + j] = m_jTowersIDs_Thin[mphi+i+1][meta+j+1];
                         }
                         
                         uint deltaR = std::sqrt(std::pow(i,2)+std::pow(j,2));
-                        
-                        if(deltaR<3) {
-                            TT_searchWindow_ID[i+2][j+2] = m_jTowersIDs_Thin[mphi +i][meta +j]; // Search window for the tau algo used for the LocalMaxima studies
-                        }
+
                         if(deltaR<2) {
                             TT_seed_ID[i+1][j+1] = m_jTowersIDs_Thin[mphi +i][meta +j]; // Seed 0.3x0.3 in phi-eta plane
                         }
@@ -274,29 +272,15 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
                         else if(deltaR<8) {
                             largeRCluster_IDs[7 +i][7 +j] = m_jTowersIDs_Thin[mphi + i][meta +j];
                         }
-                        
-
                     }
                 }
                 
                 // ********  jJ and jLJ algorithms  ********
-                m_jFEXSmallRJetAlgoTool->setup(SRJet_SearchWindow);
+                m_jFEXSmallRJetAlgoTool->setup(Jet_SearchWindow, Jet_SearchWindowDisplaced);
                 m_jFEXLargeRJetAlgoTool->setupCluster(largeRCluster_IDs);
                 m_jFEXSmallRJetAlgoTool->buildSeeds();
                 
                 bool is_Jet_LM = m_jFEXSmallRJetAlgoTool->isSeedLocalMaxima();
-                //check if Local Maxima is displaced.
-                bool check = m_jFEXSmallRJetAlgoTool->checkDisplacedLM();
-                
-                // Local maxima needs to be displaced at the edges in order to be considered.
-                if((mphi == (FEXAlgoSpaceDefs::jFEX_algoSpace_height -8) or (meta == (FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width -8))) and !check ){
-                    is_Jet_LM = false;
-                }
-                
-                //Solve edge cases where the local maxima is in the previous FPGA
-                if((meta==8 or mphi==8) and check){
-                    is_Jet_LM = false;
-                }
                 
                 if(is_Jet_LM) {
                     
@@ -306,31 +290,8 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
                     
                     int meta_LM = meta;
                     int mphi_LM = mphi;
-                    if(check && meta>8 && mphi>8) {
-                        meta_LM = meta -1;
-                        mphi_LM = mphi -1;
-                        
-                        // Due to the shift we need to recalculate the Et in the new position                        
-                        // setting Ets to 0 to recalculate
-                        SRj_Et = 0;
-                        LRj_Et = 0;
-                        for(int i = -7; i< 8; i++ ) {
-                            for(int j = -7; j< 8; j++) {
-                                int DeltaR_2 = std::pow(i,2)+std::pow(j,2);
-                                int tmp_Et = getTTowerET(m_jTowersIDs_Thin[mphi_LM + i][meta_LM +j]);
-                                
-                                if( DeltaR_2 < 16) {
-                                    SRj_Et += tmp_Et;
-                                }
-                                if( DeltaR_2 < 64) {
-                                    LRj_Et += tmp_Et;
-                                }                              
-                            }
-                        }
-                    }
 
                     //Creating SR TOB
-                                        
                     uint32_t SRJet_tobword = m_IjFEXFormTOBsTool->formSRJetTOB(m_jfexid, mphi_LM, meta_LM, SRj_Et, thr_jJ.resolutionMeV(), thr_jJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
                     
                     std::unique_ptr<jFEXTOB> jJ_tob = std::make_unique<jFEXTOB>(); 
@@ -349,14 +310,8 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
                 }
                 // ********  jTau algorithm  ********
                 
-                //avoiding overlap with next FPGA, Taus cannot be displaced.
-                if(mphi == (FEXAlgoSpaceDefs::jFEX_algoSpace_height -8) or (meta == (FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width -8))){
-                    continue;
-                }
-                
                 ATH_CHECK( m_jFEXtauAlgoTool->safetyTest());
-                m_jFEXtauAlgoTool->setup(TT_searchWindow_ID,TT_seed_ID);
-                m_jFEXtauAlgoTool->buildSeeds();
+                m_jFEXtauAlgoTool->setup(TT_seed_ID);
                 bool is_tau_LocalMax = m_jFEXtauAlgoTool->isSeedLocalMaxima();
         
                 // Save TOB is tau is a local maxima
@@ -376,8 +331,6 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
                 }                
             }
         }
-
-        
     } //end of if statement for checking if in central jfex modules
     
     //FCAL region algorithm
@@ -387,7 +340,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
         ATH_CHECK(m_jFEXForwardJetsAlgoTool->safetyTest());
         ATH_CHECK(m_jFEXForwardJetsAlgoTool->reset());
         m_jFEXForwardJetsAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
-        m_jFEXForwardJetsAlgoTool->setup(m_jTowersIDs_Wide,m_jfexid,m_id);
+        m_jFEXForwardJetsAlgoTool->setup(m_jTowersIDs_Wide,m_jfexid);
 
         m_FCALJets =  m_jFEXForwardJetsAlgoTool->calculateJetETs();
         for(std::unordered_map<int, jFEXForwardJetsInfo>::iterator it = m_FCALJets.begin(); it!=(m_FCALJets.end()); ++it) {
@@ -397,15 +350,17 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
 
             int iphi = FCALJets.getCentreLocalTTPhi();
             int ieta = FCALJets.getCentreLocalTTEta();
-
             m_SRJetET = FCALJets.getSeedET() + FCALJets.getFirstEnergyRingET();
             m_LRJetET = m_SRJetET + FCALJets.getSecondEnergyRingET();
             
             uint32_t SRFCAL_Jet_tobword = m_IjFEXFormTOBsTool->formSRJetTOB(m_jfexid, iphi, ieta, m_SRJetET, thr_jJ.resolutionMeV(), thr_jJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
             
             std::unique_ptr<jFEXTOB> jJ_tob = std::make_unique<jFEXTOB>(); 
-            jJ_tob->initialize(m_id,m_jfexid,SRFCAL_Jet_tobword,thr_jJ.resolutionMeV(),TTID);              
-            if ( SRFCAL_Jet_tobword != 0 ) m_SRJet_tobwords.push_back(std::move(jJ_tob));
+            jJ_tob->initialize(m_id,m_jfexid,SRFCAL_Jet_tobword,thr_jJ.resolutionMeV(),TTID);   
+            
+            if ( SRFCAL_Jet_tobword != 0 ){
+                m_SRJet_tobwords.push_back(std::move(jJ_tob));
+            } 
             
             if(std::fabs(FCALJets.getCentreTTEta())<2.6){
                 uint32_t LRFCAL_Jet_tobword = m_IjFEXFormTOBsTool->formLRJetTOB(m_jfexid, iphi, ieta, m_LRJetET, thr_jLJ.resolutionMeV(),thr_jLJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
@@ -492,38 +447,10 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
         for(int mphi = 8; mphi < 24; mphi++) {
             for(int meta = 8; meta < max_meta; meta++) {
 
-                int TT_seed_ID[3][3]= {{0}};
-                int TT_searchWindow_ID[5][5]= {{0}};
-                int TT_First_ETring[36]= {0};
-                int First_ETring_it = 0;
-
-                for(int i = -3; i< 4; i++ ) {
-                    for(int j = -3; j< 4; j++) {
-                        int DeltaR = std::sqrt(std::pow(i,2)+std::pow(j,2));
-                        if(DeltaR<3) {
-                            TT_searchWindow_ID[i+2][j+2] = jTowersIDs[mphi +i][meta +j]; // Search window for the tau algo used for the LocalMaxima studies
-                        }
-
-                        if(DeltaR<2) {
-                            TT_seed_ID[i+1][j+1] = jTowersIDs[mphi +i][meta +j]; // Seed 0.3x0.3 in phi-eta plane
-                        }
-                        else if(DeltaR<4) {
-                            TT_First_ETring[First_ETring_it]= jTowersIDs[mphi +i][meta +j]; // First energy ring, will be used as tau ISO
-                            ++First_ETring_it;
-
-                        }
-                    }
-                }
-
-                m_jFEXtauAlgoTool->setup(TT_searchWindow_ID,TT_seed_ID);
-                m_jFEXtauAlgoTool->buildSeeds();
-                bool is_tau_LocalMax = m_jFEXtauAlgoTool->isSeedLocalMaxima();
+                bool is_tau_LocalMax = m_jFEXtauAlgoTool->isSeedLocalMaxima_fwd(jTowersIDs[mphi][meta]);
         
                 // Save TOB is tau is a local maxima
                 if ( is_tau_LocalMax ) { 
-                    
-                    //calculates the 1st energy ring
-                    m_jFEXtauAlgoTool->setFirstEtRing(TT_First_ETring);
                     
                     uint32_t jTau_tobword = m_IjFEXFormTOBsTool->formTauTOB(m_jfexid,mphi,meta,m_jFEXtauAlgoTool->getClusterEt(),m_jFEXtauAlgoTool->getFirstEtRing(),thr_jTAU.resolutionMeV(),thr_jTAU.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
                     
@@ -735,7 +662,10 @@ int jFEXFPGA::getTTowerET_forMET(unsigned int TTID) {
 
 //Returns de ET of a given TT ID for Algorithm
 int jFEXFPGA::getTTowerET_SG(unsigned int TTID) {
-
+    
+    if(TTID == 0){
+        return -999;
+    }
     SG::ReadHandle<jTowerContainer> jTowerContainer(m_jTowerContainerKey);
     const LVL1::jTower * tmpTower = jTowerContainer->findTower(TTID);
     return tmpTower->getTotalET();

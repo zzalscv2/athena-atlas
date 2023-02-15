@@ -22,16 +22,12 @@ class IjFEXtauAlgo : virtual public IAlgTool {
     public:
         static const InterfaceID& interfaceID ( ) ;
         virtual StatusCode safetyTest() = 0;
-        virtual void setup(int TTwindow[5][5], int seed[3][3]) = 0;
+        virtual void setup(int seed[3][3]) = 0;
         virtual bool isSeedLocalMaxima() = 0;
-        virtual void buildSeeds() = 0;
+        virtual bool isSeedLocalMaxima_fwd(unsigned int TTID) = 0;
         virtual void setFirstEtRing(int First_ETring[]) =0;
 
-        virtual int getTTowerET(unsigned int TTID )  =0; 
-        virtual int getRealPhi (unsigned int TTID )  =0; 
-        virtual int getRealEta (unsigned int TTID )  =0;
         virtual int getClusterEt()  =0;
-        virtual int getIsLocalMaxima()  =0;
         virtual int getFirstEtRing()  =0;
         virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)   =0;
 

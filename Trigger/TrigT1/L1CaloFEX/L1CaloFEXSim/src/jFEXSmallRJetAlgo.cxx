@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXSmallRJetAlgo - Algorithm for small R jet Algorithm in jFEX
@@ -53,13 +53,20 @@ StatusCode LVL1::jFEXSmallRJetAlgo::safetyTest(){
   return StatusCode::SUCCESS;
 }
 
-void LVL1::jFEXSmallRJetAlgo::setup(int inputTable[7][7]) {
+void LVL1::jFEXSmallRJetAlgo::setup(int inputTable[7][7], int inputTableDisplaced[7][7]) {
 
     for(int phi=0; phi<7; phi++) {
         for (int eta=0; eta<7; eta++) {
             m_jFEXalgoTowerID[phi][eta] = inputTable[6-phi][eta];
         }
     }
+
+    for(int phi=0; phi<7; phi++) {
+        for (int eta=0; eta<7; eta++) {
+            m_jFEXalgoTowerID_displaced[phi][eta] = inputTableDisplaced[6-phi][eta];
+        }
+    }
+    
 }
 
 
@@ -111,69 +118,46 @@ int LVL1::jFEXSmallRJetAlgo::getRealEta(unsigned int TTID ) {
 void LVL1::jFEXSmallRJetAlgo::buildSeeds()
 {
 
-    m_seedSet = false;
-    m_LMDisplaced = false;
     for(int mphi = 1; mphi < 6; mphi++) {
         for(int meta = 1; meta< 6; meta++) {
             
             int seedTotalET = 0;
+            int seedTotalET_displaced = 0;
             for(int iphi = -1; iphi < 2; iphi++) {
                 for(int ieta = -1; ieta < 2; ieta++) {
                     //for that TT, build the seed
                     //here we sum TT ET to calculate seed
-                    int et_tmp = 0;
-                    et_tmp = getTTowerET(m_jFEXalgoTowerID[mphi + iphi][meta + ieta]);
-                    seedTotalET += et_tmp;
+                    seedTotalET += getTTowerET(m_jFEXalgoTowerID[mphi + iphi][meta + ieta]);
+                    seedTotalET_displaced += getTTowerET(m_jFEXalgoTowerID_displaced[mphi + iphi][meta + ieta]);
                 }
             }
             m_jFEXalgoSearchWindowSeedET[mphi -1][meta -1] = seedTotalET;
+            m_jFEXalgoSearchWindowSeedET_displaced[mphi -1][meta -1] = seedTotalET_displaced;
         }
     }
-
-
-    // checking diagonals, can be shifted
-    unsigned int centralTT_ET = getTTowerET(m_jFEXalgoTowerID[3][3]);
-    unsigned int below_centralTT_ET = getTTowerET(m_jFEXalgoTowerID[4][2]);
-    unsigned int avobe_centralTT_ET = getTTowerET(m_jFEXalgoTowerID[2][4]);
-    unsigned int avobe_seed_ET = m_jFEXalgoSearchWindowSeedET[1][3];
-    unsigned int central_seed_ET = m_jFEXalgoSearchWindowSeedET[2][2];
-
-    if( centralTT_ET < below_centralTT_ET or (centralTT_ET < avobe_centralTT_ET and central_seed_ET<=avobe_seed_ET)) {
-        m_LMDisplaced = true;
-    }
-    
-    m_seedSet = true;
 }
 
 
-//check if central TT is a local maxima
-bool LVL1::jFEXSmallRJetAlgo::isSeedLocalMaxima() {
-    
-    
-    if(m_seedSet == false) {
-        ATH_MSG_DEBUG("Local Maxima not checked due to seed not calculated.");
-    }
-    else {
+bool LVL1::jFEXSmallRJetAlgo::CalculateLM(int mymatrix[5][5]) {
 
-        //here put the 24 conditions to determine if the TT seed is a local maxima.
-        int central_seed = m_jFEXalgoSearchWindowSeedET[2][2];
-        for (int iphi = 0; iphi < 5; iphi++) {
-            for (int ieta = 0; ieta < 5; ieta++) {
-                //avoid comparing central seed to itself
-                if ((ieta == 2) && (iphi == 2)) {
-                    continue;
+    //here put the 24 conditions to determine if the TT seed is a local maxima.
+    int central_seed = mymatrix[2][2];
+    for (int iphi = 0; iphi < 5; iphi++) {
+        for (int ieta = 0; ieta < 5; ieta++) {
+            //avoid comparing central seed to itself
+            if ((ieta == 2) && (iphi == 2)) {
+                continue;
+            }
+            //strictly less than central
+            if( (iphi >= ieta) && !(ieta == 3 && iphi == 3) && !(ieta == 4 && iphi == 4) ) {
+                if(central_seed< mymatrix[iphi][ieta]) {
+                    return false;
                 }
-                //strictly less than central
-                if( (iphi >= ieta) && !(ieta == 3 && iphi == 3) && !(ieta == 4 && iphi == 4) ) {
-                    if(central_seed< m_jFEXalgoSearchWindowSeedET[iphi][ieta]) {
-                        return false;
-                    }
-                }
-                //less than or equal to central
-                if((ieta > iphi) || (ieta == 3 && iphi == 3) || (ieta == 4 && iphi == 4)) {
-                    if(central_seed<=m_jFEXalgoSearchWindowSeedET[iphi][ieta]) {
-                        return false;
-                    }
+            }
+            //less than or equal to central
+            if((ieta > iphi) || (ieta == 3 && iphi == 3) || (ieta == 4 && iphi == 4)) {
+                if(central_seed <= mymatrix[iphi][ieta]) {
+                    return false;
                 }
             }
         }
@@ -182,10 +166,16 @@ bool LVL1::jFEXSmallRJetAlgo::isSeedLocalMaxima() {
     return true;
 }
 
+//check if central TT is a local maxima
+bool LVL1::jFEXSmallRJetAlgo::isSeedLocalMaxima() {
+    
+    bool isCentralLM   = CalculateLM(m_jFEXalgoSearchWindowSeedET) && (getTTowerET(m_jFEXalgoTowerID[3][3]) >= getTTowerET(m_jFEXalgoTowerID[4][2]));
+    bool isDisplacedLM = CalculateLM(m_jFEXalgoSearchWindowSeedET_displaced) && (getTTowerET(m_jFEXalgoTowerID[3][3]) >  getTTowerET(m_jFEXalgoTowerID[2][4]));
 
-bool LVL1::jFEXSmallRJetAlgo::checkDisplacedLM()
-{
-   return m_LMDisplaced;
+    if(isCentralLM || isDisplacedLM){
+        return true;
+    }
+    return false;
 }
 
 
