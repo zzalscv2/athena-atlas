@@ -76,7 +76,7 @@ namespace {
 
 GlobalLargeRDNNCalibration::GlobalLargeRDNNCalibration()
   : JetCalibrationStep::JetCalibrationStep("GlobalLargeRDNNCalibration/GlobalLargeRDNNCalibration"),
-    m_config(nullptr), m_calibArea(""), m_dev(false)
+    m_config(nullptr), m_calibArea("")
 {
 }
 
@@ -84,13 +84,13 @@ GlobalLargeRDNNCalibration::GlobalLargeRDNNCalibration()
 // Constructor
 GlobalLargeRDNNCalibration::GlobalLargeRDNNCalibration(const std::string& name)
   : JetCalibrationStep::JetCalibrationStep(name.c_str()),
-    m_config(nullptr), m_calibArea(""), m_dev(false)
+    m_config(nullptr), m_calibArea("")
 {
 }
 
-GlobalLargeRDNNCalibration::GlobalLargeRDNNCalibration(const std::string& name, TEnv * config, TString calibArea, bool dev)
+GlobalLargeRDNNCalibration::GlobalLargeRDNNCalibration(const std::string& name, TEnv * config, TString calibArea, bool /*dev*/)
   : JetCalibrationStep::JetCalibrationStep( name.c_str() ),
-    m_config(config), m_calibArea(calibArea), m_dev(dev)
+    m_config(config), m_calibArea(calibArea)
 {
 }
 

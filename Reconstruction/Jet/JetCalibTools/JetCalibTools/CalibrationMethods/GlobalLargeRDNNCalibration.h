@@ -121,8 +121,6 @@ public:
     
     TEnv * m_config;
     TString m_calibArea;
-    bool m_dev;
-
 
 
 }; // Class GlobalLargeRDNNCalibration
