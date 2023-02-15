@@ -17,6 +17,7 @@
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
 #include "MuonReadoutGeometry/RpcDetectorElement.h"
 #include "PathResolver/PathResolver.h"
+#include "StoreGate/ReadDecorHandle.h"
 #include "xAODTracking/TrackParticlexAODHelpers.h"
 
 // Boost package to read XML
@@ -43,7 +44,10 @@ StatusCode RpcTrackAnaAlg::initialize ()
 
   ATH_CHECK( detStore()->retrieve(m_muonMgr) );
   ATH_CHECK( m_idHelperSvc.retrieve());
-  ATH_CHECK( m_eventInfo.initialize() );
+
+  ATH_CHECK( m_beamSigmaX.initialize() );
+  ATH_CHECK( m_beamSigmaY.initialize() );
+  ATH_CHECK( m_beamSigmaXY.initialize() );
 
   ATH_CHECK( m_MuonRoIContainerKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_MuonContainerKey.initialize() );
@@ -280,9 +284,6 @@ StatusCode RpcTrackAnaAlg::fillHistograms(const EventContext& ctx) const
 {
   using namespace Monitored;
 
-  SG::ReadHandle<xAOD::EventInfo>         eventInfo(m_eventInfo, ctx);
-  int e_lumiBlock                            = eventInfo->lumiBlock();
-
   if(m_plotMuonEff){
     ATH_CHECK( fillMuonExtrapolateEff(ctx) );
   }
@@ -292,8 +293,8 @@ StatusCode RpcTrackAnaAlg::fillHistograms(const EventContext& ctx) const
   }
 
   auto tool   = getGroup(m_packageName);
-  auto evtLB  = Scalar<int>("evtLB", e_lumiBlock);
-  auto run    = Scalar<int>("run",   eventInfo->runNumber());
+  auto evtLB  = Scalar<int>("evtLB", ctx.eventID().lumi_block());
+  auto run    = Scalar<int>("run", ctx.eventID().run_number());
   fill(tool, evtLB, run);
   
   return StatusCode::SUCCESS;
@@ -325,10 +326,13 @@ StatusCode RpcTrackAnaAlg::fillMuonExtrapolateEff(const EventContext& ctx) const
   // 
   // read beam position sigma from eventinfo
   // 
-  SG::ReadHandle<xAOD::EventInfo>    eventInfo(m_eventInfo, ctx);
-  const double beamPosSigmaX  = eventInfo->beamPosSigmaX();
-  const double beamPosSigmaY  = eventInfo->beamPosSigmaY();
-  const double beamPosSigmaXY = eventInfo->beamPosSigmaXY();
+  SG::ReadDecorHandle<xAOD::EventInfo, float> beamSigmaX(m_beamSigmaX, ctx);
+  SG::ReadDecorHandle<xAOD::EventInfo, float> beamSigmaY(m_beamSigmaY, ctx);
+  SG::ReadDecorHandle<xAOD::EventInfo, float> beamSigmaXY(m_beamSigmaXY, ctx);
+
+  const float beamPosSigmaX  = beamSigmaX(0);
+  const float beamPosSigmaY  = beamSigmaY(0);
+  const float beamPosSigmaXY = beamSigmaXY(0);
 
   // 
   // read muon
@@ -572,8 +576,7 @@ StatusCode RpcTrackAnaAlg::fillHistPRD(const EventContext& ctx) const
   SG::ReadHandle<Muon::RpcPrepDataContainer> rpcContainer(m_rpcPrdKey, ctx);
   const RpcIdHelper& rpcIdHelper = m_idHelperSvc->rpcIdHelper();
 
-  SG::ReadHandle<xAOD::EventInfo>    eventInfo(m_eventInfo, ctx);
-  const int             i_lb      = eventInfo->lumiBlock();
+  const int             i_lb      = ctx.eventID().lumi_block();
   std::vector<double>   v_prdTime = {}; 
 
   auto prd_sec_all        = Scalar<int>("prd_sec",         0 );
@@ -1003,8 +1006,7 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx, std::vecto
   using namespace Monitored;
   auto tool = getGroup(m_packageName);
 
-  SG::ReadHandle<xAOD::EventInfo>         eventInfo(m_eventInfo, ctx);
-  int lumiBlock                            = eventInfo->lumiBlock();
+  int lumiBlock = ctx.eventID().lumi_block();
 
   SG::ReadHandle<Muon::RpcPrepDataContainer> rpcContainer(m_rpcPrdKey, ctx);
   const RpcIdHelper& rpcIdHelper = m_idHelperSvc->rpcIdHelper();

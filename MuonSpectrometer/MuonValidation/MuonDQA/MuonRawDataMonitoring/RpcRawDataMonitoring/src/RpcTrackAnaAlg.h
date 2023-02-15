@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RPCRAWDATAMONITORING_RPCTRACKANAALG_H
@@ -16,6 +16,7 @@
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
 
@@ -120,7 +121,6 @@ class RpcTrackAnaAlg : public AthMonitorAlgorithm
 
     ///////////////////////////////////////////////////////////////////
     ServiceHandle<Muon::IMuonIdHelperSvc>         m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-    SG::ReadHandleKey<xAOD::EventInfo>            m_eventInfo {this,"EventInfo","EventInfo","event info"};
     
     const RpcIdHelper                             *m_rpcIdHelper = nullptr;
     const MuonGM::MuonDetectorManager             *m_muonMgr = nullptr;
@@ -130,6 +130,13 @@ class RpcTrackAnaAlg : public AthMonitorAlgorithm
     SG::ReadHandleKey<xAOD::MuonContainer>        m_MuonContainerKey { this, "MuonContainerKey", "Muons", "Key for Offline muon track Containers" };
     SG::ReadHandleKey<Muon::RpcPrepDataContainer> m_rpcPrdKey {this,"RpcPrepDataContainer","RPC_Measurements","RPC PRDs"};
     SG::ReadHandleKey<xAOD::VertexContainer>      m_PrimaryVertexContainerKey{this,"PrimaryVertexContainerName","PrimaryVertices","Primary Vertex Container"};
+
+    // accessors for beam spot uncertainty
+    SG::ReadDecorHandleKey<xAOD::EventInfo> m_beamSigmaX{this, "beamPosSigmaX", "EventInfo.beamPosSigmaX", "Beam spot position sigma in X"};
+    SG::ReadDecorHandleKey<xAOD::EventInfo> m_beamSigmaY{this, "beamPosSigmaY", "EventInfo.beamPosSigmaY", "Beam spot position sigma in Y"};
+    // note that this last entry is a covariance: the units are mm^2,
+    // whereas the above have units of mm
+    SG::ReadDecorHandleKey<xAOD::EventInfo> m_beamSigmaXY{this, "beamPosSigmaXY", "EventInfo.beamPosSigmaXY", "Beam spot covariance in XY"};
 
     RpcPanelMap              m_rpcPanelMap;
 
