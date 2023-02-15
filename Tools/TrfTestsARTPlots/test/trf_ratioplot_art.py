@@ -136,7 +136,7 @@ def ratioplot(filenameref, filenametest, allhistos, campaignname, ratiotitle):
 
     # Kolmogorov-Smirnoff
     res = h1.KolmogorovTest(h2)
-    print ("*** Kolmogorov-Smirnoff h1 vs. h2 = %s" %ks )
+    print ("*** Kolmogorov-Smirnoff h1 vs. h2 %s = %s" % (histoname, res ))
     if res < ks:
       ks = res
 
