@@ -103,14 +103,15 @@ def LArIdMapCfg(configFlags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.lock()
+    flags=initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.lock()
 
-    acc = LArOnOffIdMappingCfg( ConfigFlags )
-    acc.merge(LArFebRodMappingCfg(ConfigFlags))
-    acc.merge(LArCalibIdMappingCfg(ConfigFlags))
+    acc = LArOnOffIdMappingCfg( flags )
+    acc.merge(LArFebRodMappingCfg(flags))
+    acc.merge(LArCalibIdMappingCfg(flags))
     acc.store( open( "test.pkl", "wb" ) )
     print ("All OK")
