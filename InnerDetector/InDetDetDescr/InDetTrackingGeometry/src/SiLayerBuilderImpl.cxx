@@ -1167,7 +1167,7 @@ InDet::SiLayerBuilderImpl::cylindricalLayersImpl(const InDetDD::SiDetectorElemen
           new Trk::CylinderBounds(layerRadius[layerCounter],
                                   currentLayerExtend),
           std::move(currentBinnedArray), layerMaterial,
-          layerThickness[layerCounter], std::move(olDescriptor));
+          currentLayerThickness, std::move(olDescriptor));
       // register the layer to the surfaces
       registerSurfacesToLayer(layerSurfaces,*activeLayer);
 

@@ -19,6 +19,7 @@ if ConfigFlags.ITk.Geometry.AllLocal:
   setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
   ConfigFlags.TrackingGeometry.MaterialSource = "Input"
 
+ConfigFlags.Detector.GeometryHGTD = False
 
 ConfigFlags.GeoModel.AtlasVersion = "ATLAS-P2-RUN4-01-00-00"
 ConfigFlags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
@@ -71,6 +72,3 @@ cfg.merge(topoAcc)
 cfg.printConfig()
 
 cfg.run(10)
-f=open("ExtrapolationEngineTestConfig.pkl","wb")
-cfg.store(f)
-f.close()
