@@ -91,19 +91,21 @@ def LArShapeDumperCfg(flags):
 
 if __name__=="__main__":
     
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags=initConfigFlags()
+
     from LArShapeDumperFlags import addShapeDumpFlags
-    addShapeDumpFlags(ConfigFlags)
+    addShapeDumpFlags(flags)
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files=defaultTestFiles.RAW
-    ConfigFlags.LAr.ROD.forceIter=True
+    flags.Input.Files=defaultTestFiles.RAW
+    flags.LAr.ROD.forceIter=True
 
-    ConfigFlags.lock()
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     
-    cfg=MainServicesCfg(ConfigFlags)
-    cfg.merge(LArShapeDumperCfg(ConfigFlags))
+    cfg=MainServicesCfg(flags)
+    cfg.merge(LArShapeDumperCfg(flags))
 
     cfg.run(10)
