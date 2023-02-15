@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # Utilities used in athenaHLT.py
 #
@@ -6,6 +6,8 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger('athenaHLT')
 
 from functools import cache
+import os
+import sys
 
 class CondDB:
    _run2 = 236108
@@ -70,12 +72,63 @@ def get_trigconf_keys(run_number, lb_number):
 
    return d
 
+
+def getCACfg(jopath):
+   """Return the CA Cfg function based on joboptions path.
+   The format is MODULE[.FNC]."""
+
+   import importlib
+
+   sys.path.append('.')   # temporarily add local directory to search path
+
+   # try to import module as given:
+   try:
+      fnc_name = None
+      module = importlib.import_module(jopath)
+   except ModuleNotFoundError:
+      if '.' not in jopath:
+         raise
+      # or interpret as module.fnc:
+      mod_name, fnc_name = jopath.rsplit('.', maxsplit=1)
+      module = importlib.import_module(mod_name)
+
+   sys.path.pop()
+
+   log.info("Loading %s.%s", module.__name__, fnc_name)
+   return getattr(module, fnc_name)
+
+
+def reload_from_json(filename, suppress_args=[]):
+   """Re-launch athenaHLT from the given json file. Optionally suppress
+   the list of command line args (e.g. flags)."""
+
+   # Remove all command line args that are not compatible with running from JSON:
+   argv = []
+   for arg_index, arg in enumerate(sys.argv):
+      if arg == '--dump-config-reload':
+         continue
+      if arg in ['--precommand', '-c', '--postcommand', '-C']:
+         continue
+      if arg_index > 0 and sys.argv[arg_index-1] in ['--precommand', '-c', '--postcommand', '-C']:
+         continue
+      if arg.startswith('--precommand') or arg.startswith('--postcommand'):
+         continue
+      if arg in suppress_args:
+         continue
+      argv.append(arg)
+
+   argv[-1] = filename
+   log.info('Restarting %s from %s ...', argv[0], argv[-1])
+   sys.stdout.flush()
+   sys.stderr.flush()
+   os.execvp(argv[0], argv)
+
+
 #
 # Testing (used as ctest)
 #
 if __name__=='__main__':
    # Can be used as script, e.g.: python -m TrigCommon.AthHLT 327265
-   import sys
    if len(sys.argv)>1:
       log.info('SOR parameters: %s', get_sor_params(int(sys.argv[1])))
       sys.exit(0)

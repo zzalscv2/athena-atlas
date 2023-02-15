@@ -177,23 +177,8 @@ else:
       if PscConfig.exitAfterDump:
          theApp.exit(0)
       elif PscConfig.reloadAfterDump:
-         argv = []
-         for arg_index, arg in enumerate(sys.argv):
-            if arg == '--dump-config-reload':
-               continue
-            if arg in ['--precommand', '-c', '--postcommand', '-C']:
-               continue
-            if arg_index > 0 and sys.argv[arg_index-1] in ['--precommand', '-c', '--postcommand', '-C']:
-               continue
-            if arg.startswith('--precommand') or arg.startswith('--postcommand'):
-               continue
-            argv.append(arg)
-
-         argv[-1] = fname+'.json'
-         print('Restarting %s from %s ...' % (argv[0], argv[-1]))
-         sys.stdout.flush()
-         sys.stderr.flush()
-         os.execvp(argv[0], argv)
+         from TrigCommon.AthHLT import reload_from_json
+         reload_from_json(fname+".json")
 
    else:
       # storeJobOptionsCatalogue calls setup() itself, so we only need it here

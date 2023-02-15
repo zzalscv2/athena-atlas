@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigPSC )
@@ -22,3 +22,8 @@ atlas_add_library( TrigPSC
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/*.py )
 
+# Tests:
+atlas_add_test( CASetup
+   SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/python/TrigPSCPythonCASetup.py
+                 AthExHelloWorld.HelloWorldConfig.HelloWorldCfg
+   POST_EXEC_SCRIPT noerror.sh )
