@@ -562,7 +562,7 @@ def CombinedMuonOutputCfg(flags):
 
     # FIXME! Next two lines are hack to remove derivation framework variables that are added by DRAW building and are supposed to be transient
     wp_decors = ["DFCommonMuonsTight", "DFCommonGoodMuon", "DFCommonMuonsMedium",
-                 "DFCommonMuonsLoose", "InnerDetectorPt", "MuonSpectrometerPt"]    
+                 "DFCommonMuonsLoose", "InnerDetectorPt", "MuonSpectrometerPt" , "isMedium_DRAWZmumu"]    
     #Remove GlobalFELinks and related variables - these are links between FlowElement (FE) containers created in jet finding and muons. 
     #Since these transient FE containers are not in the ESD/AOD, we should not write out these links.
     gpf_vars = [ "chargedGlobalFELinks", "neutralGlobalFELinks", "deltaR_muon_clus_GlobalFEalg", "muon_efrac_matched_GlobalFE"]
