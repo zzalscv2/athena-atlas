@@ -18,13 +18,9 @@ StatusCode LArFebErrorSummaryMaker::initialize()
 
   ATH_CHECK(detStore()->retrieve( m_onlineHelper ) );
 
-  if (m_checkAllFeb)
-    {
-      std::vector<HWIdentifier>::const_iterator it = m_onlineHelper->feb_begin();
-      std::vector<HWIdentifier>::const_iterator it_e = m_onlineHelper->feb_end();
-
-      for (;it!=it_e;++it){
-          m_all_febs.insert((*it).get_identifier32().get_compact());
+  if (m_checkAllFeb) {
+      for (const HWIdentifier id : m_onlineHelper->feb_range()) {
+          m_all_febs.insert(id.get_identifier32().get_compact());
       }
       ATH_MSG_INFO(" number of FEBs from LArOnlineID  "<< m_all_febs.size()  );
     }
@@ -56,17 +52,14 @@ StatusCode LArFebErrorSummaryMaker::initialize()
        ATH_MSG_WARNING("Missing FEB's will be not checked " );
      }
      // Now let's build the list of FEB's according partition
-     std::vector<HWIdentifier>::const_iterator it = m_onlineHelper->feb_begin();
-     std::vector<HWIdentifier>::const_iterator it_e = m_onlineHelper->feb_end();
-
-     for (;it!=it_e;++it){
-        if(m_isHec && m_onlineHelper->isHECchannel(*it)) { m_all_febs.insert((*it).get_identifier32().get_compact()); continue; }
-        if(m_isFcal && m_onlineHelper->isFCALchannel(*it)) { m_all_febs.insert((*it).get_identifier32().get_compact()); continue; }
-        if((m_isEmb && m_onlineHelper->isEMBchannel(*it) && (!m_onlineHelper->isPS(*it))) 
-              || (m_isEmec && m_onlineHelper->isEMECchannel(*it)) 
-              || (m_isEmPS && m_onlineHelper->isPS(*it) && (!m_onlineHelper->isEMBchannel(*it)))  ) { 
-           if(m_isAside && m_onlineHelper->pos_neg(*it) == 1) {m_all_febs.insert((*it).get_identifier32().get_compact()); continue; }
-           if(m_isCside && m_onlineHelper->pos_neg(*it) == 0) {m_all_febs.insert((*it).get_identifier32().get_compact()); continue; }
+     for (const HWIdentifier id : m_onlineHelper->feb_range()) {
+        if(m_isHec && m_onlineHelper->isHECchannel(id)) { m_all_febs.insert(id.get_identifier32().get_compact()); continue; }
+        if(m_isFcal && m_onlineHelper->isFCALchannel(id)) { m_all_febs.insert(id.get_identifier32().get_compact()); continue; }
+        if((m_isEmb && m_onlineHelper->isEMBchannel(id) && (!m_onlineHelper->isPS(id))) 
+              || (m_isEmec && m_onlineHelper->isEMECchannel(id)) 
+              || (m_isEmPS && m_onlineHelper->isPS(id) && (!m_onlineHelper->isEMBchannel(id)))  ) { 
+           if(m_isAside && m_onlineHelper->pos_neg(id) == 1) {m_all_febs.insert(id.get_identifier32().get_compact()); continue; }
+           if(m_isCside && m_onlineHelper->pos_neg(id) == 0) {m_all_febs.insert(id.get_identifier32().get_compact()); continue; }
         }
      }
   }
@@ -315,20 +308,10 @@ StatusCode LArFebErrorSummaryMaker::execute(const EventContext& ctx) const
 }
 
 
-bool LArFebErrorSummaryMaker::masked (unsigned int hid, const std::vector<unsigned int>& v_feb) const {
+bool LArFebErrorSummaryMaker::masked (unsigned int hid, const std::set<unsigned int>& v_feb) const {
 
-  bool is_masked = false ;
-
-  if (v_feb.size()==0 ) return false ; 
-
-  std::vector<unsigned int>::const_iterator it = find(v_feb.begin(),v_feb.end(), hid); 
-  if ( it != v_feb.end() ){
-    // masked 
-    is_masked  = true  ; 
-  }
-
-  return is_masked; 
-
+  //return v_feb.contains(hid); //C++20 only ..
+  return v_feb.find(hid) != v_feb.end();
 }
 
 StatusCode LArFebErrorSummaryMaker::finalize()
