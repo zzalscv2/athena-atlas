@@ -462,7 +462,7 @@ std::vector< std::vector< int > > PixelPrepDataToxAOD::addSDOInformation( xAOD::
       std::vector< float > sdoDepEnergy;
       for( const auto& deposit : pos->second.getdeposits() ){
         if(deposit.first){
-          sdoDepBC.push_back( HepMC::barcode(deposit.first));
+          sdoDepBC.push_back(deposit.first.barcode());
         } else {
           sdoDepBC.push_back( -1 );   
         }
