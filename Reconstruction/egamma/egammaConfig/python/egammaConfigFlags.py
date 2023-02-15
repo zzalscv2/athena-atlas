@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-import unittest
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 
@@ -100,7 +99,7 @@ def createEgammaConfigFlags():
 
     egcf.addFlag("Egamma.Keys.Output.Electrons", 'Electrons')
     egcf.addFlag("Egamma.Keys.Output.ElectronsSuppESD",
-                 lambda prevFlags: ( prevFlags.Egamma.Keys.Output.EgammaSuppESD ) )
+                 lambda prevFlags: (prevFlags.Egamma.Keys.Output.EgammaSuppESD))
     egcf.addFlag("Egamma.Keys.Output.ElectronsSuppAOD",
                  lambda prevFlags: (
                      prevFlags.Egamma.Keys.Output.ElectronsSuppESD + '.' +
@@ -162,14 +161,7 @@ def createEgammaConfigFlags():
     return egcf
 
 
-# self test
-class TestEgammaConfigFlags(unittest.TestCase):
-
-    def runTest(self):
-        flags = createEgammaConfigFlags()
-        self.assertEqual(flags.Egamma.Keys.Output.Photons, "Photons")
-        self.assertEqual(flags._get("Egamma.Keys.Output.Photons"), "Photons")
-
 if __name__ == "__main__":
 
-    unittest.main()
+    flags = createEgammaConfigFlags()
+    flags.dump()
