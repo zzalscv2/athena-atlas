@@ -12,8 +12,7 @@
 # FIXME need an AFP-specific single particle generator configuration
 AtlasG4_tf.py \
     --CA \
-    --preExec 'ConfigFlags.BField.solenoidOn=False;ConfigFlags.BField.barrelToroidOn=False;ConfigFlags.BField.endcapToroidOn=False;from SimulationConfig.SimEnums import VertexSource;ConfigFlags.Sim.VertexSource=VertexSource.AsGenerated;ConfigFlags.Sim.GenerationConfiguration="ParticleGun.ParticleGunConfig.ParticleGun_ALFA_SingleParticleCfg"' \
-    --outputHITSFile 'test.CA.HITS.pool.root' \
+    --preInclude 'ParticleGun.ParticleGunConfig.ALFA_SingleParticlePreInclude' \
     --maxEvents '3' \
     --randomSeed '10' \
     --geometryVersion 'ATLAS-R2-2015-03-01-00' \

@@ -11,7 +11,7 @@
 
 AtlasG4_tf.py \
     --CA \
-    --preExec 'ConfigFlags.BField.solenoidOn=False;ConfigFlags.BField.barrelToroidOn=False;ConfigFlags.BField.endcapToroidOn=False;from SimulationConfig.SimEnums import VertexSource;ConfigFlags.Sim.VertexSource=VertexSource.AsGenerated;ConfigFlags.Sim.GenerationConfiguration="ParticleGun.ParticleGunConfig.ParticleGun_ALFA_SingleParticleCfg"' \
+    --preInclude 'ParticleGun.ParticleGunConfig.ALFA_SingleParticlePreInclude' \
     --outputHITSFile 'test.CA.HITS.pool.root' \
     --maxEvents '3' \
     --randomSeed '10' \
