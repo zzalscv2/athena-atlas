@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkGlobalChi2Fitter/GXFTrajectory.h"
@@ -42,54 +42,52 @@ namespace Trk {
     m_caloelossstate = nullptr;
   } 
   
-  GXFTrajectory::GXFTrajectory(GXFTrajectory & rhs) {
-    m_straightline = rhs.m_straightline;
-    m_fieldprop = rhs.m_fieldprop;
-    m_ndof = rhs.m_ndof;
-    m_nperpars = rhs.m_nperpars;
-    m_nscatterers = rhs.m_nscatterers;
-    m_ncaloscatterers = rhs.m_ncaloscatterers;
-    m_nbrems = rhs.m_nbrems;
-    m_nupstreamstates = rhs.m_nupstreamstates;
-    m_nupstreamscatterers = rhs.m_nupstreamscatterers;
-    m_nupstreamcaloscatterers = rhs.m_nupstreamcaloscatterers;
-    m_nupstreambrems = rhs.m_nupstreambrems;
-    m_nsihits = rhs.m_nsihits;
-    m_ntrthits = rhs.m_ntrthits;
-    m_ntrtprechits = rhs.m_ntrtprechits;
-    m_ntrttubehits = rhs.m_ntrttubehits;
-    m_npseudo = rhs.m_npseudo;
-    m_nhits = rhs.m_nhits;
-    m_noutl = rhs.m_noutl;
-    m_nmeasoutl = rhs.m_nmeasoutl;
-    m_chi2 = rhs.m_chi2;
-    m_prevchi2 = rhs.m_prevchi2;
-    m_converged = rhs.m_converged;
-    m_prefit = rhs.m_prefit;
-    m_refpar.reset(rhs.m_refpar != nullptr ? rhs.m_refpar->clone() : nullptr);
-
+  GXFTrajectory::GXFTrajectory(GXFTrajectory & rhs)
+    : m_straightline (rhs.m_straightline),
+      m_fieldprop (rhs.m_fieldprop),
+      m_ndof (rhs.m_ndof),
+      m_chi2 (rhs.m_chi2),
+      m_prevchi2 (rhs.m_prevchi2),
+      m_nperpars (rhs.m_nperpars),
+      m_nscatterers (rhs.m_nscatterers),
+      m_ncaloscatterers (rhs.m_ncaloscatterers),
+      m_nbrems (rhs.m_nbrems),
+      m_nupstreamstates (rhs.m_nupstreamstates),
+      m_nupstreamscatterers (rhs.m_nupstreamscatterers),
+      m_nupstreamcaloscatterers (rhs.m_nupstreamcaloscatterers),
+      m_nupstreambrems (rhs.m_nupstreambrems),
+      m_nhits (rhs.m_nhits),
+      m_noutl (rhs.m_noutl),
+      m_nsihits (rhs.m_nsihits),
+      m_ntrthits (rhs.m_ntrthits),
+      m_ntrtprechits (rhs.m_ntrtprechits),
+      m_ntrttubehits (rhs.m_ntrttubehits),
+      m_npseudo (rhs.m_npseudo),
+      m_nmeasoutl (rhs.m_nmeasoutl),
+      m_refpar(rhs.m_refpar != nullptr ? rhs.m_refpar->clone() : nullptr),
+      m_converged (rhs.m_converged),
+      m_scatteringangles (rhs.m_scatteringangles),
+      m_scatteringsigmas (rhs.m_scatteringsigmas),
+      m_brems (rhs.m_brems),
+      m_res (rhs.m_res),
+      m_errors (rhs.m_errors),
+      m_weightresderiv (rhs.m_weightresderiv),
+      m_totx0 (rhs.m_totx0),
+      m_toteloss (rhs.m_toteloss),
+      m_mass (rhs.m_mass),
+      m_prefit (rhs.m_prefit),
+      m_caloelossstate (nullptr),
+      m_upstreammat (rhs.m_upstreammat)
+  {
     for (std::unique_ptr<GXFTrackState> & i : rhs.m_states) {
       m_states.push_back(std::make_unique<GXFTrackState>(*i));
     }
-    
-    m_scatteringangles = rhs.m_scatteringangles;
-    m_scatteringsigmas = rhs.m_scatteringsigmas;
-    m_brems = rhs.m_brems;
-    m_res = rhs.m_res;
-    m_errors = rhs.m_errors;
-    m_weightresderiv = rhs.m_weightresderiv;
-    m_totx0 = rhs.m_totx0;
-    m_toteloss = rhs.m_toteloss;
-    m_mass = rhs.m_mass;
-    m_caloelossstate = nullptr;
-    
+   
     if (rhs.m_caloelossstate != nullptr) {
       for (auto & state : m_states) {
         conditionalSetCalorimeterEnergyLossState(state.get());
       }
     }
-    
-    m_upstreammat = rhs.m_upstreammat;
   }
 
   GXFTrajectory & GXFTrajectory::operator =(GXFTrajectory & rhs) {
