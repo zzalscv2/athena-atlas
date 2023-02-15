@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
@@ -7,24 +7,29 @@ from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, pr
 from AthExHelloWorld.HelloWorldConfig import HelloWorldCfg
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
+# temporarily force no global config flags
+from AthenaConfiguration import AllConfigFlags
+del AllConfigFlags.ConfigFlags
+
 
 def fromRunArgs(runArgs):
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
-    commonRunArgsToFlags(runArgs, ConfigFlags)
+    commonRunArgsToFlags(runArgs, flags)
 
-    processPreInclude(runArgs, ConfigFlags)
-    processPreExec(runArgs, ConfigFlags)
+    processPreInclude(runArgs, flags)
+    processPreExec(runArgs, flags)
 
-    if '_ATHENA_GENERIC_INPUTFILE_NAME_' in ConfigFlags.Input.Files:
-        ConfigFlags.Input.Files = []
-    ConfigFlags.lock()
+    if '_ATHENA_GENERIC_INPUTFILE_NAME_' in flags.Input.Files:
+        flags.Input.Files = []
+    flags.lock()
 
-    cfg=MainServicesCfg(ConfigFlags)
-    cfg.merge(HelloWorldCfg())
+    cfg=MainServicesCfg(flags)
+    cfg.merge(HelloWorldCfg(flags))
 
-    processPostInclude(runArgs, ConfigFlags, cfg)
-    processPostExec(runArgs, ConfigFlags, cfg)
+    processPostInclude(runArgs, flags, cfg)
+    processPostExec(runArgs, flags, cfg)
 
     # Run the final accumulator
     sc = cfg.run()

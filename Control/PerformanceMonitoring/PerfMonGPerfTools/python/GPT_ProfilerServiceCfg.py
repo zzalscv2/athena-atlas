@@ -30,6 +30,6 @@ if __name__ == "__main__":
     flags = initConfigFlags()
     flags.Exec.MaxEvents = 10
     cfg = MainServicesCfg(flags)
-    cfg.merge(HelloWorldCfg())
+    cfg.merge(HelloWorldCfg(flags))
     cfg.merge(GPT_ProfilerServiceCfg(flags))
     cfg.run()
