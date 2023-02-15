@@ -48,7 +48,7 @@ def L1LegacyTopoSimulationCfg(flags):
                                                     InputDumpFile = "inputdump_legacy.txt",
                                                     EnableInputDump = flags.Trigger.enableL1TopoDump,
                                                     UseBitwise = flags.Trigger.enableL1TopoBWSimulation,
-                                                    #MonHistBaseDir = "L1/L1LegacyTopoAlgorithms"
+                                                    MonHistBaseDir = "L1/L1LegacyTopoAlgorithms"
                                                    )
 
     # No muon inputs to legacy Topo
@@ -437,7 +437,7 @@ if __name__ == '__main__':
   # phase1 mon
   from L1TopoOnlineMonitoring import L1TopoOnlineMonitoringConfig as TopoMonConfig
   acc.addEventAlgo(
-      TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/L1TopoOffline',True,True,True,True,args.forceCtp,algLogLevel),
+      TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/L1TopoOffline',True,True,True,True,True,args.forceCtp,algLogLevel),
       sequenceName="AthAlgSeq"
   )
   # legacy mon
