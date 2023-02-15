@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #=============================================================================
 # Skeleton file for running simulation and MC-overlay in one job for FastChain
@@ -70,16 +70,6 @@ if hasattr(runArgs, 'preInclude'):
     for cmd in runArgs.preInclude:
         include(cmd)
 
-# Post-include
-if hasattr(runArgs, "postInclude"):
-    for fragment in runArgs.postInclude:
-        include(fragment)
-
-# Post-exec
-if hasattr(runArgs, "postExec") and runArgs.postExec != 'NONE':
-    for cmd in runArgs.postExec:
-        exec(cmd)
-
 # Pre-exec for simulation
 if hasattr(runArgs, "preSimExec"):
     FastChainLog.info("transform pre-sim exec")
@@ -124,6 +114,12 @@ elif hasattr(runArgs,'jobNumber'):
 else:
     #FastChainLog.info( 'Run number should be defined!' )
     raise RuntimeError("No run number defined!")
+
+# runNumber is MC channel number in reco
+if hasattr(runArgs, 'runNumber'):
+    # always set it in legacy config
+    athenaCommonFlags.MCChannelNumber.set_Value(runArgs.runNumber)
+    FastChainLog.info('Got MC channel number %d from runNumber', athenaCommonFlags.MCChannelNumber())
 
 # Handle cosmics track record
 if beamFlags.Beam.beamType.get_Value() == 'cosmics':
@@ -613,3 +609,15 @@ digitizationFlags.rndmSeedList.printSeeds()
 
 ServiceMgr.MessageSvc.OutputLevel = INFO
 ServiceMgr.MessageSvc.Format = "% F%45W%S%5W%e%s%7W%R%T %0W%M"
+
+# Post-include
+if hasattr(runArgs, "postInclude"):
+    for fragment in runArgs.postInclude:
+        include(fragment)
+
+# Post-exec
+if hasattr(runArgs, "postExec"):
+    FastChainLog.info("transform post-exec")
+    for cmd in runArgs.postExec:
+        exec(cmd)
+
