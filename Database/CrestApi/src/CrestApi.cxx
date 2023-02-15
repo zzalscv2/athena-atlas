@@ -17,8 +17,6 @@
 #include <filesystem>
 #include <iostream>
 
-#include <sstream>
-
 #include <CrestApi/picosha2.h>
 
 #include <cstdio>
@@ -68,6 +66,15 @@ namespace Crest {
   CrestClient::~CrestClient() {
     flush();
   }
+
+std::string CrestClient::make_url(const std::string &address) const{
+  std::string str("http://");
+  str += m_host;
+  str += ':';
+  str += m_port;
+  str += address;
+  return str;
+}
 
 //==================================
 //  TAG METHODS
@@ -1250,11 +1257,10 @@ namespace Crest {
     std::string stt;
     struct curl_slist* headers = NULL;
     if (curl) {
-      std::ostringstream url;
+      std::string url = make_url(current_path);
       std::string s;
-      url << "http://" << m_host << ':' << m_port << current_path;
 
-      curl_easy_setopt(curl, CURLOPT_URL, url.str().c_str());
+      curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
       headers = curl_slist_append(headers, "Accept: */*");
       headers = curl_slist_append(headers, "Content-Type:  multipart/form-data");
       headers = curl_slist_append(headers, "Expect:");
@@ -1320,12 +1326,11 @@ namespace Crest {
     std::string stt;
     struct curl_slist* headers = NULL;
     if (curl) {
-      std::ostringstream url;
+      std::string url = make_url(sanitisedPath);
       std::string s;
-      url << "http://" << m_host << ':' << m_port << sanitisedPath;
-      std::cout << "cURL request to " << url.str() << std::endl;
+      std::cout << "cURL request to " << url << std::endl;
 
-      curl_easy_setopt(curl, CURLOPT_URL, url.str().c_str());
+      curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
       if (js.is_null()) {
         if (action == DELETE) curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
       } else {
@@ -1523,16 +1528,15 @@ namespace Crest {
 
     struct curl_slist* headers = NULL;
     if (curl) {
-      std::ostringstream url;
+      std::string url = make_url(current_path);
       std::string s;
-      url << "http://" << m_host << ':' << m_port << current_path;
 
 
       // First set the URL that is about to receive our POST. This URL can
       // just as well be a https:
       // URL if that is what should receive the data.
 
-      curl_easy_setopt(curl, CURLOPT_URL, url.str().c_str());
+      curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
       headers = curl_slist_append(headers, "X-Crest-PayloadFormat: JSON");
       headers = curl_slist_append(headers, "Accept: */*");
       headers = curl_slist_append(headers, "Content-Type:  multipart/form-data");
@@ -2072,7 +2076,11 @@ namespace Crest {
       return;
     }
 
-    std::string current_path = s_PATH + s_TAG_PATH + '/' + tagname + s_META_PATH;
+    std::string current_path = s_PATH;
+    current_path += s_TAG_PATH;
+    current_path += '/';
+    current_path += tagname;
+    current_path += s_META_PATH;
 
     std::string retv;
 

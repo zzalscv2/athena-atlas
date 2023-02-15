@@ -47,7 +47,7 @@ namespace IOVDbNamespace{
         } else {
             rangespec=chanspec;
         }
-        if (rangespec!="") {
+        if (!rangespec.empty()) {
             // parse the range specification, look for : separator between limits
             std::string::size_type icol=rangespec.find(':');
             int lower,upper;

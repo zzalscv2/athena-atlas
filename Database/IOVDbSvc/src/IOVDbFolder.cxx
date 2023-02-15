@@ -273,7 +273,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     }
 
     size_t indIOV = 0;
-    for(auto iovhash : iovHashVect) {
+    for(const auto& iovhash : iovHashVect) {
       if(vkey >= iovhash.first.second) {
 	++indIOV;
 	continue;
