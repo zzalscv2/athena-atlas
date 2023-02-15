@@ -142,10 +142,7 @@ StatusCode LArADC2MeVCondAlg::execute(const EventContext& ctx) const{
 
   std::vector<float> ADC2MeV; //output data, overwritten in each loop iteration (avoid re-allocation)
 
-  it  = m_larOnlineID->channel_begin();
-  it_e= m_larOnlineID->channel_end();
-  for (;it!=it_e;++it) {
-    const HWIdentifier chid=*it;
+ for (const HWIdentifier chid : m_larOnlineID->channel_range()) {
     const IdentifierHash hid=m_larOnlineID->channel_Hash(chid);
 
     //Check if connected:
