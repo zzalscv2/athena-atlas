@@ -157,18 +157,12 @@ namespace Muon {
                     m_truthTrajectoryBuilder->buildTruthTrajectory(truthTrajectory.get(), genParticle);
                     if (!truthTrajectory->empty()) {
                         // always use barcode of the 'final' particle in chain in map
-                        barcode = HepMC::barcode(truthTrajectory->front());
+                        barcode = truthTrajectory->front().barcode();
 
                         if (msgLvl(MSG::VERBOSE)) {
-#ifdef HEPMC3
                             ATH_MSG_VERBOSE(" found GenParticle: size " << truthTrajectory->size() << " fs barcode " << barcode << " pdg "
                                                                         << truthTrajectory->front()->pdg_id() << " p "
-                                                                        << truthTrajectory->front()->momentum().length());
-#else
-                            ATH_MSG_VERBOSE(" found GenParticle: size " << truthTrajectory->size() << " fs barcode " << barcode << " pdg "
-                                                                        << truthTrajectory->front()->pdg_id() << " p "
-                                                                        << truthTrajectory->front()->momentum().rho());
-#endif
+                                                                        << truthTrajectory->front()->momentum());
                             if (truthTrajectory->front()->production_vertex()) {
                                 ATH_MSG_VERBOSE(" vertex: r  " << truthTrajectory->front()->production_vertex()->position().perp() << " z "
                                                                << truthTrajectory->front()->production_vertex()->position().z());
@@ -179,16 +173,11 @@ namespace Muon {
                         std::vector<HepMcParticleLink>::const_iterator pit = truthTrajectory->begin();
                         std::vector<HepMcParticleLink>::const_iterator pit_end = truthTrajectory->end();
                         for (; pit != pit_end; ++pit) {
-                            int code = HepMC::barcode(*pit);
+                            int code = (*pit).barcode();
 
                             if (msgLvl(MSG::VERBOSE) && code != barcode) {
-#ifdef HEPMC3
                                 ATH_MSG_VERBOSE("  secondary barcode: " << code << " pdg " << (*pit)->pdg_id() << " p "
-                                                                        << (*pit)->momentum().length());
-#else
-                                ATH_MSG_VERBOSE("  secondary barcode: " << code << " pdg " << (*pit)->pdg_id() << " p "
-                                                                        << (*pit)->momentum().rho());
-#endif
+                                                                        << (*pit)->momentum());
                                 if ((*pit)->production_vertex())
                                     ATH_MSG_VERBOSE(" vertex: r  " << (*pit)->production_vertex()->position().perp() << " z "
                                                                    << (*pit)->production_vertex()->position().z());
@@ -685,7 +674,7 @@ namespace Muon {
         bool foundBC = false;
         for (const auto& pit : traj) {
             if (!pit) continue;
-            if (HepMC::barcode(pit) == barcodeIn || foundBC) {
+            if (pit.barcode() == barcodeIn || foundBC) {
                 foundBC = true;
                 ATH_MSG_DEBUG("getMother() : " << pit );
                 if (pit->pdg_id() != pdgFinal) {  // the first case a track had a different flavour
@@ -705,7 +694,7 @@ namespace Muon {
         bool foundBC = false;
         for (const auto& pit : traj) {
             if (!pit) continue;
-            if (HepMC::barcode(pit) == barcodeIn || foundBC) {
+            if (pit.barcode() == barcodeIn || foundBC) {
                 foundBC = true;
                 if (pit->status() > 1) {  // first non final state particle
 #ifdef HEPMC3
@@ -730,7 +719,7 @@ namespace Muon {
         double ePrev = 0.;
         HepMC::ConstGenParticlePtr theFirst{nullptr};
         for (auto pit = traj.begin(); pit != traj.end(); ++pit) {
-            if (HepMC::barcode(*pit) == barcodeIn || foundBC) {
+            if ((*pit).barcode() == barcodeIn || foundBC) {
 #ifdef HEPMC3
                 if (!foundBC) {
                     foundBC = true;
