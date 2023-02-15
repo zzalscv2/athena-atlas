@@ -194,8 +194,8 @@ def InDetTrackRecoCfg(flags):
 
     from InDetConfig.SiliconPreProcessing import InDetRecPreProcessingSiliconCfg
     result.merge(InDetRecPreProcessingSiliconCfg(flags))
-
-
+    from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
+    result.merge(TRTPreProcessingCfg(flags))
 
 
     ClusterSplitProbContainer=''
