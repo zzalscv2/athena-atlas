@@ -1866,7 +1866,7 @@ bool FastShowerCellBuilderTool::Is_EM_Vertex(const HepMC::ConstGenVertexPtr& ver
     for(HepMC::GenVertex::particles_in_const_iterator pin=ver->particles_in_const_begin();pin!=ver->particles_in_const_end();++pin) {
       const HepMC::GenParticle* par=*pin;
 #endif
-      int absid=abs(par->pdg_id());
+      int absid=std::abs(par->pdg_id());
       if(!(absid==11 || absid==22)) return false;
     }
     for(const auto& par_out: *ver) {
