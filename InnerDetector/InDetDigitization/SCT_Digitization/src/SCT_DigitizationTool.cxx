@@ -804,8 +804,7 @@ void SCT_DigitizationTool::addSDO(SiChargedDiodeCollection* collection, SG::Writ
       if (theDeposit != depositsR_end) {
         (*theDeposit).second += i_ListOfCharges->charge();
       } else { // create a new deposit
-        InDetSimData::Deposit deposit(trkLink, i_ListOfCharges->charge());
-        deposits.push_back(deposit);
+        deposits.push_back(InDetSimData::Deposit(trkLink, i_ListOfCharges->charge()));
       }
     }
 
