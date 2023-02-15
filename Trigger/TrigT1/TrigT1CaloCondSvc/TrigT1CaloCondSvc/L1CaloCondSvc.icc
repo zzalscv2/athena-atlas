@@ -308,7 +308,7 @@ StatusCode L1CaloCondSvc::registerCondition(T*& pObj, const std::string& mykey) 
     // Used for L1Calo Overlay where we have both data and MC databases
     
     // Update for PprChanCalib
-    if (mykey!="" && mykey.find("PprChanCalib")!=std::string::npos){
+    if (!mykey.empty() && mykey.find("PprChanCalib")!=std::string::npos){
         ATH_MSG_INFO("Overriding default keys for PprChanCalib that were:");
         for (auto it=vCoolInputKeys.begin();it!=vCoolInputKeys.end();++it) {ATH_MSG_INFO(*it);}
         //Now set to specified key only
@@ -316,7 +316,7 @@ StatusCode L1CaloCondSvc::registerCondition(T*& pObj, const std::string& mykey) 
     }
     
     // Update for PprChanDefaults
-    if (mykey!="" && mykey.find("PprChanDefaults")!=std::string::npos){
+    if (!mykey.empty() && mykey.find("PprChanDefaults")!=std::string::npos){
         ATH_MSG_INFO("Overriding default keys for PprChanDefaults that were:");
         for (auto it=vCoolInputKeys.begin();it!=vCoolInputKeys.end();++it) {ATH_MSG_INFO(*it);}
         //Now set to specified key only
@@ -324,7 +324,7 @@ StatusCode L1CaloCondSvc::registerCondition(T*& pObj, const std::string& mykey) 
     }    
     
     // Update for DisabledTowers
-    if (mykey!="" && mykey.find("DisabledTowers")!=std::string::npos){
+    if (!mykey.empty() && mykey.find("DisabledTowers")!=std::string::npos){
         ATH_MSG_INFO("Overriding default keys for DisabledTowers that were:");
         for (auto it=vCoolInputKeys.begin();it!=vCoolInputKeys.end();++it) {ATH_MSG_INFO(*it);}
         //Now set to specified key only
@@ -332,7 +332,7 @@ StatusCode L1CaloCondSvc::registerCondition(T*& pObj, const std::string& mykey) 
     } 
     
     // Update for PpmDeadChannels
-    if (mykey!="" && mykey.find("PpmDeadChannels")!=std::string::npos){
+    if (!mykey.empty() && mykey.find("PpmDeadChannels")!=std::string::npos){
         ATH_MSG_INFO("Overriding default keys for PpmDeadChannels that were:");
         for (auto it=vCoolInputKeys.begin();it!=vCoolInputKeys.end();++it) {ATH_MSG_INFO(*it);}
         //Now set to specified key only
@@ -342,7 +342,7 @@ StatusCode L1CaloCondSvc::registerCondition(T*& pObj, const std::string& mykey) 
     //Check if we specified some new key
     
     // Update for PprChanCalib
-    if (mykey!="" && mykey.find("PprChanCalib")!=std::string::npos){
+    if (!mykey.empty() && mykey.find("PprChanCalib")!=std::string::npos){
 	ATH_MSG_INFO("Overriding default keys for PprChanCalib that were:");
 	for (auto it=vCoolInputKeys.begin();it!=vCoolInputKeys.end();++it) {ATH_MSG_INFO(*it);}
         //Now set to specified key only
@@ -350,7 +350,7 @@ StatusCode L1CaloCondSvc::registerCondition(T*& pObj, const std::string& mykey) 
     }
     
     // Update for PprChanDefaults
-    if (mykey!="" && mykey.find("PprChanDefaults")!=std::string::npos){
+    if (!mykey.empty() && mykey.find("PprChanDefaults")!=std::string::npos){
         ATH_MSG_INFO("Overriding default keys for PprChanDefaults that were:");
         for (auto it=vCoolInputKeys.begin();it!=vCoolInputKeys.end();++it) {ATH_MSG_INFO(*it);}
         //Now set to specified key only
@@ -358,7 +358,7 @@ StatusCode L1CaloCondSvc::registerCondition(T*& pObj, const std::string& mykey) 
     }    
     
     // Update for DisabledTowers
-    if (mykey!="" && mykey.find("DisabledTowers")!=std::string::npos){
+    if (!mykey.empty() && mykey.find("DisabledTowers")!=std::string::npos){
         ATH_MSG_INFO("Overriding default keys for DisabledTowers that were:");
         for (auto it=vCoolInputKeys.begin();it!=vCoolInputKeys.end();++it) {ATH_MSG_INFO(*it);}
         //Now set to specified key only
@@ -366,7 +366,7 @@ StatusCode L1CaloCondSvc::registerCondition(T*& pObj, const std::string& mykey) 
     } 
     
     // Update for PpmDeadChannels
-    if (mykey!="" && mykey.find("PpmDeadChannels")!=std::string::npos){
+    if (!mykey.empty() && mykey.find("PpmDeadChannels")!=std::string::npos){
         ATH_MSG_INFO("Overriding default keys for PpmDeadChannels that were:");
         for (auto it=vCoolInputKeys.begin();it!=vCoolInputKeys.end();++it) {ATH_MSG_INFO(*it);}
         //Now set to specified key only

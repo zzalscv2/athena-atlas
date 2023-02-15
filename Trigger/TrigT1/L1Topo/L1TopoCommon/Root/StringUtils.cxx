@@ -10,7 +10,7 @@ string
 TCS::join(const vector<string>& v, const char c) {
    string joined{""};
    for(const string & s : v) {
-      if(joined!="") joined += c;
+      if(!joined.empty()) joined += c;
       joined += s;
    }
    return joined;
