@@ -460,8 +460,7 @@ void HGTD_DigitizationTool::createAndStoreSDO(
       if (theDeposit != depositsR_end) {
         (*theDeposit).second += charge_list_itr->time();
       } else { // create a new deposit
-        InDetSimData::Deposit deposit(trkLink, charge_list_itr->charge());
-        deposits.push_back(deposit);
+        deposits.push_back(InDetSimData::Deposit(trkLink, charge_list_itr->charge()));
       }
     } // END LOOP charges within diode
 
