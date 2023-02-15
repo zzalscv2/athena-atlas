@@ -5,6 +5,7 @@ from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s", __name__)
 log = logging.getLogger(__name__)
 
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from .ConfigHelpers import recoKeys, AlgConfig
@@ -40,4 +41,8 @@ class METChainConfiguration(ChainConfigurationBase):
     def assembleChainImpl(self, flags):
         log.debug("Assembling chain for %s", self.chainName)
         conf = AlgConfig.fromRecoDict(flags, **self.recoDict)
-        return self.buildChain(conf.make_steps(flags, self.dict))
+        if isComponentAccumulatorCfg():
+            steps = conf.make_accumulator_steps(flags, self.dict)
+        else:
+            steps = conf.make_steps(flags, self.dict)
+        return self.buildChain(steps)

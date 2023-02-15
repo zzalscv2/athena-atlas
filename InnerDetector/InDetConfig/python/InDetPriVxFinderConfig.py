@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+
 def InDetPriVxFinderCfg(flags, name="InDetPriVxFinder", **kwargs):
     acc = ComponentAccumulator()
 
@@ -38,13 +39,35 @@ def InDetTrigPriVxFinderCfg(flags, name="InDetTrigPriVxFinder",
                             **kwargs):
 
     acc = ComponentAccumulator()
+    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
+    config = getInDetTrigConfig(signature)
 
     if "VertexFinderTool" not in kwargs:
         if adaptiveVertexing:
-            from InDetConfig.InDetPriVxFinderToolConfig import (
-                TrigGaussAdaptiveMultiFindingCfg)
-            VertexFinderTool = acc.popToolsAndMerge(
-                TrigGaussAdaptiveMultiFindingCfg(flags, signature=signature))
+            if config.actsVertex:
+                from InDetConfig.InDetPriVxFinderToolConfig import (
+                    ActsGaussAdaptiveMultiFindingCfg)
+                from InDetConfig.InDetTrackSelectionToolConfig import (
+                    TrigVtxInDetTrackSelectionCfg)
+                VertexFinderTool = acc.popToolsAndMerge(
+                    ActsGaussAdaptiveMultiFindingCfg(
+                        flags,
+                        name=f"ActsAdaptiveMultiPriVtxFinderTool{signature}",
+                        TrackSelector=acc.popToolsAndMerge(
+                            TrigVtxInDetTrackSelectionCfg(flags, signature=signature)
+                        ),
+                        useBeamConstraint=True,
+                        useSeedConstraint=False,
+                        tracksMaxZinterval=config.TracksMaxZinterval,
+                        do3dSplitting=False,
+                        addSingleTrackVertices=config.addSingleTrackVertices,
+                    )
+                )
+            else:
+                from InDetConfig.InDetPriVxFinderToolConfig import (
+                    TrigGaussAdaptiveMultiFindingCfg)
+                VertexFinderTool = acc.popToolsAndMerge(
+                    TrigGaussAdaptiveMultiFindingCfg(flags, signature=signature))
         else:
             from InDetConfig.InDetPriVxFinderToolConfig import (
                 TrigGaussIterativeFindingCfg)

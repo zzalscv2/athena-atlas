@@ -59,7 +59,7 @@ flags.addFlag("Trigger.selectChains",[])
 flags.addFlag("Trigger.disableChains",[]) 
 
 
-flags.Trigger.enabledSignatures = ['Muon', 'Photon','Electron']
+flags.Trigger.enabledSignatures = ['Muon', 'Photon','Electron','MET']
 #flags.Trigger.selectChains =  ['HLT_mu4_L1MU3V','HLT_mu8_L1MU5VF','HLT_2mu6_L12MU5VF', 'HLT_mu24_mu6_L1MU14FCH','HLT_mu24_mu6_probe_L1MU14FCH'] #, 'HLT_mu4_mu6_L12MU3V']
 
 #flags.Trigger.disableChains=["HLT_2mu4_l2io_invmDimu_L1BPH-2M9-0DR15-2MU3VF", "HLT_2mu4_l2io_invmDimu_L1BPH-2M9-0DR15-2MU3V", "HLT_2mu6_l2io_invmDimu_L1BPH-2M9-2DR15-2MU5VF"]
