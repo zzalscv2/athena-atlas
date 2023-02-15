@@ -218,7 +218,7 @@ double SUSYObjDef_xAOD::GetSignalPhotonSF(const xAOD::Photon& ph, const bool eff
     double sf_eff = 1.;
 
     CP::CorrectionCode res = m_photonEfficiencySFTool->getEfficiencyScaleFactor( ph, sf_eff );
-    if (res == CP::CorrectionCode::OutOfValidityRange) ATH_MSG_WARNING(" GetSignalPhotonSF: getEfficiencyScaleFactor out of validity range");
+    if (res == CP::CorrectionCode::OutOfValidityRange) ATH_MSG_WARNING(" GetSignalPhotonSF: EfficiencyScaleFactor out of validity range");
 
     sf *= sf_eff;
   }
@@ -228,7 +228,7 @@ double SUSYObjDef_xAOD::GetSignalPhotonSF(const xAOD::Photon& ph, const bool eff
     double sf_iso = 1.;
 
     CP::CorrectionCode res = m_photonIsolationSFTool->getEfficiencyScaleFactor( ph, sf_iso );
-    if (res == CP::CorrectionCode::OutOfValidityRange) ATH_MSG_WARNING(" GetSignalPhotonSF: getEfficiencyScaleFactor out of validity range");
+    if (res == CP::CorrectionCode::OutOfValidityRange) ATH_MSG_WARNING(" GetSignalPhotonSF: IsolationScaleFactor out of validity range");
 
     sf *= sf_iso;
   }
@@ -238,7 +238,7 @@ double SUSYObjDef_xAOD::GetSignalPhotonSF(const xAOD::Photon& ph, const bool eff
     double sf_trigger = 1.;
 
     CP::CorrectionCode res = m_photonTriggerSFTool->getEfficiencyScaleFactor( ph, sf_trigger );
-    if (res == CP::CorrectionCode::OutOfValidityRange) ATH_MSG_WARNING(" GetSignalPhotonSF: getEfficiencyScaleFactor out of validity range");
+    if (res == CP::CorrectionCode::OutOfValidityRange) ATH_MSG_WARNING(" GetSignalPhotonSF: TriggerScaleFactor out of validity range");
 
     sf *= sf_trigger;
   }

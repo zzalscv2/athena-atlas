@@ -1103,6 +1103,25 @@ int main( int argc, char* argv[] ) {
         }
       }
 
+
+      // ========================================
+      // Photons
+      if (slices["pho"]) {
+        ANA_MSG_DEBUG( "Photon step - selection" );
+        int n_SignalPhotons = 0;
+        for (const auto& y : *photons) {
+          if ( y->auxdata<char>("passOR") && y->auxdata<char>("signal")) {
+            n_SignalPhotons++;
+            ANA_MSG_DEBUG( "Photon pt = "<< y->pt()*1e-3
+                          << ", idSF = "   << objTool.GetSignalPhotonSF(*y,true,false,false)
+                          << ", isoSF = " << objTool.GetSignalPhotonSF(*y,false,true,false)
+                          << ", trigSF = "  << objTool.GetSignalPhotonSF(*y,false,false,true)
+                        );
+          }
+        }
+        if(n_SignalPhotons>0) ANA_MSG_DEBUG( "Total Event photon SF = " << objTool.GetTotalPhotonSF(*photons, true, true, true));
+      }
+
       // ====================
       // Check for combined e-mu triggers
       bool comb_trig_check = false;
