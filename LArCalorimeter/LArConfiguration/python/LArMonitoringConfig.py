@@ -48,35 +48,33 @@ def LArMonitoringConfig(inputFlags):
 
 if __name__=='__main__':
 
-   from AthenaConfiguration.AllConfigFlags import ConfigFlags
+   from AthenaConfiguration.AllConfigFlags import initConfigFlags
+   flags=initConfigFlags()
    from AthenaCommon.Logging import log
    from AthenaCommon.Constants import DEBUG
    log.setLevel(DEBUG)
 
 
-   from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
-   createLArMonConfigFlags()
-
    from AthenaConfiguration.TestDefaults import defaultTestFiles
-   ConfigFlags.Input.Files = defaultTestFiles.RAW
+   flags.Input.Files = defaultTestFiles.RAW
 
-   ConfigFlags.Output.HISTFileName = 'LArMonitoringOutput.root'
-   ConfigFlags.DQ.enableLumiAccess = True
-   ConfigFlags.DQ.useTrigger = True
-   ConfigFlags.lock()
+   flags.Output.HISTFileName = 'LArMonitoringOutput.root'
+   flags.DQ.enableLumiAccess = True
+   flags.DQ.useTrigger = True
+   flags.lock()
 
    from CaloRec.CaloRecoConfig import CaloRecoCfg
-   cfg=CaloRecoCfg(ConfigFlags)
+   cfg=CaloRecoCfg(flags)
 
    #from CaloD3PDMaker.CaloD3PDConfig import CaloD3PDCfg,CaloD3PDAlg
-   #cfg.merge(CaloD3PDCfg(ConfigFlags, filename=ConfigFlags.Output.HISTFileName, streamname='CombinedMonitoring'))
+   #cfg.merge(CaloD3PDCfg(flags, filename=flags.Output.HISTFileName, streamname='CombinedMonitoring'))
 
-   acc = LArMonitoringConfig(ConfigFlags)
+   acc = LArMonitoringConfig(flags)
    cfg.merge(acc)
 
    cfg.printConfig()
 
-   ConfigFlags.dump()
+   flags.dump()
    f=open("LArMonitoring.pkl","wb")
    cfg.store(f)
    f.close()

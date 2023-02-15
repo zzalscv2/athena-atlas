@@ -8,6 +8,9 @@ from AthenaConfiguration.Enums import LHCPeriod
 def LArHVScaleCfg(configFlags):
     result=ComponentAccumulator()
 
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+    result.merge(LArGMCfg(configFlags))
+
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     LArHVCondAlg=CompFactory.LArHVCondAlg
 
@@ -58,24 +61,26 @@ def LArHVScaleCfg(configFlags):
     return result
 
 if __name__=="__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+
+    flags=initConfigFlags()
 
     nThreads=1
-    ConfigFlags.Concurrency.NumThreads = nThreads
+    flags.Concurrency.NumThreads = nThreads
     if nThreads>0:
-        ConfigFlags.Scheduler.ShowDataDeps = True
-        ConfigFlags.Scheduler.ShowDataFlow = True
-        ConfigFlags.Scheduler.ShowControlFlow = True
-        ConfigFlags.Concurrency.NumConcurrentEvents = nThreads
+        flags.Scheduler.ShowDataDeps = True
+        flags.Scheduler.ShowDataFlow = True
+        flags.Scheduler.ShowControlFlow = True
+        flags.Concurrency.NumConcurrentEvents = nThreads
 
-    ConfigFlags.Input.Files = ["myESD-data.pool.root"]
-    ConfigFlags.lock()
+    flags.Input.Files = ["myESD-data.pool.root"]
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg=MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg=MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    cfg.merge( LArHVScaleCfg(ConfigFlags) )
+    cfg.merge( LArHVScaleCfg(flags) )
 
     cfg.run(10)

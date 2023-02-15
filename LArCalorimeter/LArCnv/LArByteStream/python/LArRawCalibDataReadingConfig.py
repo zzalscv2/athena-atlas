@@ -28,22 +28,23 @@ def LArRawCalibDataReadingCfg(configFlags,gain="HIGH",doAccDigit=False,doAccCali
 
 if __name__=="__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags=initConfigFlags()
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
     log.setLevel(DEBUG)
 
-    ConfigFlags.LAr.doAlign=False
-    ConfigFlags.Input.Files = ["/eos/atlas/atlastier0/rucio/data22_calib/calibration_LArElec-Pedestal-32s-High-All/00420537/data22_calib.00420537.calibration_LArElec-Pedestal-32s-High-All.daq.RAW/data22_calib.00420537.calibration_LArElec-Pedestal-32s-High-All.daq.RAW._lb0000._SFO-4._0001.data"]
+    flags.LAr.doAlign=False
+    flags.Input.Files = ["/eos/atlas/atlastier0/rucio/data22_calib/calibration_LArElec-Pedestal-32s-High-All/00420537/data22_calib.00420537.calibration_LArElec-Pedestal-32s-High-All.daq.RAW/data22_calib.00420537.calibration_LArElec-Pedestal-32s-High-All.daq.RAW._lb0000._SFO-4._0001.data"]
 
-    ConfigFlags.Exec.OutputLevel=DEBUG
-    ConfigFlags.lock()
+    flags.Exec.OutputLevel=DEBUG
+    flags.lock()
 
-    acc = MainServicesCfg( ConfigFlags )
-    acc.merge(LArRawCalibDataReadingCfg(ConfigFlags,doAccCalibDigit=True))
+    acc = MainServicesCfg( flags )
+    acc.merge(LArRawCalibDataReadingCfg(flags,doAccCalibDigit=True))
     
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg 
-    acc.merge(LArOnOffIdMappingCfg(ConfigFlags))
+    acc.merge(LArOnOffIdMappingCfg(flags))
 
     #f=open("LArRawCalibDataReading.pkl","wb")
     #acc.store(f)

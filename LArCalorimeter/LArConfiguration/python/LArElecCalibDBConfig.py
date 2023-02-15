@@ -212,11 +212,11 @@ def LArElecCalibDBMCSCCfg(ConfigFlags,folders):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     print ('--- run2')
-    flags1 = ConfigFlags.clone()
+    flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RAW
     flags1.lock()
     acc1 = LArElecCalibDbCfg (flags1, ['Ramp', 'Pedestal'])
@@ -225,7 +225,7 @@ if __name__ == "__main__":
     acc1.wasMerged()
 
     print ('--- run1')
-    flags2 = ConfigFlags.clone()
+    flags2 = initConfigFlags()
     flags2.Input.Files = defaultTestFiles.RAW
     flags2.Input.ProjectName = 'data12_8TeV'
     flags2.lock()
@@ -235,7 +235,7 @@ if __name__ == "__main__":
     acc2.wasMerged()
 
     print ('--- mc')
-    flags3 = ConfigFlags.clone()
+    flags3 = initConfigFlags()
     flags3.Input.Files = defaultTestFiles.ESD
     flags3.lock()
     acc3 = LArElecCalibDbCfg (flags3, ['Ramp', 'Pedestal'])
