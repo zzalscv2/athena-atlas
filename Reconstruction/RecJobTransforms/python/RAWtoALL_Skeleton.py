@@ -193,7 +193,7 @@ def fromRunArgs(runArgs):
             ConfigFlags,
             tagValuePairs={
                 "beam_type": ConfigFlags.Beam.Type.value,
-                "beam_energy": str(ConfigFlags.Beam.Energy),
+                "beam_energy": str(int(ConfigFlags.Beam.Energy)),
                 "triggerStreamOfFile": ""
                 if ConfigFlags.Input.isMC
                 else ConfigFlags.Input.TriggerStream,

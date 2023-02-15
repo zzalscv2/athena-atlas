@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon.SystemOfUnits import TeV
+from AthenaCommon.SystemOfUnits import GeV, TeV
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AutoConfigFlags import GetFileMD, getInitialTimeStampsFromRunNumbers, getRunToTimestampDict, getSpecialConfigurationMetadata
 from AthenaConfiguration.Enums import BeamType, Format, ProductionStep, BunchStructureSource, Project
@@ -137,7 +137,79 @@ def initConfigFlags():
     acf.addFlag('Beam.BunchSpacing', 25) # former global.BunchSpacing
     acf.addFlag('Beam.Type', lambda prevFlags : BeamType(GetFileMD(prevFlags.Input.Files).get('beam_type', 'collisions')), enum=BeamType)# former global.BeamType
     acf.addFlag("Beam.NumberOfCollisions", lambda prevFlags : 2. if prevFlags.Beam.Type is BeamType.Collisions else 0.) # former global.NumberOfCollisions
-    acf.addFlag('Beam.Energy', lambda prevFlags : float(GetFileMD(prevFlags.Input.Files).get('beam_energy', 6.8*TeV))) # This is the energy of each individual beam in MeV # former global.BeamEnergy
+
+    def _configureBeamEnergy(prevFlags):
+        metadata = GetFileMD(prevFlags.Input.Files)
+        default = 6.8 * TeV
+        # pool files
+        if prevFlags.Input.Format == Format.POOL:
+            return float(metadata.get("beam_energy", default))
+        # BS files
+        elif prevFlags.Input.Format == Format.BS:
+            if metadata.get("eventTypes", [""])[0] == "IS_DATA":
+                # special option for online running
+                if prevFlags.Common.isOnline:
+                    from PyUtils.OnlineISConfig import GetRunType
+
+                    return float(GetRunType()[1] or default)
+
+                # configure Beam energy depending on beam type:
+                if prevFlags.Beam.Type.value == "cosmics":
+                    return 0.0
+                elif prevFlags.Beam.Type.value == "singlebeam":
+                    return 450.0 * GeV
+                elif prevFlags.Beam.Type.value == "collisions":
+                    projectName = prevFlags.Input.ProjectName
+                    beamEnergy = None
+
+                    if "GeV" in projectName:
+                        beamEnergy = (
+                            float(
+                                (str(projectName).split("_")[1]).replace("GeV", "", 1)
+                            )
+                            / 2
+                            * GeV
+                        )
+                    elif "TeV" in projectName:
+                        if "hip5TeV" in projectName:
+                            # Approximate 'beam energy' here as sqrt(sNN)/2.
+                            beamEnergy = 1.577 * TeV
+                        elif "hip8TeV" in projectName:
+                            # Approximate 'beam energy' here as sqrt(sNN)/2.
+                            beamEnergy = 2.51 * TeV
+                        else:
+                            beamEnergy = (
+                                float(
+                                    (str(projectName).split("_")[1])
+                                    .replace("TeV", "", 1)
+                                    .replace("p", ".")
+                                )
+                                / 2
+                                * TeV
+                            )
+                            if "5TeV" in projectName:
+                                # these are actually sqrt(s) = 5.02 TeV
+                                beamEnergy = 2.51 * TeV
+                    elif projectName.endswith("_hi") or projectName.endswith("_hip"):
+                        if projectName in ("data10_hi", "data11_hi"):
+                            beamEnergy = 1.38 * TeV  # 1.38 TeV (=3.5 TeV * (Z=82/A=208))
+                        elif projectName == "data12_hi":
+                            beamEnergy = 1.577 * TeV  # 1.577 TeV (=4 TeV * (Z=82/A=208))
+                        elif projectName in ("data12_hip", "data13_hip"):
+                            # Pb (p) Beam energy in p-Pb collisions in 2012/3 was 1.577 (4) TeV.
+                            # Approximate 'beam energy' here as sqrt(sNN)/2.
+                            beamEnergy = 2.51 * TeV
+                        elif projectName in ("data15_hi", "data18_hi"):
+                            beamEnergy = 2.51 * TeV  # 2.51 TeV (=6.37 TeV * (Z=82/A=208)) - lowered to 6.37 to match s_NN = 5.02 in Pb-p runs.
+                        elif projectName == "data17_hi":
+                            beamEnergy = 2.721 * TeV  # 2.72 TeV for Xe-Xe (=6.5 TeV * (Z=54/A=129))
+                    return beamEnergy or default
+            elif metadata.get("eventTypes", [""])[0] == "IS_SIMULATION":
+                return float(metadata.get("beam_energy", default))
+        return default
+
+
+    acf.addFlag('Beam.Energy', lambda prevFlags : _configureBeamEnergy(prevFlags)) # former global.BeamEnergy
     acf.addFlag('Beam.estimatedLuminosity', lambda prevFlags : ( 1E33*(prevFlags.Beam.NumberOfCollisions)/2.3 ) *\
         (25./prevFlags.Beam.BunchSpacing)) # former flobal.estimatedLuminosity
     acf.addFlag('Beam.BunchStructureSource', lambda prevFlags: BunchStructureSource.MC if prevFlags.Input.isMC else BunchStructureSource.TrigConf)
