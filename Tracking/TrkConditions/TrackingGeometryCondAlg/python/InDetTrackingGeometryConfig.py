@@ -51,6 +51,7 @@ def PixelLayerBuilderCfg(flags, name='PixelLayerBuilder',
     kwargs.setdefault("EndcapLayerBinsR", 1)
     kwargs.setdefault("EndcapLayerBinsPhi", 1)
     kwargs.setdefault("SetLayerAssociation", True)
+    kwargs.setdefault("BarrelEnvelope", 0.0)
 
     if useCond:
         name = name+'Cond'
@@ -141,6 +142,7 @@ def SCT_LayerBuilderCfg(flags, name='SCT_LayerBuilder', useCond=True, **kwargs):
     kwargs.setdefault("EndcapLayerBinsPhi", 1)
     kwargs.setdefault("EndcapComplexRingBinning", True)
     kwargs.setdefault("SetLayerAssociation", True)
+    kwargs.setdefault("BarrelEnvelope", 0.0)
 
     if useCond:
         name = name+'Cond'

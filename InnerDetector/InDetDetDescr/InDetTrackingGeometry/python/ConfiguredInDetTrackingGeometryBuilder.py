@@ -59,6 +59,7 @@ class ConfiguredInDetTrackingGeometryBuilder( InDet__RobustTrackingGeometryBuild
           PixelLayerBuilder.BarrelLayerBinsPhi   = TrkDetFlags.PixelBarrelLayerMaterialBinsPhi()
           PixelLayerBuilder.EndcapLayerBinsR     = TrkDetFlags.PixelEndcapLayerMaterialBinsR()
           PixelLayerBuilder.EndcapLayerBinsPhi   = TrkDetFlags.PixelEndcapLayerMaterialBinsPhi()
+          PixelLayerBuilder.BarrelEnvelope       = 0.0
           
           # set the layer association
           PixelLayerBuilder.SetLayerAssociation  = setLayerAssociation
@@ -90,6 +91,7 @@ class ConfiguredInDetTrackingGeometryBuilder( InDet__RobustTrackingGeometryBuild
           SCT_LayerBuilder.EndcapLayerBinsR                = TrkDetFlags.SCT_EndcapLayerMaterialBinsR()
           SCT_LayerBuilder.EndcapLayerBinsPhi              = TrkDetFlags.SCT_EndcapLayerMaterialBinsPhi()
           SCT_LayerBuilder.EndcapComplexRingBinning        = TrkDetFlags.SCT_EndcapLayerDynamicRings()
+          SCT_LayerBuilder.BarrelEnvelope                  = 0.0
           # set the layer association                   
           SCT_LayerBuilder.SetLayerAssociation             = setLayerAssociation        
           # output level                                 

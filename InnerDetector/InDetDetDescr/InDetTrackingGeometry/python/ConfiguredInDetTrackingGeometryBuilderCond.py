@@ -55,6 +55,7 @@ class ConfiguredInDetTrackingGeometryBuilderCond( InDet__RobustTrackingGeometryB
           # additionall layers - handle with care !
           PixelLayerBuilder.BarrelAdditionalLayerRadii      = [ 130. ]   # The PST
           PixelLayerBuilder.BarrelAdditionalLayerType       = [ 0 ]     # -- will shift volume boundary to PST
+          PixelLayerBuilder.BarrelEnvelope                  = 0.0
           PixelLayerBuilder.EndcapAdditionalLayerPositionsZ = [ -1900. , 1900. ] # DBM
           PixelLayerBuilder.EndcapAdditionalLayerType       = [  1 , 1 ] # DBM
           # Pixel barrel specifications
@@ -89,6 +90,7 @@ class ConfiguredInDetTrackingGeometryBuilderCond( InDet__RobustTrackingGeometryB
           # SCT barrel specifications
           SCT_LayerBuilder.BarrelLayerBinsZ                = TrkDetFlags.SCT_BarrelLayerMaterialBinsZ()
           SCT_LayerBuilder.BarrelLayerBinsPhi              = TrkDetFlags.SCT_BarrelLayerMaterialBinsPhi()
+          SCT_LayerBuilder.BarrelEnvelope                  = 0.0
           # SCT endcap specifications                          
           SCT_LayerBuilder.EndcapLayerBinsR                = TrkDetFlags.SCT_EndcapLayerMaterialBinsR()
           SCT_LayerBuilder.EndcapLayerBinsPhi              = TrkDetFlags.SCT_EndcapLayerMaterialBinsPhi()
