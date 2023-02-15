@@ -50,10 +50,6 @@ def commonServicesCfg(flags):
     # SGCommitAuditor to sweep new DataObjects at end of Alg execute
     cfg.addAuditor( CompFactory.SGCommitAuditor() )
 
-    # Error if unmet data dependencies are met
-    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-    cfg.merge( SGInputLoaderCfg(flags, FailIfNoProxy = True), sequenceName="AthAlgSeq")
-
     # CoreDumpSvc
     cfg.addService( CompFactory.CoreDumpSvc(
         CoreDumpStream = "stdout",
