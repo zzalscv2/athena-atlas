@@ -6,7 +6,6 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 def createTestBeamConfigFlags():
     tbcf = AthConfigFlags()
-    print ("In createTestBeamConfigFlags()")
     tbcf.addFlag("TestBeam.Eta", 'NONE')
     tbcf.addFlag("TestBeam.Theta", 'NONE')
     tbcf.addFlag("TestBeam.Phi", 'NONE')
