@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArGainThresholds2Ntuple.h"
@@ -51,10 +51,7 @@ StatusCode LArGainThresholds2Ntuple::stop() {
    ATH_CHECK(m_nt->addItem("lower",lower,-1000,5000));
    ATH_CHECK(m_nt->addItem("upper",upper,-1000.,5000.));
    
-   std::vector<HWIdentifier>::const_iterator itOnId = m_onlineId->channel_begin();
-   std::vector<HWIdentifier>::const_iterator itOnIdEnd = m_onlineId->channel_end();
-   for(; itOnId!=itOnIdEnd;++itOnId){
-     const HWIdentifier hwid = *itOnId;
+   for (const HWIdentifier hwid: m_onlineId->channel_range()) {
      short lower_v, upper_v;
      febConfig->thresholds (hwid, lower_v, upper_v);
      lower = lower_v;

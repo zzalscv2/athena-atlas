@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArMinBias2Ntuple.h"
@@ -51,18 +51,15 @@ StatusCode LArMinBias2Ntuple::stop() {
  ATH_CHECK( m_nt->addItem("MinBiasAv",minbias_av) );
 
  unsigned cellCounter=0;
-   std::vector<HWIdentifier>::const_iterator itOnId = m_onlineId->channel_begin();
-   std::vector<HWIdentifier>::const_iterator itOnIdEnd = m_onlineId->channel_end();
-   for(; itOnId!=itOnIdEnd;++itOnId){
-     const HWIdentifier hwid = *itOnId;
-     if ( cabling->isOnlineConnected(hwid)) {
-	 fillFromIdentifier(hwid);       
-	 if(!m_isPileup) minbias = LArMinBias->minBiasRMS(hwid);
-	 minbias_av = LArMinBiasAv->minBiasAverage(hwid);
-	 ATH_CHECK( ntupleSvc()->writeRecord(m_nt) );
-     }//end if isConnected
-     cellCounter++;
-  }//end loop over online ID
+ for (const HWIdentifier hwid: m_onlineId->channel_range()) {
+   if ( cabling->isOnlineConnected(hwid)) {
+     fillFromIdentifier(hwid);       
+     if(!m_isPileup) minbias = LArMinBias->minBiasRMS(hwid);
+     minbias_av = LArMinBiasAv->minBiasAverage(hwid);
+     ATH_CHECK( ntupleSvc()->writeRecord(m_nt) );
+   }//end if isConnected
+   cellCounter++;
+ }//end loop over online ID
 
  ATH_MSG_INFO(  "LArMinBias2Ntuple has finished, " << cellCounter << " cells written." );
  return StatusCode::SUCCESS;

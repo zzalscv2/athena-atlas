@@ -1,22 +1,15 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArfSampl2Ntuple.h"
 #include "LArRawConditions/LArfSamplMC.h"
 #include "CaloIdentifier/CaloGain.h"
-/*
-#include "GaudiKernel/INTupleSvc.h"
-#include "GaudiKernel/NTuple.h"
-#include "GaudiKernel/SmartDataPtr.h"
-*/
 
-//#include <fstream>
 
 LArfSampl2Ntuple::LArfSampl2Ntuple(const std::string& name, ISvcLocator* pSvcLocator): 
   LArCond2NtupleBase(name, pSvcLocator) { 
   declareProperty("ContainerKey",m_contKey);
-  //declareProperty("IsMC",m_isMC = false);
 
   m_ntTitle="fSampl";
   m_ntpath="/NTUPLES/FILE1/FSAMPL";
@@ -59,10 +52,7 @@ StatusCode LArfSampl2Ntuple::stop() {
  }
 
  unsigned cellCounter=0;
- std::vector<HWIdentifier>::const_iterator itOnId = m_onlineId->channel_begin();
- std::vector<HWIdentifier>::const_iterator itOnIdEnd = m_onlineId->channel_end();
- for(; itOnId!=itOnIdEnd;++itOnId){
-   const HWIdentifier hwid = *itOnId;
+ for (const HWIdentifier hwid: m_onlineId->channel_range()) {
    if ( cabling->isOnlineConnected(hwid)) {
        fillFromIdentifier(hwid);       
        cellIndex = cellCounter;

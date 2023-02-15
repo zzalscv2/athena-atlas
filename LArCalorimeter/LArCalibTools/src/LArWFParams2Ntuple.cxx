@@ -177,11 +177,8 @@ StatusCode LArWFParams2Ntuple::stop() {
 
 
   for(long igain=CaloGain::LARHIGHGAIN; igain<CaloGain::LARNGAIN; igain++) {
-   std::vector<HWIdentifier>::const_iterator itOnId = m_onlineId->channel_begin();
-   std::vector<HWIdentifier>::const_iterator itOnIdEnd = m_onlineId->channel_end();
-   for(; itOnId!=itOnIdEnd;++itOnId){
-     const HWIdentifier hwid = *itOnId;
-     
+    for (const HWIdentifier hwid: m_onlineId->channel_range()) {
+
      //Initialize variables to 'errorcode'
      float vTcal=ILArCaliPulseParams::ERRORCODE;
      float vFstep=ILArCaliPulseParams::ERRORCODE;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArFebTimeOffset2Ntuple.h"
@@ -49,10 +49,7 @@ StatusCode LArFebTimeOffset2Ntuple::stop ATLAS_NOT_THREAD_SAFE () {
   (const_cast<LArFEBTimeOffset*>(feboffsets))->setDefaultReturnValue(novalue);
 
 
-  std::vector<HWIdentifier>::const_iterator fit=m_onlineId->feb_begin();
-  std::vector<HWIdentifier>::const_iterator fit_e=m_onlineId->feb_end();
-  for(;fit!=fit_e;++fit) {
-    const HWIdentifier fid=*fit;
+  for (const HWIdentifier fid: m_onlineId->feb_range()) {
     offset=feboffsets->TimeOffset(fid);
     
     //FIXME: The PhysWave shifter fills 0 for all not-present FEBs.

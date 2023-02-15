@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LAruA2MeV2Ntuple.h"
@@ -68,11 +68,8 @@ StatusCode LAruA2MeV2Ntuple::stop() {
      return StatusCode::FAILURE;
  }
 
- std::vector<HWIdentifier>::const_iterator itOnId = m_onlineId->channel_begin();
- std::vector<HWIdentifier>::const_iterator itOnIdEnd = m_onlineId->channel_end();
  unsigned cellCounter=0;
- for(; itOnId!=itOnIdEnd;++itOnId){
-   const HWIdentifier hwid = *itOnId;
+ for (const HWIdentifier hwid: m_onlineId->channel_range()) {
    if (cabling->isOnlineConnected(hwid)) {
      uA2MeV=laruA2MeVComplete->UA2MEV(hwid);
      if(m_DAC2uAKey != "") DAC2uA=larDAC2uAComplete->DAC2UA(hwid);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArDSPThresholds2Ntuple.h"
@@ -84,11 +84,7 @@ StatusCode LArDSPThresholds2Ntuple::stop() {
       }
    }
    
-   std::vector<HWIdentifier>::const_iterator itOnId = m_onlineId->channel_begin();
-   std::vector<HWIdentifier>::const_iterator itOnIdEnd = m_onlineId->channel_end();
-
-   for(; itOnId!=itOnIdEnd;++itOnId){
-     const HWIdentifier hwid = *itOnId;
+   for (const HWIdentifier hwid: m_onlineId->channel_range()) {
      if(m_doFlat) {
         m_tQThr=df->tQThr(hwid);
         m_samplesThr=df->samplesThr(hwid);
