@@ -56,7 +56,7 @@ namespace Muon {
             
         private:
             const Muon::MuonClusterOnTrack* m_cl{nullptr};
-            Amg::Vector3D m_dir {0, 0, 0};
+            Amg::Vector3D m_dir {Amg::Vector3D::Zero()};
             double m_distance{0.};           
         };
 
