@@ -132,16 +132,20 @@ def LArNoiseFromRawCfg(flags):
 
 if __name__=="__main__":
     
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags=initConfigFlags()
+    
     from LArNoiseFlags import addNoiseFlags
-    addNoiseFlags(ConfigFlags)
-    #ConfigFlags.Input.Files=['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MetadataTests/data18/data18_13TeV.00363979.physics_Main.daq.ESD.0750._0001.pool.root']
-    ConfigFlags.Input.Files=['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExOnline/data16_13TeV.00302347.express_express.merge.RAW._lb0432._SFO-ALL._0001.1']
+    addNoiseFlags(flags)
+    #flags.Input.Files=['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MetadataTests/data18/data18_13TeV.00363979.physics_Main.daq.ESD.0750._0001.pool.root']
+    flags.Input.Files=['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExOnline/data16_13TeV.00302347.express_express.merge.RAW._lb0432._SFO-ALL._0001.1']
+
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     
-    cfg=MainServicesCfg(ConfigFlags)
-    #cfg.merge(LArNoiseCfg(ConfigFlags))
-    cfg.merge(LArNoiseFromRawCfg(ConfigFlags))
+    cfg=MainServicesCfg(flags)
+    #cfg.merge(LArNoiseCfg(flags))
+    cfg.merge(LArNoiseFromRawCfg(flags))
 
     cfg.run(10)

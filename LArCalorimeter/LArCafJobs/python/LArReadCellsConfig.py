@@ -41,20 +41,22 @@ def LArReadCellsCfg(flags):
 
 if __name__=="__main__":
     
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags=initConfigFlags()
     from LArShapeDumperFlags import addShapeDumpFlags
-    addShapeDumpFlags(ConfigFlags)
+    addShapeDumpFlags(flags)
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files=defaultTestFiles.RAW
-    ConfigFlags.LAr.ROD.forceIter=True
-    ConfigFlags.LArShapeDump.outputNtup="SPLASH"
-
+    flags.Input.Files=defaultTestFiles.RAW
+    flags.LAr.ROD.forceIter=True
+    flags.LArShapeDump.outputNtup="SPLASH"
+    flags.lock()
+    
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     
-    cfg=MainServicesCfg(ConfigFlags)
+    cfg=MainServicesCfg(flags)
     cfg.addService(CompFactory.THistSvc(Output=["SPLASH DATAFILE='ntuple.root' OPT='RECREATE'",]))
-    cfg.merge(LArReadCellsCfg(ConfigFlags))
+    cfg.merge(LArReadCellsCfg(flags))
 
 
     cfg.run(10)
