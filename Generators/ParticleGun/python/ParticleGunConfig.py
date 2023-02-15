@@ -2,6 +2,8 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.Constants import INFO
 
+
+
 def ParticleGunBaseCfg(flags):
     result = ComponentAccumulator()
     import ParticleGun as PG
@@ -68,6 +70,22 @@ def ParticleGun_SinglePionCfg(flags):
     return result
 
 
+def ALFA_SingleParticlePreInclude(flags):
+    flags.BField.solenoidOn=False
+    flags.BField.barrelToroidOn=False
+    flags.BField.endcapToroidOn=False
+    from SimulationConfig.SimEnums import VertexSource
+    flags.Sim.VertexSource=VertexSource.AsGenerated
+    flags.Sim.GenerationConfiguration="ParticleGun.ParticleGunConfig.ParticleGun_ALFA_SingleParticleCfg"
+    flags.Sim.TwissFileBeam1="3.5TeV/0090.00m/nominal/v02/beam1.tfs"
+    flags.Sim.TwissFileBeam2="3.5TeV/0090.00m/nominal/v02/beam2.tfs"
+    from AthenaCommon.SystemOfUnits import TeV,m
+    flags.Beam.Energy=3.5*TeV
+    flags.Sim.TwissFileBeta=90.*m
+    flags.Sim.TwissFileNomReal='nominal'
+    flags.Sim.TwissFileVersion="v02"
+
+
 def ParticleGun_ALFA_SingleParticleCfg(flags):
     result = ComponentAccumulator()
     import ParticleGun as PG
@@ -77,6 +95,19 @@ def ParticleGun_ALFA_SingleParticleCfg(flags):
     pg.OutputLevel = INFO
     result.addEventAlgo(pg)
     return result
+
+
+def ZDC_SingleParticlePreInclude(flags):
+    from SimulationConfig.SimEnums import VertexSource
+    flags.Sim.VertexSource=VertexSource.AsGenerated
+    flags.Sim.GenerationConfiguration="ParticleGun.ParticleGunConfig.ParticleGun_ZDC_SingleParticleCfg"
+    flags.Sim.TwissFileBeam1="3.5TeV/0000.55m/nominal/v01/beam1.tfs"
+    flags.Sim.TwissFileBeam2="3.5TeV/0000.55m/nominal/v01/beam2.tfs"
+    from AthenaCommon.SystemOfUnits import TeV,m
+    flags.Beam.Energy=3.5*TeV
+    flags.Sim.TwissFileBeta=0.55*m
+    flags.Sim.TwissFileNomReal='nominal'
+    flags.Sim.TwissFileVersion="v01"
 
 
 def ParticleGun_ZDC_SingleParticleCfg(flags):

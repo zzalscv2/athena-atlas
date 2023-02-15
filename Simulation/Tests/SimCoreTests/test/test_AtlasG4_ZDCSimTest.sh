@@ -11,7 +11,7 @@
 
 AtlasG4_tf.py \
     --CA \
-    --preExec 'from SimulationConfig.SimEnums import VertexSource;ConfigFlags.Sim.VertexSource=VertexSource.AsGenerated;ConfigFlags.Sim.GenerationConfiguration="ParticleGun.ParticleGunConfig.ParticleGun_ZDC_SingleParticleCfg"' \
+    --preInclude 'ParticleGun.ParticleGunConfig.ZDC_SingleParticlePreInclude' \
     --outputHITSFile 'test.CA.HITS.pool.root' \
     --maxEvents '3' \
     --randomSeed '10' \
