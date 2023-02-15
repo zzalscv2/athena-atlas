@@ -10,6 +10,7 @@
 #include <array>
 #include <bitset>
 #include <numeric>
+#include <algorithm>
 
 #include "eformat/eformat.h"
 #include "MuonNSWCommonDecode/MapperSTG.h"
