@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -92,7 +92,7 @@ StatusCode L1TopoOnlineMonitor::start() {
 StatusCode L1TopoOnlineMonitor::fillHistograms( const EventContext& ctx ) const {
   
   DecisionBits decisionBits{};
-  enum class MonFunction : uint8_t {doSimMon=0, doHwMonCTP, doHwMon, doComp, doSummary};
+  enum class MonFunction : uint8_t {doSimMon=0, doHwMonCTP, doHwMon, doComp, doMultComp};
   std::vector<uint8_t> failedMonFunctions;
   std::vector<std::vector<unsigned>> multWeightsSim;
   std::vector<std::vector<unsigned>> multWeightsHdw;
@@ -123,13 +123,21 @@ StatusCode L1TopoOnlineMonitor::fillHistograms( const EventContext& ctx ) const 
   }
 
   if (m_doComp) {
-    StatusCode sc = doComp(decisionBits,multWeightsSim,multWeightsHdw);
+    StatusCode sc = doComp(decisionBits);
     ATH_MSG_DEBUG("Executed doComp: " << (sc.isFailure() ? "failed" : "ok"));
     if (sc.isFailure()) {
       failedMonFunctions.push_back(static_cast<uint8_t>(MonFunction::doComp));
     }    
   }
-  
+
+  if (m_doMultComp) {
+    StatusCode sc = doMultComp(multWeightsSim,multWeightsHdw);
+    ATH_MSG_DEBUG("Executed doMultComp: " << (sc.isFailure() ? "failed" : "ok"));
+    if (sc.isFailure()) {
+      failedMonFunctions.push_back(static_cast<uint8_t>(MonFunction::doMultComp));
+    }    
+  }
+
   auto monFailedMonFunctions = Monitored::Collection("MonitoringFailures", failedMonFunctions);
   Monitored::Group(m_monTool, monFailedMonFunctions);
 
@@ -412,7 +420,7 @@ StatusCode L1TopoOnlineMonitor::doHwMon( DecisionBits& decisionBits, std::vector
   return StatusCode::SUCCESS;
 }
 
-StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits, std::vector<std::vector<unsigned>> &multWeightsSim, std::vector<std::vector<unsigned>> &multWeightsHdw ) const {
+StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits ) const {
   if (!decisionBits.triggerBitsSim.has_value()) {
     ATH_MSG_DEBUG("Simulation bits not set. Skipping simulation to hardware comparison");
     return StatusCode::FAILURE;
@@ -489,9 +497,12 @@ StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits, std::vector<
       }
     }
   }
+  return StatusCode::SUCCESS;
+}
 
-  if (multWeightsSim.size() == 0 and multWeightsHdw.size() == 0) {
-    ATH_MSG_DEBUG("Multiplicities not set, skipping multiplicities comparisin");
+StatusCode L1TopoOnlineMonitor::doMultComp( std::vector<std::vector<unsigned>> &multWeightsSim, std::vector<std::vector<unsigned>> &multWeightsHdw ) const {
+  if (multWeightsSim.size() == 0 or multWeightsHdw.size() == 0) {
+    ATH_MSG_DEBUG("Multiplicities not set, skipping multiplicities comparison");
     return StatusCode::FAILURE;
   }
 
@@ -503,7 +514,6 @@ StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits, std::vector<
       Monitored::Group(m_monTool, monMultSim, monMultHdw);
     }
   }
-
   return StatusCode::SUCCESS;
 }
 

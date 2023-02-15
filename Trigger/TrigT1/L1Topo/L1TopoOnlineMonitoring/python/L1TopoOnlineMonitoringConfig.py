@@ -80,7 +80,7 @@ def getMultiplicityLabels(flags,topoModule):
     return topo_trigline_labels
 
 
-def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=True, doHwMonCtp=False, doHwMon=False, doComp=False, forceCtp=False, logLevel = None):
+def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=True, doHwMonCtp=False, doHwMon=False, doComp=False, doMultComp=False, forceCtp=False, logLevel = None):
     # Placeholder for phase-1 implementation
     #raise RuntimeError('L1Topo phase-1 online monitoring not yet implemented')
     alg = CompFactory.L1TopoOnlineMonitor("L1TopoMonitoringTool",
@@ -88,15 +88,16 @@ def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=Tru
                                           doSimMon = doSimMon,
                                           doHwMonCTP = doHwMonCtp,
                                           doComp = doComp,
+                                          doMultComp = doMultComp,
                                           forceCTPasHdw=forceCtp)
     if logLevel : alg.OutputLevel=logLevel
     alg.MonTool = GenericMonitoringTool(flags, 'MonTool')
     alg.MonTool.HistPath = name
-    configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp)
+    configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp, doMultComp)
 
     return alg
 
-def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp):
+def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp, doMultComp):
 
     label_topo_all = []
     for cable in range(2):
@@ -164,6 +165,8 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp):
                                     title='L1Topo events with hardware accept and simulation fail',
                                     xbins=128, xlabels=label_topo_all,
                                     xmin=0, xmax=128)
+
+    if doMultComp:                             
         ylabels = ['#frac{HdwNotSim}{Hdw}','#frac{SimNotHdw}{Sim}','#frac{HdwAndSim}{HdwOrSim}','#frac{Hdw}{Sim}']
         for topo in [(0,'2a'),(1,'2b'),(2,'3a'),(3,'3b')]:
             name = f'Phase1TopoTrigger_{topo[0]},Phase1TopoMissMatch_{topo[0]};Ph1Topo{topo[1]}'
@@ -197,7 +200,7 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp):
                                         ymin=0, ymax=len(fpga_indexes))
         
 
-    mon_failure_labels = ['doHwMon', 'doSimMon', 'doHwMonCTP', 'doComp']
+    mon_failure_labels = ['doHwMon', 'doSimMon', 'doHwMonCTP', 'doComp', 'doMultComp']
     alg.MonTool.defineHistogram('MonitoringFailures', path='EXPERT', type='TH1F',
                                 title='Counts of mon functions returning failure;;Entries',
                                 xlabels=mon_failure_labels, xbins=len(mon_failure_labels),
