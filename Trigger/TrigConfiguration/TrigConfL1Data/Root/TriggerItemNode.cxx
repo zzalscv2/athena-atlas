@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfL1Data/TriggerItemNode.h"
@@ -128,7 +128,7 @@ TrigConf::TriggerItemNode::getAllFinalNodes(std::vector<const TriggerItemNode*>&
 }
 
 void
-TrigConf::TriggerItemNode::getAllThresholds(std::vector<TriggerThreshold*>& vec) const {
+TrigConf::TriggerItemNode::getAllThresholds(std::vector<const TriggerThreshold*>& vec) const {
    if(type() == OBJ) {
       if(!isInternalTrigger()) {
          if(m_Threshold) vec.push_back(m_Threshold);
