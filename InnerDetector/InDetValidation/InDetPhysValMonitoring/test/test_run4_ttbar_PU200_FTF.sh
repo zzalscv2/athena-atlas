@@ -1,7 +1,5 @@
 #!/bin/bash
-# art-description: Run 4 configuration, ITK only recontruction, 100 GeV Muons, no pileup, TrigFastTrackFinder as an offline algorithm
-# art-input: mc15_14TeV:mc15_14TeV.900040.PG_singlemu_Pt100_etaFlatnp0_43.evgen.EVNT.e8185
-# art-input-nfiles: 1
+# art-description: Run 4 configuration, ITK only recontruction, all-hadronic ttbar, full pileup, TrigFastTrackFinder as an offline algorithm
 # art-type: grid
 # art-include: master/Athena
 # art-output: *.root
@@ -11,6 +9,7 @@
 
 lastref_dir=last_results
 dcubeXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_ITk_FastTrackFinder.xml"
+rdo_23p0=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/inputs/601237_ttbar_allhad_PU200_ITk_master_v1.RDO.root
 
 geometry=ATLAS-P2-RUN4-01-00-00
 
@@ -25,38 +24,10 @@ run () {
     return $rc
 }
 
-run "Simulation" \
-    Sim_tf.py \
-    --CA \
-    --conditionsTag 'default:OFLCOND-MC15c-SDR-14-05' \
-    --simulator 'FullG4MT' \
-    --postInclude 'default:PyJobTransforms.UseFrontier' \
-    --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
-    --geometryVersion "default:${geometry}" \
-    --inputEVNTFile ${ArtInFile} \    
-    --outputHITSFile HITS.root \
-    --maxEvents -1 \
-    --imf False \
-    --detectors Bpipe ITkPixel ITkStrip HGTD
-
-run "Digitization"\
-    Digi_tf.py \
-    --CA \
-    --conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
-    --digiSeedOffset1 170 --digiSeedOffset2 170 \
-    --geometryVersion "default:${geometry}" \
-    --inputHITSFile HITS.root \
-    --jobNumber 568 \
-    --maxEvents -1 \
-    --outputRDOFile RDO.root \
-    --preInclude 'HITtoRDO:Campaigns.PhaseIINoPileUp' \
-    --postInclude 'PyJobTransforms.UseFrontier' \
-    --detectors ITkPixel ITkStrip HGTD
-
 run "Reconstruction" \
     Reco_tf.py \
     --CA \
-    --inputRDOFile RDO.root \
+    --inputRDOFile ${rdo_23p0} \
     --outputAODFile AOD.root \
     --steering doRAWtoALL \
     --preInclude InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude \
@@ -86,3 +57,4 @@ run "dcube-last" \
     -c ${dcubeXml} \
     -r ${lastref_dir}/idpvm.root \
     idpvm.root
+
