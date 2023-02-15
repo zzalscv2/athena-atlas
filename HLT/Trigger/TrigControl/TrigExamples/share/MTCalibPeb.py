@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from TrigExamples import MTCalibPebConfig
@@ -31,17 +31,15 @@ MTCalibPebConfig.default_options.EnableL1CaloPhase1 = get_opt('EnableL1CaloPhase
 MTCalibPebConfig.default_options.EnableL1MuonPhase1 = get_opt('EnableL1MuonPhase1', True)
 MTCalibPebConfig.default_options.EnableL1CaloLegacy = get_opt('EnableL1CaloLegacy', True)
 
-# SGInputLoader takes care of unmet input dependencies (e.g. triggering conversion from BS)
-from AthenaCommon.AlgScheduler import AlgScheduler
-AlgScheduler.setDataLoaderAlg('SGInputLoader')
-
-# Increase scheduler checks and verbosity
-AlgScheduler.CheckDependencies( True )
-AlgScheduler.ShowControlFlow( True )
-AlgScheduler.ShowDataDependencies( True )
-
 # Set flags
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
+# Increase scheduler checks and verbosity
+ConfigFlags.Scheduler.CheckDependencies = True
+ConfigFlags.Scheduler.ShowControlFlow = True
+ConfigFlags.Scheduler.ShowDataDeps = True
+# Auto-load unmet input dependencies (e.g. triggering conversion from BS)
+ConfigFlags.Scheduler.AutoLoadUnmetDependencies = True
+ConfigFlags.Input.FailOnUnknownCollections = False
 MTCalibPebConfig.set_flags(ConfigFlags)
 ConfigFlags.lock()
 
