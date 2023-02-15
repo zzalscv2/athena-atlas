@@ -73,6 +73,7 @@ class Alg( CfgPyAlgorithm ):
     """
     def __init__(self, name = None, **kw):
         if name is None: name = kw.get('name', self.__class__.__name__)
+        kw.setdefault('OutputLevel', 3) #INFO
         ## init base class
         super(Alg, self).__init__(name, **kw)
         self._pyath_evtstore = None # handle to the evt store
@@ -106,14 +107,20 @@ class Alg( CfgPyAlgorithm ):
         return self._pyath_condstore
     
     def sysInitialize(self):
-        self.msg.setLevel(_get_prop_value(self,'OutputLevel'))
+        if hasattr(self, 'OutputLevel'):
+            self.msg.setLevel(self.OutputLevel)
+        else:
+            self.msg.setLevel(_get_prop_value(self,'OutputLevel'))
         return self.initialize()
     
     def initialize(self):
         return StatusCode.Success
 
     def sysReinitialize(self):
-        self.msg.setLevel(_get_prop_value(self,'OutputLevel'))
+        if hasattr(self, 'OutputLevel'):
+            self.msg.setLevel(self.OutputLevel)
+        else:
+            self.msg.setLevel(_get_prop_value(self,'OutputLevel'))
         return self.reinitialize()
     
     def reinitialize(self):
@@ -177,21 +184,27 @@ class Svc( CfgPyService ):
     """Base class for all services
     """
     def __init__(self, name = None, **kw):
-
+        kw.setdefault('OutputLevel', 3) #INFO
         if name is None: name = kw.get('name', self.__class__.__name__)
         ## init base class
         super(Svc, self).__init__(name, **kw)
         return
 
     def sysInitialize(self):
-        self.msg.setLevel(_get_prop_value(self,'OutputLevel'))
+        if hasattr(self, 'OutputLevel'):
+            self.msg.setLevel(self.OutputLevel)
+        else:
+            self.msg.setLevel(_get_prop_value(self,'OutputLevel'))
         return self.initialize()
     
     def initialize(self):
         return StatusCode.Success
 
     def sysReinitialize(self):
-        self.msg.setLevel(_get_prop_value(self,'OutputLevel'))
+        if hasattr(self, 'OutputLevel'):
+            self.msg.setLevel(self.OutputLevel)
+        else:
+            self.msg.setLevel(_get_prop_value(self,'OutputLevel'))
         return self.reinitialize()
     
     def reinitialize(self):
@@ -224,6 +237,7 @@ class AlgTool( CfgPyAlgTool ):
     """
     
     def __init__(self, name=None, parent=None, **kw):
+        kw.setdefault('OutputLevel', 3) #INFO
         if name is None: name = kw.get('name', self.__class__.__name__)
         if not (parent is None):
             if isinstance(parent, str): name = "%s.%s" % (parent,name)
@@ -260,7 +274,10 @@ class AlgTool( CfgPyAlgTool ):
         return self._pyath_condstore
     
     def sysInitialize(self):
-        self.msg.setLevel(_get_prop_value(self,'OutputLevel'))
+        if hasattr(self, 'OutputLevel'):
+            self.msg.setLevel(self.OutputLevel)
+        else:
+            self.msg.setLevel(_get_prop_value(self,'OutputLevel'))
         return self.initialize()
     
     def initialize(self):
@@ -269,7 +286,10 @@ class AlgTool( CfgPyAlgTool ):
             )
 
     def sysReinitialize(self):
-        self.msg.setLevel(_get_prop_value(self,'OutputLevel'))
+        if hasattr(self, 'OutputLevel'):
+            self.msg.setLevel(self.OutputLevel)
+        else:
+            self.msg.setLevel(_get_prop_value(self,'OutputLevel'))
         return self.reinitialize()
     
     def reinitialize(self):
@@ -292,7 +312,7 @@ class Aud( CfgPyAud ):
     Base class from which all concrete auditor classes should be derived.
     """
     def __init__(self, name=None, **kw):
-
+        kw.setdefault('OutputLevel', 3) #INFO
         if name is None: name = kw.get('name', self.__class__.__name__)
         ## init base class
         super(Aud, self).__init__(name, **kw)
@@ -302,7 +322,10 @@ class Aud( CfgPyAud ):
         return
 
     def sysInitialize(self):
-        self.msg.setLevel(_get_prop_value(self,'OutputLevel'))
+        if hasattr(self, 'OutputLevel'):
+            self.msg.setLevel(self.OutputLevel)
+        else:
+            self.msg.setLevel(_get_prop_value(self,'OutputLevel'))
         return self.initialize()
     
     def initialize(self):
@@ -346,6 +369,7 @@ class AthFilterAlgorithm(Alg):
         if name is None:
             name = kw.get('name', self.__class__.__name__)
         kw['name'] = name
+        kw.setdefault('OutputLevel', 3) #INFO
 
         ## init base class
         super(AthFilterAlgorithm, self).__init__(**kw)
@@ -384,6 +408,10 @@ class AthFilterAlgorithm(Alg):
         return
 
     def sysInitialize(self):
+        if hasattr(self, 'OutputLevel'):
+            self.msg.setLevel(self.OutputLevel)
+        else:
+            self.msg.setLevel(_get_prop_value(self,'OutputLevel'))
         myName=self.name() if callable(self.name) else self.name 
         self.cutID = self.cutFlowSvc().registerFilter(myName, self._filter_descr, True)
         if not self.cutID:
