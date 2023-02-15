@@ -180,14 +180,12 @@ StatusCode LArAutoCorrTotalCondAlg::execute() {
   std::unique_ptr<LArAutoCorrTotal> larAutoCorrTotal =
       std::make_unique<LArAutoCorrTotal>(larOnlineID, larOnOffIdMapping, m_nGains);
 
-  std::vector<HWIdentifier>::const_iterator it = larOnlineID->channel_begin();
-  std::vector<HWIdentifier>::const_iterator it_e = larOnlineID->channel_end();
   int count = 0;
   int count2 = 0;
 
-  for (; it != it_e; ++it) {
+
+  for (const HWIdentifier chid : larOnlineID->channel_range()) {
     count++;
-    const HWIdentifier chid = *it;
     const IdentifierHash hid = larOnlineID->channel_Hash(chid);
     // const unsigned int id32 = chid.get_identifier32().get_compact();
 

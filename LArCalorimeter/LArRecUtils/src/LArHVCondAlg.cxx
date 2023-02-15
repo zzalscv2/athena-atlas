@@ -1372,12 +1372,8 @@ StatusCode LArHVCondAlg::updateMethod(const EventContext& ctx,
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey,ctx};
   const CaloDetDescrManager* calodetdescrmgr = *caloMgrHandle;
 
-  std::vector<HWIdentifier>::const_iterator febid_it=m_onlineID->feb_begin();
-  std::vector<HWIdentifier>::const_iterator febid_end_it=m_onlineID->feb_end();
-
-  for (;febid_it!=febid_end_it;++febid_it) {
-      
-    bool IsMissingFeb=(bfCont->status(*febid_it).deadAll() || bfCont->status(*febid_it).deadReadout());
+  for (const HWIdentifier febId : m_onlineID->feb_range()) {  
+    bool IsMissingFeb=(bfCont->status(febId).deadAll() || bfCont->status(febId).deadReadout());
     
     if (IsMissingFeb) {       //flag for special treatment for FEB that has non contiguous eta regions, so we have to separate them
       bool is_normal=0; //FEB without discontinuity
@@ -1391,10 +1387,10 @@ StatusCode LArHVCondAlg::updateMethod(const EventContext& ctx,
       float eta_min_additive1=+30,eta_max_additive1=-30;
       float phi_min_additive1=+30,phi_max_additive1=-30;
       
-      int chans_per_feb = m_onlineID->channelInSlotMax(*febid_it);
+      int chans_per_feb = m_onlineID->channelInSlotMax(febId);
       
       for (int icha=0;icha<chans_per_feb;icha++) {   //loop on each channel of the relevant FEB
-	HWIdentifier channelId=m_onlineID->channel_Id(*febid_it,icha);
+	HWIdentifier channelId=m_onlineID->channel_Id(febId,icha);
 
 	if (cabling->isOnlineConnected(channelId)) {
 	  Identifier offlineId=cabling->cnvToIdentifier(channelId);
