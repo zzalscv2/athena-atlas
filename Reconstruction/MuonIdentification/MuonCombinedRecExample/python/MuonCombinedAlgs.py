@@ -110,18 +110,23 @@ def MuonCombinedInDetCandidateAlg( name="MuonCombinedInDetCandidateAlg",**kwargs
 
 def MuonInDetToMuonSystemExtensionAlg(name= "MuonInDetToMuonSystemExtensionAlg", **kwargs):
     kwargs.setdefault("MuonSystemExtensionTool", getPublicTool("MuonSystemExtensionTool"))
-    kwargs.setdefault("WriteStauCandidates", "InDetCandidatesStaus")
+    kwargs.setdefault("WriteStauCandidates", "InDetCandidatesStausPrompt")
     return CfgMgr.MuonInDetToMuonSystemExtensionAlg(name,**kwargs) 
 
 def MuonInDetToMuonSystemExtensionAlg_LRT(name= "MuonInDetToMuonSystemExtensionAlg_LRT", **kwargs):
     kwargs.setdefault("MuonSystemExtensionTool", getPublicTool("MuonSystemExtensionTool"))
     kwargs.setdefault("InputInDetCandidates", MuonCbKeys.InDetTrackParticlesLargeD0())
     kwargs.setdefault("WriteInDetCandidates", MuonCbKeys.InDetTrackParticlesLargeD0()+"SystemExtended")
-    kwargs.setdefault("WriteStauCandidates","")
+    kwargs.setdefault("WriteStauCandidates","InDetCandidatesStausLRT")
     
     kwargs.setdefault("CombinedTagMap", "muidcoTagMap_LRT")
     return CfgMgr.MuonInDetToMuonSystemExtensionAlg(name,**kwargs) 
 
+def MuonInDetExtensionMergerAlg(name="MuonInDetExtensionMergerAlg", **kwargs):
+    kwargs.setdefault("ToMerge", ["InDetCandidatesStausPrompt", "InDetCandidatesStausLRT"])
+    kwargs.setdefault("ToWrite", "InDetCandidatesStaus")
+    return CfgMgr.MuonInDetExtensionMergerAlg(name, **kwargs)
+  
 
 def MuonCombinedInDetCandidateAlg_LRT( name="MuonCombinedInDetCandidateAlg_LRT",**kwargs ):
     kwargs.setdefault("TrackSelector",getPublicTool("MuonCombinedInDetDetailedTrackSelectorTool_LRT") )
@@ -348,6 +353,7 @@ class MuonCombinedReconstruction(ConfiguredMuonRec):
         if muonCombinedRecFlags.doMuGirl():
             topSequence += getAlgorithm("MuonInsideOutRecoAlg")
             if muonCombinedRecFlags.doMuGirlLowBeta():
+                topSequence += getAlgorithm("MuonInDetExtensionMergerAlg")
                 topSequence += getAlgorithm("MuGirlStauAlg")
             if InDetFlags.doR3LargeD0(): topSequence += getAlgorithm("MuGirlAlg_LRT")
 

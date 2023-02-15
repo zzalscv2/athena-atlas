@@ -52,6 +52,7 @@ addAlgorithm("MuonCombinedRecExample.MuonCombinedAlgs.MuonCombinedInDetCandidate
 
 addAlgorithm("MuonCombinedRecExample.MuonCombinedAlgs.MuonInDetToMuonSystemExtensionAlg", "MuonInDetToMuonSystemExtensionAlg", UseOnlyHitSectors=useOnlyHitSectors)
 addAlgorithm("MuonCombinedRecExample.MuonCombinedAlgs.MuonInDetToMuonSystemExtensionAlg_LRT","MuonInDetToMuonSystemExtensionAlg_LRT", UseOnlyHitSectors=useOnlyHitSectors)
+addAlgorithm("MuonCombinedRecExample.MuonCombinedAlgs.MuonInDetExtensionMergerAlg", "MuonInDetExtensionMergerAlg")
 
 
 
