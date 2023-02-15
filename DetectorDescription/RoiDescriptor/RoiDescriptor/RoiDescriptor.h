@@ -24,7 +24,6 @@
 
 #include "CxxUtils/checker_macros.h"
 
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 /**
  * @brief Describes the Region of Ineterest geometry
@@ -185,16 +184,16 @@ public:
 
   static double zedWidthDefault() { return s_zedWidthDefault; }
 
-  static void  (*zedWidthDefault_set)( double d ) ATLAS_THREAD_SAFE;
+  static void  (*zedWidthDefault_set ATLAS_THREAD_SAFE)( double d );
 
   /// wrapper to circumvent the erroneous cpp warningvs for the static function pointer  
   static void circumvent_cppchecker( double d ) { zedWidthDefault_set( d ); } 
 
 private:
  
-  static void  zedWidthDefault_0( double d ) {
+  static void zedWidthDefault_0( double d ) {
+    //RAII lock guard
     std::lock_guard<std::mutex> lock(s_mutex); 
-    /// does this lock get released when ity goes out of scope ?
     if ( increment==increment_0 )  s_zedWidthDefault = d;
     increment();
   }
@@ -210,7 +209,7 @@ private:
   /// is replaced by an emtpy method for all subsequent calls so there 
   /// will be no performance overhead    
    
-  static void increment_0() { 
+  static void increment_0(){ 
     std::lock_guard<std::mutex> lock(s_mutex_inc);
     zedWidthDefault_set = zedWidthDefault_1;
     increment = increment_1;
@@ -219,10 +218,8 @@ private:
   static void increment_1() { }
 
 public:
-
   /// can't have this private, or the cpp checker complains
-  
-  static void (*increment)() ATLAS_THREAD_SAFE; /// flawed atlas coding convention - a function pointer should not be treated the same as a standard member variable by the cpp checker 
+  static void (*increment ATLAS_THREAD_SAFE)();
 
 protected:
 
