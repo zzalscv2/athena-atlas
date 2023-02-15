@@ -443,14 +443,6 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
     if not os.access(process_dir+'/bin/generate_events',os.R_OK):
         raise RuntimeError('No generate_events module found in '+process_dir)
 
-    allow_links = True
-    if cluster_type is not None:
-        if 'condor' in cluster_type.lower():
-            mglog.warning('Condor clusters do not allow links.  Will do more copying rather than linking')
-            allow_links = False
-
-    (LHAPATH,origLHAPATH,origLHAPDF_DATA_PATH) = setupLHAPDF(process_dir=process_dir, extlhapath=extlhapath, allow_links=allow_links)
-
     mglog.info('For your information, the libraries available are (should include LHAPDF):')
     ls_dir(process_dir+'/lib')
 
@@ -586,8 +578,6 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
         theApp.finalize()
         theApp.exit()
 
-    resetLHAPDF(origLHAPATH=origLHAPATH,origLHAPDF_DATA_PATH=origLHAPDF_DATA_PATH)
-
     mglog.info('Finished at '+str(time.asctime()))
     return 0
 
@@ -601,9 +591,6 @@ def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None,
     setup_path_protection()
 
     isNLO=is_NLO_run(process_dir=MADGRAPH_GRIDPACK_LOCATION)
-    LHAPATH=os.environ['LHAPATH'].split(':')[0]
-
-    (LHAPATH,origLHAPATH,origLHAPDF_DATA_PATH) = setupLHAPDF(process_dir=MADGRAPH_GRIDPACK_LOCATION, extlhapath=extlhapath)
 
     setupFastjet(process_dir=MADGRAPH_GRIDPACK_LOCATION)
 
@@ -793,8 +780,6 @@ def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None,
         add_madspin(process_dir=MADGRAPH_GRIDPACK_LOCATION)
 
     mglog.info('Finished at '+str(time.asctime()))
-
-    resetLHAPDF(origLHAPATH=origLHAPATH,origLHAPDF_DATA_PATH=origLHAPDF_DATA_PATH)
 
     return 0
 
