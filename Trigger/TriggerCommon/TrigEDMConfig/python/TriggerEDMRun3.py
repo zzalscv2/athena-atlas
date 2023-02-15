@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # ------------------------------------------------------------
 # Definition of trigger EDM for Run 3
@@ -1188,7 +1188,7 @@ def tpMap():
     return l
 
 
-def addHLTNavigationToEDMList(edmList, allDecisions, hypoDecisions):
+def addHLTNavigationToEDMList(flags, edmList, allDecisions, hypoDecisions):
     """
     Extend TriggerHLTListRun3 with HLT Navigation objects
     """
@@ -1196,8 +1196,7 @@ def addHLTNavigationToEDMList(edmList, allDecisions, hypoDecisions):
     # HLTNav_* object list is built dynamically during job configuration, here we only define its output targets
     HLTNavEDMTargets = ''
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    if not ConfigFlags.Trigger.doOnlineNavigationCompactification:
+    if not flags.Trigger.doOnlineNavigationCompactification:
         # If we are not compacting the online EDM, then we must write out all of the individual collections
         # ESD is added for MC support
         HLTNavEDMTargets = 'BS ESD'
