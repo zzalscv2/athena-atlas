@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 // @file CrestFunctions.cxx
 // Implementation for CrestFunctions utilities
@@ -12,11 +12,53 @@
 #include <exception>
 #include <regex>
 #include "IOVDbStringFunctions.h"
+#include <string>
+#include <algorithm>
+#include <map>
 
 namespace IOVDbNamespace{
   const std::string
   urlBase(){
     return  "http://crest-02.cern.ch:8080";
+  }
+
+  std::vector<IovHashPair>
+  extractIovAndHash(const std::string & jsonReply){
+    std::vector<IovHashPair> iovHashPairs;
+    bool all_ok = true;
+    std::string iovSignature = "since\":";
+    std::string hashSignature = "payloadHash\":\"";
+    size_t startpoint = jsonReply.find(hashSignature);
+    size_t endpoint = 0;
+
+    while(startpoint!=std::string::npos) {
+      startpoint+=hashSignature.size();
+      endpoint = jsonReply.find("\"",startpoint);
+      if(endpoint==std::string::npos) {
+	all_ok = false;
+	break;
+      }
+      std::string hashString = jsonReply.substr(startpoint,endpoint-startpoint);
+      startpoint= jsonReply.find(iovSignature,endpoint);
+      if(startpoint==std::string::npos) {
+	all_ok = false;
+	break;
+      }
+      startpoint+=iovSignature.size();
+      endpoint = jsonReply.find(",",startpoint);
+      if(endpoint==std::string::npos) {
+	all_ok = false;
+	break;
+      }
+      std::string iovString = jsonReply.substr(startpoint,endpoint-startpoint);
+      iovHashPairs.push_back(IovHashPair(iovString,hashString));
+      startpoint= jsonReply.find(hashSignature,endpoint);
+    }
+    if(!all_ok) {
+      std::cerr<<__FILE__<<":"<<__LINE__<< ": Formatting error found while trying to extract IOVs and Hashes from "<<jsonReply<<std::endl;
+      iovHashPairs.clear();
+    }
+    return iovHashPairs;
   }
 
   std::string
@@ -36,9 +78,27 @@ namespace IOVDbNamespace{
     }
     return hash;
   }
-  //N.B. Returns ONE hash for now, the last one.
-  std::string 
+
+  std::vector<IovHashPair>
   getIovsForTag(const std::string & tag, const bool testing){
+    std::string reply{R"delim([{"insertionTime":"2022-05-26T12:10:58+0000","payloadHash":"99331506eefbe6783a8d5d5bc8b9a44828a325adfcaac32f62af212e9642db71","since":0,"tagName":"LARIdentifierFebRodMap-RUN2-000"}])delim"};
+    if (not testing){
+      //...CrestApi returns Iovs as a json object
+      auto myCrestClient = Crest::CrestClient(urlBase());
+      try{
+        reply = myCrestClient.findAllIovs(tag).dump();
+      } catch (std::exception & e){
+        std::cout<<__FILE__<<":"<<__LINE__<< ": "<<e.what()<<" while trying to find the IOVs"<<std::endl;
+        return std::vector<IovHashPair>();
+      }
+    }
+    return extractIovAndHash(reply);
+  }
+
+  std::string 
+  getLastHashForTag(const std::string & tag, const bool testing){
+    char tu[] = "";
+    strfry(tu);
     std::string reply{R"delim([{"insertionTime":"2022-05-26T12:10:58+0000","payloadHash":"99331506eefbe6783a8d5d5bc8b9a44828a325adfcaac32f62af212e9642db71","since":0,"tagName":"LARIdentifierFebRodMap-RUN2-000"}])delim"};
     if (not testing){
       //...CrestApi returns Iovs as a json object
@@ -52,6 +112,7 @@ namespace IOVDbNamespace{
     }
     return extractHashFromJson(reply);
   }
+
 
   std::string 
   getPayloadForHash(const std::string & hash, const bool testing){
@@ -71,7 +132,7 @@ namespace IOVDbNamespace{
   
   std::string 
   getPayloadForTag(const std::string & tag, const bool testing){
-    return getPayloadForHash(getIovsForTag(tag, testing), testing);
+    return getPayloadForHash(getLastHashForTag(tag, testing), testing);
   }
   
   std::string 
@@ -147,7 +208,6 @@ namespace IOVDbNamespace{
   
   std::string 
   folderDescriptionForTag(const std::string & tag, const bool testing){
-    //std::string jsonReply{R"delim({"node_description": "<timeStamp>run-lumi</timeStamp><addrHeader><address_header service_type=\"71\" clid=\"1170039409\" /></addrHeader><typeName>AlignableTransformContainer</typeName>"})delim"};
     std::string jsonReply{R"delim({"format":"TagMetaSetDto","resources":[{"tagName":"LARAlign-RUN2-UPD4-03","description":"{\"dbname\":\"CONDBR2\",\"nodeFullpath\":\"/LAR/Align\",\"schemaName\":\"COOLONL_LAR\"}","chansize":1,"colsize":1,"tagInfo":"{\"channel_list\":[{\"0\":\"\"}],\"node_description\":\"<timeStamp>run-lumi</timeStamp><addrHeader><address_header service_type=\\\"256\\\" clid=\\\"1238547719\\\" /></addrHeader><typeName>CondAttrListCollection</typeName><updateMode>UPD1</updateMode>\",\"payload_spec\":\"PoolRef:String4k\"}","insertionTime":"2022-05-26T12:10:38+0000"}],"size":1,"datatype":"tagmetas","format":null,"page":null,"filter":null})delim"};
     if (not testing){
       auto myCrestClient = Crest::CrestClient(urlBase());
