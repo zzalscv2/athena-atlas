@@ -1542,7 +1542,7 @@ int InDet::TrackClusterAssValidation::charge(const InDet::TrackClusterAssValidat
 	ra > 1.6 ? rap = 2 : ra > .8 ?  rap = 1 : rap = 0;
 
       int                         pdg = pat->pdg_id();
-      const HepPDT::ParticleData* pd  = m_particleDataTable->particle(abs(pdg));
+      const HepPDT::ParticleData* pd  = m_particleDataTable->particle(std::abs(pdg));
       if(!pd) return 0;
       double ch = pd->charge(); if(pdg < 0) ch = -ch;
       if(ch >  .5) return  1;

@@ -349,7 +349,7 @@ G4bool TileGeoG4CalibSD::ProcessHits(G4Step* step, G4TouchableHistory* /*ROhist*
   double invisibleEnergy = GetInvisibleEnergy();
   double visibleEnergy = GetVisibleEnergy();
 
-  if (fabs(invisibleEnergy) < 0.001 * CLHEP::eV && visibleEnergy < 0.001 * CLHEP::eV) {
+  if (std::abs(invisibleEnergy) < 0.001 * CLHEP::eV && visibleEnergy < 0.001 * CLHEP::eV) {
     if (verboseLevel >= 10) G4cout << "Ignore hit because energy is too small " << visibleEnergy << " " << invisibleEnergy << G4endl;
     return true;
   }

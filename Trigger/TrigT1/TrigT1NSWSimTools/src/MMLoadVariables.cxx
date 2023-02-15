@@ -38,7 +38,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
       for(const auto it : *truthContainer) {
         const HepMC::GenEvent *subEvent = it;
 #ifdef HEPMC3
-        for(auto particle : subEvent->particles())
+        for(const auto& particle : subEvent->particles())
 #else
         for(const auto pit : subEvent->particle_range())
 #endif
@@ -64,7 +64,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
             }//muentry loop
             } // trackRecordCollection is not null
 #ifdef HEPMC3
-            for(auto vertex1 : subEvent->vertices())
+            for(const auto& vertex1 : subEvent->vertices())
 #else
             int l=0;
             for(const auto vit : subEvent->vertex_range())

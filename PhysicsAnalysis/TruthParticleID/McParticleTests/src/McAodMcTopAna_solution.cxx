@@ -210,7 +210,7 @@ StatusCode McTopAnaSolution::doMcTopWb()
   m_vtxFilter->filterMcEventCollection(mcevt, filteredMcEvt);
 
   const HepMC::GenEvent * evtAod = filteredMcEvt->front();
-  for ( auto particle:  *evtAod) {
+  for ( const auto& particle:  *evtAod) {
     ATH_MSG_DEBUG("Part. id: " << particle->pdg_id() << endmsg
                   << "E= "        << particle->momentum().e()
                   << "\tpx= "     << particle->momentum().px());

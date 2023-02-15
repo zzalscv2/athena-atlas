@@ -41,7 +41,7 @@ StatusCode TruthClosureCheck::initialize() {
 StatusCode TruthClosureCheck::sanityCheck(const HepMC::GenEvent& event) const {
   //Sanity check
   bool resetProblem(false);
-  for (auto particle: event) {
+  for (const auto& particle: event) {
     if (particle->status() == 1) {
       if (!particle->production_vertex()) {
         ATH_MSG_ERROR("Status 1 particle without a production vertex!! " << particle);
