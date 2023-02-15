@@ -4,8 +4,6 @@
 
 #include "MuonCombinePatternTools/MuonCombinePatternTool.h"
 
-
-
 #include "CxxUtils/sincos.h"
 #include "MuonHoughPatternEvent/MuonHoughPattern.h"
 #include "MuonPattern/MuonPatternChamberIntersect.h"
@@ -14,17 +12,29 @@
 #include "TrkParameters/TrackParameters.h"
 #include "TrkSurfaces/Surface.h"  
 #include <cmath> //std::abs, M_PI etc
-#include <memory> //std::unique_ptr
-#include <iterator>
-
+#include "GaudiKernel/SystemOfUnits.h"
+#include "EventPrimitives/EventPrimitivesToStringConverter.h"
 namespace{
-double rotatePhi(double phi, double rotationFraction) {
-    // check whether we rotate to a large value than pi, if so add additional
-    // rotation by -2pi
-    if (phi + rotationFraction * M_PI > M_PI) return phi + (rotationFraction - 2.) * M_PI;
-    return phi + rotationFraction * M_PI;
+    double rotatePhi(double phi, double rotationFraction) {
+        // check whether we rotate to a large value than pi, if so add additional
+        // rotation by -2pi
+        if (phi + rotationFraction * M_PI > M_PI) return phi + (rotationFraction - 2.) * M_PI;
+        return phi + rotationFraction * M_PI;
+    }
+
+    struct Unowned{
+        void operator()(const Muon::MuonPrdPattern*) {}
+    };
+
+    const Amg::Vector3D& globalPos(const Trk::PrepRawData* prd ){
+        if (prd->type(Trk::PrepRawDataType::MdtPrepData)) 
+            return static_cast<const Muon::MdtPrepData*>(prd)->globalPosition();
+        return static_cast<const Muon::MuonCluster*>(prd)->globalPosition();
+
+    }
 }
-}
+using PrdPatternPair = MuonCombinePatternTool::PrdPatternPair;
+
 MuonCombinePatternTool::MuonCombinePatternTool(const std::string& type, const std::string& name, const IInterface* parent) :
     AthAlgTool(type, name, parent),
     m_maximum_xydistance(3500),
@@ -48,6 +58,7 @@ MuonCombinePatternTool::MuonCombinePatternTool(const std::string& type, const st
 StatusCode MuonCombinePatternTool::initialize() {
     ATH_MSG_DEBUG("MuonCombinePatternTool::initialize");
     ATH_CHECK(m_idHelperSvc.retrieve());
+    ATH_CHECK(m_printer.retrieve());
     if (!m_use_cosmics) { m_splitpatterns = false; }
     if (m_use_cosmics) { m_bestphimatch = true; }
     ATH_MSG_DEBUG(" UseCosmics: " << m_use_cosmics << " Split Patterns: " << m_splitpatterns << " NoDiscarding: " << m_nodiscarding
@@ -55,70 +66,67 @@ StatusCode MuonCombinePatternTool::initialize() {
     return StatusCode::SUCCESS;
 }
 
-MuonPrdPatternCollection* MuonCombinePatternTool::combineEtaPhiPatterns(
-    const MuonPrdPatternCollection* phiPatternCollection, const MuonPrdPatternCollection* etaPatternCollection,
+std::unique_ptr<MuonPrdPatternCollection> MuonCombinePatternTool::combineEtaPhiPatterns(
+    const MuonPrdPatternCollection& phiPatternCollection, const MuonPrdPatternCollection& etaPatternCollection,
     /** phi eta association map, eta prds are key*/
-    const std::map<const Trk::PrepRawData*, std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>>* phiEtaHitAssMap) const {
+    const EtaPhiHitAssocMap& phiEtaHitAssMap) const {
     bool myDebug = false;
-    std::vector<std::unique_ptr<const Muon::MuonPrdPattern>> patternsToDelete;
-    std::vector<std::pair<const Muon::MuonPrdPattern*, const Muon::MuonPrdPattern*>>
-        candidates;  // vector of etapatterns (key) and phipatterns (value), that are
-                     // candidates for combining. Both etapatterns and phipatterns
-                     // can occur multiple times
-
-    if (m_use_cosmics && m_splitpatterns) {
-        patternsToDelete.reserve(6 * etaPatternCollection->size());  // split eta (2) and phi patterns (2) + associated (2) ,
-                                                                     // might be more when more than one match is found
-    } else {
-        patternsToDelete.reserve(etaPatternCollection->size());  // only associated patterns
-    }
+   
+    /// vector of etapatterns (key) and phipatterns (value), that are
+    /// candidates for combining. Both etapatterns and phipatterns
+    /// can occur multiple times
+    std::vector<CandidatePatPair> candidates{};  
+    
+   
     // strategy
     // associate eta pattern to phi patterns
     // are phi hits on a eta and eta hits on phi pattern?
 
     // some printout
-    ATH_MSG_DEBUG(" combineEtaPhiPatterns:  eta patterns: " << etaPatternCollection->size()
-                                                            << "  phi patterns: " << phiPatternCollection->size());
+    ATH_MSG_VERBOSE(" combineEtaPhiPatterns: "
+                    <<" eta patterns: " << etaPatternCollection.size()
+                    << "  phi patterns: " << phiPatternCollection.size()
+                    <<std::endl<<"#################################################################################"
+                    <<std::endl<<"Print eta pattern collection "<<std::endl<<m_printer->print(etaPatternCollection)
+                    <<std::endl<<"+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"                    
+                    <<std::endl<<"Print phi pattern collection "<<std::endl<<m_printer->print(phiPatternCollection)
+                    );
 
-    for (unsigned int etalevel = 0; etalevel < etaPatternCollection->size(); etalevel++) {
-        const Muon::MuonPrdPattern* etapattern = etaPatternCollection->at(etalevel);
+    for (unsigned int etalevel = 0; etalevel < etaPatternCollection.size(); etalevel++) {
+        CandPrdPatPtr etapattern{etaPatternCollection.at(etalevel), Unowned()};
         if (etapattern->numberOfContainedPrds() == 0) continue;
-
-        double theta = etapattern->globalDirection().theta();
-        const double phieta = etapattern->globalDirection().phi();
+        const Amg::Vector3D etaPatDir = etapattern->globalDirection().unit();
+        const Amg::Vector3D& etaPatPos = etapattern->globalPosition();
+        double theta = etaPatDir.theta();
+        const double phieta = etaPatDir.phi();
         CxxUtils::sincos scphieta(phieta);
-        CxxUtils::sincos sctheta(theta);
-        double dx_eta = scphieta.cs * sctheta.sn;
-        double dy_eta = scphieta.sn * sctheta.sn;
-        double dz_eta = sctheta.cs;
-        double z0 = etapattern->globalPosition().z();  // 0 for non -cosmics
-        double rz0 = z0 * sctheta.sn;                  // closest distance in rz
+        CxxUtils::sincos sctheta(theta);       
+        double z0 = etaPatPos.z();    // 0 for non -cosmics
+        double rz0 = z0 * sctheta.sn; // closest distance in rz
 
-        double eta_x = etapattern->globalPosition().x();
-        double eta_y = etapattern->globalPosition().y();
-        double pattern_z0 =
-            z0 + std::sqrt(eta_x * eta_x + eta_y * eta_y) * sctheta.cs / sctheta.sn;  // z belonging to (x0,y0) -> noncosmics just close to
-                                                                                      // 0 (0.001 * sin/cos)
-        double eta_r0 = MuonHoughMathUtils::signedDistanceOfLineToOrigin2D(eta_x, eta_y, phieta);
-        double charge = 1.;
-        if (eta_r0 < 0) charge = -1.;
+        double eta_x = etaPatPos.x();
+        double eta_y = etaPatPos.y();
+        double pattern_z0 =z0 + etaPatPos.perp() * sctheta.cs / sctheta.sn;  
+        // z belonging to (x0,y0) -> noncosmics just close to
+        // 0 (0.001 * sin/cos)
+        const double eta_r0 = MuonHoughMathUtils::signedDistanceOfLineToOrigin2D(eta_x, eta_y, phieta);
+        const double charge = eta_r0>= 0. ? 1. : -1;
         //           Get inverse curvature from eta pattern
-        double curvature = etapattern->globalDirection().mag();
-        double invcurvature = 0.;
-        if (curvature > 2) invcurvature = charge / curvature;
-
+        const double curvature = etapattern->globalDirection().mag();
+        const double invcurvature = curvature > 2 ?charge / curvature : 0.;
+      
         ATH_MSG_DEBUG(" eta pattern info level: " << etalevel << " phi " << phieta << " theta " << theta << " x0 " << eta_x << " y0 "
                                                   << eta_y << " z0 " << z0 << " hits " << etapattern->numberOfContainedPrds());
         // flags for cosmics:
         double min_average_distance = m_maximum_xydistance + m_maximum_rzdistance;
-        const Muon::MuonPrdPattern* max_phipattern = nullptr;
+        CandPrdPatPtr max_phipattern = nullptr;
         int max_philevel = -1;
         // flags
         double dotprodbest = -1.;
         int phibest = -1;
         bool ismatched = false;
-        for (unsigned int philevel = 0; philevel < phiPatternCollection->size(); philevel++) {
-            const Muon::MuonPrdPattern* phipattern = phiPatternCollection->at(philevel);
+        for (unsigned int philevel = 0; philevel < phiPatternCollection.size(); philevel++) {
+            CandPrdPatPtr phipattern{phiPatternCollection.at(philevel), Unowned()};
             if (phipattern->numberOfContainedPrds() == 0) continue;
             bool useTightAssociation = false;
 
@@ -133,14 +141,8 @@ MuonPrdPatternCollection* MuonCombinePatternTool::combineEtaPhiPatterns(
                 useTightAssociation = true;
             }
 
-            double phi = phipattern->globalDirection().phi();  // should be in rad
-            const double thetaphi = phipattern->globalDirection().theta();
-            CxxUtils::sincos scphi(phi);
-            CxxUtils::sincos scthetaphi(thetaphi);
-            double dx_phi = scphi.cs * scthetaphi.sn;
-            double dy_phi = scphi.sn * scthetaphi.sn;
-            double dz_phi = scthetaphi.cs;
-            double dotprod = dx_phi * dx_eta + dy_phi * dy_eta + dz_phi * dz_eta;
+            const Amg::Vector3D phiPatDir = phipattern->globalDirection().unit();
+            const double dotprod = phiPatDir.dot(etaPatDir); 
 
             if (dotprod > dotprodbest) {
                 dotprodbest = dotprod;
@@ -152,25 +154,21 @@ MuonPrdPatternCollection* MuonCombinePatternTool::combineEtaPhiPatterns(
                                          << std::sin(std::acos(dotprod)));
             }
 
-            double r0 = 0;
-            double phipattern_x = 0;
-            double phipattern_y = 0;
-
+            double r0{0.}, phipattern_x{0.}, phipattern_y{0.}, phi{phiPatDir.phi()};
+            CxxUtils::sincos scphi{phi};
             if (m_use_cosmics) {
                 // new information: update parameters
-                std::array<double,4> new_pars = updateParametersForCosmics(phipattern, etapattern);
+                std::array<double,4> new_pars = updateParametersForCosmics(*phipattern, *etapattern);
                 r0 = new_pars[0];
                 phi = new_pars[1];
-                scphi = CxxUtils::sincos(phi);
-                theta = new_pars[3];
-                sctheta = CxxUtils::sincos(theta);
                 rz0 = new_pars[2];
+                theta = new_pars[3];
+                scphi = CxxUtils::sincos(phi);
+                sctheta = CxxUtils::sincos(theta);                
                 phipattern_x = r0 * scphi.sn;
                 phipattern_y = r0 * scphi.cs;
-            }
-
-            else {
-                const Amg::Vector3D& posphipattern = phipattern->globalPosition();
+            } else {
+                const Amg::Vector3D posphipattern = phipattern->globalPosition();
                 phipattern_x = posphipattern.x();
                 phipattern_y = posphipattern.y();
                 r0 = MuonHoughMathUtils::signedDistanceOfLineToOrigin2D(phipattern_x, phipattern_y, phi);
@@ -190,70 +188,53 @@ MuonPrdPatternCollection* MuonCombinePatternTool::combineEtaPhiPatterns(
             std::map<Identifier, ChamberInfo> infoPerChamber;
             std::map<Muon::MuonStationIndex::StIndex, ChamberInfo> infoPerStation;
             // Loop over hits phi pattern
-            double average_distance = 0;
-            int nhits_in_average = 0;
-            int nhits_inside_distance_cut = 0;
+            double average_distance{0};
+            int nhits_in_average{0}, nhits_inside_distance_cut{0};
 
-            double phiPatMin = 1e9;
-            double phiPatMax = -1e9;
+            double phiPatMin{1e9}, phiPatMax{-1e9};
 
             for (unsigned int phihitid = 0; phihitid < phipattern->numberOfContainedPrds(); phihitid++) {
                 const Trk::PrepRawData* prd = phipattern->prd(phihitid);
-                const Amg::Vector3D& globalposhit = globalPrdPos(prd);
+                const Amg::Vector3D& globalposhit = globalPos(prd);
                 double radius_hit = globalposhit.perp();
-                double dotprodradius = sctheta.apply(radius_hit, globalposhit[Amg::z]);  // (radius_hit) * sctheta.sn + hitz * sctheta.cs;
+                double dotprodradius = sctheta.apply(radius_hit, globalposhit.z());
                 ATH_MSG_VERBOSE("combine hit: " << m_idHelperSvc->toString(prd->identify()) << " dotprod: " << dotprodradius);
-                if (dotprodradius >= 0 || m_use_cosmics)  // should be on
-                {
-                    double residu_distance_mm = 1000000.;
+                if (dotprodradius < 0 && !m_use_cosmics) continue;
+               
+                double residu_distance_mm{100.*Gaudi::Units::meter};
+                if (m_use_cosmics) {
+                    const double perp = scphi.apply(globalposhit.y(), globalposhit.x());
+                    residu_distance_mm = MuonHoughMathUtils::signedDistanceToLine(globalposhit.z(), perp, rz0, theta);
+                } else {
+                    residu_distance_mm = MuonHoughMathUtils::signedDistanceCurvedToHit(pattern_z0, theta, invcurvature, globalposhit);
+                }
 
-                    if (m_use_cosmics) {
-                        const double perp = scphi.apply(globalposhit[Amg::y], globalposhit[Amg::x]);  // hitx*scphi.cs + hity*scphi.sn;
+                double distancetoline = std::abs(residu_distance_mm);
 
-                        residu_distance_mm = MuonHoughMathUtils::signedDistanceToLine(globalposhit[Amg::z], perp, rz0, theta);
-                    } else {
-                        residu_distance_mm = MuonHoughMathUtils::signedDistanceCurvedToHit(pattern_z0, theta, invcurvature, globalposhit);
-                    }
+                ATH_MSG_VERBOSE(" distance RZ: " << residu_distance_mm);
+                if (distancetoline >= m_maximum_rzdistance)  continue;
+              
+                ATH_MSG_VERBOSE(" accepted ");
+                nhits_inside_distance_cut++;
+                nhits_in_average++;
+                average_distance += distancetoline;
 
-                    double distancetoline = std::abs(residu_distance_mm);
+                if (!useTightAssociation) { continue; }
+                Identifier chId = m_idHelperSvc->chamberId(prd->identify());
+                ChamberInfo& chInfo = infoPerChamber[chId];                
+                ++chInfo.nphi;
+                double hitphi = globalposhit.phi();
+                chInfo.phiMin = std::min(hitphi,chInfo.phiMin);
+                chInfo.phiMax = std::min(hitphi,chInfo.phiMax);
 
-                    ATH_MSG_VERBOSE(" distance RZ: " << residu_distance_mm);
-
-                    if (distancetoline < m_maximum_rzdistance) {
-                        ATH_MSG_VERBOSE(" accepted ");
-                        nhits_inside_distance_cut++;
-                        nhits_in_average++;
-                        average_distance += distancetoline;
-
-                        if (useTightAssociation) {
-                            Identifier chId = m_idHelperSvc->chamberId(prd->identify());
-                            std::map<Identifier, ChamberInfo>::iterator chPos = infoPerChamber.find(chId);
-                            ChamberInfo* chInfo = nullptr;
-                            if (chPos != infoPerChamber.end()) {
-                                chInfo = &chPos->second;
-                            } else {
-                                chInfo = &infoPerChamber[chId];
-                            }
-                            ++chInfo->nphi;
-                            double hitphi = globalposhit.phi();
-                            if (hitphi < chInfo->phiMin) chInfo->phiMin = hitphi;
-                            if (hitphi > chInfo->phiMax) chInfo->phiMax = hitphi;
-
-                            Muon::MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(prd->identify());
-                            std::map<Muon::MuonStationIndex::StIndex, ChamberInfo>::iterator stPos = infoPerStation.find(stIndex);
-                            if (stPos != infoPerStation.end()) {
-                                chInfo = &stPos->second;
-                            } else {
-                                chInfo = &infoPerStation[stIndex];
-                            }
-                            ++chInfo->nphi;
-                            if (hitphi < chInfo->phiMin) chInfo->phiMin = hitphi;
-                            if (hitphi > chInfo->phiMax) chInfo->phiMax = hitphi;
-                            if (hitphi < phiPatMin) phiPatMin = hitphi;
-                            if (hitphi > phiPatMax) phiPatMax = hitphi;
-                        }
-                    }
-                }  // dotprodradius
+                Muon::MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(prd->identify());
+                ChamberInfo& stInfo = infoPerStation[stIndex];                
+                ++stInfo.nphi;
+                stInfo.phiMin = std::min(hitphi, stInfo.phiMin);
+                stInfo.phiMax = std::max(hitphi, stInfo.phiMax);
+                phiPatMin =std::min(hitphi,phiPatMin);
+                phiPatMax =std::max(hitphi,phiPatMax);
+                
             }      // size muonpattern
 
             if (nhits_in_average > 0) average_distance /= nhits_in_average;
@@ -264,25 +245,19 @@ MuonPrdPatternCollection* MuonCombinePatternTool::combineEtaPhiPatterns(
             bool etapattern_passed = false;
             for (unsigned int etahitid = 0; etahitid < etapattern->numberOfContainedPrds(); etahitid++) {
                 const Trk::PrepRawData* prd = etapattern->prd(etahitid);
-                const Amg::Vector3D& etaglobalposhit = globalPrdPos(prd);
+                const Amg::Vector3D& etaglobalposhit = globalPos(prd);
                 const double etahitx = etaglobalposhit.x();
                 const double etahity = etaglobalposhit.y();
 
                 if (!m_use_cosmics) {
-                    double etadotprod = scphi.apply(etahity, etahitx);  // etahitx * scphi.cs + etahity * scphi.sn; //
+                    double etadotprod = scphi.apply(etahity, etahitx);  
                                                                         // same as in maketruetracksegment
                     if (etadotprod < 0) continue;                       // hit in wrong hemisphere
                 }
 
                 const double xdiff = phipattern_x - etahitx;
                 const double ydiff = phipattern_y - etahity;
-                const double etahitr = std::sqrt(xdiff * xdiff + ydiff * ydiff);
-
-                //		const double etahitz=etaglobalposhit.z();
-
-                // 		double scale = std::sqrt(etahitx*etahitx +
-                // etahity*etahity
-                // + etahitz*etahitz)/7000.; 		if (scale < 1 ) scale = 1.;
+                const double etahitr = std::hypot(xdiff, ydiff);
 
                 bool hit_passed = false;
                 double etadistancetoline = std::abs(MuonHoughMathUtils::distanceToLine(etahitx, etahity, r0, phi));
@@ -293,217 +268,186 @@ MuonPrdPatternCollection* MuonCombinePatternTool::combineEtaPhiPatterns(
                                       // might be close to position of pattern
 
                     const double scale = etahitr / 7000.;
-                    if (etadistancetoline < scale * m_maximum_xydistance) { hit_passed = true; }
-                } else {                                    // phi within 30 degrees
-                    if (2 * etadistancetoline < etahitr) {  // this corresponds with 30 degrees , normal formula:
+                    hit_passed = etadistancetoline < scale * m_maximum_xydistance; 
+                } else if (2 * etadistancetoline < etahitr) {  // this corresponds with 30 degrees , normal formula:
                                                             // (etadistancetoline/etahitr) < sin( Pi/180 * degrees)
-                        hit_passed = true;
-                    }
+                    hit_passed = true;
                 }
 
-                if (hit_passed) {
-                    // if (m_verbose) m_log << MSG::VERBOSE << "hit in xy distance cut: "
-                    // << nhits_inside_distance_cut_eta << endmsg;
-                    // nhits_inside_distance_cut_eta++;
-                    // nhits_in_average_eta++;
-                    etapattern_passed = true;  // only one hit required
-                    // break;
-                    ATH_MSG_VERBOSE(" accepted");
+                if (!hit_passed) { continue; }
+                
+                etapattern_passed = true;  // only one hit required
+                // break;
+                ATH_MSG_VERBOSE(" accepted");
 
-                    if (useTightAssociation) {
-                        Identifier chId = m_idHelperSvc->chamberId(prd->identify());
-                        std::map<Identifier, ChamberInfo>::iterator chPos = infoPerChamber.find(chId);
-                        ChamberInfo* chInfo = nullptr;
-                        if (chPos != infoPerChamber.end()) {
-                            chInfo = &chPos->second;
+                if (!useTightAssociation) { continue ;}
+                Identifier chId = m_idHelperSvc->chamberId(prd->identify());
+                
+                ChamberInfo& chInfo = infoPerChamber[chId];
+                ++chInfo.neta;
+                if (m_idHelperSvc->isMdt(prd->identify())) {
+                    Muon::MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(prd->identify());
+                    ChamberInfo& stInfo = infoPerStation[stIndex];
+
+                    const MuonGM::MdtReadoutElement* mdtDetEl =
+                        dynamic_cast<const MuonGM::MdtReadoutElement*>(prd->detectorElement());
+                    if (!mdtDetEl) continue;
+
+                    const Identifier id = prd->identify();
+                    const Trk::Surface& surf = mdtDetEl->surface(id);
+                    int layer = m_idHelperSvc->mdtIdHelper().tubeLayer(id);
+                    int tube = m_idHelperSvc->mdtIdHelper().tube(id);
+                    double halfLength = 0.5 * mdtDetEl->getWireLength(layer, tube);
+                    Amg::Vector2D lpLeft(0, -halfLength);
+                    Amg::Vector3D gposLeft = surf.localToGlobal(lpLeft);
+                    double phiLeft = gposLeft.phi();
+
+                    Amg::Vector2D lpRight(0, halfLength);
+                    const Amg::Vector3D gposRight = surf.localToGlobal(lpRight);
+                    double phiRight = gposRight.phi();
+                    double phiMin = std::min(phiRight, phiLeft);
+                    double phiMax = std::max(phiLeft ,phiRight);
+
+                    Amg::Vector3D tubePos = mdtDetEl->tubePos(id);
+                    Amg::Vector3D ROPos = mdtDetEl->ROPos(id);
+                    Amg::Vector3D HVPos = 2 * tubePos - ROPos;
+                    double tubeL = (HVPos - ROPos).mag();
+                    double phiRO = ROPos.phi();
+                    double phiHV = HVPos.phi();
+                    double phiMinPos = std::min(phiHV, phiRO);
+                    double phiMaxPos = std::max(phiRO, phiHV);
+
+                    if (std::abs(phiMin - phiMinPos) > 0.01 || std::abs(phiMax - phiMaxPos) > 0.01) {
+                        ATH_MSG_DEBUG(" inconsistent Phi!!: from locToGlob (" << phiMin << "," << phiMax << "), from positions ("
+                                                                                << phiMinPos << "," << phiMaxPos << ")");
+                    }
+                    double rotationFraction = 0.;
+                    if (phiMin < 0 && phiMax > 0) {
+                        if (phiMin < -0.75 * M_PI || phiMax > 0.75 * M_PI)
+                            rotationFraction = 1.5;
+                        else
+                            rotationFraction = 0.5;
+                    } else if (phiMax < 0) {
+                        rotationFraction = 1.;
+                    }
+                    double phiMinR = rotatePhi(phiMin, rotationFraction);
+                    double phiMaxR = rotatePhi(phiMax, rotationFraction);
+                    phiMin = std::min(phiMinR, phiMaxR);
+                    phiMax = std::max(phiMinR, phiMaxR);
+
+                    phiMinR = rotatePhi(phiMinPos, rotationFraction);
+                    phiMaxR = rotatePhi(phiMaxPos, rotationFraction);
+                    phiMinPos = std::min(phiMinR, phiMaxR);
+                    phiMaxPos = std::max(phiMinR, phiMaxR);
+
+                    // enlarge range by 0.1 rad
+                    phiMin = phiMin > 0 ? phiMin - 0.1 : phiMin + 0.1;
+                    phiMax = phiMax > 0 ? phiMax + 0.1 : phiMax - 0.1;
+
+                    double phiMinSec{1.e9},phiMaxSec{-1.e9};
+                    if (stInfo.nphi > 0 && stInfo.phiMin < 1000) {
+                        phiMinR = rotatePhi(stInfo.phiMin, rotationFraction);
+                        phiMaxR = rotatePhi(stInfo.phiMax, rotationFraction);
+                        phiMinSec = std::min(phiMinR, phiMaxR);
+                        phiMaxSec = std::max(phiMinR, phiMaxR);
+
+                        bool inside = true;
+
+                        // easy case
+                        if (phiMinSec > 0 && phiMaxSec > 0) {
+                            if (phiMin > phiMaxSec || phiMax < phiMinSec) inside = false;
+                        } else if (phiMinSec < 0 && phiMaxSec < 0) {
+                            // easy case (2), always outside
+                            inside = false;
                         } else {
-                            chInfo = &infoPerChamber[chId];
+                            // finaly check if phiMaxSec large than maxPhi
+                            if (phiMax < phiMaxSec) inside = false;
                         }
-                        ++chInfo->neta;
-                        if (m_idHelperSvc->isMdt(prd->identify())) {
-                            Muon::MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(prd->identify());
-                            ChamberInfo& stInfo = infoPerStation[stIndex];
-
-                            const MuonGM::MdtReadoutElement* mdtDetEl =
-                                dynamic_cast<const MuonGM::MdtReadoutElement*>(prd->detectorElement());
-                            if (!mdtDetEl) continue;
-
-                            const Identifier& id = prd->identify();
-                            const Trk::Surface& surf = mdtDetEl->surface(id);
-                            int layer = m_idHelperSvc->mdtIdHelper().tubeLayer(id);
-                            int tube = m_idHelperSvc->mdtIdHelper().tube(id);
-                            double halfLength = 0.5 * mdtDetEl->getWireLength(layer, tube);
-                            Amg::Vector2D lpLeft(0, -halfLength);
-                            Amg::Vector3D gposLeft = surf.localToGlobal(lpLeft);
-                            double phiLeft = gposLeft.phi();
-
-                            Amg::Vector2D lpRight(0, halfLength);
-                            const Amg::Vector3D gposRight = surf.localToGlobal(lpRight);
-                            double phiRight = gposRight.phi();
-                            double phiMin = phiRight < phiLeft ? phiRight : phiLeft;
-                            double phiMax = phiRight < phiLeft ? phiLeft : phiRight;
-
-                            Amg::Vector3D tubePos = mdtDetEl->tubePos(id);
-                            Amg::Vector3D ROPos = mdtDetEl->ROPos(id);
-                            Amg::Vector3D HVPos = 2 * tubePos - ROPos;
-                            double tubeL = (HVPos - ROPos).mag();
-                            double phiRO = ROPos.phi();
-                            double phiHV = HVPos.phi();
-                            double phiMinPos = phiHV < phiRO ? phiHV : phiRO;
-                            double phiMaxPos = phiHV < phiRO ? phiRO : phiHV;
-
-                            if (myDebug && (fabs(phiMin - phiMinPos) > 0.01 || fabs(phiMax - phiMaxPos) > 0.01)) {
-                                ATH_MSG_DEBUG(" inconsistent Phi!!: from locToGlob (" << phiMin << "," << phiMax << "), from positions ("
-                                                                                      << phiMinPos << "," << phiMaxPos << ")");
-                            }
-                            double rotationFraction = 0.;
-                            if (phiMin < 0 && phiMax > 0) {
-                                if (phiMin < -0.75 * M_PI || phiMax > 0.75 * M_PI)
-                                    rotationFraction = 1.5;
-                                else
-                                    rotationFraction = 0.5;
-                            } else if (phiMax < 0) {
-                                rotationFraction = 1.;
-                            }
-                            double phiMinR = rotatePhi(phiMin, rotationFraction);
-                            double phiMaxR = rotatePhi(phiMax, rotationFraction);
-                            phiMin = phiMinR < phiMaxR ? phiMinR : phiMaxR;
-                            phiMax = phiMinR > phiMaxR ? phiMinR : phiMaxR;
-
-                            phiMinR = rotatePhi(phiMinPos, rotationFraction);
-                            phiMaxR = rotatePhi(phiMaxPos, rotationFraction);
-                            phiMinPos = phiMinR < phiMaxR ? phiMinR : phiMaxR;
-                            phiMaxPos = phiMinR > phiMaxR ? phiMinR : phiMaxR;
-
-                            // enlarge range by 0.1 rad
-                            phiMin = phiMin > 0 ? phiMin - 0.1 : phiMin + 0.1;
-                            phiMax = phiMax > 0 ? phiMax + 0.1 : phiMax - 0.1;
-
-                            double phiMinSec = 1e9;
-                            double phiMaxSec = -1e9;
-                            if (stInfo.nphi > 0 && stInfo.phiMin < 1000) {
-                                phiMinR = rotatePhi(stInfo.phiMin, rotationFraction);
-                                phiMaxR = rotatePhi(stInfo.phiMax, rotationFraction);
-                                phiMinSec = phiMinR < phiMaxR ? phiMinR : phiMaxR;
-                                phiMaxSec = phiMinR > phiMaxR ? phiMinR : phiMaxR;
-
-                                bool inside = true;
-
-                                // easy case
-                                if (phiMinSec > 0 && phiMaxSec > 0) {
-                                    if (phiMin > phiMaxSec || phiMax < phiMinSec) inside = false;
-                                } else if (phiMinSec < 0 && phiMaxSec < 0) {
-                                    // easy case (2), always outside
-                                    inside = false;
-                                } else {
-                                    // finaly check if phiMaxSec large than maxPhi
-                                    if (phiMax < phiMaxSec) inside = false;
-                                }
-                                // case with a
-                                if (inside) {
-                                    ++stInfo.ninside;
-                                    ++chInfo->ninside;
-                                    if (myDebug) { ATH_MSG_DEBUG(" Inside  "); }
-                                } else {
-                                    ++stInfo.noutside;
-                                    ++chInfo->noutside;
-                                    if (myDebug) { ATH_MSG_DEBUG(" Outside "); }
-                                }
-                            }
-
-                            phiMinR = rotatePhi(phiPatMin, rotationFraction);
-                            phiMaxR = rotatePhi(phiPatMax, rotationFraction);
-                            double phiMinPat = phiMinR < phiMaxR ? phiMinR : phiMaxR;
-                            double phiMaxPat = phiMinR > phiMaxR ? phiMinR : phiMaxR;
-
-                            bool insidePat = true;
-                            // easy case
-                            if (phiMinPat > 0 && phiMaxPat > 0) {
-                                if (phiMin > phiMaxPat || phiMax < phiMinPat) insidePat = false;
-                            } else if (phiMinPat < 0 && phiMaxPat < 0) {
-                                // easy case (2), always outside
-                                insidePat = false;
-                            } else {
-                                // finaly check if phiMaxPat large than maxPhi
-                                if (phiMax < phiMaxPat) insidePat = false;
-                            }
-
-                            // case with a
-                            if (insidePat) {
-                                ++stInfo.ninsidePat;
-                                ++chInfo->ninsidePat;
-                                if (myDebug) { ATH_MSG_DEBUG(" InPat  "); }
-                            } else {
-                                ++stInfo.noutsidePat;
-                                ++chInfo->noutsidePat;
-                                if (myDebug) { ATH_MSG_DEBUG(" OutPat "); }
-                            }
-                            if (myDebug) {
-                                ATH_MSG_DEBUG(" : Phi MDT ("
-                                              << std::setprecision(3) << std::setw(4) << phiMin << "," << std::setw(4) << phiMax << ") "
-                                              << " from pos (" << std::setprecision(3) << std::setw(4) << phiMinPos << "," << std::setw(4)
-                                              << phiMaxPos << ") ");
-                                if (stInfo.nphi > 0 && stInfo.phiMin < 1000) {
-                                    ATH_MSG_DEBUG(" phi range (" << std::setprecision(3) << std::setw(4) << stInfo.phiMin << ","
-                                                                 << std::setw(4) << stInfo.phiMax << ")  ");
-                                }
-                                ATH_MSG_DEBUG(" pat range (" << std::setprecision(3) << std::setw(4) << phiMinPat << "," << std::setw(4)
-                                                             << phiMaxPat << ")  " << m_idHelperSvc->toString(prd->identify()));
-                                if (mdtDetEl->hasCutouts()) { ATH_MSG_DEBUG(" hasCutOuts "); }
-                                ATH_MSG_DEBUG(" ATL " << mdtDetEl->getActiveTubeLength(layer, tube) << " WL "
-                                                      << mdtDetEl->getWireLength(layer, tube) << " GL "
-                                                      << mdtDetEl->getGasLength(layer, tube) << " POSL " << tubeL);
-                            }
+                        // case with a
+                        if (inside) {
+                            ++stInfo.ninside;
+                            ++chInfo.ninside;
+                             ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" Inside  "); 
+                        } else {
+                            ++stInfo.noutside;
+                            ++chInfo.noutside;
+                             ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" Outside "); 
                         }
                     }
-                }
 
+                    phiMinR = rotatePhi(phiPatMin, rotationFraction);
+                    phiMaxR = rotatePhi(phiPatMax, rotationFraction);
+                    double phiMinPat = std::min(phiMinR, phiMaxR);
+                    double phiMaxPat = std::max(phiMinR, phiMaxR);
+
+                    bool insidePat = true;
+                    // easy case
+                    if (phiMinPat > 0 && phiMaxPat > 0) {
+                        if (phiMin > phiMaxPat || phiMax < phiMinPat) insidePat = false;
+                    } else if (phiMinPat < 0 && phiMaxPat < 0) {
+                        // easy case (2), always outside
+                        insidePat = false;
+                    } else {
+                        // finaly check if phiMaxPat large than maxPhi
+                        if (phiMax < phiMaxPat) insidePat = false;
+                    }
+
+                    // case with a
+                    if (insidePat) {
+                        ++stInfo.ninsidePat;
+                        ++chInfo.ninsidePat;
+                        ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" InPat  "); 
+                    } else {
+                        ++stInfo.noutsidePat;
+                        ++chInfo.noutsidePat;
+                         ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" OutPat ");
+                    }
+                    if (myDebug) {
+                        ATH_MSG_DEBUG(" : Phi MDT ("
+                                        << std::setprecision(3) << std::setw(4) << phiMin << "," << std::setw(4) << phiMax << ") "
+                                        << " from pos (" << std::setprecision(3) << std::setw(4) << phiMinPos << "," << std::setw(4)
+                                        << phiMaxPos << ") ");
+                        if (stInfo.nphi > 0 && stInfo.phiMin < 1000) {
+                            ATH_MSG_DEBUG(" phi range (" << std::setprecision(3) << std::setw(4) << stInfo.phiMin << ","
+                                                            << std::setw(4) << stInfo.phiMax << ")  ");
+                        }
+                        ATH_MSG_DEBUG(" pat range (" << std::setprecision(3) << std::setw(4) << phiMinPat << "," << std::setw(4)
+                                                        << phiMaxPat << ")  " << m_idHelperSvc->toString(prd->identify()));
+                        ATH_MSG_DEBUG(" ATL " << mdtDetEl->getActiveTubeLength(layer, tube) << " WL "
+                                               << mdtDetEl->getWireLength(layer, tube) << " GL "
+                                               << mdtDetEl->getGasLength(layer, tube) << " POSL " << tubeL);
+                    }
+                }
             }  // eta pattern
 
             if (!etapattern_passed) continue;  // no etahit close to phipattern, try next phi pattern
-
             unsigned int netaPhiPairs = 0;
             if (useTightAssociation) {
                 // now we have calculated the eta/phi hit content of the 'merged'
-                // pattern
-                std::map<Identifier, ChamberInfo>::iterator chit = infoPerChamber.begin();
-                std::map<Identifier, ChamberInfo>::iterator chit_end = infoPerChamber.end();
-                std::map<int, ChamberInfo> hitsPerSector;
-                for (; chit != chit_end; ++chit) {
-                    if (myDebug) {
-                        ATH_MSG_DEBUG("  " << std::setw(32) << m_idHelperSvc->toStringChamber(chit->first) << "  eta hits "
-                                           << chit->second.neta << "  phi hits " << chit->second.nphi << "  ninside  "
-                                           << chit->second.ninside << "  noutside  " << chit->second.noutside << "  ninside  "
-                                           << chit->second.ninsidePat << "  noutside  " << chit->second.noutsidePat);
-                    }
-                    if (chit->second.neta > 0 && chit->second.nphi) ++netaPhiPairs;
+                // pattern                
+                for ( auto& [chamberId, chamberInfo] : infoPerChamber) {
+                    
+                    ATH_MSG_VERBOSE("  " << std::setw(32) << m_idHelperSvc->toStringChamber(chamberId) << "  eta hits "
+                                        << chamberInfo.neta << "  phi hits " << chamberInfo.nphi << "  ninside  "
+                                        << chamberInfo.ninside << "  noutside  " << chamberInfo.noutside << "  ninside  "
+                                        << chamberInfo.ninsidePat << "  noutside  " << chamberInfo.noutsidePat);
+                
+                    netaPhiPairs += (chamberInfo.neta  && chamberInfo.nphi);
                 }
-                if (myDebug) {
-                    ATH_MSG_DEBUG(" eta/phi pattern hit overlap " << netaPhiPairs);
-                    if (!etapattern_passed) { ATH_MSG_DEBUG("  failed eta hit match "); }
-                    if (nhits_inside_distance_cut < (phipattern->numberOfContainedPrds() * 0.25)) {
-                        ATH_MSG_DEBUG("  failed phi hit match ");
-                    }
-                    if (netaPhiPairs == 0) { ATH_MSG_DEBUG("  Bad match, no overlap "); }
+               
+                ATH_MSG_DEBUG(" eta/phi pattern hit overlap " << netaPhiPairs);
+                if (!etapattern_passed) { ATH_MSG_DEBUG("  failed eta hit match "); }
+                if (nhits_inside_distance_cut < (phipattern->numberOfContainedPrds() * 0.25)) {
+                    ATH_MSG_DEBUG("  failed phi hit match ");
                 }
-                std::map<int, ChamberInfo>::iterator secIt = hitsPerSector.begin();
-                std::map<int, ChamberInfo>::iterator secIt_end = hitsPerSector.end();
-                for (; secIt != secIt_end; ++secIt) {
-                    if (myDebug) {
-                        ATH_MSG_DEBUG(" sector " << std::setw(4) << secIt->first << "  eta hits " << chit->second.neta << "  phi hits "
-                                                 << chit->second.nphi << "  ninside  " << chit->second.ninside << "  noutside  "
-                                                 << chit->second.noutside << "  ninside  " << chit->second.ninsidePat << "  noutside  "
-                                                 << chit->second.noutsidePat);
-                    }
-                }
+                if (netaPhiPairs == 0) { ATH_MSG_DEBUG("  Bad match, no overlap "); }
+                                
             }
-            if (msgLvl(MSG::DEBUG)) {
-                ATH_MSG_DEBUG(" Eta pattern compatible with phi pattern, eta/phi overlap " << netaPhiPairs << " ass phi hits "
-                                                                                           << nhits_inside_distance_cut << " tot phi hits "
-                                                                                           << phipattern->numberOfContainedPrds());
-                if (useTightAssociation) { ATH_MSG_DEBUG(" using tight association"); }
-            }
-
+            ATH_MSG_VERBOSE(" Eta pattern compatible with phi pattern, eta/phi overlap " << netaPhiPairs << " ass phi hits "
+                                                                                       << nhits_inside_distance_cut << " tot phi hits "
+                                                                                       << phipattern->numberOfContainedPrds()
+                                                                                       <<(useTightAssociation ? " using tight association ": "" ));
+          
             // at least 25% matched, to be more robust than 1!
             if ((!useTightAssociation || netaPhiPairs > 0) && nhits_inside_distance_cut >= (phipattern->numberOfContainedPrds() * 0.25)) {
                 ismatched = true;
@@ -513,23 +457,19 @@ MuonPrdPatternCollection* MuonCombinePatternTool::combineEtaPhiPatterns(
                 // patterns are split
                 if (m_use_cosmics) {
                     std::array<double,4> new_pars{r0, phi, pattern_z0, theta};
-                    std::pair<const Muon::MuonPrdPattern*, const Muon::MuonPrdPattern*> updatedpatterns =
-                        updatePatternsForCosmics(phipattern, etapattern, new_pars);
-                    phipattern = updatedpatterns.first;
-                    etapattern = updatedpatterns.second;
-
-                    patternsToDelete.emplace_back(updatedpatterns.first);
-                    patternsToDelete.emplace_back(updatedpatterns.second);
+                    PrdPatternPair updatedpatterns = updatePatternsForCosmics(*phipattern, *etapattern, new_pars);
+                    phipattern = std::move(updatedpatterns.first);
+                    etapattern = std::move(updatedpatterns.second);
                     ATH_MSG_DEBUG(" Combination accepted with cosmic selection ");
                 } else if (useTightAssociation) {
                     ATH_MSG_DEBUG(" Tight association, cleaning patterns");
 
                     // clean up hits using local phi info
-                    Muon::MuonPrdPattern* etaPat = new Muon::MuonPrdPattern(etapattern->globalPosition(), etapattern->globalDirection());
-                    Muon::MuonPrdPattern* phiPat = new Muon::MuonPrdPattern(phipattern->globalPosition(), phipattern->globalDirection());
-                    for (unsigned int etahitid = 0; etahitid < etapattern->numberOfContainedPrds(); etahitid++) {
+                    std::unique_ptr<Muon::MuonPrdPattern> etaPat = std::make_unique<Muon::MuonPrdPattern>(etapattern->globalPosition(), etapattern->globalDirection());
+                    std::unique_ptr<Muon::MuonPrdPattern> phiPat = std::make_unique<Muon::MuonPrdPattern>(phipattern->globalPosition(), phipattern->globalDirection());
+                    for (unsigned int etahitid = 0; etahitid < etapattern->numberOfContainedPrds(); ++etahitid) {
                         const Trk::PrepRawData* prd = etapattern->prd(etahitid);
-                        const Identifier& id = prd->identify();
+                        const Identifier id = prd->identify();
                         Identifier chId = m_idHelperSvc->chamberId(id);
                         std::map<Identifier, ChamberInfo>::iterator chPos = infoPerChamber.find(chId);
                         if (chPos == infoPerChamber.end()) continue;
@@ -542,7 +482,7 @@ MuonPrdPatternCollection* MuonCombinePatternTool::combineEtaPhiPatterns(
                         }
                         etaPat->addPrd(prd);
                     }
-                    for (unsigned int phihitid = 0; phihitid < phipattern->numberOfContainedPrds(); phihitid++) {
+                    for (unsigned int phihitid = 0; phihitid < phipattern->numberOfContainedPrds(); ++phihitid) {
                         const Trk::PrepRawData* prd = phipattern->prd(phihitid);
                         const Identifier& id = prd->identify();
                         Identifier chId = m_idHelperSvc->chamberId(id);
@@ -551,15 +491,13 @@ MuonPrdPatternCollection* MuonCombinePatternTool::combineEtaPhiPatterns(
 
                         if (chPos->second.neta == 0) continue;
                         phiPat->addPrd(prd);
-                    }
-                    patternsToDelete.emplace_back(etaPat);
-                    patternsToDelete.emplace_back(phiPat);
-                    phipattern = phiPat;
-                    etapattern = etaPat;
+                    }                   
+                    phipattern = std::move(phiPat);
+                    etapattern = std::move(etaPat);
                 }
 
                 if (!m_bestphimatch) {
-                    addCandidate(etapattern, phipattern, candidates, false, patternsToDelete, phiEtaHitAssMap);
+                    addCandidate(etapattern, phipattern, candidates, false, phiEtaHitAssMap);
                     ATH_MSG_DEBUG("Candidate FOUND eta " << etalevel << " phi " << philevel << " dotprod: " << dotprod);
                 } else {
                     if (average_distance < min_average_distance) {
@@ -588,20 +526,16 @@ MuonPrdPatternCollection* MuonCombinePatternTool::combineEtaPhiPatterns(
         }      // size phi level
 
         // for cosmics only match best phi pattern
-        if (m_bestphimatch) {
-            if (ismatched) {
-                //      const Muon::MuonPrdPattern* phipattern =
-                //      phiPatternCollection->at(max_philevel);
-                addCandidate(etapattern, max_phipattern, candidates, true, patternsToDelete, phiEtaHitAssMap);
-                ATH_MSG_DEBUG("Candidate FOUND eta " << etalevel << " phi " << max_philevel);
-            }
+        if (m_bestphimatch && ismatched) {            
+            addCandidate(etapattern, max_phipattern, candidates, true, phiEtaHitAssMap);
+            ATH_MSG_DEBUG("Candidate FOUND eta " << etalevel << " phi " << max_philevel);            
         }
         // make associated phi pattern for every etapattern and as candidate for
         // robustness not needed for cosmics when matched, since already done for
         // first match:
 
         if (!(m_use_cosmics && m_splitpatterns && ismatched)) {
-            const Muon::MuonPrdPattern* assphipattern = makeAssPhiPattern(etapattern, phiEtaHitAssMap, true);
+            std::unique_ptr<Muon::MuonPrdPattern> assphipattern = makeAssPhiPattern(*etapattern, phiEtaHitAssMap, true);
             ATH_MSG_DEBUG("No match found, trying to create associated phi pattern ");
             if (assphipattern) {
                 // make sure ass phi pattern is not a complete subset of one of the
@@ -609,48 +543,43 @@ MuonPrdPatternCollection* MuonCombinePatternTool::combineEtaPhiPatterns(
 
                 bool subsetcheck = false;
 
-                std::reverse_iterator<std::vector<std::pair<const Muon::MuonPrdPattern*, const Muon::MuonPrdPattern*>>::iterator> rit =
+                std::reverse_iterator<std::vector<CandidatePatPair>::iterator> rit =
                     candidates.rbegin();
                 for (; rit != candidates.rend(); ++rit) {
                     if ((*rit).first != etapattern) { break; }
                     // 	    for (;phi_it!=range.second;++phi_it) {
-                    if (subset(assphipattern, (*rit).second)) {
+                    if (subset(assphipattern.get(), (*rit).second.get())) {
                         subsetcheck = true;
                         break;
                     }
                 }
                 if (subsetcheck) {
-                    delete assphipattern;
-                    assphipattern = nullptr;
+                    
                 } else {
                     // these associated phi patterns should be deleted at end of routine:
-                    patternsToDelete.emplace_back(assphipattern);
+                    
 
                     ATH_MSG_DEBUG("Candidate FOUND eta " << etalevel << " and associated phipattern ");
 
                     ismatched = true;
 
                     // print associated pattern:
-                    if (msgLvl(MSG::VERBOSE)) printPattern(assphipattern);
+                    if (msgLvl(MSG::VERBOSE)) printPattern(assphipattern.get());
 
                     if (m_use_cosmics) {
-                        std::array<double,4> new_pars = updateParametersForCosmics(assphipattern, etapattern);
-                        std::pair<const Muon::MuonPrdPattern*, const Muon::MuonPrdPattern*> updatedpatterns =
-                            updatePatternsForCosmics(assphipattern, etapattern, new_pars);
-                        assphipattern = updatedpatterns.first;
-                        etapattern = updatedpatterns.second;
-
-                        patternsToDelete.emplace_back(updatedpatterns.first);
-                        patternsToDelete.emplace_back(updatedpatterns.second);
+                        std::array<double,4> new_pars = updateParametersForCosmics(*assphipattern, *etapattern);
+                        PrdPatternPair updatedpatterns = updatePatternsForCosmics(*assphipattern, *etapattern, new_pars);
+                        assphipattern = std::move(updatedpatterns.first);
+                        etapattern = std::move(updatedpatterns.second);
                     }
                     ATH_MSG_DEBUG(" adding eta pattern with recalculated associated phi pattern ");
 
-                    addCandidate(etapattern, assphipattern, candidates, false, patternsToDelete, phiEtaHitAssMap);
+                    addCandidate(etapattern, std::move(assphipattern), candidates, false, phiEtaHitAssMap);
                 }
             }
         }
         if (!ismatched && max_philevel > -1) {
-            addCandidate(etapattern, max_phipattern, candidates, true, patternsToDelete, phiEtaHitAssMap);
+            addCandidate(etapattern, max_phipattern, candidates, true, phiEtaHitAssMap);
             ismatched = true;
             ATH_MSG_DEBUG("No good candidate found, adding best phi pattern " << etalevel << " phi " << max_philevel);
         }
@@ -660,21 +589,17 @@ MuonPrdPatternCollection* MuonCombinePatternTool::combineEtaPhiPatterns(
                 if (!m_use_cosmics) ATH_MSG_DEBUG("dotprodbest: " << dotprodbest);
                 ATH_MSG_DEBUG("writing out eta pattern (no cleanup)");
             }
-            Muon::MuonPrdPattern* phi_dummy = nullptr;
-            candidates.emplace_back(etapattern, phi_dummy);
+            candidates.emplace_back(etapattern, nullptr);
         } else {
             if (msgLvl(MSG::DEBUG)) ATH_MSG_DEBUG("Candidate was associated to a phi pattern ");
         }
     }  // size rtheta level
-
-    MuonPrdPatternCollection* combinedpatterns = makeCombinedPatterns(candidates);
-
-    return combinedpatterns;
+    return makeCombinedPatterns(candidates);
 
 }  // combineEtaPhiPatterns
 
-MuonPrdPatternCollection* MuonCombinePatternTool::makeCombinedPatterns(
-    std::vector<std::pair<const Muon::MuonPrdPattern*, const Muon::MuonPrdPattern*>>& candidates) const {
+std::unique_ptr<MuonPrdPatternCollection> MuonCombinePatternTool::makeCombinedPatterns(
+    std::vector<CandidatePatPair>& candidates) const {
     ATH_MSG_DEBUG("Number of Candidates: " << candidates.size());
 
     //  if (m_use_cosmics == true) {
@@ -682,52 +607,35 @@ MuonPrdPatternCollection* MuonCombinePatternTool::makeCombinedPatterns(
     ATH_MSG_DEBUG("Number of Candidates after cleaning: " << candidates.size());
     //}
 
-    MuonPrdPatternCollection* combinedPatternCollection = new MuonPrdPatternCollection();
-    int number_comb_patterns = 0;
-    std::vector<std::pair<const Muon::MuonPrdPattern*, const Muon::MuonPrdPattern*>>::iterator it = candidates.begin();
-
-    for (; it != candidates.end(); ++it) {
+    std::unique_ptr<MuonPrdPatternCollection> combinedPatternCollection = std::make_unique<MuonPrdPatternCollection>();
+    int number_comb_patterns = 0;    
+    for ( const auto& [etapattern, phipattern] : candidates) {
         ATH_MSG_DEBUG("Next Candidate");
-
-        const Muon::MuonPrdPattern* etapattern = (*it).first;
-        const Muon::MuonPrdPattern* phipattern = (*it).second;
-
         if (phipattern) {
-            Muon::MuonPrdPattern* combinedpattern = makeCombinedPattern(phipattern, etapattern);
+            std::unique_ptr<Muon::MuonPrdPattern> combinedpattern = makeCombinedPattern(*phipattern, *etapattern);
             if (combinedpattern) {
-                combinedPatternCollection->push_back(combinedpattern);
-                if (msgLvl(MSG::VERBOSE)) { printPattern(combinedpattern); }
+                if (msgLvl(MSG::VERBOSE)) { printPattern(combinedpattern.get()); }
+                combinedPatternCollection->push_back(combinedpattern.release());
                 number_comb_patterns++;
             } else
                 ATH_MSG_WARNING("combined pattern lost");
         } else {  // no combined match found &&  no associated phi hits found
             if (m_splitpatterns && m_use_cosmics) {
-                ATH_MSG_DEBUG(
-                    "No combined pattern, eta pattern split based on phi "
-                    "direction of eta pattern ");
+                ATH_MSG_VERBOSE("No combined pattern, eta pattern split based on phi direction of eta pattern ");
 
-                std::vector<std::pair<Muon::MuonPrdPattern*, Muon::MuonPrdPattern*>> splitetapatterns =
-                    splitPatternsCylinder(nullptr, etapattern);
+                std::vector<PrdPatternPair> splitetapatterns = splitPatternsCylinder(nullptr, etapattern.get());
                 if (splitetapatterns.empty()) {
                     combinedPatternCollection->push_back(etapattern->clone());
                 } else {
                     for (unsigned int i = 0; i < splitetapatterns.size(); i++) {
                         if (splitetapatterns[i].second->numberOfContainedPrds() != 0) {
-                            combinedPatternCollection->push_back(splitetapatterns[i].second);
-                        } else {
-                            delete splitetapatterns[i].second;
-                        }
+                            combinedPatternCollection->push_back(splitetapatterns[i].second.release());
+                        } 
                     }
                 }
             } else {  // don't split pattern
                 ATH_MSG_DEBUG("No combined pattern, eta pattern copied ");
-                Muon::MuonPrdPattern* etapattern_copy =
-                    new Muon::MuonPrdPattern(etapattern->globalPosition(), etapattern->globalDirection());
-                for (unsigned int etahitnr = 0; etahitnr < etapattern->numberOfContainedPrds(); etahitnr++) {
-                    etapattern_copy->addPrd(etapattern->prd(etahitnr));
-                }  // size eta pattern
-                combinedPatternCollection->push_back(etapattern_copy);
-                if (msgLvl(MSG::VERBOSE)) { printPattern(etapattern_copy); }
+                combinedPatternCollection->push_back(etapattern->clone());
             }
         }
     }
@@ -738,62 +646,48 @@ MuonPrdPatternCollection* MuonCombinePatternTool::makeCombinedPatterns(
     return combinedPatternCollection;
 }
 
-Muon::MuonPrdPattern* MuonCombinePatternTool::makeCombinedPattern(const Muon::MuonPrdPattern* phipattern,
-                                                                  const Muon::MuonPrdPattern* etapattern) const {
+std::unique_ptr<Muon::MuonPrdPattern> MuonCombinePatternTool::makeCombinedPattern(const Muon::MuonPrdPattern& phipattern,
+                                                                  const Muon::MuonPrdPattern& etapattern) const {
     ATH_MSG_DEBUG("make combined pattern");
 
-    double phi = phipattern->globalDirection().phi();
-    double theta = etapattern->globalDirection().theta();
+    double phi = phipattern.globalDirection().phi();
+    double theta = etapattern.globalDirection().theta();
     CxxUtils::sincos scphi(phi);
     CxxUtils::sincos sctheta(theta);
 
-    double phieta = etapattern->globalDirection().phi();
-    double eta_x = etapattern->globalPosition().x();
-    double eta_y = etapattern->globalPosition().y();
+    double phieta = etapattern.globalDirection().phi();
+    double eta_x = etapattern.globalPosition().x();
+    double eta_y = etapattern.globalPosition().y();
     double eta_r0 = MuonHoughMathUtils::signedDistanceOfLineToOrigin2D(eta_x, eta_y, phieta);
     double charge = 1.;
     if (!m_use_cosmics && eta_r0 < 0) charge = -1.;
-    double curvature = etapattern->globalDirection().mag();
+    double curvature = etapattern.globalDirection().mag();
 
     // Store charge in sign of r0 (like in Muon eta pattern)
 
-    double x0 = charge * (phipattern->globalPosition().x());
-    double y0 = charge * (phipattern->globalPosition().y());
+    const double x0 = charge * (phipattern.globalPosition().x());
+    const double y0 = charge * (phipattern.globalPosition().y());
+    const double z0_phi = m_use_cosmics ?(calculateRz0(etapattern, phi, theta) / sctheta.sn) : 0.;  // for non-cosmics
 
-    double z0_phi = 0.;  // for non-cosmics
+    const Amg::Vector3D dir{curvature * scphi.cs * sctheta.sn, curvature * scphi.sn * sctheta.sn, curvature * sctheta.cs};
+    const Amg::Vector3D pos{x0, y0, z0_phi};
 
-    if (m_use_cosmics) {  // calculate average z_0 for eta hits
-        z0_phi = calculateRz0(etapattern, phi, theta) / sctheta.sn;
-    }
-
-    const Amg::Vector3D& dir = Amg::Vector3D(curvature * scphi.cs * sctheta.sn, curvature * scphi.sn * sctheta.sn, curvature * sctheta.cs);
-    const Amg::Vector3D& pos = Amg::Vector3D(x0, y0, z0_phi);
-
-    Muon::MuonPrdPattern* combinedpattern = new Muon::MuonPrdPattern(pos, dir);
-
-    for (unsigned int etahitnr = 0; etahitnr < etapattern->numberOfContainedPrds(); etahitnr++) {
-        combinedpattern->addPrd(etapattern->prd(etahitnr));
-    }
-
-    for (unsigned int phihitnr = 0; phihitnr < phipattern->numberOfContainedPrds(); phihitnr++) {
-        //      if
-        //      (!(combinedhoughpattern.hitInHoughPattern(phipattern->getHit(phihitnr))))
-        //      // should not be possible, maybe still good to check this
-        //{
-        combinedpattern->addPrd(phipattern->prd(phihitnr));
-    }  // size phi pattern
+    Muon::MuonPrdPattern::PrdVector comb_prds{};
+    comb_prds.insert(comb_prds.end(),etapattern.prepRawDataVec().begin(),etapattern.prepRawDataVec().end());
+    comb_prds.insert(comb_prds.end(),phipattern.prepRawDataVec().begin(),phipattern.prepRawDataVec().end());    
+    std::unique_ptr<Muon::MuonPrdPattern> combinedpattern = std::make_unique<Muon::MuonPrdPattern>(pos, dir, std::move(comb_prds));
 
     ATH_MSG_DEBUG("Combined pattern with charge " << charge << " curvature " << curvature);
     ATH_MSG_DEBUG("direction combined pattern: " << scphi.cs * sctheta.sn << " " << scphi.sn * sctheta.sn << " " << sctheta.cs);
     ATH_MSG_DEBUG("position combined pattern: " << x0 << " " << y0 << " " << z0_phi);
-    ATH_MSG_DEBUG("etapatternsize: " << etapattern->numberOfContainedPrds());
-    ATH_MSG_DEBUG("phipatternsize: " << phipattern->numberOfContainedPrds());
+    ATH_MSG_DEBUG("etapatternsize: " << etapattern.numberOfContainedPrds());
+    ATH_MSG_DEBUG("phipatternsize: " << phipattern.numberOfContainedPrds());
     ATH_MSG_DEBUG("Combined Track size: " << combinedpattern->numberOfContainedPrds());
 
     if (m_use_cosmics) {
         if (msgLvl(MSG::VERBOSE)) ATH_MSG_VERBOSE("No Cleaning for Cosmics!");
 
-        if (msgLvl(MSG::VERBOSE)) { printPattern(combinedpattern); }
+        if (msgLvl(MSG::VERBOSE)) { printPattern(combinedpattern.get()); }
         return combinedpattern;
     }
 
@@ -805,20 +699,16 @@ Muon::MuonPrdPattern* MuonCombinePatternTool::makeCombinedPattern(const Muon::Mu
         int size_before_cleanup = combinedpattern->numberOfContainedPrds();
         ATH_MSG_DEBUG("size before cleanup: " << size_before_cleanup);
 
-        Muon::MuonPrdPattern* cleaneduppattern = cleanupCombinedPattern(combinedpattern);
-
-        // swap(cleaneduppattern,combinedpattern);
-        delete combinedpattern;
-        combinedpattern = nullptr;
+        std::unique_ptr<Muon::MuonPrdPattern> cleaneduppattern = cleanupCombinedPattern(*combinedpattern);
 
         int size_after_cleanup = cleaneduppattern->numberOfContainedPrds();
         ATH_MSG_DEBUG("size after cleanup: " << size_after_cleanup);
 
         if (size_before_cleanup == size_after_cleanup || size_after_cleanup == 0) {
-            if (msgLvl(MSG::VERBOSE)) { printPattern(cleaneduppattern); }
+            if (msgLvl(MSG::VERBOSE)) { printPattern(cleaneduppattern.get()); }
             return cleaneduppattern;
         } else if (size_after_cleanup < size_before_cleanup) {
-            combinedpattern = cleaneduppattern;
+            combinedpattern = std::move(cleaneduppattern);
         } else {
             change = false;
             ATH_MSG_FATAL("Cosmic Muon through computer bit? ");
@@ -827,9 +717,9 @@ Muon::MuonPrdPattern* MuonCombinePatternTool::makeCombinedPattern(const Muon::Mu
     return nullptr;
 }  // makeCombinedPattern
 
-std::vector<std::pair<Muon::MuonPrdPattern*, Muon::MuonPrdPattern*>> MuonCombinePatternTool::splitPatterns2D(
+std::vector<PrdPatternPair> MuonCombinePatternTool::splitPatterns2D(
     const Muon::MuonPrdPattern* phipattern, const Muon::MuonPrdPattern* etapattern) const {
-    std::vector<std::pair<Muon::MuonPrdPattern*, Muon::MuonPrdPattern*>> splitPatterns;
+    std::vector<PrdPatternPair> splitPatterns;
     splitPatterns.reserve(2);
 
     double phi = phipattern->globalDirection().phi();
@@ -838,11 +728,12 @@ std::vector<std::pair<Muon::MuonPrdPattern*, Muon::MuonPrdPattern*>> MuonCombine
     CxxUtils::sincos scphi(phi);
     CxxUtils::sincos sctheta(theta);
 
-    Amg::Vector3D dir1 = Amg::Vector3D(scphi.cs * sctheta.sn, scphi.sn * sctheta.sn, sctheta.cs);
-    Amg::Vector3D dir2 = dir1;
+    const Amg::Vector3D dir1{scphi.cs * sctheta.sn, scphi.sn * sctheta.sn, sctheta.cs};
+    
+    std::unique_ptr<Muon::MuonPrdPattern> phipattern1 = std::make_unique<Muon::MuonPrdPattern>(phipattern->globalPosition(), dir1);  // "lower" pattern (y<0)
+    std::unique_ptr<Muon::MuonPrdPattern> etapattern1 = std::make_unique<Muon::MuonPrdPattern>(etapattern->globalPosition(), dir1);  // "lower" pattern (y<0)
 
-    Muon::MuonPrdPattern* phipattern1 = new Muon::MuonPrdPattern(phipattern->globalPosition(), dir1);  // "lower" pattern (y<0)
-    Muon::MuonPrdPattern* etapattern1 = new Muon::MuonPrdPattern(etapattern->globalPosition(), dir1);  // "lower" pattern (y<0)
+    Amg::Vector3D dir2{dir1};
 
     if (m_flipdirectionforcosmics) {
         const double newphi = phi + M_PI;
@@ -854,21 +745,16 @@ std::vector<std::pair<Muon::MuonPrdPattern*, Muon::MuonPrdPattern*>> MuonCombine
         dir2 = Amg::Vector3D(scnewphi.cs * scnewtheta.sn, scnewphi.sn * scnewtheta.sn, scnewtheta.cs);
     }
 
-    Muon::MuonPrdPattern* phipattern2 = new Muon::MuonPrdPattern(phipattern->globalPosition(), dir2);  // "upper" pattern (y>0)
-    Muon::MuonPrdPattern* etapattern2 = new Muon::MuonPrdPattern(etapattern->globalPosition(), dir2);  // "upper" pattern (y>0)
+    std::unique_ptr<Muon::MuonPrdPattern> phipattern2 = std::make_unique<Muon::MuonPrdPattern>(phipattern->globalPosition(), dir2);  // "upper" pattern (y>0)
+    std::unique_ptr<Muon::MuonPrdPattern> etapattern2 = std::make_unique<Muon::MuonPrdPattern>(etapattern->globalPosition(), dir2);  // "upper" pattern (y>0)
 
     ATH_MSG_DEBUG(" split pattern1 theta: " << phipattern1->globalDirection().theta() << " phi: " << phipattern1->globalDirection().phi());
     ATH_MSG_DEBUG(" split pattern2 theta: " << phipattern2->globalDirection().theta() << " phi: " << phipattern2->globalDirection().phi());
 
-    splitPatterns.emplace_back(phipattern1, etapattern1);
-    splitPatterns.emplace_back(etapattern1, etapattern2);
-
     for (unsigned int hitid = 0; hitid < phipattern->numberOfContainedPrds(); hitid++) {
         const Trk::PrepRawData* prd = phipattern->prd(hitid);
-        const Amg::Vector3D& globalposhit = globalPrdPos(prd);
-        const double hitx = globalposhit.x();
-        const double hity = globalposhit.y();
-        const double dotprod = scphi.apply(hity, hitx);  // hity * scphi.sn + hitx * scphi.cs;
+        const Amg::Vector3D& globalposhit = globalPos(prd);
+        const double dotprod = scphi.apply(globalposhit.y(), globalposhit.x());
         if (dotprod >= 0) {
             phipattern1->addPrd(prd);
         } else {
@@ -877,31 +763,30 @@ std::vector<std::pair<Muon::MuonPrdPattern*, Muon::MuonPrdPattern*>> MuonCombine
     }
     for (unsigned int hitid = 0; hitid < etapattern->numberOfContainedPrds(); hitid++) {
         const Trk::PrepRawData* prd = etapattern->prd(hitid);
-        const Amg::Vector3D& globalposhit = globalPrdPos(prd);
-        const double hitx = globalposhit.x();
-        const double hity = globalposhit.y();
-        const double dotprod = scphi.apply(hity, hitx);  // hity * scphi.sn + hitx * scphi.cs;
+        const Amg::Vector3D& globalposhit = globalPos(prd);
+        const double dotprod = scphi.apply(globalposhit.y(), globalposhit.x());
         if (dotprod >= 0) {
             etapattern1->addPrd(prd);
         } else {
             etapattern2->addPrd(prd);
         }
     }
-
+    splitPatterns.emplace_back(std::move(phipattern1), std::move(etapattern1));
+    splitPatterns.emplace_back(std::move(etapattern1), std::move(etapattern2));
     return splitPatterns;
 }
 
-std::vector<std::pair<Muon::MuonPrdPattern*, Muon::MuonPrdPattern*>> MuonCombinePatternTool::splitPatterns3D(
+std::vector<PrdPatternPair> MuonCombinePatternTool::splitPatterns3D(
     const Muon::MuonPrdPattern* phipattern, const Muon::MuonPrdPattern* etapattern) const {
     // phi pattern may be 0
 
-    std::vector<std::pair<Muon::MuonPrdPattern*, Muon::MuonPrdPattern*>> splitPatterns;
+    std::vector<PrdPatternPair> splitPatterns;
     splitPatterns.reserve(2);
 
     // phi and etapattern should have identical directions and positions (except
     // for z_0), but new built anyway to be robust
 
-    Amg::Vector3D globalpos;
+    Amg::Vector3D globalpos{Amg::Vector3D::Zero()};
     if (phipattern) {
         globalpos = phipattern->globalPosition();
     } else {
@@ -920,9 +805,9 @@ std::vector<std::pair<Muon::MuonPrdPattern*, Muon::MuonPrdPattern*>> MuonCombine
     CxxUtils::sincos scphi(phi);
     CxxUtils::sincos sctheta(theta);
 
-    Amg::Vector3D dir1 = Amg::Vector3D(scphi.cs * sctheta.sn, scphi.sn * sctheta.sn, sctheta.cs);
-    Amg::Vector3D dir2 = dir1;
-
+    Amg::Vector3D dir1{scphi.cs * sctheta.sn, scphi.sn * sctheta.sn, sctheta.cs};
+   
+     Amg::Vector3D dir2 = dir1;
     if (m_flipdirectionforcosmics) {
         const double newphi = phi + M_PI;
         const double newtheta = M_PI - theta;
@@ -934,18 +819,16 @@ std::vector<std::pair<Muon::MuonPrdPattern*, Muon::MuonPrdPattern*>> MuonCombine
         dir2 = Amg::Vector3D(scnewphi.cs * scnewtheta.sn, scnewphi.sn * scnewtheta.sn, scnewtheta.cs);
     }
 
-    Muon::MuonPrdPattern* etapattern1 = new Muon::MuonPrdPattern(globalpos, dir1);  //
-    Muon::MuonPrdPattern* etapattern2 = new Muon::MuonPrdPattern(globalpos, dir2);  // "upper" pattern (y>0)
-    Muon::MuonPrdPattern* phipattern1 = nullptr;
-    Muon::MuonPrdPattern* phipattern2 = nullptr;
+    std::unique_ptr<Muon::MuonPrdPattern> etapattern1 = std::make_unique<Muon::MuonPrdPattern>(globalpos, dir1);  //
+    std::unique_ptr<Muon::MuonPrdPattern> etapattern2 = std::make_unique<Muon::MuonPrdPattern>(globalpos, dir2);  // "upper" pattern (y>0)
+    std::unique_ptr<Muon::MuonPrdPattern> phipattern1, phipattern2{};
 
     if (phipattern) {
-        phipattern1 = new Muon::MuonPrdPattern(globalpos, dir1);  // "lower" pattern (y<0)
-        phipattern2 = new Muon::MuonPrdPattern(globalpos, dir2);  // "upper" pattern (y>0)
+        phipattern1 = std::make_unique<Muon::MuonPrdPattern>(globalpos, dir1);  // "lower" pattern (y<0)
+        phipattern2 = std::make_unique<Muon::MuonPrdPattern>(globalpos, dir2);  // "upper" pattern (y>0)
     }
 
-    splitPatterns.emplace_back(phipattern1, etapattern1);
-    splitPatterns.emplace_back(phipattern2, etapattern2);
+   
 
     if (msgLvl(MSG::DEBUG)) {
         ATH_MSG_DEBUG(" split pattern theta: " << theta << " phi: " << phi);
@@ -963,7 +846,7 @@ std::vector<std::pair<Muon::MuonPrdPattern*, Muon::MuonPrdPattern*>> MuonCombine
     if (phipattern) {
         for (unsigned int hitid = 0; hitid < phipattern->numberOfContainedPrds(); hitid++) {
             const Trk::PrepRawData* prd = phipattern->prd(hitid);
-            const Amg::Vector3D& globalposhit = globalPrdPos(prd);
+            const Amg::Vector3D& globalposhit = globalPos(prd);
             const double hitx = globalposhit.x();
             const double hity = globalposhit.y();
             const double hitz = globalposhit.z();
@@ -979,7 +862,7 @@ std::vector<std::pair<Muon::MuonPrdPattern*, Muon::MuonPrdPattern*>> MuonCombine
 
     for (unsigned int hitid = 0; hitid < etapattern->numberOfContainedPrds(); hitid++) {
         const Trk::PrepRawData* prd = etapattern->prd(hitid);
-        const Amg::Vector3D& globalposhit = globalPrdPos(prd);
+        const Amg::Vector3D& globalposhit = globalPos(prd);
         const double hitx = globalposhit.x();
         const double hity = globalposhit.y();
         const double hitz = globalposhit.z();
@@ -998,15 +881,17 @@ std::vector<std::pair<Muon::MuonPrdPattern*, Muon::MuonPrdPattern*>> MuonCombine
         }
         ATH_MSG_DEBUG("Final size, eta: " << etapattern1->numberOfContainedPrds() << " " << etapattern2->numberOfContainedPrds());
     }
+    splitPatterns.emplace_back(std::move(phipattern1), std::move(etapattern1));
+    splitPatterns.emplace_back(std::move(phipattern2), std::move(etapattern2));
 
     return splitPatterns;
 }
 
-std::vector<std::pair<Muon::MuonPrdPattern*, Muon::MuonPrdPattern*>> MuonCombinePatternTool::splitPatternsCylinder(
+std::vector<PrdPatternPair> MuonCombinePatternTool::splitPatternsCylinder(
     const Muon::MuonPrdPattern* phipattern, const Muon::MuonPrdPattern* etapattern) const {
     // phi pattern may be 0
-    Amg::Vector3D patternpos;
-    double phi;
+    Amg::Vector3D patternpos{Amg::Vector3D::Zero()};
+    double phi{0.};
 
     if (phipattern) {
         patternpos = phipattern->globalPosition();
@@ -1027,21 +912,19 @@ std::vector<std::pair<Muon::MuonPrdPattern*, Muon::MuonPrdPattern*>> MuonCombine
 
     if (!intersect) {  // no split
         ATH_MSG_DEBUG("Pattern not through calorimeter -> do not split ");
-        return std::vector<std::pair<Muon::MuonPrdPattern*,
-                                     Muon::MuonPrdPattern*>>();  // return empty vector , probably
-                                                                 // better way to save this creation
+        return {};  
     }
 
     return splitPatterns3D(phipattern, etapattern);
 }
 
-Muon::MuonPrdPattern* MuonCombinePatternTool::cleanupCombinedPattern(Muon::MuonPrdPattern*& combinedpattern) const {
-    const double phipattern = combinedpattern->globalDirection().phi();
-    const double thetapattern = combinedpattern->globalDirection().theta();
+std::unique_ptr<Muon::MuonPrdPattern> MuonCombinePatternTool::cleanupCombinedPattern(const Muon::MuonPrdPattern& combinedpattern) const {
+    const double phipattern = combinedpattern.globalDirection().phi();
+    const double thetapattern = combinedpattern.globalDirection().theta();
 
     CxxUtils::sincos scthetapattern(thetapattern);
 
-    const Amg::Vector3D& patternpos = combinedpattern->globalPosition();
+    const Amg::Vector3D& patternpos = combinedpattern.globalPosition();
     const double posx = patternpos.x();
     const double posy = patternpos.y();
     const double posz = patternpos.z();
@@ -1050,22 +933,22 @@ Muon::MuonPrdPattern* MuonCombinePatternTool::cleanupCombinedPattern(Muon::MuonP
     double r0 = MuonHoughMathUtils::signedDistanceOfLineToOrigin2D(posx, posy, phipattern);
     double charge = 1.;
     if (r0 < 0) charge = -1.;
-    double curvature = combinedpattern->globalDirection().mag();
+    double curvature = combinedpattern.globalDirection().mag();
     if (curvature > 2) invcurvature = charge / curvature;
 
     ATH_MSG_DEBUG("cleaned up pattern: phi " << phipattern << " theta: " << thetapattern << " position: " << posx << " " << posy << " "
                                              << posz);
     ATH_MSG_DEBUG("Cleanup pattern charge " << charge << " curvature " << curvature);
 
-    Muon::MuonPrdPattern* combinedpattern_cleaned =
-        new Muon::MuonPrdPattern(combinedpattern->globalPosition(), combinedpattern->globalDirection());
+    std::unique_ptr<Muon::MuonPrdPattern> combinedpattern_cleaned =
+        std::make_unique<Muon::MuonPrdPattern>(combinedpattern.globalPosition(), combinedpattern.globalDirection());
 
-    for (unsigned int hitid = 0; hitid < combinedpattern->numberOfContainedPrds(); hitid++) {
-        const Trk::PrepRawData* prd = combinedpattern->prd(hitid);
-        const Amg::Vector3D& globalposhit = globalPrdPos(prd);
+    for (unsigned int hitid = 0; hitid < combinedpattern.numberOfContainedPrds(); hitid++) {
+        const Trk::PrepRawData* prd = combinedpattern.prd(hitid);
+        const Amg::Vector3D& globalposhit = globalPos(prd);
        
         double r0 = MuonHoughMathUtils::signedDistanceOfLineToOrigin2D(posx, posy, phipattern);
-        double distance_xy = MuonHoughMathUtils::distanceToLine(globalposhit[Amg::x], globalposhit[Amg::y], r0, phipattern);
+        double distance_xy = MuonHoughMathUtils::distanceToLine(globalposhit.x(), globalposhit.y(), r0, phipattern);
 
         double radius_pattern = globalposhit.perp();
         double z0 = posz - radius_pattern * scthetapattern.cs / scthetapattern.sn;
@@ -1078,18 +961,15 @@ Muon::MuonPrdPattern* MuonCombinePatternTool::cleanupCombinedPattern(Muon::MuonP
                         << " dist xy " << distance_xy << " dist rz " << distance_rz << " scale: " << scale);
         if (std::abs(distance_xy) < scale * m_maximum_xydistance && std::abs(distance_rz) < m_maximum_rzdistance) {
             combinedpattern_cleaned->addPrd(prd);
-        } else {
-            if (msgLvl(MSG::DEBUG)) {
-                ATH_MSG_DEBUG("Hit discarded: " << hitid << " dis xy " << distance_xy << " dis rz " << distance_rz);
-                ATH_MSG_DEBUG("Hit info: ");
-                m_idHelperSvc->mdtIdHelper().print(prd->identify());
-            }
+        } else {           
+            ATH_MSG_DEBUG("Hit discarded: " << hitid << " dis xy " << distance_xy << " dis rz " << distance_rz);
+            ATH_MSG_DEBUG("Hit info: "<<m_idHelperSvc->toString(prd->identify()));
         }
     }
 
     ATH_MSG_DEBUG("size of cleaned pattern: " << combinedpattern_cleaned->numberOfContainedPrds());
 
-    if (combinedpattern_cleaned->numberOfContainedPrds() == 0 && combinedpattern->numberOfContainedPrds() != 0) {
+    if (combinedpattern_cleaned->numberOfContainedPrds() == 0 && combinedpattern.numberOfContainedPrds() != 0) {
         ATH_MSG_DEBUG(
             "cleaned up pattern is empty (should happen only when initially no phi "
             "pattern found and phi hits are added by ascociation map)");
@@ -1098,52 +978,46 @@ Muon::MuonPrdPattern* MuonCombinePatternTool::cleanupCombinedPattern(Muon::MuonP
     return combinedpattern_cleaned;
 }
 
-Muon::MuonPrdPattern* MuonCombinePatternTool::makeAssPhiPattern(
-    const Muon::MuonPrdPattern* muonpattern,
+std::unique_ptr<Muon::MuonPrdPattern> MuonCombinePatternTool::makeAssPhiPattern(
+    const Muon::MuonPrdPattern& muonpattern,
     /** phi eta association map, eta prds are key*/
-    const std::map<const Trk::PrepRawData*, std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>>* phiEtaHitAssMap,
+    const EtaPhiHitAssocMap& phiEtaHitAssMap,
     bool check_already_on_pattern) const {
     // bool hits_added = false;
-    const unsigned int size = muonpattern->numberOfContainedPrds();
+    const unsigned int size = muonpattern.numberOfContainedPrds();
 
-    std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess> hits;
+    PrepDataSet hits;
     if (check_already_on_pattern) {
-        for (unsigned int i = 0; i < size; i++) { hits.insert(muonpattern->prd(i)); }
+        for (unsigned int i = 0; i < size; i++) { hits.insert(muonpattern.prd(i)); }
     }
     std::vector<const Trk::PrepRawData*> phihits;
-    phihits.reserve(20);  // just a sophisticated guess
-
-    std::map<const Trk::PrepRawData*, std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>>::const_iterator it;
     for (unsigned int i = 0; i < size; i++) {
-        const Trk::PrepRawData* prd = muonpattern->prd(i);
+        const Trk::PrepRawData* prd = muonpattern.prd(i);
         // check on type of prd?
         const Muon::MuonCluster* muoncluster = dynamic_cast<const Muon::MuonCluster*>(prd);
-        if (muoncluster) {
-            // test on measuresphi?
-            it = phiEtaHitAssMap->find(prd);
-            if (it != phiEtaHitAssMap->end()) {  // check if hit has associated hit
-                std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>::iterator set_it = (*it).second.begin();
-                for (; set_it != (*it).second.end(); ++set_it) {
-                    if (!check_already_on_pattern || hits.find(*set_it) == hits.end()) {  // check if associated hit already in pattern
-                        phihits.push_back(*set_it);
-                        if (check_already_on_pattern) { hits.insert(*set_it); }
-                        ATH_MSG_VERBOSE("Associated Phi Hit Added to Pattern");
-                    }
-                }
-            }
+        if (!muoncluster) continue;
+        EtaPhiHitAssocMap::const_iterator itr = phiEtaHitAssMap.find(prd);
+        /// No phi hits were recorded in that chamber
+        if (itr == phiEtaHitAssMap.end()) {
+            continue;
         }
+        std::copy_if(itr->second.begin(), itr->second.end(), std::back_inserter(phihits),
+                [&check_already_on_pattern, &hits](const Trk::PrepRawData* phiHit){
+            return !check_already_on_pattern || hits.insert(phiHit).second;
+        });
     }
-    Muon::MuonPrdPattern* phipattern = nullptr;
+    
+    
+    if (phihits.empty()) { return nullptr; }
+    
+    std::unique_ptr<Muon::MuonPrdPattern> phipattern;
 
-    if (phihits.empty()) { return phipattern; }
-
-    std::vector<const Trk::PrepRawData*>::iterator vec_it = phihits.begin();
     double phi = 0., sin_phi = 0., cos_phi = 0.;
     if (m_use_cosmics) {
-        phi = muonpattern->globalDirection().phi();
+        phi = muonpattern.globalDirection().phi();
     } else {
-        for (; vec_it != phihits.end(); ++vec_it) {
-            const Amg::Vector3D& globalposhit = globalPrdPos(*vec_it);
+        for (const Trk::PrepRawData* phiHit : phihits) {
+            const Amg::Vector3D& globalposhit = globalPos(phiHit);
             CxxUtils::sincos scphihit(globalposhit.phi());
             sin_phi += scphihit.sn;
             cos_phi += scphihit.cs;
@@ -1151,46 +1025,42 @@ Muon::MuonPrdPattern* MuonCombinePatternTool::makeAssPhiPattern(
         phi = std::atan2(sin_phi, cos_phi);
     }
 
-    const double curvature = muonpattern->globalDirection().mag();
-    const double theta = muonpattern->globalDirection().theta();
+    const double curvature = muonpattern.globalDirection().mag();
+    const double theta = muonpattern.globalDirection().theta();
     CxxUtils::sincos scphi(phi);
     CxxUtils::sincos sctheta(theta);
 
     if (m_use_cosmics) {
-        phipattern = new Muon::MuonPrdPattern(muonpattern->globalPosition(), muonpattern->globalDirection());
+        phipattern = std::make_unique<Muon::MuonPrdPattern>(muonpattern.globalPosition(), muonpattern.globalDirection(), phihits);
     } else {
-        const Amg::Vector3D& globalpos = Amg::Vector3D(0.001, 0.001, 0.);
-        const Amg::Vector3D& globaldir =
-            Amg::Vector3D(curvature * scphi.cs * sctheta.sn, curvature * scphi.sn * sctheta.sn, curvature * sctheta.cs);
-        phipattern = new Muon::MuonPrdPattern(globalpos, globaldir);
+        static const Amg::Vector3D globalpos{0.001, 0.001, 0.};
+        const Amg::Vector3D& globaldir{curvature * scphi.cs * sctheta.sn, 
+                                       curvature * scphi.sn * sctheta.sn, curvature * sctheta.cs};
+        phipattern = std::make_unique<Muon::MuonPrdPattern>(globalpos, globaldir, phihits);
     }
 
-    vec_it = phihits.begin();
-    for (; vec_it != phihits.end(); ++vec_it) { phipattern->addPrd(*vec_it); }
-
+  
     // perform cleaning on newly created phipattern:
-    Muon::MuonPrdPattern* phipatternclean = cleanPhiPattern(phipattern);
-    delete phipattern;
-
+    std::unique_ptr<Muon::MuonPrdPattern> phipatternclean = cleanPhiPattern(std::move(phipattern));
+   
     if (phipatternclean->numberOfContainedPrds() <= 0) {
-        delete phipatternclean;
-        return nullptr;
+       phipatternclean.reset();
     }
     return phipatternclean;
 }
 
-std::array<double,4> MuonCombinePatternTool::updateParametersForCosmics(const Muon::MuonPrdPattern* phipattern,
-                                                           const Muon::MuonPrdPattern* etapattern) const {
+std::array<double,4> MuonCombinePatternTool::updateParametersForCosmics(const Muon::MuonPrdPattern& phipattern,
+                                                           const Muon::MuonPrdPattern& etapattern) const {
     // method returns r0, phi, rz0, theta
 
-    const unsigned int etasize = etapattern->numberOfContainedPrds();
-    const unsigned int phisize = phipattern->numberOfContainedPrds();
+    const unsigned int etasize = etapattern.numberOfContainedPrds();
+    const unsigned int phisize = phipattern.numberOfContainedPrds();
 
-    const Amg::Vector3D& etaglobalpos = etapattern->globalPosition();
-    const Amg::Vector3D& etaglobaldir = etapattern->globalDirection();
+    const Amg::Vector3D& etaglobalpos = etapattern.globalPosition();
+    const Amg::Vector3D& etaglobaldir = etapattern.globalDirection();
 
-    const Amg::Vector3D& phiglobalpos = phipattern->globalPosition();
-    const Amg::Vector3D& phiglobaldir = phipattern->globalDirection();
+    const Amg::Vector3D& phiglobalpos = phipattern.globalPosition();
+    const Amg::Vector3D& phiglobaldir = phipattern.globalDirection();
 
     std::array<double,4> old_pars{0};
 
@@ -1223,14 +1093,12 @@ std::array<double,4> MuonCombinePatternTool::updateParametersForCosmics(const Mu
     // calculate new theta and rz0: (not using phi hits this time, as eta pattern
     // is larger in general
 
-    double av_radii = 0.;
-    double av_z = 0.;
+    double av_radii{0.}, av_z{0.};
 
     for (unsigned int i = 0; i < etasize; ++i) {
-        const Trk::PrepRawData* prd = etapattern->prd(i);
-        const Amg::Vector3D& globalposhit = globalPrdPos(prd);
-        av_radii += scphi.apply(globalposhit.y(),
-                                globalposhit.x());  // globalposhit.x()*scphi.cs + globalposhit.y()*scphi.sn;
+        const Trk::PrepRawData* prd = etapattern.prd(i);
+        const Amg::Vector3D globalposhit = globalPos(prd);
+        av_radii += scphi.apply(globalposhit.y(), globalposhit.x());  
         av_z += globalposhit.z();
     }
 
@@ -1241,12 +1109,12 @@ std::array<double,4> MuonCombinePatternTool::updateParametersForCosmics(const Mu
     double sumr = 0.;
     double sumz = 0.;
     for (unsigned int i = 0; i < etasize; i++) {
-        const Trk::PrepRawData* prd = etapattern->prd(i);
-        const Amg::Vector3D& globalposhit = globalPrdPos(prd);
+        const Trk::PrepRawData* prd = etapattern.prd(i);
+        const Amg::Vector3D& globalposhit = globalPos(prd);
         
-        double radius = scphi.apply(globalposhit[Amg::y], globalposhit[Amg::x]);  // hitx*scphi.cs + hity*scphi.sn;
+        double radius = scphi.apply(globalposhit.y(), globalposhit.x());  // hitx*scphi.cs + hity*scphi.sn;
         double r_offset = radius - av_radii;
-        double z_offset = globalposhit[Amg::z] - av_z;
+        double z_offset = globalposhit.z() - av_z;
         double weight = r_offset * r_offset + z_offset * z_offset;
         int sign = 1;
         if (r_offset * std::cos(theta_orig) + z_offset * std::sin(theta_orig) < 0) { sign = -1; }
@@ -1271,33 +1139,33 @@ std::array<double,4> MuonCombinePatternTool::updateParametersForCosmics(const Mu
 
     std::array<double,4> new_pars {r0,phi,rz0,theta};
 
-    ATH_MSG_DEBUG("updated parameters: r0: " << new_pars[0] << " phi: " << new_pars[1] << " rz0: " << new_pars[2]
+    ATH_MSG_VERBOSE("updated parameters: r0: " << new_pars[0] << " phi: " << new_pars[1] << " rz0: " << new_pars[2]
                                              << " theta: " << new_pars[3]);
-    ATH_MSG_DEBUG("old parameters: r0: " << old_pars[0] << " phi: " << old_pars[1] << " rz0: " << old_pars[2] << " theta: " << old_pars[3]);
+    ATH_MSG_VERBOSE("old parameters: r0: " << old_pars[0] << " phi: " << old_pars[1] << " rz0: " << old_pars[2] << " theta: " << old_pars[3]);
 
     if (msgLvl(MSG::VERBOSE)) {
         ATH_MSG_VERBOSE("phisize: " << phisize << " etasize: " << etasize);
         for (unsigned int i = 0; i < phisize; i++) {
-            const Trk::PrepRawData* prd = phipattern->prd(i);
-            const Amg::Vector3D& globalposhit = globalPrdPos(prd);
-            double distance = MuonHoughMathUtils::signedDistanceToLine(globalposhit[Amg::x], globalposhit[Amg::y], r0, phi);
+            const Trk::PrepRawData* prd = phipattern.prd(i);
+            const Amg::Vector3D& globalposhit = globalPos(prd);
+            double distance = MuonHoughMathUtils::signedDistanceToLine(globalposhit.x(), globalposhit.y(), r0, phi);
             ATH_MSG_VERBOSE("distance to updated parameters in xy: " << distance);
-            distance = MuonHoughMathUtils::signedDistanceToLine(globalposhit[Amg::x], globalposhit[Amg::y], old_pars[0], old_pars[1]);
+            distance = MuonHoughMathUtils::signedDistanceToLine(globalposhit.x(), globalposhit.y(), old_pars[0], old_pars[1]);
             ATH_MSG_VERBOSE("old distance phi hit: " << distance);
         }
         for (unsigned int i = 0; i < etasize; i++) {
-            const Trk::PrepRawData* prd = etapattern->prd(i);
-            const Amg::Vector3D& globalposhit = globalPrdPos(prd);
-            double distance = MuonHoughMathUtils::signedDistanceToLine(globalposhit[Amg::x], globalposhit[Amg::y], r0, phi);
+            const Trk::PrepRawData* prd = etapattern.prd(i);
+            const Amg::Vector3D& globalposhit = globalPos(prd);
+            double distance = MuonHoughMathUtils::signedDistanceToLine(globalposhit.x(), globalposhit.y(), r0, phi);
             ATH_MSG_VERBOSE("distance to updated parameters in xy: " << distance);
-            distance = MuonHoughMathUtils::signedDistanceToLine(globalposhit[Amg::x], globalposhit[Amg::y], old_pars[0], old_pars[1]);
+            distance = MuonHoughMathUtils::signedDistanceToLine(globalposhit.x(), globalposhit.y(), old_pars[0], old_pars[1]);
             ATH_MSG_VERBOSE("old distance eta hit: " << distance);
         }
         for (unsigned int i = 0; i < etasize; ++i) {
-            const Trk::PrepRawData* prd = etapattern->prd(i);
-            const Amg::Vector3D& globalposhit = globalPrdPos(prd);
-            double perp = scphi.apply(globalposhit[Amg::y],
-                                      globalposhit[Amg::x]);  // globalposhit.x()*scphi.cs + globalposhit.y()*scphi.sn;
+            const Trk::PrepRawData* prd = etapattern.prd(i);
+            const Amg::Vector3D& globalposhit = globalPos(prd);
+            double perp = scphi.apply(globalposhit.y(),
+                                      globalposhit.x());  // globalposhit.x()*scphi.cs + globalposhit.y()*scphi.sn;
             double distance = MuonHoughMathUtils::signedDistanceToLine(globalposhit[Amg::z], perp, rz0, theta);
             ATH_MSG_VERBOSE("distance to updated parameters in Rz: " << distance);
             distance = MuonHoughMathUtils::signedDistanceToLine(globalposhit[Amg::z], perp, old_pars[2], old_pars[3]);
@@ -1307,8 +1175,8 @@ std::array<double,4> MuonCombinePatternTool::updateParametersForCosmics(const Mu
     return new_pars;
 }
 
-std::pair<double, double> MuonCombinePatternTool::calculateR0Phi(const Muon::MuonPrdPattern* phipattern,
-                                                                 const Muon::MuonPrdPattern* etapattern, double phi_est) const {
+std::pair<double, double> MuonCombinePatternTool::calculateR0Phi(const Muon::MuonPrdPattern& phipattern,
+                                                                 const Muon::MuonPrdPattern& etapattern, double phi_est) const {
     // use eta pattern as well, since phi patterns consist sometimes of only 1
     // station etahit error 200mrad (2Pi/16*2), phi hit 20mrad (should be hough
     // binsize (18 mrad), but prefer ~ factor 10 for stabilility)
@@ -1319,15 +1187,15 @@ std::pair<double, double> MuonCombinePatternTool::calculateR0Phi(const Muon::Muo
 
     CxxUtils::sincos scphi_est(phi_est);
 
-    const unsigned int etasize = etapattern->numberOfContainedPrds();
-    const unsigned int phisize = phipattern->numberOfContainedPrds();
+    const unsigned int etasize = etapattern.numberOfContainedPrds();
+    const unsigned int phisize = phipattern.numberOfContainedPrds();
 
-    const Amg::Vector3D& etaglobaldir = etapattern->globalDirection();
+    const Amg::Vector3D& etaglobaldir = etapattern.globalDirection();
     const double phi_etapattern = etaglobaldir.phi();
     CxxUtils::sincos scphi_eta(phi_etapattern);
 
-    const Amg::Vector3D& phiglobaldir = phipattern->globalDirection();
-    const Amg::Vector3D& phiglobalpos = phipattern->globalPosition();
+    const Amg::Vector3D& phiglobaldir = phipattern.globalDirection();
+    const Amg::Vector3D& phiglobalpos = phipattern.globalPosition();
     const double phi_phipattern = phiglobaldir.phi();
     CxxUtils::sincos scphi_phi(phi_phipattern);
 
@@ -1344,15 +1212,15 @@ std::pair<double, double> MuonCombinePatternTool::calculateR0Phi(const Muon::Muo
     // calculate average point
 
     for (unsigned int i = 0; i < etasize; i++) {
-        const Trk::PrepRawData* prd = etapattern->prd(i);
-        const Amg::Vector3D& globalposhit = globalPrdPos(prd);
+        const Trk::PrepRawData* prd = etapattern.prd(i);
+        const Amg::Vector3D& globalposhit = globalPos(prd);
         sum_etax += globalposhit.x();
         sum_etay += globalposhit.y();
     }
 
     for (unsigned int i = 0; i < phisize; i++) {
-        const Trk::PrepRawData* prd = phipattern->prd(i);
-        const Amg::Vector3D& globalposhit = globalPrdPos(prd);
+        const Trk::PrepRawData* prd = phipattern.prd(i);
+        const Amg::Vector3D& globalposhit = globalPos(prd);
         sum_phix += globalposhit.x();
         sum_phiy += globalposhit.y();
     }
@@ -1360,7 +1228,7 @@ std::pair<double, double> MuonCombinePatternTool::calculateR0Phi(const Muon::Muo
     const double av_x = (eta_error_inv2 * sum_etax + phi_error_inv2 * sum_phix) / (eta_error_inv2 * etasize + phi_error_inv2 * phisize);
     const double av_y = (eta_error_inv2 * sum_etay + phi_error_inv2 * sum_phiy) / (eta_error_inv2 * etasize + phi_error_inv2 * phisize);
 
-    if (msgLvl(MSG::VERBOSE)) { ATH_MSG_VERBOSE(" av_x: " << av_x << " av_y: " << av_y); }
+     ATH_MSG_VERBOSE(" av_x: " << av_x << " av_y: " << av_y);
 
     // calculate weighted sum:
 
@@ -1371,10 +1239,10 @@ std::pair<double, double> MuonCombinePatternTool::calculateR0Phi(const Muon::Muo
     double x_min {0.}, x_max {0.}, y_min {0.}, y_max {0.}, lever_min {0.}, lever_max{0.};
 
     for (unsigned int i = 0; i < etasize; i++) {
-        const Trk::PrepRawData* prd = etapattern->prd(i);
-        const Amg::Vector3D& globalposhit = globalPrdPos(prd);
-        double x_offset = globalposhit[Amg::x] - av_x;
-        double y_offset = globalposhit[Amg::y] - av_y;
+        const Trk::PrepRawData* prd = etapattern.prd(i);
+        const Amg::Vector3D& globalposhit = globalPos(prd);
+        double x_offset = globalposhit.x() - av_x;
+        double y_offset = globalposhit.y() - av_y;
         double height_squared = x_offset * x_offset + y_offset * y_offset;
         double weight = height_squared * eta_error_inv2;
         int sign = 1;
@@ -1384,20 +1252,20 @@ std::pair<double, double> MuonCombinePatternTool::calculateR0Phi(const Muon::Muo
 
         if (sign == 1 && height_squared > lever_max) {
             lever_max = height_squared;
-            x_max = globalposhit[Amg::x];
-            y_max = globalposhit[Amg::y];
+            x_max = globalposhit.x();
+            y_max = globalposhit.y();
         } else if (sign == -1 && height_squared > lever_min) {
             lever_min = height_squared;
-            x_min = globalposhit[Amg::x];
-            y_min = globalposhit[Amg::y];
+            x_min = globalposhit.x();
+            y_min = globalposhit.y();
         }
     }
 
     for (unsigned int i = 0; i < phisize; i++) {
-        const Trk::PrepRawData* prd = phipattern->prd(i);
-        const Amg::Vector3D& globalposhit = globalPrdPos(prd);
-        double x_offset = globalposhit[Amg::x] - av_x;
-        double y_offset = globalposhit[Amg::y] - av_y;
+        const Trk::PrepRawData* prd = phipattern.prd(i);
+        const Amg::Vector3D& globalposhit = globalPos(prd);
+        double x_offset = globalposhit.x() - av_x;
+        double y_offset = globalposhit.y() - av_y;
         double height_squared = x_offset * x_offset + y_offset * y_offset;
         double weight = height_squared * phi_error_inv2;
         int sign = 1;
@@ -1407,12 +1275,12 @@ std::pair<double, double> MuonCombinePatternTool::calculateR0Phi(const Muon::Muo
 
         if (sign == 1 && height_squared > lever_max) {
             lever_max = height_squared;
-            x_max = globalposhit[Amg::x];
-            y_max = globalposhit[Amg::y];
+            x_max = globalposhit.x();
+            y_max = globalposhit.y();
         } else if (sign == -1 && height_squared > lever_min) {
             lever_min = height_squared;
-            x_min = globalposhit[Amg::x];
-            y_min = globalposhit[Amg::y];
+            x_min = globalposhit.x();
+            y_min = globalposhit.y();
         }
     }
 
@@ -1421,8 +1289,7 @@ std::pair<double, double> MuonCombinePatternTool::calculateR0Phi(const Muon::Muo
     if (std::abs(sumx) < 0.000001 || std::abs(sumy) < 0.000001) {
         ATH_MSG_DEBUG(" sum too small to update");
 
-        return std::make_pair(MuonHoughMathUtils::signedDistanceOfLineToOrigin2D(phiglobalpos.x(), phiglobalpos.y(), phi_phipattern),
-                              phi_phipattern);
+        return std::make_pair(phi_phipattern, MuonHoughMathUtils::signedDistanceOfLineToOrigin2D(phiglobalpos.x(), phiglobalpos.y(), phi_phipattern));
     }
 
     // lever arm has to be larger than 2 m, else no update:
@@ -1430,8 +1297,7 @@ std::pair<double, double> MuonCombinePatternTool::calculateR0Phi(const Muon::Muo
         ATH_MSG_VERBOSE("lever arm too small: av_x : " << std::sqrt((x_max - x_min) * (x_max - x_min) + (y_max - y_min) * (y_max - y_min))
                                                        << " x_max: " << x_max << " x_min: " << x_min << " y_max: " << y_max
                                                        << " y_min: " << y_min);
-        return std::make_pair(MuonHoughMathUtils::signedDistanceOfLineToOrigin2D(phiglobalpos.x(), phiglobalpos.y(), phi_phipattern),
-                              phi_phipattern);
+        return std::make_pair(phi_phipattern, MuonHoughMathUtils::signedDistanceOfLineToOrigin2D(phiglobalpos.x(), phiglobalpos.y(), phi_phipattern));
     }
 
     double phi_fit = std::atan2(sumy, sumx);
@@ -1442,8 +1308,8 @@ std::pair<double, double> MuonCombinePatternTool::calculateR0Phi(const Muon::Muo
     return std::make_pair(phi_fit, r0_fit);
 }
 
-double MuonCombinePatternTool::calculateRz0(const Muon::MuonPrdPattern* pattern, double phi, double theta) {
-    double nhits = pattern->numberOfContainedPrds();
+double MuonCombinePatternTool::calculateRz0(const Muon::MuonPrdPattern& pattern, double phi, double theta) {
+    double nhits = pattern.numberOfContainedPrds();
     CxxUtils::sincos sctheta(theta);
     CxxUtils::sincos scphi(phi);
 
@@ -1471,18 +1337,18 @@ double MuonCombinePatternTool::calculateRz0(const Muon::MuonPrdPattern* pattern,
 
     double rz0 = 0.;
     for (unsigned int i = 0; i < nhits; i++) {
-        const Trk::PrepRawData* prd = pattern->prd(i);
-        const Amg::Vector3D& poshit = globalPrdPos(prd);
-        int sign = (poshit[Amg::x] * scphi.cs + poshit[Amg::y] * scphi.sn > 0) ? 1 : -1;
-        rz0 += poshit[Amg::z] * sctheta.sn - sign * sctheta.cs * poshit.perp();
+        const Trk::PrepRawData* prd = pattern.prd(i);
+        const Amg::Vector3D& poshit = globalPos(prd);
+        int sign = (poshit.x() * scphi.cs + poshit.y() * scphi.sn > 0) ? 1 : -1;
+        rz0 += poshit.z() * sctheta.sn - sign * sctheta.cs * poshit.perp();
     }
 
     if (nhits > 0) rz0 /= nhits;
     return rz0;
 }
 
-std::pair<const Muon::MuonPrdPattern*, const Muon::MuonPrdPattern*> MuonCombinePatternTool::updatePatternsForCosmics(
-    const Muon::MuonPrdPattern* phipattern, const Muon::MuonPrdPattern* etapattern, const std::array<double,4>&  new_pars) {
+MuonCombinePatternTool::PrdPatternPair MuonCombinePatternTool::updatePatternsForCosmics(
+    const Muon::MuonPrdPattern& phipattern, const Muon::MuonPrdPattern& etapattern, const std::array<double,4>&  new_pars) const  {
     double phi = new_pars[1];
     double theta = new_pars[3];
 
@@ -1498,148 +1364,70 @@ std::pair<const Muon::MuonPrdPattern*, const Muon::MuonPrdPattern*> MuonCombineP
         z0_eta = new_pars[2] / sctheta.sn;                               // z0 of rz0
     }
 
-    const Amg::Vector3D& globalDir = Amg::Vector3D(scphi.cs * sctheta.sn, scphi.sn * sctheta.sn, sctheta.cs);
-    const Amg::Vector3D& globalPosPhi = Amg::Vector3D(x0, y0, z0_phi);
-    const Amg::Vector3D& globalPosEta = Amg::Vector3D(x0, y0, z0_eta);
+    const Amg::Vector3D globalDir{scphi.cs * sctheta.sn, scphi.sn * sctheta.sn, sctheta.cs};
+    const Amg::Vector3D globalPosPhi{x0, y0, z0_phi};
+    const Amg::Vector3D globalPosEta{x0, y0, z0_eta};
+    ATH_MSG_VERBOSE("updatePatternsForCosmics() -- eta pattern "<<std::endl
+                    <<m_printer->print(*etapattern.prd(0))<<std::endl
+                    <<" -- phi pattern "<<std::endl
+                    <<m_printer->print(*phipattern.prd(0))<<std::endl
+                    <<"Theta: " <<theta<<"   globalPosEta: "<<Amg::toString(globalPosEta)<<", globalDir: "<<Amg::toString(globalDir));
+    
+    
+    std::unique_ptr<Muon::MuonPrdPattern> updatedphipattern = std::make_unique<Muon::MuonPrdPattern>(globalPosPhi, globalDir, phipattern.prepRawDataVec());
+    std::unique_ptr<Muon::MuonPrdPattern> updatedetapattern = std::make_unique<Muon::MuonPrdPattern>(globalPosEta, globalDir, etapattern.prepRawDataVec());
 
-    Muon::MuonPrdPattern* updatedphipattern = new Muon::MuonPrdPattern(globalPosPhi, globalDir);
-    Muon::MuonPrdPattern* updatedetapattern = new Muon::MuonPrdPattern(globalPosEta, globalDir);
-
-    for (unsigned int phihitnr = 0; phihitnr < phipattern->numberOfContainedPrds(); phihitnr++) {
-        updatedphipattern->addPrd(phipattern->prd(phihitnr));
-    }  // size phi pattern
-
-    for (unsigned int etahitnr = 0; etahitnr < etapattern->numberOfContainedPrds(); etahitnr++) {
-        updatedetapattern->addPrd(etapattern->prd(etahitnr));
-    }  // size eta pattern
-
-    return (std::make_pair(updatedphipattern, updatedetapattern));
+    return std::make_pair(std::move(updatedphipattern), std::move(updatedetapattern));
 }
 
-const Amg::Vector3D& MuonCombinePatternTool::globalPrdPos(const Trk::PrepRawData* prd) {
-    const Muon::MuonCluster* cprd = dynamic_cast<const Muon::MuonCluster*>(prd);
-    if (cprd) return cprd->globalPosition();
-
-    const Muon::MdtPrepData* mdtprd = dynamic_cast<const Muon::MdtPrepData*>(prd);
-    if (mdtprd) return mdtprd->globalPosition();
-
-    return prd->detectorElement()->surface(prd->identify()).center();
-}
-
-MuonPatternCombinationCollection* MuonCombinePatternTool::makePatternCombinations(const MuonPrdPatternCollection* muonpatterns) const {
+std::unique_ptr<MuonPatternCombinationCollection> MuonCombinePatternTool::makePatternCombinations(const MuonPrdPatternCollection& muonpatterns) const {
     ATH_MSG_DEBUG("makePatternCombinations");
 
-    MuonPatternCombinationCollection* patterncombinations = new MuonPatternCombinationCollection();
+    std::unique_ptr<MuonPatternCombinationCollection> patterncombinations = std::make_unique<MuonPatternCombinationCollection>();
 
-    MuonPrdPatternCollection::const_iterator pit = muonpatterns->begin();
-    MuonPrdPatternCollection::const_iterator pit_end = muonpatterns->end();
-
-    for (; pit != pit_end; ++pit) {
-        const Amg::Vector3D& roadmom = (*pit)->globalDirection();
-        const Amg::Vector3D& roadpos = (*pit)->globalPosition();
+    for (const Muon::MuonPattern* pit : muonpatterns) {
+        const Amg::Vector3D roadmom = pit->globalDirection();
+        const Amg::Vector3D roadpos = pit->globalPosition();
         ATH_MSG_DEBUG("phi: " << roadmom.phi() << " eta: " << roadmom.eta());
         ATH_MSG_DEBUG("x: " << roadpos.x() << " y: " << roadpos.y() << " z: " << roadpos.z());
 
         // sort pattern per chamber
-        std::map<Identifier, std::vector<const Trk::PrepRawData*>> chamberMap;
-        std::map<Identifier, std::vector<const Trk::PrepRawData*>>::iterator chit;
-        std::map<Identifier, std::vector<const Trk::PrepRawData*>>::iterator chit_end = chamberMap.end();
-        for (unsigned int i = 0; i < (*pit)->numberOfContainedPrds(); i++) {
-            const Trk::PrepRawData* prd = (*pit)->prd(i);
+        std::map<Identifier, std::vector<const Trk::PrepRawData*>> chamberMap;        
+        for (unsigned int i = 0; i < pit->numberOfContainedPrds(); ++i) {
+            const Trk::PrepRawData* prd = pit->prd(i);
             Identifier channelId = prd->identify();
-            Identifier moduleId;
-            if (m_idHelperSvc->isMdt(channelId)) {
-                moduleId = m_idHelperSvc->mdtIdHelper().elementID(channelId);
-            } else if (m_idHelperSvc->isCsc(channelId)) {
-                moduleId = m_idHelperSvc->cscIdHelper().elementID(channelId);
-            } else if (m_idHelperSvc->isTgc(channelId)) {
-                moduleId = m_idHelperSvc->tgcIdHelper().elementID(channelId);
-            } else if (m_idHelperSvc->isRpc(channelId)) {
-                moduleId = m_idHelperSvc->rpcIdHelper().elementID(channelId);
-            } else {
-                ATH_MSG_ERROR("prd is not a muonhit?!");
-            }
-
-            chit = chamberMap.find(moduleId);
-            if (chit != chit_end) {
-                (*chit).second.push_back(prd);
-            } else {
-                std::vector<const Trk::PrepRawData*> prdVec;
-                prdVec.reserve(10);
-                prdVec.push_back(prd);
-                chamberMap[moduleId] = prdVec;
-            }
+            const Identifier moduleId = m_idHelperSvc->chamberId(channelId);            
+            std::vector<const Trk::PrepRawData*>& chambVec = chamberMap[moduleId];
+            chambVec.reserve(pit->numberOfContainedPrds());
+            chambVec.push_back(prd);
         }
 
         // build chamberintersect vector
         std::vector<Muon::MuonPatternChamberIntersect> mpciVec;
         mpciVec.reserve(chamberMap.size());
-        Amg::Vector3D patpose;
-        Amg::Vector3D patdire;
-        chit = chamberMap.begin();
-        for (; chit != chit_end; ++chit) {
-            const Trk::PrepRawData* prd = *((*chit).second.begin());
-            // Identifier id = prd->identify();
-            const Amg::Vector3D& globalpos = globalPrdPos(prd);
-
+        Amg::Vector3D patpose{Amg::Vector3D::Zero()}, patdire{Amg::Vector3D::Zero()};
+        for ( const auto& [moduleId, chambVec] : chamberMap) {
+            const Trk::PrepRawData* prd = chambVec.front();           
+            const Amg::Vector3D& globalpos = globalPos(prd);
             if (m_use_cosmics) {
                 // not flip
-
                 patdire = roadmom.unit();
                 patpose = roadpos;
             } else {
                 MuonHoughMathUtils::extrapolateCurvedRoad(roadpos, roadmom, globalpos, patpose, patdire);
             }
 
-            Muon::MuonPatternChamberIntersect mpci = Muon::MuonPatternChamberIntersect(patpose, patdire, (*chit).second);
+            Muon::MuonPatternChamberIntersect mpci = Muon::MuonPatternChamberIntersect(patpose, patdire, chambVec);
             mpciVec.push_back(mpci);
         }
 
-        Amg::Vector3D tvertex = Amg::Vector3D(0., 0., 0.);
+        ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<"  Pattern position "<<Amg::toString(roadpos));
+        Amg::Vector3D tvertex{Amg::Vector3D::Zero()};
         Trk::TrackParameters* parameters = new Trk::Perigee(roadpos, roadmom, 1., tvertex);  // if -1 then charge flipped anyway
         Muon::MuonPatternCombination* combination = new Muon::MuonPatternCombination(parameters, mpciVec);
         patterncombinations->push_back(combination);
     }
     return patterncombinations;
-}
-
-int MuonCombinePatternTool::overlap(
-    const Muon::MuonPrdPattern* phipattern, const Muon::MuonPrdPattern* etapattern, std::vector<const Trk::PrepRawData*>& hits_to_be_added,
-    /** phi eta association map, eta prds are key*/
-    const std::map<const Trk::PrepRawData*, std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>>* phiEtaHitAssMap) const {
-    /** method no longer used */
-
-    if (!phiEtaHitAssMap) return 0;
-
-    int overlap = 0;
-    std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess> phihits;
-    for (unsigned int i = 0; i < phipattern->numberOfContainedPrds(); i++) { phihits.insert(phipattern->prd(i)); }
-
-    std::map<const Trk::PrepRawData*, std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>>::const_iterator it;
-    ATH_MSG_DEBUG("number of prds in eta pattern: " << etapattern->numberOfContainedPrds());
-    for (unsigned int i = 0; i < etapattern->numberOfContainedPrds(); i++) {
-        const Trk::PrepRawData* prd = etapattern->prd(i);
-        // check on type of prd?
-        const Muon::MuonCluster* muoncluster = dynamic_cast<const Muon::MuonCluster*>(prd);
-        if (muoncluster) {
-            it = phiEtaHitAssMap->find(prd);
-            if (it != phiEtaHitAssMap->end()) {  // check if hit has associated hit
-                std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>::iterator set_it = (*it).second.begin();
-                for (; set_it != (*it).second.end(); ++set_it) {
-                    if (phihits.find(*set_it) != phihits.end()) {  // check if associated hit is on phi pattern
-                        ATH_MSG_VERBOSE("overlapping hit found!");
-                        overlap++;
-                    } else {  // associated hit not on phi pattern
-                        hits_to_be_added.push_back(*set_it);
-                        ATH_MSG_VERBOSE("Associated Phi Hit Added to Pattern");
-                    }
-                }
-            } else {
-                ATH_MSG_VERBOSE("prd not associated to any phi hit: " << prd);
-            }
-        }
-    }
-    return overlap;
 }
 
 bool MuonCombinePatternTool::subset(const Muon::MuonPrdPattern* pattern1, const Muon::MuonPrdPattern* pattern2) {
@@ -1648,36 +1436,31 @@ bool MuonCombinePatternTool::subset(const Muon::MuonPrdPattern* pattern1, const 
     // first check if pattern 1 is not larger than 2:
     if (pattern1->numberOfContainedPrds() > pattern2->numberOfContainedPrds()) { return false; }
 
-    bool subset = true;
+    PrepDataSet hits;
+    for (unsigned int hitnr = 0; hitnr < pattern2->numberOfContainedPrds(); ++hitnr) { hits.insert(pattern2->prd(hitnr)); }
 
-    std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess> hits;
-    for (unsigned int hitnr = 0; hitnr < pattern2->numberOfContainedPrds(); hitnr++) { hits.insert(pattern2->prd(hitnr)); }
-
-    for (unsigned int hitnr = 0; hitnr < pattern1->numberOfContainedPrds(); hitnr++) {
-        if (hits.find(pattern1->prd(hitnr)) == hits.end()) {
-            subset = false;
-            break;
+    for (unsigned int hitnr = 0; hitnr < pattern1->numberOfContainedPrds(); ++hitnr) {
+        if (!hits.count(pattern1->prd(hitnr))) {
+           return false;
         }
     }
-    return subset;
+    return true;
 }
 
-bool MuonCombinePatternTool::subset(std::pair<std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>,
-                                              std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>>& candidate1,
-                                    std::pair<std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>,
-                                              std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>>& candidate2) {
+bool MuonCombinePatternTool::subset(std::pair<PrepDataSet,
+                                              PrepDataSet>& candidate1,
+                                    std::pair<PrepDataSet,
+                                              PrepDataSet>& candidate2) {
     /** is candidate1 a complete subset of other candidate2? */
 
     // first check if pattern 1 is not larger than 2:
-    if (candidate1.first.size() > candidate2.first.size() || candidate1.second.size() > candidate2.second.size()) { return false; }
-
-    std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>::iterator set_it;
-
-    for (set_it = candidate1.first.begin(); set_it != candidate1.first.end(); ++set_it) {
-        if (candidate2.first.find(*set_it) == candidate2.first.end()) { return false; }
+    if (candidate1.first.size() > candidate2.first.size() || 
+        candidate1.second.size() > candidate2.second.size()) { return false; }
+    for (const Trk::PrepRawData* find_me : candidate1.first) {
+        if (!candidate2.first.count(find_me)) { return false; }
     }
-    for (set_it = candidate1.second.begin(); set_it != candidate1.second.end(); ++set_it) {
-        if (candidate2.second.find(*set_it) == candidate2.second.end()) { return false; }
+    for (const Trk::PrepRawData* find_me :  candidate1.second) {
+        if (candidate2.second.count(find_me)) { return false; }
     }
 
     return true;
@@ -1713,26 +1496,7 @@ void MuonCombinePatternTool::printPattern(const Muon::MuonPrdPattern* muonpatter
     }
 }
 
-const Muon::MuonPrdPattern* MuonCombinePatternTool::updatePhiPattern(const Muon::MuonPrdPattern* phipattern,
-                                                                     std::vector<const Trk::PrepRawData*> missedphihits) const {
-    std::unique_ptr<Muon::MuonPrdPattern> updatedphipattern = std::make_unique< Muon::MuonPrdPattern>(phipattern->globalPosition(), phipattern->globalDirection());
-    for (unsigned int phihitnr = 0; phihitnr < phipattern->numberOfContainedPrds(); phihitnr++) {
-        updatedphipattern->addPrd(phipattern->prd(phihitnr));
-        // ATH_MSG_DEBUG(" prd: " << phipattern->prd(phihitnr) );
-    }  // size phi pattern
-
-    std::vector<const Trk::PrepRawData*>::iterator it = missedphihits.begin();
-    for (; it != missedphihits.end(); ++it) {
-        // check on compatibility?
-        updatedphipattern->addPrd(*it);
-    }
-
-    // clean updated phi pattern:
-
-    return cleanPhiPattern(updatedphipattern.get());
- }
-
-Muon::MuonPrdPattern* MuonCombinePatternTool::cleanPhiPattern(const Muon::MuonPrdPattern* phipattern) const {
+std::unique_ptr<Muon::MuonPrdPattern> MuonCombinePatternTool::cleanPhiPattern(std::unique_ptr<Muon::MuonPrdPattern> phipattern) const {
     const Amg::Vector3D& olddir = phipattern->globalDirection();
     const double theta = olddir.theta();
     const unsigned int size = phipattern->numberOfContainedPrds();
@@ -1746,7 +1510,7 @@ Muon::MuonPrdPattern* MuonCombinePatternTool::cleanPhiPattern(const Muon::MuonPr
     }
 
     // need internal class to be able to remove hits fast
-    std::unique_ptr<MuonHoughPattern> newpattern = std::make_unique< MuonHoughPattern>(MuonHough::hough_xy);
+    std::unique_ptr<MuonHoughPattern> newpattern = std::make_unique<MuonHoughPattern>(MuonHough::hough_xy);
     for (unsigned int phihitnr = 0; phihitnr < size; phihitnr++) { newpattern->addHit(std::make_shared<MuonHoughHit>(phipattern->prd(phihitnr))); }
     newpattern->updateParametersRPhi(m_use_cosmics);
     double phi = newpattern->getEPhi();
@@ -1756,7 +1520,6 @@ Muon::MuonPrdPattern* MuonCombinePatternTool::cleanPhiPattern(const Muon::MuonPr
 
     constexpr int number_of_iterations = 4;
     std::array<double,number_of_iterations> cutvalues {1000., 500., 250., 125.};
-
     if (m_use_cosmics) {
         cutvalues[0] = 5000.;
         cutvalues[1] = 2500.;
@@ -1764,7 +1527,7 @@ Muon::MuonPrdPattern* MuonCombinePatternTool::cleanPhiPattern(const Muon::MuonPr
         cutvalues[3] = 1250.;
     }
 
-    for (int it = 0; it < number_of_iterations; it++) {
+    for (int it = 0; it < number_of_iterations; ++it) {
         ATH_MSG_VERBOSE("iteration " << it << " cutvalue: " << cutvalues[it]);
         bool change = true;
         while (change) {
@@ -1777,12 +1540,12 @@ Muon::MuonPrdPattern* MuonCombinePatternTool::cleanPhiPattern(const Muon::MuonPr
                     scphi.apply(newpattern->getHitx(i), -newpattern->getHity(i)) - r0;  //  newpattern->getHitx(i) * scphi.sn -
                                                                                         //  newpattern->getHity(i) * scphi.cs - r0;
                 ATH_MSG_VERBOSE("Dist: " << dist);
-                if (fabs(dist) > fabs(max_dist)) {
+                if (std::fabs(dist) > std::abs(max_dist)) {
                     max_dist = dist;
                     max_i = i;
                 }
             }
-            if (fabs(max_dist) < cutvalues[it]) {
+            if (std::abs(max_dist) < cutvalues[it]) {
                 change = false;
             } else {
                 newpattern->removeHit(max_i);
@@ -1815,112 +1578,88 @@ Muon::MuonPrdPattern* MuonCombinePatternTool::cleanPhiPattern(const Muon::MuonPr
     double y0_new = -r0_new * scphi.cs;
     CxxUtils::sincos sctheta(thetanew);
 
-    const Amg::Vector3D pos = Amg::Vector3D(x0_new, y0_new, z0_new);
-    const Amg::Vector3D dir = Amg::Vector3D(sctheta.sn * scphi.cs, sctheta.sn * scphi.sn, sctheta.cs);
+    const Amg::Vector3D pos {x0_new, y0_new, z0_new};
+    const Amg::Vector3D dir {sctheta.sn * scphi.cs, sctheta.sn * scphi.sn, sctheta.cs};
 
-    Muon::MuonPrdPattern* cleanpattern = new Muon::MuonPrdPattern(pos, dir);
+    std::unique_ptr<Muon::MuonPrdPattern> cleanpattern = std::make_unique<Muon::MuonPrdPattern>(pos, dir);
 
     for (unsigned int i = 0; i < newpattern->size(); i++) { cleanpattern->addPrd(newpattern->getPrd(i)); }
 
     return cleanpattern;
 }
 
-void MuonCombinePatternTool::addCandidate(
-    const Muon::MuonPrdPattern* etapattern, const Muon::MuonPrdPattern* phipattern,
-    std::vector<std::pair<const Muon::MuonPrdPattern*, const Muon::MuonPrdPattern*>>& candidates, bool add_asspattern,
-    std::vector<std::unique_ptr<const Muon::MuonPrdPattern>>& patternsToDelete,
-    const std::map<const Trk::PrepRawData*, std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>>* phiEtaHitAssMap) const {
+void MuonCombinePatternTool::addCandidate(const CandPrdPatPtr& etapattern, const CandPrdPatPtr& phipattern,
+                                          std::vector<CandidatePatPair>& candidates, bool add_asspattern,
+                                          const EtaPhiHitAssocMap& phiEtaHitAssMap) const {
     if (!m_use_cosmics || !m_splitpatterns) {
         candidates.emplace_back(etapattern, phipattern);
         return;
     }
 
-    std::vector<std::pair<Muon::MuonPrdPattern*, Muon::MuonPrdPattern*>> splitpatterns = splitPatternsCylinder(phipattern, etapattern);
+    std::vector<PrdPatternPair> splitpatterns = splitPatternsCylinder(phipattern.get(), etapattern.get());
 
     if (splitpatterns.empty()) {
         candidates.emplace_back(etapattern, phipattern);
     }
 
     else {
-        for (unsigned int i = 0; i < splitpatterns.size(); i++) {
+        for (auto& [phiPattern, etaPattern] :  splitpatterns) {
             // skip when empty eta pattern , possible duplication when associated phi
             // pattern is found, but then will be cleaned later
-            if (splitpatterns[i].second->numberOfContainedPrds() == 0) {
-                delete splitpatterns[i].first;
-                delete splitpatterns[i].second;
-            } else {
-                candidates.emplace_back(splitpatterns[i].second, splitpatterns[i].first);
-
-                // these associated phi patterns should be deleted at end of routine:
-                patternsToDelete.emplace_back(splitpatterns[i].first);
-                patternsToDelete.emplace_back(splitpatterns[i].second);
-            }
+            if (etaPattern->numberOfContainedPrds() == 0) {
+                continue;
+            }   
+            candidates.emplace_back(std::move(etaPattern), std::move(phiPattern));
         }
     }
 
     // make associated pattern don't split eta pattern yet, but split based on phi
     // of ass. pattern bool asspattern_added = false;
-    if (add_asspattern) {
-        const Muon::MuonPrdPattern* assphipattern = makeAssPhiPattern(etapattern, phiEtaHitAssMap, true);
-        if (assphipattern) {
-            // print associated pattern:
-            if (msgLvl(MSG::VERBOSE)) {
-                ATH_MSG_VERBOSE("Associated Pattern: ");
-                printPattern(assphipattern);
-            }
-
-            // update parameters:
-
-            std::array<double,4> new_pars = updateParametersForCosmics(assphipattern, etapattern);
-            std::pair<const Muon::MuonPrdPattern*, const Muon::MuonPrdPattern*> updatedpatterns =
-                updatePatternsForCosmics(assphipattern, etapattern, new_pars);
-            delete assphipattern;
-
-            assphipattern = updatedpatterns.first;
-            etapattern = updatedpatterns.second;
-
-            patternsToDelete.emplace_back(updatedpatterns.first);
-            patternsToDelete.emplace_back(updatedpatterns.second);
-        
-            std::vector<std::pair<Muon::MuonPrdPattern*, Muon::MuonPrdPattern*>> splitpatterns_ass =
-                splitPatternsCylinder(assphipattern, etapattern);
-
-            if (splitpatterns_ass.empty()) {
-                candidates.emplace_back(etapattern, assphipattern);
-            }
-
-            else {
-                for (unsigned int i = 0; i < splitpatterns_ass.size(); i++) {
-                    if (splitpatterns_ass[i].first->numberOfContainedPrds() == 0 ||
-                        splitpatterns_ass[i].second->numberOfContainedPrds() == 0) {
-                        delete splitpatterns_ass[i].first;
-                        delete splitpatterns_ass[i].second;
-                    } else {
-                        candidates.emplace_back(splitpatterns_ass[i].second, splitpatterns_ass[i].first);
-
-                        // these associated phi patterns should be deleted at end of
-                        // routine:
-                        patternsToDelete.emplace_back(splitpatterns_ass[i].first);
-                        patternsToDelete.emplace_back(splitpatterns_ass[i].second);
-                    }
-                }
-            }
-        }
+    if (!add_asspattern) { return ;}
+    std::unique_ptr<Muon::MuonPrdPattern> assphipattern = makeAssPhiPattern(*etapattern, phiEtaHitAssMap, true);
+    
+    if (!assphipattern) { return;}
+    
+    // print associated pattern:
+    if (msgLvl(MSG::VERBOSE)) {
+        ATH_MSG_VERBOSE("Associated Pattern: ");
+        printPattern(assphipattern.get());
     }
+
+    // update parameters:
+    std::array<double,4> new_pars = updateParametersForCosmics(*assphipattern, *etapattern);
+    PrdPatternPair updatedpatterns = updatePatternsForCosmics(*assphipattern, *etapattern, new_pars);
+    
+    std::unique_ptr<Muon::MuonPrdPattern>& cosmicPhiPattern = updatedpatterns.first;
+    std::unique_ptr<Muon::MuonPrdPattern>& cosmicEtaPattern = updatedpatterns.second;
+    
+    std::vector<PrdPatternPair> splitpatterns_ass = splitPatternsCylinder(cosmicPhiPattern.get(), cosmicEtaPattern.get());
+    if (splitpatterns_ass.empty()) {
+        candidates.emplace_back(std::move(cosmicEtaPattern), std::move(cosmicPhiPattern));
+        return;
+    }
+
+    
+    for (auto& [splitPhiPattern, splitEtaPattern] : splitpatterns_ass) {
+        if (splitPhiPattern->numberOfContainedPrds() == 0 ||
+            splitEtaPattern->numberOfContainedPrds() == 0) {
+            continue;
+        }   
+        candidates.emplace_back(std::move(splitEtaPattern), std::move(splitPhiPattern));
+    }    
 }
 
-void MuonCombinePatternTool::cleanCandidates(std::vector<std::pair<const Muon::MuonPrdPattern*, const Muon::MuonPrdPattern*>>& candidates) {
-    std::vector<std::pair<const Muon::MuonPrdPattern*, const Muon::MuonPrdPattern*>>::iterator it1;
-    std::vector<std::pair<const Muon::MuonPrdPattern*, const Muon::MuonPrdPattern*>>::iterator it2;
-    using SetOfPrd_t = std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>;
+void MuonCombinePatternTool::cleanCandidates(std::vector<CandidatePatPair>& candidates) {
+    std::vector<CandidatePatPair>::iterator it1;
+    std::vector<CandidatePatPair>::iterator it2;   
     // map between set of prd's (eta and phi) and candidates , stored for speed
-    std::map<std::pair<const Muon::MuonPrdPattern*, const Muon::MuonPrdPattern*>, std::pair<SetOfPrd_t, SetOfPrd_t>> hitsMap;
+    std::map<CandidatePatPair, std::pair<PrepDataSet, PrepDataSet>> hitsMap;
 
     // fill map
     for (it1 = candidates.begin(); it1 != candidates.end(); ++it1) {
-        SetOfPrd_t etahits;
+        PrepDataSet etahits;
         for (unsigned int hitnr = 0; hitnr < (*it1).first->numberOfContainedPrds(); hitnr++) { etahits.insert((*it1).first->prd(hitnr)); }
-        SetOfPrd_t phihits;
+        PrepDataSet phihits;
         if ((*it1).second) {  // phi pattern might be 0!
             for (unsigned int hitnr = 0; hitnr < (*it1).second->numberOfContainedPrds(); hitnr++) {
                 phihits.insert((*it1).second->prd(hitnr));
@@ -1929,10 +1668,10 @@ void MuonCombinePatternTool::cleanCandidates(std::vector<std::pair<const Muon::M
         hitsMap.insert(std::make_pair((*it1), std::make_pair(etahits, phihits)));
     }
     for (it1 = candidates.begin(); it1 != candidates.end(); ++it1) {
-        std::pair<SetOfPrd_t, SetOfPrd_t>& hits1 = hitsMap[(*it1)];
+        std::pair<PrepDataSet, PrepDataSet>& hits1 = hitsMap[(*it1)];
         it2 = it1 + 1;
         while (it2 != candidates.end()) {
-            std::pair<SetOfPrd_t, SetOfPrd_t>& hits2 = hitsMap[(*it2)];
+            std::pair<PrepDataSet, PrepDataSet>& hits2 = hitsMap[(*it2)];
             if (subset((hits2), (hits1))) {         // 2 subset of 1, remove 2 // in case of
                                                     // equality best (earliest) is kept
                 it2 = candidates.erase(it2);        // it2 points to next item, it1 not invalidated!

@@ -1391,8 +1391,8 @@ namespace Muon {
                 MuonStationIndex::ChIndex chIndex = m_idHelperSvc->chamberIndex(prd.identify());
                 std::map<MuonStationIndex::ChIndex, std::pair<Amg::Vector3D, Amg::Vector3D>>::const_iterator pos =
                     directionsPerChamberLayer.find(chIndex);
-                Amg::Vector3D gpos;
-                Amg::Vector3D gdir;
+                Amg::Vector3D gpos{Amg::Vector3D::Zero()};
+                Amg::Vector3D gdir{Amg::Vector3D::Zero()};
                 if (pos != directionsPerChamberLayer.end()) {
                     gpos = pos->second.first;
                     gdir = pos->second.second;
@@ -1481,13 +1481,10 @@ namespace Muon {
                     Identifier id = hit.tgc ? hit.tgc->etaCluster.hitList.front()->identify() : hit.prd->identify();
                     int nhits = hit.tgc ? hit.tgc->etaCluster.hitList.size() : 1;
 
-                    if (m_idHelperSvc->isMdt(id))
-                        ++nmdt;
-                    
-                    else if (m_idHelperSvc->issTgc(id))
-                        ++nstgc;
-                    else if (m_idHelperSvc->isMM(id))
-                        ++nmm;
+                    nmdt += m_idHelperSvc->isMdt(id);
+                    nstgc  += m_idHelperSvc->issTgc(id);
+                    nmm += m_idHelperSvc->isMM(id);
+                   
 
                     if (m_doTruth) {
                         if (truthHits.count(id)) foundTruthHits.insert(id);
@@ -1498,7 +1495,7 @@ namespace Muon {
 
                 // only store maxima that have MDT hits
                 if (nmdt > 0 || (nmm + nstgc) > 0) {
-                    maxima.emplace_back(new MuonHough::MuonLayerHough::Maximum(maximum));
+                    maxima.emplace_back(std::make_unique<MuonHough::MuonLayerHough::Maximum>(maximum));
                     // add to seed list if
                     if (maximum.max > selector.getCutValue(maximum.pos)) seedMaxima.push_back(maxima.back());
                     ++nmaxima;
@@ -1838,8 +1835,8 @@ namespace Muon {
             debug->r = stripCor;
             std::map<unsigned int, unsigned int>::const_iterator pos = m_techToTruthNameIdx.find(technology);
             if (pos != m_techToTruthNameIdx.end()) { matchTruth(truthHits, *truthCollections[pos->second], id, *debug); }
-            MuonHough::Hit* hit = new MuonHough::Hit(sublayer, x, ymin, ymax, 1., debug, prd);
-            hits.emplace_back(hit);
+            std::unique_ptr<MuonHough::Hit> hit = std::make_unique<MuonHough::Hit>(sublayer, x, ymin, ymax, 1., debug, prd);
+            hits.emplace_back(std::move(hit));
         }
     }
 
@@ -2027,11 +2024,11 @@ namespace Muon {
                 phiDebug->clusterLayers = cl.phiCluster.layers();
                 phiDebug->isEtaPhi = cl.etaCluster.layers();
 
-                MuonHough::Hit* hit = new MuonHough::Hit(sublayer, x, ymin, ymax, 2 * cl.etaCluster.layers(), debug, nullptr, &cl);
-                MuonHough::PhiHit* phiHit =
-                    new MuonHough::PhiHit(sublayer, y11, phi1, phi2, 2 * cl.phiCluster.layers(), phiDebug, nullptr, &cl);
-                hits.emplace_back(hit);
-                phiHits.emplace_back(phiHit);
+                std::unique_ptr<MuonHough::Hit> hit = std::make_unique<MuonHough::Hit>(sublayer, x, ymin, ymax, 2 * cl.etaCluster.layers(), debug, nullptr, &cl);
+                std::unique_ptr<MuonHough::PhiHit> phiHit =
+                    std::make_unique<MuonHough::PhiHit>(sublayer, y11, phi1, phi2, 2 * cl.phiCluster.layers(), phiDebug, nullptr, &cl);
+                hits.emplace_back(std::move(hit));
+                phiHits.emplace_back(std::move(phiHit));
             }
         }
         ATH_MSG_DEBUG("fillTGC: Filling " << m_idHelperSvc->toStringChamber(chid) << ": loc s" << sector << " "

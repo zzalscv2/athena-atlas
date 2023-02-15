@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHoughPatternEvent/MuonHoughHitContainer.h"
@@ -30,7 +30,7 @@ int MuonHoughHitContainer::getMDThitno() const {
 
 int MuonHoughHitContainer::getRPCetahitno() const {
     int rpchitno = 0;
-    for (unsigned int i = 0; i < m_hit.size(); i++) { rpchitno += getDetectorId(i) == MuonHough::RPC && getMeasuresPhi(i); }
+    for (unsigned int i = 0; i < m_hit.size(); i++) { rpchitno += getDetectorId(i) == MuonHough::RPC && !getMeasuresPhi(i); }
     return rpchitno;
 }
 

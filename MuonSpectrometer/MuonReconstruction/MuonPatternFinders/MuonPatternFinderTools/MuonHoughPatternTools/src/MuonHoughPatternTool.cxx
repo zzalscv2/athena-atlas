@@ -1273,8 +1273,8 @@ std::unique_ptr<Muon::MuonPrdPattern> MuonHoughPatternTool::houghPatternsToOnePh
     double y0 = -r0 * cphit;
     double z0 = 0.;
 
-    const Amg::Vector3D pos = Amg::Vector3D(x0, y0, z0);
-    const Amg::Vector3D dir = Amg::Vector3D(std::sin(theta) * cphit, std::sin(theta) * sphit, std::cos(theta));
+    const Amg::Vector3D pos{x0, y0, z0};
+    const Amg::Vector3D dir{std::sin(theta) * cphit, std::sin(theta) * sphit, std::cos(theta)};
 
     std::unique_ptr<Muon::MuonPrdPattern> muonpattern = std::make_unique<Muon::MuonPrdPattern>(pos, dir);
     nphi = 0;

@@ -9,7 +9,7 @@ atlas_subdir( MuonCombinePatternTools )
 atlas_add_library( MuonCombinePatternToolsLib
                    src/*.cxx
                    PUBLIC_HEADERS MuonCombinePatternTools
-                   LINK_LIBRARIES AthenaBaseComps GaudiKernel MuonHoughPatternEvent MuonRecToolInterfaces MuonIdHelpersLib StoreGateLib
+                   LINK_LIBRARIES AthenaBaseComps GaudiKernel MuonHoughPatternEvent MuonRecToolInterfaces MuonIdHelpersLib StoreGateLib MuonRecHelperToolsLib
                    PRIVATE_LINK_LIBRARIES CxxUtils MuonReadoutGeometry MuonPattern MuonPrepRawData TrkSurfaces TrkParameters )
 
 atlas_add_component( MuonCombinePatternTools
