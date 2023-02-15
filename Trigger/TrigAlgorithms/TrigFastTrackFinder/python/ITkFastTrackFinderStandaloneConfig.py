@@ -42,7 +42,7 @@ def ITkFastTrackFinderStandaloneCfg(flags):
     from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderMonitoring
     from TriggerJobOpts.TriggerHistSvcConfig import TriggerHistSvcConfig
     acc.merge(TriggerHistSvcConfig(newflags))
-    monTool = TrigFastTrackFinderMonitoring(name = "FullScan", doResMon=False)
+    monTool = TrigFastTrackFinderMonitoring(flags, name = "FullScan", doResMon=False)
     
     ftf = CompFactory.TrigFastTrackFinder( name = "TrigFastTrackFinder_",
                                             LayerNumberTool          = acc.getPublicTool( "TrigL2LayerNumberTool_FTF" ),

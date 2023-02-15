@@ -7,12 +7,13 @@ test of Dev menu with CA migrated menu code, reproducing runHLT_standalone_newJO
 from AthenaCommon.Logging import logging
 log = logging.getLogger('test_menu_CA')
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags, initConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorDecorator
 
 # Make sure nobody uses deprecated global ConfigFlags
-del ConfigFlags
+import AthenaConfiguration.AllConfigFlags
+del AthenaConfiguration.AllConfigFlags.ConfigFlags
 
 flags = initConfigFlags()
 

@@ -658,7 +658,7 @@ def triggerRunCfg( flags, menu=None ):
     # Add HLT Navigation to EDM list
     from TrigEDMConfig import TriggerEDMRun3
     __log.info( "Number of EDM items before adding navigation: %d", len(TriggerEDMRun3.TriggerHLTListRun3))
-    TriggerEDMRun3.addHLTNavigationToEDMList(TriggerEDMRun3.TriggerHLTListRun3, decObj, decObjHypoOut)
+    TriggerEDMRun3.addHLTNavigationToEDMList(flags, TriggerEDMRun3.TriggerHLTListRun3, decObj, decObjHypoOut)
     __log.info( "Number of EDM items after adding navigation: %d", len(TriggerEDMRun3.TriggerHLTListRun3))
 
     # Configure output writing

@@ -666,7 +666,7 @@ if opt.doWriteBS or opt.doWriteRDOTrigger:
 
     # Add HLT Navigation to EDM list
     from TrigEDMConfig import TriggerEDMRun3
-    TriggerEDMRun3.addHLTNavigationToEDMList(TriggerEDMRun3.TriggerHLTListRun3, decObj, decObjHypoOut)
+    TriggerEDMRun3.addHLTNavigationToEDMList(ConfigFlags, TriggerEDMRun3.TriggerHLTListRun3, decObj, decObjHypoOut)
 
     # Configure output writing
     CAtoGlobalWrapper(triggerOutputCfg, ConfigFlags, hypos=hypos)
