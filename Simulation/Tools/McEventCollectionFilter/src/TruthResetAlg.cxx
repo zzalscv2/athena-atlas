@@ -51,7 +51,7 @@ StatusCode TruthResetAlg::execute() {
 
   //Sanity check
   bool inputProblem(false);
-  for (auto particle: inputEvent) {
+  for (const auto& particle: inputEvent) {
     if (particle->status() == 1) {
       if (!particle->production_vertex()) {
         ATH_MSG_ERROR("Status 1 particle without a production vertex!! " << particle);
@@ -194,7 +194,7 @@ StatusCode TruthResetAlg::execute() {
 
   //Sanity check
   bool outputProblem(false);
-  for (auto particle: *(outputEvent.get())) {
+  for (const auto& particle: *(outputEvent.get())) {
     if (particle->status() == 1) {
       if (!particle->production_vertex()) {
         ATH_MSG_ERROR("Status 1 particle without a production vertex!! " << particle);

@@ -118,7 +118,7 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
                                  genPart->momentum().y(),
                                  genPart->momentum().z());
     //!< get the charge via the particle table ...
-    int barcode = HepMC::barcode(genPart);
+    
     int pdgCode = genPart->pdg_id();
     int absPdgCode = std::abs(pdgCode);
     // get the charge: ap->charge() is used later, DOES NOT WORK RIGHT NOW
@@ -200,7 +200,7 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
                      std::abs(genPart->momentum().eta()) <= m_forwardBoundary) ||
        (track.measurementsOnTrack()->size() < m_minSiHitsForward &&
         std::abs(genPart->momentum().eta()) > m_forwardBoundary) ||
-       (m_onlyPrimaries && barcode >= m_primaryBarcodeCutOff)) {
+       (m_onlyPrimaries && HepMC::barcode(genPart) >= m_primaryBarcodeCutOff)) {
      ATH_MSG_VERBOSE(
        "Track does not fulfill requirements for refitting. Skipping it.");
      return nullptr;

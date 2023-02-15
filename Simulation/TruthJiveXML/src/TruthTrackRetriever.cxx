@@ -92,7 +92,7 @@ namespace JiveXML {
     for ( McEvtCollItr = McEvtColl->begin(); McEvtCollItr != McEvtColl->end(); ++McEvtCollItr){
 
       //Loop over particles in the event
-      for (auto particle:  *(*McEvtCollItr) ) {
+      for (const auto& particle:  *(*McEvtCollItr) ) {
         
         //Additional cuts for decaying particles
         if ( particle->end_vertex() ) {
