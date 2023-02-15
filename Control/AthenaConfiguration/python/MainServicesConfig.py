@@ -29,7 +29,21 @@ def AvalancheSchedulerSvcCfg(flags, **kwargs):
     kwargs.setdefault("ThreadPoolSize", flags.Concurrency.NumThreads)
 
     cfg = ComponentAccumulator()
-    cfg.addService(CompFactory.AvalancheSchedulerSvc(**kwargs), primary=True)
+    scheduler = CompFactory.AvalancheSchedulerSvc(**kwargs)
+    cfg.addService(scheduler, primary=True)
+
+    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+    # FailIfNoProxy=False makes it a warning, not an error, if unmet data
+    # dependencies are not found in the store.  It should probably be changed
+    # to True eventually.
+    inputloader_ca = SGInputLoaderCfg(flags, FailIfNoProxy=flags.Input.FailOnUnknownCollections)
+    cfg.merge(inputloader_ca, sequenceName="AthAlgSeq")
+
+    # Specifying DataLoaderAlg makes the Scheduler automatically assign
+    # all unmet data dependencies to that algorithm.
+    if flags.Scheduler.AutoLoadUnmetDependencies:
+        scheduler.DataLoaderAlg = inputloader_ca.getPrimary().getName()
+
     return cfg
 
 
@@ -67,18 +81,6 @@ def AthenaHiveEventLoopMgrCfg(flags):
     cfg.addService( arp )
 
     scheduler = cfg.getPrimaryAndMerge(AvalancheSchedulerSvcCfg(flags))
-
-    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-    # FailIfNoProxy=False makes it a warning, not an error, if unmet data
-    # dependencies are not found in the store.  It should probably be changed
-    # to True eventually.
-    inputloader_ca = SGInputLoaderCfg(flags, FailIfNoProxy=flags.Input.FailOnUnknownCollections)
-    cfg.merge(inputloader_ca, sequenceName="AthAlgSeq")
-
-    # Specifying DataLoaderAlg makes the Scheduler automatically assign
-    # all unmet data dependencies to that algorithm.
-    if flags.Scheduler.AutoLoadUnmetDependencies:
-        scheduler.DataLoaderAlg = inputloader_ca.getPrimary().getName()
 
     elmgr = CompFactory.AthenaHiveEventLoopMgr(
         WhiteboardSvc = "EventDataSvc",
