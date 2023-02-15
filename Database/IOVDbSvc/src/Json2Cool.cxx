@@ -50,14 +50,12 @@ const std::map<std::string, cool::StorageType::TypeId> typeCorrespondance={
 namespace IOVDbNamespace{
 
 
-Json2Cool::Json2Cool(std::istream & stream, BasicFolder & b, const std::string & specString):m_basicFolder(b){
-   init(stream, specString);
+  Json2Cool::Json2Cool(std::istream & stream, BasicFolder & b, const std::string & specString, const IovStore::Iov_t* iov):m_basicFolder(b){
+  init(stream, specString, iov);
   }
   
   void
-  Json2Cool::init(std::istream & s, const std::string & specString){
-    //temporary fudge: extend iov from 0 to infinity
-    const std::pair<cool::ValidityKey, cool::ValidityKey> iov(0, cool::ValidityKeyMax);
+  Json2Cool::init(std::istream & s, const std::string & specString, const IovStore::Iov_t* iov){
     if (not s.good() or s.eof()){
       const std::string msg("Json2Cool constructor; Input is invalid and could not be opened.");
       throw std::runtime_error(msg);
@@ -76,7 +74,12 @@ Json2Cool::Json2Cool(std::istream & stream, BasicFolder & b, const std::string &
       //const auto & iovFromFile=j["iov"];//iov is a two-element array
       //const std::pair<cool::ValidityKey, cool::ValidityKey> iov(iovFromFile[0], iovFromFile[1]);
       m_isVectorPayload = false;
-      m_basicFolder.setIov(iov);
+      if(iov) {
+	m_basicFolder.setIov(*iov);
+      }
+      else {
+	m_basicFolder.setIov(IovStore::Iov_t(0, cool::ValidityKeyMax));
+      }
       if (m_isVectorPayload){
         for (json::const_iterator k=payload.begin();k!=payload.end();++k){ //k are {"0":}
           const json f=k.value(); //channel id
