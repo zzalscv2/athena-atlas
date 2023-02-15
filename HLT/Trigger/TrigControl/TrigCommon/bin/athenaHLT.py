@@ -290,7 +290,7 @@ def HLTMPPy_cfgdict(args):
    else:
       cdict['trigger'].update({
          'module': 'DBPython',
-         'pythonSetupFile' : 'TrigPSC/TrigPSCPythonDbSetup.py',
+         'pythonSetupFile' : 'TrigPSC.TrigPSCPythonDbSetup',
          'db_alias': args.db_server,
          'coral_server': args.db_server,
          'use_coral': True,
