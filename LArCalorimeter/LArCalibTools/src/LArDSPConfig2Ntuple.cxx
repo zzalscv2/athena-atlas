@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArDSPConfig2Ntuple.h"
@@ -72,13 +72,8 @@ StatusCode LArDSPConfig2Ntuple::stop() {
    }
       
    LArDSPConfig larDSPConfig(attrList);
-
-      
-   std::vector<HWIdentifier>::const_iterator itOnId = m_onlineId->channel_begin();
-   std::vector<HWIdentifier>::const_iterator itOnIdEnd = m_onlineId->channel_end();
-
-   for(; itOnId!=itOnIdEnd;++itOnId){
-     const HWIdentifier hwid = *itOnId;
+   
+   for (const HWIdentifier hwid: m_onlineId->channel_range()) {
      m_peakSample=larDSPConfig.peakSample(hwid);
      m_useMgIntercept=larDSPConfig.useMGRampIntercept(hwid);
      m_useHgIntercept=larDSPConfig.useHGRampIntercept(hwid);

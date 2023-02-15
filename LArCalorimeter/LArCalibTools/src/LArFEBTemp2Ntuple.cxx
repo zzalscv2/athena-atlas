@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArFEBTemp2Ntuple.h"
@@ -48,11 +48,7 @@ StatusCode LArFEBTemp2Ntuple::stop() {
       return StatusCode::FAILURE;
    } 
 
-   std::vector<HWIdentifier>::const_iterator itOnId = m_onlineId->channel_begin();
-   std::vector<HWIdentifier>::const_iterator itOnIdEnd = m_onlineId->channel_end();
-
-   for(; itOnId!=itOnIdEnd;++itOnId) {
-	const HWIdentifier hwid = *itOnId;
+   for (const HWIdentifier hwid: m_onlineId->channel_range()) {
 	FEBTemp tv = larFEBTempTool->getFebTemp(hwid);
         ATH_MSG_DEBUG( hwid << " " << tv.size() );
 	

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArPhysWaves2Ntuple.h"
@@ -88,10 +88,7 @@ StatusCode LArPhysWaves2Ntuple::stop()
     }
     
     for (unsigned igain=CaloGain::LARHIGHGAIN;igain<CaloGain::LARNGAIN ;++igain){
-      std::vector<HWIdentifier>::const_iterator itOnId = m_onlineId->channel_begin();
-      std::vector<HWIdentifier>::const_iterator itOnIdEnd = m_onlineId->channel_end();
-      for(; itOnId!=itOnIdEnd;++itOnId){
-	const HWIdentifier chid = *itOnId;
+      for (const HWIdentifier chid: m_onlineId->channel_range()) {
 	m_gain=(long)igain;
 	const LArPhysWave& wave=physWaveContainer->get(chid,igain);
 	if (wave.isEmpty()) continue;
