@@ -1,11 +1,9 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 from AthenaConfiguration.ComponentFactory import CompFactory
-
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-def HelloWorldCfg():
+def HelloWorldCfg(flags):
     result=ComponentAccumulator()
     
     HelloAlg=CompFactory.HelloAlg
@@ -77,7 +75,7 @@ if __name__=="__main__":
     flags.fillFromArgs()
     flags.lock()
     cfg=MainServicesCfg(flags)
-    cfg.merge(HelloWorldCfg())
+    cfg.merge(HelloWorldCfg(flags))
     cfg.run()
 
     #f=open("HelloWorld.pkl","wb")
