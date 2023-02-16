@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -893,6 +893,29 @@ void test_constctor()
 }
 
 
+void test_upinsert()
+{
+  std::cout << "test_upinsert\n";
+  DataVector<AA> dv_aa;
+
+  std::vector<std::unique_ptr<AA> > v_aa;
+  for (size_t i = 0; i < 10; i++) {
+    v_aa.emplace_back (std::make_unique<AA> (i));
+  }
+
+  dv_aa.insert (dv_aa.end(), v_aa.begin(), v_aa.end());
+
+  DataVector<BB> dv_bb;
+
+  std::vector<std::unique_ptr<BB> > v_bb;
+  for (size_t i = 0; i < 10; i++) {
+    v_bb.emplace_back (std::make_unique<BB> (i));
+  }
+
+  dv_bb.insert (dv_bb.end(), v_bb.begin(), v_bb.end());
+}
+
+
 int main()
 {
   test1();
@@ -905,6 +928,7 @@ int main()
   test_emptysort();
   test_insertmove();
   test_constctor();
+  test_upinsert();
   return 0;
 }
 

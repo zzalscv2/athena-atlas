@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/DataVector_test.icc
@@ -808,7 +808,7 @@ void test2_insertion_ctor1()
   typedef typename DV::base_value_type T;
   clear_dtor_log();
   {
-    std::vector<typename DV::value_type> tt;
+    std::vector<T*> tt;
     tt.push_back (new T(1));
     tt.push_back (new T(2));
     DV v1 (tt.begin(), tt.end());
@@ -864,6 +864,20 @@ void test2_insertion_ctor2()
     delete tt[0];
     delete tt[1];
   }
+
+  clear_dtor_log();
+  {
+    std::vector<std::unique_ptr<T> > tt;
+    tt.emplace_back (std::make_unique<T>(1));
+    tt.emplace_back (std::make_unique<T>(2));
+    DV v1 (tt.begin(), tt.end(), SG::OWN_ELEMENTS);
+    assert (tt.size() == 2);
+    myassert (v1.size() == 2);
+    CHECK_INDICES(v1);
+    assert (!tt[0]);
+    assert (!tt[1]);
+  }
+  check_dtor_log (1, 2);
 }
 template <class B, class D>
 void test2_insertion_ctor()
@@ -3646,11 +3660,33 @@ void test2_insert_range1()
   }
   check_dtor_log (1, 2);
 }
+template <class DV>
+void test2_insert_range2()
+{
+  test2_insert_range1<DV>();
+
+  typedef typename DV::base_value_type T;
+  clear_dtor_log();
+  {
+    std::unique_ptr<T> tt[] = {std::make_unique<T>(1),
+                               std::make_unique<T>(2)};
+    DV v;
+    // cppcheck-suppress pointerOutOfBounds
+    v.insert (v.begin(), tt, tt+2);
+    myassert (v.size() == 2);
+    myassert (v[0]->x == 1);
+    myassert (v[1]->x == 2);
+    myassert (!tt[0]);
+    myassert (!tt[1]);
+    CHECK_INDICES(v);
+  }
+  check_dtor_log (1, 2);
+}
 template <class B, class D>
 void test2_insert_range()
 {
-  test2_insert_range1<DataVector<B> > ();
-  test2_insert_range1<DataVector<D> > ();
+  test2_insert_range2<DataVector<B> > ();
+  test2_insert_range2<DataVector<D> > ();
   test2_insert_range1<DataVector<typename test2_maybeconst<D>::type> > ();
   test2_insert_range1<ConstDataVector<DataVector<D> > > ();
 
@@ -4095,6 +4131,23 @@ void test2_assign2()
 
   delete vv[0];
   delete vv[1];
+
+  clear_dtor_log();
+  {
+    DV v;
+    v.push_back (new T(0));
+    std::unique_ptr<T> t[] = {std::make_unique<T>(1), std::make_unique<T>(2)};
+    // cppcheck-suppress pointerOutOfBounds
+    v.assign (t, t+2);
+    assert (v.size() == 2);
+    assert (v[0]->x == 1);
+    assert (v[1]->x == 2);
+    assert (!t[0]);
+    assert (!t[1]);
+    check_dtor_log(0);
+    CHECK_INDICES(v);
+  }
+  check_dtor_log(1,2);
 }
 template <class B, class D>
 void test2_assign()
