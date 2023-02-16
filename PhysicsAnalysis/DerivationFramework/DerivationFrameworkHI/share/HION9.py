@@ -39,7 +39,7 @@ DerivationName=streamName.split('_')[-1]
 TrackThinningThreshold=4000 #in MeV
 
 
-ptThreshDict = {'DFAntiKt10HIJets': 200,'AntiKt10HIJets': 200, 'DFAntiKt8HIJets': 150,'AntiKt8HIJets': 150, 'DFAntiKt6HIJets':100,'AntiKt6HIJets':100, 'DFAntiKt4HIJets':80,'AntiKt4HIJets':80} 
+ptThreshDict = {'DFAntiKt10HIJets': 50,'AntiKt10HIJets': 50, 'DFAntiKt8HIJets': 50,'AntiKt8HIJets': 50, 'DFAntiKt6HIJets':20,'AntiKt6HIJets':20, 'DFAntiKt5HIJets':20,'AntiKt5HIJets':20, 'DFAntiKt4HIJets':20,'AntiKt4HIJets':20, 'DFAntiKt3HIJets':20,'AntiKt3HIJets':20, 'DFAntiKt2HIJets':20,'AntiKt2HIJets':20} 
 
 #Book DF jets only if they are in xAOD or they are made in AODFix
 BookDFJetCollection = (jobproperties.HIRecExampleFlags.doHIAODFix or HasCollection("DFAntiKt10HI"))
@@ -51,8 +51,13 @@ if not HIDerivationFlags.isSimulation():
     TriggerDict = GetTriggers(project_tag, HIDerivationFlags.doMinBiasSelection(), DerivationName)
     for i, key in enumerate(TriggerDict):
             #Event selection based on DF jets for HI
-            expression = expression + '(' + key + ' && count(' + MainJetCollection + 'AntiKt10HIJets.pt >' + str(ptThreshDict.get("AntiKt10HIJets")) + '*GeV) >=1 ) ' + '|| (' + key + ' && count(' + MainJetCollection + 'AntiKt6HIJets.pt >' + str(ptThreshDict.get("AntiKt6HIJets")) + '*GeV) >=1 ) '+ '|| (' + key + ' && count(' + MainJetCollection + 'AntiKt4HIJets.pt >' + str(ptThreshDict.get("AntiKt4HIJets")) + '*GeV) >=1 ) ' 
+            expression = expression + '(' + key + ' && count(' + MainJetCollection + 'AntiKt10HIJets.pt >' + str(ptThreshDict.get("AntiKt10HIJets")) + '*GeV) >=1 ) ' + '|| (' + key + ' && count(' + MainJetCollection + 'AntiKt6HIJets.pt >' + str(ptThreshDict.get("AntiKt6HIJets")) + '*GeV) >=1 ) '+ '|| (' + key + ' && count(' + MainJetCollection + 'AntiKt5HIJets.pt >' + str(ptThreshDict.get("AntiKt5HIJets")) + '*GeV) >=1 ) '+ '|| (' + key + ' && count(' + MainJetCollection + 'AntiKt4HIJets.pt >' + str(ptThreshDict.get("AntiKt4HIJets")) + '*GeV) >=1 ) '+ '|| (' + key + ' && count(' + MainJetCollection + 'AntiKt3HIJets.pt >' + str(ptThreshDict.get("AntiKt3HIJets")) + '*GeV) >=1 ) ' + '|| (' + key + ' && count(' + MainJetCollection + 'AntiKt2HIJets.pt >' + str(ptThreshDict.get("AntiKt2HIJets")) + '*GeV) >=1 ) '
+
             if jobproperties.HIRecExampleFlags.doHIAODFix:  expression = expression + '|| (' + key + ' && count(' + MainJetCollection + 'AntiKt8HIJets.pt >' + str(ptThreshDict.get("AntiKt8HIJets")) + '*GeV) >=1 ) ' 
+
+            if HIDerivationFlags.isPP() and HasCollection("AntiKt2HIJets") and BookDFJetCollection: expression + '|| (' + key + ' && count(AntiKt2HIJets.pt >' + str(ptThreshDict.get("AntiKt2HIJets")) + '*GeV) >=1 ) ' 
+            if HIDerivationFlags.isPP() and HasCollection("AntiKt3HIJets") and BookDFJetCollection: expression + '|| (' + key + ' && count(AntiKt3HIJets.pt >' + str(ptThreshDict.get("AntiKt3HIJets")) + '*GeV) >=1 ) ' 
+            if HIDerivationFlags.isPP() and HasCollection("AntiKt5HIJets") and BookDFJetCollection: expression + '|| (' + key + ' && count(AntiKt5HIJets.pt >' + str(ptThreshDict.get("AntiKt5HIJets")) + '*GeV) >=1 ) ' 
             if HIDerivationFlags.isPP() and HasCollection("AntiKt6HIJets") and BookDFJetCollection: expression + '|| (' + key + ' && count(AntiKt6HIJets.pt >' + str(ptThreshDict.get("AntiKt6HIJets")) + '*GeV) >=1 ) ' 
             if HIDerivationFlags.isPP() and HasCollection("AntiKt8HIJets") and BookDFJetCollection: expression + '|| (' + key + ' && count(AntiKt8HIJets.pt >' + str(ptThreshDict.get("AntiKt8HIJets")) + '*GeV) >=1 ) ' 
             if HIDerivationFlags.isPP() and HasCollection("AntiKt10HIJets") and BookDFJetCollection: expression + '|| (' + key + ' && count(AntiKt10HIJets.pt >' + str(ptThreshDict.get("AntiKt10HIJets")) + '*GeV) >=1 ) ' 
@@ -104,7 +109,7 @@ thinningTools=[TPThinningTool]
 #largeRcollections =  [MainJetCollection +"AntiKt10HIJets"]
 largeRcollections = []
 
-for collection_number in [4, 6, 8, 10]:
+for collection_number in [2, 3, 4, 5, 6, 8, 10]:
     collection_name = "AntiKt{}HIJets".format(collection_number)
     if jobproperties.HIRecExampleFlags.doHIAODFix:
         largeRcollections.append(MainJetCollection + collection_name)
@@ -141,8 +146,8 @@ AllVarContent+=largeRcollections
 AllVarContent+=HIGlobalVars
 
 extra_jets=[]
-if jobproperties.HIRecExampleFlags.doHIAODFix: extra_jets+=["DFAntiKt4HIJets","DFAntiKt6HIJets","DFAntiKt8HIJets","DFAntiKt10HIJets","AntiKt2HIJets_Seed1"] 
-if HIDerivationFlags.isSimulation() : extra_jets+=["AntiKt4TruthJets","AntiKt6TruthJets","AntiKt8TruthJets","AntiKt10TruthJets"] 
+if jobproperties.HIRecExampleFlags.doHIAODFix: extra_jets+=["DFAntiKt2HIJets","DFAntiKt3HIJets","DFAntiKt4HIJets","DFAntiKt5HIJets","DFAntiKt6HIJets","DFAntiKt8HIJets","DFAntiKt10HIJets","AntiKt2HIJets_Seed1"] 
+if HIDerivationFlags.isSimulation() : extra_jets+=["AntiKt2TruthJets","AntiKt3TruthJets","AntiKt4TruthJets","AntiKt5TruthJets","AntiKt6TruthJets","AntiKt8TruthJets","AntiKt10TruthJets"] 
 for item in extra_jets:
     if not SlimmingHelper.AppendToDictionary.has_key(item):
         SlimmingHelper.AppendToDictionary[item]='xAOD::JetContainer'
@@ -163,7 +168,7 @@ SlimmingHelper.SmartCollections = [ "InDetTrackParticles",
                                     "PrimaryVertices"]
 ##AllVariables
 if HIDerivationFlags.isSimulation() : 
-    AllVarContent+=["AntiKt2TruthJets","AntiKt4TruthJets","TruthEvents","TruthParticles","AntiKt6TruthJets","AntiKt8TruthJets","AntiKt10TruthJets"] 
+    AllVarContent+=["AntiKt2TruthJets","AntiKt3TruthJets","AntiKt4TruthJets","AntiKt5TruthJets","TruthEvents","TruthParticles","AntiKt6TruthJets","AntiKt8TruthJets","AntiKt10TruthJets"] 
 	
 SlimmingHelper.AllVariables=AllVarContent
 
