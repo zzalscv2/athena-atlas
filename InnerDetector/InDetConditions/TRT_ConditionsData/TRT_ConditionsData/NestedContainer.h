@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -388,14 +388,17 @@ namespace TRTCond
   class NestedContainerPointerTrait
   {
   public:
-    static void erase( T& x) { delete x ; x = 0 ; }
-    static void copy( T& out, const T& in) { if(out) erase(out) ; if(in) out = in->clone() ; }
-    static bool isvalid( const T& x ) { return x!=0 ; }
-    static void initialize( T& x) { x = 0 ; }
-    static size_t footprint( const T& x) { return sizeof(T) + (x ? x->footprint() : 0) ; }
-    static void print(const T& x) { std::cout << x << std::endl ; }
-    static T initialvalue() { return 0 ; }
-    static bool isequal(const T& lhs, const T& rhs) { return lhs==rhs || (lhs && rhs && *lhs==*rhs) ; }
+    using pointer = T;
+    using base_type = std::remove_pointer_t<pointer>;
+    using const_pointer = const base_type*;
+    static void erase( pointer& x) { delete x ; x = 0 ; }
+    static void copy( pointer& out, const_pointer in) { if(out) erase(out) ; if(in) out = in->clone() ; }
+    static bool isvalid( const_pointer x ) { return x!=0 ; }
+    static void initialize( pointer& x) { x = 0 ; }
+    static size_t footprint( const_pointer x) { return sizeof(pointer) + (x ? x->footprint() : 0) ; }
+    static void print(const_pointer x) { std::cout << x << std::endl ; }
+    static pointer initialvalue() { return 0 ; }
+    static bool isequal(const_pointer lhs, const_pointer rhs) { return lhs==rhs || (lhs && rhs && *lhs==*rhs) ; }
   } ;
 }
 
