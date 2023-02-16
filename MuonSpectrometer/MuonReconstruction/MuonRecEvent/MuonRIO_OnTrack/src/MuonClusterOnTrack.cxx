@@ -31,7 +31,6 @@ MuonClusterOnTrack::MuonClusterOnTrack():
     m_globalPosition()
 {
   m_positionAlongStrip = rot.m_positionAlongStrip;
-  m_offsetNormal = rot.m_offsetNormal;
   if (rot.m_globalPosition) m_globalPosition.store(std::make_unique<const Amg::Vector3D>(*rot.m_globalPosition));
 }
 
@@ -59,7 +58,6 @@ MuonClusterOnTrack& MuonClusterOnTrack::operator=( const MuonClusterOnTrack& rot
   if ( &rot != this) {
     Trk::RIO_OnTrack::operator=(rot);//base class ass. op.
     m_positionAlongStrip = rot.m_positionAlongStrip;
-    m_offsetNormal = rot.m_offsetNormal;
     if (rot.m_globalPosition) m_globalPosition.store(std::make_unique<const Amg::Vector3D>(*rot.m_globalPosition));
     else if (m_globalPosition) m_globalPosition.release().reset();
   }
@@ -77,7 +75,6 @@ MsgStream& MuonClusterOnTrack::dump( MsgStream&    stream) const
           <<this->globalPosition().y()<<", "
           <<this->globalPosition().z()<<")"<<std::endl;
   stream << "Position along strip: "<<m_positionAlongStrip<<std::endl;
-  stream << "Offset along normal: "<<m_offsetNormal<<std::endl;
   stream<<"}"<<endmsg;
   return stream;
 }
@@ -92,7 +89,6 @@ std::ostream& MuonClusterOnTrack::dump( std::ostream&    stream) const
   stream << std::setiosflags(std::ios::fixed)<< std::setprecision(3);
 
   stream << "Position along strip: "<<m_positionAlongStrip<<std::endl;
-  stream << "Offset along normal: "<<m_offsetNormal<<std::endl;
   stream<<"}"<<std::endl;
   stream.flags( originalFormat );
   
@@ -107,13 +103,14 @@ const Amg::Vector3D& MuonClusterOnTrack::globalPosition() const {
 
   if (not m_globalPosition) {
     // calculate global position from the position of the strip and the position along the strip
-    Amg::Vector3D lpos;
+    Amg::Vector2D lpos{Amg::Vector2D::Zero()};
     if( localParameters().contains( Trk::locX ) )
-      lpos = Amg::Vector3D( localParameters().get(Trk::locX), m_positionAlongStrip, m_offsetNormal );
+      lpos = Amg::Vector2D( localParameters().get(Trk::locX), m_positionAlongStrip );
     else
-      lpos = Amg::Vector3D( m_positionAlongStrip, localParameters().get(Trk::locY), m_offsetNormal );
-    
-    Amg::Vector3D gpos = detectorElement()->surface(identify()).transform()*lpos;
+      lpos = Amg::Vector2D( m_positionAlongStrip, localParameters().get(Trk::locY) );
+
+    Amg::Vector3D gpos{Amg::Vector3D::Zero()};
+    detectorElement()->surface( identify() ).localToGlobal(lpos, gpos, gpos);
 
     m_globalPosition.set(std::make_unique<const Amg::Vector3D>(gpos));
   }
