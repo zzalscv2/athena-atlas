@@ -38,7 +38,7 @@
 
 class PixelSimHelper;
 
-class InDetSimData
+class InDetSimData final
 {
     friend class PixelSimHelper;
     friend class SCT_SimHelper;
@@ -48,12 +48,13 @@ public:
     typedef std::pair<HepMcParticleLink, float> Deposit; // A particle link, and the 
     // energy (charge) which its hits contribute to the current RDO.
     InDetSimData();
+    InDetSimData(InDetSimData&& other) noexcept = default;
     InDetSimData (const std::vector< Deposit >& deposits, int simDataWord = 0);
     InDetSimData (std::vector< Deposit >&& deposits, int simDataWord = 0);
     InDetSimData (const InDetSimData& other);
     InDetSimData &operator=(const InDetSimData& other);
     InDetSimData &operator=(InDetSimData&& other) noexcept;
-    virtual ~InDetSimData();
+    ~InDetSimData() = default;
     int word() const;                           // Get the packed simdata word
     void deposits(std::vector<Deposit>& deposits) const; // Get the Deposits
     //std::vector< Deposit > getdeposits() const; // for some reason I can't get this to return by reference! It won't compile. EJWM 

@@ -433,7 +433,7 @@ StatusCode TRTDigitizationTool::processStraws(const EventContext& ctx,
         continue;
       }
       ATH_MSG_VERBOSE ( "Deposit: trackID " << deposit.first << " energyDeposit " << deposit.second );
-      depositVector.push_back(deposit);
+      depositVector.emplace_back(std::move(deposit));
     }
 
     const TimedHitPtr<TRTUncompressedHit>& theHit(*i);
@@ -443,7 +443,7 @@ StatusCode TRTDigitizationTool::processStraws(const EventContext& ctx,
     if ( !depositVector.empty() &&
          (evtIndex == 0 || ((*i)->GetKineticEnergy()>m_minpileuptruthEkin))  &&
          (bunchCrossingTime < m_maxCrossingTimeSDO) && (bunchCrossingTime > m_minCrossingTimeSDO) ) {
-      simDataMap->insert(std::make_pair(idStraw, InDetSimData(depositVector)));
+      simDataMap->try_emplace(idStraw, std::move(depositVector));
     }
     ///// END OF SDO CREATION
 

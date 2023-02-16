@@ -313,13 +313,13 @@ void PixelDigitizationTool::addSDO(SiChargedDiodeCollection* collection) {
       // if the charge has already hit the Diode add it to the deposit
       if (theDeposit != depositsR_end) (*theDeposit).second += i_ListOfCharges->charge();
       else { // create a new deposit
-        deposits.push_back(InDetSimData::Deposit(trkLink, i_ListOfCharges->charge()));
+        deposits.emplace_back(trkLink, i_ListOfCharges->charge());
       }
     }
     // add the simdata object to the map:
     if (real_particle_hit || m_createNoiseSDO) {
-      m_simDataColl->insert(std::make_pair(collection->getId((*i_chargedDiode).first),
-                                           InDetSimData(deposits, (*i_chargedDiode).second.flag())));
+      m_simDataColl->try_emplace(collection->getId((*i_chargedDiode).first),
+                                           std::move(deposits), (*i_chargedDiode).second.flag());
     }
   }
 }

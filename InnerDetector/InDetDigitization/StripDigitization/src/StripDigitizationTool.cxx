@@ -917,8 +917,7 @@ void StripDigitizationTool::addSDO(SiChargedDiodeCollection* collection, SG::Wri
       if (theDeposit != depositsR_end) {
         (*theDeposit).second += i_ListOfCharges->charge();
       } else { // create a new deposit
-        InDetSimData::Deposit deposit(trkLink, i_ListOfCharges->charge());
-        deposits.push_back(deposit);
+        deposits.emplace_back(trkLink, i_ListOfCharges->charge());
       }
     }
 
@@ -936,8 +935,7 @@ void StripDigitizationTool::addSDO(SiChargedDiodeCollection* collection, SG::Wri
         int strip2D{sctDesign.strip(strip)};
         id_readout = m_detID->strip_id(collection->identify(),row2D, strip2D);
       }
-      std::pair<Identifier, InDetSimData> tmpSimData = std::make_pair(id_readout, InDetSimData(deposits, (*i_chargedDiode).second.flag()));
-      (*simDataCollMap)->insert(tmpSimData);
+      (*simDataCollMap)->try_emplace(id_readout, std::move(deposits), (*i_chargedDiode).second.flag());
     }
   }
 }
