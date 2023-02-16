@@ -946,8 +946,6 @@ class InEventRecoCA( ComponentAccumulator ):
     def __init__(self, name, inputMaker=None, **inputMakerArgs):
         super( InEventRecoCA, self ).__init__()
         self.name = name
-        self.mainSeq = seqAND( name )
-        self.addSequence( self.mainSeq )
 
         if inputMaker:
             assert len(inputMakerArgs) == 0, "No support for explicitly passed input maker and and input maker arguments at the same time" 
@@ -962,9 +960,7 @@ class InEventRecoCA( ComponentAccumulator ):
             args.update(**inputMakerArgs)
             self.inputMakerAlg = CompFactory.InputMakerForRoI(**args)
             
-        self.addEventAlgo( self.inputMakerAlg, self.mainSeq.getName() )
-        self.recoSeq = parOR( "InputSeq_"+self.inputMakerAlg.getName() ) #FP: why is this needed?
-        self.addSequence( self.recoSeq, self.mainSeq.getName() )
+        self.recoSeq = parOR( self.name )
         
     pass
 
@@ -976,6 +972,14 @@ class InEventRecoCA( ComponentAccumulator ):
         """ Place algorithm in the correct reconstruction sequence """
         return self.addEventAlgo( algo, sequenceName=self.recoSeq.getName() )
 
+    def addGlobalRecoAlgo( self, algo ):
+        """ Place algorithm in the main events sequence rather than HLT CF """
+        return self.addEventAlgo( algo )
+
+    def mergeGlobalReco( self, ca ):
+        """ Place algorithm in the main events sequence rather than HLT CF """
+        return self.merge( ca )
+
     def inputMaker( self ):
         return self.inputMakerAlg
 
@@ -986,8 +990,6 @@ class InViewRecoCA(ComponentAccumulator):
     def __init__(self, name, viewMaker=None, isProbe=False, **viewMakerArgs):
         super( InViewRecoCA, self ).__init__()
         self.name = name +"_probe" if isProbe else name
-        self.mainSeq = seqAND( self.name )
-        self.addSequence( self.mainSeq )
 
         if len(viewMakerArgs) != 0:
             assert viewMaker is None, "No support for explicitly passed view maker and args for EventViewCreatorAlgorithm" 
@@ -1011,17 +1013,26 @@ class InViewRecoCA(ComponentAccumulator):
             args.update(**viewMakerArgs)
             self.viewMakerAlg = CompFactory.EventViewCreatorAlgorithm(**args)
 
-        self.addEventAlgo( self.viewMakerAlg, self.mainSeq.name )
         self.viewsSeq = parOR( self.viewMakerAlg.ViewNodeName )
-        self.addSequence( self.viewsSeq, self.mainSeq.name )
+        self.addSequence( self.viewsSeq )
 
     def mergeReco( self, ca ):
         """ Merge CA moving reconstruction algorithms into the right sequence """
         return self.merge( ca, sequenceName=self.viewsSeq.name )
 
+
     def addRecoAlgo( self, algo ):
         """ Place algorithm in the correct reconstruction sequence """
         return self.addEventAlgo( algo, sequenceName=self.viewsSeq.name )
+
+    def addGlobalRecoAlgo( self, algo ):
+        """ Place algorithm in the main events sequence rather than HLT CF """
+        return self.addEventAlgo( algo )
+
+    def mergeGlobalReco( self, ca ):
+        """ Place algorithm in the main events sequence rather than HLT CF """
+        return self.merge( ca )
+
 
     def inputMaker( self ):
         return self.viewMakerAlg
@@ -1033,13 +1044,12 @@ class SelectionCA(ComponentAccumulator):
         self.isProbe=isProbe
         super( SelectionCA, self ).__init__()   
 
-        # to do: remove content sequence, leave just one for the Hypo?
-        self.stepRecoSequence = parOR(CFNaming.stepRecoName(self.name))       
-        self.stepViewSequence = seqAND(CFNaming.stepContentName(self.name), [self.stepRecoSequence])
+        self.stepViewSequence = seqAND(self.name)
         self.addSequence(self.stepViewSequence)
 
-    def mergeReco(self, other):
-        self.merge(other, sequenceName=self.stepRecoSequence.name)
+    def mergeReco(self, recoCA):
+        self.addEventAlgo(recoCA.inputMaker(), sequenceName=self.stepViewSequence.name)
+        self.merge(recoCA, sequenceName=self.stepViewSequence.name)
 
     def mergeHypo(self, other):
         """To be used when the hypo alg configuration comes with auxiliary tools/services"""
@@ -1061,7 +1071,7 @@ class SelectionCA(ComponentAccumulator):
 
     def inputMaker(self):
         """Access Input Maker (or throws)"""
-        im = findAlgorithmByPredicate(self.stepRecoSequence, lambda alg: "InputMakerInputDecisions" in alg._descriptors )
+        im = findAlgorithmByPredicate(self.stepViewSequence, lambda alg: "InputMakerInputDecisions" in alg._descriptors )
         assert im is not None, "No input maker in SeelectionCA {}".format(self.name)
         return im
 
@@ -1103,11 +1113,11 @@ def menuSequenceCAToGlobalWrapper(gen, flags, *args, **kwargs):
     def _convertSeq(s):
         sname = compName(s)
         old = AthSequencer( sname )
-        if s.ModeOR: #this seems stupid way to do it but in fact this was we avoid setting this property if is == default, this streamlining comparisons
+        if s.ModeOR: #this seems stupid way to do it but we avoid setting this property if is == default here, this is streamlining comparisons
             old.ModeOR = True
         if s.Sequential:
             old.Sequential = True
-        old.StopOverride =    s.StopOverride 
+        old.StopOverride = s.StopOverride 
         for member in s.Members:
             if isSequence(member):
                 old += _convertSeq(member)
@@ -1115,7 +1125,8 @@ def menuSequenceCAToGlobalWrapper(gen, flags, *args, **kwargs):
                 if member != msca.hypo.Alg: # removed hypo, as MenuSequence assembles it later
                     old += conf2toConfigurable(member)
         return old
-    sequence = _convertSeq(msca.sequence.Alg.Members[0])
+
+    sequence = _convertSeq(msca.ca.topSequence())
     msca.ca._algorithms = {}
     msca.ca._sequence = None
     msca.ca._allSequences = []
