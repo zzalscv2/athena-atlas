@@ -16536,6 +16536,8 @@ HLT_mu4_bJpsimutrk_MuonTrkPEB_L1MU3VF:
     3: 11
     4: 11
     5: 1
+HLT_mu4_ivarloose_2mu3noL1_L1BPH-7M14-0DR25-MU5VFMU3VF:
+  eventCount: 0
 HLT_mu4_ivarloose_mu4_11invmAB60_L12MU3V:
   eventCount: 2
   stepCounts:
@@ -16590,6 +16592,8 @@ HLT_mu4_ivarloose_mu4_7invmAB9_L1DY-BOX-2MU3V:
     2: 14
     3: 12
     4: 3
+HLT_mu4_ivarloose_mu4_L1BPH-7M14-0DR25-MU5VFMU3VF:
+  eventCount: 0
 HLT_mu4_ivarloose_mu4_b11invmAB60vtx20_L12MU3V:
   eventCount: 1
   stepCounts:
