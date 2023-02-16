@@ -355,15 +355,16 @@ namespace Muon {
         dump_output();
     }
     std::vector<std::unique_ptr<Muon::MuonSegment>> MuonClusterSegmentFinderTool::findStereoSegments(
-        const EventContext& ctx, const std::vector<const Muon::MuonClusterOnTrack*>& allClusts, int singleWedge) const {
-        std::vector<std::unique_ptr<Muon::MuonSegment>> final_segs{};
-
+        const EventContext& ctx, const std::vector<const Muon::MuonClusterOnTrack*>& allClusts, int singleWedge) const {      
+        
+        if (!m_useStereoSeeding) return {};
         /// Order any parsed hit into the layer structure
         LayerMeasVec orderedClust =
             classifyByLayer(cleanClusters(allClusts, HitType::Eta | HitType::Phi, singleWedge), HitType::Wire | HitType::Pad);
-        if (orderedClust.empty()) return final_segs;
+
+        if (orderedClust.empty()) return {};
         std::vector<NSWSeed> seeds = segmentSeedFromMM(orderedClust);
-        if (seeds.empty()) return final_segs;
+        if (seeds.empty()) return {};
         TrackCollection trackSegs{SG::OWN_ELEMENTS};
         /// Loop over the seeds
         for (NSWSeed& seed : seeds) {

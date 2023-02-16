@@ -185,6 +185,7 @@ namespace Muon {
         Gaudi::Property<double> m_maxClustDist{this, "ClusterDistance", 5.};
         Gaudi::Property<int> m_nOfSeedLayers{this, "NOfSeedLayers", 1};
 
+        Gaudi::Property<bool> m_useStereoSeeding{this, "SeedMMStereos", true};
     public:
         using SeedMeasurement = NSWSeed::SeedMeasurement;
         using MeasVec = NSWSeed::MeasVec;
