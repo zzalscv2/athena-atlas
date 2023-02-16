@@ -52,6 +52,8 @@ namespace {
         /// Use simple relation between cot(x) = tan( PI/2 -x) to convert into each other
         return std::tan(M_PI_2 - x);
     }
+    template <typename T> constexpr T absmax(const T& a, const T& b) {
+        return std::abs(a) > std::abs(b) ? a : b;}
 
 }  // namespace
 namespace Muon {
@@ -65,7 +67,7 @@ namespace Muon {
         // retrieve MuonDetectorManager
         ATH_CHECK(m_DetectorManagerKey.initialize());
         ATH_CHECK(m_mdtCreator.retrieve());
-        if (!m_mdtCreatorT0.empty()) ATH_CHECK(m_mdtCreatorT0.retrieve());
+        ATH_CHECK(m_mdtCreatorT0.retrieve(DisableTool{m_mdtCreatorT0.empty()}));
         ATH_CHECK(m_clusterCreator.retrieve());
         ATH_CHECK(m_compClusterCreator.retrieve());
         ATH_CHECK(m_idHelperSvc.retrieve());
@@ -123,7 +125,7 @@ namespace Muon {
         Amg::Transform3D amdbToGlobal = detEl->AmdbLRSToGlobalTransform();
 
         // transform nominal pointing chamber position into surface frame
-        Amg::Vector3D globalDirCh = Amg::Vector3D(detEl->center().x(), detEl->center().y(), detEl->center().z());
+        Amg::Vector3D globalDirCh{detEl->center()};
         Amg::Vector3D dirCh(gToStation.linear() * globalDirCh);
         double chamber_angleYZ = std::atan2(dirCh.z(), dirCh.y());
 
@@ -138,7 +140,7 @@ namespace Muon {
         double road_angleYZ = std::atan2(d.z(), d.y());
 
         if (!hasPhiMeasurements) road_angleXZ = M_PI;  // if no phi, take phi perpendicular to plane
-        ATH_MSG_VERBOSE("global road dir " << Amg::toString(roaddir2) << " XZ " << road_angleXZ << " YZ " << road_angleYZ << " isEndcap "
+        ATH_MSG_VERBOSE("global road pos "<<Amg::toString(roadpos)<<", global road dir " << Amg::toString(roaddir2) << " XZ " << road_angleXZ << " YZ " << road_angleYZ << " isEndcap "
                                            << isEndcap << " central phi " << detEl->center().phi() << " r " << detEl->center().perp()
                                            << " z " << detEl->center().z());
 
@@ -155,9 +157,13 @@ namespace Muon {
         TrkDriftCircleMath::CLVec cls = createClusterVec(chid, spVecs.first, gToStation);
 
         /* ***** create MDT hits ************ */
-        ATH_MSG_DEBUG(" adding mdts " << mdts.size());
-        for (auto it : mdts) ATH_MSG_DEBUG(*it);
-
+        if (msgLvl(MSG::VERBOSE)) {
+            std::stringstream sstr{};
+            for (const MdtDriftCircleOnTrack* mdt : mdts)
+            sstr<<m_printer->print(*mdt)<<std::endl;
+            ATH_MSG_VERBOSE(" adding mdts " << mdts.size()<<std::endl<<sstr.str());
+        }
+        
         // set to get Identifiers of chambers with hits
         std::set<Identifier> chamberSet;
         double phimin{-9999}, phimax{9999};
@@ -187,7 +193,27 @@ namespace Muon {
         // call segment finder
         TrkDriftCircleMath::SegVec segs = m_segmentFinder->findSegments(dcs, cls, std::move(road), dcStatistics, multiGeo.get());
 
-        ATH_MSG_DEBUG("Found " << segs.size() << " segments");
+        if (msgLvl(MSG::VERBOSE)) {
+            std::stringstream sstr{};
+            unsigned int seg_n{0};
+            for (const TrkDriftCircleMath::Segment& seg: segs) {
+                constexpr double toDeg = 1./Gaudi::Units::degree;
+                sstr<<"Segment number "<<seg_n<<" is at ("<<seg.line().x0()<<","<<seg.line().y0()<<") pointing to "<<seg.line().phi()*toDeg<<" chi2: "<<
+                (seg.chi2()/seg.ndof())<<"("<<seg.ndof()<<")"<<std::endl;
+                sstr<<"Mdt measurements: "<<seg.dcs().size()<<std::endl;
+                for (const TrkDriftCircleMath::DCOnTrack & mdt_meas : seg.dcs()){
+                sstr<<" **** "<<m_printer->print(*mdts[mdt_meas.index()]);
+                sstr<<" ("<<mdt_meas.state()<<")"<<std::endl;
+                }
+                sstr<<"Cluster measurements "<<seg.clusters().size()<<std::endl;
+                for (const TrkDriftCircleMath::Cluster& clus: seg.clusters()) {
+                    sstr<<" ---- "<<m_printer->print(*clusters[clus.index()])<<std::endl;
+                }
+                sstr<<std::endl;
+                ++seg_n;
+            }
+            ATH_MSG_VERBOSE("Found " << segs.size() << " segments "<<std::endl<<sstr.str());
+        }
 
         // return
         if (segs.empty()) { return; }
@@ -239,10 +265,10 @@ namespace Muon {
             // swap local y and z in the endcaps
             if (isEndcap) {
                 sphi = lroaddir.y();
-                lxroad = lroadpos.x() + (-lroadpos.y() + line.position().x()) * cphi / sphi;
+                lxroad = lroadpos.x() + (-lroadpos.y() + line.position().x()) * cphi / absmax(sphi, std::numeric_limits<double>::min());
             } else {
                 sphi = lroaddir.z();
-                lxroad = lroadpos.x() + (-lroadpos.z() + line.position().y()) * cphi / sphi;
+                lxroad = lroadpos.x() + (-lroadpos.z() + line.position().y()) * cphi / absmax(sphi, std::numeric_limits<double>::min());
             }
 
             double shortestTubeLen = 1e9;
@@ -627,8 +653,7 @@ namespace Muon {
 
         double scaleMax = 5.;
         if (m_curvedErrorScaling && curvature > 2) {
-            scale = 1. + curvature / 10000;  // 3*(curvature/30000)
-            if (scale > scaleMax) scale = scaleMax;
+            scale = std::min(scaleMax, 1. + curvature / 10000);
             ATH_MSG_DEBUG(" rescaled errors " << scale << " curvature " << curvature);
         }
         scale *= 2;
@@ -646,7 +671,7 @@ namespace Muon {
                 phiScale = 2.5;  // middle
             else
                 phiScale = 3.;  // outer
-            scale = sqrt(scale * scale + phiScale * phiScale);
+            scale = std::sqrt(scale*scale + phiScale*phiScale);
             ATH_MSG_DEBUG(" rescaled error for missing phi road " << scale);
         }
 
@@ -1718,17 +1743,16 @@ namespace Muon {
         int firstLayer{-1}, lastLayer{-1};
         for (const std::pair<double, std::unique_ptr<const Trk::MeasurementBase>>& rdit : rioDistVec) {
             const MdtDriftCircleOnTrack* mdt = dynamic_cast<const MdtDriftCircleOnTrack*>(rdit.second.get());
-            if (mdt) {
-                const Identifier& id = mdt->identify();
-                int layer = (m_idHelperSvc->mdtIdHelper().tubeLayer(id) - 1) + 4 * (m_idHelperSvc->mdtIdHelper().multilayer(id) - 1);
-                if (firstLayer == -1)
-                    firstLayer = layer;
-                else
-                    lastLayer = layer;
+            if (!mdt) continue;
+            const Identifier id = mdt->identify();
+            int layer = (m_idHelperSvc->mdtIdHelper().tubeLayer(id) - 1) + 4 * (m_idHelperSvc->mdtIdHelper().multilayer(id) - 1);
+            if (firstLayer == -1)
+                firstLayer = layer;
+            else
+                lastLayer = layer;
 
-                hitsOnSegment.insert(mdt->identify());
-                chambersOnSegment.insert(m_idHelperSvc->chamberId(mdt->identify()));
-            }
+            hitsOnSegment.insert(id);
+            chambersOnSegment.insert(m_idHelperSvc->chamberId(id));
         }
 
         // cross check for cosmic case
@@ -1737,8 +1761,7 @@ namespace Muon {
                                                << intersect.tubeIntersects().size());
         // clear hole vector
         std::vector<Identifier> holeVec;
-        for (unsigned int ii = 0; ii < intersect.tubeIntersects().size(); ++ii) {
-            const MuonTubeIntersect& tint = intersect.tubeIntersects()[ii];
+        for (const MuonTubeIntersect& tint : intersect.tubeIntersects()) {
             if (!chambersOnSegment.count(m_idHelperSvc->chamberId(tint.tubeId))) {
                 ATH_MSG_VERBOSE(" chamber not on segment, not counting tube  " << tint.rIntersect << " l " << tint.xIntersect << " "
                                                                                << m_idHelperSvc->toString(tint.tubeId));
@@ -1754,39 +1777,35 @@ namespace Muon {
             if (notBetweenHits && (std::abs(tint.rIntersect) > innerRadius || (!m_allMdtHoles && tint.xIntersect > distanceCut))) {
                 ATH_MSG_VERBOSE(" not counting tube:  distance to wire " << tint.rIntersect << " dist to tube end " << tint.xIntersect
                                                                          << " " << m_idHelperSvc->toString(tint.tubeId));
-            } else {
-                // check whether there is a hit in this tube
-                if (hitsOnSegment.count(tint.tubeId)) {
-                    ATH_MSG_VERBOSE(" tube on segment:  distance to wire " << tint.rIntersect << " dist to tube end " << tint.xIntersect
-                                                                           << " " << m_idHelperSvc->toString(tint.tubeId));
+                continue;
+            }
+            // check whether there is a hit in this tube
+            if (hitsOnSegment.count(tint.tubeId)) {
+                ATH_MSG_VERBOSE(" tube on segment:  distance to wire " << tint.rIntersect << " dist to tube end " << tint.xIntersect
+                                                                        << " " << m_idHelperSvc->toString(tint.tubeId));
+                continue;
+            }
+            // check whether there is a delta electron in this tube
+            if (m_removeDeltas) {
+                if (deltaVec.count(tint.tubeId)) {
+                    ATH_MSG_VERBOSE(" removing delta, distance to wire " << tint.rIntersect << " dist to tube end " << tint.xIntersect
+                                                                            << " " << m_idHelperSvc->toString(tint.tubeId));
                     continue;
                 }
-                // check whether there is a delta electron in this tube
-                if (m_removeDeltas) {
-                    if (deltaVec.count(tint.tubeId)) {
-                        ATH_MSG_VERBOSE(" removing delta, distance to wire " << tint.rIntersect << " dist to tube end " << tint.xIntersect
-                                                                             << " " << m_idHelperSvc->toString(tint.tubeId));
-                        continue;
-                    }
 
-                    const MdtPrepData* prd = findMdt(ctx, id);
-                    if (prd && std::abs(prd->localPosition()[Trk::locR]) < std::abs(tint.rIntersect)) {
-                        ATH_MSG_VERBOSE(" found and removed delta, distance to wire " << tint.rIntersect << " dist to tube end "
-                                                                                      << tint.xIntersect << " "
-                                                                                      << m_idHelperSvc->toString(tint.tubeId));
-                        continue;
-                    }
+                const MdtPrepData* prd = findMdt(ctx, id);
+                if (prd && std::abs(prd->localPosition()[Trk::locR]) < std::abs(tint.rIntersect)) {
+                    ATH_MSG_VERBOSE(" found and removed delta, distance to wire " << tint.rIntersect << " dist to tube end "
+                                                                                    << tint.xIntersect << " "
+                                                                                    << m_idHelperSvc->toString(tint.tubeId));
+                    continue;
                 }
-                if (msgLvl(MSG::VERBOSE)) {
-                    std::string holeType = "hole ";
-                    if (outoftimeVec.count(tint.tubeId)) holeType = "Out-of-time ";
-                    ATH_MSG_VERBOSE(holeType << " distance to wire " << tint.rIntersect << " dist to tube end " << tint.xIntersect << " "
-                                             << m_idHelperSvc->toString(tint.tubeId));
-                    if (!notBetweenHits) ATH_MSG_VERBOSE(" between hits");
-                }
-
-                holeVec.push_back(tint.tubeId);
             }
+            ATH_MSG_VERBOSE((outoftimeVec.count(tint.tubeId) ? "Out-of-time" : "hole") << " distance to wire " 
+                            << tint.rIntersect << " dist to tube end " << tint.xIntersect << " "
+                            << m_idHelperSvc->toString(tint.tubeId)<<(notBetweenHits ? "outside  hits" : "between hits"));
+           
+            holeVec.push_back(tint.tubeId);
         }
         return holeVec;
     }
