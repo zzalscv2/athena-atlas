@@ -225,7 +225,7 @@ StatusCode IOVDbSvc::initialize() {
   if (StatusCode::SUCCESS!=checkEventSel()) return StatusCode::FAILURE;
 
   // initialise default connection
-  if (m_par_defaultConnection!="") {
+  if (!m_par_defaultConnection.empty()) {
     // default connection is readonly if no : in name (i.e. logical conn)
     bool readonly=(m_par_defaultConnection.value().find(':')==std::string::npos);
     m_connections.push_back(new IOVDbConn(m_par_defaultConnection,readonly,msg()));
@@ -235,7 +235,7 @@ StatusCode IOVDbSvc::initialize() {
   m_iovslop=static_cast<cool::ValidityKey>(m_par_timeStampSlop*1.E9);
 
   // check for global tag in jobopt, which will override anything in input file
-  if (m_par_globalTag!="") {
+  if (!m_par_globalTag.empty()) {
     m_globalTag=m_par_globalTag;
     ATH_MSG_INFO( "Global tag: " << m_par_globalTag.value() << " set from joboptions" );
   }
@@ -307,7 +307,7 @@ StatusCode IOVDbSvc::finalize() {
 cool::IDatabasePtr IOVDbSvc::getDatabase(bool readOnly) {
   // get default database connection
   cool::IDatabasePtr dbconn;
-  if (m_par_defaultConnection=="" || m_connections.size()==0) {
+  if (m_par_defaultConnection.empty() || m_connections.size()==0) {
     ATH_MSG_INFO( "No default COOL database connection is available");
     dbconn.reset();
   } else {
@@ -792,9 +792,9 @@ StatusCode IOVDbSvc::processTagInfo() {
   if( msg().level()>=MSG::DEBUG ) m_h_tagInfoMgr->printTags(msg());
   
   // check IOVDbSvc GlobalTag, if not already set
-  if (m_globalTag=="") {
+  if (m_globalTag.empty()) {
     m_globalTag = m_h_tagInfoMgr->findTag("IOVDbGlobalTag");
-    if (m_globalTag!="") ATH_MSG_INFO( "Global tag: " << m_globalTag<< " set from input file" );
+    if (!m_globalTag.empty()) ATH_MSG_INFO( "Global tag: " << m_globalTag<< " set from input file" );
     ATH_CHECK( checkConfigConsistency() );
   }
 
@@ -812,11 +812,11 @@ StatusCode IOVDbSvc::processTagInfo() {
       // and folder meta-data is not used, and there is no <noover/> spec,
       // and no global tag set in job options
       const auto & theTag{thisNameTagPair.second};
-      if (folder->joTag()=="" && !folder->readMeta() && !folder->noOverride() && m_par_globalTag=="") {
+      if (folder->joTag().empty() && !folder->readMeta() && !folder->noOverride() && m_par_globalTag.empty()) {
         folder->setTagOverride(theTag,false);
         ATH_MSG_INFO( "TagInfo override for tag " << theTag << " in folder " << ifname );
       } else if (folder->joTag()!=theTag) {
-        const std::string tagTypeString=(folder->joTag().empty()) ? "hierarchical" : "jobOption";
+        const std::string_view tagTypeString=(folder->joTag().empty()) ? "hierarchical" : "jobOption";
         ATH_MSG_INFO( "Ignoring inputfile TagInfo request for tag " << theTag << " in folder " << ifname<<" in favour of "<<tagTypeString);
       }
     }
@@ -1034,7 +1034,7 @@ StatusCode IOVDbSvc::setupFolders() {
       }
     } else {
       // no connection specified - use default if available
-      if (m_par_defaultConnection!="") {
+      if (!m_par_defaultConnection.empty()) {
         conn=m_connections[0];
       } else {
         ATH_MSG_FATAL( "Folder request " << folderdata.folderName() << 
@@ -1078,7 +1078,7 @@ StatusCode IOVDbSvc::setupFolders() {
 }
 
 StatusCode IOVDbSvc::fillTagInfo() {
-  if (m_par_globalTag!="") {
+  if (!m_par_globalTag.empty()) {
     ATH_MSG_DEBUG( "Adding GlobalTag " << m_par_globalTag << " into TagInfo" );
     if (StatusCode::SUCCESS!=m_h_tagInfoMgr->addTag("IOVDbGlobalTag",m_par_globalTag))
       return StatusCode::FAILURE;
@@ -1087,7 +1087,7 @@ StatusCode IOVDbSvc::fillTagInfo() {
   // can be from Folders or tagOverrides properties
   for (const auto & thisFolder : m_foldermap) {
     const IOVDbFolder* folder=thisFolder.second;
-    if (folder->joTag()!="") {
+    if (!folder->joTag().empty()) {
       ATH_MSG_DEBUG( "Adding folder " << folder->folderName() <<" tag " << folder->joTag() << " into TagInfo" );
       if (StatusCode::SUCCESS!=m_h_tagInfoMgr->addTag(folder->folderName(),folder->joTag()))
         return StatusCode::FAILURE;
@@ -1097,7 +1097,7 @@ StatusCode IOVDbSvc::fillTagInfo() {
     // Here we do not have access to the TagInfo object, but can put remove
     // requests in for all folders if the global tag is set, or if there is
     // an explict joboption tag, nooverride spec, or data comes from metadata
-    if (m_par_globalTag!="" || folder->joTag()!="" || folder->noOverride() ||
+    if (!m_par_globalTag.empty() || !folder->joTag().empty() || folder->noOverride() ||
         folder->readMeta()) {
       if (StatusCode::SUCCESS!=
           m_h_tagInfoMgr->removeTagFromInput(folder->folderName())) {

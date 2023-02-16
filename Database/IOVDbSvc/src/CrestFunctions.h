@@ -15,17 +15,18 @@
 #include <vector>
 #include <string>
 #include <map> //also contains std::pair
+#include <string_view>
 
 #include "CoolKernel/ChannelId.h"
 
 namespace IOVDbNamespace{
   typedef std::pair<std::string,std::string> IovHashPair; // <IOV,Hash> pairs extracted from Json
 
-  const std::string
+  const std::string_view
   urlBase();
 
   std::vector<IovHashPair>
-  extractIovAndHash(const std::string & jsonReply);
+  extractIovAndHash(const std::string_view jsonReply);
 
   std::string
   extractHashFromJson(const std::string & jsonReply);

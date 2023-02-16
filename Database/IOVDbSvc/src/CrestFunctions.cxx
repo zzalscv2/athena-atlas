@@ -17,41 +17,41 @@
 #include <map>
 
 namespace IOVDbNamespace{
-  const std::string
+  const std::string_view
   urlBase(){
-    return  "http://crest-02.cern.ch:8080";
+    return "http://crest-02.cern.ch:8080";
   }
 
   std::vector<IovHashPair>
-  extractIovAndHash(const std::string & jsonReply){
+  extractIovAndHash(const std::string_view jsonReply){
     std::vector<IovHashPair> iovHashPairs;
     bool all_ok = true;
-    std::string iovSignature = "since\":";
-    std::string hashSignature = "payloadHash\":\"";
+    std::string_view iovSignature = "since\":";
+    std::string_view hashSignature = "payloadHash\":\"";
     size_t startpoint = jsonReply.find(hashSignature);
     size_t endpoint = 0;
 
     while(startpoint!=std::string::npos) {
       startpoint+=hashSignature.size();
-      endpoint = jsonReply.find("\"",startpoint);
+      endpoint = jsonReply.find('\"',startpoint);
       if(endpoint==std::string::npos) {
 	all_ok = false;
 	break;
       }
-      std::string hashString = jsonReply.substr(startpoint,endpoint-startpoint);
+      std::string_view hashString = jsonReply.substr(startpoint,endpoint-startpoint);
       startpoint= jsonReply.find(iovSignature,endpoint);
       if(startpoint==std::string::npos) {
 	all_ok = false;
 	break;
       }
       startpoint+=iovSignature.size();
-      endpoint = jsonReply.find(",",startpoint);
+      endpoint = jsonReply.find(',',startpoint);
       if(endpoint==std::string::npos) {
 	all_ok = false;
 	break;
       }
-      std::string iovString = jsonReply.substr(startpoint,endpoint-startpoint);
-      iovHashPairs.push_back(IovHashPair(iovString,hashString));
+      std::string_view iovString = jsonReply.substr(startpoint,endpoint-startpoint);
+      iovHashPairs.emplace_back(iovString,hashString);
       startpoint= jsonReply.find(hashSignature,endpoint);
     }
     if(!all_ok) {
@@ -65,11 +65,11 @@ namespace IOVDbNamespace{
   extractHashFromJson(const std::string & jsonReply){
     std::string hash{};
     try{
-      std::string signature="payloadHash\":\"";
+      std::string_view signature="payloadHash\":\"";
       auto signaturePosition=jsonReply.rfind(signature);
-      if (signaturePosition == std::string::npos) throw std::runtime_error("signature "+signature+" not found");
+      if (signaturePosition == std::string::npos) throw std::runtime_error("signature "+std::string(signature)+" not found");
       auto startOfHash=signaturePosition + signature.size();
-      auto endOfHash=jsonReply.find("\"",startOfHash);
+      auto endOfHash=jsonReply.find('\"',startOfHash);
       auto len=endOfHash-startOfHash;
       if (startOfHash > jsonReply.size()) throw std::runtime_error("Hash start is beyond end of string");
       hash=jsonReply.substr(startOfHash, len);
@@ -139,13 +139,13 @@ namespace IOVDbNamespace{
   extractDescriptionFromJson(const std::string & jsonReply){
     std::string description{};
     try{
-      const std::string signature="node_description\\\":\\\"";
+      const std::string_view signature="node_description\\\":\\\"";
       const auto signaturePosition = jsonReply.find(signature);
-      if (signaturePosition == std::string::npos) throw std::runtime_error("signature "+signature+" not found");
+      if (signaturePosition == std::string::npos) throw std::runtime_error("signature "+std::string(signature)+" not found");
       const auto startOfDescription= signaturePosition + signature.size();
-      const std::string endSignature = "\\\",\\\"payload_spec";
+      const std::string_view endSignature = "\\\",\\\"payload_spec";
       const auto endOfDescription=jsonReply.find(endSignature);
-      if (endOfDescription == std::string::npos) throw std::runtime_error("end signature "+endSignature+" not found");
+      if (endOfDescription == std::string::npos) throw std::runtime_error("end signature "+std::string(endSignature)+" not found");
       const auto len=endOfDescription-startOfDescription;
       description=jsonReply.substr(startOfDescription, len);
     } catch (std::exception & e){
@@ -159,9 +159,9 @@ namespace IOVDbNamespace{
   extractSpecificationFromJson(const std::string & jsonReply){
     std::string spec{};
     try{
-      const std::string signature="payload_spec\\\":\\\"";
+      const std::string_view signature="payload_spec\\\":\\\"";
       const auto signaturePosition = jsonReply.find(signature);
-      if (signaturePosition == std::string::npos) throw std::runtime_error("signature "+signature+" not found");
+      if (signaturePosition == std::string::npos) throw std::runtime_error("signature "+std::string(signature)+" not found");
       const auto startOfSpec= signaturePosition + signature.size();
       const auto endOfSpec=jsonReply.find("\\\"}\"",startOfSpec);
       const auto len=endOfSpec-startOfSpec;
@@ -178,9 +178,9 @@ namespace IOVDbNamespace{
     std::vector<std::string> names;
     std::string textRep;
     try{
-      const std::string signature="channel_list\\\":[";
+      const std::string_view signature="channel_list\\\":[";
       const auto startOfList=jsonReply.find(signature) + signature.size();
-      const auto endOfList=jsonReply.find("]", startOfList);
+      const auto endOfList=jsonReply.find(']', startOfList);
       const auto len=endOfList-startOfList;
       textRep=jsonReply.substr(startOfList, len);
     } catch (std::exception & e){
@@ -197,13 +197,14 @@ namespace IOVDbNamespace{
         list.push_back(std::stoll(m[1].str()));
         //chomp the last backslash
         std::string s = m[2].str();
-        names.push_back(s.substr(0,s.size()-1));
+        s.pop_back();
+        names.emplace_back(std::move(s));
       }
     }
     // if all the names are empty, these are unnamed channels, and can just return an empty vector for the names
     auto isEmpty=[](const std::string & s){return s.empty();};
     if ( std::all_of(names.begin(), names.end(), isEmpty)) names.clear();
-    return std::make_pair(list, names);
+    return std::make_pair(std::move(list), std::move(names));
   }
   
   std::string 

@@ -47,13 +47,18 @@ namespace Crest {
   public:
     void add(const std::string& key, const std::string& value) {
       if (m_str.empty()) {
-        m_str = key + "=" + value;
+        m_str = key;
+        m_str += '=';
+        m_str += value;
       } else {
-        m_str = m_str + "&" + key + "=" + value;
+        m_str +='&';
+        m_str += key;
+        m_str += '=';
+        m_str += value;
       }
     }
 
-    std::string getParams() {
+    const std::string &getParams() const {
       return m_str;
     }
 
@@ -67,6 +72,7 @@ namespace Crest {
   class CrestClient
   {
   private:
+    std::string make_url(const std::string &address) const;
     std::string m_host {};
     std::string m_port {};
     int m_mode {};
