@@ -14,7 +14,7 @@ Reco_tf.py --CA \
   --steering "doRAWtoALL" \
   --outputAODFile myAOD_ca.pool.root \
   --outputESDFile myESD_ca.pool.root \
-  --preExec "all:from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Jet.WriteToAOD=True; ConfigFlags.MET.WritetoAOD=True" \
+  --preExec "all:ConfigFlags.Jet.WriteToAOD=True; ConfigFlags.MET.WritetoAOD=True" \
   --imf="False" \
   --maxEvents 100
 
