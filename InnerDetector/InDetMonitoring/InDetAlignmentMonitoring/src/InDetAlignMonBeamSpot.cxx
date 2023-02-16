@@ -290,8 +290,8 @@ StatusCode InDetAlignMonBeamSpot::fillHistograms() {
       float x = vx->position().x();
       float y = vx->position().y();
       float z = vx->position().z();
-      float beamX = beamSpotX + tan(beamTiltX) * (z - beamSpotZ);
-      float beamY = beamSpotY + tan(beamTiltY) * (z - beamSpotZ);
+      float beamX = beamSpotX + std::tan(beamTiltX) * (z - beamSpotZ);
+      float beamY = beamSpotY + std::tan(beamTiltY) * (z - beamSpotZ);
       float beamZ = beamSpotZ;
 
       m_hPvX->Fill((x - beamX) * scaleFactor);
@@ -301,9 +301,9 @@ StatusCode InDetAlignMonBeamSpot::fillHistograms() {
       //m_hPvErrY->Fill( (*vxIter)->recVertex().errorPosition().error(Trk::y) );
       //m_hPvErrZ->Fill( (*vxIter)->recVertex().errorPosition().error(Trk::z) );
 
-      m_hPvErrX->Fill(sqrt(vx->covariancePosition()(Trk::x, Trk::x)));
-      m_hPvErrY->Fill(sqrt(vx->covariancePosition()(Trk::y, Trk::y)));
-      m_hPvErrZ->Fill(sqrt(vx->covariancePosition()(Trk::z, Trk::z)));
+      m_hPvErrX->Fill(std::sqrt(vx->covariancePosition()(Trk::x, Trk::x)));
+      m_hPvErrY->Fill(std::sqrt(vx->covariancePosition()(Trk::y, Trk::y)));
+      m_hPvErrZ->Fill(std::sqrt(vx->covariancePosition()(Trk::z, Trk::z)));
 
       //m_hPvErrX->Fill(Amg::error((*vxIter)->recVertex().covariancePosition(),Trk::x));   //Why this doesn't work?
       //m_hPvErrY->Fill(Amg::error((*vxIter)->recVertex().covariancePosition(),Trk::y));
