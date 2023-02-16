@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include <vector>
 #include <exception>
@@ -29,18 +29,20 @@ Muon::nsw::NSWTriggerMMMonElink::NSWTriggerMMMonElink (const uint32_t *bs, const
   m_head_BCID =           bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPMON::size_head_BCID-1);          pp+=Muon::nsw::MMTPMON::size_head_BCID;
   m_head_orbit =          bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPMON::size_head_orbit-1);         pp+=Muon::nsw::MMTPMON::size_head_orbit;
   m_head_spare =          bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPMON::size_head_spare-1);         pp+=Muon::nsw::MMTPMON::size_head_spare;
-  m_L1ID =                bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPMON::size_L1ID-1);               pp+=Muon::nsw::MMTPMON::size_L1ID;
+  m_L1ID =                bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPMON::size_L1ID-1);               pp+=Muon::nsw::MMTPMON::size_L1ID;    
   m_head_coincBCID =      bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPMON::size_head_coincBCID-1);     pp+=Muon::nsw::MMTPMON::size_head_coincBCID;
-  m_head_regionCount =    bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPMON::size_head_regionCount-1);   pp+=Muon::nsw::MMTPMON::size_head_regionCount;
-  m_head_coincRegion =    bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPMON::size_head_coincRegion-1);   pp+=Muon::nsw::MMTPMON::size_head_coincRegion;
-  m_head_reserved =       bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPMON::size_head_reserved-1);      pp+=Muon::nsw::MMTPMON::size_head_reserved;
+  m_head_regionCount =    bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPMON::size_head_regionCount-1);   pp+=Muon::nsw::MMTPMON::size_head_regionCount;  
+  m_head_coincRegion =    bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPMON::size_head_coincRegion-1);   pp+=Muon::nsw::MMTPMON::size_head_coincRegion;  
+  m_head_reserved =       bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPMON::size_head_reserved-1);      pp+=Muon::nsw::MMTPMON::size_head_reserved; 
 
-  while ( pp < (remaining-2) * sizeof(uint32_t) ){
+  //following logic could be improved if the number of stream packets is known a priori
+  while ( pp < remaining * sizeof(uint32_t) * 8 && pp < (m_wordCountFlx-1) * sizeof(uint32_t) * 8 ){
+    //-1 since we know there's a crc/trailer at the end
     //NB here using sizes from the finder but stream header is identical
     uint32_t current_streamID =     bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPMON::size_finder_streamID-1);    pp+=Muon::nsw::MMTPMON::size_finder_streamID;
     uint32_t current_regionCount =  bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPMON::size_finder_regionCount-1); pp+=Muon::nsw::MMTPMON::size_finder_regionCount;
     uint32_t current_triggerID =    bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPMON::size_finder_triggerID-1);   pp+=Muon::nsw::MMTPMON::size_finder_triggerID;
-
+    
     if (current_streamID == 0b10110001){
       //finder
       m_finder_streamID.push_back(    current_streamID);
@@ -74,13 +76,16 @@ Muon::nsw::NSWTriggerMMMonElink::NSWTriggerMMMonElink (const uint32_t *bs, const
 
 
     } else { 
-      Muon::nsw::NSWTriggerElinkException e ("Stream ID in MMTP monitoring packet now recognized");
+      std::ostringstream s;
+      s << "Stream ID in MMTP monitoring packet now recognized: " << std::hex << current_streamID << std::dec;
+      Muon::nsw::NSWTriggerElinkException e ( s.str().c_str() );
       throw e;
     }
 
-    //warning: how the swROD is behaving if the last work is a uint16 only? Just 0-padding?
-    m_trailer_CRC =         bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPMON::size_trailer_CRC-1);        pp+=Muon::nsw::MMTPMON::size_trailer_CRC;
-
   }
+
+  //warning: how the swROD is behaving if the last work is a uint16 only? Just 0-padding?
+  m_trailer_CRC =         bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPMON::size_trailer_CRC-1);        pp+=Muon::nsw::MMTPMON::size_trailer_CRC;
+
 
 }

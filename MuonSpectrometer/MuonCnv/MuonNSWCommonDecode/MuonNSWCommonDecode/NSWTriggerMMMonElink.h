@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _MUON_NSW_TRIGGER_MMMON_ELINK_H_
 #define _MUON_NSW_TRIGGER_MMMON_ELINK_H_
@@ -38,7 +38,7 @@ namespace Muon
       uint32_t head_coincBCID () const {return m_head_coincBCID;};
       uint32_t head_regionCount () const {return m_head_regionCount;};
       uint32_t head_coincRegion () const {return m_head_coincRegion;};
-      uint32_t head_reserved () const {return m_head_reserved;};
+      uint64_t head_reserved () const {return m_head_reserved;};
       const std::vector<uint32_t>& finder_streamID () const {return m_finder_streamID;}
       const std::vector<uint32_t>& finder_regionCount () const {return m_finder_regionCount;}
       const std::vector<uint32_t>& finder_triggerID () const {return m_finder_triggerID;};
@@ -79,7 +79,7 @@ namespace Muon
        uint32_t m_head_coincBCID;
        uint32_t m_head_regionCount;
        uint32_t m_head_coincRegion;
-       uint32_t m_head_reserved;
+       uint64_t m_head_reserved;
        std::vector<uint32_t> m_finder_streamID;
        std::vector<uint32_t> m_finder_regionCount;
        std::vector<uint32_t> m_finder_triggerID;
