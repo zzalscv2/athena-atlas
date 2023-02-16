@@ -338,13 +338,9 @@ void AddFlowByShifting::MoveDescendantsToParent
             for (auto descpart: *descvtx)
 #endif
               {
-                CLHEP::HepLorentzVector momentum(descpart->momentum().px(),
-                                                 descpart->momentum().py(),
-                                                 descpart->momentum().pz(),
-                                                 descpart->momentum().e());
                 ATH_MSG_DEBUG("Descendant particle: " << descpart <<
-                              " Eta = "               << momentum.pseudoRapidity() <<
-                              " Phi = "               << momentum.phi() );
+                              " Eta = "               << descpart->momentum().pseudoRapidity() <<
+                              " Phi = "               << descpart->momentum().phi() );
               }
         }
   }
@@ -359,9 +355,9 @@ double AddFlowByShifting::AddFlowToParent (HepMC::GenParticlePtr parent, const H
                                    parent->momentum().py(),
                                    parent->momentum().pz(),
                                    parent->momentum().e());
-  double pt    = momentum.perp();
-  double eta   = momentum.pseudoRapidity();
-  double phi_0 = momentum.phi();
+  double pt    = parent->momentum().perp();
+  double eta   = parent->momentum().pseudoRapidity();
+  double phi_0 = parent->momentum().phi();
 
   int error_=0;
   if(pt    !=pt)    {ATH_MSG_ERROR("ERROR pt  of track  is not defined");error_=1;} //true if pt==nan
