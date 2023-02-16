@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -145,6 +145,7 @@ protected:
   SCT_RODVetoTool* m_tool{nullptr};
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(SCT_RODVetoTool_test, Initialization) {
   ASSERT_TRUE( m_tool->initialize().isSuccess() );
 }
