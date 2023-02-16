@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPC.h"
@@ -52,10 +52,10 @@ StatusCode TrigT1RPC::initialize(){
 StatusCode TrigT1RPC::execute() {
 
     ATH_MSG_DEBUG ("in execute()");
-
-    SG::ReadCondHandle<RpcCablingCondData> readHandle{m_readKey, Gaudi::Hive::currentContext()};
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    SG::ReadCondHandle<RpcCablingCondData> readHandle{m_readKey, ctx};
     const RpcCablingCondData* readCdo{*readHandle};
-    SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgrHandle{m_muDetMgrKey};
+    SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgrHandle{m_muDetMgrKey, ctx};
     const MuonGM::MuonDetectorManager* muDetMgr = muDetMgrHandle.cptr();
     
     RPCsimuData data;         // instanciate the container for the RPC digits
@@ -261,123 +261,111 @@ StatusCode TrigT1RPC::execute() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TrigT1RPC::fill_RPCdata(RPCsimuData& data, const RpcCablingCondData* readCdo, const MuonGM::MuonDetectorManager* muDetMgr)
+StatusCode TrigT1RPC::fill_RPCdata(RPCsimuData &data, const RpcCablingCondData *readCdo, const MuonGM::MuonDetectorManager *muDetMgr)
 {
-    std::string space = "                          ";
+  std::string space = "                          ";
 
-    ATH_MSG_DEBUG("in execute(): fill RPC data");
+  ATH_MSG_DEBUG("in execute(): fill RPC data");
 
-    typedef RpcDigitContainer::const_iterator collection_iterator;
-    typedef RpcDigitCollection::const_iterator digit_iterator;
+  typedef RpcDigitContainer::const_iterator collection_iterator;
+  typedef RpcDigitCollection::const_iterator digit_iterator;
 
-    SG::ReadHandle<RpcDigitContainer> rh_rpcDigits(m_rpcDigitKey);
-    if(!rh_rpcDigits.isValid()){
+  SG::ReadHandle<RpcDigitContainer> rh_rpcDigits(m_rpcDigitKey);
+  if (!rh_rpcDigits.isValid())
+  {
       ATH_MSG_WARNING("No RPC digits container found");
       return StatusCode::SUCCESS;
-    }
-    const RpcDigitContainer* container = rh_rpcDigits.cptr();
+  }
+  const RpcDigitContainer *container = rh_rpcDigits.cptr();
 
-    // Cleanup the BIS78 strip data 
-    CHECK( m_BIS78TrigSim.clear() );
+  // Cleanup the BIS78 strip data
+  CHECK(m_BIS78TrigSim.clear());
 
-    int bisStationIndex=m_idHelperSvc->rpcIdHelper().stationNameIndex("BIS");
+  int bisStationIndex = m_idHelperSvc->rpcIdHelper().stationNameIndex("BIS");
 
-    collection_iterator it1_coll= container->begin(); 
-    collection_iterator it2_coll= container->end(); 
+  for (const RpcDigitCollection *rpcCollection : *container)
+  {
 
-    for (  ; it1_coll!=it2_coll; ++it1_coll) 
-    {
-        const  RpcDigitCollection* rpcCollection = *it1_coll;
- 
-        Identifier moduleId = rpcCollection->identify();
+      Identifier moduleId = rpcCollection->identify();
 
-	if (m_idHelperSvc->isRpc(moduleId))
+      if (!m_idHelperSvc->isRpc(moduleId))
+      {
+        continue;
+      }
+
+      for (const RpcDigit *rpcDigit : *rpcCollection) {
+     
+        Identifier channelId = rpcDigit->identify();
+        const int stationType = m_idHelperSvc->rpcIdHelper().stationName(channelId);
+        std::string StationName = m_idHelperSvc->rpcIdHelper().stationNameString(stationType);
+        int StationEta = m_idHelperSvc->rpcIdHelper().stationEta(channelId);
+        int StationPhi = m_idHelperSvc->rpcIdHelper().stationPhi(channelId);
+        int DoubletR = m_idHelperSvc->rpcIdHelper().doubletR(channelId);
+        int DoubletZ = m_idHelperSvc->rpcIdHelper().doubletZ(channelId);
+        int DoubletP = m_idHelperSvc->rpcIdHelper().doubletPhi(channelId);
+        int GasGap = m_idHelperSvc->rpcIdHelper().gasGap(channelId);
+        int MeasuresPhi = m_idHelperSvc->rpcIdHelper().measuresPhi(channelId);
+        int Strip = m_idHelperSvc->rpcIdHelper().strip(channelId);
+
+        const MuonGM::RpcReadoutElement *descriptor =
+            muDetMgr->getRpcReadoutElement(channelId);
+
+        // Get the global position of RPC strip from MuonDetDesc
+        Amg::Vector3D pos = descriptor->stripPos(channelId);
+
+        // Get the Level-1 numbering schema for the RPC strips
+        unsigned long int strip_code_cab = readCdo->strip_code_fromOffId(StationName, StationEta, StationPhi,
+                                                                         DoubletR, DoubletZ, DoubletP, GasGap, MeasuresPhi, Strip);
+
+        if (strip_code_cab)
         {
-            digit_iterator it1_digit = rpcCollection->begin();
-            digit_iterator it2_digit = rpcCollection->end();
+        // Fill data for the Level-1 RPC digit
+        float xyz[4];
+        xyz[1] = pos.x() / 10.;    // coo[0];            //RPC strip x coordinate
+        xyz[2] = pos.y() / 10.;    // coo[1];            //RPC strip y coordinate
+        xyz[3] = pos.z() / 10.;    // coo[2];            //RPC strip z coordinate
+        xyz[0] = rpcDigit->time(); // time of digits
 
-            for ( ; it1_digit!=it2_digit; ++it1_digit) 
-            {
-                const RpcDigit* rpcDigit = *it1_digit;
-		
-                if (rpcDigit->is_valid(&m_idHelperSvc->rpcIdHelper())) 
-                {
-		    Identifier channelId = rpcDigit->identify();
-		    const int stationType   = m_idHelperSvc->rpcIdHelper().stationName(channelId);
-		    std::string StationName = m_idHelperSvc->rpcIdHelper().stationNameString(stationType);
-		    int StationEta          = m_idHelperSvc->rpcIdHelper().stationEta(channelId);
-		    int StationPhi          = m_idHelperSvc->rpcIdHelper().stationPhi(channelId); 
-                    int DoubletR            = m_idHelperSvc->rpcIdHelper().doubletR(channelId);
-                    int DoubletZ            = m_idHelperSvc->rpcIdHelper().doubletZ(channelId);
-                    int DoubletP            = m_idHelperSvc->rpcIdHelper().doubletPhi(channelId);
-                    int GasGap              = m_idHelperSvc->rpcIdHelper().gasGap(channelId);
-                    int MeasuresPhi         = m_idHelperSvc->rpcIdHelper().measuresPhi(channelId);
-                    int Strip               = m_idHelperSvc->rpcIdHelper().strip(channelId);
-                    
-                    const MuonGM::RpcReadoutElement* descriptor =
-                                    muDetMgr->getRpcReadoutElement(channelId);
+        int param[3] = {0, 0, 0};
 
-		    //Get the global position of RPC strip from MuonDetDesc
-		    Amg::Vector3D pos = descriptor->stripPos(channelId);		    
+        RPCsimuDigit digit(0, strip_code_cab, param, xyz);
 
-                    // Get the Level-1 numbering schema for the RPC strips
-		    unsigned long int strip_code_cab = readCdo->strip_code_fromOffId(StationName,StationEta,StationPhi,
-						       DoubletR,DoubletZ,DoubletP,GasGap,MeasuresPhi,Strip);
-		    
-		    if(strip_code_cab) {
-		      // Fill data for the Level-1 RPC digit
-                        float xyz[4];
-			xyz[1] = pos.x()/10.;//coo[0];            //RPC strip x coordinate 
-			xyz[2] = pos.y()/10.;//coo[1];            //RPC strip y coordinate 
-			xyz[3] = pos.z()/10.;//coo[2];            //RPC strip z coordinate 
-                        xyz[0] = rpcDigit->time();  //time of digits
-                        
-			
-                        int param[3] = {0,0,0};
+        data << digit;
 
-                        RPCsimuDigit digit(0,strip_code_cab,param,xyz);
-			    
-                        data << digit;
-						
-                        ATH_MSG_DEBUG ( "Muon Identifiers from GM:" <<std::endl
-                                        << space << "StationName = " << StationName << std::endl
-                                        << space << "StationEta  = " << StationEta << std::endl 
-                                        << space << "StationPhi  = " << StationPhi << std::endl
-                                        << space << "DoubletR    = " << DoubletR << std::endl
-                                        << space << "DoubletZ    = " << DoubletZ << std::endl
-                                        << space << "DoubletP    = " << DoubletP << std::endl
-                                        << space << "GasGap      = " << GasGap << std::endl
-                                        << space << "MeasuresPhi = " << MeasuresPhi << std::endl
-                                        << space << "Strip       = " << Strip );
-                        
-		        ATH_MSG_DEBUG ("RPC Digit from GM:" << std::endl
-                                       << space << std::hex << channelId << std::dec << std::endl
-                                       << space << "GlobalPosition (cm) = " 
-                                       << setiosflags(std::ios::fixed) << std::setprecision(3)
-                                       << std::setw(11)<< pos.x() 
-                                       << setiosflags(std::ios::fixed) << std::setprecision(3)
-                                       << std::setw(11) << pos.y() 
-                                       << setiosflags(std::ios::fixed) << std::setprecision(3)
-                                       << std::setw(11) << pos.z() );
-                        
-                    }
-		    
-		    // This section fills the BIS strip data 
-		    if (stationType == bisStationIndex) {
-        	      ATH_MSG_DEBUG (  "Filling BIS strip data: StationName=" << StationName << " StationEta=" << StationEta 
-        		      << " StationPhi=" << StationPhi<< " MeasuresPhi=" << MeasuresPhi
-        		      << " Strip=" << Strip<< " GasGap=" << GasGap 
-			      << " Time=" <<rpcDigit->time() );
-		    
-		      m_BIS78TrigSim.AddStrip(StationEta, StationPhi, GasGap, MeasuresPhi, Strip);
-		    }
-  
-                }
-            }
-            std::string id = m_idHelperSvc->rpcIdHelper().show_to_string(moduleId);
+        ATH_MSG_DEBUG("Muon Identifiers from GM:" << std::endl
+                                                  << space << "StationName = " << StationName << std::endl
+                                                  << space << "StationEta  = " << StationEta << std::endl
+                                                  << space << "StationPhi  = " << StationPhi << std::endl
+                                                  << space << "DoubletR    = " << DoubletR << std::endl
+                                                  << space << "DoubletZ    = " << DoubletZ << std::endl
+                                                  << space << "DoubletP    = " << DoubletP << std::endl
+                                                  << space << "GasGap      = " << GasGap << std::endl
+                                                  << space << "MeasuresPhi = " << MeasuresPhi << std::endl
+                                                  << space << "Strip       = " << Strip);
+
+        ATH_MSG_DEBUG("RPC Digit from GM:" << std::endl
+                                           << space << std::hex << channelId << std::dec << std::endl
+                                           << space << "GlobalPosition (cm) = "
+                                           << setiosflags(std::ios::fixed) << std::setprecision(3)
+                                           << std::setw(11) << pos.x()
+                                           << setiosflags(std::ios::fixed) << std::setprecision(3)
+                                           << std::setw(11) << pos.y()
+                                           << setiosflags(std::ios::fixed) << std::setprecision(3)
+                                           << std::setw(11) << pos.z());
         }
-    }
 
-    return StatusCode::SUCCESS;
+        // This section fills the BIS strip data
+        if (stationType == bisStationIndex) {
+        ATH_MSG_DEBUG("Filling BIS strip data: StationName=" << StationName << " StationEta=" << StationEta
+                                                             << " StationPhi=" << StationPhi << " MeasuresPhi=" << MeasuresPhi
+                                                             << " Strip=" << Strip << " GasGap=" << GasGap
+                                                             << " Time=" << rpcDigit->time());
+
+        m_BIS78TrigSim.AddStrip(StationEta, StationPhi, GasGap, MeasuresPhi, Strip);
+        }
+      }
+      std::string id = m_idHelperSvc->rpcIdHelper().show_to_string(moduleId);
+  }
+
+  return StatusCode::SUCCESS;
 }
-
