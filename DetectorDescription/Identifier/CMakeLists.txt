@@ -4,7 +4,7 @@
 atlas_subdir( Identifier )
 
 # External dependencies:
-find_package( Boost )
+find_package( Boost COMPONENTS container)
 
 # Component(s) in the package:
 atlas_add_library( Identifier
