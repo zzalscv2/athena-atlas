@@ -160,7 +160,7 @@ def efMuIsoHypoConf(flags, name="UNSPECIFIED", inputMuons="UNSPECIFIED"):
 @AccumulatorCache
 def _muFastStepSeq(flags, is_probe_leg=False):
     # Step 1 (L2MuonSA)
-    selAcc = SelectionCA("L2MuFastReco",  is_probe_leg)
+    selAcc = SelectionCA("L2MuFastSel",  is_probe_leg)
     # Set EventViews for L2MuonSA step
     reco = InViewRecoCA("L2MuFastReco", isProbe=is_probe_leg)
 
@@ -168,11 +168,11 @@ def _muFastStepSeq(flags, is_probe_leg=False):
     reco.mergeReco( MuFastViewDataVerifier(flags) )
 
     # decoding
-    decodeAcc = muonDecodeCfg(flags, selAcc.name+"RoIs")
+    decodeAcc = muonDecodeCfg(flags, reco.name+"RoIs")
     reco.mergeReco(decodeAcc)
 
     #L2 SA alg
-    reco.mergeReco(l2MuFastAlgCfg( flags, roisKey=selAcc.name+"RoIs"))
+    reco.mergeReco(l2MuFastAlgCfg( flags, roisKey=reco.name+"RoIs"))
 
     selAcc.mergeReco(reco)
 
@@ -249,7 +249,7 @@ def muCombOvlpRmSequence(flags, is_probe_leg=False):
 @AccumulatorCache
 def _muEFSAStepSeq(flags, name='RoI'):
     #EF MS only
-    selAccMS = SelectionCA('EFMuMSReco_'+name)
+    selAccMS = SelectionCA('EFMuMSSel_'+name)
     
     viewName="EFMuMSReco_"+name
     if 'FS' in name:
@@ -266,7 +266,7 @@ def _muEFSAStepSeq(flags, name='RoI'):
     recoMS.mergeReco(EFMuonViewDataVerifierCfg(flags, name))
 
     # decoding
-    recoMS.mergeReco(muonDecodeCfg(flags, selAccMS.name+"RoIs"))
+    recoMS.mergeReco(muonDecodeCfg(flags, recoMS.name+"RoIs"))
 
     #Reco
     recoMS.mergeReco( MooSegmentFinderAlgCfg(flags,name="TrigMooSegmentFinder_"+name,UseTGCNextBC=False, UseTGCPriorBC=False))
