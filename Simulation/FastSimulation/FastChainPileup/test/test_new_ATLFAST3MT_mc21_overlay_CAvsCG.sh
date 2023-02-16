@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: CA vs Legacy code diff (ATLFAST3F_G4MS with overlay)
+# art-description: CA vs Legacy code diff (ATLFAST3MT with overlay)
 # art-type: grid
 # art-include: master/Athena
 # art-include: 23.0/Athena
@@ -17,7 +17,7 @@ mkdir -p run_ca; cd run_ca
 FastChain_tf.py \
   --CA \
   --runNumber 601229 \
-  --simulator ATLFAST3F_G4MS \
+  --simulator ATLFAST3MT \
   --physicsList FTFP_BERT_ATL \
   --useISF True \
   --jobNumber 1 \
@@ -41,10 +41,10 @@ echo  "art-result: $ca EVNTtoRDO_CA"
 status=$ca
 cd ../
 
-mkdir ./run_cg_pkl; cd run_cg_pkl
+mkdir -p ./run_cg_pkl; cd run_cg_pkl
 FastChain_tf.py \
   --runNumber 601229 \
-  --simulator ATLFAST3F_G4MS \
+  --simulator ATLFAST3MT \
   --steering doFCwOverlay \
   --physicsList FTFP_BERT_ATL \
   --useISF True \
@@ -76,7 +76,7 @@ cd ../
 mkdir -p ./run_cg; cd run_cg
 FastChain_tf.py \
   --runNumber 601229 \
-  --simulator ATLFAST3F_G4MS \
+  --simulator ATLFAST3MT \
   --steering doFCwOverlay \
   --physicsList FTFP_BERT_ATL \
   --useISF True \
