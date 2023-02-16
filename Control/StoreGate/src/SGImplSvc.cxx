@@ -1725,7 +1725,7 @@ void SGImplSvc::addAutoSymLinks (const std::string& key,
     bib = SG::BaseInfoBase::find (clid);
   }
   if ( bib ) {
-    std::vector<CLID> bases = bib->get_bases();
+    const std::vector<CLID>& bases = bib->get_bases();
     for ( std::size_t i = 0, iMax = bases.size(); i < iMax; ++i ) {
       if ( bases[i] != clid ) {
         if ( addSymLink( bases[i], dp ).isSuccess() ) {
