@@ -383,15 +383,19 @@ for mod in modifierList:
 #--------------------------------------------------------------
 # Increase scheduler checks and verbosity
 #--------------------------------------------------------------
+ConfigFlags.Scheduler.CheckDependencies = True
+ConfigFlags.Scheduler.ShowControlFlow = True
+ConfigFlags.Scheduler.ShowDataDeps = True
+ConfigFlags.Scheduler.EnableVerboseViews = True
+ConfigFlags.Input.FailOnUnknownCollections = opt.strictDependencies
+ConfigFlags.Scheduler.AutoLoadUnmetDependencies = not opt.strictDependencies
+
 from AthenaCommon.AlgScheduler import AlgScheduler
 AlgScheduler.CheckDependencies( True )
 AlgScheduler.ShowControlFlow( True )
 AlgScheduler.ShowDataDependencies( True )
 AlgScheduler.EnableVerboseViews( True )
 
-#--------------------------------------------------------------
-# Enable strict enforcing of data dependencies
-#--------------------------------------------------------------
 if opt.strictDependencies:
     AlgScheduler.setDataLoaderAlg("")
     if not hasattr(topSequence,"SGInputLoader"):
