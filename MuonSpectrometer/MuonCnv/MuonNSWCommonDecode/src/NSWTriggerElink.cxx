@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include <vector>
 #include <exception>
@@ -13,7 +13,7 @@ Muon::nsw::NSWTriggerElink::NSWTriggerElink (const uint32_t *bs, const uint32_t 
   // Felix header (2 words)
   uint32_t word = bs[0];
   unsigned int packet_nbytes = Muon::nsw::helper::get_bits (word, Muon::nsw::bitMaskFlxLENGTH, Muon::nsw::bitPosFlxLENGTH);
-  m_wordCountFlx = packet_nbytes; // / sizeof (uint32_t); //this should include the header itself
+  m_wordCountFlx = packet_nbytes; //this should include the header itself; copying from packet_nbytes becuase originally it was like this and it can be potentially reversed
   m_packet_status = Muon::nsw::helper::get_bits (word, Muon::nsw::bitMaskFlxSTATUS, Muon::nsw::bitPosFlxSTATUS);
   //maybe one can migrate to bit_slice also here
 
@@ -36,5 +36,5 @@ Muon::nsw::NSWTriggerElink::NSWTriggerElink (const uint32_t *bs, const uint32_t 
   m_elinkWord = bs[1];
   m_elinkId.reset(new Muon::nsw::NSWResourceId (m_elinkWord));
 
-  m_wordCount=m_wordCountFlx; //just trusting felix (TP packets have variables size in general; there's no expected size)
+  m_wordCount=m_wordCountFlx; //just trusting felix (TP packets have variables size in general; there's no expected size or prediction that can be done)
 }

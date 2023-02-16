@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _MUON_NSW_TRIGGER_MML1A_ELINK_H_
 #define _MUON_NSW_TRIGGER_MML1A_ELINK_H_
@@ -20,6 +20,8 @@ namespace Muon
     class NSWTriggerElinkException;
 
     class MMARTPacket;
+
+    class MMTrigPacket;
 
     class NSWTriggerMML1AElink : public NSWTriggerElink
     {
@@ -55,6 +57,7 @@ namespace Muon
       uint32_t trailer_CRC () const {return  m_trailer_CRC;};
 
       const std::vector<std::shared_ptr<Muon::nsw::MMARTPacket>>& art_packets () const {return m_art_packets;};
+      const std::vector<std::shared_ptr<Muon::nsw::MMTrigPacket>>& trig_packets () const {return m_trig_packets;};
 
      private:
 
@@ -87,6 +90,7 @@ namespace Muon
       uint32_t m_trailer_CRC;
 
       std::vector<std::shared_ptr<Muon::nsw::MMARTPacket>> m_art_packets;
+      std::vector<std::shared_ptr<Muon::nsw::MMTrigPacket>> m_trig_packets;
 
     };
   }

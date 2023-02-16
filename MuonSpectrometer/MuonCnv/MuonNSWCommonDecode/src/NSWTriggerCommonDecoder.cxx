@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "eformat/eformat.h"
@@ -57,9 +57,10 @@ Muon::nsw::NSWTriggerCommonDecoder::NSWTriggerCommonDecoder (const eformat::read
     }
     catch (Muon::nsw::NSWTriggerElinkException &e)
     {
+      //could think of an error msg print in case needed
       m_has_error = true;
       break;
-    }
+    }    
   }
 }
 

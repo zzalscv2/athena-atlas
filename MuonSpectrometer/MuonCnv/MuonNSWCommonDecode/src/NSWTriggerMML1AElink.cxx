@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include <vector>
 #include <exception>
@@ -12,6 +12,7 @@
 #include "MuonNSWCommonDecode/NSWTriggerMML1AElink.h"
 #include "MuonNSWCommonDecode/NSWResourceId.h"
 #include "MuonNSWCommonDecode/MMARTPacket.h"
+#include "MuonNSWCommonDecode/MMTrigPacket.h"
 
 Muon::nsw::NSWTriggerMML1AElink::NSWTriggerMML1AElink (const uint32_t *bs, const uint32_t remaining):
   NSWTriggerElink (bs, remaining)
@@ -43,8 +44,9 @@ Muon::nsw::NSWTriggerMML1AElink::NSWTriggerMML1AElink (const uint32_t *bs, const
   //this is important! It identifies the elink! It should be ABCD1230/ABCD1231/ABCD1232
   //not checked during decoding but must be checked at some point
 
-  while ( pp < (remaining-2) * sizeof(uint32_t) ){
-    //a -2 needed cause remaining includes felix header words
+  //following logic could be improved if the number of stream blocks is known a priori
+  while ( pp < remaining * sizeof(uint32_t) * 8 && pp < (m_wordCountFlx-1) * sizeof(uint32_t) * 8 ){
+    //-1 since we know there's a crc/trailer at the end
     uint32_t current_stream_head_nbits =     bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_stream_head_nbits-1);     pp+= Muon::nsw::MMTPL1A::size_stream_head_nbits;
     uint32_t current_stream_head_nwords =    bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_stream_head_nwords-1);    pp+= Muon::nsw::MMTPL1A::size_stream_head_nwords;
     uint32_t current_stream_head_fifo_size = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_stream_head_fifo_size-1); pp+= Muon::nsw::MMTPL1A::size_stream_head_fifo_size;
@@ -73,13 +75,28 @@ Muon::nsw::NSWTriggerMML1AElink::NSWTriggerMML1AElink (const uint32_t *bs, const
   }
 
   for (uint i=0; i<m_stream_data.size(); i++){
-    if (m_stream_head_streamID[i]!=0xAAA4){
-      //the it's an ART packet
+    if (m_stream_head_streamID[i]>=0xAAA0 && m_stream_head_streamID[i]<0xAAA4){
+      //then it's an ART packet
       for (uint j = 0; j < m_stream_data[i].size(); j++){
-	m_art_packets.push_back( std::make_shared<Muon::nsw::MMARTPacket>(m_stream_data[i][j]) ); //arg will be a vector<uint32_t> of size 3
+        if ( m_stream_data[i][j].size()!=3 ){
+          Muon::nsw::NSWTriggerElinkException e ("Stream ID 0xAAA[0-3] with a word longer different than three uint32_t's");
+          throw e;
+        }
+        m_art_packets.push_back( std::make_shared<Muon::nsw::MMARTPacket>(m_stream_data[i][j]) ); //arg will be a vector<uint32_t> of size 3
       }
+    } else if (m_stream_head_streamID[i]==0xAAA4){
+      //then it's a trigger packet
+      for (uint j = 0; j < m_stream_data[i].size(); j++){
+        if ( m_stream_data[i][j].size()!=1 ){
+          Muon::nsw::NSWTriggerElinkException e ("Stream ID 0xAAA4 with a word longer than one uint32_t");
+          throw e;
+        }
+        m_trig_packets.push_back( std::make_shared<Muon::nsw::MMTrigPacket>(m_stream_data[i][j][0]) ); //arg will be a uint32_t, just 1!
+      }
+    } else {
+      Muon::nsw::NSWTriggerElinkException e ("Stream ID in MMTP L1A packet now recognized");
+      throw e;
     }
-    //if 0xAAA4 then it's a trigger packet; format not yet defined
   }
 
   //warning: how the swROD is behaving if the last work is a uint16 only? Just 0-padding?

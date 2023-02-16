@@ -4,7 +4,7 @@
 atlas_subdir( MuonNSWCommonDecode )
 
 # Use tdaq-common packages
-find_package( tdaq-common COMPONENTS DataReader EventStorage eformat ers)
+find_package( tdaq-common COMPONENTS DataReader EventStorage eformat eformat_write ers)
 find_package( Boost )
 find_package( ROOT REQUIRED COMPONENTS Core Hist Tree RIO Gpad Graf )
 
@@ -27,6 +27,11 @@ atlas_add_executable (test_nsw_common_decoder
 
 atlas_add_executable (test_nsw_trigger_common_decoder
 		      src/test/test_nsw_trigger_common_decoder.cxx
+          INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+		      LINK_LIBRARIES MuonNSWCommonDecode ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES} ${ROOT_LIBRARIES})
+
+atlas_add_executable (test_nsw_trigger_common_decoder_txt
+		      src/test/test_nsw_trigger_common_decoder_txt.cxx
           INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
 		      LINK_LIBRARIES MuonNSWCommonDecode ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES} ${ROOT_LIBRARIES})
 

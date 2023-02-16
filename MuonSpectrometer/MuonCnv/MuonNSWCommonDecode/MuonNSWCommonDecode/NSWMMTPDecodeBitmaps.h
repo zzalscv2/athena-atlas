@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _MUON_NSW_MMTP_DECODE_BITMAPS_H_
@@ -84,22 +84,30 @@ namespace Muon
       constexpr int size_art_ARTs =              6;
     };
 
+    namespace MMTRIG {
+      constexpr int size_trig_BCID =            12;
+      constexpr int size_trig_reserved =         2;
+      constexpr int size_trig_dTheta =           5;
+      constexpr int size_trig_phiBin =           6;
+      constexpr int size_trig_rBin =             7;
+    };
+
   }
 }
 
 template <typename T, typename X>
 T bit_slice(const X words[], int start, int end){
-  //start and end are the positions in the entire stream                                                                                                
-  //start and end included;                                                                                                                             
+  //start and end are the positions in the entire stream
+  //start and end included;
   int wordSize = sizeof(X)*8;
   T s = 0;
   int n = end / wordSize;
   for(int i= 0; i <= n; ++i){
-    s = (s << wordSize) + words[i]; //if T is too small, does not care, it's user fault                                                                 
-    //when a fragment is splitted between N words, T should be at least of the size of N*words (in order to accomodate it)                              
+    s = (s << wordSize) + words[i]; //if T is too small, does not care, it's user fault
+    //when a fragment is splitted between N words, T should be at least of the size of N*words (in order to accomodate it)
   }
   s >>= (n+1) * wordSize - (end+1);
-  T mask = (((T)1) << (end - start + 1))- 1; //len = end - start + 1                                                                                    
+  T mask = (((T)1) << (end - start + 1))- 1; //len = end - start + 1
   s &= mask;
   return s;
 }
