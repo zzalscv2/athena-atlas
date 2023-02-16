@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -19,6 +19,7 @@ namespace PileUpTesting
 
 class PileUpHashHelper_test : public ::testing::Test {};
 
+// cppcheck-suppress syntaxError
 TEST_F(PileUpHashHelper_test, empty_mixture) {
   unsigned long long reference = 0;
   xAOD::EventInfo::PileUpMixtureID test{};
