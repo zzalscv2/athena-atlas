@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthenaKernel/BaseInfo.h
@@ -106,7 +106,7 @@
  *     This involves a @a dynamic_cast.  Returns 0 if the cast fails.
  *
  *@code
- *   static std::vector<CLID> get_bases ()
+ *   static const std::vector<CLID>& get_bases ()
  @endcode
  *     Return all the known bases of @a T (that have class IDs).
  *     @a T itself will be included in this list.
@@ -567,7 +567,7 @@ public:
    * @brief Return the class IDs of all known bases of @a T (that
    *        have class IDs).  The list will include @a T itself.
    */
-  std::vector<CLID> get_bases () const;
+  const std::vector<CLID>& get_bases () const;
 
   /**
    * @brief Return the @c type_info's of all known bases of @a T.
@@ -848,7 +848,7 @@ public:
    * @brief Return the class IDs of all known bases of @a T (that
    *        have class IDs).  The list will include @a T itself.
    */
-  static std::vector<CLID> get_bases ();
+  static const std::vector<CLID>& get_bases ();
 
 
   /**
