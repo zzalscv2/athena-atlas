@@ -22,6 +22,6 @@ def MuonClusterHypoAlgConfig(flags, name="MuonClusterHypoAlgConfig"):
 
 def MuonClusterHypoToolConfig(flags, name="MuonClusterHypoToolConfig"):
     """Monitoring Tool Configuration for HypoTool"""
-    return CompFactory.MuonClusterHypoTool(
+    return CompFactory.MuonClusterHypoTool(name,
         MonTool = HypoMon.trigMuonClusterHypoToolMonitoring(flags),
         acceptAll = False)
