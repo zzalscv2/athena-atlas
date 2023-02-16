@@ -2,19 +2,21 @@
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 _all_domains = [
+    "Trigger",
+    "BeamSpotDecoration",
     "Calo", "Tracking",
     "HGTDExtension",
-    "CaloExtension",
-    "Muon", "CombinedMuon",
+    "Muon","CombinedMuon",
     "Egamma",
+    "CaloExtension",
     "TrackCellAssociation",
     "PFlow", "Jet", "BTagging",
     "Tau",
+    "GlobalFELinking",
     "Met",
     "CaloRinger",
     "AFP",
     "HI",
-    "BeamSpotDecoration",
     "PostProcessing",
 ]
 
@@ -22,36 +24,25 @@ _all_domains = [
 def createRecoConfigFlags():
     """Return an AthConfigFlags object with required flags"""
     flags = AthConfigFlags()
-    # Different components
-    flags.addFlag("Reco.EnableBTagging",
-                  lambda prevFlags: prevFlags.Reco.EnableJet)
-    flags.addFlag("Reco.EnableCombinedMuon",
-                  lambda prevFlags: prevFlags.Detector.EnableMuon and
-                  prevFlags.Reco.EnableTracking)
-    flags.addFlag("Reco.EnableEgamma",
-                  lambda prevFlags: prevFlags.Detector.EnableCalo)
-    flags.addFlag("Reco.EnableCaloRinger",
-                  lambda prevFlags: prevFlags.Reco.EnableEgamma)
-    flags.addFlag("Reco.EnableJet", lambda prevFlags: (
-        prevFlags.Detector.EnableCalo
-        and prevFlags.Reco.EnableTracking
-        and prevFlags.Reco.EnableEgamma
-        and prevFlags.Reco.EnableCombinedMuon
-        and prevFlags.Reco.EnablePFlow))
-    flags.addFlag("Reco.EnablePFlow", lambda prevFlags: (
-        prevFlags.Reco.EnableTracking
-        and prevFlags.Detector.EnableCalo
-        and prevFlags.Tracking.doVertexFinding))
-    flags.addFlag("Reco.EnableTau", lambda prevFlags: prevFlags.Reco.EnableJet)
-    flags.addFlag("Reco.EnableMet", lambda prevFlags: (
-        prevFlags.Reco.EnableJet
-        and prevFlags.Reco.EnableTau))
+
+    # The various reconstruction domains/steps.
+    # Note that Calo and Muon System Reconstruction
+    # depend just on the Detector.EnableCalo and
+    # Detector.EnableMuon flags.
+
+    # Enable Tracking Reconstruction
     flags.addFlag("Reco.EnableTracking",
                   lambda prevFlags: prevFlags.Detector.EnableID or
                   prevFlags.Detector.EnableITk)
+    # Enable HGTD Reconstruction
     flags.addFlag("Reco.EnableHGTDExtension",
                   lambda prevFlags: prevFlags.Reco.EnableTracking and
                   prevFlags.Detector.EnableHGTD)
+    # Enable Electron/Photon (EGamma) Reconstruction
+    flags.addFlag("Reco.EnableEgamma",
+                  lambda prevFlags: prevFlags.Detector.EnableCalo)
+    # Enable Caching of InDet TrackParticles extension to
+    # Calorimeter. Used by (Muon,PFlow,Tau)
     flags.addFlag("Reco.EnableCaloExtension", lambda prevFlags: (
         (
             prevFlags.Reco.EnablePFlow
@@ -60,14 +51,46 @@ def createRecoConfigFlags():
         )
         and prevFlags.Detector.EnableCalo
         and prevFlags.Reco.EnableTracking))
-    flags.addFlag("Reco.EnableTrackCellAssociation",
-                  lambda prevFlags: prevFlags.Detector.EnableCalo and
+    # Enable Combined (InDet+MS) Muon Reconstruction
+    flags.addFlag("Reco.EnableCombinedMuon",
+                  lambda prevFlags: prevFlags.Detector.EnableMuon and
                   prevFlags.Reco.EnableTracking)
-    flags.addFlag("Reco.GlobalFELinking",
+    # Enable PFlow Reconstruction
+    flags.addFlag("Reco.EnablePFlow", lambda prevFlags: (
+        prevFlags.Reco.EnableTracking
+        and prevFlags.Detector.EnableCalo
+        and prevFlags.Tracking.doVertexFinding))
+    # Enable Jet Reconstruction
+    flags.addFlag("Reco.EnableJet", lambda prevFlags: (
+        prevFlags.Detector.EnableCalo
+        and prevFlags.Reco.EnableTracking
+        and prevFlags.Reco.EnableEgamma
+        and prevFlags.Reco.EnableCombinedMuon
+        and prevFlags.Reco.EnablePFlow))
+    # Enable Tau Reconstruction
+    flags.addFlag("Reco.EnableTau", lambda prevFlags: prevFlags.Reco.EnableJet)
+    # Enable BTagging Reconstruction
+    flags.addFlag("Reco.EnableBTagging",
+                  lambda prevFlags: prevFlags.Reco.EnableJet)
+    # Enable MET Reconstruction
+    flags.addFlag("Reco.EnableMet", lambda prevFlags: (
+        prevFlags.Reco.EnableJet
+        and prevFlags.Reco.EnableTau))
+    # Enable the building of links between the newly
+    # created jet constituents (GlobalFE)
+    # and electrons,photons,muons and taus
+    flags.addFlag("Reco.EnableGlobalFELinking",
                   lambda prevFlags: prevFlags.Reco.EnableJet and
                   prevFlags.Reco.EnableTau and prevFlags.Reco.EnablePFlow and
                   prevFlags.Reco.EnableEgamma and
                   prevFlags.Reco.EnableCombinedMuon)
+    # Enable association of calorimeter cells to Tracks
+    flags.addFlag("Reco.EnableTrackCellAssociation",
+                  lambda prevFlags: prevFlags.Detector.EnableCalo and
+                  prevFlags.Reco.EnableTracking)
+    # Enable creation of "Rings" of calorimeter cells
+    flags.addFlag("Reco.EnableCaloRinger",
+                  lambda prevFlags: prevFlags.Reco.EnableEgamma)
 
     # This flags enables trigger data decoding (not trigger simulation)
     # EDMVersion > 0 check prevents this flag being true in jobs before
@@ -79,11 +102,11 @@ def createRecoConfigFlags():
     flags.addFlag("Reco.EnableHI",
                   lambda prevFlags: "_hi" in prevFlags.Input.ProjectName)
 
-    # enable alg for decorating EventInfo with BeamSpot info
+    # Enable alg for decorating EventInfo with BeamSpot info
     # (maybe not always available for calibration runs, etc)
     flags.addFlag("Reco.EnableBeamSpotDecoration", True)
 
-    # common thinning and other post-processing
+    # Enable common thinning and other post-processing
     flags.addFlag("Reco.EnablePostProcessing", True)
     flags.addFlag("Reco.PostProcessing.ThinNegativeClusters",
                   lambda prevFlags: prevFlags.Reco.EnablePostProcessing and
