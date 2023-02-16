@@ -12,8 +12,6 @@
 
 
 #include "InDetSimData/InDetSimData.h"
-#include <iostream>
-
 
 
 InDetSimData::InDetSimData() :
@@ -71,9 +69,4 @@ InDetSimData &InDetSimData::operator=(InDetSimData&& other) noexcept {
       m_deposits=std::move(other.m_deposits);
     }
   return *this;
-}
-
-InDetSimData::~InDetSimData()
-{
-    //    delete[] m_p_deposits;
 }

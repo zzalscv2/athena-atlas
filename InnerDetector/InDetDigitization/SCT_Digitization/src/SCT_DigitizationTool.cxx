@@ -758,6 +758,8 @@ StatusCode SCT_DigitizationTool::getNextEvent(const EventContext& ctx) {
 void SCT_DigitizationTool::addSDO(SiChargedDiodeCollection* collection, SG::WriteHandle<InDetSimDataCollection>* simDataCollMap) const {
   using list_t = SiTotalCharge::list_t;
   std::vector<InDetSimData::Deposit> deposits;
+  //Check for optimization
+  static_assert(std::is_nothrow_move_constructible<InDetSimData::Deposit>::value);
   deposits.reserve(5); // no idea what a reasonable number for this would be
   // with pileup
   // loop over the charged diodes
@@ -804,7 +806,7 @@ void SCT_DigitizationTool::addSDO(SiChargedDiodeCollection* collection, SG::Writ
       if (theDeposit != depositsR_end) {
         (*theDeposit).second += i_ListOfCharges->charge();
       } else { // create a new deposit
-        deposits.push_back(InDetSimData::Deposit(trkLink, i_ListOfCharges->charge()));
+        deposits.emplace_back(trkLink, i_ListOfCharges->charge());
       }
     }
 
@@ -823,7 +825,7 @@ void SCT_DigitizationTool::addSDO(SiChargedDiodeCollection* collection, SG::Writ
         id_readout = m_detID->strip_id(collection->identify(),row2D, strip2D);
       }
 
-      (*simDataCollMap)->insert(std::make_pair(id_readout, InDetSimData(deposits, (*i_chargedDiode).second.flag())));
+      (*simDataCollMap)->try_emplace(id_readout, std::move(deposits),(*i_chargedDiode).second.flag());
     }
   }
 }

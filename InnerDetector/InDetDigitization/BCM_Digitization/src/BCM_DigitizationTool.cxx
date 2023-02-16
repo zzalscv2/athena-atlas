@@ -135,7 +135,7 @@ void BCM_DigitizationTool::createRDOsAndSDOs(const EventContext& ctx)
 
   // Digitize hit info and create RDO for each module
   for (int iMod=0; iMod<8; ++iMod) {
-    if (!m_depositVect[iMod].empty()) m_simDataCollMap->insert(std::make_pair(Identifier(iMod), InDetSimData(m_depositVect[iMod])));
+    if (!m_depositVect[iMod].empty()) m_simDataCollMap->emplace(Identifier(iMod), m_depositVect[iMod]);
     std::vector<float> analog = createAnalog(iMod,m_enerVect[iMod],m_timeVect[iMod]);
     addNoise(iMod,analog, rngWrapper->getEngine(ctx));
     for (int iGain=0; iGain<2; ++iGain) {
