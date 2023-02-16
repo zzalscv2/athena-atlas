@@ -158,7 +158,7 @@ def RecoSteering(flags):
             log.info("---------- Configured particle flow tau FE linking")
 
     acc.flagPerfmonDomain('Jets')
-    if flags.Reco.GlobalFELinking:
+    if flags.Reco.EnableGlobalFELinking:
         # We also need to build links between the newly
         # created jet constituents (GlobalFE)
         # and electrons,photons,muons and taus
