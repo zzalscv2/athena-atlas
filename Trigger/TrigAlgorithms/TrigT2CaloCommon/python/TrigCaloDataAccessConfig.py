@@ -96,7 +96,7 @@ def trigCaloDataAccessSvcCfg( flags ):
         else:
             acc.merge(CaloOffsetCorrectionCfg(flags))
 
-    acc.addService( svc )
+    acc.addService( svc, primary=True )
     return acc
 
 
