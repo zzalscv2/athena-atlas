@@ -23,7 +23,7 @@ def ForwardTransportSvcCfg(flags, name="ForwardTransportSvc", **kwargs):
     kwargs.setdefault("PositionC2", 184)
     kwargs.setdefault("ApertureC1", 999)
     kwargs.setdefault("ApertureC2", 999)
-    if flags.Detector.GeometryALFA:
+    if flags.Detector.GeometryALFA or flags.Detector.GeometryAFP:
         return ALFAForwardTransportSvcCfg(name, **kwargs)
     if flags.Detector.GeometryZDC:
         return ZDCForwardTransportSvcCfg (name, **kwargs)
