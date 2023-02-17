@@ -61,6 +61,7 @@ run "Reconstruction" \
     --steering doRAWtoALL \
     --preInclude InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude \
     --postInclude TrigFastTrackFinder.ITkFastTrackFinderStandaloneConfig.ITkFastTrackFinderStandaloneCfg \
+    --preExec "ConfigFlags.ITk.Tracking.doFastTracking=True"
 
 run "IDPVM" \
     runIDPVM.py \
