@@ -45,6 +45,7 @@
 
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentFactory import CompFactory
 import TrkConfig.AtlasExtrapolatorToolsConfig as TC
 
@@ -264,7 +265,7 @@ def MCTruthClassifierExtrapolatorCfg(flags,
     result.setPrivateTools(MCTruthExtrapolator)
     return result
 
-
+@AccumulatorCache
 def InDetExtrapolatorCfg(flags, name='InDetExtrapolator', **kwargs):
     # Inner detector config cares mainly for the "Global".
     # This is usually the RungeKutta Propagator and a material
