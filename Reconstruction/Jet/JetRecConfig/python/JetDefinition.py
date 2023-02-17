@@ -378,6 +378,18 @@ class JetInputExternal(object):
     def __str__(self):
         return f"JetInputExternal({self.name},type={str(self.basetype)})"
     
+    def __eq__(self,other):
+        return all([
+            self.name == other.name,
+            self.basetype == other.basetype,
+            self.algoBuilder == other.algoBuilder,
+            # This needs to be executed
+            self.containername(None,None) == other.containername(None,None),
+            self.prereqs == other.prereqs,
+            self.filterfn == other.filterfn,
+            self.specs == other.specs
+        ])
+
 
 ########################################################################    
 
@@ -506,7 +518,7 @@ class JetInputConstit(object):
     # Define a string conversion for printing
     def __str__(self):
         return f"JetInputConstit({self.name},type={str(self.basetype)})"
-    
+
 
     
 @clonable

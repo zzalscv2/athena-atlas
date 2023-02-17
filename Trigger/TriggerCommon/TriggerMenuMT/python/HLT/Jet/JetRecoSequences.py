@@ -32,9 +32,6 @@ from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
-# prefix used in naming HLT collections
-jetNamePrefix = JetRecoCommon.getHLTPrefix() # "HLT_"
-
 ###############################################################################################
 ### --- Reco sequence getters ---                                                                  
 
@@ -108,9 +105,9 @@ def standardJetBuildSequence( configFlags, dataSource, clustersKey, **jetRecoDic
             PFHLTSequence,
             configFlags, clustersin=clustersKey, tracktype=jetRecoDict["trkopt"], cellsin="CaloCellsFS")
         buildSeq += pfseq
-        jetDef = JetRecoCommon.defineJets(jetRecoDict,pfoPrefix=pfoPrefix,prefix=jetNamePrefix)
+        jetDef = JetRecoCommon.defineJets(jetRecoDict,pfoPrefix=pfoPrefix,prefix=JetRecoCommon.getHLTPrefix())
     else:
-        jetDef = JetRecoCommon.defineJets(jetRecoDict,clustersKey=clustersKey,prefix=jetNamePrefix)
+        jetDef = JetRecoCommon.defineJets(jetRecoDict,clustersKey=clustersKey,prefix=JetRecoCommon.getHLTPrefix())
     
     # chosen jet collection
     jetsFullName = jetDef.fullname()
@@ -207,7 +204,7 @@ def standardJetRecoSequence( configFlags, dataSource, clustersKey, **jetRecoDict
         # Add the event shape alg if needed for area subtraction
         # WARNING : offline jets use the parameter voronoiRf = 0.9 ! we might want to harmonize this.
         
-        eventShapeAlg = JetInputConfig.buildEventShapeAlg( jetDef, jetNamePrefix, voronoiRf = 1.0 )
+        eventShapeAlg = JetInputConfig.buildEventShapeAlg( jetDef, JetRecoCommon.getHLTPrefix(), voronoiRf = 1.0 )
         recoSeq += eventShapeAlg
         # Not currently written because impossible to merge
         # across event views, which is maybe a concern in
@@ -334,7 +331,7 @@ def JetFSTrackingSequence(flags,trkopt,RoIs):
 def getFastFtaggedJetCopyAlg(flags,jetsIn,jetRecoDict):
 
     caloJetRecoDict = JetRecoCommon.jetRecoDictFromString(jetsIn)
-    caloJetDef = JetRecoCommon.defineJets(caloJetRecoDict,clustersKey=JetRecoCommon.getClustersKey(caloJetRecoDict),prefix=jetNamePrefix,suffix='fastftag')
+    caloJetDef = JetRecoCommon.defineJets(caloJetRecoDict,clustersKey=JetRecoCommon.getClustersKey(caloJetRecoDict),prefix=JetRecoCommon.getHLTPrefix(),suffix='fastftag')
     decorList = JetRecoCommon.getDecorList(jetRecoDict)
     copyJetAlg = JetRecConfig.getJetCopyAlg(jetsin=jetsIn,jetsoutdef=caloJetDef,decorations=decorList)
     ftaggedJetsIn = caloJetDef.fullname()
@@ -452,7 +449,8 @@ def reclusteredJetRecoSequence( configFlags, dataSource, clustersKey, **jetRecoD
     jetViewAlg, filteredJetsName = getJetViewAlg(configFlags,jetsIn=basicJetDef.fullname(),jetPtMin=rcJetPtMin,**jetRecoDict)
     recoSeq+=jetViewAlg
 
-    rcJetDef = JetRecoCommon.defineReclusteredJets(jetRecoDict, filteredJetsName, basicJetDef.inputdef.label, jetNamePrefix, '_'+jetRecoDict["jetCalib"])
+    rc_suffix = f"_{jetRecoDict['jetCalib']}" + (f"_{jetRecoDict['trkopt']}" if JetRecoCommon.doTracking(jetRecoDict) else "")
+    rcJetDef = JetRecoCommon.defineReclusteredJets(jetRecoDict, filteredJetsName, basicJetDef.inputdef.label, JetRecoCommon.getHLTPrefix(), rc_suffix)
     rcModList = [] # Could set substructure mods
     rcJetDef.modifiers = rcModList
 
@@ -465,9 +463,7 @@ def reclusteredJetRecoSequence( configFlags, dataSource, clustersKey, **jetRecoD
     monTool = JetOnlineMon.getMonTool_TrigJetAlgorithm(configFlags, "HLTJets/"+rcJetDef.fullname()+"/")
 
     rcJetDef._internalAtt['finalPJContainer'] = rcConstitPJKey
-    # Depending on whether running the trackings step
-    ftf_suffix = "" if not JetRecoCommon.doFSTracking(jetRecoDict) else "_ftf" 
-    rcJetRecAlg = JetRecConfig.getJetRecAlg(rcJetDef, monTool, ftf_suffix)
+    rcJetRecAlg = JetRecConfig.getJetRecAlg(rcJetDef, monTool)
     recoSeq += rcJetRecAlg
 
     jetsOut = recordable(rcJetDef.fullname())
@@ -477,7 +473,7 @@ def reclusteredJetRecoSequence( configFlags, dataSource, clustersKey, **jetRecoD
 # VR track jets reconstruction sequence
 def VRJetRecoSequence(configFlags, trkopt):
     recoSeq = parOR("VRJetRecSeq", [])
-    VRTrackJetDef = JetRecoCommon.defineVRTrackJets(Rmax=0.4, Rmin=0.02, VRMassScale=30000, Ptmin=4000, prefix=jetNamePrefix, suffix="")
+    VRTrackJetDef = JetRecoCommon.defineVRTrackJets(Rmax=0.4, Rmin=0.02, VRMassScale=30000, Ptmin=4000, prefix=JetRecoCommon.getHLTPrefix(), suffix="")
     VRTrackJetName = VRTrackJetDef.fullname()
     VRTrackJetDef = solveDependencies(VRTrackJetDef)
     constitPJAlg = JetRecConfig.getConstitPJGAlg(VRTrackJetDef.inputdef)

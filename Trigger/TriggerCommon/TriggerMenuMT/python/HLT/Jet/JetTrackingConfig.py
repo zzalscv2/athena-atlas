@@ -5,10 +5,15 @@
 from JetRecTools import JetRecToolsConfig
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, conf2toConfigurable
-from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 
+from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
+from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
+from InDetConfig.InDetPriVxFinderConfig import InDetTrigPriVxFinderCfg
+from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+
+from ..Config.MenuComponents import parOR
 
 def retrieveJetContext(trkopt):
     """Tell the standard jet config about the specific track related options we are using here.
@@ -17,17 +22,21 @@ def retrieveJetContext(trkopt):
      Then, later, passing this context name in the JetDefinition and standard helper functions will ensure
     these options will consistently be used everywhere.
 
-    returns the context dictionnary and the list of keys related to tracks in this dic.
+    returns the context dictionary and the list of keys related to tracks in this dic.
     """
 
     from JetRecConfig.StandardJetContext import jetContextDic
     if trkopt not in jetContextDic:
         # *****************
         # Set the options corresponding to trkopt to a new entry in jetContextDic 
-        IDTrigConfig = getInDetTrigConfig( 'jet' )
+        trksig = {
+            'ftf':    'jet',
+            'roiftf': 'jetSuper',
+        }[trkopt]
+        IDTrigConfig = getInDetTrigConfig( trksig )
 
         tracksname = IDTrigConfig.tracks_FTF()
-        verticesname = IDTrigConfig.vertex_jet
+        verticesname = IDTrigConfig.vertex
             
         tvaname = f"JetTrackVtxAssoc_{trkopt}"
         label = f"GhostTrack_{trkopt}"
@@ -42,52 +51,45 @@ def retrieveJetContext(trkopt):
             JetTracks        = f'JetSelectedTracks_{trkopt}',
         )
 
-
         # also declare some JetInputExternal corresponding to trkopt
         # This ensures the JetRecConfig helpers know about them.
         # We declare simplistic JetInputExternal, without algoBuilder, because the rest of the trigger config is in charge of producing these containers.
-        from JetRecConfig.StandardJetConstits import stdInputExtDic, JetInputExternal, xAODType
-        stdInputExtDic[tracksname]   =  JetInputExternal( tracksname, xAODType.TrackParticle)
-        stdInputExtDic[verticesname] =  JetInputExternal( verticesname, xAODType.Vertex)
+        from JetRecConfig.JetDefinition import JetInputExternal
+        from xAODBase.xAODType import xAODType
+        from JetRecConfig.StandardJetConstits import stdInputExtDic
+        stdInputExtDic[tracksname] = JetInputExternal( tracksname, xAODType.TrackParticle )
+        stdInputExtDic[verticesname] = JetInputExternal( verticesname, xAODType.Vertex )
         
     return jetContextDic[trkopt], jetContextDic["trackKeys"]
 
 @AccumulatorCache
 def JetFSTrackingCfg(flags, trkopt, RoIs):
     """ Create the tracking CA and return it as well as the output name dictionary """
+    seqname = f"JetFSTracking_{trkopt}_RecoSequence"
     acc = ComponentAccumulator()
+    acc.addSequence(parOR(seqname))
+
     IDTrigConfig = getInDetTrigConfig( 'jet' )
-    if trkopt == "ftf":
-        from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
-        from InDetConfig.InDetPriVxFinderConfig import InDetTrigPriVxFinderCfg
-        acc.merge(trigInDetFastTrackingCfg(flags, RoIs, signatureName="jet", in_view=False))
+    assert trkopt == "ftf"
+    acc.merge(
+        trigInDetFastTrackingCfg(
+            flags,
+            RoIs,
+            signatureName="jet",
+            in_view=False
+        ),
+        seqname
+    )
 
-        # get the jetContext for trkopt (and build it if not existing yet)
-        jetContext, trkKeys = retrieveJetContext(trkopt)
+    # get the jetContext for trkopt (and build it if not existing yet)
+    jetContext, trkKeys = retrieveJetContext(trkopt)
 
-        if IDTrigConfig.vertex_jet == IDTrigConfig.vertex:
-            acc.merge(
-                JetVertexCfg(
-                    flags, trkopt, IDTrigConfig.adaptiveVertex, jetContext,
-                )
-            )
-        else:
-            acc.merge(
-                InDetTrigPriVxFinderCfg(
-                    flags,
-                    signature="jet",
-                    adaptiveVertexing=IDTrigConfig.adaptiveVertex,
-                    TracksName=jetContext["Tracks"],
-                    VxCandidatesOutputName=IDTrigConfig.vertex,
-                )
-            )
-            acc.merge(
-                JetVertexCfg(
-                    flags, trkopt, IDTrigConfig.adaptiveVertex_jet, jetContext,
-                )
-            )
-    else:
-        raise ValueError(f"Unknown trkopt {trkopt}")
+    acc.merge(
+        JetVertexCfg(
+            flags, trkopt, IDTrigConfig.adaptiveVertex, jetContext,
+        ),
+        seqname
+    )
 
     # Add the pseudo-jet creator
     acc.addEventAlgo(
@@ -97,12 +99,57 @@ def JetFSTrackingCfg(flags, trkopt, RoIs):
             OutputContainer=jetContext["GhostTracks"],
             Label=jetContext["GhostTracksLabel"],
             SkipNegativeEnergy=True,
-        )
+        ),
+        seqname
     )
 
     # make sure we output only the key,value related to tracks (otherwise, alg duplication issues)
     outmap = { k:jetContext[k] for k in trkKeys }
     
+    return acc, outmap
+
+@AccumulatorCache
+def JetRoITrackingCfg(flags, jetsIn, trkopt, RoIs):
+    """ Create the tracking CA and return it as well as the output name dictionary """
+
+    acc = ComponentAccumulator()
+
+    acc.addEventAlgo(
+        CompFactory.AthViews.ViewDataVerifier(
+            name='VDVInDetFTF_jetsuper',
+            DataObjects=[
+                ('TrigRoiDescriptorCollection' , f'StoreGateSvc+{RoIs}'),
+                ('xAOD::JetContainer' , f'StoreGateSvc+{jetsIn}'),
+            ]
+        )
+    )
+
+    assert trkopt == "roiftf"
+    IDTrigConfig = getInDetTrigConfig( 'jetSuper' )
+    acc.merge(
+        trigInDetFastTrackingCfg(
+            flags,
+            RoIs,
+            signatureName="jetSuper",
+            in_view=True
+        )
+    )
+
+    acc.merge(
+        InDetTrigPriVxFinderCfg(
+            flags,
+            name="InDetTrigPriVxFinderjetSuper",
+            signature = "jetSuper",
+            adaptiveVertexing = IDTrigConfig.adaptiveVertex,
+            TracksName = IDTrigConfig.tracks_FTF(),
+            VxCandidatesOutputName = IDTrigConfig.vertex
+        )
+    )
+
+    # make sure we output only the key,value related to tracks (otherwise, alg duplication issues)
+    jetContext, trkKeys = retrieveJetContext(trkopt)
+    outmap = { k:jetContext[k] for k in trkKeys }
+
     return acc, outmap
 
 
@@ -158,11 +205,10 @@ def jetTTVA( flags, signature, jetseq, trkopt, config, verticesname=None, adapti
 @AccumulatorCache
 def JetVertexCfg(flags, trkopt, adaptiveVertex, jetContext):
     """ Create the jet vertexing """
-    from InDetConfig.InDetPriVxFinderConfig import InDetTrigPriVxFinderCfg
-    from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
 
     acc = InDetTrigPriVxFinderCfg(
         flags,
+        name="InDetTrigPriVxFinder_jetFS",
         signature = "jet",
         adaptiveVertexing = adaptiveVertex,
         TracksName = jetContext["Tracks"],
