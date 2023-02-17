@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtSegmentT0Fitter/MdtSegmentT0Fitter.h"
@@ -28,9 +28,6 @@ namespace {
   // number of fit parameters
   constexpr unsigned int NUMPAR=3;
  
-  // prints a message if a radius is bigger than this
-  constexpr double MAX_RAD=16.;
-
   // time corresponding to r=15 mm for internal rt
   //constexpr double TUBE_TIME = 757.22;
 
