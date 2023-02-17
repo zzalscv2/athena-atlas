@@ -57,7 +57,6 @@ namespace LVL1 {
         int m_lowerEM_eta;
         int m_upperEM_eta;
         int m_jfex;
-        int m_fpga;
         
         //This flag determines if the TT ID which are in the first and second energy rings are stored
         //in the jFEXForwardJetsInfo class. It is set to false to reduce quantity data stored in class
