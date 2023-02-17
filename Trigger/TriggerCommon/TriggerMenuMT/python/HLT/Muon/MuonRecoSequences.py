@@ -63,22 +63,21 @@ muNames = muonNames().getNames('RoI')
 muNamesFS = muonNames().getNames('FS')
 muNamesLRT = muonNames().getNames('LRT')
 
-def isCosmic():
+def isCosmic(flags):
   #FIXME: this might not be ideal criteria to determine if this is cosmic chain but used to work in Run2 and will do for now, ATR-22758
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
-  return (ConfigFlags.Beam.Type == BeamType.Cosmics)
+  return (flags.Beam.Type == BeamType.Cosmics)
 
 def isLRT(name):
   return "LRT" in name
 
 #Returns relevant track collection name
-def getIDTracks(name=''):
+def getIDTracks(flags, name=''):
 
   from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 
   if isLRT(name):
     return getInDetTrigConfig("muonLRT").tracks_FTF()
-  elif isCosmic():
+  elif isCosmic(flags):
     return getInDetTrigConfig("cosmics" ).tracks_IDTrig()
   else:
     return getInDetTrigConfig("muon").tracks_FTF()
@@ -281,7 +280,7 @@ def muFastRecoSequence( flags, RoIs, doFullScanID = False, InsideOutMode=False, 
   muFastAlg.forMS = "forMS"+postFix
   muFastAlg.FILL_FSIDRoI = doFullScanID
   muFastAlg.InsideOutMode = InsideOutMode
-  muFastAlg.TrackParticlesContainerName = getIDTracks()
+  muFastAlg.TrackParticlesContainerName = getIDTracks(flags)
   #Do not run topo road and inside-out mode at the same time
   if InsideOutMode:
     muFastAlg.topoRoad = False
@@ -360,7 +359,7 @@ def muonIDCosmicTrackingSequence( RoIs, name, extraLoads=None ):
 
 
 
-def muCombRecoSequence( RoIs, name, l2mtmode=False ):
+def muCombRecoSequence( flags, RoIs, name, l2mtmode=False ):
 
   from AthenaCommon.CFElements import parOR
   postFix = ""
@@ -387,9 +386,9 @@ def muCombRecoSequence( RoIs, name, l2mtmode=False ):
     muCombAlg.L2CombinedMuonContainerName   = muNames.L2CBName+postFix
     
   if l2mtmode:
-    muCombAlg.TrackParticlesContainerName   = getIDTracks()
+    muCombAlg.TrackParticlesContainerName   = getIDTracks(flags)
   else:
-    muCombAlg.TrackParticlesContainerName   = getIDTracks(name)
+    muCombAlg.TrackParticlesContainerName   = getIDTracks(flags, name)
 
   muCombRecoSequence += muCombAlg
   sequenceOut = muCombAlg.L2CombinedMuonContainerName
@@ -522,9 +521,9 @@ def muEFCBRecoSequence( flags, RoIs, name ):
 
   elif "LRT" in name:
     ViewVerifyTrk = CfgMgr.AthViews__ViewDataVerifier("muonCBIDViewDataVerifierLRT")
-    ViewVerifyTrk.DataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks(name) ),
+    ViewVerifyTrk.DataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks(flags, name) ),
                                  ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_FlaggedCondData_TRIG' ),
-                                 ( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks(name) )]
+                                 ( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks(flags, name) )]
 
     if globalflags.InputFormat.is_bytestream():
       ViewVerifyTrk.DataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
@@ -533,9 +532,9 @@ def muEFCBRecoSequence( flags, RoIs, name ):
 
   else:
     ViewVerifyTrk = CfgMgr.AthViews__ViewDataVerifier("muonCBIDViewDataVerifier")
-    ViewVerifyTrk.DataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks() ),
+    ViewVerifyTrk.DataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks(flags) ),
                                  ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_FlaggedCondData_TRIG' ),
-                                 ( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks() )]
+                                 ( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks(flags) )]
 
     if globalflags.InputFormat.is_bytestream():
       ViewVerifyTrk.DataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
@@ -563,14 +562,14 @@ def muEFCBRecoSequence( flags, RoIs, name ):
     muEFCBRecoSequence += PTSeq
     trackParticles = PTTrackParticles[-1]
   #In case of cosmic Precision Tracking has been already called before hence no need to call here just retrieve the correct collection of tracks
-  elif isCosmic():
+  elif isCosmic(flags):
     if 'LRT' in name:
       PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( config = IDTrigConfig, rois = RoIs,  verifier = ViewVerifyTrk )
       PTSeq = parOR("precisionTrackingInMuonsLRT", PTAlgs  )
       muEFCBRecoSequence += PTSeq
       trackParticles = PTTrackParticles[-1]
     else:
-      trackParticles = getIDTracks()
+      trackParticles = getIDTracks(flags)
   else:
     PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( config = IDTrigConfig, rois = RoIs,  verifier = ViewVerifyTrk )
     PTSeq = parOR("precisionTrackingInMuons", PTAlgs  )
@@ -708,7 +707,7 @@ def muEFInsideOutRecoSequence(flags, RoIs, name):
     ViewVerifyInsideOut.DataObjects = [( 'Muon::RpcPrepDataContainer' , 'StoreGateSvc+RPC_Measurements' ),
                                        ( 'Muon::TgcPrepDataContainer' , 'StoreGateSvc+TGC_Measurements' ),
                                        ( 'MuonCandidateCollection' , 'StoreGateSvc+'+candidatesName )]
-    if not isCosmic(): ViewVerifyInsideOut.DataObjects += [( 'Muon::HoughDataPerSectorVec' , 'StoreGateSvc+HoughDataPerSectorVec')]
+    if not isCosmic(flags): ViewVerifyInsideOut.DataObjects += [( 'Muon::HoughDataPerSectorVec' , 'StoreGateSvc+HoughDataPerSectorVec')]
     if MuonGeometryFlags.hasCSC():
       ViewVerifyInsideOut.DataObjects += [( 'Muon::CscPrepDataContainer' , 'StoreGateSvc+CSC_Clusters' )]
     if (MuonGeometryFlags.hasSTGC() and MuonGeometryFlags.hasMM()): 
