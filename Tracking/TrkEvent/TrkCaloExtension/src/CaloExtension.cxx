@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkCaloExtension/CaloExtension.h"
@@ -12,7 +12,7 @@ CaloExtension::CaloExtension(
   std::vector<CurvilinearParameters>&& caloLayers)
   : m_caloEntryLayerIntersection(caloEntry)
   , m_muonEntryLayerIntersection(muonEntry)
-  , m_caloLayerIntersections(caloLayers)
+  , m_caloLayerIntersections(std::move(caloLayers))
 {}
 
 CaloExtension::~CaloExtension()
