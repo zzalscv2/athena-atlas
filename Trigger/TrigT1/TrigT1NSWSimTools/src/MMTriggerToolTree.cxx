@@ -38,7 +38,7 @@ namespace NSWL1 {
       m_trigger_diamond_iX          = new std::vector<int>();
       m_trigger_diamond_iU          = new std::vector<int>();
       m_trigger_diamond_iV          = new std::vector<int>();
-      m_trigger_diamond_age         = new std::vector<double>();
+      m_trigger_diamond_age         = new std::vector<int>();
       m_trigger_diamond_mx          = new std::vector<double>();
       m_trigger_diamond_my          = new std::vector<double>();
       m_trigger_diamond_Uavg        = new std::vector<double>();
