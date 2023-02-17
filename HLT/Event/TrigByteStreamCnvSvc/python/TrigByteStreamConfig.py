@@ -118,6 +118,8 @@ def TrigByteStreamCfg(flags, type_names=[]):
     proxy.ProviderNames += [address_provider.name]
     acc.addService(proxy)
 
-    acc.merge(SGInputLoaderCfg(flags, Load=address_provider.TypeNames, FailIfNoProxy=True))
+    acc.merge(SGInputLoaderCfg(flags,
+                               Load=address_provider.TypeNames,
+                               FailIfNoProxy=flags.Input.FailOnUnknownCollections))
 
     return acc

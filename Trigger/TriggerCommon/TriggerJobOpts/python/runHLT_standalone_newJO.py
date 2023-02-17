@@ -31,6 +31,9 @@ flags.Scheduler.ShowDataDeps = True
 flags.Scheduler.ShowDataFlow = True
 flags.Scheduler.ShowControlFlow = True
 flags.Scheduler.EnableVerboseViews = True
+flags.Scheduler.AutoLoadUnmetDependencies = True # FIXME: change this to False eventually
+flags.Input.FailOnUnknownCollections = True
+
 from CaloClusterCorrection.constants \
      import CALOCORR_JO, CALOCORR_POOL
 flags.Calo.ClusterCorrection.defaultSource = [CALOCORR_POOL, CALOCORR_JO] # temporary, until a complete support for cool is present
