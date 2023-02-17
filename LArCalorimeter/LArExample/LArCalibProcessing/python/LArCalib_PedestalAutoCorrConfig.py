@@ -37,14 +37,19 @@ def LArPedestalAutoCorrCfg(flags):
 
     else:   
        digKey="SC"
-       theLArLATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder",DumpFile = '',RawDataFile = '')
-       result.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(adcCollKey = digKey, adcBasCollKey = "", etCollKey = "",
-                                                               etIdCollKey = "", LATOMEDecoder = theLArLATOMEDecoder))
+       theLArLATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder",
+                                                           IgnoreBarrelChannels = flags.LArCalib.SCIgnoreBarrelChannels,
+                                                           IgnoreEndcapChannels = flags.LArCalib.SCIgnoreEndcapChannels,
+                                                           DumpFile = '',RawDataFile = '')
 
-    if flags.LArCalib.Input.isRawData:
-       result.addEventAlgo(CompFactory.LArDigitsAccumulator("LArDigitsAccumulator", KeyList = [digKey], 
+       if flags.LArCalib.Input.isRawData:
+          result.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(adcCollKey = digKey, adcBasCollKey = "", etCollKey = "",
+                                                               etIdCollKey = "", LATOMEDecoder = theLArLATOMEDecoder))
+          result.addEventAlgo(CompFactory.LArDigitsAccumulator("LArDigitsAccumulator", KeyList = [digKey], 
                                                              LArAccuDigitContainerName = "", NTriggersPerStep = 100,
                                                              isSC = flags.LArCalib.isSC, DropPercentTrig = 20))
+       else:   
+          result.addEventAlgo(CompFactory.LArRawSCCalibDataReadingAlg(LArSCAccDigitKey = digKey, LATOMEDecoder = theLArLATOMEDecoder))
 
     LArPedACBuilder=CompFactory.LArPedestalAutoCorrBuilder()
     LArPedACBuilder.KeyList         = [digKey,]

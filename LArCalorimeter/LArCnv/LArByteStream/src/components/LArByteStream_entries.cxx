@@ -14,6 +14,7 @@
 #include "../LArRawDataReadingAlg.h"
 #include "../LArRawCalibDataReadingAlg.h"
 #include "../LArRawSCDataReadingAlg.h"
+#include "../LArRawSCCalibDataReadingAlg.h"
 
 // Containers 
 DECLARE_COMPONENT( LArRawDataContByteStreamTool )
@@ -23,6 +24,7 @@ DECLARE_COMPONENT( LArLATOMEDecoder )
 DECLARE_COMPONENT( LArRawDataReadingAlg )
 DECLARE_COMPONENT( LArRawCalibDataReadingAlg )
 DECLARE_COMPONENT( LArRawSCDataReadingAlg )
+DECLARE_COMPONENT( LArRawSCCalibDataReadingAlg )
 
 DECLARE_CONVERTER( LArRawChannelContByteStreamCnv )
 DECLARE_CONVERTER( LArDigitContByteStreamCnv )

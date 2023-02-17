@@ -59,6 +59,7 @@ StatusCode LArAverages2Ntuple::initialize()
 
   ATH_CHECK(LArCond2NtupleBase::initialize());
 
+  ATH_CHECK( m_nt->addItem("IEvent",m_IEvent) );
   ATH_CHECK( m_nt->addItem("DAC",m_DAC,0,65535) );
   ATH_CHECK( m_nt->addItem("isPulsed",m_isPulsed,0,1) );
   ATH_CHECK( m_nt->addItem("delay",m_delay,0,240) );
@@ -121,6 +122,7 @@ StatusCode LArAverages2Ntuple::execute()
        // Add protection - Modif from JF. Marchand
        if ( !(*it) ) continue;
  
+       m_IEvent    = ctx.eventID().event_number();
        HWIdentifier chid=(*it)->channelID();
        m_isPulsed = (long)(*it)->isPulsed();
        if(m_keepPulsed && !(*it)->isPulsed()) continue;
@@ -148,8 +150,14 @@ StatusCode LArAverages2Ntuple::execute()
        for(unsigned int j=0;j<trueMaxSample;j++){
          m_Sum[j]   = sampleSum[j];
          m_SumSq[j] = sampleSum2[j];
-         m_Mean[j]  = mean[j];
-         m_RMS[j]   = RMSv[j];
+         if(m_Ntrigger){
+            m_Mean[j]  = mean[j];
+            m_RMS[j]   = RMSv[j];
+         } else {
+            m_Mean[j]=0;
+            m_RMS[j]=0;
+         }
+
        }
  
        m_onlChanId = chid.get_identifier32().get_compact();

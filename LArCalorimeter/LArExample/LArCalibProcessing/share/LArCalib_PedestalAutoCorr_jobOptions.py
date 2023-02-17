@@ -26,7 +26,10 @@ if not 'SCIgnoreBarrelChannels' in dir():
 
 if not 'SCIgnoreEndcapChannels' in dir():
    SCIgnoreEndcapChannels=False
-   
+
+if not 'SCProtectSourceId' in dir():
+   SCProtectSourceId = True
+
 if not SuperCells: include("LArCalibProcessing/LArCalib_Flags.py")
 if SuperCells:     include("LArCalibProcessing/LArCalib_FlagsSC.py")
 include("LArCalibProcessing/GetInputFiles.py")
@@ -286,6 +289,10 @@ condSeq = AthSequencer("AthCondSeq")
 from LArCabling.LArCablingAccess import LArCalibIdMapping,LArOnOffIdMapping
 LArOnOffIdMapping()
 LArCalibIdMapping()
+
+from CaloAlignmentAlgs.CaloAlignmentAlgsConf import CaloAlignCondAlg
+condSeq += CaloAlignCondAlg("CaloAlignCondAlg",LArAlignmentStore="",CaloCellPositionShiftFolder="")
+
 if SuperCells:
    from LArCabling.LArCablingAccess import LArCalibIdMappingSC,LArOnOffIdMappingSC,LArLATOMEMappingSC
    LArOnOffIdMappingSC()
@@ -381,6 +388,26 @@ if runAccumulator:
 
 else:
    
+ if SuperCells:
+   from LArByteStream.LArByteStreamConf import LArLATOMEDecoder
+   theLArLATOMEDecoder = LArLATOMEDecoder("LArLATOMEDecoder")
+   theLArLATOMEDecoder.DumpFile = SC_DumpFile
+   theLArLATOMEDecoder.RawDataFile = SC_RawDataFile
+
+   from LArByteStream.LArByteStreamConf import LArRawSCCalibDataReadingAlg
+   LArRawSCCalibDataReadingAlg = LArRawSCCalibDataReadingAlg()
+   LArRawSCCalibDataReadingAlg.LArSCAccDigitKey = Gain
+   LArRawSCCalibDataReadingAlg.LATOMEDecoder = LArLATOMEDecoder("LArLATOMEDecoder")
+   LArRawSCCalibDataReadingAlg.LATOMEDecoder.DumpFile = SC_DumpFile
+   LArRawSCCalibDataReadingAlg.LATOMEDecoder.RawDataFile = SC_RawDataFile
+   LArRawSCCalibDataReadingAlg.LATOMEDecoder.ProtectSourceId = SCProtectSourceId
+   LArRawSCCalibDataReadingAlg.LATOMEDecoder.IgnoreBarrelChannels = SCIgnoreBarrelChannels
+   LArRawSCCalibDataReadingAlg.LATOMEDecoder.IgnoreEndcapChannels = SCIgnoreEndcapChannels
+   LArRawSCCalibDataReadingAlg.LATOMEDecoder.OutputLevel = WARNING
+
+   topSequence+=LArRawSCCalibDataReadingAlg
+
+ else:  
    # Need to debug the raw data reading algo for legacy
    from LArByteStream.LArByteStreamConf import LArRawCalibDataReadingAlg
 
@@ -774,7 +801,7 @@ if ( WritePoolFile ) :
 
 ServiceMgr.EventSelector.SkipEvents = SkipEvents
 
-ServiceMgr.MessageSvc.OutputLevel  = INFO
+ServiceMgr.MessageSvc.OutputLevel  = WARNING
 ServiceMgr.MessageSvc.defaultLimit = 1000000000
 ServiceMgr.MessageSvc.infoLimit = 1000000000
 ServiceMgr.MessageSvc.Format       = "% F%20W%S%7W%R%T %0W%M"

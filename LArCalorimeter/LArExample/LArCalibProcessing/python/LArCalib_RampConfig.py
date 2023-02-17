@@ -37,27 +37,47 @@ def LArRampCfg(flags):
     result.merge(addFolders(flags,flags.LArCalib.OFCCali.Folder,detDb=flags.LArCalib.Input.Database2, tag=caliOFCTag, modifiers=chanSelStr(flags)))
     
 
-    result.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArAccCalibDigitKey=digKey,
+    if not flags.LArCalib.isSC:
+       result.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArAccCalibDigitKey=digKey,
                                                               LArFebHeaderKey="LArFebHeader",
                                                               SubCaloPreselection=flags.LArCalib.Input.SubDet,
                                                               PosNegPreselection=flags.LArCalib.Preselection.Side,
                                                               BEPreselection=flags.LArCalib.Preselection.BEC,
                                                               FTNumPreselection=flags.LArCalib.Preselection.FT))
     
-    from LArROD.LArFebErrorSummaryMakerConfig import LArFebErrorSummaryMakerCfg
-    result.merge(LArFebErrorSummaryMakerCfg(flags))
-    result.getEventAlgo("LArFebErrorSummaryMaker").CheckAllFEB=False
+       from LArROD.LArFebErrorSummaryMakerConfig import LArFebErrorSummaryMakerCfg
+       result.merge(LArFebErrorSummaryMakerCfg(flags))
+       result.getEventAlgo("LArFebErrorSummaryMaker").CheckAllFEB=False
+
+       if flags.LArCalib.Input.SubDet == "EM":
+          from LArCalibProcessing.LArStripsXtalkCorrConfig import LArStripsXtalkCorrCfg
+          result.merge(LArStripsXtalkCorrCfg(flags,[digKey,]))
+
+          theLArCalibShortCorrector = CompFactory.LArCalibShortCorrector(KeyList = [digKey,])
+          result.addEventAlgo(theLArCalibShortCorrector)
+    else:   
+       digKey="SC"
+       theLArLATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder",DumpFile = '',RawDataFile = '')
+       if flags.LArCalib.Input.isRawData:
+          result.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(adcCollKey = digKey, adcBasCollKey = "", etCollKey = "",
+                                                               etIdCollKey = "", LATOMEDecoder = theLArLATOMEDecoder))
+          result.addEventAlgo(CompFactory.LArDigitsAccumulator("LArDigitsAccumulator", KeyList = [digKey], 
+                                                             LArAccuDigitContainerName = "", NTriggersPerStep = 100,
+                                                             isSC = flags.LArCalib.isSC, DropPercentTrig = 20))
 
 
-    if flags.LArCalib.Input.SubDet == "EM":
-        from LArCalibProcessing.LArStripsXtalkCorrConfig import LArStripsXtalkCorrCfg
-        result.merge(LArStripsXtalkCorrCfg(flags,[digKey,]))
+       else:   
+          result.addEventAlgo(CompFactory.LArRawSCCalibDataReadingAlg(LArSCAccCalibDigitKey = digKey, LATOMEDecoder = theLArLATOMEDecoder))
+          # this needs also legacy  maps
+          from LArCabling.LArCablingConfig import LArCalibIdMappingCfg,LArOnOffIdMappingCfg
+          result.merge(LArOnOffIdMappingCfg(flags))
+          result.merge(LArCalibIdMappingCfg(flags))
 
-        theLArCalibShortCorrector = CompFactory.LArCalibShortCorrector(KeyList = [digKey,])
-        result.addEventAlgo(theLArCalibShortCorrector)
+
     pass
 
 
+    bcKey = "LArBadChannelSC" if flags.LArCalib.isSC else "LArBadChannel"     
 
 
     theLArRampBuilder = CompFactory.LArRampBuilder()
@@ -82,6 +102,7 @@ def LArRampCfg(flags):
     #theLArRampBuilder.LongNtuple = False
 
     theLArRampBuilder.isSC = flags.LArCalib.isSC
+    theLArRampBuilder.BadChanKey = bcKey
 
     if flags.LArCalib.Input.SubDet == "HEC":
         theLArRampBuilder.isHEC = True
@@ -96,6 +117,7 @@ def LArRampCfg(flags):
         LArRampPatcher=CompFactory.getComp("LArCalibPatchingAlg<LArRampComplete>")
         theLArRampPatcher=LArRampPatcher("LArRampPatcher")
         theLArRampPatcher.ContainerKey="LArRamp"
+        theLArRampPatcher.BadChanKey=bcKey
         theLArRampPatcher.PatchMethod="PhiAverage"
    
         theLArRampPatcher.ProblemsToPatch=["deadCalib","deadReadout","deadPhys","almostDead","short"]
@@ -123,6 +145,7 @@ def LArRampCfg(flags):
                                                         AddFEBTempInfo = False,
                                                         RawRamp = True,
                                                         SaveAllSamples =  True,
+                                                        BadChanKey = bcKey,
                                                         ApplyCorr=True,
                                                     ))
 

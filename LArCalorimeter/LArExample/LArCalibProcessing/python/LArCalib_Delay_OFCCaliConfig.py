@@ -54,14 +54,20 @@ def LArDelay_OFCCaliCfg(flags):
     else:
        digKey="SC"
        theLArLATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder",DumpFile = '',RawDataFile = '')
-       result.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(adcCollKey = digKey, adcBasCollKey = "", etCollKey = "",
+       if flags.LArCalib.Input.isRawData:
+          result.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(adcCollKey = digKey, adcBasCollKey = "", etCollKey = "",
                                                                etIdCollKey = "", LATOMEDecoder = theLArLATOMEDecoder))
-
-    if flags.LArCalib.Input.isRawData:
-       result.addEventAlgo(CompFactory.LArDigitsAccumulator("LArDigitsAccumulator", KeyList = [digKey], 
+          result.addEventAlgo(CompFactory.LArDigitsAccumulator("LArDigitsAccumulator", KeyList = [digKey], 
                                                              LArAccuDigitContainerName = "", NTriggersPerStep = 100,
                                                              isSC = flags.LArCalib.isSC, DropPercentTrig = 20))
 
+
+       else:   
+          result.addEventAlgo(CompFactory.LArRawSCCalibDataReadingAlg(LArSCAccCalibDigitKey = digKey, LATOMEDecoder = theLArLATOMEDecoder))
+          # this needs also legacy  maps
+          from LArCabling.LArCablingConfig import LArCalibIdMappingCfg,LArOnOffIdMappingCfg
+          result.merge(LArOnOffIdMappingCfg(flags))
+          result.merge(LArCalibIdMappingCfg(flags))
 
     bcKey = "LArBadChannelSC" if flags.LArCalib.isSC else "LArBadChannel"     
 
@@ -75,6 +81,8 @@ def LArDelay_OFCCaliCfg(flags):
     theLArCaliWaveBuilder.UseDacAndIsPulsedIndex = False # should have an impact only for HEC
     theLArCaliWaveBuilder.RecAllCells      = False
     theLArCaliWaveBuilder.isSC       = flags.LArCalib.isSC
+    if flags.LArCalib.isSC:
+       theLArCaliWaveBuilder.CablingKey="LArOnOffIdMapSC"
     result.addEventAlgo(theLArCaliWaveBuilder)
     
 
