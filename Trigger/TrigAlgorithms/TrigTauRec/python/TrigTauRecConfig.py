@@ -102,7 +102,7 @@ class TrigTauDefaultsKeys:
     LargeD0TrackContainer ='InDetLargeD0TrackParticles'
 
 
-def TrigTauRecMergedOnlyMVACfg(flags):
+def trigTauRecMergedCaloOnlyMVACfg(flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.ComponentFactory import CompFactory
     acc = ComponentAccumulator()
@@ -117,12 +117,7 @@ def TrigTauRecMergedOnlyMVACfg(flags):
     # Decorate the clusters
     tools.append(CompFactory.TauClusterFinder(UseOriginalCluster = False)) # TODO use JetRec.doVertexCorrection once available
 
-    tools.append(CompFactory.TauVertexedClusterDecorator(SeedJet = flags.Trigger.Offline.Tau.ActiveConfig.SeedJetCollection))
-
-    # Calibrate to TES
-    # non-MVA TES calibration is deprecated and should be phased out
-    tools.append(CompFactory.TauCalibrateLC(calibrationFile = flags.Trigger.Offline.Tau.CalibrateLCConfig,
-                                            Key_vertexInputContainer = ""))
+    tools.append(CompFactory.TauVertexedClusterDecorator(SeedJet = ''))
 
     # Calculate cell-based quantities: strip variables, EM and Had energies/radii, centFrac, isolFrac and ring energies
     from AthenaCommon.SystemOfUnits import GeV
@@ -133,26 +128,26 @@ def TrigTauRecMergedOnlyMVACfg(flags):
     tools.append(CompFactory.MvaTESVariableDecorator(Key_vertexInputContainer='',
                                                      EventShapeKey='',
                                                      VertexCorrection = False))
+    acc.addPublicTool(tools[-1])
     tools.append(CompFactory.MvaTESEvaluator(WeightFileName = flags.Trigger.Offline.Tau.MvaTESConfig))
+    acc.addPublicTool(tools[-1])
 
     for tool in tools:
         tool.inTrigger = True
         tool.calibFolder = flags.Trigger.Offline.Tau.tauRecToolsCVMFSPath
 
-
-    ## add beam type flag
-    alg = CompFactory.TrigTauRecMerged("TrigTauRecMergedOnlyMVA",
-                                        Tools=tools)
-
-    alg.Key_trackPartInputContainer = ''
-    alg.Key_trigJetSeedOutputKey = 'HLT_jet_seed' 
-    alg.Key_trigTauJetInputContainer = ''
-    alg.Key_trigTauJetOutputContainer = 'HLT_TrigTauRecMerged_CaloMVAOnly'
-    alg.Key_trigTauTrackInputContainer = ''
-    alg.Key_trigTauTrackOutputContainer = 'HLT_tautrack_dummy' 
-    alg.Key_vertexInputContainer = ''
-    alg.clustersKey = 'HLT_TopoCaloClustersLC'
-    alg.RoIInputKey = 'UpdatedCaloRoI'
+    alg = CompFactory.TrigTauRecMerged("TrigTauRecMerged_TauCaloOnlyMVA",
+                                        Tools=tools,
+                                        MonTool = tauMonitoringCaloOnlyMVA(flags),
+                                        Key_trackPartInputContainer = '',
+                                        Key_trigJetSeedOutputKey = 'HLT_jet_seed',
+                                        Key_trigTauJetInputContainer = '',
+                                        Key_trigTauJetOutputContainer = 'HLT_TrigTauRecMerged_CaloMVAOnly',
+                                        Key_trigTauTrackInputContainer = '',
+                                        Key_trigTauTrackOutputContainer = 'HLT_tautrack_dummy',
+                                        Key_vertexInputContainer = '',
+                                        clustersKey = 'HLT_TopoCaloClustersLC',
+                                        RoIInputKey = 'UpdatedCaloRoI')
     acc.addEventAlgo(alg)
 
     return acc
@@ -165,6 +160,6 @@ if __name__ == "__main__":
     flags.Input.Files = defaultTestFiles.RAW
     flags.lock()
 
-    acc = TrigTauRecMergedOnlyMVACfg(flags)
+    acc = trigTauRecMergedCaloOnlyMVACfg(flags)
     acc.printConfig(withDetails=True, summariseProps=True)
     acc.wasMerged() # do not run, do not save, we just want to see the config
