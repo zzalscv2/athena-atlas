@@ -282,6 +282,8 @@ namespace top {
 
     // Moriond2018 - AF2 JES
     // Summer2019 - JES/JER update
+    // Summer2021 - JMS-options
+    // Winter2023_PreRec - R22 Phase-1 JES/JER pre-recs
     std::string conference = "Winter2023_PreRec";
 
     // By setting calib_area to "None" we pick up the default from the JES group
@@ -292,7 +294,9 @@ namespace top {
     std::string JERSmearModel = m_config->jetJERSmearingModel();
     std::string JMSOption = m_config->jetJMSOption();
     if (JMSOption != "None") {
-      conference = "Spring2021"; // Updated files using the JMS option are in Spring2021
+      // Updated files using the JMS option are in Spring2021 - Switching and letting the user know
+      ATH_MSG_INFO("JMS not yet available for R22 pre-recs - Moving to Spring2021 R21 recommendations!");
+      conference = "Spring2021";
       if (JMSOption == "JMS_frozen") JMSOption = "_JMS_frozen";
       else if (JMSOption == "JMS_scaled") JMSOption = "_JMS_scaled";
       else {
@@ -309,6 +313,24 @@ namespace top {
     if (JERSmearModel == "All_PseudoData") {
       JERSmearModel = "All";
       ATH_MSG_INFO("JER PseudoData option provided - Treating MC as if it is data for JER uncertainty");
+    }
+
+    // Throw out a warning if we are using the FTAG-calib only NP-Model
+    if (m_config->jetUncertainties_NPModel() == "SR_Scenario1" && JERSmearModel == "Simple") {
+      ATH_MSG_WARNING(
+        "\n **********************************************************************************"
+        "\n * NP-Model 'SR_Scenario1' is ONLY supposed to be used for FTAG calibration work! *"
+        "\n * Please choose another model if you are conducting an analysis!                 *"
+        "\n **********************************************************************************"
+      );
+    }
+    // Check if we have necessary configs already for R22 for users to have an easy time debugging
+    else if (!(m_config->jetUncertainties_NPModel() == "CategoryReduction" && JERSmearModel == "Full")) {
+      ATH_MSG_WARNING(
+        "Incorrect JES/JER config: In R22 phase-1, only NP-Model \"CategoryReduction\" with some type of \"Full\""
+        " JER-smearing is supported for analyses! Your choices might lead to a crash unless you have installed custom"
+        " options!"
+      );
     }
 
     // Strings need to be defined clearly for jet tool
