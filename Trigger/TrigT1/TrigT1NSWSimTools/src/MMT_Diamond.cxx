@@ -57,14 +57,14 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<
   int uvfactor = std::round( par->getlWidth() / (B * 0.4 * 2.)/this->getRoadSize() ); // full wedge has to be considered, i.e. S(L/M)2
   this->setUVfactor(uvfactor);
 
-  for (int ihds = 0; ihds < (int)hitDatas.size(); ihds++) {
-    auto myhit = std::make_shared<MMT_Hit>(hitDatas[ihds], detManager, par, planeCoordinates);
+  for (const auto &hit_entry : hitDatas) {
+    auto myhit = std::make_shared<MMT_Hit>(hit_entry, detManager, par, planeCoordinates);
     if (myhit->verifyHit()) {
       m_hitslopes.push_back(myhit->getRZSlope());
       entry.ev_hits.push_back(myhit);
     }
   }
-  entry.side = (std::all_of(entry.ev_hits.begin(), entry.ev_hits.end(), [] (const auto hit) { return hit->getStationEta() < 0; })) ? 'C' : 'A';
+  entry.side = (std::all_of(entry.ev_hits.begin(), entry.ev_hits.end(), [] (const auto &hit) { return hit->getStationEta() < 0; })) ? 'C' : 'A';
 
   for (int i = 0; i < nroad; i++) {
     auto myroad = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
@@ -105,7 +105,7 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<
   ATH_MSG_DEBUG("CreateRoadsAndFillHits: Feeding hitDatas Ended");
 }
 
-void MMT_Diamond::findDiamonds(const unsigned int iterator, const double &sm_bc, const int &event) {
+void MMT_Diamond::findDiamonds(const unsigned int iterator, const int sm_bc, const int event) {
   auto t0 = std::chrono::high_resolution_clock::now();
   int bc_start = 999999;
   int bc_end = -1;
@@ -151,22 +151,20 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const double &sm_bc,
         }
 
         if (addc_same.size() > 8) {
+          // priority encode the hits by channel number; remember hits 8+
+          to_erase.clear();
 
-	  // priority encode the hits by channel number; remember hits 8+
-	  to_erase.clear();
+          std::sort(addc_same.begin(), addc_same.end(), [](std::pair<int, int> p1, std::pair<int, int> p2) { return p1.second < p2.second; });
+          for (unsigned int it = 8; it < addc_same.size(); it++) to_erase.push_back(addc_same[it].first);
 
-	  std::sort(addc_same.begin(), addc_same.end(), [](std::pair<int, int> p1, std::pair<int, int> p2) { return p1.second < p2.second; });
-	  for (unsigned int it = 8; it < addc_same.size(); it++) to_erase.push_back(addc_same[it].first);
-
-	  // reverse and erase
-	  std::sort(to_erase.rbegin(), to_erase.rend());
-	  for (auto l : to_erase) {
-	    hits_now.erase(hits_now.begin() + l);
-	  }
-	}
+          // reverse and erase
+          std::sort(to_erase.rbegin(), to_erase.rend());
+          for (auto l : to_erase) {
+            hits_now.erase(hits_now.begin() + l);
+          }
+        }
       }
     } // loop on plane for VMM and ART ASIC filter
-
 
     for (auto &road : m_diamonds[iterator].ev_roads) {
       road->incrementAge(bc_wind);
@@ -179,27 +177,28 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const double &sm_bc,
         ATH_MSG_DEBUG("Road (i, u, v, count): (" << road->iRoad() << ", " << road->iRoadu() << ", " << road->iRoadv() << ", " << road->countHits() << ")");
         ATH_MSG_DEBUG("------------------------------------------------------------------");
 
-	std::vector<int> bcidVec;
+        std::vector<int> bcidVec;
         for (const auto &hit: road->getHitVector()) {
-	  bcidVec.push_back(hit->getBC());
+          bcidVec.push_back(hit->getBC());
         }
-	std::sort(bcidVec.begin(), bcidVec.end());
+        std::sort(bcidVec.begin(), bcidVec.end());
 
-	// evaluating mode of the BCID of the hits in the diamond
-	// default setting in the firmware is the mode of the hits's bcid in the diamond
-	int bcidVal=bcidVec.at(0), bcidCount=1, modeCount=1, bcidMode=bcidVec.at(0);
-	for (unsigned int i=1; i<bcidVec.size(); i++){
-	  if (bcidVec.at(i) == bcidVal){
-	    bcidCount++;
-	  } else {
-	    bcidCount = 1;
-	    bcidVal = bcidVec.at(i);
-	  }
-	  if (bcidCount > modeCount) {
-	    modeCount = bcidCount;
-	    bcidMode = bcidVal;
-	  }
-	}
+        // evaluating mode of the BCID of the hits in the diamond
+        // default setting in the firmware is the mode of the hits's bcid in the diamond
+        int bcidVal=bcidVec.at(0), bcidCount=1, modeCount=1, bcidMode=bcidVec.at(0);
+        for (unsigned int i=1; i<bcidVec.size(); i++){
+          if (bcidVec.at(i) == bcidVal){
+            bcidCount++;
+          } else {
+            bcidCount = 1;
+            bcidVal = bcidVec.at(i);
+          }
+          if (bcidCount > modeCount) {
+            modeCount = bcidCount;
+            bcidMode = bcidVal;
+          }
+        }
+
         slope_t slope;
         slope.event = event;
         slope.BC = bcidMode;
@@ -224,12 +223,12 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const double &sm_bc,
         slope.dtheta = (slope.mxl - slope.my)/(1. + slope.mxl*slope.my);
         slope.side = (slope.my > 0.) ? 'A' : 'C';
         double phi = std::atan(slope.mx/slope.my);
-	double phiShifted = this->phiShift(this->getDiamond(iterator).stationPhi, phi, slope.side);
+        double phiShifted = this->phiShift(this->getDiamond(iterator).stationPhi, phi, slope.side);
         slope.phi = phi;
         slope.phiShf = phiShifted;
         slope.lowRes = road->evaluateLowRes();
 
-	m_diamonds[iterator].slopes.push_back(slope);
+        m_diamonds[iterator].slopes.push_back(slope);
       }
     }
   }
