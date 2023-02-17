@@ -5,19 +5,17 @@ logging.getLogger().info('Importing %s', __name__)
 log = logging.getLogger(__name__)
 
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
-if isComponentAccumulatorCfg():
-  pass
-else:
-  from ..HeavyIon.HeavyIonMenuSequences import HIFwdGapMenuSequence
+from ..HeavyIon.HeavyIonMenuSequences import HIFwdGapMenuSequenceCfg
 
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO,
 # so let's make them functions already now
 #----------------------------------------------------------------
-def HIFwdGapMenuSequenceCfg(flags):
-  return HIFwdGapMenuSequence(flags)
+def HIFwdGapMenuSequence(flags):
+  from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
+  return menuSequenceCAToGlobalWrapper(HIFwdGapMenuSequenceCfg, flags)
+
 
 class HeavyIonChainConfig(ChainConfigurationBase):
 
@@ -37,5 +35,5 @@ class HeavyIonChainConfig(ChainConfigurationBase):
     return self.buildChain(steps)
 
   def getHIFwdGapStep(self, flags):
-    return self.getStep(flags,1, 'Fgap', [HIFwdGapMenuSequenceCfg])
+    return self.getStep(flags,1, 'Fgap', [HIFwdGapMenuSequence])
 

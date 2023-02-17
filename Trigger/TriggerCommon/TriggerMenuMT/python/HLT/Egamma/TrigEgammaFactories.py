@@ -376,6 +376,32 @@ def egammaFSCaloRecoSequence():
 
     return parOR("egammaFSRecoSequence", [cellMaker, eventShapeMaker])
 
+def egammaFSHIEventShapeMakerCfg(flags):
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    from TrigCaloRec.TrigCaloRecConfig import hltCaloCellMakerCfg
+    from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
+
+    acc = ComponentAccumulator()    
+    cellMakerAcc = hltCaloCellMakerCfg(flags, 'HLTCaloCellMakerEGFS', 
+        roisKey = mapThresholdToL1RoICollection('FSNOSEED'), 
+        CellsName = 'CaloCellsEGFS', monitorCells=False)
+
+    acc.merge(cellMakerAcc)
+    # configure HI Event Shape by hand,
+    # in future need to reuse one from HIGlobal.HIGlobalConfig (will need more args & dependency on flags)
+    eventShapeFiller = CompFactory.HIEventShapeFillerTool( 
+                EventShapeMapTool = CompFactory.HIEventShapeMapTool())
+
+    eventShapeMakerAlg = CompFactory.HIEventShapeMaker('HLTEventShapeMakerEG',
+        HIEventShapeFillerTool = eventShapeFiller,
+        InputCellKey=cellMakerAcc.getPrimary().CellsName,
+        OutputContainerKey=TrigEgammaKeys.egEventShape) 
+
+    acc.addEventAlgo(eventShapeMakerAlg)
+    return acc
+
+
 def egammaFSEventDensitySequence(flags):
     from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import TrigIsoEventShapeAlgCfg, TrigEgammaPseudoJetAlgCfg
     from AthenaCommon.CFElements import parOR
@@ -388,3 +414,12 @@ def egammaFSEventDensitySequence(flags):
 
     return thesequence
 
+if __name__ == "__main__":
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Input.isMC=False
+    flags.lock()
+    egammaFSHIEventShapeMakerCfg(flags).printConfig(withDetails=True)

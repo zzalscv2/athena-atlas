@@ -130,9 +130,9 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
     jetHIRecSeq += cellMaker 
     from TrigT2CaloCommon.CaloDef import _algoHLTHIEventShape
     eventShapeMaker = _algoHLTHIEventShape(
-             name='HLTEventShapeMaker_egamma',
+             name='HLTEventShapeMakerEG',
              inputEDM=cellMaker.CellsName,
-             outputEDM="HLTHIEventShape"
+             outputEDM="HLT_HIEventShapeEG" # needs to be in sync with the one setup in HIMenuSequences (for Fgap triggers)
     )
     jetHIRecSeq += eventShapeMaker 
 

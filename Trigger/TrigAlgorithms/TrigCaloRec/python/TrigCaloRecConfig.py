@@ -447,15 +447,17 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED'):
+def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None, monitorCells=True):
     acc = ComponentAccumulator()
     from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg, CaloDataAccessSvcDependencies
     acc.merge(trigCaloDataAccessSvcCfg(flags))
-
+    # choose cells name given parameters
+    cellsFromName = 'CaloCellsFS' if "FS" in name else "CaloCells"
+    cells = cellsFromName if CellsName is None else CellsName
     cellMaker = CompFactory.HLTCaloCellMaker(name,
-                                             CellsName='CaloCellsFS' if "FS" in name else "CaloCells",
+                                             CellsName = cells,
                                              TrigDataAccessMT = acc.getService('TrigCaloDataAccessSvc'),
-                                             monitorCells = True,
+                                             monitorCells = monitorCells,
                                              ExtraInputs = CaloDataAccessSvcDependencies,
                                              RoIs=roisKey)
     acc.addEventAlgo(cellMaker, primary=True)
@@ -463,14 +465,12 @@ def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED'):
 
 def hltCaloCellSeedlessMakerCfg(flags, roisKey='UNSPECIFIED'):
     acc = ComponentAccumulator()
-    from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg, CaloDataAccessSvcDependencies
-    acc.merge(trigCaloDataAccessSvcCfg(flags))
+    hltCaloCellMakerAcc = hltCaloCellMakerCfg(flags, "CaloCellSeedLessFS",
+                                                    roisKey = roisKey,
+                                                    CellsName ="SeedLessFS", 
+                                                    monitorCells=False)
 
-    hltCaloCellSeedLessMaker = CompFactory.HLTCaloCellMaker("CaloCellSeedLessFS", ExtraInputs = CaloDataAccessSvcDependencies,
-                                                            RoIs = roisKey,
-                                                            CellsName ="SeedLessFS")
-
-    acc.addEventAlgo(hltCaloCellSeedLessMaker, primary=True)
+    acc.merge(hltCaloCellMakerAcc)
 
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     acc.merge(CaloNoiseCondAlgCfg(flags, noisetype="electronicNoise"))
@@ -695,3 +695,15 @@ def hltHICaloTowerMakerCfg(flags, name, clustersKey, cellsKey="CaloCells"):
     acc.merge(CaloNoiseCondAlgCfg(flags))
     acc.addEventAlgo(alg, primary=True)
     return acc
+
+
+if __name__ == "__main__":
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Input.isMC=False
+    flags.lock()    
+    hltCaloCellSeedlessMakerCfg(flags).printConfig(withDetails=True)
+    hltCaloCellMakerCfg(flags, "SthFS").printConfig(withDetails=True)
