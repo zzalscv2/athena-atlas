@@ -138,7 +138,7 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
     ATH_MSG_DEBUG("Found input hits collection " << inputCollectionH.name() << " in store " << inputCollectionH.store());
 
     for (const TRTUncompressedHit &hit : *inputCollectionH) {
-      HepMcParticleLink link = hit.particleLink();
+      const HepMcParticleLink& link = hit.particleLink();
       int pdgID = hit.GetParticleEncoding();
       if (std::abs(pdgID) != 11 || link.barcode() == 0) continue;
       HepMC::ConstGenParticlePtr particle = link.cptr();
