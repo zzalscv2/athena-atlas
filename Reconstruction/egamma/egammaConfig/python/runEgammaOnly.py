@@ -27,18 +27,33 @@ def _run():
     flags.Output.ESDFileName = "myESD.pool.root"
     flags.Output.AODFileName = "myAOD.pool.root"
 
+    # uncomment given something like export ATHENA_CORE_NUMBER=2
+    # flags.Concurrency.NumThreads = 2
+
+    # Setup detector flags
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(flags, None, use_metadata=True,
+                       toggle_geometry=True, keep_beampipe=True)
+
     # egamma Only
     from egammaConfig.egammaOnlyFromRawFlags import egammaOnlyFromRaw
     egammaOnlyFromRaw(flags)
 
     flags.lock()
-    flags.dump()
 
     from RecJobTransforms.RecoSteering import RecoSteering
     acc = RecoSteering(flags)
 
+    # Special message service configuration
+    from Digitization.DigitizationSteering import DigitizationMessageSvcCfg
+    acc.merge(DigitizationMessageSvcCfg(flags))
+
     from AthenaConfiguration.Utils import setupLoggingLevels
     setupLoggingLevels(flags, acc)
+
+    # Print reco domain status
+    from RecJobTransforms.RecoConfigFlags import printRecoFlags
+    printRecoFlags(flags)
 
     # running
     statusCode = acc.run()
