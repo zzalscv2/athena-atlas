@@ -291,12 +291,12 @@ InDetPerfPlot_Resolution::fill(const xAOD::TrackParticle& trkprt, const xAOD::Tr
   trueBC = truthprt.barcode();
   int isPrimTrk = 0;
   int isSecdTrk = 0;
-  if ((trueBC > 0) && (!HepMC::is_simulation_particle(trueBC))) {
-    isPrimTrk = 1;
-  }
+
   if (HepMC::is_simulation_particle(trueBC)) {
     isSecdTrk = 1;
-  }
+  } else {
+   if (trueBC > 0) isPrimTrk = 1;
+  } 
 
   // Move on to the next track incase the wrong track category
   if (!isPrimTrk && !isSecdTrk) {
