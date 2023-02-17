@@ -10,6 +10,8 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
+#include "TrkVertexFitterInterfaces/IVertexLinearizedTrackFactory.h"
+#include "TrkExInterfaces/IExtrapolator.h"
 #include "xAODTracking/TrackParticleFwd.h"
 #include "xAODTracking/VertexFwd.h"
 
@@ -153,8 +155,8 @@ private:
   unsigned int m_maxIterations;
   double m_maxDchi2PerNdf;
 
-  ToolHandle<Trk::IExtrapolator> m_extrapolator;
-  ToolHandle<Trk::IVertexLinearizedTrackFactory> m_linFactory;
+  ToolHandle<Trk::IExtrapolator> m_extrapolator{this, "Extrapolator", "Trk::Extrapolator"};
+  ToolHandle<Trk::IVertexLinearizedTrackFactory> m_linFactory{this, "LinearizedTrackFactory", "Trk::FullLinearizedTrackFactory"};
 };
 }
 #endif
