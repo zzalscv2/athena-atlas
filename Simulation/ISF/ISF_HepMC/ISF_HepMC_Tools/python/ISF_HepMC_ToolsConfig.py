@@ -229,7 +229,7 @@ def TruthStrategyGroupCaloDecayCfg(flags, name="ISF_MCTruthStrategyGroupCaloDeca
 def ValidationTruthStrategyCfg(flags, name="ISF_ValidationTruthStrategy", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("ParentMinP", 50.*MeV)
-    kwargs.setdefault("Regions", [1,3])
+    kwargs.setdefault("Regions", [1,2,3,4])
     result.setPrivateTools(CompFactory.ISF.ValidationTruthStrategy(name, **kwargs))
     return result
 
