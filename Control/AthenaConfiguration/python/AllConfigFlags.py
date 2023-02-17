@@ -93,9 +93,9 @@ def initConfigFlags():
 
     acf.addFlag('Scheduler.CheckDependencies', True)
     acf.addFlag('Scheduler.CheckOutputUsage', False)
-    acf.addFlag('Scheduler.ShowDataDeps', True)
-    acf.addFlag('Scheduler.ShowDataFlow', True)
-    acf.addFlag('Scheduler.ShowControlFlow', True)
+    acf.addFlag('Scheduler.ShowDataDeps', False)
+    acf.addFlag('Scheduler.ShowDataFlow', False)
+    acf.addFlag('Scheduler.ShowControlFlow', False)
     acf.addFlag('Scheduler.EnableVerboseViews', True)
     acf.addFlag('Scheduler.AutoLoadUnmetDependencies', True)
 
