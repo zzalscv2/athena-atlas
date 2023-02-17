@@ -408,10 +408,8 @@ StatusCode TgcDigitizationTool::digitizeCore(const EventContext& ctx) {
 	  // create here deposit for MuonSimData, link and tof
           const EBC_EVCOLL evColl = EBC_MAINEVCOLL;
           const HepMcParticleLink::PositionFlag idxFlag = (phit.eventId()==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_INDEX;
-	  MuonSimData::Deposit deposit(HepMcParticleLink(phit->trackNumber(), phit.eventId(), evColl, idxFlag), MuonMCData(tof, 0));
-
-	  std::vector<MuonSimData::Deposit> deposits;
-	  deposits.push_back(deposit);
+      	  std::vector<MuonSimData::Deposit> deposits;
+	        deposits.emplace_back(HepMcParticleLink(phit->trackNumber(), phit.eventId(), evColl, idxFlag), MuonMCData(tof, 0));
           MuonSimData simData(deposits,0);
           simData.setPosition(gpos);
           simData.setTime(hitTime(phit));
