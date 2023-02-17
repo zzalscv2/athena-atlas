@@ -266,8 +266,19 @@ namespace top {
     m_jetEventCleaningToolTightBad = setupJetEventCleaningTool("TightBad", m_jetCleaningToolTightBad);
 
     // Uncertainties
-    // Is our MC full or fast simulation?
-    std::string MC_type = (m_config->isAFII()) ? "AFII" : "MC20";
+    // Is our MC MC20 (for Run 2), MC21 (for Run 3), AFII, or AF3?
+    std::string MC_type = "";
+    if (!m_config->isRun3() && !m_config->isAFII()) {
+        MC_type = "MC20";
+    } else if (!m_config->isRun3()) {
+        MC_type = "AFII";
+    } else if (!m_config->isAFII()) {
+        MC_type = "MC21";
+    } else {
+        // No AF3 support yet, so quit in this case
+        ATH_MSG_ERROR("No recommendations for fastsim in Run 3 yet!");
+        return StatusCode::FAILURE;
+    }
 
     // Moriond2018 - AF2 JES
     // Summer2019 - JES/JER update
