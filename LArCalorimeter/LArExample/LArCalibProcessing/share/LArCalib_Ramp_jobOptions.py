@@ -23,24 +23,24 @@ if not 'SCIgnoreBarrelChannels' in dir():
    SCIgnoreBarrelChannels=False
 
 if not 'SCIgnoreEndcapChannels' in dir():
-   SCIgnoreEndcapChannels=False
+  SCIgnoreEndcapChannels=False
 
 if not SuperCells: include("LArCalibProcessing/LArCalib_Flags.py")
 if SuperCells:     include("LArCalibProcessing/LArCalib_FlagsSC.py")
 include("LArCalibProcessing/GetInputFiles.py")
 
-#######################################################
-#       Run properties
-#######################################################
+######################################################
+       Run properties
+######################################################
 
 if not 'SubDet' in dir():
-   SubDet = "Barrel"
+  SubDet = "Barrel"
 
 if not 'RunNumberList' in dir():
-   RunNumberList = [ '0018660' ]
-   
+  RunNumberList = [ '0018660' ]
+  
 if not 'FilePrefix' in dir():
-   if (int(RunNumberList[0]))<99800 :
+  if (int(RunNumberList[0]))<99800 :
       FilePrefix = "daq.Ramp"
    else :
       FilePrefix = "data*"
@@ -410,13 +410,28 @@ if ( runAccumulator ):
    include("./LArCalib_CalibrationPatterns_"+str(IOVBegin)+".py")
 
 else:
-   from LArByteStream.LArByteStreamConf import LArRawCalibDataReadingAlg
 
-   theLArRawCalibDataReadingAlg=LArRawCalibDataReadingAlg()
-   theLArRawCalibDataReadingAlg.LArAccCalibDigitKey=Gain
-   theLArRawCalibDataReadingAlg.LArFebHeaderKey="LArFebHeader"
-   topSequence+=theLArRawCalibDataReadingAlg
-      
+   if SuperCells:
+      from LArByteStream.LArByteStreamConf import LArLATOMEDecoder 
+      from LArByteStream.LArByteStreamConf import LArRawSCCalibDataReadingAlg
+      LArRawSCCalibDataReadingAlg = LArRawSCCalibDataReadingAlg()
+      LArRawSCCalibDataReadingAlg.LArSCAccCalibDigitKey = Gain
+      LArRawSCCalibDataReadingAlg.LATOMEDecoder = LArLATOMEDecoder("LArLATOMEDecoder")
+      LArRawSCCalibDataReadingAlg.LATOMEDecoder.DumpFile = SC_DumpFile
+      LArRawSCCalibDataReadingAlg.LATOMEDecoder.RawDataFile = SC_RawDataFile
+      LArRawSCCalibDataReadingAlg.LATOMEDecoder.ProtectSourceId = SCProtectSourceId
+      LArRawSCCalibDataReadingAlg.LATOMEDecoder.IgnoreBarrelChannels = SCIgnoreBarrelChannels
+      LArRawSCCalibDataReadingAlg.LATOMEDecoder.IgnoreEndcapChannels = SCIgnoreEndcapChannels
+      LArRawSCCalibDataReadingAlg.LATOMEDecoder.OutputLevel = WARNING
+      topSequence+=LArRawSCCalibDataReadingAlg
+
+   else:   
+      from LArByteStream.LArByteStreamConf import LArRawCalibDataReadingAlg
+ 
+      theLArRawCalibDataReadingAlg=LArRawCalibDataReadingAlg()
+      theLArRawCalibDataReadingAlg.LArAccCalibDigitKey=Gain
+      theLArRawCalibDataReadingAlg.LArFebHeaderKey="LArFebHeader"
+      topSequence+=theLArRawCalibDataReadingAlg
 
 ##########################################################################
 #                                                                        #

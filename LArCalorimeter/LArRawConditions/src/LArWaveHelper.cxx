@@ -209,7 +209,7 @@ double  LArWaveHelper::getT5(const LArWave& theWave) const
 double  LArWaveHelper::getWidth(const LArWave& theWave) const
 {
   const unsigned int N = theWave.getSize() ;
-  unsigned int imax= 0;
+  unsigned int imax= 1;
   const unsigned Nbase=5;
   double amax=-9.999E+99;
   double base = getBaseline(theWave,Nbase);

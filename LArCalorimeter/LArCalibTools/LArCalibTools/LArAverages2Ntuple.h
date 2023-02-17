@@ -47,6 +47,7 @@ class LArAverages2Ntuple : public LArCond2NtupleBase
   bool m_keepPulsed;
   int m_ipass;
 
+  NTuple::Item<unsigned long long> m_IEvent;
   NTuple::Item<long> m_Nsteps;
   NTuple::Item<long> m_DAC;
   NTuple::Item<long> m_Ntrigger;
@@ -56,10 +57,11 @@ class LArAverages2Ntuple : public LArCond2NtupleBase
   
   NTuple::Item<unsigned long> m_StepIndex;
   
-  NTuple::Array<long> m_Sum;
-  NTuple::Array<long> m_SumSq;
+  NTuple::Array<unsigned int> m_Sum;
+  NTuple::Array<unsigned int> m_SumSq;
   NTuple::Array<float> m_Mean;
   NTuple::Array<float> m_RMS;
+
 };
 
 #endif

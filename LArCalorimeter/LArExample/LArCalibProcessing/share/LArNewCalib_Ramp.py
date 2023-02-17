@@ -45,7 +45,11 @@ if __name__=='__main__':
       InputDir = args.indir
    else:
       gain=args.gain.lower().capitalize()
-      InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Ramp-7s-"+gain+"-"+args.partition+"/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Ramp-7s-"+gain+"-"+args.partition+".daq.RAW/"
+
+      if args.supercells:
+         InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Ramp-32s-"+gain+"-"+args.partition+"-DT-RawData/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Ramp-32s-"+gain+"-"+args.partition+"-DT-RawData.daq.RAW/"
+      else:
+         InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Ramp-7s-"+gain+"-"+args.partition+"/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Ramp-7s-"+gain+"-"+args.partition+".daq.RAW/"
 
    
    # move start IOVC slightly back

@@ -59,6 +59,8 @@ def addLArCalibFlags(flags):
     flags.addFlag("LArCalib.Preselection.FT",[])
     flags.addFlag("LArCalib.Preselection.Slot",[])
 
+    flags.addFlag("LArCalib.SCIgnoreBarrelChannels",False)
+    flags.addFlag("LArCalib.SCIgnoreEndcapChannels",False)
 
     flags.addFlag("LArCalib.RTM.ExtractAll",True) # False = extract only tauR 
     flags.addFlag("LArCalib.RTM.DumpOmegaScan",False)
