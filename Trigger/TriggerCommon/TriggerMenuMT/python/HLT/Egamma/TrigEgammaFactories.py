@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
-__doc__ = "ToolFactories to configure common TrigEgamma Tools" 
+__doc__ = "ToolFactories to configure common TrigEgamma Tools"
 
 """
 This file defines the Tool factories of the algorithms to be used in  electron and photon triggers.
@@ -55,18 +54,19 @@ TrigEgammaRec   = AlgFactory( egammaAlgsConf.egammaRecBuilder,
                             ConversionBuilderTool     = None,  # Don't want to use these for trigger....
                             )
 
-#Factory for egamma SC builder
-TrigEgammaSuperClusterBuilder = AlgFactory( egammaAlgsConf.egammaSuperClusterBuilder,
-        name = 'TrigEgammaSuperClusterBuilder',
+
+def TrigEgammaSuperClusterBuilderCfg(flags, name='TrigEgammaSuperClusterBuilder'):
+    TrigEgammaSuperClusterBuilder = AlgFactory( egammaAlgsConf.egammaSuperClusterBuilder,
+        name = name,
         InputEgammaRecContainerName = TrigEgammaKeys.precisionCaloEgammaRecCollection,
         SuperClusterCollectionName  = TrigEgammaKeys.precisionElectronCaloClusterContainer,
         ClusterCorrectionTool       = egammaSwSuperClusterTool,   
-        MVACalibSvc                 = trigPrecCaloEgammaMVASvc,
+        MVACalibSvc                 = trigPrecCaloEgammaMVASvc(flags),
         CalibrationType             = 'electron',
         EtThresholdCut              = 1000,
         doAdd                       = False,
-        LinkToConstituents          = False,
-        )
+        LinkToConstituents          = False)
+    return TrigEgammaSuperClusterBuilder()
 
 
 """Configuring the TrackParticlesInConeTool """

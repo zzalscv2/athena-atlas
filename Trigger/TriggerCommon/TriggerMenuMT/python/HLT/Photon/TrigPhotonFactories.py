@@ -12,12 +12,10 @@ Offline configurations are available here:
 """
 from egammaAlgs import egammaAlgsConf
 from egammaRec.Factories import AlgFactory,  FcnWrapper
-from egammaTools.egammaToolsFactories import egammaSwSuperClusterTool
 # Tools and funtions from TrigEgammaFactories
-from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import TrigEMClusterTool, TrigEMShowerBuilder_HI, TrigEMShowerBuilder, TrigEgammaDecorationTools, TrigPhotonDecorationTools, TrigEMTrackMatchBuilder
+from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import TrigEMClusterTool, TrigEMShowerBuilder_HI, TrigEMShowerBuilder, TrigEgammaDecorationTools, TrigPhotonDecorationTools
 # Load TrigEgammaKeys where we store the container names and other TrigEgamma configuration values
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-from TriggerMenuMT.HLT.Egamma.TrigEgammaMVACalibFactories import trigPrecEgammaMVASvc
 
 
 # Decoration tools for egamma and photon objects:
@@ -25,34 +23,6 @@ from TriggerMenuMT.HLT.Egamma.TrigEgammaMVACalibFactories import trigPrecEgammaM
 
 TrigEgammaKeys = getTrigEgammaKeys()
 
-
-# Factory for egamaRecBuilder/TrigEgammaRecPhoton
-TrigEgammaRecPhoton = AlgFactory( egammaAlgsConf.egammaRecBuilder,
-        name = 'TrigEgammaRecPhoton' ,
-        InputClusterContainerName = TrigEgammaKeys.precisionPhotonCaloClusterContainer, # Use as input, the clusters made by precisionCalo
-        egammaRecContainer=TrigEgammaKeys.precisionEgammaRecCollection ,
-        doTrackMatching = False,
-        doConversions = False,
-        ## Builder tools
-        TrackMatchBuilderTool = TrigEMTrackMatchBuilder, # Don't want to use these for trigger....
-        ConversionBuilderTool = None,  # Don't want to use these for trigger....
-        doAdd = False,
-        )
-
-#Factory for photon SC builder
-TrigPhotonSuperClusterBuilder = AlgFactory( egammaAlgsConf.photonSuperClusterBuilder,
-        name = 'TrigPhotonSuperClusterBuilder',
-        InputEgammaRecContainerName=TrigEgammaKeys.precisionEgammaRecCollection ,
-        SuperPhotonRecCollectionName=TrigEgammaKeys.precisionPhotonSuperClusterRecCollection,
-        SuperClusterCollectionName = TrigEgammaKeys.precisionPhotonSuperClusterCollection,
-        ClusterCorrectionTool=egammaSwSuperClusterTool,
-        MVACalibSvc= trigPrecEgammaMVASvc,
-        doConversions = False,
-        AddClustrsMatchingVtxTracks = False,
-        ConversionBuilderTool = None,
-        doAdd = False,
-        LinkToConstituents = False,
-        )
 
 #Factory for photons
 TrigTopoEgammaPhotons_HI = AlgFactory( egammaAlgsConf.xAODEgammaBuilder,

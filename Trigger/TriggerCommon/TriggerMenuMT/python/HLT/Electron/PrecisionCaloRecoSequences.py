@@ -1,12 +1,12 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from egammaAlgs import egammaAlgsConf
 from egammaRec.Factories import AlgFactory
 from AthenaCommon.CFElements import parOR
 from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool
-from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import TrigEgammaRec, TrigEgammaSuperClusterBuilder 
+from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import TrigEgammaRec, TrigEgammaSuperClusterBuilderCfg
 from AthenaCommon.Logging import logging
 
 log = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ def precisionCaloRecoSequence(flags, RoIs, ion=False, variant=''):
     precisionRecoSequence += algo
     trigEgammaRec = TrigEgammaRec(name = 'eTrigEgammaRec' + tag + RoIs + variant)
     precisionRecoSequence += trigEgammaRec
-    trigEgammaSuperClusterBuilder = TrigEgammaSuperClusterBuilder(name = 'eTrigEgammaSuperClusterBuilder' + tag + RoIs + variant)
+    trigEgammaSuperClusterBuilder = TrigEgammaSuperClusterBuilderCfg(flags, name = 'eTrigEgammaSuperClusterBuilder' + tag + RoIs + variant)
     trigEgammaSuperClusterBuilder.SuperClusterCollectionName = outputCaloClusters
     trigEgammaSuperClusterBuilder.CalibrationType = 'electron'
     precisionRecoSequence +=  trigEgammaSuperClusterBuilder
