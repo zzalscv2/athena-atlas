@@ -52,7 +52,6 @@ public:
 		std::vector<Identifier>& boardtid, std::vector<double>& boardtsum,
 		std::vector<Identifier>& backtid, std::vector<double>& backtsum);
 
-    ~TileTrigger() {}
 
     /* Set methods */
 

@@ -29,7 +29,6 @@ class TileLasCalib {
      , m_isSet_LG(false)
      , m_isSet_HG(false) { }
     
-    ~TileLasCalib() { }
     
     void setCalib(int type, double sumXinQDC, double sumX2inQDC, int nevts, int gain){
       if(nevts > 0 && !isSet(gain) && (gain == LG || gain == HG) ){

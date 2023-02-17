@@ -41,7 +41,6 @@ class TileCosmicMuon
     m_directionPhi((double)0.),m_directionTheta((double)0.),
     m_fitQuality((double)0.),m_fitNCells((int)0) {}
   
-  ~TileCosmicMuon() {};
   std::string whoami   (void) const { return "TileCosmicMuon"; }
   operator std::string() const;
 

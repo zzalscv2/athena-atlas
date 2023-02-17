@@ -37,7 +37,6 @@ public:
   
   /*   static const CLID& classID() {return CLID_TileLaser;} */
   /*   virtual const CLID& classID() {return CLID_TileLaser;} */
-  ~TileLaserObject() {}
   
   /** @brief max size of diode and pmt vectors  */
   enum MAX_SIZE {

@@ -43,8 +43,6 @@ class TileL2 {
   /** Obsolete constructor - will be removed soon*/
   TileL2(int id, float /* phi */);
 
-  /** Destructor */
-  ~TileL2() {}
 
   /* Set methods */
 

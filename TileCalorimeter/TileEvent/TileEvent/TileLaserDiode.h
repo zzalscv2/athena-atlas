@@ -26,7 +26,6 @@ class TileLaserDiode {
     , m_pedestalAlpha(0.0)
     , m_sigmaPedAlpha(0.0) { }
 
-  ~TileLaserDiode() { }
 
   int getDiodeADC() const              { return m_diodeADC; }         
   double getDiodePedestal() const      { return m_diodePedestal; }     
