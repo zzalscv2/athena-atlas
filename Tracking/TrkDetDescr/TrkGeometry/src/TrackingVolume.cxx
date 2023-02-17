@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -796,19 +796,18 @@ Trk::TrackingVolume::nextSubVolume(const Amg::Vector3D& gp,
   return this;
 }
 
-std::vector<const Trk::DetachedTrackingVolume*>*
+std::vector<const Trk::DetachedTrackingVolume*>
 Trk::TrackingVolume::assocDetachedSubVolumes(const Amg::Vector3D& gp,
                                              double tol) const
 {
-  std::vector<const Trk::DetachedTrackingVolume*>* currVols =
-    new std::vector<const Trk::DetachedTrackingVolume*>;
+  auto currVols = std::vector<const Trk::DetachedTrackingVolume*>();
 
   Trk::ArraySpan<const Trk::DetachedTrackingVolume* const> detVols =
     confinedDetachedVolumes();
   if (!detVols.empty()) {
     for (const auto *detVol : detVols) {
       if (detVol->trackingVolume()->inside(gp, tol))
-        currVols->push_back(detVol);
+        currVols.push_back(detVol);
     }
   }
   return currVols;

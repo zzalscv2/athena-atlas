@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -368,8 +368,8 @@ StatusCode Trk::CETmaterial::execute()
           if (mEff && trPar) {
             mat += mEff->thicknessInX0();
             // find volume
-            std::vector<const Trk::DetachedTrackingVolume*>* detVols = m_extrapolator->trackingGeometry()->lowestDetachedTrackingVolumes(trPar->position());
-            if (detVols && !detVols->empty()) printMatScan(theta,phi,trPar->position().perp(),trPar->position().z(),mEff->thicknessInX0(),(*detVols)[0]->name());
+            std::vector<const Trk::DetachedTrackingVolume*> detVols = m_extrapolator->trackingGeometry()->lowestDetachedTrackingVolumes(trPar->position());
+            if (!detVols.empty()) printMatScan(theta,phi,trPar->position().perp(),trPar->position().z(),mEff->thicknessInX0(),(detVols)[0]->name());
             else printMatScan(theta,phi,trPar->position().perp(),trPar->position().z(),mEff->thicknessInX0(),m_extrapolator->trackingGeometry()->lowestStaticTrackingVolume(trPar->position())->volumeName());
           }
         }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022  CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023  CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -50,15 +50,16 @@ Trk::TrackingGeometry::lowestTrackingVolume(const Amg::Vector3D& gp) const
   return (currentVolume);
 }
 
-std::vector<const Trk::DetachedTrackingVolume*>*
+std::vector<const Trk::DetachedTrackingVolume*>
 Trk::TrackingGeometry::lowestDetachedTrackingVolumes(
   const Amg::Vector3D& gp) const
 {
   double tol = 0.001;
   const Trk::TrackingVolume* currentVolume = lowestStaticTrackingVolume(gp);
-  if (currentVolume)
+  if (currentVolume){
     return currentVolume->assocDetachedSubVolumes(gp, tol);
-  return nullptr;
+  }
+  return {};
 }
 
 const Trk::TrackingVolume*

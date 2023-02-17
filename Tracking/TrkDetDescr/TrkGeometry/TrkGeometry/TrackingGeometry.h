@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -104,7 +104,7 @@ public:
   const TrackingVolume* lowestTrackingVolume(const Amg::Vector3D& gp) const;
 
   /** return the vector of lowest detached tracking Volume(->overlaps) */
-  std::vector<const Trk::DetachedTrackingVolume*>*
+  std::vector<const Trk::DetachedTrackingVolume*>
   lowestDetachedTrackingVolumes(const Amg::Vector3D& gp) const;
 
   /** return the lowest static tracking Volume */

@@ -898,10 +898,10 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
   cache.m_navigVolsInt.clear();
 
   gp = currPar->position();
-  std::vector<const Trk::DetachedTrackingVolume*>* detVols =
+  std::vector<const Trk::DetachedTrackingVolume*> detVols =
     cache.m_trackingGeometry->lowestDetachedTrackingVolumes(gp);
-  std::vector<const Trk::DetachedTrackingVolume*>::iterator dIter = detVols->begin();
-  for (; dIter != detVols->end(); ++dIter) {
+  std::vector<const Trk::DetachedTrackingVolume*>::iterator dIter = detVols.begin();
+  for (; dIter != detVols.end(); ++dIter) {
     const Trk::Layer* layR = (*dIter)->layerRepresentation();
     bool active = layR && layR->layerType();
     if (active && !resolveActive) {
@@ -1011,7 +1011,6 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
       }
     }
   }
-  delete detVols;
   cache.copyToNavigationSurfaces();
   
   // current dense
@@ -4799,10 +4798,10 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
   std::vector<std::pair<const Trk::TrackingVolume*, unsigned int>> navigVols;
 
   gp = currPar->position();
-  std::vector<const Trk::DetachedTrackingVolume*>* detVols =
+  std::vector<const Trk::DetachedTrackingVolume*> detVols =
     cache.m_trackingGeometry->lowestDetachedTrackingVolumes(gp);
-  std::vector<const Trk::DetachedTrackingVolume*>::iterator dIter = detVols->begin();
-  for (; dIter != detVols->end(); ++dIter) {
+  std::vector<const Trk::DetachedTrackingVolume*>::iterator dIter = detVols.begin();
+  for (; dIter != detVols.end(); ++dIter) {
     const Trk::Layer* layR = (*dIter)->layerRepresentation();
     bool active = layR && layR->layerType();
     if (active && !resolveActive) {
@@ -4918,7 +4917,6 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
       }
     }
   }
-  delete detVols;
 
   // confined layers
   if (cache.m_currentStatic->confinedLayers() && updateStatic) {
