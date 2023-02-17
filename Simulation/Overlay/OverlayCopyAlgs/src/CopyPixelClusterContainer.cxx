@@ -49,6 +49,7 @@ StatusCode CopyPixelClusterContainer::execute(const EventContext& ctx) const
 
   for(const InDet::PixelClusterCollection* col : *inputContainer){
     InDet::PixelClusterCollection* newCol=new InDet::PixelClusterCollection(col->identifyHash());
+    newCol->setIdentifier(col->identify());
     for(const InDet::PixelCluster* clus : *col){
       newCol->push_back(std::make_unique<InDet::PixelCluster>(*clus));
     }

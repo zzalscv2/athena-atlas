@@ -49,6 +49,7 @@ StatusCode CopySCT_ClusterContainer::execute(const EventContext& ctx) const
 
   for(const InDet::SCT_ClusterCollection* col : *inputContainer){
     InDet::SCT_ClusterCollection* newCol=new InDet::SCT_ClusterCollection(col->identifyHash());
+    newCol->setIdentifier(col->identify());
     for(const InDet::SCT_Cluster* clus : *col){
       newCol->push_back(std::make_unique<InDet::SCT_Cluster>(*clus));
     }
