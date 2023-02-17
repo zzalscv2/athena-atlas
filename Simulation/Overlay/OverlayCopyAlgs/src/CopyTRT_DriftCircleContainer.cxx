@@ -49,6 +49,7 @@ StatusCode CopyTRT_DriftCircleContainer::execute(const EventContext& ctx) const
 
   for(const InDet::TRT_DriftCircleCollection* col : *inputContainer){
     InDet::TRT_DriftCircleCollection* newCol=new InDet::TRT_DriftCircleCollection(col->identifyHash());
+    newCol->setIdentifier(col->identify());
     for(const InDet::TRT_DriftCircle* clus : *col){
       newCol->push_back(std::make_unique<InDet::TRT_DriftCircle>(*clus));
     }
