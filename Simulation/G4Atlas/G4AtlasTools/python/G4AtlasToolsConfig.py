@@ -31,8 +31,7 @@ def FastSimulationToolListCfg(flags):
         else:
             print( "getFastSimulationMasterTool INFO No Frozen Showers" )
     if flags.Detector.GeometryMuon:
-        if flags.Sim.CavernBackground not in [CavernBackground.Off, CavernBackground.Read]:
-            # and not (hasattr(simFlags, 'RecordFlux') and simFlags.RecordFlux.statusOn and simFlags.RecordFlux()):
+        if flags.Sim.CavernBackground not in [CavernBackground.Off, CavernBackground.Read] and not flags.Sim.RecordFlux:
             from TrackWriteFastSim.TrackWriteFastSimConfig import NeutronFastSimCfg
             tools += [ result.popToolsAndMerge(NeutronFastSimCfg(flags)) ]
     result.setPrivateTools(tools)

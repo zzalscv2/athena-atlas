@@ -497,7 +497,7 @@ def ATLAS_RegionCreatorListCfg(flags):
     result = ComponentAccumulator()
     regionCreatorList = []
 
-    if flags.Beam.Type is BeamType.Cosmics or flags.Sim.CavernBackground not in [CavernBackground.Off, CavernBackground.Signal]:
+    if flags.Detector.GeometryCavern or flags.Sim.CavernBackground not in [CavernBackground.Off, CavernBackground.Signal]:
         regionCreatorList += [
             result.popToolsAndMerge(SX1PhysicsRegionToolCfg(flags)),
             result.popToolsAndMerge(BedrockPhysicsRegionToolCfg(flags)),
@@ -569,7 +569,7 @@ def ATLAS_RegionCreatorListCfg(flags):
             result.popToolsAndMerge(DriftWallPhysicsRegionToolCfg(flags)),
             result.popToolsAndMerge(DriftWall1PhysicsRegionToolCfg(flags)),
             result.popToolsAndMerge(DriftWall2PhysicsRegionToolCfg(flags))]
-        if flags.Sim.CavernBackground not in [CavernBackground.Off, CavernBackground.Read]:# and not (simFlags.RecordFlux.statusOn and simFlags.RecordFlux()):
+        if flags.Sim.CavernBackground not in [CavernBackground.Off, CavernBackground.Read] and not flags.Sim.RecordFlux:
             regionCreatorList += [result.popToolsAndMerge(MuonSystemFastPhysicsRegionToolCfg(flags))]
     result.setPrivateTools(regionCreatorList)
     return result
