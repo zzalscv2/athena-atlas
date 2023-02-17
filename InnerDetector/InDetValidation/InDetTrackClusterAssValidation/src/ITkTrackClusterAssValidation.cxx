@@ -1335,7 +1335,7 @@ bool ITk::TrackClusterAssValidation::noReconstructedParticles(const ITk::TrackCl
       bool Q = false;
       for(; mc!=mce; ++mc) {
 	if((*mc).first != ID) break;
-	if(HepMC::barcode((*mc).second.cptr())==k) {Q=true; break;}
+	if((*mc).second.barcode()==k) {Q=true; break;}
       }
 
       if(!Q) continue;
@@ -1416,7 +1416,7 @@ int ITk::TrackClusterAssValidation::charge(const ITk::TrackClusterAssValidation:
   PRD_MultiTruthCollection::const_iterator mc = findTruth(event_data,d,mce);
 
   for(; mc!=mce; ++mc) {
-    if(HepMC::barcode((*mc).second.cptr())==k) {
+    if((*mc).second.barcode()==k) {
 
       HepMC::ConstGenParticlePtr   pat  = (*mc).second.cptr();
 
