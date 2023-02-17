@@ -1058,6 +1058,13 @@ void TrigFastTrackFinder::updateClusterMap(long int trackIdx, const Trk::Track* 
     if (siCLOT==nullptr) continue;
     const InDet::SiCluster* siCL = dynamic_cast<const InDet::SiCluster*>(siCLOT->prepRawData());
     if (siCL==nullptr) continue;
+
+    if(m_ITkMode) {
+      //skip non-pixel clusters because all seeds are PPP in ITK mode
+      const InDet::PixelCluster* pixCL = dynamic_cast<const InDet::PixelCluster*>(siCL);
+      if(pixCL==nullptr) continue;
+    }
+
     Identifier id = siCL->identify();
     clusterMap[id].push_back(trackIdx);
   }
