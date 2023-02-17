@@ -102,12 +102,11 @@ if muonAlignFlags.UseAsBuilt:
         conddb.addFolder('MUONALIGN_OFL','/MUONALIGN/MDT/ASBUILTPARAMS' ,className='CondAttrListCollection')
         MuonAlignAlg.ParlineFolders += ["/MUONALIGN/MDT/ASBUILTPARAMS"]
         if CommonGeometryFlags.Run not in ["RUN1","RUN2"]: 
-            MuonDetectorTool.EnableNswAsBuiltParameters = 0
-            ## disable for now, otherwise standard tests crash (ATLASRECTS-7017)
-            #MuonDetectorTool.EnableNswAsBuiltParameters = 1
-            #conddb.addFolder('MUONALIGN_OFL','/MUONALIGN/ASBUILTPARAMS/MM'  ,className='CondAttrListCollection')
-            #conddb.addFolder('MUONALIGN_OFL','/MUONALIGN/ASBUILTPARAMS/STGC',className='CondAttrListCollection')
-            #MuonAlignAlg.ParlineFolders += ['/MUONALIGN/ASBUILTPARAMS/MM','/MUONALIGN/ASBUILTPARAMS/STGC']
+            MuonDetectorTool.EnableNswAsBuiltParameters = 1
+            # TODO: remove hard-coded tag once the global tag is ready
+            conddb.addFolderWithTag('MUONALIGN_OFL','/MUONALIGN/ASBUILTPARAMS/MM' , tag='MuonAlignAsBuiltParamsMm-RUN3-01-00', className='CondAttrListCollection')
+            conddb.addFolderWithTag('MUONALIGN_OFL','/MUONALIGN/ASBUILTPARAMS/STGC',tag='MUONALIGN_STG_ASBUILT-001-03',        className='CondAttrListCollection')
+            MuonAlignAlg.ParlineFolders += ['/MUONALIGN/ASBUILTPARAMS/MM','/MUONALIGN/ASBUILTPARAMS/STGC']
 
 # nuisance parameter used during track fit to account for alignment uncertainty
 if conddb.dbdata != 'COMP200' and conddb.dbmc != 'COMP200' and \
