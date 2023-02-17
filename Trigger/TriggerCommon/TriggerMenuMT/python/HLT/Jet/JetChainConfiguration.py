@@ -8,6 +8,20 @@ log = logging.getLogger(__name__)
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
 from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep, RecoFragmentsPool
 
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+if isComponentAccumulatorCfg():
+    def callGenerator(genf, *args, **kwargs):
+        return genf(*args, **kwargs)
+    from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetCaloHypoMenuSequence, jetHICaloHypoMenuSequence, jetRoITrackJetTagHypoMenuSequence
+    from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetFSTrackingHypoMenuSequence, jetCaloRecoMenuSequence, jetCaloPreselMenuSequence
+    from TriggerMenuMT.HLT.Jet.ExoticJetSequencesConfig import jetEJsMenuSequence, jetCRMenuSequence
+else:
+    def callGenerator(genf, *args, **kwargs):
+        return RecoFragmentsPool.retrieve(genf, *args, **kwargs)
+    from TriggerMenuMT.HLT.Jet.JetMenuSequences import jetCaloHypoMenuSequence, jetHICaloHypoMenuSequence, jetRoITrackJetTagHypoMenuSequence
+    from TriggerMenuMT.HLT.Jet.JetMenuSequences import jetFSTrackingHypoMenuSequence, jetCaloRecoMenuSequence, jetCaloPreselMenuSequence
+    from TriggerMenuMT.HLT.Jet.ExoticJetSequences import jetEJsMenuSequence, jetCRMenuSequence
+
 from . import JetRecoCommon
 from . import JetPresel
 
@@ -173,37 +187,33 @@ class JetChainConfiguration(ChainConfigurationBase):
         jetDefStr = JetRecoCommon.jetRecoDictToString(self.recoDict)
 
         stepName = "MainStep_jet_"+jetDefStr
-        from TriggerMenuMT.HLT.Jet.JetMenuSequences import jetCaloHypoMenuSequence
-        jetSeq, jetDef = RecoFragmentsPool.retrieve( jetCaloHypoMenuSequence, 
+        jetSeq, jetDef = callGenerator( jetCaloHypoMenuSequence,
                                                      flags, isPerf=self.isPerf, **self.recoDict )
         jetCollectionName = str(jetSeq.hypo.Alg.Jets)
 
-        return jetCollectionName, jetDef ,ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
+        return jetCollectionName, jetDef, ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
     def getJetHICaloHypoChainStep(self, flags):
         stepName = "MainStep_HIjet"
-        from TriggerMenuMT.HLT.Jet.JetMenuSequences import jetHICaloHypoMenuSequence
-        jetSeq, jetDef = RecoFragmentsPool.retrieve( jetHICaloHypoMenuSequence,
+        jetSeq, jetDef = callGenerator( jetHICaloHypoMenuSequence,
                                                      flags, isPerf=self.isPerf, **self.recoDict )
         jetCollectionName = str(jetSeq.hypo.Alg.Jets)
 
-        return jetCollectionName, jetDef ,ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
+        return jetCollectionName, jetDef, ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
     def getJetRoITrackJetTagHypoChainStep(self, flags, jetsInKey):
         jetDefStr = JetRecoCommon.jetRecoDictToString(self.recoDict)
 
         stepName = "RoIFTFStep_jet_sel_"+jetDefStr
-        from TriggerMenuMT.HLT.Jet.JetMenuSequences import jetRoITrackJetTagHypoMenuSequence
-        jetSeq = RecoFragmentsPool.retrieve( jetRoITrackJetTagHypoMenuSequence,
-                                             flags, isPresel=False, jetsIn=jetsInKey, **self.recoDict )
+        jetSeq = callGenerator( jetRoITrackJetTagHypoMenuSequence,
+                                             flags, jetsIn=jetsInKey, isPresel=False, **self.recoDict )
         return ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
     def getJetFSTrackingHypoChainStep(self, flags, clustersKey):
         jetDefStr = JetRecoCommon.jetRecoDictToString(self.recoDict)
 
         stepName = "MainStep_jet_"+jetDefStr
-        from TriggerMenuMT.HLT.Jet.JetMenuSequences import jetFSTrackingHypoMenuSequence
-        jetSeq, jetDef = RecoFragmentsPool.retrieve( jetFSTrackingHypoMenuSequence,
+        jetSeq, jetDef = callGenerator( jetFSTrackingHypoMenuSequence,
                                                      flags, clustersKey=clustersKey,
                                                      isPerf=self.isPerf,
                                                      **self.recoDict )
@@ -212,8 +222,7 @@ class JetChainConfiguration(ChainConfigurationBase):
 
     def getJetCaloRecoChainStep(self, flags):
         stepName = "CaloRecoPTStep_jet_"+self.recoDict["clusterCalib"]
-        from TriggerMenuMT.HLT.Jet.JetMenuSequences import jetCaloRecoMenuSequence
-        jetSeq, clustersKey = RecoFragmentsPool.retrieve( jetCaloRecoMenuSequence,
+        jetSeq, clustersKey = callGenerator( jetCaloRecoMenuSequence,
                                                           flags, clusterCalib=self.recoDict["clusterCalib"] )
 
         return str(clustersKey), ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
@@ -232,8 +241,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         jetDefStr = JetRecoCommon.jetRecoDictToString(preselRecoDict)
 
         stepName = "PreselStep_jet_"+jetDefStr
-        from TriggerMenuMT.HLT.Jet.JetMenuSequences import jetCaloPreselMenuSequence
-        jetSeq, jetDef, clustersKey = RecoFragmentsPool.retrieve( jetCaloPreselMenuSequence,
+        jetSeq, jetDef, clustersKey = callGenerator( jetCaloPreselMenuSequence,
                                                                   flags, **preselRecoDict )
 
         return str(clustersKey), jetDef, ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
@@ -257,14 +265,12 @@ class JetChainConfiguration(ChainConfigurationBase):
         jetDefStr = JetRecoCommon.jetRecoDictToString(preselRecoDict)
 
         stepName = "RoIFTFStep_jet_"+jetDefStr
-        from TriggerMenuMT.HLT.Jet.JetMenuSequences import jetRoITrackJetTagHypoMenuSequence
-        jetSeq = RecoFragmentsPool.retrieve(jetRoITrackJetTagHypoMenuSequence,
+        jetSeq = callGenerator(jetRoITrackJetTagHypoMenuSequence,
                                             flags, jetsIn=jetsInKey, isPresel=True, **preselRecoDict)
 
         return ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
     def getJetEJsChainStep(self, flags, jetCollectionName, thresh, exotdictstring):
-        from TriggerMenuMT.HLT.Jet.ExoticJetSequences import jetEJsMenuSequence
 
         # Must be configured similar to : emergingPTF0p0dR1p2 or tracklessdR1p2
         if 'emerging' in exotdictstring and ('dR' not in exotdictstring \
@@ -290,14 +296,13 @@ class JetChainConfiguration(ChainConfigurationBase):
         log.debug("Running exotic jets with ptf: " + str(ptf) + "\tdR: " + str(dr) + "\ttrackless: " + str(trackless) + "\thypo: " + exotdictstring)
 
         stepName = "EJsStep_"
-        jetSeq = RecoFragmentsPool.retrieve( jetEJsMenuSequence, flags, jetsin=jetCollectionName, name=thresh)
+        jetSeq = callGenerator( jetEJsMenuSequence, flags, jetsIn=jetCollectionName, name=thresh)
         #from TrigGenericAlgs.TrigGenericAlgsConfig import PassthroughComboHypoCfg
         chainStep = ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])#, comboHypoCfg=PassthroughComboHypoCfg)
 
         return chainStep
 
     def getJetCRChainStep(self, flags, jetCollectionName, thresh, exotdictstring):
-        from TriggerMenuMT.HLT.Jet.ExoticJetSequences import jetCRMenuSequence
         
         if 'calratio' in exotdictstring:
             MinjetlogR = 1.2
@@ -309,7 +314,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         log.debug("Running exotic jets with MinjetlogR: " + str(MinjetlogR) + "\t BIB rm " + str(doBIBremoval) + "\thypo: " + exotdictstring)
 
         stepName = "CRStep_"+self.chainName
-        jetSeq = RecoFragmentsPool.retrieve( jetCRMenuSequence, flags, jetsin=jetCollectionName, name=thresh)
+        jetSeq = callGenerator( jetCRMenuSequence, flags, jetsIn=jetCollectionName, name=thresh)
         #from TrigGenericAlgs.TrigGenericAlgsConfig import PassthroughComboHypoCfg
         chainStep = ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])#, comboHypoCfg=PassthroughComboHypoCfg)
 

@@ -187,14 +187,6 @@ def getPrefilterCleaningString(prefilters_list):
 ##########################################################################################
 ### --- Modifier and decoration list getters ---
 
-def getTrackMods(trkopt):
-    trkmods = [
-        "TrackMoments:"+trkopt,
-        "JVF:"+trkopt,
-        "JVT:"+trkopt,
-    ]
-    return trkmods
-
 # Translate calib specification into something understood by
 # the calibration config helper
 def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
@@ -390,7 +382,7 @@ def defineJets(jetRecoDict,clustersKey=None,prefix='',suffix='',pfoPrefix=None):
 
     suffix="_"+jetRecoDict["jetCalib"]+'_'*(suffix.strip()!='')+suffix
     if jetDefNeedsTracks(jetRecoDict):
-        suffix += "_{}".format(jetRecoDict["trkopt"])
+        suffix += "_"+jetRecoDict["trkopt"]
 
     jetDef = JetDefinition( "AntiKt", actualradius, jetConstit, ptmin=minpt[jetradius], prefix=prefix, suffix=suffix, context=jetRecoDict["trkopt"])
     return jetDef

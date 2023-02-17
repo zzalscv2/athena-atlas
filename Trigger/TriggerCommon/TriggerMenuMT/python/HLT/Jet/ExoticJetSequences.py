@@ -9,11 +9,11 @@ from AthenaCommon.CFElements import seqAND
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
 
-def returnEJSequence(configflags, algo):
+def returnEJSequence(flags, algo):
 
     return seqAND("EmergingJetsExoticSeq", [algo])
 
-def jetEJsMenuSequence(flags, jetsin, name):
+def jetEJsMenuSequence(flags, jetsIn, name):
     
     from TrigHLTJetHypo.TrigHLTJetHypoConf import TrigJetEJsHypoAlg
     from TrigHLTJetHypo.TrigJetHypoToolConfig import trigJetEJsHypoToolFromDict
@@ -43,7 +43,7 @@ def jetEJsMenuSequence(flags, jetsin, name):
                          HypoToolGen = trigJetEJsHypoToolFromDict,
     )
                                                                                                                             
-def jetCRMenuSequence(flags, jetsin, name):
+def jetCRMenuSequence(flags, jetsIn, name):
 
     from TrigHLTJetHypo.TrigHLTJetHypoConf import TrigJetCRHypoAlg
     from TrigHLTJetHypo.TrigJetHypoToolConfig import trigJetCRHypoToolFromDict
