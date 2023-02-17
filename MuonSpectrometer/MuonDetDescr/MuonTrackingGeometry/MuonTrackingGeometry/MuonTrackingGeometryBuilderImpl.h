@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -75,14 +75,15 @@ class MuonTrackingGeometryBuilderImpl : public AthAlgTool {
   /** Private struct to contain local variables we dont want to be global in
    * this class*/
   struct LocalVariablesContainer {
-    double m_innerBarrelRadius;
-    double m_outerBarrelRadius;
-    double m_innerEndcapZ;
-    double m_outerEndcapZ;
-    bool m_adjustStatic;
-    bool m_static3d;
-    unsigned int m_frameNum{0};
-    unsigned int m_frameStat{0};
+    LocalVariablesContainer() = default;
+    double m_innerBarrelRadius = 0;
+    double m_outerBarrelRadius = 0;
+    double m_innerEndcapZ = 0;
+    double m_outerEndcapZ = 0;
+    bool m_adjustStatic = false;
+    bool m_static3d = false;
+    unsigned int m_frameNum = 0;
+    unsigned int m_frameStat = 0;
     std::vector<double> m_zPartitions;
     std::vector<int> m_zPartitionsType;
     std::vector<float> m_adjustedPhi;
@@ -93,12 +94,12 @@ class MuonTrackingGeometryBuilderImpl : public AthAlgTool {
     std::vector<std::vector<std::pair<int, float> > > m_shieldHPart;
     std::map<Trk::DetachedTrackingVolume*, std::vector<Trk::TrackingVolume*>*> m_blendMap;
     std::vector<Trk::DetachedTrackingVolume*> m_blendVols;
-    const std::vector<std::vector<std::pair<Trk::DetachedTrackingVolume*, const Span*> >*>* m_stationSpan{nullptr};
-    const std::vector<std::vector<std::pair<Trk::DetachedTrackingVolume*, const Span*> >*>* m_inertSpan{nullptr};
+    const std::vector<std::vector<std::pair<Trk::DetachedTrackingVolume*, const Span*> >*>* m_stationSpan = nullptr;
+    const std::vector<std::vector<std::pair<Trk::DetachedTrackingVolume*, const Span*> >*>* m_inertSpan = nullptr;
     RZPairVector m_msCutoutsIn;
     RZPairVector m_msCutoutsOut;
     Trk::Material m_muonMaterial;                     //!< the (empty) material
-    Trk::TrackingVolume* m_standaloneTrackingVolume;  // muon standalone tracking volume
+    Trk::TrackingVolume* m_standaloneTrackingVolume = nullptr;  // muon standalone tracking volume
   };
 
   /** Private method to find z/phi span of detached volumes */
