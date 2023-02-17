@@ -58,8 +58,7 @@ class TileRawChannel: public TileRawData {
 
     /* Destructor */
 
-    ~TileRawChannel() {
-    }
+    ~TileRawChannel() = default;
 
     void assign (const HWIdentifier& id,
                  float amplitude,

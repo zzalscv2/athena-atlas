@@ -31,7 +31,6 @@ class TileLaserControl {
       , m_lastPedMeas(0)
       , m_lastAlphaMeas(0) { }
 
-    ~TileLaserControl() { }
       
     double getPumpDiodeTemp() const  { return m_pumpDiodeTemp; }
     int getTimeLastMeasP() const     { return m_timeLastMeasP; }
