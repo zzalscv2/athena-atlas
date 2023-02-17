@@ -65,7 +65,7 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
    )
    outputStream.AcceptAlgs += AcceptAlgs
    outputStream.ExtraOutputs += [("DataHeader", f"StoreGateSvc+{outputStreamName}")]
-   if flags.Concurrency.NumThreads > 0 and flags.Scheduler.CheckOutputUsage:
+   if flags.Scheduler.CheckOutputUsage and flags.Concurrency.NumThreads > 0:
       outputStream.ExtraInputs = [tuple(l.split('#')) for l in finalItemList if '*' not in l and 'Aux' not in l]
       # Ignore dependencies
       from AthenaConfiguration.MainServicesConfig import OutputUsageIgnoreCfg
