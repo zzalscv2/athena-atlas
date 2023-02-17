@@ -51,7 +51,7 @@ def eFexTOBDecoratorCfg(flags, name, eFexEMRoIContainer = "L1_eEMRoI", eFexTauRo
     return acc
 
 if __name__ == '__main__':
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Logging import logging
     import glob
     import sys
@@ -73,6 +73,7 @@ if __name__ == '__main__':
     from AthenaCommon import Constants
     algLogLevel = getattr(Constants,args.outputLevel)
 
+    flags = initConfigFlags()
     if any(["data" in f for f in args.filesInput]):
         flags.Trigger.triggerConfig='DB'
 
