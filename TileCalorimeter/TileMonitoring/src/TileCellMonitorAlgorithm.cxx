@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileCellMonitorAlgorithm.h"
@@ -289,8 +289,6 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
         drawer = m_tileHWID->drawer(channel1_id);
         ros1 = m_tileHWID->ros(channel1_id);
         partition1 = ros1 - 1;
-        HWIdentifier adc1_id = m_tileHWID->adc_id(hash1, gain1);
-        isMaskedAdc1 = badChannels->getAdcStatus(adc1_id).isBad();
       }
 
       IdentifierHash hash2 = caloDDE->onl2();
@@ -300,8 +298,6 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
         drawer = m_tileHWID->drawer(channel2_id);
         ros2 = m_tileHWID->ros(channel2_id);
         partition2 = ros2 - 1;
-        HWIdentifier adc2_id = m_tileHWID->adc_id(hash2, gain2);
-        isMaskedAdc2 = badChannels->getAdcStatus(adc2_id).isBad();
       }
 
       // Note that drawer from HWID and module from ID are different for E3 cells near MBTS
@@ -418,6 +414,16 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
             && quality1 < 255 && quality2 < 255) {
           if (isBadChannel1 && isOkChannel1) gain1 = 1 - gain1;
           if (isBadChannel2 && isOkChannel2) gain2 = 1 - gain2;
+        }
+
+        if (hash1 != TileHWID::NOT_VALID_HASH) {
+          HWIdentifier adc1_id = m_tileHWID->adc_id(hash1, gain1);
+          isMaskedAdc1 = badChannels->getAdcStatus(adc1_id).isBad();
+        }
+
+        if (hash2 != TileHWID::NOT_VALID_HASH) {
+          HWIdentifier adc2_id = m_tileHWID->adc_id(hash2, gain2);
+          isMaskedAdc2 = badChannels->getAdcStatus(adc2_id).isBad();
         }
 
         bool channel1MaskedDueDQ(false);
