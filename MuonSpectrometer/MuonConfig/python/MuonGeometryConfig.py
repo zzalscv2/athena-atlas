@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.Enums import ProductionStep
 from AtlasGeoModel.GeoModelConfig import GeoModelCfg
 from AthenaConfiguration.Enums import LHCPeriod
@@ -99,7 +100,7 @@ def MuonDetectorToolCfg(flags):
     acc.setPrivateTools(detTool)
     return acc
 
-
+@AccumulatorCache
 def MuonAlignmentCondAlgCfg(flags):
     acc = MuonGeoModelToolCfg(flags)
     acc.merge(MuonIdHelperSvcCfg(flags))
