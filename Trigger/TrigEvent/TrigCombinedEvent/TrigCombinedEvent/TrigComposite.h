@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOMBINEDEVENT_TRIGCOMPOSITE_H
@@ -8,6 +8,7 @@
 #include <vector>
 #include <cmath>
 #include <limits>
+#include <set>
 #include "AthenaKernel/CLASS_DEF.h"
 #include "GaudiKernel/ClassID.h"
 #include "TrigNavigation/TrigFeatureLink.h"

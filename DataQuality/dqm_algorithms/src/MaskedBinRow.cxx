@@ -6,6 +6,7 @@
  * \author R. Calkins
  */
 
+#include <set>
 #include <dqm_core/AlgorithmConfig.h>
 #include <dqm_algorithms/MaskedBinRow.h>
 #include <dqm_algorithms/tools/AlgorithmHelper.h>
