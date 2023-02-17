@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSEnergyAndHitGAN.h"
@@ -8,6 +8,7 @@
 #include "ISF_FastCaloSimEvent/TFCSTruthState.h"
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
 #include "ISF_FastCaloSimEvent/TFCSCenterPositionCalculation.h"
+#include "CxxUtils/as_const_ptr.h"
 
 #include "TFile.h"
 
@@ -530,7 +531,7 @@ void TFCSEnergyAndHitGAN::Print(Option_t *option) const
   TString optprint=opt;optprint.ReplaceAll("short","");
 
   if(longprint) {
-    ATH_MSG_INFO(optprint<<"  "<<"Graph="<<m_graph<<"; json input="<<m_input<<"; free mem="<<GANfreemem()<<"; latent space="<<m_GANLatentSize<<"; Binning size="<<m_Binning.size());
+    ATH_MSG_INFO(optprint<<"  "<<"Graph="<<CxxUtils::as_const_ptr(m_graph)<<"; json input="<<CxxUtils::as_const_ptr(m_input)<<"; free mem="<<GANfreemem()<<"; latent space="<<m_GANLatentSize<<"; Binning size="<<m_Binning.size());
     for(auto& l : m_Binning) if(is_match_calosample(l.first)) {
       ATH_MSG_INFO(optprint<<"    "<<"layer="<<l.first<<" nR="<<l.second.GetNbinsX()<<" nalpha="<<l.second.GetNbinsY());
     }
