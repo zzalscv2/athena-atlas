@@ -493,42 +493,46 @@ def VoxelDensityToolCfg(flags, name="VoxelDensityTool", **kwargs):
     return result
 
 
-def getATLAS_RegionCreatorList(flags):
+def ATLAS_RegionCreatorListCfg(flags):
+    result = ComponentAccumulator()
     regionCreatorList = []
 
     if flags.Beam.Type is BeamType.Cosmics or flags.Sim.CavernBackground not in [CavernBackground.Off, CavernBackground.Signal]:
-        regionCreatorList += [SX1PhysicsRegionToolCfg(flags), BedrockPhysicsRegionToolCfg(flags), CavernShaftsConcretePhysicsRegionToolCfg(flags)]
+        regionCreatorList += [
+            result.popToolsAndMerge(SX1PhysicsRegionToolCfg(flags)),
+            result.popToolsAndMerge(BedrockPhysicsRegionToolCfg(flags)),
+            result.popToolsAndMerge(CavernShaftsConcretePhysicsRegionToolCfg(flags))]
         #regionCreatorList += ['CavernShaftsAirPhysicsRegionTool'] # Not used currently
     if flags.Detector.GeometryID:
         if flags.Detector.GeometryPixel:
-            regionCreatorList += [PixelPhysicsRegionToolCfg(flags)]
+            regionCreatorList += [result.popToolsAndMerge(PixelPhysicsRegionToolCfg(flags))]
         if flags.Detector.GeometrySCT:
-            regionCreatorList += [SCTPhysicsRegionToolCfg(flags)]
+            regionCreatorList += [result.popToolsAndMerge(SCTPhysicsRegionToolCfg(flags))]
         if flags.Detector.GeometryTRT:
-            regionCreatorList += [TRTPhysicsRegionToolCfg(flags)]
+            regionCreatorList += [result.popToolsAndMerge(TRTPhysicsRegionToolCfg(flags))]
             if flags.GeoModel.Run in [LHCPeriod.Run2, LHCPeriod.Run3]:
                 # TODO: should we support old geometry tags with Run == "UNDEFINED" and flags.GeoModel.IBLLayout not in ["noIBL", "UNDEFINED"]?
-                regionCreatorList += [TRT_ArPhysicsRegionToolCfg(flags)] #'TRT_KrPhysicsRegionTool'
+                regionCreatorList += [result.popToolsAndMerge(TRT_ArPhysicsRegionToolCfg(flags))] #'TRT_KrPhysicsRegionTool'
         # FIXME dislike the ordering here, but try to maintain the same ordering as in the old configuration.
         if flags.Detector.GeometryBpipe:
             if flags.Sim.BeamPipeSimMode is not BeamPipeSimMode.Normal:
-                regionCreatorList += [BeampipeFwdCutPhysicsRegionToolCfg(flags)]
+                regionCreatorList += [result.popToolsAndMerge(BeampipeFwdCutPhysicsRegionToolCfg(flags))]
             if not flags.Detector.GeometryFwdRegion and (flags.Detector.GeometryAFP or flags.Detector.GeometryALFA or flags.Detector.GeometryZDC):
-                regionCreatorList += [FWDBeamLinePhysicsRegionToolCfg(flags)]
+                regionCreatorList += [result.popToolsAndMerge(FWDBeamLinePhysicsRegionToolCfg(flags))]
     if flags.Detector.GeometryITk:
         if flags.Detector.GeometryITkPixel:
-            regionCreatorList += [ITkPixelPhysicsRegionToolCfg(flags)]
+            regionCreatorList += [result.popToolsAndMerge(ITkPixelPhysicsRegionToolCfg(flags))]
         if flags.Detector.GeometryITkStrip:
-            regionCreatorList += [ITkStripPhysicsRegionToolCfg(flags)]
+            regionCreatorList += [result.popToolsAndMerge(ITkStripPhysicsRegionToolCfg(flags))]
     if flags.Detector.GeometryHGTD:
-        regionCreatorList += [HGTDPhysicsRegionToolCfg(flags)]
+        regionCreatorList += [result.popToolsAndMerge(HGTDPhysicsRegionToolCfg(flags))]
     if flags.Detector.GeometryITk or flags.Detector.GeometryHGTD:  # TODO: I do not know why this is only for ITk (and HGTD)
         # FIXME dislike the ordering here, but try to maintain the same ordering as in the old configuration.
         if flags.Detector.GeometryBpipe:
             if flags.Sim.BeamPipeSimMode is not BeamPipeSimMode.Normal:
-                regionCreatorList += [BeampipeFwdCutPhysicsRegionToolCfg(flags)]
+                regionCreatorList += [result.popToolsAndMerge(BeampipeFwdCutPhysicsRegionToolCfg(flags))]
             if not flags.Detector.GeometryFwdRegion and (flags.Detector.GeometryAFP or flags.Detector.GeometryALFA or flags.Detector.GeometryZDC):
-                regionCreatorList += [FWDBeamLinePhysicsRegionToolCfg(flags)]
+                regionCreatorList += [result.popToolsAndMerge(FWDBeamLinePhysicsRegionToolCfg(flags))]
     if flags.Detector.GeometryCalo:
         if flags.Detector.GeometryLAr:
             # Shower parameterization overrides the calibration hit flag
@@ -538,35 +542,44 @@ def getATLAS_RegionCreatorList(flags):
                 Logging.log.info('  Such a configuration is not allowed, and would give junk calibration hits where the showers are modified.')
                 Logging.log.info('  Please try again with a different value of either flags.Sim.LArParameterization (' + str(flags.Sim.LArParameterization.value) + ') or flags.Sim.CalibrationRun ('+str(flags.Sim.CalibrationRun.value)+')')
                 raise RuntimeError('Configuration not allowed')
-            regionCreatorList += [EMBPhysicsRegionToolCfg(flags),
-                                  EMECPhysicsRegionToolCfg(flags),
-                                  HECPhysicsRegionToolCfg(flags),
-                                  FCALPhysicsRegionToolCfg(flags)]
+            regionCreatorList += [
+                result.popToolsAndMerge(EMBPhysicsRegionToolCfg(flags)),
+                result.popToolsAndMerge(EMECPhysicsRegionToolCfg(flags)),
+                result.popToolsAndMerge(HECPhysicsRegionToolCfg(flags)),
+                result.popToolsAndMerge(FCALPhysicsRegionToolCfg(flags))]
             if flags.Sim.LArParameterization is not LArParameterization.NoFrozenShowers:
                 # FIXME 'EMBPhysicsRegionTool' used for parametrization also - do we need a second instance??
-                regionCreatorList += [EMECParaPhysicsRegionToolCfg(flags),
-                                      FCALParaPhysicsRegionToolCfg(flags),
-                                      FCAL2ParaPhysicsRegionToolCfg(flags)]
+                regionCreatorList += [
+                    result.popToolsAndMerge(EMECParaPhysicsRegionToolCfg(flags)),
+                    result.popToolsAndMerge(FCALParaPhysicsRegionToolCfg(flags)),
+                    result.popToolsAndMerge(FCAL2ParaPhysicsRegionToolCfg(flags))]
                 if flags.Sim.LArParameterization in [LArParameterization.DeadMaterialFrozenShowers, LArParameterization.FrozenShowersFCalOnly]:
                     pass
                     #todo - add the line below
-                    regionCreatorList += [PreSampLArPhysicsRegionToolCfg(flags), DeadMaterialPhysicsRegionToolCfg(flags)]
+                    regionCreatorList += [
+                        result.popToolsAndMerge(PreSampLArPhysicsRegionToolCfg(flags)),
+                        result.popToolsAndMerge(DeadMaterialPhysicsRegionToolCfg(flags))]
     ## FIXME _initPR never called for FwdRegion??
     #if simFlags.ForwardDetectors.statusOn:
     #    if DetFlags.geometry.FwdRegion_on():
     #        regionCreatorList += ['FwdRegionPhysicsRegionTool']
     if flags.Detector.GeometryMuon:
         #todo - add the line below
-        regionCreatorList += [DriftWallPhysicsRegionToolCfg(flags), DriftWall1PhysicsRegionToolCfg(flags), DriftWall2PhysicsRegionToolCfg(flags)]
+        regionCreatorList += [
+            result.popToolsAndMerge(DriftWallPhysicsRegionToolCfg(flags)),
+            result.popToolsAndMerge(DriftWall1PhysicsRegionToolCfg(flags)),
+            result.popToolsAndMerge(DriftWall2PhysicsRegionToolCfg(flags))]
         if flags.Sim.CavernBackground not in [CavernBackground.Off, CavernBackground.Read]:# and not (simFlags.RecordFlux.statusOn and simFlags.RecordFlux()):
-            regionCreatorList += [MuonSystemFastPhysicsRegionToolCfg(flags)]
-    return regionCreatorList
+            regionCreatorList += [result.popToolsAndMerge(MuonSystemFastPhysicsRegionToolCfg(flags))]
+    result.setPrivateTools(regionCreatorList)
+    return result
 
 
-def getTB_RegionCreatorList(flags):
+def TB_RegionCreatorListCfg(flags):
     regionCreatorList = []
+    result = ComponentAccumulator()
+    # Deliberately left commented out for now
     #from G4AtlasApps.SimFlags import simFlags
-
     #TODO - migrate below>>
     #if (flags.GeoModel.AtlasVersion=="tb_LArH6_2003"):
     #    if (flags.Detector.GeometryLAr):
@@ -585,7 +598,8 @@ def getTB_RegionCreatorList(flags):
     #    if (simFlags.LArTB_H6Fcal.get_Value()):
     #        regionCreatorList += [FCALPhysicsRegionTool(flags)]
     #<<migrate above
-    return regionCreatorList
+    result.setPrivateTools(regionCreatorList)
+    return result
 
 
 #########################################################################
@@ -594,129 +608,80 @@ def ATLAS_FieldMgrListCfg(flags):
     fieldMgrList = []
 
     if flags.Sim.TightMuonStepping:
-        acc   = TightMuonsATLASFieldManagerToolCfg(flags)
-        tool  = result.popToolsAndMerge(acc)
+        tool  = result.popToolsAndMerge(TightMuonsATLASFieldManagerToolCfg(flags))
         fieldMgrList += [tool]
     else:
-        acc   = ATLASFieldManagerToolCfg(flags)
-        tool  = result.popToolsAndMerge(acc)
+        tool  = result.popToolsAndMerge(ATLASFieldManagerToolCfg(flags))
         fieldMgrList += [tool]
-
     if flags.Detector.GeometryBpipe:
-        acc = BeamPipeFieldManagerToolCfg(flags)
-        tool  = result.popToolsAndMerge(acc)
+        tool  = result.popToolsAndMerge(BeamPipeFieldManagerToolCfg(flags))
         fieldMgrList += [tool]
     if flags.Detector.GeometryID:
-        acc = InDetFieldManagerToolCfg(flags)
-        tool  = result.popToolsAndMerge(acc)
+        tool  = result.popToolsAndMerge(InDetFieldManagerToolCfg(flags))
         fieldMgrList += [tool]
     if flags.Detector.GeometryITk or flags.Detector.GeometryHGTD:  # TODO: while HGTD is included in the ITK envelope
-        acc = ITkFieldManagerToolCfg(flags)
-        tool  = result.popToolsAndMerge(acc)
+        tool  = result.popToolsAndMerge(ITkFieldManagerToolCfg(flags))
         fieldMgrList += [tool]
     if flags.Detector.GeometryCalo and flags.Sim.MuonFieldOnlyInCalo:
-        acc = MuonsOnlyInCaloFieldManagerToolCfg(flags)
-        tool  = result.popToolsAndMerge(acc)
+        tool  = result.popToolsAndMerge(MuonsOnlyInCaloFieldManagerToolCfg(flags))
         fieldMgrList += [tool]
     if flags.Detector.GeometryMuon:
-        acc = MuonFieldManagerToolCfg(flags)
-        tool  = result.popToolsAndMerge(acc)
+        tool  = result.popToolsAndMerge(MuonFieldManagerToolCfg(flags))
         fieldMgrList += [tool]
 
     #sort these forward ones later
     if flags.Detector.GeometryFwdRegion: #or forward?
-      accQ1FwdRegionFieldManager = Q1FwdFieldManagerToolCfg(flags)
-      accQ2FwdRegionFieldManager = Q2FwdFieldManagerToolCfg(flags)
-      accQ3FwdRegionFieldManager = Q3FwdFieldManagerToolCfg(flags)
-      accD1FwdRegionFieldManager = D1FwdFieldManagerToolCfg(flags)
-      accD2FwdRegionFieldManager = D2FwdFieldManagerToolCfg(flags)
-      accQ4FwdRegionFieldManager = Q4FwdFieldManagerToolCfg(flags)
-      accQ5FwdRegionFieldManager = Q5FwdFieldManagerToolCfg(flags)
-      accQ6FwdRegionFieldManager = Q6FwdFieldManagerToolCfg(flags)
-      accQ7FwdRegionFieldManager = Q7FwdFieldManagerToolCfg(flags)
-      accQ1HKickFwdRegionFieldManager = Q1HKickFwdFieldManagerToolCfg(flags)
-      accQ1VKickFwdRegionFieldManager = Q1VKickFwdFieldManagerToolCfg(flags)
-      accQ2HKickFwdRegionFieldManager = Q2HKickFwdFieldManagerToolCfg(flags)
-      accQ2VKickFwdRegionFieldManager = Q2VKickFwdFieldManagerToolCfg(flags)
-      accQ3HKickFwdRegionFieldManager = Q3HKickFwdFieldManagerToolCfg(flags)
-      accQ3VKickFwdRegionFieldManager = Q3VKickFwdFieldManagerToolCfg(flags)
-      accQ4VKickAFwdRegionFieldManager = Q4VKickAFwdFieldManagerToolCfg(flags)
-      accQ4HKickFwdRegionFieldManager = Q4HKickFwdFieldManagerToolCfg(flags)
-      accQ4VKickBFwdRegionFieldManager = Q4VKickBFwdFieldManagerToolCfg(flags)
-      accQ5HKickFwdRegionFieldManager = Q5HKickFwdFieldManagerToolCfg(flags)
-      accQ6VKickFwdRegionFieldManager = Q6VKickFwdFieldManagerToolCfg(flags)
-      accFwdRegionFieldManager = FwdRegionFieldManagerToolCfg(flags)
-
-      toolQ1FwdRegionFieldManager = result.popToolsAndMerge(accQ1FwdRegionFieldManager)
-      toolQ2FwdFieldManager = result.popToolsAndMerge(accQ2FwdRegionFieldManager)
-      toolQ3FwdFieldManager = result.popToolsAndMerge(accQ3FwdRegionFieldManager)
-      toolD1FwdFieldManager = result.popToolsAndMerge(accD1FwdRegionFieldManager)
-      toolD2FwdFieldManager = result.popToolsAndMerge(accD2FwdRegionFieldManager)
-      toolQ4FwdFieldManager = result.popToolsAndMerge(accQ4FwdRegionFieldManager)
-      toolQ5FwdFieldManager = result.popToolsAndMerge(accQ5FwdRegionFieldManager)
-      toolQ6FwdFieldManager = result.popToolsAndMerge(accQ6FwdRegionFieldManager)
-      toolQ7FwdFieldManager = result.popToolsAndMerge(accQ7FwdRegionFieldManager)
-      toolQ1HKickFwdFieldManager = result.popToolsAndMerge(accQ1HKickFwdRegionFieldManager)
-      toolQ1VKickFwdFieldManager = result.popToolsAndMerge(accQ1VKickFwdRegionFieldManager)
-      toolQ2HKickFwdFieldManager = result.popToolsAndMerge(accQ2HKickFwdRegionFieldManager)
-      toolQ2VKickFwdFieldManager = result.popToolsAndMerge(accQ2VKickFwdRegionFieldManager)
-      toolQ3HKickFwdFieldManager = result.popToolsAndMerge(accQ3HKickFwdRegionFieldManager)
-      toolQ3VKickFwdFieldManager = result.popToolsAndMerge(accQ3VKickFwdRegionFieldManager)
-      toolQ4VKickAFwdFieldManager = result.popToolsAndMerge(accQ4VKickAFwdRegionFieldManager)
-      toolQ4HKickFwdFieldManager = result.popToolsAndMerge(accQ4HKickFwdRegionFieldManager)
-      toolQ4VKickBFwdFieldManager = result.popToolsAndMerge(accQ4VKickBFwdRegionFieldManager)
-      toolQ5HKickFwdFieldManager = result.popToolsAndMerge(accQ5HKickFwdRegionFieldManager)
-      toolQ6VKickFwdFieldManager = result.popToolsAndMerge(accQ6VKickFwdRegionFieldManager)
-      toolFwdRegionFieldManager = result.popToolsAndMerge(accFwdRegionFieldManager)
-
-      fieldMgrList+=[toolQ1FwdRegionFieldManager,
-                     toolQ2FwdFieldManager,
-                     toolQ3FwdFieldManager,
-                     toolD1FwdFieldManager,
-                     toolD2FwdFieldManager,
-                     toolQ4FwdFieldManager,
-                     toolQ5FwdFieldManager,
-                     toolQ6FwdFieldManager,
-                     toolQ7FwdFieldManager,
-                     toolQ1HKickFwdFieldManager,
-                     toolQ1VKickFwdFieldManager,
-                     toolQ2HKickFwdFieldManager,
-                     toolQ2VKickFwdFieldManager,
-                     toolQ3HKickFwdFieldManager,
-                     toolQ3VKickFwdFieldManager,
-                     toolQ4VKickAFwdFieldManager,
-                     toolQ4HKickFwdFieldManager,
-                     toolQ4VKickBFwdFieldManager,
-                     toolQ5HKickFwdFieldManager,
-                     toolQ6VKickFwdFieldManager,
-                     toolFwdRegionFieldManager]
+      fieldMgrList+=[
+          result.popToolsAndMerge(Q1FwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q2FwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q3FwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(D1FwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(D2FwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q4FwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q5FwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q6FwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q7FwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q1HKickFwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q1VKickFwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q2HKickFwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q2VKickFwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q3HKickFwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q3VKickFwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q4VKickAFwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q4HKickFwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q4VKickBFwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q5HKickFwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q6VKickFwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(Q1HKickFwdFieldManagerToolCfg(flags)),
+          result.popToolsAndMerge(FwdRegionFieldManagerToolCfg(flags))]
 
     result.setPrivateTools(fieldMgrList)
     return result
 
 
-def getTB_FieldMgrList(flags):
+def TB_FieldMgrListCfg(flags):
     fieldMgrList = []
-    return fieldMgrList
+    result = ComponentAccumulator()
+    result.setPrivateTools(fieldMgrList)
+    return result
 
 
-def getGeometryConfigurationTools(flags):
+def GeometryConfigurationToolsCfg(flags):
     geoConfigToolList = []
     # The methods for these tools should be defined in the
     # package containing each tool, so G4AtlasTools in this case
     result =ComponentAccumulator()
     geoConfigToolList += [result.popToolsAndMerge(MaterialDescriptionToolCfg(flags))]
     geoConfigToolList += [result.popToolsAndMerge(VoxelDensityToolCfg(flags))]
-    return result, geoConfigToolList
+    result.setPrivateTools(geoConfigToolList)
+    return result
 
 
 def G4AtlasDetectorConstructionToolCfg(flags, name="G4AtlasDetectorConstructionTool", **kwargs):
     result = ComponentAccumulator()
 
     ## For now just have the same geometry configurations tools loaded for ATLAS and TestBeam
-    geoConfAcc, listOfGeoConfTools = getGeometryConfigurationTools(flags)
-    result.merge(geoConfAcc)
-    kwargs.setdefault("GeometryConfigurationTools", listOfGeoConfTools)
+    kwargs.setdefault("GeometryConfigurationTools", result.popToolsAndMerge(GeometryConfigurationToolsCfg(flags)))
 
     if "SenDetMasterTool" not in kwargs:
         tool = result.popToolsAndMerge(SensitiveDetectorMasterToolCfg(flags))
@@ -731,18 +696,16 @@ def G4AtlasDetectorConstructionToolCfg(flags, name="G4AtlasDetectorConstructionT
         kwargs.setdefault("FieldManagers", []) # Empty for Tile test beam
     elif False: # This block is in case we ever decide to support LAr Test Beam again in Athena in the future
         kwargs.setdefault("World", 'LArTB_World')
-        kwargs.setdefault("RegionCreators", getTB_RegionCreatorList(flags))
-        kwargs.setdefault("FieldManagers", getTB_FieldMgrList(flags))
+        kwargs.setdefault("RegionCreators", result.popToolsAndMerge(TB_RegionCreatorListCfg(flags)))
+        kwargs.setdefault("FieldManagers", result.popToolsAndMerge(TB_FieldMgrListCfg(flags)))
     else:
         if flags.Detector.GeometryCavern:
             kwargs.setdefault("World", result.popToolsAndMerge(CavernWorldCfg(flags)))
         else:
             kwargs.setdefault("World", result.popToolsAndMerge(ATLASEnvelopeCfg(flags)))
-        kwargs.setdefault("RegionCreators", getATLAS_RegionCreatorList(flags))
+        kwargs.setdefault("RegionCreators", result.popToolsAndMerge(ATLAS_RegionCreatorListCfg(flags)))
         if flags.BField.solenoidOn or flags.BField.barrelToroidOn or flags.BField.endcapToroidOn:
-            acc = ATLAS_FieldMgrListCfg(flags)
-            fieldMgrList = result.popToolsAndMerge(acc)
-            kwargs.setdefault("FieldManagers", fieldMgrList)
+            kwargs.setdefault("FieldManagers", result.popToolsAndMerge(ATLAS_FieldMgrListCfg(flags)))
     result.setPrivateTools(G4AtlasDetectorConstructionTool(name, **kwargs))
     return result
 
