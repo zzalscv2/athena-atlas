@@ -67,6 +67,15 @@ def TgcRawDataMonitoringConfig(inputFlags):
         tgcRawDataMonAlg.CtpDecisionMoniorList = ''
         tgcRawDataMonAlg.UseMuonSelectorTool = False
 
+    if inputFlags.Trigger.EDMVersion < 3: # Run2 and before
+        tgcRawDataMonAlg.MuonRoIContainerName = ''
+        tgcRawDataMonAlg.MuonRoIContainerBCm2Name = ''
+        tgcRawDataMonAlg.MuonRoIContainerBCm1Name = ''
+        tgcRawDataMonAlg.MuonRoIContainerBCp1Name = ''
+        tgcRawDataMonAlg.MuonRoIContainerBCp2Name = ''
+        tgcRawDataMonAlg.MuRoIThresholdPatternsKey = ''
+        tgcRawDataMonAlg.MonitorThresholdPatterns = False
+
     if inputFlags.Input.Format is Format.BS or 'TGC_MeasurementsAllBCs' in inputFlags.Input.Collections:
         tgcRawDataMonAlg.AnaTgcPrd=True
     if inputFlags.Input.Format is Format.BS or ('TrigT1CoinDataCollection' in inputFlags.Input.Collections and
