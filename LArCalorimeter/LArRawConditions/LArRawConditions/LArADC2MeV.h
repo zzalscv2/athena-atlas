@@ -1,7 +1,7 @@
 //Dear emacs, this is -*-c++-*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LARADC2MEV
@@ -15,6 +15,7 @@
 
 #include <vector>
 #include <array>
+#include <bitset>
 #include "LArElecCalib/LArVectorProxy.h"
 
 class LArADC2MeV {

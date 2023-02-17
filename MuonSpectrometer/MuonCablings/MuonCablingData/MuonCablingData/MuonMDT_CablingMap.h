@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONMDT_CABLING_MUONMDT_CABLINGMAP_H
 #define MUONMDT_CABLING_MUONMDT_CABLINGMAP_H
 
+#include <set>
 #include "AthenaKernel/CLASS_DEF.h"
 #include "Identifier/Identifier.h"
 #include "MuonCablingData/MdtTdcMap.h"

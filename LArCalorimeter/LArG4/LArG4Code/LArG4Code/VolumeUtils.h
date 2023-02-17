@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4CODE_VOLUMEUTILS_H
@@ -14,6 +14,7 @@
 // System includes
 #include <string>
 #include <vector>
+#include <set>
 
 // Gaudi includes
 #include "GaudiKernel/MsgStream.h"
