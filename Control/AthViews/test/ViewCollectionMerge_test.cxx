@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -162,6 +162,7 @@ protected:
 
 
 // Just read and write with handles - basic
+// cppcheck-suppress syntaxError
 TEST_F( ViewCollectionMerge_test, testBasicReadWrite ) {
 
   // Make a view vector
