@@ -185,7 +185,7 @@ def IDCalibTriggerCfg(flags):
 
     from TrigTrackingHypo.IDCalibHypoConfig import IDCalibHypoToolFromDict
     from TrigTrackingHypo.IDCalibHypoConfig import createIDCalibHypoAlg
-    theHypoAlg = createIDCalibHypoAlg("IDCalibHypo")
+    theHypoAlg = createIDCalibHypoAlg(flags, "IDCalibHypo")
 
     from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getCommonInDetFullScanSequence
     ( TrkSeq, InputMakerAlg, sequenceOut ) = RecoFragmentsPool.retrieve(getCommonInDetFullScanSequence,flags)

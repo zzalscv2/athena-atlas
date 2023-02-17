@@ -269,7 +269,7 @@ def muFastRecoSequence( flags, RoIs, doFullScanID = False, InsideOutMode=False, 
 
   ### set up MuFastSteering ###
   from TrigL2MuonSA.TrigL2MuonSAConfig import TrigL2MuonSAConfig
-  muFastAlg = TrigL2MuonSAConfig("Muon"+postFix)
+  muFastAlg = TrigL2MuonSAConfig("Muon"+postFix, flags)
 
   muFastAlg.Run2RecMuonRoI = "HLT_RecMURoIs"
   muFastAlg.RecMuonRoI = "LVL1MuonRoIs"
