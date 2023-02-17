@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSPredictExtrapWeights.h"
@@ -7,6 +7,7 @@
 #include "ISF_FastCaloSimEvent/TFCSTruthState.h"
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
 #include "ISF_FastCaloSimEvent/TFCSCenterPositionCalculation.h"
+#include "CxxUtils/as_const_ptr.h"
 
 #include "TFile.h"
 #include "TClass.h"
@@ -438,6 +439,6 @@ void TFCSPredictExtrapWeights::Print(Option_t* option) const
    TString optprint=opt;optprint.ReplaceAll("short","");
    TFCSLateralShapeParametrizationHitBase::Print(option);
 
-   if(longprint) ATH_MSG_INFO(optprint << "  m_input (TFCSPredictExtrapWeights): " << m_input);
+   if(longprint) ATH_MSG_INFO(optprint << "  m_input (TFCSPredictExtrapWeights): " << CxxUtils::as_const_ptr(m_input));
    if(longprint) ATH_MSG_INFO(optprint << "  Address of m_nn: " << (void *)m_nn);
 }
