@@ -212,9 +212,9 @@ StatusCode CscDigitizationTool::CoreDigitization(Collections_t& collections,CscS
       }
       const HepMcParticleLink::PositionFlag idxFlag = (phit.eventId()==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_INDEX;
       const HepMcParticleLink trackLink(phit->trackNumber(), phit.eventId(), evColl, idxFlag);
+      const auto cscd = CscMcData(energy, ypos, zpos);
       for (; vecBeg != vecEnd; ++vecBeg) {
-        CscSimData::Deposit deposit(trackLink, CscMcData(energy, ypos, zpos));
-        myDeposits[(*vecBeg)].push_back(deposit);
+        myDeposits[(*vecBeg)].emplace_back(trackLink,cscd);
       }
       hashVec.clear();
     }
