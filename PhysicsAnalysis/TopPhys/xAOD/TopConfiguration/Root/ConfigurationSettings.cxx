@@ -238,7 +238,11 @@ namespace top {
     registerParameter("GhostTracksQuality",
                       "WP of the ghost track quality. Option: TightPrimary, LoosePrimary. Loose, NoCut. Default TightPrimary.","TightPrimary");
     registerParameter("JetUncertainties_NPModel",
-                      "AllNuisanceParameters, CategoryReduction (default), GlobalReduction, StrongReduction - for JetUncertainties",
+                      "Model used for JetUncertainties. Possible choices:"
+                      " \"AllNuisanceParameters\", \"CategoryReduction\" (default and only option for R22 pre-recs),"
+                      " \"GlobalReduction\", \"StrongReduction\","
+                      " \"SR_Scenario1\" (ONLY to be used for FTAG calibrations!),"
+                      " or other specific StrongReduction scenarios.",
                       "CategoryReduction");
     registerParameter("JetUncertainties_QGFracFile", "To specify a root file with quark/gluon fractions,"
                                                      " in order to reduce FlavourComposition and response uncertainties."
@@ -251,12 +255,15 @@ namespace top {
                                                          " Default: None (i.e. no specific pattern is looked for in the name of the provided histograms).",
                       "None");
     registerParameter("JetJERSmearingModel",
-                      "All (inc. data smearing), All_PseudoData (use MC as pseudo-data), Full (inc. data smearing), Full_PseudoData (use MC as pseudo-data) or Simple (MC only - default)",
+                      "JER smearing model to use. Possible choices (\"Full\" is the only R22 pre-rec option):"
+                      " \"All\" (inc. data smearing), \"All_PseudoData\" (use MC as pseudo-data),"
+                      " \"Full\" (inc. data smearing), \"Full_PseudoData\" (use MC as pseudo-data - default),"
+                      " or \"Simple\" (MC only).",
                       "Full_PseudoData", {"All", "All_PseudoData", "Full", "Full_PseudoData", "Simple"});
     registerParameter("JetJMSOption",
-		      "None (default),"
-                      "JMS_frozen (The shape and magnitude of the uncertainties at m/pT = 0.25 are also used for m/pT > 0.25),"
-                       "JMS_scaled (The magnitude of the uncertainties at m/pT = 0.25 was scaled linearly with increasing m/pT)",
+                      "None (default),"
+                      " JMS_frozen (The shape and magnitude of the uncertainties at m/pT = 0.25 are also used for m/pT > 0.25),"
+                      " JMS_scaled (The magnitude of the uncertainties at m/pT = 0.25 was scaled linearly with increasing m/pT).",
                       "None");
     registerParameter("DoLargeRPseudodataJER",
                       "If set to True, produce additional JER smearing systematics treating MC as pseudo-data, provided FullJER or AllJER is specified with LargeRJetUncertainties_JESJERJMS_NPModel.",
