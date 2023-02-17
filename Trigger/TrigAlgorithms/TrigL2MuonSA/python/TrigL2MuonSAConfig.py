@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import TrigL2MuonSA.TrigL2MuonSAConf as MuonSA
 from TrigL2MuonSA.TrigL2MuonSAMonitoring import TrigL2MuonSAMonitoring
@@ -122,7 +122,7 @@ class TrigL2MuonSAConfig(MuonSA.MuFastSteering):
         newargs = ['%s_%s' % (cls.getType(),args[0]) ] + list(args)
         return super( TrigL2MuonSAConfig, cls ).__new__( cls, *newargs, **kwargs )
 
-    def __init__( self, name, *args, **kwargs ):
+    def __init__( self, name, flags, *args, **kwargs ):
         super( TrigL2MuonSAConfig, self ).__init__( name )
 
         self.DataPreparator    = theDataPreparator
@@ -190,7 +190,7 @@ class TrigL2MuonSAConfig(MuonSA.MuFastSteering):
 
         # Setup MonTool for monitored variables in AthenaMonitoring package
         # defined which histogram are created at TrigL2MuonSAMonitoring.py
-        self.MonTool = TrigL2MuonSAMonitoring()
+        self.MonTool = TrigL2MuonSAMonitoring(flags)
 
         self.StationFitter.PtFromAlphaBeta.useCscPt = True
         self.StationFitter.PtFromAlphaBeta.AvoidMisalignedCSCs = False

@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def TrigL2MuonSAMonitoring(name = "TrigL2MuonSAMonitoring"):
+def TrigL2MuonSAMonitoring(flags, name = "TrigL2MuonSAMonitoring"):
 
-    montool = GenericMonitoringTool(name, HistPath = name)
+    montool = GenericMonitoringTool(flags, name, HistPath = name)
 
     montool.defineHistogram('InnMdtHits',    type='TH1F', path='EXPERT', title="Hit multiplicity in the INNER2 road; MDT hits", xbins=50, xmin=-0.5, xmax=50.5)
     montool.defineHistogram('MidMdtHits',    type='TH1F', path='EXPERT', title="Hit multiplicity in the MIDDLE road; MDT hits", xbins=50, xmin=-0.5, xmax=50.5)
