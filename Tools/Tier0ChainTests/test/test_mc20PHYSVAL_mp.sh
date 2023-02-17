@@ -1,8 +1,7 @@
 #!/bin/sh
 
 # art-include: master/Athena
-# art-include: 22.0/Athena
-# art-include: 22.0-mc20/Athena
+# art-include: 23.0/Athena
 # art-description: DAOD building PHYSVAL mc20 MP
 # art-type: grid
 # art-output: *.pool.root
@@ -13,7 +12,14 @@
 
 set -e
 
-Reco_tf.py --athenaopts='--nprocs=2' --athenaMPMergeTargetSize 'DAOD_*:0' --inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/mc20_13TeV.361107.PowhegPythia8EvtGen_AZNLOCTEQ6L1_Zmumu.recon.AOD.e3601_s3681_r13167/AOD.27312826._000061.pool.root.1 --outputDAODFile art.pool.root --reductionConf PHYSVAL --maxEvents -1 --preExec 'from AthenaCommon.DetFlags import DetFlags; DetFlags.detdescr.all_setOff(); DetFlags.BField_setOn(); DetFlags.digitize.all_setOff(); DetFlags.detdescr.Calo_setOn(); DetFlags.simulate.all_setOff(); DetFlags.pileup.all_setOff(); DetFlags.overlay.all_setOff();'
+Derivation_tf.py \
+--CA True \
+--inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc20/AOD/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3681_r13145/1000events.AOD.27121237._002005.pool.root.1 \
+--outputDAODFile art.pool.root \
+--formats PHYSVAL \
+--maxEvents -1 \
+--sharedWriter True \
+--multiprocess True \
 
 echo "art-result: $? reco"
 
