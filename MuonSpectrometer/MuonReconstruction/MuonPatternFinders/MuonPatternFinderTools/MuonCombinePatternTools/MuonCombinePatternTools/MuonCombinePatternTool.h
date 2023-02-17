@@ -52,7 +52,7 @@ public:
 
     /** converts MuonPrdPatterns into MuonPatternCombinationCollection
      * MuonPatternCombinationCollection are default output for PatternFinder */
-    virtual std::unique_ptr<MuonPatternCombinationCollection> makePatternCombinations(const MuonPrdPatternCollection& muonpatterns) const;
+    virtual std::unique_ptr<MuonPatternCombinationCollection> makePatternCombinations(const MuonPrdPatternCollection& muonpatterns) const override;
 
 private:
     /** make combined pattern from all candidates, removes duplicates with phi
