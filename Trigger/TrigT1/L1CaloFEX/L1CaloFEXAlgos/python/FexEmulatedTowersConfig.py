@@ -18,7 +18,7 @@ def jFexEmulatedTowersCfg(  flags, name, writeKey="L1_jFexEmulatedTowers"):
 
     return acc
 
-def eFexEmulatedTowersCfg(flags, name, writeKey = "L1_eFexEmulatedTowers", verificationMode = False):
+def eFexEmulatedTowersCfg(flags, name, writeKey = "L1_eFexEmulatedTowers"):
     """
     Config for emulating eFex input data from LATOME readout
     """    
@@ -26,7 +26,6 @@ def eFexEmulatedTowersCfg(flags, name, writeKey = "L1_eFexEmulatedTowers", verif
     
     emulator = CompFactory.LVL1.eFexTowerBuilder(name)
     emulator.eFexContainerWriteKey   = writeKey
-    emulator.MappingVerificationMode = verificationMode
     acc.addEventAlgo(emulator)
 
     return acc

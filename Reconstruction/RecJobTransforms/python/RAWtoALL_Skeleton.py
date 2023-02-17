@@ -97,6 +97,18 @@ def fromRunArgs(runArgs):
         ConfigFlags.Output.doWriteBS = True
         log.info("---------- Configured DRAW_EGZ output")
 
+    if hasattr(runArgs, 'outputDAOD_L1CALO1File'):
+        flagString = 'Output.DAOD_L1CALO1FileName'
+        ConfigFlags.addFlag(flagString, runArgs.outputDAOD_L1CALO1File)
+        ConfigFlags.Output.doWriteDAOD = True
+        log.info("---------- Configured DAOD_L1CALO1 output")
+
+    if hasattr(runArgs, 'outputDAOD_L1CALO2File'):
+        flagString = 'Output.DAOD_L1CALO2FileName'
+        ConfigFlags.addFlag(flagString, runArgs.outputDAOD_L1CALO2File)
+        ConfigFlags.Output.doWriteDAOD = True
+        log.info("---------- Configured DAOD_L1CALO2 output")
+
     if hasattr(runArgs, 'outputDESDM_PHOJETFile'):
         flagString = 'Output.DESDM_PHOJETFileName'
         ConfigFlags.addFlag(flagString, runArgs.outputDESDM_PHOJETFile)
@@ -166,6 +178,17 @@ def fromRunArgs(runArgs):
         from PrimaryDPDMaker.DRAW_EGZ import DRAW_EGZCfg
         cfg.merge(DRAW_EGZCfg(ConfigFlags))
         log.info("---------- Configured DRAW_EGZ perfDPD")
+
+    # L1CALO1/2
+    for flag in [key for key in ConfigFlags._flagdict.keys() if ("Output.DAOD_L1CALO1FileName" in key)]:
+        from DerivationFrameworkL1Calo.L1CALO1 import L1CALO1Cfg
+        cfg.merge(L1CALO1Cfg(ConfigFlags))
+        log.info("---------- Configured L1CALO1 perfDPD")
+
+    for flag in [key for key in ConfigFlags._flagdict.keys() if ("Output.DAOD_L1CALO2FileName" in key)]:
+        from DerivationFrameworkL1Calo.L1CALO2 import L1CALO2Cfg
+        cfg.merge(L1CALO2Cfg(ConfigFlags))
+        log.info("---------- Configured L1CALO2 perfDPD")
 
     # DESDM PHOJET
     for flag in [key for key in ConfigFlags._flagdict.keys() if ("Output.DESDM_PHOJETFileName" in key)]:

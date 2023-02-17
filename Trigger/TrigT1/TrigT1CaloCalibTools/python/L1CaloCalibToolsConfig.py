@@ -49,7 +49,6 @@ def L1CaloxAODOfflineTriggerTowerToolsCfg(flags, name, **kwargs):
     """
     acc = ComponentAccumulator()
 
-    from CaloTriggerTool import L1CaloCells2TriggerTowersCfg
     kwargs.setdefault("L1CaloCells2TriggerTowers", acc.popToolsAndMerge(L1CaloCells2TriggerTowersCfg(flags,'L1CaloCells2TriggerTowers')))
 
     acc.setPrivateTools(CompFactory.LVL1.L1CaloxAODOfflineTriggerTowerTools(name, **kwargs))
