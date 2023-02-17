@@ -204,7 +204,7 @@ class TrigCaloClusterMaker_topo (TrigCaloClusterMakerBase):
         
         # maker tools
         CaloNoiseCondAlg()
-        TrigTopoMaker = CaloTopoClusterMaker("TrigTopoMaker")
+        TrigTopoMaker = CaloTopoClusterMaker("TopoMaker")
 
         TrigTopoMaker.CellsName = cells
         TrigTopoMaker.CalorimeterNames=["LAREM",
@@ -253,7 +253,7 @@ class TrigCaloClusterMaker_topo (TrigCaloClusterMakerBase):
         TrigTopoMaker.UseTimeCutUpperLimit = flags.Trigger.Calo.TopoCluster.useUpperLimitForTimeCut
         TrigTopoMaker.TimeCutUpperLimit = flags.Trigger.Calo.TopoCluster.timeCutUpperLimit
 
-        TrigTopoSplitter = CaloTopoClusterSplitter("TrigTopoSplitter")        
+        TrigTopoSplitter = CaloTopoClusterSplitter("TopoSplitter")        
         # cells from the following samplings will be able to form local
         # maxima. The excluded samplings are PreSamplerB, EMB1,
         # PreSamplerE, EME1, all Tile samplings, all HEC samplings and the
@@ -285,9 +285,9 @@ class TrigCaloClusterMaker_topo (TrigCaloClusterMakerBase):
         # cluster maker
 
         if not doMoments:
-          self.ClusterMakerTools = [ TrigTopoMaker.getFullName(), TrigTopoSplitter.getFullName()]
+          self.ClusterMakerTools = [ TrigTopoMaker, TrigTopoSplitter]
         else:
-          self.ClusterMakerTools = [ TrigTopoMaker.getFullName(), TrigTopoSplitter.getFullName(),  TrigTopoMoments.getFullName()]
+          self.ClusterMakerTools = [ TrigTopoMaker, TrigTopoSplitter,  TrigTopoMoments]
 
         # do not use BadChannelListCorr since this is not used for jet and tau in offline
         #TrigBadChannelListCorr = CaloClusterBadChannelListCorr()
@@ -304,10 +304,10 @@ class TrigCaloClusterMaker_topo (TrigCaloClusterMakerBase):
         #self += TrigLockVariables
 
         if doLC:
-          self.ClusterCorrectionTools += [ TrigLocalCalib.getFullName(),
-                                           TrigOOCCalib.getFullName(),
-                                           TrigOOCPi0Calib.getFullName(),
-                                           TrigDMCalib.getFullName()]
+          self.ClusterCorrectionTools += [ TrigLocalCalib,
+                                           TrigOOCCalib,
+                                           TrigOOCPi0Calib,
+                                           TrigDMCalib]
           self += TrigLocalCalib
           self += TrigOOCCalib
           self += TrigOOCPi0Calib
