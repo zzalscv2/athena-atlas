@@ -15,7 +15,7 @@ timeout 64800 Reco_tf.py --CA \
   --outputDRAW_EGZFile=myDRAW_EGZ.data \
   --outputDAOD_IDTIDEFile=myDAOD_IDTIDE.pool.root \
   --multithreaded='True' \
-  --preExec 'from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Trigger.triggerConfig= "DB"' \
+  --preExec 'ConfigFlags.Trigger.triggerConfig= "DB"' \
   --autoConfiguration="everything" \
   --conditionsTag "all:CONDBR2-BLKPA-2022-07" \
   --geometryVersion="all:ATLAS-R3S-2021-03-00-00" \
