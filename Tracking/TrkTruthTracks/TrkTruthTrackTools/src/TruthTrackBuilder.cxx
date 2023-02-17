@@ -120,10 +120,8 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
     //!< get the charge via the particle table ...
     
     int pdgCode = genPart->pdg_id();
-    int absPdgCode = std::abs(pdgCode);
     // get the charge: ap->charge() is used later, DOES NOT WORK RIGHT NOW
-    const HepPDT::ParticleData* ap =
-        m_particleDataTable->particle( absPdgCode);
+    const HepPDT::ParticleData* ap = m_particleDataTable->particle(std::abs(pdgCode));
     double charge = 1.;
     if (ap) charge = ap->charge();
     // since the PDT table only has abs(PID) values for the charge
