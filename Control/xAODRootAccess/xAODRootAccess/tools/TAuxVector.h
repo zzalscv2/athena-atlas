@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TOOLS_TAUXVECTOR_H
 #define XAODROOTACCESS_TOOLS_TAUXVECTOR_H
@@ -34,7 +34,7 @@ namespace xAOD {
    public:
       /// Constructor
       TAuxVector( const SG::IAuxTypeVectorFactory* factory,
-                  ::TClass* cl, size_t size, size_t capacity );
+                  const ::TClass* cl, size_t size, size_t capacity );
       /// Copy constructor
       TAuxVector( const TAuxVector& parent );
       /// Destructor
