@@ -69,7 +69,6 @@ protected:
         int m_TTwindow[3][3]={{0}};
         int m_ClusterEt = 0;
         int m_TauIsolation = 0;
-	    bool m_isLocalMaxima=false;
           
         std::unordered_map<int,std::vector<int> > m_map_Etvalues;
 

@@ -59,8 +59,6 @@ protected:
         int m_jFEXalgoSearchWindowSeedET[5][5] = {{0}};
         int m_jFEXalgoSearchWindowSeedET_displaced[5][5] = {{0}};
         
-        bool m_LMDisplaced_below;
-        bool m_LMDisplaced_up;
         std::unordered_map<int,std::vector<int> > m_map_Etvalues;
         
         bool CalculateLM(int mymatrix[5][5]);
