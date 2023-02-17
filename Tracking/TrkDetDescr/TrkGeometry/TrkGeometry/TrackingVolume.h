@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -288,7 +288,7 @@ public:
                                       const Amg::Vector3D& dir) const;
 
   /** Return the associated detached subvolumes */
-  std::vector<const DetachedTrackingVolume*>* assocDetachedSubVolumes(
+  std::vector<const DetachedTrackingVolume*> assocDetachedSubVolumes(
     const Amg::Vector3D& gp,
     double tol) const;
 
