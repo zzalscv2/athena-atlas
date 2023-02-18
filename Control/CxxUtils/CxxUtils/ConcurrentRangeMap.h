@@ -610,6 +610,16 @@ private:
   COMPARE m_compare;
 
   /// Payload deleter object.
+  /// Important: do not discard an object while it's still reachable
+  /// from the m_begin / m_last range --- update the pointers first.
+  /// Otherwise, the object may be deleted while another thread
+  /// is still referencing it:
+  ///   thread 1: Discard object.  Sets grace mask for both slots.
+  ///   thread 2: Call quiescent().  Clears grace mask for 2.
+  ///             Retrieve the discarded object.
+  ///   thread 1: Adjust pointers.
+  ///             Call quiescent.  The discarded object may be deleted
+  ///             at this point while thread 2 is still reading it.
   std::shared_ptr<IPayloadDeleter> m_payloadDeleter;
 
   /// Current version of the implementation class.
