@@ -139,8 +139,8 @@ def fromRunArgs(runArgs):
     from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg
     cfg.merge(BeamEffectsAlgCfg(flags))
 
-    if (not flags.Overlay.FastChain and "xAOD::EventInfo#EventInfo" in flags.Input.TypedCollections) \
-        or (flags.Overlay.FastChain and "xAOD::EventInfo#EventInfo" in flags.Input.SecondaryTypedCollections):
+    if not flags.Digitization.PileUp and ( (not flags.Overlay.FastChain and "xAOD::EventInfo#EventInfo" in flags.Input.TypedCollections) \
+                                           or (flags.Overlay.FastChain and "xAOD::EventInfo#EventInfo" in flags.Input.SecondaryTypedCollections) ):
         # Make sure signal EventInfo is rebuilt from event context
         # TODO: this is probably not needed, but keeping it to be in sync with standard simulation
         from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoUpdateFromContextAlgCfg

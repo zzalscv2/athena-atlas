@@ -65,7 +65,8 @@ def OverlayMainContentCfg(configFlags):
         acc.merge(CopyJetTruthInfoCfg(configFlags))
         acc.merge(CopyPileupParticleTruthInfoCfg(configFlags))
         acc.merge(CopyCaloCalibrationHitContainersCfg(configFlags))
-        acc.merge(CopyTrackRecordCollectionsCfg(configFlags))
+        if not configFlags.Overlay.FastChain:
+            acc.merge(CopyTrackRecordCollectionsCfg(configFlags))
 
     # Beam spot reweighting
     if configFlags.Digitization.InputBeamSigmaZ > 0:
