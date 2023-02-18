@@ -8,10 +8,13 @@ from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 from SimuJobTransforms.CommonSimulationSteering import specialConfigPreInclude, specialConfigPostInclude
 
-# temporarily force no global config flags
-from AthenaConfiguration import AllConfigFlags
-del AllConfigFlags.ConfigFlags
-
+try:
+    # temporarily force no global config flags
+    from AthenaConfiguration import AllConfigFlags
+    del AllConfigFlags.ConfigFlags
+except AttributeError:
+    # AllConfigFlags.ConfigFlags has already been deleted
+    pass
 
 def setOverlayInputFiles(runArgs, flags, log):
     hasRDO_BKGInput = hasattr(runArgs, 'inputRDO_BKGFile')
