@@ -244,6 +244,7 @@ namespace ISFTesting {
   };  // TruthSvc_test fixture
 
 
+  // cppcheck-suppress syntaxError
   TEST_F(TruthSvc_test, initialize_empty) {
     ASSERT_TRUE( m_svc->initialize().isSuccess() );
   }

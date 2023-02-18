@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -153,6 +153,7 @@ class InputConverter_test: public ::testing::Test {
 };  // InputConverter_test fixture
 
 
+// cppcheck-suppress syntaxError
 TEST_F(InputConverter_test, initialize_empty) {
   ASSERT_TRUE( m_svc->initialize().isSuccess() );
 }
