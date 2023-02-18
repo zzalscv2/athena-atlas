@@ -1,10 +1,10 @@
 """ComponentAccumulator Geant4 tools config for ISF
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import LHCPeriod
+from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
 from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg, AFIIGeoIDSvcCfg
 from ISF_Tools.ISF_ToolsConfig import EntryLayerFilterCfg
 
@@ -22,16 +22,11 @@ def EntryLayerToolCfg(flags, name="ISF_EntryLayerTool", **kwargs):
     else:
         kwargs.setdefault("CaloEntryVolumeString", "ITK::ITK")
 
-    from AthenaConfiguration.Enums import ProductionStep
     if flags.Common.ProductionStep == ProductionStep.FastChain:
         if flags.Digitization.PileUp:
             OEsvc = CompFactory.StoreGateSvc("OriginalEvent_SG")
             result.addService(OEsvc)
             kwargs.setdefault("EvtStore", OEsvc.name)
-        if flags.Overlay.FastChain:
-            kwargs.setdefault("CaloEntryLayer", f"{flags.Overlay.SigPrefix}CaloEntryLayer")
-            kwargs.setdefault("MuonEntryLayer", f"{flags.Overlay.SigPrefix}MuonEntryLayer")
-            kwargs.setdefault("MuonExitLayer",  f"{flags.Overlay.SigPrefix}MuonExitLayer")
 
     result.setPrivateTools(CompFactory.ISF.EntryLayerTool(name, **kwargs))
     return result
@@ -66,16 +61,11 @@ def AFIIEntryLayerToolCfg(flags, name="ISF_AFIIEntryLayerTool", **kwargs):
     else:
         kwargs.setdefault("CaloEntryVolumeString", "ITK::ITK")
 
-    from AthenaConfiguration.Enums import ProductionStep
     if flags.Common.ProductionStep == ProductionStep.FastChain:
         if flags.Digitization.PileUp:
             OEsvc = CompFactory.StoreGateSvc("OriginalEvent_SG")
             result.addService(OEsvc)
             kwargs.setdefault("EvtStore", OEsvc.name)
-        if flags.Overlay.FastChain:
-            kwargs.setdefault("CaloEntryLayer", f"{flags.Overlay.SigPrefix}CaloEntryLayer")
-            kwargs.setdefault("MuonEntryLayer", f"{flags.Overlay.SigPrefix}MuonEntryLayer")
-            kwargs.setdefault("MuonExitLayer",  f"{flags.Overlay.SigPrefix}MuonExitLayer")
 
     result.setPrivateTools(CompFactory.ISF.EntryLayerTool(name, **kwargs))
     return result

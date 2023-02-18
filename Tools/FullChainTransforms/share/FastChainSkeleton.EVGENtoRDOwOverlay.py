@@ -399,6 +399,27 @@ if len(globalflags.ConditionsTag()):
 # BeamEffectsAlg
 topSequence += CfgGetter.getAlgorithm("BeamEffectsAlg")
 
+import PyUtils.AthFile as af
+f = af.fopen(athenaCommonFlags.PoolRDOInput.get_Value()[0])
+def checkxAODEventInfo(inputlist):
+    """ Check for xAOD::EventInfo """
+    present = False
+    for entry in inputlist:
+        print(entry)
+        if entry[0] != 'xAOD::EventInfo':
+            continue
+        if entry[1] !='EventInfo':
+            continue
+        present = True
+        print("Accepted")
+        break
+    return present
+
+
+job += CfgGetter.getAlgorithm("EventInfoUpdateFromContextAlg")
+from OverlayCommonAlgs.OverlayFlags import overlayFlags
+job.EventInfoUpdateFromContextAlg.OutputKey = f"{overlayFlags.sigPrefix()}EventInfo"
+
 # CopyMcEventCollection
 job += CfgGetter.getAlgorithm("CopyMcEventCollection")
 
@@ -514,12 +535,6 @@ import MagFieldServices.SetupField
 #------------------------------------------------------------
 
 overlayFlags.processLegacyEventInfo.set_Value_and_Lock(True)
-if overlayFlags.processLegacyEventInfo() and not hasattr(job, "xAODMaker::EventInfoCnvAlg"):
-    from xAODEventInfoCnv.xAODEventInfoCreator import xAODMaker__EventInfoCnvAlg
-    alg = xAODMaker__EventInfoCnvAlg("EventInfoCnvAlg")
-    alg.AODKey = overlayFlags.sigPrefix() + 'McEventInfo'
-    alg.xAODKey = overlayFlags.sigPrefix() + 'EventInfo'
-    job += alg
 
 # Run the xAOD::EventInfo overlay
 job += CfgGetter.getAlgorithm("EventInfoOverlay")
@@ -548,9 +563,11 @@ if 'FPEAuditor/FPEAuditor' not in theAuditorSvc.Auditors:
 FastChainLog.info("================ Configure ================= ")
 
 # Load the input properly
-include("EventOverlayJobTransforms/OverlayInput_jobOptions.py")
-# Collections in EventInfo container are renamed (e.g. McEventInfo to Sig_McEventInfo) because EventInfo is in the EVNT input file
-# Collections in McEventCollection, TrackRecordCollection etc are not renamed because these containers are not in the EVNT input file (e.g. TruthEvent remains named TruthEvent and MuonEntryLayer remains named MuonEntryLayer)
+include.block("EventOverlayJobTransforms/OverlayInput_jobOptions.py")
+# Truth
+if DetFlags.overlay.Truth_on():
+    from SGComps import AddressRemappingSvc
+    AddressRemappingSvc.addInputRename('McEventCollection', 'TruthEvent', 'Sig_TruthEvent')
 
 # Beam overlay
 if DetFlags.overlay.BCM_on() or DetFlags.overlay.Lucid_on():
