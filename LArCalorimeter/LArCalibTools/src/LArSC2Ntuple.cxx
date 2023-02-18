@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArSC2Ntuple.h"
@@ -36,13 +36,6 @@ StatusCode LArSC2Ntuple::initialize() {
     return sc;
   }
 
-  sc=m_nt->addItem("LB",m_LB);
-  if (sc.isFailure()) {
-    ATH_MSG_ERROR( "addItem 'LB' failed" );
-    return sc;
-  }
-  
-  
   sc = m_nt->addItem("bcidVec",m_Nsamples, m_bcidVec);//here - > define length?
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "addItem 'bcidVec' failed" );

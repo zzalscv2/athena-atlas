@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARSC2NTUPLE_H
@@ -43,7 +43,6 @@ class LArSC2Ntuple : public LArDigits2Ntuple
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "EventInfoDecorKey", "EventInfo.larFlags"};
 
   NTuple::Item<short> m_latomeChannel;
-  NTuple::Item<short> m_LB;
 
   NTuple::Array<float>  m_ROD_energy;
 
