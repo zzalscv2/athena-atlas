@@ -594,15 +594,12 @@ CONCURRENTRANGEMAP::trim (const std::vector<key_query_type>& keys)
 
     // We're deleting the object now.
 
-    // Discard it.
-    m_payloadDeleter->discard (pos->second);
-    ++ndel;
+    // Discard it.  Be sure to adjust m_begin first.
+    mapped_type todel = pos->second;
     ++pos;
-  }
-
-  // If we've deleted any object, then update the begin pointer.
-  if (ndel > 0) {
     m_begin = pos;
+    m_payloadDeleter->discard (todel);
+    ++ndel;
   }
 
   return ndel;
