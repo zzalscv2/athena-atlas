@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRDOTOMUONDIGITTOOL_H
@@ -31,6 +31,9 @@
 #include "RPC_CondCabling/RpcCablingCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "TGCcablingInterface/ITGCcablingSvc.h"
+#include "xAODMuonRDO/NRPCRDOContainer.h"
+#include "MuonCablingData/MuonNRPC_CablingMap.h"
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
 
 class MdtDigitContainer;
 class CscDigitContainer;
@@ -84,6 +87,9 @@ private:
 
     using RpcDigitMap_t = std::unordered_map<IdentifierHash, std::unique_ptr<RpcDigitCollection> >;
     StatusCode decodeRpcRDO(const EventContext& ctx, RpcDigitContainer*) const;
+    
+    StatusCode decodeNRpcRDO(const EventContext& ctx, RpcDigitContainer* container ) const;
+
     StatusCode decodeRpc(const RpcPad& rpcColl, RpcDigitMap_t& rpcDigitMap, const RpcCablingCondData* rpcCab) const;
 
     using TgcDigitMap_t = std::unordered_map<IdentifierHash, std::unique_ptr<TgcDigitCollection> >;
@@ -101,7 +107,9 @@ private:
     StatusCode getTgcCabling();
 
 private:
-    // store gate transactions
+   
+
+    /// Decoder tools
     ToolHandle<ICscCalibTool> m_cscCalibTool{this, "cscCalibTool", "CscCalibTool"};
     ToolHandle<Muon::IMDT_RDO_Decoder> m_mdtRdoDecoderTool{this, "mdtRdoDecoderTool", "Muon::MdtRDO_Decoder"};
     ToolHandle<Muon::ICSC_RDO_Decoder> m_cscRdoDecoderTool{this, "cscRdoDecoderTool", "Muon::CscRDO_Decoder"};
@@ -110,18 +118,22 @@ private:
     ToolHandle<Muon::ISTGC_RDO_Decoder> m_stgcRdoDecoderTool{this, "stgcRdoDecoderTool", "Muon::STGC_RDO_Decoder"};
     ToolHandle<Muon::IMM_RDO_Decoder> m_mmRdoDecoderTool{this, "mmRdoDecoderTool", "Muon::MM_RDO_Decoder"};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-    SG::ReadCondHandleKey<RpcCablingCondData> m_rpcReadKey{this, "RpcCablingKey", "RpcCablingCondData", "Key of RpcCablingCondData"};
-
+   
     // cabling service
-    const ITGCcablingSvc* m_tgcCabling;
+    const ITGCcablingSvc* m_tgcCabling{nullptr};
+
+    const MuonGM::MuonDetectorManager* m_MuonMgr{nullptr};  // no ReadCondHandleKey used here for now, since no alignment applied in digitisation
+
 
     // algorithm properties
-    bool m_decodeMdtRDO;
-    bool m_decodeCscRDO;
-    bool m_decodeRpcRDO;
-    bool m_decodeTgcRDO;
-    bool m_decodesTgcRDO;
-    bool m_decodeMmRDO;
+    Gaudi::Property<bool> m_decodeMdtRDO{this, "DecodeMdtRDO", true};
+    Gaudi::Property<bool> m_decodeCscRDO{this, "DecodeCscRDO", true};
+    Gaudi::Property<bool> m_decodeRpcRDO{this, "DecodeRpcRDO", true};
+    Gaudi::Property<bool> m_decodeNrpcRDO{this, "DecodeNrpcRDO", false};
+    
+    Gaudi::Property<bool> m_decodeTgcRDO{this, "DecodeTgcRDO", true};
+    Gaudi::Property<bool> m_decodesTgcRDO{this, "DecodeSTGC_RDO", true};
+    Gaudi::Property<bool> m_decodeMmRDO{this, "DecodeMM_RDO", true};
 
     /** Switch for warning message disabling on one invalid channel in
         TGC sector A09 seen in 2008 data, at least run 79772 - 91800.
@@ -135,14 +147,29 @@ private:
 
     SG::ReadHandleKey<MdtCsmContainer> m_mdtRdoKey{this, "MdtRdoContainer", "MDTCSM", "Mdt RDO Input"};
     SG::WriteHandleKey<MdtDigitContainer> m_mdtDigitKey{this, "MdtDigitContainer", "MDT_DIGITS", "Mdt Digit Output"};
+    
     SG::ReadHandleKey<CscRawDataContainer> m_cscRdoKey{this, "CscRdoContainer", "CSCRDO", "Csc RDO Input"};
     SG::WriteHandleKey<CscDigitContainer> m_cscDigitKey{this, "CscDigitContainer", "CSC_DIGITS", "Csc Digit Output"};
+    
+    /// Legacy RPC rdo container + cabling
     SG::ReadHandleKey<RpcPadContainer> m_rpcRdoKey{this, "RpcRdoContainer", "RPCPAD", "Rpc RDO Input"};
+    SG::ReadCondHandleKey<RpcCablingCondData> m_rpcReadKey{this, "RpcCablingKey", "RpcCablingCondData", "Key of RpcCablingCondData"};
+
+    /// New BIS78 RDO container
+    SG::ReadHandleKey<xAOD::NRPCRDOContainer> m_nRpcRdoKey{this, "NRpcRdoContainer", "NRPCRDO", "BIS78 RPC Rdo input with ToTs"};
+    SG::ReadCondHandleKey<MuonNRPC_CablingMap> m_nRpcCablingKey{this, "NRpcCablingKey", "MuonNRPC_CablingMap", "Key of input MDT cabling map"};
+    BooleanProperty m_patch_for_rpc_time{this, "PatchForRpcTime", false, "flag for patching the RPC time"};
     SG::WriteHandleKey<RpcDigitContainer> m_rpcDigitKey{this, "RpcDigitContainer", "RPC_DIGITS", "Rpc Digit Output"};
+    
+
+    
+    
     SG::ReadHandleKey<TgcRdoContainer> m_tgcRdoKey{this, "TgcRdoContainer", "TGCRDO", "Tgc RDO Input"};
     SG::WriteHandleKey<TgcDigitContainer> m_tgcDigitKey{this, "TgcDigitContainer", "TGC_DIGITS", "Tgc Digit Output"};
+    
     SG::ReadHandleKey<Muon::STGC_RawDataContainer> m_stgcRdoKey{this, "sTgcRdoContainer", "sTGCRDO", "sTgc RDO Input"};
     SG::WriteHandleKey<sTgcDigitContainer> m_stgcDigitKey{this, "sTgcDigitContainer", "sTGC_DIGITS", "sTgc Digit Output"};
+    
     SG::ReadHandleKey<Muon::MM_RawDataContainer> m_mmRdoKey{this, "MmRdoContainer", "MMRDO", "MM RDO Input"};
     SG::WriteHandleKey<MmDigitContainer> m_mmDigitKey{this, "MmDigitContainer", "MM_DIGITS", "MM Digit Output"};
 };

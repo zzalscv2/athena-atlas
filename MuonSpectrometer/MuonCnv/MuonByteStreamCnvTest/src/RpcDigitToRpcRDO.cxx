@@ -15,11 +15,9 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "TrigT1RPClogic/ShowData.h"
 
-static double time_correction(double, double, double);
-
 namespace {
-    static constexpr unsigned int rpcRawHitWordLength = 7;
-    static constexpr double inverseSpeedOfLight = 1 / Gaudi::Units::c_light;  // need 1/299.792458
+    constexpr unsigned int rpcRawHitWordLength = 7;
+    constexpr double inverseSpeedOfLight = 1 / Gaudi::Units::c_light;  // need 1/299.792458
 }  // namespace
 
 /////////////////////////////////////////////////////////////////////////////
@@ -50,7 +48,9 @@ StatusCode RpcDigitToRpcRDO::initialize() {
     ATH_MSG_VERBOSE("Initialized WriteHandleKey: " << m_padContainerKey);
     ATH_CHECK(m_digitContainerKey.initialize());
     ATH_MSG_VERBOSE("Initialized ReadHandleKey: " << m_digitContainerKey);
-
+    for (const std::string& statName : m_exclStat) {
+        m_exclStatNames.insert(m_idHelperSvc->rpcIdHelper().stationNameIndex(statName));
+    }
     return StatusCode::SUCCESS;
 }
 
@@ -58,7 +58,7 @@ StatusCode RpcDigitToRpcRDO::initialize() {
 
 StatusCode RpcDigitToRpcRDO::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("in execute()");
-
+    
     // create an empty pad container and record it
     SG::WriteHandle<RpcPadContainer> padContainer(m_padContainerKey, ctx);
     ATH_CHECK(padContainer.record((std::make_unique<RpcPadContainer>(600))));
@@ -72,6 +72,7 @@ StatusCode RpcDigitToRpcRDO::execute(const EventContext& ctx) const {
     // fill the data with RPC simulated digits
     if (fill_RPCdata(data, ctx, readCdo).isFailure()) { ATH_MSG_ERROR("Fail to produce RPC data for byte stream simulation "); }
     ATH_MSG_DEBUG("RPC data loaded from G3:" << std::endl << ShowData<RPCsimuData>(data, "", m_data_detail));
+
 
     // ******************** Start of Level-1 simulation section *****************
 
@@ -116,6 +117,8 @@ StatusCode RpcDigitToRpcRDO::execute(const EventContext& ctx) const {
         if (padContainer->addCollection(pad, elementHash1).isFailure()) { ATH_MSG_ERROR("Unable to record RPC Pad in IDC"); }
     }
     rpcpads.clear();
+    
+
     return StatusCode::SUCCESS;
 }
 
@@ -137,62 +140,66 @@ StatusCode RpcDigitToRpcRDO::fill_RPCdata(RPCsimuData& data, const EventContext&
         ATH_MSG_DEBUG("RPC Digit -> Pad loop :: digitCollection at " << rpcCollection);
 
         IdentifierHash moduleHash = rpcCollection->identifierHash();
-        Identifier moduleId;
-        if (!m_idHelperSvc->rpcIdHelper().get_id(moduleHash, moduleId, &rpcContext)) {
-            for (const RpcDigit* rpcDigit : *rpcCollection) {
-                if (rpcDigit->is_valid(m_idHelperSvc->rpcIdHelper())) {
-                    Identifier channelId = rpcDigit->identify();
-                    int stationType = m_idHelperSvc->rpcIdHelper().stationName(channelId);
-                    std::string StationName = m_idHelperSvc->rpcIdHelper().stationNameString(stationType);
-                    int StationEta = m_idHelperSvc->rpcIdHelper().stationEta(channelId);
-                    int StationPhi = m_idHelperSvc->rpcIdHelper().stationPhi(channelId);
-                    int DoubletR = m_idHelperSvc->rpcIdHelper().doubletR(channelId);
-                    int DoubletZ = m_idHelperSvc->rpcIdHelper().doubletZ(channelId);
-                    int DoubletP = m_idHelperSvc->rpcIdHelper().doubletPhi(channelId);
-                    int GasGap = m_idHelperSvc->rpcIdHelper().gasGap(channelId);
-                    int MeasuresPhi = m_idHelperSvc->rpcIdHelper().measuresPhi(channelId);
-                    int Strip = m_idHelperSvc->rpcIdHelper().strip(channelId);
+        Identifier moduleId{0};
+        if (m_idHelperSvc->rpcIdHelper().get_id(moduleHash, moduleId, &rpcContext)) {
+            ATH_MSG_FATAL("Invalid identifier module ");
+            return StatusCode::FAILURE;
+        }
+        if (m_exclStatNames.count(m_idHelperSvc->stationName(moduleId))){
+            ATH_MSG_VERBOSE("Do not turn digit from "<<m_idHelperSvc->toString(moduleId)<<" to RDO");
+            continue;
+        }
 
-                    ATH_MSG_DEBUG("RPC Digit Type, Eta, Phi, dbR, dbZ, dbP, gg, mPhi, Strip "
-                                  << stationType << " " << StationEta << " " << StationPhi << " " << DoubletR << " " << DoubletZ << " "
-                                  << DoubletP << " " << GasGap << " " << MeasuresPhi << " " << Strip);
-                    const MuonGM::RpcReadoutElement* descriptor = m_MuonMgr->getRpcReadoutElement(channelId);
+        for (const RpcDigit* rpcDigit : *rpcCollection) {
+            const Identifier channelId = rpcDigit->identify();
+            int stationType = m_idHelperSvc->rpcIdHelper().stationName(channelId);
+            std::string StationName = m_idHelperSvc->rpcIdHelper().stationNameString(stationType);
+            // BIS stations have different readout, so they are treated separately           
+            int StationEta = m_idHelperSvc->rpcIdHelper().stationEta(channelId);
+            int StationPhi = m_idHelperSvc->rpcIdHelper().stationPhi(channelId);
+            int DoubletR = m_idHelperSvc->rpcIdHelper().doubletR(channelId);
+            int DoubletZ = m_idHelperSvc->rpcIdHelper().doubletZ(channelId);
+            int DoubletP = m_idHelperSvc->rpcIdHelper().doubletPhi(channelId);
+            int GasGap = m_idHelperSvc->rpcIdHelper().gasGap(channelId);
+            int MeasuresPhi = m_idHelperSvc->rpcIdHelper().measuresPhi(channelId);
+            int Strip = m_idHelperSvc->rpcIdHelper().strip(channelId);
 
-                    // Get the global position of RPC strip from MuonDetDesc
-                    Amg::Vector3D pos = descriptor->stripPos(channelId);
+            ATH_MSG_DEBUG("RPC Digit Type, Eta, Phi, dbR, dbZ, dbP, gg, mPhi, Strip "
+                            << stationType << " " << StationEta << " " << StationPhi << " " << DoubletR << " " << DoubletZ << " "
+                            << DoubletP << " " << GasGap << " " << MeasuresPhi << " " << Strip);
+            const MuonGM::RpcReadoutElement* descriptor = m_MuonMgr->getRpcReadoutElement(channelId);
 
-                    // get now strip_code from cablingSvc
-                    unsigned long int strip_code_cab = readCdo->strip_code_fromOffId(StationName, StationEta, StationPhi, DoubletR,
-                                                                                     DoubletZ, DoubletP, GasGap, MeasuresPhi, Strip);
+            // Get the global position of RPC strip from MuonDetDesc
+            Amg::Vector3D pos = descriptor->stripPos(channelId);
 
-                    ATH_MSG_DEBUG("From RPC Cabling Layout, strip_code = " << strip_code_cab);
+            // get now strip_code from cablingSvc
+            unsigned long int strip_code_cab = readCdo->strip_code_fromOffId(StationName, StationEta, StationPhi, DoubletR,
+                                                                                DoubletZ, DoubletP, GasGap, MeasuresPhi, Strip);
 
-                    if (strip_code_cab) {
-                        // Fill data for the Level-1 RPC digit
-                        float xyz[4];
+            ATH_MSG_DEBUG("From RPC Cabling Layout, strip_code = " << strip_code_cab);
 
-                        double tp = time_correction(pos.x(), pos.y(), pos.z());
-                        // time of flight
-                        xyz[0] = (m_patch_for_rpc_time) ? rpcDigit->time() - tp : rpcDigit->time();
-                        xyz[1] = pos.x() / 10.;  // coo[0];            //RPC strip x coordinate
-                        xyz[2] = pos.y() / 10.;  // coo[1];            //RPC strip y coordinate
-                        xyz[3] = pos.z() / 10.;  // coo[2];            //RPC strip z coordinate
+            if (strip_code_cab) {
+                // Fill data for the Level-1 RPC digit
+                float xyz[4];
+                double tp = pos.mag() * inverseSpeedOfLight;
+                // time of flight
+                xyz[0] = (m_patch_for_rpc_time) ? rpcDigit->time() - tp : rpcDigit->time();
+                xyz[1] = pos.x() / 10.;  // coo[0];            //RPC strip x coordinate
+                xyz[2] = pos.y() / 10.;  // coo[1];            //RPC strip y coordinate
+                xyz[3] = pos.z() / 10.;  // coo[2];            //RPC strip z coordinate
 
-                        int param[3] = {0, 0, 0};
+                int param[3] = {0, 0, 0};
 
-                        ATH_MSG_DEBUG("Digit with strip_code = " << strip_code_cab << " passed to RDO/LVL1 Simulation (RPCsimuDigit)");
-                        RPCsimuDigit digit(0, strip_code_cab, param, xyz);
-                        data << digit;
-                    }
-                }
+                ATH_MSG_DEBUG("Digit with strip_code = " << strip_code_cab << " passed to RDO/LVL1 Simulation (RPCsimuDigit)");
+                RPCsimuDigit digit(0, strip_code_cab, param, xyz);
+                data << digit;
             }
         }
     }
-
     return StatusCode::SUCCESS;
 }
 
-double time_correction(double x, double y, double z) { return std::sqrt(x * x + y * y + z * z) * inverseSpeedOfLight; }
+
 
 // NOTE: although this function has no clients in release 22, currently the Run2 trigger simulation is still run in
 //       release 21 on RDOs produced in release 22. Since release 21 accesses the TagInfo, it needs to be written to the
