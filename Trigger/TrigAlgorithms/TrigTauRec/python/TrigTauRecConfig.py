@@ -28,7 +28,7 @@ class TrigTauRecMerged_TauCaloOnlyMVA (TrigTauRecMerged) :
             tools.append(taualgs.getCellVariables(cellConeSize=0.2))
             # Compute MVA TES (ATR-17649), stores MVA TES as default tau pt()
             tools.append(taualgs.getMvaTESVariableDecorator())
-            tools.append(taualgs.getMvaTESEvaluator())
+            tools.append(taualgs.getMvaTESEvaluator(flags))
 
             for tool in tools:
                 tool.inTrigger = True
@@ -72,7 +72,7 @@ class TrigTauRecMerged_TauPrecisionMVA (TrigTauRecMerged) :
 
             # Compute MVA TES (ATR-17649), stores MVA TES as default tau pt()
             tools.append(taualgs.getMvaTESVariableDecorator())
-            tools.append(taualgs.getMvaTESEvaluator())
+            tools.append(taualgs.getMvaTESEvaluator(flags))
 
             # Calculate cell-based quantities: strip variables, EM and Had energies/radii, centFrac, isolFrac and ring energies
             tools.append(taualgs.getCellVariables(cellConeSize=0.2))
@@ -85,9 +85,9 @@ class TrigTauRecMerged_TauPrecisionMVA (TrigTauRecMerged) :
             tools.append(taualgs.getTauSubstructure())
 
             # RNN tau ID, either nominal or LLP
-            tools.append(taualgs.getTauJetRNNEvaluator(LLP = doLLP))
+            tools.append(taualgs.getTauJetRNNEvaluator(flags, LLP = doLLP))
             # flattened RNN score and WP
-            tools.append(taualgs.getTauWPDecoratorJetRNN(LLP = doLLP))
+            tools.append(taualgs.getTauWPDecoratorJetRNN(flags, LLP = doLLP))
 
             for tool in tools:
                 tool.inTrigger = True
