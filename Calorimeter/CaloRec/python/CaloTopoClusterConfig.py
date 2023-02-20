@@ -401,11 +401,13 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None):
              f"CaloClusterCellLinkContainer#{CaloTopoCluster.ClustersOutputName}_links"]
     toAOD = [f"xAOD::CaloClusterContainer#{CaloTopoCluster.ClustersOutputName}",
              f"CaloClusterCellLinkContainer#{CaloTopoCluster.ClustersOutputName}_links"]
-    auxItems = f"xAOD::CaloClusterAuxContainer#{CaloTopoCluster.ClustersOutputName}Aux"
+    auxItems = f"xAOD::CaloClusterAuxContainer#{CaloTopoCluster.ClustersOutputName}Aux."
     for mom in AODMoments:
         auxItems += "."+mom
 
     auxItems += ".CellLink"
+    if flags.Calo.TopoCluster.addCalibrationHitDecoration:
+        auxItems += "."+flags.Calo.TopoCluster.CalibrationHitDecorationName
     toAOD.append(auxItems)
  
     result.merge(addToESD(flags, toESD))

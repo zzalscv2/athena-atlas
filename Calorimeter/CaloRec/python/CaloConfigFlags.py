@@ -31,6 +31,9 @@ def createCaloConfigFlags():
                 lambda prevFlags: prevFlags.Calo.TopoCluster.doTimeCut)
     ccf.addFlag("Calo.TopoCluster.timeCutUpperLimit", 20.0)
     ccf.addFlag("Calo.TopoCluster.writeExtendedClusterMoments", True)
+    ccf.addFlag("Calo.TopoCluster.CalibrationHitDecorationName","calclus_NLeadingTruthParticleBarcodeEnergyPairs")
+    ccf.addFlag("Calo.TopoCluster.addCalibrationHitDecoration",False)
+
     #### Cluster correction flags:
     # If true, then reweight cells to prevent double-counting between clusters.
     ccf.addFlag ('Calo.ClusterCorrection.doSlidingWindowCellWeights', False)

@@ -12,6 +12,7 @@ if __name__=="__main__":
     cfgFlags.Output.doWriteAOD=True
     #This flag enables CaloCalTopoCluster to be created, in addition to CaloTopoCluster
     cfgFlags.Calo.TopoCluster.doTopoClusterLocalCalib=True
+    cfgFlags.Calo.TopoCluster.addCalibrationHitDecoration=True
     cfgFlags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -30,6 +31,6 @@ if __name__=="__main__":
         cfg.merge(mapping)    
 
     from PFlowUtils.PFlowCalibHitDecoratorCfg import PFlowCalibHitDecoratorCfg
-    cfg.merge(PFlowCalibHitDecoratorCfg())
+    cfg.merge(PFlowCalibHitDecoratorCfg(cfgFlags))
 
     cfg.run()
