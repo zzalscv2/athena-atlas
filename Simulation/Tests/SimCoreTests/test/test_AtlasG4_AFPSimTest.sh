@@ -13,6 +13,7 @@
 AtlasG4_tf.py \
     --CA \
     --preInclude 'ParticleGun.ParticleGunConfig.ALFA_SingleParticlePreInclude' \
+    --outputHITSFile 'test.CA.HITS.pool.root' \
     --maxEvents '3' \
     --randomSeed '10' \
     --geometryVersion 'ATLAS-R2-2015-03-01-00' \
