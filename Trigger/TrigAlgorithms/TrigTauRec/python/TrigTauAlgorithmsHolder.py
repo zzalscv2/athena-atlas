@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 ##
@@ -9,7 +9,6 @@
 ################################################################################
 
 from AthenaCommon.SystemOfUnits import mm, GeV
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
 cached_instances = {}
 
@@ -100,7 +99,7 @@ def getMvaTESVariableDecorator():
 
 ########################################################################
 # MvaTESEvaluator
-def getMvaTESEvaluator():
+def getMvaTESEvaluator(flags):
 
     _name = sPrefix + 'MvaTESEvaluator'
 
@@ -110,7 +109,7 @@ def getMvaTESEvaluator():
     from AthenaCommon.AppMgr import ToolSvc
     from tauRecTools.tauRecToolsConf import MvaTESEvaluator
     MvaTESEvaluator = MvaTESEvaluator(name = _name,
-                                      WeightFileName = ConfigFlags.Trigger.Offline.Tau.MvaTESConfig)
+                                      WeightFileName = flags.Trigger.Offline.Tau.MvaTESConfig)
 
     ToolSvc += MvaTESEvaluator
     cached_instances[_name] = MvaTESEvaluator
@@ -468,7 +467,7 @@ def getTauIDVarCalculator():
 
 ########################################################################
 # TauJetRNNEvaluator
-def getTauJetRNNEvaluator(LLP=False, OutputVarname="RNNJetScore", 
+def getTauJetRNNEvaluator(flags, LLP=False, OutputVarname="RNNJetScore",
                           MaxTracks=10, MaxClusters=6, MaxClusterDR=1.0, TrackClassification=False,
                           InputLayerScalar="scalar", InputLayerTracks="tracks", InputLayerClusters="clusters", 
                           OutputLayer="rnnid_output", OutputNode="sig_prob"):
@@ -479,8 +478,8 @@ def getTauJetRNNEvaluator(LLP=False, OutputVarname="RNNJetScore",
         return cached_instances[_name]
 
     (NetworkFile0P, NetworkFile1P, NetworkFile3P) = \
-        ConfigFlags.Trigger.Offline.Tau.TauJetRNNConfigLLP if LLP \
-        else ConfigFlags.Trigger.Offline.Tau.TauJetRNNConfig
+        flags.Trigger.Offline.Tau.TauJetRNNConfigLLP if LLP \
+        else flags.Trigger.Offline.Tau.TauJetRNNConfig
 
     from AthenaCommon.AppMgr import ToolSvc
     from tauRecTools.tauRecToolsConf import TauJetRNNEvaluator
@@ -506,7 +505,7 @@ def getTauJetRNNEvaluator(LLP=False, OutputVarname="RNNJetScore",
 
 ########################################################################
 # TauWPDecoratorJetRNN
-def getTauWPDecoratorJetRNN(LLP=False):
+def getTauWPDecoratorJetRNN(flags, LLP=False):
 
     _name = sPrefix + 'TauWPDecoratorJetRNN' + ('_LLP' if LLP else '')
 
@@ -525,12 +524,12 @@ def getTauWPDecoratorJetRNN(LLP=False):
     # if we need different WPs, we can define new flags
 
     (flatteningFile0Prong, flatteningFile1Prong, flatteningFile3Prong) = \
-        ConfigFlags.Trigger.Offline.Tau.TauJetRNNWPConfigLLP if LLP \
-        else ConfigFlags.Trigger.Offline.Tau.TauJetRNNWPConfig
+        flags.Trigger.Offline.Tau.TauJetRNNWPConfigLLP if LLP \
+        else flags.Trigger.Offline.Tau.TauJetRNNWPConfig
 
     (targetEff0Prong, targetEff1Prong, targetEff3Prong) = \
-        ConfigFlags.Trigger.Offline.Tau.TauJetRNNLLPTargetEff if LLP \
-        else ConfigFlags.Trigger.Offline.Tau.TauJetRNNTargetEff
+        flags.Trigger.Offline.Tau.TauJetRNNLLPTargetEff if LLP \
+        else flags.Trigger.Offline.Tau.TauJetRNNTargetEff
 
     TauWPDecorator = TauWPDecorator( name=_name,
                                      flatteningFile0Prong = flatteningFile0Prong,
