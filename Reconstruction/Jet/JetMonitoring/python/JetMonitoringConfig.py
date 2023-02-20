@@ -547,7 +547,7 @@ class JetMonAlgSpec(ConfigDict):
         alg.FailureOnMissingContainer = self.failureOnMissingContainer
         alg.OnlyPassingJets = self.onlyPassingJets
         alg.EventFiresAnyJetChain = self.eventFiresAnyJetChain
-        alg.isExpressStreamJob = self.isExpressStreamJob
+        alg.EnforceExpressTriggers = self.isExpressStreamJob
 
         path = self.defaultPath
         tools = []

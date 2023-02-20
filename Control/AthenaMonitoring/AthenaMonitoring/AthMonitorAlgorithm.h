@@ -367,9 +367,9 @@ private:
     std::unordered_map<std::string, size_t> m_toolLookupMap;
 
   
-   Gaudi::Property<bool> m_isExpressStreamJob{this,
-                          "isExpressStreamJob", false,
-                          "flag to be set true if Alg is to run in the express stream"};
+   Gaudi::Property<bool> m_enforceExpressTriggers{this,
+                          "EnforceExpressTriggers", false,
+                          "Requires that matched triggers made the event enter the express stream"};
 };
 
 #endif

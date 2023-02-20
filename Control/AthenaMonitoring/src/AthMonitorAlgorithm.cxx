@@ -204,8 +204,8 @@ bool AthMonitorAlgorithm::trigChainsArePassed( const std::vector<std::string>& v
   // monitored here are responsible for the event being selected for
   // the express stream.
 
-  const auto group =  m_trigDecTool->getChainGroup(m_vTrigChainNames);
-  if (m_isExpressStreamJob){  
+  const auto group =  m_trigDecTool->getChainGroup(vTrigNames);
+  if (m_enforceExpressTriggers){  
     const auto passedBits = m_trigDecTool->isPassedBits(group);
     bool expressPass = passedBits & TrigDefs::Express_passed; //bitwise AND
     if(!expressPass) {
