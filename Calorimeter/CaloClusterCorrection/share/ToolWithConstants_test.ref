@@ -5,23 +5,6 @@ TestAlg                                              INFO Initializing TestAlg..
 EventSelector                                        INFO  Enter McEventSelector Initialization 
 AthenaEventLoopMgr                                   INFO Setup EventSelector service EventSelector
 ApplicationMgr                                       INFO Application Manager Initialized successfully
-ApplicationMgr                                    SUCCESS ****************************** Algorithm Sequence ****************************
-ApplicationMgr                                    SUCCESS AthSequencer/AthMasterSeq
-ApplicationMgr                                    SUCCESS      AthSequencer/AthAlgEvtSeq
-ApplicationMgr                                    SUCCESS           AthSequencer/AthBeginSeq
-ApplicationMgr                                    SUCCESS                AthIncFirerAlg/BeginIncFiringAlg
-ApplicationMgr                                    SUCCESS                IncidentProcAlg/IncidentProcAlg1
-ApplicationMgr                                    SUCCESS           AthSequencer/AthAllAlgSeq
-ApplicationMgr                                    SUCCESS                AthSequencer/AthCondSeq
-ApplicationMgr                                    SUCCESS                AthSequencer/AthAlgSeq
-ApplicationMgr                                    SUCCESS                     PyAthena::Alg/TestAlg
-ApplicationMgr                                    SUCCESS           AthSequencer/AthEndSeq
-ApplicationMgr                                    SUCCESS                AthIncFirerAlg/EndIncFiringAlg
-ApplicationMgr                                    SUCCESS                IncidentProcAlg/IncidentProcAlg2
-ApplicationMgr                                    SUCCESS      AthSequencer/AthOutSeq
-ApplicationMgr                                    SUCCESS      AthIncFirerAlg/EndAlgorithmsFiringAlg
-ApplicationMgr                                    SUCCESS      IncidentProcAlg/IncidentProcAlg3
-ApplicationMgr                                    SUCCESS ******************************************************************************
 ApplicationMgr                                       INFO Application Manager Started successfully
 AthenaEventLoopMgr                                   INFO   ===>>>  start of run 310000    <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1, run #310000 0 events processed so far  <<<===
