@@ -1,10 +1,8 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: AuxVectorBase.h 793298 2017-01-21 01:30:06Z ssnyder $
 /**
  * @file AthContainers/AuxVectorBase.h
  * @author scott snyder <snyder@bnl.gov>
@@ -364,6 +362,13 @@ protected:
    * @param index Container index at which the first new element is being added.
    * @param beg The start of the range of new elements.
    * @param end The end of the range of new elements.
+   * @param clear If true, then any auxiliary data initially associated
+   *              with the elements are cleared after being copied.
+   * @param skipDestClear Normally, if the elements do not have auxiliary data,
+   *                      then the variables of the destination are cleared.
+   *                      If this flag is true, then this clear is skipped.
+   *                      This can be appropriate as part of a push_back,
+   *                      where the destination is already known to be clear.
    *
    * The elements in the range are being a added to the container at @c index.
    * If the new elements have associated auxiliary data,
@@ -374,7 +379,9 @@ protected:
    * (not a base iterator).
    */
   template <class ForwardIterator>
-  void moveAux (size_t index, ForwardIterator beg, ForwardIterator end);
+  void moveAux (size_t index, ForwardIterator beg, ForwardIterator end,
+                bool clear = false,
+                bool skipDestClear = false);
 
 
   /**
@@ -632,6 +639,13 @@ private:
    * @param index Container index at which the first new element is being added.
    * @param beg The start of the range of new elements.
    * @param end The end of the range of new elements.
+   * @param clear If true, then any auxiliary data initially associated
+   *              with the elements are cleared after being copied.
+   * @param skipDestClear Normally, if the elements do not have auxiliary data,
+   *                      then the variables of the destination are cleared.
+   *                      If this flag is true, then this clear is skipped.
+   *                      This can be appropriate as part of a push_back,
+   *                      where the destination is already known to be clear.
    *
    * No-auxdata version; a no-op except for checking @c m_trackIndices.
    */
@@ -639,7 +653,9 @@ private:
   void moveAux1 (const std::false_type&,
                  size_t index,
                  ForwardIterator beg,
-                 ForwardIterator end);
+                 ForwardIterator end,
+                 bool clear = false,
+                 bool skipDestClear = false);
 
 
   /**
@@ -647,6 +663,13 @@ private:
    * @param index Container index at which the first new element is being added.
    * @param beg The start of the range of new elements.
    * @param end The end of the range of new elements.
+   * @param clear If true, then any auxiliary data initially associated
+   *              with the elements are cleared after being copied.
+   * @param skipDestClear Normally, if the elements do not have auxiliary data,
+   *                      then the variables of the destination are cleared.
+   *                      If this flag is true, then this clear is skipped.
+   *                      This can be appropriate as part of a push_back,
+   *                      where the destination is already known to be clear.
    *
    * The elements in the range are being a added to the container at @c index.
    * If the new elements have associated auxiliary data,
@@ -659,7 +682,9 @@ private:
   void moveAux1 (const std::true_type&,
                  size_t index,
                  ForwardIterator beg,
-                 ForwardIterator end);
+                 ForwardIterator end,
+                 bool clear = false,
+                 bool skipDestClear = false);
 
 
   /**

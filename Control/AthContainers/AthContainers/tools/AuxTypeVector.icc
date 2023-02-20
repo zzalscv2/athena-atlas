@@ -340,13 +340,19 @@ void AuxTypeVectorHolder<T, CONT>::shift (size_t pos, ptrdiff_t offs)
   }
   else if (offs > 0) {
     size_t oldsz = vec.size();
-    vec.resize (vec.size() + offs*SCALE);
-    std::copy (vec.rbegin() + offs*SCALE,
-               vec.rbegin() + (offs+oldsz-pos)*SCALE,
-               vec.rbegin());
-    std::fill (vec.begin() + pos*SCALE,
-               vec.begin() + (pos+offs)*SCALE,
-               Zero<typename AuxDataTraits<T>::element_type>::zero());
+    // Add to the end, zero-filled.
+    vec.resize (vec.size() + offs*SCALE,
+                Zero<typename AuxDataTraits<T>::element_type>::zero());
+    if (oldsz != pos) {
+      // Shift existing elements.  If we're just extending,
+      // then we can skip this.
+      std::copy (vec.rbegin() + offs*SCALE,
+                 vec.rbegin() + (offs+oldsz-pos)*SCALE,
+                 vec.rbegin());
+      std::fill (vec.begin() + pos*SCALE,
+                 vec.begin() + (pos+offs)*SCALE,
+                 Zero<typename AuxDataTraits<T>::element_type>::zero());
+    }
   }
 }
 

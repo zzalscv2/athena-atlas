@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: AuxVectorBase.icc 793298 2017-01-21 01:30:06Z ssnyder $
 /**
  * @file AthContainers/AuxVectorBase.icc
  * @author scott snyder <snyder@bnl.gov>
@@ -459,6 +458,13 @@ AuxVectorBase::moveAux (size_t /*index*/,
  * @param index Container index at which the first new element is being added.
  * @param beg The start of the range of new elements.
  * @param end The end of the range of new elements.
+ * @param clear If true, then any auxiliary data initially associated
+ *              with the elements are cleared after being copied.
+ * @param skipDestClear Normally, if the elements do not have auxiliary data,
+ *                      then the variables of the destination are cleared.
+ *                      If this flag is true, then this clear is skipped.
+ *                      This can be appropriate as part of a push_back,
+ *                      where the destination is already known to be clear.
  *
  * The elements in the range are being a added to the container at @c index.
  * If the new elements have associated auxiliary data,
@@ -470,13 +476,15 @@ AuxVectorBase::moveAux (size_t /*index*/,
  */
 template <class ForwardIterator>
 void
-AuxVectorBase::moveAux (size_t index, ForwardIterator beg, ForwardIterator end)
+AuxVectorBase::moveAux (size_t index, ForwardIterator beg, ForwardIterator end,
+                        bool clear /*= false*/,
+                        bool skipDestClear /*= false*/)
 {
   // Forward to the appropriate specialization, depending on whether
   // or not aux data is supported.
   typedef typename std::iterator_traits<ForwardIterator>::value_type valtype;
   moveAux1 (typename AuxStore_traits<valtype>::flag(),
-            index, beg, end);
+            index, beg, end, clear, skipDestClear);
 }
 
 
@@ -485,6 +493,13 @@ AuxVectorBase::moveAux (size_t index, ForwardIterator beg, ForwardIterator end)
  * @param index Container index at which the first new element is being added.
  * @param beg The start of the range of new elements.
  * @param end The end of the range of new elements.
+ * @param clear If true, then any auxiliary data initially associated
+ *              with the elements are cleared after being copied.
+ * @param skipDestClear Normally, if the elements do not have auxiliary data,
+ *                      then the variables of the destination are cleared.
+ *                      If this flag is true, then this clear is skipped.
+ *                      This can be appropriate as part of a push_back,
+ *                      where the destination is already known to be clear.
  *
  * No-auxdata version; a no-op except for checking @c m_trackIndices.
  */
@@ -493,7 +508,9 @@ inline
 void AuxVectorBase::moveAux1 (const std::false_type&,
                               size_t /*index*/,
                               ForwardIterator /*beg*/,
-                              ForwardIterator /*end*/)
+                              ForwardIterator /*end*/,
+                              bool /*clear = false*/,
+                              bool /*skipDestClear = false*/)
 {
   ATHCONTAINERS_ASSERT (!m_trackIndices);
 }
@@ -504,6 +521,13 @@ void AuxVectorBase::moveAux1 (const std::false_type&,
  * @param index Container index at which the first new element is being added.
  * @param beg The start of the range of new elements.
  * @param end The end of the range of new elements.
+ * @param clear If true, then any auxiliary data initially associated
+ *              with the elements are cleared after being copied.
+ * @param skipDestClear Normally, if the elements do not have auxiliary data,
+ *                      then the variables of the destination are cleared.
+ *                      If this flag is true, then this clear is skipped.
+ *                      This can be appropriate as part of a push_back,
+ *                      where the destination is already known to be clear.
  *
  * The elements in the range are being a added to the container at @c index.
  * If the new elements have associated auxiliary data,
@@ -516,13 +540,15 @@ template <class ForwardIterator>
 void AuxVectorBase::moveAux1 (const std::true_type&,
                               size_t index,
                               ForwardIterator beg,
-                              ForwardIterator end)
+                              ForwardIterator end,
+                              bool clear /*= false*/,
+                              bool skipDestClear /*= false*/)
 {
   if (!m_trackIndices)
     return;
 
   while (beg != end) {
-    this->moveAux (index, *beg);
+    this->moveAux (index, *beg, clear, skipDestClear);
     ++beg;
     ++index;
   }
