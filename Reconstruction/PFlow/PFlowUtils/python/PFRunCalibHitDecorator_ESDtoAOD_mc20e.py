@@ -10,6 +10,7 @@ if __name__=="__main__":
     cfgFlags.Input.Files= ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PFlowTests/mc16_13TeV/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.ESD.e6337_e5984_s3170_r12674/ESD.25732025._000034.pool.root.1"]
     cfgFlags.Output.AODFileName="output_AOD.root"
     cfgFlags.Output.doWriteAOD=True
+    cfgFlags.Calo.TopoCluster.addCalibrationHitDecoration=True
     cfgFlags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -28,7 +29,7 @@ if __name__=="__main__":
     cfg.merge(TileGMCfg(cfgFlags))
 
     from PFlowUtils.PFlowCalibHitDecoratorCfg import PFlowCalibHitDecoratorCfg
-    cfg.merge(PFlowCalibHitDecoratorCfg())
+    cfg.merge(PFlowCalibHitDecoratorCfg(cfgFlags))
     cfg.getEventAlgo("PFlowCalibPFODecoratorAlgorithm").PFOWriteDecorHandleKey_NLeadingTruthParticles="JetETMissNeutralFlowElements.calpfo_NLeadingTruthParticleBarcodeEnergyPairs"
 
     cfg.run()
