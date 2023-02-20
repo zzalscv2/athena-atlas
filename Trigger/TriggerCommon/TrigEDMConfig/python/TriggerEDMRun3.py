@@ -525,8 +525,11 @@ TriggerHLTListRun3 = [
     ('xAOD::PhotonAuxContainer#HLT_egamma_Iso_PhotonsAux.'+PhVars,         'BS ESD AODFULL AODSLIM', 'Egamma'),
 
     ('TrigRoiDescriptorCollection#HLT_Roi_FastElectron',            'BS ESD AODFULL', 'Egamma'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_FastElectron_LRT',            'BS ESD AODFULL', 'Egamma'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_FastElectron_probe',      'BS ESD AODFULL', 'Egamma'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_FastElectron_LRT',        'BS ESD AODFULL', 'Egamma'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_FastElectron_LRT_probe',  'BS ESD AODFULL', 'Egamma'),
     ('TrigRoiDescriptorCollection#HLT_Roi_FastPhoton',              'BS ESD AODFULL', 'Egamma'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_FastPhoton_probe',        'BS ESD AODFULL', 'Egamma'),
 
     # hipTRT
     ('xAOD::TrigRNNOutputContainer#HLT_TrigTRTHTCounts',            'BS ESD AODFULL', 'Egamma', 'inViews:TRTHitGeneratorViews'),
@@ -685,9 +688,13 @@ TriggerHLTListRun3 = [
     ('xAOD::L2IsoMuonAuxContainer#HLT_MuonL2ISInfoAux.',        'BS ESD', 'Muon'),
 
     ('TrigRoiDescriptorCollection#HLT_Roi_L2SAMuon',                   'BS ESD AODFULL', 'Muon'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_L2SAMuon_LRT',                   'BS ESD AODFULL', 'Muon'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_L2SAMuon_probe',             'BS ESD AODFULL', 'Muon'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_L2SAMuon_LRT',               'BS ESD AODFULL', 'Muon'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_L2SAMuon_LRT_probe',         'BS ESD AODFULL', 'Muon'),
     ('TrigRoiDescriptorCollection#HLT_Roi_L2SAMuonForEF',              'BS ESD AODFULL', 'Muon'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_L2SAMuonForEF_probe',        'BS ESD AODFULL', 'Muon'),
     ('TrigRoiDescriptorCollection#HLT_Roi_MuonIso',                    'BS ESD AODFULL', 'Muon'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_MuonIso_probe',              'BS ESD AODFULL', 'Muon'),
 
     # Tau
 
@@ -710,10 +717,15 @@ TriggerHLTListRun3 = [
     ('xAOD::VertexAuxContainer#HLT_IDVertex_TauAux.',           'BS ESD AODFULL', 'Tau'),
 
     ('TrigRoiDescriptorCollection#HLT_Roi_Tau',              'BS ESD AODFULL',  'Tau'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_TauCore',             'BS ESD AODFULL',  'Tau'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_TauLRT',              'BS ESD AODFULL',  'Tau'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_TauIso',             'BS ESD AODFULL',  'Tau'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT',             'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_Tau_probe',        'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauCore',          'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauCore_probe',    'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauLRT',           'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauLRT_probe',     'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauIso',           'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauIso_probe',     'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT',        'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT_probe',  'BS ESD AODFULL',  'Tau'),
 
     ('xAOD::JetContainer#HLT_jet_seed',                         'BS ESD AODCOMM', 'Tau', 'inViews:TAUCaloMVAViews'),
     ('xAOD::JetAuxContainer#HLT_jet_seedAux.',                  'BS ESD AODCOMM', 'Tau'),
