@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/ConcurrentStrMap_test.cxx
@@ -28,6 +28,7 @@ extern "C" {
 #include <thread>
 #include <shared_mutex>
 #include <vector>
+#include <deque>
 #include <memory>
 #include <iostream>
 #include <sstream>
@@ -109,16 +110,94 @@ private:
 };
 
 
-using TestMap = CxxUtils::ConcurrentStrMap<size_t, TestUpdater>;
-
-
-void test1()
+template <class T>
+struct Values
 {
-  std::cout << "test1\n";
-  TestMap map {TestMap::Updater_t()};
+  Values (size_t n, float offs = 0)
+  {
+    for (size_t i = 0; i < n; i++)
+      v.push_back (i + offs);
+    max = n-1 + offs;
+  }
+  T operator[] (size_t i) const { return v[i]; }
+  T nonex() { return max + 1; }
+  void change (size_t i)
+  {
+    v[i] += 10000;
+    max = std::max (max, v[i]);
+  }
+  size_t find (T x)
+  {
+    auto it = std::find (v.begin(), v.end(), x);
+    if (it != v.end()) return it - v.begin();
+    return v.size();
+  }
+  T getnew()
+  {
+    v.push_back (++max);
+    return max;
+  }
+    
+  std::vector<T> v;
+  T max;
+};
+
+
+template <class T>
+struct Values<T*>
+{
+  Values (size_t n, float /*offs*/ = 0)
+  {
+    for (size_t i = 0; i < n; i++) {
+      o.push_back (i);
+      v.push_back (&o.back());
+    }
+  }
+  T* operator[] (size_t i) const { return v[i]; }
+  T* nonex() { return &dum; }
+  void change (size_t i)
+  {
+    o.push_back (0);
+    v[i] = &o.back();
+  }
+  size_t find (T* x)
+  {
+    auto it = std::find (v.begin(), v.end(), x);
+    if (it != v.end()) return it - v.begin();
+    return v.size();
+  }
+  T* getnew()
+  {
+    o.push_back (0);
+    v.push_back (&o.back());
+    return v.back();
+  }
+    
+  std::vector<T*> v;
+  std::deque<T> o;
+  T dum = 0;
+};
+
+
+using TestMapu = CxxUtils::ConcurrentStrMap<size_t, TestUpdater>;
+using TestMapp = CxxUtils::ConcurrentStrMap<int*, TestUpdater>;
+using TestMapi = CxxUtils::ConcurrentStrMap<int, TestUpdater>;
+using TestMapf = CxxUtils::ConcurrentStrMap<float, TestUpdater>;
+using TestMapd = CxxUtils::ConcurrentStrMap<double, TestUpdater>;
+
+
+template <class MAP>
+void test1a()
+{
+  MAP map {typename MAP::Updater_t()};
 
   const size_t MAXKEYS = 1000;
   std::vector<std::string> keys;
+
+  using const_iterator = typename MAP::const_iterator;
+  using mapped_type = typename MAP::mapped_type;
+  Values<mapped_type> vals (MAXKEYS, 0.5);
+  Values<mapped_type> vals2 (MAXKEYS, MAXKEYS + 0.5);
 
   for (size_t i = 0; i < MAXKEYS; i++) {
     std::ostringstream ss;
@@ -131,11 +210,11 @@ void test1()
   assert (map.empty());
 
   for (size_t i = 0; i < MAXKEYS; i++) {
-    auto [it, flag] = map.emplace (keys[i], i);
+    auto [it, flag] = map.emplace (keys[i], vals[i]);
     assert (flag);
     assert (it.valid());
     assert (it->first == keys[i]);
-    assert (it->second == i);
+    assert (it->second == vals[i]);
   }
 
   assert (map.size() == MAXKEYS);
@@ -143,11 +222,11 @@ void test1()
   assert (!map.empty());
 
   for (size_t i = 0; i < MAXKEYS; i++) {
-    TestMap::const_iterator it = map.find (keys[i]);
+    const_iterator it = map.find (keys[i]);
     assert (it.valid());
     assert (it != map.end());
     assert (it->first == keys[i]);
-    assert (it->second == i);
+    assert (it->second == vals[i]);
   }
   assert (map.count (keys[10]) == 1);
   assert (map.count ("foobar") == 0);
@@ -161,7 +240,7 @@ void test1()
     assert (i1.valid());
     assert (i1 != i2);
     assert (i1->first == keys[10]);
-    assert (i1->second == 10);
+    assert (i1->second == vals[10]);
     ++i1;
     assert (i1 == i2);
   }
@@ -173,26 +252,26 @@ void test1()
     assert (i1 == i2);
   }
 
-  assert (map.at (keys[10]) == 10);
+  assert (map.at (keys[10]) == vals[10]);
   EXPECT_EXCEPTION (std::out_of_range, map.at ("fooabr"));
 
   for (size_t i = 0; i < MAXKEYS; i++) {
-    auto [it, flag] = map.insert_or_assign (keys[i], i+10000);
+    auto [it, flag] = map.insert_or_assign (keys[i], vals2[i]);
     assert (!flag);
     assert (it.valid());
     assert (it->first == keys[i]);
-    assert (it->second == i+10000);
+    assert (it->second == vals2[i]);
   }
 
   assert (map.size() == MAXKEYS);
   assert (map.capacity() == 1024);
 
   for (size_t i = 0; i < MAXKEYS; i++) {
-    TestMap::const_iterator it = map.find (keys[i]);
+    const_iterator it = map.find (keys[i]);
     assert (it.valid());
     assert (it != map.end());
     assert (it->first == keys[i]);
-    assert (it->second == i+10000);
+    assert (it->second == vals2[i]);
   }
 
   std::vector<size_t> exp;
@@ -203,8 +282,9 @@ void test1()
   std::vector<size_t> seen;
   // not using reference, because our iterator doesn't return a reference
   for (const auto p : map.range()) {
-    size_t i = p.second - 10000;
-    assert (i < MAXKEYS);
+    auto it = std::find (vals2.v.begin(), vals2.v.end(), p.second);
+    assert (it != vals2.v.end());
+    size_t i = it - vals2.v.begin();
     assert (p.first == keys[i]);
     seen.push_back (i);
   }
@@ -215,8 +295,9 @@ void test1()
   seen.clear();
   // not using reference, because our iterator doesn't return a reference
   for (const auto p : map) {
-    size_t i = p.second - 10000;
-    assert (i < MAXKEYS);
+    auto it = std::find (vals2.v.begin(), vals2.v.end(), p.second);
+    assert (it != vals2.v.end());
+    size_t i = it - vals2.v.begin();
     assert (p.first == keys[i]);
     seen.push_back (i);
   }
@@ -224,61 +305,83 @@ void test1()
   std::sort (seen.begin(), seen.end());
   assert (seen == exp);
 
+  mapped_type vnew = vals.getnew();
   {
-    auto [it, flag] = map.insert (std::make_pair ("baz", 99999));
+    auto [it, flag] = map.insert (std::make_pair ("baz", vnew));
     assert (flag);
     assert (it.valid());
     assert (it->first == "baz");
-    assert (it->second == 99999);
+    assert (it->second == vnew);
   }    
   {
-    auto [it, flag] = map.insert (std::make_pair ("baz", 99998));
+    mapped_type vnew2 = vals.getnew();
+    auto [it, flag] = map.insert (std::make_pair ("baz", vnew2));
     assert (!flag);
     assert (it.valid());
     assert (it->first == "baz");
-    assert (it->second == 99999);
-  }    
+    assert (it->second == vnew);
+  }
+}
+void test1()
+{
+  std::cout << "test1\n";
+  test1a<TestMapu>();
+  test1a<TestMapp>();
+  test1a<TestMapi>();
+  test1a<TestMapf>();
+  test1a<TestMapd>();
 }
 
 
 // Bulk copy / insert.
-void test2()
+template <class MAP>
+void test2a()
 {
-  std::cout << "test2\n";
-  std::vector<std::pair<std::string, size_t> > data
-    { {"zero",  0},
-      {"one",   1},
-      {"two",   2},
-      {"three", 3},
-      {"four",  4},
-      {"five",  5},
-      {"six",   6},
-      {"seven", 7},
-      {"eight", 8},
-      {"nine",  9},
+  std::vector<std::string> keys
+    { "zero",
+      "one", 
+      "two", 
+      "three",
+      "four",
+      "five",
+      "six", 
+      "seven",
+      "eight",
+      "nine",
     };
-  
-  TestMap map1 (data.begin(), data.end(), TestMap::Updater_t());
+
+  size_t nkeys = keys.size();
+  using Updater_t = typename MAP::Updater_t;
+  using const_iterator = typename MAP::const_iterator;
+  using mapped_type = typename MAP::mapped_type;
+  Values<mapped_type> vals (nkeys, 0.5);
+
+  std::vector<std::pair<std::string, mapped_type> > data;
+  for (size_t i = 0; i < nkeys; i++) {
+    data.emplace_back (keys[i], vals[i]);
+  }
+
+  MAP map1 (data.begin(), data.end(), Updater_t());
   assert (map1.size() == 10);
   {
-    TestMap::const_iterator it = map1.find ("four");
+    const_iterator it = map1.find ("four");
     assert (it.valid());
     assert (it != map1.end());
     assert (it->first == "four");
-    assert (it->second == 4);
+    assert (it->second == vals[4]);
   }
 
-  TestMap map2 (map1, TestMap::Updater_t());
+  MAP map2 (map1, Updater_t());
   assert (map2.size() == 10);
   {
-    TestMap::const_iterator it = map2.find ("six");
+    const_iterator it = map2.find ("six");
     assert (it.valid());
     assert (it != map2.end());
     assert (it->first == "six");
-    assert (it->second == 6);
+    assert (it->second == vals[6]);
   }
 
-  TestMap map3 {TestMap::Updater_t()};
+  MAP map3 {Updater_t()};
   assert (map3.capacity() == 64);
   assert (map3.size() == 0);
 
@@ -291,27 +394,16 @@ void test2()
 
   map3.insert (std::begin(data), std::end(data));
   assert (map3.size() == 10);
-  assert (map3.at ("five") == 5);
+  assert (map3.at ("five") == vals[5]);
 }
-
-
-// With a pointer value.
-void test3()
+void test2()
 {
-  std::cout << "test3\n";
-
-  using PtrMap = CxxUtils::ConcurrentStrMap<const int*, TestUpdater>;
-  PtrMap map {PtrMap::Updater_t()};
-
-  int v[10] = {0};
-
-  map.emplace ("one", &v[1]);
-  map.emplace ("three", &v[3]);
-  map.emplace ("five", &v[5]);
-
-  assert (map.at("three") == &v[3]);
-  assert (map.find("three")->first == "three");
-  assert (map.find("three")->second == &v[3]);
+  std::cout << "test2\n";
+  test2a<TestMapu>();
+  test2a<TestMapp>();
+  test2a<TestMapi>();
+  test2a<TestMapf>();
+  test2a<TestMapd>();
 }
 
 
@@ -361,15 +453,15 @@ class test4_Writer
   : public test4_Base
 {
 public:
-  test4_Writer (int slot, TestMap& map);
+  test4_Writer (int slot, TestMapu& map);
   void operator()();
 
 private:
-  TestMap& m_map;
+  TestMapu& m_map;
 };
 
 
-test4_Writer::test4_Writer (int slot, TestMap& map)
+test4_Writer::test4_Writer (int slot, TestMapu& map)
   : test4_Base (slot),
     m_map (map)
 {
@@ -413,15 +505,15 @@ class test4_Iterator
   : public test4_Base
 {
 public:
-  test4_Iterator (int slot, TestMap& map);
+  test4_Iterator (int slot, TestMapu& map);
   void operator()();
 
 private:
-  TestMap& m_map;
+  TestMapu& m_map;
 };
 
 
-test4_Iterator::test4_Iterator (int slot, TestMap& map)
+test4_Iterator::test4_Iterator (int slot, TestMapu& map)
   : test4_Base (slot),
     m_map (map)
 {
@@ -442,9 +534,9 @@ void test4_Iterator::operator()()
       assert (p.second == i || p.second == i+10*nwrites || p.second == i +20*nwrites);
     }
 
-    TestMap::const_iterator_range range = m_map.range();
-    TestMap::const_iterator begin2 = range.begin();
-    TestMap::const_iterator end2 = range.end();
+    TestMapu::const_iterator_range range = m_map.range();
+    TestMapu::const_iterator begin2 = range.begin();
+    TestMapu::const_iterator end2 = range.end();
     while (begin2 != end2) {
       --end2;
       if (end2->second == nwrites) continue;
@@ -463,15 +555,15 @@ class test4_Reader
   : public test4_Base
 {
 public:
-  test4_Reader (int slot, TestMap& map);
+  test4_Reader (int slot, TestMapu& map);
   void operator()();
 
 private:
-  TestMap& m_map;
+  TestMapu& m_map;
 };
 
 
-test4_Reader::test4_Reader (int slot, TestMap& map)
+test4_Reader::test4_Reader (int slot, TestMapu& map)
   : test4_Base (slot),
     m_map (map)
 {
@@ -485,7 +577,7 @@ void test4_Reader::operator()()
 
   while (true) {
     for (size_t i = 0; ; ++i) {
-      TestMap::const_iterator it = m_map.find (key(i));
+      TestMapu::const_iterator it = m_map.find (key(i));
       if (it == m_map.end()) break;
       assert(it->second == i || it->second == i+10*nwrites || it->second == i+20*nwrites);
     }
@@ -498,7 +590,7 @@ void test4_Reader::operator()()
 
 void test4_iter()
 {
-  TestMap map {TestMap::Updater_t()};
+  TestMapu map {TestMapu::Updater_t()};
 
   const int nthread = 4;
   std::thread threads[nthread];
@@ -532,11 +624,11 @@ void test4()
 
 
 class ConcurrentStrMapAdapter
-  : public TestMap
+  : public TestMapu
 {
 public:
   ConcurrentStrMapAdapter()
-    : TestMap (TestMap::Updater_t(), 512)
+    : TestMapu (TestMapu::Updater_t(), 512)
   {
   }
   static std::string name() { return "ConcurrentStrMap"; }
@@ -922,7 +1014,6 @@ int main (int argc, char** argv)
   std::cout << "CxxUtils/ConcurrentStrMap_test\n";
   test1();
   test2();
-  test3();
   test4();
   return 0;
 }
