@@ -557,8 +557,9 @@ class MenuSequence(object):
 class MenuSequenceCA(MenuSequence):
     ''' MenuSequence with Component Accumulator '''
 
-    def __init__(self, flags, selectionCA, HypoToolGen, isProbe=False ):
+    def __init__(self, flags, selectionCA, HypoToolGen, isProbe=False, globalRecoCA=None ):
         self.ca = selectionCA
+        self._globalCA = globalRecoCA
         allAlgs = self.ca.getEventAlgos()
         inputMaker = [ a for a in allAlgs if isInputMakerBase(a)]
         assert len(inputMaker) == 1, "Wrong number of input makers in the component accumulator {}".format(len(inputMaker))
@@ -586,6 +587,9 @@ class MenuSequenceCA(MenuSequence):
         self._hypo.Alg = hypoAlg
         return self._hypo
 
+    @property
+    def globalRecoCA(self):
+        return self._globalCA
 
 class EmptyMenuSequenceCA(EmptyMenuSequence):
     def __init__(self, the_name):
@@ -961,24 +965,16 @@ class InEventRecoCA( ComponentAccumulator ):
             self.inputMakerAlg = CompFactory.InputMakerForRoI(**args)
             
         self.recoSeq = parOR( self.name )
-        
+        self.addSequence( self.recoSeq )
     pass
 
     def mergeReco( self, ca ):
         """ Merged CA moving reconstruction algorithms into the right sequence """
-        return self.merge( ca, sequenceName=self.recoSeq.getName() )
+        return self.merge( ca, sequenceName=self.recoSeq.name )
 
     def addRecoAlgo( self, algo ):
         """ Place algorithm in the correct reconstruction sequence """
-        return self.addEventAlgo( algo, sequenceName=self.recoSeq.getName() )
-
-    def addGlobalRecoAlgo( self, algo ):
-        """ Place algorithm in the main events sequence rather than HLT CF """
-        return self.addEventAlgo( algo )
-
-    def mergeGlobalReco( self, ca ):
-        """ Place algorithm in the main events sequence rather than HLT CF """
-        return self.merge( ca )
+        return self.addEventAlgo( algo, sequenceName=self.recoSeq.name )
 
     def inputMaker( self ):
         return self.inputMakerAlg
@@ -1024,14 +1020,6 @@ class InViewRecoCA(ComponentAccumulator):
     def addRecoAlgo( self, algo ):
         """ Place algorithm in the correct reconstruction sequence """
         return self.addEventAlgo( algo, sequenceName=self.viewsSeq.name )
-
-    def addGlobalRecoAlgo( self, algo ):
-        """ Place algorithm in the main events sequence rather than HLT CF """
-        return self.addEventAlgo( algo )
-
-    def mergeGlobalReco( self, ca ):
-        """ Place algorithm in the main events sequence rather than HLT CF """
-        return self.merge( ca )
 
 
     def inputMaker( self ):
@@ -1131,6 +1119,9 @@ def menuSequenceCAToGlobalWrapper(gen, flags, *args, **kwargs):
     msca.ca._sequence = None
     msca.ca._allSequences = []
     appendCAtoAthena(msca.ca)
+    if msca.globalRecoCA:
+        appendCAtoAthena(msca.globalRecoCA)
+
     return MenuSequence(flags,
                         Sequence   = sequence,
                         Maker       = maker,

@@ -14,6 +14,7 @@ from TrigMinBias.TrigMinBiasMonitoring import MbtsHypoToolMonitoring
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from ..Config.MenuComponents import InViewRecoCA, InEventRecoCA, SelectionCA, MenuSequenceCA
 
 
 ########
@@ -152,7 +153,6 @@ def MinBiasSPSequence(flags):
 
 @AccumulatorCache
 def MinBiasZVertexFinderSequenceCfg(flags):
-    from ..Config.MenuComponents import InViewRecoCA, SelectionCA, MenuSequenceCA
     recoAcc = InViewRecoCA(name="ZVertFinderReco", InViewRoIs="InputRoI", RequireParentView=True)
     vdv = CompFactory.AthViews.ViewDataVerifier( "VDVZFinderInputs",
                                                   DataObjects = [( 'SpacePointContainer' , 'StoreGateSvc+PixelTrigSpacePoints'), 
@@ -205,40 +205,40 @@ def MinBiasTrkSequence(flags):
                             Hypo        = trackCountHypo,
                             HypoToolGen = TrackCountHypoToolGen)
 
-def MinBiasMbtsSequence(flags):
-    from TrigMinBias.TrigMinBiasConf import MbtsHypoAlg
-    from TrigMinBias.MbtsConfig import MbtsFexCfg
-    fex = MbtsFexCfg(flags, MbtsBitsKey=recordable("HLT_MbtsBitsContainer"))
-    MbtsRecoSeq = parOR("MbtsRecoSeq", [fex])
+@AccumulatorCache
+def MinBiasMbtsSequenceCfg(flags):
+    recoAcc = InEventRecoCA(name="Mbts")
+    from TrigMinBias.MbtsConfig import MbtsFexCfg, MbtsSGInputCfg
+    fex = MbtsFexCfg(flags, MbtsBitsKey = recordable("HLT_MbtsBitsContainer"))
+    recoAcc.mergeReco(fex)
+    selAcc = SelectionCA("MbtsSel")    
+    hypo = CompFactory.MbtsHypoAlg("MbtsHypoAlg", MbtsBitsKey = fex.getPrimary().MbtsBitsKey)
+    selAcc.mergeReco(recoAcc)
+    selAcc.addHypoAlgo(hypo)
 
-    from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorInitialROITool
-    MbtsInputMakerAlg = InputMakerForRoI("IM_Mbts", 
-                                        RoIsLink="initialRoI", 
-                                        RoITool = ViewCreatorInitialROITool(),
-                                        RoIs='MbtsRoI', # not used in fact
-                                        )
-
-    MbtsSequence = seqAND("MbtsSequence", [MbtsInputMakerAlg, MbtsRecoSeq])
-
-    hypo = MbtsHypoAlg("MbtsHypoAlg", MbtsBitsKey=fex.MbtsBitsKey)
-
-
-    return MenuSequence(flags,
-                        Sequence    = MbtsSequence,
-                        Maker       = MbtsInputMakerAlg,
-                        Hypo        = hypo,
-                        HypoToolGen = MbtsHypoToolGen)
-
+    return MenuSequenceCA(flags,
+                          selAcc,
+                          HypoToolGen = MbtsHypoToolGen, 
+                          globalRecoCA = MbtsSGInputCfg(flags))
+    
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.lock()
-    ca = MinBiasZVertexFinderSequenceCfg(flags)
-    ca.ca.printConfig(withDetails=True)
-
+    zf = MinBiasZVertexFinderSequenceCfg(flags)
+    zf.ca.printConfig(withDetails=True)
     from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
-    ms = menuSequenceCAToGlobalWrapper(MinBiasZVertexFinderSequenceCfg, flags)
+    zfms = menuSequenceCAToGlobalWrapper(MinBiasZVertexFinderSequenceCfg, flags)
+    
+
+    mb = MinBiasMbtsSequenceCfg(flags)
+    mb.ca.printConfig()
+    mbms = menuSequenceCAToGlobalWrapper(MinBiasMbtsSequenceCfg, flags)
+    
     spca = SPCounterRecoAlgCfg(flags)
     spca.printConfig(withDetails=True)
+
     spca.wasMerged()
+
+
