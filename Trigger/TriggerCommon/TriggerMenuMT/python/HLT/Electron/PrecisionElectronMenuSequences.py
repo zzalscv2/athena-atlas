@@ -45,7 +45,7 @@ def precisionElectronMenuSequence(flags, is_probe_leg=False, ion=False,  variant
     # make the Hypo
     from TrigEgammaHypo.TrigEgammaPrecisionElectronHypoTool import createTrigEgammaPrecisionElectronHypoAlg
     with ConfigurableCABehavior():
-       hypo_tuple = createTrigEgammaPrecisionElectronHypoAlg("TrigEgamma" + tag(ion) + "HypoAlg_noGSF"+ variant, sequenceOut)
+       hypo_tuple = createTrigEgammaPrecisionElectronHypoAlg(flags, "TrigEgamma" + tag(ion) + "HypoAlg_noGSF"+ variant, sequenceOut)
     thePrecisionElectronHypo = conf2toConfigurable(hypo_tuple[0])
     hypo_acc = hypo_tuple[1]
     appendCAtoAthena( hypo_acc )

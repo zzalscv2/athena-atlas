@@ -4,7 +4,7 @@
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 from ROOT import egammaPID
 
@@ -14,15 +14,14 @@ def same( val , tool):
 #
 # Create the hypo alg with all selectors
 #
-def createTrigEgammaPrecisionElectronHypoAlg(name, sequenceOut):
+def createTrigEgammaPrecisionElectronHypoAlg(flags, name, sequenceOut):
     acc = ComponentAccumulator()
-    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool("MonTool_"+name,
+    monTool = GenericMonitoringTool(flags, "MonTool_"+name,
                                     HistPath = 'PrecisionElectronHypo/'+name)
   
-    acc_ElectronCBSelectorTools = TrigEgammaPrecisionElectronCBSelectorCfg()
-    acc_ElectronLHSelectorTools = TrigEgammaPrecisionElectronLHSelectorCfg()
-    acc_ElectronDNNSelectorTools = TrigEgammaPrecisionElectronDNNSelectorCfg()
+    acc_ElectronCBSelectorTools = TrigEgammaPrecisionElectronCBSelectorCfg(flags)
+    acc_ElectronLHSelectorTools = TrigEgammaPrecisionElectronLHSelectorCfg(flags)
+    acc_ElectronDNNSelectorTools = TrigEgammaPrecisionElectronDNNSelectorCfg(flags)
 
     acc.merge(acc_ElectronCBSelectorTools)
     acc.merge(acc_ElectronLHSelectorTools)
@@ -49,9 +48,8 @@ def createTrigEgammaPrecisionElectronHypoAlg(name, sequenceOut):
     return thePrecisionElectronHypo, acc
 
 def TrigEgammaPrecisionElectronHypoAlgCfg(flags, name, inputElectronCollection ):
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
-    hypo_tuple = createTrigEgammaPrecisionElectronHypoAlg( name, inputElectronCollection )
+    hypo_tuple = createTrigEgammaPrecisionElectronHypoAlg( flags, name, inputElectronCollection )
     hypo_alg = hypo_tuple[0]
     hypo_acc = hypo_tuple[1]
     acc.addEventAlgo( hypo_alg )
@@ -227,7 +225,7 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
   #
   # Compile the chain
   #
-  def compile(self):
+  def compile(self, flags):
 
     if 'nocut' == self.pidname():
       self.nocut()
@@ -246,20 +244,19 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
 
     if hasattr(self.tool(), "MonTool"):
       
-      doValidationMonitoring = ConfigFlags.Trigger.doValidationMonitoring # True to monitor all chains for validation purposes
+      doValidationMonitoring = flags.Trigger.doValidationMonitoring # True to monitor all chains for validation purposes
       monGroups = self.__monGroups
 
       if (any('egammaMon:online' in group for group in monGroups) or doValidationMonitoring):
-        self.addMonitoring()
+        self.addMonitoring(flags)
 
 
   #
   # Create the monitoring code
   #
-  def addMonitoring(self):
+  def addMonitoring(self, flags):
 
-    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool("MonTool_"+self.chain(),
+    monTool = GenericMonitoringTool(flags, "MonTool_"+self.chain(),
                                     HistPath = 'PrecisionElectronHypo/'+self.chain())
     monTool.defineHistogram('dEta', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo #Delta#eta_{EF L1}; #Delta#eta_{EF L1}", xbins=80, xmin=-0.01, xmax=0.01)
     monTool.defineHistogram('dPhi', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo #Delta#phi_{EF L1}; #Delta#phi_{EF L1}", xbins=80, xmin=-0.01, xmax=0.01)
@@ -276,7 +273,7 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
                             xbins=13, xmin=-1.5, xmax=12.5,  opt="kCumulative", xlabels=cuts)
 
 
-    if ConfigFlags.Trigger.doValidationMonitoring:
+    if flags.Trigger.doValidationMonitoring:
       monTool.defineHistogram('ptcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo ptcone20; ptcone20;", xbins=50, xmin=0, xmax=5.0),
       monTool.defineHistogram('relptcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo; ptcone20/pt;", xbins=50, xmin=0, xmax=1),
       monTool.defineHistogram('ptvarcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo ptvarcone20; ptvarcone20;", xbins=50, xmin=0, xmax=5.0),
@@ -286,19 +283,17 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
     self.tool().MonTool = monTool
 
 
-def _IncTool( name, monGroups, cpart, tool=None):
+def _IncTool(flags, name, monGroups, cpart, tool=None):
     config = TrigEgammaPrecisionElectronHypoToolConfig(name, monGroups, cpart, tool=tool)
-    config.compile()
+    config.compile(flags)
     return config.tool()
 
 
 
-def TrigEgammaPrecisionElectronHypoToolFromDict( d , tool=None):
+def TrigEgammaPrecisionElectronHypoToolFromDict(flags, d , tool=None):
     """ Use menu decoded chain dictionary to configure the tool """
     cparts = [i for i in d['chainParts'] if ((i['signature']=='Electron') or (i['signature']=='Electron'))]
-    name = d['chainName']
-    monGroups = d['monGroups']
-    return _IncTool( name, monGroups, cparts[0] , tool=tool )
+    return _IncTool( flags, d['chainName'], d['monGroups'], cparts[0] , tool=tool )
 
 
 
@@ -306,11 +301,11 @@ def TrigEgammaPrecisionElectronHypoToolFromDict( d , tool=None):
 #
 # Electron DNN Selectors
 #
-def TrigEgammaPrecisionElectronDNNSelectorCfg(name='TrigEgammaPrecisionElectronDNNSelector', ConfigFilePath=None):
+def TrigEgammaPrecisionElectronDNNSelectorCfg(flags, name='TrigEgammaPrecisionElectronDNNSelector', ConfigFilePath=None):
     acc = ComponentAccumulator()
     # We should include the DNN here
     if not ConfigFilePath:
-      ConfigFilePath = ConfigFlags.Trigger.egamma.dnnVersion
+      ConfigFilePath = flags.Trigger.egamma.dnnVersion
   
     import collections.abc
     SelectorNames = collections.OrderedDict({
@@ -336,7 +331,7 @@ def TrigEgammaPrecisionElectronDNNSelectorCfg(name='TrigEgammaPrecisionElectronD
 #
 # Electron LH Selectors
 #
-def TrigEgammaPrecisionElectronLHSelectorCfg( name='TrigEgammaPrecisionElectronLHSelector', ConfigFilePath=None, ConfigFileNoPixPath=None, ConfigFileNoGSFPath=None, ConfigFileNoGSFNoPixPath=None):
+def TrigEgammaPrecisionElectronLHSelectorCfg(flags, name='TrigEgammaPrecisionElectronLHSelector', ConfigFilePath=None, ConfigFileNoPixPath=None, ConfigFileNoGSFPath=None, ConfigFileNoGSFNoPixPath=None):
 
     # Configure the LH selectors
     acc = ComponentAccumulator()
@@ -362,10 +357,10 @@ def TrigEgammaPrecisionElectronLHSelectorCfg( name='TrigEgammaPrecisionElectronL
     VariationConfigInfos['_nogsf']['postfix']        = ''
     VariationConfigInfos['_nogsf_nopix']['postfix']  = '_NoPix'
     
-    VariationConfigInfos['_default']['path']      = ConfigFilePath           if ConfigFilePath           else ConfigFlags.Trigger.egamma.electronPidVersion
-    VariationConfigInfos['_nopix']['path']        = ConfigFileNoPixPath      if ConfigFileNoPixPath      else ConfigFlags.Trigger.egamma.electronNoPixPidVersion
-    VariationConfigInfos['_nogsf']['path']        = ConfigFileNoGSFPath      if ConfigFileNoGSFPath      else ConfigFlags.Trigger.egamma.electronNoGSFPidVersion
-    VariationConfigInfos['_nogsf_nopix']['path']  = ConfigFileNoGSFNoPixPath if ConfigFileNoGSFNoPixPath else ConfigFlags.Trigger.egamma.electronNoGSFNoPixPidVersion
+    VariationConfigInfos['_default']['path']      = ConfigFilePath           if ConfigFilePath           else flags.Trigger.egamma.electronPidVersion
+    VariationConfigInfos['_nopix']['path']        = ConfigFileNoPixPath      if ConfigFileNoPixPath      else flags.Trigger.egamma.electronNoPixPidVersion
+    VariationConfigInfos['_nogsf']['path']        = ConfigFileNoGSFPath      if ConfigFileNoGSFPath      else flags.Trigger.egamma.electronNoGSFPidVersion
+    VariationConfigInfos['_nogsf_nopix']['path']  = ConfigFileNoGSFNoPixPath if ConfigFileNoGSFNoPixPath else flags.Trigger.egamma.electronNoGSFNoPixPidVersion
     
     from AthenaCommon.Logging import logging
     log = logging.getLogger('TrigEgammaPrecisionElectronHypoTool')
@@ -393,7 +388,7 @@ def TrigEgammaPrecisionElectronLHSelectorCfg( name='TrigEgammaPrecisionElectronL
 # Electron CB Selectors
 #
 
-def TrigEgammaPrecisionElectronCBSelectorCfg(name='TrigEgammaPrecisionElectronCBSelector', ConfigFilePath=None):
+def TrigEgammaPrecisionElectronCBSelectorCfg(flags, name='TrigEgammaPrecisionElectronCBSelector', ConfigFilePath=None):
     acc = ComponentAccumulator()
     from ElectronPhotonSelectorTools.TrigEGammaPIDdefs import BitDefElectron
 
@@ -417,7 +412,7 @@ def TrigEgammaPrecisionElectronCBSelectorCfg(name='TrigEgammaPrecisionElectronCB
     )
 
     if not ConfigFilePath:
-        ConfigFilePath = ConfigFlags.Trigger.egamma.electronHIPidVersion
+        ConfigFilePath = flags.Trigger.egamma.electronHIPidVersion
 
     from collections import OrderedDict
     SelectorNames = OrderedDict({

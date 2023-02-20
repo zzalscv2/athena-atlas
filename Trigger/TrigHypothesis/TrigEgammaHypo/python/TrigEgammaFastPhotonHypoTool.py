@@ -1,8 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-
 from AthenaCommon.SystemOfUnits import GeV
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 #
 # For photons
@@ -86,7 +85,7 @@ class TrigEgammaFastPhotonHypoToolConfig:
   #
   # Compile the chain
   #
-  def compile(self):
+  def compile(self, flags):
     if self.pidname() in ('etcut', 'ion'):
         self.etcut()
     elif 'noalg' == self.pidname():
@@ -100,21 +99,19 @@ class TrigEgammaFastPhotonHypoToolConfig:
     # add mon tool
     if hasattr(self.tool(), "MonTool"):
       
-      doValidationMonitoring = ConfigFlags.Trigger.doValidationMonitoring # True to monitor all chains for validation purposes
+      doValidationMonitoring = flags.Trigger.doValidationMonitoring # True to monitor all chains for validation purposes
       monGroups = self.__monGroups
 
       if (any('egammaMon:online' in group for group in monGroups) or doValidationMonitoring):
-        self.addMonitoring()
+        self.addMonitoring(flags)
 
 
   #
   # Monitoring code
   #
-  def addMonitoring(self):
+  def addMonitoring(self, flags):
     
-    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-
-    monTool = GenericMonitoringTool("MonTool"+self.chain(),
+    monTool = GenericMonitoringTool(flags, "MonTool"+self.chain(),
                                     HistPath = 'FastPhotonHypo/'+self.chain())
     monTool.defineHistogram('CutCounter', type='TH1I', path='EXPERT', title="FastPhoton Hypo Cut Counter;Cut Counter", xbins=8, xmin=-1.5, xmax=7.5, opt="kCumulative")
     monTool.defineHistogram('Et', type='TH1F', path='EXPERT', title="FastPhoton Hypo E_{T}^{EM};E_{T}^{EM} [MeV]",xbins=50, xmin=-2000, xmax=100000)
@@ -130,18 +127,14 @@ class TrigEgammaFastPhotonHypoToolConfig:
 
 
 
-def _IncTool(name, monGroups, cpart, tool=None):
+def _IncTool(flags, name, monGroups, cpart, tool=None):
   config = TrigEgammaFastPhotonHypoToolConfig(name,monGroups, cpart, tool=tool)
-  config.compile()
+  config.compile(flags)
   return config.tool()
 
 
 
-def TrigEgammaFastPhotonHypoToolFromDict( d , tool=None):
+def TrigEgammaFastPhotonHypoToolFromDict(flags, chainDict, tool=None):
     """ Use menu decoded chain dictionary to configure the tool """
-    cparts = [i for i in d['chainParts'] if i['signature']=='Photon' ]
-    name = d['chainName']
-    monGroups = d['monGroups']
-    return _IncTool( name, monGroups, cparts[0] , tool=tool)
-
-
+    cparts = [i for i in chainDict['chainParts'] if i['signature']=='Photon' ]
+    return _IncTool( flags, chainDict['chainName'], chainDict['monGroups'], cparts[0] , tool=tool)

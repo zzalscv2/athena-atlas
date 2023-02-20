@@ -1,9 +1,9 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 from AthenaCommon.SystemOfUnits import GeV
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
-def _IncTool(name, monGroups, threshold, sel, tool=None):
+def _IncTool(flags, name, monGroups, threshold, sel, tool=None):
 
 
     if not tool:
@@ -12,11 +12,10 @@ def _IncTool(name, monGroups, threshold, sel, tool=None):
 
     if hasattr(tool, "MonTool"):
 
-        doValidationMonitoring = ConfigFlags.Trigger.doValidationMonitoring # True to monitor all chains for validation purposes
+        doValidationMonitoring = flags.Trigger.doValidationMonitoring # True to monitor all chains for validation purposes
 
         if (any('egammaMon:online' in group for group in monGroups) or doValidationMonitoring):
-            from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-            monTool = GenericMonitoringTool("MonTool_"+name,
+            monTool = GenericMonitoringTool(flags, "MonTool_"+name,
                                             HistPath = 'PrecisionCaloHypo/'+tool.getName())
             monTool.defineHistogram('dEta', type='TH1F', path='EXPERT', title="PrecisionCalo Hypo #Delta#eta_{L2 L1}; #Delta#eta_{L2 L1}", xbins=80, xmin=-0.01, xmax=0.01)
             monTool.defineHistogram('dPhi', type='TH1F', path='EXPERT', title="PrecisionCalo Hypo #Delta#phi_{L2 L1}; #Delta#phi_{L2 L1}", xbins=80, xmin=-0.01, xmax=0.01)
@@ -56,7 +55,7 @@ def _IncTool(name, monGroups, threshold, sel, tool=None):
     return tool
 
 
-def TrigEgammaPrecisionCaloHypoToolFromDict( d, tool=None ):
+def TrigEgammaPrecisionCaloHypoToolFromDict( flags, d, tool=None ):
     """ Use menu decoded chain dictionary to configure the tool """
     cparts = [i for i in d['chainParts'] if ((i['signature']=='Electron') or (i['signature']=='Photon'))]
 
@@ -65,7 +64,5 @@ def TrigEgammaPrecisionCaloHypoToolFromDict( d, tool=None ):
     
     def __sel(cpart):
         return 'ion' if 'ion' in cpart['extra'] else (cpart['addInfo'][0] if cpart['addInfo'] else cpart['IDinfo'])
-    
-    name = d['chainName']
-    monGroups = d['monGroups']    
-    return _IncTool( name, monGroups, __th( cparts[0]),  __sel( cparts[0] ) , tool=tool)
+
+    return _IncTool(flags, d['chainName'], d['monGroups'], __th( cparts[0]),  __sel( cparts[0] ) , tool=tool)

@@ -49,7 +49,7 @@ def precisionPhotonMenuSequence(flags, name,ion=False):
 
     # Hypo 
     from TrigEgammaHypo.TrigEgammaPrecisionPhotonHypoTool import createTrigEgammaPrecisionPhotonHypoAlg
-    thePrecisionPhotonHypo = createTrigEgammaPrecisionPhotonHypoAlg(name+ tag(ion) +"Hypo", sequenceOut)
+    thePrecisionPhotonHypo = createTrigEgammaPrecisionPhotonHypoAlg(flags, name+ tag(ion) +"Hypo", sequenceOut)
     
     from TrigEgammaHypo.TrigEgammaPrecisionPhotonHypoTool import TrigEgammaPrecisionPhotonHypoToolFromDict
 
