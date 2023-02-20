@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 _all_domains = [
@@ -6,8 +6,9 @@ _all_domains = [
     "BeamSpotDecoration",
     "Calo", "Tracking",
     "HGTDExtension",
-    "Muon","CombinedMuon",
+    "Muon", "CombinedMuon",
     "Egamma",
+    "Isolation",
     "CaloExtension",
     "TrackCellAssociation",
     "PFlow", "Jet", "BTagging",
@@ -60,6 +61,10 @@ def createRecoConfigFlags():
         prevFlags.Reco.EnableTracking
         and prevFlags.Detector.EnableCalo
         and prevFlags.Tracking.doVertexFinding))
+    # Enable Isolation Reconstruction
+    flags.addFlag("Reco.EnableIsolation", lambda prevFlags: (
+        prevFlags.Reco.EnableCombinedMuon
+        or prevFlags.Reco.EnableEgamma))
     # Enable Jet Reconstruction
     flags.addFlag("Reco.EnableJet", lambda prevFlags: (
         prevFlags.Detector.EnableCalo
