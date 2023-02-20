@@ -10,7 +10,6 @@ from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
-
 class Singleton(type):
     _instances = {}
     def __call__(cls, *args, **kwargs):
@@ -353,6 +352,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         # Loop over all chainDicts and send them off to their respective assembly code
         listOfChainConfigs = []
         perSig_lengthOfChainConfigs = []
+        not_migrated=False
 
         for chainPartDict in chainDicts:
             chainPartConfig = None
@@ -383,12 +383,15 @@ class GenerateMenuMT(object, metaclass=Singleton):
                 log.error('Available signature(s): %s', self.availableSignatures)
                 raise Exception('Stopping the execution. Please correct the configuration.')
 
-            log.debug("Chain %s \n chain configs: %s",chainPartDict['chainName'],chainPartConfig)
-            if isComponentAccumulatorCfg() and \
-                (chainPartConfig is None or (any(["_MissingCA" in step.name for step in chainPartConfig.steps]) \
-                    and "_MissingCA" not in chainPartConfig.steps[-1].name )):      
-                    # if a MissingCA step exist and it's not the last one, do not build the chain because it's incomplete              
-                log.warning(str(NoCAmigration("[__generateChainConfigs] Chain {0} removed because is incomplete".format(chainPartDict['chainName'])) ))       
+            log.debug("Chain %s \n chain configs: %s",chainPartDict['chainName'],chainPartConfig)            
+            import itertools   
+            
+            # check if there are not migrated steps between migrated ones
+            # if built-up steps are not consecutive, do not build the chain because it's incomplete  
+            not_migrated |= (chainPartConfig is None or  \
+                len([k for k, g in itertools.groupby(["_MissingCA" in step.name for step in chainPartConfig.steps]) if k==0])!=1)                    
+            if isComponentAccumulatorCfg() and not_migrated:                              
+                log.debug(str(NoCAmigration("[__generateChainConfigs] Chain {0} removed leg because is incomplete".format(chainPartDict['chainName'])) ))       
             else:
                 listOfChainConfigs.append(chainPartConfig)
                 perSig_lengthOfChainConfigs.append((chainPartConfig.nSteps,chainPartConfig.alignmentGroups))
@@ -397,12 +400,9 @@ class GenerateMenuMT(object, metaclass=Singleton):
         # multi-element list for intra-sig combined chains
         # here, we flatten it accordingly (works for both cases!)
         lengthOfChainConfigs = []
-        if isComponentAccumulatorCfg() and \
-           (chainPartConfig is None or (any(["_MissingCA" in step.name for step in chainPartConfig.steps]) \
-                                        and "_MissingCA" not in chainPartConfig.steps[-1].name )):      
-            # if a MissingCA step exist and it's not the last one, do not build the chain because it's incomplete              
-            log.warning(str(NoCAmigration("[__generateChainConfigs] Chain {0} removed because is incomplete".format(chainPartDict['chainName'])) ))       
-        else:
+        if isComponentAccumulatorCfg() and not_migrated:                                  
+            log.debug(str(NoCAmigration("[__generateChainConfigs] Chain {0} removed because is incomplete".format(chainPartDict['chainName'])) ))       
+        else:        
             for nSteps, aGrps in perSig_lengthOfChainConfigs:
                 if len(nSteps) != len(aGrps):
                     log.error("Chain part has %s steps and %s alignment groups - these don't match!",nSteps,aGrps)
@@ -410,17 +410,13 @@ class GenerateMenuMT(object, metaclass=Singleton):
                     for a,b in zip(nSteps,aGrps):
                         lengthOfChainConfigs.append((a,b))
             
-        ## if log.isEnabledFor(logging.DEBUG):
-        ##     import pprint
-        ##     pp = pprint.PrettyPrinter(indent=4, depth=8)
-        ##     log.debug('mainChainDict dictionary: %s', pp.pformat(mainChainDict))
-
-
+       
         # This part is to deal with combined chains between different signatures
         try:
+            if isComponentAccumulatorCfg() and not_migrated:
+                raise NoCAmigration("[__generateChainConfigs] chain {0} generation missed configuration".format(mainChainDict['chainName']))                               
+
             if len(listOfChainConfigs) == 0:
-                if isComponentAccumulatorCfg():
-                    raise NoCAmigration("[__generateChainConfigs] chain {0} generation missed configuration".format(mainChainDict['chainName']))                               
                 raise Exception('[__generateChainConfigs] No Chain Configuration found for {0}'.format(mainChainDict['chainName']))                    
             else:
                 if len(listOfChainConfigs)>1:

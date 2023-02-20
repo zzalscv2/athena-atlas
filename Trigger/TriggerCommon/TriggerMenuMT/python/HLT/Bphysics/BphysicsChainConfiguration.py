@@ -12,11 +12,20 @@ from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from ..Muon.MuonChainConfiguration import MuonChainConfiguration
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
-if isComponentAccumulatorCfg():
-    pass
-else:
-    from ..Muon.MuonChainConfiguration import mul2IOOvlpRmSequenceCfg, mul2mtCBOvlpRmSequenceCfg, muEFCBSequenceCfg
+from ..Muon.MuonChainConfiguration import mul2IOOvlpRmSequenceCfg, mul2mtCBOvlpRmSequenceCfg, muEFCBSequenceCfg
 
+if isComponentAccumulatorCfg():
+    def StreamerDimuL2ComboHypoCfg(): pass
+    def StreamerDimuL2IOComboHypoCfg(): pass
+    def StreamerDimuL2MTComboHypoCfg():pass
+    def DimuEFComboHypoCfg():pass
+    def BmutrkComboHypoCfg():pass
+    def StreamerDimuEFComboHypoCfg():pass
+    def TrigMultiTrkComboHypoToolFromDict():pass
+    def BmumuxComboHypoCfg(): pass
+    def BmuxComboHypoCfg(): pass
+    def TrigBmumuxComboHypoToolFromDict(): pass
+else:
     from .BphysicsMenuSequences import dimuL2Sequence, dimuEFSequence, bmumuxSequence
 
     from TrigBphysHypo.TrigMultiTrkComboHypoConfig import StreamerDimuL2ComboHypoCfg, StreamerDimuL2IOComboHypoCfg, StreamerDimuL2MTComboHypoCfg, DimuEFComboHypoCfg, BmutrkComboHypoCfg, StreamerDimuEFComboHypoCfg, TrigMultiTrkComboHypoToolFromDict

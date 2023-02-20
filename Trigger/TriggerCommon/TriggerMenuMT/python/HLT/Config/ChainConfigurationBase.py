@@ -56,16 +56,19 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
                     seqArray.append( RecoFragmentsPool.retrieve( sequenceCfg, flags, **stepArgs ))                                                       
             except NameError:
                 if isComponentAccumulatorCfg():
-                    log.warning(str(NoCAmigration('[getStep] This sequence {0} does not exist for CA components'.format(sequenceCfg.__name__)) ))                    
+                    log.warning(str(NoCAmigration('[getStep] Menu sequence {0} does not exist for CA components'.format(sequenceCfg.__name__)) ))                    
                 else: 
                     raise
 
-        if (len(seqArray)>0):
-            # Bind flags to comboHypo generator if needed
-            if 'flags' in inspect.signature(comboHypoCfg).parameters:
-                comboHypoCfg = functools.partial(comboHypoCfg, flags)
-            return ChainStep(stepName, seqArray, [self.mult], [self.dict], comboHypoCfg, comboTools)
+        if (len(seqArray)>0):                                
+            if inspect.signature(comboHypoCfg).parameters and all(inspect.signature(comboTool).parameters for comboTool in comboTools):                
+                # Bind flags to comboHypo generator if needed
+                if 'flags' in inspect.signature(comboHypoCfg).parameters:
+                    comboHypoCfg = functools.partial(comboHypoCfg, flags)
+                return ChainStep(stepName, seqArray, [self.mult], [self.dict], comboHypoCfg = comboHypoCfg, comboToolConfs = comboTools) 
 
+        
+        # if not returned any step
         try:
             if isComponentAccumulatorCfg():
                 raise NoCAmigration                            
