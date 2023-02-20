@@ -167,11 +167,7 @@ if DQMonFlags.doMonitoring():
          local_logger.warning("The legacy Run-2 CTP monitoring is no longer supported")
 
       if DQMonFlags.doLVL1CaloMon():
-         try:
-            include("TrigT1CaloMonitoring/TrigT1CaloMonitoring_forRecExCommission.py")
-            include("TrigT1Monitoring/TrigT1Monitoring_forRecExCommission.py")
-         except Exception:
-            treatException("DataQualitySteering_jobOptions.py: exception when setting up L1 Calo monitoring")
+         local_logger.warning("The legacy L1Calo monitoring is no longer supported")
 
       if DQMonFlags.doHLTMon():
          local_logger.warning("The legacy Run-2 HLT monitoring is no longer supported")
