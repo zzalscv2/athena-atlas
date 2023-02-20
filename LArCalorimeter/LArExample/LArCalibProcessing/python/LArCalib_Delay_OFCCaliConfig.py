@@ -53,7 +53,7 @@ def LArDelay_OFCCaliCfg(flags):
           result.addEventAlgo(theLArCalibShortCorrector)
     else:
        digKey="SC"
-       theLArLATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder",DumpFile = '',RawDataFile = '')
+       theLArLATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder")
        if flags.LArCalib.Input.isRawData:
           result.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(adcCollKey = digKey, adcBasCollKey = "", etCollKey = "",
                                                                etIdCollKey = "", LATOMEDecoder = theLArLATOMEDecoder))

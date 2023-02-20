@@ -29,16 +29,18 @@ LArMphysOverMcalCondAlg    =  CompFactory.getComp("LArFlatConditionsAlg<LArMphys
 LArOFCCondAlg              =  CompFactory.getComp("LArFlatConditionsAlg<LArOFCFlat>")
 LArShapeCondAlg            =  CompFactory.getComp("LArFlatConditionsAlg<LArShapeFlat>")
 
-LArDAC2uASCCondAlg = CompFactory.getComp("LArFlatConditionsAlg<LArDAC2uASC>")
-LArRampSCCondAlg = CompFactory.getComp("LArFlatConditionsAlg<LArRampSC>")
-LAruA2MeVSCCondAlg = CompFactory.getComp("LArFlatConditionsAlg<LAruA2MeVSC>")
-LArfSamplSCCondAlg     =  CompFactory.getComp("LArFlatConditionsAlg<LArfSamplSC>")
-LArShapeSCCondAlg      =  CompFactory.getComp("LArFlatConditionsAlg<LArShapeSC>")
-LArPedestalSCCondAlg   =  CompFactory.getComp("LArFlatConditionsAlg<LArPedestalSC>")
-LArNoiseSCCondAlg       =  CompFactory.getComp("LArFlatConditionsAlg<LArNoiseSC>")
-LArMinBiasSCCondAlg       =  CompFactory.getComp("LArFlatConditionsAlg<LArMinBiasSC>")
-LArAutoCorrSCCondAlg      =  CompFactory.getComp("LArFlatConditionsAlg<LArAutoCorrSC>")
-LArPileupAverageSCCondAlg = CompFactory.getComp("LArFlatConditionsAlg<LArMinBiasAverageSC>")
+LArHVScaleCorrSCCondFlatAlg  =  CompFactory.getComp("LArFlatConditionsAlg<LArHVScaleCorrSC>")
+LArDAC2uASCCondAlg           =  CompFactory.getComp("LArFlatConditionsAlg<LArDAC2uASC>")
+LArRampSCCondAlg             =  CompFactory.getComp("LArFlatConditionsAlg<LArRampSC>")
+LAruA2MeVSCCondAlg           =  CompFactory.getComp("LArFlatConditionsAlg<LAruA2MeVSC>")
+LArfSamplSCCondAlg           =  CompFactory.getComp("LArFlatConditionsAlg<LArfSamplSC>")
+LArShapeSCCondAlg            =  CompFactory.getComp("LArFlatConditionsAlg<LArShapeSC>")
+LArPedestalSCCondAlg         =  CompFactory.getComp("LArFlatConditionsAlg<LArPedestalSC>")
+LArNoiseSCCondAlg            =  CompFactory.getComp("LArFlatConditionsAlg<LArNoiseSC>")
+LArMinBiasSCCondAlg          =  CompFactory.getComp("LArFlatConditionsAlg<LArMinBiasSC>")
+LArAutoCorrSCCondAlg         =  CompFactory.getComp("LArFlatConditionsAlg<LArAutoCorrSC>")
+LArPileupAverageSCCondAlg    =  CompFactory.getComp("LArFlatConditionsAlg<LArMinBiasAverageSC>")
+LArMphysOverMcalSCCondAlg    =  CompFactory.getComp("LArFlatConditionsAlg<LArHVScaleCorrSC>")
 
 
 def LArElecCalibDbCfg(ConfigFlags,condObjs):
@@ -110,6 +112,43 @@ def LArElecCalibDBRun2Cfg(ConfigFlags,condObjs):
 
     return result
 
+def LArElecCalibDBSCCfg(ConfigFlags,condObjs):
+
+    _larCondDBFoldersDataSC = {"Ramp":("LArRamp","/LAR/ElecCalibFlatSC/Ramp", LArRampSCCondAlg ),
+                               "DAC2uA":("LArDAC2uA","/LAR/ElecCalibFlatSC/DAC2uA",LArDAC2uASCCondAlg),
+                               "Pedestal":("LArPedestal","/LAR/ElecCalibFlatSC/Pedestal",LArPedestalSCCondAlg),
+                               "uA2MeV":("LAruA2MeV","/LAR/ElecCalibFlatSC/uA2MeV", LAruA2MeVSCCondAlg),
+                               "MphysOverMcal":("LArMphysOverMcal","/LAR/ElecCalibFlatSC/MphysOverMcal",LArMphysOverMcalSCCondAlg),
+                               "OFC":("LArOFC","/LAR/ElecCalibFlatSC/OFC",LArOFCCondAlg),
+                               "Shape":("LArShape","/LAR/ElecCalibFlatSC/Shape",LArShapeSCCondAlg),
+                               "HVScaleCorr":("LArHVScaleCorr","/LAR/ElecCalibFlatSC/HVScaleCorr",LArHVScaleCorrSCCondFlatAlg),
+                               "fSampl":("LArfSampl","/LAR/ElecCalibMCSC/fSampl",LArfSamplSCCondAlg),
+                           }
+
+    result=IOVDbSvcCfg(ConfigFlags)
+    iovDbSvc=result.getService("IOVDbSvc")
+    condLoader=result.getCondAlgo("CondInputLoader")
+
+
+    for condData in condObjs:
+        try:
+            outputKey,fldr,calg=_larCondDBFoldersDataSC[condData]
+        except KeyError:
+            raise ConfigurationError("No conditions data %s found for SCdata" % condData)
+            
+        dbString="<db>COOLONL_LAR/CONDBR2</db>"
+        persClass="CondAttrListCollection"
+        if condData == "fSampl":
+            dbString="<db>COOLOFL_LAR/OFLP200</db>"
+            result.addCondAlgo(calg(ReadKey="LArfSampl", WriteKey=outputKey))
+            calg = None
+
+        iovDbSvc.Folders.append(fldr+dbString)# (addFolder(ConfigFlags,fldr,"LAR_ONL",'CondAttrListCollection'))
+        condLoader.Load.append((persClass,fldr))
+        if calg is not None:
+            result.addCondAlgo(calg (ReadKey=fldr, WriteKey=outputKey))
+
+    return result
 
 
 
@@ -177,7 +216,7 @@ def LArElecCalibDBMCCfg(ConfigFlags,folders):
         if calg is not None:
             result.addCondAlgo(calg(ReadKey=key,WriteKey=key+"Sym"))
 
-    result.merge(addFolderList(ConfigFlags,folderlist))
+    result.merge(addFolderList(ConfigFlags,folderlist,db="OFLP200"))
     return result
 
 
@@ -207,7 +246,7 @@ def LArElecCalibDBMCSCCfg(ConfigFlags,folders):
         if calg is not None:
             result.addCondAlgo(calg(ReadKey=fldr,WriteKey=key))
 
-    result.merge(addFolderList(ConfigFlags,folderlist))
+    result.merge(addFolderList(ConfigFlags,folderlist,db="OFLP200"))
     return result
 
 

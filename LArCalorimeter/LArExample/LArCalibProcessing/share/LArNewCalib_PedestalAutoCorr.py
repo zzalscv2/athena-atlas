@@ -65,53 +65,52 @@ if __name__=='__main__':
    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
    
    #Import the flag-container that is the arguemnt to the configuration methods
-   from AthenaConfiguration.AllConfigFlags import ConfigFlags
+   from AthenaConfiguration.AllConfigFlags import initConfigFlags
    from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
-   
+   flags=initConfigFlags() 
    #first needs to define, if we are with SC or not
-   addLArCalibFlags(ConfigFlags)
-   ConfigFlags.LArCalib.isSC = args.supercells
+   addLArCalibFlags(flags, args.supercells)
    
    #Now we set the flags as required for this particular job:
    #The following flags help finding the input bytestream files: 
-   ConfigFlags.LArCalib.Input.Dir = InputDir
-   ConfigFlags.LArCalib.Input.Type = args.trig
-   ConfigFlags.LArCalib.Input.RunNumbers = [int(args.run),]
-   ConfigFlags.LArCalib.Input.isRawData = args.rawdata
+   flags.LArCalib.Input.Dir = InputDir
+   flags.LArCalib.Input.Type = args.trig
+   flags.LArCalib.Input.RunNumbers = [int(args.run),]
+   flags.LArCalib.Input.isRawData = args.rawdata
 
    # Input files
-   ConfigFlags.Input.Files=ConfigFlags.LArCalib.Input.Files
+   flags.Input.Files=flags.LArCalib.Input.Files
    #Print the input files we found 
    log.info("Input files to be processed:")
-   for f in ConfigFlags.Input.Files:
+   for f in flags.Input.Files:
        log.info(f)
    
 
    #Some configs depend on the sub-calo in question
    #(sets also the preselection of LArRawCalibDataReadingAlg)
-   if not ConfigFlags.LArCalib.isSC:
+   if not flags.LArCalib.isSC:
       if args.subdet == 'EMB' or args.subdet == 'EMEC':
-         ConfigFlags.LArCalib.Input.SubDet="EM"
+         flags.LArCalib.Input.SubDet="EM"
       else:   
-         ConfigFlags.LArCalib.Input.SubDet=args.subdet
+         flags.LArCalib.Input.SubDet=args.subdet
  
       if args.side !="":
          if args.side == "C":
-            ConfigFlags.LArCalib.Preselection.Side = [0]
+            flags.LArCalib.Preselection.Side = [0]
          elif args.side == "A":   
-            ConfigFlags.LArCalib.Preselection.Side = [1]
+            flags.LArCalib.Preselection.Side = [1]
          else:   
             log.warning("Bad side argument: ",args.side," using both!!") 
  
       if args.subdet == 'EMB':
-         ConfigFlags.LArCalib.Preselection.BEC = [0]
+         flags.LArCalib.Preselection.BEC = [0]
       else:   
-         ConfigFlags.LArCalib.Preselection.BEC = [1]
+         flags.LArCalib.Preselection.BEC = [1]
  
       if args.subdet == 'FCAL':
-         ConfigFlags.LArCalib.Preselection.FT = [6]
+         flags.LArCalib.Preselection.FT = [6]
       elif args.subdet == 'HEC':
-         ConfigFlags.LArCalib.Preselection.FT = [3,10,16,22]
+         flags.LArCalib.Preselection.FT = [3,10,16,22]
 
    #Output of this job:
    OutputPedAutoCorrRootFileName = args.outrprefix + "_" + args.run
@@ -120,36 +119,36 @@ if __name__=='__main__':
    if args.subdet != "":
       OutputPedAutoCorrRootFileName = OutputPedAutoCorrRootFileName + "_"+args.subdet
       OutputPedAutoCorrPoolFileName = OutputPedAutoCorrPoolFileName + "_"+args.subdet
-      if ConfigFlags.LArCalib.Input.SubDet=="EM":
+      if flags.LArCalib.Input.SubDet=="EM":
          OutputPedAutoCorrRootFileName = OutputPedAutoCorrRootFileName + args.side
          OutputPedAutoCorrPoolFileName = OutputPedAutoCorrPoolFileName + args.side
    OutputPedAutoCorrRootFileName = OutputPedAutoCorrRootFileName + ".root"
    OutputPedAutoCorrPoolFileName = OutputPedAutoCorrPoolFileName + ".pool.root"
 
-   ConfigFlags.LArCalib.Output.ROOTFile = args.outrdir + "/" + OutputPedAutoCorrRootFileName
-   ConfigFlags.LArCalib.Output.POOLFile = args.outpdir + "/" + OutputPedAutoCorrPoolFileName
-   ConfigFlags.IOVDb.DBConnection="sqlite://;schema="+args.outpdir + "/" + args.outsql +";dbname=CONDBR2"
+   flags.LArCalib.Output.ROOTFile = args.outrdir + "/" + OutputPedAutoCorrRootFileName
+   flags.LArCalib.Output.POOLFile = args.outpdir + "/" + OutputPedAutoCorrPoolFileName
+   flags.IOVDb.DBConnection="sqlite://;schema="+args.outpdir + "/" + args.outsql +";dbname=CONDBR2"
 
    #The global tag we are working with
-   ConfigFlags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
+   flags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
    
    #BadChannels sqlite file to be created 
-   ConfigFlags.LArCalib.BadChannelDB = args.outpdir + "/" + args.badsql
+   flags.LArCalib.BadChannelDB = args.outpdir + "/" + args.badsql
 
    #Other potentially useful flags-settings:
    
    #Define the global output Level:
    from AthenaCommon.Constants import INFO 
-   ConfigFlags.Exec.OutputLevel = INFO
+   flags.Exec.OutputLevel = INFO
    
-   ConfigFlags.lock()
+   flags.lock()
    
    # create bad chan sqlite file
-   if not ConfigFlags.LArCalib.isSC:
-      cmdline = (['AtlCoolCopy', 'COOLOFL_LAR/CONDBR2', 'sqlite://;schema='+ConfigFlags.LArCalib.BadChannelDB+';dbname=CONDBR2', '-f', '/LAR/BadChannelsOfl/BadChannels',  '-f', '/LAR/BadChannelsOfl/MissingFEBs', '-t', ConfigFlags.IOVDb.GlobalTag, '-c', '-a',  '-hitag'])
+   if not flags.LArCalib.isSC:
+      cmdline = (['AtlCoolCopy', 'COOLOFL_LAR/CONDBR2', 'sqlite://;schema='+flags.LArCalib.BadChannelDB+';dbname=CONDBR2', '-f', '/LAR/BadChannelsOfl/BadChannels',  '-f', '/LAR/BadChannelsOfl/MissingFEBs', '-t', flags.IOVDb.GlobalTag, '-c', '-a',  '-hitag'])
    else:   
-      cmdline = (['AtlCoolCopy', 'COOLOFL_LAR/CONDBR2', 'sqlite://;schema='+ConfigFlags.LArCalib.BadChannelDB+';dbname=CONDBR2', '-f', '/LAR/BadChannelsOfl/BadChannels',  '-of', '/LAR/BadChannelsOfl/BadChannelsSC', '-t', 'LARBadChannelsOflBadChannels-RUN2-empty', '-ot', 'LARBadChannelsOflBadChannelsSC-RUN2-UPD3-00', '-c', '-a',  '-hitag', '-ch', '0'])
-      cmdline1 = (['AtlCoolCopy', 'COOLOFL_LAR/CONDBR2', 'sqlite://;schema='+ConfigFlags.LArCalib.BadChannelDB+';dbname=CONDBR2', '-f', '/LAR/BadChannelsOfl/MissingFEBs', '-of', '/LAR/BadChannelsOfl/MissingFEBsSC', '-t', ConfigFlags.IOVDb.GlobalTag, '-ot', 'LARBadChannelsOflMissingFEBsSC-RUN2-UPD3-01', '-a',  '-hitag'])
+      cmdline = (['AtlCoolCopy', 'COOLOFL_LAR/CONDBR2', 'sqlite://;schema='+flags.LArCalib.BadChannelDB+';dbname=CONDBR2', '-f', '/LAR/BadChannelsOfl/BadChannels',  '-of', '/LAR/BadChannelsOfl/BadChannelsSC', '-t', 'LARBadChannelsOflBadChannels-RUN2-empty', '-ot', 'LARBadChannelsOflBadChannelsSC-RUN2-UPD3-00', '-c', '-a',  '-hitag', '-ch', '0'])
+      cmdline1 = (['AtlCoolCopy', 'COOLOFL_LAR/CONDBR2', 'sqlite://;schema='+flags.LArCalib.BadChannelDB+';dbname=CONDBR2', '-f', '/LAR/BadChannelsOfl/MissingFEBs', '-of', '/LAR/BadChannelsOfl/MissingFEBsSC', '-t', flags.IOVDb.GlobalTag, '-ot', 'LARBadChannelsOflMissingFEBsSC-RUN2-UPD3-01', '-a',  '-hitag'])
 
    try:
       cp = subprocess.run(cmdline, check=True, capture_output=True )
@@ -157,16 +156,16 @@ if __name__=='__main__':
       log.error('Could not create BadChan sqlite file !!!!')
       sys.exit(-1)
  
-   if ConfigFlags.LArCalib.isSC:
+   if flags.LArCalib.isSC:
       try:
          cp = subprocess.run(cmdline1, check=True, capture_output=True )
       except Exception as e:
          log.error('Could not create BadChan sqlite file !!!!')
          sys.exit(-1)
  
-   cfg=MainServicesCfg(ConfigFlags)
+   cfg=MainServicesCfg(flags)
    
-   cfg.merge(LArPedestalAutoCorrCfg(ConfigFlags))
+   cfg.merge(LArPedestalAutoCorrCfg(flags))
 
    cfg.getEventAlgo("OutputConditionsAlg").Run1= IOVBegin
    if 'IOVEnd' in dir() and IOVEnd>0:
@@ -177,7 +176,7 @@ if __name__=='__main__':
    cfg.run() 
 
    #build tag hierarchy in output sqlite file
-   cmdline = (['/afs/cern.ch/user/l/larcalib/LArDBTools/python/BuildTagHierarchy.py',args.outpdir + "/" + args.outsql , ConfigFlags.IOVDb.GlobalTag])
+   cmdline = (['/afs/cern.ch/user/l/larcalib/LArDBTools/python/BuildTagHierarchy.py',args.outpdir + "/" + args.outsql , flags.IOVDb.GlobalTag])
    log.debug(cmdline)
    try:
       subprocess.run(cmdline, check=True)

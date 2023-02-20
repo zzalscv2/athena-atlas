@@ -70,6 +70,7 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
 
     rootfile=flags.LArCalib.Output.ROOTFile
     if rootfile != "":
+        bcKey = "LArBadChannelSC" if flags.LArCalib.isSC else "LArBadChannel"     
         if nColl > 0:
            muSuffix="_mu"
         else:   
@@ -79,6 +80,7 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
         OFC2Ntup.NtupleName   = "OFC"+keySuffix+muSuffix
         OFC2Ntup.AddFEBTempInfo   = False   
         OFC2Ntup.isSC = flags.LArCalib.isSC
+        OFC2Ntup.BadChanKey = bcKey
         result.addEventAlgo(OFC2Ntup)
 
         Shape2Ntup=CompFactory.LArShape2Ntuple("LArShape2Ntuple"+keySuffix)
@@ -86,6 +88,7 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
         Shape2Ntup.NtupleName="SHAPE"+keySuffix
         Shape2Ntup.AddFEBTempInfo   = False
         Shape2Ntup.isSC = flags.LArCalib.isSC
+        Shape2Ntup.BadChanKey = bcKey
         result.addEventAlgo(Shape2Ntup)
 
     
@@ -99,7 +102,7 @@ def LArOFPhasePickerCfg(flags):
 
     result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix="", nColl=0))
     if flags.LArCalib.OFC.Ncoll > 0:
-       result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix="", nColl=flags.LArCalib.OFC.Ncoll))
+       result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix="mu", nColl=flags.LArCalib.OFC.Ncoll))
     
 
     #RegistrationSvc    

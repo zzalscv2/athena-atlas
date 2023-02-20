@@ -13,25 +13,33 @@ def LArPileUpAutoCorrCfg(flags):
     from IOVDbSvc.IOVDbSvcConfig import addFolders
 
     #load fsampl, MinBias Average and PulseShape 32 samples from OFLP200
-    result.merge(addFolders(flags,"/LAR/ElecCalibMC/Shape",detDb="LAR_OFL", db="OFLP200",tag="LARElecCalibMCShapeLArPileupShape-RUN2-2018",className="LArShape32MC"))
-    result.merge(addFolders(flags,"/LAR/ElecCalibMC/fSampl",detDb="LAR_OFL", db="OFLP200",tag="LARElecCalibMCfSampl-G4101-20371-FTFP_BERT_BIRK_v2",className="LArfSamplMC"))
-    result.merge(addFolders(flags,"/LAR/ElecCalibMC/MinBias",detDb="LAR_OFL", db="OFLP200",tag="LARElecCalibMCMinBias-mc16-Epos-A3-s3687",className="LArMinBiasMC"))
+    if flags.LArCalib.isSC:
+       from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBMCSCCfg
+       result.merge(LArElecCalibDBMCSCCfg(flags,["fSamplSC","ShapeSC","MinBiasSC"]))
+    else:
+       result.merge(addFolders(flags,"/LAR/ElecCalibMC/Shape",detDb="LAR_OFL", db="OFLP200",tag="LARElecCalibMCShapeLArPileupShape-RUN2-2018",className="LArShape32MC"))
+       result.merge(addFolders(flags,"/LAR/ElecCalibMC/fSampl",detDb="LAR_OFL", db="OFLP200",tag="LARElecCalibMCfSampl-G4101-20371-FTFP_BERT_BIRK_v2",className="LArfSamplMC"))
+       result.merge(addFolders(flags,"/LAR/ElecCalibMC/MinBias",detDb="LAR_OFL", db="OFLP200",tag="LARElecCalibMCMinBias-mc16-Epos-A3-s3687",className="LArMinBiasMC"))
 
-    result.addCondAlgo(CompFactory.LArMCSymCondAlg())
+    if not flags.LArCalib.isSC:
+       result.addCondAlgo(CompFactory.LArMCSymCondAlg())
 
-    LArShapeSymAlg =  CompFactory.getComp("LArSymConditionsAlg<LArShape32MC, LArShape32Sym>")
-    result.addCondAlgo(LArShapeSymAlg(ReadKey="LArShape",WriteKey="LArShapeSym"))
+       LArShapeSymAlg =  CompFactory.getComp("LArSymConditionsAlg<LArShape32MC, LArShape32Sym>")
+       result.addCondAlgo(LArShapeSymAlg(ReadKey="LArShape",WriteKey="LArShapeSym"))
 
-    LArfSamplSymAlg =  CompFactory.getComp("LArSymConditionsAlg<LArfSamplMC, LArfSamplSym>")
-    result.addCondAlgo(LArfSamplSymAlg(ReadKey="LArfSampl", WriteKey="LArfSamplSym"))
+       LArfSamplSymAlg =  CompFactory.getComp("LArSymConditionsAlg<LArfSamplMC, LArfSamplSym>")
+       result.addCondAlgo(LArfSamplSymAlg(ReadKey="LArfSampl", WriteKey="LArfSamplSym"))
 
-    LArMinBiasSymAlg =  CompFactory.getComp("LArSymConditionsAlg<LArMinBiasMC, LArMinBiasSym>")    
-    result.addCondAlgo(LArMinBiasSymAlg(ReadKey="LArMinBias",WriteKey="LArMinBiasSym"))
+       LArMinBiasSymAlg =  CompFactory.getComp("LArSymConditionsAlg<LArMinBiasMC, LArMinBiasSym>")    
+       result.addCondAlgo(LArMinBiasSymAlg(ReadKey="LArMinBias",WriteKey="LArMinBiasSym"))
 
     from LArCalibProcessing.utils import FolderTagResolver
     FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
     rs=FolderTagResolver()
     AutoCorrTag=rs.getFolderTag(flags.LArCalib.AutoCorr.Folder)
+    PedestalTag=rs.getFolderTag(flags.LArCalib.Pedestal.Folder)
+    RampTag=rs.getFolderTag(flags.LArCalib.Ramp.Folder)
+    MpMcTag=rs.getFolderTag(flags.LArCalib.MPhysOverMCal.Folder)
     PhysAutoCorrTag= rs.getFolderTag(flags.LArCalib.PhysAutoCorr.Folder)
     nColl=flags.LArCalib.OFC.Ncoll
     if (nColl>0):
@@ -44,13 +52,30 @@ def LArPileUpAutoCorrCfg(flags):
 
     result.merge(addFolders(flags,flags.LArCalib.AutoCorr.Folder,detDb=flags.LArCalib.Input.Database, tag=AutoCorrTag, modifiers=chanSelStr(flags), 
                             className="LArAutoCorrComplete"))
+    result.merge(addFolders(flags,flags.LArCalib.Pedestal.Folder,detDb=flags.LArCalib.Input.Database, tag=PedestalTag, modifiers=chanSelStr(flags), 
+                            className="LArPedestalComplete"))
+    result.merge(addFolders(flags,flags.LArCalib.Ramp.Folder,detDb=flags.LArCalib.Input.Database, tag=RampTag, modifiers=chanSelStr(flags), 
+                            className="LArRampComplete"))
+    result.merge(addFolders(flags,flags.LArCalib.MPhysOverMCal.Folder,detDb=flags.LArCalib.Input.Database, tag=MpMcTag, modifiers=chanSelStr(flags), 
+                            className="LArMphysOverMcalComplete"))
 
     #Need ADC2MeV values for AutoCorrCondAlg ... 
     #use current production values as input conditions
-    from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDbCfg
-    requiredConditions=["Ramp","DAC2uA","uA2MeV","MphysOverMcal","HVScaleCorr","Pedestal"]
-    result.merge(LArElecCalibDbCfg(flags,requiredConditions))
-    result.addCondAlgo(CompFactory.LArADC2MeVCondAlg(UseFEBGainTresholds=False))
+    requiredConditions=["DAC2uA","uA2MeV","HVScaleCorr"]
+    if flags.LArCalib.isSC:
+       from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
+       result.merge(LArElecCalibDBSCCfg(flags,requiredConditions))
+       mapKey="LArOnOffIdMapSC"
+       bcKey = "LArBadChannelSC"
+    else:
+       from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDbCfg
+       #requiredConditions=["Ramp","DAC2uA","uA2MeV","MphysOverMcal","HVScaleCorr","Pedestal"]
+       result.merge(LArElecCalibDbCfg(flags,requiredConditions))
+       mapKey="LArOnOffIdMap"
+       bcKey = "LArBadChannel"
+
+    result.addCondAlgo(CompFactory.LArADC2MeVCondAlg(UseFEBGainTresholds=False,LArOnOffIdMappingKey=mapKey))
+
     theLArAutoCorrTotalCondAlg=CompFactory.LArAutoCorrTotalCondAlg()
     theLArAutoCorrTotalCondAlg.Nsamples=flags.LArCalib.OFC.Nsamples  
     from AthenaCommon.SystemOfUnits import ns
@@ -59,16 +84,23 @@ def LArPileUpAutoCorrCfg(flags):
     theLArAutoCorrTotalCondAlg.isMC=False
     theLArAutoCorrTotalCondAlg.LArAutoCorrObjKey="LArAutoCorr"
     theLArAutoCorrTotalCondAlg.LArAutoCorrTotalObjKey="LArPhysAutoCorr"  
+    theLArAutoCorrTotalCondAlg.LArOnOffIdMappingObjKey=mapKey
+    if flags.LArCalib.isSC:
+       theLArAutoCorrTotalCondAlg.LArShapeObjKey = "LArShapeSC"
+       theLArAutoCorrTotalCondAlg.LArfSamplObjKey = "LArfSamplSC"
+       theLArAutoCorrTotalCondAlg.LArMinBiasObjKey = "LArMinBiasSC"
+
     result.addCondAlgo(theLArAutoCorrTotalCondAlg)
     
     result.addEventAlgo(CompFactory.LArAutoCorrAlgToDB(GroupingType=flags.LArCalib.GroupingType,
-                                                       NMinbias=nColl))
+                                                       NMinbias=nColl,isSC=flags.LArCalib.isSC))
 
     
     #Ntuple writing
     rootfile=flags.LArCalib.Output.ROOTFile
     if rootfile != "":
-        result.addEventAlgo(CompFactory.LArAutoCorr2Ntuple(ContainerKey="LArPhysAutoCorr",OffId=True))
+        result.addEventAlgo(CompFactory.LArAutoCorr2Ntuple(ContainerKey="LArPhysAutoCorr",OffId=True,isSC=flags.LArCalib.isSC,
+                                                           BadChanKey=bcKey))
         import os
         if os.path.exists(rootfile):
             os.remove(rootfile)

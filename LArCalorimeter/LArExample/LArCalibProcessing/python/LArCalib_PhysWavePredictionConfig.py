@@ -19,6 +19,8 @@ def LArPhysWavePredictionCfg(flags):
     PhysWaveTag=rs.getFolderTag(flags.LArCalib.PhysWave.Folder)
     del rs #Close database
 
+    bcKey = "LArBadChannelSC" if flags.LArCalib.isSC else "LArBadChannel"     
+
     #Lots of special settings for HEC
     isHEC= (flags.LArCalib.Input.SubDet == "HEC")
 
@@ -68,6 +70,7 @@ def LArPhysWavePredictionCfg(flags):
     LArPhysWavePredictor.DumpMphysMcali           = False # set to True to dump on a ASCII file
     LArPhysWavePredictor.KeyPhys                  = "LArPhysWave"
     LArPhysWavePredictor.isHEC                    = isHEC
+    LArPhysWavePredictor.BadChanKey               = bcKey
 
 
     result.addEventAlgo(LArPhysWavePredictor)
@@ -97,12 +100,14 @@ def LArPhysWavePredictionCfg(flags):
       LArPhysWaves2Ntuple.AddFEBTempInfo   = False  
       LArPhysWaves2Ntuple.KeyList      = [ "LArPhysWave"  ]
       LArPhysWaves2Ntuple.isSC = flags.LArCalib.isSC
+      LArPhysWaves2Ntuple.BadChanKey = bcKey
       result.addEventAlgo(LArPhysWaves2Ntuple)
 
       LArMphysOverMcal2Ntuple                = CompFactory.LArMphysOverMcal2Ntuple( "LArMphysOverMcal2Ntuple" )
       LArMphysOverMcal2Ntuple.ContainerKey   = "LArMphysOverMcal"
       LArMphysOverMcal2Ntuple.AddFEBTempInfo   = False
       LArMphysOverMcal2Ntuple.isSC = flags.LArCalib.isSC
+      LArMphysOverMcal2Ntuple.BadChanKey = bcKey
       result.addEventAlgo(LArMphysOverMcal2Ntuple)
 
       import os

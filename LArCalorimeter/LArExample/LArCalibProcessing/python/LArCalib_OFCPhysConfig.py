@@ -45,11 +45,13 @@ def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
 
     rootfile=flags.LArCalib.Output.ROOTFile
     if rootfile != "":
+        bcKey = "LArBadChannelSC" if flags.LArCalib.isSC else "LArBadChannel"     
         OFC2Ntup=CompFactory.LArOFC2Ntuple("LArOFC2Ntuple_"+postfix)
         OFC2Ntup.ContainerKey = "LArOFC_"+postfix
         OFC2Ntup.NtupleName   = "OFC_"+postfix
         OFC2Ntup.AddFEBTempInfo   = False   
         OFC2Ntup.isSC = flags.LArCalib.isSC
+        OFC2Ntup.BadChanKey = bcKey
         result.addEventAlgo(OFC2Ntup)
 
         Shape2Ntup=CompFactory.LArShape2Ntuple("LArShape2Ntuple_"+postfix)
@@ -57,8 +59,8 @@ def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
         Shape2Ntup.NtupleName="SHAPE_"+postfix
         Shape2Ntup.AddFEBTempInfo   = False
         Shape2Ntup.isSC = flags.LArCalib.isSC
+        Shape2Ntup.BadChanKey = bcKey
         result.addEventAlgo(Shape2Ntup)
-
 
     rs=FolderTagResolver()
     if nColl > 0:

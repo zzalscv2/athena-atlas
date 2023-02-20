@@ -51,70 +51,71 @@ if __name__=='__main__':
        log.debug(value)
 
   #Import the flag-container that is the arguemnt to the configuration methods
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
+  flags=initConfigFlags()
   #add SC dumping specific flags
   from LArCafJobs.LArSCDumperFlags import addSCDumpFlags
-  addSCDumpFlags(ConfigFlags)
+  addSCDumpFlags(flags)
 
   if len(args.infile) > 0:
-     ConfigFlags.Input.Files = [args.infile]
+     flags.Input.Files = [args.infile]
   elif len(args.inppatt) > 0:
      from LArCalibProcessing.GetInputFiles import GetInputFilesFromPattern
-     ConfigFlags.Input.Files = GetInputFilesFromPattern(args.indir,args.inppatt)
+     flags.Input.Files = GetInputFilesFromPattern(args.indir,args.inppatt)
   else:   
      from LArCalibProcessing.GetInputFiles import GetInputFilesFromPrefix
-     ConfigFlags.Input.Files = GetInputFilesFromPrefix(args.indir,args.inpref)
+     flags.Input.Files = GetInputFilesFromPrefix(args.indir,args.inpref)
 
   if args.run != 0:
-     ConfigFlags.Input.RunNumber = [args.run]
+     flags.Input.RunNumber = [args.run]
 
   # first autoconfig
   from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
   try:
-     runinfo=getLArDTInfoForRun(ConfigFlags.Input.RunNumber[0], connstring="COOLONL_LAR/CONDBR2")
+     runinfo=getLArDTInfoForRun(flags.Input.RunNumber[0], connstring="COOLONL_LAR/CONDBR2")
   except Exception:
      log.warning("Could not get DT run info, using defaults !")
-     ConfigFlags.LArSCDump.doEt=True
+     flags.LArSCDump.doEt=True
      if args.nsamp > 0:
-        ConfigFlags.LArSCDump.nSamples=args.nsamp
+        flags.LArSCDump.nSamples=args.nsamp
      else:   
-        ConfigFlags.LArSCDump.nSamples=5
-     ConfigFlags.LArSCDump.nEt=1
-     ConfigFlags.LArSCDump.digitsKey="SC"
+        flags.LArSCDump.nSamples=5
+     flags.LArSCDump.nEt=1
+     flags.LArSCDump.digitsKey="SC"
      CKeys=["SC_ET"]
   else:
      CKeys=[]
-     ConfigFlags.LArSCDump.digitsKey=""
+     flags.LArSCDump.digitsKey=""
      for i in range(0,len(runinfo.streamTypes())):
         if args.EtId and runinfo.streamTypes()[i] ==  "SelectedEnergy":
               CKeys += ["SC_ET_ID"]
-              ConfigFlags.LArSCDump.doEt=True
-              ConfigFlags.LArSCDump.nEt=runinfo.streamLengths()[i]
+              flags.LArSCDump.doEt=True
+              flags.LArSCDump.nEt=runinfo.streamLengths()[i]
         elif args.Et and runinfo.streamTypes()[i] ==  "Energy":
               CKeys += ["SC_ET"]
-              ConfigFlags.LArSCDump.doEt=True
-              ConfigFlags.LArSCDump.nEt=runinfo.streamLengths()[i]
+              flags.LArSCDump.doEt=True
+              flags.LArSCDump.nEt=runinfo.streamLengths()[i]
         elif args.samples and runinfo.streamTypes()[i] ==  "RawADC":
-              ConfigFlags.LArSCDump.digitsKey="SC"
+              flags.LArSCDump.digitsKey="SC"
               if args.nsamp > 0:
-                 ConfigFlags.LArSCDump.nSamples=args.nsamp
+                 flags.LArSCDump.nSamples=args.nsamp
               else:
-                 ConfigFlags.LArSCDump.nSamples=runinfo.streamLengths()[i]
+                 flags.LArSCDump.nSamples=runinfo.streamLengths()[i]
         elif args.samplesBas and runinfo.streamTypes()[i] ==  "ADC":
               CKeys += ["SC_ADC_BAS"]
               if args.nsamp > 0:
-                 ConfigFlags.LArSCDump.nSamples=args.nsamp
+                 flags.LArSCDump.nSamples=args.nsamp
               else:
-                 ConfigFlags.LArSCDump.nSamples=runinfo.streamLengths()[i]
-     if  args.nsamp > 0 and args.nsamp < ConfigFlags.LArSCDump.nSamples:
-        ConfigFlags.LArSCDump.nSamples=args.nsamp
+                 flags.LArSCDump.nSamples=runinfo.streamLengths()[i]
+     if  args.nsamp > 0 and args.nsamp < flags.LArSCDump.nSamples:
+        flags.LArSCDump.nSamples=args.nsamp
   
   log.info("Autoconfigured: ")
-  log.info("nSamples: %d nEt: %d digitsKey %s",ConfigFlags.LArSCDump.nSamples, ConfigFlags.LArSCDump.nEt, ConfigFlags.LArSCDump.digitsKey)
+  log.info("nSamples: %d nEt: %d digitsKey %s",flags.LArSCDump.nSamples, flags.LArSCDump.nEt, flags.LArSCDump.digitsKey)
   log.info(CKeys)
 
   # now set flags according parsed options
-  #if args.samples and not ("SC" in CKeys or ConfigFlags.LArSCDump.digitsKey=="SC"):
+  #if args.samples and not ("SC" in CKeys or flags.LArSCDump.digitsKey=="SC"):
   #   log.warning("Samples asked, but they are not in RunLogger, no output !!!!")
 
   if args.samplesBas and "SC_ADC_BAS" not in CKeys:
@@ -127,48 +128,47 @@ if __name__=='__main__':
      CKeys += ["SC_LATOME_HEADER"]
 
   if args.rod:
-     ConfigFlags.LArSCDump.doRawChan=True  
+     flags.LArSCDump.doRawChan=True  
      CKeys += ["LArRawChannels"]
      log.info("Adding ROD energies")
 
   # now construct the job
-  ConfigFlags.LAr.doAlign=False
+  flags.LAr.doAlign=False
 
   if args.evtree: # should include trigger info
-     ConfigFlags.Trigger.triggerConfig = 'DB'
-     ConfigFlags.Trigger.L1.doCTP = True
-     ConfigFlags.Trigger.L1.doMuon = False
-     ConfigFlags.Trigger.L1.doCalo = False
-     ConfigFlags.Trigger.L1.doTopo = False
+     flags.Trigger.triggerConfig = 'DB'
+     flags.Trigger.L1.doCTP = True
+     flags.Trigger.L1.doMuon = False
+     flags.Trigger.L1.doCalo = False
+     flags.Trigger.L1.doTopo = False
 
-     ConfigFlags.Trigger.enableL1CaloLegacy = True
-     ConfigFlags.Trigger.enableL1CaloPhase1 = True
+     flags.Trigger.enableL1CaloLegacy = True
+     flags.Trigger.enableL1CaloPhase1 = True
 
-  ConfigFlags.LArSCDump.fillNoisyRO=args.noisyRO
+  flags.LArSCDump.fillNoisyRO=args.noisyRO
 
-  ConfigFlags.lock()
+  flags.lock()
 
   #Import the MainServices (boilerplate)
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
   from LArGeoAlgsNV.LArGMConfig import LArGMCfg
 
-  acc = MainServicesCfg(ConfigFlags)
-  acc.merge(LArGMCfg(ConfigFlags))
+  acc = MainServicesCfg(flags)
+  acc.merge(LArGMCfg(flags))
 
   if args.evtree: # should include trigger info
      from LArCafJobs.LArSCDumperSkeleton import L1CaloMenuCfg
-     acc.merge(L1CaloMenuCfg(ConfigFlags))
+     acc.merge(L1CaloMenuCfg(flags))
      from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-     tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(ConfigFlags))
+     tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
   else: 
      tdt = None
 
 
   if args.bc:
-     # FIXME should be SC version
      from LArBadChannelTool.LArBadChannelConfig import  LArBadFebCfg, LArBadChannelCfg
-     acc.merge(LArBadChannelCfg(ConfigFlags))
-     acc.merge(LArBadFebCfg(ConfigFlags))
+     acc.merge(LArBadChannelCfg(flags,None,True))
+     acc.merge(LArBadFebCfg(flags))
 
   if args.geom:
       log.warning("Adding real geometry is not working yet")
@@ -179,11 +179,11 @@ if __name__=='__main__':
       #AthReadAlg_ExtraInputs.append(('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager')) 
 
   from LArCalibProcessing.LArSC2NtupleConfig import LArSC2NtupleCfg
-  acc.merge(LArSC2NtupleCfg(ConfigFlags, AddBadChannelInfo=args.bc, AddFEBTempInfo=False, isSC=True, isFlat=False, 
+  acc.merge(LArSC2NtupleCfg(flags, AddBadChannelInfo=args.bc, AddFEBTempInfo=False, isSC=True, isFlat=False, 
                             OffId=args.offline, AddHash=args.ahash, AddCalib=args.calib, RealGeometry=args.geom, ExpandId=args.expid, # from LArCond2NtupleBase 
-                            NSamples=ConfigFlags.LArSCDump.nSamples, FTlist={}, FillBCID=args.bcid, ContainerKey=ConfigFlags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
+                            NSamples=flags.LArSCDump.nSamples, FTlist={}, FillBCID=args.bcid, ContainerKey=flags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
                             SCContainerKeys=CKeys, OverwriteEventNumber = args.overEvN,                        # from LArSC2Ntuple
-                            FillRODEnergy = ConfigFlags.LArSCDump.doRawChan,
+                            FillRODEnergy = flags.LArSCDump.doRawChan,
                             FillLB=args.evtree, FillTriggerType = args.evtree,
                             TrigNames=["L1_EM3","L1_EM7","L1_EM15","L1_EM22VHI","L1_eEM5","L1_eEM15","L1_eEM22M"],
                             TrigDecisionTool=tdt,
@@ -197,7 +197,7 @@ if __name__=='__main__':
 
   # some logging
   log.info("Input files to be processed:")
-  for f in ConfigFlags.Input.Files:
+  for f in flags.Input.Files:
       log.info(f)
   log.info("Output file: ")
   log.info(args.outfile)

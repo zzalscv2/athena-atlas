@@ -39,8 +39,7 @@ def LArPedestalAutoCorrCfg(flags):
        digKey="SC"
        theLArLATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder",
                                                            IgnoreBarrelChannels = flags.LArCalib.SCIgnoreBarrelChannels,
-                                                           IgnoreEndcapChannels = flags.LArCalib.SCIgnoreEndcapChannels,
-                                                           DumpFile = '',RawDataFile = '')
+                                                           IgnoreEndcapChannels = flags.LArCalib.SCIgnoreEndcapChannels)
 
        if flags.LArCalib.Input.isRawData:
           result.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(adcCollKey = digKey, adcBasCollKey = "", etCollKey = "",
