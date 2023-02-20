@@ -48,6 +48,11 @@ def LArPedestalAutoCorrCfg(flags):
                                                              LArAccuDigitContainerName = "", NTriggersPerStep = 100,
                                                              isSC = flags.LArCalib.isSC, DropPercentTrig = 20))
        else:   
+          # this needs also legacy  maps
+          from LArCabling.LArCablingConfig import LArCalibIdMappingCfg,LArOnOffIdMappingCfg
+          result.merge(LArOnOffIdMappingCfg(flags))
+          result.merge(LArCalibIdMappingCfg(flags))
+
           result.addEventAlgo(CompFactory.LArRawSCCalibDataReadingAlg(LArSCAccDigitKey = digKey, LATOMEDecoder = theLArLATOMEDecoder))
 
     LArPedACBuilder=CompFactory.LArPedestalAutoCorrBuilder()

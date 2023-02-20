@@ -34,6 +34,8 @@ class LArRawSCCalibDataReadingAlg : public  AthReentrantAlgorithm {
  private:
   // Mapping input
   SG::ReadCondHandleKey<LArLATOMEMapping> m_mapKey {this,"MappingKey","LArLATOMEMap"};
+  SG::ReadCondHandleKey<LArCalibLineMapping> m_calibMapKey{this,"CalibCablingKey","LArCalibLineMap","SG Key of LArCalibLineMapping object"};
+  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this, "OnOffMap", "LArOnOffIdMap", "SG key for mapping object"};
 
   //Event output:
   SG::WriteHandleKey<LArAccumulatedDigitContainer> m_accDigitKey{this,"LArSCAccDigitKey",""};
