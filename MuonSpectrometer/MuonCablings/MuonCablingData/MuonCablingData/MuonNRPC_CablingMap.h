@@ -21,6 +21,9 @@ public:
     /** typedef to implement the csm mapping to ROB */
     /* mapping from hashid to ROB identifier as Subdetector+Rodid */
     using CablingData = NrpcCablingData;
+    using ChamberToROBMap = std::map<IdentifierHash, uint32_t>;
+    using ROBToChamberMap = std::map<uint32_t, std::vector<IdentifierHash>>;
+    using ListOfROB = std::vector<uint32_t>;
     MuonNRPC_CablingMap();
     ~MuonNRPC_CablingMap();
 
@@ -39,13 +42,24 @@ public:
     bool insertChannels(const CablingData& cabling_data, MsgStream& log);
     /// Performs consistency checks for the cabling data (I.e. looking for 0 strips and overlaps)
     bool finalize(MsgStream& log);
-
+    
+    /** return the ROD id of a given chamber, given the hash id */
+    uint32_t getROBId(const IdentifierHash& stationCode, MsgStream& log) const;
+    /** get the robs corresponding to a vector of hashIds, copied from Svc before the readCdo migration */
+    ListOfROB getROBId(const std::vector<IdentifierHash>& rpcHashVector, MsgStream& log) const;
+     /** return a HashId list for a  given ROD */
+    const std::vector<IdentifierHash>& getChamberHashVec(const uint32_t ROBI, MsgStream& log) const;
 private:
 
     using OnlToOfflMap = std::map<NrpcCablingOnData, NrpcCablingOffData>;
     using OfflToOnlMap = std::map<NrpcCablingOffData, std::set<NrpcCablingOnData>>;
-    OnlToOfflMap m_onToOffline;
-    OfflToOnlMap m_offToOnline;
+    /// Map to cache the online -> offline conversions
+    OnlToOfflMap m_onToOffline{};
+    /// Map to cache the offline -> online conversions
+    OfflToOnlMap m_offToOnline{};
+
+    ChamberToROBMap m_chambROBs{};
+    ROBToChamberMap m_ROBHashes{};
 
     bool stripReadByCard(const NrpcCablingOnData& card, uint16_t strip) const;
     

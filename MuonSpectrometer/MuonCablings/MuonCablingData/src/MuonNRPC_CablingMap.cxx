@@ -26,12 +26,24 @@ MuonNRPC_CablingMap::~MuonNRPC_CablingMap() = default;
 
 bool MuonNRPC_CablingMap::convert(const CablingData& cabling_data, Identifier& id, bool check_valid) const {
     bool valid{!check_valid};
-    id = check_valid ? m_rpcIdHelper->channelID(cabling_data.stationIndex, cabling_data.eta, cabling_data.phi, cabling_data.doubletR,
-                                                cabling_data.doubletZ, cabling_data.doubletPhi, cabling_data.gasGap, cabling_data.measPhi,
-						cabling_data.strip, valid)
-                     : m_rpcIdHelper->channelID(cabling_data.stationIndex, cabling_data.eta, cabling_data.phi, cabling_data.doubletR,
-                                                cabling_data.doubletZ, cabling_data.doubletPhi, cabling_data.gasGap, cabling_data.measPhi,
-						cabling_data.strip);
+    id = check_valid ? m_rpcIdHelper->channelID(cabling_data.stationIndex, 
+                                                cabling_data.eta, 
+                                                cabling_data.phi, 
+                                                cabling_data.doubletR,
+                                                cabling_data.doubletZ, 
+                                                cabling_data.doubletPhi, 
+                                                cabling_data.gasGap, 
+                                                cabling_data.measPhi,
+						                        cabling_data.strip, valid)
+                     : m_rpcIdHelper->channelID(cabling_data.stationIndex, 
+                                                cabling_data.eta, 
+                                                cabling_data.phi, 
+                                                cabling_data.doubletR,
+                                                cabling_data.doubletZ, 
+                                                cabling_data.doubletPhi, 
+                                                cabling_data.gasGap, 
+                                                cabling_data.measPhi,
+						                        cabling_data.strip);
     return valid;
 }
 
@@ -128,6 +140,7 @@ bool MuonNRPC_CablingMap::finalize(MsgStream& log) {
         log<<MSG::ERROR<<"finalize() -- No data has been loaded "<<endmsg;
         return false;
     }
+    /// First check that the map does not have any overlapping channels
     for (const auto& [chambChannel, cards] : m_offToOnline){
          if (log.level() <= MSG::VERBOSE) {
             log<<MSG::VERBOSE<<"Check mapping consistency of "<<chambChannel<<endmsg;
@@ -149,7 +162,47 @@ bool MuonNRPC_CablingMap::finalize(MsgStream& log) {
                     <<" lastStrip: "<<static_cast<int>(card.lastStrip)<<" are read by another one"<<endmsg;
                 return false;
             }
-         }
+        }
     }
+    /// Generate the ROB maps
+    CablingData RobOffId{};
+    RobOffId.strip = 1;
+    for (const auto& [card, chamber]: m_onToOffline) {
+        static_cast<NrpcCablingOffData&>(RobOffId) = chamber;
+        Identifier chId{0};
+        if (!convert(RobOffId, chId, true)){
+            log<<MSG::ERROR<<"Could not construct an offline identifier from "<<chamber<<endmsg;
+            return false;
+        }
+        IdentifierHash hash{0};
+        if (m_rpcIdHelper->get_module_hash(chId,hash)) {
+            log<<MSG::ERROR<<" Failed to generate a hash for "<<chamber<<endmsg;
+            return false;
+        }
+        uint32_t hardId = (card.subDetector << 16) | card.tdcSector;
+        m_chambROBs[hash] = hardId;
+        std::vector<IdentifierHash> & robHashes = m_ROBHashes[hardId];
+        if (std::find(robHashes.begin(),robHashes.end(),hash) == robHashes.end()) robHashes.push_back(hash);
+    }    
     return true;
+}
+uint32_t MuonNRPC_CablingMap::getROBId(const IdentifierHash& stationCode, MsgStream& log) const {
+    ChamberToROBMap::const_iterator it = m_chambROBs.find(stationCode);
+    if (it != m_chambROBs.end()) { return it->second; }
+    log << MSG::WARNING << "Station code " << stationCode << " not found !" << endmsg;
+    return 0;
+}
+
+MuonNRPC_CablingMap::ListOfROB MuonNRPC_CablingMap::getROBId(const std::vector<IdentifierHash>& rpcHashVector, MsgStream& log) const {
+    ListOfROB to_ret{};
+    to_ret.reserve(rpcHashVector.size());
+    for (const IdentifierHash& hash : rpcHashVector) to_ret.push_back(getROBId(hash, log));
+    return to_ret;
+}
+const std::vector<IdentifierHash>& MuonNRPC_CablingMap::getChamberHashVec(const uint32_t ROBI, MsgStream& log) const {
+    ROBToChamberMap::const_iterator itr  = m_ROBHashes.find(ROBI);
+    if (itr != m_ROBHashes.end()) return itr->second;
+    log<< MSG::WARNING<<"ROB ID "<<ROBI<<" not found ! "<<endmsg;
+    static const std::vector<IdentifierHash> dummy;
+    return dummy;
 }
