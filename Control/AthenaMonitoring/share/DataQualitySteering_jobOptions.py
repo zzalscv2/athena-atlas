@@ -164,12 +164,7 @@ if DQMonFlags.doMonitoring():
       #--------------------#
 
       if DQMonFlags.doCTPMon():
-         try:
-            local_logger.info("CTPMonitoring: including (TrigT1CTMonitoring/TrigT1CTMonitoringJobOptions_forRecExCommission.py")
-            include("TrigT1CTMonitoring/TrigT1CTMonitoringJobOptions_forRecExCommission.py")
-         except Exception:
-            local_logger.info("CTPMonitoring: including (TrigT1CTMonitoring/TrigT1CTMonitoringJobOptions_forRecExCommission.py FAILED")
-            treatException("DataQualitySteering_jobOptions.py: exception when setting up central trigger monitoring")
+         local_logger.warning("The legacy Run-2 CTP monitoring is no longer supported")
 
       if DQMonFlags.doLVL1CaloMon():
          try:
