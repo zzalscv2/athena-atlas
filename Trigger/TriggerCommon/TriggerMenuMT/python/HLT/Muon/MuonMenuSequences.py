@@ -981,7 +981,7 @@ def muRoiClusterSequence(flags):
     from TrigLongLivedParticles.TrigLongLivedParticlesConfig import MuonClusterConfig
     from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConfig import MuonClusterHypoAlgConfig, TrigLongLivedParticlesHypoToolFromDict
 
-    muvtxMuonClusterSequence = parOR('muvtxMuonClusterSequence', [MuonClusterConfig('muvtxMuonCluster')])
+    muvtxMuonClusterSequence = parOR('muvtxMuonClusterSequence', [MuonClusterConfig(flags, 'muvtxMuonCluster')])
 
 
 
