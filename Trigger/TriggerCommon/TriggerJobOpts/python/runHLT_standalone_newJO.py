@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+ 
 #
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
@@ -58,19 +58,24 @@ flags.addFlag("Trigger.disabledSignatures",[])
 flags.addFlag("Trigger.selectChains",[])       
 flags.addFlag("Trigger.disableChains",[]) 
 
+flags.Trigger.enabledSignatures = ['Muon', 'Tau','MinBias','Bphysics','Egamma', 'Electron', 'Photon', 'MET', 'Jet']
+# missing: 'Bjet'
 
-flags.Trigger.enabledSignatures = ['Muon', 'Photon', 'Electron', 'MET', 'Jet']
-#flags.Trigger.selectChains =  ['HLT_mu4_L1MU3V','HLT_mu8_L1MU5VF','HLT_2mu6_L12MU5VF', 'HLT_mu24_mu6_L1MU14FCH','HLT_mu24_mu6_probe_L1MU14FCH'] #, 'HLT_mu4_mu6_L12MU3V']
-#flags.Trigger.disableChains=["HLT_2mu4_l2io_invmDimu_L1BPH-2M9-0DR15-2MU3VF", "HLT_2mu4_l2io_invmDimu_L1BPH-2M9-0DR15-2MU3V", "HLT_2mu6_l2io_invmDimu_L1BPH-2M9-2DR15-2MU5VF"]
-# exclude jets for now, since their MenuSeuqnece Structure needs more work to migrate
+# disable bBhv chains cause they cause terrible crash
+flags.Trigger.disableChains=[
+    "HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary", "HLT_2e5_lhvloose_bBeeM6000_L1BKeePrimary",
+    "HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled", "HLT_2e5_lhvloose_bBeeM6000_L1BKeePrescaled",
+    "HLT_e5_lhvloose_bBeeM6000_L1EM22VHI", "HLT_e5_lhvloose_bBeeM6000_L14J15",     
+    "HLT_e5_lhvloose_bBeeM6000_L1All"
+    ]
 
 #--------------#
 #Leave commented lines for tests, since this is under development
-#from AthenaCommon.Constants import DEBUG
-#flags.Exec.OutputLevel=DEBUG
 #flags.Trigger.triggerMenuModifier=[ 'emptyMenu','HLT_mu8_L1MU5VF']
-#flags.Trigger.selectChains = [ 'HLT_mu8_L1MU5VF']#'HLT_j0_perf_L1RD0_FILLED']#'HLT_mu26_ivarmedium_mu6_l2io_probe_L1MU14FCH'] #'HLT_mu0_muoncalib_L1MU14FCH', 'HLT_mu6_L1MU5VF','HLT_mu6_msonly_L1MU5VF'] #'HLT_mu0_muoncalib_L1MU14FCH',#HLT_mu6_L1MU5VF
+#flags.Trigger.selectChains =  ['HLT_mu4_L1MU3V','HLT_mu8_L1MU5VF','HLT_2mu6_L12MU5VF', 'HLT_mu24_mu6_L1MU14FCH','HLT_mu24_mu6_probe_L1MU14FCH'] #, 'HLT_mu4_mu6_L12MU3V']
 #--------------#
+
+
 
 flags.InDet.useSctDCS = False
 flags.InDet.usePixelDCS = False
@@ -146,6 +151,8 @@ if flags.Overlay.doTrackOverlay:
 
 if log.getEffectiveLevel() <= logging.DEBUG:
     acc.printConfig(withDetails=False, summariseProps=True, printDefaults=True)
+
+
 
 if flags.Common.isOnline:
   from TrigOnlineMonitor.TrigOnlineMonitorConfig import trigOpMonitorCfg
