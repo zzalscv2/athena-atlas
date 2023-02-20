@@ -72,7 +72,7 @@ StatusCode MuonRdoToMuonDigitTool::initialize() {
     ATH_CHECK(m_stgcRdoDecoderTool.retrieve(DisableTool{!m_decodesTgcRDO}));
     ATH_CHECK(m_mmRdoDecoderTool.retrieve(DisableTool{!m_decodeMmRDO}));
 
-    ATH_CHECK(detStore()->retrieve(m_MuonMgr));
+   ATH_CHECK(m_DetectorManagerKey.initialize());
    
 
     return StatusCode::SUCCESS;
@@ -700,6 +700,11 @@ StatusCode MuonRdoToMuonDigitTool::decodeNRpcRDO(const EventContext& ctx, RpcDig
     if (!cabling.isValid()) {
         ATH_MSG_FATAL("Failed to retrieve "<<m_nRpcCablingKey.fullKey());
         return StatusCode::FAILURE;
+    }
+    SG::ReadCondHandle<MuonGM::MuonDetectorManager> muonDetMgr{m_DetectorManagerKey,ctx};
+    if (!muonDetMgr.isValid()) {
+        ATH_MSG_FATAL("Failed to retrieve the readout geometry "<<muonDetMgr.fullKey());
+        return StatusCode::FAILURE;
     }    
     using CablingData = MuonNRPC_CablingMap::CablingData;
     const RpcIdHelper& id_helper = m_idHelperSvc->rpcIdHelper();
@@ -746,7 +751,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeNRpcRDO(const EventContext& ctx, RpcDig
         /// Need to add the correction
         const float digit_time = rdo->time();
         const float ToT = m_patch_for_rpc_time ? rdo->timeoverthr() 
-                                            + inverseSpeedOfLight * (m_MuonMgr->getRpcReadoutElement(chanId)->stripPos(chanId)).mag() : rdo->timeoverthr() ;
+                                            + inverseSpeedOfLight * (muonDetMgr->getRpcReadoutElement(chanId)->stripPos(chanId)).mag() : rdo->timeoverthr() ;
         
         std::unique_ptr<RpcDigit> digit = std::make_unique<RpcDigit>(chanId, digit_time, ToT);
         coll->push_back(std::move(digit));

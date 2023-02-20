@@ -76,6 +76,7 @@ def getMdtDigitToMdtRDO(name="MdtDigitToMdtRDO", **kwargs):
     return CfgMgr.MdtDigitToMdtRDO(name, **kwargs)
 
 def getRpcDigitToRpcRDO(name="RpcDigitToRpcRDO", **kwargs):
+    from MuonRecExample import MuonAlignConfig  # noqa: F401 (import side-effects)
     from Digitization.DigitizationFlags import digitizationFlags
     if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
         from OverlayCommonAlgs.OverlayFlags import overlayFlags
