@@ -1151,7 +1151,7 @@ DataVector<T, BASE>::insert(iterator position, value_type pElem)
   testInsert ("insert");
   iterator ret (this->m_pCont.insert(position.base(), pElem), this);
   this->shift (ret - this->begin(), 1);
-  this->moveAux (ret-this->begin(), pElem);
+  this->moveAux (ret-this->begin(), pElem, false, true);
   return ret;
 }
 
@@ -1181,7 +1181,7 @@ DataVector<T, BASE>::insert(iterator position,
   value_type ptr = pElem.release();
   iterator ret (this->m_pCont.insert(position.base(), ptr), this);
   this->shift (ret - this->begin(), 1);
-  this->moveAux (ret-this->begin(), ptr);
+  this->moveAux (ret-this->begin(), ptr, false, true);
   return ret;
 }
 
@@ -1248,7 +1248,7 @@ void DataVector<T, BASE>::insert(iterator position,
   this->m_pCont.insert(position.base(), first, last);
   size_t n = this->m_pCont.size() - old_sz;
   this->shift (idx, n);
-  this->moveAux (idx, first, last);
+  this->moveAux (idx, first, last, false, true);
 }
 
 
@@ -2944,7 +2944,7 @@ DATAVECTOR::insert(iterator position, value_type pElem)
   testInsert ("insert");
   iterator ret (m_pCont.insert(position.base(), pElem), this);
   this->shift (ret - this->begin(), 1);
-  this->moveAux (ret-this->begin(), pElem);
+  this->moveAux (ret-this->begin(), pElem, false, true);
   return ret;
 }
 
@@ -2974,7 +2974,7 @@ DATAVECTOR::insert(iterator position, std::unique_ptr<base_value_type> pElem)
   value_type ptr = pElem.release();
   iterator ret (m_pCont.insert(position.base(), ptr), this);
   this->shift (ret - this->begin(), 1);
-  this->moveAux (ret-this->begin(), ptr);
+  this->moveAux (ret-this->begin(), ptr, false, true);
   return ret;
 }
 
@@ -3033,7 +3033,7 @@ DATAVECTOR::insert (iterator position, InputIterator first, InputIterator last)
   m_pCont.insert(position.base(), first, last);
   size_t n = this->m_pCont.size() - old_sz;
   this->shift (idx, n);
-  this->moveAux (idx, first, last);
+  this->moveAux (idx, first, last, false, true);
 }
 
 
