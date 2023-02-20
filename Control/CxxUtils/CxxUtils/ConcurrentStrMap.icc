@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/ConcurrentStrMap.icc
@@ -521,7 +521,7 @@ T_CONCURRENTSTRMAP
 inline
 auto CONCURRENTSTRMAP::mappedAsMapped (val_t val) -> mapped_type
 {
-  return reinterpret_cast<mapped_type> (val);
+  return CxxUtils::detail::UIntConv<mapped_type>::uintToVal (val);
 }
 
 
@@ -533,7 +533,7 @@ T_CONCURRENTSTRMAP
 inline
 auto CONCURRENTSTRMAP::mappedAsVal (mapped_type val) -> val_t
 {
-  return reinterpret_cast<val_t> (val);
+  return CxxUtils::detail::UIntConv<mapped_type>::valToUInt (val);
 }
 
 
