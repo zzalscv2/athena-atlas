@@ -202,6 +202,8 @@ JetChainParts = {
        'preselcHT500',
        'preseljHT600',
        'preselcHT600',
+       'preselcHT650',
+       'preselcHT850',
        #b-jet preselections
        'presel2c20XX2c20b85',
        'presel2c20XX2c20b90',
@@ -260,6 +262,9 @@ JetChainParts = {
                       'HT300',
                       'HT500',
                       'HT50',
+                      'HT500XX0eta240',
+                      'HT650XX0eta240',
+                      'HT850XX0eta240',
                       'HT1000XX0eta240',
                       'HT1000XX020jvt',
                       'HT1000XX0eta240XX020jvt',
