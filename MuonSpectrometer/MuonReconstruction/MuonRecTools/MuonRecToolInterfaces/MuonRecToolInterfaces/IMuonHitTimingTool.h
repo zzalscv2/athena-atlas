@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_IMUONHITTIMINGTOOL_H
@@ -19,6 +19,7 @@
 
 #include "GaudiKernel/IAlgTool.h"
 #include "MuonStationIndex/MuonStationIndex.h"
+#include <set>
 
 namespace Muon {
 
