@@ -1428,7 +1428,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_JvtWP, "Jet.JvtWP", rEnv, "FixedEffPt"); // https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PileupJetRecommendations
   configFromFile(m_JvtPtMax, "Jet.JvtPtMax", rEnv, 60.0e3);
   configFromFile(m_JvtConfig, "Jet.JvtConfig", rEnv, "Moriond2018/");
-  configFromFile(m_jetUncertaintiesConfig, "Jet.UncertConfig", rEnv, "rel21/Summer2019/R4_SR_Scenario1_SimpleJER.config"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
+  configFromFile(m_jetUncertaintiesConfig, "Jet.UncertConfig", rEnv, "rel22/Winter2023_PreRec/R4_CategoryReduction_FullJER.config"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel22/
   configFromFile(m_jetUncertaintiesAnalysisFile, "Jet.AnalysisFile", rEnv, "default"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
   configFromFile(m_jetUncertaintiesCalibArea, "Jet.UncertCalibArea", rEnv, "default"); // Defaults to default area set by tool
   configFromFile(m_jetUncertaintiesPDsmearing, "Jet.UncertPDsmearing", rEnv, false); // for non "SimpleJER" config, run the PDSmear systematics. This are labelled with an __2 if they are being used, but otherwise will have the same tree name as the JET_JER systematic trees.
@@ -1441,7 +1441,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_ToptagConfig, "Jet.ToptaggerConfig", rEnv, "DNNTagger_AntiKt10UFOSD_TopInclusive80_Oct30.dat");
   configFromFile(m_JetTruthLabelName, "Jet.JetTruthLabelName", rEnv, "R10TruthLabel_R21Precision_2022v1");
   configFromFile(m_TopTaggerCalibArea, "Jet.TopTaggerCalibArea", rEnv, "JSSWTopTaggerDNN/Rel21/February2022/");
-  configFromFile(m_jesConfig, "Jet.JESConfig", rEnv, "JES_MC20PreRecommendation_PFlow_Dec2022_Rel22.config");
+  configFromFile(m_jesConfig, "Jet.JESConfig", rEnv, "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"); //https://twiki.cern.ch/twiki/bin/view/AtlasProtected/ApplyJetCalibrationR22
   configFromFile(m_jesConfigAFII, "Jet.JESConfigAFII", rEnv, "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config");
   configFromFile(m_jesConfigJMS, "Jet.JESConfigJMS", rEnv, "JES_JMS_MC16Recommendation_Consolidated_MC_only_EMTopo_July2019_Rel21.config");
   configFromFile(m_jesConfigJMSData, "Jet.JESConfigJMSData", rEnv, "JES_JMS_MC16Recommendation_Consolidated_data_only_EMTopo_Sep2019_Rel21.config");
