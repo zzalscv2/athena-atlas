@@ -58,10 +58,10 @@ namespace top {
     m_jetAntiKt4_MCAFII_PFlow_ConfigFile("JES_MC16Recommendation_AFII_PFlow_Apr2019_Rel21.config"),
     m_jetAntiKt4_MCAFII_PFlow_CalibSequence("JetArea_Residual_EtaJES_GSC_Smear"),
 
-    m_jetAntiKt4_Data_PFlow_ConfigFile("JES_MC20PreRecommendation_PFlow_Dec2022_Rel22.config"),
+    m_jetAntiKt4_Data_PFlow_ConfigFile("PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"),
     m_jetAntiKt4_Data_PFlow_CalibSequence("JetArea_Residual_EtaJES_GSC_Insitu"),
 
-    m_jetAntiKt4_PFlow_MCFS_ConfigFile("JES_MC20PreRecommendation_PFlow_Dec2022_Rel22.config"),
+    m_jetAntiKt4_PFlow_MCFS_ConfigFile("PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"),
     m_jetAntiKt4_PFlow_MCFS_CalibSequence("JetArea_Residual_EtaJES_GSC"),
 
     m_jetAntiKt4_Data_PFlow_JMS_ConfigFile("JES_JMS_MC16Recommendation_Consolidated_data_only_PFlow_July2019_Rel21.config"),
