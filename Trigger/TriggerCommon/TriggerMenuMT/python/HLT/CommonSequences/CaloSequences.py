@@ -65,12 +65,8 @@ def cellRecoSequence(flags, name="HLTCaloCellMakerFS", RoIs=caloFSRoI, outputNam
     if not RoIs:
         from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
         RoIs = mapThresholdToL1RoICollection("FSNOSEED")
-    from AthenaCommon.AppMgr import ServiceMgr as svcMgr
     from TrigCaloRec.TrigCaloRecConfig import HLTCaloCellMaker
-    alg = HLTCaloCellMaker(name)
-    alg.RoIs=RoIs
-    alg.TrigDataAccessMT=svcMgr.TrigCaloDataAccessSvc
-    alg.CellsName=outputName
+    alg = HLTCaloCellMaker(flags, name, roisKey = RoIs, CellsName=outputName, monitorCells=False)
     return parOR(name+"RecoSequence", [alg]), str(alg.CellsName)
 
 def caloClusterRecoSequence(

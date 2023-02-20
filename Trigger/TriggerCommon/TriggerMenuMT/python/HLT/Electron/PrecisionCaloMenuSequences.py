@@ -49,7 +49,7 @@ def precisionCaloSequence(flags, ion=False, variant=''):
         # event views in this sequence. the egammaFSRecoSequence is thus placed
         # before the precisionCaloInViewSequence.
         from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import egammaFSCaloRecoSequence
-        egammaFSRecoSequence = egammaFSCaloRecoSequence()
+        egammaFSRecoSequence = egammaFSCaloRecoSequence(flags)
         theSequence += egammaFSRecoSequence
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo

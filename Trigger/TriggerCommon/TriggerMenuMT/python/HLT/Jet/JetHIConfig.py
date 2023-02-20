@@ -124,9 +124,11 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
     from TrigCaloRec.TrigCaloRecConfig import HLTCaloCellMaker
-    cellMaker = HLTCaloCellMaker('HLTCaloCellMakerEGFS')
-    cellMaker.RoIs = mapThresholdToL1RoICollection('FSNOSEED')
-    cellMaker.CellsName = 'CaloCellsEGFS'
+    cellMaker = HLTCaloCellMaker(configFlags,
+                                 name = 'HLTCaloCellMakerEGFS',
+                                 roisKey = mapThresholdToL1RoICollection('FSNOSEED'),
+                                 CellsName = 'CaloCellsEGFS',
+                                 monitorCells = False)
     jetHIRecSeq += cellMaker 
     from TrigT2CaloCommon.CaloDef import _algoHLTHIEventShape
     eventShapeMaker = _algoHLTHIEventShape(

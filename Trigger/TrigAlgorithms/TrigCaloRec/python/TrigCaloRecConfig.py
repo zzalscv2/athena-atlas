@@ -1,75 +1,64 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-
 from TrigCaloRec.TrigCaloRecConf import (TrigCaloClusterMaker,
                                          TrigCaloTowerMaker,
                                          TrigCaloClusterCalibrator)
 
 from TrigCaloRec.TrigCaloRecConf import HLTCaloCellMaker as _HLTCaloCellMaker
-
+from TrigEDMConfig.TriggerEDMRun3 import recordable
 from AthenaCommon.SystemOfUnits import MeV, deg
 
 from AthenaCommon.Logging import logging
 mlog = logging.getLogger ('TrigCaloRecConfig')
 
-def AddFolderCheck(folder, tag):
-    from IOVDbSvc.CondDB import conddb
-    from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-    folders = svcMgr.IOVDbSvc.Folders
-    found=False
-    for text in folders:
-        if text.find("/CALO/HadCalibration/"+folder)>=0:
-            found=True
-    if ( not found ):
-        conddb.addFolder("CALO","/CALO/HadCalibration/"+folder+tag)
+
+def trigCaloClusterMakerMonTool(flags, doMonCells = False):
+    """Monitoring tool for TrigCaloClusterMaker"""
+
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    monTool = GenericMonitoringTool(flags, 'MonTool')
+
+    maxNumberOfClusters = 1200 if doMonCells else 50
+    maxProcTime = 150000 if doMonCells else 4500
+
+    monTool.defineHistogram('container_size', path='EXPERT', type='TH1F',  title="Container Size; Number of Clusters; Number of Events", xbins=50, xmin=0.0, xmax=maxNumberOfClusters)
+    monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title="Total Execution Time; Execution time [ us ] ; Number of runs", xbins=100, xmin=0.0, xmax=maxProcTime)
+    monTool.defineHistogram('TIME_ClustMaker', path='EXPERT', type='TH1F', title="Cluster Maker Time; Execution time [ us ] ; Number of runs", xbins=100, xmin=0.0, xmax=maxProcTime)
+    monTool.defineHistogram('TIME_ClustCorr', path='EXPERT', type='TH1F', title="Cluster Correction Time; Execution time [ us ] ; Number of runs", xbins=100, xmin=0.0, xmax=100)
+    monTool.defineHistogram('Et', path='EXPERT', type='TH1F',  title="Cluster E_T; E_T [ MeV ] ; Number of Clusters", xbins=135, xmin=-200.0, xmax=2500.0)
+    monTool.defineHistogram('Eta', path='EXPERT', type='TH1F', title="Cluster #eta; #eta ; Number of Clusters", xbins=100, xmin=-2.5, xmax=2.5)
+    monTool.defineHistogram('Phi', path='EXPERT', type='TH1F', title="Cluster #phi; #phi ; Number of Clusters", xbins=64, xmin=-3.2, xmax=3.2)
+    monTool.defineHistogram('Eta,Phi', path='EXPERT', type='TH2F', title="Number of Clusters; #eta ; #phi ; Number of Clusters", xbins=100, xmin=-2.5, xmax=2.5, ybins=128, ymin=-3.2, ymax=3.2)
+    monTool.defineHistogram('clusterSize', path='EXPERT', type='TH1F', title="Cluster Type; Type ; Number of Clusters", xbins=13, xmin=0.5, xmax=13.5)
+    monTool.defineHistogram('signalState', path='EXPERT', type='TH1F', title="Signal State; Signal State ; Number of Clusters", xbins=4, xmin=-1.5, xmax=2.5)
+    monTool.defineHistogram('size', path='EXPERT', type='TH1F', title="Cluster Size; Size [Cells] ; Number of Clusters", xbins=125, xmin=0.0, xmax=250.0)
+    monTool.defineHistogram('N_BAD_CELLS', path='EXPERT', type='TH1F', title="N_BAD_CELLS; N_BAD_CELLS ; Number of Clusters", xbins=250, xmin=0.5, xmax=250.5)
+    monTool.defineHistogram('ENG_FRAC_MAX', path='EXPERT', type='TH1F', title="ENG_FRAC_MAX; ENG_FRAC_MAX ; Number of Clusters", xbins=50, xmin=0.0, xmax=1.1)
+    monTool.defineHistogram('mu', path='EXPERT', type='TH1F',  title="mu; mu; Number of Events", xbins=50, xmin=0.0, xmax=100)
+    monTool.defineHistogram('mu,container_size', path='EXPERT', type='TH2F',  title="Container Size versus #mu; #mu; cluster container size", xbins=50, xmin=20.0, xmax=70, ybins=50, ymin=0.0, ymax=maxNumberOfClusters)
+
+    if doMonCells:
+        monTool.defineHistogram('count_1thrsigma', path='EXPERT', type='TH1F',  title="count_1thrsigma; count_1thresigma; Number of Events", xbins=50, xmin=0.0, xmax=10e3)
+        monTool.defineHistogram('count_2thrsigma', path='EXPERT', type='TH1F',  title="count_2thrsigma; count_2thresigma; Number of Events", xbins=50, xmin=0.0, xmax=5e3)
+        monTool.defineHistogram('mu,count_1thrsigma', path='EXPERT', type='TH2F',  title="nCells above 1st thr versus #mu; #mu; nCells", xbins=50, xmin=20.0, xmax=70, ybins=50, ymin=0.0, ymax=10e3)
+        monTool.defineHistogram('mu,count_2thrsigma', path='EXPERT', type='TH2F',  title="nCells above 2nd thr versus #mu; #mu; nCells", xbins=50, xmin=20.0, xmax=70, ybins=50, ymin=0.0, ymax=5e3)
+
+    return monTool
+
 
 class TrigCaloTowerMakerBase (TrigCaloTowerMaker):
     __slots__ = []
     def __init__(self, name):
         super( TrigCaloTowerMakerBase, self ).__init__(name)
 
-
 class TrigCaloClusterMakerBase (TrigCaloClusterMaker):
     __slots__ = []
     def __init__(self, name):
         super( TrigCaloClusterMakerBase, self ).__init__(name)
 
-        from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-        monTool = GenericMonitoringTool('MonTool')
-
-        # Set range variables
-        maxNumberOfClusters=50.0
-        maxProcTime=4500.0
-        MonCells=False
-        if ( "FS" in name ):
-            maxNumberOfClusters=1200.0
-            maxProcTime=150000
-            MonCells=True # enable monitoring for cells for FS case
-
-        # Define histograms
-        monTool.defineHistogram('container_size', path='EXPERT', type='TH1F',  title="Container Size; Number of Clusters; Number of Events", xbins=50, xmin=0.0, xmax=maxNumberOfClusters)
-        monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title="Total Execution Time; Execution time [ us ] ; Number of runs", xbins=100, xmin=0.0, xmax=maxProcTime)
-        monTool.defineHistogram('TIME_ClustMaker', path='EXPERT', type='TH1F', title="Cluster Maker Time; Execution time [ us ] ; Number of runs", xbins=100, xmin=0.0, xmax=maxProcTime)
-        monTool.defineHistogram('TIME_ClustCorr', path='EXPERT', type='TH1F', title="Cluster Correction Time; Execution time [ us ] ; Number of runs", xbins=100, xmin=0.0, xmax=100)
-        monTool.defineHistogram('Et', path='EXPERT', type='TH1F',  title="Cluster E_T; E_T [ MeV ] ; Number of Clusters", xbins=135, xmin=-200.0, xmax=2500.0)
-        monTool.defineHistogram('Eta', path='EXPERT', type='TH1F', title="Cluster #eta; #eta ; Number of Clusters", xbins=100, xmin=-2.5, xmax=2.5)
-        monTool.defineHistogram('Phi', path='EXPERT', type='TH1F', title="Cluster #phi; #phi ; Number of Clusters", xbins=64, xmin=-3.2, xmax=3.2)
-        monTool.defineHistogram('Eta,Phi', path='EXPERT', type='TH2F', title="Number of Clusters; #eta ; #phi ; Number of Clusters", xbins=100, xmin=-2.5, xmax=2.5, ybins=128, ymin=-3.2, ymax=3.2)
-        monTool.defineHistogram('clusterSize', path='EXPERT', type='TH1F', title="Cluster Type; Type ; Number of Clusters", xbins=13, xmin=0.5, xmax=13.5)
-        monTool.defineHistogram('signalState', path='EXPERT', type='TH1F', title="Signal State; Signal State ; Number of Clusters", xbins=4, xmin=-1.5, xmax=2.5)
-        monTool.defineHistogram('size', path='EXPERT', type='TH1F', title="Cluster Size; Size [Cells] ; Number of Clusters", xbins=125, xmin=0.0, xmax=250.0)
-        monTool.defineHistogram('N_BAD_CELLS', path='EXPERT', type='TH1F', title="N_BAD_CELLS; N_BAD_CELLS ; Number of Clusters", xbins=250, xmin=0.5, xmax=250.5)
-        monTool.defineHistogram('ENG_FRAC_MAX', path='EXPERT', type='TH1F', title="ENG_FRAC_MAX; ENG_FRAC_MAX ; Number of Clusters", xbins=50, xmin=0.0, xmax=1.1)
-        monTool.defineHistogram('mu', path='EXPERT', type='TH1F',  title="mu; mu; Number of Events", xbins=50, xmin=0.0, xmax=100)
-        monTool.defineHistogram('mu,container_size', path='EXPERT', type='TH2F',  title="Container Size versus #mu; #mu; cluster container size", xbins=50, xmin=20.0, xmax=70, ybins=50, ymin=0.0, ymax=maxNumberOfClusters)
-        if ( MonCells ) :
-          monTool.defineHistogram('count_1thrsigma', path='EXPERT', type='TH1F',  title="count_1thrsigma; count_1thresigma; Number of Events", xbins=50, xmin=0.0, xmax=10e3)
-          monTool.defineHistogram('count_2thrsigma', path='EXPERT', type='TH1F',  title="count_2thrsigma; count_2thresigma; Number of Events", xbins=50, xmin=0.0, xmax=5e3)
-          monTool.defineHistogram('mu,count_1thrsigma', path='EXPERT', type='TH2F',  title="nCells above 1st thr versus #mu; #mu; nCells", xbins=50, xmin=20.0, xmax=70, ybins=50, ymin=0.0, ymax=10e3)
-          monTool.defineHistogram('mu,count_2thrsigma', path='EXPERT', type='TH2F',  title="nCells above 2nd thr versus #mu; #mu; nCells", xbins=50, xmin=20.0, xmax=70, ybins=50, ymin=0.0, ymax=5e3)
-
-        self.MonCells = MonCells
-        self.MonTool = monTool
+        from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+        self.MonCells = "FS" in name
+        self.MonTool = trigCaloClusterMakerMonTool(flags, self.MonCells)
 
 class TrigCaloClusterMaker_topo (TrigCaloClusterMakerBase):
     __slots__ = []
@@ -337,29 +326,13 @@ class HLTCaloCellSeedLessMaker (_HLTCaloCellMaker):
         self.RoIs=''
         self.TrigDataAccessMT=svcMgr.TrigCaloDataAccessSvc
 
-class HLTCaloCellMaker (_HLTCaloCellMaker):
-    __slots__ = []
-    def __init__(self, name):
-        super( HLTCaloCellMaker, self ).__init__(name)
-        from TrigT2CaloCommon.TrigCaloDataAccessConfig import CaloDataAccessSvcDependencies
-        self.ExtraInputs=CaloDataAccessSvcDependencies
-        from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-        monTool = GenericMonitoringTool('MonTool')
-        maxNumberOfCells=1600.0
-        maxProcTime=800.0
-        monitorCells=True
-        if ( "FS" in name ):
-          maxNumberOfCells=240000
-          maxProcTime=160000
-          monitorCells=False
-        monTool.defineHistogram('Cells_N', path='EXPERT', type='TH1F',  title="Cells N; NCells; events", xbins=40, xmin=0.0, xmax=maxNumberOfCells)
-        monTool.defineHistogram('TIME_exec', path='EXPERT', type='TH1F', title="Cells time; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=maxProcTime)
-        if ( monitorCells ):
-          monTool.defineHistogram('Cells_eT', path='EXPERT', type='TH1F',  title="Cells E_T; E_T [ GeV ] ; Nclusters", xbins=100, xmin=0.0, xmax=100.0)
-          monTool.defineHistogram('Cells_eta', path='EXPERT', type='TH1F', title="Cells #eta; #eta ; Nclusters", xbins=100, xmin=-2.5, xmax=2.5)
-          monTool.defineHistogram('Cells_phi', path='EXPERT', type='TH1F', title="Cells #phi; #phi ; Nclusters", xbins=128, xmin=-3.2, xmax=3.2)
-        self.MonTool = monTool
-        self.monitorCells = monitorCells
+
+def HLTCaloCellMaker(flags, name, roisKey='UNSPECIFIED', CellsName=None, monitorCells=True):
+    """Wrapper for legacy job options"""
+    from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
+    cellmaker = algorithmCAToGlobalWrapper(hltCaloCellMakerCfg, flags, name, roisKey, CellsName, monitorCells)[0]
+    return cellmaker
+
 
 class TrigCaloClusterCalibrator_LC(TrigCaloClusterCalibrator):
     """ Class to set up the default configurations for LC calibrations """
@@ -454,14 +427,31 @@ def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None,
     # choose cells name given parameters
     cellsFromName = 'CaloCellsFS' if "FS" in name else "CaloCells"
     cells = cellsFromName if CellsName is None else CellsName
+
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    monTool = GenericMonitoringTool(flags, 'MonTool')
+    monTool.defineHistogram('Cells_N', path='EXPERT', type='TH1F',  title="Cells N; NCells; events",
+                            xbins=40, xmin=0, xmax=1600 if monitorCells else 240000)
+    monTool.defineHistogram('TIME_exec', path='EXPERT', type='TH1F', title="Cells time; time [ us ] ; Nruns",
+                            xbins=80, xmin=0, xmax=800 if monitorCells else 160000)
+    if monitorCells:
+        monTool.defineHistogram('Cells_eT', path='EXPERT', type='TH1F',  title="Cells E_T; E_T [ GeV ] ; Nclusters",
+                                xbins=100, xmin=0.0, xmax=100.0)
+        monTool.defineHistogram('Cells_eta', path='EXPERT', type='TH1F', title="Cells #eta; #eta ; Nclusters",
+                                xbins=100, xmin=-2.5, xmax=2.5)
+        monTool.defineHistogram('Cells_phi', path='EXPERT', type='TH1F', title="Cells #phi; #phi ; Nclusters",
+                                xbins=128, xmin=-3.2, xmax=3.2)
+
     cellMaker = CompFactory.HLTCaloCellMaker(name,
                                              CellsName = cells,
                                              TrigDataAccessMT = acc.getService('TrigCaloDataAccessSvc'),
-                                             monitorCells = monitorCells,
                                              ExtraInputs = CaloDataAccessSvcDependencies,
-                                             RoIs=roisKey)
+                                             RoIs=roisKey,
+                                             monitorCells = monitorCells,
+                                             MonTool = monTool)
     acc.addEventAlgo(cellMaker, primary=True)
     return acc
+
 
 def hltCaloCellSeedlessMakerCfg(flags, roisKey='UNSPECIFIED'):
     acc = ComponentAccumulator()
@@ -532,13 +522,16 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey, cellsKey="CaloCells"):
                                 'AVG_LAR_Q',
                                 'AVG_TILE_Q'
                                 ]
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
 
-    alg = CompFactory.TrigCaloClusterMaker(name,
-                                             Cells=cellsKey,
-                                             CaloClusters=recordable(clustersKey),
-                                             ClusterMakerTools = [ topoMaker, topoSplitter, topoMoments] # moments are missing yet
-                                            )
+    doMonCells = "FS" in name
+    alg = CompFactory.TrigCaloClusterMaker(
+        name,
+        Cells=cellsKey,
+        CaloClusters=recordable(clustersKey),
+        ClusterMakerTools = [ topoMaker, topoSplitter, topoMoments], # moments are missing yet
+        MonCells = doMonCells,
+        MonTool = trigCaloClusterMakerMonTool(flags, doMonCells) )
+
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     acc.merge(CaloNoiseCondAlgCfg(flags))
     acc.addEventAlgo(alg, primary=True)
@@ -686,7 +679,6 @@ class TrigCaloTowerMaker_hijet (TrigCaloTowerMakerBase):
 def hltHICaloTowerMakerCfg(flags, name, clustersKey, cellsKey="CaloCells"):
     acc = ComponentAccumulator()
 
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
     alg = CompFactory.TrigCaloTowerMaker(name,
                                              Cells=cellsKey,
                                              CaloClusters=recordable(clustersKey),

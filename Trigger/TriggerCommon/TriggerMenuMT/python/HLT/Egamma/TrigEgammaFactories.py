@@ -355,17 +355,15 @@ def TrigPhotonDecorationTools():
     #Return a list with the tools that decorate only photons
     return [ PhotonPIDBuilder() ]
 
-def egammaFSCaloRecoSequence():
+def egammaFSCaloRecoSequence(flags):
     from AthenaCommon.CFElements import parOR
 
-    from AthenaCommon.AppMgr import ServiceMgr as svcMgr
     from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
     from TrigCaloRec.TrigCaloRecConfig import HLTCaloCellMaker
 
-    cellMaker = HLTCaloCellMaker('HLTCaloCellMakerEGFS')
-    cellMaker.RoIs = mapThresholdToL1RoICollection('FSNOSEED')
-    cellMaker.TrigDataAccessMT = svcMgr.TrigCaloDataAccessSvc
-    cellMaker.CellsName = 'CaloCellsEGFS'
+    cellMaker = HLTCaloCellMaker(flags, 'HLTCaloCellMakerEGFS',
+                                 roisKey = mapThresholdToL1RoICollection('FSNOSEED'),
+                                 CellsName = 'CaloCellsEGFS', monitorCells = False)
 
     from TrigT2CaloCommon.CaloDef import _algoHLTHIEventShape
     eventShapeMaker = _algoHLTHIEventShape(
