@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ class RpcPrepDataContainerCnv;
 namespace Muon
 {
 
-    class RpcRdoToPrepDataToolCore;
+    class RpcRdoToPrepDataToolMT;
     class RpcPrepDataContainerCnv_p1;
     class RpcPrepDataContainerCnv_p2;
 
@@ -34,7 +34,7 @@ namespace Muon
 class RpcPrepData :   public MuonCluster
 {
 
-    friend class Muon::RpcRdoToPrepDataToolCore;
+    friend class Muon::RpcRdoToPrepDataToolMT;
 
     ///////////////////////////////////////////////////////////////////
     // Public methods:
@@ -45,10 +45,10 @@ public:
     friend class Muon::RpcPrepDataContainerCnv_p1;
     friend class Muon::RpcPrepDataContainerCnv_p2;
 
-    RpcPrepData();
-    RpcPrepData(const RpcPrepData &);
+    RpcPrepData() = default;
+    RpcPrepData(const RpcPrepData &) = default;
     RpcPrepData(RpcPrepData &&) noexcept = default;
-    RpcPrepData &operator=(const RpcPrepData &);
+    RpcPrepData &operator=(const RpcPrepData &) = default;
     RpcPrepData &operator=(RpcPrepData &&) noexcept = default;
 
 
@@ -82,6 +82,28 @@ public:
                  const float time,
                  const int triggerInfo,
                  const int ambiguityFlag);
+    /** @brief Extra constructor containing the time over threshold variable*/
+    RpcPrepData( const Identifier& RDOId,
+                 const IdentifierHash &idDE,
+                 const Amg::Vector2D& locpos,
+                 const std::vector<Identifier>& rdoList,
+                 const Amg::MatrixX& locErrMat,
+                 const MuonGM::RpcReadoutElement* detEl,
+                 const float time,
+                 const float timeOverThresh,
+                 const int triggerInfo,
+                 const int ambiguityFlag);
+    RpcPrepData( const Identifier& RDOId,
+                 const IdentifierHash &idDE,
+                 const Amg::Vector2D& locpos,
+                 std::vector<Identifier>&& rdoList,
+                 Amg::MatrixX&& locErrMat,
+                 const MuonGM::RpcReadoutElement* detEl,
+                 const float time,
+                 const float timeOverThresh,
+                 const int triggerInfo,
+                 const int ambiguityFlag);
+
  
     /** @brief Extra Constructor without TriggerInfo for a slimmed version of RpcPrepData to come. */
     RpcPrepData( const Identifier& RDOId,
@@ -105,7 +127,7 @@ public:
 
 
     /** @brief Destructor: */
-    virtual ~RpcPrepData();
+    virtual ~RpcPrepData() = default;
 
     /** @brief Returns the time. */
     float time() const;
@@ -132,6 +154,9 @@ public:
         - i+1 if "i" other MuonPrepRawData are produced along with the current one from a single RDO hit*/
     int ambiguityFlag() const;
 
+    /** @brief Returns the time over threshold */
+    float timeOverThreshold() const;
+
     /** @brief Dumps information about the PRD*/
     virtual MsgStream&    dump( MsgStream&    stream) const override;
 
@@ -141,20 +166,27 @@ public:
 private:
 
     /** Cached pointer to the detector element - should never be zero.*/
-    const MuonGM::RpcReadoutElement* m_detEl;
+    const MuonGM::RpcReadoutElement* m_detEl{nullptr};
 
     /** Float since PRD produced from RDO, and RDO should contain the time calculated from the bcid and the RPC clock
     ticks. (as bcid*25+ticks*3.125).*/
-    float m_time;
+    float m_time{0.f};
+
+     /**
+     * time over threshold (BIS78 chips only)
+    */
+    float m_timeOverThreshold{-1.f};
 
     /** usually false, unless ijk>5 or highpt&&ijk==0 */
 
-    int m_triggerInfo;
+    int m_triggerInfo{0};
     /** Trigger ambiguities.
         - 0 if the ambiguites have not been removed by choice;
         - 1 if the ambiguities are fully solved
         - i+1 if "i" other preprawdata are produced along with the current one from a single RDO hit*/
-    int m_ambiguityFlag;
+    int m_ambiguityFlag{0};
+
+   
 
 };
 
@@ -181,16 +213,15 @@ inline int RpcPrepData::ambiguityFlag() const
 {
     return m_ambiguityFlag;
 }
-  // return globalPosition:
- inline const Amg::Vector3D& RpcPrepData::globalPosition() const
+inline float RpcPrepData::timeOverThreshold() const { return m_timeOverThreshold; }
+
+inline const Amg::Vector3D& RpcPrepData::globalPosition() const
    {
-      if (not m_globalPosition) {
+      if (!m_globalPosition) {
         m_globalPosition.set(std::make_unique<const Amg::Vector3D>(
           m_detEl->surface(identify())
             .Trk::Surface::localToGlobal(localPosition())));
       }
-
-      if (not m_globalPosition) throw Trk::PrepRawDataUndefinedVariable();
       return *m_globalPosition;
     }
 }
