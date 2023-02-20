@@ -616,13 +616,13 @@ CscRawDataProvider.CSC_RawDataProviderToolMT         INFO Retrieved tool Decoder
 CscRawDataProvider.CSC_RawDataProviderToolMT         INFO initialize() successful in CscRawDataProvider.CSC_RawDataProviderToolMT
 ClassIDSvc                                           INFO getRegistryEntries: read 54 CLIDRegistry entries for module ALL
 RpcRdoToRpcPrepData.RpcPrepDataProviderTool          INFO properties are 
-RpcRdoToRpcPrepData.RpcPrepDataProviderTool          INFO produceRpcCoinDatafromTriggerWords 1
-RpcRdoToRpcPrepData.RpcPrepDataProviderTool          INFO reduceCablingOverlap               1
-RpcRdoToRpcPrepData.RpcPrepDataProviderTool          INFO solvePhiAmbiguities                1
-RpcRdoToRpcPrepData.RpcPrepDataProviderTool          INFO timeShift                          -12.5
-RpcRdoToRpcPrepData.RpcPrepDataProviderTool          INFO etaphi_coincidenceTime             1000
-RpcRdoToRpcPrepData.RpcPrepDataProviderTool          INFO overlap_timeTolerance              1000
-RpcRdoToRpcPrepData.RpcPrepDataProviderTool          INFO Correct prd time from cool db      0
+RpcRdoToRpcPrepData.RpcPrepDataProviderTool          INFO produceRpcCoinDatafromTriggerWords  'produceRpcCoinDatafromTriggerWords':True
+RpcRdoToRpcPrepData.RpcPrepDataProviderTool          INFO reduceCablingOverlap                'reduceCablingOverlap':True
+RpcRdoToRpcPrepData.RpcPrepDataProviderTool          INFO solvePhiAmbiguities                 'solvePhiAmbiguities':True
+RpcRdoToRpcPrepData.RpcPrepDataProviderTool          INFO timeShift                           'timeShift':-12.5000
+RpcRdoToRpcPrepData.RpcPrepDataProviderTool          INFO etaphi_coincidenceTime              'etaphi_coincidenceTime':1000.00
+RpcRdoToRpcPrepData.RpcPrepDataProviderTool          INFO overlap_timeTolerance               'overlap_timeTolerance':1000.00
+RpcRdoToRpcPrepData.RpcPrepDataProviderTool          INFO Correct prd time from cool db       'RPCInfoFromDb':False
 RpcRdoToRpcPrepData                                  INFO Retrieved DecodingTool = PrivateToolHandle('Muon::RpcRdoToPrepDataToolMT/RpcPrepDataProviderTool')
 TgcRdoToTgcPrepData.TgcPrepDataProviderTool          INFO initialize() successful in TgcRdoToTgcPrepData.TgcPrepDataProviderTool
 TgcRdoToTgcPrepData                                  INFO Retrieved DecodingTool = PrivateToolHandle('Muon::TgcRdoToPrepDataToolMT/TgcPrepDataProviderTool')
