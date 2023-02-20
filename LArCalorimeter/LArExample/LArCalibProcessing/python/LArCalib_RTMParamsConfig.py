@@ -63,28 +63,36 @@ def LArRTMParamsCfg(flags):
     result.addEventAlgo(LArRTMParamExtractor)
 
     rootfile=flags.LArCalib.Output.ROOTFile
+    bcKey = "LArBadChannelSC" if flags.LArCalib.isSC else "LArBadChannel"
     if rootfile != "":
         LArWFParams2Ntuple = CompFactory.LArWFParams2Ntuple("LArWFParams2Ntuple")
         LArWFParams2Ntuple.DumpCaliPulseParams = True
         LArWFParams2Ntuple.DumpDetCellParams   = True
         LArWFParams2Ntuple.CaliPulseParamsKey="LArCaliPulseParams_RTM"
         LArWFParams2Ntuple.DetCellParamsKey="LArDetCellParams_RTM"
+        LArWFParams2Ntuple.BadChanKey = bcKey
+        LArWFParams2Ntuple.isSC = flags.LArCalib.isSC
         result.addEventAlgo(LArWFParams2Ntuple)
    
         if flags.LArCalib.RTM.DumpOmegaScan:
             LArOmegaScans2Ntuple = CompFactory.LArCaliWaves2Ntuple("LArOmegaScans2Ntuple")
             LArOmegaScans2Ntuple.NtupleName = "OMEGASCAN"
+            LArOmegaScans2Ntuple.BadChanKey = bcKey
+            LArOmegaScans2Ntuple.isSC = flags.LArCalib.isSC
             LArOmegaScans2Ntuple.KeyList = ["OmegaScan"]
             result.addEventAlgo(LArOmegaScans2Ntuple)
 
         if ( flags.LArCalib.RTM.DumpResOscill ):
             LArResOscillsBefore2Ntuple = CompFactory.LArCaliWaves2Ntuple("LArResOscillsBefore2Ntuple")
             LArResOscillsBefore2Ntuple.NtupleName = "RESOSCILLBEFORE"
+            LArResOscillsBefore2Ntuple.BadChanKey = bcKey
+            LArResOscillsBefore2Ntuple.isSC = flags.LArCalib.isSC
             LArResOscillsBefore2Ntuple.KeyList = ["ResOscillBefore"]
             result.addEventAlgo(LArResOscillsBefore2Ntuple)
             
             LArResOscillsAfter2Ntuple = CompFactory.LArCaliWaves2Ntuple("LArResOscillsAfter2Ntuple")
             LArResOscillsAfter2Ntuple.NtupleName = "RESOSCILLAFTER"
+            LArResOscillsAfter2Ntuple.BadChanKey = bcKey
             LArResOscillsAfter2Ntuple.KeyList = ["ResOscillAfter"]
             result.addEventAlgo(LArResOscillsAfter2Ntuple)
 

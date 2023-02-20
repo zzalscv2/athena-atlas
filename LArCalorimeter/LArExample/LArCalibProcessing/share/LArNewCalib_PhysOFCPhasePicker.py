@@ -42,7 +42,7 @@ if __name__=='__main__':
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
    flags=initConfigFlags()
    from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
-   addLArCalibFlags(flags)
+   addLArCalibFlags(flags,args.supercells)
    
    #Now we set the flags as required for this particular job:
    #The following flags help finding the input bytestream files: 
@@ -56,9 +56,6 @@ if __name__=='__main__':
 
    # pileup normalisation
    flags.LArCalib.OFC.Ncoll = 60
-
-   # others flags settings
-   flags.LArCalib.isSC = args.supercells
 
    #Configure the Bad-Channel database we are reading 
    #(the AP typically uses a snapshot in an sqlite file

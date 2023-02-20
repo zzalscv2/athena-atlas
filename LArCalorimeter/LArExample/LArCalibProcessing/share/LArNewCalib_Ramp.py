@@ -63,91 +63,89 @@ if __name__=='__main__':
    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
    
    #Import the flag-container that is the arguemnt to the configuration methods
-   from AthenaConfiguration.AllConfigFlags import ConfigFlags
+   from AthenaConfiguration.AllConfigFlags import initConfigFlags
    from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
-   addLArCalibFlags(ConfigFlags)
+   flags=initConfigFlags()
+   addLArCalibFlags(ConfigFlags, args.supercells)
    
    #Now we set the flags as required for this particular job:
    #The following flags help finding the input bytestream files: 
-   ConfigFlags.LArCalib.Input.Dir = InputDir
-   ConfigFlags.LArCalib.Input.Type = args.trig
-   ConfigFlags.LArCalib.Input.RunNumbers = [int(args.run),]
-   ConfigFlags.LArCalib.Input.Database = args.outpdir + "/" +args.inpsql
-   ConfigFlags.LArCalib.Input.Database2 = args.outpdir + "/" +args.inofcsql
+   flags.LArCalib.Input.Dir = InputDir
+   flags.LArCalib.Input.Type = args.trig
+   flags.LArCalib.Input.RunNumbers = [int(args.run),]
+   flags.LArCalib.Input.Database = args.outpdir + "/" +args.inpsql
+   flags.LArCalib.Input.Database2 = args.outpdir + "/" +args.inofcsql
 
    # Input files
-   ConfigFlags.Input.Files=ConfigFlags.LArCalib.Input.Files
+   flags.Input.Files=flags.LArCalib.Input.Files
    #Print the input files we found 
    print ("Input files to be processed:")
-   for f in ConfigFlags.Input.Files:
+   for f in flags.Input.Files:
        print (f)
    
-   # others flags settings
-   ConfigFlags.LArCalib.isSC = args.supercells
-
    #Some configs depend on the sub-calo in question
    #(sets also the preselection of LArRawCalibDataReadingAlg)
-   if not ConfigFlags.LArCalib.isSC:
+   if not flags.LArCalib.isSC:
       if args.subdet == 'EMB' or args.subdet == 'EMEC':
-         ConfigFlags.LArCalib.Input.SubDet="EM"
+         flags.LArCalib.Input.SubDet="EM"
       else:   
-         ConfigFlags.LArCalib.Input.SubDet=args.subdet
+         flags.LArCalib.Input.SubDet=args.subdet
  
       if not args.side:   
-         ConfigFlags.LArCalib.Preselection.Side = [0,1]
+         flags.LArCalib.Preselection.Side = [0,1]
       elif args.side == "C":
-         ConfigFlags.LArCalib.Preselection.Side = [0]
+         flags.LArCalib.Preselection.Side = [0]
       elif args.side == "A":   
-         ConfigFlags.LArCalib.Preselection.Side = [1]
+         flags.LArCalib.Preselection.Side = [1]
       else:   
          print("unknown side ",args.side)
          sys.exit(-1)
  
       if args.subdet == 'EMB':
-         ConfigFlags.LArCalib.Preselection.BEC = [0]
+         flags.LArCalib.Preselection.BEC = [0]
       else:   
-         ConfigFlags.LArCalib.Preselection.BEC = [1]
+         flags.LArCalib.Preselection.BEC = [1]
  
       if args.subdet == 'FCAL':
-         ConfigFlags.LArCalib.Preselection.FT = [6]
+         flags.LArCalib.Preselection.FT = [6]
       elif args.subdet == 'HEC':
-         ConfigFlags.LArCalib.Preselection.FT = [3,10,16,22]
+         flags.LArCalib.Preselection.FT = [3,10,16,22]
    
    #Configure the Bad-Channel database we are reading 
    #(the AP typically uses a snapshot in an sqlite file
-   ConfigFlags.LArCalib.BadChannelDB = args.outpdir + "/" + args.badsql
-   ConfigFlags.LArCalib.BadChannelTag = "-RUN2-UPD3-00"
+   flags.LArCalib.BadChannelDB = args.outpdir + "/" + args.badsql
+   flags.LArCalib.BadChannelTag = "-RUN2-UPD3-00"
    
    #Output of this job:
    OutputRampRootFileName = args.outrprefix + "_" + args.run
    OutputRampPoolFileName = args.outpprefix + "_" + args.run
    OutputRampRootFileName += "_"+args.subdet
    OutputRampPoolFileName += "_"+args.subdet
-   if ConfigFlags.LArCalib.Input.SubDet=="EM":
+   if flags.LArCalib.Input.SubDet=="EM":
       OutputRampRootFileName += args.side
       OutputRampPoolFileName += args.side
    OutputRampRootFileName += ".root"
    OutputRampPoolFileName += ".pool.root"
 
-   ConfigFlags.LArCalib.Output.ROOTFile = args.outrdir + "/" + OutputRampRootFileName
-   ConfigFlags.LArCalib.Output.POOLFile = args.outpdir + "/" + OutputRampPoolFileName
-   ConfigFlags.IOVDb.DBConnection="sqlite://;schema="+args.outpdir + "/" + args.outsql +";dbname=CONDBR2"
+   flags.LArCalib.Output.ROOTFile = args.outrdir + "/" + OutputRampRootFileName
+   flags.LArCalib.Output.POOLFile = args.outpdir + "/" + OutputRampPoolFileName
+   flags.IOVDb.DBConnection="sqlite://;schema="+args.outpdir + "/" + args.outsql +";dbname=CONDBR2"
 
    #The global tag we are working with
-   ConfigFlags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
+   flags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
    
 
    #Other potentially useful flags-settings:
    
    #Define the global output Level:
    from AthenaCommon.Constants import INFO 
-   ConfigFlags.Exec.OutputLevel = INFO
+   flags.Exec.OutputLevel = INFO
    
-   ConfigFlags.lock()
+   flags.lock()
    
-   cfg=MainServicesCfg(ConfigFlags)
+   cfg=MainServicesCfg(flags)
    
-   cfg.merge(LArRampCfg(ConfigFlags))
+   cfg.merge(LArRampCfg(flags))
 
    cfg.getEventAlgo("OutputConditionsAlg").Run1= IOVBegin
    if 'IOVEnd' in dir() and IOVEnd>0:
@@ -159,7 +157,7 @@ if __name__=='__main__':
 
    #build tag hierarchy in output sqlite file
    import subprocess
-   cmdline = (['/afs/cern.ch/user/l/larcalib/LArDBTools/python/BuildTagHierarchy.py',args.outpdir + "/" + args.outsql , ConfigFlags.IOVDb.GlobalTag])
+   cmdline = (['/afs/cern.ch/user/l/larcalib/LArDBTools/python/BuildTagHierarchy.py',args.outpdir + "/" + args.outsql , flags.IOVDb.GlobalTag])
    print(cmdline)
    try:
       subprocess.run(cmdline, check=True)

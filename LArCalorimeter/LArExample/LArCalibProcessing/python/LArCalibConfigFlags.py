@@ -1,9 +1,9 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
-def addLArCalibFlags(flags):
+def addLArCalibFlags(flags, isSC=False):
     
     flags.Input.isMC=False
-    flags.addFlag("LArCalib.isSC",False)
+    flags.addFlag("LArCalib.isSC",isSC)
     flags.addFlag("LArCalib.BadChannelDB","LAR_OFL")
     flags.addFlag("LArCalib.BadChannelTag","-RUN2-UPD3-00")
 
