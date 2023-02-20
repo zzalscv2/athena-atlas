@@ -11,26 +11,6 @@ CondInputLoader                                      INFO Will create WriteCondH
 EventSelector                                        INFO  Enter McEventSelector Initialization 
 AthenaEventLoopMgr                                   INFO Setup EventSelector service EventSelector
 ApplicationMgr                                       INFO Application Manager Initialized successfully
-ApplicationMgr                                    SUCCESS ****************************** Algorithm Sequence ****************************
-ApplicationMgr                                    SUCCESS AthSequencer/AthMasterSeq
-ApplicationMgr                                    SUCCESS      AthSequencer/AthAlgEvtSeq
-ApplicationMgr                                    SUCCESS           AthSequencer/AthBeginSeq
-ApplicationMgr                                    SUCCESS                AthIncFirerAlg/BeginIncFiringAlg
-ApplicationMgr                                    SUCCESS                IncidentProcAlg/IncidentProcAlg1
-ApplicationMgr                                    SUCCESS           AthSequencer/AthAllAlgSeq
-ApplicationMgr                                    SUCCESS                AthSequencer/AthCondSeq
-ApplicationMgr                                    SUCCESS                     CondInputLoader/CondInputLoader
-ApplicationMgr                                    SUCCESS                     ToolConstantsCondAlg/ToolConstantsCondAlg_deadOTXCorrCtes
-ApplicationMgr                                    SUCCESS                     ToolConstantsCondAlg/ToolConstantsCondAlg_CaloSwClusterCorrections.rfac-v5
-ApplicationMgr                                    SUCCESS                AthSequencer/AthAlgSeq
-ApplicationMgr                                    SUCCESS                     CaloClusterCorrDumper/dumper1
-ApplicationMgr                                    SUCCESS           AthSequencer/AthEndSeq
-ApplicationMgr                                    SUCCESS                AthIncFirerAlg/EndIncFiringAlg
-ApplicationMgr                                    SUCCESS                IncidentProcAlg/IncidentProcAlg2
-ApplicationMgr                                    SUCCESS      AthSequencer/AthOutSeq
-ApplicationMgr                                    SUCCESS      AthIncFirerAlg/EndAlgorithmsFiringAlg
-ApplicationMgr                                    SUCCESS      IncidentProcAlg/IncidentProcAlg3
-ApplicationMgr                                    SUCCESS ******************************************************************************
 CondInputLoader                                      INFO created CondCont<CondAttrListCollection> with key 'ConditionStore+/LAR/CellCorrOfl/deadOTX'
 ApplicationMgr                                       INFO Application Manager Started successfully
 AthenaEventLoopMgr                                   INFO   ===>>>  start of run 310000    <<<===

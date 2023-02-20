@@ -3,7 +3,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def MainServicesMiniCfg(loopMgr='AthenaEventLoopMgr', masterSequence='AthAlgSeq'):
+def MainServicesMiniCfg(flags, loopMgr='AthenaEventLoopMgr', masterSequence='AthAlgSeq'):
     """Mininmal basic config, just good enough for HelloWorld and alike"""
     cfg = ComponentAccumulator(CompFactory.AthSequencer(masterSequence,Sequential=True))
     cfg.setAsTopLevel()
@@ -15,7 +15,7 @@ def MainServicesMiniCfg(loopMgr='AthenaEventLoopMgr', masterSequence='AthAlgSeq'
     cfg.setAppProperty('JobOptionsType', 'NONE')
     cfg.setAppProperty('JobOptionsPostAction', '')
     cfg.setAppProperty('JobOptionsPreAction', '')
-    cfg.setAppProperty('PrintAlgsSequence', True)
+    cfg.setAppProperty('PrintAlgsSequence', flags.Exec.PrintAlgsSequence)
     return cfg
 
 
@@ -202,7 +202,7 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
         LoopMgr = "AthMpEvtLoopMgr"
 
     # Core components needed for serial and threaded jobs:
-    cfg = MainServicesMiniCfg(loopMgr=LoopMgr, masterSequence='AthMasterSeq')
+    cfg = MainServicesMiniCfg(flags, loopMgr=LoopMgr, masterSequence='AthMasterSeq')
 
     # Main sequences and incident handling:
     addMainSequences(flags, cfg)

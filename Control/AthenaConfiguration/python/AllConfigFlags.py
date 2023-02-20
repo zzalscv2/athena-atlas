@@ -23,6 +23,7 @@ def initConfigFlags():
     #Flags steering the job execution:
     from AthenaCommon.Constants import INFO
     acf.addFlag('Exec.OutputLevel',INFO) #Global Output Level
+    acf.addFlag('Exec.PrintAlgsSequence', False) # Allows AppMgr to print the algorithm sequence
     acf.addFlag('Exec.MaxEvents',-1)
     acf.addFlag('Exec.SkipEvents',0)
     acf.addFlag('Exec.DebugStage','')

@@ -300,33 +300,6 @@ PyComponentMgr                                       INFO Initializing PyCompone
 TestAlg                                              INFO Initializing TestAlg...
 ClassIDSvc                                           INFO  getRegistryEntries: read 1097 CLIDRegistry entries for module ALL
 ApplicationMgr                                       INFO Application Manager Initialized successfully
-ApplicationMgr                                    SUCCESS ****************************** Algorithm Sequence ****************************
-ApplicationMgr                                    SUCCESS AthSequencer/AthMasterSeq
-ApplicationMgr                                    SUCCESS      AthSequencer/AthAlgEvtSeq
-ApplicationMgr                                    SUCCESS           AthSequencer/AthBeginSeq
-ApplicationMgr                                    SUCCESS                AthIncFirerAlg/BeginIncFiringAlg
-ApplicationMgr                                    SUCCESS                IncidentProcAlg/IncidentProcAlg1
-ApplicationMgr                                    SUCCESS           AthSequencer/AthAllAlgSeq
-ApplicationMgr                                    SUCCESS                AthSequencer/AthCondSeq
-ApplicationMgr                                    SUCCESS                     CondInputLoader/CondInputLoader
-ApplicationMgr                                    SUCCESS                     LArFebRodMappingAlg/LArFebRodMappingAlg
-ApplicationMgr                                    SUCCESS                     LArCalibLineMappingAlg/LArCalibLineMappingAlg
-ApplicationMgr                                    SUCCESS                     TileEMScaleCondAlg/TileEMScaleCondAlg
-ApplicationMgr                                    SUCCESS                     TileCalibCondAlg<TileCalibDrawerFlt>/TileSampleNoiseCondAlg
-ApplicationMgr                                    SUCCESS                     LArOnOffMappingAlg/LArOnOffMappingAlg
-ApplicationMgr                                    SUCCESS                     LArMCSymCondAlg/LArMCSymCondAlg
-ApplicationMgr                                    SUCCESS                     LArSymConditionsAlg<LArRampMC, LArRampSym>/LArSymConditionsAlg<LArRampMC, LArRampSym>
-ApplicationMgr                                    SUCCESS                     LArSymConditionsAlg<LArDAC2uAMC, LArDAC2uASym>/LArSymConditionsAlg<LArDAC2uAMC, LArDAC2uASym>
-ApplicationMgr                                    SUCCESS                     LArSymConditionsAlg<LAruA2MeVMC, LAruA2MeVSym>/LArSymConditionsAlg<LAruA2MeVMC, LAruA2MeVSym>
-ApplicationMgr                                    SUCCESS                     LArSymConditionsAlg<LArMphysOverMcalMC, LArMphysOverMcalSym>/LArSymConditionsAlg<LArMphysOverMcalMC, LArMphysOverMcalSym>
-ApplicationMgr                                    SUCCESS                     LArADC2MeVCondAlg/LArADC2MeVCondAlg
-ApplicationMgr                                    SUCCESS                AthSequencer/AthAlgSeq
-ApplicationMgr                                    SUCCESS                     PyAthena::Alg/TestAlg
-ApplicationMgr                                    SUCCESS           AthSequencer/AthEndSeq
-ApplicationMgr                                    SUCCESS                AthIncFirerAlg/EndIncFiringAlg
-ApplicationMgr                                    SUCCESS                IncidentProcAlg/IncidentProcAlg2
-ApplicationMgr                                    SUCCESS      AthSequencer/AthOutSeq
-ApplicationMgr                                    SUCCESS ******************************************************************************
 CondInputLoader                                      INFO created CondCont<AthenaAttributeList> with key 'ConditionStore+/LAR/Identifier/CalibIdMap'
 CondInputLoader                                      INFO created CondCont<AthenaAttributeList> with key 'ConditionStore+/LAR/Identifier/FebRodMap'
 CondInputLoader                                      INFO created CondCont<AthenaAttributeList> with key 'ConditionStore+/LAR/Identifier/OnOffIdMap'

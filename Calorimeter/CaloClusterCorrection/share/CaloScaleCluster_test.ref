@@ -57,26 +57,6 @@ CondInputLoader                                      INFO Will create WriteCondH
 PyComponentMgr                                       INFO Initializing PyComponentMgr...
 TestAlg                                              INFO Initializing TestAlg...
 ApplicationMgr                                       INFO Application Manager Initialized successfully
-ApplicationMgr                                    SUCCESS ****************************** Algorithm Sequence ****************************
-ApplicationMgr                                    SUCCESS AthSequencer/AthMasterSeq
-ApplicationMgr                                    SUCCESS      AthSequencer/AthAlgEvtSeq
-ApplicationMgr                                    SUCCESS           AthSequencer/AthBeginSeq
-ApplicationMgr                                    SUCCESS                AthIncFirerAlg/BeginIncFiringAlg
-ApplicationMgr                                    SUCCESS                IncidentProcAlg/IncidentProcAlg1
-ApplicationMgr                                    SUCCESS           AthSequencer/AthAllAlgSeq
-ApplicationMgr                                    SUCCESS                AthSequencer/AthCondSeq
-ApplicationMgr                                    SUCCESS                     CaloAlignCondAlg/CaloAlignCondAlg
-ApplicationMgr                                    SUCCESS                     CondInputLoader/CondInputLoader
-ApplicationMgr                                    SUCCESS                     LArOnOffMappingAlg/LArOnOffMappingAlg
-ApplicationMgr                                    SUCCESS                AthSequencer/AthAlgSeq
-ApplicationMgr                                    SUCCESS                     PyAthena::Alg/TestAlg
-ApplicationMgr                                    SUCCESS           AthSequencer/AthEndSeq
-ApplicationMgr                                    SUCCESS                AthIncFirerAlg/EndIncFiringAlg
-ApplicationMgr                                    SUCCESS                IncidentProcAlg/IncidentProcAlg2
-ApplicationMgr                                    SUCCESS      AthSequencer/AthOutSeq
-ApplicationMgr                                    SUCCESS      AthIncFirerAlg/EndAlgorithmsFiringAlg
-ApplicationMgr                                    SUCCESS      IncidentProcAlg/IncidentProcAlg3
-ApplicationMgr                                    SUCCESS ******************************************************************************
 CondInputLoader                                      INFO created CondCont<AthenaAttributeList> with key 'ConditionStore+/LAR/Identifier/OnOffIdMap'
 ApplicationMgr                                       INFO Application Manager Started successfully
 AthenaEventLoopMgr                                   INFO   ===>>>  start of run 1    <<<===
