@@ -12,6 +12,8 @@
 #include "StoreGate/ReadHandle.h"
 #include "HepPDT/ParticleDataTable.hh"
 #include "AtlasHepMC/GenParticle.h"
+#include "AtlasHepMC/GenVertex.h"
+
 #include <cmath>
 
 ///////////////////////////////////////////////////////////////////
