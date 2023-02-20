@@ -84,7 +84,6 @@ PileupReweightingTool::PileupReweightingTool( const std::string& name ) :CP::TPi
       break;
    }
 #endif
-
 }
 
 #ifndef XAOD_STANDALONE
@@ -170,6 +169,7 @@ StatusCode PileupReweightingTool::initialize() {
 
    //set debugging if debugging is on:
    EnableDebugging(this->msgLvl(MSG::DEBUG));
+   PrintInfo(msgLvl(MSG::INFO));
 
    //convert custom periods vector to a vector of vectors (length 3) ...
    std::vector<std::vector<int>> customPeriods;
@@ -189,6 +189,7 @@ StatusCode PileupReweightingTool::initialize() {
    //see if we need variations 
    if(m_upVariation && (m_prwFiles.size()+m_lumicalcFiles.size())!=0) {
       m_upTool.reset( new TPileupReweighting((name()+"_upVariation").c_str()) );
+      m_upTool->PrintInfo(msgLvl(MSG::INFO));
       m_upTool->SetParentTool(this);
       m_upTool->CopyProperties(this);
       m_upTool->SetDataScaleFactors(m_upVariation);
@@ -196,6 +197,7 @@ StatusCode PileupReweightingTool::initialize() {
    }
    if(m_downVariation && (m_prwFiles.size()+m_lumicalcFiles.size())!=0) {
       m_downTool.reset( new TPileupReweighting((name()+"_downVariation").c_str()) );
+      m_downTool->PrintInfo(msgLvl(MSG::INFO));
       m_downTool->SetParentTool(this);
       m_downTool->CopyProperties(this);
       m_downTool->SetDataScaleFactors(m_downVariation);
