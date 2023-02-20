@@ -5258,6 +5258,16 @@ HLT_j20_0eta290_020jvt_boffperf_pf_ftf_L1J15:
     0: 9
     1: 22
     2: 22
+HLT_j20_0eta290_020jvt_boffperf_pf_ftf_L1RD0_FILLED:
+  eventCount: 24
+  stepCounts:
+    0: 50
+    1: 24
+    2: 24
+  stepFeatures:
+    0: 50
+    1: 44
+    2: 44
 HLT_j20_0eta290_020jvt_boffperf_pf_ftf_L1jJ30:
   eventCount: 24
   stepCounts:
