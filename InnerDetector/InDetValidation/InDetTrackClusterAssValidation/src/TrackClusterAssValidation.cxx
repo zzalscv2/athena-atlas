@@ -11,6 +11,7 @@
 #include "TrackClusterAssValidation.h"
 #include "StoreGate/ReadHandle.h"
 #include "HepPDT/ParticleDataTable.hh"
+#include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
 #include <cmath>
 
