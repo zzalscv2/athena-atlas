@@ -121,10 +121,7 @@ private:
    
     // cabling service
     const ITGCcablingSvc* m_tgcCabling{nullptr};
-
-    const MuonGM::MuonDetectorManager* m_MuonMgr{nullptr};  // no ReadCondHandleKey used here for now, since no alignment applied in digitisation
-
-
+ 
     // algorithm properties
     Gaudi::Property<bool> m_decodeMdtRDO{this, "DecodeMdtRDO", true};
     Gaudi::Property<bool> m_decodeCscRDO{this, "DecodeCscRDO", true};
@@ -158,6 +155,10 @@ private:
     /// New BIS78 RDO container
     SG::ReadHandleKey<xAOD::NRPCRDOContainer> m_nRpcRdoKey{this, "NRpcRdoContainer", "NRPCRDO", "BIS78 RPC Rdo input with ToTs"};
     SG::ReadCondHandleKey<MuonNRPC_CablingMap> m_nRpcCablingKey{this, "NRpcCablingKey", "MuonNRPC_CablingMap", "Key of input MDT cabling map"};
+    
+    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_DetectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager",
+                                                                            "Key of input MuonDetectorManager condition data"};
+
     BooleanProperty m_patch_for_rpc_time{this, "PatchForRpcTime", false, "flag for patching the RPC time"};
     SG::WriteHandleKey<RpcDigitContainer> m_rpcDigitKey{this, "RpcDigitContainer", "RPC_DIGITS", "Rpc Digit Output"};
     

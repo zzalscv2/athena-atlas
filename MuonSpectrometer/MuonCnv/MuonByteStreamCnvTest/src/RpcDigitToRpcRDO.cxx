@@ -24,7 +24,7 @@ namespace {
 /////////////////////////////////////////////////////////////////////////////
 
 RpcDigitToRpcRDO::RpcDigitToRpcRDO(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator), m_MuonMgr(nullptr) {}
+    AthReentrantAlgorithm(name, pSvcLocator) {}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -32,9 +32,10 @@ StatusCode RpcDigitToRpcRDO::initialize() {
     ATH_MSG_DEBUG(" in initialize()");
 
     ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(detStore()->retrieve(m_MuonMgr));
+    
 
     ATH_CHECK(m_readKey.initialize());
+    ATH_CHECK(m_DetectorManagerKey.initialize());
 
     // Fill Tag Info
     if (fillTagInfo() != StatusCode::SUCCESS) {
@@ -135,7 +136,11 @@ StatusCode RpcDigitToRpcRDO::fill_RPCdata(RPCsimuData& data, const EventContext&
         return StatusCode::SUCCESS;
     }
     ATH_MSG_DEBUG("Found RpcDigitContainer called " << container.name() << " in store " << container.store());
-
+    SG::ReadCondHandle<MuonGM::MuonDetectorManager> muonDetMgr{m_DetectorManagerKey,ctx};
+    if (!muonDetMgr.isValid()) {
+        ATH_MSG_FATAL("Failed to retrieve the readout geometry "<<muonDetMgr.fullKey());
+        return StatusCode::FAILURE;
+    }
     for (const RpcDigitCollection* rpcCollection : *container) {
         ATH_MSG_DEBUG("RPC Digit -> Pad loop :: digitCollection at " << rpcCollection);
 
@@ -167,7 +172,7 @@ StatusCode RpcDigitToRpcRDO::fill_RPCdata(RPCsimuData& data, const EventContext&
             ATH_MSG_DEBUG("RPC Digit Type, Eta, Phi, dbR, dbZ, dbP, gg, mPhi, Strip "
                             << stationType << " " << StationEta << " " << StationPhi << " " << DoubletR << " " << DoubletZ << " "
                             << DoubletP << " " << GasGap << " " << MeasuresPhi << " " << Strip);
-            const MuonGM::RpcReadoutElement* descriptor = m_MuonMgr->getRpcReadoutElement(channelId);
+            const MuonGM::RpcReadoutElement* descriptor = muonDetMgr->getRpcReadoutElement(channelId);
 
             // Get the global position of RPC strip from MuonDetDesc
             Amg::Vector3D pos = descriptor->stripPos(channelId);
