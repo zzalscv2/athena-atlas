@@ -7,6 +7,7 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "Identifier/Identifier.h"
 #include "MuonCablingData/NrpcCablingData.h"
+#include <set>
 /**********************************************
  *
  * @brief NRPC map data object

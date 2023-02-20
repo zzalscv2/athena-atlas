@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONINSIDEOUTANALYSIS_H
@@ -8,6 +8,7 @@
 #include "MuonRecValidationNtuples/MuonInsideOutAnalysisPlots.h"
 #include "MuonRecValidationNtuples/MuonInsideOutValidationNtuple.h"
 #include "MuonRecHelperTools/TimePointBetaFitter.h"
+#include <set>
 
 class TTree;
 class TDirectory;
