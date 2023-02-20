@@ -126,7 +126,7 @@ def RecoSteering(flags):
 
     # EGamma and CombinedMuon isolation
     acc.flagPerfmonDomain('Isolation')
-    if flags.Reco.EnableCombinedMuon or flags.Reco.EnableEgamma:
+    if flags.Reco.EnableIsolation:
         from IsolationAlgs.IsolationSteeringConfig import IsolationSteeringCfg
         acc.merge(IsolationSteeringCfg(flags))
         log.info("---------- Configured isolation")
