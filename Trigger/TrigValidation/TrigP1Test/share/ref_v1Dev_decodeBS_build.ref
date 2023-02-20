@@ -6440,6 +6440,8 @@ HLT_mu11_mu6_bBmumux_BdmumuKst_L1LFV-MU8VF:
   eventCount: 0
 HLT_mu11_mu6_bBmumux_BdmumuKst_L1MU8VF_2MU5VF:
   eventCount: 0
+HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:
+  eventCount: 0
 HLT_mu11_mu6_bBmumux_BpmumuKp_L1LFV-MU8VF:
   eventCount: 0
 HLT_mu11_mu6_bBmumux_BpmumuKp_L1MU8VF_2MU5VF:
