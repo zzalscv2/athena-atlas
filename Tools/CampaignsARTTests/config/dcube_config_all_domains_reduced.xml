@@ -524,7 +524,7 @@
      </TDirectory>
     </TDirectory>
     <hist1D name="Electron_author" plotopts="" tests="KS" type="TH1F"/>
-    <hist1D name="Electron_mu_averadge" plotopts="" tests="KS" type="TH1F"/>
+    <hist1D name="Electron_mu_average" plotopts="" tests="KS" type="TH1F"/>
     <hist1D name="Electron_mu_actual" plotopts="" tests="KS" type="TH1F"/>
     <hist1D name="Electron_res_et" plotopts="" tests="KS" type="TProfile"/>
     <hist1D name="Electron_res_eta" plotopts="" tests="KS" type="TProfile"/>
