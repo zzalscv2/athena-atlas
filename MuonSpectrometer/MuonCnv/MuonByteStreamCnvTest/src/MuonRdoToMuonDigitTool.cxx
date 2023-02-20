@@ -762,8 +762,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeNRpcRDO(const EventContext& ctx, RpcDig
     /// Copy the newly created digits to the map
     for ( auto& [hash, coll] : digit_map) {
         if (coll->empty()) continue;
-        RpcDigitContainer::IDC_WriteHandle lock = container->getWriteHandle(hash);
-        ATH_CHECK(lock.addOrDelete(std::move(coll)));
+        ATH_CHECK(container->addOrDelete(std::move(coll), hash));
     }
     return StatusCode::SUCCESS;
 }
