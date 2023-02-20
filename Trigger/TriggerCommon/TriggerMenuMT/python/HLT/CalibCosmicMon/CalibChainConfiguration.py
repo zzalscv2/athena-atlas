@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool # ChainStep,
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool, algorithmCAToGlobalWrapper
 from TrigT2CaloCommon.CaloDef import fastCaloRecoSequence
 from TrigGenericAlgs.TrigGenericAlgsConfig import TimeBurnerCfg, TimeBurnerHypoToolGen
 from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorInitialROITool
@@ -21,7 +21,7 @@ def getLArNoiseBurstRecoSequence(flags):
     cells_sequence, cells_name = RecoFragmentsPool.retrieve(cellRecoSequence, flags, RoIs='')
     noiseBurstRecoSeq += cells_sequence
     from TrigCaloHypo.TrigCaloHypoConfig import TrigLArNoiseBurstRecoAlgCfg
-    noiseBurstRecoSeq += TrigLArNoiseBurstRecoAlgCfg(CellContainerKey=cells_name)
+    noiseBurstRecoSeq += algorithmCAToGlobalWrapper(TrigLArNoiseBurstRecoAlgCfg, flags, cells_name)[0]
     
     return noiseBurstRecoSeq
 
