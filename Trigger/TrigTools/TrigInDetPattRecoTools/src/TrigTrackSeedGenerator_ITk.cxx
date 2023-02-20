@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -61,11 +61,8 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
   const int MaxEdges = 2000000;
 
-  const float cut_dphi_min      =-0.012;
   const float cut_dphi_max      = 0.012;
-  const float cut_dcurv_min     =-0.001;
   const float cut_dcurv_max     = 0.001;
-  const float cut_tau_ratio_min =-0.007;
   const float cut_tau_ratio_max = 0.007;
   const float min_z0            = roiDescriptor->zedMinus();
   const float max_z0            = roiDescriptor->zedPlus();
@@ -329,7 +326,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 	float tau2 = pNS->m_p[0];
 	float tau_ratio = tau2*uat_1 - 1.0;
 	
-	if(tau_ratio < cut_tau_ratio_min) {
+	if(tau_ratio < -1.0*cut_tau_ratio_max) {
 	  last_out = out_idx;
 	  continue;
 	}
@@ -341,7 +338,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 	if(dPhi<-M_PI) dPhi += 2*M_PI;
 	else if(dPhi>M_PI) dPhi -= 2*M_PI;
 	
-	if(dPhi < cut_dphi_min || dPhi > cut_dphi_max) {
+	if(dPhi < -1.0*(cut_dphi_max) || dPhi > cut_dphi_max) {
 	  continue;
 	}
 	
@@ -349,7 +346,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 	float dcurv = curv2-curv1;
         
 	
-	if(dcurv < cut_dcurv_min || dcurv > cut_dcurv_max) {
+	if(dcurv < -1.0*(cut_dcurv_max) || dcurv > cut_dcurv_max) {
 	  continue;
 	}
 		
@@ -533,7 +530,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
 	  //2. d0 cut
     
-	  const double fabs_d0 = std::fabs(pS_r*(B*pS_r - A));
+	  const double fabs_d0 = std::abs(pS_r*(B*pS_r - A));
 	  
 	  if(fabs_d0 > m_settings.m_tripletD0Max) {
 	    continue;
