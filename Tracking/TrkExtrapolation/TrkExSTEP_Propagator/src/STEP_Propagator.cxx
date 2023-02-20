@@ -2183,7 +2183,7 @@ propagateRungeKuttaImpl(Cache& cache,
             }
             ++iSol;
           }
-          solutions = valid_solutions;
+          solutions = std::move(valid_solutions);
           if (solution)
             break;
         }
