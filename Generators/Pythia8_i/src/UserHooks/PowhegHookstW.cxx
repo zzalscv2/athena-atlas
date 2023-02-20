@@ -521,15 +521,15 @@ public:
 //--------------------------------------------------------------------------
 
 private:
-  int m_nFinal, m_vetoMode, m_vetoCount, m_pThardMode, m_pTemtMode,
-    m_emittedMode, m_pTdefMode, m_MPIvetoMode, m_QEDvetoMode;
-  double m_pThard, m_pTMPI;
-  bool   m_accepted, m_isEmt;
+  int m_nFinal = 0, m_vetoMode = 0, m_vetoCount = 0, m_pThardMode = 0, m_pTemtMode = 0,
+    m_emittedMode = 0, m_pTdefMode = 0, m_MPIvetoMode = 0, m_QEDvetoMode = 0;
+  double m_pThard = 0.0, m_pTMPI = 0.0;
+  bool   m_accepted = false, m_isEmt = false;
   // The number of accepted emissions (in a row)
   // Flag for PowHeg Born or Radiation
-  int m_nAcceptSeq;
+  int m_nAcceptSeq = 0;
   // Statistics on vetos
-  unsigned long int m_nISRveto, m_nFSRveto;
+  unsigned long int m_nISRveto = 0UL, m_nFSRveto = 0UL;
 
 };
 
