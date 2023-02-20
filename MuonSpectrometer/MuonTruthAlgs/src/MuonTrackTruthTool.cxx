@@ -160,9 +160,15 @@ namespace Muon {
                         barcode = truthTrajectory->front().barcode();
 
                         if (msgLvl(MSG::VERBOSE)) {
+#ifdef HEPMC3
                             ATH_MSG_VERBOSE(" found GenParticle: size " << truthTrajectory->size() << " fs barcode " << barcode << " pdg "
                                                                         << truthTrajectory->front()->pdg_id() << " p "
                                                                         << truthTrajectory->front()->momentum());
+#else
+                            ATH_MSG_VERBOSE(" found GenParticle: size " << truthTrajectory->size() << " fs barcode " << barcode << " pdg "
+                                                                        << truthTrajectory->front()->pdg_id() << " p "
+                                                                        << truthTrajectory->front()->momentum().rho());
+#endif
                             if (truthTrajectory->front()->production_vertex()) {
                                 ATH_MSG_VERBOSE(" vertex: r  " << truthTrajectory->front()->production_vertex()->position().perp() << " z "
                                                                << truthTrajectory->front()->production_vertex()->position().z());
@@ -176,8 +182,13 @@ namespace Muon {
                             int code = (*pit).barcode();
 
                             if (msgLvl(MSG::VERBOSE) && code != barcode) {
+#ifdef HEPMC3
                                 ATH_MSG_VERBOSE("  secondary barcode: " << code << " pdg " << (*pit)->pdg_id() << " p "
                                                                         << (*pit)->momentum());
+#else
+                                ATH_MSG_VERBOSE("  secondary barcode: " << code << " pdg " << (*pit)->pdg_id() << " p "
+                                                                        << (*pit)->momentum().rho());
+#endif
                                 if ((*pit)->production_vertex())
                                     ATH_MSG_VERBOSE(" vertex: r  " << (*pit)->production_vertex()->position().perp() << " z "
                                                                    << (*pit)->production_vertex()->position().z());
