@@ -86,7 +86,8 @@ public:
 		     LArRawSCContainer* et_id_coll,
 		     LArLATOMEHeaderContainer* header_coll) const;
 
-  StatusCode convert(const RawEvent* re, const LArLATOMEMapping *map,
+  StatusCode convert(const RawEvent* re, const LArLATOMEMapping *map, 
+                     const LArOnOffIdMapping *onoffmap, const LArCalibLineMapping *clmap,
                      LArAccumulatedDigitContainer* accdigits,
                      LArAccumulatedCalibDigitContainer* caccdigits,
                      LArLATOMEHeaderContainer* header_coll) const;
@@ -147,7 +148,8 @@ private:
     
     /** @brief Execute decoding for an event*/
 
-    void fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* pROB, const LArLATOMEMapping *map);
+    void fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* pROB, const LArLATOMEMapping *map, 
+                        const LArOnOffIdMapping *onoffmap=nullptr, const LArCalibLineMapping *clmap=nullptr);
 
   private:
     bool compareOrSet(Word& param, Word value, bool compare);
@@ -165,7 +167,8 @@ private:
     int signEnergy(unsigned int energy);
     /** @brief Pass ADC values from an event*/
     void fillRaw(const LArLATOMEMapping *map);
-    void fillCalib(const LArLATOMEMapping *map);
+    void fillCalib(const LArLATOMEMapping *map, 
+                   const LArOnOffIdMapping *onoffmap, const LArCalibLineMapping *clmap);
     void fillHeader();
     
     enum MODE {
@@ -253,9 +256,7 @@ private:
   BooleanProperty m_ignoreEndcapChannels{this, "IgnoreEndcapChannels", false};
   BooleanProperty m_protectSourceId{this, "ProtectSourceId", true, "discard main readout sourceID, should be false for reading all files from the mon path with old source IDs"};
   BooleanProperty m_keepPulsed{this, "KeepOnlyPulsed", true};
-  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this, "OnOffMap", "LArOnOffIdMap", "SG key for mapping object"};
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKeySC{this,"ScCablingKey","LArOnOffIdMapSC","SG Key of SC LArOnOffIdMapping object"};
-  SG::ReadCondHandleKey<LArCalibLineMapping> m_calibMapKey{this,"CalibCablingKey","LArCalibLineMap","SG Key of LArCalibLineMapping object"};
 
 };
 

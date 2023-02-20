@@ -34,14 +34,13 @@ StatusCode LArLATOMEDecoder::initialize() {
   ATH_CHECK(detStore()->retrieve(m_onlineId,"LArOnline_SuperCellID"));
 
   ATH_CHECK( m_sc2ccMappingTool.retrieve() );
-  ATH_CHECK( m_cablingKey.initialize() );
   ATH_CHECK( m_cablingKeySC.initialize() );
-  ATH_CHECK( m_calibMapKey.initialize() );
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode LArLATOMEDecoder::convert(const RawEvent* re, const LArLATOMEMapping *map,
+                                     const LArOnOffIdMapping *onoffmap, const LArCalibLineMapping *clmap,
 				     LArAccumulatedDigitContainer* accdigits,
 				     LArAccumulatedCalibDigitContainer* caccdigits,
 				     LArLATOMEHeaderContainer* header_coll) const{
@@ -76,7 +75,7 @@ StatusCode LArLATOMEDecoder::convert(const RawEvent* re, const LArLATOMEMapping 
 	  ATH_MSG_DEBUG(" found latome source ID " << std::hex << latomeSourceID);
 	}
 	EventProcess ev(this, 0, 0, 0, 0, accdigits, caccdigits, header_coll);
-	ev.fillCollection(&robFrag, map);
+	ev.fillCollection(&robFrag, map, onoffmap, clmap);
       }
       catch (eformat::Issue& ex) {
 	ATH_MSG_WARNING ( " exception thrown by ROBFragment, badly corrupted event. Abort decoding " );
@@ -113,7 +112,7 @@ StatusCode LArLATOMEDecoder::convert(const std::vector<const OFFLINE_FRAGMENTS_N
 	  ATH_MSG_DEBUG(" found latome source ID " << std::hex << latomeSourceID);
 	}
  	EventProcess ev(this,  adc_coll, adc_bas_coll, et_coll, et_id_coll, 0, 0, header_coll);
-	ev.fillCollection(pRob, map);
+	ev.fillCollection(pRob, map, nullptr, nullptr);
       }	
       catch (eformat::Issue& ex) {
 	ATH_MSG_WARNING ( " exception thrown by ROBFragment, badly corrupted event. Abort decoding " );
@@ -428,7 +427,8 @@ void LArLATOMEDecoder::EventProcess::decodeChannel(unsigned int& wordshift, unsi
 
 
 
-void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, const LArLATOMEMapping *map) {
+void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, const LArLATOMEMapping *map, 
+                                     const LArOnOffIdMapping *onoffmap, const LArCalibLineMapping *clmap) {
   //Mon* mon = new Mon;
 
   /// some of this info should be used in the LatomeHeader class and for cross checks also (same as for the mon header)
@@ -824,12 +824,17 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
   if(!m_isAveraged && !m_isAutoCorr){
     fillRaw(map);
   } else{
-    fillCalib(map);
+    if(onoffmap && clmap) { 
+      fillCalib(map,onoffmap,clmap);
+    } else {
+      ATH_MSG_ERROR("Do not have mapping !!!");
+    } 
   }
   fillHeader();
 }
 
-void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping *map) {
+void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping *map, 
+                                     const LArOnOffIdMapping* cablingLeg, const LArCalibLineMapping *clcabling) {
 
   CaloGain::CaloGain gain=CaloGain::LARHIGHGAIN;
   uint32_t DAC_value=0;
@@ -839,19 +844,10 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping *map) {
   LArCalibParams* calibParams2=0;
 
   int pattype=m_nthLATOME>>16;
-  const LArCalibLineMapping *clcabling=0;
   const LArOnOffIdMapping* cabling =0;
-  const LArOnOffIdMapping* cablingLeg =0;
   if(m_caccdigits){ /// accumulated calib digits requested so decode dac and delay from headers
     m_caccdigits->setDelayScale(25./240.);
 
-    SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_decoder->m_calibMapKey};
-    clcabling= {*clHdl};
-    if(!clcabling) {
-      ATH_MSG_ERROR(  "Do not have calib line mapping from key " << m_decoder->m_calibMapKey.key() );
-      return;
-    }
-  
     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_decoder->m_cablingKeySC};
     cabling = {*cablingHdl};
     if(!cabling) {
@@ -859,12 +855,6 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping *map) {
       return;
     }
     
-    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdlLeg{m_decoder->m_cablingKey};
-    cablingLeg = {*cablingHdlLeg};
-    if(!cablingLeg) {
-      ATH_MSG_ERROR( "Do not have mapping object " << m_decoder->m_cablingKey.key());
-      return;
-    }
     calibParams1=new LArCalibParams();
     calibParams2=new LArCalibParams();
 

@@ -67,12 +67,12 @@ def LArRampCfg(flags):
 
 
        else:   
-          result.addEventAlgo(CompFactory.LArRawSCCalibDataReadingAlg(LArSCAccCalibDigitKey = digKey, LATOMEDecoder = theLArLATOMEDecoder))
           # this needs also legacy  maps
           from LArCabling.LArCablingConfig import LArCalibIdMappingCfg,LArOnOffIdMappingCfg
           result.merge(LArOnOffIdMappingCfg(flags))
           result.merge(LArCalibIdMappingCfg(flags))
 
+          result.addEventAlgo(CompFactory.LArRawSCCalibDataReadingAlg(LArSCAccCalibDigitKey = digKey, LATOMEDecoder = theLArLATOMEDecoder))
 
     pass
 

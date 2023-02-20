@@ -58,7 +58,9 @@ LArRawSCCalibDataReadingAlg::LArRawSCCalibDataReadingAlg(const std::string& name
      return StatusCode::FAILURE;
   }
 
-  ATH_CHECK(m_mapKey.initialize() );
+  ATH_CHECK( m_mapKey.initialize() );
+  ATH_CHECK( m_cablingKey.initialize() );
+  ATH_CHECK( m_calibMapKey.initialize() );
 
   ATH_CHECK(m_robDataProviderSvc.retrieve());
   ATH_CHECK(detStore()->retrieve(m_onlineId,"LArOnlineID"));  
@@ -104,10 +106,24 @@ StatusCode LArRawSCCalibDataReadingAlg::execute(const EventContext& ctx) const {
      return StatusCode::FAILURE;
   }
 
+  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
+  const LArOnOffIdMapping *onoffmap = *cablingHdl;
+  if(!onoffmap) {
+    ATH_MSG_ERROR( "Do not have mapping object " << m_cablingKey.key());
+    return StatusCode::FAILURE;
+  }
+
+  SG::ReadCondHandle<LArCalibLineMapping> clmapHdl(m_calibMapKey, ctx);
+  const LArCalibLineMapping *clmap=*clmapHdl;
+  if(!clmap) {
+     ATH_MSG_ERROR("Do not have calib line mapping with the key " << m_calibMapKey.key());
+     return StatusCode::FAILURE;
+  }
+
   //Get full events and filter out LAr ROBs
   const RawEvent* rawEvent=m_robDataProviderSvc->getEvent(ctx);
  
-  StatusCode sc = m_latomeDecoder->convert(rawEvent, map,
+  StatusCode sc = m_latomeDecoder->convert(rawEvent, map, onoffmap, clmap,
                                            accdigits, caccdigits,
                                            latome_header_coll);
   if (sc != StatusCode::SUCCESS) 
