@@ -99,14 +99,14 @@ if flags.Common.isOnline:
   flags.IOVDb.GlobalTag = flags.Trigger.OnlineCondTag
 #otherwise, read these from file metadata (e.g. for MC)
 
-flags.lock()
+from TriggerJobOpts import runHLT
+_allflags = flags.clone()   # copy including Concurrency flags
+_allflags.lock()
+runHLT.lock_and_restrict(flags)
 flags.dump()
-# Enable when debugging deduplication issues
-# ComponentAccumulator.debugMode = "trackCA trackEventAlog ... and so on"
-log.setLevel(logging.DEBUG)
 
-acc = MainServicesCfg(flags)
-acc.getService('AvalancheSchedulerSvc').VerboseSubSlots = True
+acc = MainServicesCfg(_allflags)
+del _allflags
 
 # this delcares to the scheduler that EventInfo object comes from the input
 loadFromSG = [('xAOD::EventInfo', 'StoreGateSvc+EventInfo')]
