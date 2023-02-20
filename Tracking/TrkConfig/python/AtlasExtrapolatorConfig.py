@@ -2,45 +2,50 @@
 
 # New configuration for ATLAS extrapolator
 # The extrapolator  combines
+#
 # - The mathematical propagation of track
 #    parameters to a destination surface via the configured propagators
 #    RungeKuttaPropagator or STEP_propagator.
 #    They both perform track parameters propagation through
-#    the magnetic field. The STEP additionally includes material effects.
+#    the magnetic field. The STEP_propagator
+#    additionally includes material effects.
 #
-# - The application of material effects either in certain
-#   points/surfaces via the relevant MaterialEffectsUpdators,
-#   EnergyLoss and MultipleScattering tools,
-#   or continuously via the STEP propagator.
+# - The application of material effects:
+#   1) Either in certain points/surfaces via the
+#   relevant MaterialEffectsUpdators, EnergyLoss and
+#   MultipleScattering tools,
+#   2) or continuously via the STEP propagator.
 #
 # - The possible navigation procedure determining the starting
-#   and destination volume for the extrapolation that provides
+#   and destination volume for the extrapolation and provides
 #   the boundary surfaces to be be intersected.
 #
 # We need/can configure :
 # The "Global" Propagagor property (usually Runge Kutta )
 # The "Global" Material effects updator property
 # The Navigator property
-# The STEP_Propagator property (needed tracking workloads inside dense volumes)
+# The STEP_Propagator property (for tracking workloads inside dense volumes)
 #
 # Aditionally and for consistency/clarity we might want to have
-# specific setting for ITK/ID, Calo, MS , BeamPipe, Cavern
-# Otherwise the global one will be used.
+# specific settings for each subdetector volume :
+# - ITK/ID,
+# - Calo,
+# - Muon Spectrometer,
+# - BeamPipe,
+# - Cavern
+# Otherwise the global propagator is used.
 #
-# Also notice although the EnergyLossUpdators/MultipleScatteringUpdators
-# are arrays only the [0] entry is used (in extrapolateM relates to GlabalChi2).
 #
 # The extrapolator provides many method and one instance can be used
 # in various contexts.
 # Broadly we have 2 cases.
 # - Inner detector and e/gamma rely on RungeKuttaPropagator.
-#   And have Material effects updator with no energy loss.
-#   Note as an example of various uses that e/gamma for extrapolation
-#   to calo uses extrapolateDirectly, so not navigation or material
-#   effects.
+#   They use Material effects updator(s) with no energy loss.
+#   As an example e/gamma for extrapolation to calo uses extrapolateDirectly,
+#   so not navigation or material effects.
 #
 # - Muons (and PFlow) do full tracking (intersections) inside the calo.
-#   They rely on the STEP_Propagator  (intersection code always use it)
+#   They rely on the STEP_Propagator  (the intersections code always use it).
 #   And Muons prefer to use STEP globally.
 
 
@@ -48,24 +53,25 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentFactory import CompFactory
 import TrkConfig.AtlasExtrapolatorToolsConfig as TC
+from TrkConfig.TrkExSTEP_PropagatorConfig import AtlasSTEP_PropagatorCfg
 
-# For debugging comparisons with old-style config it is helpful to have names match
-use_old_names=False
+# For debugging comparisons with old-style config
+use_old_names = False
+
 
 def AtlasExtrapolatorCfg(flags, name='AtlasExtrapolator'):
     # Default "ATLAS" with some reasonable defaults
     # Rk for Global/ID STEP to be used for dense volumes.
-    from TrkConfig.AtlasExtrapolatorToolsConfig import AtlasMultipleScatteringUpdatorCfg
+    from TrkConfig.AtlasExtrapolatorToolsConfig import (
+        AtlasMultipleScatteringUpdatorCfg)
 
     result = ComponentAccumulator()
 
-    # PROPAGATOR DEFAULTS
-
+    # propagator defaults
     from TrkConfig.TrkExRungeKuttaPropagatorConfig import (
         RungeKuttaPropagatorCfg)
     AtlasRungeKuttaPropagator = result.popToolsAndMerge(
         RungeKuttaPropagatorCfg(flags))
-    from TrkConfig.TrkExSTEP_PropagatorConfig import AtlasSTEP_PropagatorCfg
     AtlasSTEP_Propagator = result.popToolsAndMerge(
         AtlasSTEP_PropagatorCfg(flags))
     ITkPropagator = None
@@ -80,8 +86,7 @@ def AtlasExtrapolatorCfg(flags, name='AtlasExtrapolator'):
     if flags.Detector.GeometryITk:
         AtlasPropagators += [ITkPropagator]
 
-    # UPDATOR DEFAULTS
-
+    # updator defaults
     AtlasMaterialEffectsUpdator = result.popToolsAndMerge(
         TC.AtlasMaterialEffectsUpdatorCfg(flags))
     AtlasMaterialEffectsUpdatorLandau = result.popToolsAndMerge(
@@ -91,7 +96,6 @@ def AtlasExtrapolatorCfg(flags, name='AtlasExtrapolator'):
         ITkMaterialEffectsUpdator = result.popToolsAndMerge(
             TC.ITkMaterialEffectsUpdatorCfg(flags))
 
-
     AtlasUpdators = []
     AtlasUpdators += [AtlasMaterialEffectsUpdator]
     AtlasUpdators += [AtlasMaterialEffectsUpdatorLandau]
@@ -100,8 +104,7 @@ def AtlasExtrapolatorCfg(flags, name='AtlasExtrapolator'):
 
     AtlasNavigator = result.popToolsAndMerge(TC.AtlasNavigatorCfg(flags))
 
-    # CONFIGURE PROPAGATORS/UPDATORS ACCORDING TO GEOMETRY SIGNATURE
-
+    # configure propagators/updators according to geometry signature
     AtlasSubPropagators = []
     AtlasSubPropagators += [AtlasRungeKuttaPropagator.name]  # Global
     if flags.Detector.GeometryITk:
@@ -124,7 +127,8 @@ def AtlasExtrapolatorCfg(flags, name='AtlasExtrapolator'):
     AtlasSubUpdators += [AtlasMaterialEffectsUpdator.name]  # MS
     AtlasSubUpdators += [AtlasMaterialEffectsUpdator.name]  # Cavern
 
-    AtlasELossUpdater = result.popToolsAndMerge(TC.AtlasEnergyLossUpdatorCfg(flags))
+    AtlasELossUpdater = result.popToolsAndMerge(
+        TC.AtlasEnergyLossUpdatorCfg(flags))
     AtlasEnergyLossUpdater = AtlasELossUpdater
 
     # call the base class constructor
@@ -192,8 +196,7 @@ def egammaCaloExtrapolatorCfg(flags, name='egammaCaloExtrapolator'):
     if flags.Detector.GeometryITk:
         egammaUpdators += [ITkMaterialEffectsUpdator]
 
-    # CONFIGURE PROPAGATORS/UPDATORS ACCORDING TO GEOMETRY SIGNATURE
-
+    # configure propagators/updators according to geometry signature
     egammaSubPropagators = []
     egammaSubPropagators += [RungeKuttaPropagator.name]  # Global
     if flags.Detector.GeometryITk:
@@ -230,7 +233,7 @@ def egammaCaloExtrapolatorCfg(flags, name='egammaCaloExtrapolator'):
 
 def MCTruthClassifierExtrapolatorCfg(flags,
                                      name='MCTruthClassifierExtrapolator'):
-    # MCTruthClassifier . Used to Extrapolate Directly  to extrapolate
+    # MCTruthClassifier. Used to Extrapolate Directly
     # photons (fwd Electrons) to a specific surface to the calo
     # for truth matching.
     # We do not do "tracking" as electrons/photon have showered.
@@ -250,8 +253,7 @@ def MCTruthClassifierExtrapolatorCfg(flags,
 
     MCTruthSubUpdators = []
 
-    # CONFIGURE PROPAGATORS/UPDATORS ACCORDING TO GEOMETRY SIGNATURE
-
+    # configure propagators/updators according to geometry signature
     MCTruthSubUpdators += [NoElossMaterialEffectsUpdator.name]  # Global
     MCTruthSubUpdators += [NoElossMaterialEffectsUpdator.name]  # ID
     MCTruthSubUpdators += [NoElossMaterialEffectsUpdator.name]  # beampipe
@@ -265,12 +267,13 @@ def MCTruthClassifierExtrapolatorCfg(flags,
     result.setPrivateTools(MCTruthExtrapolator)
     return result
 
+
 @AccumulatorCache
 def InDetExtrapolatorCfg(flags, name='InDetExtrapolator', **kwargs):
     # Inner detector config cares mainly for the "Global".
     # This is usually the RungeKutta Propagator and a material
     # effects updator without energy loss.
-    # Extrapolators are in the InDet volume.
+    # As extrapolations are to happen inside the InDet volume.
     result = ComponentAccumulator()
 
     # FIXME copied from the old config, also needs fixing on the c++ side.
@@ -282,16 +285,18 @@ def InDetExtrapolatorCfg(flags, name='InDetExtrapolator', **kwargs):
         Propagators = [InDetPropagator]
         kwargs.setdefault("Propagators", Propagators)
 
-    propagator = kwargs.get('Propagators')[0].name if kwargs.get(
-        'Propagators', None) is not None and len(kwargs.get('Propagators', None)) > 0 else None
+    propagator = kwargs.get('Propagators')[0].name if (
+        kwargs.get('Propagators', None) is not None
+        and len(kwargs.get('Propagators', None)) > 0) else None
 
     if 'MaterialEffectsUpdators' not in kwargs:
         InDetMaterialEffectsUpdator = result.getPrimaryAndMerge(
             TC.InDetMaterialEffectsUpdatorCfg(flags))
         MaterialEffectsUpdators = [InDetMaterialEffectsUpdator]
         kwargs.setdefault("MaterialEffectsUpdators", MaterialEffectsUpdators)
-    material_updator = kwargs.get('MaterialEffectsUpdators')[0].name if kwargs.get(
-        'MaterialEffectsUpdators', None) is not None and len(kwargs.get('MaterialEffectsUpdators', None)) > 0 else None
+    material_updator = kwargs.get('MaterialEffectsUpdators')[0].name if (
+        kwargs.get('MaterialEffectsUpdators', None) is not None
+        and len(kwargs.get('MaterialEffectsUpdators', None)) > 0) else None
 
     if 'Navigator' not in kwargs:
         AtlasNavigator = result.popToolsAndMerge(
@@ -301,8 +306,7 @@ def InDetExtrapolatorCfg(flags, name='InDetExtrapolator', **kwargs):
     sub_propagators = []
     sub_updators = []
 
-    # CONFIGURE PROPAGATORS/UPDATORS ACCORDING TO GEOMETRY SIGNATURE
-
+    # configure propagators/updators according to geometry signature
     # Global entry
     sub_propagators += [propagator]
     sub_updators += [material_updator]
@@ -317,7 +321,8 @@ def InDetExtrapolatorCfg(flags, name='InDetExtrapolator', **kwargs):
     kwargs.setdefault("SubPropagators", sub_propagators)
     kwargs.setdefault("SubMEUpdators", sub_updators)
 
-    AtlasELossUpdater = result.popToolsAndMerge(TC.AtlasEnergyLossUpdatorCfg(flags))
+    AtlasELossUpdater = result.popToolsAndMerge(
+        TC.AtlasEnergyLossUpdatorCfg(flags))
     kwargs.setdefault("EnergyLossUpdater", AtlasELossUpdater)
 
     extrapolator = CompFactory.Trk.Extrapolator(name, **kwargs)
@@ -326,10 +331,10 @@ def InDetExtrapolatorCfg(flags, name='InDetExtrapolator', **kwargs):
 
 
 def MuonExtrapolatorCfg(flags, name="MuonExtrapolator", **kwargs):
-    from TrkConfig.AtlasExtrapolatorToolsConfig import AtlasMultipleScatteringUpdatorCfg
-    from TrkConfig.TrkExSTEP_PropagatorConfig import AtlasSTEP_PropagatorCfg
+    from TrkConfig.AtlasExtrapolatorToolsConfig import (
+        AtlasMultipleScatteringUpdatorCfg)
 
-    # Muon set the STEP also as the single "Global" propagator
+    # Muons set the STEP also as the single "Global" propagator
     result = ComponentAccumulator()
 
     AtlasMaterialEffectsUpdator = result.popToolsAndMerge(
@@ -338,14 +343,18 @@ def MuonExtrapolatorCfg(flags, name="MuonExtrapolator", **kwargs):
     kwargs.setdefault("MaterialEffectsUpdators", [AtlasMaterialEffectsUpdator])
 
     kwargs.setdefault("MultipleScatteringUpdater",
-                      result.popToolsAndMerge(AtlasMultipleScatteringUpdatorCfg(flags, UseTrkUtils=True)))
+                      result.popToolsAndMerge(
+                          AtlasMultipleScatteringUpdatorCfg(flags,
+                                                            UseTrkUtils=True)))
 
-    AtlasNavigator = result.popToolsAndMerge(TC.AtlasNavigatorCfg(flags, name = 'InDetNavigator' if use_old_names else None))
+    AtlasNavigator = result.popToolsAndMerge(TC.AtlasNavigatorCfg(
+        flags, name='InDetNavigator' if use_old_names else None))
     kwargs.setdefault("Navigator", AtlasNavigator)
 
-    AtlasELossUpdater = result.popToolsAndMerge(TC.AtlasEnergyLossUpdatorCfg(flags))
+    AtlasELossUpdater = result.popToolsAndMerge(
+        TC.AtlasEnergyLossUpdatorCfg(flags))
     kwargs.setdefault("EnergyLossUpdater", AtlasELossUpdater)
-   
+
     if 'STEP_Propagator' not in kwargs:
         AtlasSTEP_Propagator = result.popToolsAndMerge(
             AtlasSTEP_PropagatorCfg(flags))
@@ -354,10 +363,9 @@ def MuonExtrapolatorCfg(flags, name="MuonExtrapolator", **kwargs):
     if 'Propagators' not in kwargs:
         if use_old_names:
             kwargs.setdefault("Propagators", [result.popToolsAndMerge(
-                AtlasSTEP_PropagatorCfg(flags, name="MuonPropagator"))]) 
+                AtlasSTEP_PropagatorCfg(flags, name="MuonPropagator"))])
         else:
             kwargs.setdefault("Propagators", [kwargs["STEP_Propagator"]])
-
 
     kwargs.setdefault("ResolveMuonStation", True)
     # must be > 1um to avoid missing MTG intersections
@@ -373,34 +381,35 @@ def MuonStraightLineExtrapolatorCfg(flags,
                                     **kwargs):
     # Muon set the STEP also as the single "Global" propagator
     result = ComponentAccumulator()
-    from TrkConfig.TrkExSTEP_PropagatorConfig import AtlasSTEP_PropagatorCfg
 
     muon_prop = None
     if use_old_names:
-        muon_prop=result.popToolsAndMerge( AtlasSTEP_PropagatorCfg(flags, name='MuonStraightLinePropagator'))
+        muon_prop = result.popToolsAndMerge(
+            AtlasSTEP_PropagatorCfg(flags, name='MuonStraightLinePropagator'))
     else:
-        muon_prop=result.popToolsAndMerge( AtlasSTEP_PropagatorCfg(flags))
+        muon_prop = result.popToolsAndMerge(AtlasSTEP_PropagatorCfg(flags))
     kwargs.setdefault("Propagators", [muon_prop])
     kwargs.setdefault("STEP_Propagator", muon_prop)
     extrap = result.popToolsAndMerge(
         MuonExtrapolatorCfg(flags, name, **kwargs))
     result.setPrivateTools(extrap)
-    result.addPublicTool(extrap) 
-    # This ^ should be done by the client with the public tool, but since it's hard to track down
-    # (and since Extrapolators are a specicial case), just be pragmatic for now.
+    result.addPublicTool(extrap)
+    # This should be done by the client with the public tool,
+    # but since it's hard to track down
+    # (and since Extrapolators are a specicial case),
+    # just be pragmatic for now.
     return result
 
 
 def MCTBExtrapolatorCfg(flags, name='MCTBExtrapolator', **kwargs):
     # Muon set the STEP also as the single "Global" propagator
     result = ComponentAccumulator()
-    from TrkConfig.TrkExSTEP_PropagatorConfig import AtlasSTEP_PropagatorCfg
     if use_old_names:
         kwargs.setdefault("Propagators", [result.popToolsAndMerge(
             AtlasSTEP_PropagatorCfg(flags, name='MCTBPropagator'))])
         kwargs.setdefault("STEP_Propagator",
                           result.popToolsAndMerge(AtlasSTEP_PropagatorCfg(flags)))
-    else:    
+    else:
         prop = result.popToolsAndMerge(
             AtlasSTEP_PropagatorCfg(flags))
         kwargs.setdefault("Propagators", [prop])
