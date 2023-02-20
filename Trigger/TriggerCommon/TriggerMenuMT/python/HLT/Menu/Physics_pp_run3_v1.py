@@ -418,6 +418,22 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_e50_etcut_L1eEM26M', groups=SupportPhIGroup+SingleElectronGroup+['RATE:CPS_eEM26M']),
         ChainProp(name='HLT_e120_etcut_L1eEM26M', groups=SupportPhIGroup+SingleElectronGroup+['RATE:CPS_eEM26M']),
         ChainProp(name='HLT_e250_etcut_L1eEM26M', groups=SupportPhIGroup+SingleElectronGroup+['RATE:CPS_eEM26M']),
+        
+        #ATR-26738
+        ChainProp(name='HLT_e5_etcut_L1EM3' , groups=SingleElectronGroup+SupportLegGroup+['RATE:CPS_EM3']+['PS:NoBulkMCProd']),
+        ChainProp(name='HLT_e10_etcut_L1EM7', groups=SingleElectronGroup+SupportLegGroup+['RATE:CPS_EM7']),
+        ChainProp(name='HLT_e15_etcut_L1EM7', groups=SingleElectronGroup+SupportLegGroup+['RATE:CPS_EM7']),
+        ChainProp(name='HLT_e20_etcut_L1EM15VHI', groups=SingleElectronGroup+SupportLegGroup+['RATE:CPS_EM15VHI']),
+        ChainProp(name='HLT_e25_etcut_L1EM15VHI', groups=SingleElectronGroup+SupportLegGroup+['RATE:CPS_EM15VHI']),
+        ChainProp(name='HLT_e30_etcut_L1EM15VHI', groups=SingleElectronGroup+SupportLegGroup+['RATE:CPS_EM15VHI']),
+        ChainProp(name='HLT_e40_etcut_L1EM15VHI', groups=SingleElectronGroup+SupportLegGroup+['RATE:CPS_EM15VHI']),
+        ChainProp(name='HLT_e60_etcut_L1EM22VHI', groups=SingleElectronGroup+SupportLegGroup+['RATE:CPS_EM22VHI']),
+        ChainProp(name='HLT_e70_etcut_L1EM22VHI', groups=SingleElectronGroup+SupportLegGroup+['RATE:CPS_EM22VHI']),
+        ChainProp(name='HLT_e80_etcut_L1EM22VHI', groups=SingleElectronGroup+SupportLegGroup+['RATE:CPS_EM22VHI']),
+        ChainProp(name='HLT_e100_etcut_L1EM22VHI', groups=SingleElectronGroup+SupportLegGroup+['RATE:CPS_EM22VHI']),
+
+
+
         #------------ support background studies
         ChainProp(name='HLT_e10_lhvloose_L1EM7', groups=SupportLegGroup+SingleElectronGroup+['RATE:CPS_EM7']),
         ChainProp(name='HLT_e14_lhvloose_L1EM10VH', groups=SupportLegGroup+SingleElectronGroup+['RATE:CPS_EM10VH']),

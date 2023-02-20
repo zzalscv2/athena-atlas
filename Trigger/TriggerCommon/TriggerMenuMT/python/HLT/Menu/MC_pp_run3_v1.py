@@ -160,7 +160,6 @@ def addMCSignatures(chains):
         #------------ nopid trigger and etcut from ATR-26311
         # ATR-23723
         ChainProp(name='HLT_e5_nopid_L1EM3', groups=SingleElectronGroup+['PS:NoBulkMCProd']),
-        ChainProp(name='HLT_e5_etcut_L1EM3', groups=SingleElectronGroup+['PS:NoBulkMCProd']),
 
         #  ATR-26311
         #  Validating/checking eFEX and primary electron trigger
