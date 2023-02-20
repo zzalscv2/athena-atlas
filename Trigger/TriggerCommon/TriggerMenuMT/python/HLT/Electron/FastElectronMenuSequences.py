@@ -25,7 +25,7 @@ def fastElectronSequence(flags, variant=''):
 
     # Configure the reconstruction algorithm sequence
     from TriggerMenuMT.HLT.Electron.FastElectronRecoSequences import fastElectronRecoSequence
-    (fastElectronRec, sequenceOut) = fastElectronRecoSequence(InViewRoIs, variant)
+    (fastElectronRec, sequenceOut) = fastElectronRecoSequence(flags, InViewRoIs, variant)
     
     # Suffix to distinguish probe leg sequences
     fastElectronInViewAlgs = parOR("fastElectronInViewAlgs" + variant, [fastElectronRec])
