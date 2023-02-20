@@ -11,7 +11,10 @@ from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 if isComponentAccumulatorCfg():
     pass
 else:
-    from TriggerMenuMT.HLT.MinBias.MinBiasMenuSequences import MinBiasSPSequence, MinBiasTrkSequence, MinBiasMbtsSequence, MinBiasZVertexFinderSequenceCfg
+    from TriggerMenuMT.HLT.MinBias.MinBiasMenuSequences import (MinBiasSPSequence, 
+                                                                MinBiasTrkSequence,
+                                                                MinBiasMbtsSequenceCfg, 
+                                                                MinBiasZVertexFinderSequenceCfg)
     from TriggerMenuMT.HLT.MinBias.ALFAMenuSequences import ALFAPerfSequence
     from TriggerMenuMT.HLT.MinBias.AFPMenuSequence import AFPTrkSequenceCfg, AFPGlobalSequenceCfg
 
@@ -26,9 +29,6 @@ def MinBiasSPSequenceCfg(flags):
 
 def MinBiasTrkSequenceCfg(flags):
     return MinBiasTrkSequence(flags)
-
-def MinBiasMbtsSequenceCfg(flags):
-    return MinBiasMbtsSequence(flags)
 
 def MinBiasMbtsEmptySequenceCfg(flags):
     return EmptyMenuSequence("EmptyMbts")
@@ -82,6 +82,12 @@ def MinBiasZVertexFinderCfg(flags):
     from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
     return menuSequenceCAToGlobalWrapper(MinBiasZVertexFinderSequenceCfg, flags)
 
+def MinBiasMbtsCfg(flags):
+    #TODO we can do that inside of the getStep ... next interation
+    from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
+    return menuSequenceCAToGlobalWrapper(MinBiasMbtsSequenceCfg, flags)
+
+
 class MinBiasChainConfig(ChainConfigurationBase):
 
     def __init__(self, chainDict):
@@ -117,7 +123,7 @@ class MinBiasChainConfig(ChainConfigurationBase):
         return self.buildChain(steps)
 
     def getMinBiasMbtsStep(self, flags):
-        return self.getStep(flags,1,'Mbts',[MinBiasMbtsSequenceCfg])
+        return self.getStep(flags,1,'Mbts',[MinBiasMbtsCfg])
 
     def getMinBiasEmptyMbtsStep(self, flags):
         return self.getStep(flags,1,'EmptyMbts',[MinBiasMbtsEmptySequenceCfg])
