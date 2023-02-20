@@ -424,4 +424,5 @@ for rev_tool in revertex_tools:
     HION13SlimmingHelper.StaticContent += ["xAOD::VertexContainer#%s" % rev_tool.OutputVtxContainerName]
     HION13SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % rev_tool.OutputVtxContainerName]
 
+HION13SlimmingHelper.SmartCollections = ["Muons", "PrimaryVertices", "InDetTrackParticles"]
 HION13SlimmingHelper.AppendContentToStream(HION13Stream)
