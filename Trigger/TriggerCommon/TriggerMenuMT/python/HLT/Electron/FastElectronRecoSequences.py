@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaCommon.CFElements import parOR
 
@@ -8,9 +8,9 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
+from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
 
-
-def fastElectronRecoSequence(RoIs, variant=''):
+def fastElectronRecoSequence(flags, RoIs, variant=''):
     
     import AthenaCommon.CfgMgr as CfgMgr
 
@@ -25,14 +25,11 @@ def fastElectronRecoSequence(RoIs, variant=''):
                                   ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+%s' % trackParticlesName ),
                                   ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs )]
                                   
-    from TrigEgammaRec.TrigEgammaFastElectronConfig import TrigEgammaFastElectron_ReFastAlgo_Clean
-    theElectronFex = TrigEgammaFastElectron_ReFastAlgo_Clean("EgammaFastElectronFex_Clean_gen"+variant)
-
+    from TrigEgammaRec.TrigEgammaFastElectronConfig import fastElectronFexAlgCfg
+    theElectronFex = algorithmCAToGlobalWrapper(fastElectronFexAlgCfg, flags, name="EgammaFastElectronFex_Clean_gen"+variant, rois=RoIs)[0]
     theElectronFex.TrigEMClusterName = CaloMenuDefs.L2CaloClusters
-    theElectronFex.RoIs = RoIs
     theElectronFex.TrackParticlesName = trackParticlesName
-    theElectronFex.ElectronsName=TrigEgammaKeys.fastElectronContainer
-    theElectronFex.DummyElectronsName= "HLT_FastDummyElectrons"
+    theElectronFex.ElectronsName = TrigEgammaKeys.fastElectronContainer
 
     fastElectronRecoSequence = parOR( "fastElectron"+RoIs)
     fastElectronRecoSequence += ViewVerifyTrk
