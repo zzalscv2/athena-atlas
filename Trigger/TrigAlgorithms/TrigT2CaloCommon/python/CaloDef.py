@@ -10,14 +10,14 @@ from TriggerMenuMT.HLT.CommonSequences.FullScanDefs import caloFSRoI
 # defined as private within this module, so that they can be configured only in functions in this module
 ########################
 
-def _algoHLTCaloCell(name="HLTCaloCellMaker", inputEDM='', outputEDM='CellsClusters', RoIMode=True) :
+def _algoHLTCaloCell(flags, name="HLTCaloCellMaker", inputEDM='', outputEDM='CellsClusters', RoIMode=True) :
    if not inputEDM:
       from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
       inputEDM = mapThresholdToL1RoICollection("FSNOSEED")
 
    from AthenaCommon.AppMgr import ServiceMgr as svcMgr
    from TrigCaloRec.TrigCaloRecConfig import HLTCaloCellMaker
-   algo=HLTCaloCellMaker(name)
+   algo=HLTCaloCellMaker(flags, name)
    #"HLTCaloCellMaker"
    algo.RoIs=inputEDM
    algo.TrigDataAccessMT=svcMgr.TrigCaloDataAccessSvc
@@ -219,7 +219,7 @@ def clusterFSInputMaker( ):
 
 
 def HLTCellMaker(flags,RoIs=caloFSRoI, outputName="CaloCells", algSuffix=""):
-    cellMakerAlgo = _algoHLTCaloCell(name="HLTCaloCellMaker"+algSuffix, inputEDM=RoIs, outputEDM=outputName, RoIMode=True)
+    cellMakerAlgo = _algoHLTCaloCell(flags, name="HLTCaloCellMaker"+algSuffix, inputEDM=RoIs, outputEDM=outputName, RoIMode=True)
     return cellMakerAlgo
 
 

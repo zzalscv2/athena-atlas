@@ -6,7 +6,7 @@ from AthenaCommon.CFElements import seqAND
 def HIFwdGapMenuSequence(flags):
 
   from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import egammaFSCaloRecoSequence
-  egammaFSRecoSequence = egammaFSCaloRecoSequence()
+  egammaFSRecoSequence = egammaFSCaloRecoSequence(flags)
 
   from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorInitialROITool
   HIFwdGapInputMakerAlg = InputMakerForRoI('IM_HIFwdGap',
