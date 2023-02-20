@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigInDetEvent/TrigSiSpacePointBase.h"
@@ -26,11 +26,11 @@ TrigFTF_GNN_Layer::TrigFTF_GNN_Layer(const TrigInDetSiLayer& ls, float ew, int b
   }
 
   float t1   = m_z1/m_r1;
-  float eta1 = -log(sqrt(1+t1*t1)-t1);
+  float eta1 = -std::log(sqrt(1+t1*t1)-t1);
 
 
   float t2   = m_z2/m_r2;
-  float eta2 = -log(sqrt(1+t2*t2)-t2);
+  float eta2 = -std::log(sqrt(1+t2*t2)-t2);
 
   m_minEta = eta1;
   m_maxEta = eta2;
@@ -100,16 +100,16 @@ TrigFTF_GNN_Layer::TrigFTF_GNN_Layer(const TrigInDetSiLayer& ls, float ew, int b
 	if(m_layer.m_type == 0) {//barrel
 	  m_minRadius.push_back(m_layer.m_refCoord - 2.0);
           m_maxRadius.push_back(m_layer.m_refCoord + 2.0);
-	  float z1 = 0.5*m_layer.m_refCoord*(std::exp(e1)-std::exp(-e1));
+	  float z1 = m_layer.m_refCoord*std::sinh(e1);
 	  m_minBinCoord.push_back(z1);
-	  float z2 = 0.5*m_layer.m_refCoord*(std::exp(e2)-std::exp(-e2));
+	  float z2 = m_layer.m_refCoord*std::sinh(e2);
 	  m_maxBinCoord.push_back(z2);
 	}
 	else {//endcap
-	  float r = 2*m_layer.m_refCoord*std::exp(-e1)/(1-std::exp(-e1)*std::exp(-e1));
+	  float r = m_layer.m_refCoord/std::sinh(e1);
 	  m_minBinCoord.push_back(r);
 	  m_minRadius.push_back(r - 2.0);
-	  r = 2*m_layer.m_refCoord*std::exp(-e2)/(1-std::exp(-e2)*std::exp(-e2));
+	  r = m_layer.m_refCoord/std::sinh(e2);
 	  m_maxBinCoord.push_back(r);
 	  m_maxRadius.push_back(r + 2.0);
 	  
@@ -129,7 +129,7 @@ bool TrigFTF_GNN_Layer::verifyBin(const TrigFTF_GNN_Layer* pL, int b1, int b2, f
 
   if(m_layer.m_type == 0 && pL->m_layer.m_type == 0) {//barrel -> barrel
 
-    float tol = 5.0;
+    const float tol = 5.0;
 
     float min_b2 = pL->m_minBinCoord.at(b2);
     float max_b2 = pL->m_maxBinCoord.at(b2);
@@ -149,7 +149,7 @@ bool TrigFTF_GNN_Layer::verifyBin(const TrigFTF_GNN_Layer* pL, int b1, int b2, f
 
   if(m_layer.m_type == 0 && pL->m_layer.m_type != 0) {//barrel -> endcap
 
-    float tol = 10.0;
+    const float tol = 10.0;
 
     float z2 = pL->m_layer.m_refCoord;
     float r2max = pL->m_maxBinCoord.at(b2);
@@ -223,22 +223,16 @@ TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TrigInDetSiLayer>& 
 
   m_etaBinWidth = conn->m_etaBin;
 
-  std::cout<<"TrigFTF_GNN Geometry::initialize, delta_eta="<<m_etaBinWidth<<std::endl;
-
   for(const auto& layer : layers) {
     const TrigFTF_GNN_Layer* pL = addNewLayer(layer, m_nEtaBins);
     m_nEtaBins += pL->num_bins();
   }
  
-  std::cout<<"total number of TrigFTF_GNN layers "<<m_layMap.size()<<std::endl;
-
   int nBins = 0;
   
   for(auto gnn_layer : m_layArray) {
     nBins += gnn_layer->num_bins();
   }
-
-  std::cout<<"Total "<<nBins<<" eta bins created out of "<<m_nEtaBins<<std::endl;
 
   //calculating bin tables in the connector...
 
@@ -288,7 +282,6 @@ TrigFTF_GNN_Geometry::~TrigFTF_GNN_Geometry() {
 const TrigFTF_GNN_Layer* TrigFTF_GNN_Geometry::getTrigFTF_GNN_LayerByKey(unsigned int key) const {
   std::map<unsigned int, TrigFTF_GNN_Layer*>::const_iterator it = m_layMap.find(key);
   if(it == m_layMap.end()) {
-    std::cout << " TrigFTF_GNN_Layer* TrigFTF_GNN_Geometry::getTrigFTF_GNN_LayerByKey("<<key<<") returning nullptr" << std::endl; 
     return nullptr;
   }
   return (*it).second;

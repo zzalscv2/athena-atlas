@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetIdentifier/SCT_ID.h"
@@ -110,7 +110,7 @@ void TrigL2LayerNumberTool::createModuleHashMap(std::map<std::tuple<short,short,
     if(offlineId==0) continue;
  
     short barrel_ec = m_pixelId->barrel_ec(offlineId);
-    if(abs(barrel_ec)>2) continue;//no DBM needed
+    if(std::abs(barrel_ec)>2) continue;//no DBM needed
     short layer_disk = m_pixelId->layer_disk(offlineId);
     short phi_index = m_pixelId->phi_module(offlineId);
     short eta_index = m_pixelId->eta_module(offlineId);
