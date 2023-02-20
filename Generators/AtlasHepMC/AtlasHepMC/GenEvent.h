@@ -110,6 +110,13 @@ public:
       ret.insert({bcpartpair.first,std::const_pointer_cast<const HepMC3::GenParticle>(bcpartpair.second)});
     return ret;
    }
+  std::map<int,int> id_to_barcode_map() const {
+    std::map<int, int> ret;
+    for (const auto &bcvertpair: m_vertexBC) ret.insert({bcvertpair.second->id(),bcvertpair.first});
+    for (const auto &bcpartpair: m_particleBC) ret.insert({bcpartpair.second->id(),bcpartpair.first});
+    return ret;
+   }
+
 
   void fillAttribute(GenEvent* e) {
     const auto eventAttributes = e->attributes(); // this makes a copy
