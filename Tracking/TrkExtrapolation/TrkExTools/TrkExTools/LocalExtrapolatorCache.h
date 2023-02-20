@@ -71,8 +71,6 @@ struct Cache
     const Trk::EnergyLoss* m_cacheEloss = nullptr;
     //!< cache of TrackStateOnSurfaces
     std::vector<const Trk::TrackStateOnSurface*>* m_matstates = nullptr;
-    //!< cache of Transport Jacobians
-    std::vector<Trk::TransportJacobian*>* m_jacs = nullptr;
     // for active volumes
     std::unique_ptr<identifiedParameters_t> m_identifiedParameters;
 

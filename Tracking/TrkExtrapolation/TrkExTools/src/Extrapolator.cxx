@@ -3750,38 +3750,16 @@ Trk::Extrapolator::extrapolateToDestinationLayer(const EventContext& ctx,
   // start is destination layer -> on layer navigation, take care
   bool startIsDestLayer = startLayer == (&lay);
 
-  Trk::TransportJacobian* jac = nullptr;
   // get the Parameters on the destination surface
-  double pathLimit = -1.;
   ManagedTrackParmPtr parm(cache.manage(parm_ref));
-  ManagedTrackParmPtr destParameters(cache.manage(
-    cache.m_jacs
-      ? prop.propagate(ctx,
-                       *parm,
-                       sf,
-                       dir,
-                       bcheck,
-                       MagneticFieldProperties(),
-                       jac,
-                       pathLimit,
-                       particle)
-      : prop.propagate(
-          ctx, *parm, sf, dir, bcheck, MagneticFieldProperties(), particle)));
+  ManagedTrackParmPtr destParameters(cache.manage(prop.propagate(
+      ctx, *parm, sf, dir, bcheck, MagneticFieldProperties(), particle)));
 
   // fallback to anyDirection
   if (!destParameters) {
-    destParameters = cache.manage(
-      (cache.m_jacs
-         ? prop.propagate(ctx,
-                          *parm,
-                          sf,
-                          Trk::anyDirection,
-                          bcheck,
-                          MagneticFieldProperties(),
-                          jac,
-                          pathLimit,
-                          particle)
-         : prop.propagate(ctx, *parm, sf, Trk::anyDirection, bcheck, m_fieldProperties, particle)));
+    destParameters =
+        cache.manage(prop.propagate(ctx, *parm, sf, Trk::anyDirection, bcheck,
+                                    m_fieldProperties, particle));
   }
 
   // return the pre-updated ones
