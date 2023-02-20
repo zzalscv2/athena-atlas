@@ -446,7 +446,7 @@ AllowedTopos_Bphysics = [
 
     ##### TO BE REMOVED ONCE IMPLEMENTED IN SIGNATURE CODE
     # topoVariants
-    'BsmumuPhi','BpmumuKp','BcmumuPi','BdmumuKst','LbPqKm','BcmumuDsloose','BcmumuDploose','BcmumuD0Xloose','BcmumuDstarloose',
+    'Bidperf','BsmumuPhi','BpmumuKp','BcmumuPi','BdmumuKst','LbPqKm','BcmumuDsloose','BcmumuDploose','BcmumuD0Xloose','BcmumuDstarloose',
     'BpmuD0X','BdmuDpX','BdmuDstarX','BsmuDsX','LbmuLcX',
     # topoExtras
     'Lxy0','noos','nocut','lowpt'
@@ -454,7 +454,7 @@ AllowedTopos_Bphysics = [
 
 ]
 AllowedTopos_Bphysics_topoVariant = [
-    'BsmumuPhi','BpmumuKp','BcmumuPi','BdmumuKst','LbPqKm','BcmumuDsloose','BcmumuDploose','BcmumuD0Xloose','BcmumuDstarloose',
+    'Bidperf','BsmumuPhi','BpmumuKp','BcmumuPi','BdmumuKst','LbPqKm','BcmumuDsloose','BcmumuDploose','BcmumuD0Xloose','BcmumuDstarloose',
     'BpmuD0X','BdmuDpX','BdmuDstarX','BsmuDsX','LbmuLcX'
 ]
 AllowedTopos_Bphysics_topoExtra = ['Lxy0','noos','nocut','lowpt']

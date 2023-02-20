@@ -12971,6 +12971,13 @@ HLT_mu11_mu6_bBmumux_BdmumuKst_L1MU8VF_2MU5VF:
   stepFeatures:
     0: 13
     1: 11
+HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:
+  eventCount: 0
+  stepCounts:
+    0: 3
+  stepFeatures:
+    0: 12
+    1: 11
 HLT_mu11_mu6_bBmumux_BpmumuKp_L1LFV-MU8VF:
   eventCount: 0
   stepCounts:

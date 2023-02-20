@@ -111,12 +111,13 @@ def BmumuxComboHypoCfg(flags, name):
 
 
 def TrigBmumuxComboHypoToolFromDict(flags, chainDict):
-    
+
     topoAlgs = chainDict['chainName']
     log.debug("Set for algorithm %s", topoAlgs)
     tool = CompFactory.TrigBmumuxComboHypoTool(topoAlgs)
     decay = chainDict['topo'][-1]
     trigDecayDict = {             # xAOD::TrigBphys::pType
+        'Bidperf':            6,  # MULTIMU
         'BpmumuKp':           7,  # BKMUMU
         'BcmumuPi':          21,  # BCPIMUMU
         'BsmumuPhi':          9,  # BSPHIMUMU
