@@ -116,7 +116,9 @@ namespace CP {
       inline void DisableWarnings(Bool_t in) { m_SetWarnings = !in;}
       /** Indicate if additional debugging information should be output */
       inline void EnableDebugging(Bool_t in) { m_debugging = in;}
-
+      /** disable info */
+      inline void PrintInfo(Bool_t in) { m_printInfo = in; }
+    
       /** Set how to handle configurations where some of your data has no corresponding mc to describe it 
           0=Default (Throw exception), 1=Subtract lumi from normalizations (i.e. discard data), 2=keep lumi and continue*/
       inline void SetUnrepresentedDataAction(Int_t action, Double_t tolerance=0.05) {
@@ -329,6 +331,7 @@ namespace CP {
       TPileupReweighting* m_parentTool; //points to self if not a 'systematic varion' tool instance
       Bool_t m_SetWarnings;
       Bool_t m_debugging;
+      Bool_t m_printInfo;
       Bool_t m_countingMode;
       Int_t m_unrepresentedDataAction;                         //used as property in wrapper tool
       Bool_t m_isInitialized;Bool_t m_lumiVectorIsLoaded;

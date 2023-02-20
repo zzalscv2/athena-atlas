@@ -1,12 +1,6 @@
 PathResolver             WARNING Locating dev file dev/PMGTools/PMGxsecDB_mc21.txt. Do not let this propagate to a release
 PathResolver             WARNING Locating dev file dev/PileupReweighting/share/DSID601xxx/pileup_mc21a_dsid601229_FS.root. Do not let this propagate to a release
-Info in <CP::TPileupReweighting::UsePeriodConfig>: Using MC16 Period configuration
-Info in <CP::TPileupReweighting::UsePeriodConfig>: Using MC16 Period configuration
-Info in <CP::TPileupReweighting::UsePeriodConfig>: Using MC16 Period configuration
 PathResolver             WARNING Locating dev file dev/PileupReweighting/share/DSID601xxx/pileup_mc21a_dsid601229_FS.root. Do not let this propagate to a release
-Info in <CP::TPileupReweighting::AddLumiCalcFile>: Adding LumiMetaData (scale factor=0.970874)...
-Info in <CP::TPileupReweighting::AddLumiCalcFile>: Adding LumiMetaData (scale factor=1.010100)...
-Info in <CP::TPileupReweighting::AddLumiCalcFile>: Adding LumiMetaData (scale factor=0.934579)...
 ToolSvc.JVTEfficiencyToolWARNING Supplied SF file JetJvtEfficiency/Moriond2018/JvtSFFile_EMPFlowJets.root doesn't seem to contain SFs for NNJvt, falling back to dummy SFs ...
     NNJVT.Network.graph.Offline.Nonprompt_All_MaxWeight.json
 
@@ -82,7 +76,6 @@ CalibrationDataInterfaceROOT->retrieveCalibrationIndex : container DL1dv01/AntiK
 
 
 ToolSvc.TauEffTool_MediumWARNING Could not determine MC campaign from run number! The mu dependent systematic of the trigger scale factors should not be trusted. Current (410000). Will only print this warning once.
-Info in <CP::TPileupReweighting::GetRandomRunNumber>: Initializing the subtool..
 Warning in <CP::TPileupReweighting::Initialize>: has 0.012435% unrepresented data. This was reassigned (UnrepresentedDataAction=3)
 ToolSvc.TauTrigEffTool...WARNING Could not determine MC campaign from run number! The mu dependent systematic of the trigger scale factors should not be trusted. Current (410000). Will only print this warning once.
 ToolSvc.TauTrigEffTool...WARNING Could not determine MC campaign from run number! The mu dependent systematic of the trigger scale factors should not be trusted. Current (410000). Will only print this warning once.
