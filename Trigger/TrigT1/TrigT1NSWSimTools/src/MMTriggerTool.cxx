@@ -210,10 +210,7 @@ namespace NSWL1 {
             /*
              * Here we create roads with all MMT_Hit collected before (if any), then we save the results
              */
-            auto smallest_it = std::minmax_element(hitDatas.begin(), hitDatas.end(), [](const auto &h1, const auto &h2) {
-                return (h1.BC_time > -1 && h2.BC_time > -1 && h1.BC_time < h2.BC_time); });
-            int smallest_bc = (*smallest_it.first).BC_time;
-            diamond->findDiamonds(i-nskip, smallest_bc, event);
+            diamond->findDiamonds(i-nskip, event);
 
             if (!diamond->getSlopeVector(i-nskip).empty()) {
               if (m_doNtuple) {

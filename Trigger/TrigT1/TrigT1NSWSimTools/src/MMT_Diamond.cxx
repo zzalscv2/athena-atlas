@@ -105,7 +105,9 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<
   ATH_MSG_DEBUG("CreateRoadsAndFillHits: Feeding hitDatas Ended");
 }
 
-void MMT_Diamond::findDiamonds(const unsigned int iterator, const int sm_bc, const int event) {
+void MMT_Diamond::findDiamonds(const unsigned int iterator, const int event) {
+  if (m_diamonds[iterator].ev_hits.empty()) return;
+
   auto t0 = std::chrono::high_resolution_clock::now();
   int bc_start = 999999;
   int bc_end = -1;
@@ -115,9 +117,9 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int sm_bc, con
   m_diamonds[iterator].slopes.clear();
 
   // Comparison with lambda function (easier to implement)
-  std::sort(m_diamonds[iterator].ev_hits.begin(), m_diamonds[iterator].ev_hits.end(), [](auto h1, auto h2){ return h1->getAge() < h2->getAge(); });
-  bc_start = m_diamonds[iterator].ev_hits.front()->getAge();
-  bc_end = m_diamonds[iterator].ev_hits.front()->getAge() + 16;
+  std::sort(m_diamonds[iterator].ev_hits.begin(), m_diamonds[iterator].ev_hits.end(), [](const auto &h1, const auto &h2){ return h1->getBC() < h2->getBC(); });
+  bc_start = m_diamonds[iterator].ev_hits.front()->getBC();
+  bc_end = m_diamonds[iterator].ev_hits.front()->getBC() + 16;
   ATH_MSG_DEBUG("Window Start: " << bc_start << " - Window End: " << bc_end);
 
   for (const auto &road : m_diamonds[iterator].ev_roads) road->reset();
@@ -134,8 +136,8 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int sm_bc, con
     hits_now.clear();
 
     for (unsigned int j = ibc; j < m_diamonds[iterator].ev_hits.size(); j++) {
-      if (m_diamonds[iterator].ev_hits[j]->getAge() == bc) hits_now.push_back(m_diamonds[iterator].ev_hits[j]);
-      else if (m_diamonds[iterator].ev_hits[j]->getAge() > bc) {
+      if (m_diamonds[iterator].ev_hits[j]->getBC() == bc) hits_now.push_back(m_diamonds[iterator].ev_hits[j]);
+      else if (m_diamonds[iterator].ev_hits[j]->getBC() > bc) {
         ibc = j;
         break;
       }
@@ -170,7 +172,7 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int sm_bc, con
       road->incrementAge(bc_wind);
       if (!hits_now.empty()) road->addHits(hits_now);
 
-      if (road->checkCoincidences(bc_wind) && bc >= (sm_bc - 1)) {
+      if (road->checkCoincidences(bc_wind) && bc >= (bc_start - 1)) {
 
         ATH_MSG_DEBUG("------------------------------------------------------------------");
         ATH_MSG_DEBUG("Coincidence FOUND @BC: " << bc);
@@ -211,7 +213,7 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int sm_bc, con
         slope.xbkg = road->countXHits(true);
         slope.uvmuon = road->countUVHits(false);
         slope.xmuon = road->countXHits(false);
-        slope.age = slope.BC - sm_bc;
+        slope.age = slope.BC - bc_start;
         slope.mxl = road->mxl();
         slope.my = road->avgSofX(); // defined as my in ATL-COM-UPGRADE-2015-033
         slope.uavg = road->avgSofUV(2,4);
