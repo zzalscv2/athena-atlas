@@ -1,10 +1,30 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import BeamType, LHCPeriod
+from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum
+
+class TrackFitterType(FlagEnum):
+    DistributedKalmanFilter = 'DistributedKalmanFilter'
+    GlobalChi2Fitter = 'GlobalChi2Fitter'
+    GaussianSumFilter = 'GaussianSumFilter'
+
+class KalmanUpdatorType(FlagEnum):
+    KalmanUpdator = 'KalmanUpdator'
+    KalmanUpdator_xk = 'KalmanUpdator_xk'
+    KalmanUpdatorSMatrix = 'KalmanUpdatorSMatrix'
+    KalmanWeightUpdator = 'KalmanWeightUpdator'
+    KalmanUpdatorAmg = 'KalmanUpdatorAmg'
+
 
 def createTrackingConfigFlags():
     icf = AthConfigFlags()
+
+    # control which fitter to be used
+    icf.addFlag("Tracking.trackFitterType",
+                TrackFitterType.GlobalChi2Fitter, enum=TrackFitterType)
+    # control which measurement updator to load as InDetUpdator
+    icf.addFlag("Tracking.kalmanUpdator",
+                KalmanUpdatorType.KalmanUpdatorSMatrix, enum=KalmanUpdatorType)
 
     icf.addFlag("Tracking.materialInteractions", lambda prevFlags:
                 prevFlags.Beam.Type is not BeamType.SingleBeam)

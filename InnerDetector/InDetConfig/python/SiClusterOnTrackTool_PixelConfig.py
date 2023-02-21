@@ -9,15 +9,18 @@ from AthenaConfiguration.Enums import BeamType
 #############################################
 
 def InDetPixelClusterOnTrackToolBaseCfg(flags, name="PixelClusterOnTrackTool", **kwargs):
-    from PixelConditionsAlgorithms.PixelConditionsConfig import PixelDistortionAlgCfg, PixelOfflineCalibCondAlgCfg
-    acc = PixelOfflineCalibCondAlgCfg(flags)    # To produce PixelOfflineCalibData
-    acc.merge(PixelDistortionAlgCfg(flags)) # To produce PixelDistortionData
+    from PixelConditionsAlgorithms.PixelConditionsConfig import (
+        PixelDistortionAlgCfg, PixelOfflineCalibCondAlgCfg)
+    acc = PixelOfflineCalibCondAlgCfg(flags) # To produce PixelOfflineCalibData
+    acc.merge(PixelDistortionAlgCfg(flags))  # To produce PixelDistortionData
 
-    from TrkConfig.TrkRIO_OnTrackCreatorConfig import RIO_OnTrackErrorScalingCondAlgCfg
+    from TrkConfig.TrkRIO_OnTrackCreatorConfig import (
+        RIO_OnTrackErrorScalingCondAlgCfg)
     acc.merge(RIO_OnTrackErrorScalingCondAlgCfg(flags)) # To produce RIO_OnTrackErrorScaling
 
     if 'LorentzAngleTool' not in kwargs:
-        from SiLorentzAngleTool.PixelLorentzAngleConfig import PixelLorentzAngleToolCfg
+        from SiLorentzAngleTool.PixelLorentzAngleConfig import (
+            PixelLorentzAngleToolCfg)
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(
             PixelLorentzAngleToolCfg(flags)))
 
@@ -25,25 +28,26 @@ def InDetPixelClusterOnTrackToolBaseCfg(flags, name="PixelClusterOnTrackTool", *
         kwargs.setdefault("ErrorStrategy", 0)
         kwargs.setdefault("PositionStrategy", 0)
 
-    kwargs.setdefault("DisableDistortions", False) ## Is this correct?
-    kwargs.setdefault("applyNNcorrection", flags.InDet.Tracking.doPixelClusterSplitting and flags.InDet.Tracking.pixelClusterSplittingType == "NeuralNet")
-    kwargs.setdefault("NNIBLcorrection", flags.InDet.Tracking.doPixelClusterSplitting and flags.InDet.Tracking.pixelClusterSplittingType == "NeuralNet")
-    split_cluster_map_extension = flags.InDet.Tracking.ActiveConfig.extension if flags.InDet.Tracking.ActiveConfig.useTIDE_Ambi else ""
-    kwargs.setdefault("SplitClusterAmbiguityMap", f"SplitClusterAmbiguityMap{split_cluster_map_extension}")
+    kwargs.setdefault(
+        "applyNNcorrection",
+        flags.InDet.Tracking.doPixelClusterSplitting and \
+        flags.InDet.Tracking.pixelClusterSplittingType == "NeuralNet")
+    kwargs.setdefault(
+        "NNIBLcorrection",
+        flags.InDet.Tracking.doPixelClusterSplitting and \
+        flags.InDet.Tracking.pixelClusterSplittingType == "NeuralNet")
+    split_cluster_map_extension = flags.InDet.Tracking.ActiveConfig.extension \
+                                  if flags.InDet.Tracking.ActiveConfig.useTIDE_Ambi else ""
+    kwargs.setdefault("SplitClusterAmbiguityMap",
+                      f"SplitClusterAmbiguityMap{split_cluster_map_extension}")
     kwargs.setdefault("RunningTIDE_Ambi", flags.InDet.Tracking.doTIDE_Ambi)
 
-    acc.setPrivateTools(CompFactory.InDet.PixelClusterOnTrackTool(name, **kwargs))
+    acc.setPrivateTools(
+        CompFactory.InDet.PixelClusterOnTrackTool(name, **kwargs))
     return acc
 
 def InDetPixelClusterOnTrackToolDigitalCfg(flags, name="InDetPixelClusterOnTrackToolDigital", **kwargs):
     kwargs.setdefault("SplitClusterAmbiguityMap", "")
-
-    if flags.InDet.Tracking.doDigitalROTCreation:
-        kwargs.setdefault("applyNNcorrection", False)
-        kwargs.setdefault("NNIBLcorrection", False)
-        kwargs.setdefault("ErrorStrategy", 2)
-        kwargs.setdefault("PositionStrategy", 1)
-
     return InDetPixelClusterOnTrackToolBaseCfg(flags, name, **kwargs)
 
 def InDetPixelClusterOnTrackToolNNSplittingCfg(flags, name="InDetPixelClusterOnTrackToolNNSplitting", **kwargs):
@@ -52,7 +56,8 @@ def InDetPixelClusterOnTrackToolNNSplittingCfg(flags, name="InDetPixelClusterOnT
     if flags.InDet.Tracking.doPixelClusterSplitting \
        and flags.InDet.Tracking.pixelClusterSplittingType == "NeuralNet" \
        and "NnClusterizationFactory" not in kwargs:
-        from InDetConfig.SiClusterizationToolConfig import NnClusterizationFactoryCfg
+        from InDetConfig.SiClusterizationToolConfig import (
+            NnClusterizationFactoryCfg)
         kwargs.setdefault("NnClusterizationFactory", acc.popToolsAndMerge(
             NnClusterizationFactoryCfg(flags)))
 
@@ -61,10 +66,7 @@ def InDetPixelClusterOnTrackToolNNSplittingCfg(flags, name="InDetPixelClusterOnT
     return acc
 
 def InDetPixelClusterOnTrackToolCfg(flags, name="InDetPixelClusterOnTrackTool", **kwargs):
-    if flags.InDet.Tracking.doDigitalROTCreation:
-        return InDetPixelClusterOnTrackToolDigitalCfg(flags, name, **kwargs)
-    else:
-        return InDetPixelClusterOnTrackToolNNSplittingCfg(flags, name, **kwargs)
+    return InDetPixelClusterOnTrackToolNNSplittingCfg(flags, name, **kwargs)
 
 
 def InDetBroadPixelClusterOnTrackToolCfg(flags, name='InDetBroadPixelClusterOnTrackTool', **kwargs):
@@ -76,17 +78,20 @@ def InDetBroadPixelClusterOnTrackToolCfg(flags, name='InDetBroadPixelClusterOnTr
 #############################################
 
 def TrigPixelClusterOnTrackToolBaseCfg(flags, name="InDetTrigPixelClusterOnTrackTool", **kwargs):
-    from PixelConditionsAlgorithms.PixelConditionsConfig import PixelDistortionAlgCfg, PixelOfflineCalibCondAlgCfg
+    from PixelConditionsAlgorithms.PixelConditionsConfig import (
+        PixelDistortionAlgCfg, PixelOfflineCalibCondAlgCfg)
     acc = PixelOfflineCalibCondAlgCfg(flags) # To produce PixelOfflineCalibData
     acc.merge(PixelDistortionAlgCfg(flags))  # To produce PixelDistortionData
 
-    from TrkConfig.TrkRIO_OnTrackCreatorConfig import RIO_OnTrackErrorScalingCondAlgCfg
+    from TrkConfig.TrkRIO_OnTrackCreatorConfig import (
+        RIO_OnTrackErrorScalingCondAlgCfg)
     acc.merge(RIO_OnTrackErrorScalingCondAlgCfg(flags)) # To produce RIO_OnTrackErrorScaling
 
     if 'LorentzAngleTool' not in kwargs:
-        from SiLorentzAngleTool.PixelLorentzAngleConfig import PixelLorentzAngleToolCfg
+        from SiLorentzAngleTool.PixelLorentzAngleConfig import (
+            PixelLorentzAngleToolCfg)
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(
-            PixelLorentzAngleToolCfg(flags)) )
+            PixelLorentzAngleToolCfg(flags)))
 
     if 'NnClusterizationFactory' not in kwargs:
         from InDetConfig.SiClusterizationToolConfig import TrigNnClusterizationFactoryCfg
@@ -104,11 +109,13 @@ def TrigPixelClusterOnTrackToolBaseCfg(flags, name="InDetTrigPixelClusterOnTrack
 ###########################################
 
 def ITkPixelClusterOnTrackToolBaseCfg(flags, name="ITkPixelClusterOnTrackTool", **kwargs):
-    from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelOfflineCalibCondAlgCfg
+    from PixelConditionsAlgorithms.ITkPixelConditionsConfig import (
+        ITkPixelOfflineCalibCondAlgCfg)
     acc = ITkPixelOfflineCalibCondAlgCfg(flags) # To produce PixelOfflineCalibData
 
     if 'LorentzAngleTool' not in kwargs:
-        from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
+        from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import (
+            ITkPixelLorentzAngleToolCfg)
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(
             ITkPixelLorentzAngleToolCfg(flags)))
 
@@ -117,7 +124,9 @@ def ITkPixelClusterOnTrackToolBaseCfg(flags, name="ITkPixelClusterOnTrackTool", 
         kwargs.setdefault("PositionStrategy", 0)
 
     kwargs.setdefault("applyNNcorrection", False )
-    kwargs.setdefault("SplitClusterAmbiguityMap", f"SplitClusterAmbiguityMap{flags.ITk.Tracking.ActiveConfig.extension}")
+    kwargs.setdefault(
+        "SplitClusterAmbiguityMap",
+        f"SplitClusterAmbiguityMap{flags.ITk.Tracking.ActiveConfig.extension}")
     kwargs.setdefault("RunningTIDE_Ambi", True )
 
     kwargs.setdefault("PixelErrorScalingKey", "")
@@ -128,12 +137,13 @@ def ITkPixelClusterOnTrackToolBaseCfg(flags, name="ITkPixelClusterOnTrackTool", 
 def ITkPixelClusterOnTrackToolTruthSplittingCfg(flags, name='ITkPixelClusterOnTrackToolTruthSplitting', **kwargs):
     acc = ComponentAccumulator()
 
-    if flags.ITk.Tracking.doPixelClusterSplitting \
-       and flags.ITk.Tracking.pixelClusterSplittingType == "Truth":
+    if flags.ITk.Tracking.doPixelClusterSplitting and \
+       flags.ITk.Tracking.pixelClusterSplittingType == "Truth":
         if 'NnClusterizationFactory' not in kwargs:
-            from InDetConfig.SiClusterizationToolConfig import ITkTruthClusterizationFactoryCfg
+            from InDetConfig.SiClusterizationToolConfig import (
+                ITkTruthClusterizationFactoryCfg)
             kwargs.setdefault("NnClusterizationFactory", acc.popToolsAndMerge(
-                ITkTruthClusterizationFactoryCfg(flags))) #Truth-based for ITk for now
+                ITkTruthClusterizationFactoryCfg(flags)))
 
     acc.setPrivateTools(acc.popToolsAndMerge(
         ITkPixelClusterOnTrackToolBaseCfg(flags, name, **kwargs)))
