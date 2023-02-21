@@ -804,7 +804,7 @@ def efLateMuRoIAlgSequence(flags):
     eflateViewsMaker.ViewFallThrough = True
 
     #Get Late Muon RoIs
-    efLateMuRoISequence, sequenceOut = efLateMuRoISequence()
+    efLateMuRoISequence, sequenceOut = efLateMuRoISequence(flags)
 
     #Final sequence running in view
     eflateViewsMaker.ViewNodeName = efLateMuRoISequence.name()

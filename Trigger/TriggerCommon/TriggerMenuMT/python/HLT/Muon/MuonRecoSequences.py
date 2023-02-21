@@ -804,7 +804,7 @@ def efmuisoRecoSequence( RoIs, Muons, doMSiso=False ):
   return efmuisoRecoSequence, sequenceOut
 
 
-def efLateMuRoISequence(): 
+def efLateMuRoISequence(flags):
 
   from AthenaCommon.CFElements import parOR
   efLateMuRoISequence = parOR("efLateMuRoIViewNode")
@@ -821,7 +821,7 @@ def efLateMuRoISequence():
   topSequence.SGInputLoader.Load += [( 'MuCTPI_RDO' , 'StoreGateSvc+MUCTPI_RDO' )]
 
   from TrigmuRoI.TrigmuRoIConfig import TrigmuRoIConfig
-  roiAlg = TrigmuRoIConfig("TrigmuRoI")
+  roiAlg = TrigmuRoIConfig(flags, "TrigmuRoI")
   sequenceOut = "LateMuRoIs"
   roiAlg.RoisWriteHandleKey=sequenceOut
 
