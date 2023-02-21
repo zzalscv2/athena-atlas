@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
-# Cosmic_run3_v1.py menu cosmics running with MT framework
+# Cosmic_run3_v1.py menu
 #------------------------------------------------------------------------#
 
 # This defines the input format of the chain and it's properties with the defaults set
@@ -9,7 +9,6 @@
 #['name', 'L1chainParts'=[], 'stream', 'groups', 'merging'=[], 'topoStartFrom'=False],
 from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 from .SignatureDicts import ChainStore
-from .PhysicsP1_pp_run3_v1 import addP1Signatures
 from .Physics_pp_run3_v1 import (
     SingleJetGroup,
     SingleBjetGroup,
@@ -27,11 +26,10 @@ from .Physics_pp_run3_v1 import (
     EgammaStreamersGroup,
     SupportGroup
 )
+from . import P1_run3_v1
 
-def setupMenu(menu_name):
-
+def getCosmicSignatures():
     chains = ChainStore()
-    
 
     chains['Muon'] = [
         ChainProp(name='HLT_mu4_cosmic_L1MU3V_EMPTY', l1SeedThresholds=['MU3V'], stream=['CosmicMuons'], groups=['RATE:Cosmic_Muon','BW:Muon']),
@@ -129,7 +127,14 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_noalg_L1XE60',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=METStreamersGroup+SupportLegGroup),
     ]
 
+    return chains
+
+def setupMenu(menu_name):
+
+    chains = getCosmicSignatures()
+
     # Add all standard monitoring chains from addP1Signatures function
-    addP1Signatures(chains)
+    P1_run3_v1.addCommonP1Signatures(chains)
+    P1_run3_v1.addCosmicP1Signatures(chains)
 
     return chains

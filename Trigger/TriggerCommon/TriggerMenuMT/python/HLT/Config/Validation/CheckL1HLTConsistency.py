@@ -61,12 +61,14 @@ def checkL1HLTConsistency(flags):
 
     l1topo_alg_to_board, l1topo_alg_to_item = getL1TopoAlgMaps(lvl1access)
 
+    missing_L1_items = []
     for chain in HLTMenuConfig.dictsList():
         log.debug('[checkL1HLTConsistency] Checking the l1thresholds in the chain %s', chain["chainName"])
 #        #don't check the noalg chains (they don't do anything in the HLT anyway)
 #        if 'HLT_noalg_' in chain["chainName"]:
 #            continue
 
+        is_missing=False
         l1item_vec = chain['L1item'].split(',')
         for l1item in l1item_vec:
             if l1item == "":
@@ -74,10 +76,15 @@ def checkL1HLTConsistency(flags):
                 continue
             if l1item not in lvl1items:
                 log.error('[checkL1HLTConsistency] chain %s: L1item: %s, not found in the items list of the L1Menu %s', chain["chainName"], chain["L1item"], lvl1name)
-                raise Exception("Please fix the menu or the chain.")
+                missing_L1_items.append(l1item)
+                is_missing=True
             else:
                 if l1item not in allUsedItems:
                     allUsedItems.append(l1item)
+
+        # Avoid crashing on lookups
+        if is_missing:
+            continue
 
         # Find L1 Threshold information for current chain
         l1thr_vec = []
@@ -209,6 +216,12 @@ def checkL1HLTConsistency(flags):
         if wrongLabel or not rightLabel:
             errormsg = 'Incorrect L1Calo version label -- check Legacy/Phase-I assignment'
             chainsWithWrongLabel.update({chain['chainName']: (chain['groups'],errormsg)})
+
+    if missing_L1_items:
+        log.error('[checkL1HLTConsistency] Missing L1 items:')
+        for i in missing_L1_items:
+            log.error(f'  {i}')
+        raise Exception("Please fix the menu or the chains.")
 
     if len(chainsWithWrongLabel) and ('Physics' in lvl1name): # apply this check only for the Physics menu, for now
         log.error('These chains have the wrong groups:')

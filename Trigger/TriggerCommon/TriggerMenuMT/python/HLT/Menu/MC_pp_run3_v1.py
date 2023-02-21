@@ -35,15 +35,13 @@ from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import ( SingleElectronGroup,
                                                         LegacyTopoGroup,
 )
 
+from AthenaCommon.Logging import logging
+log = logging.getLogger( __name__ )
 
-def addMCSignatures(chains):
-    from AthenaCommon.Logging import logging
-    log = logging.getLogger( __name__ )
-    log.info('[setupMenu] going to add the MC menu chains now')
+def getMCSignatures():
+    chains = ChainStore()
 
-    chainsMC = ChainStore()
-
-    chainsMC['Muon'] = [
+    chains['Muon'] = [
 
         ChainProp(name="HLT_mu8_L1MU5VF", groups=SingleMuonGroup),
         ChainProp(name="HLT_mu10_L1MU8F", groups=SingleMuonGroup),
@@ -76,7 +74,7 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_2mu4_L1BPH-7M14-0DR25-MU5VFMU3VF', l1SeedThresholds=['MU3VF'], stream=["BphysDelayed"], groups=MultiMuonGroup+EOFBPhysL1MuGroup+Topo3Group),
     ]
 
-    chainsMC['Jet'] = [
+    chains['Jet'] = [
 
         # low threshold single jet support chains with JVT
         ChainProp(name='HLT_j45_020jvt_pf_ftf_preselj20_L1J15', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportLegGroup),
@@ -117,7 +115,7 @@ def addMCSignatures(chains):
 
     ]
 
-    chainsMC['Bjet'] = [
+    chains['Bjet'] = [
         # B-tagger training
         ChainProp(name='HLT_j20_0eta290_020jvt_boffperf_pf_ftf_L1J15', l1SeedThresholds=['FSNOSEED'], groups=SingleBjetGroup+SupportLegGroup, monGroups=['bJetMon:online']),
         ChainProp(name='HLT_j20_0eta290_020jvt_boffperf_pf_ftf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SingleBjetGroup+SupportLegGroup, monGroups=['bJetMon:online']),
@@ -127,7 +125,7 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_j80c_020jvt_j55c_020jvt_j28c_020jvt_j20c_020jvt_SHARED_3j20c_020jvt_bdl1d82_pf_ftf_presel2c20XX2c20b85_L1MU8F_2J15_J20', l1SeedThresholds=['FSNOSEED']*5, groups=PrimaryLegGroup+MultiBjetGroup),
     ]
 
-    chainsMC['Egamma'] = [
+    chains['Egamma'] = [
         ChainProp(name='HLT_e5_lhtight_L1EM3', groups=SingleElectronGroup),
         ChainProp(name='HLT_e5_lhtight_noringer_L1EM3', groups=SingleElectronGroup),
         ChainProp(name='HLT_e26_lhtight_L1eEM26', groups=SingleElectronGroup),
@@ -180,7 +178,7 @@ def addMCSignatures(chains):
         
     ]
 
-    chainsMC['Bphysics'] = [    
+    chains['Bphysics'] = [
 
         #ATR-21566, chains for di-muon TLA, but with HLT selections to test rates. Here streaming into BphysDelayed (not in TLA stream)   
         ChainProp(name='HLT_2mu4_b7invmAB22vtx20_L1BPH-7M22-2MU3VF', l1SeedThresholds=['MU3VF'],stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+Topo3Group),
@@ -190,11 +188,11 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_2mu4_b0dRAB127invmAB22vtx20_L1BPH-7M22-0DR12-2MU3V', l1SeedThresholds=['MU3V'],stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+Topo3Group),
     ]
 
-    chainsMC['Streaming'] += [
+    chains['Streaming'] += [
         ChainProp(name='HLT_noalg_L1All', l1SeedThresholds=['FSNOSEED'], groups=['Primary:CostAndRate', 'RATE:SeededStreamers', 'BW:Other']), # ATR-22072, for rates in MC.
     ]
 
-    chainsMC['Combined'] += [
+    chains['Combined'] += [
 
         ## ATR-25456 - Photon+MET reoptimised
         ChainProp(name='HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_80mTAC_L1EM22VHI',l1SeedThresholds=['EM22VHI']+2*['FSNOSEED'], groups=PrimaryLegGroup+EgammaMETGroup),
@@ -210,23 +208,21 @@ def addMCSignatures(chains):
 
     # check for chains that have the 'PS:Online' group, so that they are not simulated
     # -- does not make sense in MC menu
-    for sig in chainsMC:
-        for chain in chainsMC[sig]:
+    for sig,chainsInSig in chains.items():
+        for chain in chainsInSig:
             if 'PS:Online' in chain.groups:
-                log.error("chain %s in MC menu has the group 'PS:Online', will not be simulated!", chain.name)
+                log.error("chain %s in MC menu [%s] has the group 'PS:Online', will not be simulated!", chain.name, sig)
                 raise RuntimeError("Remove the group 'PS:Online' from the chain %s",chain.name)
 
-    for sig in chainsMC:
-        chains[sig] += chainsMC[sig]
+    return chains
 
 def setupMenu(menu_name):
-
-    from AthenaCommon.Logging import logging
-    log = logging.getLogger( __name__ )
-    log.info('[setupMenu] going to add the MC menu chains now')
     
     chains = physics_menu.setupMenu(menu_name)
 
-    addMCSignatures(chains)
+    log.info('[setupMenu] going to add the MC menu chains now')
+
+    for sig,chainsInSig in getMCSignatures().items():
+        chains[sig] += chainsInSig
 
     return chains

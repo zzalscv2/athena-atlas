@@ -8,11 +8,13 @@
 # always required are: name, stream and groups
 #['name', 'L1chainParts'=[], 'stream', 'groups', 'merging'=[], 'topoStartFrom'=False],
 
-import TriggerMenuMT.HLT.Menu.MC_pp_run3_v1 as mc_menu
-from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
+from . import MC_pp_run3_v1 as mc_menu
+from .SignatureDicts import ChainStore
+from ..Config.Utility.ChainDefInMenu import ChainProp
 
 # this is not the best option, due to flake violation, this list has to be changed when some groups are removed
-from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import (PhysicsStream,
+
+from .Physics_pp_run3_v1 import (PhysicsStream,
                                                                  SingleMuonGroup,
                                                                  MultiMuonGroup,
                                                                  SingleElectronGroup,
@@ -52,15 +54,9 @@ from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import (PhysicsStream,
 
 DevGroup = ['Development']
 
-def setupMenu(menu_name):
-
-    chains = mc_menu.setupMenu(menu_name)
-
-    from AthenaCommon.Logging import logging
-    log = logging.getLogger( __name__ )
-    log.info('[setupMenu] going to add the Dev menu chains now')
-
-    chains['Muon'] += [
+def getDevSignatures():
+    chains = ChainStore()
+    chains['Muon'] = [
 
         ChainProp(name='HLT_mu6_ivarmedium_L1MU5VF', groups=DevGroup+SingleMuonGroup),
 
@@ -94,7 +90,7 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_mu4_ivarloose_2mu3noL1_L1BPH-7M14-0DR25-MU5VFMU3VF', l1SeedThresholds=['MU3VF','FSNOSEED'], stream=['BphysDelayed'], groups=MultiMuonGroup+EOFBPhysL1MuGroup+Topo3Group),
     ]
 
-    chains['Egamma'] += [
+    chains['Egamma'] = [
         # ElectronChains----------
 
         # electron forward triggers (keep this only for dev now)
@@ -122,7 +118,7 @@ def setupMenu(menu_name):
 
     ]
 
-    chains['MET'] += [
+    chains['MET'] = [
 
         ChainProp(name='HLT_xe30_cell_L1XE30',       l1SeedThresholds=['FSNOSEED'], groups=METGroup+DevGroup),
         ChainProp(name='HLT_xe30_mht_L1XE30',        l1SeedThresholds=['FSNOSEED'], groups=METGroup+DevGroup),
@@ -164,7 +160,7 @@ def setupMenu(menu_name):
     ]
 
 
-    chains['Jet'] += [
+    chains['Jet'] = [
 
         # pflow jet chains without pile-up residual correction for calibration derivations and calibration cross-checks ATR-26827
         ChainProp(name='HLT_j0_perf_pf_subjesgscIS_ftf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportGroup+['RATE:CPS_RD0_FILLED']),
@@ -348,7 +344,7 @@ def setupMenu(menu_name):
         ]
 
 
-    chains['Bjet'] += [
+    chains['Bjet'] = [
         
         # single bjet pflow options, # changes according to ATR-23883
         ChainProp(name="HLT_j225_0eta290_bdl1d60_pf_ftf_L1J100", l1SeedThresholds=['FSNOSEED'], groups=SingleBjetGroup + DevGroup),
@@ -459,7 +455,7 @@ def setupMenu(menu_name):
 
     ]
 
-    chains['Tau'] += [
+    chains['Tau'] = [
         ChainProp(name="HLT_tau25_looseRNN_tracktwoMVA_L1TAU12IM", groups=SingleTauGroup),
         ChainProp(name="HLT_tau25_looseRNN_tracktwoLLP_L1TAU12IM", groups=SingleTauGroup),
         ChainProp(name="HLT_tau25_tightRNN_tracktwoMVA_L1TAU12IM", groups=SingleTauGroup),
@@ -547,7 +543,7 @@ def setupMenu(menu_name):
         ChainProp(name="HLT_tau20_idperf_tracktwoMVA_L1eTAU12", groups=DevGroup),
     ]
 
-    chains['Bphysics'] += [
+    chains['Bphysics'] = [
         #ATR-21003; default dimuon and Bmumux chains from Run2; l2io validation; should not be moved to Physics
         ChainProp(name='HLT_2mu4_noL2Comb_bJpsimumu_L12MU3V', stream=["BphysDelayed"], groups=BphysicsGroup+DevGroup),
         ChainProp(name='HLT_mu6_noL2Comb_mu4_noL2Comb_bJpsimumu_L1MU5VF_2MU3V', l1SeedThresholds=['MU5VF','MU3V'], stream=["BphysDelayed"], groups=BphysicsGroup+DevGroup),
@@ -557,7 +553,7 @@ def setupMenu(menu_name):
 
     ]
 
-    chains['Combined'] += [
+    chains['Combined'] = [
 
         # Test chains for muon + jet/MET merging/aligning
         ChainProp(name='HLT_mu6_xe30_mht_L1XE30', l1SeedThresholds=['MU5VF','FSNOSEED'], stream=[PhysicsStream], groups=MuonMETGroup),
@@ -654,32 +650,32 @@ def setupMenu(menu_name):
 
     ]
 
-    chains['Beamspot'] += [
+    chains['Beamspot'] = [
         ChainProp(name='HLT_beamspot_allTE_trkfast_BeamSpotPEB_L1J15',  l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['PS:Online', 'RATE:BeamSpot',  'BW:BeamSpot']),        
     ]
 
-    chains['MinBias'] += [
+    chains['MinBias'] = [
 
     ]
 
-    chains['Calib'] += [
+    chains['Calib'] = [
         #ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_ANY', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=['RATE:ALFACalibration','BW:Detector']+LowMuGroup),
         # Calib Chains
         ChainProp(name='HLT_larpsallem_L1EM3', groups=SingleElectronGroup+SupportLegGroup),
     ]
 
-    chains['Streaming'] += [
+    chains['Streaming'] = [
 
         # ATR-24037
         ChainProp(name='HLT_noalg_L1jXEPerf100',     l1SeedThresholds=['FSNOSEED'], groups=METPhaseIStreamersGroup),
 
     ]
 
-    chains['Monitor'] += [
-       ChainProp(name='HLT_l1topodebug_legacy_L1All', l1SeedThresholds=['FSNOSEED'], stream=['L1TopoMismatches'], groups=['PS:Online', 'RATE:Monitoring', 'BW:Other']),
+    chains['Monitor'] = [
+       ChainProp(name='HLT_l1topodebug_legacy_L1All', l1SeedThresholds=['FSNOSEED'], stream=['L1TopoMismatches'], groups=['PS:Online', 'PS:NoHLTRepro', 'RATE:Monitoring', 'BW:Other']),
     ]
 
-    chains['UnconventionalTracking'] += [
+    chains['UnconventionalTracking'] = [
         #Isolated High Pt Trigger Test chain for optimisation studies
         ChainProp(name='HLT_isotrk50_L1XE50', groups=UnconvTrkGroup+DevGroup, l1SeedThresholds=['FSNOSEED']),
 
@@ -696,5 +692,18 @@ def setupMenu(menu_name):
         # TrigVSI, ATR-25722
         ChainProp(name='HLT_fsvsi0_L1All', groups=PrimaryLegGroup+UnconvTrkGroup+DevGroup+['PS:NoHLTRepro'], l1SeedThresholds=['FSNOSEED']),
     ]
+
+    return chains
+
+def setupMenu(menu_name):
+
+    chains = mc_menu.setupMenu(menu_name)
+
+    from AthenaCommon.Logging import logging
+    log = logging.getLogger( __name__ )
+    log.info('[setupMenu] going to add the Dev menu chains now')
+
+    for sig,chainsInSig in getDevSignatures().items():
+        chains[sig] += chainsInSig
 
     return chains
