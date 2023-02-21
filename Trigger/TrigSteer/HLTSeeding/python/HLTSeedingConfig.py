@@ -2,10 +2,13 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-import math
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
+from TrigEDMConfig.TriggerEDMRun3 import recordable
+
+import math
+
 log = logging.getLogger('HLTSeedingConfig')
 
 _mapL1ThresholdToDecisionCollection = {
@@ -95,7 +98,6 @@ def mapThresholdToL1RoICollection(threshold):
 
 def createLegacyCaloRoIUnpackers(flags):
     from HLTSeeding.HLTSeedingMonitoring import RoIsUnpackingMonitoring
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
     emUnpacker = CompFactory.EMRoIsUnpackingTool(Decisions = mapThresholdToL1DecisionCollection("EM"),
                                                  DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEEM"),
                                                  OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("EM")),
@@ -119,7 +121,6 @@ def createLegacyCaloRoIUnpackers(flags):
 
 def createCaloRoIUnpackers(flags):
     from HLTSeeding.HLTSeedingMonitoring import RoIsUnpackingMonitoring
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
     tools = []
 
     if flags.Trigger.L1.doeFex:
@@ -195,7 +196,6 @@ def createCaloRoIUnpackers(flags):
 
 def createLegacyMuonRoIUnpackers(flags):
     from HLTSeeding.HLTSeedingMonitoring import RoIsUnpackingMonitoring
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
     muUnpacker = CompFactory.MURoIsUnpackingTool(
         Decisions = mapThresholdToL1DecisionCollection("MU"),
         DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEMU"),
@@ -206,7 +206,6 @@ def createLegacyMuonRoIUnpackers(flags):
 
 def createMuonRoIUnpackers(flags):
     from HLTSeeding.HLTSeedingMonitoring import RoIsUnpackingMonitoring
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
     muUnpacker = CompFactory.MuonRoIsUnpackingTool(
         Decisions = mapThresholdToL1DecisionCollection("MU"),
         DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEMU"),
@@ -231,20 +230,20 @@ def createKeyWriterTool():
 
 def L1TriggerResultMakerCfg(flags):
     acc = ComponentAccumulator()
-    l1trMaker = CompFactory.L1TriggerResultMaker()
 
     # Reset properties to empty by default and fill based on flags below
-    l1trMaker.MuRoIKey = ""
-    l1trMaker.eFexEMRoIKey = ""
-    l1trMaker.eFexTauRoIKey = ""
-    l1trMaker.jFexTauRoIKey = ""
-    l1trMaker.jFexSRJetRoIKey = ""
-    l1trMaker.jFexLRJetRoIKey = ""
-    l1trMaker.gFexSRJetRoIKey = ""
-    l1trMaker.gFexLRJetRoIKey = ""
-    l1trMaker.cTauRoIKey = ""
-    l1trMaker.cjTauLinkKey = ""
-    l1trMaker.ThresholdPatternTools = []
+    l1trMaker = CompFactory.L1TriggerResultMaker(
+        MuRoIKey = "",
+        eFexEMRoIKey = "",
+        eFexTauRoIKey = "",
+        jFexTauRoIKey = "",
+        jFexSRJetRoIKey = "",
+        jFexLRJetRoIKey = "",
+        gFexSRJetRoIKey = "",
+        gFexLRJetRoIKey = "",
+        cTauRoIKey = "",
+        cjTauLinkKey = "",
+        ThresholdPatternTools = [] )
 
     # Muon RoIs
     if flags.Trigger.L1.doMuon and flags.Trigger.enableL1MuonPhase1:
@@ -293,61 +292,21 @@ def L1TriggerResultMakerCfg(flags):
     return acc
 
 
-class HLTSeeding(CompFactory.HLTSeeding) :
-    def __init__(self, name='HLTSeeding', *args, **kwargs):
-        super(HLTSeeding, self).__init__(name, *args, **kwargs)
-
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
-
-        # CTP unpacker
-        ctpUnpacker = CompFactory.CTPUnpackingTool()
-
-        self.ctpUnpacker = ctpUnpacker
-        from TrigEDMConfig.TriggerEDMRun3 import recordable
-
-        # needs to be set up such that the Roiupdater is set to false by default
-
-        self.RoIBRoIUnpackers += [
-            CompFactory.FSRoIsUnpackingTool("FSRoIsUnpackingTool",
-                                            RoiUpdater=None, 
-                                            Decisions=mapThresholdToL1DecisionCollection("FSNOSEED"),
-                                            OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("FSNOSEED") )) ]
-        # EM unpacker
-        if flags.Trigger.L1.doCalo:
-            if flags.Trigger.enableL1CaloPhase1:
-                self.xAODRoIUnpackers += createCaloRoIUnpackers(flags)
-            if flags.Trigger.enableL1CaloLegacy:
-                self.RoIBRoIUnpackers += createLegacyCaloRoIUnpackers(flags)
-
-        # MU unpacker
-        if flags.Trigger.L1.doMuon:
-            if flags.Trigger.enableL1MuonPhase1:
-                self.xAODRoIUnpackers += createMuonRoIUnpackers(flags)
-            else:
-                self.RoIBRoIUnpackers += createLegacyMuonRoIUnpackers(flags)
-
-        self.prescaler = createPrescalingTool(flags)
-        self.KeyWriterTool = createKeyWriterTool()
-
-        self.DoCostMonitoring = flags.Trigger.CostMonitoring.doCostMonitoring
-        self.CostMonitoringChain = flags.Trigger.CostMonitoring.chain
-
-        self.HLTSeedingSummaryKey = "HLTSeedingSummary"
-
-
 def HLTSeedingCfg(flags, seqName = None):
     if seqName:
         from AthenaCommon.CFElements import parOR
         acc = ComponentAccumulator(sequence=parOR(seqName)) # TODO - once rec-ex-common JO are phased out this can also be dropped
     else:
         acc = ComponentAccumulator()
+
     from HLTSeeding.HLTSeedingMonitoring import CTPUnpackingMonitoring, L1DataConsistencyMonitoring
-    decoderAlg = CompFactory.HLTSeeding()
-    decoderAlg.RoIBResult = "RoIBResult" if flags.Trigger.enableL1CaloLegacy or not flags.Trigger.enableL1MuonPhase1 else ""
-    decoderAlg.L1TriggerResult = "L1TriggerResult" if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1 else ""
-    decoderAlg.HLTSeedingSummaryKey = "HLTSeedingSummary" # Transient, consumed by DecisionSummaryMakerAlg
-    decoderAlg.ctpUnpacker = CompFactory.CTPUnpackingTool( ForceEnableAllChains = flags.Trigger.HLTSeeding.forceEnableAllChains,
-                                                           MonTool = CTPUnpackingMonitoring(flags, 512, 400) )
+    decoderAlg = CompFactory.HLTSeeding(
+        RoIBResult = "RoIBResult" if flags.Trigger.enableL1CaloLegacy or not flags.Trigger.enableL1MuonPhase1 else "",
+        L1TriggerResult = "L1TriggerResult" if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1 else "",
+        HLTSeedingSummaryKey = "HLTSeedingSummary", # Transient, consumed by DecisionSummaryMakerAlg
+        ctpUnpacker = CompFactory.CTPUnpackingTool( ForceEnableAllChains = flags.Trigger.HLTSeeding.forceEnableAllChains,
+                                                    MonTool = CTPUnpackingMonitoring(flags, 512, 400) )
+    )
 
     # Add L1DataConsistencyChecker unless we forceEnableAllChains which always results in missing TOBs
     if not flags.Trigger.HLTSeeding.forceEnableAllChains:
@@ -365,8 +324,6 @@ def HLTSeedingCfg(flags, seqName = None):
         transTypeKey = ("TransientBSOutType","StoreGateSvc+TransientBSOutKey")
         decoderAlg.ExtraInputs += [transTypeKey]
 
-
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
     decoderAlg.RoIBRoIUnpackers += [
         CompFactory.FSRoIsUnpackingTool("FSRoIsUnpackingTool", Decisions=mapThresholdToL1DecisionCollection("FSNOSEED"),
                                         OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("FSNOSEED")) ) ]
@@ -419,15 +376,12 @@ def HLTSeedingCfg(flags, seqName = None):
 
     return acc
 
+
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
-    ConfigFlags.Trigger.HLTSeeding.forceEnableAllChains= True
-    ConfigFlags.Input.Files= ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1",]
-    ConfigFlags.lock()
-    acc = HLTSeedingCfg( ConfigFlags )
-
-
-    f=open("HLTSeedingConf.pkl","wb")
-    acc.store(f)
-    f.close()
+    flags = initConfigFlags()
+    flags.Trigger.HLTSeeding.forceEnableAllChains= True
+    flags.Input.Files= ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1",]
+    flags.lock()
+    acc = HLTSeedingCfg( flags )
