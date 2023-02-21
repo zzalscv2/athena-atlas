@@ -954,18 +954,20 @@ bool TileCellBuilder::maskBadChannels (TileDrawerEvtStatusArray& drawerEvtStatus
       float ene2 = pCell->ene2();
       pCell->setEnergy(ene2, ene2, gain2, gain2); // use energy/gain from second pmt for both pmts
 
+      uint8_t qualCorrection = (gain1 != CaloGain::INVALIDGAIN) ? (gain1 - gain2) : 0;
+      uint8_t qual2 = pCell->qual2();
+      uint8_t qual1 = qual2 + qualCorrection; // if gains are different, qua11 and qual2 will be different
+      if (qual1 > m_qualityCut && gain1 > gain2) qual1 = qual2 - qualCorrection; // new feature in release 17.2
+
       if (chStatus2.isBadTiming()) {
         pCell->setTime(0.0); // time in second pmt is bad - no cell time
-        uint8_t qual2 = pCell->qual2();
         uint8_t qbit2 = pCell->qbit2() & (~(TileCell::MASK_TIME)); // clear time bit for second pmt
         uint8_t qbit1 = qbit2 | TileCell::MASK_BADCH; // set bad channel bit for first pmt
-        uint8_t qual1 = qual2 + (gain1 - gain2); // if gains are different, qua11 and qual2 will be different
-        if (qual1 > m_qualityCut && gain1 > gain2) qual1 = qual2 - (gain1 - gain2); // new feature in release 17.2
         pCell->setQuality(qual1, qbit1, 0); // change quality and qbits for first pmt
         pCell->setQuality(qual2, qbit2, 1); // update qbits for second pmt
       } else {
         pCell->setTime(pCell->time2());  // use time from second pmt as cell time
-        pCell->setQuality(pCell->qual2(), (pCell->qbit2() | TileCell::MASK_BADCH), 0); // change quality flag for first pmt
+        pCell->setQuality(qual1, (pCell->qbit2() | TileCell::MASK_BADCH), 0); // change quality flag for first pmt
       }
       
       return true;
@@ -977,18 +979,20 @@ bool TileCellBuilder::maskBadChannels (TileDrawerEvtStatusArray& drawerEvtStatus
       float ene1 = pCell->ene1();
       pCell->setEnergy(ene1, ene1, gain1, gain1);  // use energy/gain from first pmt for both pmts
 
+      uint8_t qualCorrection = (gain2 != CaloGain::INVALIDGAIN) ? (gain2 - gain1) : 0;
+      uint8_t qual1 = pCell->qual1();
+      uint8_t qual2 = qual1 + qualCorrection; // if gains are different, qua11 and qual2 will be different
+      if (qual2 > m_qualityCut && gain2 > gain1) qual2 = qual1 - qualCorrection; // new feature in release 17.2
+
       if (chStatus1.isBadTiming()) {
         pCell->setTime(0.0); // time in first pmt is bad - no cell time
-        uint8_t qual1 = pCell->qual1();
         uint8_t qbit1 = pCell->qbit1() & (~(TileCell::MASK_TIME)); // clear time bit for first pmt
         uint8_t qbit2 = qbit1 | TileCell::MASK_BADCH; // set bad channel bit for second pmt
-        uint8_t qual2 = qual1 + (gain2 - gain1); // if gains are different, qua11 and qual2 will be different
-        if (qual2 > m_qualityCut && gain2 > gain1) qual2 = qual1 - (gain2 - gain1); // new feature in release 17.2
         pCell->setQuality(qual1, qbit1, 0); // update qbits for first pmt
         pCell->setQuality(qual2, qbit2, 1); // change quality and qbits for second pmt
       } else {
         pCell->setTime(pCell->time1());  // use time from first pmt as cell time
-        pCell->setQuality(pCell->qual1(), (pCell->qbit1() | TileCell::MASK_BADCH), 1); // change quality flag for second pmt
+        pCell->setQuality(qual2, (pCell->qbit1() | TileCell::MASK_BADCH), 1); // change quality flag for second pmt
       }
       
       return true;
