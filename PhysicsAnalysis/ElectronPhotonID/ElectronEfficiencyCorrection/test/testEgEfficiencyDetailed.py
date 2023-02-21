@@ -17,7 +17,7 @@ def getScalefactor(tool_options):
 
 
 stype = 'FullSim'
-runno = 425504
+runno = 428648
 model = 'TOTAL'
 pT = 41212.1
 eta = -0.94
@@ -60,7 +60,7 @@ print('    ---> map looks good! ')
 
 # third check: print all ID levels
 print(' ==== CHECK III:  ID LVL ==== ')
-for thisid in [eleid, 'LooseBLayer', 'Tight']:
+for thisid in ['Medium', 'LooseBLayer', 'Tight']:
     getScalefactor(' -t %s -r %d -c %s -e %1.2f -p %1.2f -d %s %s ' %
                    (stype, runno, model, eta, pT, thisid, other))
 
@@ -88,12 +88,12 @@ getScalefactor(' -t %s -r %d -c %s -e %1.2f -p %1.2f -d %s %s ' %
                (stype, runno, model, eta, pT, 'Reconstruction', other))
 for thisother in [
     '-i Tight_VarRad',
-    '-i Tight_VarRad -g SINGLE_E_2015_e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose_2016_2017_e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0'
+    '-i Tight_VarRad -g 2022_e26_lhtight_ivarloose_L1EM22VHI_OR_e60_lhmedium_L1EM22VHI_OR_e140_lhloose_L1EM22VHI'
 ]:
     for thissim in rangeofsim:
         for thisrunno in rangeofrunno :
             flags = (thissim, thisrunno, model, eta,
-                     pT, eleid, thisother+other)
+                     pT, "Tight", thisother+other)
             getScalefactor(
                 ' -t %s -r %d -c %s -e %1.2f -p %1.2f -d %s %s ' % flags)
 
