@@ -440,7 +440,9 @@ if len(opt.enabledSignatures)==1 or opt.selectChains:
 #
 # This is the earliest we can lock since InDetJobProperties.py
 # above still modifies the ConfigFlags.
-ConfigFlags.lock()
+
+from TriggerJobOpts import runHLT
+runHLT.lock_and_restrict(ConfigFlags)
 
 # Only import this here to avoid we accidentally use CAs before locking
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
