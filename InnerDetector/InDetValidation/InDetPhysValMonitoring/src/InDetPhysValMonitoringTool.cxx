@@ -473,7 +473,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
       }
       else {
         // Fill track only entries with dummy truth values
-        m_monPlots->fillNtuple(*thisTrack);
+        m_monPlots->fillNtuple(*thisTrack, primaryvertex);
       }
     }
   }
@@ -497,7 +497,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
           const xAOD::TrackParticle* thisTrack = cachedAssoc.second[itrack];
           
           // Fill track entries with truth association
-          m_monPlots->fillNtuple(*thisTrack, *thisTruth, itrack);
+          m_monPlots->fillNtuple(*thisTrack, *thisTruth, primaryvertex, itrack);
       }
     }
   }

@@ -361,10 +361,10 @@ InDetRttPlots::fillFakeRate(const xAOD::TrackParticle& track, const xAOD::Jet& j
 
 //IDPVM Ntuple
 void
-InDetRttPlots::fillNtuple(const xAOD::TrackParticle& track) {
+InDetRttPlots::fillNtuple(const xAOD::TrackParticle& track, const xAOD::Vertex* vtx) {
   // Fill track only entries with dummy truth values
   if (m_ntupleTruthToReco){ 
-    m_ntupleTruthToReco->fillTrack(track);
+    m_ntupleTruthToReco->fillTrack(track, vtx);
     m_ntupleTruthToReco->fillTree();
   }
 }
@@ -379,10 +379,10 @@ InDetRttPlots::fillNtuple(const xAOD::TruthParticle& truth) {
 }
 
 void 
-InDetRttPlots::fillNtuple(const xAOD::TrackParticle& track, const xAOD::TruthParticle& truth, const int truthMatchRanking) {
+InDetRttPlots::fillNtuple(const xAOD::TrackParticle& track, const xAOD::TruthParticle& truth, const xAOD::Vertex* vtx, const int truthMatchRanking) {
   // Fill track and truth entries
   if (m_ntupleTruthToReco){ 
-    m_ntupleTruthToReco->fillTrack(track, truthMatchRanking);
+    m_ntupleTruthToReco->fillTrack(track, vtx, truthMatchRanking);
     m_ntupleTruthToReco->fillTruth(truth);
     m_ntupleTruthToReco->fillTree();
   }

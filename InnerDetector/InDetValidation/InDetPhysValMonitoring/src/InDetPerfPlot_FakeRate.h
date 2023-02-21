@@ -33,6 +33,7 @@ public:
 private:
   TEfficiency* m_fakerate_vs_eta;
   TEfficiency* m_fakerate_vs_pt;
+  TEfficiency* m_fakerate_vs_lowpt;
   TEfficiency* m_fakerate_vs_phi;
   TEfficiency* m_fakerate_vs_d0;
   TEfficiency* m_fakerate_vs_z0;

@@ -38,6 +38,7 @@ private:
   TEfficiency* m_efficiency_vs_pt_low{};
   TEfficiency* m_efficiency_vs_pt_high{};
   TEfficiency* m_efficiency_vs_pt_log{};
+  TEfficiency* m_efficiency_vs_lowpt{};
   TEfficiency* m_efficiency_vs_phi{};
   TEfficiency* m_efficiency_vs_d0{};
   TEfficiency* m_efficiency_vs_d0_abs{};
