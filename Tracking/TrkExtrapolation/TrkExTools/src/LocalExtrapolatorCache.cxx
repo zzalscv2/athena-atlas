@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 #include "TrkSurfaces/Surface.h"
 #include "TrkExUtils/ExtrapolationCache.h" 
@@ -10,9 +10,7 @@ namespace Trk{
 
   Cache::Cache()
       : m_trackParmContainer(128)
-      , // always reserve some space; still occasionally more slots are
-        // needed; above 150 there are very few cases the max in q431 was 257
-      m_lastValidParameters(m_trackParmContainer)
+      , m_lastValidParameters(m_trackParmContainer)
       , m_parametersAtBoundary(m_trackParmContainer)
     {
       m_navigSurfs.reserve(1024);
@@ -31,18 +29,12 @@ namespace Trk{
     
     Cache::~Cache()
     {
-      s_navigSurfsMax.update(m_navigSurfs.size());
-      s_navigVolsMax.update(m_navigVols.size());
-      s_navigVolsIntMax.update(m_navigVols.size());
       if (m_ownParametersOnDetElements && m_parametersOnDetElements) {
         for (const Trk::TrackParameters* parm : *m_parametersOnDetElements) {
           delete parm;
         }
       }
-      s_containerSizeMax.update(trackParmContainer().size());
     }
-
-
 
   IMaterialEffectsUpdator::ICache&
   Cache::subMaterialEffectsUpdatorCache( const TrackingVolume& tvol){

@@ -112,11 +112,6 @@ momentumOutput(const Amg::Vector3D& mom)
 
 } // end of anonymous namespace
 
-Trk::Cache::AtomicMax Trk::Cache::s_navigSurfsMax{};
-Trk::Cache::AtomicMax Trk::Cache::s_navigVolsMax{};
-Trk::Cache::AtomicMax Trk::Cache::s_navigVolsIntMax{};
-Trk::Cache::AtomicMax Trk::Cache::s_containerSizeMax{};
-bool Trk::Cache::s_reported{};
 
 // constructor
 Trk::Extrapolator::Extrapolator(const std::string& t, const std::string& n, const IInterface* p)
@@ -439,20 +434,6 @@ Trk::Extrapolator::finalize()
                    << ")");
       ATH_MSG_INFO(" ------------------------------------------------------------------");
     }
-  }
-
-  if (!Trk::Cache::s_reported) {
-    Trk::Cache::s_reported = true;
-    ATH_MSG_INFO("Trk::Cache s_navigSurfsMax    = "
-                 << Trk::Cache::s_navigSurfsMax.val());
-    ATH_MSG_INFO("Trk::Cache s_navigSurfsMax    = "
-                 << Trk::Cache::s_navigSurfsMax.val());
-    ATH_MSG_INFO("Trk::Cache s_navigVolsMax     = "
-                 << Trk::Cache::s_navigVolsMax.val());
-    ATH_MSG_INFO("Trk::Cache s_navigVolsIntMax  = "
-                 << Trk::Cache::s_navigVolsIntMax.val());
-    ATH_MSG_INFO("Trk::Cache s_containerSizeMax = "
-                 << Trk::Cache::s_containerSizeMax.val());
   }
 
   return StatusCode::SUCCESS;
