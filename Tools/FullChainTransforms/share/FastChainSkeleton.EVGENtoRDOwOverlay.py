@@ -399,13 +399,13 @@ if len(globalflags.ConditionsTag()):
 # BeamEffectsAlg
 topSequence += CfgGetter.getAlgorithm("BeamEffectsAlg")
 
-import PyUtils.AthFile as af
-f = af.fopen(athenaCommonFlags.PoolRDOInput.get_Value()[0])
-def checkxAODEventInfo(inputlist):
+def checkxAODEventInfo(inputEVNTfile):
     """ Check for xAOD::EventInfo """
+    import PyUtils.AthFile as af
+    f = af.fopen(inputEVNTfile)
+    inputlist = f.infos['eventdata_items']
     present = False
     for entry in inputlist:
-        print(entry)
         if entry[0] != 'xAOD::EventInfo':
             continue
         if entry[1] !='EventInfo':
@@ -415,9 +415,16 @@ def checkxAODEventInfo(inputlist):
         break
     return present
 
-
-job += CfgGetter.getAlgorithm("EventInfoUpdateFromContextAlg")
 from OverlayCommonAlgs.OverlayFlags import overlayFlags
+overlayFlags.processLegacyEventInfo = not checkxAODEventInfo(athenaCommonFlags.PoolEvgenInput.get_Value()[0])
+if overlayFlags.processLegacyEventInfo():
+    FastChainLog.info("Dealing with Legacy EventInfo in inputs")
+    if not hasattr(job, "EventInfoCnvAlg"):
+        alg = CfgMgr.xAODMaker__EventInfoCnvAlg("EventInfoCnvAlg")
+        alg.AODKey = 'McEventInfo'
+        alg.xAODKey = 'Input_EventInfo'
+        job += alg
+job += CfgGetter.getAlgorithm("EventInfoUpdateFromContextAlg")
 job.EventInfoUpdateFromContextAlg.OutputKey = f"{overlayFlags.sigPrefix()}EventInfo"
 
 # CopyMcEventCollection
@@ -533,8 +540,6 @@ import MagFieldServices.SetupField
 #------------------------------------------------------------
 # xAOD::EventInfo setup
 #------------------------------------------------------------
-
-overlayFlags.processLegacyEventInfo.set_Value_and_Lock(True)
 
 # Run the xAOD::EventInfo overlay
 job += CfgGetter.getAlgorithm("EventInfoOverlay")
