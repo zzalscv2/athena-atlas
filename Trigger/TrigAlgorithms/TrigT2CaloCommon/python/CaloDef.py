@@ -187,22 +187,6 @@ def fastCalo_AllEM_EVCreator():
 
     return (fastCaloViewsMaker, InViewRoIs)
 
-##################################
-# standalone testing
-###################################
-
-def createFastCaloSequence(EMRoIDecisions, doRinger=False, ClustersName="HLT_FastCaloEMClusters", RingerKey="HLT_FastCaloRinger"):
-    """Used for standalone testing"""
-    (fastCaloViewsMaker, InViewRoIs) = fastCaloEVCreator()
-    # connect to RoIs
-
-    fastCaloViewsMaker.InputMakerInputDecisions  = [ EMRoIDecisions ]
-    fastCaloViewsMaker.InputMakerOutputDecisions =  EMRoIDecisions + "IMOUTPUT"
-
-    (fastCaloInViewSequence, sequenceOut) = fastCaloRecoSequence(InViewRoIs, doRinger=doRinger, ClustersName=ClustersName, RingerKey=RingerKey)
-
-    fastCaloSequence = seqAND("fastCaloSequence", [fastCaloViewsMaker, fastCaloInViewSequence ])
-    return (fastCaloSequence, sequenceOut)
 
 ##################################
 # cluster maker functions
