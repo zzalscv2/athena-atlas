@@ -27,16 +27,17 @@ def TrigLArNoiseBurstRecoAlgCfg(flags, cells_name):
 
     cfg.addCondAlgo( CompFactory.LArBadFebCondAlg(
          "LArKnownBadFebAlg",
-         ReadKey="/LAR/BadChannels/KnownBADFEBs",
+         ReadKey="/LAR/BadChannels/KnownBADFEBs" if not flags.Input.isMC else "",
          WriteKey="LArKnownBadFEBs") )
 
     cfg.addCondAlgo( CompFactory.LArBadFebCondAlg(
          "LArKnownMNBFebAlg",
-         ReadKey="/LAR/BadChannels/KnownMNBFEBs",
+         ReadKey="/LAR/BadChannels/KnownMNBFEBs" if not flags.Input.isMC else "",
          WriteKey="LArKnownMNBFEBs") )
 
-    cfg.merge( addFolders(flags, ["/LAR/BadChannels/KnownBADFEBs", "/LAR/BadChannels/KnownMNBFEBs"],
-                          "LAR_ONL", className="AthenaAttributeList") )
+    if not flags.Input.isMC:
+        cfg.merge( addFolders(flags, ["/LAR/BadChannels/KnownBADFEBs", "/LAR/BadChannels/KnownMNBFEBs"],
+                              "LAR_ONL", className="AthenaAttributeList") )
 
     return cfg
 
