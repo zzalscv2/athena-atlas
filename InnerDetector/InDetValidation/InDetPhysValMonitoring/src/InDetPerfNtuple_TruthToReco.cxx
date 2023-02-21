@@ -32,6 +32,7 @@ InDetPerfNtuple_TruthToReco::InDetPerfNtuple_TruthToReco(InDetPlotBase* pParent,
     m_track_qOverP("track_qOverP",m_undefinedValue,*this),
     m_track_qOverPt("track_qOverPt",m_undefinedValue,*this),
     m_track_z0sin("track_z0sin",m_undefinedValue,*this),
+    m_track_z0sin_wrt_primvtx("track_z0sin_wrt_primvtx",m_undefinedValue,*this),
     m_trackErr_pt("trackErr_pt",m_undefinedValue,*this),
     m_trackErr_d0("trackErr_d0",m_undefinedValue,*this),
     m_trackErr_z0("trackErr_z0",m_undefinedValue,*this),
@@ -110,7 +111,7 @@ void InDetPerfNtuple_TruthToReco::fillTruth(const xAOD::TruthParticle& truth) {
     m_truth_z0sin   = (((m_truth_theta() != m_undefinedValue) && (m_truth_z0()     != m_undefinedValue)) ? m_truth_z0() * std::sin(m_truth_theta())           : m_undefinedValue);
 }
 
-void InDetPerfNtuple_TruthToReco::fillTrack(const xAOD::TrackParticle& track, const int truthMatchRanking) {
+void InDetPerfNtuple_TruthToReco::fillTrack(const xAOD::TrackParticle& track, const xAOD::Vertex* vtx, const int truthMatchRanking ) {
     m_hasTrack = (int)true;
     m_passedTrackSelection = (m_acc_passedTrackSelection.isAvailable(track) ? (int)m_acc_passedTrackSelection(track) : 0);
 
@@ -147,6 +148,8 @@ void InDetPerfNtuple_TruthToReco::fillTrack(const xAOD::TrackParticle& track, co
     m_track_qOverP  = track.qOverP(); 
     m_track_qOverPt = track.qOverP() * (1 / std::sin(track.theta()));
     m_track_z0sin   = track.z0() * std::sin(track.theta()); 
+    if (vtx) m_track_z0sin_wrt_primvtx = ( track.z0() - vtx->z() ) *std::sin(track.theta()); 
+    else m_track_z0sin_wrt_primvtx = m_undefinedValue;
 
     if (track.qOverP() == 0) m_trackErr_pt = m_undefinedValue;
     else {

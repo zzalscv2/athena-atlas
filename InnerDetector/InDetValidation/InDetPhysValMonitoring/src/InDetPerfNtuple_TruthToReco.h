@@ -8,6 +8,7 @@
 #include "InDetPerfNtuple.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTracking/Vertex.h"
 #include <cmath> // std::isnan()
 
 class InDetPerfNtuple_TruthToReco: public InDetPerfNtuple {
@@ -15,7 +16,7 @@ public:
     InDetPerfNtuple_TruthToReco(InDetPlotBase* pParent, const std::string& dirName, const std::string & treeName); 
     
     void fillTree(); 
-    void fillTrack(const xAOD::TrackParticle& track, const int truthMatchRanking = -1); 
+    void fillTrack(const xAOD::TrackParticle& track, const xAOD::Vertex* vtx, const int truthMatchRanking = -1); 
     void fillTruth(const xAOD::TruthParticle& truth);
 
     SG::AuxElement::Accessor<bool> m_acc_passedTruthSelection{"passedTruthSelection"};
@@ -56,6 +57,7 @@ private:
     InDetPerfNtupleBranch<float> m_track_qOverP; 
     InDetPerfNtupleBranch<float> m_track_qOverPt; 
     InDetPerfNtupleBranch<float> m_track_z0sin; 
+    InDetPerfNtupleBranch<float> m_track_z0sin_wrt_primvtx; 
 
     //Track fit errors
     InDetPerfNtupleBranch<float> m_trackErr_pt; 

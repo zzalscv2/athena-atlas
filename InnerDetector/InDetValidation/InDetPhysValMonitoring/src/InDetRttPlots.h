@@ -146,9 +146,9 @@ public:
   void fillFakeRate(const xAOD::TrackParticle& particle, const bool isFake, const bool isAssociatedTruth, const float mu, const unsigned int nVtx, float weight);
 
   // fill IDPVM Ntuple
-  void fillNtuple(const xAOD::TrackParticle& track);
+  void fillNtuple(const xAOD::TrackParticle& track, const xAOD::Vertex* vtx);
   void fillNtuple(const xAOD::TruthParticle& truth);
-  void fillNtuple(const xAOD::TrackParticle& track, const xAOD::TruthParticle& truth, const int truthMatchRanking); 
+  void fillNtuple(const xAOD::TrackParticle& track, const xAOD::TruthParticle& truth, const xAOD::Vertex* vtx, const int truthMatchRanking); 
 
   virtual ~InDetRttPlots() {/**nop**/
   };

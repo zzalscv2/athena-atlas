@@ -389,6 +389,7 @@ InDetPerfPlot_Resolution::getTrackParameters(const xAOD::TrackParticle& trkprt) 
 
   m_trkP[D0] = trkprt.d0();
   m_trkP[Z0] = trkprt.z0();
+  m_trkP[QOVERP] = trkprt.qOverP() * Gaudi::Units::GeV;
   const float sinTheta{std::sin(trkprt.theta())};
   const bool saneSineValue = (std::abs(sinTheta) > smallestAllowableSin);
   const float inverseSinTheta = saneSineValue ? 1./sinTheta : undefinedValue;
@@ -403,6 +404,7 @@ InDetPerfPlot_Resolution::getTrackParameters(const xAOD::TrackParticle& trkprt) 
   m_trkErrP[Z0] = std::sqrt(trkprt.definingParametersCovMatrix()(1, 1));
   m_trkErrP[PHI] = std::sqrt(trkprt.definingParametersCovMatrix()(2, 2));
   m_trkErrP[THETA] = std::sqrt(trkprt.definingParametersCovMatrix()(3, 3));
+  m_trkErrP[QOVERP] = std::sqrt(trkprt.definingParametersCovMatrix()(4, 4)) * Gaudi::Units::GeV;
   m_trkErrP[QOVERPT] = std::sqrt(trkprt.definingParametersCovMatrix()(4, 4)) * inverseSinTheta;
   m_trkErrP[Z0SIN] = std::sqrt(std::pow(m_trkErrP[Z0] * std::sin(m_trkP[THETA]), 2) + 
                                std::pow(m_trkP[Z0] * m_trkErrP[THETA] * std::cos(m_trkP[THETA]), 2) + 
@@ -453,6 +455,7 @@ InDetPerfPlot_Resolution::getTrackParameters(const xAOD::TruthParticle& truthprt
       m_truetrkP[QOVERPT] = undefinedValue;
     }
   }
+  m_truetrkP[QOVERP] = qOverP * Gaudi::Units::GeV;
   //need both z0 and theta for z0sinTheta
   if ((m_truetrkP[Z0] != undefinedValue) and (m_truetrkP[THETA] != undefinedValue)){
     const float sinTheta =std::sin(m_truetrkP[THETA]);

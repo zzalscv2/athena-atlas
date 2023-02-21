@@ -40,7 +40,7 @@ class IExtrapolator;
 class InDetPerfPlot_Resolution: public InDetPlotBase {
 public:
   enum Param {
-    D0, Z0, QOVERPT, THETA, PHI, PT, Z0SIN, NPARAMS
+    D0, Z0, QOVERP, QOVERPT, THETA, PHI, PT, Z0SIN, NPARAMS
   };
 
   InDetPerfPlot_Resolution(InDetPlotBase* pParent, const std::string& dirName);
@@ -72,7 +72,7 @@ private:
 
   float m_LowPtBins[m_nLowPtBins + 1]{};
    
-  std::string m_paramProp[NPARAMS] = { "d0", "z0", "ptqopt", "theta", "phi", "pt", "z0sin" }; 
+  std::string m_paramProp[NPARAMS] = { "d0", "z0", "qoverp", "ptqopt", "theta", "phi", "pt", "z0sin" }; 
  
   IDPVM::ResolutionHelper m_resolutionHelper;
   IDPVM::ResolutionHelper::methods m_resolutionMethod;
