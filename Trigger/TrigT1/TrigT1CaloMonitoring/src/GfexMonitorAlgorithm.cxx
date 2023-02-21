@@ -133,12 +133,152 @@ StatusCode GfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
   auto gFexMet_Rms = Monitored::Scalar<float>("gFexMET_Rms",0.0);
   auto gFexSumEt_Rms = Monitored::Scalar<float>("gFexSumET_Rms",0.0);
 
+  /* Variables with pt cuts */
+  // SR jets
+  auto gFexSRJetPtCutPt0 = Monitored::Scalar<float>("gFexSRJetPtCutPt0",0.0);
+  auto gFexSRJetPtCutPt10 = Monitored::Scalar<float>("gFexSRJetPtCutPt10",0.0);
+  auto gFexSRJetPtCutPt50 = Monitored::Scalar<float>("gFexSRJetPtCutPt50",0.0);
+  auto gFexSRJetPtCutPt100 = Monitored::Scalar<float>("gFexSRJetPtCutPt100",0.0);
+
+  auto gFexSRJetEtaCutPt0 = Monitored::Scalar<float>("gFexSRJetEtaCutPt0",0.0);
+  auto gFexSRJetEtaCutPt10 = Monitored::Scalar<float>("gFexSRJetEtaCutPt10",0.0);
+  auto gFexSRJetEtaCutPt50 = Monitored::Scalar<float>("gFexSRJetEtaCutPt50",0.0);
+  auto gFexSRJetEtaCutPt100 = Monitored::Scalar<float>("gFexSRJetEtaCutPt100",0.0);
+
+  auto gFexSRJetPhiCutPt0 = Monitored::Scalar<float>("gFexSRJetPhiCutPt0",0.0);
+  auto gFexSRJetPhiCutPt10 = Monitored::Scalar<float>("gFexSRJetPhiCutPt10",0.0);
+  auto gFexSRJetPhiCutPt50 = Monitored::Scalar<float>("gFexSRJetPhiCutPt50",0.0);
+  auto gFexSRJetPhiCutPt100 = Monitored::Scalar<float>("gFexSRJetPhiCutPt100",0.0);
+
+  // LR jets
+  auto gFexLRJetPtCutPt0 = Monitored::Scalar<float>("gFexLRJetPtCutPt0",0.0);
+  auto gFexLRJetPtCutPt10 = Monitored::Scalar<float>("gFexLRJetPtCutPt10",0.0);
+  auto gFexLRJetPtCutPt50 = Monitored::Scalar<float>("gFexLRJetPtCutPt50",0.0);
+  auto gFexLRJetPtCutPt100 = Monitored::Scalar<float>("gFexLRJetPtCutPt100",0.0);
+
+  auto gFexLRJetEtaCutPt0 = Monitored::Scalar<float>("gFexLRJetEtaCutPt0",0.0);
+  auto gFexLRJetEtaCutPt10 = Monitored::Scalar<float>("gFexLRJetEtaCutPt10",0.0);
+  auto gFexLRJetEtaCutPt50 = Monitored::Scalar<float>("gFexLRJetEtaCutPt50",0.0);
+  auto gFexLRJetEtaCutPt100 = Monitored::Scalar<float>("gFexLRJetEtaCutPt100",0.0);
+
+  auto gFexLRJetPhiCutPt0 = Monitored::Scalar<float>("gFexLRJetPhiCutPt0",0.0);
+  auto gFexLRJetPhiCutPt10 = Monitored::Scalar<float>("gFexLRJetPhiCutPt10",0.0);
+  auto gFexLRJetPhiCutPt50 = Monitored::Scalar<float>("gFexLRJetPhiCutPt50",0.0);
+  auto gFexLRJetPhiCutPt100 = Monitored::Scalar<float>("gFexLRJetPhiCutPt100",0.0);
+
+  /* Variables with FPGA region cuts */
+  // SR jets
+  auto gFexSRJetEtaCutFPGAa = Monitored::Scalar<float>("gFexSRJetEtaCutFPGAa",0.0);
+  auto gFexSRJetEtaCutFPGAb = Monitored::Scalar<float>("gFexSRJetEtaCutFPGAb",0.0);
+  auto gFexSRJetEtaCutFPGAc = Monitored::Scalar<float>("gFexSRJetEtaCutFPGAc",0.0);
+
+  auto gFexSRJetPhiCutFPGAa = Monitored::Scalar<float>("gFexSRJetPhiCutFPGAa",0.0);
+  auto gFexSRJetPhiCutFPGAb = Monitored::Scalar<float>("gFexSRJetPhiCutFPGAb",0.0);
+  auto gFexSRJetPhiCutFPGAc = Monitored::Scalar<float>("gFexSRJetPhiCutFPGAc",0.0);
+
+  auto gFexSRJetEtCutFPGAa = Monitored::Scalar<float>("gFexSRJetEtCutFPGAa",0.0);
+  auto gFexSRJetEtCutFPGAb = Monitored::Scalar<float>("gFexSRJetEtCutFPGAb",0.0);
+  auto gFexSRJetEtCutFPGAc = Monitored::Scalar<float>("gFexSRJetEtCutFPGAc",0.0);
+  // Same as above, but requiring non-zero objects by enforcing pt>0
+  auto gFexSRJetEtaCutFPGAaCutPt0 = Monitored::Scalar<float>("gFexSRJetEtaCutFPGAaCutPt0",0.0);
+  auto gFexSRJetEtaCutFPGAbCutPt0 = Monitored::Scalar<float>("gFexSRJetEtaCutFPGAbCutPt0",0.0);
+  auto gFexSRJetEtaCutFPGAcCutPt0 = Monitored::Scalar<float>("gFexSRJetEtaCutFPGAcCutPt0",0.0);
+
+  auto gFexSRJetPhiCutFPGAaCutPt0 = Monitored::Scalar<float>("gFexSRJetPhiCutFPGAaCutPt0",0.0);
+  auto gFexSRJetPhiCutFPGAbCutPt0 = Monitored::Scalar<float>("gFexSRJetPhiCutFPGAbCutPt0",0.0);
+  auto gFexSRJetPhiCutFPGAcCutPt0 = Monitored::Scalar<float>("gFexSRJetPhiCutFPGAcCutPt0",0.0);
+
+  auto gFexSRJetEtCutFPGAaCutPt0 = Monitored::Scalar<float>("gFexSRJetEtCutFPGAaCutPt0",0.0);
+  auto gFexSRJetEtCutFPGAbCutPt0 = Monitored::Scalar<float>("gFexSRJetEtCutFPGAbCutPt0",0.0);
+  auto gFexSRJetEtCutFPGAcCutPt0 = Monitored::Scalar<float>("gFexSRJetEtCutFPGAcCutPt0",0.0);
+
+  // LR jets
+  auto gFexLRJetEtaCutFPGAa = Monitored::Scalar<float>("gFexLRJetEtaCutFPGAa",0.0);
+  auto gFexLRJetEtaCutFPGAb = Monitored::Scalar<float>("gFexLRJetEtaCutFPGAb",0.0);
+  auto gFexLRJetEtaCutFPGAc = Monitored::Scalar<float>("gFexLRJetEtaCutFPGAc",0.0);
+
+  auto gFexLRJetPhiCutFPGAa = Monitored::Scalar<float>("gFexLRJetPhiCutFPGAa",0.0);
+  auto gFexLRJetPhiCutFPGAb = Monitored::Scalar<float>("gFexLRJetPhiCutFPGAb",0.0);
+  auto gFexLRJetPhiCutFPGAc = Monitored::Scalar<float>("gFexLRJetPhiCutFPGAc",0.0);
+
+  auto gFexLRJetEtCutFPGAa = Monitored::Scalar<float>("gFexLRJetEtCutFPGAa",0.0);
+  auto gFexLRJetEtCutFPGAb = Monitored::Scalar<float>("gFexLRJetEtCutFPGAb",0.0);
+  auto gFexLRJetEtCutFPGAc = Monitored::Scalar<float>("gFexLRJetEtCutFPGAc",0.0);
+  // Same as above, but requiring non-zero objects by enforcing pt>0
+  auto gFexLRJetEtaCutFPGAaCutPt0 = Monitored::Scalar<float>("gFexLRJetEtaCutFPGAaCutPt0",0.0);
+  auto gFexLRJetEtaCutFPGAbCutPt0 = Monitored::Scalar<float>("gFexLRJetEtaCutFPGAbCutPt0",0.0);
+  auto gFexLRJetEtaCutFPGAcCutPt0 = Monitored::Scalar<float>("gFexLRJetEtaCutFPGAcCutPt0",0.0);
+
+  auto gFexLRJetPhiCutFPGAaCutPt0 = Monitored::Scalar<float>("gFexLRJetPhiCutFPGAaCutPt0",0.0);
+  auto gFexLRJetPhiCutFPGAbCutPt0 = Monitored::Scalar<float>("gFexLRJetPhiCutFPGAbCutPt0",0.0);
+  auto gFexLRJetPhiCutFPGAcCutPt0 = Monitored::Scalar<float>("gFexLRJetPhiCutFPGAcCutPt0",0.0);
+
+  auto gFexLRJetEtCutFPGAaCutPt0 = Monitored::Scalar<float>("gFexLRJetEtCutFPGAaCutPt0",0.0);
+  auto gFexLRJetEtCutFPGAbCutPt0 = Monitored::Scalar<float>("gFexLRJetEtCutFPGAbCutPt0",0.0);
+  auto gFexLRJetEtCutFPGAcCutPt0 = Monitored::Scalar<float>("gFexLRJetEtCutFPGAcCutPt0",0.0);
+
   for(const xAOD::gFexJetRoI* gFexLRJetRoI : *gFexLRJetContainer){
     gFexLRJeteT=gFexLRJetRoI->gFexTobEt();
     gFexLRJeteta=gFexLRJetRoI->eta();
     gFexLRJetphi=gFexLRJetRoI->phi();
     gtype=gFexLRJetRoI->gFexType();
     fill(m_packageName,gFexLRJeteta,gFexLRJetphi,gFexLRJeteT,gtype);
+
+    // pT cuts
+    if(gFexLRJeteT > 0){
+      gFexLRJetPtCutPt0 = gFexLRJetRoI->gFexTobEt();
+      gFexLRJetEtaCutPt0 = gFexLRJetRoI->eta();
+      gFexLRJetPhiCutPt0 = gFexLRJetRoI->phi();
+      fill(m_packageName,gFexLRJetPtCutPt0,gFexLRJetEtaCutPt0,gFexLRJetPhiCutPt0);
+    }
+    if(gFexLRJeteT > 10){
+      gFexLRJetPtCutPt10 = gFexLRJetRoI->gFexTobEt();
+      gFexLRJetEtaCutPt10 = gFexLRJetRoI->eta();
+      gFexLRJetPhiCutPt10 = gFexLRJetRoI->phi();
+      fill(m_packageName,gFexLRJetPtCutPt10,gFexLRJetEtaCutPt10,gFexLRJetPhiCutPt10);
+    }
+    if(gFexLRJeteT > 50){
+      gFexLRJetPtCutPt50 = gFexLRJetRoI->gFexTobEt();
+      gFexLRJetEtaCutPt50 = gFexLRJetRoI->eta();
+      gFexLRJetPhiCutPt50 = gFexLRJetRoI->phi();
+      fill(m_packageName,gFexLRJetPtCutPt50,gFexLRJetEtaCutPt50,gFexLRJetPhiCutPt50);
+    }
+    if(gFexLRJeteT > 100){
+      gFexLRJetPtCutPt100 = gFexLRJetRoI->gFexTobEt();
+      gFexLRJetEtaCutPt100 = gFexLRJetRoI->eta();
+      gFexLRJetPhiCutPt100 = gFexLRJetRoI->phi();
+      fill(m_packageName,gFexLRJetPtCutPt100,gFexLRJetEtaCutPt100,gFexLRJetPhiCutPt100);
+    }
+
+    // FPGA region cuts
+    if(gFexLRJeteta > 0 && gFexLRJeteta < 2.5){ // pFPGA A
+      gFexLRJetEtaCutFPGAa = gFexLRJetRoI->eta();
+      gFexLRJetPhiCutFPGAa = gFexLRJetRoI->phi();
+      gFexLRJetEtCutFPGAa = gFexLRJetRoI->gFexTobEt();
+      fill(m_packageName,gFexLRJetEtaCutFPGAa,gFexLRJetPhiCutFPGAa,gFexLRJetEtCutFPGAa);
+      if(gFexLRJeteT > 0){
+        fill(m_packageName,gFexLRJetEtaCutFPGAaCutPt0);
+      }
+    }
+    if(gFexLRJeteta < 0 && gFexLRJeteta > -2.5){ // pFPGA B
+      gFexLRJetEtaCutFPGAb = gFexLRJetRoI->eta();
+      gFexLRJetPhiCutFPGAb = gFexLRJetRoI->phi();
+      gFexLRJetEtCutFPGAb = gFexLRJetRoI->gFexTobEt();
+      fill(m_packageName,gFexLRJetEtaCutFPGAb,gFexLRJetPhiCutFPGAb,gFexLRJetEtCutFPGAb);
+      if(gFexLRJeteT > 0){
+        fill(m_packageName,gFexLRJetEtaCutFPGAbCutPt0);
+      }
+    }
+    if(std::abs(gFexLRJeteta) > 2.5 && std::abs(gFexLRJeteta) < 4.9){ // pFPGA C
+      gFexLRJetEtaCutFPGAc = gFexLRJetRoI->eta();
+      gFexLRJetPhiCutFPGAc = gFexLRJetRoI->phi();
+      gFexLRJetEtCutFPGAc = gFexLRJetRoI->gFexTobEt();
+      fill(m_packageName,gFexLRJetEtaCutFPGAc,gFexLRJetPhiCutFPGAc,gFexLRJetEtCutFPGAc);
+      if(gFexLRJeteT > 0){
+        fill(m_packageName,gFexLRJetEtaCutFPGAcCutPt0);
+      }
+    }
+
   }
 
   for(const xAOD::gFexJetRoI* gFexSRJetRoI : *gFexSRJetContainer){
@@ -147,6 +287,71 @@ StatusCode GfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
     gFexSRJetphi=gFexSRJetRoI->phi();
     gtype=gFexSRJetRoI->gFexType();
     fill(m_packageName,gFexSRJeteta,gFexSRJetphi,gFexSRJeteT,gtype);
+
+    // pT cuts
+    if(gFexSRJeteT > 0){
+      gFexSRJetPtCutPt0 = gFexSRJetRoI->gFexTobEt();
+      gFexSRJetEtaCutPt0 = gFexSRJetRoI->eta();
+      gFexSRJetPhiCutPt0 = gFexSRJetRoI->phi();
+      fill(m_packageName,gFexSRJetPtCutPt0,gFexSRJetEtaCutPt0,gFexSRJetPhiCutPt0);
+    }
+    if(gFexSRJeteT > 10){
+      gFexSRJetPtCutPt10 = gFexSRJetRoI->gFexTobEt();
+      gFexSRJetEtaCutPt10 = gFexSRJetRoI->eta();
+      gFexSRJetPhiCutPt10 = gFexSRJetRoI->phi();
+      fill(m_packageName,gFexSRJetPtCutPt10,gFexSRJetEtaCutPt10,gFexSRJetPhiCutPt10);
+    }
+    if(gFexSRJeteT > 50){
+      gFexSRJetPtCutPt50 = gFexSRJetRoI->gFexTobEt();
+      gFexSRJetEtaCutPt50 = gFexSRJetRoI->eta();
+      gFexSRJetPhiCutPt50 = gFexSRJetRoI->phi();
+      fill(m_packageName,gFexSRJetPtCutPt50,gFexSRJetEtaCutPt50,gFexSRJetPhiCutPt50);
+    }
+    if(gFexSRJeteT > 100){
+      gFexSRJetPtCutPt100 = gFexSRJetRoI->gFexTobEt();
+      gFexSRJetEtaCutPt100 = gFexSRJetRoI->eta();
+      gFexSRJetPhiCutPt100 = gFexSRJetRoI->phi();
+      fill(m_packageName,gFexSRJetPtCutPt100,gFexSRJetEtaCutPt100,gFexSRJetPhiCutPt100);
+    }
+
+    // FPGA region cuts
+    if(gFexSRJeteta > 0 && gFexSRJeteta < 2.5){ // pFPGA A
+      gFexSRJetEtaCutFPGAa = gFexSRJetRoI->eta();
+      gFexSRJetPhiCutFPGAa = gFexSRJetRoI->phi();
+      gFexSRJetEtCutFPGAa = gFexSRJetRoI->gFexTobEt();
+      fill(m_packageName,gFexSRJetEtaCutFPGAa,gFexSRJetPhiCutFPGAa,gFexSRJetEtCutFPGAa);
+      if(gFexSRJeteT > 0){
+        gFexSRJetEtaCutFPGAaCutPt0 = gFexSRJetRoI->eta();
+        gFexSRJetPhiCutFPGAaCutPt0 = gFexSRJetRoI->phi();
+        gFexSRJetEtCutFPGAaCutPt0 = gFexSRJetRoI->gFexTobEt();
+        fill(m_packageName,gFexSRJetEtaCutFPGAaCutPt0,gFexSRJetPhiCutFPGAaCutPt0,gFexSRJetEtCutFPGAaCutPt0);
+      }
+    }
+    if(gFexSRJeteta < 0 && gFexSRJeteta > -2.5){ // pFPGA B
+      gFexSRJetEtaCutFPGAb = gFexSRJetRoI->eta();
+      gFexSRJetPhiCutFPGAb = gFexSRJetRoI->phi();
+      gFexSRJetEtCutFPGAb = gFexSRJetRoI->gFexTobEt();
+      fill(m_packageName,gFexSRJetEtaCutFPGAb,gFexSRJetPhiCutFPGAb,gFexSRJetEtCutFPGAb);
+      if(gFexSRJeteT > 0){
+        gFexSRJetEtaCutFPGAbCutPt0 = gFexSRJetRoI->eta();
+        gFexSRJetPhiCutFPGAbCutPt0 = gFexSRJetRoI->phi();
+        gFexSRJetEtCutFPGAbCutPt0 = gFexSRJetRoI->gFexTobEt();
+        fill(m_packageName,gFexSRJetEtaCutFPGAbCutPt0,gFexSRJetPhiCutFPGAbCutPt0,gFexSRJetEtCutFPGAbCutPt0);
+      }
+    }
+    if(std::abs(gFexSRJeteta) > 2.5 && std::abs(gFexSRJeteta) < 4.9){ // pFPGA C
+      gFexSRJetEtaCutFPGAc = gFexSRJetRoI->eta();
+      gFexSRJetPhiCutFPGAc = gFexSRJetRoI->phi();
+      gFexSRJetEtCutFPGAc = gFexSRJetRoI->gFexTobEt();
+      fill(m_packageName,gFexSRJetEtaCutFPGAc,gFexSRJetPhiCutFPGAc,gFexSRJetEtCutFPGAc);
+      if(gFexSRJeteT > 0){
+        fill(m_packageName,gFexSRJetEtaCutFPGAcCutPt0);
+        gFexSRJetEtaCutFPGAcCutPt0 = gFexSRJetRoI->eta();
+        gFexSRJetPhiCutFPGAcCutPt0 = gFexSRJetRoI->phi();
+        gFexSRJetEtCutFPGAcCutPt0 = gFexSRJetRoI->gFexTobEt();
+        fill(m_packageName,gFexSRJetEtaCutFPGAcCutPt0,gFexSRJetPhiCutFPGAcCutPt0,gFexSRJetEtCutFPGAcCutPt0);
+      }
+    }
   }
 
   for(const xAOD::gFexJetRoI* gFexRhoRoI : *gFexRhoContainer){
