@@ -244,39 +244,39 @@ namespace FEHelpers {
 
   void FillNeutralFlowElements::addStandardSamplingEnergies(xAOD::FlowElement& theFE,const xAOD::CaloCluster& theCluster){
 
-    const std::array< std::pair<xAOD::CaloCluster::CaloSample,const std::string>, 28> samplingAttributePairs{{
-      {xAOD::CaloCluster::CaloSample::PreSamplerB,"LAYERENERGY_PreSamplerB"},
-      {xAOD::CaloCluster::CaloSample::EMB1,"LAYERENERGY_EMB1"},
-      {xAOD::CaloCluster::CaloSample::EMB2,"LAYERENERGY_EMB2"},
-      {xAOD::CaloCluster::CaloSample::EMB3,"LAYERENERGY_EMB3"},
-      {xAOD::CaloCluster::CaloSample::PreSamplerE,"LAYERENERGY_PreSamplerE"},
-      {xAOD::CaloCluster::CaloSample::EME1,"LAYERENERGY_EME1"},
-      {xAOD::CaloCluster::CaloSample::EME2,"LAYERENERGY_EME2"},
-      {xAOD::CaloCluster::CaloSample::EME3,"LAYERENERGY_EME3"},
-      {xAOD::CaloCluster::CaloSample::HEC0,"LAYERENERGY_HEC0"},
-      {xAOD::CaloCluster::CaloSample::HEC1,"LAYERENERGY_HEC1"},
-      {xAOD::CaloCluster::CaloSample::HEC2,"LAYERENERGY_HEC2"},
-      {xAOD::CaloCluster::CaloSample::HEC3,"LAYERENERGY_HEC3"},
-      {xAOD::CaloCluster::CaloSample::TileBar0,"LAYERENERGY_TileBar0"},
-      {xAOD::CaloCluster::CaloSample::TileBar1,"LAYERENERGY_TileBar1"},
-      {xAOD::CaloCluster::CaloSample::TileBar2,"LAYERENERGY_TileBar2"},
-      {xAOD::CaloCluster::CaloSample::TileGap1,"LAYERENERGY_TileGap1"},
-      {xAOD::CaloCluster::CaloSample::TileGap2,"LAYERENERGY_TileGap2"},
-      {xAOD::CaloCluster::CaloSample::TileGap3,"LAYERENERGY_TileGap3"},
-      {xAOD::CaloCluster::CaloSample::TileExt0,"LAYERENERGY_TileExt0"},
-      {xAOD::CaloCluster::CaloSample::TileExt1,"LAYERENERGY_TileExt1"},
-      {xAOD::CaloCluster::CaloSample::TileExt2,"LAYERENERGY_TileExt2"},
-      {xAOD::CaloCluster::CaloSample::FCAL0,"LAYERENERGY_FCAL0"},
-      {xAOD::CaloCluster::CaloSample::FCAL1,"LAYERENERGY_FCAL1"},
-      {xAOD::CaloCluster::CaloSample::FCAL2,"LAYERENERGY_FCAL2"},
-      {xAOD::CaloCluster::CaloSample::MINIFCAL0,"LAYERENERGY_MINIFCAL0"},
-      {xAOD::CaloCluster::CaloSample::MINIFCAL1,"LAYERENERGY_MINIFCAL1"},
-      {xAOD::CaloCluster::CaloSample::MINIFCAL2,"LAYERENERGY_MINIFCAL2"},
-      {xAOD::CaloCluster::CaloSample::MINIFCAL3,"LAYERENERGY_MINIFCAL3"},
+   static const std::array< std::pair<xAOD::CaloCluster::CaloSample, const SG::AuxElement::Accessor<float>>, 28> samplingAttributePairs{{
+      {xAOD::CaloCluster::CaloSample::PreSamplerB,SG::AuxElement::Accessor<float>("LAYERENERGY_PreSamplerB")},
+      {xAOD::CaloCluster::CaloSample::EMB1,SG::AuxElement::Accessor<float>("LAYERENERGY_EMB1")},
+      {xAOD::CaloCluster::CaloSample::EMB2,SG::AuxElement::Accessor<float>("LAYERENERGY_EMB2")},
+      {xAOD::CaloCluster::CaloSample::EMB3,SG::AuxElement::Accessor<float>("LAYERENERGY_EMB3")},
+      {xAOD::CaloCluster::CaloSample::PreSamplerE,SG::AuxElement::Accessor<float>("LAYERENERGY_PreSamplerE")},
+      {xAOD::CaloCluster::CaloSample::EME1,SG::AuxElement::Accessor<float>("LAYERENERGY_EME1")},
+      {xAOD::CaloCluster::CaloSample::EME2,SG::AuxElement::Accessor<float>("LAYERENERGY_EME2")},
+      {xAOD::CaloCluster::CaloSample::EME3,SG::AuxElement::Accessor<float>("LAYERENERGY_EME3")},
+      {xAOD::CaloCluster::CaloSample::HEC0,SG::AuxElement::Accessor<float>("LAYERENERGY_HEC0")},
+      {xAOD::CaloCluster::CaloSample::HEC1,SG::AuxElement::Accessor<float>("LAYERENERGY_HEC1")},
+      {xAOD::CaloCluster::CaloSample::HEC2,SG::AuxElement::Accessor<float>("LAYERENERGY_HEC2")},
+      {xAOD::CaloCluster::CaloSample::HEC3,SG::AuxElement::Accessor<float>("LAYERENERGY_HEC3")},
+      {xAOD::CaloCluster::CaloSample::TileBar0,SG::AuxElement::Accessor<float>("LAYERENERGY_TileBar0")},
+      {xAOD::CaloCluster::CaloSample::TileBar1,SG::AuxElement::Accessor<float>("LAYERENERGY_TileBar1")},
+      {xAOD::CaloCluster::CaloSample::TileBar2,SG::AuxElement::Accessor<float>("LAYERENERGY_TileBar2")},
+      {xAOD::CaloCluster::CaloSample::TileGap1,SG::AuxElement::Accessor<float>("LAYERENERGY_TileGap1")},
+      {xAOD::CaloCluster::CaloSample::TileGap2,SG::AuxElement::Accessor<float>("LAYERENERGY_TileGap2")},
+      {xAOD::CaloCluster::CaloSample::TileGap3,SG::AuxElement::Accessor<float>("LAYERENERGY_TileGap3")},
+      {xAOD::CaloCluster::CaloSample::TileExt0,SG::AuxElement::Accessor<float>("LAYERENERGY_TileExt0")},
+      {xAOD::CaloCluster::CaloSample::TileExt1,SG::AuxElement::Accessor<float>("LAYERENERGY_TileExt1")},
+      {xAOD::CaloCluster::CaloSample::TileExt2,SG::AuxElement::Accessor<float>("LAYERENERGY_TileExt2")},
+      {xAOD::CaloCluster::CaloSample::FCAL0,SG::AuxElement::Accessor<float>("LAYERENERGY_FCAL0")},
+      {xAOD::CaloCluster::CaloSample::FCAL1,SG::AuxElement::Accessor<float>("LAYERENERGY_FCAL1")},
+      {xAOD::CaloCluster::CaloSample::FCAL2,SG::AuxElement::Accessor<float>("LAYERENERGY_FCAL2")},
+      {xAOD::CaloCluster::CaloSample::MINIFCAL0,SG::AuxElement::Accessor<float>("LAYERENERGY_MINIFCAL0")},
+      {xAOD::CaloCluster::CaloSample::MINIFCAL1,SG::AuxElement::Accessor<float>("LAYERENERGY_MINIFCAL1")},
+      {xAOD::CaloCluster::CaloSample::MINIFCAL2,SG::AuxElement::Accessor<float>("LAYERENERGY_MINIFCAL2")},
+      {xAOD::CaloCluster::CaloSample::MINIFCAL3,SG::AuxElement::Accessor<float>("LAYERENERGY_MINIFCAL3")},
     }};
 
     for (const auto & [sampling,attribute]:samplingAttributePairs) {
-      this->addSamplingEnergy(sampling,attribute,theCluster,theFE);
+      attribute(theFE) = theCluster.eSample(sampling);
     }
   }  
 
