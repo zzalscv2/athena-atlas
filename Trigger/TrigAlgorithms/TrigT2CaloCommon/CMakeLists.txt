@@ -13,7 +13,7 @@ atlas_add_library( TrigT2CaloCommonLib
                    PUBLIC_HEADERS TrigT2CaloCommon
                    PRIVATE_INCLUDE_DIRS ${TBB_INCLUDE_DIRS} ${TDAQ-COMMON_INCLUDE_DIRS}
                    LINK_LIBRARIES AthenaBaseComps AthenaKernel AthenaMonitoringKernelLib CaloEvent CaloGeoHelpers CaloIdentifier GaudiKernel IRegionSelector Identifier LArByteStreamLib LArCablingLib LArRawUtilsLib LArRecEvent TileByteStreamLib TileEvent xAODEventInfo xAODTrigCalo LArRawConditions LArRecConditions
-                   PRIVATE_LINK_LIBRARIES ${TBB_LIBRARIES} ${TDAQ-COMMON_LIBRARIES} ByteStreamCnvSvcBaseLib CaloDetDescrLib CaloUtilsLib LArBadChannelToolLib LArElecCalib LArIdentifier LArRecConditions LArRecUtilsLib StoreGateLib TestTools TrigSteeringEvent )
+                   PRIVATE_LINK_LIBRARIES ${TBB_LIBRARIES} ${TDAQ-COMMON_LIBRARIES} ByteStreamCnvSvcBaseLib CaloDetDescrLib CaloUtilsLib LArBadChannelToolLib LArIdentifier LArRecUtilsLib StoreGateLib TestTools TrigSteeringEvent )
 
 atlas_add_component( TrigT2CaloCommon
                      src/components/*.cxx
@@ -21,7 +21,6 @@ atlas_add_component( TrigT2CaloCommon
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-select=ATL900,ATL901 )
-atlas_install_joboptions( share/*.py )
 
 # Tests:
 atlas_add_test( TrigCaloDataAccessSvc
