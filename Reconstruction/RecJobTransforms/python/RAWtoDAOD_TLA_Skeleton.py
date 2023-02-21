@@ -32,6 +32,8 @@ def fromRunArgs(runArgs):
 
     # Set non-default flags 
     ConfigFlags.Trigger.DecodeHLT = False
+    ConfigFlags.Trigger.L1.doCTP = False
+    ConfigFlags.Trigger.DecisionMakerValidation.Execute = False
 
     # process pre-include/exec
     processPreInclude(runArgs, ConfigFlags)

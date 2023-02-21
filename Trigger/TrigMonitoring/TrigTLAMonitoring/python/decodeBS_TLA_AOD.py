@@ -8,6 +8,7 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger('decodeBS_TLA_AOD.py')
 
 
+
 def decodingCfg(flags):
     """ Configure deserialization of RAW byte stream """
     acc = ComponentAccumulator()
@@ -18,6 +19,11 @@ def decodingCfg(flags):
     acc.addSequence(seqAND("Decoding"))
 
     acc.addEventAlgo(CompFactory.HLTResultMTByteStreamDecoderAlg(), "Decoding")
+
+    from TrigDecisionMaker.TrigDecisionMakerConfig import Run3DecisionMakerCfg
+    
+    acc.merge(Run3DecisionMakerCfg(flags))
+
 
     deserialiser = CompFactory.TriggerEDMDeserialiserAlg("TLATrigDeserialiser")
     deserialiser.ModuleID = DataScoutingInfo.DataScoutingIdentifiers["PhysicsTLA"]
@@ -40,6 +46,8 @@ def outputCfg(flags):
     ItemList += [ "xAOD::EventInfo#EventInfo", "xAOD::EventAuxInfo#EventInfoAux." ]
     ItemList += [ 'xAOD::TrigCompositeContainer#*' ]
     ItemList += [ 'xAOD::TrigCompositeAuxContainer#*' ]
+    ItemList += [ 'xAOD::TrigDecision#*' ]
+    ItemList += [ 'xAOD::TrigDecisionAuxInfo#*']
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     acc.merge(OutputStreamCfg(flags, "AOD", ItemList=ItemList))
@@ -99,6 +107,10 @@ if __name__ == "__main__":
     flags.Trigger.triggerConfig = "DB"
     flags.Input.isMC = False
 
+    # decoding flags for TrigDecisionMakerMT    
+    flags.Trigger.DecodeHLT = False
+    flags.Trigger.L1.doCTP = False
+    flags.Trigger.DecisionMakerValidation.Execute = False
     
     flags.lock()
 
