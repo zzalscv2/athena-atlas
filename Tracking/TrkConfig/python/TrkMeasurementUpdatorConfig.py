@@ -2,6 +2,7 @@
 # Configuration of TrkMeasurementUpdator_xk and TrkMeasurementUpdator packages
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from TrkConfig.TrkConfigFlags import KalmanUpdatorType
 
 # Relative timing results from ATLASRECTS-6755
 # normalized to Trk::KalmanUpdator_xk time
@@ -26,42 +27,24 @@ def KalmanUpdatorCfg(flags, name='KalmanUpdator', **kwargs):
 def InDetUpdatorCfg(flags, name='InDetUpdator', **kwargs):
     if flags.Detector.GeometryITk:
         name = name.replace("InDet", "ITk")
-        return ITkUpdatorCfg(flags, name, **kwargs)
 
     acc = ComponentAccumulator()
 
     tool = None
-    if flags.InDet.Tracking.kalmanUpdator == "fast":
+    if flags.Tracking.kalmanUpdator == KalmanUpdatorType.KalmanUpdator_xk:
         tool = CompFactory.Trk.KalmanUpdator_xk(name, **kwargs)
-    elif flags.InDet.Tracking.kalmanUpdator == "weight":
+    elif flags.Tracking.kalmanUpdator == KalmanUpdatorType.KalmanWeightUpdator:
         tool = CompFactory.Trk.KalmanWeightUpdator(name, **kwargs)
-    elif flags.InDet.Tracking.kalmanUpdator == "smatrix":
+    elif flags.Tracking.kalmanUpdator == KalmanUpdatorType.KalmanUpdatorSMatrix:
         tool = CompFactory.Trk.KalmanUpdatorSMatrix(name, **kwargs)
-    elif flags.InDet.Tracking.kalmanUpdator == "amg":
+    elif flags.Tracking.kalmanUpdator == KalmanUpdatorType.KalmanUpdatorAmg:
         tool = CompFactory.Trk.KalmanUpdatorAmg(name, **kwargs)
-    else:
+    elif flags.Tracking.kalmanUpdator == KalmanUpdatorType.KalmanUpdator:
         tool = CompFactory.Trk.KalmanUpdator(name, **kwargs)
 
     acc.setPrivateTools(tool)
     return acc
 
 
-# Needed as long as flags.InDet.Tracking vs flags.ITk.Tracking are used
-# To remove ultimately after Tracking flags are unified
 def ITkUpdatorCfg(flags, name='ITkUpdator', **kwargs):
-    result = ComponentAccumulator()
-
-    tool = None
-    if flags.ITk.Tracking.kalmanUpdator == "fast":
-        tool = CompFactory.Trk.KalmanUpdator_xk(name, **kwargs)
-    elif flags.ITk.Tracking.kalmanUpdator == "weight":
-        tool = CompFactory.Trk.KalmanWeightUpdator(name, **kwargs)
-    elif flags.ITk.Tracking.kalmanUpdator == "smatrix":
-        tool = CompFactory.Trk.KalmanUpdatorSMatrix(name, **kwargs)
-    elif flags.ITk.Tracking.kalmanUpdator == "amg":
-        tool = CompFactory.Trk.KalmanUpdatorAmg(name, **kwargs)
-    else:
-        tool = CompFactory.Trk.KalmanUpdator(name, **kwargs)
-
-    result.setPrivateTools(tool)
-    return result
+    return InDetUpdatorCfg(flags, name, **kwargs)
