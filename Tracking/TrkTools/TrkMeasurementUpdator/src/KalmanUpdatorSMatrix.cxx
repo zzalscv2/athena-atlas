@@ -1080,12 +1080,13 @@ Trk::KalmanUpdatorSMatrix::calculateFilterStep_5D (const TrackParameters& TP,
 }
 
 
-Trk::FitQualityOnSurface Trk::KalmanUpdatorSMatrix::makeChi2_1D(const SParVector5& parTrk,
-                                                          const Amg::MatrixX& covTrk,
-                                                          const double& valRio,
-                                                          const double& covRio,
-                                                          const int& key,
-                                                          const int& sign) const
+Trk::FitQualityOnSurface Trk::KalmanUpdatorSMatrix::makeChi2_1D(
+  const SParVector5& parTrk,
+  const AmgSymMatrix(5)& covTrk,
+  const double& valRio,
+  const double& covRio,
+  const int& key,
+  const int& sign) const
 {   // sign: -1 = updated, +1 = predicted parameters.
   int mk=0;
   if (key!=1) for (int i=0; i<5; ++i) if (key & (1<<i)) mk=i;
@@ -1101,12 +1102,13 @@ Trk::FitQualityOnSurface Trk::KalmanUpdatorSMatrix::makeChi2_1D(const SParVector
   return {chiSquared, 1};
 }
 
-Trk::FitQualityOnSurface  Trk::KalmanUpdatorSMatrix::makeChi2_2D(const SParVector5& parTrk,
-                                                          const Amg::MatrixX& covTrk,
-                                                          const SParVector2& parRio,
-                                                          const SCovMatrix2& covRio,
-                                                          const int& key,
-                                                          const int& sign) const
+Trk::FitQualityOnSurface  Trk::KalmanUpdatorSMatrix::makeChi2_2D(
+  const SParVector5& parTrk,
+  const AmgSymMatrix(5)& covTrk,
+  const SParVector2& parRio,
+  const SCovMatrix2& covRio,
+  const int& key,
+  const int& sign) const
 {   // sign: -1 = updated, +1 = predicted parameters.
 
   ROOT::Math::SVector<int,2> index(0,1); // locX and Y if key==3
@@ -1127,11 +1129,12 @@ Trk::FitQualityOnSurface  Trk::KalmanUpdatorSMatrix::makeChi2_2D(const SParVecto
   return {chiSquared, 2};
 }
 
-Trk::FitQualityOnSurface  Trk::KalmanUpdatorSMatrix::makeChi2_5D(const SParVector5& parOne,
-                                                          const Amg::MatrixX& covOne,
-                                                          const SParVector5& parTwo,
-                                                          const Amg::MatrixX& covTwo,
-                                                          const int& sign) const
+Trk::FitQualityOnSurface  Trk::KalmanUpdatorSMatrix::makeChi2_5D(
+  const SParVector5& parOne,
+  const AmgSymMatrix(5)& covOne,
+  const SParVector5& parTwo,
+  const AmgSymMatrix(5)& covTwo,
+  const int& sign) const
 {   // sign: -1 = updated, +1 = predicted parameters.
 
   SCovMatrix5 ScovOne;
@@ -1283,7 +1286,7 @@ bool Trk::KalmanUpdatorSMatrix::getStartCov(SCovMatrix5& M,
 
 
 Trk::FitQualityOnSurface Trk::KalmanUpdatorSMatrix::makeChi2Object(const Amg::VectorX& residual,
-                                                                    const Amg::MatrixX& covTrk,
+                                                                    const AmgSymMatrix(5)& covTrk,
                                                                     const Amg::MatrixX& covRio,
                                                                     const Amg::MatrixX& H,
                                                                     const int& sign) const
@@ -1422,7 +1425,8 @@ void Trk::KalmanUpdatorSMatrix::logGainForm(int nc, const SParVector5& r,
 }
 
 void Trk::KalmanUpdatorSMatrix::logResult(const std::string& methodName,
-                                   const AmgVector(5)& par, const AmgSymMatrix(5)& covPar) const
+                                   const AmgVector(5)& par, 
+                                   const AmgSymMatrix(5)& covPar) const
 {
     // again some verbose debug output
     msg(MSG::VERBOSE) << "-U- ==> result for KalmanUpdatorSMatrix::"<<methodName<<endmsg;
