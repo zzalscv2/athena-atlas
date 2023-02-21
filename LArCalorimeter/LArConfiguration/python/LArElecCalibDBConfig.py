@@ -44,13 +44,15 @@ LArMphysOverMcalSCCondAlg    =  CompFactory.getComp("LArFlatConditionsAlg<LArHVS
 
 
 def LArElecCalibDbCfg(ConfigFlags,condObjs):
-
+    
     #Check MC case
     if ConfigFlags.Input.isMC:
         return LArElecCalibDBMCCfg(ConfigFlags,condObjs)
     
-    #Check run 1 case:
-    if "COMP200" in ConfigFlags.IOVDb.DatabaseInstance:
+    from AthenaConfiguration.Enums import LHCPeriod
+
+    #Check run 1 case:    
+    if ConfigFlags.GeoModel.Run < LHCPeriod.Run2 :
         return LArElecCalibDBRun1Cfg(ConfigFlags,condObjs)
 
     #Everything else, eg run 2 (and 3?) data
@@ -160,8 +162,8 @@ def LArElecCalibDBRun1Cfg(ConfigFlags,condObjs):
                                "uA2MeV":("/LAR/ElecCalibOfl/uA2MeV/Symmetry","LAR_OFL", "LAruA2MeVMC",LAruA2MeVSymAlg),
                                "MphysOverMcal":("/LAR/ElecCalibOfl/MphysOverMcal/RTM","LAR_OFL","LArMphysOverMcalComplete",None),
                                "HVScaleCorr":("/LAR/ElecCalibOnl/HVScaleCorr","LAR_ONL","LArHVScaleCorrComplete",None),
-                               "OFC":("/LAR/ElecCalibOfl/OFC/PhysWave/RTM/"+ ConfigFlags.LAr.OFCShapeFolder if len(ConfigFlags.LAr.OFCShapeFolder)>0 else "5samples1phase","LAR_OFL","LArOFCComplete",None),
-                               "Shape":("/LAR/ElecCalibOfl/Shape/RTM/"+ ConfigFlags.LAr.OFCShapeFolder if len(ConfigFlags.LAr.OFCShapeFolder)>0 else "5samples1phase","LAR_OFL","LArShapeComplete",None),
+                               "OFC":("/LAR/ElecCalibOfl/OFC/PhysWave/RTM/"+ ConfigFlags.LAr.OFCShapeFolder if len(ConfigFlags.LAr.OFCShapeFolder)>0 else "/LAR/ElecCalibOfl/OFC/PhysWave/RTM/5samples1phase","LAR_OFL","LArOFCComplete",None),
+                               "Shape":("/LAR/ElecCalibOfl/Shape/RTM/"+ ConfigFlags.LAr.OFCShapeFolder if len(ConfigFlags.LAr.OFCShapeFolder)>0 else "/LAR/ElecCalibOfl/Shape/RTM/5samples1phase","LAR_OFL","LArShapeComplete",None),
                            }
 
 
@@ -266,7 +268,8 @@ if __name__ == "__main__":
     print ('--- run1')
     flags2 = initConfigFlags()
     flags2.Input.Files = defaultTestFiles.RAW
-    flags2.Input.ProjectName = 'data12_8TeV'
+    from AthenaConfiguration.Enums import LHCPeriod
+    flags2.GeoModel.Run=LHCPeriod.Run1
     flags2.lock()
     acc2 = LArElecCalibDbCfg (flags2, ['Ramp', 'Pedestal'])
     acc2.printCondAlgs(summariseProps=True)

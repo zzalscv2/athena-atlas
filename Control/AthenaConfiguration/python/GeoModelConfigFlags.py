@@ -41,7 +41,7 @@ def createGeoModelConfigFlags(analysis=False):
     gcf.addFlag('GeoModel.Layout', 'atlas') # replaces global.GeoLayout
 
     gcf.addFlag("GeoModel.Align.Dynamic",
-                lambda prevFlags : not prevFlags.Input.isMC and prevFlags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.Overlay])
+                lambda prevFlags : not prevFlags.Input.isMC and prevFlags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.Overlay] and prevFlags.GeoModel.Run > LHCPeriod.Run1)
 
     gcf.addFlag("GeoModel.Align.LegacyConditionsAccess",
                 lambda prevFlags : prevFlags.Common.Project is Project.AthSimulation or prevFlags.Common.ProductionStep is ProductionStep.Simulation)
