@@ -50,7 +50,7 @@ allowed_obs = {
     }
 }
 
-from TriggerMenuMT.HLT.MinBias.MinBiasChainConfiguration import TrigAFPDijetComboHypoToolCfg
+from TriggerMenuMT.HLT.MinBias.AFPMenuSequence import TrigAFPDijetComboHypoToolCfg
 from TriggerMenuMT.HLT.Muon.MuonChainConfiguration import TrigMuonEFIdtpInvMassHypoToolCfg
 
 def TrigComboHypoToolFromDict(flags, chainDict):

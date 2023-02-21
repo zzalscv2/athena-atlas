@@ -64,8 +64,7 @@ def TrackCountHypoToolGen(chainDict):
     return hypo
 
 def MbtsHypoToolGen(flags, chainDict):
-    from TrigMinBias.TrigMinBiasConf import MbtsHypoTool
-    hypo = MbtsHypoTool(chainDict["chainName"]) # to now no additional settings
+    hypo = CompFactory.MbtsHypoTool(chainDict["chainName"]) # to now no additional settings
     if chainDict["chainParts"][0]["extra"] in ["vetombts2in", "vetospmbts2in"]:
         hypo.MbtsCounters=2
         hypo.MBTSMode=1

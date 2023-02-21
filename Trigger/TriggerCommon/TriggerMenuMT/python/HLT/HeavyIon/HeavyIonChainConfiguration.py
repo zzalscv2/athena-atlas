@@ -3,9 +3,8 @@
 from AthenaCommon.Logging import logging
 logging.getLogger().info('Importing %s', __name__)
 log = logging.getLogger(__name__)
-
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
-
 from ..HeavyIon.HeavyIonMenuSequences import HIFwdGapMenuSequenceCfg
 
 #----------------------------------------------------------------
@@ -28,12 +27,15 @@ class HeavyIonChainConfig(ChainConfigurationBase):
   def assembleChainImpl(self, flags):
     log.debug('Assembling chain for %s', self.chainName)
     steps = []
-
-    if 'Fgap' in self.chainPart['hypoFgapInfo'][0]:
-      steps.append(self.getHIFwdGapStep(flags))
+    if isComponentAccumulatorCfg():
+      if 'Fgap' in self.chainPart['hypoFgapInfo'][0]:
+        steps.append(self.getStep(flags,1, 'Fgap', [HIFwdGapMenuSequenceCfg]))
+    else:
+      if 'Fgap' in self.chainPart['hypoFgapInfo'][0]:
+        steps.append(self.getHIFwdGapStep(flags))
 
     return self.buildChain(steps)
 
   def getHIFwdGapStep(self, flags):
-    return self.getStep(flags,1, 'Fgap', [HIFwdGapMenuSequence])
+    return self.getStep(flags, 1, 'Fgap', [HIFwdGapMenuSequence])
 
