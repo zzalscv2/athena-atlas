@@ -103,14 +103,17 @@ def trigCaloDataAccessSvcCfg( flags ):
 if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    import sys
 
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW
     flags.Input.isMC=False
     flags.lock()
-    acc = ComponentAccumulator()
-    from AthenaCommon.CFElements import parOR
 
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    acc = MainServicesCfg( flags )
+
+    from AthenaCommon.CFElements import parOR
     acc.addSequence(parOR("HLTBeginSeq"))
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
@@ -142,18 +145,9 @@ if __name__ == "__main__":
 
     acc.getService("TrigCaloDataAccessSvc").MonTool = mon
 
-
-    TestCaloDataAccess=CompFactory.TestCaloDataAccess
-    testAlg = TestCaloDataAccess()
+    testAlg = CompFactory.TestCaloDataAccess()
     acc.addEventAlgo(testAlg)
 
     acc.printConfig(True)
-
-    print("running this configuration")  # noqa: ATL901
-    of = open("test.pkl", "wb")
-    acc.store(of)
-    of.close()
-
-
-
-
+    sc = acc.run(10)
+    sys.exit(sc.isFailure())
