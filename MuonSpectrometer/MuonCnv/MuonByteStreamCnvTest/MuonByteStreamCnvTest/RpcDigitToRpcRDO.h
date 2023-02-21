@@ -83,7 +83,7 @@ private:
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
     Gaudi::Property<std::vector<std::string>> m_exclStat{this, "ExcludeHitsFromStations",
-                                                            {}, "Digits from these stations are not converted" };
+                                                            {"BIS"}, "Digits from these stations are not converted" };
    
     std::set<int> m_exclStatNames{};
 };
