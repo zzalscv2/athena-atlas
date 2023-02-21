@@ -110,13 +110,19 @@ atlas_add_test(generateMenuMT_newJO
    PROPERTIES TIMEOUT 500
    POST_EXEC_SCRIPT noerror.sh )
 
-atlas_add_test( test_menu_CA
-   SCRIPT test_menu_CA.py
+
+function( atlas_test_ca_trigger_menu menu )
+   atlas_add_test( "menu_CA_${menu}"
+   SCRIPT test_menu_CA.py Trigger.triggerMenuSetup=${menu}
    PRIVATE_WORKING_DIRECTORY
    PROPERTIES TIMEOUT 500
-   POST_EXEC_SCRIPT "check_log.py --errors --config checklogTriggerTest.conf ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/unitTestRun_test_menu_CA/test_menu_CA.log" 
-   )
-   
+   POST_EXEC_SCRIPT "check_log.py --errors --config checklogTriggerTest.conf ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/unitTestRun_menu_CA_${menu}/menu_CA_${menu}.log" )
+endfunction()
+
+# test for CA menu
+atlas_test_ca_trigger_menu( Dev_pp_run3_v1 )
+atlas_test_ca_trigger_menu( PhysicsP1_pp_lowMu_run3_v1 )
+atlas_test_ca_trigger_menu( Dev_HI_run3_v1 )
 
 # test for menu name consistency
 atlas_add_test( test_menu_dump

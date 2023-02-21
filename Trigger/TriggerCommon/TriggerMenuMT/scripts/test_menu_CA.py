@@ -22,7 +22,7 @@ flags.addFlag("Trigger.enabledSignatures",[])
 flags.addFlag("Trigger.disabledSignatures",[])
 flags.addFlag("Trigger.selectChains",[])
 flags.addFlag("Trigger.disableChains",[])
-flags.Trigger.enabledSignatures = ['Muon', 'Photon','Electron']
+flags.Trigger.enabledSignatures = ['Muon', 'Photon','Electron', 'MinBias', 'HeavyIon']
 
 flags.Trigger.generateMenuDiagnostics = True
 
@@ -31,6 +31,7 @@ flags.Input.Files = defaultTestFiles.RAW
 flags.Trigger.triggerMenuSetup="Dev_pp_run3_v1"
 
 flags.Trigger.EDMVersion=3
+flags.fillFromArgs()
 flags.lock()
 flags.dump()
 
