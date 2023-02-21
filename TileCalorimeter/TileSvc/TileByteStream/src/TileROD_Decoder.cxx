@@ -1146,7 +1146,14 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
   uint32_t l1id[4] = {0};
 
 
-  float samples[2][48][16] = {{{0}}};
+  int sampleNumber = (size-40)/48;
+  int delta = size - (sampleNumber*48+40);
+  if (delta!=0) {
+  ATH_MSG_WARNING( "Unexpected fragment size " << size << " => "<< sampleNumber << " samples will be unpacked and last "
+                    << delta << " words will be ignored ");
+  }
+  std :: vector< std :: vector< std :: vector< float > > > samples(2, std ::vector<std::vector<float>>(48,std::vector<float>(sampleNumber)));
+
 
   const uint32_t* const end_data = data + size; 
   while (data < end_data) {
@@ -1165,7 +1172,7 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
         }
         
         // check trailer
-        const uint32_t* trailer = data + paramsSize + 3 + fragSize; // 2 = (BCID + L1ID)
+        const uint32_t* trailer = data + (size/4)-4; 
         if ((trailer + 1) <= end_data // 3 = (trailer size)
             && *trailer == 0x87654321
             ) {
