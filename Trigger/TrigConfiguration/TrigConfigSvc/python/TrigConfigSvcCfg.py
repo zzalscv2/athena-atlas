@@ -377,26 +377,26 @@ if __name__ == "__main__":
 
         def test_currentMenu(self):
             from AthenaConfiguration.AllConfigFlags import initConfigFlags
-            ConfigFlags = initConfigFlags()
-            ConfigFlags.Trigger.EDMVersion = 3
+            flags = initConfigFlags()
+            flags.Trigger.EDMVersion = 3
             from AthenaConfiguration.TestDefaults import defaultTestFiles
-            ConfigFlags.Input.Files = defaultTestFiles.RAW
-            ConfigFlags.lock()
-            TrigConfigSvcCfg( ConfigFlags )
-            L1PrescaleCondAlgCfg( ConfigFlags )
-            BunchGroupCondAlgCfg( ConfigFlags )
-            HLTPrescaleCondAlgCfg( ConfigFlags )
+            flags.Input.Files = defaultTestFiles.RAW
+            flags.lock()
+            TrigConfigSvcCfg( flags )
+            L1PrescaleCondAlgCfg( flags )
+            BunchGroupCondAlgCfg( flags )
+            HLTPrescaleCondAlgCfg( flags )
 
         def test_legacyMenu(self):
             from AthenaConfiguration.AllConfigFlags import initConfigFlags
-            ConfigFlags = initConfigFlags()
+            flags = initConfigFlags()
             from AthenaConfiguration.TestDefaults import defaultTestFiles
-            ConfigFlags.Input.Files = defaultTestFiles.RAW
-            ConfigFlags.lock()
-            TrigConfigSvcCfg( ConfigFlags )
-            L1PrescaleCondAlgCfg( ConfigFlags )
-            BunchGroupCondAlgCfg( ConfigFlags )
-            HLTPrescaleCondAlgCfg( ConfigFlags )
+            flags.Input.Files = defaultTestFiles.RAW
+            flags.lock()
+            TrigConfigSvcCfg( flags )
+            L1PrescaleCondAlgCfg( flags )
+            BunchGroupCondAlgCfg( flags )
+            HLTPrescaleCondAlgCfg( flags )
 
         def test_jsonConverter(self):
             keys = createJsonMenuFiles(run=360026, lb=151)
