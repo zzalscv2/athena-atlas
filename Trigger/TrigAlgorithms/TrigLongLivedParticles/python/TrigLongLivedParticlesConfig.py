@@ -1,17 +1,14 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from TrigLongLivedParticles.TrigLongLivedParticlesConf import MuonCluster
+from AthenaConfiguration.ComponentFactory import CompFactory
+from TrigEDMConfig.TriggerEDMRun3 import recordable
 
-class MuonClusterConfig(MuonCluster):
-    __slots__ = []
-    def __init__ (self, name="MuonClusterConfig"):
-        super(MuonClusterConfig, self).__init__(name)
+def MuonClusterConfig(flags, name="MuonClusterConfig"):
+    from TrigLongLivedParticles.TrigLongLivedParticlesMonitoring import trigMuonClusterAlgorithmMonitoring
 
-        from TrigLongLivedParticles.TrigLongLivedParticlesMonitoring import TrigMuonClusterAlgorithmMonitoring
-        from TrigEDMConfig.TriggerEDMRun3 import recordable
-
-        self.MonTool = TrigMuonClusterAlgorithmMonitoring()
-        self.TrigRoIs_CompositeContainer = recordable("HLT_MuRoICluster_Composites")
-
-        # muClu Parameters
-        self.DeltaR      = 0.4
+    alg = CompFactory.MuonCluster(
+        name,
+        TrigRoIs_CompositeContainer = recordable("HLT_MuRoICluster_Composites"),
+        DeltaR      = 0.4,  # muClu Parameters
+        MonTool = trigMuonClusterAlgorithmMonitoring(flags))
+    return alg
