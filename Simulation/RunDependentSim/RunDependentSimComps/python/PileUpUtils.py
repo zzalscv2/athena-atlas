@@ -1,5 +1,6 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+from copy import deepcopy
 from math import ceil
 
 from AthenaCommon.Logging import logging
@@ -146,7 +147,7 @@ def generatePileUpProfile(flags,
             maxEvents,))
     if not doNotCorrectMaxEvents and not flags.ExecutorSplitting.TotalSteps > 1:
         # round up to nearest 100 events..
-        corrMaxEvents = ceil(float(maxEvents)/100.0)*100.0
+        corrMaxEvents = ceil(float(maxEvents) / 100.0) * 100.0
     else:
         if not flags.ExecutorSplitting.TotalSteps > 1:
             logger.warning("Using the actual number of HITS input events for this job -- not for production use!")
@@ -164,7 +165,7 @@ def generatePileUpProfile(flags,
 
     runMaxEvents = sum(lb["evts"] for lb in generatedProfile)
     logger.info("There are %d events in this run.", runMaxEvents)
-    jobsPerRun = int(ceil(float(runMaxEvents)/corrMaxEvents))
+    jobsPerRun = int(ceil(float(runMaxEvents) / corrMaxEvents))
     logger.info("Assuming there are usually %d events per job. (Based on %d events in this job.)",
                 corrMaxEvents, maxEvents)
     logger.info("There must be %d jobs per run.", jobsPerRun)
@@ -179,7 +180,7 @@ def generatePileUpProfile(flags,
         # Load needed tools
         from RunDependentSimComps.RunDependentMCTaskIterator import getRandomlySampledRunLumiInfoFragment
         fragment = getRandomlySampledRunLumiInfoFragment(
-            jobnumber=(jobNumber-1),
+            jobnumber=(jobNumber - 1),
             task=generatedProfile,
             maxEvents=maxEvents,
             totalEvents=totalEvents,
@@ -189,7 +190,7 @@ def generatePileUpProfile(flags,
         # Load needed tools
         from RunDependentSimComps.RunDependentMCTaskIterator import getRunLumiInfoFragment
         fragment = getRunLumiInfoFragment(
-            jobnumber=(jobNumber-1),
+            jobnumber=(jobNumber - 1),
             task=generatedProfile,
             maxEvents=maxEvents,
             totalEvents=totalEvents,
@@ -210,9 +211,9 @@ def generatePileUpProfile(flags,
 
 
 def generateRunAndLumiProfile(flags,
-                          profile,
-                          sequentialEventNumbers=False,
-                          doNotCorrectMaxEvents=False):
+                              profile,
+                              sequentialEventNumbers=False,
+                              doNotCorrectMaxEvents=False):
     """Generate RunAndLumiOverrideList """
     logger = logging.getLogger("PileUp")
     logger.info('Doing RunLumiOverride configuration from file.')
@@ -227,11 +228,11 @@ def generateRunAndLumiProfile(flags,
         totalEvents = flags.ExecutorSplitting.TotalEvents
 
     if maxEvents == -1:
-        raise SystemExit("maxEvents = %d is not supported! Please set this to the number of events per file times the number of files per job." % (
-            maxEvents,))
+        errorMessage = "maxEvents = -1 is not supported! Please set this to the number of events per file times the number of files per job."
+        raise SystemExit(errorMessage)
     if not doNotCorrectMaxEvents and not flags.ExecutorSplitting.TotalSteps > 1:
         # round up to nearest 25 events...
-        corrMaxEvents = ceil(float(maxEvents)/25.0)*25.0
+        corrMaxEvents = ceil(float(maxEvents) / 25.0) * 25.0
     else:
         logger.warning(
             "Using the actual number of EVNT input events for this job -- not for production use!")
@@ -243,14 +244,13 @@ def generateRunAndLumiProfile(flags,
     #  the number of events specified by this run is not evenly
     #  divisible by trfMaxEvents.
     tempProfile = loadPileUpProfile(flags, profile)
-    profileTotalEvents=sum(lb['evts'] for lb in tempProfile)
-    corrTotalEvents = max(maxEvents,50)
-    scaleTaskLengthSim = float(corrTotalEvents)/float(profileTotalEvents)
-
+    profileTotalEvents = sum(lb['evts'] for lb in tempProfile)
+    corrTotalEvents = max(maxEvents, 50)
+    scaleTaskLengthSim = float(corrTotalEvents) / float(profileTotalEvents)
 
     generatedProfile = []
     step = -1
-    cacheElement=None
+    cacheElement = None
 
     def simEvts(x):
         return int(scaleTaskLengthSim * x)
@@ -258,18 +258,19 @@ def generateRunAndLumiProfile(flags,
     for el in tempProfile:
         if el['step'] != step:
             if cacheElement is not None:
-                cacheElement['evts'] =  simEvts(cacheElement['evts'])
+                cacheElement['evts'] = simEvts(cacheElement['evts'])
                 generatedProfile += [cacheElement]
-            cacheElement = el
             step = el['step']
+            cacheElement = deepcopy(el)
+            cacheElement['mu'] = step
         else:
             cacheElement['evts'] += el['evts']
-    cacheElement['evts'] =  simEvts(cacheElement['evts'])
+    cacheElement['evts'] = simEvts(cacheElement['evts'])
     generatedProfile += [cacheElement]
 
     runMaxEvents = sum(lb["evts"] for lb in generatedProfile)
     logger.info("There are %d events in this run.", runMaxEvents)
-    jobsPerRun = int(ceil(float(runMaxEvents)/corrMaxEvents))
+    jobsPerRun = int(ceil(float(runMaxEvents) / corrMaxEvents))
     logger.info("Assuming there are usually %d events per job. (Based on %d events in this job.)",
                 corrMaxEvents, maxEvents)
     logger.info("There must be %d jobs per run.", jobsPerRun)
@@ -281,7 +282,7 @@ def generateRunAndLumiProfile(flags,
     # Load needed tools
     from RunDependentSimComps.RunDependentMCTaskIterator import getRunLumiInfoFragment
     fragment = getRunLumiInfoFragment(
-    jobnumber=(jobNumber-1),
+    jobnumber=(jobNumber - 1),
         task=generatedProfile,
         maxEvents=maxEvents,
         totalEvents=totalEvents,
@@ -292,7 +293,7 @@ def generateRunAndLumiProfile(flags,
     for element in fragment:
         if element['evts'] == 0:
             logger.warning('Found lumiblock with no events!  This lumiblock will not be used:\n (' + element.__str__() + ')' )
-    fragment = [x for x in fragment if x['evts'] != 0]
+    fragment = sorted([x for x in fragment if x['evts'] != 0], key=lambda x: x['step'])
 
     flags.Input.RunAndLumiOverrideList = fragment
 
