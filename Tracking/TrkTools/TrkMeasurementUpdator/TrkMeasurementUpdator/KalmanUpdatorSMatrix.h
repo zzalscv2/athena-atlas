@@ -306,24 +306,24 @@ private:
       (sign=+1) or smoothed/updated input track state (sign=-1).
   */
   FitQualityOnSurface  makeChi2_1D(const SParVector5&,
-                                   const Amg::MatrixX&,
+                                   const AmgSymMatrix(5)&,
                                    const double&,
                                    const double&,
                                    const int&,
                                    const int&) const;
   FitQualityOnSurface  makeChi2_2D(const SParVector5&,
-                                   const Amg::MatrixX&,
+                                   const AmgSymMatrix(5)&,
                                    const SParVector2&,
                                    const SCovMatrix2&,
                                    const int&,
                                    const int&) const;
   FitQualityOnSurface  makeChi2_5D(const SParVector5&,
-                                   const Amg::MatrixX&,
+                                   const AmgSymMatrix(5)&,
                                    const SParVector5&,
-                                   const Amg::MatrixX&,
+                                   const AmgSymMatrix(5)&,
                                    const int&) const;
   FitQualityOnSurface  makeChi2Object(const Amg::VectorX&,
-                                      const Amg::MatrixX&,
+                                      const AmgSymMatrix(5)&,
                                       const Amg::MatrixX&,
                                       const Amg::MatrixX&,
                                       const int&) const;
