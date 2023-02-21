@@ -1,17 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.Logging import logging
 
 #Muon RecRoiTools
 from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg
-
-# Local (generated) configurable(s):
-from TrigT1MuctpiPhase1.TrigT1MuctpiPhase1Conf import LVL1MUCTPIPHASE1__MUCTPI_AthAlg
-
-#####
-##New style config
-#####
 
 def TrigThresholdDecisionToolCfg(flags, name="TrigThresholdDecisionTool"):
   acc = ComponentAccumulator()
@@ -57,35 +50,3 @@ def MUCTPI_AthAlgCfg(flags):
   alg.MUCTPI_AthTool = acc.popToolsAndMerge(MUCTPI_AthToolCfg(flags, name="MUCTPI_AthTool"))
   acc.addEventAlgo(alg)
   return acc
-
-
-#####
-##Old style config
-#####
-
-
-class L1MuctpiPhase1_on_Data( LVL1MUCTPIPHASE1__MUCTPI_AthAlg ):
-
-  """
-    Module configuring the MuCTPI simulation to be re-run on data BS file
-    (that already has a result from a previous MuCTPI simulation running)
-  """
-
-  def __init__( self, name = "L1MuctpiPhase1_on_Data" ):
-
-    LVL1MUCTPIPHASE1__MUCTPI_AthAlg.__init__( self, name )
-
-    logger = logging.getLogger( "L1MuctpiPhase1_on_Data" )
-    logger.info( "Configuring MuCTPI" )
-
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    self.MUCTPI_AthTool = MUCTPI_AthToolCfg(ConfigFlags, "MUCTPI_AthTool")
-    self.InputSource = "RDO"
-    self.RDOLocID = "MUCTPI_RDO"
-    self.RDOOutputLocID = "MUCTPI_RDO+"
-    self.RoIOutputLocID = "not_used_1"
-    self.CTPOutputLocID = "/Run/L1MuCTPItoCTPLocation"
-    self.OverlapStrategyName = ConfigFlags.Trigger.MUCTPI.OverlapStrategy
-    self.LUTXMLFile = ConfigFlags.Trigger.MUCTPI.OverlapStrategy
-    self.IsData=1
-    self.FlaggingMode = False
