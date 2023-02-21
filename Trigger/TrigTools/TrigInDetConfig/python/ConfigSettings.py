@@ -464,7 +464,7 @@ class ConfigSettings_fullScanLRT( _ConfigSettingsBase ):
 class ConfigSettings_DJetLRT( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
-      self._name     = "displacedJetLRT"
+      self._name     = "DJetLRT"
       self._suffix   = "DJLRT"
       self._roi      = "HLT_Roi_DJ"
       self._doFullScan      = False
@@ -501,7 +501,7 @@ class ConfigSettings_DJetLRT( _ConfigSettingsBase ):
 class ConfigSettings_DVtxLRT( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
-      self._name     = "displacedVertexLRT"
+      self._name     = "DVtxLRT"
       self._suffix   = "DVLRT"
       self._roi      = "HLT_Roi_DV"
       self._doFullScan      = False
