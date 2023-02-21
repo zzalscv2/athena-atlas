@@ -200,6 +200,8 @@ namespace LVL1::MuCTPIBits {
   static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_ECFW_PHI_MASK = 0x3;
   static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_BA_PHIOVERLAP_SHIFT = 13;
   static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_BA_PHIOVERLAP_MASK = 0x1;
+  static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_NSWMON_SHIFT = 18;
+  static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_NSWMON_MASK = 0x1;
   static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_BA_GT1ROI_SHIFT = 12;
   static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_BA_GT1ROI_MASK = 0x1;
   static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_ECFW_GOODMF_SHIFT = 15;
@@ -231,6 +233,14 @@ namespace LVL1::MuCTPIBits {
   static constexpr uint32_t RUN3_TOPO_WORD_PHI_MASK = 0xff;
   static constexpr uint32_t RUN3_TOPO_WORD_DET_SHIFT = 13;
   static constexpr uint32_t RUN3_TOPO_WORD_DET_MASK  = 0x3;
+  static constexpr uint32_t RUN3_TOPO_WORD_CANDFLAGS_ECFW_CHARGE_SHIFT = 20;
+  static constexpr uint32_t RUN3_TOPO_WORD_CANDFLAGS_ECFW_BW23_SHIFT = 21;
+  static constexpr uint32_t RUN3_TOPO_WORD_CANDFLAGS_ECFW_INNERCOIN_SHIFT = 22;
+  static constexpr uint32_t RUN3_TOPO_WORD_CANDFLAGS_ECFW_GOODMF_SHIFT = 23;
+  static constexpr uint32_t RUN3_TOPO_WORD_CANDFLAGS_ECFW_CHARGE_MASK = 0x1;
+  static constexpr uint32_t RUN3_TOPO_WORD_CANDFLAGS_ECFW_BW23_MASK = 0x1;
+  static constexpr uint32_t RUN3_TOPO_WORD_CANDFLAGS_ECFW_INNERCOIN_MASK = 0x1;
+  static constexpr uint32_t RUN3_TOPO_WORD_CANDFLAGS_ECFW_GOODMF_MASK = 0x1;
 
   // ROD status word
   static constexpr uint32_t RUN3_STATUS_WORD_ID_SHIFT = 29;
