@@ -18,29 +18,31 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
 
   if config is None :
     raise ValueError('makeInDetTrigFastTracking() No config provided!')
-  #Add suffix to the algorithms
-  signature =  '_{}'.format( config.input_name )
-
-  log.info( "Fast tracking using new configuration: %s %s", config.input_name, config.name )
 
   #Global keys/names for Trigger collections
   from .InDetTrigCollectionKeys import  TrigPixelKeys, TrigSCTKeys
   from InDetRecExample.InDetKeys import InDetKeys
   from TrigInDetConfig.TrigInDetConfig import InDetCacheNames
-  from AthenaCommon.GlobalFlags import globalflags
+  from AthenaConfiguration.Enums import Format
 
   from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
   from AthenaConfiguration.AllConfigFlags import ConfigFlags
   from InDetTrigRecExample import InDetTrigCA
   
-  InDetTrigCA.InDetTrigConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
+  InDetTrigCA.InDetTrigConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.input_name)
   flags = InDetTrigCA.InDetTrigConfigFlags
+
+  #Add suffix to the algorithms
+  signature =  '_{}'.format( flags.InDet.Tracking.ActiveConfig.input_name )
   
+  log.info( "Fast tracking using new configuration: %s %s and suffix %s", flags.InDet.Tracking.ActiveConfig.input_name, flags.InDet.Tracking.ActiveConfig.name, flags.InDet.Tracking.ActiveConfig.suffix )
+
   # Load RDOs if we aren't loading bytestream                                                                                       
   from AthenaCommon.AlgSequence import AlgSequence
   topSequence = AlgSequence()
 
-  if not globalflags.InputFormat.is_bytestream():
+  isByteStream = flags.Input.Format == Format.BS
+  if not isByteStream:
      topSequence.SGInputLoader.Load += [( 'PixelRDO_Container' , InDetKeys.PixelRDOs() ),
                                         ( 'SCT_RDO_Container' , InDetKeys.SCT_RDOs() )]
 
@@ -61,10 +63,10 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
                                     ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTFlaggedCondCacheKey ),
                                     ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
                                     ( 'TagInfo' , 'DetectorStore+ProcessingTags' )]
-    if doFTF and config.name == 'fullScanUTT' :
+    if doFTF and flags.InDet.Tracking.ActiveConfig.name == 'fullScanUTT' :
       ViewDataVerifier.DataObjects += [ ( 'DataVector< LVL1::RecJetRoI >' , 'StoreGateSvc+HLT_RecJETRoIs' ) ]
 
-    if not globalflags.InputFormat.is_bytestream():
+    if not isByteStream:
       ViewDataVerifier.DataObjects +=   [( 'PixelRDO_Container' , InDetKeys.PixelRDOs() ),
                                          ( 'SCT_RDO_Container' , InDetKeys.SCT_RDOs() )]
 
@@ -75,14 +77,12 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
   from AthenaCommon.AppMgr import ToolSvc
 
   #Only add raw data decoders if we're running over raw data
-  if globalflags.InputFormat.is_bytestream():
-    #Pixel
+  if isByteStream:
 
+    #Pixel
     from PixelRawDataByteStreamCnv.PixelRawDataByteStreamCnvConf import PixelRodDecoder
     InDetPixelRodDecoder = PixelRodDecoder(name = "InDetPixelRodDecoder_" + signature)
-    # Disable duplcated pixel check for data15 because duplication mechanism was used.
-    from RecExConfig.RecFlags import rec
-    if len(rec.projectName())>=6 and rec.projectName()[:6]=="data15":
+    if "data15" in flags.Input.ProjectName:         # Disable for data15 because duplication mechanism was used.
        InDetPixelRodDecoder.CheckDuplicatedPixel=False
     ToolSvc += InDetPixelRodDecoder
 
@@ -161,18 +161,16 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
 
   from PixelConditionsTools.PixelConditionsToolsConf import PixelConditionsSummaryTool
   idPixelSummary = PixelConditionsSummaryTool("PixelConditionsSummaryTool",
-                                              UseByteStreamFEI4=globalflags.InputFormat.is_bytestream(),
-                                              UseByteStreamFEI3=globalflags.InputFormat.is_bytestream())
+                                              UseByteStreamFEI4=isByteStream,
+                                              UseByteStreamFEI3=isByteStream)
 
   from SiClusterizationTool.SiClusterizationToolConf import InDet__MergedPixelsTool, InDet__PixelRDOTool
 
   InDetPixelRDOTool = InDet__PixelRDOTool(name = "InDetPixelRDOTool_" + signature,
                                           PixelConditionsSummaryTool = idPixelSummary)
                                           
-  # Enable dupilcated RDO check for data15 because duplication mechanism was used.
-  from RecExConfig.RecFlags import rec
-  if len(rec.projectName())>=6 and rec.projectName()[:6]=="data15":
-     InDetPixelRDOTool.CheckDuplicatedRDO = True
+  if "data15" in flags.Input.ProjectName:
+     InDetPixelRDOTool.CheckDuplicatedRDO = True   # Disable for data15 because duplication mechanism was used.
 
   InDetMergedPixelsTool = InDet__MergedPixelsTool(name                       = "InDetMergedPixelsTool_" + signature,
                                                   globalPosAlg               = InDetClusterMakerTool,
@@ -216,8 +214,8 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
   from SCT_ConditionsTools.SCT_ConfigurationConditionsToolSetup import SCT_ConfigurationConditionsToolSetup
   sct_ConfigurationConditionsToolSetup = SCT_ConfigurationConditionsToolSetup()
   sct_ConfigurationConditionsToolSetup.setToolName("InDetSCT_ConfigurationConditionsTool_" + signature)
-  from IOVDbSvc.CondDB import conddb
-  if (globalflags.DataSource() == "geant4") or (conddb.dbdata == "CONDBR2"):
+
+  if (flags.Input.isMC or flags.IOVDb.DatabaseInstance == "CONDBR2"):
      sct_ConfigurationConditionsToolSetup.setChannelFolder("/SCT/DAQ/Config/ChipSlim") # For MC (OFLP200) or Run 2, 3 data (CONDBR2)
   sct_ConfigurationConditionsToolSetup.setup()
   InDetSCT_ConditionsSummaryToolWithoutFlagged.ConditionsTools.append(sct_ConfigurationConditionsToolSetup.getTool().getFullName())
@@ -228,7 +226,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
   sct_ReadCalibDataToolSetup.setup()
   InDetSCT_ConditionsSummaryToolWithoutFlagged.ConditionsTools.append(sct_ReadCalibDataToolSetup.getTool().getFullName())
 
-  if (globalflags.InputFormat.is_bytestream()):
+  if isByteStream:
      from SCT_ConditionsTools.SCT_ByteStreamErrorsToolSetup import SCT_ByteStreamErrorsToolSetup
      sct_ByteStreamErrorsToolSetup = SCT_ByteStreamErrorsToolSetup()
      sct_ByteStreamErrorsToolSetup.setToolName("InDetSCT_BSErrorTool_" + signature)
@@ -326,7 +324,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
       if config is None:
             raise ValueError('makeInDetTrigFastTracking() No signature config specified')
 
-      if config.useSiSPSeededTrackFinder and "LRT" in config.name:
+      if flags.InDet.Tracking.ActiveConfig.useSiSPSeededTrackFinder and "LRT" in flags.InDet.Tracking.ActiveConfig.name:
         # use SiSPSeededTrackFinder for fast tracking
         from InDetRecExample.ConfiguredNewTrackingCuts import ConfiguredNewTrackingCuts
         trackingCuts = ConfiguredNewTrackingCuts( "R3LargeD0" )
@@ -350,12 +348,12 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
                                                                 WriteKey = "SCT_DetElementBoundaryLinks_xk")
 
         from .InDetTrigCommon import siSPSeededTrackFinder_builder, add_prefix
-        siSPSeededTrackFinder = siSPSeededTrackFinder_builder( name                  = add_prefix( 'siSPSeededTrackFinder', config.input_name ),
+        siSPSeededTrackFinder = siSPSeededTrackFinder_builder( name                  = add_prefix( 'siSPSeededTrackFinder', flags.InDet.Tracking.ActiveConfig.input_name ),
                                                                config                = config,
-                                                               outputTracks          = config.trkTracks_FTF(), 
+                                                               outputTracks          = flags.InDet.Tracking.ActiveConfig.trkTracks_FTF(), 
                                                                trackingCuts          = trackingCuts,
                                                                usePrdAssociationTool = False,
-                                                               nameSuffix            = config.input_name,
+                                                               nameSuffix            = flags.InDet.Tracking.ActiveConfig.input_name,
                                                                trackSummaryTool      = trackSummaryTool )
 
 
@@ -365,7 +363,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
 
         from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderBase
         #TODO: eventually adapt IDTrigConfig also in FTF configuration (pass as additional param)
-        theFTF = TrigFastTrackFinderBase(flags, "TrigFastTrackFinder_" + signature, config.input_name,
+        theFTF = TrigFastTrackFinderBase(flags, "TrigFastTrackFinder_" + signature, flags.InDet.Tracking.ActiveConfig.input_name,
                                         conditionsTool = InDetSCT_ConditionsSummaryToolWithoutFlagged )
         theFTF.RoIs           = rois
 
@@ -374,28 +372,29 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
 
         viewAlgs.append(theFTF)
 
-      if not config.doZFinderOnly: 
+      if not flags.InDet.Tracking.ActiveConfig.doZFinderOnly: 
 
         from InDetTrigParticleCreation.InDetTrigParticleCreationConf import InDet__TrigTrackingxAODCnvMT
         theTrackParticleCreatorAlg = InDet__TrigTrackingxAODCnvMT(name = "InDetTrigTrackParticleCreatorAlg" + signature,
-                                                                  TrackName = config.trkTracks_FTF(),
+                                                                  TrackName = flags.InDet.Tracking.ActiveConfig.trkTracks_FTF,
                                                                   ParticleCreatorTool = InDetTrigParticleCreatorToolFTF)
 
         #In general all FTF trackParticle collections are recordable except beamspot to save space
-        theTrackParticleCreatorAlg.TrackParticlesName = config.tracks_FTF()
+        theTrackParticleCreatorAlg.TrackParticlesName = flags.InDet.Tracking.ActiveConfig.tracks_FTF
 
         viewAlgs.append(theTrackParticleCreatorAlg)
 
         if secondStageConfig is not None:
           #have been supplied with a second stage config, create another instance of FTF
-          
+
+          inputTracksname = flags.InDet.Tracking.ActiveConfig.trkTracks_FTF   #before ActiveConfig gets replaced -needs restructuring
           from AthenaConfiguration.AllConfigFlags import ConfigFlags
           flags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+secondStageConfig.name)
 
           theFTF2 = TrigFastTrackFinderBase(flags, "TrigFastTrackFinder_" + secondStageConfig.input_name, secondStageConfig.input_name,
                                             conditionsTool = InDetSCT_ConditionsSummaryToolWithoutFlagged )
           theFTF2.RoIs           = rois
-          theFTF2.inputTracksName = config.trkTracks_FTF()
+          theFTF2.inputTracksName = inputTracksname
         
           
           viewAlgs.append(theFTF2)
