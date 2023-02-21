@@ -1,13 +1,14 @@
 #!/bin/sh
 #
 # art-description: heavy ion reconstruction test from Sebastian Tapia 
-# art-athena-mt: 4
+# art-athena-mt: 8
 # art-type: grid
 # art-include: master/Athena
 # art-include: 23.0/Athena
 
+export ATHENA_CORE_NUMBER=8
 export TRF_ECHO=True; Reco_tf.py \
---athenaopts="--threads=8" \
+--multithreaded \
 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecJobTransformTests/data18_hi.00367384.physics_HardProbes.daq.RAW._lb0145._SFO-8._0001.data \
 --outputESDFile=ESD.pool.root \
 --outputAODFile=AOD.pool.root \

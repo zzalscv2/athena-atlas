@@ -96,6 +96,13 @@ def TRTPIDNNCondAlgCfg(flags, name="TRTPIDNNCondAlg", **kwargs):
     """Return a ComponentAccumulator for TRTHTCondAlg algorithm"""
     acc = ComponentAccumulator()
     acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Calib/PID_NN", "/TRT/Calib/PID_NN", className="CondAttrListCollection"))
+
+    from AthenaConfiguration.Enums import LHCPeriod
+    if flags.GeoModel.Run is LHCPeriod.Run1:
+        from IOVDbSvc.IOVDbSvcConfig import addOverride
+        acc.merge(addOverride(flags,"/TRT/Calib/PID_NN", "TRTCalibPID_NN_v1"))
+        acc.merge(addOverride(flags,"/TRT/Onl/Calib/PID_NN", "TRTCalibPID_NN_v1"))
+
     kwargs.setdefault("TRTPIDNNWriteKey", "TRTPIDNN")
     acc.addCondAlgo(CompFactory.TRTPIDNNCondAlg(name, **kwargs))
     return acc
