@@ -198,7 +198,7 @@ def tauIdSequence(flags, RoIs, name):
     return tauIdSequence, sequenceOut
 
 
-def precTrackSequence( RoIs , name):
+def precTrackSequence( flags, RoIs , name):
 
     signatureName, signatureNameID = _getTauSignatureShort( name )
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
@@ -232,7 +232,7 @@ def precTrackSequence( RoIs , name):
     from TrigInDetConfig.InDetTrigPrecisionTracking import makeInDetTrigPrecisionTracking
     #When run in a different view than FTF some data dependencies needs to be loaded through verifier
     #Pass verifier as an argument and it will automatically append necessary DataObjects@NOTE: Don't provide any verifier if loaded in the same view as FTF
-    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( config = IDTrigConfig, verifier = ViewVerifyTrk, rois = RoIs )
+    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, verifier = ViewVerifyTrk, rois = RoIs )
 
     from TrigInDetConfig.InDetTrigVertices import makeInDetTrigVertices
     vtxAlg = makeInDetTrigVertices( whichSignature       = signatureName, 
@@ -434,7 +434,7 @@ def tauPrecIsoTrackSequence(flags):
     tauPrecIsoViewsMaker.RequireParentView = True
     tauPrecIsoViewsMaker.ViewNodeName      = RecoSequenceName
 
-    (tauPrecIsoTrackInViewSequence, sequenceOut) = precTrackSequence( tauPrecIsoViewsMaker.InViewRoIs, RecoSequenceName)
+    (tauPrecIsoTrackInViewSequence, sequenceOut) = precTrackSequence(flags, tauPrecIsoViewsMaker.InViewRoIs, RecoSequenceName)
 
     tauPrecIsoTrkSequence = seqAND("tauPrecIsoTrkSequence", [tauPrecIsoViewsMaker, tauPrecIsoTrackInViewSequence ])
     return (tauPrecIsoTrkSequence, tauPrecIsoViewsMaker, sequenceOut)
@@ -456,7 +456,7 @@ def tauPrecLRTTrackSequence(flags):
     tauPrecLRTViewsMaker.RequireParentView = True
     tauPrecLRTViewsMaker.ViewNodeName      = RecoSequenceName
 
-    (tauPrecLRTTrackInViewSequence, sequenceOut) = precTrackSequence( tauPrecLRTViewsMaker.InViewRoIs, RecoSequenceName)
+    (tauPrecLRTTrackInViewSequence, sequenceOut) = precTrackSequence(flags, tauPrecLRTViewsMaker.InViewRoIs, RecoSequenceName)
 
     tauPrecLRTTrkSequence = seqAND("tauPrecLRTTrkSequence", [tauPrecLRTViewsMaker, tauPrecLRTTrackInViewSequence ])
     return (tauPrecLRTTrkSequence, tauPrecLRTViewsMaker, sequenceOut)

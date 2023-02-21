@@ -19,7 +19,7 @@ def FullScanLRTTriggerSequence(flags):
 
     from TrigInDetConfig.InDetTrigPrecisionTracking import makeInDetTrigPrecisionTracking
 
-    tracks_name, track_particles_names, pt_reco_algs = makeInDetTrigPrecisionTracking(config = lrtcfg, rois = trkFSRoI)
+    tracks_name, track_particles_names, pt_reco_algs = makeInDetTrigPrecisionTracking(flags, config = lrtcfg, rois = trkFSRoI)
 
 
     pt_seq = parOR("UncTrkrecoSeqfslrtpt", [pt_reco_algs])

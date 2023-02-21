@@ -80,7 +80,7 @@ def remapToOffline( name ):
    else:
        return name
 
-def makeInDetPatternRecognition( config, verifier = 'IDTrigViewDataVerifier'  ):
+def makeInDetPatternRecognition( flags, config, verifier = 'IDTrigViewDataVerifier' ):
       viewAlgs = [] #list of all algs running in this module
 
       dataVerifier = None
@@ -184,7 +184,8 @@ def makeInDetPatternRecognition( config, verifier = 'IDTrigViewDataVerifier'  ):
 
       #Verifier should not be necessary when both patt. rec. and PT runs in the same view -> None
       #Also provides particle cnv alg inside
-      precisionAlgs = ambiguitySolverForIDPatternRecognition(config      = config,
+      precisionAlgs = ambiguitySolverForIDPatternRecognition(flags,
+                                                             config      = config,
                                                              inputTracks = config.trkTracks_IDTrig(), 
                                                              verifier    = None, 
                                                              summaryTool = summaryTool )
@@ -197,7 +198,7 @@ def makeInDetPatternRecognition( config, verifier = 'IDTrigViewDataVerifier'  ):
 
 
 # This could potentially be unified with makeInDetTrigPrecisionTracking in the InDetTrigPrecisionTracking.py?
-def ambiguitySolverForIDPatternRecognition( config, summaryTool, inputTracks,verifier=None ):
+def ambiguitySolverForIDPatternRecognition( flags, config, summaryTool, inputTracks,verifier=None ):
    ptAlgs = [] #List containing all the precision tracking algorithms hence every new added alg has to be appended to the list
    
    #-----------------------------------------------------------------------------
@@ -248,7 +249,8 @@ def ambiguitySolverForIDPatternRecognition( config, summaryTool, inputTracks,ver
    from InDetTrigRecExample.InDetTrigConfigRecLoadToolsPost import InDetTrigParticleCreatorToolWithSummary
    creatorTool = InDetTrigParticleCreatorToolWithSummary
    
-   trackParticleCnvAlg = trackParticleCnv_builder(name                 = add_prefix( 'xAODParticleCreatorAlg', config.name + '_IDTrig' ), 
+   trackParticleCnvAlg = trackParticleCnv_builder(flags,
+                                                  name                 = add_prefix( 'xAODParticleCreatorAlg', config.name + '_IDTrig' ),
                                                   config               = config,
                                                   inTrackCollectionKey = config.trkTracks_IDTrig()+"_Amb",
                                                   outTrackParticlesKey = config.tracks_IDTrig(),

@@ -327,7 +327,7 @@ def muonIDFastTrackingSequence( RoIs, name, extraLoads=None, extraLoadsForl2mtmo
 
   return muonIDFastTrackingSequence
 
-def muonIDCosmicTrackingSequence( RoIs, name, extraLoads=None ):
+def muonIDCosmicTrackingSequence( flags, RoIs, name, extraLoads=None ):
 
   from AthenaCommon.CFElements import parOR
   viewNodeName=name+"IDTrackingViewNode"
@@ -343,7 +343,7 @@ def muonIDCosmicTrackingSequence( RoIs, name, extraLoads=None ):
   dataVerifier.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s'%RoIs )]
 
   from TrigInDetConfig.EFIDTracking import makeInDetPatternRecognition
-  trackingAlgs, _ = makeInDetPatternRecognition( config  = IDTrigConfig, verifier = 'VDVCosmicIDTracking' )
+  trackingAlgs, _ = makeInDetPatternRecognition( flags, config  = IDTrigConfig, verifier = 'VDVCosmicIDTracking' )
 
   if extraLoads:
     dataVerifier.DataObjects += extraLoads
@@ -552,26 +552,26 @@ def muEFCBRecoSequence( flags, RoIs, name ):
   #Pass verifier as an argument and it will automatically append necessary DataObjects
   #@NOTE: Don't provide any verifier if loaded in the same view as FTF
   if 'FS' in name:
-    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( config = IDTrigConfig, rois = RoIs, verifier = False)
+    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, rois = RoIs, verifier = False)
     PTSeq = parOR("precisionTrackingInMuonsFS", PTAlgs  )
     muEFCBRecoSequence += PTSeq
     trackParticles = PTTrackParticles[-1]
   elif 'LRT' in name:
-    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( config = IDTrigConfig, rois = RoIs,  verifier = ViewVerifyTrk )
+    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, rois = RoIs,  verifier = ViewVerifyTrk )
     PTSeq = parOR("precisionTrackingInMuonsLRT", PTAlgs  )
     muEFCBRecoSequence += PTSeq
     trackParticles = PTTrackParticles[-1]
   #In case of cosmic Precision Tracking has been already called before hence no need to call here just retrieve the correct collection of tracks
   elif isCosmic(flags):
     if 'LRT' in name:
-      PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( config = IDTrigConfig, rois = RoIs,  verifier = ViewVerifyTrk )
+      PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, rois = RoIs,  verifier = ViewVerifyTrk )
       PTSeq = parOR("precisionTrackingInMuonsLRT", PTAlgs  )
       muEFCBRecoSequence += PTSeq
       trackParticles = PTTrackParticles[-1]
     else:
       trackParticles = getIDTracks(flags)
   else:
-    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( config = IDTrigConfig, rois = RoIs,  verifier = ViewVerifyTrk )
+    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, rois = RoIs,  verifier = ViewVerifyTrk )
     PTSeq = parOR("precisionTrackingInMuons", PTAlgs  )
     muEFCBRecoSequence += PTSeq
     trackParticles = PTTrackParticles[-1]
@@ -677,7 +677,7 @@ def muEFInsideOutRecoSequence(flags, RoIs, name):
 
     from TrigInDetConfig.InDetTrigPrecisionTracking import makeInDetTrigPrecisionTracking
     #When run in a different view than FTF some data dependencies needs to be loaded through verifier
-    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( config = IDTrigConfig, rois=RoIs)
+    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking(flags, config = IDTrigConfig, rois=RoIs)
     PTSeq = parOR("precisionTrackingInLateMuons", PTAlgs  )
 
     efmuInsideOutRecoSequence += PTSeq
@@ -745,7 +745,7 @@ def muEFInsideOutRecoSequence(flags, RoIs, name):
 
 
 
-def efmuisoRecoSequence( RoIs, Muons, doMSiso=False ):
+def efmuisoRecoSequence( flags, RoIs, Muons, doMSiso=False ):
 
   from AthenaCommon.CFElements import parOR
 
@@ -780,7 +780,7 @@ def efmuisoRecoSequence( RoIs, Muons, doMSiso=False ):
   PTTrackParticles = [] #List of TrackParticleKeys
   
   from TrigInDetConfig.InDetTrigPrecisionTracking import makeInDetTrigPrecisionTracking
-  PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( config = IDTrigConfig, rois=RoIs )
+  PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, rois=RoIs )
 
   PTSeq = parOR("precisionTrackingInMuonsIso"+name, PTAlgs  )
   efmuisoRecoSequence += PTSeq

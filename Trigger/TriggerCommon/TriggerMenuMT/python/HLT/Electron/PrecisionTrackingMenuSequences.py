@@ -32,7 +32,7 @@ def precisionTrackingSequence(flags, ion=False, variant=''):
     
     # calling precision tracking
     from TriggerMenuMT.HLT.Electron.PrecisionTrackingRecoSequences import precisionTracking
-    precisionTrackInViewSequence, trackParticles = precisionTracking(InViewRoIs, ion, variant)
+    precisionTrackInViewSequence, trackParticles = precisionTracking(flags, InViewRoIs, ion, variant)
 
     precisionTrackingInViewAlgs = parOR(tag(ion) + "InViewAlgs" + variant, [precisionTrackInViewSequence])
     precisionTrackingViewsMaker.ViewNodeName = tag(ion) + "InViewAlgs" + variant

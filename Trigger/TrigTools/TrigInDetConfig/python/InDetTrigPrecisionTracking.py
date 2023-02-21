@@ -2,15 +2,13 @@
 #
 #           Setup of precision tracking
 
-from __future__ import print_function
-
-from AthenaCommon.Logging import logging 
+from AthenaCommon.Logging import logging
 log = logging.getLogger("InDetTrigPrecisionTracking")
 
 from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
 
 
-def makeInDetTrigPrecisionTracking( config=None, verifier=False, rois='EMViewRoIs', prefix="InDetTrigMT" ) :      
+def makeInDetTrigPrecisionTracking( flags, config=None, verifier=False, rois='EMViewRoIs', prefix="InDetTrigMT" ) :
     
     log.info( "makeInDetTrigPrecisionTracking:: {} {} doTRT: {} ".format(  config.input_name, config.name, config.doTRT ) )
 
@@ -86,7 +84,8 @@ def makeInDetTrigPrecisionTracking( config=None, verifier=False, rois='EMViewRoI
     if config.electronPID:
       creatorTool = InDetTrigParticleCreatorToolWithSummaryTRTPid
     
-    trackParticleCnvAlg = trackParticleCnv_builder( name                 = prefix+'xAODParticleCreatorAlg'+config.input_name+'_IDTrig',
+    trackParticleCnvAlg = trackParticleCnv_builder( flags,
+                                                    name                 = prefix+'xAODParticleCreatorAlg'+config.input_name+'_IDTrig',
                                                     config               = config,
                                                     inTrackCollectionKey = finalTrackCollection,
                                                     outTrackParticlesKey = outTrackParticles,

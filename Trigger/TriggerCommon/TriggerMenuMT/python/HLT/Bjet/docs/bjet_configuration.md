@@ -307,6 +307,7 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
       The first algorithms are second stage of fast tracking and precision tracking (see [BjetTrackingConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetTrackingConfiguration.py)).
       ```python
         secondStageAlgs, PTTrackParticles = getSecondStageBjetTracking(
+          flags,
           inputRoI=InputMakerAlg.InViewRoIs,
           inputVertex=prmVtxKey,
           inputJets=InputMakerAlg.InViewJets
