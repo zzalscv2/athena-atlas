@@ -134,9 +134,10 @@ if DQMonFlags.doMonitoring():
 
    if not DQMonFlags.doNewMonitoring():
       if DQMonFlags.useTrigger():
-         if not hasattr(ToolSvc, DQMonFlags.nameTrigDecTool()):
-            local_logger.debug("trigger decision tool not found, including it now")
-            include("AthenaMonitoring/TrigDecTool_jobOptions.py")
+         from AthenaConfiguration.AllConfigFlags import ConfigFlags
+         from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
+         from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+         CAtoGlobalWrapper(TrigDecisionToolCfg, ConfigFlags)
 
       doOldStylePreSetup()
 
