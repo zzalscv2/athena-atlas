@@ -1,8 +1,8 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-def getxAODConfigSvc(ConfigFlags):
+def getxAODConfigSvc(flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -10,11 +10,11 @@ def getxAODConfigSvc(ConfigFlags):
 
     cfgsvc = CompFactory.TrigConf.xAODConfigSvc('xAODConfigSvc')
     # We serve in-file metadata where possible. If it does not exist (e.g. RAWtoALL), then it is obtained from the Conditions and Detector stores
-    cfgsvc.UseInFileMetadata = ConfigFlags.Trigger.triggerConfig == 'INFILE'
+    cfgsvc.UseInFileMetadata = flags.Trigger.triggerConfig == 'INFILE'
     acc.addService(cfgsvc, primary=True)
 
-    if ConfigFlags.Trigger.triggerConfig == 'INFILE':
+    if flags.Trigger.triggerConfig == 'INFILE':
         from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
-        acc.merge(MetaDataSvcCfg(ConfigFlags))
+        acc.merge(MetaDataSvcCfg(flags))
 
     return acc
