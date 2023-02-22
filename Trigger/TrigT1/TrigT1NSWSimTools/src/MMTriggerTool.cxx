@@ -187,20 +187,18 @@ namespace NSWL1 {
       auto reco_it = Hits_Data_Set_Time.find(pair_event);
       if (reco_it != Hits_Data_Set_Time.end()) {
         if (reco_it->second.size() >= (diamond->getXthreshold()+diamond->getUVthreshold())) {
-          std::vector<hitData_entry> hitDatas;
-          for (const auto &hit_it : reco_it->second) hitDatas.push_back(hit_it.second);
           if (do_MMDiamonds) {
             /*
              * Filling hits for each event: a new class, MMT_Hit, is called in
              * order to use both algorithms witghout interferences
              */
-            diamond->createRoads_fillHits(i-nskip, hitDatas, m_detManager, pars[station], stationPhi);
+            diamond->createRoads_fillHits(i-nskip, reco_it->second, m_detManager, pars[station], stationPhi);
             if (m_doNtuple) {
-              for(const auto &hit : hitDatas) {
-                m_trigger_VMM->push_back(hit.VMM_chip);
-                m_trigger_plane->push_back(hit.plane);
-                m_trigger_station->push_back(hit.station_eta);
-                m_trigger_strip->push_back(hit.strip);
+              for(const auto &hit : reco_it->second) {
+                m_trigger_VMM->push_back(hit.second.VMM_chip);
+                m_trigger_plane->push_back(hit.second.plane);
+                m_trigger_station->push_back(hit.second.station_eta);
+                m_trigger_strip->push_back(hit.second.strip);
               }
               std::vector<double> slopes = diamond->getHitSlopes();
               for (const auto &s : slopes) m_trigger_RZslopes->push_back(s);
@@ -324,6 +322,8 @@ namespace NSWL1 {
             auto find = std::make_unique<MMT_Finder>(pars[station], 1);
             ATH_MSG_DEBUG(  "Number of Roads Configured " <<  find->get_roads()  );
 
+            std::vector<hitData_entry> hitDatas;
+            for (const auto &hit_it : reco_it->second) hitDatas.push_back(hit_it.second);
             std::map<std::pair<int,int>,finder_entry> hitBuffer;
             for (const auto &hit_it : reco_it->second) {
               find->fillHitBuffer( hitBuffer, hit_it.second.entry_hit(pars[station]), pars[station] ); // Hit object, Map (road,plane) -> Finder entry
@@ -462,8 +462,8 @@ namespace NSWL1 {
                 }
               }
             }
+            hitDatas.clear();
           } // if-else Diamond clause
-          hitDatas.clear();
         } else {
           ATH_MSG_DEBUG( "Available hits are " << reco_it->second.size() << ", less than X+UV threshold, skipping" );
           nskip++;

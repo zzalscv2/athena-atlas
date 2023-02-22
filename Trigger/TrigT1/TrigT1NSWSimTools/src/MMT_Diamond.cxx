@@ -15,7 +15,7 @@ void MMT_Diamond::clearEvent() {
   }
 }
 
-void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<hitData_entry> &hitDatas, const MuonGM::MuonDetectorManager* detManager, std::shared_ptr<MMT_Parameters> par, const int phi) {
+void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::map<hitData_key,hitData_entry> &hitDatas, const MuonGM::MuonDetectorManager* detManager, std::shared_ptr<MMT_Parameters> par, const int phi) {
   ATH_MSG_DEBUG("createRoads_fillHits: Feeding hitDatas Start");
 
   diamond_t entry;
@@ -24,7 +24,6 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<
   entry.stationPhi = (par->getSector() == 'S') ? phi*2-1 : phi*2-2;
 
   std::string sector = (par->getSector() == 'L') ? "MML" : "MMS";
-  const double pitch = par->getPitch(), eta1 = par->getLowerBoundEta1(), eta2 = par->getLowerBoundEta2();
 
   /*
    * The following for-loop merges all plane global coordinates in one single shot:
@@ -58,7 +57,7 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<
   this->setUVfactor(uvfactor);
 
   for (const auto &hit_entry : hitDatas) {
-    auto myhit = std::make_shared<MMT_Hit>(hit_entry, detManager, par, planeCoordinates);
+    auto myhit = std::make_shared<MMT_Hit>(hit_entry.second, detManager, par, planeCoordinates);
     if (myhit->verifyHit()) {
       m_hitslopes.push_back(myhit->getRZSlope());
       entry.ev_hits.push_back(myhit);
@@ -68,7 +67,7 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<
 
   for (int i = 0; i < nroad; i++) {
     auto myroad = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
-                                             m_xthr, m_uvthr, pitch, eta1, eta2, i);
+                                             m_xthr, m_uvthr, i);
     entry.ev_roads.push_back(myroad);
 
     int nuv = (this->getUV()) ? this->getUVfactor() : 0;
@@ -76,27 +75,27 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<
       if (i-uv < 0) continue;
 
       auto myroad_0 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
-                                                 m_xthr, m_uvthr, pitch, eta1, eta2, i, i+uv, i-uv);
+                                                 m_xthr, m_uvthr, i, i+uv, i-uv);
       entry.ev_roads.push_back(myroad_0);
 
       auto myroad_1 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
-                                                 m_xthr, m_uvthr, pitch, eta1, eta2, i, i-uv, i+uv);
+                                                 m_xthr, m_uvthr, i, i-uv, i+uv);
       entry.ev_roads.push_back(myroad_1);
 
       auto myroad_2 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
-                                                 m_xthr, m_uvthr, pitch, eta1, eta2, i, i+uv-1, i-uv);
+                                                 m_xthr, m_uvthr, i, i+uv-1, i-uv);
       entry.ev_roads.push_back(myroad_2);
 
       auto myroad_3 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
-                                                 m_xthr, m_uvthr, pitch, eta1, eta2, i, i-uv, i+uv-1);
+                                                 m_xthr, m_uvthr, i, i-uv, i+uv-1);
       entry.ev_roads.push_back(myroad_3);
 
       auto myroad_4 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
-                                                 m_xthr, m_uvthr, pitch, eta1, eta2, i, i-uv+1, i+uv);
+                                                 m_xthr, m_uvthr, i, i-uv+1, i+uv);
       entry.ev_roads.push_back(myroad_4);
 
       auto myroad_5 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
-                                                 m_xthr, m_uvthr, pitch, eta1, eta2, i, i+uv, i-uv+1);
+                                                 m_xthr, m_uvthr, i, i+uv, i-uv+1);
       entry.ev_roads.push_back(myroad_5);
     }
   }
@@ -176,7 +175,7 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int event) {
 
         ATH_MSG_DEBUG("------------------------------------------------------------------");
         ATH_MSG_DEBUG("Coincidence FOUND @BC: " << bc);
-        ATH_MSG_DEBUG("Road (i, u, v, count): (" << road->iRoad() << ", " << road->iRoadu() << ", " << road->iRoadv() << ", " << road->countHits() << ")");
+        ATH_MSG_DEBUG("Road (x, u, v, count): (" << road->iRoadx() << ", " << road->iRoadu() << ", " << road->iRoadv() << ", " << road->countHits() << ")");
         ATH_MSG_DEBUG("------------------------------------------------------------------");
 
         std::vector<int> bcidVec;
@@ -206,7 +205,7 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const int event) {
         slope.BC = bcidMode;
         slope.totalCount = road->countHits();
         slope.realCount = road->countRealHits();
-        slope.iRoad = road->iRoad();
+        slope.iRoad = road->iRoadx();
         slope.iRoadu = road->iRoadu();
         slope.iRoadv = road->iRoadv();
         slope.uvbkg = road->countUVHits(true); // the bool in the following 4 functions refers to background/noise hits
