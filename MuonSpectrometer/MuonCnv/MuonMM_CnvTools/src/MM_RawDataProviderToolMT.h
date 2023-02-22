@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONMM_CNVTOOLS_MM_RAWDATAPROVIDERTOOLMT_H
@@ -48,7 +48,9 @@ namespace Muon
       std::vector<uint32_t>  m_allRobIds;
       
       // Key for the cache for the CSM containers; can be empty,
-      SG::UpdateHandleKey<MM_RawDataCollection_Cache> m_rdoContainerCacheKey;
+      SG::UpdateHandleKey<MM_RawDataCollection_Cache> m_rdoContainerCacheKey{this, "MmContainerCacheKey", 
+                                                  "", "Optional external cache for the MM container"};
+     
   };
 } // end of namespace
 

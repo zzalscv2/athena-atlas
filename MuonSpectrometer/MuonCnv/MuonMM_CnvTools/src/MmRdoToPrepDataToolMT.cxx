@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MmRdoToPrepDataToolMT.h"
@@ -10,7 +10,7 @@ Muon::MmRdoToPrepDataToolMT::MmRdoToPrepDataToolMT(const std::string& t,
   :
   base_class(t,n,p)
 {
-  declareProperty("PrdCacheKey", m_prdContainerCacheKey, "Optional external cache for the MM PRD container");
+  
 }
 
 StatusCode Muon::MmRdoToPrepDataToolMT::initialize()

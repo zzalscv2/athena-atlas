@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MmRdoToPrepDataToolCore.h"
@@ -21,6 +21,7 @@ using namespace Muon;
 namespace {
   // Count hits with negative charge, which indicates bad calibration
   std::atomic<bool> hitNegativeCharge{false};
+  std::atomic<bool> invalidLocalPos{false};
 }
 class NswCalibDbTimeChargeData;
 
@@ -125,11 +126,14 @@ StatusCode Muon::MmRdoToPrepDataToolCore::processCollection(Muon::MMPrepDataCont
  
     // get the local and global positions
     const MuonGM::MMReadoutElement* detEl = MuonDetMgr->getMMReadoutElement(layid);
-    Amg::Vector2D localPos{0.,0.};
+    Amg::Vector2D localPos{Amg::Vector2D::Zero()};
 
-    bool getLocalPos = detEl->stripPosition(prdId,localPos);
+    bool getLocalPos = detEl->stripPosition(prdId, localPos);
     if ( !getLocalPos ) {
-      ATH_MSG_WARNING("Could not get the local strip position for "<<m_idHelperSvc->toString(prdId));
+      if (!invalidLocalPos || msgLvl(MSG::DEBUG)){
+          ATH_MSG_WARNING("Could not get the local strip position for "<<m_idHelperSvc->toString(prdId));
+          invalidLocalPos = true;
+      }
       continue;
     }
 
@@ -142,19 +146,18 @@ StatusCode Muon::MmRdoToPrepDataToolCore::processCollection(Muon::MMPrepDataCont
     NSWCalib::CalibratedStrip calibStrip;
     ATH_CHECK (m_calibTool->calibrateStrip(ctx, rdo, calibStrip));
     if (calibStrip.charge < 0) {
-        if (!hitNegativeCharge){
+        if (!hitNegativeCharge || msgLvl(MSG::DEBUG)){
           ATH_MSG_WARNING("One MM RDO or more, such as one with pdo = "<<rdo->charge() << " counts, corresponds to a negative charge (" << calibStrip.charge << "). Skipping these RDOs");
           hitNegativeCharge = true;
         }
         continue;
     }
 
-    const Amg::Vector3D globalDir = globalPos;
     Trk::LocalDirection localDir;
     const Trk::PlaneSurface& psurf = detEl->surface(layid);
-    Amg::Vector2D lpos;
+    Amg::Vector2D lpos{Amg::Vector2D::Zero()};
     psurf.globalToLocal(globalPos,globalPos,lpos);
-    psurf.globalToLocalDirection(globalDir, localDir);
+    psurf.globalToLocalDirection(globalPos, localDir);
        
     ATH_MSG_DEBUG(" Surface centre x " << psurf.center().x() << " y " << psurf.center().y() << " z " << psurf.center().z() );
     ATH_MSG_DEBUG(" localPos x " << localPos.x() << " localPos y " << localPos.y() << " lpos recalculated 0 " << lpos[0] << " lpos y " << lpos[1]);
