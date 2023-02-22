@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONMmRdoToPrepDataToolMT_H
@@ -28,7 +28,8 @@ namespace Muon
 
   private:
     /// This is the key for the cache for the MM PRD containers, can be empty
-    SG::UpdateHandleKey<MMPrepDataCollection_Cache> m_prdContainerCacheKey;
+    SG::UpdateHandleKey<MMPrepDataCollection_Cache> m_prdContainerCacheKey{this, "PrdCacheKey", 
+                                      "", "Optional external cache for the MM PRD container"};
   }; 
 } // end of namespace
 

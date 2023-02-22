@@ -16,7 +16,7 @@ Muon::MM_RawDataProviderToolMT::MM_RawDataProviderToolMT(const std::string& t, c
 : MM_RawDataProviderToolCore(t, n, p)
 {
   declareInterface<IMuonRawDataProviderTool>(this);
-  declareProperty("MmContainerCacheKey", m_rdoContainerCacheKey, "Optional external cache for the MM container");
+ 
 }
 
 
