@@ -355,7 +355,7 @@ namespace CP {
                 }
             }
         } else return true;
-        Error("CollectionContainer", "Could not find any SF period in %s matching the run number %u", EffiCollection::FileTypeName(type()).c_str(), RunNumber);
+        Warning("CollectionContainer", "Could not find any SF period in %s matching the run number %u", EffiCollection::FileTypeName(type()).c_str(), RunNumber);
         return false;
     }
     EfficiencyScaleFactor* CollectionContainer::retrieve(unsigned int RunNumber) {
