@@ -14,10 +14,10 @@ except Exception:
 if DQMonFlags.doMonitoring() and not DQMonFlags.doNewMonitoring():
    if DQMonFlags.useTrigger():
       # trigger decision tool
-      try:
-         include("AthenaMonitoring/TrigDecTool_jobOptions.py")
-      except Exception:
-         treatException("Could not load AthenaMonitoring/TrigDecTool_jobOptions.py")
+      from AthenaConfiguration.AllConfigFlags import ConfigFlags
+      from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
+      from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+      CAtoGlobalWrapper(TrigDecisionToolCfg, ConfigFlags)
 
    # set up first monitoring manager to set static variables
    from AthenaMonitoring.AthenaMonitoringConf import AthenaMonManager
