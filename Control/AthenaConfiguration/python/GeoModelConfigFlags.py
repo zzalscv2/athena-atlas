@@ -41,7 +41,9 @@ def createGeoModelConfigFlags(analysis=False):
     gcf.addFlag('GeoModel.Layout', 'atlas') # replaces global.GeoLayout
 
     gcf.addFlag("GeoModel.Align.Dynamic",
-                lambda prevFlags : not prevFlags.Input.isMC and prevFlags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.Overlay] and prevFlags.GeoModel.Run > LHCPeriod.Run1)
+                lambda prevFlags : prevFlags.GeoModel.Run >= LHCPeriod.Run2 and not prevFlags.Input.isMC)
+                # TODO: dynamic alignment is for now enabled by default for data overlay
+                # to disable, add 'and prevFlags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.Overlay]'
 
     gcf.addFlag("GeoModel.Align.LegacyConditionsAccess",
                 lambda prevFlags : prevFlags.Common.Project is Project.AthSimulation or prevFlags.Common.ProductionStep is ProductionStep.Simulation)

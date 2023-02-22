@@ -23,7 +23,7 @@ Overlay_tf.py \
 --inputBS_SKIMFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/mc15_valid.00200010.overlay_streamsAll_2016_pp_1.skim.DRAW.r8381/DRAW.09331084._000146.pool.root.1 \
 --outputRDOFile dataOverlayRDO.pool.root \
 --maxEvents 100 \
---conditionsTag CONDBR2-BLKPA-2016-12-01 \
+--conditionsTag CONDBR2-BLKPA-RUN2-10 \
 --preInclude 'Campaigns.DataOverlayPPTest' \
 --postInclude 'OverlayConfiguration.DataOverlayConditions.PPTestCfg' 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
 --postExec 'with open("ConfigOverlay.pkl", "wb") as f: cfg.store(f)' \
