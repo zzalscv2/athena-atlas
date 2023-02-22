@@ -321,7 +321,8 @@ ISF::InputConverter::convertParticle(HepMC::GenParticlePtr genPartPtr, EBC_EVCOL
   // rather than a constant '1' (e.g. could use GenEvent index for that?)
   const int bcid = (kindOfCollection==EBC_MAINEVCOLL) ? 0 : 1;
 
-  auto hmpl = std::make_unique<HepMcParticleLink>(genPartPtr, parentEvent->event_number(), kindOfCollection);
+  auto hmpl = std::make_unique<HepMcParticleLink>(pBarcode, parentEvent->event_number(), kindOfCollection);
+  
   auto sParticle = std::make_unique<ISF::ISFParticle>( std::move(pos),
                                                        std::move(mom),
                                                        pMass,
