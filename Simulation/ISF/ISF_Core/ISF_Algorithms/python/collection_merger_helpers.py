@@ -33,6 +33,7 @@ def generate_mergeable_collection_name(bare_collection_name,
         merger_input_collections = getattr(collection_merger,
                                            input_attribute_name)
         merger_input_collections.append(mergeable_collection)
+        merger_input_collections.sort()
     elif athenaCommonFlags.DoFullChain() and DetFlags.pileup.any_on():
         mergeable_collection = hardscatterSG+bare_collection_name
     else:
