@@ -31,6 +31,34 @@ def MC23a(flags):
         # ensure better randomisation of high-pt minbias events
         flags.Digitization.PU.HighPtMinBiasInputColOffset = -1
 
+def MC23c(flags):
+    """MC23c flags for MC to match 2023 Run 3 data"""
+    flags.Input.MCCampaign = Campaign.MC23c
+
+    flags.Beam.NumberOfCollisions = 60.
+
+    from LArConfiguration.LArConfigRun3 import LArConfigRun3PileUp
+    LArConfigRun3PileUp(flags)
+
+    # radiation damage
+    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
+    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
+
+    # pile-up
+    # These numbers are based upon a relative XS scaling of the high-pt slice
+    # of 64%, which leads to a relative high-pt / low-pt sampling of
+    # 0.001953314389 / 0.9980466856. Those numbers are then multiplied by 84.5
+    # to follow pile-up profile. Only a relevant number of significant digits
+    # are kept.
+    flags.Digitization.PU.NumberOfLowPtMinBias = 84.335
+    flags.Digitization.PU.NumberOfHighPtMinBias = 0.165
+    flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
+    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run450000_MC23c_MultiBeamspot_flat50_75'
+
+    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        # ensure better randomisation of high-pt minbias events
+        flags.Digitization.PU.HighPtMinBiasInputColOffset = -1
+
 
 def MC23aSingleBeamspot(flags):
     """MC23a flags for MC to match 2022 Run 3 data (single beamspot version)"""
@@ -38,6 +66,14 @@ def MC23aSingleBeamspot(flags):
 
     # override only pile-up profile
     flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run410000_MC23a_SingleBeamspot'
+
+
+def MC23cSingleBeamspot(flags):
+    """MC23c flags for MC to match 2023 Run 3 data (single beamspot version)"""
+    MC23c(flags)
+
+    # override only pile-up profile
+    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run450000_MC23c_SingleBeamspot_flat50_75'
 
 
 def MC23LowMu(flags):
@@ -87,6 +123,13 @@ def BeamspotSplitMC23a():
 
     return substeps, event_fractions
 
+def BeamspotSplitMC23c():
+    """MC23a beamspot splitting configuration"""
+    substeps = 4
+    event_fractions = [0.22, 0.22, 0.22, 0.34]
+
+    return substeps, event_fractions
+
 
 def MC23SimulationNoIoV(flags):
     """MC23 base flags for simulation without specifying conditions IoVs"""
@@ -107,6 +150,24 @@ def MC23SimulationNoIoV(flags):
     from SimuJobTransforms.G4Optimizations import enableG4Optimizations
     enableG4Optimizations(flags)
 
+def MC23cSimulationNoIoV(flags):
+    """MC23 base flags for simulation without specifying conditions IoVs"""
+    flags.Input.MCCampaign = Campaign.MC23c
+
+    from SimulationConfig.SimEnums import SimulationFlavour, TruthStrategy
+    flags.Sim.PhysicsList = 'FTFP_BERT_ATL'
+    flags.Sim.TruthStrategy = TruthStrategy.MC15aPlus
+
+    flags.Sim.TRTRangeCut = 30.0
+    flags.Sim.TightMuonStepping = True
+
+    from SimuJobTransforms.SimulationHelpers import enableBeamPipeKill, enableFrozenShowersFCalOnly
+    enableBeamPipeKill(flags)
+    if flags.Sim.ISF.Simulator in [SimulationFlavour.FullG4MT, SimulationFlavour.FullG4MT_QS]:
+        enableFrozenShowersFCalOnly(flags)
+
+    from SimuJobTransforms.G4Optimizations import enableG4Optimizations
+    enableG4Optimizations(flags)
 
 def MC23SimulationSingleIoV(flags):
     """MC23 flags for simulation"""
@@ -116,6 +177,13 @@ def MC23SimulationSingleIoV(flags):
     flags.Input.OverrideRunNumber = True
     flags.Input.LumiBlockNumber = [1] # dummy value
 
+def MC23cSimulationSingleIoV(flags):
+    """MC23 flags for simulation"""
+    MC23SimulationNoIoV(flags)
+
+    flags.Input.RunNumber = [450000]
+    flags.Input.OverrideRunNumber = True
+    flags.Input.LumiBlockNumber = [1] # dummy value
 
 def MC23aSimulationMultipleIoV(flags):
     """MC23 flags for simulation"""
@@ -128,6 +196,17 @@ def MC23aSimulationMultipleIoV(flags):
                               profile= 'RunDependentSimData.PileUpProfile_run410000_MC23a_MultiBeamspot')
 
 
+def MC23cSimulationMultipleIoV(flags):
+    """MC23 flags for simulation"""
+    MC23cSimulationNoIoV(flags)
+
+    flags.Input.OverrideRunNumber = True
+
+    from RunDependentSimComps.PileUpUtils import generateRunAndLumiProfile
+    generateRunAndLumiProfile(flags,
+                              profile= 'RunDependentSimData.PileUpProfile_run450000_MC23c_MultiBeamspot_flat50_75')
+
+
 def MC23SimulationSingleIoVCalibrationHits(flags):
     """MC23 flags for simulation with CalibrationHits"""
     MC23SimulationSingleIoV(flags)
@@ -135,10 +214,16 @@ def MC23SimulationSingleIoVCalibrationHits(flags):
     CalHits(flags)
     ParticleID(flags)
 
-
 def MC23aSimulationMultipleIoVCalibrationHits(flags):
     """MC23 flags for simulation with CalibrationHits"""
     MC23aSimulationMultipleIoV(flags)
+    from SimuJobTransforms import CalHits, ParticleID
+    CalHits(flags)
+    ParticleID(flags)
+
+def MC23cSimulationMultipleIoVCalibrationHits(flags):
+    """MC23 flags for simulation with CalibrationHits"""
+    MC23cSimulationMultipleIoV(flags)
     from SimuJobTransforms import CalHits, ParticleID
     CalHits(flags)
     ParticleID(flags)

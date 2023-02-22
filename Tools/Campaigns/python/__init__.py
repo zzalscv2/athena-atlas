@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from .MC16 import (MC16a, MC16d, MC16e, MC16NoPileUp,
   MC16SimulationNoIoV, MC16SimulationSingleIoV, MC16Simulation)
@@ -9,7 +9,10 @@ from .MC21 import (MC21a, MC21aSingleBeamspot, MC21LowMu, MC21NoPileUp, Beamspot
   MC21SimulationMultipleIoVCalibrationHits, MC21SimulationMultiBeamSpotCalibrationHits)
 from .MC23 import (MC23a, MC23aSingleBeamspot, MC23LowMu, MC23NoPileUp, BeamspotSplitMC23a,
   MC23SimulationNoIoV, MC23SimulationSingleIoV, MC23aSimulationMultipleIoV,
-  MC23SimulationSingleIoVCalibrationHits, MC23aSimulationMultipleIoVCalibrationHits)
+  MC23SimulationSingleIoVCalibrationHits, MC23aSimulationMultipleIoVCalibrationHits,
+  MC23c, MC23cSingleBeamspot, BeamspotSplitMC23c,
+  MC23cSimulationNoIoV, MC23cSimulationSingleIoV, MC23cSimulationMultipleIoV,
+  MC23cSimulationMultipleIoVCalibrationHits)
 from .PhaseII import (PhaseIIPileUp1, PhaseIIPileUp60, PhaseIIPileUp140, PhaseIIPileUp200,
   PhaseIIPileUpMC21a, PhaseIINoPileUp,
   PhaseIISimulationNoIoV, PhaseIISimulationSingleIoV, PhaseIISimulation)
@@ -26,6 +29,9 @@ __all__ = [
   'MC23a', 'MC23aSingleBeamspot', 'MC23LowMu', 'MC23NoPileUp', 'BeamspotSplitMC23a',
   'MC23SimulationNoIoV', 'MC23SimulationSingleIoV', 'MC23aSimulationMultipleIoV',
   'MC23SimulationSingleIoVCalibrationHits', 'MC23aSimulationMultipleIoVCalibrationHits',
+  'MC23c', 'MC23cSingleBeamspot', 'BeamspotSplitMC23c',
+  'MC23cSimulationNoIoV', 'MC23cSimulationSingleIoV', 'MC23cSimulationMultipleIoV',
+  'MC23cSimulationMultipleIoVCalibrationHits',
   'PhaseIIPileUp1', 'PhaseIIPileUp60', 'PhaseIIPileUp140', 'PhaseIIPileUp200',
   'PhaseIIPileUpMC21a', 'PhaseIINoPileUp',
   'PhaseIISimulationNoIoV', 'PhaseIISimulationSingleIoV', 'PhaseIISimulation',
