@@ -568,20 +568,33 @@ AsgElectronLikelihoodTool::calculate(const EventContext& ctx,
       if (vard0 > 0) {
         d0sigma = sqrtf(vard0);
       }
-      if (!t->summaryValue(TRT_PID, xAOD::eProbabilityHT)) {
-        allFound = false;
-        notFoundList += "eProbabilityHT ";
-      }
 
-      // Transform the TRT PID output for use in the LH tool.
-      double tau = 15.0;
-      double fEpsilon = 1.0e-30; // to avoid zero division
-      double pid_tmp = TRT_PID;
-      if (pid_tmp >= 1.0)
-        pid_tmp = 1.0 - 1.0e-15; // this number comes from TMVA
-      else if (pid_tmp <= fEpsilon)
-        pid_tmp = fEpsilon;
-      trans_TRT_PID = -log(1.0 / pid_tmp - 1.0) * (1. / double(tau));
+      const static SG::AuxElement::Accessor<float> trans_TRT_PID_acc("transformed_e_probability_ht");
+      if (!trans_TRT_PID_acc.isAvailable(*el)) {
+        // most probable case, need to compute the variable
+
+        if (!t->summaryValue(TRT_PID, xAOD::eProbabilityHT)) {
+          allFound = false;
+          notFoundList += "eProbabilityHT ";
+        }
+
+        // Transform the TRT PID output for use in the LH tool.
+        const double tau = 15.0;
+        const double fEpsilon = 1.0e-30; // to avoid zero division
+        double pid_tmp = TRT_PID;
+        if (pid_tmp >= 1.0)
+          pid_tmp = 1.0 - 1.0e-15; // this number comes from TMVA
+        else if (pid_tmp <= fEpsilon)
+          pid_tmp = fEpsilon;
+        trans_TRT_PID = -log(1.0 / pid_tmp - 1.0) * (1. / double(tau));
+      }
+      else
+      {
+        // it means the variable have been already computed by another tool
+        // usually this is the EGammaVariableCorrection, which means that
+        // it is also fudged (only MC)
+        trans_TRT_PID = trans_TRT_PID_acc(*el);
+      }
 
       unsigned int index;
       if (t->indexOfParameterAtPosition(index, xAOD::LastMeasurement)) {
