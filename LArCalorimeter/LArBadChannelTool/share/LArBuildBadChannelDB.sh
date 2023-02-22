@@ -243,8 +243,21 @@ do
       SCParam=""
   fi
 
+  if [[ "$t" == *"UPD1"* ]]; then 
+      database="LAR_ONL"
+      folder="/LAR/BadChannels/BadChannels"
+      tagname=
+  else
+      database="LAR_OFL"
+      folder="/LAR/BadChannelsOfl/BadChannels"
+  fi
+  if [ $issc == 1 ];
+      then
+      folder=${folder}"SC"
+  fi
   echo "Running athena to read current database content...with run number " $runnumber
-  python -m LArBadChannelTool.LArBadChannel2Ascii -r $runnumber -o $oldTextFile -t ${t} $SCParam > oracle2ascii_$t.log 2>&1 
+
+  python -m LArBadChannelTool.LArBadChannel2Ascii -r $runnumber -o $oldTextFile -d ${database} -t ${t} $SCParam > oracle2ascii_$t.log 2>&1 
 
   if [ $? -ne 0 ];  then
       echo "Athena reported an error reading back sqlite file ! Please check oracle2ascii_$t.log!"
@@ -280,7 +293,7 @@ do
 
   echo "Running athena to build sqlite database file ..."
   echo "Parameters: -o ${outputSqlite} -t $t -r $runnumber -l $lbnumber ${inputTextFile} $iovEnd"
-  python -m LArBadChannelTool.LArBadChannelDBAlg -o ${outputSqlite} -t $t -r $runnumber -l $lbnumber $SCFlag ${inputTextFile} $iovEnd > ascii2sqlite_$t.log 2>&1
+  python -m LArBadChannelTool.LArBadChannelDBAlg -o ${outputSqlite} -t $t -r $runnumber -l $lbnumber -f ${folder} $SCParam ${inputTextFile} $iovEnd > ascii2sqlite_$t.log 2>&1
   if [ $? -ne 0 ];  then
     echo "Athena reported an error! Please check ascii2sqlite_$t.log!"
     exit
@@ -298,7 +311,7 @@ do
   fi
 
   echo "Running athena to test readback of sqlite database file"
-  python -m LArBadChannelTool.LArBadChannel2Ascii -o $outputTextFile -d $outputSqlite -t $t -r $runnumber -l $lbnumber  $SCFlag > sqlite2ascii_$t.log 2>&1
+  python -m LArBadChannelTool.LArBadChannel2Ascii -o $outputTextFile -d $outputSqlite -t $t -f ${folder} -r $runnumber -l $lbnumber  $SCParam > sqlite2ascii_$t.log 2>&1
   if [ $? -ne 0 ];  then
       echo "Athena reported an error reading back sqlite file ! Please check sqlite2ascii_$t.log!"
       exit
@@ -315,13 +328,13 @@ do
   if [ $t == ${upd4TagName} ]
   then
      echo "Copying UPD4 to Bulk as well..."
-     AtlCoolCopy "sqlite://;schema=${outputSqlite};dbname=CONDBR2"  "sqlite://;schema=${outputSqlite};dbname=CONDBR2"  -f /LAR/BadChannelsOfl/BadChannels -t LARBadChannelsOflBadChannels-${upd4TagName} -of /LAR/BadChannelsOfl/BadChannels -ot LARBadChannelsOflBadChannels-${BulkTagName}
+     AtlCoolCopy "sqlite://;schema=${outputSqlite};dbname=CONDBR2"  "sqlite://;schema=${outputSqlite};dbname=CONDBR2"  -f ${folder} -t ${folder//\//}-${upd4TagName} -of ${folder} -ot ${folder//\//}-${BulkTagName} -a -c > AtlCoolCopy.ofl.log 2>&1
   fi   
 
   if [ $t == ${upd1TagName} ]
       then
       echo "Copying UPD1 for online database..."
-      AtlCoolCopy "sqlite://;schema=${outputSqlite};dbname=CONDBR2" "sqlite://;schema=${outputSqliteOnl};dbname=CONDBR2" -f /LAR/BadChannelsOfl/BadChannels -t LARBadChannelsOflBadChannels-${upd1TagName} -of  /LAR/BadChannels/BadChannels -ot LARBadChannelsBadChannels-${upd1TagName} -a -c > AtlCoolCopy.onl.log 2>&1
+      AtlCoolCopy "sqlite://;schema=${outputSqlite};dbname=CONDBR2" "sqlite://;schema=${outputSqliteOnl};dbname=CONDBR2" -f ${folder} -t ${folder//\//}-${upd1TagName} -of  ${folder} -ot ${folder//\//}-${upd1TagName} -a -c > AtlCoolCopy.onl.log 2>&1
       
       if [ $? -ne 0 ];  then
 	  echo "AtlCoolCopy reported an error! Please check AtlCoolCopy.onl.log!"
@@ -369,12 +382,13 @@ cat $summaryFile
 echo "Output sqlite files:"
 echo "$outputSqlite: Containing UPD1 and/or UPD4 and/or Bulk version of bad-channel list for OFFLINE DB. UPD4 valid as of run $runnumber"
 echo "Upload to OFFLINE oracle server:"
+echo "export COOL_FLASK=http://aiatlas001.cern.ch:5000"
 echo "/afs/cern.ch/user/a/atlcond/utilsflask/AtlCoolMerge.py  --flask ${outputSqlite} CONDBR2 ATONR_COOLOFL_GPN ATLAS_COOLOFL_LAR_W <password>"
 if [ -f $outputSqliteOnl ];
 then
     echo "$outputSqliteOnl: Containing UPD1 version of bad-channel list for ONLINE DB."
     echo "Upload to ONLINE oracle server using"
     echo "export COOL_FLASK=http://aiatlas001.cern.ch:5000"
-    echo "/afs/cern.ch/user/a/atlcond/utilsflask/AtlCoolMerge.py --flask BadChannels.db CONDBR2 ATONR_COOLOFL_GPN ATLAS_COOLOFL_LAR_W <password>"
+    echo "/afs/cern.ch/user/a/atlcond/utilsflask/AtlCoolMerge.py BadChannels.db CONDBR2 ATONR_COOL ATLAS_COOLONL_LAR_W <password>"
 fi 
 
