@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import Logging
 from .configurable import Configurable
@@ -119,6 +119,21 @@ class PowhegBase(Configurable):
             raise
         else:
             logger.info("Local directory \"virtual\" now points to {}".format(MadLoop_virtual))
+
+    def link_external_powheg_libraries(self, librarypath):
+        '''
+        Manual fix for external libraries path.
+        This library is expected to be installed in the POWHEGPATH folder.
+        Needs to be adjusted if the version of the library changes.
+        '''
+        logger.warning("Applying manual fixes for library paths:" + librarypath)
+        logger.debug("LD_LIBRARY_PATH (before) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
+        ldpath = os.getenv('LD_LIBRARY_PATH')
+        powhegpath = os.getenv('POWHEGPATH')
+        librarypath = glob.glob(powhegpath+librarypath)
+        ldpath_new = ldpath+ ":" + librarypath[0]
+        os.environ['LD_LIBRARY_PATH'] = ldpath_new
+        logger.debug("LD_LIBRARY_PATH (after) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
 
     def __init__(self, base_directory, version, executable_name, cores, powheg_executable="pwhg_main", is_reweightable=True, warning_output = [], info_output = [], error_output = [], **kwargs):
         """! Constructor.
