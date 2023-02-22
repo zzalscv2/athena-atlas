@@ -36,7 +36,7 @@ StatusCode DecayInFlyTruthTrajectoryBuilder::initialize() {
 
 //================================================================
 void DecayInFlyTruthTrajectoryBuilder::
-buildTruthTrajectory(TruthTrajectory *result, HepMC::ConstGenParticlePtr input) const
+buildTruthTrajectory(TruthTrajectory *result, const HepMC::ConstGenParticlePtr& input) const
 {
   result->clear();
   if(input) {
@@ -53,16 +53,16 @@ buildTruthTrajectory(TruthTrajectory *result, HepMC::ConstGenParticlePtr input) 
 
     // copy the outer half to result
     while(!tmp.empty()) {
-      result->push_back(tmp.top());
+      result->emplace_back(tmp.top());
       tmp.pop();
     }
 
     // The input particle itself
-    result->push_back(input);
+    result->emplace_back(input);
 
     // Now continue towards the interaction point
     while( (next = getMother(current)) ) {
-      result->push_back(current = next);
+      result->emplace_back(current = next);
     }
   }
 }
@@ -126,37 +126,21 @@ DecayInFlyTruthTrajectoryBuilder::truthTrajectoryCuts(const HepMC::ConstGenVerte
 }
 
 //================================================================
-HepMC::ConstGenParticlePtr DecayInFlyTruthTrajectoryBuilder::getDaughter(HepMC::ConstGenParticlePtr mother) const {
-
-  HepMC::ConstGenParticlePtr daughter{nullptr};
-  
+HepMC::ConstGenParticlePtr DecayInFlyTruthTrajectoryBuilder::getDaughter(const HepMC::ConstGenParticlePtr& mother) const {
   if(mother) {
-
     MotherDaughter res = truthTrajectoryCuts(mother->end_vertex());
-    if(res.first == mother) {
-      daughter = res.second;
-    }
-
+    if(res.first == mother) return res.second;
   }
-
-  return daughter;
+  return {nullptr};
 }
 
 //================================================================
-HepMC::ConstGenParticlePtr DecayInFlyTruthTrajectoryBuilder::getMother(HepMC::ConstGenParticlePtr daughter) const {
-
-  HepMC::ConstGenParticlePtr mother{nullptr};
-
+HepMC::ConstGenParticlePtr DecayInFlyTruthTrajectoryBuilder::getMother(const HepMC::ConstGenParticlePtr& daughter) const {
   if(daughter) {
-
     MotherDaughter res = truthTrajectoryCuts(daughter->production_vertex());
-    if(res.second == daughter) {
-      mother = res.first;
-    }
-
+    if(res.second == daughter) return res.first;
   }
-
-  return mother;
+  return {nullptr};
 }
 
 //================================================================

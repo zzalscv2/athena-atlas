@@ -29,13 +29,13 @@ namespace Trk {
     /** Build a TruthTrajectory this particle belongs to.  
      *  The result may be an empty TruthTrajectory (in case input did not pass the cuts).
      */
-    virtual void buildTruthTrajectory(TruthTrajectory *result, HepMC::ConstGenParticlePtr input) const = 0;
+    virtual void buildTruthTrajectory(TruthTrajectory *result, const HepMC::ConstGenParticlePtr& input) const = 0;
 
     /** Previous particle on the truth trajectory or 0 */
-    virtual HepMC::ConstGenParticlePtr getMother(HepMC::ConstGenParticlePtr part) const = 0;
+    virtual HepMC::ConstGenParticlePtr getMother(const HepMC::ConstGenParticlePtr& part) const = 0;
 
     /** Next particle on the truth trajectory or 0 */
-    virtual HepMC::ConstGenParticlePtr getDaughter(HepMC::ConstGenParticlePtr part) const = 0;
+    virtual HepMC::ConstGenParticlePtr getDaughter(const HepMC::ConstGenParticlePtr& part) const = 0;
   };
   
 } // namespace Trk

@@ -22,18 +22,18 @@ namespace Trk {
 
     virtual StatusCode initialize();
     
-    void buildTruthTrajectory(TruthTrajectory *result, HepMC::ConstGenParticlePtr input) const ;
+    void buildTruthTrajectory(TruthTrajectory *result, const HepMC::ConstGenParticlePtr& input) const ;
     
     /** Returns an umambiguous mother of the truth particle on a TruthTrajectory, or 0.
      * Implemented via truthTrajectoryCuts().
      */
-    HepMC::ConstGenParticlePtr getMother(HepMC::ConstGenParticlePtr particle) const;
+    HepMC::ConstGenParticlePtr getMother(const HepMC::ConstGenParticlePtr& particle) const;
 
     /** Returns an umambiguous daughter of the truth particle on a TruthTrajectory, or 0.
      * This assumes no one mother can correspond to no more than one daughter.
      * Implemented via truthTrajectoryCuts().
      */
-    HepMC::ConstGenParticlePtr getDaughter(HepMC::ConstGenParticlePtr particle) const;
+    HepMC::ConstGenParticlePtr getDaughter(const HepMC::ConstGenParticlePtr& particle) const;
 
     /** Return type for the next method */
     typedef std::pair<HepMC::ConstGenParticlePtr,HepMC::ConstGenParticlePtr> MotherDaughter;
