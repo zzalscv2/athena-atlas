@@ -11,13 +11,9 @@
 
 namespace Muon {
 
-    // Static members
-    unsigned int MuPatTrack::s_maxNumberOfInstantiations = 0;
-    unsigned int MuPatTrack::s_numberOfInstantiations = 0;
-    unsigned int MuPatTrack::s_numberOfCopies = 0;
+    // Static members   
     unsigned int MuPatTrack::s_processingStageStringMaxLen = 0;
     std::vector<std::string> MuPatTrack::s_processingStageStrings;
-    std::mutex MuPatTrack::s_mutex;
     std::once_flag MuPatTrack::s_stageStringsInitFlag;
 
     // Static functions
@@ -69,81 +65,67 @@ namespace Muon {
 
     // member functions
     MuPatTrack::MuPatTrack(const std::vector<MuPatSegment*>& segments, std::unique_ptr<Trk::Track>& track, MuPatSegment* seedSeg) :
-        MuPatCandidateBase(), created(Unknown), lastSegmentChange(Unknown), m_segments(segments), m_seedSeg(nullptr) {
-#ifdef MCTB_OBJECT_POINTERS
-        std::cout << " new track " << this << std::endl;
-#endif
+        MuPatCandidateBase(), m_segments(segments) {
+
         m_track.swap(track);
         // increase segment counters
         modifySegmentCounters(+1);
         m_hasMomentum = hasMomentum();
-#ifdef MCTB_OBJECT_COUNTERS
-        addInstance();
-#endif
+
         // now update links between tracks and segments
         updateSegments(true);
-        m_excludedSegments.push_back(nullptr);
-        m_excludedSegments.clear();
-        if (seedSeg)
+       
+        if (seedSeg){
             m_seedSeg = seedSeg;
-        else if (segments.size())
+            addToTrash(seedSeg->garbage());
+        } else if (segments.size())
             m_seedSeg = segments[0];
+        for (MuPatSegment* seg : segments){
+            addToTrash(seg->garbage());
+        }
     }
 
     MuPatTrack::MuPatTrack(MuPatSegment* segment, std::unique_ptr<Trk::Track>& track) :
-        MuPatCandidateBase(), created(Unknown), lastSegmentChange(Unknown), m_seedSeg(nullptr) {
+        MuPatCandidateBase(){
         m_track.swap(track);
-#ifdef MCTB_OBJECT_POINTERS
-        std::cout << " new track " << this << std::endl;
-#endif
+
         m_segments.reserve(3);
         m_segments.push_back(segment);
+        addToTrash(segment->garbage());
         // increase segment counters
         modifySegmentCounters(+1);
         m_hasMomentum = hasMomentum();
-#ifdef MCTB_OBJECT_COUNTERS
-        addInstance();
-#endif
+
         // now update links between tracks and segments
         updateSegments(true);
-        m_excludedSegments.push_back(nullptr);
-        m_excludedSegments.clear();
+        
     }
 
     MuPatTrack::MuPatTrack(MuPatSegment* segment1, MuPatSegment* segment2, std::unique_ptr<Trk::Track>& track, MuPatSegment* seedSeg) :
-        MuPatCandidateBase(), created(Unknown), lastSegmentChange(Unknown), m_seedSeg(nullptr) {
+        MuPatCandidateBase() {
         m_track.swap(track);
-#ifdef MCTB_OBJECT_POINTERS
-        std::cout << " new track " << this << std::endl;
-#endif
+
         m_segments.reserve(3);
         m_segments.push_back(segment1);
         m_segments.push_back(segment2);
         // increase segment counters
         modifySegmentCounters(+1);
         m_hasMomentum = hasMomentum();
-#ifdef MCTB_OBJECT_COUNTERS
-        addInstance();
-#endif
+
         // now update links between tracks and segments
         updateSegments(true);
-        m_excludedSegments.push_back(nullptr);
+        
         m_excludedSegments.clear();
         if (seedSeg)
             m_seedSeg = seedSeg;
         else
             m_seedSeg = segment1 ? segment1 : segment2;
+        for (MuPatSegment* seg : {segment1, segment2, seedSeg}) {
+            if (seg) addToTrash(seg->garbage());
+        }
     }
 
     MuPatTrack::~MuPatTrack() {
-        // decrease segment counters
-#ifdef MCTB_OBJECT_POINTERS
-        std::cout << " delete trackcan " << this << std::endl;
-#endif
-        modifySegmentCounters(-1);
-#ifdef MCTB_OBJECT_COUNTERS
-        removeInstance();
-#endif
         // now update links between tracks and segments
         updateSegments(false);
     }
@@ -155,27 +137,19 @@ namespace Muon {
         m_segments(can.m_segments),
         m_excludedSegments(can.m_excludedSegments),
         m_seedSeg(can.m_seedSeg) {
-#ifdef MCTB_OBJECT_POINTERS
-        std::cout << " ctor track " << this << std::endl;
-#endif
+
         m_track = std::make_unique<Trk::Track>(can.track());
         m_hasMomentum = can.m_hasMomentum;
         // increase segment counters
         modifySegmentCounters(+1);
 
-#ifdef MCTB_OBJECT_COUNTERS
-        addInstance();
-        ++s_numberOfCopies;
-#endif
         // now update links between tracks and segments
         updateSegments(true);
     }
 
     MuPatTrack& MuPatTrack::operator=(const MuPatTrack& can) {
         if (&can != this) {
-#ifdef MCTB_OBJECT_POINTERS
-            std::cout << " operator= track " << this << std::endl;
-#endif
+
             // now update links between tracks and segments, remove old links
             updateSegments(false);
 
@@ -198,9 +172,6 @@ namespace Muon {
             // increase new segment counters
             modifySegmentCounters(+1);
 
-#ifdef MCTB_OBJECT_COUNTERS
-            ++s_numberOfCopies;
-#endif
             // now update links between tracks and segments, add new segments
             updateSegments(true);
         }
@@ -235,11 +206,12 @@ namespace Muon {
 
     void MuPatTrack::addExcludedSegment(MuPatSegment* segment) { m_excludedSegments.push_back(segment); }
     bool MuPatTrack::isSegmentExcluded(const MuPatSegment* segment) const {
-        return std::find(m_excludedSegments.begin(),m_excludedSegments.end(), segment) != m_excludedSegments.end();
-    }   
+        return std::find(m_excludedSegments.begin(), m_excludedSegments.end(), segment) != m_excludedSegments.end();
+    }
     void MuPatTrack::addSegment(MuPatSegment* segment, std::unique_ptr<Trk::Track>& newTrack) {
         // add segment and increase counter
         m_segments.push_back(segment);
+        addToTrash(segment->garbage());
         segment->addTrack(this);
         ++segment->usedInFit;
         for (const MuonStationIndex::ChIndex& chit : segment->chambers()) addChamber(chit);

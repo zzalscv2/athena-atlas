@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MOOTRACKBUILDER_H
@@ -10,7 +10,6 @@
 #include "GaudiKernel/ToolHandle.h"
 
 // Tools & interfaces
-#include "MuPatPrimitives/MuPatGarbage.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRecHelperTools/IMuonEDMHelperSvc.h"
 #include "MuonRecHelperTools/MuonEDMPrinterTool.h"
@@ -128,7 +127,7 @@ namespace Muon {
             @param externalPhiHits if provided, the external phi hits will be used instead of the phi hits on the segment
             @return a pointer to the resulting track, will return zero if combination failed. Ownership passed to user.
         */
-        MuonSegment* combineToSegment(const EventContext& ctx, const MuPatCandidateBase& firstEntry, const MuPatCandidateBase& secondEntry,
+        std::unique_ptr<MuonSegment> combineToSegment(const EventContext& ctx, const MuPatCandidateBase& firstEntry, const MuPatCandidateBase& secondEntry,
                                       const PrepVec* patternPhiHits) const;
     
         /** @brief combine two segments to a super segment
@@ -137,7 +136,7 @@ namespace Muon {
             @param externalPhiHits if provided, the external phi hits will be used instead of the phi hits on the segment
             @return a pointer to the combined segment, will return zero if combination failed. Ownership passed to user.
         */
-        virtual MuonSegment* combineToSegment(const EventContext& ctx, const MuonSegment& seg1, const MuonSegment& seg2,
+        virtual std::unique_ptr<MuonSegment> combineToSegment(const EventContext& ctx, const MuonSegment& seg1, const MuonSegment& seg2,
                                               const PrepVec* patternPhiHits) const override;
 
         /** @brief combine two segments to a track
@@ -172,8 +171,8 @@ namespace Muon {
             @param segInfo a reference to a MuPatSegment
             @return a pointer to vector of tracks, the ownership of the vector and the tracks is passed to the client calling the tool.
          */
-        std::vector<std::unique_ptr<Trk::Track> > combineWithSegmentFinding(const EventContext& ctx, const MuPatTrack& candidate, const MuPatSegment& segInfo,
-                                                                            GarbageContainer&, const PrepVec* patternPhiHits) const;
+        std::vector<std::unique_ptr<Trk::Track> > combineWithSegmentFinding(const EventContext& ctx, const MuPatTrack& candidate, 
+                                                                            const MuPatSegment& segInfo, const PrepVec* patternPhiHits) const;
 
         /** @brief find tracks by redoing the segment finding in the chamber of the segment
             @param candidate a reference to a MuPatTrack
@@ -182,8 +181,7 @@ namespace Muon {
             @return a pointer to vector of tracks, the ownership of the vector and the tracks is passed to the client calling the tool.
          */
         std::vector<std::unique_ptr<Trk::Track> > combineWithSegmentFinding(const EventContext& ctx, const MuPatTrack& candidate, const Trk::TrackParameters& pars,
-                                                                            const std::set<Identifier>& chIds, GarbageContainer& trash_bin,
-                                                                            const PrepVec* patternPhiHits) const;
+                                                                            const std::set<Identifier>& chIds, const PrepVec* patternPhiHits) const;
         /** @brief find tracks by redoing the segment finding in the chamber of the segment
             @param track a reference to a Track
             @param pars predicted track parameters in first chamber
@@ -230,7 +228,7 @@ namespace Muon {
         bool isSplitTrack(const EventContext& ctx, const Trk::Track& track1, const Trk::Track& track2) const;
 
         /** @brief look for split tracks in collection and merge them */
-        TrackCollection* mergeSplitTracks(const EventContext& ctx, const TrackCollection& tracks, GarbageContainer& trash_bin) const;
+        TrackCollection* mergeSplitTracks(const EventContext& ctx, const TrackCollection& tracks) const;
 
         /**
             @brief interface for tools to find track in the muon system starting from a vector of segments
@@ -240,14 +238,13 @@ namespace Muon {
 
         */
     public:
-        virtual std::vector<std::unique_ptr<MuPatTrack> > find(const EventContext& ctx, MuPatCandidateBase& candidate, const std::vector<MuPatSegment*>& segments,
-                                                               GarbageContainer& trash_bin) const override;
+        virtual std::vector<std::unique_ptr<MuPatTrack> > find(const EventContext& ctx, MuPatCandidateBase& candidate, const std::vector<MuPatSegment*>& segments) const override;
 
         /** @brief interface for tools which refine the hit content of a given track
             @param track input track
             @return new refined track. Pointer could be zero, ownership passed to caller
         */
-        virtual void refine(const EventContext& ctx, MuPatTrack& track, GarbageContainer& trash_bin) const override;
+        virtual void refine(const EventContext& ctx, MuPatTrack& track) const override;
 
     private:
         void removeDuplicateWithReference(std::unique_ptr<Trk::SegmentCollection>& segments,

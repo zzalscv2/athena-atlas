@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_IMUONTRACKBUILDER_H
@@ -20,7 +20,6 @@ namespace Muon {
     class MuPatCandidateBase;
     class MuPatSegment;
     class MuPatTrack;
-    class GarbageContainer;
 
     /** @brief The IMuonTrackBuilder is a pure virtual interface for tools extending muon track candidates with
         segments in a given chamber
@@ -45,8 +44,7 @@ namespace Muon {
                     The ownership of the tracks is passed to the client calling the tool.
 
         */
-        virtual std::vector<std::unique_ptr<MuPatTrack> > find(const EventContext& ctx, MuPatCandidateBase& candidate, const std::vector<MuPatSegment*>& segments,
-                                                               GarbageContainer& trash_bin) const = 0;
+        virtual std::vector<std::unique_ptr<MuPatTrack> > find(const EventContext& ctx, MuPatCandidateBase& candidate, const std::vector<MuPatSegment*>& segments) const = 0;
     };
 
 }  // namespace Muon

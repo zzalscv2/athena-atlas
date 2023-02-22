@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_IMUONSEGMENTTRACKBUILDER_H
@@ -55,7 +55,7 @@ namespace Muon {
             @param externalPhiHits if provided, the external phi hits will be used instead of the phi hits on the segment
             @return a pointer to the combined segment, will return zero if combination failed. Ownership passed to user.
         */
-        virtual MuonSegment* combineToSegment(const EventContext& ctx, const MuonSegment& seg1, const MuonSegment& seg2,
+        virtual std::unique_ptr<MuonSegment> combineToSegment(const EventContext& ctx, const MuonSegment& seg1, const MuonSegment& seg2,
                                               const PrepVec* patternPhiHits) const = 0;
 
         /** @brief combine two segments to a track
