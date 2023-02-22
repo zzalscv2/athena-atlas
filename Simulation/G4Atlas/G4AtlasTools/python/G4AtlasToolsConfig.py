@@ -306,7 +306,6 @@ def CombinedTestBeamSensitiveDetectorListCfg(flags):
 def SensitiveDetectorMasterToolCfg(flags, name="SensitiveDetectorMasterTool", **kwargs):
     result = ComponentAccumulator()
     # NB Currently only supporting the standard ATLAS dector and the Tile Test Beam
-    print("BEAM TYPE IS", flags.Beam.Type)
     if flags.Beam.Type is BeamType.TestBeam:
         kwargs.setdefault("SensitiveDetectors", result.popToolsAndMerge(TileTestBeamSensitiveDetectorListCfg(flags)))
     elif "ATLAS" in flags.GeoModel.AtlasVersion:
