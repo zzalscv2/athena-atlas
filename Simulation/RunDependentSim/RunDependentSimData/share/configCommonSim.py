@@ -11,22 +11,24 @@ cacheElement=None
 if not 'scaleTaskLengthSim' in dir():
     profileTotalEvents=sum(lb['evts'] for lb in JobMaker)
     trfTotalEvents = runArgs.maxEvents
-    corrTotalEvents = max(trfTotalEvents,50)
+    corrTotalEvents = max(trfTotalEvents, 50)
     scaleTaskLengthSim = float(corrTotalEvents)/float(profileTotalEvents)
 
 def simEvts(x):
     return int(scaleTaskLengthSim * x)
 
+from copy import deepcopy
 for el in JobMaker:
     if el['step'] != step:
         if cacheElement is not None:
-            cacheElement['evts'] =  simEvts(cacheElement['evts'])
+            cacheElement['evts'] = simEvts(cacheElement['evts'])
             JobMakerSim += [cacheElement]
-        cacheElement = el
         step = el['step']
+        cacheElement = deepcopy(el)
+        cacheElement['mu'] = step
     else:
         cacheElement['evts'] += el['evts']
-cacheElement['evts'] =  simEvts(cacheElement['evts'])
+cacheElement['evts'] = simEvts(cacheElement['evts'])
 JobMakerSim += [cacheElement]
 
 import math
@@ -96,6 +98,8 @@ else:
     #Load needed tools
     from RunDependentSimComps.RunDependentMCTaskIterator import getRunLumiInfoFragment
     fragment=getRunLumiInfoFragment(jobnumber=(trfJobNumber-1),task=JobMakerSim,maxEvents=trfMaxEvents,totalEvents=trfTotalEvents,skipEvents=trfSkipEvents,sequentialEventNumbers=sequentialEventNumbers)
+
+fragment = sorted(fragment, key=lambda x: x['step'])
 
 from G4AtlasApps.SimFlags import simFlags
 simFlags.RunAndLumiOverrideList=fragment
