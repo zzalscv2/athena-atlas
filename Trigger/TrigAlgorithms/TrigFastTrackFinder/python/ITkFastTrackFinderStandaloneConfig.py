@@ -5,10 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def ITkFastTrackFinderStandaloneCfg(flags):
     acc = ComponentAccumulator()
 
-    if flags.ITk.Tracking.doFastTracking:
-        newflags = flags.cloneAndReplace("ITk.Tracking.ActiveConfig", "ITk.Tracking.FastPass")
-    else:
-        newflags = flags.cloneAndReplace("ITk.Tracking.ActiveConfig", "ITk.Tracking.FTFPass")
+    newflags = flags.cloneAndReplace("ITk.Tracking.ActiveConfig", "ITk.Tracking.FTFPass")
     
     ResolvedTrackCollectionKey = 'TrigFastTrackFinder_IDTrig_Tracks'
     SiSPSeededTrackCollectionKey = 'TrigFastTrackFinder_FTF_Tracks'
