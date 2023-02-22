@@ -23,7 +23,7 @@ def fastCaloSequence(flags, name="fastCaloSequence"):
     from TrigT2CaloCommon.CaloDef import fastCaloRecoSequence
     (fastCaloViewsMaker, InViewRoIs) = fastCaloEVCreator()
     # reco sequence always build the rings
-    (fastCaloInViewSequence, sequenceOut) = fastCaloRecoSequence(InViewRoIs, doRinger=True)
+    (fastCaloInViewSequence, sequenceOut) = fastCaloRecoSequence(InViewRoIs)
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
     robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Calo, flags, nameSuffix=fastCaloViewsMaker.name())[0]

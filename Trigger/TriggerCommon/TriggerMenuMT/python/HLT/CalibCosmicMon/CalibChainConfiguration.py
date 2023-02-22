@@ -56,7 +56,7 @@ def LArPSAllEMSequence(flags, name="LArPSSequence_AllEM"):
     from TrigT2CaloCommon.CaloDef import fastCalo_AllEM_EVCreator
  
     (LArPSViewsMaker_AllEM, InViewRoIs) = fastCalo_AllEM_EVCreator()
-    (LArPSAllEMInViewSequence, sequenceOut) = fastCaloRecoSequence(InViewRoIs,doRinger=False, ClustersName="HLT_LArPS_AllCaloEMClusters",doAllEm=True,doAll=False)
+    (LArPSAllEMInViewSequence, sequenceOut) = fastCaloRecoSequence(InViewRoIs,ClustersName="HLT_LArPS_AllCaloEMClusters",doAllEm=True,doAll=False)
     LArPSViewsMaker_AllEM.ViewNodeName = LArPSAllEMInViewSequence.name()
     LArPSAllEMSequence = seqAND(name,[LArPSViewsMaker_AllEM, LArPSAllEMInViewSequence])
     return (LArPSAllEMSequence, LArPSViewsMaker_AllEM, sequenceOut)
@@ -86,7 +86,7 @@ def LArPSAllSequence( flags,  name="LArPSSequence_All"):
     from TrigT2CaloCommon.CaloDef import fastCalo_All_EVCreator
     
     (LArPSViewsMaker_All, InViewRoIs) = fastCalo_All_EVCreator()
-    (LArPSAllInViewSequence, sequenceOut) = fastCaloRecoSequence(InViewRoIs,doRinger=False, ClustersName="HLT_LArPS_AllCaloClusters",doAllEm=False,doAll=True)
+    (LArPSAllInViewSequence, sequenceOut) = fastCaloRecoSequence(InViewRoIs,ClustersName="HLT_LArPS_AllCaloClusters",doAllEm=False,doAll=True)
     LArPSViewsMaker_All.ViewNodeName = LArPSAllInViewSequence.name()
     LArPSAllSequence = seqAND(name,[LArPSViewsMaker_All, LArPSAllInViewSequence])
     return (LArPSAllSequence, LArPSViewsMaker_All, sequenceOut)
