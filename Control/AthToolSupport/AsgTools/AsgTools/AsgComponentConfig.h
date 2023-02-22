@@ -20,6 +20,13 @@
 
 namespace asg
 {
+  /// @brief Namespace for "implementation types"
+  namespace details
+  {
+    // Forward declaration of the private tool configuration type
+    struct AsgComponentPrivateToolConfig;
+  }
+
   /// \brief an object that stores the configuration for an \ref
   /// AsgComponent and is able to create one from it
 
@@ -271,7 +278,7 @@ namespace asg
     std::string m_name;
 
     /// \brief the map of (private) tools to create
-    std::map<std::string,std::tuple<AsgComponentConfig,std::string> > m_privateTools;
+    std::map<std::string, details::AsgComponentPrivateToolConfig> m_privateTools;
 
     /// \brief the map of (private) tool handle arrays to manage, and
     /// the tools they contain
@@ -305,7 +312,19 @@ namespace asg
                                      std::size_t split);
     /// \}
   };
-}
+
+  namespace details {
+
+    /// @brief Helper type with all necessary details about private tools
+    struct AsgComponentPrivateToolConfig {
+      /// The configuration of the private tool
+      AsgComponentConfig m_config;
+      /// The property name (?) of the private tool
+      std::string m_propName;
+    };
+
+  } // namespace details
+} // namespace asg
 
 #include "AsgComponentConfig.icc"
 
