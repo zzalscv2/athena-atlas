@@ -1,21 +1,21 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from TrigCaloRec.TrigCaloRecConf import (TrigCaloClusterMaker,
-                                         TrigCaloTowerMaker,
-                                         TrigCaloClusterCalibrator)
+from AthenaCommon.SystemOfUnits import MeV, deg
+from AthenaCommon.Logging import logging
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
+from TrigCaloRec.TrigCaloRecConf import TrigCaloClusterMaker, TrigCaloTowerMaker
 from TrigCaloRec.TrigCaloRecConf import HLTCaloCellMaker as _HLTCaloCellMaker
 from TrigEDMConfig.TriggerEDMRun3 import recordable
-from AthenaCommon.SystemOfUnits import MeV, deg
 
-from AthenaCommon.Logging import logging
 mlog = logging.getLogger ('TrigCaloRecConfig')
 
 
 def trigCaloClusterMakerMonTool(flags, doMonCells = False):
     """Monitoring tool for TrigCaloClusterMaker"""
 
-    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     monTool = GenericMonitoringTool(flags, 'MonTool')
 
     maxNumberOfClusters = 1200 if doMonCells else 50
@@ -334,92 +334,6 @@ def HLTCaloCellMaker(flags, name, roisKey='UNSPECIFIED', CellsName=None, monitor
     return cellmaker
 
 
-class TrigCaloClusterCalibrator_LC(TrigCaloClusterCalibrator):
-    """ Class to set up the default configurations for LC calibrations """
-
-    def __init__(self, name="TrigCaloClusterCalibrator_LC", **kwargs):
-        super(TrigCaloClusterCalibrator_LC, self).__init__(name, **kwargs)
-
-        from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
-        from CaloClusterCorrection.CaloClusterCorrectionConf import CaloLCClassificationTool, CaloLCWeightTool, CaloLCOutOfClusterTool, CaloLCDeadMaterialTool
-        from CaloClusterCorrection.CaloClusterCorrectionConf import CaloClusterLocalCalib
-        from AthenaCommon.GlobalFlags import globalflags
-
-        # Need electronic noise for LCWeights
-        CaloNoiseCondAlg(noisetype="electronicNoise")
-
-        # Figure out the detector version
-        det_version_is_rome = globalflags.DetDescrVersion().startswith("Rome")
-
-        self.ClusterCorrectionTools = []
-
-        # Set up the tools
-        self += CaloClusterLocalCalib(
-            "TrigLocalCalib",
-            ClusterRecoStatus = [1, 2])
-        self.TrigLocalCalib += CaloLCClassificationTool(
-            "TrigLCClassify",
-            ClassificationKey = "EMFracClassify",
-            UseSpread = False,
-            MaxProbability = 0.85 if det_version_is_rome else 0.5,
-            UseNormalizedEnergyDensity = not det_version_is_rome,
-            StoreClassificationProbabilityInAOD = True)
-        self.TrigLocalCalib.ClusterClassificationTool = [self.TrigLocalCalib.TrigLCClassify]
-        self.TrigLocalCalib += CaloLCWeightTool(
-            "TrigLCWeight",
-            CorrectionKey = "H1ClusterCellWeights",
-            SignalOverNoiseCut = 2.0,
-            UseHadProbability = True)
-        self.TrigLocalCalib.LocalCalibTools = [self.TrigLocalCalib.TrigLCWeight]
-        self.ClusterCorrectionTools.append(self.TrigLocalCalib)
-
-        self += CaloClusterLocalCalib(
-            "TrigOOCCalib",
-            ClusterRecoStatus = [1, 2])
-        self.TrigOOCCalib += CaloLCOutOfClusterTool(
-            "TrigLCOut",
-            CorrectionKey = "OOCCorrection",
-            UseEmProbability = False,
-            UseHadProbability = True)
-        self.TrigOOCCalib.LocalCalibTools = [self.TrigOOCCalib.TrigLCOut]
-        self.ClusterCorrectionTools.append(self.TrigOOCCalib)
-
-        self += CaloClusterLocalCalib(
-            "TrigOOCPi0Calib",
-            ClusterRecoStatus = [1, 2])
-        self.TrigOOCPi0Calib += CaloLCOutOfClusterTool(
-            "TrigLCOutPi0",
-            CorrectionKey = "OOCPi0Correction",
-            UseEmProbability = True,
-            UseHadProbability = False)
-        self.TrigOOCPi0Calib.LocalCalibTools = [self.TrigOOCPi0Calib.TrigLCOutPi0]
-        self.ClusterCorrectionTools.append(self.TrigOOCPi0Calib)
-
-        self += CaloClusterLocalCalib(
-            "TrigDMCalib",
-            ClusterRecoStatus = [1, 2])
-        self.TrigDMCalib += CaloLCDeadMaterialTool(
-            "TrigLCDeadMaterial",
-            HadDMCoeffKey = "HadDMCoeff2",
-            ClusterRecoStatus = 0,
-            WeightModeDM = 2,
-            UseHadProbability = True)
-        self.TrigDMCalib.LocalCalibTools = [self.TrigDMCalib.TrigLCDeadMaterial]
-        self.ClusterCorrectionTools.append(self.TrigDMCalib)
-
-        # Also set up the monitoring
-        from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-        self.MonTool = GenericMonitoringTool("MonTool")
-        self.MonTool.defineHistogram('Et', path='EXPERT', type='TH1F',  title="Cluster E_T; E_T [ MeV ] ; Number of Clusters", xbins=135, xmin=-200.0, xmax=2500.0)
-        self.MonTool.defineHistogram('Eta', path='EXPERT', type='TH1F', title="Cluster #eta; #eta ; Number of Clusters", xbins=100, xmin=-2.5, xmax=2.5)
-        self.MonTool.defineHistogram('Phi', path='EXPERT', type='TH1F', title="Cluster #phi; #phi ; Number of Clusters", xbins=64, xmin=-3.2, xmax=3.2)
-        self.MonTool.defineHistogram('Eta,Phi', path='EXPERT', type='TH2F', title="Number of Clusters; #eta ; #phi ; Number of Clusters", xbins=100, xmin=-2.5, xmax=2.5, ybins=128, ymin=-3.2, ymax=3.2)
-
-
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
-
-
 def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None, monitorCells=True):
     acc = ComponentAccumulator()
     from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg, CaloDataAccessSvcDependencies
@@ -467,6 +381,7 @@ def hltCaloCellSeedlessMakerCfg(flags, roisKey='UNSPECIFIED'):
     acc.addCondAlgo(CompFactory.CaloNoiseSigmaDiffCondAlg())
 
     return acc
+
 
 def hltTopoClusterMakerCfg(flags, name, clustersKey, cellsKey="CaloCells"):
     acc = ComponentAccumulator()
@@ -633,6 +548,22 @@ def hltCaloTopoClusterCalibratorCfg(flags, name, clustersin, clustersout, **kwar
         ),
     ]  # End ClusterCorrectionTools
     #NB: Could we take these from CaloRec.CaloTopoClusterConfig.getTopoClusterLocalCalibTools?
+
+    # Monitoring
+    monTool = GenericMonitoringTool(flags, "MonTool")
+    monTool.defineHistogram('Et', path='EXPERT', type='TH1F',
+                            title="Cluster E_T; E_T [ MeV ] ; Number of Clusters",
+                            xbins=135, xmin=-200.0, xmax=2500.0)
+    monTool.defineHistogram('Eta', path='EXPERT', type='TH1F',
+                            title="Cluster #eta; #eta ; Number of Clusters",
+                            xbins=100, xmin=-2.5, xmax=2.5)
+    monTool.defineHistogram('Phi', path='EXPERT', type='TH1F',
+                            title="Cluster #phi; #phi ; Number of Clusters",
+                            xbins=64, xmin=-3.2, xmax=3.2)
+    monTool.defineHistogram('Eta,Phi', path='EXPERT', type='TH2F',
+                            title="Number of Clusters; #eta ; #phi ; Number of Clusters",
+                            xbins=100, xmin=-2.5, xmax=2.5, ybins=128, ymin=-3.2, ymax=3.2)
+    calibrator.MonTool = monTool
 
     acc.addEventAlgo(calibrator, primary=True)
     return acc

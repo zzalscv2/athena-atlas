@@ -91,12 +91,13 @@ def LCCaloClusterRecoSequence(
     The clusters will be created as a shallow copy of the EM level clusters
     """
     em_sequence, em_clusters = RecoFragmentsPool.retrieve(caloClusterRecoSequence, flags=flags, RoIs=RoIs)
-    from TrigCaloRec.TrigCaloRecConfig import TrigCaloClusterCalibrator_LC
-    alg = TrigCaloClusterCalibrator_LC(
-            name,
-            InputClusters = em_clusters,
-            OutputClusters = outputName,
-            OutputCellLinks = outputName+"_cellLinks")
+    from TrigCaloRec.TrigCaloRecConfig import hltCaloTopoClusterCalibratorCfg
+    alg = algorithmCAToGlobalWrapper(hltCaloTopoClusterCalibratorCfg,
+                                     flags, name,
+                                     clustersin = em_clusters,
+                                     clustersout = outputName,
+                                     OutputCellLinks = outputName+"_cellLinks")[0]
+
     return parOR(name+"RecoSequence", [em_sequence, alg]), str(alg.OutputClusters)
 
 def caloTowerHIRecoSequence(
