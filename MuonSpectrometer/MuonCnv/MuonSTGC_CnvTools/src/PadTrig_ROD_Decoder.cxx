@@ -43,6 +43,9 @@ StatusCode PadTrig_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE
       link->getOrbit(),
       link->getBcid(),
       link->getL1id(),
+      link->getOrbitid(),
+      link->getOrbit1(),
+      link->getStatus(),
       link->getNumberOfHits(),
       link->getNumberOfPfebs(),
       link->getNumberOfTriggers(),
@@ -61,7 +64,8 @@ StatusCode PadTrig_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE
       link->getTriggerRelBcids(),
       link->getBcidRels(),
       link->getBcidStatuses(),
-      link->getBcidMultZeros()
+      link->getBcidMultZeros(),
+      link->getBcidMultiplicities()
     };
     ATH_MSG_DEBUG("Pad trigger fillCollection " << std::hex << collection->getSourceid() << std::dec << " " << rdo.numberOfCollections());
     ATH_CHECK(rdo.addCollection(collection, rdo.numberOfCollections()));

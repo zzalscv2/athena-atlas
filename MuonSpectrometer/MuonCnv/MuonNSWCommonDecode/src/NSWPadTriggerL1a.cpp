@@ -83,6 +83,7 @@ Muon::nsw::NSWPadTriggerL1a::NSWPadTriggerL1a(const uint32_t* bs, const uint32_t
     m_bcid_rel.push_back(databc.relbcid);
     m_bcid_status.push_back(databc.status);
     m_bcid_multzero.push_back(databc.mult0);
+    m_bcid_multiplicity.push_back(databc.multiplicity);
     m_bcid_n++;
 
     for (size_t trig = 0; trig < databc.bandids.size(); trig++) {

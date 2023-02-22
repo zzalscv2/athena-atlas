@@ -22,6 +22,9 @@ public:
                        uint32_t orbit,
                        uint32_t bcid,
                        uint32_t l1id,
+                       uint32_t orbitid,
+                       uint32_t orbit1,
+                       uint32_t status,
                        uint32_t hit_n,
                        uint32_t pfeb_n,
                        uint32_t trigger_n,
@@ -40,7 +43,8 @@ public:
                        const uint32_vt& trigger_relbcid,
                        const uint32_vt& bcid_rel,
                        const uint32_vt& bcid_status,
-                       const uint32_vt& bcid_multzero);
+                       const uint32_vt& bcid_multzero,
+                       const uint32_vt& bcid_multiplicity);
 
     // constructor for sim
     NSW_PadTriggerData(bool side_A, uint32_t sector, uint32_t bcid, uint32_t l1id);
@@ -54,6 +58,9 @@ public:
     uint32_t getOrbit()              const { return m_orbit; }
     uint32_t getBcid()               const { return m_bcid; }
     uint32_t getL1id()               const { return m_l1id; }
+    uint32_t getOrbitid()            const { return m_orbitid; }
+    uint32_t getOrbit1()             const { return m_orbit1; }
+    uint32_t getStatus()             const { return m_status; }
     uint32_t getNumberOfHits()       const { return m_hit_n; }
     uint32_t getNumberOfPfebs()      const { return m_pfeb_n; }
     uint32_t getNumberOfTriggers()   const { return m_trigger_n; }
@@ -73,6 +80,7 @@ public:
     uint32_vt getBcidRels()          const { return m_bcid_rel; }
     uint32_vt getBcidStatuses()      const { return m_bcid_status; }
     uint32_vt getBcidMultZeros()     const { return m_bcid_multzero; }
+    uint32_vt getBcidMultiplicities() const { return m_bcid_multiplicity; }
 
     std::string string() const;
     friend std::ostream& operator<<(std::ostream& stream, const NSW_PadTriggerData& rhs);
@@ -99,6 +107,9 @@ private:
     uint32_t m_orbit{0};
     uint32_t m_bcid{0};
     uint32_t m_l1id{0};
+    uint32_t m_orbitid{0};
+    uint32_t m_orbit1{0};
+    uint32_t m_status{0};
     uint32_t m_hit_n{0};
     uint32_t m_pfeb_n{0};
     uint32_t m_trigger_n{0};
@@ -118,6 +129,7 @@ private:
     uint32_vt m_bcid_rel{};
     uint32_vt m_bcid_status{};
     uint32_vt m_bcid_multzero{};
+    uint32_vt m_bcid_multiplicity{};
 
     static constexpr uint32_t NULL_BANDID{0xff};
     static constexpr uint32_t NULL_PHIID{0x3f};

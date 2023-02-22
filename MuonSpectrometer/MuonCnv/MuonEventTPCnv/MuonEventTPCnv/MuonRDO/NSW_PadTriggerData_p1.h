@@ -16,6 +16,9 @@ struct NSW_PadTriggerData_p1 {
     uint32_t m_orbit{0};
     uint32_t m_bcid{0};
     uint32_t m_l1id{0};
+    uint32_t m_orbitid{0};
+    uint32_t m_orbit1{0};
+    uint32_t m_status{0};
     uint32_t m_hit_n{0};
     uint32_t m_pfeb_n{0};
     uint32_t m_trigger_n{0};
@@ -35,6 +38,7 @@ struct NSW_PadTriggerData_p1 {
     uint32_vt m_bcid_rel{};
     uint32_vt m_bcid_status{};
     uint32_vt m_bcid_multzero{};
+    uint32_vt m_bcid_multiplicity{};
 
 };
 } // namespace Muon

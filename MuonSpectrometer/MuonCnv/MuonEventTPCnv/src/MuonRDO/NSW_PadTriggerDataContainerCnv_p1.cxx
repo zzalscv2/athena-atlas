@@ -17,6 +17,9 @@ void NSW_PadTriggerDataContainerCnv_p1::persToTrans(const NSW_PadTriggerDataCont
             pCollection.m_orbit,
             pCollection.m_bcid,
             pCollection.m_l1id,
+            pCollection.m_orbitid,
+            pCollection.m_orbit1,
+            pCollection.m_status,
             pCollection.m_hit_n,
             pCollection.m_pfeb_n,
             pCollection.m_trigger_n,
@@ -35,7 +38,8 @@ void NSW_PadTriggerDataContainerCnv_p1::persToTrans(const NSW_PadTriggerDataCont
             pCollection.m_trigger_relbcid,
             pCollection.m_bcid_rel,
             pCollection.m_bcid_status,
-            pCollection.m_bcid_multzero
+            pCollection.m_bcid_multzero,
+            pCollection.m_bcid_multiplicity
             );
         if(transientObj->addCollection(tCollection.release(), transientObj->numberOfCollections()).isFailure()) {
             throw std::runtime_error{ "Could not add collection to transient container!" };
@@ -62,6 +66,9 @@ void NSW_PadTriggerDataContainerCnv_p1::transToPers(const NSW_PadTriggerDataCont
         pCollection.m_orbit = tCollection->getOrbit();
         pCollection.m_bcid = tCollection->getBcid();
         pCollection.m_l1id = tCollection->getL1id();
+        pCollection.m_orbitid = tCollection->getOrbitid();
+        pCollection.m_orbit1 = tCollection->getOrbit1();
+        pCollection.m_status = tCollection->getStatus();
         pCollection.m_hit_n = tCollection->getNumberOfHits();
         pCollection.m_pfeb_n = tCollection->getNumberOfPfebs();
         pCollection.m_trigger_n = tCollection->getNumberOfTriggers();
@@ -81,6 +88,7 @@ void NSW_PadTriggerDataContainerCnv_p1::transToPers(const NSW_PadTriggerDataCont
         pCollection.m_bcid_rel = tCollection->getBcidRels();
         pCollection.m_bcid_status = tCollection->getBcidStatuses();
         pCollection.m_bcid_multzero = tCollection->getBcidMultZeros();
+        pCollection.m_bcid_multzero = tCollection->getBcidMultiplicities();
         persistentObj->m_collections.push_back(std::move(pCollection));
     }
 }

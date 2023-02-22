@@ -148,25 +148,26 @@ namespace Muon
       /*
         Public interface
       */
-      uint32_t getNumberOfHits()                   const { return m_hit_n; };
-      uint32_t getNumberOfPfebs()                  const { return m_pfeb_n; };
-      uint32_t getNumberOfTriggers()               const { return m_trigger_n; };
-      uint32_t getNumberOfBcids()                  const { return m_bcid_n; };
-      std::vector<uint32_t> getHitRelBcids()       const { return m_hit_relbcid; };
-      std::vector<uint32_t> getHitPfebs()          const { return m_hit_pfeb; };
-      std::vector<uint32_t> getHitTdsChannels()    const { return m_hit_tdschannel; };
-      std::vector<uint32_t> getHitVmmChannels()    const { return m_hit_vmmchannel; };
-      std::vector<uint32_t> getHitVmms()           const { return m_hit_vmm; };
-      std::vector<uint32_t> getHitPadChannels()    const { return m_hit_padchannel; };
-      std::vector<uint32_t> getPfebAddresses()     const { return m_pfeb_addr; };
-      std::vector<uint32_t> getPfebNChannels()     const { return m_pfeb_nchan; };
-      std::vector<uint32_t> getPfebDisconnecteds() const { return m_pfeb_disconnected; };
-      std::vector<uint32_t> getTriggerBandIds()    const { return m_trigger_bandid; };
-      std::vector<uint32_t> getTriggerPhiIds()     const { return m_trigger_phiid; };
-      std::vector<uint32_t> getTriggerRelBcids()   const { return m_trigger_relbcid; };
-      std::vector<uint32_t> getBcidRels()          const { return m_bcid_rel; };
-      std::vector<uint32_t> getBcidStatuses()      const { return m_bcid_status; };
-      std::vector<uint32_t> getBcidMultZeros()     const { return m_bcid_multzero; };
+      uint32_t getNumberOfHits()     const { return m_hit_n; };
+      uint32_t getNumberOfPfebs()    const { return m_pfeb_n; };
+      uint32_t getNumberOfTriggers() const { return m_trigger_n; };
+      uint32_t getNumberOfBcids()    const { return m_bcid_n; };
+      const std::vector<uint32_t>& getHitRelBcids()        const { return m_hit_relbcid; };
+      const std::vector<uint32_t>& getHitPfebs()           const { return m_hit_pfeb; };
+      const std::vector<uint32_t>& getHitTdsChannels()     const { return m_hit_tdschannel; };
+      const std::vector<uint32_t>& getHitVmmChannels()     const { return m_hit_vmmchannel; };
+      const std::vector<uint32_t>& getHitVmms()            const { return m_hit_vmm; };
+      const std::vector<uint32_t>& getHitPadChannels()     const { return m_hit_padchannel; };
+      const std::vector<uint32_t>& getPfebAddresses()      const { return m_pfeb_addr; };
+      const std::vector<uint32_t>& getPfebNChannels()      const { return m_pfeb_nchan; };
+      const std::vector<uint32_t>& getPfebDisconnecteds()  const { return m_pfeb_disconnected; };
+      const std::vector<uint32_t>& getTriggerBandIds()     const { return m_trigger_bandid; };
+      const std::vector<uint32_t>& getTriggerPhiIds()      const { return m_trigger_phiid; };
+      const std::vector<uint32_t>& getTriggerRelBcids()    const { return m_trigger_relbcid; };
+      const std::vector<uint32_t>& getBcidRels()           const { return m_bcid_rel; };
+      const std::vector<uint32_t>& getBcidStatuses()       const { return m_bcid_status; };
+      const std::vector<uint32_t>& getBcidMultZeros()      const { return m_bcid_multzero; };
+      const std::vector<uint32_t>& getBcidMultiplicities() const { return m_bcid_multiplicity; };
 
       /*
         Public interface: NSW header
@@ -506,6 +507,7 @@ namespace Muon
       std::vector<uint32_t> m_bcid_rel{};
       std::vector<uint32_t> m_bcid_status{};
       std::vector<uint32_t> m_bcid_multzero{};
+      std::vector<uint32_t> m_bcid_multiplicity{};
 
       /*
         Configurable parameters
