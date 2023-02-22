@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackToSegmentTool.h"
@@ -52,7 +52,7 @@ namespace Muon {
         std::set<Identifier> chIds;
 
         // copy rots, get surface
-        auto rots = DataVector<const Trk::MeasurementBase>();
+        DataVector<const Trk::MeasurementBase> rots{};
         rots.reserve(track.measurementsOnTrack()->size());
 
         // loop over TSOS
@@ -62,15 +62,13 @@ namespace Muon {
             return nullptr;
         }
         // track direction vector
-        Amg::Vector3D dir = perigee->momentum().unit();
+        const Amg::Vector3D dir = perigee->momentum().unit();
 
         const Amg::Transform3D* surfaceTransform = nullptr;
         const Amg::Transform3D* backupTransform = nullptr;
         std::unique_ptr<Amg::Transform3D> surfaceTransformToBeDeleted;
         double weightedDistanceSquared{0}, weightSquared{0};
         for (const Trk::TrackStateOnSurface* tsos : *states) {
-            if (!tsos) continue;  // sanity check
-
             // require TrackParameters
             const Trk::TrackParameters* pars = tsos->trackParameters();
             if (!pars) continue;
@@ -118,8 +116,6 @@ namespace Muon {
         double minDist = -1e6;
         const Trk::TrackParameters* closestPars = nullptr;
         for (const Trk::TrackStateOnSurface* tsos : *states) {
-            if (!tsos) continue;  // sanity check
-
             // require TrackParameters
             const Trk::TrackParameters* pars = tsos->trackParameters();
             if (!pars || !pars->covariance()) continue;
@@ -133,7 +129,7 @@ namespace Muon {
         }
 
         if (!surfaceTransform) {
-            ATH_MSG_WARNING(" failed to create a PlaneSurface for the track, cannot make segment!!! " << std::endl
+            ATH_MSG_DEBUG(" failed to create a PlaneSurface for the track, cannot make segment!!! " << std::endl
                                                                                                       << m_printer->print(track)
                                                                                                       << std::endl
                                                                                                       << m_printer->printStations(track));
@@ -165,7 +161,7 @@ namespace Muon {
             }
             exPars->parameters()[Trk::qOverP] = closestPars->parameters()[Trk::qOverP];
         }
-        Amg::Vector2D locPos;
+        Amg::Vector2D locPos{Amg::Vector2D::Zero()};
         if (!surf->globalToLocal(exPars->position(), exPars->momentum(), locPos)) {
             ATH_MSG_WARNING(" localToGlobal failed!!! ");            
             return nullptr;
@@ -179,8 +175,7 @@ namespace Muon {
 
         // make the Jacobian to convert all in one go from global to local
         // so that the correlations are calculated correctly
-        AmgSymMatrix(5) globalToLocalMeasJacobian;
-        globalToLocalMeasJacobian.setZero();
+        AmgSymMatrix(5) globalToLocalMeasJacobian{AmgSymMatrix(5)::Zero()};
         globalToLocalMeasJacobian(Trk::locX, Trk::locX) = 1.0;
         globalToLocalMeasJacobian(Trk::locY, Trk::locY) = 1.0;
         globalToLocalMeasJacobian(Trk::phi, Trk::phi) = globalToLocalMeasAnglesJacobian(0, 0);
