@@ -12,6 +12,9 @@ def defineMenu():
     l1items = L1MenuFlags.items()
     l1items += [
 
+        # ATR-26727
+        'L1_DY-BOX-2MU3VF',
+
         'L1_MU14FCH_jJ80',
         'L1_MU14FCH_jXE70',
 

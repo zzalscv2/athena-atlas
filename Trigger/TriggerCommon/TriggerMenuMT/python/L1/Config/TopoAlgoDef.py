@@ -466,6 +466,7 @@ class TopoAlgoDef:
             {"minDeta": 5, "maxDeta": 99, "minDphi": 5, "maxDphi": 99, "mult": 1, "otype1" : "MU5VFab", "nleading1": HW.muonOutputWidthSelect, "otype2" : "MU3Vab", "nleading2": HW.muonOutputWidthSelect}, #5DETA99-5DPHI99-MU5VFab-MU3Vab
             {"minDeta": 5, "maxDeta": 99, "minDphi": 5, "maxDphi": 99, "mult": 2, "otype1" : "MU5VFab", "nleading1": HW.muonOutputWidthSelect, "otype2" : "", "nleading2": HW.muonOutputWidthSelect}, #5DETA99-5DPHI99-2MU5VFab
             {"minDeta": 5, "maxDeta": 99, "minDphi": 5, "maxDphi": 99, "mult": 2, "otype1" : "MU3Vab",  "nleading1": HW.muonOutputWidthSelect, "otype2" : "", "nleading2": HW.muonOutputWidthSelect}, #5DETA99-5DPHI99-2MU3Vab
+            {"minDeta": 5, "maxDeta": 99, "minDphi": 5, "maxDphi": 99, "mult": 2, "otype1" : "MU3VFab",  "nleading1": HW.muonOutputWidthSelect, "otype2" : "", "nleading2": HW.muonOutputWidthSelect}, #5DETA99-5DPHI99-2MU3VFab
         ]
         for x in algolist:            
             class d:
