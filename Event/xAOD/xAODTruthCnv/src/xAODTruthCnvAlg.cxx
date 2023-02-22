@@ -336,6 +336,7 @@ namespace xAODMaker {
         if ( genEvt_valid_beam_particles ) beamParticles = genEvt->beam_particles();
         xTruthParticleContainer->reserve(genEvt->particles_size());
         for (auto part: *genEvt) {
+            int k = part->barcode();
 #endif
 	    // (a) create TruthParticle
 	    xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
@@ -348,8 +349,8 @@ namespace xAODMaker {
 	    if (!isSignalProcess) xTruthPileupEvent->addTruthParticleLink(eltp);
                     
 	    // Create link between HepMC and xAOD truth
-	    if (isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(part,0,EBC_MAINEVCOLL,HepMcParticleLink::IS_POSITION), eltp));
-	    if (!isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(part,genEvt->event_number()), eltp));
+	    if (isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(k,0,EBC_MAINEVCOLL,HepMcParticleLink::IS_POSITION), eltp));
+	    if (!isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(k,genEvt->event_number()), eltp));
                     
 	    // Is this one of the beam particles?
 	    if (genEvt_valid_beam_particles) {
