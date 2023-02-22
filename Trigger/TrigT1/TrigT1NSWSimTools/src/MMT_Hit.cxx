@@ -34,7 +34,7 @@ MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* 
   m_Y = -1.;
   m_Z = -1.;
   m_R = -1.;
-  m_Ri = -1.;
+  m_Rp = -1.;
   m_isNoise = false;
   m_time = entry.gtime;
 
@@ -46,20 +46,14 @@ MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* 
   int region = int(float(m_strip)/(64*8));
   // map of mmfe8s layer,radius(MMFE8 index on sector)
   unsigned int mmfe8s[8][16];
-  unsigned int R;
   // loop on layers
   for( unsigned int L=0; L<8; L++){
     // loop on pcbs
     for(unsigned int p=1; p<9; p++){
       // loop on sides
       for(unsigned int s=0; s<2; s++){ //loop on 0 (Left) and 1 (Right), same convention used also later
-	if(L%2==s){
-	  R=(p-1)*2;
-	}
-	else{
-	  R=(p-1)*2+1;
-	}
-	mmfe8s[L][R]=s;
+        unsigned int R = (L%2==s) ? (p-1)*2 : (p-1)*2+1;
+        mmfe8s[L][R]=s;
       }
     }
   }
@@ -95,8 +89,7 @@ MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* 
 
   m_R = globalPos.perp();
   m_Z = globalPos.z();
-  m_oneOverZ = 1./m_Z;
-  m_Ri = m_strip*roP.stripPitch;
+  m_PitchOverZ = roP.stripPitch/m_Z;
   m_RZslope = m_R / m_Z;
 
   int eta = std::abs(m_station_eta)-1;
@@ -106,7 +99,8 @@ MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* 
 
   double index = std::round((std::abs(m_RZslope)-0.1)/5e-04); // 0.0005 is approx. the step in slope achievable with a road size of 8 strips
   double roundedSlope = 0.1 + index*((0.6 - 0.1)/1000.);
-  m_shift = roundedSlope*(planeCoordinates[m_plane].Z() - planeCoordinates[0].Z());
+  m_Rp = roP.distanceFromZAxis + roundedSlope*(planeCoordinates[m_plane].Z() - planeCoordinates[0].Z());
+  m_shift = m_Rp / m_Z;
 }
 
 MMT_Hit::MMT_Hit(const MMT_Hit* hit)
@@ -129,9 +123,9 @@ MMT_Hit::MMT_Hit(const MMT_Hit* hit)
     m_age (hit->m_age),
     m_Y (hit->m_Y),
     m_Z (hit->m_Z),
-    m_oneOverZ (hit->m_oneOverZ),
+    m_PitchOverZ (hit->m_PitchOverZ),
     m_R (hit->m_R),
-    m_Ri (hit->m_Ri),
+    m_Rp (hit->m_Rp),
     m_isNoise (hit->m_isNoise),
     m_time (hit->m_time),
     m_shift (hit->m_shift)

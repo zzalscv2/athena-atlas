@@ -35,11 +35,11 @@ class MMT_Hit {
     int getStationEta() const { return m_station_eta; }
     int getStationPhi() const { return m_station_phi; }
     double getR() const { return m_R; }
-    double getRi() const { return m_Ri; }
+    double getRp() const { return m_Rp; }
     double getX() const { return m_localX; }
     double getY() const { return m_Y; }
     double getZ() const { return m_Z; }
-    double getOneOverZ() const { return m_oneOverZ; }
+    double getPitchOverZ() const { return m_PitchOverZ; }
     float getTime() const { return m_time; }
     bool isNoise() const { return m_isNoise; }
     bool isX() const;
@@ -70,8 +70,8 @@ class MMT_Hit {
     double m_localX;
     double m_RZslope, m_YZslope;
     int m_BC_time, m_age;
-    double m_Y, m_Z, m_oneOverZ;
-    double m_R, m_Ri;
+    double m_Y, m_Z, m_PitchOverZ;
+    double m_R, m_Rp;
     bool m_isNoise;
     float m_time, m_shift;
 };

@@ -12,7 +12,7 @@
 class MMT_Road {
   public:
     MMT_Road(const char sector, const int roadSize, const int UpX, const int DownX, const int UpUV, const int DownUV, const int xthr, const int uvthr,
-             const double pitch, const double eta1, const double eta2, const int iroadx, const int iroadu = -1, const int iroadv = -1);
+             const int iroadx, const int iroadu = -1, const int iroadv = -1);
     ~MMT_Road()=default;
 
     void addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits);
@@ -27,7 +27,6 @@ class MMT_Road {
     bool evaluateLowRes() const;
     bool horizontalCheck() const;
     void incrementAge(const int &bcwind);
-    double getPitch() const { return m_pitch; }
     const std::vector<std::unique_ptr<MMT_Hit> >& getHitVector() const { return m_road_hits; }
     int getRoadSize() const { return m_roadSize; }
     int getRoadSizeUpX() const { return m_roadSizeUpX; }
@@ -37,7 +36,6 @@ class MMT_Road {
     char getSector() const { return m_sector; }
     int getXthreshold() const { return m_xthr; }
     int getUVthreshold() const { return m_uvthr; }
-    int iRoad() const { return m_iroad; }
     int iRoadx() const { return m_iroadx; }
     int iRoadu() const { return m_iroadu; }
     int iRoadv() const { return m_iroadv; }
@@ -47,14 +45,12 @@ class MMT_Road {
     bool stereoCheck() const;
 
   private:
-    int m_iroad;
     int m_iroadx;
     int m_iroadu;
     int m_iroadv;
     char m_sector;
     int m_xthr, m_uvthr;
     int m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV;
-    double m_pitch, m_innerRadiusEta1, m_innerRadiusEta2;
     std::vector<std::unique_ptr<MMT_Hit> > m_road_hits;
 };
 #endif

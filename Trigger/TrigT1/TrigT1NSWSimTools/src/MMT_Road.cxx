@@ -5,9 +5,8 @@
 #include "TrigT1NSWSimTools/MMT_Road.h"
 
 MMT_Road::MMT_Road(const char sector, const int roadSize, const int UpX, const int DownX, const int UpUV, const int DownUV, const int xthr, const int uvthr,
-                   const double pitch, const double eta1, const double eta2, const int iroadx, const int iroadu, const int iroadv) {
+                   const int iroadx, const int iroadu, const int iroadv) {
   m_sector = sector;
-  m_iroad  = iroadx;
   m_iroadx = iroadx;
   m_iroadu = (iroadu != -1) ? iroadu : iroadx;
   m_iroadv = (iroadv != -1) ? iroadv : iroadx;
@@ -19,9 +18,6 @@ MMT_Road::MMT_Road(const char sector, const int roadSize, const int UpX, const i
   m_roadSizeDownX = DownX;
   m_roadSizeUpUV = UpUV;
   m_roadSizeDownUV = DownUV;
-  m_pitch = pitch;
-  m_innerRadiusEta1 = eta1;
-  m_innerRadiusEta2 = eta2;
 }
 
 void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
@@ -47,9 +43,9 @@ void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
     }
     else continue;
 
-    double val = (std::abs(hit_i->getStationEta()) == 1) ? m_innerRadiusEta1 : m_innerRadiusEta2;
-    double slow  = (val + (m_roadSize*iroad     + 0.5 - olow )*m_pitch + hit_i->getShift())*hit_i->getOneOverZ();
-    double shigh = (val + (m_roadSize*(iroad+1) + 0.5 + ohigh)*m_pitch + hit_i->getShift())*hit_i->getOneOverZ();
+    double val = hit_i->getShift();
+    double slow  = val + (m_roadSize*iroad     + 0.5 - olow )*hit_i->getPitchOverZ();
+    double shigh = val + (m_roadSize*(iroad+1) + 0.5 + ohigh)*hit_i->getPitchOverZ();
 
     val = hit_i->getRZSlope();
     bool has_hit = (val > 0.) ? (val > slow && val < shigh) : (val > shigh && val < slow);
