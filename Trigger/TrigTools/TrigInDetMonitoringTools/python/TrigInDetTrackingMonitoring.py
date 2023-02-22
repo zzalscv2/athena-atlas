@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
  
-def TrigInDetTrackCnvMonitoring(name="TrigInDetTrackCnvMonitoring"):
+def TrigInDetTrackCnvMonitoring(flags, name="TrigInDetTrackCnvMonitoring"):
 
-    montool = GenericMonitoringTool(name)
+    montool = GenericMonitoringTool(flags, name)
 
     #TODO need to revisit binning with higher stats
     if 'minBias' in name or 'MinBias' in name:

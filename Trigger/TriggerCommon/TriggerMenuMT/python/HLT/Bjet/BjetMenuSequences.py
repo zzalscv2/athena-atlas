@@ -60,6 +60,7 @@ def getBJetSequence(flags, jc_name=None):
     # Second stage of Fast Tracking and Precision Tracking
     from TriggerMenuMT.HLT.Bjet.BjetTrackingConfiguration import getSecondStageBjetTracking
     secondStageAlgs, PTTrackParticles = getSecondStageBjetTracking(
+        flags,
         inputRoI=InputMakerAlg.InViewRoIs,
         inputVertex=prmVtxKey,
         inputJets=InputMakerAlg.InViewJets

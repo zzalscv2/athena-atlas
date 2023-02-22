@@ -181,7 +181,7 @@ def MinBiasTrkSequence(flags):
         idTrigConfig = getInDetTrigConfig('minBias')
 
         from TrigInDetConfig.EFIDTracking import makeInDetPatternRecognition
-        algs,_ = makeInDetPatternRecognition(idTrigConfig, verifier='VDVMinBiasIDTracking')
+        algs,_ = makeInDetPatternRecognition(flags, idTrigConfig, verifier='VDVMinBiasIDTracking')
         vdv = algs[0]
         assert vdv.DataObjects, "Likely not ViewDataVerifier, does not have DataObjects property"
         vdv.DataObjects += [("xAOD::TrigCompositeContainer", "HLT_vtx_z")]

@@ -1,9 +1,8 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CFElements import parOR, seqAND
-#from AthenaCommon.Constants import DEBUG
 
-def getSecondStageBjetTracking( inputRoI, inputVertex, inputJets ):
+def getSecondStageBjetTracking( flags, inputRoI, inputVertex, inputJets ):
     algSequence = []
 
 
@@ -31,7 +30,7 @@ def getSecondStageBjetTracking( inputRoI, inputVertex, inputJets ):
 
     # Precision Tracking
     from TrigInDetConfig.InDetTrigPrecisionTracking import makeInDetTrigPrecisionTracking
-    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( config = IDTrigConfig, rois=inputRoI )
+    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, rois=inputRoI )
     algSequence.append( seqAND("PrecisionTrackingSequence",PTAlgs) )
 
     return [ algSequence, PTTrackParticles ]

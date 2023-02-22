@@ -127,17 +127,18 @@ and should be configured using
 
       from TrigInDetConfig.InDetTrigPrecisionTracking import makeInDetTrigPrecisionTracking
 
-      viewAlgs, viewVerify = makeInDetTrigPrecisionTracking( config = idconfig, rois = RoIs )
+      viewAlgs, viewVerify = makeInDetTrigPrecisionTracking( flags, config = idconfig, rois = RoIs )
 
       TrackCollection = idconfig.tracks_IDTrig()
 
 
 The actual interface is 
 <pre>
-  def makeInDetTrigPrecisionTracking( config = None, verifier = False, rois = 'EMViewRoIs', prefix = 'InDetTrigMT'):
+  def makeInDetTrigPrecisionTracking( flags, config = None, verifier = False, rois = 'EMViewRoIs', prefix = 'InDetTrigMT'):
 </pre>
 where the arguments are    
-  
+
+       flags     - ConfigFlags instance
        config    - the ID Trigger configuration for the signature
        verifier  - the view data verifier
        rois      - the view RoI name 

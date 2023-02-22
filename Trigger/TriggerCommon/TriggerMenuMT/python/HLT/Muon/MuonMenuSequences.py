@@ -258,7 +258,7 @@ def muCombAlgSequence(flags):
       extraLoads += [( 'xAOD::TrigCompositeContainer' , 'StoreGateSvc+%s' % decision )]
 
     if isCosmic(flags):
-        muTrigIDRecoSequence = muonIDCosmicTrackingSequence( l2muCombViewsMaker.InViewRoIs , "", extraLoads )
+        muTrigIDRecoSequence = muonIDCosmicTrackingSequence( flags, l2muCombViewsMaker.InViewRoIs , "", extraLoads )
     else:
         muTrigIDRecoSequence = muonIDFastTrackingSequence( l2muCombViewsMaker.InViewRoIs , "", extraLoads, extraLoadsForl2mtmode )
 
@@ -923,7 +923,7 @@ def muEFIsoAlgSequence(flags, doMSiso=False):
 
     ### get EF reco sequence ###
     from .MuonRecoSequences  import efmuisoRecoSequence
-    efmuisoRecoSequence, sequenceOut = efmuisoRecoSequence( efmuIsoViewsMaker.InViewRoIs, efmuIsoViewsMaker.InViewMuons, doMSiso )
+    efmuisoRecoSequence, sequenceOut = efmuisoRecoSequence( flags, efmuIsoViewsMaker.InViewRoIs, efmuIsoViewsMaker.InViewMuons, doMSiso )
 
     efmuIsoViewsMaker.ViewNodeName = efmuisoRecoSequence.name()
 

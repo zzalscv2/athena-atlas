@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool
@@ -21,5 +21,5 @@ def getTrigCosmicInDetTracking(flags):
     verifier.DataObjects += [('TrigRoiDescriptorCollection', 'StoreGateSvc+InputRoI')]
 
     from TrigInDetConfig.EFIDTracking import makeInDetPatternRecognition
-    efidAlgs, verifierForEF = makeInDetPatternRecognition(idTrigConfig, verifier='VDVCosmicsIDTracking')
+    efidAlgs, verifierForEF = makeInDetPatternRecognition(flags, idTrigConfig, verifier='VDVCosmicsIDTracking')
     return   dataPrepInputMaker, [verifier,verifierForEF] + dataPrepAlgs + efidAlgs

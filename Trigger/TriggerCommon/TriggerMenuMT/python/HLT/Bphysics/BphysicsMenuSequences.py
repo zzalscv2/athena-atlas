@@ -45,7 +45,7 @@ def bmumuxAlgSequence(flags):
         InViewMuons = 'HLT_Muons_Bmumux')
 
     from .BphysicsRecoSequences import bmumuxRecoSequence
-    recoSequence = bmumuxRecoSequence(viewMaker.InViewRoIs, viewMaker.InViewMuons)
+    recoSequence = bmumuxRecoSequence(flags, viewMaker.InViewRoIs, viewMaker.InViewMuons)
 
     viewMaker.ViewNodeName = recoSequence.name()
 
