@@ -3,4 +3,5 @@
 from AthenaCommon import CfgMgr
 
 def getActsFatrasSimTool(name="ISF_ActsFatrasSimTool", **kwargs):
+    kwargs.setdefault('MaxSteps'          , 2000           )
     return CfgMgr.ISF__ActsFatrasSimTool(name, **kwargs)
