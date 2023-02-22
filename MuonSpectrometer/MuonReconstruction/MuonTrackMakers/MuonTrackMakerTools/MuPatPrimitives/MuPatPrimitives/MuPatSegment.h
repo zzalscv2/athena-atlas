@@ -40,15 +40,12 @@ namespace Muon {
         - a flag indicating whether the segment contains MDT hits
      */
 
-    class MuPatSegment : public MuPatCandidateBase {
+    class MuPatSegment : public MuPatCandidateBase, public Trk::ObjectCounter<MuPatSegment> {
     public:
-        MuPatSegment();
+        MuPatSegment() = default;
 
-        ~MuPatSegment();
+        ~MuPatSegment() = default;
 
-        MuPatSegment(const MuPatSegment& info);
-
-        MuPatSegment& operator=(const MuPatSegment& info);
 
         int quality{0};
         const MuonSegmentQuality* segQuality{nullptr};
@@ -66,21 +63,6 @@ namespace Muon {
         /** @brief returns first track parameters */
         const Trk::TrackParameters& entryPars() const;
 
-        /** @brief reset the maximum number of objects counter */
-        static void resetMaxNumberOfInstantiations();
-
-        /** @brief maximum number of objects of this type in memory */
-        static unsigned int maxNumberOfInstantiations();
-
-        /** current number of objects of this type in memory */
-        static unsigned int numberOfInstantiations();
-
-        /** @brief reset the copy constructor counter */
-        static void resetNumberOfCopies();
-
-        /** @brief number of times the copy constructor was called since last reset */
-        static unsigned int numberOfCopies();
-
         /** @brief add a new track to the segment */
         void addTrack(MuPatTrack*);
 
@@ -91,61 +73,10 @@ namespace Muon {
         const std::set<MuPatTrack*>& tracks() const { return m_associatedTracks; }
 
     private:
-        /** @brief Keeping track of number of object instances */
-        static void addInstance();
-
-        /** @brief Keeping track of number of object instances */
-        static void removeInstance();
-
-        static unsigned int s_numberOfInstantiations ATLAS_THREAD_SAFE;     //<! current number of objects of this type in memory
-        static unsigned int s_maxNumberOfInstantiations ATLAS_THREAD_SAFE;  //<! maximum number of objects of this type in memory
-        static unsigned int s_numberOfCopies ATLAS_THREAD_SAFE;  //<! number of times the copy constructor was called since last reset
-        static std::mutex s_mutex;                               //<! to remove race condition in addInstance()
-
         std::set<MuPatTrack*> m_associatedTracks;  //<! list of associated tracks
 
     };  // class MuPatSegment
-
-    //
-    // static inline functions implementations
-    //
-    inline unsigned int MuPatSegment::maxNumberOfInstantiations() {
-        const std::lock_guard<std::mutex> lock(s_mutex);
-
-        return s_maxNumberOfInstantiations;
-    }
-
-    inline unsigned int MuPatSegment::numberOfCopies() {
-        const std::lock_guard<std::mutex> lock(s_mutex);
-
-        return s_numberOfCopies;
-    }
-
-    inline void MuPatSegment::addInstance() {
-        const std::lock_guard<std::mutex> lock(s_mutex);
-
-        ++s_numberOfInstantiations;
-        if (s_numberOfInstantiations > s_maxNumberOfInstantiations) { s_maxNumberOfInstantiations = s_numberOfInstantiations; }
-    }
-
-    inline void MuPatSegment::removeInstance() {
-        const std::lock_guard<std::mutex> lock(s_mutex);
-
-        if (s_numberOfInstantiations > 0) --s_numberOfInstantiations;
-    }
-
-    inline void MuPatSegment::resetMaxNumberOfInstantiations() {
-        const std::lock_guard<std::mutex> lock(s_mutex);
-
-        s_maxNumberOfInstantiations = 0;
-    }
-
-    inline void MuPatSegment::resetNumberOfCopies() {
-        const std::lock_guard<std::mutex> lock(s_mutex);
-
-        s_numberOfCopies = 0;
-    }
-
+    
     //
     // inline member functions implementations
     //

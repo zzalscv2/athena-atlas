@@ -56,7 +56,7 @@ namespace Muon {
         return StatusCode::SUCCESS;
     }
 
-    std::unique_ptr<MuPatSegment> MuPatCandidateTool::createSegInfo(const EventContext& ctx, const MuonSegment& segment, GarbageContainer& trash_bin) const {
+    std::unique_ptr<MuPatSegment> MuPatCandidateTool::createSegInfo(const EventContext& ctx, const MuonSegment& segment) const {
         Identifier chid = m_edmHelperSvc->chamberId(segment);
         if (m_idHelperSvc->isTrigger(chid)) {
             ATH_MSG_WARNING("Trigger hit only segments not supported " << m_idHelperSvc->toStringChamber(chid));
@@ -87,16 +87,15 @@ namespace Muon {
         info->segPars.reset(m_edmHelperSvc->createTrackParameters(segment, 5000., 0.));
         if (!info->segPars) { ATH_MSG_WARNING(" failed to create track parameter for segment "); }
 
-        updateHits(*info, info->segment->containedMeasurements(), trash_bin, m_doMdtRecreation, m_doCscRecreation, true);
-        m_hitHandler->create(ctx, segment, info->hitList(), trash_bin);
+        updateHits(*info, info->segment->containedMeasurements(), m_doMdtRecreation, m_doCscRecreation, true);
+        m_hitHandler->create(ctx, segment, info->hitList());
         return info;
     }
 
-    bool MuPatCandidateTool::extendWithSegment(MuPatTrack& can, MuPatSegment& segInfo, std::unique_ptr<Trk::Track>& track,
-                                               GarbageContainer& trash_bin) const {
+    bool MuPatCandidateTool::extendWithSegment(MuPatTrack& can, MuPatSegment& segInfo, std::unique_ptr<Trk::Track>& track) const {
         // add segment to candidate
         can.addSegment(&segInfo, track);
-        return  recalculateCandidateSegmentContent(can, trash_bin);
+        return recalculateCandidateSegmentContent(can);
     }
 
     std::unique_ptr<MuPatTrack> MuPatCandidateTool::copyCandidate(MuPatTrack* canIn) const {
@@ -105,40 +104,39 @@ namespace Muon {
         return can;
     }
 
-    std::unique_ptr<MuPatTrack> MuPatCandidateTool::createCandidate(MuPatSegment& segInfo, std::unique_ptr<Trk::Track>& track,
-                                                                    GarbageContainer& trash_bin) const {
+    std::unique_ptr<MuPatTrack> MuPatCandidateTool::createCandidate(MuPatSegment& segInfo, std::unique_ptr<Trk::Track>& track) const {
         // create the new candidate
         std::unique_ptr<MuPatTrack> candidate = std::make_unique< MuPatTrack>(&segInfo, track);
-        recalculateCandidateSegmentContent(*candidate, trash_bin);
+        recalculateCandidateSegmentContent(*candidate);
         return candidate;
     }
 
-    bool MuPatCandidateTool::updateTrack(MuPatTrack& candidate, std::unique_ptr<Trk::Track>& track, GarbageContainer& trash_bin) const {
+    bool MuPatCandidateTool::updateTrack(MuPatTrack& candidate, std::unique_ptr<Trk::Track>& track) const {
         candidate.updateTrack(track);
-        return recalculateCandidateSegmentContent(candidate, trash_bin);
+        return recalculateCandidateSegmentContent(candidate);
     }
 
     std::unique_ptr<MuPatTrack> MuPatCandidateTool::createCandidate(MuPatSegment& segInfo1, MuPatSegment& segInfo2,
-                                                                    std::unique_ptr<Trk::Track>& track, GarbageContainer& trash_bin) const {
+                                                                    std::unique_ptr<Trk::Track>& track) const {
         // create the new candidate
         std::unique_ptr<MuPatTrack> candidate = std::make_unique<MuPatTrack>(&segInfo1, &segInfo2, track);
-        recalculateCandidateSegmentContent(*candidate, trash_bin);
+        recalculateCandidateSegmentContent(*candidate);
         return candidate;
     }
 
-    std::unique_ptr<MuPatTrack> MuPatCandidateTool::createCandidate(std::unique_ptr<Trk::Track>& track, GarbageContainer& trash_bin) const {
+    std::unique_ptr<MuPatTrack> MuPatCandidateTool::createCandidate(std::unique_ptr<Trk::Track>& track) const {
         // create a dummy segment vector
         std::vector<MuPatSegment*> segments;
 
         // create the new candidate
         std::unique_ptr<MuPatTrack> candidate = std::make_unique<MuPatTrack>(segments, track);
-        recalculateCandidateSegmentContent(*candidate, trash_bin);
+        recalculateCandidateSegmentContent(*candidate);
         return candidate;
     }
 
     void MuPatCandidateTool::updateHits(MuPatCandidateBase& entry, const MuPatCandidateTool::MeasVec& measurements,
-                                        GarbageContainer& trash_bin, bool recreateMDT, bool recreateCSC, bool createComp) const {
-        MeasVec etaHits, phiHits, fakePhiHits, allHits;
+                                        bool recreateMDT, bool recreateCSC, bool createComp) const {
+        MeasVec etaHits{}, phiHits{}, fakePhiHits{}, allHits{};
 
         unsigned int nmdtHitsMl1{0}, nmdtHitsMl2{0}, ncscHitsEta{0}, ncscHitsPhi{0}, nrpcHitsEta{0}, nrpcHitsPhi{0}, ntgcHitsEta{0},
             ntgcHitsPhi{0};
@@ -194,18 +192,16 @@ namespace Muon {
                             continue;
                         }
                         ATH_MSG_DEBUG(" recreating MdtDriftCircleOnTrack ");
-                        const MdtDriftCircleOnTrack* newMdt =
-                            m_mdtRotCreator->createRIO_OnTrack(*mdt->prepRawData(), mdt->globalPosition());
-                        trash_bin.push_back(newMdt);
-                        meas = newMdt;
+                        std::unique_ptr<const MdtDriftCircleOnTrack> newMdt{
+                            m_mdtRotCreator->createRIO_OnTrack(*mdt->prepRawData(), mdt->globalPosition())};
+                        meas = newMdt.get();
+                        entry.addToTrash(std::move(newMdt));
                     }
                 }
 
-                bool isSmall = m_idHelperSvc->isSmallChamber(id);
-                if (isSmall)
-                    hasSmall = true;
-                else
-                    hasLarge = true;
+                const bool isSmall = m_idHelperSvc->isSmallChamber(id);
+                hasSmall |= isSmall;
+                hasLarge |= !isSmall;
 
                 if (isSmall != previssmall && !is_first_meas && stIndex == prevstIndex) hassloverlap = true;
 
@@ -214,47 +210,33 @@ namespace Muon {
                 prevstIndex = stIndex;
 
                 unsigned int ml = m_idHelperSvc->mdtIdHelper().multilayer(id);
-                if (ml == 1)
-                    ++nmdtHitsMl1;
-                else
-                    ++nmdtHitsMl2;
+                nmdtHitsMl1 += (ml ==1);
+                nmdtHitsMl2 += (ml ==2);
             } else {
                 measuresPhi = m_idHelperSvc->measuresPhi(id);
 
-                bool isRpc = m_idHelperSvc->isRpc(id);
-                if (isRpc) {
-                    if (measuresPhi)
-                        ++nrpcHitsPhi;
-                    else
-                        ++nrpcHitsEta;
-                }
+                const bool isRpc = m_idHelperSvc->isRpc(id);
+                const bool isTgc = m_idHelperSvc->isTgc(id);
+                nrpcHitsPhi += (measuresPhi && isRpc);
+                nrpcHitsEta += (!measuresPhi && isRpc);
+                
+                ntgcHitsPhi += (measuresPhi && isTgc);
+                ntgcHitsEta += (!measuresPhi && isTgc);
 
-                bool isTgc = m_idHelperSvc->isTgc(id);
-                if (isTgc) {
-                    if (measuresPhi)
-                        ++ntgcHitsPhi;
-                    else
-                        ++ntgcHitsEta;
-                }
-
-                if (isCsc) {
-                    if (recreateCSC) {
-                        const CscClusterOnTrack* csc = dynamic_cast<const CscClusterOnTrack*>(meas);
-                        if (!csc) {
-                            ATH_MSG_WARNING(" found CscClusterOnTrack without CSC identifier " << m_idHelperSvc->toString(id));
-                            continue;
-                        }
-                        ATH_MSG_DEBUG(" recreating CscClusterOnTrack ");
-                        const MuonClusterOnTrack* newCsc = m_cscRotCreator->createRIO_OnTrack(*csc->prepRawData(), csc->globalPosition());
-                        trash_bin.push_back(newCsc);
-                        meas = newCsc;
+                ncscHitsPhi+= (measuresPhi && isCsc);
+                ncscHitsEta+= (!measuresPhi && isCsc);             
+                if (isCsc && recreateCSC) {
+                    const CscClusterOnTrack* csc = dynamic_cast<const CscClusterOnTrack*>(meas);
+                    if (!csc) {
+                        ATH_MSG_WARNING(" found CscClusterOnTrack without CSC identifier " << m_idHelperSvc->toString(id));
+                        continue;
                     }
-
-                    if (measuresPhi)
-                        ++ncscHitsPhi;
-                    else
-                        ++ncscHitsEta;
-                }
+                    ATH_MSG_DEBUG(" recreating CscClusterOnTrack ");
+                    std::unique_ptr<const MuonClusterOnTrack> newCsc{m_cscRotCreator->createRIO_OnTrack(*csc->prepRawData(), csc->globalPosition())};
+                    meas = newCsc.get();
+                    entry.addToTrash(std::move(newCsc));                    
+                }  
+                
 
                 // if selected create competing ROTs for trigger hits
                 if (createComp && (isRpc || isTgc)) {
@@ -278,8 +260,8 @@ namespace Muon {
         }
 
         if (createComp) {
-            if (m_createCompetingROTsEta && !triggerHitsEta.empty()) createAndAddCompetingROTs(triggerHitsEta, etaHits, allHits, trash_bin);
-            if (m_createCompetingROTsPhi && !triggerHitsPhi.empty()) createAndAddCompetingROTs(triggerHitsPhi, phiHits, allHits, trash_bin);
+            if (m_createCompetingROTsEta && !triggerHitsEta.empty()) createAndAddCompetingROTs(triggerHitsEta, etaHits, allHits, entry);
+            if (m_createCompetingROTsPhi && !triggerHitsPhi.empty()) createAndAddCompetingROTs(triggerHitsPhi, phiHits, allHits, entry);
         }
 
         entry.nmdtHitsMl1 = nmdtHitsMl1;
@@ -320,7 +302,7 @@ namespace Muon {
 
     void MuPatCandidateTool::createAndAddCompetingROTs(const std::vector<const MuonClusterOnTrack*>& rots,
                                                        MuPatCandidateTool::MeasVec& hits, MuPatCandidateTool::MeasVec& allHits,
-                                                       GarbageContainer& trash_bin) const {
+                                                       MuPatCandidateBase& trash_bin) const {
         typedef std::map<Identifier, std::vector<const MuonClusterOnTrack*> > IdClusMap;
         typedef IdClusMap::iterator IdClusIt;
         IdClusMap idClusters;
@@ -386,11 +368,11 @@ namespace Muon {
             allHits.push_back(comprot.get());
 
             // add to garbage collection
-            trash_bin.push_back(std::move(comprot));
+            trash_bin.addToTrash(std::move(comprot));
         }
     }
 
-    bool MuPatCandidateTool::recalculateCandidateSegmentContent(MuPatTrack& candidate, GarbageContainer& trash_bin) const {
+    bool MuPatCandidateTool::recalculateCandidateSegmentContent(MuPatTrack& candidate) const {
         // loop over track and get the chambers on the track
         const Trk::TrackStates* states = candidate.track().trackStateOnSurfaces();
         if (!states) return false;
@@ -430,9 +412,9 @@ namespace Muon {
 
         // recalculate hit list
         candidate.hitList().clear();
-        m_hitHandler->create(candidate.track(), candidate.hitList(), trash_bin);
+        m_hitHandler->create(candidate.track(), candidate.hitList());
         // update the hit summary
-        updateHits(candidate, candidate.track().measurementsOnTrack()->stdcont(), trash_bin);
+        updateHits(candidate, candidate.track().measurementsOnTrack()->stdcont());
 
         ATH_MSG_VERBOSE("Print content after recalculateCandidateSegmentContent() -- "<<m_hitHandler->print(candidate.hitList()));
 
@@ -472,7 +454,7 @@ namespace Muon {
         if (level == 0) return oss.str();
 
         if (segment.hitList().size() >= 2) {
-            MuPatHitDistanceAlongParameters distCal{};
+            DistanceAlongParameters distCal{};
             oss << " length " << distCal(segment.hitList().front(), segment.hitList().back());
         }
         oss << std::endl << m_hitHandler->print(segment.hitList(), true, false, false);

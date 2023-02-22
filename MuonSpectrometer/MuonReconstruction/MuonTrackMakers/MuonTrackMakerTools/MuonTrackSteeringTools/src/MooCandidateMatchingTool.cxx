@@ -239,17 +239,15 @@ namespace Muon {
     }
 
     bool MooCandidateMatchingTool::match(const EventContext& ctx, const Trk::Track& track, const MuonSegment& segment, bool useTightCuts) const {
-        GarbageContainer trash_bin;
-
         ATH_MSG_DEBUG("Match track/segment: useTightCuts " << useTightCuts);
         // convert segment and track
         std::unique_ptr<Trk::Track> inTrack = std::make_unique<Trk::Track>(track);
-        std::unique_ptr<MuPatTrack> candidate = m_candidateTool->createCandidate(inTrack, trash_bin);
+        std::unique_ptr<MuPatTrack> candidate = m_candidateTool->createCandidate(inTrack);
         if (!candidate) {
             ATH_MSG_VERBOSE("Failed to create track candidate");
             return false;
         }
-        std::unique_ptr<MuPatSegment> segInfo(m_candidateTool->createSegInfo(ctx, segment, trash_bin));
+        std::unique_ptr<MuPatSegment> segInfo(m_candidateTool->createSegInfo(ctx, segment));
         if (!segInfo) {
             ATH_MSG_VERBOSE("Failed to create segment candidate");
             return false;

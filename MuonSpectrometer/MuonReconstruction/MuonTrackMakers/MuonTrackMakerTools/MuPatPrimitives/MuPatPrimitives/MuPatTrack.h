@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUPATTRACK_H
@@ -15,6 +15,7 @@
 #include "MuonStationIndex/MuonStationIndex.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkTrack/Track.h"
+#include "TrkEventPrimitives/TrkObjectCounter.h"
 
 namespace Muon {
 
@@ -33,7 +34,7 @@ namespace Muon {
           This information can be used to speed up the pat-rec code by avoiding fits that
           were already tried.
      */
-    class MuPatTrack : public MuPatCandidateBase {
+    class MuPatTrack : public MuPatCandidateBase, public Trk::ObjectCounter<MuPatTrack> {
         friend class MuPatCandidateTool;
 
     public:
@@ -89,7 +90,7 @@ namespace Muon {
 
         /** @brief access to track */
         Trk::Track& track() const;
-         /** @brief update track. Candidate takes ownership of track. */
+        /** @brief update track. Candidate takes ownership of track. */
         void updateTrack(std::unique_ptr<Trk::Track>& newTrack);
 
         /** @brief access to segments */
@@ -124,33 +125,12 @@ namespace Muon {
         /** @brief string containing the names of the segments on the candidate */
         std::string segmentNames() const;
 
-        /** @brief reset the maximum number of objects counter */
-        static void resetMaxNumberOfInstantiations();
-        /** @brief maximum number of objects of this type in memory */
-        static unsigned int maxNumberOfInstantiations();
-        /** current number of objects of this type in memory */
-        static unsigned int numberOfInstantiations();
-        /** @brief reset the copy constructor counter */
-        static void resetNumberOfCopies();
-        /** @brief number of times the copy constructor was called since last reset */
-        static unsigned int numberOfCopies();
-
-    private:
-        //
-        // private static functions
-        //
-        /** @brief Keeping track of number of object instances */
-        static void addInstance();
-
-        /** @brief Keeping track of number of object instances */
-        static void removeInstance();
-
-        /** @brief Initialize s_processingStageStrings & s_processingStageStringMaxLen */
-        static void initProcessingStageStrings();
-
+    private:       
         //
         // private member functions
-        //       
+        //
+        /** @brief Initialize s_processingStageStrings & s_processingStageStringMaxLen */
+        static void initProcessingStageStrings();
         /** @brief update segment/track association, if add == true ,will add track to segments else remove it */
         void updateSegments(bool add);
 
@@ -158,87 +138,28 @@ namespace Muon {
         //
         // public data members
         //
-        ProcessingStage created;
-        ProcessingStage lastSegmentChange;
+        ProcessingStage created{Unknown};
+        ProcessingStage lastSegmentChange{Unknown};
 
-    private:
-        //
-        // private static data members
-        //
-        /** current number of objects of this type in memory */
-        static unsigned int s_numberOfInstantiations ATLAS_THREAD_SAFE;
-        /** maximum number of objects of this type in memory */
-        static unsigned int s_maxNumberOfInstantiations ATLAS_THREAD_SAFE;
-        /** number of copies made */
-        static unsigned int s_numberOfCopies ATLAS_THREAD_SAFE;
-        /** maximum width of the strings corresponding to the ProcessingStage */
-        static unsigned int s_processingStageStringMaxLen ATLAS_THREAD_SAFE;
+    private:       
 
-        static std::mutex s_mutex;  //<! to remove race condition in addInstance
-
+        
         static std::once_flag s_stageStringsInitFlag;
         static std::vector<std::string> s_processingStageStrings ATLAS_THREAD_SAFE;
-
+        static unsigned int s_processingStageStringMaxLen ATLAS_THREAD_SAFE;
         /** @brief increase the segment counters by the passed number */
         void modifySegmentCounters(int change);
 
         /** @brief check whether track measures momentum */
         bool hasMomentum(const Trk::Track& track) const;
 
-        std::vector<MuPatSegment*> m_segments;          //<! list of associated segments
-        std::vector<MuPatSegment*> m_excludedSegments;  //<! list of associated segments
-        std::unique_ptr<Trk::Track> m_track;            //<! associated track
-        MuPatSegment* m_seedSeg;                        //!< The special segment for this track
+        std::vector<MuPatSegment*> m_segments{};          //<! list of associated segments
+        std::vector<MuPatSegment*> m_excludedSegments{};  //<! list of associated segments
+        std::unique_ptr<Trk::Track> m_track{};            //<! associated track
+        MuPatSegment* m_seedSeg{nullptr};                        //!< The special segment for this track
 
     };  // class MuPatTrack
 
-    //
-    // static inline functions implementations
-    //
-    inline unsigned int MuPatTrack::numberOfInstantiations() {
-        const std::lock_guard<std::mutex> lock(s_mutex);
-
-        return s_numberOfInstantiations;
-    }
-
-    inline unsigned int MuPatTrack::maxNumberOfInstantiations() {
-        const std::lock_guard<std::mutex> lock(s_mutex);
-
-        return s_maxNumberOfInstantiations;
-    }
-
-    inline unsigned int MuPatTrack::numberOfCopies() {
-        const std::lock_guard<std::mutex> lock(s_mutex);
-
-        return s_numberOfCopies;
-    }
-
-    inline void MuPatTrack::addInstance() {
-        const std::lock_guard<std::mutex> lock(s_mutex);
-
-        ++s_numberOfInstantiations;
-        if (s_numberOfInstantiations > s_maxNumberOfInstantiations) {
-            s_maxNumberOfInstantiations = static_cast<unsigned int>(s_numberOfInstantiations);
-        }
-    }
-
-    inline void MuPatTrack::removeInstance() {
-        const std::lock_guard<std::mutex> lock(s_mutex);
-
-        if (s_numberOfInstantiations > 0) --s_numberOfInstantiations;
-    }
-
-    inline void MuPatTrack::resetMaxNumberOfInstantiations() {
-        const std::lock_guard<std::mutex> lock(s_mutex);
-
-        s_maxNumberOfInstantiations = 0;
-    }
-
-    inline void MuPatTrack::resetNumberOfCopies() {
-        const std::lock_guard<std::mutex> lock(s_mutex);
-
-        s_numberOfCopies = 0;
-    }
 
     //
     // inline member functions implementations

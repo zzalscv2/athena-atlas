@@ -206,7 +206,7 @@ def MuonPhiHitSelectorCfg(flags, name="MuonPhiHitSelector",**kwargs):
 
 
 def MuPatHitToolCfg(flags, name="MuPatHitTool",**kwargs):
-    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg, TriggerChamberClusterOnTrackCreatorCfg
+    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg
     from TrkConfig.TrkExRungeKuttaPropagatorConfig import RungeKuttaPropagatorCfg
     
     result = RungeKuttaPropagatorCfg(flags)
@@ -218,8 +218,7 @@ def MuPatHitToolCfg(flags, name="MuPatHitTool",**kwargs):
         from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import CscClusterOnTrackCreatorCfg
         kwargs.setdefault("CscRotCreator", result.popToolsAndMerge(CscClusterOnTrackCreatorCfg(flags)))
     else:
-        kwargs.setdefault("CscRotCreator", "")
-    kwargs.setdefault("TriggerChamberClusterOnTrackCreator", result.popToolsAndMerge( TriggerChamberClusterOnTrackCreatorCfg(flags) ) )
+        kwargs.setdefault("CscRotCreator", "")    
     printer =  result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags))
     kwargs.setdefault('Printer', printer)
     result.addPublicTool( printer )

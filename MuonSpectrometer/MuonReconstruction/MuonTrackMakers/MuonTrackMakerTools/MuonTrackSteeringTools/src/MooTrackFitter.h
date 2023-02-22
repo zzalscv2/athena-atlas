@@ -37,7 +37,6 @@
 
 #include "MuPatHitTool.h"
 #include "MuPatPrimitives/MuPatCandidateBase.h"
-#include "MuPatPrimitives/MuPatGarbage.h"
 #include "MuPatPrimitives/MuPatHit.h"
 
 namespace Trk {
@@ -75,69 +74,7 @@ namespace Muon {
 
         typedef std::vector<std::pair<const Trk::TrackParameters*, const Trk::Layer*> > MaterialLayers;
 
-        struct FitterData {
-            FitterData() = default;
-            MeasVec phiHits;
-            MeasVec etaHits;
-            MeasVec measurements;
-            MeasVec firstLastMeasurements;
-
-            int nOverlaps{-1};
-            int nSmall{-1};
-            int nLarge{-1};
-            SLStationMap smallLargeChambersPerStation;
-
-            double avePhi{0.};
-            double phiMin{0.};
-            double phiMax{0.};
-
-            bool hasBarrel{false};
-            bool hasEndcap{false};
-            const MuPatCandidateBase* firstEntry{nullptr};
-            const MuPatCandidateBase* secondEntry{nullptr};
-            std::set<MuonStationIndex::StIndex> stations;
-            MuPatHitList hitList;
-
-            MuPatHitList copyHitList1;
-            MuPatHitList copyHitList2;
-
-            Trk::Perigee* startPars{nullptr};
-
-            bool firstIsTrack{false};
-            bool secondIsTrack{false};
-            bool firstHasMomentum{false};
-            bool secondHasMomentum{false};
-            std::set<Identifier> mdtIdsFirst;
-            std::set<Identifier> mdtIdsSecond;
-
-            int numberOfSLOverlaps() {
-                // check if already initialized
-                if (nOverlaps == -1) {
-                    nOverlaps = 0;
-                    nSmall = 0;
-                    nLarge = 0;
-                    // loop over SLStationMap and count the number of times there is a station with both S and L
-                    SLStationMap::iterator it = smallLargeChambersPerStation.begin();
-                    SLStationMap::iterator it_end = smallLargeChambersPerStation.end();
-                    for (; it != it_end; ++it) {
-                        if (it->second.first) ++nSmall;
-                        if (it->second.second) ++nLarge;
-                        if (it->second.first && it->second.second) ++nOverlaps;
-                    }
-                }
-                return nOverlaps;
-            }
-            int numberOfSmallChambers() {
-                if (nSmall < 0) numberOfSLOverlaps();
-                return nSmall;
-            }
-            int numberOfLargeChambers() {
-                if (nLarge < 0) numberOfSLOverlaps();
-                return nLarge;
-            }
-
-            MaterialLayers materialLayers;
-        };
+        
 
     public:
         /** default AlgTool constructor */
@@ -180,7 +117,7 @@ namespace Muon {
         std::unique_ptr<Trk::Perigee> createPerigee(const EventContext& ctx, const Trk::TrackParameters& firstPars, const Trk::MeasurementBase& firstMeas) const;
 
         /** fit track */
-        std::unique_ptr<Trk::Track> fit(const EventContext& ctx, const Trk::Perigee& startPars, MeasVec& hits, GarbageContainer& garbage,
+        std::unique_ptr<Trk::Track> fit(const EventContext& ctx, const Trk::Perigee& startPars, MeasVec& hits,
                                         Trk::ParticleHypothesis partHypo, bool prefit) const;
 
         /** fit track, refit if needed */
@@ -193,24 +130,86 @@ namespace Muon {
 
         /** construct a track from a list of TSOS and a start parameters */
         std::unique_ptr<Trk::Track> fitSplitTrack(const EventContext& ctx, const Trk::TrackParameters& startPars,
-                                                  const std::vector<const Trk::TrackStateOnSurface*>& tsos,
-                                                  GarbageContainer& garbage) const;
+                                                  const std::vector<const Trk::TrackStateOnSurface*>& tsos) const;
 
     private:
+        struct FitterData {
+            FitterData() = default;
+            ~FitterData() = default;
+
+            MeasVec phiHits{};
+            MeasVec etaHits{};
+            MeasVec measurements{};
+            MeasVec firstLastMeasurements{};
+
+            int nOverlaps{-1};
+            int nSmall{-1};
+            int nLarge{-1};
+            SLStationMap smallLargeChambersPerStation;
+
+            double avePhi{0.};
+            double phiMin{0.};
+            double phiMax{0.};
+
+            bool hasBarrel{false};
+            bool hasEndcap{false};
+            const MuPatCandidateBase* firstEntry{nullptr};
+            const MuPatCandidateBase* secondEntry{nullptr};
+            std::set<MuonStationIndex::StIndex> stations{};
+            MuPatHitList hitList{};
+
+            std::unique_ptr<Trk::Perigee> startPars{nullptr};
+
+            std::vector<std::unique_ptr<const Trk::MeasurementBase>> garbage{};
+
+            bool firstIsTrack{false};
+            bool secondIsTrack{false};
+            bool firstHasMomentum{false};
+            bool secondHasMomentum{false};
+            std::set<Identifier> mdtIdsFirst{};
+            std::set<Identifier> mdtIdsSecond{};
+
+            int numberOfSLOverlaps() {
+                // check if already initialized
+                if (nOverlaps == -1) {
+                    nOverlaps = 0;
+                    nSmall = 0;
+                    nLarge = 0;
+                    // loop over SLStationMap and count the number of times there is a station with both S and L
+                    SLStationMap::iterator it = smallLargeChambersPerStation.begin();
+                    SLStationMap::iterator it_end = smallLargeChambersPerStation.end();
+                    for (; it != it_end; ++it) {
+                        if (it->second.first) ++nSmall;
+                        if (it->second.second) ++nLarge;
+                        if (it->second.first && it->second.second) ++nOverlaps;
+                    }
+                }
+                return nOverlaps;
+            }
+            int numberOfSmallChambers() {
+                if (nSmall < 0) numberOfSLOverlaps();
+                return nSmall;
+            }
+            int numberOfLargeChambers() {
+                if (nLarge < 0) numberOfSLOverlaps();
+                return nLarge;
+            }
+
+            MaterialLayers materialLayers;
+        };
         /** clean and evaluate the track,
             @return 0 if Track does not forfill criteria, a unique_ptr otherwise (could be to a track which is the same as the current)
         */
         std::unique_ptr<Trk::Track> cleanAndEvaluateTrack(const EventContext& ctx, Trk::Track& track, const std::set<Identifier>& excludedChambers) const;
 
         /** extract all information needed for the fit from the track */
-        bool extractData(const EventContext& ctx, const MuPatCandidateBase& entry1, const MuPatCandidateBase& entry2, FitterData& fitterData,
-                         GarbageContainer& garbage) const;
+        bool extractData(const MuPatCandidateBase& entry1, const MuPatCandidateBase& entry2, FitterData& fitterData) const;
 
         /** extract all information from the HitList of a FitterData object */
         bool extractData(FitterData& fitterData, bool usePreciseHits) const;
 
         /** check fitterData, add fake phi hits if needed. If provided the reference parameter will be used to calcualte the fake hits */
-        bool addFakePhiHits(const EventContext& ctx, FitterData& fitterData, const Trk::TrackParameters* referenceParameter, GarbageContainer& garbage) const;
+        bool addFakePhiHits(const EventContext& ctx, FitterData& fitterData, const Trk::TrackParameters& referenceParameter) const;
 
         /** sanity check for entries */
         bool corruptEntry(const MuPatCandidateBase& entry) const;
@@ -219,10 +218,10 @@ namespace Muon {
         bool getMaterial(const Trk::TrackParameters& pars, FitterData& fitterData) const;
 
         /** create a perigee parameter give the input data */
-        Trk::Perigee* createStartParameters(const EventContext& ctx, FitterData& inputData, GarbageContainer& garbage) const;
+        void createStartParameters(const EventContext& ctx, FitterData& inputData) const;
 
         /** get segment from entry */
-        const MuonSegment* segmentFromEntry(const EventContext& ctx, const MuPatCandidateBase& entry, GarbageContainer& garbage) const;
+        std::shared_ptr<const MuonSegment> segmentFromEntry(const EventContext& ctx, const MuPatCandidateBase& entry) const;
 
         /** check whether data has sufficient phi constraints */
         unsigned int hasPhiConstrain(FitterData& inputData) const;
@@ -231,15 +230,14 @@ namespace Muon {
         unsigned int hasPhiConstrain(Trk::Track* track) const;
 
         /** create fake phi hit on the surface of the give measurement */
-        const Trk::MeasurementBase* createFakePhiForMeasurement(const Trk::MeasurementBase& measurement, const Amg::Vector3D* overlapPos,
-                                                                const Amg::Vector3D* phiPos, double error, GarbageContainer& garbage) const;
+        std::unique_ptr<Trk::MeasurementBase> createFakePhiForMeasurement(const Trk::MeasurementBase& measurement, const Amg::Vector3D* overlapPos,
+                                                                const Amg::Vector3D* phiPos, double error) const;
 
         /** get q/p from entry */
         double qOverPFromEntry(const MuPatCandidateBase& entry) const;
 
         /** get q/p using angle + position of the two entries */
-        double qOverPFromEntries(const EventContext& ctx, const MuPatCandidateBase& firstEntry, const MuPatCandidateBase& secondEntry,
-                                 GarbageContainer& garbage) const;
+        double qOverPFromEntries(const EventContext& ctx, const MuPatCandidateBase& firstEntry, const MuPatCandidateBase& secondEntry) const;
 
         /** calculate phi used to for seeding the fit */
         double phiSeeding(const EventContext& ctx, FitterData& fitterData) const;
@@ -248,7 +246,7 @@ namespace Muon {
         double thetaSeeding(const MuPatCandidateBase& entry, MeasVec& etaHits) const;
 
         /** clean phi hits, returns true if anything happened during the cleaning */
-        bool cleanPhiHits(const EventContext& ctx, double momentum, FitterData& phiHits, const PrepVec* patternPhiHits, GarbageContainer& garbage) const;
+        bool cleanPhiHits(const EventContext& ctx, double momentum, FitterData& phiHits, const PrepVec* patternPhiHits) const;
 
         /** check whether mometum of start parameter is ok */
         bool validMomentum(const Trk::TrackParameters& pars) const;
@@ -259,7 +257,6 @@ namespace Muon {
         void removeSegmentOutliers(FitterData& fitterData) const;
         void cleanEntry(const MuPatCandidateBase& entry, std::set<Identifier>& removedIdentifiers) const;
         void cleanSegment(const MuonSegment& seg, std::set<Identifier>& removedIdentifiers) const;
-        void copyHitList(const MuPatHitList& hitList, MuPatHitList& copy, GarbageContainer& garbage) const;
 
         std::pair<double, double> getElementHalfLengths(const Identifier& id, const Trk::TrkDetElementBase* ele) const;
 
