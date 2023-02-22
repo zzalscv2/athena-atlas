@@ -19,18 +19,18 @@ namespace Muon {
 
        
 
-        void buildTruthTrajectory(TruthTrajectory* result, HepMC::ConstGenParticlePtr input) const override;
+        void buildTruthTrajectory(TruthTrajectory* result, const HepMC::ConstGenParticlePtr& input) const override;
 
         /** Returns an umambiguous mother of the truth particle on a TruthTrajectory, or 0.
          * Implemented via truthTrajectoryCuts().
          */
-        HepMC::ConstGenParticlePtr getMother(HepMC::ConstGenParticlePtr particle) const override;
+        HepMC::ConstGenParticlePtr getMother(const HepMC::ConstGenParticlePtr& particle) const override;
 
         /** Returns an umambiguous daughter of the truth particle on a TruthTrajectory, or 0.
          * This assumes no one mother can correspond to no more than one daughter.
          * Implemented via truthTrajectoryCuts().
          */
-        HepMC::ConstGenParticlePtr getDaughter(HepMC::ConstGenParticlePtr particle) const override;
+        HepMC::ConstGenParticlePtr getDaughter(const HepMC::ConstGenParticlePtr&particle) const override;
 
     private:
         /** Return type for the next method */
@@ -45,7 +45,7 @@ namespace Muon {
          * between mother and daughter particles; i.e. TruthTrajectories
          * are not allowed to branch.
          */
-        MotherDaughter truthTrajectoryCuts(HepMC::ConstGenVertexPtr vtx) const;
+        MotherDaughter truthTrajectoryCuts(const HepMC::ConstGenVertexPtr& vtx) const;
 
         // mutable bool m_isDecayIntoTwoMuons; // Really don't think this does anything? EJWM.
     };
