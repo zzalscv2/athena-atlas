@@ -252,9 +252,11 @@ namespace top {
           auto t = m_electronToolsFactory.emplace(
             m_electronToolsFactory.end(), "AsgElectronEfficiencyCorrectionTool/ElTrigEff_" + std::to_string(
               j) + "_" + std::to_string(nTools));
-          top::check(t->setProperty("MapFilePath",
-                                    "ElectronEfficiencyCorrection/2015_2017/rel21.2/Consolidation_September2018_v1/map3.txt"),
-                     "Fail");
+          if (!m_config->isRun3()) {
+            top::check(t->setProperty("MapFilePath",
+                       "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"),
+                       "Fail");
+          }
           top::check(t->setProperty("TriggerKey",
                                     (j ? year + "_" + trigKey : "Eff_" + year + "_" + trigKey)),
                      "Failed to set TriggerKey");
@@ -294,9 +296,11 @@ namespace top {
           auto tLoose = m_electronToolsFactoryLoose.emplace(
             m_electronToolsFactoryLoose.end(), "AsgElectronEfficiencyCorrectionTool/ElTrigEffLoose_" + std::to_string(
               j) + "_" + std::to_string(nTools));
-          top::check(tLoose->setProperty("MapFilePath",
-                                         "ElectronEfficiencyCorrection/2015_2017/rel21.2/Consolidation_September2018_v1/map3.txt"),
-                     "Fail");
+          if (!m_config->isRun3()) {
+            top::check(tLoose->setProperty("MapFilePath",
+                       "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"),
+                       "Fail");
+          }
           top::check(tLoose->setProperty("TriggerKey",
                                          (j ? year + "_" + trigKey : "Eff_" + year + "_" + trigKey)),
                      "Failed to set TriggerKey");
@@ -540,7 +544,10 @@ namespace top {
     if (type == "HighPtCaloOnly") working_point = "FCHighPtCaloOnly";
     if (type == "TightTrackOnly") working_point = "Gradient";
     if (type == "TightTrackOnly_FixedRad") working_point = "Gradient";
-    if (type == "FCTight" || type == "FCLoose" || type == "FCHighPtCaloOnly" || type == "Gradient") working_point = type;
+
+    // this hack is needed as the run 2 triggers do not have SFs for Tight_VarRad, but Run 3 do...
+    if (!m_config->isRun3() && type == "Tight_VarRad") return "FCTight";
+    if (type == "FCTight" || type == "FCLoose" || type == "FCHighPtCaloOnly" || type == "Gradient" || type == "Tight_VarRad") working_point = type;
 
     return working_point;
   }
@@ -577,7 +584,7 @@ namespace top {
     // only these isolations are available for photons triggers
     // we need to check for these as the code otherwise crashed 
     // with a meaningless error
-    static const std::vector<std::string> allowedIso = {"TightCaloOnly", "Loose"};
+    static const std::vector<std::string> allowedIso = {"TightCaloOnly", "Loose", "FixedCutTight", "FixedCutLoose"};
 
     if (std::find(allowedIso.begin(), allowedIso.end(), isol) == allowedIso.end()) {
       return StatusCode::FAILURE;

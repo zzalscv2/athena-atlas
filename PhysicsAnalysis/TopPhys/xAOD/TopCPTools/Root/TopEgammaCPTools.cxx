@@ -696,8 +696,8 @@ IAsgElectronEfficiencyCorrectionTool*
         top::check(asg::setProperty(tool, "IsoKey", iso_key), "Failed to set IsoKey to " + name);
       }
       if (trigger_key != "" && trigger_key != "None") {
-        //ATH_MSG_INFO(" Adding TriggerKey : " + trigger_key);
-        //top::check(asg::setProperty(tool, "TriggerKey", trigger_key), "Failed to set TriggerKey to " + name);
+        ATH_MSG_INFO(" Adding TriggerKey : " + trigger_key);
+        top::check(asg::setProperty(tool, "TriggerKey", trigger_key), "Failed to set TriggerKey to " + name);
       }
       // Initialise this tool
 
@@ -721,6 +721,11 @@ IAsgElectronEfficiencyCorrectionTool*
     // If isolation WP is PLVTight or PLVLoose, switch to no isolation to trick this function.
     if (iso_key == "PLVTight" || iso_key == "PLVLoose") iso_key = "";
 
+    // fixes needed for run 2
+    if (!m_config->isRun3() && (trigger_key != "" && trigger_key != "None")) {
+      if (iso_key == "Tight_VarRad") iso_key = "FCTight";
+    }
+
     if( (iso_key == "PLImprovedTight" || iso_key == "PLImprovedVeryTight") && m_config->useElectronChargeIDSelection() ){
       ATH_MSG_INFO( "ECIDS tool and PLImproved* isolation detected, switching to combined isolation SFs.");
       iso_key += "ECIDS";
@@ -738,9 +743,13 @@ IAsgElectronEfficiencyCorrectionTool*
       tool = asg::ToolStore::get<IAsgElectronEfficiencyCorrectionTool>(name);
     } else {
       tool = new AsgElectronEfficiencyCorrectionTool(name);
-      if (map_path != "UseEgammaRecommended") {
-	// Give the full map path if not using the default one
-	top::check(asg::setProperty(tool, "MapFilePath", map_path), "Failed to set MapFilePath to " + name);
+      if (!m_config->isRun3() && (trigger_key != "" && trigger_key != "None")) {
+        top::check(asg::setProperty(tool, "MapFilePath", "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"), "Failed to set MapFilePath to " + name);
+      } else {
+        if (map_path != "UseEgammaRecommended") {
+          // Give the full map path if not using the default one
+          top::check(asg::setProperty(tool, "MapFilePath", map_path), "Failed to set MapFilePath to " + name);
+        }
       }
       // Set the data type for all tools
       top::check(asg::setProperty(tool, "ForceDataType", data_type), "Failed to set ForceDataType to " + name);
@@ -768,8 +777,8 @@ IAsgElectronEfficiencyCorrectionTool*
         top::check(asg::setProperty(tool, "IsoKey", iso_key), "Failed to set IsoKey to " + name);
       }
       if (trigger_key != "" && trigger_key != "None") {
-        //ATH_MSG_INFO(" Adding TriggerKey : " + trigger_key);
-        //top::check(asg::setProperty(tool, "TriggerKey", trigger_key), "Failed to set TriggerKey to " + name);
+        ATH_MSG_INFO(" Adding TriggerKey : " + trigger_key);
+        top::check(asg::setProperty(tool, "TriggerKey", trigger_key), "Failed to set TriggerKey to " + name);
       }
       top::check(asg::setProperty(tool, "OutputLevel", MSG::INFO), "Failed to set OutputLevel to " + name);
       top::check(tool->initialize(), "Failed to initialize " + name);
