@@ -34,6 +34,9 @@
 #include "Acts/Geometry/PassiveLayerBuilder.hpp"
 #include <Acts/Plugins/Json/JsonMaterialDecorator.hpp>
 #include <Acts/Plugins/Json/MaterialMapJsonConverter.hpp>
+#include <Acts/Surfaces/PlanarBounds.hpp>
+#include <Acts/Surfaces/AnnulusBounds.hpp>
+#include <Acts/Surfaces/RectangleBounds.hpp>
 
 // PACKAGE
 #include "ActsGeometry/ActsAlignmentStore.h"
@@ -44,6 +47,10 @@
 #include "ActsGeometry/ActsHGTDLayerBuilder.h"
 #include "ActsInterop/IdentityHelper.h"
 #include "ActsInterop/Logger.h"
+
+#include <limits>
+#include <random>
+#include <stdexcept>
 
 using namespace Acts::UnitLiterals;
 
@@ -402,9 +409,166 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
   m_nominalAlignmentStore =
       std::unique_ptr<const ActsAlignmentStore>(nominalAlignmentStore);
 
+  if(m_runConsistencyChecks) {
+    ATH_MSG_INFO("Running extra consistency check! (this is SLOW)");
+    if(!runConsistencyChecks()) {
+      ATH_MSG_ERROR("Consistency check has failed! Geometry is not consistent");
+      return StatusCode::FAILURE;
+    }
+  }
+
   ATH_MSG_INFO("Acts TrackingGeometry construction completed");
 
   return StatusCode::SUCCESS;
+}
+
+bool ActsTrackingGeometrySvc::runConsistencyChecks() const {
+  bool result = true;
+
+  std::vector<Acts::Vector2> localPoints;
+  localPoints.reserve(1000);
+  std::mt19937 gen;
+  std::uniform_real_distribution<> dist(0.0, 1.0);
+
+  std::optional<std::ofstream> os;
+  if(!m_consistencyCheckOutput.empty()){
+    os = std::ofstream{m_consistencyCheckOutput};
+    if(!os->good()) {
+      throw std::runtime_error{"Failed to open consistency check output file"};
+    }
+  }
+
+  if(os) {
+    (*os) << "geo_id,vol_id,lay_id,sen_id,type,acts_loc0,acts_loc1,acts_inside,trk_loc0,trk_loc1,trk_inside,x,y,z" << std::endl;
+  }
+  for(size_t i=0;i<localPoints.capacity();i++) {
+    localPoints.emplace_back(dist(gen), dist(gen));
+  }
+
+  ActsGeometryContext explicitContext;
+  explicitContext.construction = true;
+  Acts::GeometryContext gctx = explicitContext.context();
+
+  size_t nTotalSensors = 0;
+  size_t nInconsistentInside = 0;
+  size_t nMismatchedNormals = 0;
+
+  m_trackingGeometry->visitSurfaces([&](const auto* surface) {
+      nTotalSensors++;
+
+      const auto* actsDetElem = dynamic_cast<const ActsDetectorElement*>(surface->associatedDetectorElement());
+      if(actsDetElem == nullptr) {
+        ATH_MSG_ERROR("Invalid detector element found");
+        result = false;
+        return;
+      }
+      const auto* siDetElem = dynamic_cast<const InDetDD::SiDetectorElement*>(actsDetElem->upstreamDetectorElement());
+      if(siDetElem  == nullptr) {
+        return;
+      }
+
+      const auto& trkSurface = siDetElem->surface();
+
+      if(!trkSurface.normal().isApprox(surface->normal(gctx))) {
+        nMismatchedNormals++;
+        result = false;
+      }
+
+      auto doPoints = [&](unsigned int type, Acts::Vector2 loc) -> bool {
+          Acts::Vector3 glb = surface->localToGlobal(gctx, loc, Acts::Vector3::Zero());
+
+          Amg::Vector2D locTrk = trkSurface.globalToLocal(glb).value();
+
+          auto gId = surface->geometryId();
+          if(os) {
+            (*os) << gId.value() 
+                  << "," << gId.volume()
+                  << "," << gId.layer()
+                  << "," << gId.sensitive()
+                  << "," << type
+                  << "," << loc[0] 
+                  << "," << loc[1] 
+                  << "," << surface->insideBounds(loc)
+                  << "," << locTrk[0] 
+                  << "," << locTrk[1] 
+                  << "," << trkSurface.insideBounds(locTrk)
+                  << "," << glb[0] 
+                  << "," << glb[1] 
+                  << "," << glb[2] 
+                  << std::endl;
+          }
+
+          return surface->insideBounds(loc) == trkSurface.insideBounds(locTrk);
+      };
+
+      if(const auto* bounds = dynamic_cast<const Acts::PlanarBounds*>(&surface->bounds()); bounds) {
+        ATH_MSG_VERBOSE("Planar bounds");
+
+        const Acts::RectangleBounds& boundingBox = bounds->boundingBox();
+        Acts::Vector2 min = boundingBox.min().array() - 1*Acts::UnitConstants::mm;
+        Acts::Vector2 max = boundingBox.max().array() - 1*Acts::UnitConstants::mm;
+        Acts::Vector2 diag = max - min;
+
+        bool insideConsistent = true;
+
+        for(const auto& testPoint : localPoints) {
+          Acts::Vector2 loc = min.array() + (testPoint.array() * diag.array());
+          if(!doPoints(0, loc)) {
+            result = false;
+            insideConsistent = false;
+          }
+        }
+
+        if(!insideConsistent) {
+          nInconsistentInside++;
+        }
+
+
+      }
+      else if(const auto* bounds = dynamic_cast<const Acts::AnnulusBounds*>(&surface->bounds()); bounds) {
+        ATH_MSG_VERBOSE("Annulus bounds");
+
+        // custom bounding box algo
+        std::vector<Acts::Vector2> vertices = bounds->vertices(5); // 5 segments on the radial edges
+        Acts::Vector2 min{std::numeric_limits<double>::max(), std::numeric_limits<double>::max()};
+        Acts::Vector2 max{std::numeric_limits<double>::lowest(), std::numeric_limits<double>::lowest()};
+        for (const auto& vtx : vertices) {
+          min = min.array().min(vtx.array());
+          max = max.array().max(vtx.array());
+        }
+        min.array() -= 1*Acts::UnitConstants::mm;
+        max.array() += 1*Acts::UnitConstants::mm;
+        Acts::Vector2 diag = max - min;
+
+        for(const auto& testPoint : localPoints) {
+          Acts::Vector2 locXY = min.array() + (testPoint.array() * diag.array());
+
+          Acts::Vector3 glb = surface->transform(gctx) * Acts::Vector3{locXY[0], locXY[1], 0};
+          Acts::Vector2 locPC = surface->globalToLocal(gctx, glb, Acts::Vector3::Zero()).value();
+
+        bool insideConsistent = true;
+
+          if(!doPoints(1, locPC)) {
+            result = false;
+            insideConsistent = false;
+          }
+
+          if(!insideConsistent) {
+            nInconsistentInside++;
+          }
+        }
+      }
+      else {
+        result = false;
+      }
+
+  });
+
+  ATH_MSG_INFO("Total number of sensors                   : " << nTotalSensors);
+  ATH_MSG_INFO("Number of sensors with mismatched normals : " << nMismatchedNormals);
+  ATH_MSG_INFO("Number of sensors with inconsistent inside: " << nInconsistentInside);
+
+  return result;
 }
 
 std::shared_ptr<const Acts::TrackingGeometry>

@@ -34,6 +34,8 @@ from ActsGeometry.ActsGeometryConfig import ActsExtrapolationAlgCfg, ActsTrackin
 from AthenaCommon.Constants import INFO
 tgSvc = ActsTrackingGeometrySvcCfg(flags,
                                    OutputLevel=INFO,
+                                   RunConsistencyChecks=True,
+                                   #  ConsistencyCheckOutput="trk_geo_check.csv", # enable debug output writing
                                    ObjDebugOutput=True)
 acc.merge(tgSvc)
 
