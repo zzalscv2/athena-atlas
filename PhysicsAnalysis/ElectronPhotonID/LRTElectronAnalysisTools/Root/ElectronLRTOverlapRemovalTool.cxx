@@ -24,15 +24,45 @@ namespace CP
 
         if (!m_isDAOD)
         {
-            if (m_electronLLHTool.empty())
+            if (m_electronLLHToolVeryLooseNoPix.empty())
             {
                 asg::AsgToolConfig config("AsgElectronLikelihoodTool/ElectronLHSelectorVeryLooseNoPix");
                 ATH_CHECK(config.setProperty("ConfigFile", "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodVeryLooseTriggerConfig_NoPix.conf"));
-                ATH_CHECK(config.makePrivateTool(m_electronLLHTool));
+                ATH_CHECK(config.makePrivateTool(m_electronLLHToolVeryLooseNoPix));
             }
 
             ATH_MSG_DEBUG("Retrieving electron selection tool");
-            ATH_CHECK(m_electronLLHTool.retrieve());
+            ATH_CHECK(m_electronLLHToolVeryLooseNoPix.retrieve());
+
+            if (m_electronLLHToolLooseNoPix.empty())
+            {
+                asg::AsgToolConfig config("AsgElectronLikelihoodTool/ElectronLHSelectorLooseNoPix");
+                ATH_CHECK(config.setProperty("ConfigFile", "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodLooseTriggerConfig_NoPix.conf"));
+                ATH_CHECK(config.makePrivateTool(m_electronLLHToolLooseNoPix));
+            }
+
+            ATH_MSG_DEBUG("Retrieving electron selection tool");
+            ATH_CHECK(m_electronLLHToolLooseNoPix.retrieve());
+
+            if (m_electronLLHToolMediumNoPix.empty())
+            {
+                asg::AsgToolConfig config("AsgElectronLikelihoodTool/ElectronLHSelectorMediumNoPix");
+                ATH_CHECK(config.setProperty("ConfigFile", "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodMediumTriggerConfig_NoPix.conf"));
+                ATH_CHECK(config.makePrivateTool(m_electronLLHToolMediumNoPix));
+            }
+
+            ATH_MSG_DEBUG("Retrieving electron selection tool");
+            ATH_CHECK(m_electronLLHToolMediumNoPix.retrieve());
+
+            if (m_electronLLHToolTightNoPix.empty())
+            {
+                asg::AsgToolConfig config("AsgElectronLikelihoodTool/ElectronLHSelectorTightNoPix");
+                ATH_CHECK(config.setProperty("ConfigFile", "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodTightTriggerConfig_NoPix.conf"));
+                ATH_CHECK(config.makePrivateTool(m_electronLLHToolTightNoPix));
+            }
+
+            ATH_MSG_DEBUG("Retrieving electron selection tool");
+            ATH_CHECK(m_electronLLHToolTightNoPix.retrieve());
         } 
 
         return StatusCode::SUCCESS;
@@ -51,7 +81,17 @@ namespace CP
             return bool(DFCommonElectronsWP(*electron) );
         } else
         {
-            return bool(m_electronLLHTool->accept(electron));
+            if (IDWorkingPoint == "DFCommonElectronsLHTightNoPix"){
+                return bool(m_electronLLHToolTightNoPix->accept(electron));
+            }
+            if (IDWorkingPoint == "DFCommonElectronsLHMediumNoPix"){
+                return bool(m_electronLLHToolMediumNoPix->accept(electron));
+            }
+            if (IDWorkingPoint == "DFCommonElectronsLHLooseNoPix"){
+                return bool(m_electronLLHToolLooseNoPix->accept(electron));
+            }
+                
+            return bool(m_electronLLHToolVeryLooseNoPix->accept(electron));
         }
 
     }
@@ -69,7 +109,7 @@ namespace CP
         // Loop over lrt electrons to remove those that do not pass ID.
         // Needed in case there are no prompt electrons passing ID
         if (m_strategy == CP::IElectronLRTOverlapRemovalTool::promptStrategy){
-            ATH_MSG_DEBUG("Implementing overlap removal strategy 0");
+            ATH_MSG_DEBUG("Implementing overlap removal strategy 1");
             for (const xAOD::Electron *LRTElectron : LRTElectronCol)
             {
                 if (!electronPassesID(LRTElectron,"DFCommonElectronsLHVeryLooseNoPix"))  ElectronsToRemove.insert(LRTElectron);
@@ -132,28 +172,29 @@ namespace CP
                     else if (m_strategy == CP::IElectronLRTOverlapRemovalTool::defaultStrategy){ //use tighter electron, if both equally tight use std collection
                     
                         ATH_MSG_DEBUG("Removing Electron with looser WP");
-                        if (electronPassesID(promptElectron,"DFCommonElectronsLHTightNoPix")){
-                            ElectronsToRemove.insert(LRTElectron);
-                        }
-                        else if (electronPassesID(promptElectron,"DFCommonElectronsLHMediumNoPix") ) {
-                            if (electronPassesID(LRTElectron,"DFCommonElectronsLHTightNoPix") ){
-                                ElectronsToRemove.insert(promptElectron);
-                            }
-                            else ElectronsToRemove.insert(LRTElectron);
-                        }
-                        else if (electronPassesID(promptElectron,"DFCommonElectronsLHLooseNoPix") ) {
-                            if (electronPassesID(LRTElectron,"DFCommonElectronsLHMediumNoPix") ){
-                                ElectronsToRemove.insert(promptElectron);
-                            }
-                            else ElectronsToRemove.insert(LRTElectron);
-                        }
-                        else if (electronPassesID(promptElectron,"DFCommonElectronsLHVeryLooseNoPix") ) {
-                            if (electronPassesID(LRTElectron,"DFCommonElectronsLHLooseNoPix") ){
-                                ElectronsToRemove.insert(promptElectron);
-                            }
-                            else ElectronsToRemove.insert(LRTElectron);
-                        }
-                    }
+
+			if (electronPassesID(promptElectron,"DFCommonElectronsLHTightNoPix")){
+			    ElectronsToRemove.insert(LRTElectron);
+			}
+			else if (electronPassesID(promptElectron,"DFCommonElectronsLHMediumNoPix") ) {
+			    if (electronPassesID(LRTElectron,"DFCommonElectronsLHTightNoPix") ){
+				ElectronsToRemove.insert(promptElectron);
+			    }
+			    else ElectronsToRemove.insert(LRTElectron);
+			}
+			else if (electronPassesID(promptElectron,"DFCommonElectronsLHLooseNoPix") ) {
+			    if (electronPassesID(LRTElectron,"DFCommonElectronsLHMediumNoPix") ){
+				ElectronsToRemove.insert(promptElectron);
+			    }
+			    else ElectronsToRemove.insert(LRTElectron);
+			}
+			else if (electronPassesID(promptElectron,"DFCommonElectronsLHVeryLooseNoPix") ) {
+			    if (electronPassesID(LRTElectron,"DFCommonElectronsLHLooseNoPix") ){
+				ElectronsToRemove.insert(promptElectron);
+			    }
+			    else ElectronsToRemove.insert(LRTElectron);
+			}
+                    } 
                 }
             } // end lrt loop
         }   // end prompt loop

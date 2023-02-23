@@ -55,7 +55,10 @@ namespace CP
         Gaudi::Property<bool> m_isDAOD{this, "isDAOD", true, "Switch for running on AOD (false) or DAOD (true)"}; /** Switches method for retrieving electron ID **/
         Gaudi::Property<std::string> m_IDWorkingPoint{this, "IDWorkingPoint", "DFCommonElectronsLHVeryLooseNoPix", "ID working point for checking if ID is passed"}; /** Switches method for retrieving electron ID **/
 
-        ToolHandle<IAsgElectronLikelihoodTool> m_electronLLHTool{this, "ElectronLLHTool", "", "Electron LLH tool to use for the overlap removal"}; 
+        ToolHandle<IAsgElectronLikelihoodTool> m_electronLLHToolVeryLooseNoPix{this, "ElectronLLHToolVeryLooseNoPix", "", "Electron LLH tool to use for the overlap removal"}; 
+        ToolHandle<IAsgElectronLikelihoodTool> m_electronLLHToolLooseNoPix{this, "ElectronLLHToolLooseNoPix", "", "Electron LLH tool to use for the overlap removal"}; 
+        ToolHandle<IAsgElectronLikelihoodTool> m_electronLLHToolMediumNoPix{this, "ElectronLLHToolMediumNoPix", "", "Electron LLH tool to use for the overlap removal"}; 
+        ToolHandle<IAsgElectronLikelihoodTool> m_electronLLHToolTightNoPix{this, "ElectronLLHToolTightNoPix", "", "Electron LLH tool to use for the overlap removal"}; 
 
         bool electronPassesID(const xAOD::Electron *electron, std::string IDWorkingPoint) const;
 
