@@ -184,17 +184,17 @@ bool MeasurementProcessor::calculateDerivatives(void) {
     {
       const TrackSurfaceIntersection& intersection =
           m->intersection(FittedTrajectory);
-      Amg::Vector3D* driftDirection = new Amg::Vector3D(
+      Amg::Vector3D driftDirection = Amg::Vector3D(
           m->sensorDirection().cross(intersection.direction()));
-      *driftDirection = driftDirection->unit();
+      driftDirection = driftDirection.unit();
       m->minimizationDirection(driftDirection);
       driftDerivatives(m->numberDoF(), *m);
     } else if (m->isVertex()) {
       const TrackSurfaceIntersection& intersection =
           m->intersection(FittedTrajectory);
-      Amg::Vector3D* minimizationDirection = new Amg::Vector3D(
+      Amg::Vector3D minimizationDirection = Amg::Vector3D(
           m->sensorDirection().cross(intersection.direction()));
-      *minimizationDirection = minimizationDirection->unit();
+      minimizationDirection = minimizationDirection.unit();
       m->minimizationDirection(minimizationDirection);
       m->derivative(D0,
                     m->weight() * (m_cosPhi0 * m->minimizationDirection().y() -
