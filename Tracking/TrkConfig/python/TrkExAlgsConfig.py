@@ -17,8 +17,8 @@ def ExtrapolatorComparisonTestCfg(flags, name = "ExtrapolatorComparisonTest", **
   
   if "ExtrapolationTool" not in kwargs:
     from ActsGeometry.ActsGeometryConfig import ActsExtrapolationToolCfg
-    kwargs.setdefault("ExtrapolationTool", result.getPrimaryAndMerge(
-      ActsExtrapolationToolCfg(flags)))
+    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(
+      ActsExtrapolationToolCfg(flags))) # PrivateToolHandle
   
   result.addEventAlgo(CompFactory.Trk.ExtrapolatorComparisonTest(name, **kwargs))
   return result

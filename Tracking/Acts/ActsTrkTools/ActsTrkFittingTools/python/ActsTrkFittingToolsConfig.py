@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -18,15 +18,14 @@ def ActsKalmanFitterCfg(flags, name: str = "ActsKalmanFitter", **kwargs):
     #  /eos/project-a/acts/public/MaterialMaps/ATLAS/material-maps-Pixel-SCT.json
 
     if "TrackingGeometryTool" not in kwargs:
-        trkGeoTool = result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
-        kwargs["TrackingGeometryTool"] = trkGeoTool
+        kwargs["TrackingGeometryTool"] = result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)) # PrivateToolHandle
 
     if "ExtrapolationTool" not in kwargs:
-        kwargs["ExtrapolationTool"] = result.getPrimaryAndMerge(
+        kwargs["ExtrapolationTool"] = result.popToolsAndMerge(
             ActsExtrapolationToolCfg(flags, MaxSteps=10000)
-        )
+        ) # PrivateToolHandle
 
-    result.merge(ActsExtrapolationToolCfg(flags, MaxSteps=10000))
+    result.addPublicTool(result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000))) # FIXME redundant?
 
     kwargs.setdefault("ReverseFilteringPt", 1.0)  # @TODO: Unit
 

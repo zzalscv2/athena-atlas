@@ -21,16 +21,16 @@ def ActsTrkFindingToolCfg(flags, **kwargs) -> ComponentAccumulator:
 
     kwargs.setdefault(
         "TrackingGeometryTool",
-        acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
-    )
+        acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
+    ) # PrivateToolHandle
     kwargs.setdefault(
         "ExtrapolationTool",
-        acc.getPrimaryAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
-    )
+        acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
+    ) # PrivateToolHandle
 
     kwargs.setdefault(
-        "SummaryTool", acc.getPrimaryAndMerge(InDetTrackSummaryToolCfg(flags))
-    )
+        "SummaryTool", acc.popToolsAndMerge(InDetTrackSummaryToolCfg(flags))
+    ) # PrivateToolHandle
 
     kwargs.setdefault(
         "ATLASConverterTool",
