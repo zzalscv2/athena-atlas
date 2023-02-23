@@ -186,11 +186,11 @@ namespace top {
                                                 sf = 1.;
                                               } else {
                                                 sf = NAN;
-                                                top::check(globalTriggerTool->getEfficiencyScaleFactor(
+                                                globalTriggerTool->getEfficiencyScaleFactor(
                                                              selectedElectrons,
                                                              selectedMuons,
                                                              selectedPhotons,
-                                                             sf), "Failed to get global trigger SF");
+                                                             sf).ignore();
                                               }
                                               std::string auxname(m_decor_triggerSF);
                                               auxname += "_";
