@@ -27,7 +27,7 @@ class LArOnlineID_Base;
 class LArADC2MeVCondAlg: public AthReentrantAlgorithm {
  public:
 
-  LArADC2MeVCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
   ~LArADC2MeVCondAlg();
 
   StatusCode initialize() override;
@@ -53,6 +53,7 @@ class LArADC2MeVCondAlg: public AthReentrantAlgorithm {
 
   Gaudi::Property<bool> m_useFEBGainThresholds{this,"UseFEBGainTresholds",true};
   Gaudi::Property<bool> m_isSuperCell{this,"isSuperCell",false,"switch to true to use the SuperCell Identfier helper"};
+  Gaudi::Property<bool> m_completeDetector{this,"CompleteDetector",true,"If True, this algo will fail if input data is missing"};
 
   size_t m_nGains = 0UL;
   const LArOnlineID_Base* m_larOnlineID=nullptr;

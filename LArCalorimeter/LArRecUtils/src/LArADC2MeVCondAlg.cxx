@@ -10,10 +10,6 @@
 #include <memory>
 #include "GaudiKernel/EventIDRange.h"
 
-LArADC2MeVCondAlg::LArADC2MeVCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name, pSvcLocator)
-{}
-
 LArADC2MeVCondAlg::~LArADC2MeVCondAlg() {}
 
 
@@ -127,12 +123,17 @@ StatusCode LArADC2MeVCondAlg::execute(const EventContext& ctx) const{
   unsigned nNoRamp=0;
   unsigned nNoHVScaleCorr=0;
 
-  //'Guess' the degree of the ramp polynom (should be all the same):
+  //'Guess' the degree of the ramp polynom by searching the first filled ramp
+  //The value should be all the same for all cells & gains and in reality always 2
   unsigned rampPolyDeg=0;
   std::vector<HWIdentifier>::const_iterator it  = m_larOnlineID->channel_begin();
   std::vector<HWIdentifier>::const_iterator it_e= m_larOnlineID->channel_end();
   while (rampPolyDeg==0 && it!=it_e) {
-    rampPolyDeg=larRamp->ADC2DAC(*it,0).size();
+    size_t gain=0;
+    while ( rampPolyDeg==0 && gain < m_nGains) {
+      rampPolyDeg=larRamp->ADC2DAC(*it,gain).size();
+      ++gain;
+    }
     ++it;
   }
 
@@ -199,8 +200,10 @@ StatusCode LArADC2MeVCondAlg::execute(const EventContext& ctx) const{
 	// ADC2DAC is a vector (polynomial fit of ramps)
 	const ILArRamp::RampRef_t adc2dac = larRamp->ADC2DAC(chid,igain);
 	if (adc2dac.size()<2) {
-          // Some channels can be missing in some configurations.
+          // Some channels can be missing in some configurations, 
+	  //for example during the electronic calibration processing
           ATH_MSG_VERBOSE("No Ramp found for channel " << m_larOnlineID->channel_name(chid) << ", gain " << igain);
+	  ++nNoRamp;
 	  continue;
 	}
       
@@ -234,14 +237,20 @@ StatusCode LArADC2MeVCondAlg::execute(const EventContext& ctx) const{
 
   ATH_CHECK(writeHandle.record(std::move(lArADC2MeVObj)));
   
-  if (nNouA2MeV) ATH_MSG_ERROR( "No uA2MeV values for " << nNouA2MeV << " channels" );
-  if (nNoDAC2uA) ATH_MSG_ERROR( "No DAC2uA values for " << nNouA2MeV << " channels" );
-  if (nNoRamp) ATH_MSG_ERROR( "No Ramp values for " << nNoRamp << " channels * gains " );
-  
+  if (nNouA2MeV) ATH_MSG_ERROR("No uA2MeV values for " << nNouA2MeV << " channels");
+  if (nNoDAC2uA) ATH_MSG_ERROR("No DAC2uA values for " << nNouA2MeV << " channels");
+  if (nNoRamp) {
+    if (m_completeDetector) {
+      ATH_MSG_ERROR("No Ramp values for " << nNoRamp << " channels * gains " );
+    }
+    else {
+      ATH_MSG_WARNING("No Ramp values for " << nNoRamp << " channels * gains " );
+    }
+  }
   if (nNoMphysOverMcal) ATH_MSG_INFO("No MphysOverMcal values for " << nNoMphysOverMcal << " channels * gains");
   if (nNoHVScaleCorr) ATH_MSG_WARNING("No HVScaleCorr values for " << nNoHVScaleCorr << " channels");
 
-  if (nNouA2MeV || nNoDAC2uA || nNoRamp) 
+  if (nNouA2MeV || nNoDAC2uA || (nNoRamp && m_completeDetector)) 
     return StatusCode::FAILURE;
   else
     return StatusCode::SUCCESS;
