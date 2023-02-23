@@ -22,8 +22,8 @@ def MC23a(flags):
     # 0.001953314389 / 0.9980466856. Those numbers are then multiplied by 84.5
     # to follow pile-up profile. Only a relevant number of significant digits
     # are kept.
-    flags.Digitization.PU.NumberOfLowPtMinBias = 84.335
-    flags.Digitization.PU.NumberOfHighPtMinBias = 0.165
+    flags.Digitization.PU.NumberOfLowPtMinBias = 61.380
+    flags.Digitization.PU.NumberOfHighPtMinBias = 0.120
     flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
     flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run410000_MC23a_MultiBeamspot'
 
@@ -50,10 +50,10 @@ def MC23c(flags):
     # 0.001953314389 / 0.9980466856. Those numbers are then multiplied by 84.5
     # to follow pile-up profile. Only a relevant number of significant digits
     # are kept.
-    flags.Digitization.PU.NumberOfLowPtMinBias = 84.335
-    flags.Digitization.PU.NumberOfHighPtMinBias = 0.165
+    flags.Digitization.PU.NumberOfLowPtMinBias = 90.323
+    flags.Digitization.PU.NumberOfHighPtMinBias = 0.177
     flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
-    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run450000_MC23c_MultiBeamspot_flat50_75'
+    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run450000_MC23c_MultiBeamspot'
 
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         # ensure better randomisation of high-pt minbias events
@@ -73,7 +73,7 @@ def MC23cSingleBeamspot(flags):
     MC23c(flags)
 
     # override only pile-up profile
-    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run450000_MC23c_SingleBeamspot_flat50_75'
+    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run450000_MC23c_SingleBeamspot'
 
 
 def MC23LowMu(flags):
@@ -204,7 +204,7 @@ def MC23cSimulationMultipleIoV(flags):
 
     from RunDependentSimComps.PileUpUtils import generateRunAndLumiProfile
     generateRunAndLumiProfile(flags,
-                              profile= 'RunDependentSimData.PileUpProfile_run450000_MC23c_MultiBeamspot_flat50_75')
+                              profile= 'RunDependentSimData.PileUpProfile_run450000_MC23c_MultiBeamspot')
 
 
 def MC23SimulationSingleIoVCalibrationHits(flags):
