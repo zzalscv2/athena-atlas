@@ -74,7 +74,7 @@ def LArPileUpAutoCorrCfg(flags):
        mapKey="LArOnOffIdMap"
        bcKey = "LArBadChannel"
 
-    result.addCondAlgo(CompFactory.LArADC2MeVCondAlg(UseFEBGainTresholds=False,LArOnOffIdMappingKey=mapKey))
+    result.addCondAlgo(CompFactory.LArADC2MeVCondAlg(UseFEBGainTresholds=False,LArOnOffIdMappingKey=mapKey,CompleteDetector=False))
 
     theLArAutoCorrTotalCondAlg=CompFactory.LArAutoCorrTotalCondAlg()
     theLArAutoCorrTotalCondAlg.Nsamples=flags.LArCalib.OFC.Nsamples  
