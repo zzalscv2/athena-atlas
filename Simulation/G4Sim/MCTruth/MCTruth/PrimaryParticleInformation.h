@@ -8,6 +8,8 @@
 #include "G4VUserPrimaryParticleInformation.hh"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
+#include "AtlasHepMC/MagicNumbers.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace ISF {
   class ISFParticle;
@@ -35,7 +37,7 @@ private:
   ISF::ISFParticle* m_theISFParticle{};
 
   int m_regenerationNr{0};
-  int m_barcode{-1};
+  mutable int m_barcode ATLAS_THREAD_SAFE = HepMC::INVALID_PARTICLE_BARCODE;
 };
 
 #endif

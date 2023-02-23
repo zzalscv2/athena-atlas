@@ -25,6 +25,8 @@ constexpr int PHOTOSMIN = 10000;
 /// interactions in standard MC Production
 constexpr int crazyParticleBarcode(std::numeric_limits<int32_t>::max());
 
+constexpr int INVALID_PARTICLE_BARCODE = -1;
+
 template <class T>  inline bool is_simulation_particle(const T& p){ return (barcode(p)>SIM_BARCODE_THRESHOLD);}
 template <>  inline bool is_simulation_particle(const int& b){ return (b>SIM_BARCODE_THRESHOLD);}
 

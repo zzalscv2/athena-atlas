@@ -6,6 +6,8 @@
 #define TrackInformation_H
 
 #include "VTrackInformation.h"
+#include "AtlasHepMC/MagicNumbers.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace ISF {
   class ISFParticle;
@@ -29,6 +31,7 @@ public:
 private:
 	int m_regenerationNr;
 	HepMC::GenParticlePtr m_theParticle;
+	mutable int m_barcode ATLAS_THREAD_SAFE = HepMC::INVALID_PARTICLE_BARCODE;
 	ISF::ISFParticle *m_theBaseISFParticle;
 	bool m_returnedToISF;
 };

@@ -21,12 +21,18 @@ TrackInformation::TrackInformation(HepMC::GenParticlePtr p, ISF::ISFParticle* ba
 
 int TrackInformation::GetParticleBarcode() const
 {
-  return ( m_theParticle ? HepMC::barcode(m_theParticle) : 0 );
+  if (m_barcode != HepMC::INVALID_PARTICLE_BARCODE) return m_barcode;
+  if (m_theParticle) {
+      m_barcode = HepMC::barcode(m_theParticle);
+      return m_barcode;
+  }
+  return 0;
 }
 
 void TrackInformation::SetParticle(HepMC::GenParticlePtr p)
 {
   m_theParticle=p;
+  m_barcode = HepMC::INVALID_PARTICLE_BARCODE;
 }
 
 void TrackInformation::SetBaseISFParticle(ISF::ISFParticle* p)
