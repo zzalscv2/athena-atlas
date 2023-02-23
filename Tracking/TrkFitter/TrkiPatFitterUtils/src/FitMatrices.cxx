@@ -634,8 +634,8 @@ __attribute__((flatten))
 }
 
 void FitMatrices::usePerigee(const FitMeasurement& measurement) {
-  m_perigee = measurement.perigee();
-  m_perigeeWeight = measurement.perigeeWeight();
+  m_perigee = &(measurement.perigee());
+  m_perigeeWeight = &(measurement.perigeeWeight());
   // TODO: needs eigen equiv !!
   if (m_matrixFromCLHEP) {
     m_usePerigee = true;

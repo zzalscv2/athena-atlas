@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -134,13 +134,13 @@ class FitMeasurement {
   const MeasurementBase* measurementBase(void) const;
   double minEnergyDeposit(void) const;
   const Amg::Vector3D& minimizationDirection(void) const;
-  void minimizationDirection(Amg::Vector3D* value);
+  void minimizationDirection(const Amg::Vector3D& value);
   const Amg::Vector3D& normal(void) const;
   int numberDoF(void) const;
   void numberDoF(int value);
   bool numericalDerivative(void) const;
-  const Amg::VectorX* perigee(void) const;
-  const Amg::MatrixX* perigeeWeight(void) const;
+  const Amg::VectorX& perigee(void) const;
+  const Amg::MatrixX& perigeeWeight(void) const;
   const Amg::Vector3D& position(void) const;
   void print(MsgStream& log) const;
   static void printHeading(MsgStream& log);
@@ -209,14 +209,14 @@ class FitMeasurement {
   bool m_materialEffectsOwner;
   const MeasurementBase* m_measurementBase;
   double m_minEnergyDeposit;
-  Amg::Vector3D* m_minimizationDirection;
-  Amg::Vector3D* m_normal;
+  Amg::Vector3D m_minimizationDirection;
+  Amg::Vector3D m_normal;
   int m_numberDoF;
   bool m_numericalDerivative;
   bool m_outlier;
   double m_particleMassSquared;
-  const Amg::VectorX* m_perigee;
-  const Amg::MatrixX* m_perigeeWeight;
+  Amg::VectorX m_perigee;
+  Amg::MatrixX m_perigeeWeight;
   Amg::Vector3D m_position;
   double m_qOverP;
   double m_radiationThickness;
@@ -227,7 +227,7 @@ class FitMeasurement {
   double m_scatteringAngle;
   double m_scatteringAngleOffSet;
   double m_secondResidual;
-  Amg::Vector3D* m_sensorDirection;
+  Amg::Vector3D m_sensorDirection;
   double m_sigma;
   double m_sigmaMinus;
   double m_sigmaPlus;
@@ -447,16 +447,15 @@ inline double FitMeasurement::minEnergyDeposit(void) const {
 }
 
 inline const Amg::Vector3D& FitMeasurement::minimizationDirection(void) const {
-  return *m_minimizationDirection;
+  return m_minimizationDirection;
 }
 
-inline void FitMeasurement::minimizationDirection(Amg::Vector3D* value) {
-  delete m_minimizationDirection;
+inline void FitMeasurement::minimizationDirection(const Amg::Vector3D& value) {
   m_minimizationDirection = value;
 }
 
 inline const Amg::Vector3D& FitMeasurement::normal(void) const {
-  return *m_normal;
+  return m_normal;
 }
 
 inline int FitMeasurement::numberDoF(void) const {
@@ -473,11 +472,11 @@ inline bool FitMeasurement::numericalDerivative(void) const {
   return m_numericalDerivative;
 }
 
-inline const Amg::VectorX* FitMeasurement::perigee(void) const {
+inline const Amg::VectorX& FitMeasurement::perigee(void) const {
   return m_perigee;
 }
 
-inline const Amg::MatrixX* FitMeasurement::perigeeWeight(void) const {
+inline const Amg::MatrixX& FitMeasurement::perigeeWeight(void) const {
   return m_perigeeWeight;
 }
 
@@ -530,7 +529,7 @@ inline void FitMeasurement::scattererTheta(double value) {
 }
 
 inline const Amg::Vector3D& FitMeasurement::sensorDirection(void) const {
-  return *m_sensorDirection;
+  return m_sensorDirection;
 }
 
 inline void FitMeasurement::setEnergyGain(void) {
