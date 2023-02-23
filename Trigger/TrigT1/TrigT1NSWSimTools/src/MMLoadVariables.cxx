@@ -38,12 +38,9 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
       for(const auto it : *truthContainer) {
         const HepMC::GenEvent *subEvent = it;
 #ifdef HEPMC3
-        for(const auto& particle : subEvent->particles())
+        for(const auto& particle : subEvent->particles()){
 #else
-        for(const auto pit : subEvent->particle_range())
-#endif
-        {
-#ifndef HEPMC3
+        for(const auto pit : subEvent->particle_range()){
           const HepMC::GenParticle *particle = pit;
 #endif
           const HepMC::FourVector momentum = particle->momentum();

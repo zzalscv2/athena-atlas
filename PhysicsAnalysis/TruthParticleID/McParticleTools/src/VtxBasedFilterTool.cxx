@@ -126,8 +126,7 @@ StatusCode VtxBasedFilterTool::buildGenEvent( const HepMC::GenEvent* in,
     }
     
     if ( addVertex( vtx, out ).isFailure() ) {
-      msg(MSG::WARNING)
-	<< "Could not add vertex [" << HepMC::barcode(vtx) << "]" << endmsg;
+      msg(MSG::WARNING) << "Could not add vertex [" << vtx << "]" << endmsg;
     }
   } //> end loop over vertices
   

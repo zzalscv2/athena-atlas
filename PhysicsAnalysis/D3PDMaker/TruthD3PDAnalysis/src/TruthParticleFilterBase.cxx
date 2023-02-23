@@ -279,13 +279,13 @@ TruthParticleFilterBase::addVertex (HepMC::ConstGenVertexPtr v, HepMC::GenEvent*
     HepMC::suggest_barcode (vnew,HepMC::barcode(v));
 //AV: Are these needed?FIXME?    vnew->weights() = v->weights();
     // Fill in the existing relations of the new vertex.
-    for (auto  p : v->particles_in())
+    for (const auto&  p : v->particles_in())
     {
       HepMC::GenParticlePtr pnew = HepMC::barcode_to_particle (ev,HepMC::barcode(p));
       if (pnew) vnew->add_particle_in (pnew);
     }
     
-   for (auto  p :v->particles_out())
+   for (const auto&  p :v->particles_out())
     {
       HepMC::GenParticlePtr pnew = HepMC::barcode_to_particle (ev,HepMC::barcode(p));
       if (pnew) vnew->add_particle_out (pnew);

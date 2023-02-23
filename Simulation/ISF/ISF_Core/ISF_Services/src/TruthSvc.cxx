@@ -396,12 +396,7 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
           vtxFromTI->add_particle_out( p);
 #ifdef HEPMC3
           Barcode::ParticleBarcode secBCFromTI = ti.childBarcode(i);
-          if (secBCFromTI) {
-            HepMC::suggest_barcode( p, secBCFromTI );
-          }
-          else {
-            HepMC::suggest_barcode( p, secBC );
-          }
+          HepMC::suggest_barcode( p, secBCFromTI ? secBCFromTI :secBC );
 #endif
         }
       }

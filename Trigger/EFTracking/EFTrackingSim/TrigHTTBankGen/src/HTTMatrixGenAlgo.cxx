@@ -331,8 +331,8 @@ std::vector<HTTTruthTrack> HTTMatrixGenAlgo::filterTrainingTracks(std::vector<HT
   std::vector<HTTTruthTrack> training_tracks;
 
   for (HTTTruthTrack const & track : truth_tracks) {
-    if (track.getBarcode() >= 1000000 || abs(track.getPDGCode()) != m_TRAIN_PDG) continue;
-    if (abs(track.getD0()) > m_D0_THRESHOLD) continue;
+    if (track.getBarcode() >= 1000000 || std::abs(track.getPDGCode()) != m_TRAIN_PDG) continue;
+    if (std::abs(track.getD0()) > m_D0_THRESHOLD) continue;
     
     double pt = TMath::Sqrt(track.getPX()*track.getPX() + track.getPY()*track.getPY());
     double pt_GeV = pt / 1000;
