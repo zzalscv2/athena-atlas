@@ -43,20 +43,15 @@ StatusCode Trk::KalmanUpdator::initialize()
     // pass individual outputlevel to message stream
   m_outputlevel = msg().level()-MSG::DEBUG;
   if (m_cov0.size() < 5) {
-    ATH_MSG_INFO( "Wrong-sized initial covariance given, so set to default: "  );
+    ATH_MSG_WARNING( "Wrong-sized initial covariance given, so set to default: "  );
     m_cov0 = {250.,250,0.25,0.25, 0.000001};
   }
-  ATH_MSG_INFO( "Initial covariance: " << m_cov0[0] << ", "
-                << m_cov0[1] << ", " << m_cov0[2] << ", "
-                << m_cov0[3] << ", " << m_cov0[4] << " (diagonal)"  );
-  ATH_MSG_DEBUG( "initialize() successful in " << name()  );
   return StatusCode::SUCCESS;
 }
 
 // finalize
 StatusCode Trk::KalmanUpdator::finalize()
 {
-    ATH_MSG_DEBUG( "finalize() successful in " << name()  );
     return StatusCode::SUCCESS;
 }
 
@@ -671,7 +666,7 @@ Amg::MatrixX Trk::KalmanUpdator::projection(const Amg::MatrixX& M, const int key
 
 
 bool Trk::KalmanUpdator::consistentParamDimensions(const Trk::LocalParameters& P,
-                                                         const int& dimCov) const {
+                                                   int dimCov) const {
   if (P.dimension() != dimCov ) {
     ATH_MSG_WARNING( "Inconsistency in dimension of local coord - problem with LocalParameters object?"  );
     ATH_MSG_WARNING( "dim of local parameters: "<< P.dimension()<< " vs. dim of error matrix: "<<dimCov  );

@@ -282,7 +282,7 @@ std::pair<AmgVector(5),AmgSymMatrix(5)>* Trk::KalmanUpdator_xk::updateParameterD
  const AmgSymMatrix(5)    & Et,
  const Amg::VectorX       & P ,
  const Amg::MatrixX       & Ep,
- const int                & K ,
+ int                        K ,
  Trk::FitQualityOnSurface*& Q ,
  bool                       X) const
 {

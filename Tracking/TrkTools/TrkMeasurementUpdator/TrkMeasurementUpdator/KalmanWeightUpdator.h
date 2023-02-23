@@ -32,7 +32,7 @@ namespace Trk {
  *  This version of the tool implements the weight formalism
  *  @author Sebastian.Fleischmann@cern.ch
  */
-class KalmanWeightUpdator
+class KalmanWeightUpdator final
   : virtual public IUpdator
   , public AthAlgTool
 {
@@ -168,7 +168,7 @@ public:
     const AmgSymMatrix(5) &,
     const Amg::VectorX&,
     const Amg::MatrixX&,
-    const int&,
+    int,
     Trk::FitQualityOnSurface*&,
     bool) const override final
   {
