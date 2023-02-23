@@ -261,7 +261,6 @@ namespace Trk {
 
   StatusCode GlobalChi2Fitter::finalize() {
 
-    ATH_MSG_INFO("finalize()");
     ATH_MSG_INFO(m_fit_status[S_FITS] << " attempted track fits");
     ATH_MSG_INFO(m_fit_status[S_SUCCESSFUL_FITS] << " successful track fits");
     ATH_MSG_INFO(m_fit_status[S_MAT_INV_FAIL] << " track fits failed because of a matrix inversion failure");
