@@ -183,24 +183,23 @@ def createSimConfigFlags():
     scf.addFlag("Sim.ISF.UseTrackingGeometryCond", False) # Using Condition for tracking Geometry
 
     def _decideHITSMerging(prevFlags):
-        simulator = prevFlags.Sim.ISF.Simulator
         # Further specialization possible in future
-        if simulator in [SimulationFlavour.FullG4MT, SimulationFlavour.FullG4MT_QS, SimulationFlavour.PassBackG4MT, SimulationFlavour.AtlasG4]:
+        if prevFlags.Sim.ISF.Simulator.isFullSim():
             doID = False
             doITk = False
             doCALO = False
             doMUON = False
-        elif simulator in [SimulationFlavour.ATLFASTIIF_G4MS, SimulationFlavour.ATLFASTIIFMT, SimulationFlavour.ATLFAST3F_G4MS]:
+        elif prevFlags.Sim.ISF.Simulator.usesFatras() and prevFlags.Sim.ISF.Simulator.usesFastCaloSim():
             doID = True
             doITk = True
             doCALO = True
             doMUON = True
-        elif simulator in [SimulationFlavour.ATLFASTIIMT, SimulationFlavour.ATLFAST3MT, SimulationFlavour.ATLFAST3MT_QS]:
+        elif prevFlags.Sim.ISF.Simulator.usesFastCaloSim():
             doID = False
             doITk = False
             doCALO = True
             doMUON = False
-        elif simulator in [SimulationFlavour.Unknown]:
+        elif prevFlags.Sim.ISF.Simulator in [SimulationFlavour.Unknown]:
             doID = True
             doITk = True
             doCALO = True
