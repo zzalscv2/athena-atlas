@@ -8,6 +8,7 @@ def DataQualityToolsConfig(flags):
     from .DQTLumiMonAlg import DQTLumiMonAlgConfig
     from .DQTBackgroundMon import DQTBackgroundMonAlgConfig
     from .DQTDetSynchMonAlg import DQTDetSynchMonAlgConfig
+    from .DQTGlobalWZFinderAlg import DQTGlobalWZFinderAlgConfig
 
     result = ComponentAccumulator()
 
@@ -15,6 +16,7 @@ def DataQualityToolsConfig(flags):
     if flags.DQ.Environment != 'tier0Raw':
         if flags.DQ.DataType is not DQDataType.Cosmics:
             result.merge(DQTLumiMonAlgConfig(flags))
+            result.merge(DQTGlobalWZFinderAlgConfig(flags))
 
     # only when input is RAW
     if flags.DQ.Environment in ('online', 'tier0', 'tier0Raw'):
