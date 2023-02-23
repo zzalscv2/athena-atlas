@@ -8,4 +8,4 @@ xAODDigest.py --extravars "../${1}_CAConfig/run_${2}/myAOD.pool.root" "${1}_${2}
 
 comparexAODDigest.py "${1}_${2}_digest_legacy.txt" "${1}_${2}_digest_CA.txt" 
 
-acmd.py diff-root "../${1}/run_${2}/myAOD.pool.root" "../${1}_CAConfig/run_${2}/myAOD.pool.root" --nan-equal --error-mode resilient --ignore-leaves index_ref TrigNavigationAux CombinedMuonTrackParticlesAux EventInfoAux InDetForwardTrackParticlesAux MuonTruthParticlesAuxDyn SlowMuonsAux --order-trees --entries 10 --mode semi-detailed
+acmd.py diff-root "../${1}/run_${2}/myAOD.pool.root" "../${1}_CAConfig/run_${2}/myAOD.pool.root" --nan-equal --error-mode resilient --ignore-leaves index_ref TrigNavigationAux EventInfoAux MuonTruthParticlesAuxDyn --order-trees --entries 10 --mode semi-detailed
