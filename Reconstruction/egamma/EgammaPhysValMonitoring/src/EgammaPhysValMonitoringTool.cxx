@@ -368,8 +368,29 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
       ATH_MSG_ERROR("Filling reco photon  hists  failed " << name() << "...");
       return StatusCode::FAILURE;
     }
-  } // end is MC / code using truth particles
-
+  } else // end is MC / code using truth particles
+  {//---------Electrons----------------------
+      if (!fillRecoElecHistograms(nullptr, eventInfo.ptr())) {
+        ATH_MSG_ERROR("Filling reco elecectron hists  failed " << name()
+                                                               << "...");
+        return StatusCode::FAILURE;
+      }
+      //---------Frwd Electrons----------------------
+      if (!fillRecoFrwdElecHistograms(nullptr, eventInfo.ptr())) {
+        ATH_MSG_ERROR("Filling reco frwd elecectron hists  failed " << name()
+                                                                    << "...");
+        return StatusCode::FAILURE;
+      }
+      //----------Photons
+      if (!fillRecoPhotHistograms(nullptr, eventInfo.ptr())) {
+        ATH_MSG_ERROR("Filling reco photon  hists  failed " << name() << "...");
+        return StatusCode::FAILURE;
+      }
+      
+  }
+    
+    
+    
   return StatusCode::SUCCESS;
 }
 
@@ -390,42 +411,43 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoElecHistograms(const xAOD::Truth
 
   float weight = eventInfo->beamSpotWeight();
   
-  for(const auto *const electron : *Electrons){
-    bool isElecPrompt=false;
-
-    if(!(electron->isGoodOQ (xAOD::EgammaParameters::BADCLUSELECTRON))) continue;
-
-    if(electron->isAvailable <int>("truthType")) {
-      MCTruthPartClassifier::ParticleType type = (MCTruthPartClassifier::ParticleType) electron->auxdata<int>("truthType");
-      if(type==MCTruthPartClassifier::IsoElectron) {
-        isElecPrompt=true;
-	      //fill energy scale
-      	const xAOD::TruthParticle* thePart = xAOD::TruthHelpers::getTruthParticle(*electron); // 20.7.X.Y.I
-	      if(thePart) {
-          float EtLin = (electron->pt()-thePart->pt())/thePart->pt();
-          m_oElectronValidationPlots.res_et->Fill(thePart->pt()/GeV,EtLin,weight);
-          m_oElectronValidationPlots.res_eta->Fill(thePart->eta(),EtLin,weight);
-          if (thePart->pt()/GeV>20.) {
-              m_oElectronValidationPlots.res_et_cut->Fill(thePart->pt()/GeV,EtLin,weight);
-              m_oElectronValidationPlots.res_eta_cut->Fill(thePart->eta(),EtLin,weight);
-              m_oElectronValidationPlots.res_et_cut_pt_20->Fill(thePart->pt()/GeV,EtLin,weight);
-              m_oElectronValidationPlots.res_eta_cut_pt_20->Fill(thePart->eta(),EtLin,weight);
-          }
-	        m_oElectronValidationPlots.matrix->Fill(electron->pt()/GeV,thePart->pt()/GeV);
-        } else {
-	        ATH_MSG_INFO ("Truth particle associated not in egamma truth collection");
+    for(const auto *const electron : *Electrons){
+        bool isElecPrompt=false;
+        
+        if(!(electron->isGoodOQ (xAOD::EgammaParameters::BADCLUSELECTRON))) continue;
+        
+        if(electron->author()&xAOD::EgammaParameters::AuthorElectron||
+           electron->author()&xAOD::EgammaParameters::AuthorAmbiguous)   numofele++;
+        
+        if(!m_isMC) m_oElectronValidationPlots.fill(*electron,*eventInfo,isElecPrompt);
+        else {
+            if(electron->isAvailable <int>("truthType")) {
+                MCTruthPartClassifier::ParticleType type = (MCTruthPartClassifier::ParticleType) electron->auxdata<int>("truthType");
+                if(type==MCTruthPartClassifier::IsoElectron) {
+                    isElecPrompt=true;
+                    //fill energy scale
+                    const xAOD::TruthParticle* thePart = xAOD::TruthHelpers::getTruthParticle(*electron); // 20.7.X.Y.I
+                    if(thePart) {
+                        float EtLin = (electron->pt()-thePart->pt())/thePart->pt();
+                        m_oElectronValidationPlots.res_et->Fill(thePart->pt()/GeV,EtLin,weight);
+                        m_oElectronValidationPlots.res_eta->Fill(thePart->eta(),EtLin,weight);
+                        if (thePart->pt()/GeV>20.) {
+                            m_oElectronValidationPlots.res_et_cut->Fill(thePart->pt()/GeV,EtLin,weight);
+                            m_oElectronValidationPlots.res_eta_cut->Fill(thePart->eta(),EtLin,weight);
+                            m_oElectronValidationPlots.res_et_cut_pt_20->Fill(thePart->pt()/GeV,EtLin,weight);
+                            m_oElectronValidationPlots.res_eta_cut_pt_20->Fill(thePart->eta(),EtLin,weight);
+                        }
+                        m_oElectronValidationPlots.matrix->Fill(electron->pt()/GeV,thePart->pt()/GeV);
+                    } else {
+                        ATH_MSG_INFO ("Truth particle associated not in egamma truth collection");
+                    }
+                }
+                
+            } else if(m_isMC){ if(Match(electron,11, truthParticles)!=nullptr ) isElecPrompt=true;}
+            
+            m_oElectronValidationPlots.fill(*electron,*eventInfo,isElecPrompt);
         }
-	  } 
-      
-    } else if(m_isMC){ if(Match(electron,11, truthParticles)!=nullptr ) isElecPrompt=true;}
-    
-    
-    m_oElectronValidationPlots.fill(*electron,*eventInfo,isElecPrompt);
-    if(electron->author()&xAOD::EgammaParameters::AuthorElectron||
-       electron->author()&xAOD::EgammaParameters::AuthorAmbiguous)   numofele++;
-    
-  } 
-  
+    }
   m_oElectronValidationPlots.m_oCentralElecPlots.nParticles->Fill(numofele);
   m_oElectronValidationPlots.m_oCentralElecPlots.nParticles_weighted->Fill(numofele,weight);
   
@@ -548,38 +570,43 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoPhotHistograms(const xAOD::Truth
   int numofCnv=0;
   float weight = eventInfo->beamSpotWeight();
 
-  for(const auto *photon : *Photons){
-    bool isPhotPrompt=false;
-    if (photon->author()&xAOD::EgammaParameters::AuthorCaloTopo35) continue;//21.0.>7
-    if(!(photon->isGoodOQ (xAOD::EgammaParameters::BADCLUSPHOTON))) continue;
-      if(photon->isAvailable <int>("truthType")) {
-        MCTruthPartClassifier::ParticleType type = (MCTruthPartClassifier::ParticleType) photon->auxdata<int>("truthType");
-        if(type==MCTruthPartClassifier::IsoPhoton) {
-          isPhotPrompt=true;	
-          //fill energy scale
-          const xAOD::TruthParticle* thePart = xAOD::TruthHelpers::getTruthParticle(*photon);//20.7.X.Y.I
-          //	const xAOD::TruthParticle* thePart = xAOD::EgammaHelpers::getTruthParticle(photon);
-          if(thePart&&thePart->pt()/GeV>20.) {
-            float EtLin = (photon->pt()-thePart->pt())/thePart->pt();
-            m_oPhotonValidationPlots.res_et->Fill(thePart->pt()/GeV,EtLin,weight);
-            m_oPhotonValidationPlots.res_eta->Fill(thePart->eta(),EtLin,weight);
-            if (std::abs(EtLin)<0.2){
-              m_oPhotonValidationPlots.res_et_cut->Fill(thePart->pt()/GeV,EtLin,weight);
-              m_oPhotonValidationPlots.res_eta_cut->Fill(thePart->eta(),EtLin,weight);
-            }
-          }else {
-            cout<<"Truth particle associated not in egamma truth collection"<<endl;
-          }
+    for(const auto *photon : *Photons){
+        bool isPhotPrompt=false;
+        if (photon->author()&xAOD::EgammaParameters::AuthorCaloTopo35) continue;//21.0.>7
+        if(!(photon->isGoodOQ (xAOD::EgammaParameters::BADCLUSPHOTON))) continue;
+        
+        if(photon->author()&xAOD::EgammaParameters::AuthorPhoton&&photon->pt()/GeV>7.)           numofPhot++;
+        else if(photon->pt()*0.001<7.)  numofTopo++;
+        else if(photon->author()&xAOD::EgammaParameters::AuthorAmbiguous&&photon->pt()/GeV>7.)   numofAmb++;
+        if(xAOD::EgammaHelpers::isConvertedPhoton(photon)&&photon->pt()/GeV>7.)                  numofCnv++;
+        if(!m_isMC) m_oPhotonValidationPlots.fill(*photon,*eventInfo, isPhotPrompt);
+        else {
+            if(photon->isAvailable <int>("truthType")) {
+                MCTruthPartClassifier::ParticleType type = (MCTruthPartClassifier::ParticleType) photon->auxdata<int>("truthType");
+                if(type==MCTruthPartClassifier::IsoPhoton) {
+                    isPhotPrompt=true;	
+                    //fill energy scale
+                    const xAOD::TruthParticle* thePart = xAOD::TruthHelpers::getTruthParticle(*photon);//20.7.X.Y.I
+                    //	const xAOD::TruthParticle* thePart = xAOD::EgammaHelpers::getTruthParticle(photon);
+                    if(thePart&&thePart->pt()/GeV>20.) {
+                        float EtLin = (photon->pt()-thePart->pt())/thePart->pt();
+                        m_oPhotonValidationPlots.res_et->Fill(thePart->pt()/GeV,EtLin,weight);
+                        m_oPhotonValidationPlots.res_eta->Fill(thePart->eta(),EtLin,weight);
+                        if (std::abs(EtLin)<0.2){
+                            m_oPhotonValidationPlots.res_et_cut->Fill(thePart->pt()/GeV,EtLin,weight);
+                            m_oPhotonValidationPlots.res_eta_cut->Fill(thePart->eta(),EtLin,weight);
+                        }
+                    }else {
+                        cout<<"Truth particle associated not in egamma truth collection"<<endl;
+                    }
+                }
+                
+            } else if(m_isMC){if(Match(photon,22, truthParticles)!=nullptr ) isPhotPrompt=true;}    
+            
+            m_oPhotonValidationPlots.fill(*photon,*eventInfo, isPhotPrompt);
+            
         }
-      
-      } else if(m_isMC){if(Match(photon,22, truthParticles)!=nullptr ) isPhotPrompt=true;}    
-      
-      m_oPhotonValidationPlots.fill(*photon,*eventInfo, isPhotPrompt);
-      if(photon->author()&xAOD::EgammaParameters::AuthorPhoton&&photon->pt()/GeV>7.)           numofPhot++;
-      else if(photon->pt()*0.001<7.)  numofTopo++;  
-      else if(photon->author()&xAOD::EgammaParameters::AuthorAmbiguous&&photon->pt()/GeV>7.)   numofAmb++; 
-      if(xAOD::EgammaHelpers::isConvertedPhoton(photon)&&photon->pt()/GeV>7.)                  numofCnv++;
-  }
+    }
   numPhotAll = numofPhot+numofTopo+numofAmb;
   m_oPhotonValidationPlots.m_oAllPlots.m_nParticles->Fill(numPhotAll);
   m_oPhotonValidationPlots.m_oPhotPlots.m_nParticles->Fill(numofPhot);

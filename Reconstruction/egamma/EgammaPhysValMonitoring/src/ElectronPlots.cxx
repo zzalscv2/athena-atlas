@@ -70,13 +70,13 @@ void ElectronPlots::initializePlots(){
   m_oShowerShapesAllRecoPlots.fill(electron,eventInfo);
   m_oIsolationAllRecoPlots.fill(electron,eventInfo);
   m_oTrackAllRecoPlots.fill(electron,eventInfo);
+ 
+  if(!isPrompt) return;
       
   m_oKinPromptRecoPlots.fill(electron,eventInfo);
   m_oShowerShapesPromptRecoPlots.fill(electron,eventInfo);
   m_oIsolationPromptRecoPlots.fill(electron,eventInfo);
   m_oTrackPromptRecoPlots.fill(electron,eventInfo);
-
-  if(!isPrompt) return;
 
   m_oKinIsoRecoPlots.fill(electron,eventInfo);
   m_oShowerShapesIsoRecoPlots.fill(electron,eventInfo);
