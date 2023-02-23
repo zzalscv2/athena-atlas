@@ -140,10 +140,7 @@ JetHistoAttributeFiller::JetHistoAttributeFiller( const std::string& type,  cons
 
 
 StatusCode JetHistoAttributeFiller::initialize() {
-  ATH_MSG_INFO("  initialize "  <<  m_varX.isEnabled());
-
   ATH_CHECK(m_varX.retrieve() );
-  
   m_nVar = 1;
   if( ! m_varY.isEnabled() ){
     ATH_MSG_INFO( "Filling 1 var X=("<< m_varX->describe() << ")");
