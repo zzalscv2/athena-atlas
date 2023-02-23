@@ -36,7 +36,7 @@ StatusCode jFexTower2SCellDecorator::initialize() {
     ATH_CHECK( m_jTowersReadKey.initialize() );
     
     // This will avoid extra variables when the Key is different than DataTowers
-    if( (m_jTowersReadKey.key()).compare(m_ReadKey_name) != 0 ){
+    if( (m_jTowersReadKey.key()).compare("L1_jFexDataTowers") != 0 ){
         m_save_emulated_var = false;
     }    
     
@@ -87,7 +87,7 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
     }  
      
     if(ScellContainer->empty() || triggerTowerContainer->empty() || jTowerContainer->empty() ){
-        ATH_MSG_WARNING("Nothing to decorate here, at least one container is empty. ScellContainer.size="<<ScellContainer->size() << " or jTowerContainer.size=" << jTowerContainer->size() << " or triggerTowerContainer.size=" << triggerTowerContainer->size() );
+        ATH_MSG_DEBUG("Nothing to decorate here, at least one container is empty. ScellContainer.size="<<ScellContainer->size() << " or jTowerContainer.size=" << jTowerContainer->size() << " or triggerTowerContainer.size=" << triggerTowerContainer->size() );
         return StatusCode::SUCCESS;
     }
     

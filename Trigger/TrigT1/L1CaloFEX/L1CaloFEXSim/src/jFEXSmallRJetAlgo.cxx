@@ -54,7 +54,7 @@ StatusCode LVL1::jFEXSmallRJetAlgo::safetyTest(){
 }
 
 void LVL1::jFEXSmallRJetAlgo::setup(int inputTable[7][7], int inputTableDisplaced[7][7]) {
-
+    
     for(int phi=0; phi<7; phi++) {
         for (int eta=0; eta<7; eta++) {
             m_jFEXalgoTowerID[phi][eta] = inputTable[6-phi][eta];
@@ -66,7 +66,6 @@ void LVL1::jFEXSmallRJetAlgo::setup(int inputTable[7][7], int inputTableDisplace
             m_jFEXalgoTowerID_displaced[phi][eta] = inputTableDisplaced[6-phi][eta];
         }
     }
-    
 }
 
 
@@ -149,13 +148,13 @@ bool LVL1::jFEXSmallRJetAlgo::CalculateLM(int mymatrix[5][5]) {
                 continue;
             }
             //strictly less than central
-            if( (iphi >= ieta) && !(ieta == 3 && iphi == 3) && !(ieta == 4 && iphi == 4) ) {
-                if(central_seed< mymatrix[iphi][ieta]) {
+            if( (iphi > ieta) || (iphi == 0 && ieta == 0) || (iphi == 1 && ieta == 1) ) {
+                if(central_seed < mymatrix[iphi][ieta]) {
                     return false;
                 }
             }
             //less than or equal to central
-            if((ieta > iphi) || (ieta == 3 && iphi == 3) || (ieta == 4 && iphi == 4)) {
+            if((iphi < ieta) || (iphi == 3 && ieta == 3) || (iphi == 4 && ieta == 4)) {
                 if(central_seed <= mymatrix[iphi][ieta]) {
                     return false;
                 }
@@ -171,6 +170,8 @@ bool LVL1::jFEXSmallRJetAlgo::isSeedLocalMaxima() {
     
     bool isCentralLM   = CalculateLM(m_jFEXalgoSearchWindowSeedET) && (getTTowerET(m_jFEXalgoTowerID[3][3]) >= getTTowerET(m_jFEXalgoTowerID[4][2]));
     bool isDisplacedLM = CalculateLM(m_jFEXalgoSearchWindowSeedET_displaced) && (getTTowerET(m_jFEXalgoTowerID[3][3]) >  getTTowerET(m_jFEXalgoTowerID[2][4]));
+    
+
 
     if(isCentralLM || isDisplacedLM){
         return true;

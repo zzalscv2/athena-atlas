@@ -488,7 +488,8 @@ void LVL1::jFEXPileupAndNoise::ApplyNoiseCuts(std::unordered_map<int,std::vector
         }        
         if(m_apply_noise2met && map_Etvalues[key][1]<=Met_NoiseCut){ // Et for Met
             map_Etvalues[key][1]=0.;
-        }
+        }            
+
     }
     
 }

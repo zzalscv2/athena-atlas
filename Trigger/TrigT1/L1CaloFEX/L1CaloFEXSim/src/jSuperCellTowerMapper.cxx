@@ -1219,7 +1219,7 @@ StatusCode jSuperCellTowerMapper::AssignPileupAndNoiseValues(std::unique_ptr<jTo
         //COMMENTED FOR NOW, currently applied in the firmware at P1  
         //s etting noise for EMB, EMEC and HEC (all LAr)   
         // the noise cut depends on different regions for LAr and Tile
-        //if(layer == 0 or (layer == 1 and TTid > 300000) ){
+        //if(layer == 0 or (layer == 1 and TTid > 500000) ){
             //noise = 40*25;
         //}
         //else if(layer == 1 ){ // 500 MEV cut for Tile

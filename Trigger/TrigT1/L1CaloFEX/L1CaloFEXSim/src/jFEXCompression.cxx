@@ -10,7 +10,7 @@
 
 #include "L1CaloFEXSim/jFEXCompression.h"
 #include <cmath>
-
+#include <iostream>
 namespace LVL1 {
 
 const int jFEXCompression::s_steps[] = {25, 50, 100, 200, 400};
@@ -60,9 +60,11 @@ int jFEXCompression::Expand(unsigned int code) {
     range++;
   }
   /// Now expand the value
-  int Et = s_minET[range] + (code-s_minCode[range])*s_steps[range];
+  int minEt = s_minET[range];
+  int valEt = (code-s_minCode[range])*s_steps[range];
   
-  return Et;
+  float Et = minEt+valEt;
+  return std::round(Et);
 }
 
 

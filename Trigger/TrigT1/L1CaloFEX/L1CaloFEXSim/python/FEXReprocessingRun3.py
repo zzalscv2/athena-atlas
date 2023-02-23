@@ -100,7 +100,7 @@ if __name__ == '__main__':
     from L1CaloFEXSim.L1CaloFEXSimCfg import ReadSCellFromByteStreamCfg,TriggerTowersInputCfg
     
     #Creates SCells
-    acc.merge(ReadSCellFromByteStreamCfg(flags,key="SCell",keyIn="SC_ET"))
+    acc.merge(ReadSCellFromByteStreamCfg(flags,key="SCell",keyIn="SC_ET_ID"))
     
     # Creates the TriggerTower container
     acc.merge(TriggerTowersInputCfg(flags))
@@ -213,7 +213,13 @@ if __name__ == '__main__':
 
         decoderTools += [inputjFexTool]
         # saving/adding the jTower xAOD container
-        outputEDM += addEDM('xAOD::jFexTowerContainer', inputjFexTool.jTowersWriteKey.Path)        
+        outputEDM += addEDM('xAOD::jFexTowerContainer', inputjFexTool.jTowersWriteKey.Path)    
+        
+        
+        # Uses SCell to decorate the jTowers
+        from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloFEXDecoratorCfg
+        DecoratorAlgo = L1CaloFEXDecoratorCfg(flags, name = 'jFexTower2SCellDecorator', ExtraInfo=True)
+        acc.merge(DecoratorAlgo)    
 
     if "gFex" in args.outputs:    
 
@@ -280,10 +286,7 @@ if __name__ == '__main__':
     decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=decoderTools, MaybeMissingROBs=maybeMissingRobs)
     acc.addEventAlgo(decoderAlg, sequenceName='AthAlgSeq')
     
-    # Uses SCell to decorate the jTowers
-    from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloFEXDecoratorCfg
-    DecoratorAlgo = L1CaloFEXDecoratorCfg(flags, 'jFexTower2SCellDecorator', True)
-    acc.merge(DecoratorAlgo)
+
    
     
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
