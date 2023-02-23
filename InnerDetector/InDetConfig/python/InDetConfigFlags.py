@@ -25,7 +25,11 @@ def createInDetConfigFlags():
     # Turn running of truth matching on and off (by default on for MC off for data)
     icf.addFlag("InDet.doTruth", lambda prevFlags: prevFlags.Input.isMC)
     # Toggle track slimming
-    icf.addFlag("InDet.doSlimming", True)
+    icf.addFlag("InDet.doSlimming", lambda prevFlags:
+                not(prevFlags.Beam.Type in [BeamType.SingleBeam,
+                                            BeamType.Cosmics] \
+                    or prevFlags.Tracking.doHighPileup \
+                    or prevFlags.Tracking.doVtxLumi) )
     # defines if the X1X mode is used for the offline or not
     icf.addFlag("InDet.selectSCTIntimeHits", lambda prevFlags: (
         not(prevFlags.Beam.Type is BeamType.Cosmics or \
@@ -60,7 +64,8 @@ def createInDetConfigFlags():
     # Control cuts and settings for different lumi to limit CPU and disk space
     icf.addFlag("InDet.Tracking.cutLevel", cutLevel)
     # Switch for running TIDE Ambi
-    icf.addFlag("InDet.Tracking.doTIDE_Ambi", True)
+    icf.addFlag("InDet.Tracking.doTIDE_Ambi", lambda prevFlags:
+                not(prevFlags.Beam.Type is BeamType.Cosmics))
     # Turn on running of Brem Recovery in tracking
     icf.addFlag("InDet.Tracking.doBremRecovery", lambda prevFlags: (
         not (prevFlags.Tracking.doVtxLumi or
@@ -75,8 +80,9 @@ def createInDetConfigFlags():
     # Use Calo ROIs to seed specific cuts for the ambi
     icf.addFlag("InDet.Tracking.doCaloSeededAmbi",
                 lambda prevFlags: prevFlags.Detector.EnableCalo)
+    # Try to split pixel clusters
     icf.addFlag("InDet.Tracking.doPixelClusterSplitting",
-                True)  # Try to split pixel clusters
+                lambda prevFlags: not(prevFlags.Beam.Type is BeamType.Cosmics))
     # choose splitter type: NeuralNet or AnalogClus
     icf.addFlag("InDet.Tracking.pixelClusterSplittingType", "NeuralNet")
     # Cut value for splitting clusters into two parts
@@ -101,15 +107,15 @@ def createInDetConfigFlags():
                 lambda prevFlags: (
                     prevFlags.InDet.Tracking.doMinBias or
                     prevFlags.InDet.Tracking.doLowMu or
-                    prevFlags.InDet.Tracking.doInnerDetectorCommissioning))
+                    prevFlags.Beam.Type is BeamType.Cosmics))
     # Turn running of track segment creation in SCT on and off
     icf.addFlag("InDet.Tracking.doTrackSegmentsSCT",
                 lambda prevFlags: (prevFlags.InDet.Tracking.doLowMu or
-                                   prevFlags.InDet.Tracking.doInnerDetectorCommissioning))
+                                   prevFlags.Beam.Type is BeamType.Cosmics))
     # Turn running of track segment creation in TRT on and off
     icf.addFlag("InDet.Tracking.doTrackSegmentsTRT",
                 lambda prevFlags: (prevFlags.InDet.Tracking.doLowMu or
-                                   prevFlags.InDet.Tracking.doInnerDetectorCommissioning))
+                                   prevFlags.Beam.Type is BeamType.Cosmics))
     # turn on / off TRT extensions
     icf.addFlag("InDet.Tracking.doTRTExtension", True)
     # control to run TRT Segment finding (do it always after new tracking!)
@@ -145,7 +151,7 @@ def createInDetConfigFlags():
             prevFlags.InDet.Tracking.doLowMu)))
     icf.addFlag("InDet.Tracking.doTrackSegmentsDisappearing", lambda prevFlags: (
         not(prevFlags.Reco.EnableHI or
-            prevFlags.InDet.Tracking.doInnerDetectorCommissioning)))
+            prevFlags.Beam.Type is BeamType.Cosmics)))
     # Turn running of BeamGas second pass on and off
     icf.addFlag("InDet.Tracking.doBeamGas",
                 lambda prevFlags: prevFlags.Beam.Type is BeamType.SingleBeam)
@@ -156,7 +162,6 @@ def createInDetConfigFlags():
     # Switch for running Robust settings
     icf.addFlag("InDet.Tracking.doRobustReco", False)
     # Switch for running looser settings in ID for commissioning
-    icf.addFlag("InDet.Tracking.doInnerDetectorCommissioning", lambda prevFlags: prevFlags.Beam.Type is BeamType.Cosmics)
     # Special reconstruction for BLS physics
     icf.addFlag("InDet.Tracking.doBLS", False)
     # Special configuration for low-mu runs
