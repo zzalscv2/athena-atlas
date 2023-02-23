@@ -11,7 +11,8 @@ ATLAS_EXT_PROJECT_NAME="AthenaExternals"
 ATLAS_BUILDTYPE="RelWithDebInfo"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=102
                         -DLCG_VERSION_POSTFIX="b_ATLAS_11"
-                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v36r10.000/Gaudi-v36r10.000.tar.gz;URL_MD5;8ec6a34071aacf7f796f74010df69d37")
+                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v36r10.000/Gaudi-v36r10.000.tar.gz;URL_MD5;8ec6a34071aacf7f796f74010df69d37"
+                        -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/archive/refs/tags/v23.4.0.tar.gz;URL_MD5;b2a4293abcd36470b781392bdd936da4")
 ATLAS_EXTRA_MAKE_ARGS=()
 
 # Let "the common script" do all the heavy lifting.
