@@ -96,23 +96,8 @@ if DQMonFlags.doGlobalMon():
         ManagedAthenaGlobalPhysMon.DataType            = DQMonFlags.monManDataType()
         ManagedAthenaGlobalPhysMon.Environment         = DQMonFlags.monManEnvironment()
 
-        from MuonSelectorTools.MuonSelectorToolsConf import CP__MuonSelectionTool
-        ToolSvc += CP__MuonSelectionTool("DQTMuonSelectionTool",
-                                        MaxEta=2.4,
-                                        MuQuality=1)
-        ToolSvc += CfgMgr.CP__IsolationSelectionTool("DQTIsoGradientTool",
-                                                    MuonWP="Loose_VarRad",
-                                                    ElectronWP="Loose_VarRad"
-                                                    );
-
-        from DataQualityTools.DataQualityToolsConf import DQTGlobalWZFinderTool
-        MyDQTGlobalWZFinderTool = DQTGlobalWZFinderTool(
-            name  = 'DQTGlobalWZFinderTool',
-            doTrigger = rec.doTrigger(),
-            MuonSelectionTool = ToolSvc.DQTMuonSelectionTool,
-            IsolationSelectionTool = ToolSvc.DQTIsoGradientTool
-        )
-        ManagedAthenaGlobalPhysMon.AthenaMonTools += [ MyDQTGlobalWZFinderTool ];
+        from DataQualityTools.DQTGlobalWZFinderAlg import DQTGlobalWZFinderAlg
+        topSequence += DQTGlobalWZFinderAlgConfig(DQMonFlags)
 
         from DataQualityTools.DQTLumiMonAlg import DQTLumiMonAlgConfig
         topSequence += DQTLumiMonAlgConfig(DQMonFlags, isOld=True)
