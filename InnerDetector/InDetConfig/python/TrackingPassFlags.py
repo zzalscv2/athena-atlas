@@ -222,14 +222,13 @@ def createTrackingPassFlags():
 
     # --- cluster cuts
     icf.addFlag("minClusters", lambda pcf:
-                    3 if (pcf.Detector.EnablePixel and not pcf.Detector.EnableSCT) else
-                    6  if (pcf.Detector.EnableSCT and not pcf.Detector.EnablePixel) else
-                    6 if pcf.InDet.Tracking.doInnerDetectorCommissioning else
-                    minClusters_ranges( pcf ) )
+                3 if (pcf.Detector.EnablePixel and not pcf.Detector.EnableSCT) else
+                6  if (pcf.Detector.EnableSCT and not pcf.Detector.EnablePixel) else
+                6 if pcf.Beam.Type is BeamType.Cosmics else
+                minClusters_ranges( pcf ) )
 
     icf.addFlag("minSiNotShared", lambda pcf:
-                    5 if pcf.InDet.Tracking.doInnerDetectorCommissioning else
-                    6)
+                5 if pcf.Beam.Type is BeamType.Cosmics else 6)
     
     icf.addFlag("maxShared", 1) # cut is now on number of shared modules
     icf.addFlag("minPixel", 0)
@@ -309,8 +308,8 @@ def createTrackingPassFlags():
     icf.addFlag("SecondarynHolesGapMax"     , 2 )
 
     icf.addFlag("rejectShortExtensions"     , lambda pcf:
-                    False if pcf.InDet.Tracking.doInnerDetectorCommissioning else
-                    rejectShortExtensions_ranges( pcf ) ) # extension finder in back tracking
+                False if pcf.Beam.Type is BeamType.Cosmics else
+                rejectShortExtensions_ranges( pcf ) ) # extension finder in back tracking
                     
     icf.addFlag("SiExtensionCuts"           , SiExtensionCuts_ranges) # cut in Si Extensions before fit
 
@@ -1034,11 +1033,11 @@ def createSCTTrackingPassFlags():
                            else Xi2max_ranges( pcf )
     icf.Xi2maxNoAdd      = lambda pcf: 100.0 if pcf.Beam.Type is BeamType.Cosmics \
                            else Xi2maxNoAdd_ranges( pcf )
-    icf.nWeightedClustersMin = lambda pcf: 4 if pcf.InDet.Tracking.doInnerDetectorCommissioning and pcf.Beam.Type is BeamType.Cosmics \
+    icf.nWeightedClustersMin = lambda pcf: 4 if pcf.Beam.Type is BeamType.Cosmics \
                                else 6
-    icf.minClusters      = lambda pcf: 4 if pcf.InDet.Tracking.doInnerDetectorCommissioning and pcf.Beam.Type is BeamType.Cosmics \
+    icf.minClusters      = lambda pcf: 4 if pcf.Beam.Type is BeamType.Cosmics \
                            else minClusters_ranges( pcf )
-    icf.minSiNotShared   = lambda pcf: 4 if pcf.InDet.Tracking.doInnerDetectorCommissioning and pcf.Beam.Type is BeamType.Cosmics \
+    icf.minSiNotShared   = lambda pcf: 4 if pcf.Beam.Type is BeamType.Cosmics \
                            else 5
     
     icf.RunPixelPID      = False
