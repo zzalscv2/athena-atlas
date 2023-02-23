@@ -40,7 +40,7 @@ namespace Trk {
     based on KalmanUpdatorSMatrix from:
     @author Wolfgang Liebig <http://consult.cern.ch/xwho/people/54608>
  */
-class KalmanUpdatorAmg
+class KalmanUpdatorAmg final
   : virtual public IUpdator
   , public AthAlgTool
 {
@@ -174,7 +174,7 @@ public:
     const AmgSymMatrix(5) &,
     const Amg::VectorX&,
     const Amg::MatrixX&,
-    const int&,
+    int,
     Trk::FitQualityOnSurface*&,
     bool) const override final;
 
@@ -275,7 +275,7 @@ private:
   //!< Avoid multiplications with sparse H matrices by cutting 2D rows&columns
   //!< out of the full cov matrix.
   template<int DIM>
-  AmgSymMatrix(DIM) projection_T(const AmgSymMatrix(5) &, const int&) const;
+  AmgSymMatrix(DIM) projection_T(const AmgSymMatrix(5) &, int) const;
 
   /** also the chi2 calculation and FitQuality object creation is
       combined in an extra method. It is called by all the XXX-FitQuality()
@@ -329,7 +329,7 @@ private:
                  const AmgSymMatrix(5) &) const;
 
   //!< method testing correct use of LocalParameters
-  bool consistentParamDimensions(const LocalParameters&, const int&) const;
+  bool consistentParamDimensions(const LocalParameters&, int) const;
 
   //!< Test if angles are inside boundaries.
   /** Absolute phi values should be in [-pi, pi] (how about endpoints?)
@@ -493,7 +493,7 @@ KalmanUpdatorAmg::calculateFilterStep_T(const AmgVector(5) & trkPar,
 
 template<int DIM>
 AmgSymMatrix(DIM) Trk::KalmanUpdatorAmg::projection_T(const AmgSymMatrix(5) & M,
-                                                      const int& key) const
+                                                      int key) const
 {
   if (key == 3 || key == 7 ||
       key == 15) { // shortcuts for the most common use cases

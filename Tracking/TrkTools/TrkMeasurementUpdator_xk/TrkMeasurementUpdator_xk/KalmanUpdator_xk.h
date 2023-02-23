@@ -107,7 +107,7 @@ namespace Trk {
 	 FitQualityOnSurface*&) const override final;
       virtual std::pair<AmgVector(5),AmgSymMatrix(5)>* updateParameterDifference
 	(const AmgVector(5)&,const AmgSymMatrix(5)&, const Amg::VectorX&, const Amg::MatrixX&,
-	 const int&,Trk::FitQualityOnSurface*&,bool) const override final;
+	 int,Trk::FitQualityOnSurface*&,bool) const override final;
 
       virtual bool addToState
 	(PatternTrackParameters&,const Amg::Vector2D&  ,const Amg::MatrixX&,

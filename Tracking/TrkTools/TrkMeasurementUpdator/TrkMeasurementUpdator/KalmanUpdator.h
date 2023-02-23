@@ -40,7 +40,7 @@ namespace Trk {
 
     @author M. Elsing, W. Liebig <http://consult.cern.ch/xwho>
  */
-class KalmanUpdator
+class KalmanUpdator final
   : virtual public IUpdator
   , public AthAlgTool
 {
@@ -171,7 +171,7 @@ public:
     const AmgSymMatrix(5) &,
     const Amg::VectorX&,
     const Amg::MatrixX&,
-    const int&,
+    int,
     Trk::FitQualityOnSurface*&,
     bool) const override final
   {
@@ -231,7 +231,7 @@ private:
                  const Amg::MatrixX&) const;
 
   //! method testing correct use of LocalParameters */
-  bool consistentParamDimensions(const LocalParameters&, const int&) const;
+  bool consistentParamDimensions(const LocalParameters&, int) const;
   //! tests if ranges of abolute phi (-pi, pi) and theta (0, pi) are correct */
   bool thetaPhiWithinRange(const Amg::VectorX&, const int key = 31) const;
   //! tests if ranges of phi (-pi, pi) and theta (0, pi) residuals are correct
