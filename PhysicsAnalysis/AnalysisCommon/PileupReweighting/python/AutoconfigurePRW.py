@@ -23,7 +23,7 @@ def getLumicalcFiles(campaign):
             'GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root'
         )
 
-    elif campaign in [Campaign.MC21a]:
+    elif campaign in [Campaign.MC21a, Campaign.MC23a]:
         list.append(
             'GoodRunsLists/data22_13p6TeV/20220902/ilumicalc_histograms_None_430536-430648_OflLumi-Run3-001.root'
         )
@@ -77,6 +77,10 @@ def defaultConfigFiles(campaign):
     elif campaign in [Campaign.MC21a]:
         list.append(
             'PileupReweighting/mc21_common/mc21a.410000.physlite.prw.v1.root'
+        )
+    elif campaign in [Campaign.MC23a]:
+        list.append(
+            'PileupReweighting/mc23_common/mc23a.410000.physlite.prw.v1.root'
         )
     else:
         raise ValueError(f'Unsupported campaign {campaign}')
