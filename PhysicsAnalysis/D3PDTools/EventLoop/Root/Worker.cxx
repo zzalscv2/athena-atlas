@@ -37,6 +37,7 @@
 #include <EventLoop/StopwatchModule.h>
 #include <EventLoop/PostClosedOutputsModule.h>
 #include <EventLoop/TEventModule.h>
+#include <EventLoop/WorkerConfigModule.h>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/RootUtils.h>
 #include <RootCoreUtils/ThrowMsg.h>
@@ -388,6 +389,7 @@ namespace EL
       m_modules.push_back (std::make_unique<Detail::AlgorithmTimerModule> ());
     m_modules.push_back (std::make_unique<Detail::FileExecutedModule> ());
     m_modules.push_back (std::make_unique<Detail::EventCountModule> ());
+    m_modules.push_back (std::make_unique<Detail::WorkerConfigModule> ());
     m_modules.push_back (std::make_unique<Detail::AlgorithmStateModule> ());
     m_modules.push_back (std::make_unique<Detail::PostClosedOutputsModule> ());
 

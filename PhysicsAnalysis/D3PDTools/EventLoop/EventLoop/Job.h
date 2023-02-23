@@ -221,6 +221,19 @@ namespace EL
     static const std::string optSkipEvents;
 
 
+    /// \brief a python configuration file that will be executed on
+    /// the worker
+    ///
+    /// This allows to inspect the meta-data of the first input file
+    /// and configure the job accordingly.
+    ///
+    /// EXPERIMENTAL: This feature is currently (23 Feb 23) new and
+    /// experimental and details of its implementation and usage may
+    /// still change.
+  public:
+    static const std::string optWorkerConfigFile;
+
+
     /// description: the name of the option for selecting the number
     ///   of files per batch job.  (only BatchDriver and derived
     ///   drivers).

@@ -13,6 +13,9 @@
 #   error "This header should not be used in Athena"
 #endif // XAOD_STANDALONE
 
+#include <memory>
+#include <vector>
+
 // Forward declaration(s):
 namespace xAOD {
    class TEvent;

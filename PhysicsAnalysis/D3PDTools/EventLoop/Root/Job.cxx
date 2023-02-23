@@ -37,6 +37,7 @@ namespace EL
   const std::string Job::optAlgorithmTimer = "nc_EventLoop_AlgorithmTimer";
   const std::string Job::optMaxEvents = "nc_EventLoop_MaxEvents";
   const std::string Job::optSkipEvents = "nc_EventLoop_SkipEvents";
+  const std::string Job::optWorkerConfigFile = "nc_EventLoop_WorkerConfigFile";
   const std::string Job::optFilesPerWorker = "nc_EventLoop_FilesPerWorker";
   const std::string Job::optEventsPerWorker = "nc_EventLoop_EventsPerWorker";
   const std::string Job::optWorkerPostClosedOutputsExecutable = "nc_EventLoop_WorkerPostClosedOutputsExecutable";

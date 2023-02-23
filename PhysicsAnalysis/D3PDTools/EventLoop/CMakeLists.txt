@@ -28,7 +28,7 @@ atlas_add_root_dictionary( EventLoop
    EventLoop/LLDriver.h EventLoop/LSFDriver.h EventLoop/LocalDriver.h
    EventLoop/OutputStream.h EventLoop/MetricsSvc.h EventLoop/SoGEDriver.h
    EventLoop/StatusCode.h EventLoop/TorqueDriver.h
-   EventLoop/VomsProxySvc.h EventLoop/SlurmDriver.h
+   EventLoop/VomsProxySvc.h EventLoop/SlurmDriver.h EventLoop/WorkerConfig.h
    Root/LinkDef.h
    EXTERNAL_PACKAGES ROOT )
 
