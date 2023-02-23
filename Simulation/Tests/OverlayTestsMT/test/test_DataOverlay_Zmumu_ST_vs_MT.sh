@@ -22,7 +22,7 @@ Overlay_tf.py \
 --outputRDOFile MC_plus_data.MT.RDO.pool.root \
 --triggerConfig 'Overlay=NONE' \
 --maxEvents 10 --digiSeedOffset1 511 --digiSeedOffset2 727 \
---conditionsTag CONDBR2-BLKPA-2016-12-01 \
+--conditionsTag CONDBR2-BLKPA-RUN2-10 \
 --samplingFractionDbTag FTFP_BERT_BIRK \
 --preExec 'from LArROD.LArRODFlags import larRODFlags;larRODFlags.nSamples.set_Value_and_Lock(4);from LArConditionsCommon.LArCondFlags import larCondFlags; larCondFlags.OFCShapeFolder.set_Value_and_Lock("4samples1phase")' \
 --postInclude 'EventOverlayJobTransforms/Rt_override_CONDBR2-BLKPA-2015-12.py' \
@@ -43,7 +43,7 @@ then
     --outputRDOFile MC_plus_data.ST.RDO.pool.root \
     --triggerConfig 'Overlay=NONE' \
     --maxEvents 10 --digiSeedOffset1 511 --digiSeedOffset2 727 \
-    --conditionsTag CONDBR2-BLKPA-2016-12-01 \
+    --conditionsTag CONDBR2-BLKPA-RUN2-10 \
     --samplingFractionDbTag FTFP_BERT_BIRK \
     --preExec 'from LArROD.LArRODFlags import larRODFlags;larRODFlags.nSamples.set_Value_and_Lock(4);from LArConditionsCommon.LArCondFlags import larCondFlags; larCondFlags.OFCShapeFolder.set_Value_and_Lock("4samples1phase")' \
     --postInclude 'EventOverlayJobTransforms/Rt_override_CONDBR2-BLKPA-2015-12.py' \

@@ -58,7 +58,7 @@ def overlayTestFlags(flags, args):
         flags.Input.Files = defaultTestFiles.HITS_DATA_OVERLAY
         flags.Input.SecondaryFiles = defaultTestFiles.RAW_BKG
         flags.Output.RDOFileName = "dataOverlayRDO.pool.root"
-        flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2016-12-01"
+        flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-RUN2-10"
         flags.IOVDb.DatabaseInstance = "CONDBR2"
         flags.Overlay.DataOverlay = True
         from Campaigns import DataOverlayPPTest
