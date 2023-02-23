@@ -7,7 +7,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 from TrigCaloRec.TrigCaloRecConf import TrigCaloClusterMaker, TrigCaloTowerMaker
-from TrigCaloRec.TrigCaloRecConf import HLTCaloCellMaker as _HLTCaloCellMaker
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
 mlog = logging.getLogger ('TrigCaloRecConfig')
@@ -314,17 +313,6 @@ class TrigCaloClusterMaker_topo (TrigCaloClusterMakerBase):
              self.TrigLocalCalib.TrigLCClassify.UseNormalizedEnergyDensity = True
 
         from CaloRec import CaloClusterTopoCoolFolder  # noqa: F401
-
-class HLTCaloCellSeedLessMaker (_HLTCaloCellMaker):
-    __slots__ = []
-    def __init__(self, name="CaloCellSeedLessFS"):
-        super( HLTCaloCellSeedLessMaker, self ).__init__(name)
-        from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-        from TrigT2CaloCommon.TrigCaloDataAccessConfig import CaloDataAccessSvcDependencies
-        self.ExtraInputs=CaloDataAccessSvcDependencies
-        self.CellsName="SeedLessFS"
-        self.RoIs=''
-        self.TrigDataAccessMT=svcMgr.TrigCaloDataAccessSvc
 
 
 def HLTCaloCellMaker(flags, name, roisKey='UNSPECIFIED', CellsName=None, monitorCells=True):
