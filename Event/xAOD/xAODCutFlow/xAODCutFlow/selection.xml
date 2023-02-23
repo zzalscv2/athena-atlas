@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration -->
+<!-- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
 
    <!-- xAOD::CutBookkeeper interface type(s). -->
@@ -8,6 +8,8 @@
           id="F2F90B2F-B879-43B8-AF9B-0F843E299A87" />
    <typedef name="xAOD::CutBookkeeper" />
    <typedef name="xAOD::CutBookkeeperContainer" />
+   <typedef name="xAOD::CutBookkeeperLink_t" />
+   <typedef name="xAOD::CutBookkeeperLinks_t" />
 
    <!-- xAOD::CutBookkeeper auxiliary type(s). -->
    <class name="xAOD::CutBookkeeperAuxContainer_v1"

@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration -->
+<!-- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
 
    <!-- xAOD::MissingET interface type(s). -->
@@ -70,5 +70,7 @@
    <class name="xAOD::MissingETAuxAssociationMap_v2"
           id="05184C74-A3CE-4C89-959E-D7E9F0A98D13" />
    <typedef name="xAOD::MissingETAuxAssociationMap" />
+
+   <typedef name="MissingETBase::Types::jetlink_t" />
 
 </lcgdict>
