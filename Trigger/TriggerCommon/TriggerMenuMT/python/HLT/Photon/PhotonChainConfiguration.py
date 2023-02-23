@@ -31,13 +31,13 @@ def hipTRTMenuSequenceCfg(flags):
     return hipTRTMenuSequence(flags)
 
 def precisionPhotonCaloIsoMenuSequenceCfg(flags, name, ion):
-    return precisionPhotonCaloIsoMenuSequence(flags, name, ion)
+    return precisionPhotonCaloIsoMenuSequence(flags, name, ion=ion)
 
 def precisionPhotonMenuSequenceCfg(flags, name, ion):
-    return precisionPhotonMenuSequence(flags, name, ion)
+    return precisionPhotonMenuSequence(flags, name, ion=ion)
 
 def precisionCaloMenuSequenceCfg(flags, name, ion):
-    return precisionCaloMenuSequence(flags, name, ion)
+    return precisionCaloMenuSequence(flags, name, ion=ion)
 
 def fastPhotonCaloSequenceCfg( flags, doRinger = False ):
     return fastCaloMenuSequence(flags, 'Photon', doRinger=doRinger)
