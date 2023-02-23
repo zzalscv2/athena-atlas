@@ -41,6 +41,8 @@ def TrackStateOnSurfaceDecoratorCfg(ConfigFlags, name, **kwargs):
     from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
     acc = SCT_ReadoutGeometryCfg(ConfigFlags) # To produce SCT_DetectorElementCollection
 
+    kwargs.setdefault("DecorationPrefix", "notSet")
+
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
     AtlasExtrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(ConfigFlags))
     acc.addPublicTool(AtlasExtrapolator)
