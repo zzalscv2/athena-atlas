@@ -125,24 +125,22 @@ def ActsGeantFollowerCfg(flags, name="ActsGeantFollowerTool", **kwargs):
     result.merge(tgSvc)
 
     print('DEF WRITER : ')
-    Actsextrapol = ActsExtrapolationToolCfg(flags,
-                                        InteractionMultiScatering = True,
-                                        InteractionEloss = True,
-                                        InteractionRecord=True,
-                                        OutputLevel=INFO)                                 
-    result.merge(Actsextrapol)
+    Actsextrapol = result.popToolsAndMerge(ActsExtrapolationToolCfg(flags,
+                                                                    InteractionMultiScatering = True,
+                                                                    InteractionEloss = True,
+                                                                    InteractionRecord=True,
+                                                                    OutputLevel=INFO))
+    result.addPublicTool(Actsextrapol)
 
     from TrkConfig.AtlasExtrapolationEngineConfig import AtlasExtrapolationEngineCfg
-    extrapAcc = AtlasExtrapolationEngineCfg(flags)
-    AtlasExtrapolationEngine = extrapAcc.getPrimary()
-    result.merge(extrapAcc)
+    AtlasExtrapolationEngine = result.getPrimaryAndMerge(AtlasExtrapolationEngineCfg(flags))
 
 
     #Setup Helper
     followingHelper = CompFactory.ActsGeantFollowerHelper("ActsGeantFollowerHelper",
                                                           **kwargs,
                                                           ExtrapolationEngine=AtlasExtrapolationEngine,
-                                                          ActsExtrapolator=Actsextrapol.getPrimary(),
+                                                          ActsExtrapolator=result.getPublicTool(Actsextrapol.name), # PublicToolHandle
                                                           ExtrapolateDirectly=False,
                                                           ExtrapolateIncrementally=True,
                                                           OutputLevel=INFO)

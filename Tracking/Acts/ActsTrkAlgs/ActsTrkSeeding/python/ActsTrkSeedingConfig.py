@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -17,11 +17,12 @@ def ActsTrkITkPixelSeedingFromAthenaCfg(flags,
 
     # Need To add additional tool(s)
     # Tracking Geometry Tool
-    geoTool = acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
+    geoTool = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
+    acc.addPublicTool(geoTool)
 
     # ATLAS Converter Tool
     converterTool = acc.popToolsAndMerge(ActsATLASConverterToolCfg(flags))
-    
+
     # Track Param Estimation Tool
     trackEstimationTool = acc.popToolsAndMerge(TrackParamsEstimationToolCfg(flags))
 
@@ -35,7 +36,7 @@ def ActsTrkITkPixelSeedingFromAthenaCfg(flags,
     kwargs.setdefault('InputSpacePoints', ['ITkPixelSpacePoints'])
     kwargs.setdefault('OutputSeeds', 'ITkPixelSeeds')
     kwargs.setdefault('SeedTool', seedTool)
-    kwargs.setdefault('TrackingGeometryTool', geoTool)
+    kwargs.setdefault('TrackingGeometryTool', acc.getPublicTool(geoTool.name)) # PublicToolHandle
     kwargs.setdefault('ATLASConverterTool', converterTool)
     kwargs.setdefault('TrackParamsEstimationTool', trackEstimationTool)
     kwargs.setdefault('OutputEstimatedTrackParameters', 'ITkPixelEstimatedTrackParams')
@@ -57,11 +58,12 @@ def ActsTrkITkStripSeedingFromAthenaCfg(flags,
 
     # Need To add additional tool(s)
     # Tracking Geometry Tool
-    geoTool = acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
+    geoTool = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
+    acc.addPublicTool(geoTool)
 
     # ATLAS Converter Tool
     converterTool = acc.popToolsAndMerge(ActsATLASConverterToolCfg(flags))
-    
+
     # Track Param Estimation Tool
     trackEstimationTool = acc.popToolsAndMerge(TrackParamsEstimationToolCfg(flags))
 
@@ -75,7 +77,7 @@ def ActsTrkITkStripSeedingFromAthenaCfg(flags,
     kwargs.setdefault('InputSpacePoints', ['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints'])
     kwargs.setdefault('OutputSeeds', 'ITkStripSeeds')
     kwargs.setdefault('SeedTool', seedTool)
-    kwargs.setdefault('TrackingGeometryTool', geoTool)
+    kwargs.setdefault('TrackingGeometryTool', acc.getPublicTool(geoTool.name)) # PublicToolHandle
     kwargs.setdefault('ATLASConverterTool', converterTool)
     kwargs.setdefault('TrackParamsEstimationTool', trackEstimationTool)
     kwargs.setdefault('OutputEstimatedTrackParameters', 'ITkStripEstimatedTrackParams')

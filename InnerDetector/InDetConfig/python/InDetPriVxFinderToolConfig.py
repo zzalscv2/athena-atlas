@@ -179,13 +179,13 @@ def ActsGaussAdaptiveMultiFindingCfg(flags, name="ActsAdaptiveMultiPriVtxFinderT
 
     if "TrackingGeometryTool" not in kwargs:
         from ActsGeometry.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(
-            ActsTrackingGeometryToolCfg(flags)))
+        kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(
+            ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
 
     if "ExtrapolationTool" not in kwargs:
         from ActsGeometry.ActsGeometryConfig import ActsExtrapolationToolCfg
-        kwargs.setdefault("ExtrapolationTool", acc.getPrimaryAndMerge(
-            ActsExtrapolationToolCfg(flags)))
+        kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(
+            ActsExtrapolationToolCfg(flags))) # PrivateToolHandle
 
     kwargs.setdefault("useBeamConstraint",
                       flags.Tracking.PriVertex.useBeamConstraint)
@@ -209,13 +209,13 @@ def ActsIterativeFindingCfg(flags, name="ActsIterativePriVtxFinderTool", **kwarg
 
     if "TrackingGeometryTool" not in kwargs:
         from ActsGeometry.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(
-            ActsTrackingGeometryToolCfg(flags)))
+        kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(
+            ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
 
     if "ExtrapolationTool" not in kwargs:
         from ActsGeometry.ActsGeometryConfig import ActsExtrapolationToolCfg
-        kwargs.setdefault("ExtrapolationTool", acc.getPrimaryAndMerge(
-            ActsExtrapolationToolCfg(flags)))
+        kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(
+            ActsExtrapolationToolCfg(flags))) # PrivateToolHandle
 
     kwargs.setdefault("useBeamConstraint",
                       flags.Tracking.PriVertex.useBeamConstraint)

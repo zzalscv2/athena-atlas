@@ -77,6 +77,7 @@ def ActsTrackingGeometrySvcCfg(flags, name = "ActsTrackingGeometrySvc", **kwargs
   result.addService(actsTrackingGeometrySvc)
   return result
 
+
 def ActsPropStepRootWriterSvcCfg(flags,
                                  name="ActsPropStepRootWriterSvc",
                                  **kwargs):
@@ -84,18 +85,21 @@ def ActsPropStepRootWriterSvcCfg(flags,
     result.addService(CompFactory.ActsPropStepRootWriterSvc(name, **kwargs))
     return result
 
+
 def ActsTrackingGeometryToolCfg(flags, name = "ActsTrackingGeometryTool" ) :
   result = ComponentAccumulator()
   result.merge(ActsTrackingGeometrySvcCfg(flags))
   result.merge(ActsAlignmentCondAlgCfg(flags))
-  result.addPublicTool(CompFactory.ActsTrackingGeometryTool(name), primary=True)
+  result.setPrivateTools(CompFactory.ActsTrackingGeometryTool(name))
   return result
+
 
 def NominalAlignmentCondAlgCfg(flags, name = "NominalAlignmentCondAlg", **kwargs) :
   result = ComponentAccumulator()
   result.merge(ActsTrackingGeometrySvcCfg(flags))
   result.addCondAlgo(CompFactory.NominalAlignmentCondAlg(name, **kwargs))
   return result
+
 
 def ActsAlignmentCondAlgCfg(flags, name = "ActsAlignmentCondAlg", **kwargs) :
   result = ComponentAccumulator()
@@ -118,12 +122,13 @@ def ActsAlignmentCondAlgCfg(flags, name = "ActsAlignmentCondAlg", **kwargs) :
   result.addCondAlgo(CompFactory.ActsAlignmentCondAlg(name, **kwargs))
   return result
 
+
 def ActsExtrapolationToolCfg(flags, name="ActsExtrapolationTool", **kwargs) :
   result=ComponentAccumulator()
   from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
   result.merge(AtlasFieldCacheCondAlgCfg(flags))
-  result.merge(ActsTrackingGeometryToolCfg(flags))
-  result.addPublicTool(CompFactory.ActsExtrapolationTool(name, **kwargs), primary=True)
+  kwargs.setdefault("TrackingGeometryTool", result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+  result.setPrivateTools(CompFactory.ActsExtrapolationTool(name, **kwargs))
   return result
 
 
@@ -133,55 +138,61 @@ def ActsMaterialTrackWriterSvcCfg(flags, name="ActsMaterialTrackWriterSvc", **kw
   result.addService(CompFactory.ActsMaterialTrackWriterSvc(name, **kwargs), primary=True)
   return result
 
+
 def ActsMaterialStepConverterToolCfg(flags, name = "ActsMaterialStepConverterTool", **kwargs ) :
   result=ComponentAccumulator()
   result.addPublicTool(CompFactory.ActsMaterialStepConverterTool(name, **kwargs), primary=True)
   return result
 
+
 def ActsSurfaceMappingToolCfg(flags, name = "ActsSurfaceMappingTool", **kwargs ) :
   result=ComponentAccumulator()
-  result.merge(ActsTrackingGeometryToolCfg(flags))
+  kwargs.setdefault("TrackingGeometryTool", result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
   result.addPublicTool(CompFactory.ActsSurfaceMappingTool(name, **kwargs), primary=True)
   return result
 
+
 def ActsVolumeMappingToolCfg(flags, name = "ActsVolumeMappingTool", **kwargs ) :
   result=ComponentAccumulator()
-  result.merge(ActsTrackingGeometryToolCfg(flags))
+  kwargs.setdefault("TrackingGeometryTool", result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
   result.addPublicTool(CompFactory.ActsVolumeMappingTool(name, **kwargs), primary=True)
   return result
+
 
 def ActsMaterialJsonWriterToolCfg(flags, name= "ActsMaterialJsonWriterTool", **kwargs) :
   result=ComponentAccumulator()
   result.addPublicTool(CompFactory.ActsMaterialJsonWriterTool(name, **kwargs), primary=True)
   return result
 
+
 def ActsObjWriterToolCfg(flags, name= "ActsObjWriterTool", **kwargs) :
   result=ComponentAccumulator()
   result.addPublicTool(CompFactory.ActsObjWriterTool(name, **kwargs), primary=True)
   return result
 
+
 def ActsExtrapolationAlgCfg(flags, name = "ActsExtrapolationAlg", **kwargs):
   result = ComponentAccumulator()
 
   if "ExtrapolationTool" not in kwargs:
-    kwargs["ExtrapolationTool"] = result.getPrimaryAndMerge(ActsExtrapolationToolCfg(flags))
+    kwargs["ExtrapolationTool"] = result.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) # PrivateToolHandle
 
   result.merge(ActsPropStepRootWriterSvcCfg(flags, FilePath="propsteps.root", TreeName="propsteps"))
   result.addEventAlgo(CompFactory.ActsExtrapolationAlg(name, **kwargs))
   return result
 
+
 def ActsATLASConverterToolCfg(flags, name="ActsATLASConverterTool", **kwargs):
     result = ComponentAccumulator()
-    result.setPrivateTools(
-      CompFactory.ActsATLASConverterTool(name,
-                                         TrackingGeometryTool=result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
-                                         **kwargs) )
+    kwargs.setdefault("TrackingGeometryTool", result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+    result.setPrivateTools(CompFactory.ActsATLASConverterTool(name, **kwargs) )
     return result
+
 
 def ActsWriteTrackingGeometryCfg(flags, name="ActsWriteTrackingGeometry", **kwargs):
     result = ComponentAccumulator()
 
-    result.merge(ActsTrackingGeometryToolCfg(flags))
+    kwargs.setdefault("TrackingGeometryTool", result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
 
     kwargs["MaterialJsonWriterTool"] = \
       result.getPrimaryAndMerge(ActsMaterialJsonWriterToolCfg(flags,
@@ -212,6 +223,7 @@ def ActsWriteTrackingGeometryCfg(flags, name="ActsWriteTrackingGeometry", **kwar
 
     result.addEventAlgo(CompFactory.ActsWriteTrackingGeometry(name, **kwargs))
     return result
+
 
 def ActsMaterialMappingCfg(flags, name = "ActsMaterialMapping", **kwargs):
     result = ComponentAccumulator()

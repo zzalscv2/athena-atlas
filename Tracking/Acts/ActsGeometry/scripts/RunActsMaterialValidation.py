@@ -87,12 +87,11 @@ log.debug('Dumping of ConfigFlags now.')
 flags.dump()
 
 from ActsGeometry.ActsGeometryConfig import ActsExtrapolationToolCfg
-extrapol = ActsExtrapolationToolCfg(flags,
-                                    "ActsExtrapolationTool",
-                                    InteractionMultiScatering = True,
-                                    InteractionEloss = True,
-                                    InteractionRecord = True)
-cfg.merge(extrapol)
+extrapol = cfg.popToolsAndMerge(ActsExtrapolationToolCfg(flags,
+                                                         "ActsExtrapolationTool",
+                                                         InteractionMultiScatering = True,
+                                                         InteractionEloss = True,
+                                                         InteractionRecord = True))
 
 from ActsGeometry.ActsGeometryConfig import ActsExtrapolationAlgCfg
 cfg.merge(ActsExtrapolationAlgCfg(flags,
@@ -101,7 +100,7 @@ cfg.merge(ActsExtrapolationAlgCfg(flags,
                                   EtaRange=[-5, 5],
                                   PtRange=[20, 100],
                                   WriteMaterialTracks = True,
-                                  ExtrapolationTool=extrapol.getPrimary()))
+                                  ExtrapolationTool=extrapol))
 
 from AthenaConfiguration.FPEAndCoreDumpConfig import FPEAndCoreDumpCfg
 cfg.merge(FPEAndCoreDumpCfg(flags))
