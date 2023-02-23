@@ -78,22 +78,22 @@ bool LVL1::jFEXtauAlgo::isSeedLocalMaxima(){
             int ttEt = getTTowerET(m_TTwindow[iphi][ieta]);
             m_ClusterEt += ttEt;
             //avoid comparing central seed to itself
-            if ((ieta == 1) && (iphi == 1)) {
+            if ((iphi == 1) && (ieta == 1)) {
                 continue;
             }
-            else if( (iphi > ieta) || (ieta==2 && iphi==2) ) { //strictly less than central
+            else if( (iphi > ieta) || (iphi==0 && ieta==0) ) { //less than or equal to central
                 if(central_seed<ttEt) {
                     return false;
                 }
             }
-            else if((ieta > iphi) || (ieta == 0 && iphi == 0)) { //less than or equal to central
+            else if( (iphi < ieta) || (iphi == 2 && ieta == 2)) { //strictly less than central
                 if(central_seed<=ttEt) {
                     return false;
                 }
             }
         }
     }
-
+    
     ATH_MSG_DEBUG("Tau Local Maxima found. with ClusterET = "<<m_ClusterEt);
     return true;
 }

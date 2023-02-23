@@ -81,15 +81,17 @@ namespace LVL1 {
         
         StatusCode ReadfromFile(const std::string& , std::unordered_map<unsigned int, std::vector<unsigned int> >&);
         
-        int SumEtSeed_EM(unsigned int TTID);
+        int SumEtSeed(unsigned int TTID);
         int getEt(unsigned int TTID);
-        bool isLM(unsigned int TTID, int CentralSeedEt);
+        bool isLM(unsigned int TTID);
         bool isLMabove(unsigned int TTID);
         
         //Conditions for greater
-        bool condG(unsigned int TTID);
+        unsigned int elementsCorr(unsigned int TTID);
+        bool condCorr(unsigned int TTID);
         //Conditions for greater or equal
-        bool condGE(unsigned int TTID);
+        unsigned int elementsCorr2(unsigned int TTID);
+        bool condCorr2(unsigned int TTID);
         
         std::array<float,2> globalEtaPhi(int TTID);
 

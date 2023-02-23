@@ -362,7 +362,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
                 m_SRJet_tobwords.push_back(std::move(jJ_tob));
             } 
             
-            if(std::fabs(FCALJets.getCentreTTEta())<2.6){
+            if(std::fabs(FCALJets.getCentreTTEta())<2.51){
                 uint32_t LRFCAL_Jet_tobword = m_IjFEXFormTOBsTool->formLRJetTOB(m_jfexid, iphi, ieta, m_LRJetET, thr_jLJ.resolutionMeV(),thr_jLJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
 
                 std::unique_ptr<jFEXTOB> jLJ_tob = std::make_unique<jFEXTOB>(); 

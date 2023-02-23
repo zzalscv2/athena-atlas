@@ -139,19 +139,29 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
                 //STEP 4: define TTID which will be the key for class in map
                 int myTTIDKey = m_jFEXalgoTowerID[centre_nphi][centre_neta];
                 
-                
                 //STEP 5: ignore when tower ID is zero. Should not happend though
                 if(myTTIDKey == 0) {
                     continue;
                 }
+                bool iAmJet = false;
                 
-                int CentralEt = SumEtSeed_EM(myTTIDKey);
-                bool iAmLM      = isLM(myTTIDKey,CentralEt);
-                bool iAmLMabove = isLMabove(myTTIDKey);
-                bool conGE = condGE(myTTIDKey);
-                bool conG = condG(myTTIDKey);                
-
-                bool iAmJet = (iAmLM && conGE ) || (iAmLMabove && conG );
+                //Know wich consition should satisfy
+                unsigned int elemCorr  = elementsCorr(myTTIDKey);
+                unsigned int elemCorr2 = elementsCorr2(myTTIDKey);
+                
+                
+                if(elemCorr == 0 and elemCorr2 == 0){
+                    iAmJet = isLM(myTTIDKey);
+                }
+                else if(elemCorr == 0 and elemCorr2 > 0){
+                    iAmJet = isLM(myTTIDKey) and condCorr2(myTTIDKey);
+                }
+                else if(elemCorr > 0 and elemCorr2 == 0){
+                    iAmJet = isLM(myTTIDKey) or (isLMabove(myTTIDKey) and condCorr(myTTIDKey));
+                }
+                else if(elemCorr > 0 and elemCorr2 > 0){
+                    iAmJet = (isLM(myTTIDKey) and condCorr2(myTTIDKey)) or (isLMabove(myTTIDKey) and condCorr(myTTIDKey));
+                }
                 
                 if(iAmJet){
                     
@@ -189,7 +199,7 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
                         if(m_storeEnergyRingTTIDs) {
                             TriggerTowerInformation.includeTTIDinFirstER(firstER_TT);
                         }                        
-                    }                    
+                    }    
 
                     // 2nd Energy Ring!
                     it_seed_map = m_2ndRingMap.find(myTTIDKey);
@@ -215,8 +225,8 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
     return FCALJetTowerIDLists;
 }
 
-int LVL1::jFEXForwardJetsAlgo::SumEtSeed_EM(unsigned int TTID) {
-
+int LVL1::jFEXForwardJetsAlgo::SumEtSeed(unsigned int TTID) {
+    
     // Exists the jTower in the mapping?
     auto it_seed_map = m_SeedRingMap.find(TTID);
     if(it_seed_map == m_SeedRingMap.end()) {
@@ -226,15 +236,14 @@ int LVL1::jFEXForwardJetsAlgo::SumEtSeed_EM(unsigned int TTID) {
     
     int summedEt = 0;
     for(const auto& seedTT : it_seed_map->second){
-        //TTs for FCAL 2 and FCAL 3 are avoid in the Seeding 
-        if(seedTT < 900000){
-            summedEt += getEt(seedTT);  
-        }
+        summedEt += getEt(seedTT);  
     }
     return summedEt;
 }
 
-bool LVL1::jFEXForwardJetsAlgo::isLM(unsigned int TTID, int CentralSeedEt){
+bool LVL1::jFEXForwardJetsAlgo::isLM(unsigned int TTID){
+    
+    int CentralSeedEt = SumEtSeed(TTID);
     
     // Exists the jTower in the seach (greater than) tower map?
     auto it_seed_map = m_SearchGMap.find(TTID);
@@ -246,7 +255,8 @@ bool LVL1::jFEXForwardJetsAlgo::isLM(unsigned int TTID, int CentralSeedEt){
     bool greater = true;
     for (const auto& Gtt : it_seed_map->second ){
         //checking if the Central seed has strictly more energy than its neighbours
-        if( CentralSeedEt <= SumEtSeed_EM(Gtt) ){
+        int tmpEt = SumEtSeed(Gtt);
+        if( CentralSeedEt <= tmpEt ){
             greater = false;
             break;
         }
@@ -256,7 +266,7 @@ bool LVL1::jFEXForwardJetsAlgo::isLM(unsigned int TTID, int CentralSeedEt){
     if(!greater){
         return false;
     }
-    
+
     // Exists the jTower in the seach (greater or equal than) tower map?
     it_seed_map = m_SearchGeMap.find(TTID);
     if(it_seed_map == m_SearchGeMap.end()) {
@@ -267,13 +277,14 @@ bool LVL1::jFEXForwardJetsAlgo::isLM(unsigned int TTID, int CentralSeedEt){
     bool greaterEqual = true;
     for (const auto& Gtt : it_seed_map->second ){
         //checking if the Central seed has strictly more energy than its neighbours
-        if( CentralSeedEt < SumEtSeed_EM(Gtt) ){
+        int tmpEt = SumEtSeed(Gtt);
+        if( CentralSeedEt < tmpEt ){
             greaterEqual = false;
             break;
         }
     }
-    
-    //No need to continue.. Not a LM
+
+    //Not a LM
     if(!greaterEqual){
         return false;
     }    
@@ -288,7 +299,6 @@ bool LVL1::jFEXForwardJetsAlgo::isLMabove(unsigned int TTID){
         ATH_MSG_FATAL("Could not find TT" << TTID << " in the correction (LM above) for jets file.");
         return false;
     }
-    
     // If there is not Trigger tower to correct with, then return false
     if( (it_seed_map->second).size() == 0){
         return false;
@@ -296,31 +306,41 @@ bool LVL1::jFEXForwardJetsAlgo::isLMabove(unsigned int TTID){
     
     for (const auto& Gtt : it_seed_map->second ){
         //Checking if the displaced TT is a seed
-        return isLM(Gtt,SumEtSeed_EM(Gtt));       
+        return isLM(Gtt);       
     }
     return false;
 }
 
-bool LVL1::jFEXForwardJetsAlgo::condG(unsigned int TTID){
+unsigned int LVL1::jFEXForwardJetsAlgo::elementsCorr(unsigned int TTID){
+    auto it_seed_map = m_CorrMap.find(TTID);
+    if(it_seed_map == m_CorrMap.end()) {
+        ATH_MSG_FATAL("Could not find TT" << TTID << " in the condition (greater than) for jets file.");
+        return 0;
+    }    
+    
+    return (it_seed_map->second).size();
+}
+
+bool LVL1::jFEXForwardJetsAlgo::condCorr(unsigned int TTID){
 
     // Exists the jTower in the correction tower map?
     auto it_seed_map = m_CorrMap.find(TTID);
     if(it_seed_map == m_CorrMap.end()) {
-         ATH_MSG_FATAL("Could not find TT" << TTID << " in the condition (greater than) for jets file.");
+        ATH_MSG_FATAL("Could not find TT" << TTID << " in the condition (greater than) for jets file.");
         return false;
     }
     
     // If there is no TT to check then the Et of central is always bigger :D
     if( (it_seed_map->second).size() == 0){
-         ATH_MSG_DEBUG("TT " << TTID << " does not have any TT obove to correct with");
-        return true;
+        return false;
     }
     
     int centralEt = getEt(TTID);
     
     for (const auto& Gtt : it_seed_map->second ){
         //Checking if central Et is always strictly greater than the previous TT Et 
-        if(centralEt <= getEt(Gtt) ){
+        int tmpEt = getEt(Gtt);
+        if(centralEt <= tmpEt ){
             return false;
         }
     }
@@ -328,7 +348,17 @@ bool LVL1::jFEXForwardJetsAlgo::condG(unsigned int TTID){
     
 }
 
-bool LVL1::jFEXForwardJetsAlgo::condGE(unsigned int TTID){
+unsigned int LVL1::jFEXForwardJetsAlgo::elementsCorr2(unsigned int TTID){
+    auto it_seed_map = m_Corr2Map.find(TTID);
+    if(it_seed_map == m_Corr2Map.end()) {
+        ATH_MSG_FATAL("Could not find TT" << TTID << " in the condition (greater than) for jets file.");
+        return 0;
+    }    
+    
+    return (it_seed_map->second).size();
+}
+
+bool LVL1::jFEXForwardJetsAlgo::condCorr2(unsigned int TTID){
 
     // Exists the jTower in the correction tower map?
     auto it_seed_map = m_Corr2Map.find(TTID);
@@ -336,16 +366,13 @@ bool LVL1::jFEXForwardJetsAlgo::condGE(unsigned int TTID){
          ATH_MSG_FATAL("Could not find TT" << TTID << " in the correction (greater or equal) file.");
         return false;
     }
-    // If there is no TT to check then the Et of central is always bigger :D
-    if( (it_seed_map->second).size() == 0){
-        return true;
-    }
     
     int centralEt = getEt(TTID);
     
     for (const auto& Gtt : it_seed_map->second ){
         //Checking if central Et is always greater or equal than the previous TT Et 
-        if(centralEt < getEt(Gtt) ){
+        int tmpEt = getEt(Gtt);
+        if(centralEt < tmpEt ){
             return false;
         }
     }
