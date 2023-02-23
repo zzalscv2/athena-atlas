@@ -22,12 +22,18 @@ void PrimaryParticleInformation::SuggestBarcode(int bc)
 
 int PrimaryParticleInformation::GetParticleBarcode() const
 {
-  return m_theParticle?HepMC::barcode(m_theParticle):m_barcode;
+  if (m_barcode !=  HepMC::INVALID_PARTICLE_BARCODE) return m_barcode;
+  if (m_theParticle) {
+      m_barcode = HepMC::barcode(m_theParticle);
+      return m_barcode;
+  }
+  return 0;
 }
 
 void PrimaryParticleInformation::SetParticle(HepMC::GenParticlePtr p)
 {
   m_theParticle=p;
+  m_barcode = HepMC::INVALID_PARTICLE_BARCODE;
 }
 
 void PrimaryParticleInformation::SetISFParticle(ISF::ISFParticle* p)
