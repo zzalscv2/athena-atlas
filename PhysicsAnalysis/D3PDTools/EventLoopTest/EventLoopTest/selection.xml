@@ -3,5 +3,6 @@
    <!-- Unit test types: -->
    <class name="EL::UnitTestAlg5" />
    <class name="EL::UnitTestAlg6" />
+   <class name="EL::UnitTestAlg7" />
 
 </lcgdict>
