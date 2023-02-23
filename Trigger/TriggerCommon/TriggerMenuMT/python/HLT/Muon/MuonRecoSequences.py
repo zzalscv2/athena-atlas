@@ -267,32 +267,16 @@ def muFastRecoSequence( flags, RoIs, doFullScanID = False, InsideOutMode=False, 
   ToolSvc += L2RpcClusterPreparator
 
   ### set up MuFastSteering ###
-  from TrigL2MuonSA.TrigL2MuonSAConfig import TrigL2MuonSAConfig
-  muFastAlg = TrigL2MuonSAConfig("Muon"+postFix, flags)
-
-  muFastAlg.Run2RecMuonRoI = "HLT_RecMURoIs"
-  muFastAlg.RecMuonRoI = "LVL1MuonRoIs"
-  muFastAlg.MuRoIs = RoIs
-  muFastAlg.MuonL2SAInfo = muNames.L2SAName+postFix
-  muFastAlg.L2IOCB = muNames.L2CBName+postFix
-  muFastAlg.MuonCalibrationStream = "MuonCalibrationStream"+postFix
-  muFastAlg.forID = muNames.L2forIDName+postFix
-  muFastAlg.forMS = "forMS"+postFix
-  muFastAlg.FILL_FSIDRoI = doFullScanID
-  muFastAlg.InsideOutMode = InsideOutMode
-  muFastAlg.TrackParticlesContainerName = getIDTracks(flags)
-  #Do not run topo road and inside-out mode at the same time
-  if InsideOutMode:
-    muFastAlg.topoRoad = False
-  
-  if l2mtmode:
-    muFastAlg.multitrackMode = True
-    muFastAlg.doEndcapForl2mt = False
-
-  if flags.Trigger.enableL1MuonPhase1:
-    muFastAlg.UseRun3Config = True
-  else:
-    muFastAlg.UseRun3Config = False
+  from TrigL2MuonSA.TrigL2MuonSAConfig_newJO import l2MuFastAlgCfg
+  muFastAlg = algorithmCAToGlobalWrapper(l2MuFastAlgCfg, flags,
+                                         roisKey = RoIs,
+                                         setup = postFix,
+                                         FILL_FSIDRoI = doFullScanID,
+                                         MuonL2SAInfo = muNames.L2SAName+postFix,
+                                         L2IOCB = muNames.L2CBName+postFix,
+                                         forID = muNames.L2forIDName+postFix,
+                                         forMS = "forMS"+postFix,
+                                         TrackParticlesContainerName = getIDTracks(flags))[0]
 
   muFastRecoSequence += muFastAlg
   sequenceOut = muFastAlg.MuonL2SAInfo
