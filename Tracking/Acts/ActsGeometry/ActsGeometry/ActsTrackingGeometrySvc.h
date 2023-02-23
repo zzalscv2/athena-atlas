@@ -85,6 +85,8 @@ private:
   Acts::CylinderVolumeBuilder::Config makeBeamPipeConfig(
       std::shared_ptr<const Acts::CylinderVolumeHelper> cvh) const;
 
+  bool runConsistencyChecks() const;
+
   ServiceHandle<StoreGateSvc> m_detStore;
   const InDetDD::SiDetectorManager* p_pixelManager;
   const InDetDD::SiDetectorManager* p_SCTManager;
@@ -111,6 +113,12 @@ private:
   Gaudi::Property<std::vector<size_t>> m_barrelMaterialBins{this, "BarrelMaterialBins", {10, 10}};
   Gaudi::Property<std::vector<size_t>> m_endcapMaterialBins{this, "EndcapMaterialBins", {5, 20}};
   Gaudi::Property<std::vector<std::string>> m_buildSubdetectors{this, "BuildSubDetectors", {"Pixel", "SCT", "TRT", "Calo", "HGTD"}};
+
+  BooleanProperty m_runConsistencyChecks{this, "RunConsistencyChecks", 
+    false, "Run extra consistency checks w.r.t to Trk::. This is SLOW!"};
+
+  StringProperty m_consistencyCheckOutput{this, "ConsistencyCheckOutput", 
+    "", "Output file for geometry debugging, will not write if empty",};
 
   ToolHandle<IActsTrackingVolumeBuilder> m_caloVolumeBuilder{this, 
       "CaloVolumeBuilder", "", "CaloVolumeBuilder"};
