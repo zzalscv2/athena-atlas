@@ -1,11 +1,13 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def OutputConditionsAlgCfg(flags, name="OutputConditionsAlg",outputFile='condobjs.root', **kwargs):
 
-    from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
+    result = ComponentAccumulator(sequence = CompFactory.AthSequencer("AthOutSeq", StopOverride=True))
 
-    result=PoolWriteCfg(flags)
+    from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
+    result.merge(PoolWriteCfg(flags))
 
     kwargs.setdefault("WriteIOV",True)
     oca=CompFactory.OutputConditionsAlg(name,**kwargs)
