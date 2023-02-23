@@ -170,6 +170,11 @@ class hardScatterStrategy(InDetPhysValFlagsJobProperty):
     allowedTypes = ['int']
     StoredValue = 0 # default to sum(pt²)
 
+class doIDTIDE(InDetPhysValFlagsJobProperty):
+    statusOn = True
+    allowedTypes = ['bool']
+    StoredValue = False
+
 
 # -----------------------------------------------------------------------------
 # 2nd step
@@ -242,7 +247,8 @@ _list_InDetPhysValJobProperties = [
     doHitLevelPlots,
     ancestorIDs,
     requiredSiHits,
-    hardScatterStrategy
+    hardScatterStrategy,
+    doIDTIDE
 ]
 
 for j in _list_InDetPhysValJobProperties:

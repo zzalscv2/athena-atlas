@@ -20,29 +20,24 @@ run() { (set -x; exec "$@") }
 
 lastref_dir=last_results
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-dcubeXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_R22.xml"
-dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_reco_r22.root"
+dcubeXml_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_idtide.xml"
+dcubeXml_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_lrt.xml"
+dcubeRef_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_idtide.root"
+dcubeRef_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_lrt.root"
 
 # Reco step based on test InDetPhysValMonitoring ART setup from Josh Moss.
 run Reco_tf.py \
   --inputRDOFile     ${ArtInFile} \
   --outputAODFile   physval.AOD.root \
-  --outputNTUP_PHYSVALFile physval.ntuple.root \
+  --outputDAOD_IDTIDEFile DAOD_TIDE.pool.root \
   --conditionsTag   'OFLCOND-MC16-SDR-RUN2-08' \
   --steering        doRAWtoALL \
   --checkEventCount False \
   --ignoreErrors    True \
   --maxEvents       100 \
-  --valid           True \
-  --validationFlags doInDet \
   --postExec 'condSeq.TileSamplingFractionCondAlg.G4Version = -1' \
   --preExec 'from InDetRecExample.InDetJobProperties import InDetFlags; \
   InDetFlags.doSlimming.set_Value_and_Lock(False); rec.doTrigger.set_Value_and_Lock(False); \
-  from InDetPhysValMonitoring.InDetPhysValJobProperties import InDetPhysValFlags; \
-  InDetPhysValFlags.doValidateTightPrimaryTracks.set_Value_and_Lock(True); \
-  InDetPhysValFlags.doValidateTracksInJets.set_Value_and_Lock(False); \
-  InDetPhysValFlags.doValidateGSFTracks.set_Value_and_Lock(False); \
-  InDetPhysValFlags.doPhysValOutput.set_Value_and_Lock(True); \
   rec.doDumpProperties=True; rec.doCalo=True; rec.doEgamma=True; \
   rec.doForwardDet=False; rec.doInDet=True; rec.doJetMissingETTag=True; \
   rec.doLArg=True; rec.doLucid=True; rec.doMuon=True; rec.doMuonCombined=True; \
@@ -51,29 +46,50 @@ run Reco_tf.py \
   AODFlags.ThinGeantTruth.set_Value_and_Lock(False);  \
   AODFlags.ThinNegativeEnergyCaloClusters.set_Value_and_Lock(False); \
   AODFlags.ThinNegativeEnergyNeutralPFOs.set_Value_and_Lock(False);\
-  AODFlags.ThinInDetForwardTrackParticles.set_Value_and_Lock(False) '
+  AODFlags.ThinInDetForwardTrackParticles.set_Value_and_Lock(False) ' "all:import InDetPhysValMonitoring.InDetPhysValDecoration; InDetPhysValMonitoring.InDetPhysValDecoration.getMetaData = lambda : ''"
 rec_tf_exit_code=$?
 echo "art-result: $rec_tf_exit_code reco"
 
 if [ $rec_tf_exit_code -eq 0 ]  ;then
+  #run IDPVM for IDTIDE derivation
+  run runIDPVM.py --doIDTIDE --doTracksInJets --doTracksInBJets --filesInput DAOD_TIDE.pool.root --outputFile physval_idtide.ntuple.root
+  #for LRT
+  run runIDPVM.py --doLargeD0Tracks --filesInput physval.AOD.root --outputFile physval_lrt.ntuple.root
+
   echo "download latest result"
   run art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
   run ls -la "$lastref_dir"
 
-  echo "compare with Rel 22.0.73"
+  echo "compare with nightly 2023-02-15T2101 for IDTIDE derivation"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube \
-    -c ${dcubeXml} \
-    -r ${dcubeRef} \
-    physval.ntuple.root
-  echo "art-result: $? dcube"
+    -p -x dcube_idtide \
+    -c ${dcubeXml_idtide} \
+    -r ${dcubeRef_idtide} \
+    physval_idtide.ntuple.root
+  echo "art-result: $? dcube_idtide"
   
   echo "compare with last build"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_last \
-    -c ${dcubeXml} \
-    -r ${lastref_dir}/physval.ntuple.root \
-    physval.ntuple.root
-  echo "art-result: $? dcube_last"
+    -p -x dcube_idtide_last \
+    -c ${dcubeXml_idtide} \
+    -r ${lastref_dir}/physval_idtide.ntuple.root \
+    physval_idtide.ntuple.root
+  echo "art-result: $? dcube_idtide_last"
+
+  echo "compare with nightly 2023-02-15T2101 for LRT and normal tracks"
+  $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+    -p -x dcube_lrt \
+    -c ${dcubeXml_lrt} \
+    -r ${dcubeRef_lrt} \
+    physval_lrt.ntuple.root
+  echo "art-result: $? dcube_lrt"
+  
+  echo "compare with last build"
+  $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+    -p -x dcube_lrt_last \
+    -c ${dcubeXml_lrt} \
+    -r ${lastref_dir}/physval_lrt.ntuple.root \
+    physval_lrt.ntuple.root
+  echo "art-result: $? dcube_lrt_last"
 fi
 

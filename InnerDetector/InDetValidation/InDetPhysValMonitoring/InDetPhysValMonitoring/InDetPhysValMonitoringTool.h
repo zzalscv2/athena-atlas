@@ -172,6 +172,7 @@ private:
     BooleanProperty m_onlyFillMatched {this, "onlyFillTruthMatched", false, "Only fill truth-to-reco (eff, reso, matched hit) plots"}; 
     BooleanProperty m_doTRTExtensionPlots {this, "doTRTExtensionPlots", true, "do TRT extension plots"};
     BooleanProperty m_useGRL {this, "useGRL", false, "Apply GRL selection or not when running on data"};
+    BooleanProperty m_doIDTIDEPlots{this, "doIDTIDEPlots", false, "do ID TIDE derivation plots"};
 
     FloatProperty m_maxTrkJetDR{this,"maxTrkJetDR",0.4,"the maximum dR to jets to allow for track-in-jet plots"}; 
     StringProperty m_dirName {this, "DirName", "SquirrelPlots/", "Top level directory to write histograms into"}; 

@@ -129,12 +129,13 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
             kwargs.setdefault("hardScatterSelectionTool", hardScatterSelectionTool)
 
         if flags.PhysVal.IDPVM.doValidateTracksInJets:
-            jets_name = 'AntiKt4TruthJets'
+            jets_name = 'AntiKt4EMPFlowJets'
             kwargs.setdefault("JetContainerName", jets_name)
             kwargs.setdefault("FillTrackInJetPlots", True)
 
-            from InDetPhysValMonitoring.addTruthJetsConfig import AddTruthJetsIfNotExistingCfg
-            acc.merge(AddTruthJetsIfNotExistingCfg(flags))
+            if "xAOD::JetContainer#AntiKt4TruthJets" not in flags.Input.TypedCollections:
+                from InDetPhysValMonitoring.addTruthJetsConfig import AddTruthJetsIfNotExistingCfg
+                acc.merge(AddTruthJetsIfNotExistingCfg(flags))
 
             if flags.PhysVal.IDPVM.doValidateTracksInBJets:
                 kwargs.setdefault("FillTrackInBJetPlots", True)
@@ -192,6 +193,14 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
 
     elif flags.PhysVal.IDPVM.doExpertOutput:
         kwargs.setdefault("DetailLevel", 200)
+
+    # for IDTIDE derivation
+    if flags.PhysVal.IDPVM.doIDTIDE:
+        kwargs.setdefault("doIDTIDEPlots", True)
+        jets_name = 'AntiKt4EMPFlowJets'
+        kwargs.setdefault("JetContainerName", jets_name)
+        kwargs.setdefault("FillTrackInJetPlots", True)
+        kwargs.setdefault("FillTrackInJetPlots", True)
 
     tool = CompFactory.InDetPhysValMonitoringTool(**kwargs)
     acc.setPrivateTools(tool)

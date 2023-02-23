@@ -34,6 +34,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--maxProdVertRadius", help='Maximum production radius for truth particles', type=float, default=300)
     IDPVMparser.add_argument("--GRL", help='Which GRL(s) to use, if any, when running on data', choices=['2015', '2016', '2017', '2018', '2022'], nargs='+', default=[])
     IDPVMparser.add_argument("--validateExtraTrackCollections", help='List of extra track collection names to be validated in addition to Tracks.', nargs='+', default=[])
+    IDPVMparser.add_argument("--doIDTIDE", help='run the output from IDTIDE derivation', action='store_true', default=False)
     return IDPVMparser.parse_args()
 
 # Parse the arguments
@@ -59,6 +60,7 @@ flags.PhysVal.IDPVM.doPhysValOutput  = not MyArgs.doExpertPlots
 flags.PhysVal.IDPVM.doValidateTruthToRecoNtuple = MyArgs.doTruthToRecoNtuple
 flags.PhysVal.IDPVM.doValidateTracksInBJets = MyArgs.doTracksInBJets
 flags.PhysVal.IDPVM.doValidateTracksInJets = MyArgs.doTracksInJets
+flags.PhysVal.IDPVM.doIDTIDE= MyArgs.doIDTIDE
 flags.PhysVal.IDPVM.doValidateLooseTracks = MyArgs.doLoose
 flags.PhysVal.IDPVM.doValidateTightPrimaryTracks = MyArgs.doTightPrimary
 flags.PhysVal.IDPVM.doTruthOriginPlots = MyArgs.doTruthOrigin

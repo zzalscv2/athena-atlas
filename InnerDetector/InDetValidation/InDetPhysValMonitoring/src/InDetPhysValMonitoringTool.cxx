@@ -256,6 +256,23 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
     rttConfig.doTrkInJetPlots_truthFromB = false;
   }
 
+  // For IDTIDE derivation
+  // disable the vertex plots since no covariance from IDTIDE
+  if (m_doIDTIDEPlots){ 
+    rttConfig.doVertexPlots = false;
+    rttConfig.doVerticesVsMuPlots = false;
+    rttConfig.doHardScatterVertexPlots = false;
+    rttConfig.doTrkInJetPlots = true;
+    rttConfig.doTrkInJetPlots_bjets = true;
+    rttConfig.doTrkInJetPlots_matched = true;
+    rttConfig.doTrkInJetPlots_matched_bjets = true;
+    rttConfig.doTrkInJetPlots_fake = true;
+    rttConfig.doTrkInJetPlots_fake_bjets = true;
+    rttConfig.doTrkInJetPlots_unlinked = true;
+    rttConfig.doTrkInJetPlots_unlinked_bjets = true;
+    rttConfig.doTrkInJetPlots_truthFromB = true;
+  }
+
   /// account for detail level 
   if (m_detailLevel < 200){
     rttConfig.doResolutionPlotSecd = false;
