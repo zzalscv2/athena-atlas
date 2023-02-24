@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /******************************************************************************
@@ -695,7 +695,7 @@ void CP::TPileupReweighting::AddDistributionTree(TTree *tree, TFile *file) {
       TString sHistName(histName);
       TString weightName(customName);
       const auto &[ptr, inserted] = loadedHistos.try_emplace(sHistName, true);
-      
+
       if(inserted) {
          if(( (!m_ignoreFilePeriods) || m_periods.find(runNbr)==m_periods.end()) && isMC) {
             //if ignoring file periods, will still add the period if it doesnt exist!
@@ -1218,7 +1218,10 @@ Int_t CP::TPileupReweighting::Initialize() {
           for(auto lb : run.second.lumiByLbn) {
             totLumi += lb.second.first;
           }
-          hist->Scale( totLumi / hist->Integral() );
+          const double integral = hist->Integral();
+          if (std::abs(integral) > 0.) {
+            hist->Scale(totLumi / integral);
+          }
 
          }
 
@@ -1602,7 +1605,7 @@ Float_t CP::TPileupReweighting::GetCombinedWeight(Int_t periodNumber, Int_t chan
      Initialize();
    }
    if(m_countingMode) return 0.;
-  
+
    //decide how many dimensions this weight has - use the emptyHistogram to tell...
    TH1* hist = m_emptyHistogram.get();
    if(!hist) {
@@ -1730,7 +1733,7 @@ Double_t CP::TPileupReweighting::GetDataWeight(Int_t runNumber, const TString& t
     Initialize();
   }
    if(m_countingMode) return 0.;
-   
+
    //determine which period this run number is in
    Int_t periodNumber = GetFirstFoundPeriodNumber(runNumber);
 
