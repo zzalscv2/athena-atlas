@@ -425,33 +425,18 @@ void SCT_DetailedSurfaceChargesGenerator::processSiHit(const SiDetectorElement* 
         ATH_MSG_INFO("element->isBarrel(): " << element->isBarrel() << " stripPitch: " << stripPitch << " stripPatternCentre: " << stripPatternCentre);
         ATH_MSG_INFO("tanLorentz, y1, xtakadist = " << tanLorentz << ", " << y1 << ", " << xtakadist);
 #endif
-
-        double Q_m2[50], Q_m1[50], Q_00[50], Q_p1[50], Q_p2[50]; // Charge arrays for up to 25 ns
-        // Clear charge arrays
-        for (int it{0}; it<50; it++) {
-          Q_m2[it]=0.;
-          Q_m1[it]=0.;
-          Q_00[it]=0.;
-          Q_p1[it]=0.;
-          Q_p2[it]=0.;
-        }
-
+        double Q_all[5][50]={};
+        
         // Electron and hole transportation starting at x0 and y0
-        holeTransport    (x0, y0, Q_m2, Q_m1, Q_00, Q_p1, Q_p2, rndmEngine);
-        electronTransport(x0, y0, Q_m2, Q_m1, Q_00, Q_p1, Q_p2, rndmEngine);
-
+        holeTransport    (x0, y0, Q_all[0], Q_all[1], Q_all[2], Q_all[3], Q_all[4], rndmEngine);
+        electronTransport(x0, y0, Q_all[0], Q_all[1], Q_all[2], Q_all[3], Q_all[4], rndmEngine);
         //Loop over the strips and add the surface charges from each step and strip
         for (int strip{-2}; strip<=2; strip++) {
           double ystrip{y1 + strip*stripPitch};
           SiLocalPosition position{element->hitLocalToLocal(x1, ystrip)};
           if (p_design->inActiveArea(position)) {
             for (int itq{0}; itq<50; itq++) {
-              double charge{0.};
-              if (strip == -2) charge = Q_m2[itq];
-              if (strip == -1) charge = Q_m1[itq];
-              if (strip ==  0) charge = Q_00[itq];
-              if (strip ==  1) charge = Q_p1[itq];
-              if (strip ==  2) charge = Q_p2[itq];
+              const double charge =Q_all[strip+2][itq];
               double time{(itq+1)*0.5 + timeOfFlight};
               if (charge != 0.) inserter(SiSurfaceCharge(position, SiCharge(q1*charge,time,hitproc,trklink)));
 #ifdef SCT_DIG_DEBUG
