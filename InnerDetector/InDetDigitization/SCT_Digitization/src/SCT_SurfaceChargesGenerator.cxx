@@ -488,7 +488,7 @@ void SCT_SurfaceChargesGenerator::processSiHit(const SiDetectorElement* element,
             if (not m_doRamo) {
               break;
             } else {  // if we want to take into account also Ramo Potential
-              double Q_m2{0.}, Q_m1{0.}, Q_00{0.}, Q_p1{0.}, Q_p2{0.}; // Charges
+               double Q_all[5]={0.0,0.0,0.0,0.0,0.0};
 
               dstrip = y1 / stripPitch; // mm
               // need the distance from the nearest strips
@@ -505,17 +505,12 @@ void SCT_SurfaceChargesGenerator::processSiHit(const SiDetectorElement* element,
               double yfin{dstrip * stripPitch}; // mm
               double zfin{thickness - trap_pos}; // mm
 
-              m_radDamageTool->holeTransport(y0, z0, yfin, zfin, Q_m2, Q_m1, Q_00, Q_p1, Q_p2);
+              m_radDamageTool->holeTransport(y0, z0, yfin, zfin, Q_all[0], Q_all[1], Q_all[2], Q_all[3], Q_all[4]);
               for (int strip{-2}; strip<=2; strip++) {
                 const double ystrip{yd + strip * stripPitch}; // mm
                 const SiLocalPosition position(element->hitLocalToLocal(xd, ystrip));
                 if (design->inActiveArea(position)) {
-                  double charge{0.};
-                  if (strip == -2) charge = Q_m2;
-                  if (strip == -1) charge = Q_m1;
-                  if (strip ==  0) charge = Q_00;
-                  if (strip ==  1) charge = Q_p1;
-                  if (strip ==  2) charge = Q_p2;
+                  const double charge = Q_all[strip+2];
                   const double time{drift_time};
                   if (charge != 0.) {
                     inserter(SiSurfaceCharge(position, SiCharge(q1*charge, time, hitproc, trklink)));
@@ -523,7 +518,7 @@ void SCT_SurfaceChargesGenerator::processSiHit(const SiDetectorElement* element,
                   }
                 }
               }
-              ATH_MSG_INFO("strip zero charge = " << Q_00); // debug
+              ATH_MSG_INFO("strip zero charge = " << Q_all[2]); // debug
             } // m_doRamo==true
           } // chargeIsTrapped()
         } // m_doTrapping==true
