@@ -169,14 +169,14 @@ namespace ActsTrk {
   
   StatusCode
   SeedingTool::createSeeds(const EventContext& /*ctx*/,
-			   const std::vector<const ActsTrk::SpacePoint*>& spContainer,
-			   const Acts::Vector3& beamSpotPos,
-			   const Acts::Vector3& bField,
-			   ActsTrk::SeedContainer& seedContainer ) const
-  {					 
+                           const std::vector<const xAOD::SpacePoint*>& spContainer,
+                           const Acts::Vector3& beamSpotPos,
+                           const Acts::Vector3& bField,
+                           ActsTrk::SeedContainer& seedContainer ) const
+  {
     // Create Seeds
     //TODO POSSIBLE OPTIMISATION come back here: see MR !52399 ( i.e. use static thread_local)
-    std::vector< seed_type > groupSeeds;
+    std::vector<Acts::Seed< xAOD::SpacePoint >> groupSeeds;
     ATH_CHECK(createSeeds(spContainer.begin(),
 			  spContainer.end(),
 			  beamSpotPos,
@@ -339,19 +339,19 @@ namespace ActsTrk {
         });
       m_finderCfg.getTopStripDirection.connect(
         [](const void*, const value_type& sp) -> Acts::Vector3 {
-          return sp.topStripDirection();
+          return sp.topStripDirection().cast<double>();
         });
       m_finderCfg.getBottomStripDirection.connect(
         [](const void*, const value_type& sp) -> Acts::Vector3 {
-          return sp.bottomStripDirection();
+          return sp.bottomStripDirection().cast<double>();
         });
       m_finderCfg.getStripCenterDistance.connect(
           [](const void*, const value_type& sp) -> Acts::Vector3 {
-            return sp.stripCenterDistance();
+            return sp.stripCenterDistance().cast<double>();
           });
       m_finderCfg.getTopStripCenterPosition.connect(
           [](const void*, const value_type& sp) -> Acts::Vector3 {
-            return sp.topStripCenter();
+            return sp.topStripCenter().cast<double>();
           });
     }
 

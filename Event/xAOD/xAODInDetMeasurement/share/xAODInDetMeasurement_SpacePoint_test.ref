@@ -1,0 +1,38 @@
+ --------- PIXEL SPACE POINT  ------------ 
+Identifier Hash = 123485
+Global Position =  1
+ 0
+32
+Global x = 1
+Global y = 0
+Global z = 32
+Global Radius = 1
+varianceR = 0.21
+varianceZ = 0.34
+measurementIndexes = [1]
+ --------- STRIP SPACE POINT  ------------ 
+Identifier Hash = 123485 123486
+Global Position =  1
+ 0
+32
+Global x = 1
+Global y = 0
+Global z = 32
+Global Radius = 1
+varianceR = 0.21
+varianceZ = 0.34
+measurementIndexes = [1, 4]
+topHalfStripLength = 1.2
+bottomHalfStripLength = 0.32
+topStripDirection =    2.3
+  55.1
+0.3355
+bottomStripDirection = 1
+2
+5
+stripCenterDistance = 0.012
+  3.5
+ 2.11
+topStripCenter =    0
+   0
+1.02

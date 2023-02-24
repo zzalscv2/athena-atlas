@@ -21,7 +21,8 @@ namespace ActsTrk {
     /// @name Constructors with and without parameters
     //@{
     StripInformationHelper() = default;
-    StripInformationHelper(const Amg::Vector3D& stripStart,
+    StripInformationHelper(const unsigned int& idHash,
+			   const Amg::Vector3D& stripStart,
                            const Amg::Vector3D& stripEnd,
                            const Amg::Vector3D& beamSpotVertex,
                            const float& locx,
@@ -38,7 +39,8 @@ namespace ActsTrk {
 
     /// @name Public method to set strip properties
     //@{
-    void set(const Amg::Vector3D& stripStart,
+    void set(const unsigned int& idHash,
+	     const Amg::Vector3D& stripStart,
              const Amg::Vector3D& stripEnd,
              const Amg::Vector3D& beamSpotVertex,
              const float& locx,
@@ -48,6 +50,7 @@ namespace ActsTrk {
 
     /// @name Public methods to return strip properties
     //@{
+    const unsigned int& idHash() const {return m_idHash;}
     const size_t& clusterIndex() const {return m_clusterIndex;}
     const Amg::Vector3D& stripCenter () const {return m_stripCenter ;}
     const Amg::Vector3D& stripDirection () const {return m_stripDir ;}
@@ -83,6 +86,8 @@ namespace ActsTrk {
     size_t        m_stripIndex {0};
     /// @param m_clusterIndex xAOD::StripCluster index in container
     size_t        m_clusterIndex {0};
+    /// @param m_idHash xAOD::StripCluster idHash for connection to detector element
+    unsigned int  m_idHash {0};
   };
 
 } // end of name space

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODINDETMEASUREMENT_DICT_H
@@ -17,7 +17,15 @@
 #include "xAODInDetMeasurement/versions/StripClusterContainer_v1.h"
 #include "xAODInDetMeasurement/versions/StripClusterAuxContainer_v1.h"
 
+#include "xAODInDetMeasurement/SpacePoint.h"
+#include "xAODInDetMeasurement/SpacePointContainer.h"
+#include "xAODInDetMeasurement/versions/SpacePoint_v1.h"
+#include "xAODInDetMeasurement/versions/SpacePointContainer_v1.h"
+#include "xAODInDetMeasurement/versions/SpacePointAuxContainer_v1.h"
+
 #include "xAODCore/tools/DictHelpers.h"
+
+#include <vector>
 
 // Instantiate all necessary types for the dictionary.
 namespace {
@@ -25,6 +33,9 @@ namespace {
         // Type(s) needed for the dictionary generation to succeed.
         XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, PixelClusterContainer_v1 );
         XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, StripClusterContainer_v1 );
+        XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, SpacePointContainer_v1 );
+        xAOD::ArrayFloat3 array_type1;
+        std::vector< xAOD::ArrayFloat3 > vec_type1;
     };
 }
 

@@ -6,17 +6,19 @@
 
 namespace ActsTrk {
 
-    StripInformationHelper::StripInformationHelper (const Amg::Vector3D& stripStart,
+    StripInformationHelper::StripInformationHelper (const unsigned int& idHash,
+						    const Amg::Vector3D& stripStart,
                                                     const Amg::Vector3D& stripEnd,
                                                     const Amg::Vector3D& beamSpotVertex,
                                                     const float& locx,
                                                     const size_t& clusterIndex,
                                                     const size_t& stripIndex)
     {
-        this->set(stripStart, stripEnd, beamSpotVertex, locx, clusterIndex, stripIndex);
+        this->set(idHash, stripStart, stripEnd, beamSpotVertex, locx, clusterIndex, stripIndex);
     }
 
-    void StripInformationHelper::set(const Amg::Vector3D& stripStart,
+    void StripInformationHelper::set(const unsigned int& idHash,
+				     const Amg::Vector3D& stripStart,
                                      const Amg::Vector3D& stripEnd,
                                      const Amg::Vector3D& beamSpotVertex,
                                      const float& locx,
@@ -31,6 +33,7 @@ namespace ActsTrk {
         m_locX         = locx;
         m_clusterIndex = clusterIndex;
         m_stripIndex   = stripIndex;
+	m_idHash       = idHash;
     }
 
     Amg::Vector3D StripInformationHelper::position(const double& shift) const

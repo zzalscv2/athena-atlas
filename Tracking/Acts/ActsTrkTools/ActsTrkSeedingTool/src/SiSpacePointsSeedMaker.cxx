@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "src/SiSpacePointsSeedMaker.h"
 #include "GaudiKernel/EventContext.h"
 
@@ -22,7 +26,6 @@
 #include "GaudiKernel/ITHistSvc.h"
 #include "SiSPSeededTrackFinderData/ITkSiSpacePointForSeed.h"
 
-#include "ActsTrkEvent/SpacePoint.h"
 #include "TTree.h"
 
 
@@ -142,7 +145,7 @@ namespace ActsTrk {
 
   void
   SiSpacePointsSeedMaker::newSpacePoint(InDet::SiSpacePointsSeedMakerEventData& data,
-                                        const ActsTrk::SpacePoint* const& sp) const
+                                        const xAOD::SpacePoint* const& sp) const
   {
     data.v_ActsSpacePointForSeed.emplace_back(sp);
     data.ns++;
@@ -227,18 +230,18 @@ namespace ActsTrk {
         }
       }
     } else {
-      // get the ActsTrk::SpacePointContainer and loop on entries to check which space point
+      // get the xAOD::SpacePointContainer and loop on entries to check which space point
       // you want to use for seeding
 
-      SG::ReadHandle< ActsTrk::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsPixel, ctx );
+      SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsPixel, ctx );
       if (!inputSpacePointContainer.isValid()){
-        ATH_MSG_FATAL("ActsTrk::SpacePointContainer with key " << m_actsSpacepointsPixel.key() << " is not available...");
+        ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsPixel.key() << " is not available...");
         return StatusCode::FAILURE;
       }
-      const ActsTrk::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
+      const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
       // TODO: here you need to write some lines to implement the
       // check on the used PDRs in previous tracking passes
-      for (const ActsTrk::SpacePoint * sp : *inputSpacePointCollection) {
+      for (const xAOD::SpacePoint * sp : *inputSpacePointCollection) {
         newSpacePoint(data, sp);
       }
 
@@ -266,18 +269,18 @@ namespace ActsTrk {
         }
       }
     } else {
-      // get the ActsTrk::SpacePointContainer and loop on entries to check which space point
+      // get the xAOD::SpacePointContainer and loop on entries to check which space point
       // you want to use for seeding
 
-      SG::ReadHandle< ActsTrk::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsStrip, ctx );
+      SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsStrip, ctx );
       if (!inputSpacePointContainer.isValid()){
-        ATH_MSG_FATAL("ActsTrk::SpacePointContainer with key " << m_actsSpacepointsStrip.key() << " is not available...");
+        ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsStrip.key() << " is not available...");
         return StatusCode::FAILURE;
       }
-      const ActsTrk::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
+      const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
       // TODO: here you need to write some lines to implement the
       // check on the used PDRs in previous tracking passes
-      for (const ActsTrk::SpacePoint * sp : *inputSpacePointCollection) {
+      for (const xAOD::SpacePoint * sp : *inputSpacePointCollection) {
         newSpacePoint(data, sp);
       }
 
@@ -305,18 +308,18 @@ namespace ActsTrk {
         newSpacePoint(data, sp);
       }
     } else {
-      // get the ActsTrk::SpacePointContainer and loop on entries to check which space point
+      // get the xAOD::SpacePointContainer and loop on entries to check which space point
       // you want to use for seeding
 
-      SG::ReadHandle< ActsTrk::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsOverlap, ctx );
+      SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_actsSpacepointsOverlap, ctx );
       if (!inputSpacePointContainer.isValid()){
-        ATH_MSG_FATAL("ActsTrk::SpacePointContainer with key " << m_actsSpacepointsOverlap.key() << " is not available...");
+        ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_actsSpacepointsOverlap.key() << " is not available...");
         return StatusCode::FAILURE;
       }
-      const ActsTrk::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
+      const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
       // TODO: here you need to write some lines to implement the
       // check on the used PDRs in previous tracking passes
-      for (const ActsTrk::SpacePoint * sp : *inputSpacePointCollection) {
+      for (const xAOD::SpacePoint * sp : *inputSpacePointCollection) {
         newSpacePoint(data, sp);
       }
 
@@ -490,12 +493,11 @@ namespace ActsTrk {
 
     // Now we get care of the input space points!
     // Need to convert these space points to Acts EDM
-    std::unique_ptr<ActsTrk::SpacePointContainer> actsSpContainer =
-      std::make_unique<ActsTrk::SpacePointContainer>();
-    std::unique_ptr<ActsTrk::SpacePointData> actsSpData =
-      std::make_unique<ActsTrk::SpacePointData>();
-    std::unique_ptr<ActsTrk::SpacePointMeasurementDetails> actsSpDetails =
-      std::make_unique<ActsTrk::SpacePointMeasurementDetails>();
+    std::unique_ptr<xAOD::SpacePointContainer> actsSpContainer =
+      std::make_unique<xAOD::SpacePointContainer>();
+    std::unique_ptr<xAOD::SpacePointAuxContainer> actsSpContainerAux =
+      std::make_unique<xAOD::SpacePointAuxContainer>();
+    actsSpContainer->setStore( actsSpContainerAux.get() );
 
     // select the ACTS seeding tool to call, if for PPP or SSS
     bool isPixel = (m_fastTracking or data.iteration == 1) and m_pixel;
@@ -506,8 +508,8 @@ namespace ActsTrk {
     if (m_doSpacePointConversion) {
 
       actsSpContainer->reserve(data.l_ITkSpacePointForSeed.size());
-      actsSpData->reserve(data.l_ITkSpacePointForSeed.size());
-      actsSpDetails->reserve(data.l_ITkSpacePointForSeed.size());
+      actsSpContainerAux->reserve(data.l_ITkSpacePointForSeed.size());
+
       sp_storage.reserve(data.l_ITkSpacePointForSeed.size());
 
       std::size_t el_index = 0;
@@ -516,47 +518,47 @@ namespace ActsTrk {
         sp_storage.push_back(&sp);
 
         // Get position and covariance
-        Acts::Vector3 position { sp.x(), sp.y(), sp.z() };
+	Eigen::Matrix<float, 3, 1> position { sp.x(), sp.y(), sp.z() };
         Acts::Vector2 covariance { sp.covr(), sp.covz() };
 
         // This index correspond to the space point in
         // the input_space_points collection (data.l_ITkSpacePointForSeed)
         // (used later for storing the seed into data)
-        boost::container::static_vector<std::size_t, 2> indexes( {el_index++} );
+	std::vector<std::size_t> indexes( {el_index++} );
         if (isPixel) {
-          std::unique_ptr<ActsTrk::SpacePoint> toAdd =
-          std::make_unique<ActsTrk::SpacePoint>( position,
-                                                 covariance,
-                                                 *actsSpData.get(),
-                                                 indexes);
-          actsSpContainer->push_back( std::move(toAdd) );
+	  xAOD::SpacePoint *toAdd = new xAOD::SpacePoint();
+	  actsSpContainer->push_back(toAdd);
+	  toAdd->setSpacePoint(0, 
+			       position,
+			       sp.covr(), sp.covz(),
+			       indexes);
           data.v_ActsSpacePointForSeed.emplace_back( actsSpContainer->back() );
         } else {
           // defining additional quantities needed for measurement details:
           Amg::Vector3D topStrip = {sp.b0()[0],sp.b0()[1],sp.b0()[2]};
           float topHalfStripLength = topStrip.norm();
-          Eigen::Matrix<double, 3, 1> topStripDirection = topStrip/topHalfStripLength;
-          Eigen::Matrix<double, 3, 1> topStripCenter = {sp.r0()[0],sp.r0()[1],sp.r0()[2]};
+          Eigen::Matrix<float, 3, 1> topStripDirection = (topStrip/topHalfStripLength).cast <float>();
+          Eigen::Matrix<float, 3, 1> topStripCenter = {sp.r0()[0],sp.r0()[1],sp.r0()[2]};
 
           Amg::Vector3D bottomStrip = {sp.b1()[0],sp.b1()[1],sp.b1()[2]};
           float bottomHalfStripLength = bottomStrip.norm();
-          Eigen::Matrix<double, 3, 1> bottomStripDirection = bottomStrip/bottomHalfStripLength;
-          Eigen::Matrix<double, 3, 1> stripCenterDistance = {sp.dr()[0],sp.dr()[1],sp.dr()[2]};
+          Eigen::Matrix<float, 3, 1> bottomStripDirection = (bottomStrip/bottomHalfStripLength).cast <float>();
+          Eigen::Matrix<float, 3, 1> stripCenterDistance = {sp.dr()[0],sp.dr()[1],sp.dr()[2]};
 
-          std::unique_ptr<ActsTrk::SpacePoint> toAdd =
-            std::make_unique<ActsTrk::SpacePoint>( position,
-                                                   covariance,
-                                                   // add stuff here
-                                                   topHalfStripLength,
-                                                   topStripDirection,
-                                                   bottomHalfStripLength,
-                                                   bottomStripDirection,
-                                                   stripCenterDistance,
-                                                   topStripCenter,
-                                                   *actsSpData.get(),
-                                                   *actsSpDetails.get(),
-                                                   indexes);
-          actsSpContainer->push_back( std::move(toAdd) );
+	  xAOD::SpacePoint *toAdd = new xAOD::SpacePoint();
+          actsSpContainer->push_back(toAdd);
+
+	  toAdd->setSpacePoint({0, 0},
+			       position,
+			       sp.covr(), sp.covz(),
+			       indexes,
+			       topHalfStripLength,
+			       bottomHalfStripLength,
+			       topStripDirection,
+			       bottomStripDirection,
+			       stripCenterDistance,
+			       topStripCenter);
+
           data.v_ActsSpacePointForSeed.emplace_back( actsSpContainer->back() );
 
         }

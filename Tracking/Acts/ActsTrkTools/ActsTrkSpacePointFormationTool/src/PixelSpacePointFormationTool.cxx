@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkSurfaces/Surface.h"
@@ -23,10 +23,10 @@ namespace ActsTrk {
         return StatusCode::SUCCESS;
     }
 
-    std::unique_ptr<ActsTrk::SpacePoint>
+    StatusCode
     PixelSpacePointFormationTool::producePixelSpacePoint(const xAOD::PixelCluster& cluster,
-                                                         ActsTrk::SpacePointData& data,
-                                                         const boost::container::static_vector<std::size_t, 2>& measIndexes,
+                                                         xAOD::SpacePoint& sp,
+                                                         const std::vector<std::size_t>& measIndexes,
                                                          const InDetDD::SiDetectorElement& element) const
     {
         // evaluate the cluster width for space point covariance evaluation
@@ -34,7 +34,7 @@ namespace ActsTrk {
           (dynamic_cast<const InDetDD::PixelModuleDesign*>(&element.design()));
         if (not design){
             ATH_MSG_ERROR("Cast to InDetDD::PixelModuleDesign failed.");
-            return nullptr;
+            return StatusCode::FAILURE;
         }
 
         // Implementing space point covariance calculation as defined in
@@ -64,13 +64,12 @@ namespace ActsTrk {
         float cov_z = 6.*covTerm*(float(Tp(0, 2))*float(Tp(0, 2))+float(Tp(1, 2))*float(Tp(1, 2)));
         float cov_r = 6.*covTerm*(float(Tp(2, 2))*float(Tp(2, 2)));
 
-        Eigen::Matrix<double, 2, 1> variance(cov_r, cov_z);
-
-        std::unique_ptr<ActsTrk::SpacePoint> spacePoint =
-          std::make_unique<ActsTrk::SpacePoint>( cluster.globalPosition().cast <double> (),
-                                                 variance,
-                                                 data,
-                                                 measIndexes );
-        return spacePoint;
+	sp.setSpacePoint(cluster.identifierHash(),
+			 cluster.globalPosition(),
+			 cov_r, 
+			 cov_z,
+			 measIndexes);
+	
+        return StatusCode::SUCCESS;
     }
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKSEEDINGTOOL_SISPACEPOINTSSEEDMAKER_H
@@ -149,7 +149,7 @@ namespace ActsTrk {
 		    const Trk::SpacePoint* const& sp) const;
     void
       newSpacePoint(InDet::SiSpacePointsSeedMakerEventData& data,
-		    const ActsTrk::SpacePoint* const& sp) const;
+		    const xAOD::SpacePoint* const& sp) const;
     static void pixInform(const Trk::SpacePoint* const& sp,
 			  float* r) ;
     static void stripInform(InDet::SiSpacePointsSeedMakerEventData& data,
@@ -183,9 +183,9 @@ namespace ActsTrk {
     SG::ReadHandleKey< ::SpacePointOverlapCollection > m_spacepointsOverlap {this, "SpacePointsOverlapName", "OverlapSpacePoints"};
     SG::ReadHandleKey< Trk::PRDtoTrackMap > m_prdToTrackMap {this, "PRDtoTrackMap", "", "option PRD-to-track association"};
 
-    SG::ReadHandleKey< ActsTrk::SpacePointContainer > m_actsSpacepointsPixel {this, "ActsTrkSpacePointsPixelName", "ITkPixelSpacePoints", "Pixel space points container"};
-    SG::ReadHandleKey< ActsTrk::SpacePointContainer > m_actsSpacepointsStrip {this, "ActsTrkSpacePointsStripName", "ITkStripSpacePoints", "Strip space points container"};
-    SG::ReadHandleKey< ActsTrk::SpacePointContainer > m_actsSpacepointsOverlap {this, "ActsTrkSpacePointsOverlapName", "ITkStripOverlapSpacePoints", "Strip overlap space points container"};
+    SG::ReadHandleKey< xAOD::SpacePointContainer > m_actsSpacepointsPixel {this, "ActsTrkSpacePointsPixelName", "ITkPixelSpacePoints", "Pixel space points container"};
+    SG::ReadHandleKey< xAOD::SpacePointContainer > m_actsSpacepointsStrip {this, "ActsTrkSpacePointsStripName", "ITkStripSpacePoints", "Strip space points container"};
+    SG::ReadHandleKey< xAOD::SpacePointContainer > m_actsSpacepointsOverlap {this, "ActsTrkSpacePointsOverlapName", "ITkStripOverlapSpacePoints", "Strip overlap space points container"};
     SG::ReadHandleKey< xAOD::PixelClusterContainer > m_pixelClusterContainerKey {this, "PixelClusterContainerKey", "ITkPixelClusters", "Key of input pixel clusters"};
     SG::ReadHandleKey< xAOD::StripClusterContainer > m_stripClusterContainerKey {this, "StripClusterContainerKey", "ITkStripClusters", "Key of input strip clusters"};
 
@@ -197,7 +197,7 @@ namespace ActsTrk {
     Gaudi::Property< bool > m_strip {this, "useStrip", true };
     Gaudi::Property< bool > m_useOverlap {this, "useOverlapSpCollection", true};
     Gaudi::Property< bool > m_fastTracking {this, "useFastTracking", false};
-    Gaudi::Property< bool > m_doSpacePointConversion {this, "doSpacePointConversion", true, "Convert Trk::SpacePoint container into ActsTrk::SpacePoint container"};
+    Gaudi::Property< bool > m_doSpacePointConversion {this, "doSpacePointConversion", true, "Convert Trk::SpacePoint container into xAOD::SpacePoint container"};
 
   private:
     // Validation

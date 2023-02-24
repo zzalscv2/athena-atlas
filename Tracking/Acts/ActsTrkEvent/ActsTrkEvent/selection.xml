@@ -1,15 +1,5 @@
-<!-- Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration -->
+<!-- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
-
-  <class name="SpacePointData"
-	 id="E3B251F4-6D90-489E-98F8-2C7B73EA4700" />
-
-  <class name="SpacePointMeasurementDetails"
-	 id="AAE033CF-E243-4827-8EB2-5A21E93601C5" />
-
-  <class name="SpacePoint" />
-  <class name="SpacePointContainer" 
-	 id="9ED9A88B-E81E-46B2-9371-33122EAF9B4D" />
 
   <class name="Seed" />
   <class name="SeedContainer"

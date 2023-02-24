@@ -30,8 +30,8 @@ namespace ActsTrk {
     public extends<AthAlgTool, ActsTrk::ISeedingTool> {
 
   public:
-    using value_type = ActsTrk::SpacePoint;
-    using seed_type = Acts::Seed< ActsTrk::SpacePoint >;
+    using value_type = xAOD::SpacePoint;
+    using seed_type = Acts::Seed< xAOD::SpacePoint >;
 
     OrthogonalSeedingTool(const std::string& type, const std::string& name,
 			  const IInterface* parent);
@@ -42,7 +42,7 @@ namespace ActsTrk {
     // Interface
     virtual StatusCode
       createSeeds(const EventContext& ctx,
-		  const std::vector<const ActsTrk::SpacePoint*>& spContainer,
+		  const std::vector<const xAOD::SpacePoint*>& spContainer,
 		  const Acts::Vector3& beamSpotPos,
 		  const Acts::Vector3& bField,
 		  ActsTrk::SeedContainer& seedContainer ) const override;
