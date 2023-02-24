@@ -1700,6 +1700,20 @@ class ItemDef:
         MenuItem('L1_ALFA_B7R1_OD').setLogic( (d.ALFA_B7R1U_OD & d.ALFA_B7R1L_OD) & d.BGRP0).setTriggerType(TT.alfa)
         MenuItem('L1_ALFA_A7R1_OD').setLogic( (d.ALFA_A7R1U_OD & d.ALFA_A7R1L_OD) & d.BGRP0).setTriggerType(TT.alfa)
 
+        # BGRP0 is vetoed due to clash with CALREQ2, use BGRP12 instead
+        MenuItem('L1_ALFA_B7L1U_OD_BGRP12').setLogic(d.ALFA_B7L1U_OD & bgrp12cond).setTriggerType(TT.alfa)
+        MenuItem('L1_ALFA_B7L1L_OD_BGRP12').setLogic(d.ALFA_B7L1L_OD & bgrp12cond).setTriggerType(TT.alfa)
+        MenuItem('L1_ALFA_A7L1U_OD_BGRP12').setLogic(d.ALFA_A7L1U_OD & bgrp12cond).setTriggerType(TT.alfa)
+        MenuItem('L1_ALFA_A7L1L_OD_BGRP12').setLogic(d.ALFA_A7L1L_OD & bgrp12cond).setTriggerType(TT.alfa)
+        MenuItem('L1_ALFA_A7R1U_OD_BGRP12').setLogic(d.ALFA_A7R1U_OD & bgrp12cond).setTriggerType(TT.alfa)
+        MenuItem('L1_ALFA_A7R1L_OD_BGRP12').setLogic(d.ALFA_A7R1L_OD & bgrp12cond).setTriggerType(TT.alfa)
+        MenuItem('L1_ALFA_B7R1U_OD_BGRP12').setLogic(d.ALFA_B7R1U_OD & bgrp12cond).setTriggerType(TT.alfa)
+        MenuItem('L1_ALFA_B7R1L_OD_BGRP12').setLogic(d.ALFA_B7R1L_OD & bgrp12cond).setTriggerType(TT.alfa)
+
+        MenuItem('L1_ALFA_B7L1_OD_BGRP12').setLogic( (d.ALFA_B7L1U_OD & d.ALFA_B7L1L_OD) & bgrp12cond).setTriggerType(TT.alfa)
+        MenuItem('L1_ALFA_A7L1_OD_BGRP12').setLogic( (d.ALFA_A7L1U_OD & d.ALFA_A7L1L_OD) & bgrp12cond).setTriggerType(TT.alfa)
+        MenuItem('L1_ALFA_B7R1_OD_BGRP12').setLogic( (d.ALFA_B7R1U_OD & d.ALFA_B7R1L_OD) & bgrp12cond).setTriggerType(TT.alfa)
+        MenuItem('L1_ALFA_A7R1_OD_BGRP12').setLogic( (d.ALFA_A7R1U_OD & d.ALFA_A7R1L_OD) & bgrp12cond).setTriggerType(TT.alfa)
 
         try:
 
