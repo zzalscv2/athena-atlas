@@ -7,8 +7,10 @@
 # art-athena-mt: 8
 
 Reco_tf.py  \
---AMI x701  \
---inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_900GeV.00424070.express_express.merge.RAW._lb0100._SFO-ALL._0001.1" \
+--AMI f1287  \
+--CA False \
+--preExec="all:from RecExConfig.RecFlags import rec; rec.doZdc.set_Value_and_Lock(False); from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Trigger.triggerConfig='DB'; DQMonFlags.useTrigger=False; DQMonFlags.doHLTMon=False;" \
+--inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_calib.00421734.express_express.merge.RAW._lb0021._SFO-ALL._0001.1" \
 --outputAODFile="AOD.pool.root" \
 --outputESDFile="ESD.pool.root" \
 --outputHISTFile="HIST.root" \
@@ -25,5 +27,4 @@ then
   art.py compare grid --entries 30 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --ignore-exit-code diff-pool
   rc2=$?
 fi
-echo  "art-result: ${rc2} Diff"
-
+echo  "art-result: ${rc2} (against previous nightly)"

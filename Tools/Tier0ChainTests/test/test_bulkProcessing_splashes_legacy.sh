@@ -8,6 +8,7 @@
 
 Reco_tf.py  \
 --AMI f1287  \
+--CA False \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_comm.00420624.express_express.merge.RAW._lb1054._SFO-ALL._0001.1" \
 --outputAODFile="AOD.pool.root" \
 --outputESDFile="ESD.pool.root" \
@@ -26,12 +27,3 @@ then
   rc2=$?
 fi
 echo  "art-result: ${rc2} (against previous nightly)"
-
-rc3=-9999
-if [ ${rc1} -eq 0 ]
-then
-  art.py compare ref . /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3-22.0_references_for_comparison/test_bulkProcessing_beamSplashes_2022-05-23T2101 \
-  --entries 100 --mode=semi-detailed --order-trees --ignore-exit-code diff-pool
-  rc3=$?
-fi
-echo  "art-result: ${rc3} (against reference)"

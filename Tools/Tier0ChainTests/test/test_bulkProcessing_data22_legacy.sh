@@ -8,6 +8,7 @@
 
 Reco_tf.py  \
 --AMI f1316  \
+--CA False \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00437548.physics_Main.daq.RAW._lb1044._SFO-15._0002.data" \
 --maxEvents=700 \
 --outputAODFile="AOD.pool.root" \
