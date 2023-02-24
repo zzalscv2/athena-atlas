@@ -122,6 +122,8 @@ public:
 
   bool disableModule(size_t side, size_t module);
 
+  void set2ndDerivStep(size_t step);
+  
   void SetGainFactorsHGLG(float gainFactorHG, float gainFactorLG);
 
   void SetGainFactorsHGLG(const ZDCModuleFloatArray& gainFactorsHG, const ZDCModuleFloatArray& gainFactorsLG); 

@@ -141,6 +141,15 @@ void ZDCDataAnalyzer::enableRepass(const ZDCModuleFloatArray& peak2ndDerivMinRep
   }
 }
 
+void ZDCDataAnalyzer::set2ndDerivStep(size_t step)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->set2ndDerivStep(step);
+    }
+  }
+}
+
 void ZDCDataAnalyzer::SetGainFactorsHGLG(float gainFactorHG, float gainFactorLG)
 {
   for (size_t side : {0, 1}) {
