@@ -3,6 +3,7 @@
 */
 
 #include "MuPatPrimitives/MuPatCandidateBase.h"
+#include <set>
 
 namespace Muon {
 
