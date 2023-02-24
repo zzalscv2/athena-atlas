@@ -716,7 +716,9 @@ namespace InDet {
 
       SiWidth siWidth{Amg::Vector2D(dnStrips,1.), Amg::Vector2D(width,stripL)};
 
-      SCT_Cluster* cluster = new SCT_Cluster{clusterId, locpos, *pGroup , siWidth, element, errorMatrix};
+      SCT_Cluster* cluster =
+          new SCT_Cluster{clusterId, locpos,  std::move(*pGroup),
+                          siWidth,   element, std::move(errorMatrix)};
 
       cluster->setHashAndIndex(idHash, clusterNumber);
 

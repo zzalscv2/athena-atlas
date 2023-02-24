@@ -234,7 +234,7 @@ std::vector<InDet::PixelClusterParts> InDet::TotPixelClusterSplitter::splitClust
 
 int InDet::TotPixelClusterSplitter::pixelType(const int PhiIdx, const int EtaIdx) 
 {
-  if (!(EtaIdx%18 == 0 || EtaIdx%18 == 17))
+  if (EtaIdx%18 != 0 && EtaIdx%18 != 17)
   {
     if (PhiIdx==152 || PhiIdx==154 || PhiIdx==156 || PhiIdx==158 ||
         PhiIdx==169 || PhiIdx==171 || PhiIdx==173 || PhiIdx==175)
