@@ -92,9 +92,9 @@ const InDet::TRT_DriftCircleOnTrack* InDet::TRT_DriftCircleOnTrackNoDriftTimeToo
   Trk::DefinedParameter  radius(0.,Trk::locX);
   Trk::LocalParameters  lp(radius);  
   Amg::MatrixX cov(1,1);
-  cov(0,0)=1.33333; 
-  return new InDet::TRT_DriftCircleOnTrack
-    (DC,lp,cov,iH,predictedLocZ,dir,Trk::NODRIFTTIME);
-}  
-
+  cov(0,0)=1.33333;
+  return new InDet::TRT_DriftCircleOnTrack(DC, std::move(lp), std::move(cov),
+                                           iH, predictedLocZ, dir,
+                                           Trk::NODRIFTTIME);
+}
 
