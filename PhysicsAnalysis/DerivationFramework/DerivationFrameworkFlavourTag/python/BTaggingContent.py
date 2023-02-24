@@ -2,27 +2,20 @@
 
 from AthenaConfiguration.Enums import LHCPeriod
 
-# from
-# https://stackoverflow.com/questions/3663450/python-remove-substring-only-at-the-end-of-string
-def rchop(thestring, ending):
-    if thestring.endswith(ending):
-        return thestring[:-len(ending)]
-
-    return thestring
-
 
 JetStandardAux = \
     [ "pt"
     , "eta"
     , "btaggingLink"
     , "HadronConeExclTruthLabelID"
+    , "HadronConeExclTruthLabelBarcode"
     , "HadronConeExclExtendedTruthLabelID"
     , "ConeExclBHadronsFinal"
     , "ConeExclCHadronsFinal"
     ]
 
 BTaggingStandardRun3Aux = \
-    [ 
+    [
       "DL1r_pu"
     , "DL1r_pc"
     , "DL1r_pb"
@@ -43,7 +36,7 @@ BTaggingStandardRun3Aux = \
 
     , "SV1_NGTinSvx"
     , "SV1_masssvx"
-       
+
     , "DL1dv00Flip_pu"
     , "DL1dv00Flip_pc"
     , "DL1dv00Flip_pb"
@@ -51,11 +44,11 @@ BTaggingStandardRun3Aux = \
     , "DL1r20210824r22Flip_pu"
     , "DL1r20210824r22Flip_pc"
     , "DL1r20210824r22Flip_pb"
-    
+
     , "DL1dv01Flip_pu"
     , "DL1dv01Flip_pc"
     , "DL1dv01Flip_pb"
-    
+
     , "dipsLoose20220314v2flip_pu"
     , "dipsLoose20220314v2flip_pc"
     , "dipsLoose20220314v2flip_pb"
@@ -216,18 +209,16 @@ def BTaggingStandardContent(jetcol, ConfigFlags = None):
     # deal with name mismatch between PV0TrackJets and BTagging_Track
     btagging = btaggingtmp.replace("PV0Track", "Track")
 
-    jetcontent = \
-        [ jetcol ] \
-        + [ ".".join( [ jetcol + "Aux" ] + JetStandardAux ) ]
+    jetcontent = [ jetcol ] + [
+        ".".join( [ jetcol + "Aux" ] + JetStandardAux )
+    ]
 
     isRun4 = False
     if ConfigFlags is not None:
         isRun4 = ConfigFlags.GeoModel.Run >= LHCPeriod.Run4
 
-    btagcontent = \
-        [ btagging ] \
-        + [ ".".join( [ btagging + "Aux" ] + \
-                      (BTaggingStandardRun4Aux if isRun4 else BTaggingStandardRun3Aux) ) ]
+    aux = BTaggingStandardRun4Aux if isRun4 else BTaggingStandardRun3Aux
+    btagcontent = [ btagging ] + [ ".".join([ btagging + "Aux" ] + aux) ]
 
     return jetcontent + btagcontent
 
@@ -249,10 +240,10 @@ def BTaggingXbbContent(jetcol, ConfigFlags = None):
     if ConfigFlags is not None:
         isRun4 = ConfigFlags.GeoModel.Run >= LHCPeriod.Run4
 
+    hl_aux = BTaggingHighLevelRun4Aux if isRun4 else BTaggingHighLevelRun3Aux
+    aux = BTaggingStandardRun4Aux if isRun4 else BTaggingStandardRun3Aux
     # add aux variables
-    btaggingAllAux = (BTaggingHighLevelRun4Aux if isRun4 else BTaggingHighLevelRun3Aux) \
-                     + (BTaggingStandardRun4Aux if isRun4 else BTaggingStandardRun3Aux)
+    btaggingAllAux = aux + hl_aux
     btagcontent = [ ".".join( [ btagging + "Aux" ] + btaggingAllAux ) ]
 
     return [jetcol] + jetcontent + [ btagging ] + btagcontent
-    

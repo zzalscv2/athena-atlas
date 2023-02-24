@@ -56,7 +56,11 @@ def FTAG1Cfg(flags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
     FTAG1SlimmingHelper = SlimmingHelper("FTAG1SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    
+
+    # Many of these are added to AllVariables below as well. We add
+    # these items in both places in case some of the smart collections
+    # add variables from some other collection. For flavor tagging,
+    # for example will add jet variables.
     FTAG1SlimmingHelper.SmartCollections = [
                                            "Electrons",
                                            "Muons",
@@ -75,6 +79,8 @@ def FTAG1Cfg(flags):
             "PrimaryVertices",
             "InDetTrackParticles",
             "InDetLargeD0TrackParticles",
+            "AntiKt4EMPFlowJets",
+            "AntiKtVR30Rmax4Rmin02PV0TrackJets",
             "BTagging_AntiKt4EMPFlow",
             "BTagging_AntiKtVR30Rmax4Rmin02Track",
             "BTagging_AntiKt4EMPFlowJFVtx",

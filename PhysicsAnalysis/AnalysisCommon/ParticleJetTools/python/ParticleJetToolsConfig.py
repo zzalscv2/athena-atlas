@@ -12,10 +12,15 @@ from AthenaCommon import Logging
 jrtlog = Logging.logging.getLogger('ParticleJetToolsConfig')
 
 from AthenaConfiguration.ComponentFactory import CompFactory
-from JetRecConfig.JetRecConfig import isAnalysisRelease
+# workaround for missing JetRecConfig in AthAnalysis
+try:
+    from JetRecConfig.JetRecConfig import isAnalysisRelease
+except ModuleNotFoundError:
+    def isAnalysisRelease():
+        return True
 
 # Putting MCTruthClassifier here as we needn't stick jet configs in really foreign packages
-def getMCTruthClassifier():    
+def getMCTruthClassifier():
     # Assume mc15 value
     firstSimCreatedBarcode = 200000
     truthclassif = CompFactory.MCTruthClassifier(
@@ -47,7 +52,7 @@ def getCopyTruthLabelParticles(truthtype):
     else:
         truthcategory = "FlavourLabel"
         toolProperties['ParticleType'] = truthtype
-        
+
     tooltype = truthpartoptions[truthcategory]["ToolType"]
     toolProperties.update( PtMin = truthpartoptions[truthcategory]["ptmin"],
                            OutputName = "TruthLabel"+truthtype)
@@ -101,18 +106,36 @@ def getJetConeLabeling():
         )
     return truthpartonlabel
 
-def getJetDeltaRLabelTool(jetdef, modspec):
-    """returns a ParticleJetDeltaRLabelTool 
-    Cone matching for B, C and tau truth for all but track jets.
 
-    This function is meant to be used as callback from JetRecConfig where 
-    it is called as func(jetdef, modspec). Hence the jetdef argument even if not used in this case.
+def _getCommonLabelNames(prefix):
+    """Internal unlity to name labels
+
+    Returns a dictionary to configure labeling tools. Takes one
+    argument which is prefixed to each label.
     """
-    jetptmin = float(modspec)
-    jetdrlabeler = CompFactory.ParticleJetDeltaRLabelTool(
-        "jetdrlabeler_jetpt{0}GeV".format(int(jetptmin/1000)),
-        LabelName = "HadronConeExclTruthLabelID",
-        DoubleLabelName = "HadronConeExclExtendedTruthLabelID",
+    return dict(
+        LabelName=f"{prefix}TruthLabelID",
+        DoubleLabelName=f"{prefix}ExtendedTruthLabelID",
+        LabelPtName=f"{prefix}TruthLabelPt",
+        LabelPtScaledName=f"{prefix}TruthLabelPtScaled",
+        LabelLxyName=f"{prefix}TruthLabelLxy",
+        LabelDRName=f"{prefix}TruthLabelDR",
+        LabelPdgIdName=f"{prefix}TruthLabelPdgId",
+        LabelBarcodeName=f"{prefix}TruthLabelBarcode",
+        ChildLxyName=f"{prefix}TruthLabelChildLxy",
+        ChildPtName=f"{prefix}TruthLabelChildPt",
+        ChildPdgIdName=f"{prefix}TruthLabelChildPdgId",
+    )
+
+
+def getJetDeltaRFlavorLabelTool(name='jetdrlabeler', jet_pt_min=5000):
+    """Get the standard flavor tagging delta-R labeling tool
+
+    Uses cone matching to B, C and tau truth particles.
+    """
+    return CompFactory.ParticleJetDeltaRLabelTool(
+        name,
+        **_getCommonLabelNames("HadronConeExcl"),
         BLabelName = "ConeExclBHadronsFinal",
         CLabelName = "ConeExclCHadronsFinal",
         TauLabelName = "ConeExclTausFinal",
@@ -121,22 +144,42 @@ def getJetDeltaRLabelTool(jetdef, modspec):
         TauParticleCollection = "TruthLabelTausFinal",
         PartPtMin = 5000.,
         DRMax = 0.3,
-        MatchMode = "MinDR"
+        MatchMode = "MinDR",
+        JetPtMin = jet_pt_min,
         )
-    jetdrlabeler.JetPtMin = jetptmin
-    return jetdrlabeler
 
-def getJetGhostLabelTool(jetdef, modspec):
-    jetghostlabeler = CompFactory.ParticleJetGhostLabelTool(
-        "jetghostlabeler",
-        LabelName = "HadronGhostTruthLabelID",
-        DoubleLabelName = "HadronGhostExtendedTruthLabelID",
+
+def getJetDeltaRLabelTool(jetdef, modspec):
+    """returns a ParticleJetDeltaRLabelTool
+    Cone matching for B, C and tau truth for all but track jets.
+
+    This function is meant to be used as callback from JetRecConfig where
+    it is called as func(jetdef, modspec). Hence the jetdef argument even if not used in this case.
+    """
+    jetptmin = float(modspec)
+    name = "jetdrlabeler_jetpt{0}GeV".format(int(jetptmin/1000))
+    return getJetDeltaRFlavorLabelTool(name, jetptmin)
+
+
+def getJetGhostFlavorLabelTool(name="jetghostlabeler"):
+    return CompFactory.ParticleJetGhostLabelTool(
+        name,
+        **_getCommonLabelNames('HadronGhost'),
         GhostBName = "GhostBHadronsFinal",
         GhostCName = "GhostCHadronsFinal",
         GhostTauName = "GhostTausFinal",
         PartPtMin = 5000.0
     )
-    return jetghostlabeler
+
+
+def getJetGhostLabelTool(jetdef, modspec):
+    """get ghost-based flavor tagging labeling
+
+    This is a wrapper for JetRecConfig where it's called as
+    func(jetdef, modspec)
+    """
+    return getJetGhostFlavorLabelTool()
+
 
 def getJetTruthLabelTool(jetdef, modspec):
 
