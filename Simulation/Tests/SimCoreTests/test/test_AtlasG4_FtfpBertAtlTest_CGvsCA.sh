@@ -1,6 +1,8 @@
 #!/bin/sh
 #
 # art-description: Run simulation outside ISF, reading di-jet events, using FTFP_BERT_ATL physics list, writing HITS, using 2015 geometry and conditions
+# art-include: 23.0/Athena
+# art-include: 23.0/AthSimulation
 # art-include: master/Athena
 # art-include: master/AthSimulation
 # art-type: grid

@@ -1,6 +1,8 @@
 #!/bin/sh
 #
 # art-description: Run simulation outside ISF, using 2012 geometry and conditions, reading single muon events, writing HITS
+# art-include: 23.0/Athena
+# art-include: 23.0/AthSimulation
 # art-include: master/Athena
 # art-include: master/AthSimulation
 # art-type: grid

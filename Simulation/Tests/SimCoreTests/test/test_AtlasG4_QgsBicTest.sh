@@ -1,6 +1,8 @@
 #!/bin/sh
 #
 # art-description: Run simulation outside ISF, with alternative QGS_BIC physics list, reading in SU3 SUSY events, using 2015 geometry and conditions
+# art-include: 23.0/Athena
+# art-include: 23.0/AthSimulation
 # art-include: master/Athena
 # art-include: master/AthSimulation
 # art-type: grid
