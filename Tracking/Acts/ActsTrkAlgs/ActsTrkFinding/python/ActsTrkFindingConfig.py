@@ -19,10 +19,9 @@ def ActsTrkFindingCfg(flags, name: str = "ActsTrkFindingAlg", **kwargs):
     kwargs.setdefault("InputEstimatedTrackParameters", "ITkPixelEstimatedTrackParams")
     kwargs.setdefault("TracksLocation", "SiSPSeededActsTracks")
 
-    ## The following is a placeholder for when we implement ActsTrkFindingLiveMonitoringCfg.
-    # if flags.Acts.doMonitoring:
-    #     from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkFindingLiveMonitoringCfg
-    #     kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkFindingLiveMonitoringCfg(flags)))
+    if flags.Acts.doMonitoring:
+        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkFindingMonitoringCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkFindingMonitoringCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.TrackFindingAlg(name, **kwargs))
     return acc
