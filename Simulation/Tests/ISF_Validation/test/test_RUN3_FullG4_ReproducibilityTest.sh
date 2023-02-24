@@ -3,6 +3,8 @@
 # art-description: MC21-style simulation using FullG4, checking that the SkipEvents argument works (7 TeV ttbar input - needs updating)
 # art-include: 22.0/Athena
 # art-include: 22.0/AthSimulation
+# art-include: 23.0/Athena
+# art-include: 23.0/AthSimulation
 # art-include: master/Athena
 # art-include: master/AthSimulation
 # art-type: grid
