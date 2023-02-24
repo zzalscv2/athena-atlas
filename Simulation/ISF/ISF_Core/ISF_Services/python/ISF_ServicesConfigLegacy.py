@@ -31,6 +31,7 @@ def getParticleBrokerSvc(name="ISF_ParticleBrokerSvc", **kwargs):
 
 
 def getAFIIParticleBrokerSvc(name="ISF_AFIIParticleBrokerSvc", **kwargs):
+    kwargs.setdefault('GeoIDSvc', 'ISF_AFIIGeoIDSvc')
     kwargs.setdefault('EntryLayerTool', 'ISF_AFIIEntryLayerTool')
     return getParticleBrokerSvc(name, **kwargs)
 
