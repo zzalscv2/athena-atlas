@@ -97,7 +97,7 @@ void SiHitCollectionCnv_p2::transToPers(const SiHitCollection* transCont, SiHitC
     SiHitCollection::const_iterator siHit = it;
 
 
-    if ( siHit->particleLink().barcode() != lastBarcode ) {
+    if ( siHit->particleLink().barcode() != lastBarcode || (idx-endBC)==USHRT_MAX ) {
 
       // store barcode once for set of consecutive hits with same barcode
 
@@ -110,7 +110,7 @@ void SiHitCollectionCnv_p2::transToPers(const SiHitCollection* transCont, SiHitC
       }
     }
 
-    if ( (int)siHit->identify() != lastId ) {
+    if ( ( (int)siHit->identify() != lastId ) || (idx-endId)==USHRT_MAX) {
 
       // store id once for set of consecutive hits with same barcode
 
@@ -137,9 +137,9 @@ void SiHitCollectionCnv_p2::transToPers(const SiHitCollection* transCont, SiHitC
     CLHEP::Hep3Vector direction(0.0, 0.0, 0.0);
     double theta = 0.0;
     double phi = 0.0;
-    bool startNewString = false;
+    bool startNewString = (dRLast >= dRcut || dTLast >= dTcut || (idx - endHit) == USHRT_MAX);
 
-    if (dRLast < dRcut && dTLast < dTcut) {
+    if (!startNewString) {
 
       // hit is part of existing string
 
@@ -163,7 +163,7 @@ void SiHitCollectionCnv_p2::transToPers(const SiHitCollection* transCont, SiHitC
       }
     }
 
-    if (startNewString || dRLast >= dRcut || dTLast >= dTcut) {
+    if (startNewString) {
 
       // begin new hit string
 
@@ -237,6 +237,20 @@ void SiHitCollectionCnv_p2::transToPers(const SiHitCollection* transCont, SiHitC
   persCont->m_nBC.push_back(idx - endBC);
   persCont->m_nId.push_back(idx - endId);
   persCont->m_nHits.push_back(idx - endHit);
+#ifdef ENABLE_SANITY_CHECKS
+  // Sanity check
+  const unsigned int init(0);
+  const unsigned int transContSize = transCont->size();
+  if (std::accumulate(persCont->m_nBC.begin(), persCont->m_nBC.end(), init)!=transContSize) {
+    log << MSG::ERROR << "transToPers: sum of entries of persCont->m_nBC (" << std::accumulate(persCont->m_nBC.begin(), persCont->m_nBC.end(), init) << ") does not match transient container size = " << transContSize << endmsg;
+  }
+  if (std::accumulate(persCont->m_nId.begin(), persCont->m_nId.end(), init)!=transContSize) {
+    log << MSG::ERROR << "transToPers: sum of entries of persCont->m_nId (" << std::accumulate(persCont->m_nId.begin(), persCont->m_nId.end(), init) << ") does not match transient container size = " << transContSize << endmsg;
+  }
+  if (std::accumulate(persCont->m_nHits.begin(), persCont->m_nHits.end(), init)!=transContSize) {
+    log << MSG::ERROR << "transToPers: sum of entries of persCont->m_nHits (" << std::accumulate(persCont->m_nHits.begin(), persCont->m_nHits.end(), init) << ") does not match transient container size = " << transContSize << endmsg;
+  }
+#endif
 }
 
 
@@ -247,8 +261,27 @@ SiHitCollection* SiHitCollectionCnv_p2::createTransient(const SiHitCollection_p2
 }
 
 
+#ifdef ENABLE_SANITY_CHECKS
+void SiHitCollectionCnv_p2::persToTrans(const SiHitCollection_p2* persCont, SiHitCollection* transCont, MsgStream &log)
+#else
 void SiHitCollectionCnv_p2::persToTrans(const SiHitCollection_p2* persCont, SiHitCollection* transCont, MsgStream &/*log*/)
+#endif
 {
+#ifdef ENABLE_SANITY_CHECKS
+  // Sanity check
+  const unsigned int transContSize = persCont->m_hitEne_2b.size(); // this vector has one entry per transient SiHit, so its size can be used as a proxy for the transient Container size
+  const unsigned int init(0);
+  if (std::accumulate(persCont->m_nBC.begin(), persCont->m_nBC.end(), init)!=transContSize) {
+    log << MSG::ERROR << "persToTrans: sum of entries of persCont->m_nBC (" << std::accumulate(persCont->m_nBC.begin(), persCont->m_nBC.end(), init) << ") does not match transient container size = " << transContSize << endmsg;
+  }
+  if (std::accumulate(persCont->m_nId.begin(), persCont->m_nId.end(), init)!=transContSize) {
+    log << MSG::ERROR << "persToTrans: sum of entries of persCont->m_nId (" << std::accumulate(persCont->m_nId.begin(), persCont->m_nId.end(), init) << ") does not match transient container size = " << transContSize << endmsg;
+  }
+  if (std::accumulate(persCont->m_nHits.begin(), persCont->m_nHits.end(), init)!=transContSize) {
+    log << MSG::ERROR << "persToTrans: sum of entries of persCont->m_nHits (" << std::accumulate(persCont->m_nHits.begin(), persCont->m_nHits.end(), init) << ") does not match transient container size = " << transContSize << endmsg;
+  }
+#endif
+
   unsigned int hitCount = 0;
   unsigned int angleCount = 0;
   unsigned int idxBC = 0;
