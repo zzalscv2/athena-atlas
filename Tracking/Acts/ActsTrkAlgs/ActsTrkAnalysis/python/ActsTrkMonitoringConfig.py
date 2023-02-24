@@ -104,3 +104,18 @@ def ActsTrkITkStripSeedingMonitoringCfg(flags,
     acc.setPrivateTools(monTool)
     acc.merge(ActsTrkMonitoringHistSvcCfg(flags))     
     return acc
+
+def ActsTrkFindingMonitoringCfg(flags,
+                                name: str = "ActsTrkFindingLiveMonitoring",
+                                **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    monTool = GenericMonitoringTool(flags, name)
+    
+    monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title="Time for execute",
+                            xbins=100, xmin=0, xmax=70000)
+    
+    acc.setPrivateTools(monTool)
+    acc.merge(ActsTrkMonitoringHistSvcCfg(flags))
+    return acc
