@@ -5,6 +5,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from LArCalibProcessing.utils import FolderTagResolver
 from IOVDbSvc.IOVDbSvcConfig import addFolders
+from copy import deepcopy
 
 def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
     result=ComponentAccumulator()
@@ -26,23 +27,29 @@ def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
     LArPhysOFCAlg.UseDelta = flags.LArCalib.OFC.useDelta
     LArPhysOFCAlg.KeyOFC   = "LArOFC_"+postfix
     LArPhysOFCAlg.KeyShape = "LArShape_"+postfix
-    if (nColl==0):
-        LArPhysOFCAlg.DecoderTool = CompFactory.LArAutoCorrDecoderTool(UseAlwaysHighGain=flags.LArCalib.PhysACuseHG,
-                                                                       isSC = flags.LArCalib.isSC)
-    else:
-        LArPhysOFCAlg.DecoderTool = CompFactory.LArAutoCorrDecoderTool(DecodeMode=1,
-                                                                       UseAlwaysHighGain=flags.LArCalib.PhysACuseHG,
-                                                                       isSC = flags.LArCalib.isSC,
-                                                                       KeyAutoCorr="LArPhysAutoCorr")
-                                                            
+    
     if flags.LArCalib.OFC.Nsamples==4 and not flags.LArCalib.isSC:
         LArPhysOFCAlg.ReadDSPConfig   = True
         LArPhysOFCAlg.DSPConfigFolder = "/LAR/Configuration/DSPConfiguration"
         
 
+    LArPhysOFCAlg.DecoderTool = CompFactory.LArAutoCorrDecoderTool(UseAlwaysHighGain=flags.LArCalib.PhysACuseHG,
+                                                                   isSC = flags.LArCalib.isSC)
 
     result.addEventAlgo(LArPhysOFCAlg)
-
+    if (nColl>0):
+        #create a copy to calculate pile-up OFCs
+        LArPhysOFCAlgMu=deepcopy(LArPhysOFCAlg)
+        LArPhysOFCAlgMu.name=LArPhysOFCAlg.name+"_mu"
+        LArPhysOFCAlgMu.KeyOFC   = "LArOFC_"+postfix+"_mu"
+        LArPhysOFCAlg.KeyShape = "LArShape_"+postfix+"_mu"
+        LArPhysOFCAlgMu.DecoderTool = CompFactory.LArAutoCorrDecoderTool(DecodeMode=1,
+                                                                         UseAlwaysHighGain=flags.LArCalib.PhysACuseHG,
+                                                                         isSC = flags.LArCalib.isSC,
+                                                                         KeyAutoCorr="LArPhysAutoCorr")
+        result.addEventAlgo(LArPhysOFCAlgMu)
+    
+    
     rootfile=flags.LArCalib.Output.ROOTFile
     if rootfile != "":
         bcKey = "LArBadChannelSC" if flags.LArCalib.isSC else "LArBadChannel"     
@@ -54,6 +61,16 @@ def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
         OFC2Ntup.BadChanKey = bcKey
         result.addEventAlgo(OFC2Ntup)
 
+        if (nColl>0):
+            OFC2NtupMu=CompFactory.LArOFC2Ntuple("LArOFC2Ntuple_"+postfix+"_mu")
+            OFC2NtupMu.ContainerKey = "LArOFC_"+postfix+"_mu"
+            OFC2NtupMu.NtupleName   = "OFC_"+postfix+"_mu"
+            OFC2NtupMu.AddFEBTempInfo   = False   
+            OFC2NtupMu.isSC = flags.LArCalib.isSC
+            OFC2NtupMu.BadChanKey = bcKey
+            result.addEventAlgo(OFC2NtupMu)
+             
+
         Shape2Ntup=CompFactory.LArShape2Ntuple("LArShape2Ntuple_"+postfix)
         Shape2Ntup.ContainerKey="LArShape_"+postfix
         Shape2Ntup.NtupleName="SHAPE_"+postfix
@@ -62,24 +79,30 @@ def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
         Shape2Ntup.BadChanKey = bcKey
         result.addEventAlgo(Shape2Ntup)
 
+
+    objList=["LArOFCComplete#LArOFC_"+postfix+"#"+flags.LArCalib.OFCPhys.Folder+folderSuffix,
+             "LArShapeComplete#LArShape_"+postfix+"#"+flags.LArCalib.Shape.Folder+folderSuffix]
+
     rs=FolderTagResolver()
+    OFCTag=rs.getFolderTag(flags.LArCalib.OFCPhys.Folder+folderSuffix)
+    ShapeTag=rs.getFolderTag(flags.LArCalib.Shape.Folder+folderSuffix)
+    tagList=[OFCTag,ShapeTag]
+
     if nColl > 0:
+       objList+=["LArOFCComplete#LArOFC_"+postfix+"_mu#"+flags.LArCalib.OFCPhys.Folder+folderSuffix]
        tagstr=rs.getFolderTag(flags.LArCalib.OFCPhys.Folder+folderSuffix)
        tagpref=tagstr[0:tagstr.find(folderSuffix)+len(folderSuffix)]
        tagpost=tagstr[tagstr.find(folderSuffix)+len(folderSuffix):]
        nc=int(nColl)
-       OFCTag=f'{tagpref}-mu-{nc}{tagpost}'   
-    else:
-       OFCTag=rs.getFolderTag(flags.LArCalib.OFCPhys.Folder+folderSuffix)
-    ShapeTag=rs.getFolderTag(flags.LArCalib.Shape.Folder+folderSuffix)
+       OFCTagmu=f'{tagpref}-mu-{nc}{tagpost}'   
+       tagList.append(OFCTagmu)
     del rs #Close database
 
     from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
-    result.merge(OutputConditionsAlgCfg(flags,name="OutCondAlg"+postfix,
+    result.merge(OutputConditionsAlgCfg(flags,name="OutCondAlg",
                                         outputFile=flags.LArCalib.Output.POOLFile,
-                                        ObjectList=["LArOFCComplete#LArOFC_"+postfix+"#"+flags.LArCalib.OFCPhys.Folder+folderSuffix,
-                                                    "LArShapeComplete#LArShape_"+postfix+"#"+flags.LArCalib.Shape.Folder+folderSuffix],
-                                        IOVTagList=[OFCTag,ShapeTag]))
+                                        ObjectList=objList,
+                                        IOVTagList=tagList))
 
     return result
 
@@ -121,14 +144,14 @@ def LArOFCPhysCfg(flags,loadPhysAC=True):
 
 
     #def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
-    result.merge(_ofcAlg(flags,"3ns","%isamples3bins17phases"%flags.LArCalib.OFC.Nsamples,nPhases=8,dPhases=3,nDelays=24,nColl=0))
+    if not loadPhysAC:
+        #post-processing mode, fix SG key to allow subsequent OFC-phase picking
+        key1="_unpicked"
+    else:
+        key1=""
 
-    result.merge(_ofcAlg(flags,"3ns_mu","%isamples3bins17phases"%flags.LArCalib.OFC.Nsamples,nPhases=8,dPhases=3,nDelays=24,nColl=nColl))
-
-    result.merge(_ofcAlg(flags,"1ns","%isamples"%flags.LArCalib.OFC.Nsamples,nPhases=24,dPhases=1,nDelays=24,nColl=0))
-
-    result.merge(_ofcAlg(flags,"1ns_mu","%isamples"%flags.LArCalib.OFC.Nsamples,nPhases=24,dPhases=1,nDelays=24,nColl=nColl))
-
+    result.merge(_ofcAlg(flags,"3ns%s"%key1,"%isamples3bins17phases"%flags.LArCalib.OFC.Nsamples,nPhases=8,dPhases=3,nDelays=24,nColl=nColl))
+    result.merge(_ofcAlg(flags,"1ns","%isamples%s"%(flags.LArCalib.OFC.Nsamples,key1),nPhases=24,dPhases=1,nDelays=24,nColl=nColl))
 
     #RegistrationSvc    
     result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = False))
