@@ -396,6 +396,27 @@ def addHeavyIonP1Signatures(chains):
     chainsP1['Calib'] = [
         # 'ZDCCalib' stream
         ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_OR_LHCF', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
+
+        # ALFA streamers for alignment (ATR-23602)
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_ANY',     l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_ELAST15', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_ELAST18', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_SYST17',  l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_SYST18',  l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        # ALFA single counters
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_B7L1U_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_B7L1L_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_A7L1U_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_A7L1L_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_A7R1U_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_A7R1L_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_B7R1U_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_B7R1L_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        # Upper/lower coincidence
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_B7L1_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_A7L1_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_B7R1_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_A7R1_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
     ]
     
     addP1Signatures(chains,chainsP1)

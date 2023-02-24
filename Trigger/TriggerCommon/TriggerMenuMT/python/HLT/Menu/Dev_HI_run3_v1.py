@@ -346,8 +346,6 @@ def getDevHISignatures():
         ChainProp(name='HLT_noalg_mb_L1MBTS_1_VTE5', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1TE5_VTE20',      l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1TE20_VTE200',    l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
-
-
     ]
 
     #---- beamspot trigger with VTE to avoid busy tracking in central events
