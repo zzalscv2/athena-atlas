@@ -6,12 +6,11 @@
 # art-include: 23.0/Athena
 # art-athena-mt: 8
 
-# temporary preExec override due to ATLASRECTS-7502
-
 Reco_tf.py  \
---AMI f1328  \
---preExec="flags.DQ.Steering.doJetMon=False; flags.DQ.Steering.doTauMon=False; flags.DQ.Steering.doMissingEtMon=False" \
+--AMI f1287  \
+--CA False \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_cos.00421739.express_express.merge.RAW._lb0534._SFO-12._0001.1" \
+--preExec='all:from RecExConfig.RecFlags import rec; rec.doZdc.set_Value_and_Lock(False); from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Trigger.triggerConfig="DB";  ConfigFlags.DQ.Steering.HLT.doBjet=True; ConfigFlags.DQ.Steering.HLT.doInDet=True; ConfigFlags.DQ.Steering.HLT.doBphys=True; ConfigFlags.DQ.Steering.HLT.doCalo=True; ConfigFlags.DQ.Steering.HLT.doEgamma=False; ConfigFlags.DQ.Steering.HLT.doMET=True; ConfigFlags.DQ.Steering.HLT.doJet=True; ConfigFlags.DQ.Steering.HLT.doMinBias=True; ConfigFlags.DQ.Steering.HLT.doMuon=True; ConfigFlags.DQ.Steering.HLT.doTau=True; ConfigFlags.Tile.doTimingHistogramsForGain=0;' \
 --outputAODFile="AOD.pool.root" \
 --outputESDFile="ESD.pool.root" \
 --outputHISTFile="HIST.root" \

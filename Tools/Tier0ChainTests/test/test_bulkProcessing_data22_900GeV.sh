@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: Express processing at Tier0
+# art-description: RecoTrf
 # art-type: grid
 # art-include: master/Athena
 # art-include: 23.0/Athena
@@ -8,8 +8,7 @@
 
 Reco_tf.py  \
 --AMI f1328  \
---preExec="flags.DQ.useTrigger=False; flags.DQ.Steering.doHLTMon=False;" \
---inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_calib.00421734.express_express.merge.RAW._lb0021._SFO-ALL._0001.1" \
+--inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_900GeV.00424070.express_express.merge.RAW._lb0100._SFO-ALL._0001.1" \
 --outputAODFile="AOD.pool.root" \
 --outputESDFile="ESD.pool.root" \
 --outputHISTFile="HIST.root" \

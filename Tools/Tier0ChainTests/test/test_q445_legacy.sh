@@ -9,8 +9,8 @@
 # art-athena-mt: 8
 
 Reco_tf.py \
---CA True \
 --AMI=q445 \
+--CA False \
 --multithreaded \
 --maxEvents=500 \
 --outputRDOFile=myRDO.pool.root --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root --outputHISTFile=myHIST.root \
