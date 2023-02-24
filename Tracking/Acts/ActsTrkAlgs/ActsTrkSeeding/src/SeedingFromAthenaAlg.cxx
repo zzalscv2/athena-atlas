@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/SeedingFromAthenaAlg.h"
@@ -105,13 +105,13 @@ namespace ActsTrk {
     // ================================================== //
 
     ATH_MSG_DEBUG( "Retrieving elements from " << m_spacePointKey.size() << " input collections...");
-    std::vector<const ActsTrk::SpacePointContainer *> all_input_collections;
+    std::vector<const xAOD::SpacePointContainer *> all_input_collections;
     all_input_collections.reserve(m_spacePointKey.size());
 
     std::size_t number_input_space_points = 0;
     for (auto& spacePointKey : m_spacePointKey) {
       ATH_MSG_DEBUG( "Retrieving from Input Collection '" << spacePointKey.key() << "' ..." );
-      SG::ReadHandle< ActsTrk::SpacePointContainer > handle = SG::makeHandle( spacePointKey, ctx );
+      SG::ReadHandle< xAOD::SpacePointContainer > handle = SG::makeHandle( spacePointKey, ctx );
       ATH_CHECK( handle.isValid() );
       all_input_collections.push_back(handle.cptr());
       ATH_MSG_DEBUG( "    \\__ " << handle->size() << " elements!");
@@ -120,7 +120,7 @@ namespace ActsTrk {
 
     // TODO: Write some lines to check which SPs you want to use from the input container
     // At the time being we fill a vector with all SPs available.
-    std::vector<const ActsTrk::SpacePoint*> selectedSpacePoints;
+    std::vector<const xAOD::SpacePoint*> selectedSpacePoints;
     selectedSpacePoints.reserve(number_input_space_points);
 
     for (const auto* collection : all_input_collections) {
@@ -182,7 +182,7 @@ namespace ActsTrk {
 
     // Estimate Track Parameters
     auto retrieveSurfaceFunction = 
-      [this, &inputClusterContainer, &detEle] (const Acts::Seed<ActsTrk::SpacePoint>& seed) -> const Acts::Surface& 
+      [this, &inputClusterContainer, &detEle] (const Acts::Seed<xAOD::SpacePoint>& seed) -> const Acts::Surface& 
       { 
 	std::size_t bottom_idx = seed.sp().front()->measurementIndexes()[0];
 
@@ -213,7 +213,7 @@ namespace ActsTrk {
 	trackParams->push_back( toAdd );
       }
     }
-    
+
     // ================================================== //   
     // ===================== STORE OUTPUT =============== //
     // ================================================== //   

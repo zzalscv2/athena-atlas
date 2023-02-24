@@ -92,7 +92,7 @@ namespace ActsTrk {
 
   StatusCode
   OrthogonalSeedingTool::createSeeds(const EventContext& /*ctx*/,
-				     const std::vector<const ActsTrk::SpacePoint*>& spContainer,
+				     const std::vector<const xAOD::SpacePoint*>& spContainer,
 				     const Acts::Vector3& beamSpotPos,
 				     const Acts::Vector3& bField,
 				     ActsTrk::SeedContainer& seedContainer ) const
@@ -104,8 +104,8 @@ namespace ActsTrk {
     finderOpts.bFieldInZ = bField[2];
     finderOpts = finderOpts.toInternalUnits().calculateDerivedQuantities(m_finderCfg);
 
-    std::function<std::pair<Acts::Vector3, Acts::Vector2>(const ActsTrk::SpacePoint *sp)>
-      create_coordinates = [](const ActsTrk::SpacePoint *sp) {
+    std::function<std::pair<Acts::Vector3, Acts::Vector2>(const xAOD::SpacePoint *sp)>
+      create_coordinates = [](const xAOD::SpacePoint *sp) {
       Acts::Vector3 position(sp->x(), sp->y(), sp->z());
       Acts::Vector2 variance(sp->varianceR(), sp->varianceZ());
       return std::make_pair(position, variance);

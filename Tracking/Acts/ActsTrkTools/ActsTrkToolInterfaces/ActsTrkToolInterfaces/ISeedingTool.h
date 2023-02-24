@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKTOOLINTERFACES_ISEEDINGTOOL_H
@@ -12,9 +12,11 @@
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
 
 // ACTS EDM
-#include "ActsTrkEvent/SpacePoint.h"
+#include "xAODInDetMeasurement/SpacePointContainer.h"
+#include "xAODInDetMeasurement/SpacePointAuxContainer.h"
 #include "ActsTrkEvent/Seed.h"
 
+#include "Acts/Definitions/Algebra.hpp"
 
 namespace ActsTrk {
   class ISeedingTool
@@ -25,7 +27,7 @@ namespace ActsTrk {
     virtual 
       StatusCode
       createSeeds(const EventContext& ctx,
-                  const std::vector<const ActsTrk::SpacePoint*>& spContainer,
+                  const std::vector<const xAOD::SpacePoint*>& spContainer,
                   const Acts::Vector3& beamSpotPos,
                   const Acts::Vector3& bField,
                   ActsTrk::SeedContainer& seedContainer ) const = 0;

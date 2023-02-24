@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -17,7 +17,7 @@
 #include "SiSPSeededTrackFinderData/SiSpacePointsProSeed.h"
 #include "SiSPSeededTrackFinderData/ITkSiSpacePointsProSeed.h"
 
-#include "ActsTrkEvent/SpacePoint.h"
+#include "xAODInDetMeasurement/SpacePointContainer.h"
 
 #include <list>
 #include <map>
@@ -176,7 +176,7 @@ namespace InDet {
     std::list<ITk::SiSpacePointForSeed> l_ITkSpacePointForSeed;
     std::list<ITk::SiSpacePointForSeed>::iterator i_ITkSpacePointForSeed;
 
-    std::vector<const ActsTrk::SpacePoint*> v_ActsSpacePointForSeed;  //<! list of acts space points considered for seed building.
+    std::vector<const xAOD::SpacePoint*> v_ActsSpacePointForSeed;  //<! list of acts space points considered for seed building.
 
     std::list<InDet::SiSpacePointsSeed> l_seeds;
     std::list<InDet::SiSpacePointsSeed>::iterator i_seed;

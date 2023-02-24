@@ -31,7 +31,6 @@ def ActsTrkPixelSpacePointFormationCfg(flags,
     kwargs.setdefault("PixelDetectorElements", "ITkPixelDetectorElementCollection")
 
     kwargs.setdefault("PixelSpacePoints", "ITkPixelSpacePoints")
-    kwargs.setdefault("PixelSpacePointData", "ITkPixelSpacePointData")
 
     if flags.Acts.doMonitoring:
         from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkPixelSpacePointFormationMonitoringToolCfg
@@ -55,9 +54,7 @@ def ActsTrkStripSpacePointFormationCfg(flags,
     kwargs.setdefault("StripElementPropertiesTable", "ITkStripElementPropertiesTable")
 
     kwargs.setdefault("StripSpacePoints", "ITkStripSpacePoints")
-    kwargs.setdefault("StripSpacePointData", "ITkStripSpacePointData")
     kwargs.setdefault("StripOverlapSpacePoints", "ITkStripOverlapSpacePoints")
-    kwargs.setdefault("StripOverlapSpacePointData", "ITkStripOverlapSpacePointData")
     kwargs.setdefault("ProcessOverlapForStrip", True)
 
     if flags.Acts.doMonitoring:

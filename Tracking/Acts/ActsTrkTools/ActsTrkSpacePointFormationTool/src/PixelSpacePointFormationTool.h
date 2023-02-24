@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKSPACEPOINTFORMATIONTOOL_PIXELSPACEPOINTFORMATIONTOOL_H
@@ -8,10 +8,9 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ActsTrkToolInterfaces/IPixelSpacePointFormationTool.h"
 
-#include "ActsTrkEvent/SpacePoint.h"
-#include "ActsTrkEvent/SpacePointData.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
+#include "xAODInDetMeasurement/SpacePointContainer.h"
 
 #include <string>
 
@@ -38,10 +37,10 @@ namespace ActsTrk {
 
     /// @name Production of space points
     //@{
-    virtual std::unique_ptr<ActsTrk::SpacePoint> producePixelSpacePoint(const xAOD::PixelCluster& cluster,
-                                                                        ActsTrk::SpacePointData& data,
-                                                                        const boost::container::static_vector<std::size_t, 2>& measIndexes,
-                                                                        const InDetDD::SiDetectorElement& element) const override;
+    virtual StatusCode producePixelSpacePoint(const xAOD::PixelCluster& cluster,
+					      xAOD::SpacePoint& sp,
+					      const std::vector<std::size_t>& measIndexes,
+					      const InDetDD::SiDetectorElement& element) const override;
     //@}
 
   private:

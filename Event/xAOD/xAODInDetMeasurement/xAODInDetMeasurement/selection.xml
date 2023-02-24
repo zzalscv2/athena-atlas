@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration -->
+<!-- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
 
     <class name="xAOD::PixelCluster_v1" />
@@ -20,5 +20,18 @@
     <class name="xAOD::StripClusterAuxContainer_v1"
            id="25606F37-C929-45DD-8B85-9DF98D04D456" />
     <typedef name="xAOD::StripClusterAuxContainer" />
+
+    <class name="xAOD::SpacePoint_v1" />
+    <class name="xAOD::SpacePointContainer_v1" 
+	   id="C76BF012-FEAB-46E7-BE80-3D0379077768" />
+    <typedef name="xAOD::SpacePoint" />
+    <typedef name="xAOD::SpacePointContainer" />
+
+    <class name="xAOD::SpacePointAuxContainer_v1"
+	   id="81290828-11AF-4A18-A8AD-A73D550B1B0C" />
+    <typedef name="xAOD::SpacePointAuxContainer" />
+
+    <class name="xAOD::ArrayFloat3"/>
+    <class name="std::vector<xAOD::ArrayFloat3>"/>
 
 </lcgdict>

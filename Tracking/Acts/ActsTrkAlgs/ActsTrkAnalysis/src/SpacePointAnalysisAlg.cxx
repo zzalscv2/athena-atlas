@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SpacePointAnalysisAlg.h"
@@ -38,9 +38,9 @@ namespace ActsTrk {
     else
       ATH_CHECK(detStore()->retrieve(stripID, "SCT_ID"));
     
-    SG::ReadHandle< ActsTrk::SpacePointContainer > inputSpacePointContainer( m_spacePointContainerKey, ctx );
+    SG::ReadHandle< xAOD::SpacePointContainer > inputSpacePointContainer( m_spacePointContainerKey, ctx );
     if (!inputSpacePointContainer.isValid()){
-      ATH_MSG_FATAL("ActsTrk::SpacePointContainer with key " << m_spacePointContainerKey.key() << " is not available...");
+      ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_spacePointContainerKey.key() << " is not available...");
       return StatusCode::FAILURE;
     }
 
@@ -65,8 +65,8 @@ namespace ActsTrk {
       inputContainer = inputClusterContainer.cptr();
     }
     
-    std::function<IdentifierHash(const ActsTrk::SpacePoint&)> mapper =
-      [inputContainer](const ActsTrk::SpacePoint& sp) {
+    std::function<IdentifierHash(const xAOD::SpacePoint&)> mapper =
+      [inputContainer](const xAOD::SpacePoint& sp) {
       auto& cluster_indices = sp.measurementIndexes();
             IdentifierHash idHash =
       std::visit([cluster_indices](auto container) -> IdentifierHash {
@@ -74,7 +74,7 @@ namespace ActsTrk {
       return idHash;
     };
 
-    const ActsTrk::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
+    const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
     auto monitor_barrelEndcap = Monitored::Collection("barrelEndcap", *inputSpacePointCollection,
 						      [this, &pixelID, &stripID, &mapper] (const auto* spacePoint) -> int
 						      {

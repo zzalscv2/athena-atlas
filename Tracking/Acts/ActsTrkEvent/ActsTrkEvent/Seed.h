@@ -1,18 +1,17 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKEVENT_SEED_H
 #define ACTSTRKEVENT_SEED_H 1
 
 #include "Acts/Seeding/Seed.hpp"
-#include "ActsTrkEvent/SpacePoint.h"
-
+#include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "AthContainers/DataVector.h"
 
 namespace ActsTrk {
-  typedef Acts::Seed< ActsTrk::SpacePoint > Seed;
-  typedef DataVector< Acts::Seed< ActsTrk::SpacePoint > > SeedContainer;
+  typedef Acts::Seed< xAOD::SpacePoint > Seed;
+  typedef DataVector< Acts::Seed< xAOD::SpacePoint > > SeedContainer;
 }
 
 // Set up a CLID for the type:
