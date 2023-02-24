@@ -258,9 +258,8 @@ namespace InDet {
   NnClusterizationFactory::estimateNumberOfParticles(const InDet::PixelCluster& pCluster,
                                                      Amg::Vector3D & beamSpotPosition) const{
     double tanl=0;
-    const std::vector<double> invalidResult{};
     NNinput input( createInput(pCluster,beamSpotPosition,tanl) );
-    if (!input) return invalidResult;
+    if (!input) return {};
     // If using old TTrainedNetworks, fetch correct ones for the
     // without-track situation and call them now.
     if (m_useTTrainedNetworks) {
@@ -268,7 +267,7 @@ namespace InDet {
       SG::ReadCondHandle<TTrainedNetworkCollection> nn_collection( m_readKeyWithoutTrack );
       if (!nn_collection.isValid()) {
 	      ATH_MSG_FATAL( "Failed to get trained network collection with key " << m_readKeyWithoutTrack.key() );
-        return invalidResult;
+        return {};
       }
       return estimateNumberOfParticlesTTN(**nn_collection, inputData);
     }
@@ -283,10 +282,9 @@ namespace InDet {
                                                      const Trk::TrackParameters& trackParsAtSurface) const{
     Amg::Vector3D dummyBS(0,0,0);
     double tanl=0;
-    const std::vector<double> invalidResult{};
     NNinput input( createInput(pCluster,dummyBS,tanl) );
     
-    if (!input) return invalidResult;
+    if (!input) return {};
     addTrackInfoToInput(input,pixelSurface,trackParsAtSurface,tanl);
     std::vector<double> inputData=(this->*m_assembleInput)(input);
     // If using old TTrainedNetworks, fetch correct ones for the
@@ -295,7 +293,7 @@ namespace InDet {
       SG::ReadCondHandle<TTrainedNetworkCollection> nn_collection( m_readKeyWithTrack );
       if (!nn_collection.isValid()) {
 	      ATH_MSG_FATAL( "Failed to get trained network collection with key " << m_readKeyWithoutTrack.key() );
-        return invalidResult;
+        return {};
       }
       return estimateNumberOfParticlesTTN(**nn_collection, inputData);
     }
@@ -366,9 +364,8 @@ namespace InDet {
     ATH_MSG_VERBOSE(" Starting to estimate positions...");
     double tanl=0;
     NNinput input( createInput(pCluster,beamSpotPosition,tanl) );
-    const std::vector<Amg::Vector2D> invalidResult{};
     if (!input){
-      return invalidResult;
+      return {};
     }
     // If using old TTrainedNetworks, fetch correct ones for the
     // without-track situation and call them now.
@@ -377,7 +374,7 @@ namespace InDet {
       SG::ReadCondHandle<TTrainedNetworkCollection> nn_collection( m_readKeyWithoutTrack );
       if (!nn_collection.isValid()) {
 	      ATH_MSG_FATAL( "Failed to get trained network collection with key " << m_readKeyWithoutTrack.key() );
-        return invalidResult;
+        return {};
       }
       // *(ReadCondHandle<>) returns a pointer rather than a reference ...
       return estimatePositionsTTN(**nn_collection, inputData,input,pCluster,numberSubClusters,errors);
@@ -396,10 +393,9 @@ namespace InDet {
                                              int numberSubClusters) const{
     ATH_MSG_VERBOSE(" Starting to estimate positions...");
     Amg::Vector3D dummyBS(0,0,0);
-    const std::vector<Amg::Vector2D> invalidResult{};
     double tanl=0;
     NNinput input( createInput(pCluster, dummyBS, tanl) );
-    if (!input) return invalidResult;
+    if (!input) return {};
     addTrackInfoToInput(input,pixelSurface,trackParsAtSurface,tanl);
     // If using old TTrainedNetworks, fetch correct ones for the
     // without-track situation and call them now.
@@ -408,7 +404,7 @@ namespace InDet {
       SG::ReadCondHandle<TTrainedNetworkCollection> nn_collection( m_readKeyWithTrack );
       if (!nn_collection.isValid()) {
 	      ATH_MSG_FATAL( "Failed to get trained network collection with key " << m_readKeyWithTrack.key() );
-        return invalidResult;
+        return {};
       }
       return estimatePositionsTTN(**nn_collection, inputData,input,pCluster,numberSubClusters,errors);
     }
@@ -485,14 +481,13 @@ namespace InDet {
                                                   int numberSubClusters,
                                                   std::vector<Amg::MatrixX> & errors) const {
     SG::ReadCondHandle<LWTNNCollection> lwtnn_collection(m_readKeyJSON) ;
-    const std::vector<Amg::Vector2D> invalidResult{};
     if (not lwtnn_collection.isValid()) {
       ATH_MSG_FATAL(  "Failed to get LWTNN network collection with key " << m_readKeyJSON.key() );
-      return invalidResult;
+      return {};
     }
     if (lwtnn_collection->empty()){
       ATH_MSG_FATAL( "estimatePositionsLWTNN: LWTNN network collection with key " << m_readKeyJSON.key()<<" is empty." );
-      return invalidResult;
+      return {};
     }
     // Need to evaluate the correct network once per cluster we're interested in.
     // Save the output
@@ -516,7 +511,7 @@ namespace InDet {
 	      ATH_MSG_FATAL( "estimatePositionsLWTNN: No lwtnn network found for the number of clusters.\n"
 	        <<" If you are outside the valid range for an lwtnn-based configuration, please run with useNNTTrainedNetworks instead.\n Key = " 
 	        << m_readKeyJSON.key() );
-	      return invalidResult;
+	      return {};
       }
       if(numberSubClusters==1) {
         outputNode = m_outputNodesPos1; 
@@ -526,7 +521,7 @@ namespace InDet {
         outputNode = m_outputNodesPos3[cluster-1]; 
       } else {
         ATH_MSG_FATAL( "Cannot evaluate LWTNN networks with " << numberSubClusters << " numberSubClusters" );
-        return invalidResult;
+        return {};
       }
       
       // Order of output matches order in JSON config in "outputs"
@@ -658,14 +653,13 @@ namespace InDet {
   NnClusterizationFactory::getPositionsFromOutput(std::vector<double> & output,
       const NNinput & input,
       const InDet::PixelCluster& pCluster) const{
-    std::vector<Amg::Vector2D> invalidResult{};
     ATH_MSG_VERBOSE(" Translating output back into a position " );
     const InDetDD::SiDetectorElement* element=pCluster.detectorElement();//DEFINE
     const InDetDD::PixelModuleDesign* design
         (dynamic_cast<const InDetDD::PixelModuleDesign*>(&element->design()));
     if (not design){
       ATH_MSG_ERROR("Dynamic cast failed at line "<<__LINE__<<" of NnClusterizationFactory.cxx.");
-      return invalidResult;
+      return {};
     }
     int numParticles=output.size()/2;
     int columnWeightedPosition=input.columnWeightedPosition;
