@@ -5,7 +5,7 @@
 #ifndef MUPATCANDIDATEBASE_H
 #define MUPATCANDIDATEBASE_H
 
-
+#include <set>
 
 #include "Identifier/Identifier.h"
 #include "MuPatPrimitives/MuPatHit.h"
