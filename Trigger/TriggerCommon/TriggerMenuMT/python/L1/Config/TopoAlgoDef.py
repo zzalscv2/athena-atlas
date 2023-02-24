@@ -461,7 +461,7 @@ class TopoAlgoDef:
         # 3. MinDeltaEta
         # 4. MaxDeltaEta
         # 5. DeltaPhiMin
-        # 6. DeltaPhiMin
+        # 6. DeltaPhiMax
         algolist=[
             {"minDeta": 5, "maxDeta": 99, "minDphi": 5, "maxDphi": 99, "mult": 1, "otype1" : "MU5VFab", "nleading1": HW.muonOutputWidthSelect, "otype2" : "MU3Vab", "nleading2": HW.muonOutputWidthSelect}, #5DETA99-5DPHI99-MU5VFab-MU3Vab
             {"minDeta": 5, "maxDeta": 99, "minDphi": 5, "maxDphi": 99, "mult": 2, "otype1" : "MU5VFab", "nleading1": HW.muonOutputWidthSelect, "otype2" : "", "nleading2": HW.muonOutputWidthSelect}, #5DETA99-5DPHI99-2MU5VFab
@@ -486,10 +486,10 @@ class TopoAlgoDef:
                 alg.addgeneric('MaxTob', d.nleading1)
                 alg.addvariable('MinET1',      0*_et_conversion)
                 alg.addvariable('MinET2',      0*_et_conversion)
-                alg.addvariable('DeltaEtaMin', d.minDeta*_eta_conversion)
-                alg.addvariable('DeltaEtaMax', d.maxDeta*_eta_conversion)
-                alg.addvariable('DeltaPhiMin', d.minDphi*_phi_conversion)
-                alg.addvariable('DeltaPhiMax', d.maxDphi*_phi_conversion)
+                alg.addvariable('MinDeltaEta', d.minDeta*_eta_conversion)
+                alg.addvariable('MaxDeltaEta', d.maxDeta*_eta_conversion)
+                alg.addvariable('MinDeltaPhi', d.minDphi*_phi_conversion)
+                alg.addvariable('MaxDeltaPhi', d.maxDphi*_phi_conversion)
             else:
                 alg.addgeneric('InputWidth1', d.nleading1)
                 alg.addgeneric('InputWidth2', d.nleading2)
@@ -574,8 +574,8 @@ class TopoAlgoDef:
         # 2. MinEt2
         # 3. MinMSqr
         # 4. MaxMSqr
-        # 5. DeltaPhiMin
-        # 6. DeltaPhiMin
+        # 5. MinDeltaPhi
+        # 6. MaxDeltaPhi
         eINVM_DPHIMap = [
         {  
             "algoname"  : "INVM_DPHI_eEMsm6",
@@ -617,8 +617,8 @@ class TopoAlgoDef:
                 alg.addvariable('MinET2', get_threshold_cut(d.otype1, d.ocut2List[bitId]) * _et_conversion, bitId)
                 alg.addvariable('MinMSqr', d.minInvm * d.minInvm * _et_conversion * _et_conversion, bitId)
                 alg.addvariable('MaxMSqr', d.maxInvm * d.maxInvm * _et_conversion * _et_conversion, bitId)
-                alg.addvariable('DeltaPhiMin', d.minDphi * _phi_conversion, bitId)
-                alg.addvariable('DeltaPhiMax', d.maxDphi * _phi_conversion, bitId)
+                alg.addvariable('MinDeltaPhi', d.minDphi * _phi_conversion, bitId)
+                alg.addvariable('MaxDeltaPhi', d.maxDphi * _phi_conversion, bitId)
             
             tm.registerTopoAlgo(alg)    
 
@@ -897,10 +897,10 @@ class TopoAlgoDef:
         alg.addgeneric('NumResultBits', 1)
         alg.addvariable('MinET1',  get_threshold_cut('eTAU', 40)*_et_conversion)
         alg.addvariable('MinET2',   0*_et_conversion)
-        alg.addvariable('MinEta1',  0*_eta_conversion)
-        alg.addvariable('MaxEta1', 49*_eta_conversion)
-        alg.addvariable('MinEta2',  0*_eta_conversion)
-        alg.addvariable('MaxEta2', 49*_eta_conversion)
+        alg.addvariable('EtaMin1',  0*_eta_conversion)
+        alg.addvariable('EtaMax1', 49*_eta_conversion)
+        alg.addvariable('EtaMin2',  0*_eta_conversion)
+        alg.addvariable('EtaMax2', 49*_eta_conversion)
         alg.addvariable('DRCut', 0) #TODO: conversion needed here?
         tm.registerTopoAlgo(alg)        
 
@@ -1039,8 +1039,8 @@ class TopoAlgoDef:
             alg.addgeneric('NumResultBits', 1)                        
             alg.addvariable('MinET1',      get_threshold_cut(d.otype, d.ocut1)*_et_conversion if d.ocut1 > 0 else get_threshold_cut(d.otype, 5)*_et_conversion, 0)
             alg.addvariable('MinET2',      get_threshold_cut(d.otype, d.ocut2)*_et_conversion if d.ocut2 > 0 else get_threshold_cut(d.otype, 5)*_et_conversion, 0)
-            alg.addvariable('DeltaPhiMin', d.minDphi*_phi_conversion, 0)
-            alg.addvariable('DeltaPhiMax', d.maxDphi*_phi_conversion, 0)
+            alg.addvariable('MinDeltaPhi', d.minDphi*_phi_conversion, 0)
+            alg.addvariable('MaxDeltaPhi', d.maxDphi*_phi_conversion, 0)
             tm.registerTopoAlgo(alg)
 
         # Tau dR chains
@@ -1246,8 +1246,8 @@ class TopoAlgoDef:
             alg.addgeneric('NumResultBits', 1)
             alg.addvariable('MinET1', get_threshold_cut(d.otype, d.ocut1)*_et_conversion, 0)
             alg.addvariable('MinET2', get_threshold_cut(d.otype, d.ocut2)*_et_conversion, 0)
-            alg.addvariable('DeltaEtaMin', d.minDeta*_eta_conversion, 0)
-            alg.addvariable('DeltaEtaMax', d.maxDeta*_eta_conversion, 0)
+            alg.addvariable('MinDeltaEta', d.minDeta*_eta_conversion, 0)
+            alg.addvariable('MaxDeltaEta', d.maxDeta*_eta_conversion, 0)
             tm.registerTopoAlgo(alg)
 
         # DISAMB 3 lists with DR cut to 2nd and 3rd lists
@@ -1312,8 +1312,8 @@ class TopoAlgoDef:
                 alg.addvariable('MinET2',      get_threshold_cut(d.otype2, d.ocut2)*_et_conversion , bitid)
                 alg.addvariable('MinMSqr',     d.minInvm*d.minInvm *_et_conversion*_et_conversion , bitid)
                 alg.addvariable('MaxMSqr',     _no_m_upper_threshold , bitid)  # no upper threshold
-                alg.addvariable('DeltaPhiMin', d.minDphi*_phi_conversion , bitid)
-                alg.addvariable('DeltaPhiMax', maxDphi*_phi_conversion, bitid)
+                alg.addvariable('MinDeltaPhi', d.minDphi*_phi_conversion , bitid)
+                alg.addvariable('MaxDeltaPhi', maxDphi*_phi_conversion, bitid)
             tm.registerTopoAlgo(alg)
 
 
@@ -1345,8 +1345,8 @@ class TopoAlgoDef:
                 alg.addvariable('MinET2',      get_threshold_cut(d.otype2, d.ocut2)*_et_conversion , bitid)
                 alg.addvariable('MinMSqr',     d.minInvm*d.minInvm *_et_conversion*_et_conversion , bitid)
                 alg.addvariable('MaxMSqr',     _no_m_upper_threshold , bitid)  # no upper threshold
-                alg.addvariable('DeltaPhiMin', d.minDphi*_phi_conversion , bitid)
-                alg.addvariable('DeltaPhiMax', maxDphi*_phi_conversion, bitid)
+                alg.addvariable('MinDeltaPhi', d.minDphi*_phi_conversion , bitid)
+                alg.addvariable('MaxDeltaPhi', maxDphi*_phi_conversion, bitid)
             tm.registerTopoAlgo(alg)
 
 
@@ -1568,8 +1568,8 @@ class TopoAlgoDef:
         # 6. MaxEta1
         # 7. MinEta2
         # 8. MaxEta2
-        # 9. DeltaPhiMin
-        # 10. DeltaPhiMin
+        # 9. MinDeltaPhi
+        # 10. MaxDeltaPhi
         ZAFBDphimap = [
             { "minInvm": 60 , "minDphiList": [4, 25], "maxDphi": 32, "minEta2": 23, "maxEta2": 49,
               "inputwidth1": HW.eEmOutputWidthSelect, "otype1" : "eEM", "ocut1" : 18, "olist1" : "abm",
@@ -1602,8 +1602,8 @@ class TopoAlgoDef:
                 alg.addvariable('MaxEta1', 49*_eta_conversion, bitid)
                 alg.addvariable('MinEta2', 23*_eta_conversion, bitid)
                 alg.addvariable('MaxEta2', 49*_eta_conversion, bitid)
-                alg.addvariable('DeltaPhiMin', minDphi*_phi_conversion, bitid)
-                alg.addvariable('DeltaPhiMax', d.maxDphi*_phi_conversion, bitid)
+                alg.addvariable('MinDeltaPhi', minDphi*_phi_conversion, bitid)
+                alg.addvariable('MaxDeltaPhi', d.maxDphi*_phi_conversion, bitid)
             tm.registerTopoAlgo(alg)
 
         # ATR-19302, ATR-21637
@@ -1634,8 +1634,8 @@ class TopoAlgoDef:
             alg.addvariable('MaxEta1',49*_eta_conversion)
             alg.addvariable('MinEta2', 0*_eta_conversion)
             alg.addvariable('MaxEta2',49*_eta_conversion)
-            alg.addvariable('DeltaPhiMin', d.minDphi*_phi_conversion)
-            alg.addvariable('DeltaPhiMax', d.maxDphi*_phi_conversion)
+            alg.addvariable('MinDeltaPhi', d.minDphi*_phi_conversion)
+            alg.addvariable('MaxDeltaPhi', d.maxDphi*_phi_conversion)
             tm.registerTopoAlgo(alg)
 
 
