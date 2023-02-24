@@ -453,10 +453,10 @@ bool GenObjectsFilterTool::pass( HepMC::ConstGenVertexPtr vtx,
    if  (*(event->vertices().begin()) == vtx ) return true; 
       
    if(m_addOnlyFirstVertex) return false;
-   for( auto iter: vtx->particles_in()) {
+   for(const auto& iter: vtx->particles_in()) {
       if( pass( iter ) ) return true;
    }
-   for( auto iter: vtx->particles_out()) {
+   for(const auto& iter: vtx->particles_out()) {
       if( pass( iter ) ) return true;
    }
 #else

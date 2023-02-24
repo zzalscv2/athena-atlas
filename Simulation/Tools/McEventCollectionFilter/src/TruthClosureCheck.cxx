@@ -78,16 +78,16 @@ void TruthClosureCheck::printGenVertex(HepMC::ConstGenVertexPtr origVertex,
   ATH_MSG_INFO("Original Vertex:");
   ATH_MSG_INFO( origVertex );
   ATH_MSG_INFO("Particles In:");
-  for (auto originalPartIn: origVertex->particles_in()) ATH_MSG_INFO( originalPartIn );
+  for (const auto& originalPartIn: origVertex->particles_in()) ATH_MSG_INFO( originalPartIn );
   ATH_MSG_INFO("Particles Out:");
-  for (auto originalPartOut: origVertex->particles_out()) ATH_MSG_INFO( originalPartOut );
+  for (const auto& originalPartOut: origVertex->particles_out()) ATH_MSG_INFO( originalPartOut );
   ATH_MSG_INFO("----------------------------------");
   ATH_MSG_INFO("Reset Vertex:");
   ATH_MSG_INFO( resetVertex );
   ATH_MSG_INFO("Particles In:");
-  for (auto resetPartIn: resetVertex->particles_in()) ATH_MSG_INFO( resetPartIn );
+  for (const auto& resetPartIn: resetVertex->particles_in()) ATH_MSG_INFO( resetPartIn );
   ATH_MSG_INFO("Particles Out:");
-  for (auto resetPartOut: resetVertex->particles_out()) ATH_MSG_INFO( resetPartOut );
+  for (const auto& resetPartOut: resetVertex->particles_out()) ATH_MSG_INFO( resetPartOut );
   ATH_MSG_INFO("----------------------------------");
   return;
 }
