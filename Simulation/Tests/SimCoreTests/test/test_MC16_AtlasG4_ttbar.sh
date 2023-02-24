@@ -2,8 +2,7 @@
 #
 # art-description: MC16-style simulation using FullG4
 # art-include: 21.0/Athena
-# art-include: 21.3/Athena
-# art-include: 21.9/Athena
+# art-include: 23.0/Athena
 # art-include: master/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'

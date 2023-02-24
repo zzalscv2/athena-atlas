@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # art-description: Simulation example to test agreement between ConfGetter and ComponentAccumulator configurations.
+# art-include: 23.0/Athena
 # art-include: master/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'

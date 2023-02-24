@@ -3,8 +3,8 @@
 # art-description: Reading single particle gen events, checking that the SkipEvents argument works, using 2015 geometry and conditions
 # art-include: 21.0/Athena
 # art-include: 21.0/AthSimulation
-# art-include: 21.3/Athena
-# art-include: 21.9/Athena
+# art-include: 23.0/Athena
+# art-include: 23.0/AthSimulation
 # art-include: master/Athena
 # art-include: master/AthSimulation
 # art-type: grid
