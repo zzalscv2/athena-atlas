@@ -1227,7 +1227,7 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
             int end_channel(start_channel + 12);
             for (int channel = start_channel; channel < end_channel; ++channel) {
 
-              for (int samplesIdx = 15; samplesIdx >= 0; --samplesIdx) {
+              for (int samplesIdx = sampleNumber-1; samplesIdx >= 0; --samplesIdx) {
                 samples[gain][channel][samplesIdx] = (*sample & 0x0FFF);
                 ++sample;
                
@@ -1259,7 +1259,7 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
      
        adcID = m_tileHWID->adc_id(drawerID, ch1, gain);
       // always 16 samples
-      std::vector<float> digiVec(&samples[gain][channel][0], &samples[gain][channel][16]);
+      std::vector<float> digiVec(&samples[gain][channel][0], &samples[gain][channel][sampleNumber]);
       pDigits.push_back(new TileDigits(adcID, digiVec));
       
       ATH_MSG_VERBOSE("FRAG6: " << (std::string) *(pDigits.back()));
