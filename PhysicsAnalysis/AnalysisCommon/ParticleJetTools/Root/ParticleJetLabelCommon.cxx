@@ -4,6 +4,27 @@
 
 #include "ParticleJetTools/ParticleJetLabelCommon.h"
 
+#include "TruthUtils/PIDHelpers.h"
+
+// private internal functions
+namespace {
+  // this returns a charm child if it exists, otherwise returns the
+  // particle itself. If the truth record contains broken links return
+  // a nullptr.
+  const xAOD::TruthParticle* getCharmChild(const xAOD::TruthParticle* p) {
+    for (unsigned int n = 0; n < p->nChildren(); n++) {
+      const xAOD::TruthParticle* child = p->child(n);
+      // nullptr would indicate a broken truth record, but the rest of
+      // the code lets this pass silently so we'll do the same here.
+      if (!child) return nullptr;
+      if (MC::PID::hasCharm(child->pdgId())) {
+        return getCharmChild(child);
+      }
+    }
+    return p;
+  }
+}
+
 namespace ParticleJetTools {
 
   // the code below is taken from ParticleJetDeltaRLabelTool with
@@ -100,7 +121,11 @@ namespace ParticleJetTools {
     pt_scaled(n.pt_scaled),
     Lxy(n.Lxy),
     dr(n.dr),
-    pdgId(n.pdgId)
+    pdgId(n.pdgId),
+    barcode(n.barcode),
+    childLxy(n.childLxy),
+    childPt(n.childPt),
+    childPdgId(n.childPdgId)
   {
   }
 
@@ -150,9 +175,11 @@ namespace ParticleJetTools {
     // hierarchy: b > c > tau > light
     int label = 0; // default: light
     const xAOD::TruthParticle* labelling_particle = nullptr;
+    const xAOD::TruthParticle* child_particle = nullptr;
     if (particles.b.size()) {
       label = 5;
       labelling_particle = getMaxPtPart(particles.b);
+      child_particle = getCharmChild(labelling_particle);
     } else if (particles.c.size()) {
       label = 4;
       labelling_particle = getMaxPtPart(particles.c);
@@ -169,12 +196,21 @@ namespace ParticleJetTools {
       decs.Lxy(jet) = NAN;
       decs.dr(jet) = NAN;
       decs.pdgId(jet) = 0;
+      decs.barcode(jet) = -1;
+      decs.childLxy(jet) = NAN;
+      decs.childPt(jet) = NAN;
+      decs.childPdgId(jet) = 0;
     } else {
       decs.pt(jet) = partPt(labelling_particle);
       decs.pt_scaled(jet) = partPt(labelling_particle) / jet.pt();
       decs.Lxy(jet) = partLxy(labelling_particle);
       decs.dr(jet) = partDR(labelling_particle, jet);
       decs.pdgId(jet) = partPdgId(labelling_particle);
+      decs.barcode(jet) = labelling_particle ?
+        labelling_particle->barcode() : -1;
+      decs.childLxy(jet) = partLxy(child_particle);
+      decs.childPt(jet) = partPt(child_particle);
+      decs.childPdgId(jet) = partPdgId(child_particle);
     }
 
     // extended flavour label
@@ -211,7 +247,7 @@ namespace ParticleJetTools {
 
   float partPt(const xAOD::TruthParticle* part) {
     if (!part) return NAN;
-    return part->pt(); 
+    return part->pt();
   }
   float partLxy(const xAOD::TruthParticle* part) {
     if (!part) return NAN;
