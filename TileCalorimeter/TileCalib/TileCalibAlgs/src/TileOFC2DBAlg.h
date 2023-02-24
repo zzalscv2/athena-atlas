@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TileCalibAlgs_TileOFC2DBAlg_h
@@ -54,6 +54,7 @@ class TileOFC2DBAlg: public AthAlgorithm {
     UnsignedIntegerProperty m_runIOVUntil;
     UnsignedIntegerProperty m_lbnIOVSince;
     UnsignedIntegerProperty m_lbnIOVUntil;
+    UnsignedIntegerProperty m_maxChan;
     bool m_of2;
     bool m_fixedPhases;
     std::string m_runType;
