@@ -44,6 +44,8 @@ def createTrigTrackingPassFlags():
       factory = flagsFactory(getInDetTrigConfig(i))     
       flags.addFlagsCategory(category,factory,prefix=True)
 
+    flags.addFlag('Trigger.InDetTracking.RoiZedWidthDefault', 180.0)
+
     return flags
 
 

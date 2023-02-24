@@ -344,6 +344,7 @@ def HLTSeedingCfg(flags, seqName = None):
     decoderAlg.KeyWriterTool = createKeyWriterTool()
     decoderAlg.DoCostMonitoring = flags.Trigger.CostMonitoring.doCostMonitoring
     decoderAlg.CostMonitoringChain = flags.Trigger.CostMonitoring.chain
+    decoderAlg.RoiZedWidthDefault = flags.Trigger.InDetTracking.RoiZedWidthDefault
 
     if flags.Input.Format is Format.BS and not flags.Trigger.doLVL1:
         # Add the algorithm decoding ByteStream into xAOD (Run-3 L1) and/or RoIBResult (legacy L1)
