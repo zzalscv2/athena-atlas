@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _ZDCFitWrapper_h
@@ -11,6 +11,7 @@
 #include <memory>
 
 double ZDCFermiExpFit(const double* xvec, const double* pvec);
+double ZDCFermiExpFitRefl(const double* xvec, const double* pvec);
 
 class ZDCFitWrapper
 {
@@ -101,8 +102,15 @@ public:
 
 class ZDCPrePulseFitWrapper : public ZDCFitWrapper
 {
+protected:
+  float m_preT0Min;
+  float m_preT0Max;
 public:
-  ZDCPrePulseFitWrapper(std::shared_ptr<TF1> wrapperTF1) : ZDCFitWrapper(wrapperTF1) {}
+  ZDCPrePulseFitWrapper(std::shared_ptr<TF1> wrapperTF1) : ZDCFitWrapper(wrapperTF1)
+  {
+    m_preT0Min = GetTMin();
+    m_preT0Max = GetTMax();
+  }
 
   virtual void SetInitialPrePulse(float amp, float t0, float expamp, bool fixPrePulseToZero) = 0;
 
@@ -172,10 +180,74 @@ public:
     return constant / amp;
   }
 
-  //  virtual float GetNDOF() const {return _fitFunc->GetNDF(); }
-
   virtual double operator()(const double *x, const double *p)  override{
     return ZDCFermiExpFit(x, p);
+  }
+
+  virtual void ConstrainFit() override;
+  virtual void UnconstrainFit() override;
+};
+
+//
+// A special version of the fermi*negative exponential function that includes a term to describe
+//   the "reflection" effects we see in the ZDC+LHCf joint run due to the splitting of the ZDC
+//   signals to send a copy to LHCf DAQ. It's not really a reflection but an artifact introduced
+//   by the bandwidth limit of the linear fan-in/fan-out module that we used.
+//
+class ZDCFitExpFermiVariableTausLHCf : public ZDCFitWrapper
+{
+protected:
+  bool m_fixTau1;
+  bool m_fixTau2;
+
+  float m_tau1;
+  float m_tau2;
+
+public:
+
+  ZDCFitExpFermiVariableTausLHCf(const std::string& tag, float tmin, float tmax, bool fixTau1, bool fixTau2, float tau1, float tau2);
+
+  virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
+  virtual void SetT0FitLimits(float tMin, float tMax) override;
+
+  virtual float GetAmplitude() const override {return GetWrapperTF1()->GetParameter(0); }
+  virtual float GetAmpError() const override {return GetWrapperTF1()->GetParError(0); }
+
+  virtual float GetTau1() const override {return GetWrapperTF1()->GetParameter(2);}
+  virtual float GetTau2() const override {return GetWrapperTF1()->GetParameter(3);}
+
+  virtual float GetTime() const override {
+    const TF1* theTF1 = GetWrapperTF1();
+
+    float fitT0 =  theTF1->GetParameter(1);
+
+    float tau1 = theTF1->GetParameter(2);
+    float tau2 = theTF1->GetParameter(3);
+
+    // Correct the time to the maximum
+    //
+    if (tau2 > tau1) fitT0 += tau1 * std::log(tau2 / tau1 - 1.0);
+    return fitT0;
+  }
+
+  virtual float GetShapeParameter(size_t index) const override
+  {
+    if (index == 0) return GetWrapperTF1()->GetParameter(2);
+    else if (index == 1) return GetWrapperTF1()->GetParameter(3);
+    else throw std::runtime_error("Fit parameter does not exist.");
+  }
+
+  virtual float GetBkgdMaxFraction() const override
+  {
+    const TF1* theTF1 = ZDCFitWrapper::GetWrapperTF1();
+    double amp = theTF1->GetParameter(0);
+    double constant = theTF1->GetParameter(4);
+
+    return constant / amp;
+  }
+
+  virtual double operator()(const double *x, const double *p)  override{
+    return ZDCFermiExpFitRefl(x, p);
   }
 
   virtual void ConstrainFit() override;

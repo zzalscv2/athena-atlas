@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_ZDCPulseAnalyzer_h
@@ -257,8 +257,8 @@ private:
   float m_bkgdMaxFraction;
   float m_delayedBaselineShift;
 
-  int m_lastHGOverFlowSample  = -999;
-  int m_firstHGOverFlowSample = 999;
+  int m_lastHGOverFlowSample;
+  int m_firstHGOverFlowSample;
 
   std::vector<float> m_ADCSamplesHGSub;
   std::vector<float> m_ADCSamplesLGSub;
@@ -270,6 +270,11 @@ private:
 
   std::vector<float> m_samplesDeriv2nd;
 
+  // When using combined delayed + undelayed pulses we calculate the chisquare ourselves
+  //   so fill this vector as part of that calculation. For the cases where we do not use
+  //   delayed samples (2015 and Run3 onward) this vector is not used as the pulls are calculated
+  //   when they are fetched.
+  //
   std::vector<float> m_fitPulls;
 
   // Private methods
@@ -345,12 +350,13 @@ public:
 
   void SetPeak2ndDerivMinTolerance(size_t tolerance) {
     m_peak2ndDerivMinTolerance = tolerance;
-    m_defaultT0Max = m_deltaTSample * (m_peak2ndDerivMinSample + m_peak2ndDerivMinTolerance + 1);
-    m_defaultT0Min = m_deltaTSample * (m_peak2ndDerivMinSample - m_peak2ndDerivMinTolerance + 1);
+    m_initializedFits = false;
   }
 
   void SetForceLG(bool forceLG) {m_forceLG = forceLG;}
   bool ForceLG() const {return m_forceLG;}
+
+  void set2ndDerivStep(size_t step) {m_2ndDerivStep = step;}
 
   void SetCutValues(float chisqDivAmpCutHG, float chisqDivAmpCutLG,
                     float deltaT0MinHG, float deltaT0MaxHG,
@@ -494,18 +500,7 @@ public:
   std::shared_ptr<TGraphErrors> GetCombinedGraph() const;
   std::shared_ptr<TGraphErrors> GetGraph() const;
 
-
-  std::unique_ptr<TH1> GetFitPulls() const
-  {
-    int nbins = (m_useDelayed ? 2 * m_Nsample : m_Nsample);
-    std::unique_ptr<TH1> hist {new TH1F((std::string("FitPulls") + m_tag).c_str(), "", nbins, m_tmin, m_tmax)};
-
-    for (size_t ibin = 0; ibin < (size_t) nbins; ibin++) {
-      hist->SetBinContent(ibin + 1, m_fitPulls[ibin]);
-    }
-
-    return hist;
-  }
+  std::vector<float> GetFitPulls() const;
 
   std::shared_ptr<TGraphErrors> GetUndelayedGraph() const;
   std::shared_ptr<TGraphErrors> GetDelayedGraph() const;
