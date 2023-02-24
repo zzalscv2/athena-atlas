@@ -31,8 +31,8 @@ namespace Muon
     const DataVector<NSW_MMTP_RawDataHit>& hits () const { return m_hits; }
     const DataVector<NSW_MMTP_RawDataSegment>& segments () const { return m_segments; }
 
-    void addHit     (NSW_MMTP_RawDataHit* hit)     {m_hits.push_back(hit);}
-    void addSegment (NSW_MMTP_RawDataSegment* seg) {m_segments.push_back(seg);}
+    void addHit     (uint16_t art_BCID, uint8_t art_layer, uint16_t art_channel)                      {m_hits.push_back(new NSW_MMTP_RawDataHit(art_BCID, art_layer, art_channel));}
+    void addSegment (uint16_t trig_BCID, uint8_t trig_dTheta, uint8_t trig_rBin, uint8_t trig_phiBin) {m_segments.push_back(new NSW_MMTP_RawDataSegment(trig_BCID, trig_dTheta, trig_rBin, trig_phiBin));}
 
   private:
     //IdentifierHash m_idHash;
