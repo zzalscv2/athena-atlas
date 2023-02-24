@@ -14,7 +14,6 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
     kwargs.setdefault('TileDigitsContainerFlx', 'TileDigitsFlxCnt')
     kwargs.setdefault('FirstSample', 0)
     kwargs.setdefault('LastSample', 7)
-    kwargs.setdefault('FragIDs', fragIDs)
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
@@ -97,7 +96,7 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
                 name = f'{moduleName}_ch_{str(channel)}_{gainName}_samples'
                 path = moduleName
                 channelSamplesGroup.defineHistogram(name, title = title, path = path, type = 'TH1F',
-                                                    xbins = 4096, xmin = -0.5, xmax = 4095.5)
+                                                    xbins = 1024, xmin = -0.5, xmax = 1023.5)
 
 
     channelSamplesGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileLegacyMonSamples', 'Tile/Legacy/Digits')
@@ -127,7 +126,7 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
             name = f'{moduleName}_{gainName}_samples'
             path = moduleName
             channelSamplesGroup.defineHistogram(name, title = title, path = path, type = 'TH1F',
-                                                xbins = 4096, xmin = -0.5, xmax = 4095.5)
+                                                xbins = 4096, xmin = -1000, xmax = 1000)
 
     channelProfileGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileFlxMonProf', 'Tile/Compare/Digits/Profile')
     for moduleName in modules:
