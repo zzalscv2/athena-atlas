@@ -340,6 +340,7 @@ def createTriggerRecoFlags():
         muonflags = createMuonConfigFlags()
         muonflags.Muon.useTGCPriorNextBC=True
         muonflags.Muon.MuonTrigger=True
+        muonflags.Muon.enableErrorTuning=False
         return muonflags
 
     def __muonCombined():
