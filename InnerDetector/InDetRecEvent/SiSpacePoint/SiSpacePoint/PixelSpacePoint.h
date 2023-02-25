@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,73 +13,63 @@
 #ifndef TRKSPACEPOINT_PIXELSPACEPOINT_H
 #define TRKSPACEPOINT_PIXELSPACEPOINT_H
 
-
 #include "TrkSpacePoint/SpacePoint.h"
 
 class IdentifierHash;
 
-namespace Trk
-{
- class PrepRawData;
+namespace Trk {
+class PrepRawData;
 }
 
+namespace InDet {
 
-namespace InDet
-{
+/**
+ * @class PixelSpacePoint
+ * A PixelSpacePoint is created from a PixelCluster.
+ */
 
-  /**
-   * @class PixelSpacePoint
-   * A PixelSpacePoint is created from a PixelCluster.
-   */
+class PixelSpacePoint final : public Trk::SpacePoint {
 
-  class PixelSpacePoint final : public Trk::SpacePoint {
+  ///////////////////////////////////////////////////////////////////
+  // Public methods:
+  ///////////////////////////////////////////////////////////////////
+ public:
+  /** Default constructor */
+  PixelSpacePoint() = default;
 
-    ///////////////////////////////////////////////////////////////////
-    // Public methods:
-    ///////////////////////////////////////////////////////////////////
-  public:
+  /** Parametrised constructor */
+  PixelSpacePoint(IdentifierHash elementId, const Trk::PrepRawData* clus);
 
-    /** Default constructor */
-    PixelSpacePoint() ;
+  /** add Covariance Matrix and global position directly */
+  PixelSpacePoint(IdentifierHash elementId, const Trk::PrepRawData* clus,
+                  const Amg::Vector3D& globpos, const Amg::MatrixX& globcov);
 
-    /** Parametrised constructor */
-    PixelSpacePoint( IdentifierHash elementId,
-                     const Trk::PrepRawData* clus);
+  PixelSpacePoint(const PixelSpacePoint& PSP) = default;
+  PixelSpacePoint(PixelSpacePoint&& PSP) noexcept = default;
+  PixelSpacePoint& operator=(const PixelSpacePoint&) = default;
+  PixelSpacePoint& operator=(PixelSpacePoint&&) noexcept = default;
 
-    /** add Covariance Matrix and global position directly */
-    PixelSpacePoint( IdentifierHash elementId,
-                     const Trk::PrepRawData* clus,
-                     const Amg::Vector3D& globpos,
-                     const Amg::MatrixX& globcov);
+  /** Destructor */
+  ~PixelSpacePoint() = default;
 
-    /** Copy constructor */
-    PixelSpacePoint( const PixelSpacePoint & PSP);
+  /** Clones */
+  virtual SpacePoint* clone() const override final;
 
-    /** Destructor */
-    ~PixelSpacePoint() = default;
+  /** Interface method for output, to be overloaded by child classes */
+  virtual MsgStream& dump(MsgStream& out) const override final;
 
-    /** Overloading assignment operator */
-    PixelSpacePoint &operator=(const PixelSpacePoint &);
-
-    /** Clones */
-    virtual SpacePoint* clone() const override final;
-
-    /** Interface method for output, to be overloaded by child classes */
-    virtual MsgStream&    dump( MsgStream& out ) const override final;
-
-    /** Interface method for output, to be overloaded by child classes */
-    virtual std::ostream& dump( std::ostream& out ) const override final;
-
+  /** Interface method for output, to be overloaded by child classes */
+  virtual std::ostream& dump(std::ostream& out) const override final;
 };
 
-  ///////////////////////////////////////////////////////////////////
-  // Inline methods:
-  ///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+// Inline methods:
+///////////////////////////////////////////////////////////////////
 
-  inline Trk::SpacePoint* PixelSpacePoint::clone() const
-    {  return new PixelSpacePoint(*this);  }
+inline Trk::SpacePoint* PixelSpacePoint::clone() const {
+  return new PixelSpacePoint(*this);
+}
 
-} // end of namespace Trk
+}  // namespace InDet
 
-
-#endif // TRKSPACEPOINT_PIXELSPACEPOINT_H
+#endif  // TRKSPACEPOINT_PIXELSPACEPOINT_H
