@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SORTMUPATHITS_H
@@ -42,7 +42,7 @@ namespace Muon {
 
         SortMuPatHits(const IMuonIdHelperSvc* idh) : m_idh{idh} {}
         /// Sort the mu pat hits using their associated surfaces
-         double operator()(const MuPatHitPtr& hit1, const MuPatHitPtr& hit2) const {
+        bool operator()(const MuPatHitPtr& hit1, const MuPatHitPtr& hit2) const {
             return operator()(hit1.get(), hit2.get());
         }
         bool operator()(const MuPatHit* hit1, const MuPatHit* hit2) const {
@@ -91,6 +91,29 @@ namespace Muon {
 
         /// DistanceAlongParameters distanceCalculator;
         const IMuonIdHelperSvc* m_idh{nullptr};
+    };
+    /// Cosmic parameter sorting
+    class CosmicMuPatHitSorter{
+        public:
+            CosmicMuPatHitSorter(const Trk::TrackParameters& refPars):
+                m_ref(refPars) {}
+        
+        bool operator()(const MuPatHitPtr& hit1, const MuPatHitPtr& hit2) const {
+            return operator()(hit1->measurement(), hit2->measurement());
+        }
+        bool operator()(const MuPatHit* hit1, const MuPatHit* hit2) const {           
+            return operator()(hit1->measurement(), hit2->measurement());
+        }
+        bool operator() (const Trk::MeasurementBase* meas1, const Trk::MeasurementBase* meas2) const  {
+            return operator()(*meas1,*meas2);
+        }
+        bool operator() (const Trk::MeasurementBase& meas1, const Trk::MeasurementBase& meas2) const {
+            static const DistanceAlongParameters parsSorter{};
+            return parsSorter(m_ref, meas1) < parsSorter(m_ref, meas2);
+        }
+        private:
+            const Trk::TrackParameters& m_ref;
+
     };
 
 }  // namespace Muon
