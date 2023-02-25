@@ -84,14 +84,19 @@ namespace CP
             if (IDWorkingPoint == "DFCommonElectronsLHTightNoPix"){
                 return bool(m_electronLLHToolTightNoPix->accept(electron));
             }
-            if (IDWorkingPoint == "DFCommonElectronsLHMediumNoPix"){
+            else if (IDWorkingPoint == "DFCommonElectronsLHMediumNoPix"){
                 return bool(m_electronLLHToolMediumNoPix->accept(electron));
             }
-            if (IDWorkingPoint == "DFCommonElectronsLHLooseNoPix"){
+            else if (IDWorkingPoint == "DFCommonElectronsLHLooseNoPix"){
                 return bool(m_electronLLHToolLooseNoPix->accept(electron));
+            }    
+            else if (IDWorkingPoint == "DFCommonElectronsLHVeryLooseNoPix"){
+                return bool(m_electronLLHToolVeryLooseNoPix->accept(electron));
             }
-                
-            return bool(m_electronLLHToolVeryLooseNoPix->accept(electron));
+            else{ 
+                ATH_MSG_ERROR("IDWorkingPoint provided is not a valid Working Point!");
+                return false;
+            }
         }
 
     }
@@ -159,6 +164,8 @@ namespace CP
 
                 const double lrt_elEta0 = lrt_cluster->eta0();
                 const double lrt_elPhi0 = lrt_cluster->phi0();
+                ATH_MSG_DEBUG("Prompt eta, phi: "<<prompt_elEta0<< ", "<<prompt_elPhi0);
+                ATH_MSG_DEBUG("LRT eta, phi: "<<lrt_elEta0<< ", "<<lrt_elPhi0);
 
                 if (prompt_elEta0 == lrt_elEta0 && prompt_elPhi0 == lrt_elPhi0) 
                 {
