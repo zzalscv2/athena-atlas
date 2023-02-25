@@ -179,29 +179,34 @@ namespace CP
                     else if (m_strategy == CP::IElectronLRTOverlapRemovalTool::defaultStrategy){ //use tighter electron, if both equally tight use std collection
                     
                         ATH_MSG_DEBUG("Removing Electron with looser WP");
-
-			if (electronPassesID(promptElectron,"DFCommonElectronsLHTightNoPix")){
-			    ElectronsToRemove.insert(LRTElectron);
-			}
-			else if (electronPassesID(promptElectron,"DFCommonElectronsLHMediumNoPix") ) {
-			    if (electronPassesID(LRTElectron,"DFCommonElectronsLHTightNoPix") ){
-				ElectronsToRemove.insert(promptElectron);
-			    }
-			    else ElectronsToRemove.insert(LRTElectron);
-			}
-			else if (electronPassesID(promptElectron,"DFCommonElectronsLHLooseNoPix") ) {
-			    if (electronPassesID(LRTElectron,"DFCommonElectronsLHMediumNoPix") ){
-				ElectronsToRemove.insert(promptElectron);
-			    }
-			    else ElectronsToRemove.insert(LRTElectron);
-			}
-			else if (electronPassesID(promptElectron,"DFCommonElectronsLHVeryLooseNoPix") ) {
-			    if (electronPassesID(LRTElectron,"DFCommonElectronsLHLooseNoPix") ){
-				ElectronsToRemove.insert(promptElectron);
-			    }
-			    else ElectronsToRemove.insert(LRTElectron);
-			}
-                    } 
+                        if (electronPassesID(promptElectron,"DFCommonElectronsLHTightNoPix")){
+                            ElectronsToRemove.insert(LRTElectron);
+                        }
+                        else if (electronPassesID(promptElectron,"DFCommonElectronsLHMediumNoPix") ) {
+                            if (electronPassesID(LRTElectron,"DFCommonElectronsLHTightNoPix") ){
+                                ElectronsToRemove.insert(promptElectron);
+                            }
+                            else ElectronsToRemove.insert(LRTElectron);
+                        }
+                        else if (electronPassesID(promptElectron,"DFCommonElectronsLHLooseNoPix") ) {
+                            if (electronPassesID(LRTElectron,"DFCommonElectronsLHMediumNoPix") ){
+                                ElectronsToRemove.insert(promptElectron);
+                            }
+                            else ElectronsToRemove.insert(LRTElectron);
+                        }
+                        else if (electronPassesID(promptElectron,"DFCommonElectronsLHVeryLooseNoPix") ) {
+                            if (electronPassesID(LRTElectron,"DFCommonElectronsLHLooseNoPix") ){
+                                ElectronsToRemove.insert(promptElectron);
+                            }
+                            else ElectronsToRemove.insert(LRTElectron);
+                        }
+                        else { 
+                            if (electronPassesID(LRTElectron,"DFCommonElectronsLHVeryLooseNoPix") ) {
+                                ElectronsToRemove.insert(promptElectron);
+                            }
+                            else ElectronsToRemove.insert(LRTElectron);
+                        }
+                    }
                 }
             } // end lrt loop
         }   // end prompt loop
