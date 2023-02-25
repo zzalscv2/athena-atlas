@@ -55,8 +55,8 @@ def ITkTrackingSiPatternCfg(flags,
     if configuration_settings.doActsSeed:
 
         from ActsTrkSeeding.ActsTrkSeedingConfig import (
-            ActsTrkSeedingFromAthenaCfg)
-        acc.merge(ActsTrkSeedingFromAthenaCfg(flags))
+            ActsTrkSeedingCfg)
+        acc.merge(ActsTrkSeedingCfg(flags))
         
         if flags.ITk.Tracking.ActiveConfig.extension == "ConversionFinding":
             from AthenaCommon.Logging import logging 
