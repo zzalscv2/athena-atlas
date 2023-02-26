@@ -80,27 +80,28 @@ MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* 
   Identifier strip_id = detManager->mmIdHelper()->channelID(m_station_name, m_station_eta, m_station_phi, m_multiplet, m_gasgap, m_strip);
   const MuonGM::MMReadoutElement* readout = detManager->getMMReadoutElement(strip_id);
   Amg::Vector3D globalPos(0.0, 0.0, 0.0);
-  readout->stripGlobalPosition(strip_id, globalPos);
+  if(readout->stripGlobalPosition(strip_id, globalPos)) {
 
-  MMDetectorHelper aHelper;
-  char side = (globalPos.z() > 0.) ? 'A' : 'C';
-  MMDetectorDescription* mm = aHelper.Get_MMDetector(m_sector, std::abs(m_station_eta), m_station_phi, m_multiplet, side);
-  MMReadoutParameters roP   = mm->GetReadoutParameters();
+    MMDetectorHelper aHelper;
+    char side = (globalPos.z() > 0.) ? 'A' : 'C';
+    MMDetectorDescription* mm = aHelper.Get_MMDetector(m_sector, std::abs(m_station_eta), m_station_phi, m_multiplet, side);
+    MMReadoutParameters roP   = mm->GetReadoutParameters();
 
-  m_R = globalPos.perp();
-  m_Z = globalPos.z();
-  m_PitchOverZ = roP.stripPitch/m_Z;
-  m_RZslope = m_R / m_Z;
+    m_R = globalPos.perp();
+    m_Z = globalPos.z();
+    m_PitchOverZ = roP.stripPitch/m_Z;
+    m_RZslope = m_R / m_Z;
 
-  int eta = std::abs(m_station_eta)-1;
-  double base = par->ybases[m_plane][eta];
-  m_Y = base + m_strip*roP.stripPitch - roP.stripPitch/2.;
-  m_YZslope = m_Y / m_Z;
+    int eta = std::abs(m_station_eta)-1;
+    double base = par->ybases[m_plane][eta];
+    m_Y = base + m_strip*roP.stripPitch - roP.stripPitch/2.;
+    m_YZslope = m_Y / m_Z;
 
-  double index = std::round((std::abs(m_RZslope)-0.1)/5e-04); // 0.0005 is approx. the step in slope achievable with a road size of 8 strips
-  double roundedSlope = 0.1 + index*((0.6 - 0.1)/1000.);
-  m_Rp = roP.distanceFromZAxis + roundedSlope*(planeCoordinates[m_plane].Z() - planeCoordinates[0].Z());
-  m_shift = m_Rp / m_Z;
+    double index = std::round((std::abs(m_RZslope)-0.1)/5e-04); // 0.0005 is approx. the step in slope achievable with a road size of 8 strips
+    double roundedSlope = 0.1 + index*((0.6 - 0.1)/1000.);
+    m_Rp = roP.distanceFromZAxis + roundedSlope*(planeCoordinates[m_plane].Z() - planeCoordinates[0].Z());
+    m_shift = m_Rp / m_Z;
+  }
 }
 
 MMT_Hit::MMT_Hit(const MMT_Hit* hit)
