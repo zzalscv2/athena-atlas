@@ -6,9 +6,11 @@
 # art-include: 23.0/Athena
 # art-athena-mt: 8
 
+# temporary preExec override due to ATLASRECTS-7502
+
 Reco_tf.py  \
 --AMI f1328  \
---preExec="flags.DQ.useTrigger=False; flags.DQ.Steering.doHLTMon=False;" \
+--preExec="flags.DQ.useTrigger=False; flags.DQ.Steering.doHLTMon=False; flags.DQ.Steering.doJetMon=False; flags.DQ.Steering.doTauMon=False; flags.DQ.Steering.doMissingEtMon=False" \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_calib.00421734.express_express.merge.RAW._lb0021._SFO-ALL._0001.1" \
 --outputAODFile="AOD.pool.root" \
 --outputESDFile="ESD.pool.root" \
