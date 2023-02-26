@@ -70,14 +70,6 @@ StatusCode DQTGlobalWZFinderAlg::fillHistograms( const EventContext& ctx ) const
 
   if (m_doRunBeam) {  
     
-    std::cout << "muonPtCut: " << m_muonPtCut << std::endl;
-    std::cout << "electronEtCut: " << m_electronEtCut << std::endl;
-    std::cout << "zCutLow: " << m_zCutLow << std::endl;
-    std::cout << "zCutHigh: " << m_zCutHigh << std::endl;
-    std::cout << "muonMaxEta: " << m_muonMaxEta << std::endl;
-    std::cout << "Z_ee_trigger: " << m_Z_ee_trigger << std::endl;
-    std::cout << "Z_mm_trigger: " << m_Z_mm_trigger << std::endl;
-
      auto group = getGroup("default");
 
      //Get LumiBlock and EventNumber
@@ -153,7 +145,6 @@ StatusCode DQTGlobalWZFinderAlg::fillHistograms( const EventContext& ctx ) const
      std::vector<const xAOD::Electron*> allElectrons;
      
      // Electron Cut Flow
-     Int_t El_N = 0;
      ATH_MSG_DEBUG("Start electron selection");
   
      auto elegroup = getGroup("electron");
@@ -163,7 +154,6 @@ StatusCode DQTGlobalWZFinderAlg::fillHistograms( const EventContext& ctx ) const
 
        if(goodElectrons(electron, pVtx, ctx)){
          ATH_MSG_DEBUG("Good electron");
-         El_N++;
 
 	       auto ele_Et = Scalar("ele_Et", electron->pt()/GeV);
          auto ele_Eta = Scalar("ele_Eta", electron->eta());
@@ -175,10 +165,8 @@ StatusCode DQTGlobalWZFinderAlg::fillHistograms( const EventContext& ctx ) const
      
      // Muon Cut Flow
      
-     Int_t MuZ_N = 0;
      auto muongroup = getGroup("muon");
      ATH_MSG_DEBUG("Start muon selection");
-
      
      for (const auto &muon : *muons){
        auto muTrk = (muon)->primaryTrackParticle();
@@ -217,7 +205,6 @@ StatusCode DQTGlobalWZFinderAlg::fillHistograms( const EventContext& ctx ) const
          goodmuonsTP.push_back(muon);
          if (((muon)->pt() > m_muonPtCut*GeV))
          {
-           MuZ_N++;
            auto muon_Pt = Scalar("muon_Pt", (muon)->pt()/GeV);
 	         auto muon_Eta = Scalar("muon_Eta", (muon)->eta());
 	         auto muon_Phi = Scalar("muon_Phi", (muon)->phi());
@@ -314,7 +301,7 @@ StatusCode DQTGlobalWZFinderAlg::fillHistograms( const EventContext& ctx ) const
            auto isTruth = Scalar("isTruth", false);  
 	 
            if(writeTTrees){
-             auto isTruth = Scalar("isTruth", checkTruthElectron(leadingEle) & checkTruthElectron(subleadingEle));
+             isTruth = checkTruthElectron(leadingEle) && checkTruthElectron(subleadingEle);
 	         }
            fill(ZeeGroup, mass, eta1, eta2, phi1, phi2, pT1, pT2, evtWeight, LB, runNumber, eventNumber, isTruth, writeTTrees, osel);   
          }
@@ -351,7 +338,7 @@ StatusCode DQTGlobalWZFinderAlg::fillHistograms( const EventContext& ctx ) const
 	         auto pT2 = Scalar("pT2", subleadingMuZ->pt());
            auto isTruth = Scalar("isTruth", false);
            if (writeTTrees){
-	          isTruth = Scalar("isTruth", checkTruthMuon(leadingMuZ) & checkTruthMuon(subleadingMuZ)); 
+	          isTruth = checkTruthMuon(leadingMuZ) && checkTruthMuon(subleadingMuZ); 
            }
            fill(ZmumuGroup, eta1, eta2, phi1, phi2, pT1, pT2, isTruth, evtWeight, LB, runNumber, eventNumber, mass, writeTTrees, osmu); 
          }
