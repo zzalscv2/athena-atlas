@@ -74,6 +74,12 @@ public:
     const xAOD::Electron& inputObject,
     double& efficiencyScaleFactor) const override final;
   //
+  virtual CP::CorrectionCode getEfficiencyScaleFactor(
+    const double et,  /*in MeV*/
+    const double cluster_eta, /*cluster*/
+    const unsigned int runNumber,
+    double& efficiencyScaleFactor) const override final;
+  //
   virtual CP::CorrectionCode applyEfficiencyScaleFactor(
     const xAOD::Electron& inputObject) const override final;
   //
@@ -130,7 +136,7 @@ private:
     float m_toy_scale;
   };
 
-  // To check if the metadat can be retrieved
+  /// To check if the metadata can be retrieved
   bool m_metadata_retrieved = false;
 
   /// Pointer to the underlying ROOT based tool

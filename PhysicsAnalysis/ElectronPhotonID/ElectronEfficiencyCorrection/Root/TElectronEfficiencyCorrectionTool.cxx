@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -161,9 +161,9 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
   const unsigned int runnumber,
   const double cluster_eta,
   const double et, /* in MeV */
-  std::vector<double>& result,
-  size_t& index_of_corr,
-  size_t& index_of_toys) const
+  Result& result,
+  const bool onlyTotal,
+  const int corrIndex) const
 {
   /*
    * At this point, we know the size of the vector.
@@ -173,18 +173,9 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
    */
   ATH_MSG_DEBUG("Max number of systematics seen : "
                 << m_nSysMax << " number of toys " << m_nToyMC);
-  result.resize(static_cast<size_t>(Position::End) + m_nSysMax + m_nToyMC);
-  const size_t position_corrSys = static_cast<size_t>(Position::End);
-  const size_t position_uncorrToyMCSF = position_corrSys + m_nSysMax;
   // Set up the non-0 defaults
-  result[static_cast<size_t>(Position::SF)] = -999;
-  result[static_cast<size_t>(Position::Total)] = 1;
-  if (m_nSysMax) {
-    index_of_corr = position_corrSys;
-  }
-  if (m_nToyMC) {
-    index_of_toys = position_uncorrToyMCSF;
-  }
+  result.SF = -999;
+  result.Total = 1;
   /*
    * Determine Simulation flavour and find the run period
    */
@@ -353,9 +344,17 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
   const double scaleFactorErr = currentHist->GetBinError(globalBinNumber);
   /*
    * Write the retrieved values to the output
-   * */
-  result[static_cast<size_t>(Position::SF)] = scaleFactor;
-  result[static_cast<size_t>(Position::Total)] = scaleFactorErr;
+   */
+  result.SF= scaleFactor;
+  result.Total = scaleFactorErr;
+
+  /*
+   * if we only wanted the Total we can exit here
+   */
+  if (onlyTotal) {
+    return 1;
+  }
+
   /*
    * Do the stat error using the available info from the above (SF)
    */
@@ -365,7 +364,7 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
     if (!statVector[runnumberIndex].empty()) {
       statErr = static_cast<TH1*>(statVector[runnumberIndex][index].get())
                   ->GetBinContent(globalBinNumber);
-      result[static_cast<size_t>(Position::Stat)] = statErr;
+      result.Stat = statErr;
     }
   }
   /*
@@ -381,48 +380,51 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
       val = sqrt(val * val + valAdd * valAdd);
     }
   }
-  result[static_cast<size_t>(Position::UnCorr)] = val;
-  /*
-   * The previous setup is becoming cumbersome
-   * for the N~16 systematic variations.
-   * So we keep them in a vector of vector of HistArray
-   * The first vector index being the runnumber
-   * The second the systematic
-   * And them the HistArray for high low etc.
-   * We invert the order in the output
-   */
-  const std::vector<std::vector<HistArray>>& sysList =
-    (isFastSim) ? m_fastSysList : m_sysList;
-  if (sysList.size() > static_cast<unsigned int>(index)) {
-    if (sysList.at(index).size() > static_cast<unsigned int>(runnumberIndex)) {
-      const int sys_entries = sysList.at(index).at(runnumberIndex).size();
-      for (int sys = 0; sys < sys_entries; ++sys) {
+  result.UnCorr = val;
+  if (corrIndex >= 0) {
+    /*
+     * The previous setup is becoming cumbersome
+     * for the N~16 systematic variations.
+     * So we keep them in a vector of vector of HistArray
+     * The first vector index being the runnumber
+     * The second the systematic
+     * And them the HistArray for high low etc.
+     * We invert the order in the output
+     */
+    const std::vector<std::vector<HistArray>>& sysList =
+        (isFastSim) ? m_fastSysList : m_sysList;
+    if (sysList.size() > static_cast<unsigned int>(index)) {
+      if (sysList.at(index).size() >
+          static_cast<unsigned int>(runnumberIndex)) {
+        const int sys_entries = sysList.at(index).at(runnumberIndex).size();
+        size_t sysIndex = sys_entries - 1 - corrIndex;
         double sysVal =
-          static_cast<TH2*>(
-            sysList[index][runnumberIndex][sys_entries - 1 - sys].get())
-            ->GetBinContent(globalBinNumber);
-        result[position_corrSys + sys_entries - 1 - sys] = sysVal;
-      }
-      if (m_nSysMax > 0 && sys_entries <= 1) {
-        if (result[position_corrSys] == 0) {
-          result[position_corrSys] = scaleFactorErr;
+            static_cast<TH2*>(
+                sysList[index][runnumberIndex][sysIndex].get())
+                ->GetBinContent(globalBinNumber);
+        result.Corr = sysVal; 
+        if (m_nSysMax > 0 && sys_entries <= 1) {
+          if (result.Corr  == 0) {
+            result.Corr = scaleFactorErr;
+          }
         }
       }
     }
   }
   /*
-   * Do the toys
+   * Do the toys if requested 
    */
   if (m_doToyMC || m_doCombToyMC) {
+    result.toys.resize(static_cast<size_t>(m_nToyMC));
     const std::vector<std::vector<HistArray>>& toyMCList =
       ((isFastSim) ? m_uncorrToyMCSystFast : m_uncorrToyMCSystFull);
     if (toyMCList.size() > (unsigned int)runnumberIndex) {
-      for (int toy = 0; toy < m_nToyMC; toy++) {
+      for (int toy = 0; toy < m_nToyMC; ++toy) {
         if (toyMCList[runnumberIndex][toy].size() >
             static_cast<unsigned int>(index)) {
-          result[position_uncorrToyMCSF + toy] =
-            static_cast<TH2*>(toyMCList[runnumberIndex][toy][index].get())
-              ->GetBinContent(globalBinNumber);
+          result.toys[toy] =
+              static_cast<TH2*>(toyMCList[runnumberIndex][toy][index].get())
+                  ->GetBinContent(globalBinNumber);
         }
       }
     }
@@ -958,7 +960,7 @@ Root::TElectronEfficiencyCorrectionTool::setup(
   }
   TH1* tmpHist(nullptr);
   HistArray tmpArray;
-  for (auto& hist : hists) {
+  for (const auto& hist : hists) {
     tmpHist = static_cast<TH1*>(hist);
     tmpHist->SetDirectory(nullptr);
     tmpArray.emplace_back(tmpHist);

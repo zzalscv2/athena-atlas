@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-   Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef __TELECTRONEFFICIENCYCORRECTIONTOOL__
@@ -37,16 +37,15 @@ class TElectronEfficiencyCorrectionTool : public asg::AsgMessaging
 {
 public:
   using HistArray = std::vector<std::unique_ptr<TH1>>;
-  /**
-   * The position of each result
-   */
-  enum struct Position
-  {
-    SF = 0,
-    Total = 1,
-    Stat = 2,
-    UnCorr = 3,
-    End = 4
+
+  // The Result
+  struct Result{
+    double SF = 0;
+    double Total = 0;
+    double Stat = 0;
+    double UnCorr = 0;
+    double Corr = 0;
+    std::vector<double> toys{};
   };
 
   /** Standard constructor */
@@ -65,20 +64,21 @@ public:
    *  @ runnumber the run number 1st dimension of the stored measurements
    *  @ cluster_eta the cluster eta 2nd dimension of the stored measurements
    *  @ et third dimension of the stored measurments
-   *  @ result the vector with the results. The first
-   *  @ Position::End entries are filled with the
+   *  @ result struct filled with
    *  SF, Total uncertainty, Stat uncertainty, Uncorr uncertainty
-   *  @ index_of_corr this is where the correlated syst start
-   *  @ index_of_toys this is where the potential toys start
+   *  @ index_of_corr systematic
    *  returns 0 in failure
+   *
+   *  Toy production is controlled by internal flags
+   *  set by the Asg Tool. As toys are special.
    */
   int calculate(const PATCore::ParticleDataType::DataType dataType,
-                const unsigned int runnumber,
+                const unsigned int runnumber, 
                 const double cluster_eta,
                 const double et, /* in MeV */
-                std::vector<double>& result,
-                size_t& index_of_corr,
-                size_t& index_of_toys) const;
+                Result& result,
+                const bool onlyTotal = false,
+                const int corrIndex = -999) const;
 
   /// Add an input file with the auxiliary measurement
   inline void addFileName(const std::string& val)

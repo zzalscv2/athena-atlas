@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef __TPHOTONEFFICIENCYCORRECTIONTOOL__
@@ -7,48 +7,51 @@
 
 /**
   @class TPhotonEfficiencyCorrectionTool
-  @brief Calculate the egamma scale factors in pure ROOT, inherit the structure from TElectronEfficiencyCorrection tool
-  For each photon type declare a tool and use addFileName to add root files containing scale factors for this specific type. 
-  After adding root files call initialize()
-  In the event loop use calculate(const PATCore::ParticleDataType::DataType dataType, const unsigned int runnumber, const double cluster_eta, const double et)
-  This returns a TResult. The scale factor and its uncertainty are obtained by calling getScaleFactor() or getTotalUncertainty (See header file of TResult in package PATCore)
-  For a short documentation see the included README file
+  @brief Calculate the egamma scale factors in pure ROOT, inherit the structure
+  from TElectronEfficiencyCorrection tool For each photon type declare a tool
+  and use addFileName to add root files containing scale factors for this
+  specific type. After adding root files call initialize() In the event loop use
+  calculate(const PATCore::ParticleDataType::DataType dataType, const unsigned
+  int runnumber, const double cluster_eta, const double et) This returns a
+  TResult. The scale factor and its uncertainty are obtained by calling
+  getScaleFactor() or getTotalUncertainty (See header file of TResult in package
+  PATCore) For a short documentation see the included README file
 
   @author Karsten Koeneke, Felix Buehrer,  Michael Pitt
   @date   January 2014
   */
 
 // STL includes
-#include <vector>
 #include <string>
+#include <vector>
 // Include the return object and the base class
-#include "PATCore/PATCoreEnums.h"
 #include "ElectronEfficiencyCorrection/TElectronEfficiencyCorrectionTool.h"
+#include "PATCore/PATCoreEnums.h"
 
 namespace Root {
-    class TPhotonEfficiencyCorrectionTool : public Root::TElectronEfficiencyCorrectionTool{
-    
-    public:
-        struct Result{
-            double scaleFactor=-999.0;
-            double totalUncertainty=-999.0;
-        };
+class TPhotonEfficiencyCorrectionTool
+    : public Root::TElectronEfficiencyCorrectionTool {
 
-        TPhotonEfficiencyCorrectionTool(const char* name="TPhotonEfficiencyCorrectionTool");
-        ~TPhotonEfficiencyCorrectionTool();
-        int initialize();
-        // Additional public methods
-        int calculate( const PATCore::ParticleDataType::DataType dataType,
-				const unsigned int runnumber,
-				const double cluster_eta,
-				const double et, /* in MeV */
-				Result& sf_and_err
-				) const;
-	
-    private :
-    };
+ public:
+  struct Result {
+    double scaleFactor = -999.0;
+    double totalUncertainty = -999.0;
+  };
 
-} // End: namespace Root
+  TPhotonEfficiencyCorrectionTool(
+      const char* name = "TPhotonEfficiencyCorrectionTool");
+  ~TPhotonEfficiencyCorrectionTool();
+  int initialize();
+  // Additional public methods
+  int calculate(const PATCore::ParticleDataType::DataType dataType,
+                const unsigned int runnumber, const double cluster_eta,
+                const double et, /* in MeV */
+                Result& sf_and_err) const;
+
+ private:
+};
+
+}  // namespace Root
 
 #endif
 
