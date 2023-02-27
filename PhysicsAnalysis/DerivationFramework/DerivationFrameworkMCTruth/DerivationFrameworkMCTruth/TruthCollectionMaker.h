@@ -8,6 +8,7 @@
 #include <string>
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "Gaudi/Property.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -35,13 +36,21 @@ namespace DerivationFramework {
 
     private:
       mutable std::atomic<unsigned int> m_ntotpart, m_npasspart;
+      // R/W handles
       SG::ReadHandleKey<xAOD::TruthParticleContainer> m_particlesKey
          {this, "ParticlesKey", "TruthParticles", "ReadHandleKey for input TruthParticleContainer"};
       SG::WriteHandleKey<xAOD::TruthParticleContainer> m_outputParticlesKey
          {this, "NewCollectionName", "", "WriteHandleKey for new TruthParticleContainer"};
-      std::string m_partString;
-      bool m_do_compress, m_do_sherpa;
-      bool m_keep_navigation_info;
+      // Non-handle properties
+      Gaudi::Property<std::string> m_partString
+         {this, "ParticleSelectionString", "", "ExpressionEvaluation string for particle selection"};
+      Gaudi::Property<bool> m_do_compress
+         {this, "Do_Compress", false, "Removes particles with the same pdgId in a decay chain (but keeps first and last)"};
+      Gaudi::Property<bool> m_do_sherpa 
+         {this, "Do_Sherpa", false, "Checks if there are truth W bosons in the current record.  If not, tries to combine W daughters to create one"};
+      Gaudi::Property<bool> m_keep_navigation_info
+         {this, "KeepNavigationInfo", true, "m_do_sherpa currently only works for W+jets"}; 
+      // Decor handles
       SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_linkDecoratorKey
          {this, "originalTruthParticle", "TruthParticles.originalTruthParticle", "Name of the decoration linking to the orgiginal truth particle"};
       SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_originDecoratorKey
