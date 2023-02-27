@@ -12,9 +12,7 @@ from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
 from MuonConfig.MuonTrackBuildingConfig import MuonSegmentRegionRecoveryToolCfg
 
 from TrkConfig.AtlasExtrapolatorToolsConfig import AtlasEnergyLossUpdatorCfg
-# FIXME
-GeV = 1000
-mm = 1
+from AthenaCommon.SystemOfUnits import GeV, mm
 
 def InDetCandidateToolCfg(flags, name="InDetCandidateTool", **kwargs):
     from InDetConfig.InDetTrackSelectorToolConfig import MuonCombinedInDetDetailedTrackSelectorToolCfg
