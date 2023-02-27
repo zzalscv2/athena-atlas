@@ -633,8 +633,9 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
             opt5._getValue(containerSplitLevel);
             opt6._getValue(auxSplitLevel);
             if (containerSplitLevel == defSplitLevel) {
-               if ( (m_name.size() >= 5 && m_name.substr(m_name.size()-5, 4) == RootAuxDynIO::AUX_POSTFIX)
-                    || info->clazz().Properties().HasProperty("IAuxStore") ) containerSplitLevel = auxSplitLevel;
+               if( RootAuxDynIO::hasAuxStore( string_view(m_name).substr(0, m_name.size()-1), info->clazz().Class() ) ) {
+                  containerSplitLevel = auxSplitLevel;
+               }
             }
             if (!m_tree) {
                m_tree = new TTree(treeName.c_str(), treeName.c_str(), (m_branchName.empty() ? containerSplitLevel : defSplitLevel));
@@ -761,10 +762,10 @@ DbStatus  RootTreeContainer::addObject(const DbColumn* col,
                   if ( !::isalnum(*j) ) *j = '_';
                }
             }
-            dsc.branch  = m_tree->Branch(nam.c_str(),   // Branch name
-                                         dsc.clazz->GetName(), // Object class
-                                         (void*)&dsc.buffer,   // Object address
-                                         defBufferSize, // Buffer size
+            dsc.branch  = m_tree->Branch(nam.c_str(),           // Branch name
+                                         dsc.clazz->GetName(),  // Object class
+                                         (void*)&dsc.buffer,    // Object address
+                                         defBufferSize,         // Buffer size
                                          defSplitLevel);        // Split Mode (Levels)
             if ( dsc.branch )  {
                dsc.leaf = dsc.branch->GetLeaf(nam.c_str());
@@ -776,8 +777,7 @@ DbStatus  RootTreeContainer::addObject(const DbColumn* col,
                setBranchOffsetTabLen( dsc.branch, branchOffsetTabLen );
 
                // AUX STORE specifics
-               if ( (nam.size() >= 4 && nam.substr(nam.size()-4) == RootAuxDynIO::AUX_POSTFIX)
-	            || RootType(dsc.clazz->GetName()).Properties().HasProperty("IAuxStore") ) {
+               if( RootAuxDynIO::hasAuxStore(nam, dsc.clazz) ) {
                   TClass *storeTClass = dsc.clazz->GetBaseClass("SG::IAuxStoreIO");
                   if( storeTClass ) {
                      // This is a class implementing SG::IAuxStoreIO

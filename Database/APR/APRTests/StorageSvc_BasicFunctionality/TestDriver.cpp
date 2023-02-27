@@ -89,7 +89,6 @@ TestDriver::testWriting()
      error << "There is no ClassID property for class \"SimpleTestClass\"" << std::ends;
      throw std::runtime_error( error.str() );
   }
-
   for ( int i = 0; i < m_nObjects; ++i ) {
     myObjects.push_back( new SimpleTestClass() );
     SimpleTestClass* myObject = myObjects.back();
@@ -167,6 +166,7 @@ TestDriver::testReading()
 
   // Fetch the containers
   std::vector<const Token*> containerTokens;
+  containerTokens.reserve(2);
   storageExplorer->containers( *fd, containerTokens );
   if ( containerTokens.size() != 2 ) {
     throw std::runtime_error( "Unexpected number of containers" );

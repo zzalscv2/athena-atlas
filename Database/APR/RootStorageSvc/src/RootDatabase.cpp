@@ -36,13 +36,15 @@
 #include "Compression.h"
 #include "TKey.h"
 
+#include "ROOT/RNTuple.hxx"
+
 using namespace pool;
 using namespace std;
 
 /// Standard Constuctor
 RootDatabase::RootDatabase() :
         m_file(nullptr), 
-        m_version ("1.1"),
+        m_version ("2.0"),
         m_defCompression(1),
         m_defCompressionAlg(1),
         m_defSplitLevel(99),
@@ -303,7 +305,11 @@ DbStatus RootDatabase::close(DbAccessMode /* mode */ )  {
          log << DbPrintLvl::Debug << "Closing DB " << nam << DbPrint::endmsg;
          bool closed(false);
 
-         if ( byteCount(WRITE_COUNTER) > 0 )   {
+         if( byteCount(WRITE_COUNTER) > 0 ) {
+            for( auto& writer : m_ntupleWriterMap ) {
+               writer.second->close();
+               writer.second.reset();
+            }
             TDirectory::TContext dirCtxt(0);
             m_file->ResetErrno();
             m_file->Write("0", m_defWritePolicy);
@@ -815,12 +821,12 @@ DbStatus RootDatabase::setAutoFlush(const DbOption& opt)
 }
 
 
-void RootDatabase::registerBranchContainer(RootTreeContainer* cont)
 /* register creation (or opening for update) of a Branch Container.
    If it is located in a TTree with AUTO_FLUSH option, the whole TTree must be Filled
    (instead of the container branch, or the AUTO_FLUSH option will not work).
    TTree::Fill() is done in commit in transAct()
 */
+void RootDatabase::registerBranchContainer(RootTreeContainer* cont)
 {
    TTree* tree = cont->getTTree();
    // cout << "------ registerBranchContainer: " << cont->getName() << endl;
@@ -861,6 +867,12 @@ DbStatus RootDatabase::transAct(Transaction::Action action)
    // MN: maybe !m_file should be an error
    if( m_file == nullptr or !m_file->IsWritable() )
       return Success;
+
+   // Flush the RNTuples from the DB level, so every ntuple is flused only once
+   for( auto& writer : m_ntupleWriterMap ) {
+      auto wr = writer.second.get();
+      if( wr->isGrouped() and wr->needsCommit() ) wr->commit();
+   }
 
    if( fillBranchContainerTrees() != Success ) return Error;
 
@@ -1013,6 +1025,7 @@ DbStatus RootDatabase::fillBranchContainerTrees()
          if( clean == 0 ) {
             // good - all containers were updated.  Fill the TTree and clean dirty status
             int num_bytes = tree->Fill();
+            //cout << "-----MN---  Filled branch container TTree: " << m_file->GetName() << "::" << tree->GetName() << endl;
             if( num_bytes > 0 ) {
                addByteCount( RootDatabase::WRITE_COUNTER, num_bytes );
             } else {
@@ -1047,3 +1060,46 @@ DbStatus RootDatabase::fillBranchContainerTrees()
    return Success;
 }
 
+
+std::unique_ptr<RootAuxDynIO::IRootAuxDynReader>
+RootDatabase::getNTupleAuxDynReader(const std::string& ntuple_name, const std::string& field_name)
+{
+   auto reader_entry = m_ntupleReaderMap.find(ntuple_name);
+   if( reader_entry == m_ntupleReaderMap.end() ) {
+      return nullptr;
+   }
+   return RootAuxDynIO::getNTupleAuxDynReader(field_name, reader_entry->second.get());
+}
+
+
+RNTupleReader*
+RootDatabase::getNTupleReader(std::string ntuple_name)
+{
+   auto reader_entry = m_ntupleReaderMap.find(ntuple_name);
+   if( reader_entry != m_ntupleReaderMap.end() ) {
+      return reader_entry->second.get();
+   }
+   const std::string file_name = m_file->GetName();
+   auto native_reader = RNTupleReader::Open(string("RNT:")+ntuple_name, file_name);
+   RNTupleReader *r = native_reader.get();
+   m_ntupleReaderMap.emplace(ntuple_name, std::move(native_reader));
+   return r;
+}
+
+
+RootAuxDynIO::IRNTupleWriter*
+RootDatabase::getNTupleWriter(std::string ntuple_name, bool create)
+{
+   auto& writer = m_ntupleWriterMap[ntuple_name];
+   if( !writer and create ) {
+      DbPrint log(m_file->GetName());
+      auto compr = ROOT::CompressionSettings( (ROOT::ECompressionAlgorithm)m_defCompressionAlg, m_defCompression );
+      //if( mn ) log << DbPrintLvl::Debug << "Creating RNTuple '" << ntuple_name << "'" << DbPrint::endmsg;
+      writer = RootAuxDynIO::getNTupleAuxDynWriter(m_file, string("RNT:")+ntuple_name, compr);
+   }
+   if( writer and create ) {
+      // treat the create flag as an indication of a new container client and count them
+      writer->increaseClientCount();
+   }
+   return writer.get();
+}

@@ -5,7 +5,10 @@
 #include "AthContainers/tools/error.h"
 #include "AthContainers/exceptions.h"
 
+#include "DataModelRoot/RootType.h"
 #include "RootAuxDynIO/RootAuxDynIO.h"
+#include "RNTupleAuxDynReader.h"
+#include "RNTupleAuxDynWriter.h"
 #include "TBranchAuxDynReader.h"
 #include "TBranchAuxDynWriter.h"
 
@@ -16,10 +19,19 @@
 #include "TDictAttributeMap.h"
 
 
-class TTree;
+#include <ROOT/RNTuple.hxx>
+using RNTupleModel = ROOT::Experimental::RNTupleModel;
 
 namespace RootAuxDynIO
 {
+
+   bool
+   hasAuxStore(std::string_view fieldname, TClass *tc) {
+      // check the name first, and only if it does not match AUX_POSTFIX ask TClass
+      return endsWithAuxPostfix(fieldname)
+         or (tc and RootType(tc).Properties().HasProperty("IAuxStore"));
+   }
+
 
    std::string
    getKeyFromBranch(TBranch* branch)
@@ -34,9 +46,7 @@ namespace RootAuxDynIO
          if( strncmp(brname, clname, namelen) == 0 && brname[namelen] == '_' ) {
             key.erase (0, namelen+1);
          }
-
-         if (key.size() >= 5 && key.substr(key.size()-4, 4) == RootAuxDynIO::AUX_POSTFIX )
-            key.erase(key.size()-4);
+         if( endsWithAuxPostfix(key) )  key.erase( key.size()-AUX_POSTFIX_LEN );
          return key;
       }
       return "";
@@ -53,9 +63,9 @@ namespace RootAuxDynIO
    }
 
    std::string
-   auxFieldName(const std::string& attr_name, const std::string& baseBranchName)
+   auxFieldName(const std::string& attr_name, const std::string& baseName)
    {
-      std::string field_name = baseBranchName;
+      std::string field_name = baseName;
       if( field_name.back() == '.' )  field_name.pop_back();
       field_name += ":" + attr_name;    // MN TODO <- find a good delimiter
       return field_name;
@@ -73,24 +83,38 @@ namespace RootAuxDynIO
          msg << "GetExpectedType() failed for branch: " << bname;
          return false;
       }
-      if( tc and ( endsWithAuxPostfix(bname) or (tc->GetAttributeMap() && tc->GetAttributeMap()->HasKey("IAuxStore")) ) ) {
+      if( tc and ( endsWithAuxPostfix(bname)
+                   or (tc->GetAttributeMap() && tc->GetAttributeMap()->HasKey("IAuxStore")) ) ) {
          return tc->GetBaseClass("SG::IAuxStoreHolder") != nullptr;
       }
       return false;
    }
 
+   //  ---------------------  Dynamic Aux Attribute Readers
 
    std::unique_ptr<RootAuxDynIO::IRootAuxDynReader>
    getBranchAuxDynReader(TTree* tree, TBranch* branch) {
       return std::make_unique<TBranchAuxDynReader>(tree, branch);
    }
 
+   std::unique_ptr<RootAuxDynIO::IRootAuxDynReader>
+   getNTupleAuxDynReader(const std::string& field_name, RNTupleReader* native_reader) {
+      return std::make_unique<RNTupleAuxDynReader>(field_name, native_reader);
+   }
+
+   //  ---------------------  Dynamic Aux Attribute Writers
+
    /// generate TBranchAuxDynWriter
    /// tree -> destination tree
-   /// do_branch_fill -> flag to Fill each TBranch immediately
+   /// do_branch_fill -> flag telling to Fill each TBranch immediately
    std::unique_ptr<RootAuxDynIO::IRootAuxDynWriter>
    getBranchAuxDynWriter(TTree* tree, int offsettab_len,  bool do_branch_fill) {
       return std::make_unique<TBranchAuxDynWriter>(tree, offsettab_len, do_branch_fill);
+   }
+
+   std::unique_ptr<RootAuxDynIO::IRNTupleWriter>
+   getNTupleAuxDynWriter(TFile* file, const std::string& ntupleName, int compression) {
+      return std::make_unique<RNTupleAuxDynWriter>(file, ntupleName, compression); 
    }
 
 }

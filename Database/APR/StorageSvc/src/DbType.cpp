@@ -58,6 +58,8 @@ DbType DbType::getType(const std::string& name)  {
 const std::string DbType::storageName()  const {
   if ( *this == TEST_StorageType          )
     return "Test";
+  else if ( exactMatch(ROOTRNTUPLE_StorageType) )
+    return "ROOT_RNTuple";
   else if ( exactMatch(ROOTKEY_StorageType)    )
     return "ROOT_Key";
   else if ( exactMatch(ROOTTREE_StorageType)   )
