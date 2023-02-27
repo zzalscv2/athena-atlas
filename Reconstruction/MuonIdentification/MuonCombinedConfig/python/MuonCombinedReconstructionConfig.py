@@ -523,8 +523,8 @@ def CombinedMuonOutputCfg(flags):
 
     # FIXME! Fix for ATLASRECTS-5151. Remove when better solution found.
     from TrkEventCnvTools.TrkEventCnvToolsConfigCA import (
-        MuonTrkEventCnvSuperToolCfg)
-    result.merge(MuonTrkEventCnvSuperToolCfg(flags))
+        TrkEventCnvSuperToolCfg)
+    result.merge(TrkEventCnvSuperToolCfg(flags))
 
     # Avoid old-style import from from IsolationAlgs.IsoUpdatedTrackCones import iso_vars
     # But shouldn't be here.

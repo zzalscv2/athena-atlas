@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetEventCnvTools/InDetEventCnvTool.h"
@@ -49,34 +49,29 @@ StatusCode InDet::InDetEventCnvTool::initialize() {
   StatusCode sc = AthAlgTool::initialize();
   if (sc.isFailure()) return sc;
   
-  // check if SLHC geo is used (TRT not implemented) 
-  // if not SLHC, get the TRT Det Descr manager
   ATH_CHECK(detStore()->retrieve(m_idDictMgr, "IdDict")) ;
  
   const IdDictDictionary* dict = m_idDictMgr->manager()->find_dictionary("InnerDetector");
   if (!dict) {
-   ATH_MSG_ERROR( " Cannot access InnerDetector dictionary ");
+    ATH_MSG_ERROR( " Cannot access InnerDetector dictionary ");
     return StatusCode::FAILURE;
   }
-
-  bool isSLHC = false;
-  // Find string SLHC in dictionary file name - if found is SLHC geo
-  if (dict->file_name().find("SLHC")!=std::string::npos) isSLHC=true;
 
   //retrieving the various ID helpers
   ATH_CHECK (detStore()->retrieve(m_IDHelper, "AtlasID"));
 
   ATH_CHECK( detStore()->retrieve(m_pixelHelper, "PixelID") );
   ATH_CHECK( detStore()->retrieve(m_SCTHelper, "SCT_ID") );
-  ATH_CHECK( detStore()->retrieve(m_TRTHelper, "TRT_ID") );
+  if(!m_trtDetEleContKey.empty())
+    ATH_CHECK( detStore()->retrieve(m_TRTHelper, "TRT_ID") );
 
   ATH_CHECK( m_pixClusContName.initialize() );
   ATH_CHECK( m_sctClusContName.initialize() );
-  ATH_CHECK( m_trtDriftCircleContName.initialize() );
+  ATH_CHECK( m_trtDriftCircleContName.initialize(!m_trtDriftCircleContName.empty()) );
 
   ATH_CHECK( m_pixelDetEleCollKey.initialize() );
   ATH_CHECK( m_SCTDetEleCollKey.initialize() );
-  ATH_CHECK(!isSLHC && m_trtDetEleContKey.initialize(!m_trtDetEleContKey.key().empty()));
+  ATH_CHECK( m_trtDetEleContKey.initialize(!m_trtDetEleContKey.empty()));
 
   return sc;
      

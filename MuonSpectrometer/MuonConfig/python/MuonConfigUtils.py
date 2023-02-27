@@ -63,6 +63,6 @@ def SetupMuonStandaloneOutput(cfg, flags, itemsToRecord):
 
     # Fix for ATLASRECTS-5151
     from TrkEventCnvTools.TrkEventCnvToolsConfigCA import (
-        MuonTrkEventCnvSuperToolCfg)
-    cfg.merge(MuonTrkEventCnvSuperToolCfg(flags))
+        TrkEventCnvSuperToolCfg)
+    cfg.merge(TrkEventCnvSuperToolCfg(flags))
 
