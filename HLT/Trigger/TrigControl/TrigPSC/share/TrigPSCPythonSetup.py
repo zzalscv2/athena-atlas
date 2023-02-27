@@ -61,10 +61,6 @@ else:
 
    del logLevel
 
-   ## Now clone and use locked flags for services configuration
-   flags = flags.clone()
-   flags.lock()
-
    ServiceMgr += getMessageSvc(flags, theApp.MessageSvcType)
    theApp.setOutputLevel(flags.Exec.OutputLevel)
 
@@ -102,6 +98,10 @@ else:
       print(" | Execute command before jobOptions script END.  | ")
       print(" +------------------------------------------------+ ")
       print("\n")
+
+   ## Now clone and use locked flags for services configuration
+   flags = flags.clone()
+   flags.lock()
 
    ### basic job configuration before user configuration ------------------------
    from TrigServices.TriggerUnixStandardSetup import setupCommonServices
