@@ -255,7 +255,6 @@ if opt.setMenu:
 setModifiers = ['noLArCalibFolders',
                 'ForceMuonDataType',
                 'useNewRPCCabling',
-                'enableCostMonitoring',
                 'useOracle',
                 'BunchSpacing25ns',
                 'disableInDetDCS',
@@ -691,12 +690,6 @@ if opt.reverseViews or opt.filterViews:
     for alg in viewMakers:
         alg.ReverseViewsDebug = opt.reverseViews
         alg.FallThroughFilter = theFilter
-
-#-------------------------------------------------------------
-# Cost Monitoring Post Setup
-#-------------------------------------------------------------
-from TrigCostMonitor.TrigCostMonitorConfig import  TrigCostMonitorPostSetup
-TrigCostMonitorPostSetup()
 
 #-------------------------------------------------------------
 # Disable overly verbose and problematic ChronoStatSvc print-out

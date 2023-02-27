@@ -88,7 +88,10 @@ def getTrigCOOLUpdateHelper(flags, name='TrigCOOLUpdateHelper'):
 
 def getHltROBDataProviderSvc(flags, name='ROBDataProviderSvc'):
    '''online ROB data provider service'''
-   svc = CompFactory.HltROBDataProviderSvc(name)
+   svc = CompFactory.HltROBDataProviderSvc(name,
+      doCostMonitoring = (flags.Trigger.CostMonitoring.doCostMonitoring and
+                          flags.Trigger.CostMonitoring.monitorROBs) )
+
    svc.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
    svc.MonTool.defineHistogram('TIME_ROBReserveData', path='EXPERT', type='TH1F',
                                title='Time to reserve ROBs for later retrieval;time [mu s]',

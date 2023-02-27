@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 
@@ -54,17 +54,3 @@ def TrigCostMonitorFinalizeCfg(flags, seqName=""):
       log.debug('Cost monitoring is not enabled - TrigCostFinalizeAlg will not be included')
 
     return None
-
-
-def TrigCostMonitorPostSetup():
-  from AthenaCommon.Logging import logging
-  log = logging.getLogger('TrigCostMonitorPostSetup')
-
-  from AthenaCommon.AppMgr import ServiceMgr as svcMgr 
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
-  if 'doCostMonitoring' in svcMgr.ROBDataProviderSvc.properties():
-      svcMgr.ROBDataProviderSvc.doCostMonitoring = \
-          (ConfigFlags.Trigger.CostMonitoring.doCostMonitoring and ConfigFlags.Trigger.CostMonitoring.monitorROBs)
-      log.info('Set ROBDataProviderSvc.doCostMonitoring=%s', svcMgr.ROBDataProviderSvc.doCostMonitoring)
-  else:
-      log.info('ROBDataProviderSvc does not have property doCostMonitoring - will not do cost monitor for ROS.')

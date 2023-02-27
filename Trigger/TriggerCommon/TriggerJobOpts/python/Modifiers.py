@@ -501,23 +501,6 @@ class autoConditionsTag(_modifier):
         from RecExConfig.AutoConfiguration import ConfigureConditionsTag
         ConfigureConditionsTag()
 
-class enableCostMonitoring(_modifier):
-    """
-    Enable Cost Monitoring for online
-    """
-    def preSetup(self, flags):
-        flags.Trigger.CostMonitoring.doCostMonitoring = True
-
-class forceCostMonitoring(_modifier):
-    """
-    Enable Cost Monitoring and produce the monitoring collections in each event
-    without requiring the HLT cost monitoring chain to be present and active.
-    """
-    def preSetup(self, flags):
-        flags.Trigger.CostMonitoring.doCostMonitoring = True
-        flags.Trigger.CostMonitoring.monitorAllEvents = True
-
-
 class BeamspotFromSqlite(_modifier):
     """
     Read beamspot from sqlite file (./beampos.db)
