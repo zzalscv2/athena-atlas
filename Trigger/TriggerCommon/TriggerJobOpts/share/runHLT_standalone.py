@@ -273,7 +273,8 @@ else:           # More data modifiers
                      #Set muComb/muIso Backextrapolator tuned for real data
                      #Monitoring for L1 muon group
                      #Monitoring L1Topo at ROB level
-                     'enableSchedulerMon'
+                     'enableSchedulerMon',
+                     'superCellWithBCID',
     ]
 
 #-------------------------------------------------------------

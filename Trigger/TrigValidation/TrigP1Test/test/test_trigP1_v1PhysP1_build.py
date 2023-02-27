@@ -21,7 +21,7 @@ ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
 ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
 ex.input = 'data'
-ex.args = '-c "setMenu=\'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale\';doL1Sim=True;rewriteLVL1=True;superCellNoBCID=True;enableL1NSWVetoMode=False;enableL1NSWMMTrigger=False;enableL1NSWPadTrigger=False;enableL1NSWStripTrigger=False;"'
+ex.args = '-c "setMenu=\'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale\';doL1Sim=True;rewriteLVL1=True;enableL1NSWVetoMode=False;enableL1NSWMMTrigger=False;enableL1NSWPadTrigger=False;enableL1NSWStripTrigger=False;"'
 ex.args += ' -o output'
 ex.args += ' --dump-config-reload'
 
