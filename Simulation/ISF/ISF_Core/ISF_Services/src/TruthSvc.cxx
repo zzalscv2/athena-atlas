@@ -105,7 +105,7 @@ StatusCode ISF::TruthSvc::initializeTruthCollection()
 void ISF::TruthSvc::deleteChildVertex(HepMC::GenVertexPtr vertex) const {
   HepMC::GenEvent* parent=vertex->parent_event(); 
   std::vector<HepMC::GenVertexPtr> verticesToDelete=HepMC::descendant_vertices(vertex);
-  for (auto v: verticesToDelete) parent->remove_vertex(v);
+  for (auto& v: verticesToDelete) parent->remove_vertex(v);
   verticesToDelete.clear();
   return;
 }

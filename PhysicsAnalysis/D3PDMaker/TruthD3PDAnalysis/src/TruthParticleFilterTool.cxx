@@ -314,8 +314,8 @@ bool TruthParticleFilterTool::isFromTau(HepMC::ConstGenParticlePtr part) {
    auto itrParent=prod->particles_in().begin();
    auto endParent=prod->particles_in().end();
 #else
-  HepMC::GenVertex::particle_iterator itrParent = prod->particles_begin(HepMC::parents);
-  HepMC::GenVertex::particle_iterator endParent = prod->particles_end(HepMC::parents);
+  auto itrParent = prod->particles_in_const_begin();
+  auto endParent = prod->particles_in_const_end();
 #endif
   int n_iter=0;
   for(;itrParent!=endParent; ++itrParent){
