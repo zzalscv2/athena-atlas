@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Identifier/Identifier.h"
@@ -196,7 +196,7 @@ CaloDetDescriptor::getSampling(IdentifierHash onecalo_hash) const
   }
 }
 
-bool CaloDetDescriptor::get_cylinder_surface (Amg::Transform3D* htrans,
+bool CaloDetDescriptor::get_cylinder_surface (Amg::Transform3D& htrans,
                                               double& radius,
                                               double& hphi, 
                                               double& hlength, 
@@ -205,7 +205,7 @@ bool CaloDetDescriptor::get_cylinder_surface (Amg::Transform3D* htrans,
   // For cylinders : htrans is the displacement compared to a cylinder centered along the
   //                 z axis
 
-  *htrans = m_transform;
+  htrans = m_transform;
   radius = m_calo_r_min;
   hlength = m_calo_z_max;
   hphi = 0.5*m_lar_dphi*m_lar_n_phi;
@@ -217,13 +217,13 @@ bool CaloDetDescriptor::get_cylinder_surface (Amg::Transform3D* htrans,
     hlength = m_calo_z_max-m_calo_z_min;
     double z = m_calo_sign*(m_calo_z_min + m_calo_z_max)/2.;
     Amg::Translation3D vec(Amg::Vector3D(0.,0.,z));
-    *htrans = (*htrans) * vec;
+    htrans = (htrans) * vec;
   }
 
   return true;
 }
 
-bool CaloDetDescriptor::get_disk_surface (Amg::Transform3D* htrans,
+bool CaloDetDescriptor::get_disk_surface (Amg::Transform3D& htrans,
                                           double& z, 
                                           double& rmin, 
                                           double& rmax, 
@@ -233,12 +233,12 @@ bool CaloDetDescriptor::get_disk_surface (Amg::Transform3D* htrans,
   // For disks : htrans is the position of the entrance surface, i.e. the alignment
   //             heptransform + a z shift to put the entrance at the right z. 
 
-  *htrans = m_transform;
+  htrans = m_transform;
   z = m_calo_z_min*m_calo_sign;
   depth = m_calo_z_max - m_calo_z_min;
 
   Amg::Translation3D vec(0.,0.,z);
-  *htrans = (*htrans) * vec;
+  htrans = (htrans) * vec;
 
   rmin = m_calo_r_min;
   rmax = m_calo_r_max;

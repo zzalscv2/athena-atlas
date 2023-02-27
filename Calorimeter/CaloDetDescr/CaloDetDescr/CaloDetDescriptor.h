@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -223,7 +223,7 @@ class CaloDetDescriptor : public Identifiable
   /** this will be the closest radius of this region */
   /** @brief this will be the closest radius of this region (for Trk::Surface)
    */
-  bool get_cylinder_surface (Amg::Transform3D* htrans,
+  bool get_cylinder_surface (Amg::Transform3D& htrans,
 			     double& radius, 
 			     double& hphi, 
 			     double& hlength, 
@@ -231,7 +231,7 @@ class CaloDetDescriptor : public Identifiable
 
   /** @brief (for Trk::Surface)
    */
-  bool get_disk_surface (Amg::Transform3D* htrans,
+  bool get_disk_surface (Amg::Transform3D& htrans,
 			 double& z,
 			 double& rmin, 
 			 double& rmax, 
