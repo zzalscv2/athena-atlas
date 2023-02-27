@@ -44,6 +44,8 @@ def TgcRawDataMonitoringConfig(inputFlags):
 
     tgcRawDataMonAlg.FillGapByGapHistograms = (doGapByGapHitOcc or doGapByGapEffMap or doHitResiduals)
 
+    tgcRawDataMonAlg.GRLTool = ""
+
     tgcRawDataMonAlg.UseOnlyCombinedMuons = True
     tgcRawDataMonAlg.UseOnlyMuidCoStacoMuons = True
     tgcRawDataMonAlg.UseMuonSelectorTool = True
@@ -1194,7 +1196,7 @@ if __name__=='__main__':
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.Input.isMC = True
+    flags.Input.isMC = False
 
     import glob
     import sys
@@ -1207,11 +1209,13 @@ if __name__=='__main__':
         flags.Input.Files = inputs
         flags.Output.HISTFileName = 'ExampleMonitorOutput.root'
 
-    flags.Trigger.triggerConfig = "FILE"
-    flags.Trigger.triggerMenuSetup = "Dev_pp_run3_v1"
-
-    if not flags.Input.isMC:
+    if flags.Input.isMC:
+        flags.Trigger.triggerConfig = "FILE"
+        flags.Trigger.triggerMenuSetup = "MC_pp_run3_v1_BulkMCProd_prescale"
+    else:
         flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2022-10"
+        flags.Trigger.triggerConfig = "DB"
+
 
     flags.lock()
     flags.dump()
@@ -1244,9 +1248,21 @@ if __name__=='__main__':
 
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     cfg.merge(AtlasFieldCacheCondAlgCfg(flags))
-    from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg,generateL1Menu
-    cfg.merge(L1ConfigSvcCfg(flags))
-    generateL1Menu(flags)
+
+    from TrigConfigSvc.TrigConfigSvcCfg import TrigConfigSvcCfg,L1PrescaleCondAlgCfg,BunchGroupCondAlgCfg,HLTPrescaleCondAlgCfg
+    cfg.merge( TrigConfigSvcCfg( flags ) )
+    cfg.merge( L1PrescaleCondAlgCfg( flags ) )
+    cfg.merge( BunchGroupCondAlgCfg( flags ) )
+    cfg.merge( HLTPrescaleCondAlgCfg( flags ) )
+
+    if not flags.Input.isMC:
+        from AthenaConfiguration.ComponentFactory import CompFactory
+        cfg.getEventAlgo('TgcRawDataMonAlg').GRLTool = CompFactory.GoodRunsListSelectorTool('GoodRunsListSelectorTool')
+        cfg.getEventAlgo('TgcRawDataMonAlg').GRLTool.GoodRunsListVec = ['data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns.xml']
+    else:
+        from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import generateMenuMT
+        generateMenuMT(flags)
+
 
     cfg.printConfig(withDetails=False, summariseProps = False)
 
