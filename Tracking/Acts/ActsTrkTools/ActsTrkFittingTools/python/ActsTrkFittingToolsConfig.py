@@ -3,6 +3,8 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+from ActsInterop import UnitConstants
+
 from ActsGeometry.ActsGeometryConfig import (
     ActsExtrapolationToolCfg,
     ActsTrackingGeometryToolCfg,
@@ -27,7 +29,8 @@ def ActsKalmanFitterCfg(flags, name: str = "ActsKalmanFitter", **kwargs):
 
     result.addPublicTool(result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000))) # FIXME redundant?
 
-    kwargs.setdefault("ReverseFilteringPt", 1.0)  # @TODO: Unit
+    kwargs.setdefault("ReverseFilteringPt", 1.0 * UnitConstants.GeV)
+    kwargs.setdefault("OverstepLimit", 300 * UnitConstants.um)
 
     ActsATLASConverterTool = result.popToolsAndMerge(ActsATLASConverterToolCfg(flags))
     kwargs["ATLASConverterTool"] = ActsATLASConverterTool

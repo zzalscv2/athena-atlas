@@ -54,7 +54,7 @@ StatusCode ActsKalmanFitter::initialize() {
   m_logger = makeActsAthenaLogger(this, "Acts Kalman Refit");
 
   auto field = std::make_shared<ATLASMagneticFieldWrapper>();
-  Acts::EigenStepper<> stepper(field);
+  Acts::EigenStepper<> stepper(field, m_overstepLimit);
   Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometryTool->trackingGeometry() } );     
   Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator> propagator(std::move(stepper), 
 								     std::move(navigator),

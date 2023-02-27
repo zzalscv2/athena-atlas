@@ -207,12 +207,15 @@ private:
     // the settable job options
   Gaudi::Property< double > m_option_outlierChi2Cut {this, "OutlierChi2Cut", 12.5, 
       "Chi2 cut used by the outlier finder" };
-  Gaudi::Property< double > m_option_ReverseFilteringPt {this, "ReverseFilteringPt", 1.0, 
+  Gaudi::Property< double > m_option_ReverseFilteringPt {this, "ReverseFilteringPt", 1.0 * Acts::UnitConstants::GeV,
       "Pt cut used for the ReverseFiltering logic"};
   Gaudi::Property< int > m_option_maxPropagationStep {this, "MaxPropagationStep", 5000, 
       "Maximum number of steps for one propagate call"};
   Gaudi::Property< double > m_option_seedCovarianceScale {this, "SeedCovarianceScale", 100.,
       "Scale factor for the input seed covariance when doing refitting"};
+
+  Gaudi::Property<double> m_overstepLimit{this, "OverstepLimit", 100 * Acts::UnitConstants::mm, 
+      "Overstep limit / tolerance for the Eigen stepper (use ACTS units!)"};
 
   /// Type erased track fitter function.
     using Fitter = Acts::KalmanFitter<Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>, traj_Type>;

@@ -265,6 +265,10 @@ atlas_add_citest( ACTS_ValidateTracks
     SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateTracks.sh
     LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
 
+atlas_add_citest( ACTS_ActsKfRefitting
+    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsKfRefitting.sh
+    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+
 #################################################################################
 # Trigger
 #################################################################################
