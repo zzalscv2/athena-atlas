@@ -758,6 +758,8 @@ StatusCode SCT_DigitizationTool::getNextEvent(const EventContext& ctx) {
 void SCT_DigitizationTool::addSDO(SiChargedDiodeCollection* collection, SG::WriteHandle<InDetSimDataCollection>* simDataCollMap) const {
   using list_t = SiTotalCharge::list_t;
   std::vector<InDetSimData::Deposit> deposits;
+  const InDetDD::SCT_ModuleSideDesign& sctDesign{dynamic_cast<const InDetDD::SCT_ModuleSideDesign&>(collection->design())};
+  const auto collectionid = collection->identify();
   //Check for optimization
   static_assert(std::is_nothrow_move_constructible<InDetSimData::Deposit>::value);
   deposits.reserve(5); // no idea what a reasonable number for this would be
@@ -813,18 +815,9 @@ void SCT_DigitizationTool::addSDO(SiChargedDiodeCollection* collection, SG::Writ
     // add the simdata object to the map:
     if (real_particle_hit or m_createNoiseSDO) {
       InDetDD::SiReadoutCellId roCell{(*i_chargedDiode).second.getReadoutCell()};
-      int strip{roCell.strip()};
-      const InDetDD::SCT_ModuleSideDesign& sctDesign{dynamic_cast<const InDetDD::SCT_ModuleSideDesign&>(collection->design())};
-
-      int row2D{sctDesign.row(strip)};
-      Identifier id_readout;
-      if (row2D < 0) { // SCT sensors
-        id_readout = m_detID->strip_id(collection->identify(),strip);
-      } else { // Upgrade sensors
-        int strip2D{sctDesign.strip(strip)};
-        id_readout = m_detID->strip_id(collection->identify(),row2D, strip2D);
-      }
-
+      const int strip{roCell.strip()};
+      const int row2D{sctDesign.row(strip)};
+      Identifier id_readout =  row2D < 0 ? m_detID->strip_id(collectionid,strip) : m_detID->strip_id(collectionid,row2D, sctDesign.strip(strip));
       (*simDataCollMap)->try_emplace(id_readout, std::move(deposits),(*i_chargedDiode).second.flag());
     }
   }
