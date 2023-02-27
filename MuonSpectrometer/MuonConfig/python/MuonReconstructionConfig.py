@@ -16,8 +16,8 @@ def StandaloneMuonOutputCfg(flags):
 
     # FIXME! Fix for ATLASRECTS-5151. Remove when better solution found.
     from TrkEventCnvTools.TrkEventCnvToolsConfigCA import (
-        MuonTrkEventCnvSuperToolCfg)
-    result.merge(MuonTrkEventCnvSuperToolCfg(flags))
+        TrkEventCnvSuperToolCfg)
+    result.merge(TrkEventCnvSuperToolCfg(flags))
 
     aod_items = []
     if flags.Detector.EnableMM or flags.Detector.EnablesTGC:
