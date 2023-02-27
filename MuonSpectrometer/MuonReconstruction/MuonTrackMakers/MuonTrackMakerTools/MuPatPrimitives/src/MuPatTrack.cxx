@@ -132,6 +132,7 @@ namespace Muon {
 
     MuPatTrack::MuPatTrack(const MuPatTrack& can) :
         MuPatCandidateBase(can),
+        Trk::ObjectCounter<MuPatTrack>(can),
         created(can.created),
         lastSegmentChange(can.lastSegmentChange),
         m_segments(can.m_segments),
