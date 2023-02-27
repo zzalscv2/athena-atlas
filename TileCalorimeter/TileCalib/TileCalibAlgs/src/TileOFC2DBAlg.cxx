@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //=== IOVDbTest includes
@@ -38,6 +38,7 @@ TileOFC2DBAlg::TileOFC2DBAlg(const std::string& name, ISvcLocator* pSvcLocator)
 
   declareProperty("FixedPhasesNumber",   m_nFixedPhases   = 100);
   declareProperty("PhaseStep",          m_phaseStep      = 0.5);
+  declareProperty("MaxChan",            m_maxChan        = 1, "Number of channels for which OFCs will be created with fixed phases");
   declareProperty("Modules",            m_modules        = {"AUX01"}, "Modules for which OFC should be stored in DB");
   declareProperty("CreateAllModules",   m_creatAllModules = true, "All missing modules is written to DB with zero size (empty)");
 }
@@ -146,26 +147,16 @@ StatusCode TileOFC2DBAlg::execute() {
       phases.push_back(iPhase * m_phaseStep);
     }
 
-    unsigned int maxChan(0);
     int nPhases = phases.size();
     TileCalibDrawerOfc* drawerOfc;
 
     for (unsigned int drawerIdx : m_drawerIdxs) {
       coolChannelCreated[drawerIdx] = true;        
-      if (drawerIdx == 0) {
-        maxChan = 1;
-        //=== create an OFC blob interpreter
-        drawerOfc = TileCalibDrawerOfc::getInstance(blob, objVersion, ndig, -nPhases, maxChan, TileCalibUtils::MAX_GAIN); // nPhases, nChann, nGains
-      } else {
-        //=== create an OFC blob interpreter
-        maxChan = TileCalibUtils::MAX_CHAN;
-        drawerOfc = TileCalibDrawerOfc::getInstance(blob, objVersion, ndig, -nPhases, maxChan, TileCalibUtils::MAX_GAIN); // nPhases, nChann, nGains
-        
-      }
+      drawerOfc = TileCalibDrawerOfc::getInstance(blob, objVersion, ndig, -nPhases, m_maxChan, TileCalibUtils::MAX_GAIN); // nPhases, nChann, nGains
 
       drawerOfc->setPhases(0, 0, phases);      
 
-      for (unsigned int channel = 0; channel < maxChan; ++channel) {
+      for (unsigned int channel = 0; channel < m_maxChan; ++channel) {
         for (unsigned int gain = 0; gain < TileCalibUtils::MAX_GAIN; ++gain) {
 
           for (float phase : phases) {
