@@ -74,7 +74,6 @@ StatusCode RpcRdoToRpcDigit::execute(const EventContext& ctx) const {
 StatusCode RpcRdoToRpcDigit::decodeRpc(const RpcPad* rdoColl, TempDigitContainer& container, const RpcCablingCondData* rpcCab) const {
    
     ATH_MSG_DEBUG(" Number of CMs in this Pad " << rdoColl->size());
-    const Identifier padOfflineId = rdoColl->identify();
     // Get pad online id and sector id
     uint16_t padId = rdoColl->onlineId();
     uint16_t sectorId = rdoColl->sector();
