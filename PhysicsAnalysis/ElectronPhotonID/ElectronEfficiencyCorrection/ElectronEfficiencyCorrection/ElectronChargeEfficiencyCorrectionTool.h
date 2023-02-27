@@ -72,18 +72,26 @@ public:
 
   virtual int systUncorrVariationIndex(const xAOD::Electron&) const override final
   {
-    ATH_MSG_WARNING("systUncorrVariationIndex is not implemented in "
-                    "ElectronChargeEfficiencyCorrectionTool");
+    ATH_MSG_ERROR(
+        "systUncorrVariationIndex is not implemented in "
+        "ElectronChargeEfficiencyCorrectionTool");
     return -999;
   }
 
-  //
+  virtual CP::CorrectionCode getEfficiencyScaleFactor(
+      const double, const double, const unsigned int,
+      double&) const override final{
+    ATH_MSG_ERROR(
+        "No toysimplemented in "
+        "ElectronChargeEfficiencyCorrectionTool");
+    return CP::CorrectionCode::Error;
+  }
   //
   virtual int getNumberOfToys() const override final
   {
-    ATH_MSG_WARNING("No toysimplemented in "
-                    "ElectronChargeEfficiencyCorrectionTool");
- 
+    ATH_MSG_ERROR(
+        "No toysimplemented in "
+        "ElectronChargeEfficiencyCorrectionTool");
     return -1;
   };
   /// print available/implemented correlation models
@@ -149,11 +157,6 @@ private:
   /// Factor for GeV <-> MeV switching
   float m_gevmev;
 
-  // const xAOD::TruthParticle *m_truthparticle;
-
-  /// Random number generator for throwing the dice
-  //    TRandom3 *m_Rndm;
-
   // Systematics
   std::vector<std::string> m_systematics;
 
@@ -173,10 +176,3 @@ private:
 } // End namespace CP
 
 #endif
-
-/// Apply the correction on a modifyable object
-//......virtual CP::CorrectionCode applyCorrection( xAOD::Electron& ele );
-
-/// Create a corrected copy from a constant muon
-//...virtual CP::CorrectionCode correctedCopy( const xAOD::Electron& input,
-//...					      xAOD::Electron*& output );

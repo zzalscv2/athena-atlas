@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,48 +14,39 @@
 // This class header
 #include "PhotonEfficiencyCorrection/TPhotonEfficiencyCorrectionTool.h"
 
+Root::TPhotonEfficiencyCorrectionTool::TPhotonEfficiencyCorrectionTool(
+    const char* name)
+    : Root::TElectronEfficiencyCorrectionTool(name) {}
 
-Root::TPhotonEfficiencyCorrectionTool::TPhotonEfficiencyCorrectionTool(const char* name):
-    Root::TElectronEfficiencyCorrectionTool(name){
-    }
+Root::TPhotonEfficiencyCorrectionTool::~TPhotonEfficiencyCorrectionTool() =
+    default;
 
-Root::TPhotonEfficiencyCorrectionTool::~TPhotonEfficiencyCorrectionTool()= default;
-
-int Root::TPhotonEfficiencyCorrectionTool::initialize(){
-    //Apparently the TResult needs a "specific convention" for the 1st  2
-   return Root::TElectronEfficiencyCorrectionTool::initialize();
+int Root::TPhotonEfficiencyCorrectionTool::initialize() {
+  return Root::TElectronEfficiencyCorrectionTool::initialize();
 }
 
-using Result = Root::TPhotonEfficiencyCorrectionTool::Result;
-int Root::TPhotonEfficiencyCorrectionTool::calculate( const PATCore::ParticleDataType::DataType dataType,
-						      const unsigned int runnumber,
-						      const double cluster_eta,
-						      const double et, /* in MeV */
-						      Result& sf_and_err
-						      ) const {
+int Root::TPhotonEfficiencyCorrectionTool::calculate(
+    const PATCore::ParticleDataType::DataType dataType,
+    const unsigned int runnumber, const double cluster_eta,
+    const double et, /* in MeV */
+    Root::TPhotonEfficiencyCorrectionTool::Result& sf_and_err) const {
 
-    size_t CorrIndex{0},MCToysIndex{0};
-    std::vector<double> result;
-    const int status = Root::TElectronEfficiencyCorrectionTool::calculate(dataType,
-									  runnumber,
-									  cluster_eta,
-									  et, /* in MeV */
-									  result,
-									  CorrIndex,
-									  MCToysIndex
-									  );
-    
-    // if status 0 something went wrong
-    if (!status) {
-      sf_and_err.scaleFactor=-999;
-      sf_and_err.totalUncertainty=1;
-      ATH_MSG_DEBUG("Something went wrong ... for debugging, " << 
-		    "look for a message from TElectronEfficiencyCorrectionTool");
-      return 0;
-    }
+  Root::TElectronEfficiencyCorrectionTool::Result result;
+  const int status = Root::TElectronEfficiencyCorrectionTool::calculate(
+      dataType, runnumber, cluster_eta, et, /* in MeV */
+      result,true);
 
-    // For Photons we only support one correlation model
-    sf_and_err.scaleFactor= result[static_cast<size_t>(Root::TElectronEfficiencyCorrectionTool::Position::SF)];
-    sf_and_err.totalUncertainty=result[static_cast<size_t>(Root::TElectronEfficiencyCorrectionTool::Position::Total)];
-    return status;
+  // if status 0 something went wrong
+  if (!status) {
+    sf_and_err.scaleFactor = -999;
+    sf_and_err.totalUncertainty = 1;
+    ATH_MSG_DEBUG(
+        "Something went wrong ... for debugging, "
+        << "look for a message from TElectronEfficiencyCorrectionTool");
+    return 0;
+  }
+  // For Photons we only support one correlation model
+  sf_and_err.scaleFactor = result.SF;
+  sf_and_err.totalUncertainty = result.Total;
+  return status;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -288,7 +288,7 @@ CP::ElectronChargeEfficiencyCorrectionTool::initialize()
     ATH_MSG_ERROR(
       "OS/SS SF vectors not filled or of different size. -- Problem with "
       "files. -- Report to <hn-atlas-EGammaWG@cern.ch>");
-    return StatusCode(CP::CorrectionCode::Error);
+    return StatusCode::FAILURE;
   }
 
   m_systematics.insert(m_systematics.end(), set_systematics.begin(), set_systematics.end());

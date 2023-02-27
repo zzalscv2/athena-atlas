@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // IAsgElectronEfficiencyCorrection.h to be used in the tool.
@@ -21,6 +21,12 @@ class IAsgElectronEfficiencyCorrectionTool : virtual public CP::ISystematicsTool
 public:
   virtual CP::CorrectionCode getEfficiencyScaleFactor(
     const xAOD::Electron& inputObject,
+    double& efficiencyScaleFactor) const = 0;
+
+  virtual CP::CorrectionCode getEfficiencyScaleFactor(
+    const double et, /*in MeV*/
+    const double eta, /*cluster*/
+    const unsigned int runNumber,
     double& efficiencyScaleFactor) const = 0;
 
   virtual CP::CorrectionCode applyEfficiencyScaleFactor(
