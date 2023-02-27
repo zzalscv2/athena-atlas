@@ -35,10 +35,10 @@ def LArAutoCorrTotalCondAlgDefault():
 
     if larRODFlags.doOFCPileupOptimization():
         if larRODFlags.NumberOfCollisions():
-            theAutoCorrTotalCondAlg.Nminbias=larRODFlags.NumberOfCollisions()
+            theAutoCorrTotalCondAlg.NoPileUp = larRODFlags.NumberOfCollisions() <= 0
             mlog.info("  setup for  Ncollisions %f   deltaBunch %f", larRODFlags.NumberOfCollisions(), jobproperties.Beam.bunchSpacing())
         else:
-            theAutoCorrTotalCondAlg.Nminbias=jobproperties.Beam.numberOfCollisions()
+            theAutoCorrTotalCondAlg.NoPileUp = jobproperties.Beam.numberOfCollisions() <=0
             mlog.info("  setup for  Ncollisions %f   deltaBunch %f", jobproperties.Beam.numberOfCollisions(), jobproperties.Beam.bunchSpacing())
     else:
         theAutoCorrTotalCondAlg.Nminbias=0.

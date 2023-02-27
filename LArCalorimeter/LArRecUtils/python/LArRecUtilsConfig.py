@@ -114,13 +114,13 @@ def LArAutoCorrTotalCondAlgCfg (flags, name = 'LArAutoCorrTotalCondAlg', **kwarg
 
     if flags.LAr.ROD.DoOFCPileupOptimization:
         if flags.LAr.ROD.NumberOfCollisions:
-            kwargs.setdefault("Nminbias", flags.LAr.ROD.NumberOfCollisions)
+            kwargs.setdefault("NoPileUp", flags.LAr.ROD.NumberOfCollisions <= 0)
             mlog.info(" NMminBias %f", flags.LAr.ROD.NumberOfCollisions)
         else:
-            kwargs.setdefault("Nminbias", flags.Beam.NumberOfCollisions)
+            kwargs.setdefault("NoPileUp", flags.Beam.NumberOfCollisions <=0 )
             mlog.info(" NMminBias %f", flags.Beam.NumberOfCollisions)
     else:
-        kwargs.setdefault('Nminbias',0.)
+        kwargs.setdefault('NoPileUp',True)
         mlog.info(" no pileup noise in LArAutoCorrTotal ")
 
     #The LArAutoCorrTotalAlg needs cabling and
@@ -168,13 +168,13 @@ def LArAutoCorrTotalSCCondAlgCfg (flags, name = 'LArAutoCorrTotalSCCondAlg', **k
 
     if flags.LAr.ROD.DoOFCPileupOptimization:
         if flags.LAr.ROD.NumberOfCollisions:
-            kwargs.setdefault("Nminbias", flags.LAr.ROD.NumberOfCollisions)
+            kwargs.setdefault("NoPileUp", flags.LAr.ROD.NumberOfCollisions <=0 )
             mlog.info(" NMminBias %f", flags.LAr.ROD.NumberOfCollisions)
         else:
-            kwargs.setdefault("Nminbias", flags.Beam.NumberOfCollisions)
+            kwargs.setdefault("NoPileUp", flags.Beam.NumberOfCollisions <= 0 )
             mlog.info(" NMminBias %f", flags.Beam.NumberOfCollisions)
     else:
-        kwargs.setdefault('Nminbias',0.)
+        kwargs.setdefault('NoPileUp',True)
         mlog.info(" no pileup noise in LArAutoCorrTotal ")
 
     LArAutoCorrTotalCondAlg=CompFactory.LArAutoCorrTotalCondAlg
