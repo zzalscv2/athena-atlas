@@ -235,11 +235,12 @@ def precTrackSequence( flags, RoIs , name):
     PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, verifier = ViewVerifyTrk, rois = RoIs )
 
     from TrigInDetConfig.InDetTrigVertices import makeInDetTrigVertices
-    vtxAlg = makeInDetTrigVertices( whichSignature       = signatureName, 
-                           inputTrackCollection = IDTrigConfig.tracks_IDTrig(), 
-                           outputVtxCollection  = IDTrigConfig.vertex, 
-                           config               = IDTrigConfig, 
-                           adaptiveVertex       = IDTrigConfig.adaptiveVertex ) 
+    vtxAlg = makeInDetTrigVertices( flags,
+                                    whichSignature       = signatureName,
+                                    inputTrackCollection = IDTrigConfig.tracks_IDTrig(),
+                                    outputVtxCollection  = IDTrigConfig.vertex,
+                                    config               = IDTrigConfig,
+                                    adaptiveVertex       = IDTrigConfig.adaptiveVertex )
 
     trackSequence = parOR(name, [ViewVerifyTrk] + PTAlgs + vtxAlg )
 
@@ -257,7 +258,7 @@ def tauFTFSequence( flags, RoIs, name ):
     IDTrigConfig = getInDetTrigConfig( signatureNameID )
 
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-    viewAlgs, viewVerify = makeInDetTrigFastTracking( config = IDTrigConfig, rois = RoIs )
+    viewAlgs, viewVerify = makeInDetTrigFastTracking( flags, config = IDTrigConfig, rois = RoIs )
 
     TrackCollection = IDTrigConfig.trkTracks_FTF()
 

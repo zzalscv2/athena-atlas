@@ -283,7 +283,7 @@ def muFastRecoSequence( flags, RoIs, doFullScanID = False, InsideOutMode=False, 
   return muFastRecoSequence, sequenceOut
 
 
-def muonIDFastTrackingSequence( RoIs, name, extraLoads=None, extraLoadsForl2mtmode=None, doLRT=False ):
+def muonIDFastTrackingSequence( flags, RoIs, name, extraLoads=None, extraLoadsForl2mtmode=None, doLRT=False ):
 
   from AthenaCommon.CFElements import parOR
 
@@ -297,7 +297,7 @@ def muonIDFastTrackingSequence( RoIs, name, extraLoads=None, extraLoadsForl2mtmo
   IDTrigConfig = getInDetTrigConfig( "muon"+name ) 
 
   from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-  viewAlgs, viewVerify = makeInDetTrigFastTracking( config = IDTrigConfig, rois = RoIs )
+  viewAlgs, viewVerify = makeInDetTrigFastTracking( flags, config = IDTrigConfig, rois = RoIs )
   viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs )]
   if extraLoads:
     viewVerify.DataObjects += extraLoads
@@ -321,7 +321,7 @@ def muonIDCosmicTrackingSequence( flags, RoIs, name, extraLoads=None ):
   IDTrigConfig = getInDetTrigConfig( "cosmics" )
 
   from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-  dataPreparationAlgs, dataVerifier = makeInDetTrigFastTracking( config = IDTrigConfig, rois = RoIs, doFTF = False)
+  dataPreparationAlgs, dataVerifier = makeInDetTrigFastTracking( flags, config = IDTrigConfig, rois = RoIs, doFTF = False)
    
   dataVerifier.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s'%RoIs )]
 
@@ -522,7 +522,7 @@ def muEFCBRecoSequence( flags, RoIs, name ):
   if "FS" in name:
     #Need to run tracking for full scan chains
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-    viewAlgs, viewVerify = makeInDetTrigFastTracking(config = IDTrigConfig, rois = RoIs) 
+    viewAlgs, viewVerify = makeInDetTrigFastTracking(flags, config = IDTrigConfig, rois = RoIs)
 
     for viewAlg in viewAlgs:
       muEFCBRecoSequence += viewAlg
@@ -755,7 +755,7 @@ def efmuisoRecoSequence( flags, RoIs, Muons, doMSiso=False ):
   IDTrigConfig = getInDetTrigConfig( 'muonIso'+name )
 
   from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-  viewAlgs, viewVerify = makeInDetTrigFastTracking( config = IDTrigConfig, rois = RoIs )
+  viewAlgs, viewVerify = makeInDetTrigFastTracking( flags, config = IDTrigConfig, rois = RoIs )
   viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+MUEFIsoRoIs'+name ),
                              ( 'xAOD::MuonContainer' , 'StoreGateSvc+IsoViewMuons'+name )]
 

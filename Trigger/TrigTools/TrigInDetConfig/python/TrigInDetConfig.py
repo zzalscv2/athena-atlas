@@ -408,18 +408,19 @@ def trigInDetPrecisionTrackingCfg( inflags, signatureName, in_view=True ):
   return acc
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     ComponentAccumulator.debugMode = "trackCA trackPublicTool trackEventAlgo trackCondAlgo trackPrivateTool"
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.lock()
     # this configuration is not runable, the test checks if there is no mistake in python scripts above
     # output can be used by experts to check actual configuration (e.g. here we configure to run on RAW and it should be reflected in settings)
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg( ConfigFlags )
-    acc.merge( trigInDetFastTrackingCfg( ConfigFlags, roisKey="ElectronRoIs", signatureName="Electron" ) )
+    acc = MainServicesCfg( flags )
+    acc.merge( trigInDetFastTrackingCfg( flags, roisKey="ElectronRoIs", signatureName="Electron" ) )
 
-    acc.merge( trigInDetPrecisionTrackingCfg( ConfigFlags, signatureName="Electron" , in_view=True) )
+    acc.merge( trigInDetPrecisionTrackingCfg( flags, signatureName="Electron" , in_view=True) )
 
 
     acc.printConfig(withDetails=True, summariseProps=True)

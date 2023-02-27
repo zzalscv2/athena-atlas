@@ -19,11 +19,11 @@ def getCommonInDetFullScanSequence(flags):
 
     from ..CommonSequences.FullScanDefs import trkFSRoI
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTrackingNoView
-    TrkInputNoViewAlg = makeInDetTrigFastTrackingNoView(config=IDTrigConfig, rois=trkFSRoI)
+    TrkInputNoViewAlg = makeInDetTrigFastTrackingNoView(flags, config=IDTrigConfig, rois=trkFSRoI)
 
     from TrigInDetConfig.InDetTrigVertices import makeInDetTrigVertices
     
-    vtxAlgs = makeInDetTrigVertices("jet", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex_jet, IDTrigConfig, adaptiveVertex=IDTrigConfig.adaptiveVertex_jet)
+    vtxAlgs = makeInDetTrigVertices(flags, "jet", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex_jet, IDTrigConfig, adaptiveVertex=IDTrigConfig.adaptiveVertex_jet)
     prmVtx = vtxAlgs[-1]
 
     TrkSeq = [InputMakerAlg,TrkInputNoViewAlg, prmVtx]
@@ -60,7 +60,7 @@ def getCommonInDetFullScanLRTSequence(flags):
     from ..CommonSequences.FullScanDefs import trkFSRoI
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTrackingNoView
 
-    ftf_algs = makeInDetTrigFastTrackingNoView(config=std_cfg, secondStageConfig = lrt_cfg, rois=trkFSRoI)
+    ftf_algs = makeInDetTrigFastTrackingNoView(flags, config=std_cfg, secondStageConfig = lrt_cfg, rois=trkFSRoI)
 
     #create two sequencers first contains everything apart from the final two algs
     std_seq = seqAND("UncTrkrecoSeq", [InputMakerAlg, ftf_algs[0:-2]])

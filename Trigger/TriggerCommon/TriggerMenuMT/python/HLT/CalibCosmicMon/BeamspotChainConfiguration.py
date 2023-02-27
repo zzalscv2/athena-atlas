@@ -43,7 +43,7 @@ def allTE_trkfast( flags, signature="FS" ):
         if(signature == "FS"):
             IDTrigConfig = getInDetTrigConfig("beamSpotFS")
 
-        viewAlgs, viewVerify  = makeInDetTrigFastTracking( config = IDTrigConfig,  rois=inputMakerAlg.InViewRoIs)
+        viewAlgs, viewVerify  = makeInDetTrigFastTracking(flags, config = IDTrigConfig,  rois=inputMakerAlg.InViewRoIs)
 
         vertexAlg = T2VertexBeamSpot_activeAllTE(flags, "vertex_"+signature )
         vertexAlg.TrackCollection = IDTrigConfig.trkTracks_FTF()

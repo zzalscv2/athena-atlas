@@ -16,7 +16,7 @@ def bmumuxRecoSequence(flags, rois, muons):
     config = getInDetTrigConfig('bmumux')
 
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-    viewAlgs, viewDataVerifier = makeInDetTrigFastTracking(config, rois)
+    viewAlgs, viewDataVerifier = makeInDetTrigFastTracking(flags, config, rois)
     viewDataVerifier.DataObjects += [('TrigRoiDescriptorCollection', 'StoreGateSvc+%s' % rois),
                                      ('xAOD::MuonContainer', 'StoreGateSvc+%s' % muons)]
 

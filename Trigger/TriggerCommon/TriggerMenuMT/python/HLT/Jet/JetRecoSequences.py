@@ -311,16 +311,16 @@ def JetFSTrackingSequence(flags,trkopt,RoIs):
 
     trackcollmap = None
 
-    viewAlgs = makeInDetTrigFastTrackingNoView( config = IDTrigConfig, rois=RoIs)
+    viewAlgs = makeInDetTrigFastTrackingNoView(flags, config = IDTrigConfig, rois=RoIs)
 
     # add the collections for the eflowRec reconstriction in the trigger
     trackvtxcontainers[trkopt] =  ( IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex_jet ) 
 
-    vtxAlgs = makeInDetTrigVertices( "jet", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex_jet, IDTrigConfig, IDTrigConfig.adaptiveVertex_jet )
+    vtxAlgs = makeInDetTrigVertices( flags, "jet", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex_jet, IDTrigConfig, IDTrigConfig.adaptiveVertex_jet )
 
     # now run the actual vertex finders and TTVA tools
     if IDTrigConfig.vertex_jet != IDTrigConfig.vertex:
-        vtxAlgs += makeInDetTrigVertices( "amvf", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex, IDTrigConfig, IDTrigConfig.adaptiveVertex )
+        vtxAlgs += makeInDetTrigVertices( flags, "amvf", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex, IDTrigConfig, IDTrigConfig.adaptiveVertex )
 
     jetTrkSeq = parOR(f"JetFSTracking_{trkopt}_RecoSequence", viewAlgs+vtxAlgs)
     trackcollmap = jetTTVA( flags, "jet", jetTrkSeq, trkopt, IDTrigConfig, verticesname=IDTrigConfig.vertex_jet,  adaptiveVertex=IDTrigConfig.adaptiveVertex_jet )
@@ -342,10 +342,10 @@ def JetRoITrackJetTagSequence(flags,jetsIn,trkopt,RoIs):
 
     IDTrigConfig = getInDetTrigConfig( 'jetSuper' )
 
-    viewAlgs, viewVerify = makeInDetTrigFastTracking( config = IDTrigConfig, rois=RoIs)
+    viewAlgs, viewVerify = makeInDetTrigFastTracking(flags, config = IDTrigConfig, rois=RoIs)
     viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs ),( 'xAOD::JetContainer' , 'StoreGateSvc+%s' % jetsIn)]
 
-    vtxAlgs = makeInDetTrigVertices( "jetSuper", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex, IDTrigConfig, IDTrigConfig.adaptiveVertex )
+    vtxAlgs = makeInDetTrigVertices( flags, "jetSuper", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex, IDTrigConfig, IDTrigConfig.adaptiveVertex )
 
     tracksIn = IDTrigConfig.tracks_FTF()
 

@@ -33,7 +33,7 @@ def fastTrackingSequence(flags, variant=''):
 
     # calling fast tracking
     from TriggerMenuMT.HLT.Electron.FastTrackingRecoSequences import fastTracking
-    fastTrackingInViewSequence, trackParticles = fastTracking(RoIs,variant)
+    fastTrackingInViewSequence, trackParticles = fastTracking(flags,RoIs,variant)
 
     fastTrackingInViewAlgs = parOR("fastTrackingInViewAlgs"+variant, [fastTrackingInViewSequence])
     fastTrackingViewsMaker.ViewNodeName = "fastTrackingInViewAlgs"+variant

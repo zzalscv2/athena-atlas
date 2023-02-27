@@ -12,7 +12,7 @@ def getSecondStageBjetTracking( flags, inputRoI, inputVertex, inputJets ):
 
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
 
-    viewAlgs, viewVerify = makeInDetTrigFastTracking( config = IDTrigConfig, rois=inputRoI)
+    viewAlgs, viewVerify = makeInDetTrigFastTracking(flags, config = IDTrigConfig, rois=inputRoI)
 
     viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % inputRoI ),
                                ( 'xAOD::VertexContainer' , 'StoreGateSvc+%s' % inputVertex ),
