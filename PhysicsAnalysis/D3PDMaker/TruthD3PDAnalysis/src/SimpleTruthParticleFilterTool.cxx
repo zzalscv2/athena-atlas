@@ -48,7 +48,7 @@ SimpleTruthParticleFilterTool::isAccepted (HepMC::ConstGenParticlePtr p)
   if ( std::abs(p->pdg_id())==15 && p->status()!=1 && p->end_vertex() ){
     // Special handling for taus - take the ones that are last in the tau chain
 #ifdef HEPMC3
-    for (auto pit: p->end_vertex()->particles_out()){
+    for (const auto& pit: p->end_vertex()->particles_out()){
       if (!pit || std::abs(pit->pdg_id())!=15) continue;
       last=false;
       break;

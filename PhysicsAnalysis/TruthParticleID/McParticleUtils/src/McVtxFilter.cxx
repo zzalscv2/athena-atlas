@@ -338,7 +338,7 @@ bool McVtxFilter::checkParentBranch( HepMC::ConstGenVertexPtr vtx ) const
 
   std::vector<int> parentIds;
 #ifdef HEPMC3
-  for ( auto Part: vtx->particles_in() ) {
+  for ( const auto& Part: vtx->particles_in() ) {
     parentIds.push_back( Part->pdg_id() );
   }
 #else

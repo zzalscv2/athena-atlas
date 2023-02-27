@@ -116,7 +116,7 @@ public:
       //Find total 4-momentum of incoming particles
       double px(0), py(0), pz(0), e(0);//HepMC::FourVector does NOT support operators + or += !!!!!!
 #ifdef HEPMC3
-      for (auto PartIn:  m_vertex->particles_in()){
+      for (const auto& PartIn:  m_vertex->particles_in()){
 #else
       HepMC::GenVertex::particles_in_const_iterator itPartIn,itPartInE(m_vertex->particles_in_const_end());
       for ( itPartIn = m_vertex->particles_in_const_begin();itPartIn!=itPartInE;++itPartIn) {
@@ -256,7 +256,7 @@ bool VP1TruthVertexCollection::load()
       continue;
 
 #ifdef HEPMC3
-     for (auto vtx:  genEvent->vertices()) {
+     for (const auto& vtx:  genEvent->vertices()) {
 #else
     HepMC::GenEvent::vertex_const_iterator itVertex, itVertexEnd(genEvent->vertices_end());
     for (itVertex = genEvent->vertices_begin(); itVertex != itVertexEnd; ++itVertex ) {
@@ -296,7 +296,7 @@ QStringList VP1TruthVertexCollection::infoOnClicked(SoPath* pickedPath)
     //Make output:
     l <<"Truth vertex from collection "+text()+":" ;
 #ifdef HEPMC3
-     for ( auto PartIn: vtx->particles_in()) {
+     for (const auto& PartIn: vtx->particles_in()) {
 #else
     HepMC::GenVertex::particles_in_const_iterator itPartIn,itPartInE(vtx->particles_in_const_end());
     for ( itPartIn = vtx->particles_in_const_begin();itPartIn!=itPartInE;++itPartIn) {
@@ -310,7 +310,7 @@ QStringList VP1TruthVertexCollection::infoOnClicked(SoPath* pickedPath)
       l << "--> In: "+name+" ("+str(pdg)+")  [ P = "+str(m_d->mag(PartIn->momentum())/Gaudi::Units::GeV)+" GeV ]";
     }
 #ifdef HEPMC3
-     for ( auto PartOut: vtx->particles_out()) {
+     for (const auto& PartOut: vtx->particles_out()) {
 #else
     HepMC::GenVertex::particles_out_const_iterator itPartOut,itPartOutE(vtx->particles_out_const_end());
     for ( itPartOut = vtx->particles_out_const_begin();itPartOut!=itPartOutE;++itPartOut) {

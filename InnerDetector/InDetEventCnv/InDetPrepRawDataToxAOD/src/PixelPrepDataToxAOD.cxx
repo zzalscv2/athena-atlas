@@ -1111,11 +1111,11 @@ void  PixelPrepDataToxAOD::addNNTruthInfo(  xAOD::TrackMeasurementValidation* xp
       pdgid[hitNumber]   = particle->pdg_id();
       HepMC::FourVector mom=particle->momentum();
       truep[hitNumber]  = std::sqrt(mom.x()*mom.x()+mom.y()*mom.y()+mom.z()*mom.z());
-      auto vertex =  particle->production_vertex();
+      const auto vertex =  particle->production_vertex();
 //AV Please note that taking the first particle as a mother is ambiguous.
 #ifdef HEPMC3
-      if ( vertex && vertex->particles_in().size()>0){
-        auto mother_of_particle=vertex->particles_in().at(0);             
+      if ( vertex && !vertex->particles_in().empty()){
+        const auto& mother_of_particle=vertex->particles_in().front();             
         motherBarcode[hitNumber] =  HepMC::barcode(mother_of_particle);
         motherPdgid[hitNumber]    = mother_of_particle->pdg_id();
       }
