@@ -8,6 +8,7 @@
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "MuonReadoutGeometry/TgcDetectorElement.h"
+#include "GoodRunsLists/TGRLCollection.h"
 
 namespace {
   // Cut values on pt bein exploited throughout the monitoring
@@ -45,12 +46,10 @@ StatusCode TgcRawDataMonitorAlgorithm::initialize() {
   ATH_CHECK(m_TgcCoinDataContainerPrevBCKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_PrimaryVertexContainerKey.initialize(SG::AllowEmpty));
 
-  if( !m_extrapolator.empty() ) ATH_CHECK(m_extrapolator.retrieve());
-  else m_extrapolator.disable();
-  if( !m_tgcMonTool.empty() ) ATH_CHECK(m_tgcMonTool.retrieve());
-  else m_tgcMonTool.disable();
-  if( !m_muonSelectionTool.empty() ) ATH_CHECK(m_muonSelectionTool.retrieve());
-  else m_muonSelectionTool.disable();
+  ATH_CHECK(m_extrapolator.retrieve(DisableTool{m_extrapolator.empty()}));
+  ATH_CHECK(m_tgcMonTool.retrieve(DisableTool{m_tgcMonTool.empty()}));
+  ATH_CHECK(m_muonSelectionTool.retrieve(DisableTool{m_muonSelectionTool.empty()}));
+  ATH_CHECK(m_GoodRunsListSelectorTool.retrieve(DisableTool{m_GoodRunsListSelectorTool.empty()}));
 
   ATH_CHECK(m_L1MenuKey.initialize()); // ReadHandleKey, but DetStore (so renounce)
   renounce(m_L1MenuKey);
@@ -134,6 +133,22 @@ StatusCode TgcRawDataMonitorAlgorithm::initialize() {
 
 StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
   ATH_MSG_DEBUG("fillHistograms()");
+
+  if( !m_GoodRunsListSelectorTool.empty() ){
+    int runNumber   = GetEventInfo(ctx)->runNumber();
+    int lumiBlockNr = GetEventInfo(ctx)->lumiBlock();
+    if(m_GoodRunsListSelectorTool->getGRLCollection()->IsEmpty()){
+      ATH_MSG_ERROR("Empty GRL");
+      return StatusCode::FAILURE;
+    }
+    bool pass = m_GoodRunsListSelectorTool->getGRLCollection()->HasRunLumiBlock(runNumber,lumiBlockNr);
+    if(pass){
+      ATH_MSG_DEBUG("passing GRL: run=" << runNumber << " lb=" << lumiBlockNr);
+    }else{
+      ATH_MSG_DEBUG("failed GRL: run=" << runNumber << " lb=" << lumiBlockNr);
+      return StatusCode::SUCCESS;
+    }
+  }
 
   // Print out all available muon triggers
   // This is to be used when making a list of triggers

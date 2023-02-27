@@ -18,6 +18,7 @@
 #include "MuonTrigCoinData/TgcCoinDataContainer.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
+#include "GoodRunsLists/IGoodRunsListSelectorTool.h"
 #include "ITgcRawDataMonitorTool.h"
 #include "MuonPrepRawData/TgcPrepDataContainer.h"
 #include "TrigConfData/L1Menu.h"
@@ -240,6 +241,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
 		      std::vector<Monitored::ObjectsCollection<std::vector<ExtTrigInfo>, double>>&,
 		      MonVariables&) const;
   
+  ToolHandle<IGoodRunsListSelectorTool> m_GoodRunsListSelectorTool{this,"GRLTool","GoodRunsListSelectorTool","GoodRunsListSelectorTool"};
   ToolHandle<Trk::IExtrapolator> m_extrapolator{this,"TrackExtrapolator","Trk::Extrapolator/AtlasExtrapolator","Track extrapolator"};
   ToolHandle<ITgcRawDataMonitorTool> m_tgcMonTool{this,"TgcRawDataMonitorTool","TgcDawDataMonitorTool","TgcRawDataMonitorTool"};
   ToolHandle<CP::IMuonSelectionTool> m_muonSelectionTool{this,"MuonSelectionTool","CP::MuonSelectionTool/MuonSelectionTool","MuonSelectionTool"};
