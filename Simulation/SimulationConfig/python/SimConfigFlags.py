@@ -47,7 +47,6 @@ def createSimConfigFlags():
     def _checkRegenerationIncrementConf(prevFlags):
         regenInc  = 0
         if prevFlags.Input.Files:
-            
             mdstring = GetFileMD(prevFlags.Input.Files).get("RegenerationIncrement", "0")
             regenInc = eval(mdstring)
             if not regenInc:
@@ -81,9 +80,18 @@ def createSimConfigFlags():
     scf.addFlag("Sim.DoFullChain", False)
 
     def _check_G4_version(prevFlags):
+        # Determine the Geant4 version which will be used by the
+        # configuration.  In jobs where we are running simulation,
+        # then the G4Version should reflect the version in the
+        # release, so the version in environment should take
+        # precedence over any input file metadata.  In jobs where
+        # simulation is not run, then the G4Version from the input
+        # file metadata should take precedence.
         version = ""
-        if prevFlags.Input.Files:
-            version = GetFileMD(prevFlags.Input.Files).get("G4Version", "")
+        from AthenaConfiguration.Enums import ProductionStep
+        if prevFlags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain]:
+            if prevFlags.Input.Files:
+                version = GetFileMD(prevFlags.Input.Files).get("G4Version", "")
         if not version:
             from os import environ
             version = str(environ.get("G4VERS", ""))
