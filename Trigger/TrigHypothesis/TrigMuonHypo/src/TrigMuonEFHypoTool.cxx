@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/SystemOfUnits.h"
@@ -46,6 +46,8 @@ StatusCode TrigMuonEFHypoTool::initialize(){
   }
   // minimum d0 cut for displaced muon triggers
   if (m_d0min>0.) ATH_MSG_DEBUG( " Rejecting muons with abs(d0) < "<<m_d0min<<" mm");
+  
+  if (m_runCommissioningChain) ATH_MSG_INFO("m_runCommissioningChain set to true (for absence of NSW)");
   
   if ( not m_monTool.name().empty() ) {
     ATH_CHECK( m_monTool.retrieve() );
@@ -110,9 +112,23 @@ bool TrigMuonEFHypoTool::decideOnSingleObject(TrigMuonEFHypoTool::MuonEFInfo& in
 	    ATH_MSG_DEBUG("No numberOfGoodPrecisionLayers variable found; not passing hypo");
 	    result=false;
 	  }
-	  if(std::abs(muon->eta()) > 1.05 && nGoodPrcLayers < 3){
-	    ATH_MSG_DEBUG("Muon has less than three GoodPrecisionLayers; not passing hypo");
-	    result=false;
+	  if(std::abs(muon->eta()) > 1.3) {
+	    if (m_runCommissioningChain) {
+	      if(nGoodPrcLayers < 2){
+		ATH_MSG_DEBUG("Muon has less than two GoodPrecisionLayers; not passing hypo (requrement loosend according to absence of NSW)");
+		result=false;
+	      }
+	    } else {
+	      if(nGoodPrcLayers < 3){
+		ATH_MSG_DEBUG("Muon has less than three GoodPrecisionLayers; not passing hypo");
+		result=false;
+	      }
+	    }
+	  } else if (std::abs(muon->eta()) > 1.05) {
+	    if(nGoodPrcLayers < 3){
+	      ATH_MSG_DEBUG("Muon has less than three GoodPrecisionLayers; not passing hypo");
+	      result=false;
+	    }
 	  }
 	}
 	if (m_d0min>0.) {

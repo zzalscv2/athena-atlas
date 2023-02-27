@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONHYPO_TRIGMUONEFHYPOTOOL_H 
@@ -67,6 +67,8 @@ class TrigMuonEFHypoTool: public ::AthAlgTool {
         this, "MinimumD0", 0., "lower d0 cut (mm)"};
    Gaudi::Property< bool > m_checkOvlp {
         this, "RemoveOverlaps", false, "do overlap removal"};
+  Gaudi::Property<bool> m_runCommissioningChain{
+    this, "RunCommissioningChain", false, "Apply a looser requirement according to absence of NSW"};
 
   // Other members:   
   std::vector<size_t> m_bins={0};
