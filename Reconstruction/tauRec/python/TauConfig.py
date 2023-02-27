@@ -65,8 +65,8 @@ def TauBuildAlgCfg(flags):
                                CellMakerTool                  = result.popToolsAndMerge(tauTools.TauCellFinalizerCfg(flags)))
 
     if flags.GeoModel.Run is LHCPeriod.Run4:
-        BuildAlg.PixelDetEleCollKey=""
-        BuildAlg.SCTDetEleCollKey=""
+        BuildAlg.PixelDetEleCollKey="ITkPixelDetectorElementCollection"
+        BuildAlg.SCTDetEleCollKey="ITkStripDetectorElementCollection"
         BuildAlg.TRTDetEleContKey=""
 
     result.addEventAlgo(BuildAlg)
