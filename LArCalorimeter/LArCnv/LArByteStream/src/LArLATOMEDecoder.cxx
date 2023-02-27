@@ -863,6 +863,8 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping *map,
       StatusCode sc2 = calibParams2->initialize();
       if(sc1 != StatusCode::SUCCESS || sc2 != StatusCode::SUCCESS){
 	ATH_MSG_WARNING( "could not initialize LArCalibParams, acc calib will not be filled " );
+	delete calibParams1;
+  delete calibParams2;
 	return;
       } 
       if(pattype==0x49 || pattype==0x4a){
@@ -989,8 +991,8 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping *map,
   }/// for loop on SCs
 
 
-  if(calibParams1)delete calibParams1;
-  if(calibParams2)delete calibParams2;
+  delete calibParams1;
+  delete calibParams2;
 
 }
 
