@@ -24,15 +24,45 @@ namespace CP
 
         if (!m_isDAOD)
         {
-            if (m_electronLLHTool.empty())
+            if (m_electronLLHToolVeryLooseNoPix.empty())
             {
                 asg::AsgToolConfig config("AsgElectronLikelihoodTool/ElectronLHSelectorVeryLooseNoPix");
                 ATH_CHECK(config.setProperty("ConfigFile", "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodVeryLooseTriggerConfig_NoPix.conf"));
-                ATH_CHECK(config.makePrivateTool(m_electronLLHTool));
+                ATH_CHECK(config.makePrivateTool(m_electronLLHToolVeryLooseNoPix));
             }
 
             ATH_MSG_DEBUG("Retrieving electron selection tool");
-            ATH_CHECK(m_electronLLHTool.retrieve());
+            ATH_CHECK(m_electronLLHToolVeryLooseNoPix.retrieve());
+
+            if (m_electronLLHToolLooseNoPix.empty())
+            {
+                asg::AsgToolConfig config("AsgElectronLikelihoodTool/ElectronLHSelectorLooseNoPix");
+                ATH_CHECK(config.setProperty("ConfigFile", "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodLooseTriggerConfig_NoPix.conf"));
+                ATH_CHECK(config.makePrivateTool(m_electronLLHToolLooseNoPix));
+            }
+
+            ATH_MSG_DEBUG("Retrieving electron selection tool");
+            ATH_CHECK(m_electronLLHToolLooseNoPix.retrieve());
+
+            if (m_electronLLHToolMediumNoPix.empty())
+            {
+                asg::AsgToolConfig config("AsgElectronLikelihoodTool/ElectronLHSelectorMediumNoPix");
+                ATH_CHECK(config.setProperty("ConfigFile", "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodMediumTriggerConfig_NoPix.conf"));
+                ATH_CHECK(config.makePrivateTool(m_electronLLHToolMediumNoPix));
+            }
+
+            ATH_MSG_DEBUG("Retrieving electron selection tool");
+            ATH_CHECK(m_electronLLHToolMediumNoPix.retrieve());
+
+            if (m_electronLLHToolTightNoPix.empty())
+            {
+                asg::AsgToolConfig config("AsgElectronLikelihoodTool/ElectronLHSelectorTightNoPix");
+                ATH_CHECK(config.setProperty("ConfigFile", "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodTightTriggerConfig_NoPix.conf"));
+                ATH_CHECK(config.makePrivateTool(m_electronLLHToolTightNoPix));
+            }
+
+            ATH_MSG_DEBUG("Retrieving electron selection tool");
+            ATH_CHECK(m_electronLLHToolTightNoPix.retrieve());
         } 
 
         return StatusCode::SUCCESS;
@@ -51,7 +81,22 @@ namespace CP
             return bool(DFCommonElectronsWP(*electron) );
         } else
         {
-            return bool(m_electronLLHTool->accept(electron));
+            if (IDWorkingPoint == "DFCommonElectronsLHTightNoPix"){
+                return bool(m_electronLLHToolTightNoPix->accept(electron));
+            }
+            else if (IDWorkingPoint == "DFCommonElectronsLHMediumNoPix"){
+                return bool(m_electronLLHToolMediumNoPix->accept(electron));
+            }
+            else if (IDWorkingPoint == "DFCommonElectronsLHLooseNoPix"){
+                return bool(m_electronLLHToolLooseNoPix->accept(electron));
+            }    
+            else if (IDWorkingPoint == "DFCommonElectronsLHVeryLooseNoPix"){
+                return bool(m_electronLLHToolVeryLooseNoPix->accept(electron));
+            }
+            else{ 
+                ATH_MSG_ERROR("IDWorkingPoint provided is not a valid Working Point!");
+                return false;
+            }
         }
 
     }
@@ -69,7 +114,7 @@ namespace CP
         // Loop over lrt electrons to remove those that do not pass ID.
         // Needed in case there are no prompt electrons passing ID
         if (m_strategy == CP::IElectronLRTOverlapRemovalTool::promptStrategy){
-            ATH_MSG_DEBUG("Implementing overlap removal strategy 0");
+            ATH_MSG_DEBUG("Implementing overlap removal strategy 1");
             for (const xAOD::Electron *LRTElectron : LRTElectronCol)
             {
                 if (!electronPassesID(LRTElectron,"DFCommonElectronsLHVeryLooseNoPix"))  ElectronsToRemove.insert(LRTElectron);
@@ -119,6 +164,8 @@ namespace CP
 
                 const double lrt_elEta0 = lrt_cluster->eta0();
                 const double lrt_elPhi0 = lrt_cluster->phi0();
+                ATH_MSG_DEBUG("Prompt eta, phi: "<<prompt_elEta0<< ", "<<prompt_elPhi0);
+                ATH_MSG_DEBUG("LRT eta, phi: "<<lrt_elEta0<< ", "<<lrt_elPhi0);
 
                 if (prompt_elEta0 == lrt_elEta0 && prompt_elPhi0 == lrt_elPhi0) 
                 {
