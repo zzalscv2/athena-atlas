@@ -12,9 +12,9 @@
 
 /// Anonymous namespace for helpers
 namespace {
-  const static SG::AuxElement::Decorator<unsigned int> decRRN("RandomRunNumber");
-  const static SG::AuxElement::Decorator<unsigned int> decRLBN("RandomLumiBlockNumber");
-  const static SG::AuxElement::Decorator<unsigned long long> decHash("PRWHash");
+  const static SG::ConstAuxElement::Decorator<unsigned int> decRRN("RandomRunNumber");
+  const static SG::ConstAuxElement::Decorator<unsigned int> decRLBN("RandomLumiBlockNumber");
+  const static SG::ConstAuxElement::Decorator<unsigned long long> decHash("PRWHash");
 }
 
 //
@@ -102,14 +102,21 @@ namespace CP
 
     // Deal with the parts that aren't related to systematics
     // Get random run and lumi block numbers
-    unsigned int rrn = m_pileupReweightingTool->getRandomRunNumber(*evtInfo, true);
-    // If it returns 0, try again without the mu dependence
-    if (rrn == 0)
-      rrn = m_pileupReweightingTool->getRandomRunNumber(*evtInfo, false);
-    decRRN(*evtInfo) = rrn;
-    decRLBN(*evtInfo) = (rrn == 0) ? 0 : m_pileupReweightingTool->GetRandomLumiBlockNumber(rrn);
+    unsigned int rrn = 0;
+    if(decRRN.isAvailable(*evtInfo))
+      rrn = decRRN(*evtInfo);
+    else{
+      rrn = m_pileupReweightingTool->getRandomRunNumber(*evtInfo, true);
+      // If it returns 0, try again without the mu dependence
+      if(rrn == 0)
+        rrn = m_pileupReweightingTool->getRandomRunNumber(*evtInfo, false);
+      decRRN(*evtInfo) = rrn;
+    }
+    if(!decRLBN.isAvailable(*evtInfo))
+      decRLBN(*evtInfo) = (rrn == 0) ? 0 : m_pileupReweightingTool->GetRandomLumiBlockNumber(rrn);
     // Also decorate with the hash, this can be used for rerunning PRW (but usually isn't)
-    decHash(*evtInfo) = m_pileupReweightingTool->getPRWHash(*evtInfo);
+    if(!decHash.isAvailable(*evtInfo))
+      decHash(*evtInfo) = m_pileupReweightingTool->getPRWHash(*evtInfo);
 
     // Take care of the weight (which is the only thing depending on systematics)
     for (const auto& sys : m_systematicsList.systematicsVector())
