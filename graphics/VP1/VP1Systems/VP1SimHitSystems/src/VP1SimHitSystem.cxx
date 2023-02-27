@@ -25,6 +25,7 @@
 // Section of includes for global calo hits
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
+#include "CaloDetDescrUtils/CaloDetDescrBuilder.h"
 
 // Section of includes for LAr calo hits
 #include "LArSimEvent/LArHit.h"
@@ -70,7 +71,7 @@ public:
 
   // Managers
   const TileDetDescrManager* tile_dd_man{nullptr};
-  const CaloDetDescrManager* lar_dd_man{nullptr};
+  std::unique_ptr<CaloDetDescrManager> lar_dd_man;
 
   // ID helpers
   const TileID*              tile_id{nullptr};
@@ -154,13 +155,8 @@ void VP1SimHitSystem::systemcreate(StoreGateSvc* detstore)
       messageDebug("0 pointer to Tile ID Helper");
       return;
   }
-  status = detstore->retrieve(m_clockwork->lar_dd_man);
-  if(status.isFailure() || m_clockwork->lar_dd_man==nullptr) {
-      //m_clockwork->noCalo = true;
-      messageDebug("Unable to retrieve Calo (LAr) DD Manager");
-      return;
-  }
 
+  m_clockwork->lar_dd_man = buildCaloDetDescrNoAlign(serviceLocator(),Athena::getMessageSvc());
 }
 
 void VP1SimHitSystem::buildEventSceneGraph(StoreGateSvc* sg, SoSeparator *root)
