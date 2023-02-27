@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AsgTools )
@@ -56,6 +56,10 @@ endif()
 atlas_add_executable (asg_tools_test_init util/asg_tools_test_init.cxx
                       LINK_LIBRARIES AsgTools )
 
-# This ought to work, but I can't figure it out.
-#atlas_add_test (asg_tools_test_init_test COMMAND asg_tools_test_init asg::AsgTool)
-#atlas_add_test (asg_tools_test_init_test SCRIPT asg_tools_test_init asg::AsgTool)
+# Test(s) in the package:
+if( XAOD_STANDALONE )
+   atlas_add_test( BaseToolInit
+      SCRIPT $<TARGET_FILE:asg_tools_test_init> "asg::AsgTool" )
+   atlas_add_test( AsgComponentConfig_dictionary
+      SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/test/AsgComponentConfig_dictionary_test.py" )
+endif()

@@ -61,8 +61,7 @@ namespace {
   struct ASGTOOLSSTANDALONEDICT_INSTANTIATIONS {
     std::vector<std::string> type1;
     std::map<std::string, std::vector<std::string> > type2;
-    std::tuple<asg::AsgComponentConfig, std::string> type3;
-    std::map<std::string,std::tuple<asg::AsgComponentConfig, std::string> > type4;
+    std::map<std::string, asg::details::AsgComponentPrivateToolConfig> type3;
   };
 }
 

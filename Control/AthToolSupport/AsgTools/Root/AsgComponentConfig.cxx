@@ -173,7 +173,7 @@ namespace asg
     if (split == std::string::npos)
     {
       toolConfig.setName (name);
-      m_privateTools[name] = std::make_tuple (std::move (toolConfig), "");
+      m_privateTools[name] = {toolConfig, ""};
       return StatusCode::SUCCESS;
     } else
     {
@@ -196,7 +196,7 @@ namespace asg
       auto& arrayData = m_toolArrays[name];
       auto myname = makeArrayName (name, arrayData.size());
       toolConfig.setName (myname);
-      m_privateTools.emplace (myname, std::make_tuple (std::move (toolConfig), name));
+      m_privateTools[myname] = {toolConfig, name};
       arrayData.push_back (myname);
       return myname;
     } else
@@ -242,7 +242,7 @@ namespace asg
     auto subtool = m_privateTools.find (name.substr (0, split));
     if (subtool == m_privateTools.end())
       throw std::runtime_error ("trying to access unknown private tool: " + name.substr (0, split));
-    result.config = &std::get<0>(subtool->second);
+    result.config = &(subtool->second.m_config);
     result.prefix = name.substr (0, split + 1);
     result.name = name.substr (split + 1);
     return result;
@@ -304,13 +304,13 @@ namespace asg
     {
       ToolHandle<AsgTool> th (toolInfo.first, component.get());
       std::shared_ptr<void> mycleanup;
-      if (AsgToolConfig(std::get<0>(toolInfo.second)).makeTool (th, mycleanup).isFailure())
+      if (AsgToolConfig(toolInfo.second.m_config).makeTool (th, mycleanup).isFailure())
       {
         ANA_MSG_ERROR ("failed to create subtool \"" << toolInfo.first << "\" on component \"" << component->name() << "\"");
         return StatusCode::FAILURE;
       }
       component->addCleanup (mycleanup);
-      if (std::get<1>(toolInfo.second).empty())
+      if (toolInfo.second.m_propName.empty())
       {
         if (component->setProperty (toolInfo.first, th->name()).isFailure())
         {
@@ -358,14 +358,14 @@ namespace asg
 
     for (const auto& tool : m_privateTools)
     {
-      ANA_CHECK (std::get<0>(tool.second).configureComponentExpert (prefix + m_name + ".", true));
-      if (std::get<1>(tool.second).empty())
+      ANA_CHECK (tool.second.m_config.configureComponentExpert (prefix + m_name + ".", true));
+      if (tool.second.m_propName.empty())
       {
         std::string toolPath = prefix + m_name + "." + tool.first;
         const auto split = toolPath.rfind ('.');
         std::string toolName = toolPath.substr (split+1);
         std::string componentName = toolPath.substr (0, split);
-        StringProperty athenaProperty (toolName, std::get<0>(tool.second).typeAndName());
+        StringProperty athenaProperty (toolName, tool.second.m_config.typeAndName());
         ANA_CHECK (joSvc->addPropertyToCatalogue (componentName, std::move (athenaProperty)));
       }
     }
@@ -376,7 +376,13 @@ namespace asg
       for (const auto& tool : toolArray.second)
       {
         auto toolConfig = m_privateTools.find (tool);
-        valueArray.push_back (std::get<0>(toolConfig->second).typeAndName());
+        if (toolConfig == m_privateTools.end())
+        {
+          ANA_MSG_ERROR ("Couldn't find private tool with name \"" << tool << "\"");
+          ANA_MSG_ERROR ("This is an internal inconsistency!");
+          return StatusCode::FAILURE;
+        }
+        valueArray.push_back (toolConfig->second.m_config.typeAndName());
       }
       std::string valueString = Gaudi::Utils::toString (valueArray);
       std::string propertyPath = prefix + m_name + "." + toolArray.first;
