@@ -7,5 +7,6 @@
 
 #include "EventLoopTest/UnitTestAlg5.h"
 #include "EventLoopTest/UnitTestAlg6.h"
+#include "EventLoopTest/UnitTestAlg7.h"
 
 #endif
