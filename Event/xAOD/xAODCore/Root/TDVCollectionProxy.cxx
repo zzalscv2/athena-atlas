@@ -23,6 +23,9 @@
 // Local include(s):
 #include "xAODCore/tools/TDVCollectionProxy.h"
 
+#include <iostream>
+using namespace std;
+const bool mn = getenv("MN_DEBUG");
 
 namespace xAOD {
 
@@ -289,16 +292,19 @@ namespace xAOD {
       }
 
       /// 
-      static void* feed( void* from, void* to, size_t size )  {
+      static void* feed( void* from, void* to, size_t size )
+      {
          DataVector<char> *dv = reinterpret_cast<DataVector<char>*>(to);
          // find out vector element typeinfo and get RootUtils::Type for it
          const std::type_info &elem_typeinfo = dv->dvlinfo_v().elt_tinfo();
          auto ru_type = RootUtils::Type( SG::normalizedTypeinfoName(elem_typeinfo) );
          // copy vector elements into DataVector
+         if(mn) cout << "PROX:  feed, typename=" << ru_type.getTypeName() << "  typesize=" << ru_type.getSize() <<endl;
+
          char *src = reinterpret_cast<char*>( from );
          for(size_t i=0; i<size; i++) {
             void *obj = ru_type.create();
-            ru_type.assign(obj, src);
+            // ru_type.assign(obj, src); //MN: this may crash, so for now we do not copy data (bad only for CaloCluster
             dv->dvlinfo_v().push(dv,obj);
             src += ru_type.getSize();
          } 

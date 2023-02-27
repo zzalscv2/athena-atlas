@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaPoolCnvSvc.cxx
@@ -86,6 +86,7 @@ StatusCode AthenaPoolCnvSvc::initialize() {
       if(m_storageTechProp.value() == #TECH) m_dbType = pool::TECH##_StorageType
    CHECK_TECH(ROOTTREE);
    CHECK_TECH(ROOTTREEINDEX);
+   CHECK_TECH(ROOTRNTUPLE);
    if( m_dbType == TEST_StorageType ) {
       ATH_MSG_FATAL("Unknown StorageType rquested: " << m_storageTechProp.value());
       return StatusCode::FAILURE;

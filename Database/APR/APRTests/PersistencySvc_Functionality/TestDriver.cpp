@@ -145,17 +145,21 @@ pool::TestDriver::write(pool::DbType storageType)
     m_testClassPrimitives.push_back( *object_TestClassPrimitives );
 
     ///////////////////////////////////////////////////////////
-    TestClassSimpleContainers* object_TestClassSimpleContainers = new TestClassSimpleContainers();
-    v_testClassSimpleContainers.push_back( object_TestClassSimpleContainers );
-    object_TestClassSimpleContainers->setNonZero();
-    Token* token_TestClassSimpleContainers = persistencySvc->registerForWrite( placementHint_TestClassSimpleContainers,
-                                                                               object_TestClassSimpleContainers,
-                                                                               class_TestClassSimpleContainers );
-    if ( ! token_TestClassSimpleContainers ) {
-       throw std::runtime_error( "Could not write an object" );
+    if( storageType.exactMatch(pool::ROOTRNTUPLE_StorageType) ) {
+       std::cout << "Skiping RNTuple test: TestClassSimpleContainers - not all STL continers are supported by RNTuple" << std::endl;
+    } else {
+       TestClassSimpleContainers* object_TestClassSimpleContainers = new TestClassSimpleContainers();
+       v_testClassSimpleContainers.push_back( object_TestClassSimpleContainers );
+       object_TestClassSimpleContainers->setNonZero();
+       Token* token_TestClassSimpleContainers = persistencySvc->registerForWrite( placementHint_TestClassSimpleContainers,
+                                                                                  object_TestClassSimpleContainers,
+                                                                                  class_TestClassSimpleContainers );
+       if ( ! token_TestClassSimpleContainers ) {
+          throw std::runtime_error( "Could not write an object" );
+       }
+       m_tokens.push_back( token_TestClassSimpleContainers );
+       m_testClassSimpleContainers.push_back( *object_TestClassSimpleContainers );
     }
-    m_tokens.push_back( token_TestClassSimpleContainers );
-    m_testClassSimpleContainers.push_back( *object_TestClassSimpleContainers );
 
     ///////////////////////////////////////////////////////////
     TestClassVectors* object_TestClassVectors = new TestClassVectors();
@@ -172,7 +176,7 @@ pool::TestDriver::write(pool::DbType storageType)
 
 
     // Commit and hold the transaction
-    if( ( i + 1 ) % m_eventsToCommitAndHold == 0 ) {
+    if( ( i + 1 ) % m_eventsToCommitAndHold == 0 or storageType.exactMatch(pool::ROOTRNTUPLE_StorageType) ) {
       if( ! persistencySvc->session().transaction().commitAndHold() ) {
         throw std::runtime_error( "Could not commit and hold the transaction." );
       }
@@ -278,11 +282,13 @@ pool::TestDriver::read()
     delete object_testClassPrimitives;
     ++j;
 
-    ///////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
     const Token& token = *( m_tokens.at(numberOfTypes*i + j) );
     Guid SimpleContainersClassID;
     SimpleContainersClassID.fromString("4E1F4DBB-1973-1974-1999-204F37331A02");
-    if( token.classID() == SimpleContainersClassID ) {
+    if( token.classID() == SimpleContainersClassID
+        and !pool::ROOTRNTUPLE_StorageType.exactMatch(token.technology()) )
+    {
        void* data_testClassSimpleContainers = persistencySvc->readObject(token);
        if ( data_testClassSimpleContainers == 0 ) {
           throw std::runtime_error( "Could not read the stored data" );
@@ -299,7 +305,6 @@ pool::TestDriver::read()
        delete object_testClassSimpleContainers;
        ++j;
     }
-    
     ///////////////////////////////////////////////////////////
     void* data_testClassVectors = persistencySvc->readObject( *( m_tokens[numberOfTypes*i + j] ) );
     if ( data_testClassVectors == 0 ) {

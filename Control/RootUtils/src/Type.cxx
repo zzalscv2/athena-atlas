@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file RootUtils/src/Type.cxx
@@ -143,15 +143,15 @@ Type::~Type()
 
 /**
  * @brief Initialize from a type name.
- * @param typname The name of the type.
+ * @param type_name The name of the type.
  *
  * The @c Type object must have been just default-constructed.
  *
- * @c typname may be either the name of a fundamental type,
+ * @c type_name may be either the name of a fundamental type,
  * or the name of a class known to ROOT.  An exception will be
  * thrown if the name is not recognized.
  */
-void Type::init (const std::string& typname)
+void Type::init (const std::string& type_name)
 {
   // Make sure root's table of types is initialized.
   // May be needed for root 6.
@@ -159,7 +159,7 @@ void Type::init (const std::string& typname)
 
   assert (m_cls == 0 && m_type == kNoType_t);
 
-  TClass* cls = TClass::GetClass (typname.c_str());
+  TClass* cls = TClass::GetClass (type_name.c_str());
   if (cls) {
     init (cls);
     return;
@@ -168,7 +168,7 @@ void Type::init (const std::string& typname)
   for (int i = 0; i < kNumDataTypes; ++i) {
     EDataType type = static_cast<EDataType>(i);
     TDataType* dt = TDataType::GetDataType(type);
-    if (dt && typname == dt->GetTypeName()) {
+    if (dt && type_name == dt->GetTypeName()) {
       init (type);
       return;
     }
@@ -176,36 +176,44 @@ void Type::init (const std::string& typname)
 
   EDataType type = kNoType_t;
   // Check for some other synonyms.
-  if (typname == "uint32_t") {
+  // RNTuple likes to prepend "std::" to type names - remove it before comparison
+  std::string tname;
+  if( type_name.rfind("std::", 0) == 0 ) {
+     // remove std:: prefix if present
+     tname = type_name.substr(5);
+  } else {
+     tname = type_name;
+  }
+  if (tname == "uint32_t") {
     if (sizeof (unsigned int) == 4)
       type = kUInt_t;
   }
-  else if (typname == "int32_t") {
+  else if (tname == "int32_t") {
     if (sizeof (unsigned int) == 4)
       type = kInt_t;
   }
-  else if (typname == "uint16_t") {
+  else if (tname == "uint16_t") {
     if (sizeof (unsigned short) == 2)
       type = kUShort_t;
   }
-  else if (typname == "int16_t") {
+  else if (tname == "int16_t") {
     if (sizeof (short) == 2)
       type = kShort_t;
   }
-  else if (typname == "uint8_t") {
+  else if (tname == "uint8_t") {
     type = kUChar_t;
   }
-  else if (typname == "int8_t") {
+  else if (tname == "int8_t") {
     type = kChar_t;
   }
-  else if (typname == "uint64_t") {
+  else if (tname == "uint64_t") {
     if (sizeof(unsigned long) == 8)
       type = kULong_t;
     else if (sizeof(unsigned long long) == 8)
       type = kULong64_t;
         
   }
-  else if (typname == "int64_t") {
+  else if (tname == "int64_t") {
     if (sizeof(long) == 8)
       type = kLong_t;
     else if (sizeof(long long) == 8)
@@ -218,7 +226,7 @@ void Type::init (const std::string& typname)
   }
 
   throw std::runtime_error (std::string ("RootUtils::Type: Can't find type `") +
-                            typname + "'.");
+                            type_name + "'.");
 }
 
 

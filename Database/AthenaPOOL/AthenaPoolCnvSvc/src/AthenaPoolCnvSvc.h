@@ -207,6 +207,7 @@ private: // properties
 
    /// Default Storage Tech for containers (ROOTTREE, ROOTTREEINDEX, ROOTRNTUPLE)
    StringProperty  m_storageTechProp{this,"StorageTechnology", "ROOTTREEINDEX"};
+   //StringProperty  m_storageTechProp{this,"StorageTechnology", "ROOTRNTUPLE"};
    /// PoolContainerPrefix, prefix for top level POOL container: default = "POOLContainer"
    StringProperty  m_containerPrefixProp{this,"PoolContainerPrefix","CollectionTree"};
    /// TopLevelContainerName, naming hint policy for top level POOL container: default = "<type>"

@@ -20,12 +20,16 @@
 #include <mutex>
 
 // Forward declarations
+namespace ROOT { namespace Experimental { class RNTupleReader; } }
+using RNTupleReader = ROOT::Experimental::RNTupleReader;
+
 class TFile;
 class TTree;
 class TBranch;
 class IFileMgr;
 namespace RootAuxDynIO {
    class IRootAuxDynReader;
+   class IRNTupleWriter;
 }
 
 /*
@@ -106,8 +110,8 @@ namespace pool  {
     // mutex to prevent concurrent read I/O from AuxDynReader
     std::recursive_mutex  m_iomutex;
 
-    // remember all branchAuxTrees created for Fill at Commit
-    std::map<TTree*, TTree*>  m_branchAuxTreeMap;
+    std::map<std::string, std::unique_ptr<RootAuxDynIO::IRNTupleWriter> >  m_ntupleWriterMap;
+    std::map<std::string, std::unique_ptr<RNTupleReader> >                 m_ntupleReaderMap;
 
   public:
     /// Standard Constuctor
@@ -206,6 +210,13 @@ namespace pool  {
 
     /// Execute Database Transaction action
     virtual DbStatus transAct(Transaction::Action action);
+
+    std::unique_ptr<RootAuxDynIO::IRootAuxDynReader> getNTupleAuxDynReader(const std::string& ntuple_name, const std::string& field_name);
+    RNTupleReader*      getNTupleReader(std::string ntuple_name);
+
+    /// return NTupleWriter for a given ntuple_name
+    /// create a new one if needed when create==true
+    RootAuxDynIO::IRNTupleWriter*  getNTupleWriter(std::string ntuple_name, bool create=false);
 
   protected:
     // Execute any pending Fills before commit or flush

@@ -16,12 +16,14 @@
 #include "RootKeyContainer.h"
 #include "RootTreeContainer.h"
 #include "RootTreeIndexContainer.h"
+#include "RNTupleContainer.h"
 
 // declare the types provided by this Storage plugin
 DECLARE_COMPONENT_WITH_ID(pool::RootOODb, "ROOT_All")
 DECLARE_COMPONENT_WITH_ID(pool::RootOOKey, "ROOT_Key")
 DECLARE_COMPONENT_WITH_ID(pool::RootOOTree, "ROOT_Tree")
 DECLARE_COMPONENT_WITH_ID(pool::RootOOTreeIndex, "ROOT_TreeIndex")
+DECLARE_COMPONENT_WITH_ID(pool::RootOORNTuple, "ROOT_RNTuple")
 
 using namespace pool;
 
@@ -62,6 +64,9 @@ IDbContainer* RootOODb::createContainer(const DbType& typ) {
   }
   else if ( typ.match(ROOT_StorageType) )    {
     return new RootTreeIndexContainer();
+  }
+  else if ( typ.match(ROOTRNTUPLE_StorageType) )    {
+    return new RNTupleContainer();
   }
   return 0;
 }

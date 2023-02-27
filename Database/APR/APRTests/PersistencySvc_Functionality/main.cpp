@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include "TestDriver.h"
 #include "StorageSvc/DbType.h"
+#include "RVersion.h"
 
 void runTestForStorageType(const pool::DbType& storageType, pool::TestDriver& driver)
 {   
@@ -44,6 +45,8 @@ int main( int, char** )
       std::cout << std::endl;
       runTestForStorageType(pool::ROOTTREEINDEX_StorageType, driver);
       std::cout << std::endl;
+      // MN: Enable this test when RNTuple is in production
+      // runTestForStorageType(pool::ROOTRNTUPLE_StorageType, driver);
    } catch ( std::exception& e ) {
       std::cerr << e.what() << std::endl;
       return 1;

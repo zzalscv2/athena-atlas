@@ -27,7 +27,7 @@ bool TBranchAuxDynStore::readData(SG::auxid_t auxid)
    try {
       auto& brInfo = m_reader.getBranchInfo(auxid, *this);
       if( !brInfo.branch ) return false; 
- 
+
       // Make a 1-element vector.
       SG::AuxStoreInternal::getDataInternal(auxid, 1, 1, true);
       if( brInfo.isPackedContainer ) {
