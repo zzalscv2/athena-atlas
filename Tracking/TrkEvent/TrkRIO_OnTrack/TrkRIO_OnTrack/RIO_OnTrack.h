@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -74,29 +74,33 @@ namespace Trk {
       /** Constructor with parameters and without externalPrediction:
       LocalParameters, LocalAmg::MatrixX, id& This class owns the
       LocalParameters and the error matrix */
-      RIO_OnTrack(const LocalParameters& locpars,
-                  const Amg::MatrixX& loccov,
-                  const Identifier& id);
+     RIO_OnTrack(const LocalParameters& locpars, 
+                 const Amg::MatrixX& loccov,
+                 const Identifier& id);
 
-      /** Default Constructor for POOL */
-      RIO_OnTrack() = default;
-      /** Copy Constructor */
-      RIO_OnTrack(const RIO_OnTrack& rot) = default;
-      RIO_OnTrack(RIO_OnTrack&& rot) = default;
+     RIO_OnTrack(LocalParameters&& locpars, 
+                 Amg::MatrixX&& loccov,
+                 const Identifier& id);
 
-      /** Assignment operator */
-      RIO_OnTrack& operator=(const RIO_OnTrack& rot) = default;
-      RIO_OnTrack& operator=(RIO_OnTrack&& rot) = default;
+     /** Default Constructor for POOL */
+     RIO_OnTrack() = default;
+     /** Copy Constructor */
+     RIO_OnTrack(const RIO_OnTrack& rot) = default;
+     RIO_OnTrack(RIO_OnTrack&& rot) = default;
 
-      /** Destructor */
-      virtual ~RIO_OnTrack() = default;
+     /** Assignment operator */
+     RIO_OnTrack& operator=(const RIO_OnTrack& rot) = default;
+     RIO_OnTrack& operator=(RIO_OnTrack&& rot) = default;
 
-      /** Pseudo-constructor, needed to avoid excessive RTTI*/
-      virtual RIO_OnTrack* clone() const override = 0;
-      
-      /** NVI clone returning unique_ptr*/
-      std::unique_ptr<RIO_OnTrack> uniqueClone() const{
-        return std::unique_ptr<RIO_OnTrack>(clone());
+     /** Destructor */
+     virtual ~RIO_OnTrack() = default;
+
+     /** Pseudo-constructor, needed to avoid excessive RTTI*/
+     virtual RIO_OnTrack* clone() const override = 0;
+
+     /** NVI clone returning unique_ptr*/
+     std::unique_ptr<RIO_OnTrack> uniqueClone() const {
+       return std::unique_ptr<RIO_OnTrack>(clone());
       };
                 
      /** returns the surface for the local to global transformation 

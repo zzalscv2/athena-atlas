@@ -76,7 +76,12 @@ namespace InDet{
                               const Amg::Vector3D& predictedTrackDirection, 
                               const Trk::DriftCircleStatus status);
 
-
+      TRT_DriftCircleOnTrack(const InDet::TRT_DriftCircle* RIO,
+                             Trk::LocalParameters&& driftRadius,
+                             Amg::MatrixX&& errDriftRadius,
+                             const IdentifierHash& idDE, double predictedLocZ,
+                             const Amg::Vector3D& predictedTrackDirection,
+                             const Trk::DriftCircleStatus status);
       /**
        * Constructor used by the TP converters
        */

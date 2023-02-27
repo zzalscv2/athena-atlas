@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -65,6 +65,11 @@ public:
   MeasurementBase(const LocalParameters& pars, const Amg::MatrixX& cov)
     : m_localParams(pars)
     , m_localCovariance(cov)
+  {}
+
+  MeasurementBase(LocalParameters&& pars, Amg::MatrixX&& cov)
+    : m_localParams(std::move(pars))
+    , m_localCovariance(std::move(cov))
   {}
 
   /** Virtual destructor */

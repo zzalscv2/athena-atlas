@@ -122,16 +122,18 @@ const InDet::TRT_DriftCircleOnTrack* InDet::TRT_DriftCircleOnTrackTool::correct
 
   if(!m_useErrorCorrection || DC->localPosition().x() > .30) {
     Trk::DefinedParameter  radius(sign*DC->localPosition().x(),Trk::locX);
-    Trk::LocalParameters lp(radius);  
-    return new InDet::TRT_DriftCircleOnTrack(DC,lp,cov,iH,predictedLocZ,dir,Trk::DECIDED);
+    Trk::LocalParameters lp(radius);
+    return new InDet::TRT_DriftCircleOnTrack(DC, std::move(lp), std::move(cov),
+                                             iH, predictedLocZ, dir,
+                                             Trk::DECIDED);
   }
 
   cov(0,0) =  DC->localPosition().x()*DC->localPosition().x() +.09; 
 
   Trk::DefinedParameter radius(0.,Trk::locX);
-  Trk::LocalParameters  lp(radius);  
+  Trk::LocalParameters  lp(radius);
 
-  return new InDet::TRT_DriftCircleOnTrack(DC,lp,cov,iH,predictedLocZ,dir,Trk::DECIDED);
-}  
-
+  return new InDet::TRT_DriftCircleOnTrack(
+      DC, std::move(lp), std::move(cov), iH, predictedLocZ, dir, Trk::DECIDED);
+}
 
