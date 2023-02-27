@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 # Default name of HitDV output
@@ -17,7 +16,7 @@ def createTrigHitDVHypoAlg(flags, name):
     from TrigEDMConfig.TriggerEDMRun3 import recordable
     theHitDVHypo.HitDV = recordable(hitDVName)
 
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         theHitDVHypo.isMC = True
     else:
         theHitDVHypo.isMC = False
