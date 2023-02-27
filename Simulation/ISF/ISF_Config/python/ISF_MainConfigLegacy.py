@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
 """
 Tools configurations for ISF
@@ -584,13 +584,8 @@ def getKernel_ATLFASTIIF_G4MS(name="ISF_Kernel_ATLFASTIIF_G4MS", **kwargs):
 def getKernel_ATLFAST3F_G4MS(name="ISF_Kernel_ATLFAST3F_G4MS", **kwargs):
     kwargs.setdefault("BeamPipeSimulationSelectors" , [ 'ISF_DefaultParticleKillerSelector' ]       )
     kwargs.setdefault("IDSimulationSelectors"       , [ 'ISF_DefaultFatrasSelector' ]               )
-    kwargs.setdefault("CaloSimulationSelectors"     , [ 'ISF_MuonAFIIGeant4Selector',
+    kwargs.setdefault("CaloSimulationSelectors",      [ 'ISF_MuonFatrasSelector',
                                                         'ISF_EtaGreater5ParticleKillerSimSelector',
-                                                        'ISF_PionATLFAST3Geant4Selector',
-                                                        'ISF_ProtonATLFAST3Geant4Selector',
-                                                        'ISF_NeutronATLFAST3Geant4Selector',
-                                                        'ISF_ChargedKaonATLFAST3Geant4Selector',
-                                                        'ISF_KLongATLFAST3Geant4Selector',
                                                         'ISF_DefaultFastCaloSimV2Selector'])
     kwargs.setdefault("MSSimulationSelectors"       , [ 'ISF_DefaultAFIIGeant4Selector' ]           )
     kwargs.setdefault("CavernSimulationSelectors"   , [ 'ISF_DefaultParticleKillerSelector' ]       )
