@@ -79,7 +79,16 @@ CaloTTDescriptor::set (float               eta_min,
   m_phi_max  = phi_max;
   m_dphi     = dphi;
   m_nEta     = (short) ((eta_max - eta_min)/deta + 0.501);
-  m_nPhi     = (short) ((phi_max - phi_min)/dphi + 0.501);
+  // Dummy conditional to prevent these two statements from being
+  // evaluated using a vectorized instruction.  Otherwise, we can
+  // get a FPE in the clang build from the division because there
+  // are two unused vector lanes.
+  if (m_nEta > 0) {
+    m_nPhi     = (short) ((phi_max - phi_min)/dphi + 0.501);
+  }
+  else {
+    m_nPhi = 0;
+  }
   m_sign_eta = sign_eta;
   m_nLay = n_lay;
 }
