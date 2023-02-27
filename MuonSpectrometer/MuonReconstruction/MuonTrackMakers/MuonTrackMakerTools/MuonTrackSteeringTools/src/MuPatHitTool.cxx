@@ -89,8 +89,13 @@ namespace Muon {
             std::unique_ptr<MuPatHit> hit = std::make_unique<MuPatHit>(std::move(exPars), meas->uniqueClone(), std::move(broadMeas), std::move(hitInfo));
             hitList.push_back(std::move(hit));           
         }
-        const SortMuPatHits isLargerCal{m_idHelperSvc.get()};
-        std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);          
+        if (!m_isCosmic) {
+            const SortMuPatHits isLargerCal{m_idHelperSvc.get()};
+            std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);          
+        } else {
+            const CosmicMuPatHitSorter isLargerCal{pars};
+            std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);      
+        }
         return true;
     }
 
@@ -136,8 +141,14 @@ namespace Muon {
             hit->setResidual(residual,pull);
             hitList.push_back(std::move(hit));         
         }
-        const SortMuPatHits isLargerCal{m_idHelperSvc.get()};
-        std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);
+        if (!m_isCosmic) {
+            const SortMuPatHits isLargerCal{m_idHelperSvc.get()};
+            std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);          
+        } else {
+            const Trk::TrackParameters* pars = track.perigeeParameters();
+            const CosmicMuPatHitSorter isLargerCal{*pars};
+            std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);      
+        }
         return true;
     }
 
@@ -145,8 +156,18 @@ namespace Muon {
         // copy first list into outList
         MuPatHitList tmpList{};
         tmpList.reserve(hitList1.size() + hitList2.size());
-        const SortMuPatHits isLargerCal{m_idHelperSvc.get()};
-        std::merge(hitList1.begin(), hitList1.end(), hitList2.begin(), hitList2.end(), std::back_inserter(tmpList), isLargerCal);
+        if (!m_isCosmic) {
+            const SortMuPatHits isLargerCal{m_idHelperSvc.get()};
+            std::merge(hitList1.begin(), hitList1.end(), hitList2.begin(), hitList2.end(), 
+                            std::back_inserter(tmpList), isLargerCal);
+        } else if (!hitList1.empty()) {
+            const Trk::TrackParameters& pars{hitList1.front()->parameters()};
+            const CosmicMuPatHitSorter isLargerCal{pars};            
+            std::merge(hitList1.begin(), hitList1.end(), hitList2.begin(), hitList2.end(), 
+                            std::back_inserter(tmpList), isLargerCal);
+        } else {
+            return hitList2;
+        }
         MuPatHitList outList{};
         outList.reserve(tmpList.size());
         std::set<Identifier> used_hits{};

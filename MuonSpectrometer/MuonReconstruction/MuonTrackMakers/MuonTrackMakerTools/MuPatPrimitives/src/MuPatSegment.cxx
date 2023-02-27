@@ -15,8 +15,7 @@ namespace Muon {
         std::set<MuPatTrack*>::iterator pos = m_associatedTracks.find(track);
         if (pos != m_associatedTracks.end()) {
             // if found remove it from list
-            m_associatedTracks.erase(pos);
-            addToTrash(track->garbage());
+            m_associatedTracks.erase(pos);            
         }
         
     }
