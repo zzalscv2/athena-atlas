@@ -173,4 +173,5 @@ def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
     from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
     return AthenaPoolCnvSvcCfg(flags,
                                PoolAttributes=PoolAttributes,
-                               ParallelCompression=use_parallel_compression)
+                               ParallelCompression=use_parallel_compression,
+                               StorageTechnology=flags.Output.StorageTechnology)
