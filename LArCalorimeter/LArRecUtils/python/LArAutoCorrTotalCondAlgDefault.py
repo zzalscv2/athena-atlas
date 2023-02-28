@@ -41,7 +41,7 @@ def LArAutoCorrTotalCondAlgDefault():
             theAutoCorrTotalCondAlg.NoPileUp = jobproperties.Beam.numberOfCollisions() <=0
             mlog.info("  setup for  Ncollisions %f   deltaBunch %f", jobproperties.Beam.numberOfCollisions(), jobproperties.Beam.bunchSpacing())
     else:
-        theAutoCorrTotalCondAlg.Nminbias=0.
+        theAutoCorrTotalCondAlg.NoPileUp = True
         mlog.info("  setup for computing total noise autocorrelation without pileup")
     
  
