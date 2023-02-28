@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,18 +13,23 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "StoreGate/ReadHandleKey.h" 
+#include "StoreGate/WriteDecorHandleKey.h"
+#include "xAODJet/JetContainer.h"
 
 namespace DerivationFramework {
 
   class TruthD2Decorator : public AthAlgTool, public IAugmentationTool {
     public: 
       TruthD2Decorator(const std::string& t, const std::string& n, const IInterface* p);
+      StatusCode initialize();
       virtual StatusCode addBranches() const;
 
     private:
-      //configurables
-      std::string m_jetContainerKey; 
-      std::string m_decorationName;
+      SG::ReadHandleKey<xAOD::JetContainer> m_jetContainerKey
+         {this, "JetContainerKey", "AntiKt10TruthTrimmedPtFrac5SmallR20Jets", "Name of jet container key for input"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decorationName
+         {this, "DecorationName", "AntiKt10TruthTrimmedPtFrac5SmallR20Jets.D2", "Decoration Name"};
   }; 
 }
 

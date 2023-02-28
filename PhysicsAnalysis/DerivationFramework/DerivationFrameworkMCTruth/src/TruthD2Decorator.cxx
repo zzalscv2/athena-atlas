@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -9,7 +9,7 @@
 //
 
 #include "DerivationFrameworkMCTruth/TruthD2Decorator.h"
-#include "xAODJet/JetContainer.h"
+#include "StoreGate/WriteDecorHandle.h"
 #include <vector>
 #include <string>
 
@@ -21,22 +21,35 @@ namespace DerivationFramework {
     AthAlgTool(t,n,p)
   {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
-    declareProperty ("JetContainerKey", m_jetContainerKey = "AntiKt10TruthTrimmedPtFrac5SmallR20Jets", "Name of jet container key for input");
-    declareProperty ("DecorationName", m_decorationName = "D2", "Decoration Name");
 
   }
+
+  StatusCode TruthD2Decorator::initialize()  
+  {
+ 
+      ATH_CHECK(m_jetContainerKey.initialize()); 
+      m_decorationName = m_jetContainerKey.key()+".D2";
+      ATH_CHECK(m_decorationName.initialize());
+
+      return StatusCode::SUCCESS;
+
+  }
+
 
   StatusCode TruthD2Decorator::addBranches() const
   {
 
+      // Event context
+      const EventContext& ctx = Gaudi::Hive::currentContext();
+
       // Set up the decorators 
-      SG::AuxElement::Decorator< float > decoratorD2(m_decorationName); 
+      SG::WriteDecorHandle< xAOD::JetContainer, float > decoratorD2(m_decorationName, ctx); 
 
       // Get the Large-R jet Container
-      const xAOD::JetContainer* largeRjets = evtStore()->retrieve< const xAOD::JetContainer >(m_jetContainerKey);
+      SG::ReadHandle<xAOD::JetContainer> largeRjets(m_jetContainerKey, ctx);
       
-      if(!largeRjets) {
-        ATH_MSG_ERROR ("Couldn't retrieve JetContainer with key " << m_jetContainerKey.c_str());
+      if(!largeRjets.isValid()) {
+        ATH_MSG_ERROR ("Couldn't retrieve JetContainer with key " << m_jetContainerKey.key());
         return StatusCode::FAILURE;
       }
 
