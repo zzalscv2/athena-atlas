@@ -20,7 +20,7 @@ from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCombinedMuon
 from MuonSegmentTrackMaker.MuonTrackMakerAlgsMonitoring import MuPatTrackBuilderMonitoring
 from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCombinedInDetCandidateAlgCfg, MuonCombinedAlgCfg, MuonCreatorAlgCfg
 
-from TrigMuonEF.TrigMuonEFConfig_newJO import TrigMuonEFTrackIsolationAlgCfg, MuonFilterAlgCfg, MergeEFMuonsAlgCfg
+from TrigMuonEF.TrigMuonEFConfig import TrigMuonEFTrackIsolationAlgCfg, MuonFilterAlgCfg, MergeEFMuonsAlgCfg
 from AthenaCommon.CFElements import seqAND, parOR, seqOR
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache

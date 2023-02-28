@@ -781,45 +781,38 @@ def efmuisoRecoSequence( flags, RoIs, Muons, doMSiso=False ):
   efmuisoRecoSequence += PTSeq
 
   # set up algs
-  from TrigMuonEF.TrigMuonEFConfig import TrigMuonEFTrackIsolationConfig
-  trigEFmuIso = TrigMuonEFTrackIsolationConfig("TrigEFMuIso"+name)
-  if doMSiso:
-    trigEFmuIso.requireCombinedMuon=False
-  trigEFmuIso.MuonEFContainer = Muons
-  trackParticles = PTTrackParticles[-1]
-  trigEFmuIso.IdTrackParticles = trackParticles
-  trigEFmuIso.MuonContName = muNames.EFIsoMuonName+name
-  trigEFmuIso.ptcone02Name = "%s.ptcone02" % Muons
-  trigEFmuIso.ptcone03Name = "%s.ptcone03" % Muons
+  from TrigMuonEF.TrigMuonEFConfig import TrigMuonEFTrackIsolationAlgCfg
+  trigEFmuIso = algorithmCAToGlobalWrapper(TrigMuonEFTrackIsolationAlgCfg,flags,name="TrigEFMuIso"+name, requireCombinedMuon = not doMSiso, 
+                                           MuonEFContainer = Muons,IdTrackParticles = PTTrackParticles[-1], MuonContName = muNames.EFIsoMuonName+name,
+                                           ptcone02Name = "%s.ptcone02" % Muons, ptcone03Name = "%s.ptcone03" % Muons)
 
   efmuisoRecoSequence += trigEFmuIso
 
-  sequenceOut = trigEFmuIso.MuonContName
+  sequenceOut = muNames.EFIsoMuonName+name
 
   return efmuisoRecoSequence, sequenceOut
 
-
-def efLateMuRoISequence(flags):
-
-  from AthenaCommon.CFElements import parOR
-  efLateMuRoISequence = parOR("efLateMuRoIViewNode")
-
+def VDVLateMuCfg(flags):
+  acc = ComponentAccumulator()
   # TODO: Replace MuCTPI_RDO dependency with xAOD::MuonRoIContainer for BC+1, BC-1 candidates, ATR-25031
-  import AthenaCommon.CfgMgr as CfgMgr
-  efLateMuRoIVDV = CfgMgr.AthViews__ViewDataVerifier( "efLateMuRoIVDV" )
-  efLateMuRoIVDV.DataObjects = [( 'MuCTPI_RDO' , 'StoreGateSvc+MUCTPI_RDO' )]
-  efLateMuRoISequence += efLateMuRoIVDV
+  dataObjects = [( 'MuCTPI_RDO' , 'StoreGateSvc+MUCTPI_RDO' )]
 
+  alg = CompFactory.AthViews.ViewDataVerifier( name = "efLateMuRoIVDV",
+                                               DataObjects = dataObjects)
+  acc.addEventAlgo(alg)
+  return acc
+
+
+def efLateMuRoISequenceCfg(flags):
+
+  acc = VDVLateMuCfg(flags)
   # Make sure the RDOs are still available at whole-event level
-  from AthenaCommon.AlgSequence import AlgSequence
-  topSequence = AlgSequence()
-  topSequence.SGInputLoader.Load += [( 'MuCTPI_RDO' , 'StoreGateSvc+MUCTPI_RDO' )]
+  loadFromSG= [( 'MuCTPI_RDO' , 'StoreGateSvc+MUCTPI_RDO' )]
+  from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+  acc.merge(SGInputLoaderCfg(flags, Load=loadFromSG))
 
   from TrigmuRoI.TrigmuRoIConfig import TrigmuRoIConfig
-  roiAlg = TrigmuRoIConfig(flags, "TrigmuRoI")
   sequenceOut = "LateMuRoIs"
-  roiAlg.RoisWriteHandleKey=sequenceOut
+  acc.merge(TrigmuRoIConfig(flags, "TrigmuRoI", outputRoIs=sequenceOut))
 
-  efLateMuRoISequence+=roiAlg
-
-  return efLateMuRoISequence, sequenceOut
+  return acc, sequenceOut

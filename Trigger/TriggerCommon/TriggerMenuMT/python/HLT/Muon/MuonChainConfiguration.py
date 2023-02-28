@@ -15,8 +15,10 @@ from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 if isComponentAccumulatorCfg():
     from .generateMuon import muFastSequence, muEFSASequence, muCombSequence, muEFCBSequence,  muCombOvlpRmSequence, muFastOvlpRmSequence
 else: 
-    from .MuonMenuSequences import muFastSequence, muFastCalibSequence, muFastOvlpRmSequence, mul2mtSAOvlpRmSequence, muCombSequence, muCombLRTSequence, muCombOvlpRmSequence, mul2mtCBOvlpRmSequence, mul2IOOvlpRmSequence, muEFSASequence, muEFCBSequence, muEFCBIDperfSequence, muEFCBLRTSequence, muEFCBLRTIDperfSequence, muEFSAFSSequence, muEFCBFSSequence, muEFIsoSequence, muEFMSIsoSequence, efLateMuRoISequence, efLateMuSequence, muRoiClusterSequence, muEFIDtpSequence
+    from .MuonMenuSequences import muFastSequence, muFastCalibSequence, muFastOvlpRmSequence, mul2mtSAOvlpRmSequence, muCombSequence, muCombLRTSequence, muCombOvlpRmSequence, mul2mtCBOvlpRmSequence, mul2IOOvlpRmSequence, muEFSASequence, muEFCBSequence, muEFCBIDperfSequence, muEFCBLRTSequence, muEFCBLRTIDperfSequence, muEFSAFSSequence, muEFCBFSSequence, muEFIsoSequence, muEFMSIsoSequence, efLateMuSequence, muEFIDtpSequence
 
+from .MuonMenuSequences import efLateMuRoISequence, muRoiClusterSequence
+from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
 from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFInvMassHypoToolFromDict
 from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFIdtpInvMassHypoToolFromDict
 
@@ -82,13 +84,20 @@ def muEFMSIsoSequenceCfg(flags,is_probe_leg=False):
     return muEFMSIsoSequence(flags, is_probe_leg=is_probe_leg)
 
 def muEFLateRoISequenceCfg(flags,is_probe_leg=False):
-    return efLateMuRoISequence(flags)
+    if isComponentAccumulatorCfg():
+        return efLateMuRoISequence(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(efLateMuRoISequence, flags)
 
 def muEFLateSequenceCfg(flags,is_probe_leg=False):
     return efLateMuSequence(flags)
 
 def muRoiClusterSequenceCfg(flags,is_probe_leg=False):
-    return muRoiClusterSequence(flags)
+    if isComponentAccumulatorCfg():
+        return muRoiClusterSequence(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(muRoiClusterSequence, flags)
+
 
 #############################################
 ###  Class/function to configure muon chains
