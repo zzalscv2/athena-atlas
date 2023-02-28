@@ -139,10 +139,6 @@ if flags.Trigger.doTransientByteStream and flags.Trigger.doCalo:
     from TriggerJobOpts.TriggerTransBSConfig import triggerTransBSCfg_Calo
     acc.merge(triggerTransBSCfg_Calo(flags), sequenceName="HLTBeginSeq")
 
-if flags.Input.isMC and flags.Trigger.doMuon:
-    loadFromSG += [('RpcPadContainer', 'StoreGateSvc+RPCPAD'),
-                   ('TgcRdoContainer', 'StoreGateSvc+TGCRDO')]
-
 if flags.Trigger.doLVL1:
     from TriggerJobOpts.Lvl1SimulationConfig import Lvl1SimulationCfg
     acc.merge(Lvl1SimulationCfg(flags), sequenceName="HLTBeginSeq")
