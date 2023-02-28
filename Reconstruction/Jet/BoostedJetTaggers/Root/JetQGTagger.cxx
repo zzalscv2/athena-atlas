@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JetQGTagger.h"
@@ -51,7 +51,6 @@ namespace CP {
     declareProperty( "UseJetVars",   m_mode = 0); // 0 uses the tracks. 1 uses variables from the jets
 
     declareProperty( "Tagger", m_taggername = "ntrack");
-    m_calibArea = "BoostedJetTaggers/QGTagger/May2019/"; // Overwrite base class default
     declareProperty( "TopoWeightFile", m_topofile = "");
     declareProperty( "ExpWeightFile", m_expfile = "qgsyst_exp.root");
     declareProperty( "MEWeightFile",  m_mefile  = "qgsyst_me.root");
@@ -73,29 +72,12 @@ namespace CP {
     ATH_MSG_INFO( "Initializing QuarkGluonTagger tool" );
 
     if( ! m_configFile.empty() ) {
-      ATH_MSG_INFO( "Using config file : "<< m_configFile );
-      // check for the existence of the configuration file
-      std::string configPath;
-      configPath = PathResolverFindDataFile(("BoostedJetTaggers/"+m_configFile).c_str());
-      FileStat_t fStats;
-      int fSuccess = gSystem->GetPathInfo(configPath.c_str(), fStats);
 
-      if ( fSuccess ){
-        ATH_MSG_ERROR( "Recommendations file " << m_configFile << " could not be found");
-        return StatusCode::FAILURE;
-      }
-      else {
-        ATH_MSG_DEBUG( "Recommendations file was found : " << configPath );
-      }
-
-      TEnv configReader;
-      if(configReader.ReadFile( configPath.c_str(), EEnvLevel(0) ) != 0 ) {
-        ATH_MSG_ERROR( "Error while reading config file : "<< configPath );
-        return StatusCode::FAILURE;
-      }
+      /// Get configReader
+      ATH_CHECK( getConfigReader() );
 
       // read in the specified track cut in the config file
-      m_NTrackCut=configReader.GetValue("NTrackCut" ,-1);
+      m_NTrackCut=m_configReader.GetValue("NTrackCut" ,-1);
 
       ATH_MSG_VERBOSE( "NTrackCut by config file : "<<m_NTrackCut );
 
@@ -112,9 +94,9 @@ namespace CP {
       }
     }
     if(m_cuttype != "linear_pt" && m_cuttype != "threshold" && m_cuttype != "log_pt"){
-	ATH_MSG_ERROR("Cuttype set to: " << m_cuttype );
-	ATH_MSG_ERROR("Cuttype invalid. Must use 'linear_pt', 'log_pt', or 'threshold'");
-	return StatusCode::FAILURE;	
+      ATH_MSG_ERROR("Cuttype set to: " << m_cuttype );
+      ATH_MSG_ERROR("Cuttype invalid. Must use 'linear_pt', 'log_pt', or 'threshold'");
+      return StatusCode::FAILURE;	
     }
  
     // decorators used to store
@@ -715,7 +697,7 @@ namespace CP {
 
   StatusCode JetQGTagger::loadHist(TH2D *&hist,std::string fname,std::string histname){
 
-    std::string filename = PathResolverFindCalibFile( (m_calibArea+fname).c_str() );
+    std::string filename = PathResolverFindCalibFile( ("BoostedJetTaggers/"+m_calibArea+fname).c_str() );
     ATH_MSG_INFO("CALIB FILE: " << filename << " histo: " << histname);
     if (filename.empty()){
       ATH_MSG_ERROR( "Could NOT resolve file name " << fname );
@@ -729,6 +711,5 @@ namespace CP {
     hist->SetDirectory(0);
     return StatusCode::SUCCESS;
   }
-
 
 } /* namespace CP */

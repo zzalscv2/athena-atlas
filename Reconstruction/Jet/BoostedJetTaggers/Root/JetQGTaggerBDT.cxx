@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JetQGTaggerBDT.h"
@@ -35,40 +35,16 @@ namespace CP {
     ATH_MSG_INFO( "Initializing JetQGTaggerBDT tool" );
 
     if( ! m_configFile.empty() ) {
-      ATH_MSG_INFO( "Using config file : "<< m_configFile );
-      // check for the existence of the configuration file
-      std::string configPath;
-      configPath = PathResolverFindDataFile(("BoostedJetTaggers/"+m_configFile).c_str());
 
-      /* https://root.cern.ch/root/roottalk/roottalk02/5332.html */
-      FileStat_t fStats;
-      int fSuccess = gSystem->GetPathInfo(configPath.c_str(), fStats);
-      if(fSuccess != 0){
-        ATH_MSG_ERROR("Recommendations file could not be found : " << configPath);
-        return StatusCode::FAILURE;
-      }
-      else {
-        ATH_MSG_DEBUG("Recommendations file was found : "<<configPath);
-      }
-
-      TEnv configReader;
-      if(configReader.ReadFile( configPath.c_str(), EEnvLevel(0) ) != 0 ) {
-        ATH_MSG_ERROR( "Error while reading config file : "<< configPath );
-        return StatusCode::FAILURE;
-      }
-
-      // get the CVMFS calib area where stuff is stored
-      m_calibArea = configReader.GetValue("CalibArea" ,"");
+      /// Get configReader
+      ATH_CHECK( getConfigReader() );
 
       // get the name/path of the JSON config
-      m_tmvaConfigFileName = configReader.GetValue("TMVAConfigFile" ,"");
-
-      m_strScoreCut = configReader.GetValue("ScoreCut" ,"");
-
-      ATH_MSG_INFO( "scoreCut: "<<m_strScoreCut );
+      m_tmvaConfigFileName = m_configReader.GetValue("TMVAConfigFile" ,"");
 
     }
-    // if the calibArea is specified to be "Local" then it looks in the same place as the top level configs
+
+    /// if the calibArea is specified to be "Local" then it looks in the same place as the top level configs
     if( m_calibArea.empty() ){
       ATH_MSG_ERROR( "You need to specify where the calibArea is as either being Local or on CVMFS" );
       return StatusCode::FAILURE;
@@ -76,30 +52,33 @@ namespace CP {
     else if(m_calibArea.compare("Local")==0){
       std::string localCalibArea = "BoostedJetTaggers/share/JetQGTaggerBDT/";
       ATH_MSG_INFO( "Using Local calibArea " << localCalibArea );
-      // convert the JSON config file name to the full path
+      /// convert the JSON config file name to the full path
       m_tmvaConfigFilePath = PathResolverFindCalibFile(localCalibArea+m_tmvaConfigFileName);
     }
     else{
       ATH_MSG_INFO( "Using CVMFS calibArea" );
-      // get the config file from CVMFS
-      // necessary because xml files are too large to house on the data space
-      m_tmvaConfigFilePath = PathResolverFindCalibFile( (m_calibArea+m_tmvaConfigFileName).c_str() );
+      /// get the config file from CVMFS
+      /// necessary because xml files are too large to house on the data space
+      m_tmvaConfigFilePath = PathResolverFindCalibFile( ("BoostedJetTaggers/"+m_calibArea+"/"+m_tmvaConfigFileName).c_str() );
     }
 
     /// Make sure score cut string is not empty
+    m_strScoreCut = m_configReader.GetValue("ScoreCut" ,"");
     if(m_strScoreCut.empty()){
       ATH_MSG_ERROR( "Score cut function is empty!" );
       return StatusCode::FAILURE;
     }
-    // set up InDet selection tool
+    else  ATH_MSG_INFO( "scoreCut: " << m_strScoreCut );
+    
+    /// set up InDet selection tool
     ANA_CHECK( ASG_MAKE_ANA_TOOL( m_trkSelectionTool,  InDet::InDetTrackSelectionTool ) );
     ANA_CHECK( m_trkSelectionTool.setProperty( "CutLevel", "Loose" ) );
     ANA_CHECK( m_trkSelectionTool.retrieve() );
 
-    // read json file for DNN weights
+    /// read json file for DNN weights
     ATH_MSG_INFO( "BDT Tagger configured with: " << m_tmvaConfigFilePath );
 
-    // -- Initialize TMVA for BDTs for each slot
+    /// -- Initialize TMVA for BDTs for each slot
     TMVA::Tools::Instance();
     for (auto& tagger : m_bdtTagger) {
       tagger.tmva = std::make_unique<TMVA::Reader>( "!Color:!Silent" );
@@ -110,7 +89,7 @@ namespace CP {
       tagger.tmva->AddVariable( "JetEta", &tagger.eta );
       tagger.tmva->AddVariable( "TrackC1", &tagger.trackC1 );
 
-      // configure the bdt
+      /// configure the bdt
       tagger.tmva->BookMVA( m_BDTmethod.c_str(), m_tmvaConfigFilePath.c_str() );
     }
 
@@ -248,10 +227,10 @@ namespace CP {
   }
 
   bool JetQGTaggerBDT::calculateVariables( const xAOD::Jet& jet, asg::AcceptData &acceptData ) const {
-    //calculate q/g tagging variables from GhostTracks associated to jet
-    //some derivations apply slimming to these tracks, which would lead to wrong values.
-    //so we compare the number of GhostTracks to NumTrkPt500 (i.e. nTracks)
-    //      if they are "close enough" we can proceed
+    ///calculate q/g tagging variables from GhostTracks associated to jet
+    ///some derivations apply slimming to these tracks, which would lead to wrong values.
+    ///so we compare the number of GhostTracks to NumTrkPt500 (i.e. nTracks)
+    ///      if they are "close enough" we can proceed
 
     bool validVars = true;
     bool isValid = true;
@@ -272,7 +251,7 @@ namespace CP {
     }
     else {
       for ( const auto *vx : *vxCont ) {
-        // take the first vertex in the list that is a primary vertex
+        /// take the first vertex in the list that is a primary vertex
         if ( vx->vertexType()==xAOD::VxType::PriVtx ) {
           primvertex = vx;
           break;
@@ -286,17 +265,17 @@ namespace CP {
       return validVars;
     }
 
-    //NTracks
+    ///NTracks
     std::vector<int> nTrkVec;
     if(jet.getAttribute(xAOD::JetAttribute::NumTrkPt500, nTrkVec)){
       ATH_MSG_DEBUG(nTrkVec.size());
       m_bdtTagger->ntracks = (float) nTrkVec[primvertex->index()];
     }
     else
-      //if NumTrkPt500 is not available, I can't confirm that the number of GhostTracks is correct (i.e. unslimmed)
+      ///if NumTrkPt500 is not available, I can't confirm that the number of GhostTracks is correct (i.e. unslimmed)
       validVars = false;
 
-    //TrackWidth
+    ///TrackWidth
     bool undefTrackWidth = false;
     std::vector<float> trkWidthVec;
     if(jet.getAttribute(xAOD::JetAttribute::TrackWidthPt500, trkWidthVec)){
@@ -304,11 +283,11 @@ namespace CP {
       m_bdtTagger->trackwidth = trkWidthVec[primvertex->index()];
     }
     else
-      //if TrackWidthPt500 is not available, we can maybe calculate it from tracks
+      ///if TrackWidthPt500 is not available, we can maybe calculate it from tracks
       undefTrackWidth = true;
     float weightedwidth = 0.;
 
-    //TrackC1
+    ///TrackC1
     float beta = 0.2;
     float weightedwidth2 = 0.;
     float sumPt = 0.;
@@ -318,7 +297,7 @@ namespace CP {
       ATH_MSG_ERROR("This jet has no associated objects");
       validVars = false;
     }
-    //track selection
+    ///track selection
     for(unsigned i=trackParttmp.size();i>0; i--){
       if(!trackParttmp[i-1]){
         trackParttmp.erase(trackParttmp.begin()+i-1);
@@ -327,8 +306,6 @@ namespace CP {
       const xAOD::TrackParticle* trk = static_cast<const xAOD::TrackParticle*>(trackParttmp[i-1]);
       bool accept = (trk->pt()>500 &&
           m_trkSelectionTool->accept(*trk)
-          // TODO: Implement alternative to TrackParticle::vertex()
-          //&& (trk->vertex()==primvertex || (!trk->vertex() && std::abs((trk->z0()+trk->vz()-primvertex->z())*sin(trk->theta()))<3.))
       );
       if (!accept){
         trackParttmp.erase(trackParttmp.begin()+i-1);
@@ -340,7 +317,7 @@ namespace CP {
       validVars = false;
     }
 
-    //calculate TrackC1 (and TrackWidth if necessary)
+    ///calculate TrackC1 (and TrackWidth if necessary)
     for(unsigned i=0; i<trackParttmp.size(); i++){
       double ipt = trackParttmp.at(i)->pt();
       double ieta = trackParttmp.at(i)->eta();
@@ -370,10 +347,10 @@ namespace CP {
   }
 
   bool JetQGTaggerBDT::isCorrectNumberOfTracks(int expectedNTracks, int nTracksFromGhostTracks) const{
-    //some derivations do not store all tracks associated to the jet.
-    //In this case the calculation of the tagging variables will be wrong.
-    //The requirements are fairly loose, because a few tracks may get lost in the derivation production.
-    //But it will fail quickly if the too many tracks were slimmed away.
+    ///some derivations do not store all tracks associated to the jet.
+    ///In this case the calculation of the tagging variables will be wrong.
+    ///The requirements are fairly loose, because a few tracks may get lost in the derivation production.
+    ///But it will fail quickly if the too many tracks were slimmed away.
     if(nTracksFromGhostTracks == 0){
       if(expectedNTracks == 0)
         return true;
@@ -389,4 +366,4 @@ namespace CP {
 
 } /* namespace CP */
 
-// the end
+/// the end

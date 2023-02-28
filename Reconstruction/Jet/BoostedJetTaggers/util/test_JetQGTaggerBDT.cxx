@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -150,7 +150,8 @@ int main( int argc, char* argv[] ) {
   asg::StandaloneToolHandle<CP::JetQGTaggerBDT> m_Tagger; //!
   m_Tagger.setTypeAndName("CP::JetQGTaggerBDT/MyTagger");
   if(verbose) ANA_CHECK( m_Tagger.setProperty("OutputLevel", MSG::DEBUG) );
-  if(! m_Tagger.setProperty( "ConfigFile", "JetQGTaggerBDT/JetQGTaggerBDT50Gluon.dat") )  return 1;
+  if(! m_Tagger.setProperty( "CalibArea", "JetQGTaggerBDT/Oct18/") )  return 1;
+  if(! m_Tagger.setProperty( "ConfigFile", "JetQGTaggerBDT50Gluon.dat") )  return 1;
   if(! m_Tagger.setProperty( "UseJetVars", 0) )  return 1;
   if(! m_Tagger.retrieve() )  return 1;
 
