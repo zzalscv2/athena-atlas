@@ -35,12 +35,6 @@ DerivationFramework::TruthCollectionMaker::TruthCollectionMaker(const std::strin
   , m_metaStore( "MetaDataStore", n )
 {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
-    declareProperty("ParticlesKey", m_particlesKey="TruthParticles");
-    declareProperty("NewCollectionName", m_outputParticlesKey="");
-    declareProperty("ParticleSelectionString", m_partString="");
-    declareProperty("Do_Compress",m_do_compress=false);
-    declareProperty("Do_Sherpa",m_do_sherpa=false);
-    declareProperty("KeepNavigationInfo",m_keep_navigation_info=true);
     declareProperty("MetaDataStore", m_metaStore );
 }
 
@@ -72,13 +66,21 @@ StatusCode DerivationFramework::TruthCollectionMaker::initialize()
     }
 
     // Initialise decorator handle keys
+    m_linkDecoratorKey = m_particlesKey.key()+".originalTruthParticle";
     ATH_CHECK(m_linkDecoratorKey.initialize());
+    m_originDecoratorKey = m_particlesKey.key()+".classifierParticleOrigin";
     ATH_CHECK(m_originDecoratorKey.initialize());
+    m_typeDecoratorKey = m_particlesKey.key()+".classifierParticleType";
     ATH_CHECK(m_typeDecoratorKey.initialize());
+    m_outcomeDecoratorKey = m_particlesKey.key()+".classifierParticleOutCome";
     ATH_CHECK(m_outcomeDecoratorKey.initialize());
+    m_classificationDecoratorKey = m_particlesKey.key()+".Classification";
     ATH_CHECK(m_classificationDecoratorKey.initialize());
+    m_motherIDDecoratorKey = m_particlesKey.key()+".motherID"; 
     ATH_CHECK(m_motherIDDecoratorKey.initialize());
+    m_daughterIDDecoratorKey = m_particlesKey.key()+".daughterID";
     ATH_CHECK(m_daughterIDDecoratorKey.initialize());
+    m_hadronOriginDecoratorKey = m_particlesKey.key()+".TopHadronOriginFlag";
     ATH_CHECK(m_hadronOriginDecoratorKey.initialize());
 
     return StatusCode::SUCCESS;
@@ -145,14 +147,14 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
     m_ntotpart += nParticles;
 
     // Set up decorators
-    SG::WriteDecorHandle<xAOD::TruthParticleContainer, ElementLink<xAOD::TruthParticleContainer> > linkDecorator(m_linkDecoratorKey);
-    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > originDecorator(m_originDecoratorKey);  
-    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > typeDecorator(m_typeDecoratorKey);
-    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > outcomeDecorator(m_outcomeDecoratorKey);
-    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationDecorator(m_classificationDecoratorKey);
-    SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > motherIDDecorator(m_motherIDDecoratorKey);
-    SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > daughterIDDecorator(m_daughterIDDecoratorKey);
-    SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > hadronOriginDecorator(m_hadronOriginDecoratorKey);
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, ElementLink<xAOD::TruthParticleContainer> > linkDecorator(m_linkDecoratorKey, ctx);
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > originDecorator(m_originDecoratorKey, ctx);  
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > typeDecorator(m_typeDecoratorKey, ctx);
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > outcomeDecorator(m_outcomeDecoratorKey, ctx);
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationDecorator(m_classificationDecoratorKey, ctx);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > motherIDDecorator(m_motherIDDecoratorKey, ctx);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > daughterIDDecorator(m_daughterIDDecoratorKey, ctx);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > hadronOriginDecorator(m_hadronOriginDecoratorKey, ctx);
     
     // Execute the text parsers and update the mask
     if (!m_partString.empty()) {
@@ -172,10 +174,10 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
             //Let's check if we want to build W/Z bosons
             bool SherpaW = false;
             bool SherpaZ = false;
-            if (m_partString.find("24") != std::string::npos && m_do_sherpa && is_sherpa) {
+            if (m_partString.value().find("24") != std::string::npos && m_do_sherpa && is_sherpa) {
                 SherpaW = true;
             }
-            if (m_partString.find("23") != std::string::npos && m_do_sherpa && is_sherpa) {
+            if (m_partString.value().find("23") != std::string::npos && m_do_sherpa && is_sherpa) {
                 SherpaZ = true;
             }
             if ((SherpaW or SherpaZ) && is_sherpa){

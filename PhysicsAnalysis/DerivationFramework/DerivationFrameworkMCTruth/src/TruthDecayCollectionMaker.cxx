@@ -26,18 +26,8 @@ DerivationFramework::TruthDecayCollectionMaker::TruthDecayCollectionMaker(const 
                                                                           const std::string& n,
                                                                           const IInterface* p)
   : AthAlgTool(t,n,p)
-  , m_particlesKey("TruthParticles")
-  , m_collectionName("")
 {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
-    declareProperty("ParticlesKey", m_particlesKey);
-    declareProperty("NewCollectionName", m_collectionName);
-    declareProperty("PDGIDsToKeep", m_pdgIdsToKeep={}, "PDG IDs of particles to build the collection from");
-    declareProperty("KeepBHadrons", m_keepBHadrons=false, "Keep b-hadrons (easier than by PDG ID)");
-    declareProperty("KeepCHadrons", m_keepCHadrons=false, "Keep c-hadrons (easier than by PDG ID)");
-    declareProperty("KeepBSM", m_keepBSM=false, "Keep BSM particles (easier than by PDG ID)");
-    declareProperty("RejectHadronChildren", m_rejectHadronChildren=false, "Drop hadron descendants");
-    declareProperty("Generations", m_generations=-1, "Number of generations after the particle in question to keep (-1 for all)");
 }
 
 // Destructor
@@ -71,11 +61,17 @@ StatusCode DerivationFramework::TruthDecayCollectionMaker::initialize()
     }
 
     // Decorators
+    m_originDecoratorKey = m_particlesKey.key()+".classifierParticleOrigin";
     ATH_CHECK(m_originDecoratorKey.initialize());
+    m_typeDecoratorKey.key()+".classifierParticleType";
     ATH_CHECK(m_typeDecoratorKey.initialize());
+    m_outcomeDecoratorKey.key()+".classifierParticleOutCome";
     ATH_CHECK(m_outcomeDecoratorKey.initialize());
+    m_classificationDecoratorKey.key()+".Classification";
     ATH_CHECK(m_classificationDecoratorKey.initialize());
+    m_motherIDDecoratorKey.key()+".motherID";
     ATH_CHECK(m_motherIDDecoratorKey.initialize());
+    m_daughterIDDecoratorKey.key()+".daughterID";
     ATH_CHECK(m_daughterIDDecoratorKey.initialize());
 
     return StatusCode::SUCCESS;
@@ -114,13 +110,14 @@ StatusCode DerivationFramework::TruthDecayCollectionMaker::addBranches() const
     for (const auto * part : *truthParticles){
         // If this passes my cuts, keep it
         if (id_ok(*part)){
-            addTruthParticle( *part, newParticlesWriteHandle.ptr(), newVerticesWriteHandle.ptr(), seen_particles , m_generations );
+            addTruthParticle( ctx, *part, newParticlesWriteHandle.ptr(), newVerticesWriteHandle.ptr(), seen_particles , m_generations );
         }
     } // Loop over the initial truth particle collection
     return StatusCode::SUCCESS;
 }
 
-int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const xAOD::TruthParticle& old_part, 
+int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const EventContext& ctx,
+                                                                      const xAOD::TruthParticle& old_part, 
                                                                       xAOD::TruthParticleContainer* part_cont, 
                                                                       xAOD::TruthVertexContainer* vert_cont, 
                                                                       std::vector<int>& seen_particles,
@@ -135,12 +132,12 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const xAOD
     // Now we have seen it
     seen_particles.push_back(old_part.barcode());
     // Set up decorators
-    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > originDecorator(m_originDecoratorKey);  
-    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > typeDecorator(m_typeDecoratorKey);
-    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > outcomeDecorator(m_outcomeDecoratorKey);
-    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationDecorator(m_classificationDecoratorKey);
-    SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > motherIDDecorator(m_motherIDDecoratorKey);
-    SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > daughterIDDecorator(m_daughterIDDecoratorKey);
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > originDecorator(m_originDecoratorKey, ctx);  
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > typeDecorator(m_typeDecoratorKey, ctx);
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > outcomeDecorator(m_outcomeDecoratorKey, ctx);
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationDecorator(m_classificationDecoratorKey, ctx);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > motherIDDecorator(m_motherIDDecoratorKey, ctx);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > daughterIDDecorator(m_daughterIDDecoratorKey, ctx);
     // Make a truth particle and add it to the container
     xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
     part_cont->push_back( xTruthParticle );
@@ -149,7 +146,7 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const xAOD
     ElementLink<xAOD::TruthParticleContainer> eltp(*part_cont, my_index);
     // Decay vertex information
     if (old_part.hasDecayVtx()) {
-        int vert_index = addTruthVertex( *old_part.decayVtx(), part_cont, vert_cont, seen_particles, generations);
+        int vert_index = addTruthVertex( ctx, *old_part.decayVtx(), part_cont, vert_cont, seen_particles, generations);
         ElementLink<xAOD::TruthVertexContainer> eltv( *vert_cont, vert_index );
         xTruthParticle->setDecayVtxLink( eltv );
         (*vert_cont)[vert_index]->addIncomingParticleLink( eltp );
@@ -185,7 +182,8 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const xAOD
     return my_index;
 }
 
-int DerivationFramework::TruthDecayCollectionMaker::addTruthVertex( const xAOD::TruthVertex& old_vert, 
+int DerivationFramework::TruthDecayCollectionMaker::addTruthVertex( const EventContext& ctx, 
+                                                                    const xAOD::TruthVertex& old_vert, 
                                                                     xAOD::TruthParticleContainer* part_cont, 
                                                                     xAOD::TruthVertexContainer* vert_cont, 
                                                                     std::vector<int>& seen_particles,
@@ -212,7 +210,7 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthVertex( const xAOD::
 	  continue;
 	}
         // Continue on the next generation; note that we only decrement the generation if this particle doesn't also pass our cuts
-        int part_index = addTruthParticle( *old_vert.outgoingParticle(n), part_cont, vert_cont, seen_particles,
+        int part_index = addTruthParticle( ctx, *old_vert.outgoingParticle(n), part_cont, vert_cont, seen_particles,
                                            generations-1+(id_ok(*old_vert.outgoingParticle(n))?1:0) );
         ElementLink<xAOD::TruthParticleContainer> eltp( *part_cont, part_index);
         xTruthVertex->addOutgoingParticleLink( eltp );

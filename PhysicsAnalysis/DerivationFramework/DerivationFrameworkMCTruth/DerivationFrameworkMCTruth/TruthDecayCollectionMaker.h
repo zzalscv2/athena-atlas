@@ -31,11 +31,16 @@ namespace DerivationFramework {
       virtual StatusCode addBranches() const;
 
     private:
-      std::vector<int> m_pdgIdsToKeep; //!< List of PDG IDs to build this collection from
-      bool m_keepBHadrons; //!< Option to keep all b-hadrons (better than giving PDG IDs)
-      bool m_keepCHadrons; //!< Option to keep all c-hadrons (better than giving PDG IDs)
-      bool m_keepBSM; //!< Option to keep all BSM particles (better than giving PDG IDs)
-      bool m_rejectHadronChildren; //!< Option to reject hadron descendants
+      Gaudi::Property<std::vector<int> > m_pdgIdsToKeep //!< List of PDG IDs to build this collection from
+         {this, "PDGIDsToKeep", {}, "PDG IDs of particles to build the collection from"}; 
+      Gaudi::Property<bool> m_keepBHadrons //!< Option to keep all b-hadrons (better than giving PDG IDs)
+         {this, "KeepBHadrons", false, "Keep b-hadrons (easier than by PDG ID)"};
+      Gaudi::Property<bool> m_keepCHadrons //!< Option to keep all c-hadrons (better than giving PDG IDs)
+         {this, "KeepCHadrons", false, "Keep c-hadrons (easier than by PDG ID)"};
+      Gaudi::Property<bool> m_keepBSM //!< Option to keep all BSM particles (better than giving PDG IDs)
+         {this, "KeepBSM", false, "Keep BSM particles (easier than by PDG ID)"};
+      Gaudi::Property<bool> m_rejectHadronChildren //!< Option to reject hadron descendants
+         {this, "RejectHadronChildren", false, "Drop hadron descendants"};
       SG::ReadHandleKey<xAOD::TruthParticleContainer> m_particlesKey
          {this, "ParticlesKey", "TruthParticles", "ReadHandleKey for input TruthParticleContainer"};
       SG::WriteHandleKey<xAOD::TruthParticleContainer> m_outputParticlesKey
@@ -55,13 +60,18 @@ namespace DerivationFramework {
       SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_daughterIDDecoratorKey
          {this, "daughterID", "TruthParticles.daughterID","Name of the decoration which records the ID of the particle's daughter"};
 
-      std::string m_collectionName; //!< Output collection name stem
-      int m_generations; //!< Number of generations after the particle in question to keep
+      Gaudi::Property<std::string> m_collectionName //!< Output collection name stem
+         {this, "NewCollectionName", "", "New collection name stem"};
+      Gaudi::Property<int> m_generations //!< Number of generations after the particle in question to keep
+         {this, "Generations", -1, "Number of generations after the particle in question to keep (-1 for all)"}; 
+
       // Helper functions for building up the decay product collections
-      int addTruthParticle( const xAOD::TruthParticle& old_part, xAOD::TruthParticleContainer* part_cont,
+      int addTruthParticle( const EventContext& ctx,
+                            const xAOD::TruthParticle& old_part, xAOD::TruthParticleContainer* part_cont,
                             xAOD::TruthVertexContainer* vert_cont, std::vector<int>& seen_particles,
                             const int generations=-1) const;
-      int addTruthVertex( const xAOD::TruthVertex& old_vert, xAOD::TruthParticleContainer* part_cont,
+      int addTruthVertex( const EventContext&, 
+                          const xAOD::TruthVertex& old_vert, xAOD::TruthParticleContainer* part_cont,
                           xAOD::TruthVertexContainer* vert_cont, std::vector<int>& seen_particles,
                           const int generations=-1) const;
       bool id_ok( const xAOD::TruthParticle& part ) const;
