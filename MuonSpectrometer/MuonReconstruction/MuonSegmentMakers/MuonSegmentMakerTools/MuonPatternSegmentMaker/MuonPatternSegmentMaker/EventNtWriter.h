@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTNTWRITER_H
@@ -25,6 +25,9 @@ class EventNtWriter {
  public:
   EventNtWriter(std::string name, const MdtIdHelper* mdtId = 0, const RpcIdHelper* rpcId = 0, 
 		const TgcIdHelper* tgcId = 0, const MuonGM::MuonDetectorManager* detMgr = 0);
+  EventNtWriter(const EventNtWriter&) = delete;
+  EventNtWriter& operator=(const EventNtWriter&) = delete;
+
   void endEvent();
   void close();
   void fill( Muon::MuonPatternSegmentMaker::ROTsPerRegion& rots, const Muon::MuonPatternCombination* pattern, bool hasPhi );
