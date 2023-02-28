@@ -106,7 +106,7 @@ private:
     std::vector<int> et;
     std::vector<int> et_id;
     std::vector<bool> saturation;
-    unsigned int latomeChannel;
+    unsigned int latomeChannel{};
   };
 
   class LatomeAveragedRawData{
@@ -115,7 +115,7 @@ private:
       std::vector<unsigned long long> sum;
       std::vector<unsigned long long> sumSq;
       std::vector<unsigned int> nTrigValid;
-      unsigned int latomeChannel;
+      unsigned int latomeChannel{};
   };
 
   class LatomeCalibPatterns{
@@ -184,60 +184,60 @@ private:
     std::vector<Word> m_packetEnd;
 
     // rod header
-    Word m_latomeBCID;
+    Word m_latomeBCID{};
     //// mon header
-    Word m_latomeID;
-    Word m_l1ID;
-    Word m_nPackets;
-    Word m_iPacket;
-    Word m_nWordsPerPacket;
-    Word m_monHeaderSize;
-    Word m_region;
-    Word m_nStreams;
-    Word m_streamNumber;
-    Word m_at0typeRec;
-    Word m_at1typeRec;
-    Word m_at0type;
-    Word m_at1type;
-    Word m_at0nBC;
-    Word m_at1nBC;
-    Word m_at0BC;
-    Word m_at1BC;
-    Word m_activeSC;
-    Word m_nsc1;
-    Word m_nsc2;
-    Word m_nsc3;
-    Word m_nsc4;
-    Word m_nsc5;
-    Word m_nsc6;
-    bool m_headerDecoded;
+    Word m_latomeID{};
+    Word m_l1ID{};
+    Word m_nPackets{};
+    Word m_iPacket{};
+    Word m_nWordsPerPacket{};
+    Word m_monHeaderSize{};
+    Word m_region{};
+    Word m_nStreams{};
+    Word m_streamNumber{};
+    Word m_at0typeRec{};
+    Word m_at1typeRec{};
+    Word m_at0type{};
+    Word m_at1type{};
+    Word m_at0nBC{};
+    Word m_at1nBC{};
+    Word m_at0BC{};
+    Word m_at1BC{};
+    Word m_activeSC{};
+    Word m_nsc1{};
+    Word m_nsc2{};
+    Word m_nsc3{};
+    Word m_nsc4{};
+    Word m_nsc5{};
+    Word m_nsc6{};
+    bool m_headerDecoded{};
 
-    short m_nBC_rawADC;
-    short m_nBC_ADC;
-    short m_nBC_E;
-    short m_nBC_EID;
-    short m_nBC_Averaged;
+    short m_nBC_rawADC{};
+    short m_nBC_ADC{};
+    short m_nBC_E{};
+    short m_nBC_EID{};
+    short m_nBC_Averaged{};
     
-    short m_BC_rawADC;
-    short m_BC_ADC;
-    short m_BC_E;
-    short m_BC_EID;
+    short m_BC_rawADC{};
+    short m_BC_ADC{};
+    short m_BC_E{};
+    short m_BC_EID{};
 
-    bool m_hasRawAdc;
-    bool m_hasAdc;
-    bool m_hasE;
-    bool m_hasEID;
-    bool m_isAveraged;
-    bool m_isAutoCorr;
+    bool m_hasRawAdc{};
+    bool m_hasAdc{};
+    bool m_hasE{};
+    bool m_hasEID{};
+    bool m_isAveraged{};
+    bool m_isAutoCorr{};
     
-    const LArLATOMEDecoder *m_decoder;
-    LArDigitContainer* m_adc_coll;
-    LArDigitContainer* m_adc_bas_coll;
-    LArRawSCContainer* m_et_coll;
-    LArRawSCContainer* m_et_id_coll;
-    LArAccumulatedDigitContainer* m_accdigits;
-    LArAccumulatedCalibDigitContainer* m_caccdigits;
-    LArLATOMEHeaderContainer* m_header_coll;
+    const LArLATOMEDecoder *m_decoder{};
+    LArDigitContainer* m_adc_coll{};
+    LArDigitContainer* m_adc_bas_coll{};
+    LArRawSCContainer* m_et_coll{};
+    LArRawSCContainer* m_et_id_coll{};
+    LArAccumulatedDigitContainer* m_accdigits{};
+    LArAccumulatedCalibDigitContainer* m_caccdigits{};
+    LArLATOMEHeaderContainer* m_header_coll{};
     
     // LATOME source ID is stored here:
     unsigned int m_nthLATOME = 0;
@@ -249,7 +249,7 @@ private:
   };
 
   // propary of tool
-  const LArOnline_SuperCellID* m_onlineId;
+  const LArOnline_SuperCellID* m_onlineId{};
   ToolHandle<ICaloSuperCellIDTool> m_sc2ccMappingTool;
   
   BooleanProperty m_ignoreBarrelChannels{this, "IgnoreBarrelChannels", false};
