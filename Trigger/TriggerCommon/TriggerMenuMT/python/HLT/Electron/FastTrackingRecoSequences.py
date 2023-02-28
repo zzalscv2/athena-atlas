@@ -1,15 +1,15 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 
 
-def fastTracking(RoIs, variant=''):
+def fastTracking(flags, RoIs, variant=''):
     TrigEgammaKeys = getTrigEgammaKeys(variant)
     IDTrigConfig = TrigEgammaKeys.IDTrigConfig
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-    viewAlgs, viewVerify = makeInDetTrigFastTracking( config = IDTrigConfig, rois = RoIs )
+    viewAlgs, viewVerify = makeInDetTrigFastTracking( flags, config = IDTrigConfig, rois = RoIs )
     viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs )]
 
     TrackParticlesName = ""

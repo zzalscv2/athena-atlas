@@ -18,9 +18,8 @@ def makeInDetTrigPrecisionTracking( flags, config=None, verifier=False, rois='EM
     if config is None:
         raise ValueError('PrecisionTracking No configuration provided!')
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
     from InDetTrigRecExample import InDetTrigCA
-    InDetTrigCA.InDetTrigConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
+    InDetTrigCA.InDetTrigConfigFlags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
     
     from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
     summaryTool = CAtoLegacyPublicToolWrapper(InDetTrigTrackSummaryToolCfg)

@@ -53,7 +53,8 @@ import unittest
 
 class FlagsCopiedTest(unittest.TestCase):
     def setUp(self):
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+        from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        flags = initConfigFlags()
         flags.Trigger.doID
         flags.Trigger.InDetTracking.Muon
         flags.Trigger.InDetTracking.Electron.minPT = 2.0 * Units.GeV

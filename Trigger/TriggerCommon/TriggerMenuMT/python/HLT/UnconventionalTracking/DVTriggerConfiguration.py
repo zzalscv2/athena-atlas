@@ -34,7 +34,7 @@ def DVRecoFragment(flags):
         ViewFallThrough = True)
 
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-    viewAlgs, viewVerify = makeInDetTrigFastTracking( config = LRTConfig, LRTInputCollection = FSConfig.trkTracks_FTF(), rois=inputMakerAlg.InViewRoIs )
+    viewAlgs, viewVerify = makeInDetTrigFastTracking( flags, config = LRTConfig, LRTInputCollection = FSConfig.trkTracks_FTF(), rois=inputMakerAlg.InViewRoIs )
 
     viewVerify.DataObjects += [ ( 'TrigRoiDescriptorCollection',  'StoreGateSvc+%s' % inputMakerAlg.InViewRoIs ),
                                 ( 'TrackCollection', 'StoreGateSvc+%s' % FSConfig.trkTracks_FTF() ),

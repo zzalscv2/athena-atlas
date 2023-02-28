@@ -95,14 +95,14 @@ An example on how to call this
 
       from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
 
-      viewAlgs, viewVerify = makeInDetTrigFastTracking( config = idconfig, rois = RoIs )
+      viewAlgs, viewVerify = makeInDetTrigFastTracking( flags, config = idconfig, rois = RoIs )
 
       TrackCollection = idconfig.tracks_FTF()
 
 
 The actual interface is 
 <pre>
-  def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True, viewVerifier='IDViewDataVerifier', secondStageConfig = None):
+  def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF = True, viewVerifier='IDViewDataVerifier', secondStageConfig = None):
 </pre>
 where the arguments are    
   

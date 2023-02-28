@@ -48,7 +48,7 @@ def DJDispFragment(flags):
     fscfg = getInDetTrigConfig("jet")
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
 
-    algs, view_verify = makeInDetTrigFastTracking(config=lrtcfg, LRTInputCollection = fscfg.trkTracks_FTF(), rois = InputMakerAlg.InViewRoIs)
+    algs, view_verify = makeInDetTrigFastTracking(flags, config=lrtcfg, LRTInputCollection = fscfg.trkTracks_FTF(), rois = InputMakerAlg.InViewRoIs)
 
     reco_seq = parOR("UncTrkrecoSeqDJTrigDispRecoSeq", algs)
 

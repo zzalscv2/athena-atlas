@@ -14,7 +14,7 @@ def getTrigCosmicInDetTracking(flags):
 
     idTrigConfig = getInDetTrigConfig('cosmics')
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-    dataPrepAlgs, verifier = makeInDetTrigFastTracking(config=idTrigConfig, 
+    dataPrepAlgs, verifier = makeInDetTrigFastTracking(flags, config=idTrigConfig,
                                      rois=dataPrepInputMaker.InViewRoIs, 
                                      viewVerifier='VDVCosmicsIDTracking', 
                                      doFTF=False) # no fast tracking, just data prep

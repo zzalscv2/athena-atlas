@@ -114,7 +114,7 @@ def MinBiasSPSequence(flags):
     idTrigConfig = getInDetTrigConfig('minBias')
 
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-    idAlgs, verifier = makeInDetTrigFastTracking(config=idTrigConfig, 
+    idAlgs, verifier = makeInDetTrigFastTracking(flags, config=idTrigConfig,
                                      rois=spInputMakerAlg.InViewRoIs, 
                                      viewVerifier='IDDataPrepCosmicsDataVerifier', 
                                      doFTF=False)

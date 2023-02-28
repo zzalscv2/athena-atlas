@@ -9,12 +9,12 @@ log = logging.getLogger("InDetTrigFastTracking")
 
 include("InDetTrigRecExample/InDetTrigRec_jobOptions.py")
 
-def makeInDetTrigFastTrackingNoView( config = None, rois = 'EMViewRoIs', doFTF = True, secondStageConfig = None, LRTInputCollection = None ):
+def makeInDetTrigFastTrackingNoView( flags, config = None, rois = 'EMViewRoIs', doFTF = True, secondStageConfig = None, LRTInputCollection = None ):
 
-  viewAlgs, viewVerify = makeInDetTrigFastTracking( config, rois, doFTF, None, secondStageConfig, LRTInputCollection)
+  viewAlgs, viewVerify = makeInDetTrigFastTracking( flags, config, rois, doFTF, None, secondStageConfig, LRTInputCollection)
   return viewAlgs
 
-def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True, viewVerifier='IDViewDataVerifier', secondStageConfig = None, LRTInputCollection = None):
+def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF = True, viewVerifier='IDViewDataVerifier', secondStageConfig = None, LRTInputCollection = None):
 
   if config is None :
     raise ValueError('makeInDetTrigFastTracking() No config provided!')
@@ -26,10 +26,9 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
   from AthenaConfiguration.Enums import Format
 
   from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
   from InDetTrigRecExample import InDetTrigCA
   
-  InDetTrigCA.InDetTrigConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.input_name)
+  InDetTrigCA.InDetTrigConfigFlags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.input_name)
   flags = InDetTrigCA.InDetTrigConfigFlags
 
   #Add suffix to the algorithms
@@ -198,7 +197,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
   InDetPixelClusterization.RegSelTool = makeRegSelTool_Pixel()
 
   from InDetPrepRawDataFormation.MonitoringTool import PixelClusterization_MonitoringTool
-  InDetPixelClusterization.MonTool = PixelClusterization_MonitoringTool(ConfigFlags)
+  InDetPixelClusterization.MonTool = PixelClusterization_MonitoringTool(flags)
 
   viewAlgs.append(InDetPixelClusterization)
 
@@ -272,7 +271,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
   InDetSCT_Clusterization.RegSelTool = makeRegSelTool_SCT()
   
   from InDetPrepRawDataFormation.MonitoringTool import SCT_Clusterization_MonitoringTool
-  InDetSCT_Clusterization.MonTool = SCT_Clusterization_MonitoringTool(ConfigFlags)
+  InDetSCT_Clusterization.MonTool = SCT_Clusterization_MonitoringTool(flags)
   
 
   viewAlgs.append(InDetSCT_Clusterization)
@@ -298,7 +297,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
                                                                     ProcessOverlaps        = DetFlags.haveRIO.SCT_on(),
                                                                     SpacePointCacheSCT     = InDetCacheNames.SpacePointCacheSCT,
                                                                     SpacePointCachePix     = InDetCacheNames.SpacePointCachePix,
-                                                                    monTool                = InDetMonitoringTool(ConfigFlags))
+                                                                    monTool                = InDetMonitoringTool(flags))
 
   viewAlgs.append(InDetSiTrackerSpacePointFinder)
 
@@ -388,8 +387,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
           #have been supplied with a second stage config, create another instance of FTF
 
           inputTracksname = flags.InDet.Tracking.ActiveConfig.trkTracks_FTF   #before ActiveConfig gets replaced -needs restructuring
-          from AthenaConfiguration.AllConfigFlags import ConfigFlags
-          flags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+secondStageConfig.name)
+          flags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+secondStageConfig.name)
 
           theFTF2 = TrigFastTrackFinderBase(flags, "TrigFastTrackFinder_" + secondStageConfig.input_name, secondStageConfig.input_name,
                                             conditionsTool = InDetSCT_ConditionsSummaryToolWithoutFlagged )

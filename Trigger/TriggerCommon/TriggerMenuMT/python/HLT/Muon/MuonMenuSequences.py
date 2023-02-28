@@ -264,7 +264,7 @@ def muCombAlgSequence(flags):
     if isCosmic(flags):
         muTrigIDRecoSequence = muonIDCosmicTrackingSequence( flags, l2muCombViewsMaker.InViewRoIs , "", extraLoads )
     else:
-        muTrigIDRecoSequence = muonIDFastTrackingSequence( l2muCombViewsMaker.InViewRoIs , "", extraLoads, extraLoadsForl2mtmode )
+        muTrigIDRecoSequence = muonIDFastTrackingSequence( flags, l2muCombViewsMaker.InViewRoIs , "", extraLoads, extraLoadsForl2mtmode )
 
 
     # for Inside-out L2SA
@@ -343,7 +343,7 @@ def muCombLRTAlgSequence(flags):
 
     extraLoads = []
 
-    muFastIDRecoSequence = muonIDFastTrackingSequence( l2muCombLRTViewsMaker.InViewRoIs , "LRT", extraLoads, doLRT=True )
+    muFastIDRecoSequence = muonIDFastTrackingSequence( flags, l2muCombLRTViewsMaker.InViewRoIs , "LRT", extraLoads, doLRT=True )
 
     muCombLRTIDSequence = parOR("l2muCombLRTIDSequence", [muFastIDRecoSequence, muCombLRTRecoSequence])
 
@@ -852,7 +852,7 @@ def efLateMuAlgSequence(flags):
     #decode data in these RoIs
     viewAlgs_MuonPRD = algorithmCAToGlobalWrapper(muonDecodeCfg,muonflags,RoIs=eflateViewsMaker.InViewRoIs.path())
     #ID fast tracking
-    muFastIDRecoSequence = muonIDFastTrackingSequence( eflateViewsMaker.InViewRoIs,"Late" )
+    muFastIDRecoSequence = muonIDFastTrackingSequence( flags, eflateViewsMaker.InViewRoIs,"Late" )
     #inside-out reco sequence
     #Clone and replace offline flags so we can set muon trigger specific values
     #muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
