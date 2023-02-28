@@ -17,41 +17,40 @@
 #include "StoreGate/WriteHandle.h"
 
 HIClusterMaker::HIClusterMaker(const std::string& name, ISvcLocator* pSvcLocator)
-	: AthAlgorithm(name,pSvcLocator)
+  : AthReentrantAlgorithm(name,pSvcLocator)
 {
 }
 
 StatusCode HIClusterMaker::initialize()
 {
-	//First we initialize keys - after initialization they are frozen
-	ATH_CHECK( m_towerContainerKey.initialize() );
-	ATH_CHECK( m_cellContainerKey.initialize() );
-	ATH_CHECK( m_outputKey.initialize() );
+  //First we initialize keys - after initialization they are frozen
+  ATH_CHECK( m_towerContainerKey.initialize() );
+  ATH_CHECK( m_cellContainerKey.initialize() );
+  ATH_CHECK( m_outputKey.initialize() );
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode HIClusterMaker::execute()
+StatusCode HIClusterMaker::execute(const EventContext &ctx) const
 {
 
   //retrieve the tower container from store
   const INavigable4MomentumCollection* navInColl = 0;
-  SG::ReadHandle<INavigable4MomentumCollection>  readHandleTower ( m_towerContainerKey );
-	navInColl = readHandleTower.cptr();
+  SG::ReadHandle<INavigable4MomentumCollection>  readHandleTower ( m_towerContainerKey, ctx );
+  navInColl = readHandleTower.cptr();
 
   const CaloCellContainer * cellColl ;
-	SG::ReadHandle<CaloCellContainer>  readHandleCell ( m_cellContainerKey );
+  SG::ReadHandle<CaloCellContainer>  readHandleCell ( m_cellContainerKey, ctx );
   cellColl = readHandleCell.cptr();
 
   //make the container
   //Tricky migration: here we don't have to migrate our methods but what we use from CaloClusterStoreHelper
-  SG::WriteHandle<xAOD::CaloClusterContainer> writeHandleContainer ( m_outputKey );
+  SG::WriteHandle<xAOD::CaloClusterContainer> writeHandleContainer ( m_outputKey, ctx );
   ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(writeHandleContainer));
 
   //loop on towers
   for(const auto *towerItr : *navInColl)
   {
-
     //initialize variables
     float E_cl=0;
     float eta_cl=0;
@@ -70,8 +69,7 @@ StatusCode HIClusterMaker::execute()
     std::unique_ptr<xAOD::CaloCluster> cl(CaloClusterStoreHelper::makeCluster(cellColl));
 
     if ( cellToken.size() == 0 ) continue;
-    for(NavigationToken<CaloCell,double,CaloCellIDFcn>::const_iterator cellItr = cellToken.begin();
-	cellItr != cellToken.end(); ++cellItr )
+    for(NavigationToken<CaloCell,double,CaloCellIDFcn>::const_iterator cellItr = cellToken.begin(); cellItr != cellToken.end(); ++cellItr )
     {
       //Bad cell policy - to be kept
       //if(m_bad_cell_tool->SkipCell(*cellItr))
@@ -94,7 +92,6 @@ StatusCode HIClusterMaker::execute()
 
       unsigned int sample = (CaloSampling::CaloSample) (*cellItr)->caloDDE()->getSampling();
       samplingPattern |= (0x1U<<sample);
-
     }//end cell loop
 
     float eta0=towerItr->eta();
@@ -146,11 +143,10 @@ StatusCode HIClusterMaker::execute()
     cl->setTime(time_cl);
     cl->setSamplingPattern(samplingPattern);
 
-    msg(MSG::VERBOSE) << std::setw(20) << "PUSHING CLUSTER"
-		      << std::setw(15) << cl->e()
-		      << std::setw(15) << cl->eta()
-		      << std::setw(15) << cl->phi()
-		      << endmsg;
+    ATH_MSG_VERBOSE( std::setw(20) << "PUSHING CLUSTER"
+                  << std::setw(15) << cl->e()
+                  << std::setw(15) << cl->eta()
+                  << std::setw(15) << cl->phi() );
 
     writeHandleContainer->push_back(std::move(cl));
   }//end tower loop
@@ -165,7 +161,7 @@ StatusCode HIClusterMaker::finalize()
 
 StatusCode HIClusterMaker::dumpClusters(xAOD::CaloClusterContainer* clusColl)
 {
-  msg(MSG::INFO) << "Dumping PseudoJets" << endmsg;
+  ATH_MSG_INFO("Dumping PseudoJets");
   for(xAOD::CaloClusterContainer::iterator clusCollIter= clusColl->begin();
       clusCollIter!= clusColl->end(); ++clusCollIter)
   {
@@ -179,7 +175,7 @@ StatusCode HIClusterMaker::dumpClusters(xAOD::CaloClusterContainer* clusColl)
 
     if (!cellLinks)
     {
-      msg(MSG::ERROR) << "Can't get valid links to CaloCells (CaloClusterCellLink)!" << endmsg;
+      ATH_MSG_ERROR("Can't get valid links to CaloCells (CaloClusterCellLink)!");
       return StatusCode::FAILURE;
     }
 
@@ -187,11 +183,10 @@ StatusCode HIClusterMaker::dumpClusters(xAOD::CaloClusterContainer* clusColl)
     float sumw=0;
     // CaloClusterCellLink::iterator cellIterEnd=cellLinks->end();
     // for(CaloClusterCellLink::iterator cellIter=cellLinks->end();
-    // 	cellIter != cellIterEnd; cellIter++, ncells++ )
+    //   cellIter != cellIterEnd; cellIter++, ncells++ )
     // {
     xAOD::CaloCluster::cell_iterator cellIterEnd = cl->cell_end();
-    for(xAOD::CaloCluster::cell_iterator cellIter= cl->cell_begin();
-    	cellIter != cellIterEnd; ++cellIter )
+    for(xAOD::CaloCluster::cell_iterator cellIter= cl->cell_begin(); cellIter != cellIterEnd; ++cellIter )
     {
       CxxUtils::prefetchNext (cellIter, cellIterEnd);
       const CaloCell* pCell=(*cellIter);
@@ -210,15 +205,14 @@ StatusCode HIClusterMaker::dumpClusters(xAOD::CaloClusterContainer* clusColl)
     }
 
     ATH_MSG_INFO( std::setw(10) << "DUMPING CLUSTER"
-		   << std::setw(15) << cl->e()
-		   << std::setw(15) << cl->eta()
-		   << std::setw(15) << cl->phi()
-		   << std::setw(15) << E_cl
-		   << std::setw(15) << eta_cl
-		   << std::setw(15) << phi_cl
-		   << std::setw(15) << ncells
-		   << std::setw(15) << sumw );
-
+               << std::setw(15) << cl->e()
+               << std::setw(15) << cl->eta()
+               << std::setw(15) << cl->phi()
+               << std::setw(15) << E_cl
+               << std::setw(15) << eta_cl
+               << std::setw(15) << phi_cl
+               << std::setw(15) << ncells
+               << std::setw(15) << sumw );
   }
   return StatusCode::SUCCESS;
 }
