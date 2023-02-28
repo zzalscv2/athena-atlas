@@ -292,7 +292,7 @@ namespace xAOD {
       }
 
       /// 
-      static void* feed( void* from, void* to, size_t size )
+      static void* feed( void* /*from*/, void* to, size_t size )
       {
          DataVector<char> *dv = reinterpret_cast<DataVector<char>*>(to);
          // find out vector element typeinfo and get RootUtils::Type for it
@@ -301,12 +301,12 @@ namespace xAOD {
          // copy vector elements into DataVector
          if(mn) cout << "PROX:  feed, typename=" << ru_type.getTypeName() << "  typesize=" << ru_type.getSize() <<endl;
 
-         char *src = reinterpret_cast<char*>( from );
+         //char *src = reinterpret_cast<char*>( from );
          for(size_t i=0; i<size; i++) {
             void *obj = ru_type.create();
             // ru_type.assign(obj, src); //MN: this may crash, so for now we do not copy data (bad only for CaloCluster
             dv->dvlinfo_v().push(dv,obj);
-            src += ru_type.getSize();
+            //src += ru_type.getSize();
          } 
          return nullptr;
       }
