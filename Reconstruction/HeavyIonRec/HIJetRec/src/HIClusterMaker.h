@@ -22,7 +22,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#include <AthenaBaseComps/AthAlgorithm.h>
+#include <AthenaBaseComps/AthReentrantAlgorithm.h>
 //Ideally use forward class decl. for CaloClusterContainer
 //Cannot because this class is defined via typedef
 #include <xAODCaloEvent/CaloClusterContainer.h>
@@ -33,7 +33,7 @@
 
 class CaloCellContainer;
 
-class HIClusterMaker : public AthAlgorithm
+class HIClusterMaker : public AthReentrantAlgorithm
 {
 
 public:
@@ -42,7 +42,7 @@ public:
   ~HIClusterMaker() {};
 
   virtual StatusCode initialize();
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext &ctx) const;
   virtual StatusCode finalize();
 
   //Simple helper to dump clusters for debugging
