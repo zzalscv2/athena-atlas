@@ -7,7 +7,6 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger('runHLT_standalone_newJO')
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
-from AthenaConfiguration.ComponentAccumulator import CompFactory
 from AthenaConfiguration.Enums import Format
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
@@ -31,7 +30,7 @@ flags.Scheduler.ShowDataDeps = True
 flags.Scheduler.ShowDataFlow = True
 flags.Scheduler.ShowControlFlow = True
 flags.Scheduler.EnableVerboseViews = True
-flags.Scheduler.AutoLoadUnmetDependencies = True # FIXME: change this to False eventually
+flags.Scheduler.AutoLoadUnmetDependencies = False
 flags.Input.FailOnUnknownCollections = True
 
 from CaloClusterCorrection.constants \
@@ -108,8 +107,10 @@ flags.dump()
 acc = MainServicesCfg(_allflags)
 del _allflags
 
-# this delcares to the scheduler that EventInfo object comes from the input
-loadFromSG = [('xAOD::EventInfo', 'StoreGateSvc+EventInfo')]
+# Load these objects from StoreGate
+loadFromSG = [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
+              ('TrigConf::L1Menu','DetectorStore+L1TriggerMenu'),
+              ('TrigConf::HLTMenu','DetectorStore+HLTTriggerMenu')]
 
 if flags.Input.Format is Format.BS:
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
@@ -139,13 +140,15 @@ if flags.Trigger.doTransientByteStream and flags.Trigger.doCalo:
     acc.merge(triggerTransBSCfg_Calo(flags), sequenceName="HLTBeginSeq")
 
 if flags.Input.isMC and flags.Trigger.doMuon:
-    loadFromSG += [( 'RpcPadContainer' , 'StoreGateSvc+RPCPAD' ), ( 'TgcRdoContainer' , 'StoreGateSvc+TGCRDO' )]
+    loadFromSG += [('RpcPadContainer', 'StoreGateSvc+RPCPAD'),
+                   ('TgcRdoContainer', 'StoreGateSvc+TGCRDO')]
 
 if flags.Trigger.doLVL1:
     from TriggerJobOpts.Lvl1SimulationConfig import Lvl1SimulationCfg
     acc.merge(Lvl1SimulationCfg(flags), sequenceName="HLTBeginSeq")
 
-acc.addEventAlgo(CompFactory.SGInputLoader(Load=loadFromSG), sequenceName="AthAlgSeq")
+from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+acc.merge(SGInputLoaderCfg(flags, loadFromSG))
 
 #track overlay needs this to ensure that the collections are copied correctly (due to the hardcoding of the name in the converters)
 if flags.Overlay.doTrackOverlay:
