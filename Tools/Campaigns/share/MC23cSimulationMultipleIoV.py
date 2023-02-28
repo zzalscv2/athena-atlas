@@ -4,6 +4,6 @@ from G4AtlasApps.SimFlags import simFlags
 simFlags.RunNumber = 450000
 
 from AthenaCommon.Resilience import protectedInclude
-protectedInclude("RunDependentSimData/configLumi_simProfile_run450000_mc23c_MultiBeamspot_flat50_75.py")
+protectedInclude("RunDependentSimData/configLumi_simProfile_run450000_mc23c_MultiBeamspot.py")
 
 protectedInclude("Campaigns/MC23SimulationNoIoV.py")
