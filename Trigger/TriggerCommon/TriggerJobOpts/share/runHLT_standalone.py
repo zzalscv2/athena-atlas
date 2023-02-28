@@ -274,8 +274,10 @@ else:           # More data modifiers
                      #Monitoring for L1 muon group
                      #Monitoring L1Topo at ROB level
                      'enableSchedulerMon',
-                     'superCellWithBCID',
     ]
+    if opt.doL1Sim:
+        setModifiers += ['superCellWithBCID']
+
 
 #-------------------------------------------------------------
 # Modifiers
