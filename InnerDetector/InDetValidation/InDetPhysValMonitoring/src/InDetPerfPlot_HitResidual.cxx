@@ -84,6 +84,8 @@ InDetPerfPlot_HitResidual::initializePlots() {
 
   book(m_etaWidth.at(PIXEL).at(BARREL), "clusterEtaWidth_pixel_barrel");
   book(m_etaWidth.at(PIXEL).at(ENDCAP), "clusterEtaWidth_pixel_endcap");
+  book(m_phiWidth.at(PIXEL).at(BARREL), "clusterPhiWidth_pixel_barrel");
+  book(m_phiWidth.at(PIXEL).at(ENDCAP), "clusterPhiWidth_pixel_endcap");
   //
   book(m_phiWidth.at(SCT).at(BARREL), "clusterPhiWidth_sct_barrel");
   book(m_phiWidth.at(SCT).at(ENDCAP), "clusterPhiWidth_sct_endcap");
