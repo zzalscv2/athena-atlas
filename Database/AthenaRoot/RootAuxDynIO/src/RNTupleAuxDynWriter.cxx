@@ -116,7 +116,7 @@ namespace RootAuxDynIO
          auto field = RFieldBase::Create(field_name, attr_type).Unwrap();
          m_entry->CaptureValue( field->CaptureValue( attr_data ) );
          m_ntupleFieldMap[ field_name ] = field.get();
-         m_model->AddField( move(field) );
+         m_model->AddField( std::move(field) );
       }
       else {
          // NTupleWriter and Fields already created
