@@ -611,15 +611,8 @@ if hasattr(topSequence,"SGInputLoader"):
 # ---------------------------------------------------------------
 # Monitoring
 # ---------------------------------------------------------------
-if not hasattr(svcMgr, 'THistSvc'):
-    from GaudiSvc.GaudiSvcConf import THistSvc
-    svcMgr += THistSvc()
-    if ConfigFlags.Trigger.L1MuonSim.WriteNSWDebugNtuple:
-        svcMgr.THistSvc.Output += [ "NSWL1Simulation DATAFILE='NSWL1Simulation.root'  OPT='RECREATE'" ]
-
-if hasattr(svcMgr.THistSvc, "Output"):
-    from TriggerJobOpts.TriggerHistSvcConfig import setTHistSvcOutput
-    setTHistSvcOutput(svcMgr.THistSvc.Output)
+from TriggerJobOpts.TriggerHistSvcConfig import TriggerHistSvcConfig
+CAtoGlobalWrapper(TriggerHistSvcConfig, ConfigFlags)
 
 if athenaCommonFlags.isOnline():
     from TrigOnlineMonitor.TrigOnlineMonitorConfig import trigOpMonitorCfg

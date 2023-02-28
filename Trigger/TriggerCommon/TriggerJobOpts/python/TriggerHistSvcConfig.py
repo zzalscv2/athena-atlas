@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 def setTHistSvcOutput(outputList):
@@ -10,11 +10,21 @@ def setTHistSvcOutput(outputList):
 
     return
 
+
 def TriggerHistSvcConfig(flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.ComponentFactory import CompFactory
+
+    output = []
+    if flags.Trigger.L1MuonSim.WriteNSWDebugNtuple:
+        output += [ "NSWL1Simulation DATAFILE='NSWL1Simulation.root' OPT='RECREATE'" ]
+
+    # add default outputs
+    setTHistSvcOutput(output)
+
     acc = ComponentAccumulator()
-    histSvc = CompFactory.THistSvc()
-    setTHistSvcOutput(histSvc.Output)
+    histSvc = CompFactory.THistSvc(
+        Output = output)
+
     acc.addService( histSvc )
     return acc
