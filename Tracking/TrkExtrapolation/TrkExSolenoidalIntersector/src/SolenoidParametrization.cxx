@@ -116,20 +116,21 @@ SolenoidParametrization::parametrizeSolenoid(void){
   MagField::AtlasFieldCache fieldCache;
   m_fieldCondObj->getInitializedCache (fieldCache);
   
+  constexpr int n = 200;
+  Amg::VectorX difference(n);  // it is filled below in the loop over n
+  Amg::MatrixX derivative(n,s_numberParameters); //set zero below
   for (int binZ = 0; binZ < s_maxBinZ; ++binZ){ 
-    double cotTheta	= smallOffset; 
-    for (int binTheta = 0; binTheta < s_maxBinTheta - 1; ++binTheta){
+    double cotTheta	= smallOffset;
+    for (int binTheta = 0; binTheta < s_maxBinTheta - 1; ++binTheta) {
       double 	r      	= 0.;
       double 	z      	= zAtAxis;
-      int 	n      	= 200;
       double	dr;
       if (cotTheta < s_zOuter/s_rOuter){
         dr = s_rOuter/double(n);
       } else {
         dr = s_zOuter/(cotTheta*double(n));
       }
-      Amg::VectorX difference(n);
-      Amg::MatrixX derivative	= Amg::MatrixX::Zero(n,s_numberParameters);
+      derivative.setZero();
       for (int k = 0; k < n; ++k){
         r 			+= dr;
         z 			+= dr*cotTheta;
@@ -181,7 +182,7 @@ SolenoidParametrization::parametrizeSolenoid(void){
         m_parameters[key++]    	= solution(5);
       }
       cotTheta	+= 1./s_binInvSizeTheta;
-    }
+    }  // Loop over binTheta
     zAtAxis 	+= 1./s_binInvSizeZ;
   }
   //
