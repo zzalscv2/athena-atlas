@@ -10,7 +10,6 @@ from TrigMuonHypo.TrigMuonHypoConf import (  # noqa: F401 (import all into this 
     TrigMuonEFIdtpHypoAlg, TrigMuonEFIdtpHypoTool,
     TrigMuonEFTrackIsolationHypoAlg, TrigMuonEFTrackIsolationHypoTool,
     TrigMuonEFInvMassHypoTool, TrigMuonEFIdtpInvMassHypoTool,
-    TrigMuonLateMuRoIHypoAlg, TrigMuonLateMuRoIHypoTool
 )
 
 # import monitoring
@@ -1057,22 +1056,14 @@ class TrigMuonEFIdtpInvMassHypoConfig(object) :
         return tool
 
 
-def TrigMuonLateMuRoIHypoToolFromDict( chainDict ) :
-    config = TrigMuonLateMuRoIHypoConfig()
-    tool = config.ConfigurationHypoTool( chainDict['chainName'] )
+def TrigMuonLateMuRoIHypoAlgCfg(flags, name="TrigMuRoIHypoAlg", **kwargs):
+    return CompFactory.TrigMuonLateMuRoIHypoAlg(name, **kwargs)
+
+def TrigMuonLateMuRoIHypoToolFromDict(flags, chainDict ) :
+    tool = TrigMuonLateMuRoIHypoCfg(flags, chainDict['chainName'])
     return tool
 
-class TrigMuonLateMuRoIHypoConfig(object) :
+def TrigMuonLateMuRoIHypoCfg(flags, name="TrigMuRoIHypoTool") :
 
-    log = logging.getLogger('TrigMuonLateMuRoIHypoConfig')
-
-    def ConfigurationHypoTool(self, toolName):
-
-        tool = CompFactory.TrigMuonLateMuRoIHypoTool(toolName)
-
-        try:
-            tool.AcceptAll = False
-
-        except LookupError:
-            raise Exception('TrigMuonLateMuRoI Hypo Misconfigured')
-        return tool
+    tool = CompFactory.TrigMuonLateMuRoIHypoTool(name, AcceptAll=False)
+    return tool

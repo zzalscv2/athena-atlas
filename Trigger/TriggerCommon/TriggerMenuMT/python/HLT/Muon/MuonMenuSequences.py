@@ -2,9 +2,10 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from ..Config.MenuComponents import MenuSequence, RecoFragmentsPool, algorithmCAToGlobalWrapper
+from ..Config.MenuComponents import MenuSequence, MenuSequenceCA, RecoFragmentsPool, algorithmCAToGlobalWrapper, SelectionCA, InViewRecoCA, InEventRecoCA
 from AthenaCommon.CFElements import parOR, seqAND, seqOR
 from AthenaCommon.Logging import logging
+from AthenaConfiguration.ComponentFactory import CompFactory
 log = logging.getLogger(__name__)
 
 #-----------------------------------------------------#
@@ -12,18 +13,21 @@ log = logging.getLogger(__name__)
 ### Load data from Muon detectors ###
 #-----------------------------------------------------#
 #import MuonRecExample.MuonRecStandaloneOnlySetup
-from MuonCombinedRecExample.MuonCombinedRecFlags import muonCombinedRecFlags
-from MuonRecExample.MuonRecFlags import muonRecFlags
-muonRecFlags.doTrackPerformance    = True
-muonRecFlags.TrackPerfSummaryLevel = 2
-muonRecFlags.TrackPerfDebugLevel   = 5
-muonCombinedRecFlags.doCaloTrkMuId = False
-muonCombinedRecFlags.printSummary = False
-muonCombinedRecFlags.doSiAssocForwardMuons = False
-muonCombinedRecFlags.doStatisticalCombination = False
-muonCombinedRecFlags.doCombinedFit = True
-muonRecFlags.enableErrorTuning = False
-muonRecFlags.runCommissioningChain = False
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+
+if not isComponentAccumulatorCfg():
+    from MuonCombinedRecExample.MuonCombinedRecFlags import muonCombinedRecFlags
+    from MuonRecExample.MuonRecFlags import muonRecFlags
+    muonRecFlags.doTrackPerformance    = True
+    muonRecFlags.TrackPerfSummaryLevel = 2
+    muonRecFlags.TrackPerfDebugLevel   = 5
+    muonCombinedRecFlags.doCaloTrkMuId = False
+    muonCombinedRecFlags.printSummary = False
+    muonCombinedRecFlags.doSiAssocForwardMuons = False
+    muonCombinedRecFlags.doStatisticalCombination = False
+    muonCombinedRecFlags.doCombinedFit = True
+    muonRecFlags.enableErrorTuning = False
+    muonRecFlags.runCommissioningChain = False
 
 
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
@@ -789,45 +793,42 @@ def muEFCBFSSequence(flags, is_probe_leg=False):
                          HypoToolGen = TrigMuonEFCombinerHypoToolFromName,
                          IsProbe     = is_probe_leg )
 
-def efLateMuRoIAlgSequence(flags):
+def efLateMuRoIAlgSequenceCfg(flags):
 
-    from .MuonRecoSequences import efLateMuRoISequence
+    selAcc = SelectionCA('EFLateMuSel')
+    
+    viewName="EFLateMuRoIReco"
+    ViewCreatorInitialROITool=CompFactory.ViewCreatorInitialROITool
+    roiTool         = ViewCreatorInitialROITool()
+    requireParentView = True
+                                                         
+    recoLateMu = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView)
 
-    eflateViewsMaker = EventViewCreatorAlgorithm("IMeflatemuroi")
-    #
-    eflateViewsMaker.RoIsLink = "initialRoI"
-    eflateViewsMaker.RoITool = ViewCreatorInitialROITool()
-    #
-    eflateViewsMaker.Views = "MULATEViewRoIs"
-    eflateViewsMaker.InViewRoIs = "MULATERoIs"
-    #
-    eflateViewsMaker.ViewFallThrough = True
+    from .MuonRecoSequences import efLateMuRoISequenceCfg
 
     #Get Late Muon RoIs
-    efLateMuRoISequence, sequenceOut = efLateMuRoISequence(flags)
+    efLateMuRoIAcc, sequenceOut = efLateMuRoISequenceCfg(flags)
+    recoLateMu.mergeReco(efLateMuRoIAcc)
 
-    #Final sequence running in view
-    eflateViewsMaker.ViewNodeName = efLateMuRoISequence.name()
-    muonSequence = seqAND("lateMuonRoISequence", [eflateViewsMaker, efLateMuRoISequence])
-
-    return (muonSequence, eflateViewsMaker, sequenceOut)
+    selAcc.mergeReco(recoLateMu)
+    return (selAcc, sequenceOut)
 
 def efLateMuRoISequence(flags):
 
-    (muonEFLateSequence, eflateViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(efLateMuRoIAlgSequence, flags)
+    (selAcc, sequenceOut) = efLateMuRoIAlgSequenceCfg(flags)
 
-    # setup EFCB hypo
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonLateMuRoIHypoAlg
-    trigMuonEFLateHypo = TrigMuonLateMuRoIHypoAlg( "TrigMuonLateMuRoIHypoAlg" )
-    trigMuonEFLateHypo.LateRoIs = sequenceOut
+    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonLateMuRoIHypoAlgCfg, TrigMuonLateMuRoIHypoToolFromDict
+    latemuHypo = TrigMuonLateMuRoIHypoAlgCfg( flags,
+                              name = 'TrigMuonLateMuRoIHypoAlg',
+                              LateRoIs = sequenceOut)
 
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonLateMuRoIHypoToolFromDict
+    selAcc.addHypoAlgo(latemuHypo)
+    
+    latemuRoISequence = MenuSequenceCA(flags, selAcc,
+                                    HypoToolGen = TrigMuonLateMuRoIHypoToolFromDict)
 
-    return MenuSequence( flags,
-                         Sequence    = muonEFLateSequence,
-                         Maker       = eflateViewsMaker,
-                         Hypo        = trigMuonEFLateHypo,
-                         HypoToolGen = TrigMuonLateMuRoIHypoToolFromDict )
+
+    return latemuRoISequence
 
 
 def efLateMuAlgSequence(flags):
@@ -977,31 +978,29 @@ def muEFMSIsoSequence(flags, is_probe_leg=False):
 
 def muRoiClusterSequence(flags):
 
-    from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorInitialROITool
     from TrigLongLivedParticles.TrigLongLivedParticlesConfig import MuonClusterConfig
     from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConfig import MuonClusterHypoAlgConfig, TrigLongLivedParticlesHypoToolFromDict
 
-    muvtxMuonClusterSequence = parOR('muvtxMuonClusterSequence', [MuonClusterConfig(flags, 'muvtxMuonCluster')])
+    selAcc = SelectionCA('muRoIClusterSel')
+    
+    viewName="MuRoIClusReco"
+    ViewCreatorInitialROITool=CompFactory.ViewCreatorInitialROITool
+    roiTool         = ViewCreatorInitialROITool()
+                                                         
+    recoRoICluster = InEventRecoCA(name=viewName, RoITool = roiTool, mergeUsingFeature = False, RoIs = 'HLT_muVtxCluster_RoIs')
+    recoRoICluster.mergeReco(MuonClusterConfig(flags, 'muvtxMuonCluster'))
+    selAcc.mergeReco(recoRoICluster)
 
 
+    hypoAlg = MuonClusterHypoAlgConfig( flags,
+                              name = 'MuRoiClusterHypoAlg')
 
+    selAcc.addHypoAlgo(hypoAlg)
+    
+    muRoIClusterSequence = MenuSequenceCA(flags, selAcc,
+                                          HypoToolGen = TrigLongLivedParticlesHypoToolFromDict)
 
-    inputMaker = InputMakerForRoI(
-                name = 'IM_muvtxMuonCluster',
-                mergeUsingFeature = False,
-                RoITool = ViewCreatorInitialROITool(),
-                RoIs = 'HLT_muVtxCluster_RoIs'
-                )
-
-    muvtx_sequence = seqAND('muvtxSequence', [inputMaker, muvtxMuonClusterSequence])
-
-    hypo        = MuonClusterHypoAlgConfig(flags, 'MuRoiClusterHypoAlg')
-
-    return MenuSequence( flags,
-                         Sequence    = muvtx_sequence,
-                         Maker       = inputMaker,
-                         Hypo        = hypo,
-                         HypoToolGen = TrigLongLivedParticlesHypoToolFromDict )
+    return muRoIClusterSequence
 
 
 ######################
