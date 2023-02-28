@@ -14,7 +14,6 @@
 #include "xAODMuonRDO/NRPCRDOAuxContainer.h"
 
 namespace {
-    constexpr unsigned int rpcRawHitWordLength = 7;
     constexpr double inverseSpeedOfLight = 1 / Gaudi::Units::c_light;  // need 1/299.792458
    
 }  // namespace

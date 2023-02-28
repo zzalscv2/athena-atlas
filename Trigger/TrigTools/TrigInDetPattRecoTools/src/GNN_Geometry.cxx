@@ -228,12 +228,6 @@ TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TrigInDetSiLayer>& 
     m_nEtaBins += pL->num_bins();
   }
  
-  int nBins = 0;
-  
-  for(auto gnn_layer : m_layArray) {
-    nBins += gnn_layer->num_bins();
-  }
-
   //calculating bin tables in the connector...
 
   for(std::map<int, std::vector<FASTRACK_CONNECTION*> >::const_iterator it = conn->m_connMap.begin();it!=conn->m_connMap.end();++it) {
