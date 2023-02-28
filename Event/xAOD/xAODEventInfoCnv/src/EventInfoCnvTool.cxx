@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: EventInfoCnvTool.cxx 727101 2016-03-01 15:56:08Z krasznaa $
@@ -156,6 +156,18 @@ namespace xAODMaker {
          if( xaod->eventType( xAOD::EventInfo::IS_SIMULATION ) || forceMCInfoCopy ) {
             xaod->setMCChannelNumber( aod->event_type()->mc_channel_number() );
             xaod->setMCEventNumber( aod->event_type()->mc_event_number() );
+            // Special case: sometimes in MC we have not yet copied the run number
+            //  into the channel number.  The channel number comes out 0, even
+            //  when it should be set.  To protect, if we get zero use the run #.
+            if (aod->event_type()->mc_channel_number()==0){
+               xaod->setMCChannelNumber( aod->event_ID()->run_number() );
+            }
+            if (aod->event_type()->mc_event_number()!=0){
+               xaod->setMCEventNumber( aod->event_type()->mc_event_number() );
+            } else {
+               // In evgen, the MC event number is not yet set
+               xaod->setMCEventNumber( aod->event_ID()->event_number() );
+            }
             std::vector< float >
                eventWeights( aod->event_type()->n_mc_event_weights(), 0.0 );
             for( unsigned int i = 0; i < aod->event_type()->n_mc_event_weights();
