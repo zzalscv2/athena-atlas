@@ -98,9 +98,9 @@ template <class T> inline bool fromDecay(T p)  {
       auto v=p->production_vertex();
       if (!v) return false;
 #ifdef HEPMC3
-      for ( auto anc: v->particles_in())
+      for ( const auto& anc: v->particles_in())
       if (isDecayed(anc) && (PID::isTau(anc->pdg_id()) || PID::isHadron(anc->pdg_id()))) return true;
-      for ( auto anc: v->particles_in())
+      for ( const auto& anc: v->particles_in())
       if (fromDecay<T>(anc)) return true;
 #else
       for (auto  anc=v->particles_in_const_begin(); anc != v->particles_in_const_end(); ++anc)
@@ -117,7 +117,7 @@ template <class T>  std::vector<T> findChildren(T p)
       auto v=p->end_vertex();
       if (!v) return ret;
 #ifdef HEPMC3
-      for (auto pp: v->particles_out()) ret.push_back(pp);
+      for (const auto& pp: v->particles_out()) ret.push_back(pp);
 #else
       for (auto pp=v->particles_out_const_begin();pp!=v->particles_out_const_end();++pp) ret.push_back(*pp);
 #endif

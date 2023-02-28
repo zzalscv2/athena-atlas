@@ -344,7 +344,7 @@ StatusCode TestHepMC::execute() {
     int vtxDisplacedstatuscodenot12CheckRateCnt=0;
     int vtxDisplacedMoreThan_1m_CheckRateCnt=0;
 #ifdef HEPMC3
-    for (auto vtx: evt->vertices()) {
+    for (const auto& vtx: evt->vertices()) {
 #else
     for (auto vitr = evt->vertices_begin(); vitr != evt->vertices_end(); ++vitr ) {
       const HepMC::GenVertex* vtx = *vitr;
@@ -396,7 +396,7 @@ StatusCode TestHepMC::execute() {
           if (m_dumpEvent) ATH_MSG_WARNING("parents info: ");
           if (part->production_vertex()) {
 #ifdef HEPMC3
-            for(auto p_parents: part->production_vertex()->particles_in()) {
+            for(const auto& p_parents: part->production_vertex()->particles_in()) {
 #else
             for(auto p_parents_it = part->production_vertex()->particles_in_const_begin(); p_parents_it != part->production_vertex()->particles_in_const_end(); ++p_parents_it) {
             auto p_parents=(*p_parents_it);
