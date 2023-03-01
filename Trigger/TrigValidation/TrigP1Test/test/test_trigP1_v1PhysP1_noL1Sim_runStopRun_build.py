@@ -18,7 +18,7 @@ ex.input = 'data'
 precommand = ''.join([
   "setMenu='PhysicsP1_pp_run3_v1_HLTReprocessing_prescale';",
   "forceEnableAllChains=True;",
-  "enableCostMonitoring=False;",
+  "flags.Trigger.CostMonitoring.doCostMonitoring=False;",
   "disableChains=['HLT_cosmic_id_L1MU3V_EMPTY','HLT_cosmic_id_L1MU8VF_EMPTY']", # Temporary workaround for ATR-25459
 ])
 ex.args = f'-i -M -ul -c "{precommand}"'

@@ -262,7 +262,7 @@ class ExecStep(Step):
         # Enable CostMonitoring/FPEAuditor
         if self.type != 'other':
             if self.costmon:
-                self.add_hlt_jo_modifier('forceCostMonitoring=True')
+                self.add_hlt_jo_modifier('from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Trigger.CostMonitoring.monitorAllEvents=True')
             if self.fpe_auditor:
                 self.add_hlt_jo_modifier('fpeAuditor=True')
 
