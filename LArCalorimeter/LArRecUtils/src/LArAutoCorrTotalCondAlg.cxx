@@ -24,7 +24,7 @@ LArAutoCorrTotalCondAlg::LArAutoCorrTotalCondAlg(const std::string &name,
       m_LArfSamplObjKey("LArfSamplSym"),
       m_LArMinBiasObjKey("LArMinBiasSym"),
       m_LArAutoCorrTotalObjKey("LArAutoCorrTotal"),
-      m_Nminbias(0), m_NoPile(false), m_isMC(true),
+      m_NoPile(false), m_isMC(true),
       m_isSuperCell(false), m_Nsamples(5),
       m_firstSample(0), m_deltaBunch(1) {
   declareProperty("LArADC2MeVObjKey", m_LArADC2MeVObjKey,
@@ -45,8 +45,7 @@ LArAutoCorrTotalCondAlg::LArAutoCorrTotalCondAlg(const std::string &name,
                   "Key to read LArMinBias object");
   declareProperty("LArAutoCorrTotalObjKey", m_LArAutoCorrTotalObjKey,
                   "Key to write LArAutoCorrTotal object");
-  declareProperty("Nminbias", m_Nminbias);
-  declareProperty("NoPile", m_NoPile);
+  declareProperty("NoPileUp", m_NoPile);
   declareProperty("isMC", m_isMC);
   declareProperty("isSuperCell", m_isSuperCell);
   declareProperty("Nsamples", m_Nsamples, "Max number of samples to use");
@@ -70,10 +69,6 @@ StatusCode LArAutoCorrTotalCondAlg::initialize() {
 
   ATH_CHECK(m_LArAutoCorrTotalObjKey.initialize());
 
-  m_NoPile = false;
-  if (m_Nminbias <= 0)
-    m_NoPile = true;
-
   ATH_CHECK(m_LArNoiseObjKey.initialize(!m_NoPile && m_isMC));
   ATH_CHECK(m_LArPedestalObjKey.initialize(!m_NoPile && !m_isMC));
   ATH_CHECK(m_LArfSamplObjKey.initialize(!m_NoPile));
@@ -86,7 +81,7 @@ StatusCode LArAutoCorrTotalCondAlg::initialize() {
     m_nGains = 3;
   }
 
-  ATH_MSG_DEBUG("settings: m_Nminbias " << m_Nminbias << " m_NoPile " << m_NoPile);
+  ATH_MSG_DEBUG("settings: m_NoPile " << m_NoPile);
   return StatusCode::SUCCESS;
 }
 

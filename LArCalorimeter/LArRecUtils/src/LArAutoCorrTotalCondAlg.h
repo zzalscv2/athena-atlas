@@ -46,7 +46,6 @@ private:
 
   SG::WriteCondHandleKey<LArAutoCorrTotal> m_LArAutoCorrTotalObjKey;
 
-  float m_Nminbias;
   bool m_NoPile;
   bool m_isMC;
   bool m_isSuperCell;

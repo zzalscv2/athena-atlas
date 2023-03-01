@@ -270,7 +270,7 @@ theAutoCorrTotalCondAlg.isMC = False
 theAutoCorrTotalCondAlg.LArAutoCorrObjKey = "LArAutoCorrRef"
 theAutoCorrTotalCondAlg.LArAutoCorrTotalObjKey = KeyOutputAC
 theAutoCorrTotalCondAlg.isSuperCell = SuperCells
-theAutoCorrTotalCondAlg.Nminbias = NColl
+theAutoCorrTotalCondAlg.NoPileUp = (NColl <=0) 
 if SuperCells:
    theAutoCorrTotalCondAlg.LArADC2MeVObjKey = "LArADC2MeVSC"
    theAutoCorrTotalCondAlg.LArOnOffIdMappingObjKey = "LArOnOffIdMapSC"
