@@ -61,16 +61,16 @@ namespace RootAuxDynIO
       void addAttribute( const std::string& field_name, const std::string& attr_type, void* attr_data );
 
       /// Add a new field to the RNTuple - for now only allowed before the first write
-      void addField( const std::string& field_name, const std::string& attr_type );
+      virtual void addField( const std::string& field_name, const std::string& attr_type ) override;
 
       /// Supply data address for a given field
-      void addFieldValue( const std::string& field_name, void* attr_data );
+      virtual void addFieldValue( const std::string& field_name, void* attr_data ) override;
 
       virtual int commit() override final;
 
-      virtual const std::string& getName() const { return m_ntupleName; }
+      virtual const std::string& getName() const override { return m_ntupleName; }
 
-      virtual size_t size() const { return m_rowN; }
+      virtual size_t size() const override { return m_rowN; }
 
       virtual bool needsCommit() override final { return m_entry or m_model; }
 
@@ -78,7 +78,7 @@ namespace RootAuxDynIO
 
       virtual void increaseClientCount() override final { m_clients++; }
 
-      void close();
+      virtual void close() override;
       
       virtual ~RNTupleAuxDynWriter();
    };
