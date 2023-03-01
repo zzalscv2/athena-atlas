@@ -90,7 +90,7 @@ AntiKt10UFOCHS = JetDefinition("AntiKt",1.0,cst.UFO,
 
 AntiKt10UFOCSSK = JetDefinition("AntiKt",1.0,cst.UFOCSSK,
                                 ghostdefs = standardghosts+flavourghosts+["AntiKtVR30Rmax4Rmin02PV0TrackJets"] ,
-                                modifiers = ("Sort", "Filter:50000","TrackMoments", "JetGhostLabel"),
+                                modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","PartonTruthLabel"),
                                 standardRecoMode = True,                               
                                 )
 

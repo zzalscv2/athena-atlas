@@ -1,8 +1,8 @@
-# DerivationFrameworkExamples
+# DerivationFrameworkJetEtMiss
 
 This package contains the derivation formats (JETMX) needed for Jet/Etmiss performance studies. 
 
-In Run 3 the derivation framework will move to the component accumulator. The config files can now be found in the python directory, not the share directory anymore (to be obsoleted once all derivation formats across ATLAS were migrated). 
+In Run 3 the derivation framework moved to the component accumulator. The config files can now be found in the python directory, not the share directory anymore!
 
 ## How to run: 
 
