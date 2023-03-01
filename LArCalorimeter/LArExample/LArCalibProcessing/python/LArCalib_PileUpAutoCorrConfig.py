@@ -35,7 +35,7 @@ def LArPileUpAutoCorrCfg(flags):
 
     from LArCalibProcessing.utils import FolderTagResolver
     FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
-    rs=FolderTagResolver()
+    rs=FolderTagResolver(dbname="sqlite://;schema=%s;dbname=CONDBR2"%flags.LArCalib.Input.Database)
     AutoCorrTag=rs.getFolderTag(flags.LArCalib.AutoCorr.Folder)
     PedestalTag=rs.getFolderTag(flags.LArCalib.Pedestal.Folder)
     RampTag=rs.getFolderTag(flags.LArCalib.Ramp.Folder)
@@ -85,6 +85,7 @@ def LArPileUpAutoCorrCfg(flags):
     theLArAutoCorrTotalCondAlg.LArAutoCorrObjKey="LArAutoCorr"
     theLArAutoCorrTotalCondAlg.LArAutoCorrTotalObjKey="LArPhysAutoCorr"  
     theLArAutoCorrTotalCondAlg.LArOnOffIdMappingObjKey=mapKey
+    theLArAutoCorrTotalCondAlg.LArPedestalObjKey="Pedestal"
     if flags.LArCalib.isSC:
        theLArAutoCorrTotalCondAlg.LArShapeObjKey = "LArShapeSC"
        theLArAutoCorrTotalCondAlg.LArfSamplObjKey = "LArfSamplSC"

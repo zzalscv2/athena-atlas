@@ -177,7 +177,7 @@ StatusCode LArAutoCorrTotalCondAlg::execute() {
 
   int count = 0;
   int count2 = 0;
-
+  int count3 =0;
 
   for (const HWIdentifier chid : larOnlineID->channel_range()) {
     count++;
@@ -194,6 +194,12 @@ StatusCode LArAutoCorrTotalCondAlg::execute() {
         const ILArAutoCorr::AutoCorrRef_t AC =
             larAutoCorr->autoCorr(chid, igain);
 
+	if (AC.size() == 0) {
+	  ATH_MSG_INFO("No ElecCalib AC for channel " << larOnlineID->channel_name(chid) << ", gain "<<igain << ". Skip.");
+	  continue;
+	}
+	    
+	count3++;
         int nsamples_AC_OFC = AC.size() + 1;
 
         if (nsamples_AC_OFC > m_Nsamples) {
@@ -318,6 +324,7 @@ StatusCode LArAutoCorrTotalCondAlg::execute() {
   }
 
   ATH_MSG_INFO("LArAutoCorrTotal Ncell " << count);
+  ATH_MSG_INFO("LArAutoCorrTotal Ncell * Ngain " << count3);
   ATH_MSG_INFO("LArAutoCorrTotal Nconnected " << count2);
 
   ATH_MSG_INFO("LArAutoCorrTotal record with key" << m_LArAutoCorrTotalObjKey);
