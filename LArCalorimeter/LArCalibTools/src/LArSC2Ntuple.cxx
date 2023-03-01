@@ -565,7 +565,7 @@ void LArSC2Ntuple::fillRODEnergy(HWIdentifier SCId, rawChanMap_t &rawChanMap, co
  std::fill(m_ROD_energy.begin(), m_ROD_energy.end(), 0.);
  for(unsigned i=0; i<cellIds.size(); ++i ) {
     const HWIdentifier hwcell=cablingROD->createSignalChannelID(cellIds[i]);
-    if (hwcell.is_valid()) {
+    if (hwcell.is_valid()  && (rawChanMap.count(hwcell) != 0) ) {
        m_ROD_energy[i] = rawChanMap[hwcell]->energy();
     } else {
        ATH_MSG_WARNING(i<<"-th cell invalid Id");
