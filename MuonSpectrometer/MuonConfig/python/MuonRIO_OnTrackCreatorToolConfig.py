@@ -79,6 +79,7 @@ def MdtDriftCircleOnTrackCreatorCfg(flags,name="MdtDriftCircleOnTrackCreator", *
         kwargs.setdefault("DoFixedError", True)
         kwargs.setdefault("TimingMode", 1)
         kwargs.setdefault("UseParametrisedError", True)
+        kwargs.setdefault("ApplyToF", False)
 
     else: # collisions simulation/data settings
         kwargs.setdefault("DoTofCorrection", True)

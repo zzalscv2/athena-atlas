@@ -22,38 +22,17 @@
 #include <boost/assign/std/vector.hpp>
 
 Muon::MdtDriftCircleOnTrackCreator::MdtDriftCircleOnTrackCreator(const std::string& ty,const std::string& na,const IInterface* pa) :
-    AthAlgTool(ty,na,pa),
-    m_mdtCalibSvcSettings(new MdtCalibrationSvcSettings()), // create calibration service settings 
-    m_errorStrategy(Muon::MuonDriftCircleErrorStrategyInput())
-{
+    AthAlgTool(ty,na,pa)  {
     // algtool interface - necessary!
   declareInterface<IMdtDriftCircleOnTrackCreator>(this);
   declareInterface<IRIO_OnTrackCreator>(this);
   
-  // --- if any of those false, then just copy, but no update.
-  declareProperty("doMDT",  m_doMdt = true);
-  declareProperty("TimingMode", m_timeCorrectionType = 0 );
-  declareProperty("FixedError",m_fixedError = 1.);
-  declareProperty("DiscardMaskedHits",m_discardMaskedHits = true);
-  declareProperty("GlobalToLocalTolerance",m_globalToLocalTolerance = 1000., "Tolerance used for the Surface::globalToLocal" );
-  
+ 
   // configuration of the calibration service settings
   declareProperty("TimeWindowLowerBound",m_mdtCalibSvcSettings->windowLowerBound );
   declareProperty("TimeWindowUpperBound",m_mdtCalibSvcSettings->windowUpperBound );
   declareProperty("TimeWindowSetting",m_mdtCalibSvcSettings->windowSetting );
-  
-  // configuration of the default error strategy
-  declareProperty("DefaultErrorStrategy", m_defaultStrategy = "Moore", "Default error strategy to be used in calculating errors" );
-  declareProperty("CreateTubeHit",m_createTubeHits = false );
-  declareProperty("DoErrorScaling",m_scaleMdtCov = true, "Switch on error scaling" );
-  declareProperty("DoFixedError",m_doFixedError = true);
-  declareProperty("UseParametrisedError", m_useErrorParametrisation = false );
-  declareProperty("UseErrorAtPredictedPosition", m_errorAtPredictedPosition = false,
-                  "The error will be adjusted to be that corresponding to the predicted position. This is useful to fix problems with tracks very close to the wire.");
-  declareProperty("DoWireSag",m_doWireSag = false );
-  declareProperty("DoStationError",m_stationError=false,"Add a term to the error to account for poorly aligned stations");
-  declareProperty("T0RefitError",m_t0Refit=false,"Add an error to account for the T0 refit");
-  declareProperty("DeweightIndividualChambers",m_doIndividualChamberReweights = true, "Apply chamber specific deweighting");
+
   declareProperty("DoTofCorrection",m_mdtCalibSvcSettings->doTof );
   declareProperty("DoPropagationCorrection",m_mdtCalibSvcSettings->doProp );
   declareProperty("DoTemperatureCorrection",m_mdtCalibSvcSettings->doTemp );
@@ -61,9 +40,7 @@ Muon::MdtDriftCircleOnTrackCreator::MdtDriftCircleOnTrackCreator(const std::stri
   declareProperty("DoWireSagCorrection",m_mdtCalibSvcSettings->doWireSag );
   declareProperty("DoSlewingCorrection",m_mdtCalibSvcSettings->doSlew );
   declareProperty("DoBackgroundCorrection",m_mdtCalibSvcSettings->doBkg );
-  declareProperty("DoSegmentErrors",m_doSegments=true , "Use error strategy for segments");
-  declareProperty("UseLooseErrors",m_looseErrors=false , "Use error strategy for MC");
-  declareProperty("IsMC",m_isMC=false);
+ 
 }
 
 StatusCode Muon::MdtDriftCircleOnTrackCreator::initialize()
@@ -155,9 +132,9 @@ Muon::MdtDriftCircleOnTrack* Muon::MdtDriftCircleOnTrackCreator::createRIO_OnTra
                                                                                          const double beta,
                                                                                          const double tTrack ) const
 {
-  const MuonDriftCircleErrorStrategy* myStrategy = nullptr==strategy?&m_errorStrategy:strategy;
+  const MuonDriftCircleErrorStrategy* myStrategy = !strategy? &m_errorStrategy : strategy;
   
-  const Identifier& iD = mdtPrd.identify();
+  const Identifier iD = mdtPrd.identify();
   
   // check whether the MdtPrepData is not a masked hit
   if( m_discardMaskedHits && mdtPrd.status() == Muon::MdtStatusMasked ){
@@ -319,7 +296,7 @@ Muon::MdtDriftCircleOnTrackCreator::getLocalMeasurement(const MdtPrepData& DC,
                                                         const double beta,
                                                         const double tTrack) const
 {
-  const MuonDriftCircleErrorStrategy* myStrategy = nullptr==strategy?&m_errorStrategy:strategy;
+  const MuonDriftCircleErrorStrategy* myStrategy = !strategy?&m_errorStrategy:strategy;
   
   ATH_MSG_VERBOSE( "getLocalMeasurement with m_doMdt="<<m_doMdt<<" and "<<(*myStrategy));
   // ATH_MSG_INFO( "Dumping PRD: "<<DC);
@@ -336,7 +313,7 @@ Muon::MdtDriftCircleOnTrackCreator::getLocalMeasurement(const MdtPrepData& DC,
       Amg::MatrixX  localCov(1,1);
       localCov(0,0) = 0.0;
  
-      return {Amg::Vector2D(),localCov,0.,false};
+      return {Trk::LocalParameters{},localCov,0.,false};
     }
     
     // call calibration Service
@@ -367,8 +344,8 @@ Muon::MdtDriftCircleOnTrackCreator::getLocalMeasurement(const MdtPrepData& DC,
                         << inputData.triggerOffset );
         break;
       case COSMICS_TOF:
-        inputData.tof = timeOfFlight(gpos, beta, tTrack, (double)t0Shift);
-        ATH_MSG_VERBOSE( " running in COSMICS_TOF mode, tof: " << inputData.tof );
+        inputData.tof = timeOfFlight(gpos, beta, tTrack, t0Shift);
+        ATH_MSG_VERBOSE( " running in COSMICS_TOF mode, tof: " << inputData.tof<<" tTrack: "<<tTrack<<" t0Shift: "<<t0Shift<<" applyToF: "<<m_applyToF );
         break;
       default:
         // default, no tof. Indicates wrong configuration
@@ -379,10 +356,10 @@ Muon::MdtDriftCircleOnTrackCreator::getLocalMeasurement(const MdtPrepData& DC,
     
     // call the calibration service providing the time when the particle passed the tube
     ok = m_mdtCalibrationTool->driftRadiusFromTime( *calibHit, inputData, *m_mdtCalibSvcSettings );
-    
     driftTime = calibHit->driftTime();
     radius    = calibHit->driftRadius();  // copy new values
     errRadius=radius; // Use same value      
+
     if ( myStrategy->creationParameter(MuonDriftCircleErrorStrategy::ErrorAtPredictedPosition)){
       std::optional<Amg::Vector2D> myLocalPosition = DC.detectorElement()->surface(DC.identify()).Trk::Surface::globalToLocal(gpos);
 	  if (myLocalPosition) {
@@ -440,7 +417,7 @@ Muon::MdtDriftCircleOnTrackCreator::getLocalMeasurement(const MdtPrepData& DC,
   newLocalCov(0,0) = sigmaR2;
   
   // return new values
-  return { Trk::LocalParameters(radiusPar), newLocalCov, driftTime, ok };
+  return { Trk::LocalParameters(std::move(radiusPar)), newLocalCov, driftTime, ok };
 }
 
 Muon::MdtDriftCircleOnTrack* Muon::MdtDriftCircleOnTrackCreator::correct(
@@ -642,7 +619,7 @@ Muon::MdtDriftCircleStatus Muon::MdtDriftCircleOnTrackCreator::driftCircleStatus
 }
 
 double Muon::MdtDriftCircleOnTrackCreator::timeOfFlight(const Amg::Vector3D& pos, const double beta, const double tTrack, const double tShift) const {
-  return (pos.mag() * m_inverseSpeedOfLight / beta + tTrack + tShift);
+  return m_applyToF *(pos.mag() * m_inverseSpeedOfLight / beta) + tTrack + tShift;
 }
 
 double Muon::MdtDriftCircleOnTrackCreator::parametrisedSigma( double r ) {
