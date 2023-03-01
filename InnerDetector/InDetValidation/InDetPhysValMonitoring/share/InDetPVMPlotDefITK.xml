@@ -31,6 +31,7 @@
 <!ENTITY Z0PARA "250.0">
 <!ENTITY QOPPARA "5.0e-3">
 <!ENTITY Z0SINPARA "40.0">
+<!ENTITY TIMEPARA "0.4">
 <!-- dR plots for tracks in jets -->
 <!ENTITY DRMAX "0.4">
 <!ENTITY SMALLDRMAX "0.1">
@@ -415,6 +416,23 @@
 =======================================================
 end of hit residuals & cluster width plots
 =======================================================
+  -->
+
+  <!--
+      =======================================================
+      HGTD timing plots
+      =======================================================
+  -->
+
+  <h id="reco_time" type="TH1F" title="reco_{time}">
+    <x title="reco_{time} [ns]" n="160" lo="-&TIMEPARA;" hi="&TIMEPARA;"/>
+    <y title="Number of Entries"/>
+  </h>
+
+  <!--
+      =======================================================
+      end of HGTD timing plots
+      =======================================================
   -->
 
 </hdef>

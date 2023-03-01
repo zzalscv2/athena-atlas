@@ -53,6 +53,7 @@
        <hist1D name="reco_pt" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="reco_lowpt" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="reco_chi2Overndof" plotopts="" tests="KS" type="TH1F"/>
+       <hist1D name="reco_time" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="truth_d0" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="truth_z0" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="truth_phi" plotopts="" tests="KS" type="TH1F"/>

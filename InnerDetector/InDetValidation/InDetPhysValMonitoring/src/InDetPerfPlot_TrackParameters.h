@@ -40,6 +40,7 @@ private:
   TH1* m_reco_ndof;
   TH1* m_reco_chi2Overndof;
   TH1* m_reco_author;
+  TH1* m_reco_time;
 
   TH1* m_truth_d0;
   TH1* m_truth_z0;
