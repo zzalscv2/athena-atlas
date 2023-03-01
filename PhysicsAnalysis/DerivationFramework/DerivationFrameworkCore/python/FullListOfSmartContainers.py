@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 FullListOfSmartContainers = [
    "EventInfo",
@@ -27,21 +27,15 @@ FullListOfSmartContainers = [
    "AntiKt10TruthTrimmedPtFrac5SmallR20Jets",
    "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
    "AntiKt10TrackCaloClusterTrimmedPtFrac5SmallR20Jets",
-   "AntiKt10EMPFlowTrimmedPtFrac5SmallR20Jets",
    "AntiKt10TruthSoftDropBeta100Zcut10Jets",
    "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
    "AntiKt10UFOCHSSoftDropBeta100Zcut10Jets",
    "AntiKt4LCTopoJets",
    "AntiKt4EMTopoJets",
    "AntiKt4EMPFlowJets",
+   "AntiKt4EMTopoLowPtJets",
+   "AntiKt4EMPFlowLowPtJets",
    "AntiKt2LCTopoJets",
-   "AntiKt3LCTopoJets",
-   "AntiKt5LCTopoJets",
-   "AntiKt6LCTopoJets",
-   "AntiKt7LCTopoJets",
-   "AntiKt8LCTopoJets",
-   "AntiKt8EMTopoJets",
-   "AntiKt8EMPFlowJets",
    "AntiKtVR30Rmax4Rmin02PV0TrackJets",
    "BTagging_AntiKt4EMPFlow",
    "BTagging_AntiKt4EMPFlow_expert",
