@@ -20,6 +20,7 @@
 
 
 #include <cstdint>
+#include <cstddef>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -49,6 +50,32 @@ constexpr bool sgkeyLess (const sgkey_t a, const sgkey_t b)
 {
   return a < b;
 }
+
+
+/**
+ * @brief Hash functional for sgkey_t.
+ */
+struct SGKeyHash
+{
+  inline
+  constexpr size_t operator() (const sgkey_t k) const
+  {
+    return k;
+  }
+};
+
+
+/**
+ * @brief Comparison functional for sgkey_t.
+ */
+struct SGKeyEqual
+{
+  inline
+  constexpr bool operator() (const sgkey_t a, const sgkey_t b) const
+  {
+    return sgkeyEqual (a, b);
+  }
+};
 
 
 /**
