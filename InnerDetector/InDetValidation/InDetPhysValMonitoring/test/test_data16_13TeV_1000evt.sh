@@ -3,6 +3,7 @@
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # art-output: physval*.root
 # art-output: *.xml
 # art-output: dcube*
