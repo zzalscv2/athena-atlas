@@ -193,8 +193,8 @@ bool Config::initialize(int argc, char* argv[])
   ANA_CHECK( tool.setProperty("UseRandomRunNumber", true) );
 
   run_number = 0;
-  std::vector<char> eta_flags(eta_edges.size()-1, 0);
-  std::vector<char> pt_flags(pt_edges.size()-1, 0);
+  std::vector<int8_t> eta_flags(eta_edges.size()-1, 0);
+  std::vector<int8_t> pt_flags(pt_edges.size()-1, 0);
 
   for (int i=1; i<argc; ++i) {
     std::string key{argv[i]};
@@ -437,7 +437,9 @@ bool displayFindings_analysis(const Config& cfg, const map_t& affected_bins)
 
 bool find_boundaries(const Config& cfg,
                      const map_t::mapped_type& affected_bins,
-                     Domain& bounds, bool& abs_eta, bool& holes)
+                     Domain& bounds,
+                     bool& abs_eta,
+                     bool& holes)
 {
   if (affected_bins.empty()) return false;
   constexpr float inf{std::numeric_limits<float>::max()};
@@ -515,11 +517,12 @@ bool parse_csv_token(const float x, std::vector<float>& bins)
 }
 
 
-bool parse_csv_token(std::string s, std::vector<char>& flags, 
+bool parse_csv_token(std::string s,
+                     std::vector<int8_t>& flags, 
                      const std::vector<float>& edges)
 {
   const bool accept_aliases{&edges == &eta_edges};
-  if (flags.size() != edges.size()-1) return false;
+  if (flags.size() != edges.size() - 1) return false;
   int alias{0};
   if (s == "nocrack") alias = 1;
   else if (s == "barrel") alias = 2;
@@ -560,7 +563,7 @@ bool parse_csv_list(std::string val, Args&... args)
 {
   std::replace(val.begin(), val.end(), ',', ' ');
   std::stringstream ss{val};
-  while(true) {
+  while (true) {
     std::conditional_t<(sizeof...(Args)<2), float, std::string> x;
     ss >> x;
     if (ss.fail()) break;
