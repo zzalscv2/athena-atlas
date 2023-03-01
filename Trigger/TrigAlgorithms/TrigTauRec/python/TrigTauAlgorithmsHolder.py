@@ -59,61 +59,6 @@ def getJetSeedBuilder():
     cached_instances[_name] = JetSeedBuilder
     return JetSeedBuilder
 
-########################################################################
-# Tau energy calibration and tau axis direction
-def getTauAxis():
-    _name = sPrefix + 'TauAxis'
-    
-    if _name in cached_instances:
-        return cached_instances[_name]
-    
-    from tauRecTools.tauRecToolsConf import TauAxisSetter
-    TauAxisSetter = TauAxisSetter(  name = _name, 
-                                    ClusterCone = 0.2,
-                                    VertexCorrection = doVertexCorrection )
-    # No Axis correction at trigger level
-                                    
-    cached_instances[_name] = TauAxisSetter                
-    return TauAxisSetter
-
-########################################################################
-# MvaTESVariableDecorator
-def getMvaTESVariableDecorator():
-
-    _name = sPrefix + 'MvaTESVariableDecorator'
-
-    if _name in cached_instances:
-        return cached_instances[_name]
-
-    from AthenaCommon.AppMgr import ToolSvc
-    from tauRecTools.tauRecToolsConf import MvaTESVariableDecorator
-    MvaTESVariableDecorator = MvaTESVariableDecorator(name = _name,
-                                                      VertexCorrection = doVertexCorrection)
-
-    MvaTESVariableDecorator.Key_vertexInputContainer = ""
-    MvaTESVariableDecorator.EventShapeKey = ""
-
-    ToolSvc += MvaTESVariableDecorator
-    cached_instances[_name] = MvaTESVariableDecorator
-    return MvaTESVariableDecorator
-
-########################################################################
-# MvaTESEvaluator
-def getMvaTESEvaluator(flags):
-
-    _name = sPrefix + 'MvaTESEvaluator'
-
-    if _name in cached_instances:
-        return cached_instances[_name]
-
-    from AthenaCommon.AppMgr import ToolSvc
-    from tauRecTools.tauRecToolsConf import MvaTESEvaluator
-    MvaTESEvaluator = MvaTESEvaluator(name = _name,
-                                      WeightFileName = flags.Trigger.Offline.Tau.MvaTESConfig)
-
-    ToolSvc += MvaTESEvaluator
-    cached_instances[_name] = MvaTESEvaluator
-    return MvaTESEvaluator
 
 ########################################################################
 # Tau cell variables calculation
@@ -414,36 +359,6 @@ def getTauTrackFinder(applyZ0cut=False, maxDeltaZ0=2, noSelector = False, prefix
 
     cached_instances[_name] = TauTrackFinder      
     return TauTrackFinder
-
-
-# Associate the cluster in jet constituents to the tau candidate
-def getTauClusterFinder():
-    _name = sPrefix + 'TauClusterFinder'
-
-    if _name in cached_instances:
-        return cached_instances[_name]
-  
-    from tauRecTools.tauRecToolsConf import TauClusterFinder
-    TauClusterFinder = TauClusterFinder(name = _name,
-                                        UseOriginalCluster = False)
-
-    cached_instances[_name] = TauClusterFinder
-    return TauClusterFinder
-
-
-def getTauVertexedClusterDecorator():
-    from tauRecTools.tauRecToolsConf import TauVertexedClusterDecorator
-
-    _name = sPrefix + 'TauVertexedClusterDecorator'
-    
-    if _name in cached_instances:
-        return cached_instances[_name]
-  
-    myTauVertexedClusterDecorator = TauVertexedClusterDecorator(name = _name,
-                                                                SeedJet = "")
-    
-    cached_instances[_name] = myTauVertexedClusterDecorator
-    return myTauVertexedClusterDecorator
 
 
 ########################################################################

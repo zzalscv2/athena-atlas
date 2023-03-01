@@ -3,6 +3,7 @@
 from TrigTauRec.TrigTauRecConf import TrigTauRecMerged
 from TrigTauRec.TrigTauRecMonitoring import tauMonitoringCaloOnlyMVA,  tauMonitoringPrecisionMVA
 
+
 class TrigTauRecMerged_TauCaloOnlyMVA (TrigTauRecMerged) :
 
         def __init__(self, flags, name = "TrigTauRecMerged_TauCaloOnlyMVA"):
@@ -43,6 +44,7 @@ class TrigTauRecMerged_TauPrecisionMVA (TrigTauRecMerged) :
             super( TrigTauRecMerged_TauPrecisionMVA , self ).__init__( name )
             self.MonTool = tauMonitoringPrecisionMVA(flags)
 
+            from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper, conf2toConfigurable
             import TrigTauRec.TrigTauAlgorithmsHolder as taualgs
             tools = []
 
@@ -56,14 +58,19 @@ class TrigTauRecMerged_TauPrecisionMVA (TrigTauRecMerged) :
             tools.append(taualgs.getTauVertexFinder(doUseTJVA=False)) #don't use TJVA by default
             # Set LC energy scale (0.2 cone) and intermediate axis (corrected for vertex: useless at trigger)       
 
-            tools.append(taualgs.getTauAxis())
+            from TrigTauRec.TrigTauToolsConfig import (tauAxisCfg, tauClusterFinderCfg, tauVertexedClusterDecoratorCfg, tauMvaTESVariableDecoratorCfg, tauMvaTESEvaluatorCfg)
+            ca = CAtoGlobalWrapper(tauAxisCfg,flags,name="TrigTau_TauAxis")
+            tools.append(conf2toConfigurable(ca.popPrivateTools()))
             
             # tightened to 0.75 mm for tracktwoMVA (until the track BDT can be used)
             tools.append(taualgs.getTauTrackFinder(applyZ0cut=True, maxDeltaZ0=0.75, prefix='TrigTauTightDZ_'))            
             
             # Decorate the clusters
-            tools.append(taualgs.getTauClusterFinder())
-            tools.append(taualgs.getTauVertexedClusterDecorator())
+            ca = CAtoGlobalWrapper(tauClusterFinderCfg,flags,name="TrigTau_TauClusterFinder")
+            tools.append(conf2toConfigurable(ca.popPrivateTools()))
+
+            ca = CAtoGlobalWrapper(tauVertexedClusterDecoratorCfg,flags,name="TrigTau_TauVertexedClusterDecorator")
+            tools.append(conf2toConfigurable(ca.popPrivateTools()))
 
             from AthenaCommon.Logging import log
             if doTrackBDT:
@@ -71,8 +78,12 @@ class TrigTauRecMerged_TauPrecisionMVA (TrigTauRecMerged) :
                 log.warning( "BDT track classifier is deprecated and won't be scheduled")
 
             # Compute MVA TES (ATR-17649), stores MVA TES as default tau pt()
-            tools.append(taualgs.getMvaTESVariableDecorator())
-            tools.append(taualgs.getMvaTESEvaluator(flags))
+            from AthenaCommon.AppMgr import ToolSvc
+            CAtoGlobalWrapper(tauMvaTESVariableDecoratorCfg,flags,name="TrigTau_MvaTESVariableDecorator")            
+            tools.append(ToolSvc.TrigTau_MvaTESVariableDecorator)
+
+            CAtoGlobalWrapper(tauMvaTESEvaluatorCfg,flags,name="TrigTau_MvaTESEvaluator")           
+            tools.append(ToolSvc.TrigTau_MvaTESEvaluator)
 
             # Calculate cell-based quantities: strip variables, EM and Had energies/radii, centFrac, isolFrac and ring energies
             tools.append(taualgs.getCellVariables(cellConeSize=0.2))
@@ -100,7 +111,6 @@ class TrigTauDefaultsKeys:
     VertexContainer = 'PrimaryVertices'
     TrackContainer ='InDetTrackParticles'
     LargeD0TrackContainer ='InDetLargeD0TrackParticles'
-
 
 def trigTauRecMergedCaloOnlyMVACfg(flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
