@@ -69,6 +69,7 @@ InDetPerfPlot_TrackParameters::initializePlots() {
   book(m_reco_ndof,   "reco_ndof");
   book(m_reco_chi2Overndof, "reco_chi2Overndof");
   book(m_reco_author,  "reco_author");
+  book(m_reco_time,    "reco_time");
 
   book(m_truth_d0,     "truth_d0");
   book(m_truth_z0,     "truth_z0");
@@ -163,6 +164,11 @@ InDetPerfPlot_TrackParameters::fill(const xAOD::TrackParticle& particle, float w
   std::bitset<xAOD::TrackPatternRecoInfo::NumberOfTrackRecoInfo>  patternInfo = particle.patternRecoInfo();
   for(unsigned int i = 0; i < xAOD::TrackPatternRecoInfo::NumberOfTrackRecoInfo; i++){
     if(patternInfo.test(i)) fillHisto(m_reco_author, i, weight);
+  }
+
+  static const SG::AuxElement::Accessor< float > acc("time");
+  if( acc.isAvailable(particle) ) {
+    fillHisto(m_reco_time, particle.time(), weight);
   }
 
 }
