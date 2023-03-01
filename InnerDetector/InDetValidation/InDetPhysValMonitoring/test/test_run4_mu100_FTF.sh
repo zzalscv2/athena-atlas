@@ -33,7 +33,7 @@ run "Simulation" \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
     --geometryVersion "default:${geometry}" \
-    --inputEVNTFile ${ArtInFile} \    
+    --inputEVNTFile ${ArtInFile} \
     --outputHITSFile HITS.root \
     --maxEvents -1 \
     --imf False \
@@ -70,7 +70,7 @@ run "IDPVM" \
     --doHitLevelPlots \
     --doExpertPlots \
     --truthMinPt=1000 \
-    --validateExtraTrackCollections 'TrigFastTrackFinder_FTF_'
+    --validateExtraTrackCollections {'TrigFastTrackFinder_FTF_','TrigFastTrackFinder_IDTrig_'}
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
