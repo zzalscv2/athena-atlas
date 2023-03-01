@@ -362,8 +362,8 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     # Add the sequence to the job:
     algSeq += metSequence
     metVars += [
-        'AnaMET_%SYS%.mpx   -> met_mpx_%SYS%',
-        'AnaMET_%SYS%.mpy   -> met_mpy_%SYS%',
+        'AnaMET_%SYS%.met   -> met_met_%SYS%',
+        'AnaMET_%SYS%.phi   -> met_phi_%SYS%',
         'AnaMET_%SYS%.sumet -> met_sumet_%SYS%',
     ]
 

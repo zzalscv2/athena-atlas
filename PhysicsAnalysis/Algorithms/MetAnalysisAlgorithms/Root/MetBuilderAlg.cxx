@@ -56,7 +56,20 @@ namespace CP
         ANA_MSG_ERROR ("could not find MET soft-term: " << m_softTerm);
         return StatusCode::FAILURE;
       }
-      ATH_CHECK (met::buildMETSum (m_finalKey, met, softTerm->source()));
+      ANA_CHECK (met::buildMETSum (m_finalKey, met, softTerm->source()));
+
+      const static SG::AuxElement::Decorator<float> met_met_dec("met");
+      const static SG::AuxElement::Decorator<float> met_phi_dec("phi");
+      for (const xAOD::MissingET *metTerm : (*met))
+      {
+        if (!metTerm)
+        {
+          ANA_MSG_WARNING("failed to retrieve MET term to decorate met and phi aux vars!");
+          continue;
+        }
+        met_met_dec(*metTerm) = metTerm->met();
+        met_phi_dec(*metTerm) = metTerm->phi();
+      }
     }
 
     return StatusCode::SUCCESS;
