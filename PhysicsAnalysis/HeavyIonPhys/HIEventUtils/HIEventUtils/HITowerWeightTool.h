@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HIEVENTUTILS_HITOWERWEIGHTTOOL_H
@@ -25,7 +25,7 @@ class HITowerWeightTool : virtual public asg::AsgTool, virtual public IHITowerWe
 
     virtual ~HITowerWeightTool() {};
     virtual StatusCode initialize() override;
-    virtual StatusCode configureEvent() override;
+    virtual int getRunIndex() const override;
     virtual float getEtaPhiResponse(float eta, float phi) const override;
     virtual float getEtaPhiOffset(float eta, float phi) const override;
     virtual float getWeight(float eta, float phi, int sampling) const override;
@@ -44,8 +44,6 @@ class HITowerWeightTool : virtual public asg::AsgTool, virtual public IHITowerWe
     TH3F* m_h3Mag;
     TH3F* m_h3EtaPhiResponse;
     TH3F* m_h3EtaPhiOffset;
-    unsigned int m_runNumber;
-    int m_runIndex;
     std::map<unsigned int, int> m_runMap;
 
 

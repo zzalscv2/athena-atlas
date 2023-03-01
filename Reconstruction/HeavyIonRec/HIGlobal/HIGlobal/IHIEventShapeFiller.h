@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef __INTERFACE_HIEVENTSHAPEMODIFIER_H__
@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <memory>
 
 class CaloCellContainer;
 
@@ -26,14 +27,12 @@ class IHIEventShapeFiller : virtual public asg::IAsgTool
 public:
   virtual ~IHIEventShapeFiller() {};
 
-  virtual StatusCode initializeCollection(xAOD::HIEventShapeContainer* evtShape_) = 0;
+  virtual StatusCode initializeIndex() = 0;
+  virtual StatusCode initializeEventShapeContainer(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape) const = 0;
   
-  virtual StatusCode fillCollectionFromTowers(const SG::ReadHandleKey<xAOD::CaloClusterContainer>& m_tower_container_key,
-    const SG::ReadHandleKey<INavigable4MomentumCollection>& m_navi_container_key) = 0;
+  virtual StatusCode fillCollectionFromTowers(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const SG::ReadHandleKey<xAOD::CaloClusterContainer>& m_tower_container_key, const SG::ReadHandleKey<INavigable4MomentumCollection>& m_navi_container_key, const EventContext& ctx) const = 0;
 
-  virtual StatusCode fillCollectionFromCells(const SG::ReadHandleKey<CaloCellContainer>& m_cell_container_key) = 0;
-
-  virtual const xAOD::HIEventShapeContainer* getHIEventShapeContainer() const = 0;
+  virtual StatusCode fillCollectionFromCells(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const SG::ReadHandleKey<CaloCellContainer>& m_cell_container_key, const EventContext& ctx) const = 0;
 
   inline std::string getContainerName() const { return m_outputContainerName; };
   inline void setContainerName(std::string cname) { m_outputContainerName = cname; };

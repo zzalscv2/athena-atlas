@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HIEVENTUTILS_HIEVENTSHAPEINDEX_H
@@ -7,6 +7,7 @@
 
 #include "xAODHIEvent/HIEventShapeContainer.h"
 #include "HIEventUtils/HIEventDefs.h"
+#include <memory>
 #include <map>
 #include <cmath>
 #include <TH2.h>
@@ -23,10 +24,9 @@ public:
   //returns total number of bins
 
   unsigned int setBinning(const TH2* h2, bool asMask);
-  unsigned int setBinning(const xAOD::HIEventShapeContainer* shape);
   unsigned int setBinning(HI::BinningScheme scheme);
 
-  void initializeEventShapeContainer(xAOD::HIEventShapeContainer* shape_container, unsigned int num_harmonics) const;
+  void initializeEventShapeContainer(std::unique_ptr<xAOD::HIEventShapeContainer>& shape_container, unsigned int num_harmonics) const;
   //can associate ptr to shape container w/ binning
   //not required
 
@@ -37,6 +37,7 @@ public:
   unsigned int getNumBins() const {return m_size;};
   xAOD::HIEventShape* getShape(float eta, int layer, xAOD::HIEventShapeContainer* shape_container) const;
   const xAOD::HIEventShape* getShape(float eta, int layer, const xAOD::HIEventShapeContainer* shape_container) const;
+  xAOD::HIEventShape* getShape(float eta, int layer, std::unique_ptr<xAOD::HIEventShapeContainer>& shape_container) const;
   //HIEventShapeIndex& operator=(const HIEventShapeIndex& in);
   std::string print() const;
 private:
@@ -56,9 +57,7 @@ private:
     bool operator< (const range_index_t& rhs)  const {return this->eta_min < rhs.eta_min;};
   };
   std::map<int,std::vector<range_index_t> > m_edges;
-  //pointer to container
-  //only used to check compatibility of bins, not used as accessor
-  const xAOD::HIEventShapeContainer* m_shape_container;
+  
   unsigned int m_size;
 
   unsigned int getIndex_Internal(float eta, int layer, bool etaIndex) const;

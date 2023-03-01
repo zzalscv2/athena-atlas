@@ -1,16 +1,15 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef __HIEVENTSHAPEMAKER_H__
 #define __HIEVENTSHAPEMAKER_H__
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "xAODHIEvent/HIEventShapeContainer.h"
 #include "xAODHIEvent/HIEventShapeAuxContainer.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
-#include <string>
 
 #include "GaudiKernel/ToolHandle.h"
 #include "Gaudi/Property.h"
@@ -20,20 +19,25 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 
+#include <string>
+#include <iostream> 
+#include <sstream> 
+#include <memory>
+
 class CaloCellContainer;
 
-class HIEventShapeMaker : public AthAlgorithm
+class HIEventShapeMaker : public AthReentrantAlgorithm
 {
 public:
 
   /** Standard Athena-Algorithm Constructor */
   HIEventShapeMaker(const std::string& name, ISvcLocator* pSvcLocator);
   /** Default Destructor */
-  ~HIEventShapeMaker() {};
+  ~HIEventShapeMaker() = default;
 
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
   virtual StatusCode finalize() override;
 
 private:
@@ -49,7 +53,7 @@ private:
   ToolHandle<IHIEventShapeFiller> m_HIEventShapeFillerTool{ this, "HIEventShapeFillerTool", "HIEventShapeFillerTool", "HIEventShapeFillerTool" };
   ToolHandle<IHIEventShapeSummaryTool> m_summaryTool{ this, "SummaryTool", "HIEventShapeSummaryTool", "Handle to IHIEventShapeSummaryTool" };
 
-  void PrintHIEventShapeContainer(const xAOD::HIEventShapeContainer* Container);
+  std::string PrintHIEventShapeContainer(const xAOD::HIEventShapeContainer* Container) const;
 };
 
 #endif
