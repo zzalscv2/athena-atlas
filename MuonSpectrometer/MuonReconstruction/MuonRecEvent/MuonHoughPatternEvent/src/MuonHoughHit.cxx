@@ -49,7 +49,6 @@ MuonHoughHit::MuonHoughHit(const Amg::Vector3D& pos_vec, bool measures_phi, Muon
 }
 
 std::string MuonHoughHit::getWhichDetector() const {
-    MsgStream log(Athena::getMessageSvc(), "MuonHoughHit::getWhichDetector");
     std::string detector_name;
     switch (m_detector_id) {
         case MuonHough::MDT: detector_name = "MDT"; break;
@@ -57,6 +56,7 @@ std::string MuonHoughHit::getWhichDetector() const {
         case MuonHough::RPC: detector_name = "RPC"; break;
         case MuonHough::TGC: detector_name = "TGC"; break;
         default:
+            MsgStream log(Athena::getMessageSvc(), "MuonHoughHit::getWhichDetector");    
             if (log.level() <= MSG::WARNING) log << MSG::WARNING << "MuonHoughHit:: no valid detector_id" << endmsg;
     }
     return detector_name;

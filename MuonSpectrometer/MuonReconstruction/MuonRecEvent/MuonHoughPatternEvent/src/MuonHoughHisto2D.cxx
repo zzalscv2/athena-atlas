@@ -1,11 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHoughPatternEvent/MuonHoughHisto2D.h"
 
-#include "AthenaKernel/getMessageSvc.h"
-#include "GaudiKernel/MsgStream.h"
 #include "TFile.h"
 #include "TH2F.h"
 
@@ -46,7 +44,7 @@ void MuonHoughHisto2D::reset() {
     m_maximumIsValid = true;
 }
 
-void MuonHoughHisto2D::findMaxima(int printlevel, bool which_segment) {
+void MuonHoughHisto2D::findMaxima() {
     m_maximumbins.clear();  // clear old m_maxima_vector and start searching again
 
     int maximum_number = 0;
@@ -57,13 +55,10 @@ void MuonHoughHisto2D::findMaxima(int printlevel, bool which_segment) {
         int maxbin = 0;
 
         ATH_MSG_VERBOSE("MuonHoughHisto2D::size bins above threshold: " << m_bins_above_threshold.size());
-        
-
-        std::set<int>::iterator it = m_bins_above_threshold.begin();
-        std::set<int>::iterator it_end = m_bins_above_threshold.end();
-        for (; it != it_end; ++it) {
-            if (!checkIfMaximumAlreadyUsed(*it)) {
-                checkIfMaximum(*it, maximum, maxbin, which_segment, printlevel);  // call by ref
+      
+        for (const int bin_num :m_bins_above_threshold) {
+            if (!checkIfMaximumAlreadyUsed(bin_num)) {
+                checkIfMaximum(bin_num, maximum, maxbin);  // call by ref
             }
         }
 
@@ -76,16 +71,13 @@ void MuonHoughHisto2D::findMaxima(int printlevel, bool which_segment) {
             m_maximumbins.push_back(maxbin);
         }  // maxbin <> m_threshold
 
-        if (printlevel >= 10) {
-            if (maximum == -1.) {
-               ATH_MSG_VERBOSE("MuonHoughHisto2D::No Bins Above Threshold");
-            } else {
-                std::pair<double, double> coords = binnumberToCoords(maxbin);
-                ATH_MSG_VERBOSE("MuonHoughHisto2D::Maximum Number: " << maximum_number << " Maximum: " << maximum
-                    << " binnumber: " << maxbin << " x: " << coords.first << " y: " << coords.second);
-            }
-        }  // printlevel
-
+        if (maximum == -1.) {
+            ATH_MSG_VERBOSE("MuonHoughHisto2D::No Bins Above Threshold");
+        } else {
+            std::pair<double, double> coords = binnumberToCoords(maxbin);
+            ATH_MSG_VERBOSE("MuonHoughHisto2D::Maximum Number: " << maximum_number << " Maximum: " << maximum
+                << " binnumber: " << maxbin << " x: " << coords.first << " y: " << coords.second);
+        }    
         maximum_number++;
     }  // number_of_maxima
 
@@ -116,10 +108,9 @@ std::pair<int, double> MuonHoughHisto2D::getMax() const {
     return maxpair;
 }
 
-std::pair<int, double> MuonHoughHisto2D::getMaximumBin(unsigned int maximum_number, bool which_segment, int printlevel) {
-    MsgStream log(Athena::getMessageSvc(), "MuonHoughHisto2D::getMaximumBin");
+std::pair<int, double> MuonHoughHisto2D::getMaximumBin(unsigned int maximum_number) {
     if (m_maxima_found == 0) {
-        findMaxima(printlevel, which_segment);  // fills m_maximumbins
+        findMaxima();  // fills m_maximumbins
     }
 
     int maxbin = -1;
@@ -136,9 +127,9 @@ std::pair<int, double> MuonHoughHisto2D::getMaximumBin(unsigned int maximum_numb
 
 }  // getMaximumBin
 
-std::pair<double, double> MuonHoughHisto2D::getCoordsMaximum(unsigned int maximum_number, bool which_segment, int printlevel) {
+std::pair<double, double> MuonHoughHisto2D::getCoordsMaximum(unsigned int maximum_number) {
     std::pair<double, double> coordsmaximum;
-    int binnumber = getMaxBin(maximum_number, which_segment, printlevel);
+    int binnumber = getMaxBin(maximum_number);
 
     if (binnumber != -1) {
         coordsmaximum = binnumberToCoords(binnumber);
@@ -163,7 +154,7 @@ bool MuonHoughHisto2D::checkIfMaximumAlreadyUsed(int binnumber) const {
     return check;
 }
 
-bool MuonHoughHisto2D::checkIfMaximum(int binnumber, double& maximum, int& maxbin, bool /*which_segment*/, int /*printlevel*/) const {
+bool MuonHoughHisto2D::checkIfMaximum(int binnumber, double& maximum, int& maxbin) const {
     bool check = false;
 
     double content_bin_area = content_Bin_Area(binnumber);  // now no area anymore == getBinContent

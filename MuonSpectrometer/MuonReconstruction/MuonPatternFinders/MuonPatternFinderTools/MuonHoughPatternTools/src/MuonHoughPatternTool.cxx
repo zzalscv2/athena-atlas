@@ -118,9 +118,11 @@ void MuonHoughPatternTool::makePatterns(int id_number, double weightmdt, const M
     for (int level = 0; level < m_maximum_level; level++) {
         if (test_for_next_level) {
             ATH_MSG_DEBUG("Iteration number: " << level);
-            fillHistos(id_number, level, event_for_hough.get(), houghtransform.get());
-            // if( level == 0 ) fillHistos(id_number,level,event_for_hough,houghtransform);
-
+            
+            houghtransform->resetHisto();
+            ATH_MSG_DEBUG("fillHistos size hits not in patterns " << event_for_hough->size());
+            houghtransform->fill(*event_for_hough);
+    
             if (m_use_histos && level == 0 && id_number == MuonHough::hough_curved_at_a_cylinder) {
                 const MuonHoughHisto2DContainer& histos = houghtransform->histos();
                 TDirectory* dir = gDirectory;
@@ -175,9 +177,7 @@ StatusCode MuonHoughPatternTool::initialize() {
 
     ATH_MSG_DEBUG("Number of iterations: " << m_maximum_level << " Maxima per iteration: " << m_number_of_maxima);
 
-    StatusCode sc = StatusCode::SUCCESS;
-
-    return sc;
+    return StatusCode::SUCCESS;
 }
 
 void MuonHoughPatternTool::resetAssociation(const MuonHoughHitContainer& event) {
@@ -221,25 +221,6 @@ MuonHoughPatternContainerShip MuonHoughPatternTool::emptyHoughPattern() const {
     return houghpattern;
 }  // emptyHoughPattern
 
-void MuonHoughPatternTool::fillHistos(int /*id_number*/, int level, const MuonHoughHitContainer* event_to_analyse,
-                                      MuonHoughTransformSteering* houghtransform) const {
-    ATH_MSG_DEBUG("fillHistos , level: " << level);
-
-    //  histograms shouldn't need to be reset for first iteration , but somehow necessary
-    //  if (level!=0) {
-    houghtransform->resetHisto();
-    // }
-
-    // weightRescaling is switched off (11-1-2008), since now reweighting method done only once per event
-    //  weightRescaling(event_to_analyse,id_number,level);
-
-    ATH_MSG_DEBUG("fillHistos size hits not in patterns " << event_to_analyse->size());
-
-    houghtransform->fill(event_to_analyse);
-
-    ATH_MSG_VERBOSE("fillHistos::end of filling, now analyse histo: ");
-}
-
 bool MuonHoughPatternTool::analyseHisto(int id_number, int level, const std::unique_ptr<MuonHoughHitContainer>& event_to_analyse,
                                         std::unique_ptr<MuonHoughTransformSteering>& houghtransform,
                                         MuonHoughPatternContainerShip& houghpatterns_all) const {
@@ -256,16 +237,14 @@ bool MuonHoughPatternTool::analyseHisto(int id_number, int level, const std::uni
     bool test_for_next_level = false;
 
     const unsigned int threshold_for_next_houghpattern = getThresholdHoughPattern(id_number);
-    bool which_segment = 0;
     double numberofmaxima = 0;
     double maximum_residu = m_maximum_residu_mm;
     if (m_use_cosmics) { maximum_residu = m_maximum_residu_mm_cosmics; }
     MuonHoughPatternCollection houghpatterns = houghtransform->constructHoughPatterns(
-        event_to_analyse.get(), maximum_residu, m_maximum_residu_angle, m_number_of_maxima, which_segment, m_printlevel);
+        *event_to_analyse, maximum_residu, m_maximum_residu_angle, m_number_of_maxima);
 
     for (unsigned int maximum_number = 0; maximum_number < houghpatterns.size(); ++maximum_number) {
-        //      bool which_segment = maximum_number;
-
+  
         std::unique_ptr<MuonHoughPattern>& houghpattern = houghpatterns[maximum_number];
         if (!houghpattern) { continue; }
         numberofmaxima = houghpattern->getMaximumHistogram();
@@ -279,8 +258,7 @@ bool MuonHoughPatternTool::analyseHisto(int id_number, int level, const std::uni
                                                                            << " numberofmaxima: " << numberofmaxima);
         }
 
-        ATH_MSG_DEBUG(" level: " << level << " which_segment: " << which_segment);
-        if (m_printlevel >= 4) { houghpattern->printHoughPattern(); }
+       if (m_printlevel >= 4) { houghpattern->printHoughPattern(); }
 
         // checks for next level / maximum
 
@@ -645,7 +623,7 @@ std::unique_ptr<MuonHoughTransformSteering> MuonHoughPatternTool::whichHoughTran
     if (m_use_negative_weights) ATH_MSG_DEBUG(" Negative weights are used ");
     ATH_MSG_DEBUG("IP setting: " << !m_use_cosmics);
     ATH_MSG_DEBUG("*********************************");
-    return std::make_unique<MuonHoughTransformSteering>(houghtransformer);
+    return std::make_unique<MuonHoughTransformSteering>(std::move(houghtransformer));
 }
 
 std::vector<int> MuonHoughPatternTool::maxLevelHoughPattern(const MuonHoughPatternContainerShip& houghpattern) const  // obsolete?

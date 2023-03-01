@@ -1398,7 +1398,7 @@ std::unique_ptr<MuonPatternCombinationCollection> MuonCombinePatternTool::makePa
             Identifier channelId = prd->identify();
             const Identifier moduleId = m_idHelperSvc->chamberId(channelId);            
             std::vector<const Trk::PrepRawData*>& chambVec = chamberMap[moduleId];
-            chambVec.reserve(pit->numberOfContainedPrds());
+            if (chambVec.empty()) chambVec.reserve(pit->numberOfContainedPrds());
             chambVec.push_back(prd);
         }
 

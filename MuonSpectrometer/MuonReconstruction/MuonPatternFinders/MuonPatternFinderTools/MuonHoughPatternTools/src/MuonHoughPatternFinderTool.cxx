@@ -156,12 +156,9 @@ namespace Muon {
             addCollections(stgcCols, *hitcontainer, phietahitassociation);
         }
         // analyse data
-        std::unique_ptr<MuonPatternCombinationCollection> patCombiCol;
-        if (hitcontainer) {
-            patCombiCol.reset(analyse(ctx, *hitcontainer, phietahitassociation));
-        } else {
-            ATH_MSG_INFO(" No hit container created! ");
-        }
+        std::unique_ptr<MuonPatternCombinationCollection> patCombiCol = analyse(ctx, *hitcontainer, 
+                                                                                phietahitassociation);
+        
 
         // ensure we always output a collection
         if (!patCombiCol) {
@@ -170,23 +167,10 @@ namespace Muon {
         }
 
         // summary
-        if (m_summary || msgLvl(MSG::DEBUG)) {
-            if (patCombiCol->empty())
-                ATH_MSG_DEBUG(" summarizing output: Combined pattern combination empty");
-            else
-                ATH_MSG_DEBUG(" summarizing Combined pattern combination output: " << m_printer->print(*patCombiCol));
-        }
-
-        // clean up tool for next call
-
-        // clear stationmaps
-        rpcmdtstationmap.clear();
-        tgcmdtstationmap.clear();
-        // clear etaphi association map
-        phietahitassociation.clear();
-
+      
+        ATH_MSG_DEBUG(" summarizing Combined pattern combination output: " <<std::endl << m_printer->print(*patCombiCol));
+    
         ATH_MSG_VERBOSE("execute(end) ");
-
         // return result
         return {std::move(patCombiCol), nullptr};
     }
@@ -212,21 +196,26 @@ namespace Muon {
         return StatusCode::SUCCESS;
     }
 
-    MuonPatternCombinationCollection* MuonHoughPatternFinderTool::analyse(const EventContext& ctx,
+    std::unique_ptr<MuonPatternCombinationCollection> MuonHoughPatternFinderTool::analyse(const EventContext& ctx,
         const MuonHoughHitContainer& hitcontainer,
         const EtaPhiHitAssocMap& phietahitassociation) const {
         ATH_MSG_DEBUG("size of event: " << hitcontainer.size());
 
-        std::stringstream sstr{};
-        for (size_t h = 0; h < hitcontainer.size() ; ++h){
-            const auto& houghHit = hitcontainer.getHit(h);
-            sstr<<m_printer->print(*houghHit->getPrd())<<" weight: "<<houghHit->getWeight()<<std::endl;    
+        if (msgLvl(MSG::VERBOSE)) {
+            std::stringstream sstr{};
+            for (size_t h = 0; h < hitcontainer.size() ; ++h){
+                const auto& houghHit = hitcontainer.getHit(h);
+                sstr<<m_printer->print(*houghHit->getPrd())<<" weight: "<<houghHit->getWeight()<<std::endl;    
+            }
+            ATH_MSG_VERBOSE("Dump Hough container "<<std::endl<<sstr.str());
         }
+       
         
         /** reconstructed patterns stored per [number_of_ids][level][which_segment] */
         MuonHoughPatternContainerShip houghpattern = m_muonHoughPatternTool->emptyHoughPattern();
         //  pass through hitcontainer (better still: preprawdata and only after make
         //  internal hitcontainer)
+       
         m_muonHoughPatternTool->makePatterns(hitcontainer, houghpattern);
         
         std::unique_ptr<MuonPrdPatternCollection> phipatterns{m_muonHoughPatternTool->getPhiMuonPatterns(houghpattern)};        
@@ -265,7 +254,7 @@ namespace Muon {
         record(etapatterns, m_CosmicEtaPatternsKey, ctx);
         record(combinedpatterns, m_COMBINED_PATTERNSKey, ctx);
 
-        return patterncombinations.release();
+        return patterncombinations;
     }
 
     std::unique_ptr<MuonHoughHitContainer> MuonHoughPatternFinderTool::getAllHits(
@@ -460,7 +449,7 @@ namespace Muon {
     void MuonHoughPatternFinderTool::addMdtCollection(const MdtPrepDataCollection* mdt_coll, MuonHoughHitContainer& hitcontainer,
                                                       std::map<int, std::vector<std::pair<int, int>>>& rpcmdtstationmap,
                                                       std::map<int, std::vector<std::pair<int, int>>>& tgcmdtstationmap) const {
-        const int size = mdt_coll->size();
+        const unsigned int size = mdt_coll->size();
         if (!size) return;
 
         auto new_mdt_hit = [](const Muon::MdtPrepData* mdt_hit, double prob, double weight) {
@@ -669,9 +658,9 @@ namespace Muon {
                         double dis = 0.;
                         const Amg::Vector3D& globalpos = mdt_hit.prd->globalPosition();
                         if (barrel) {
-                            dis = globalpos[Amg::AxisDefs::z] - globalpos.perp() * rpc_inv_rz_ratio;
+                            dis = globalpos.z() - globalpos.perp() * rpc_inv_rz_ratio;
                         } else {  // can that happen?
-                            dis = globalpos.perp() - rpc_rz_ratio * globalpos[Amg::AxisDefs::z];
+                            dis = globalpos.perp() - rpc_rz_ratio * globalpos.z();
                         }
 
                         /// if (mdt_hit.weighted_trigger < 0.1) { mdt_hit.weighted_trigger = 1.; }
@@ -818,9 +807,9 @@ namespace Muon {
         } else if constexpr (std::is_same<CollContainer, RpcPrepDataCollection>::value) {
             channel_max = m_idHelperSvc->rpcIdHelper().stripMax();
         } else if constexpr(std::is_same<CollContainer, sTgcPrepDataCollection>::value) {
-            channel_max = m_idHelperSvc->stgcIdHelper().channelMax();
-        } else if constexpr(std::is_same<CollContainer, MMPrepDataCollection>::value) {
-            channel_max = m_idHelperSvc->mmIdHelper().channelMax();
+            channel_max = m_idHelperSvc->stgcIdHelper().channelMax(cont.front()->identify());
+        } else if constexpr(std::is_same<CollContainer, MMPrepDataCollection>::value) {            
+            channel_max = m_idHelperSvc->mmIdHelper().channelMax(cont.front()->identify());
         }
 
         auto layer_channel = [this](const Identifier& id) {
@@ -885,9 +874,9 @@ namespace Muon {
                             std::is_same<CollContainer, MMPrepDataCollection>::value) {
                     for (uint16_t ch : prd->stripNumbers()) {
                         const int channel = ch + measures_phi * channel_max;
-                        channelWeights[channel -1] += 0.55;
-                        channelWeights[channel] += 1.;
-                        channelWeights[channel + 1] +=0.55;
+                        channelWeights.at(channel -1) += 0.55;
+                        channelWeights.at(channel) += 1.;
+                        channelWeights.at(channel + 1) +=0.55;
                     }
                 } else {
                     /// Find channels that have accumulated hits

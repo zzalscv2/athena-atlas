@@ -19,7 +19,7 @@ public:
 
     /** return maximum of container
      * gives first id histogram (sector) and then maximumbin */
-    std::pair<int, int> getMaximumBinnumber(unsigned int maximum_number, bool which_segment, int printlevel = 0) const;
+    std::pair<int, int> getMaximumBinnumber() const;
 
     /** resets histograms */
     void reset() const;
@@ -36,7 +36,7 @@ private:
 };
 
 inline int MuonHoughHisto2DContainer::size() const { return m_histos.size(); }
-inline MuonHoughHisto2D* MuonHoughHisto2DContainer::getHisto(int id) const { return m_histos[id].get(); }
+inline MuonHoughHisto2D* MuonHoughHisto2DContainer::getHisto(int id) const { return m_histos.at(id).get(); }
 inline void MuonHoughHisto2DContainer::reserve(int size) { m_histos.reserve(size); }
 inline void MuonHoughHisto2DContainer::push_back(std::unique_ptr<MuonHoughHisto2D> histo) { m_histos.push_back(std::move(histo)); }
 

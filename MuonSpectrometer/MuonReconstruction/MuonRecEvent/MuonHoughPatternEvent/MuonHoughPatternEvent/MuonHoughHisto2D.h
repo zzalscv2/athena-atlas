@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONHOUGHPATTERNEVENT_MUONHOUGHHISTO2D_H
@@ -55,27 +55,27 @@ public:
     void reset();
 
     /** find maxima in histogram */
-    void findMaxima(int printlevel = 0, bool which_segment = 0);
+    void findMaxima();
 
     /** returns binnumber and maximum of histogram (doesn't use m_bins_above_threshold) */
     std::pair<int, double> getMax() const;
     /** returns binnumber and maximum of maximum number maximum_number*/
-    std::pair<int, double> getMaximumBin(unsigned int maximum_number = 0, bool which_segment = 0, int printlevel = 0);
+    std::pair<int, double> getMaximumBin(unsigned int maximum_number = 0);
     /** returns coords of maximum number maximum_number*/
-    std::pair<double, double> getCoordsMaximum(unsigned int maximum_number = 0, bool which_segment = 0, int printlevel = 0);
+    std::pair<double, double> getCoordsMaximum(unsigned int maximum_number = 0);
 
     /** check when searching for several maxima if binnumber is close to an earlier found maximum */
     bool checkIfMaximumAlreadyUsed(int binnumber) const;
     /** check if binnumber is a maximum */
-    bool checkIfMaximum(int binnumber, double& maximum, int& maxbin, bool which_segment = 0, int printlevel = 0) const;
+    bool checkIfMaximum(int binnumber, double& maximum, int& maxbin) const;
 
     /** calculates the distance in binwidths between two binnumbers ("Manhattan metric") */
     int distanceBins(int binnumber1, int binnumber2) const;
 
     /** return value of maximum bin */
-    double getMaximum(unsigned int maximum_number = 0, bool which_segment = 0, int printlevel = 0);
+    double getMaximum(unsigned int maximum_number = 0);
     /** return maximum binnumber */
-    int getMaxBin(unsigned int maximum_number = 0, bool which_segment = 0, int printlevel = 0);
+    int getMaxBin(unsigned int maximum_number = 0);
 
     /** return the total content of binarea (default: content of bin) */
     double content_Bin_Area(int binnumber) const;
@@ -212,11 +212,11 @@ inline double MuonHoughHisto2D::getBinWidthX() const { return m_binwidthx; }
 inline double MuonHoughHisto2D::getBinWidthY() const { return m_binwidthy; }
 inline void MuonHoughHisto2D::setThreshold(double threshold) { m_threshold = m_scale * threshold; }
 inline double MuonHoughHisto2D::getThreshold() const { return m_threshold; }
-inline double MuonHoughHisto2D::getMaximum(unsigned int maximum_number, bool which_segment, int printlevel) {
-    return getMaximumBin(maximum_number, which_segment, printlevel).second;
+inline double MuonHoughHisto2D::getMaximum(unsigned int maximum_number) {
+    return getMaximumBin(maximum_number).second;
 }
-inline int MuonHoughHisto2D::getMaxBin(unsigned int maximum_number, bool which_segment, int printlevel) {
-    return getMaximumBin(maximum_number, which_segment, printlevel).first;
+inline int MuonHoughHisto2D::getMaxBin(unsigned int maximum_number) {
+    return getMaximumBin(maximum_number).first;
 }
 inline int MuonHoughHisto2D::coordToBinx(double x) const { return static_cast<int>((x - m_xmin) * m_invbinwidthx) + 1; }
 inline int MuonHoughHisto2D::coordToBiny(double y) const { return static_cast<int>((y - m_ymin) * m_invbinwidthy) + 1; }
