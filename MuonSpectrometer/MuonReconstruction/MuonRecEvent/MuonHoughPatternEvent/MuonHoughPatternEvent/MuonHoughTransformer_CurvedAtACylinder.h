@@ -16,14 +16,13 @@ public:
     ~MuonHoughTransformer_CurvedAtACylinder() = default;
 
     /** fill hit in histogram */
-    void fillHit(const std::shared_ptr<MuonHoughHit>& hit, double weight = 1.) override final;
+    void fillHit(const std::shared_ptr<MuonHoughHit>& hit, double weight) override final;
     /** fill transformed values in histogram */
-    int fillHisto(double xbin, double theta, double weight = 1., int sector = 0)  override final;
+    int fillHisto(double xbin, double theta, double weight, int sector)  override final;
 
     /** associate hits to maximum found */
-    std::unique_ptr<MuonHoughPattern> hookAssociateHitsToMaximum(const MuonHoughHitContainer* event, std::pair<double, double> coordsmaximum,
-                                                         double residu_mm, double residu_grad, int sector = 0, bool which_segment = 0,
-                                                         int printlevel = 999) const override final;
+    std::unique_ptr<MuonHoughPattern> hookAssociateHitsToMaximum(const MuonHoughHitContainer& event, std::pair<double, double> coordsmaximum,
+                                                         double residu_mm, double residu_grad, int sector) const override final;
 
     /** returns the phi sector */
     int sector(const std::shared_ptr<MuonHoughHit>& hit) const override final;

@@ -54,15 +54,6 @@ private:
     void useIPMuons();
 
     /**
-     * @brief fills the hough histograms
-     * @param[in] id_number The enum number corresponding to the HoughTransform
-     * @param[in] level The iteration number
-     * @param[in] event_to_analyse The hitcontainer which fills the histogram
-     * @param[in] houghtransform The HoughTransform
-     */
-    void fillHistos(int id_number, int level, const MuonHoughHitContainer* event_to_analyse,
-                    MuonHoughTransformSteering* houghtransform) const;
-    /**
      * @brief analyses the hough histograms
      * @param[in] id_number The enum number corresponding to the HoughTransform
      * @param[in] level The iteration number

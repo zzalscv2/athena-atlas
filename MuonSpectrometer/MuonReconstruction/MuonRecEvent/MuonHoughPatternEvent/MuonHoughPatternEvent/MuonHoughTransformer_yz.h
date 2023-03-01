@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONHOUGHPATTERNEVENT_MUONHOUGHTRANSFORMER_YZ_H
@@ -16,7 +16,7 @@ public:
     virtual ~MuonHoughTransformer_yz() = default;
 
     /** returns the hit position in yz frame */
-    std::pair<double, double> getHitPos(const MuonHoughHitContainer* event, int hitid)
+    std::pair<double, double> getHitPos(const MuonHoughHitContainer& event, int hitid)
         const override final;  // returns the relevant position of the hit (xy-RPC in case of id==id_xy_rpc etc.)
     /** build new houghpattern */
     std::unique_ptr<MuonHoughPattern> initialiseHoughPattern() const override final;

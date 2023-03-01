@@ -82,7 +82,7 @@ namespace Muon {
             EtaPhiHitAssocMap& phietahitassociation) const;
 
         /** analyse hits */
-        MuonPatternCombinationCollection* analyse( const EventContext& ctx,
+        std::unique_ptr<MuonPatternCombinationCollection> analyse( const EventContext& ctx,
             const MuonHoughHitContainer& hitcontainer,
             const EtaPhiHitAssocMap& phietahitassociation) const;
 

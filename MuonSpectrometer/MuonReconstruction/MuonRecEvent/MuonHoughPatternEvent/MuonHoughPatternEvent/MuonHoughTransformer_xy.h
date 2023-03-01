@@ -16,7 +16,7 @@ public:
     virtual ~MuonHoughTransformer_xy() = default;
 
     /** returns the hit position in xy frame */
-    std::pair<double, double> getHitPos(const MuonHoughHitContainer* event, int hitid) const override;
+    std::pair<double, double> getHitPos(const MuonHoughHitContainer& event, int hitid) const override;
     /** build new houghpattern */
     std::unique_ptr<MuonHoughPattern> initialiseHoughPattern() const override final;   
 };
