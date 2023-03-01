@@ -73,9 +73,9 @@ StatusCode JetCaloEnergies::initialize() {
   
   // Init standard variables if necessary
   ATH_CHECK(m_ePerSamplingKey.initialize());
-  ATH_CHECK(m_emFracKey.initialize( isInVector(m_emFracKey.key(), m_calculationNames) ));
-  ATH_CHECK(m_hecFracKey.initialize( isInVector(m_hecFracKey.key(), m_calculationNames) ));
-  ATH_CHECK(m_psFracKey.initialize( isInVector(m_psFracKey.key(), m_calculationNames) ));
+  ATH_CHECK(m_emFracKey.initialize());
+  ATH_CHECK(m_hecFracKey.initialize());
+  ATH_CHECK(m_psFracKey.initialize());
   ATH_CHECK(m_em3FracKey.initialize( isInVector(m_em3FracKey.key(), m_calculationNames) ));
   ATH_CHECK(m_tile0FracKey.initialize( isInVector(m_tile0FracKey.key(), m_calculationNames) ));
   ATH_CHECK(m_effNClustsFracKey.initialize( isInVector(m_effNClustsFracKey.key(), m_calculationNames) ));
