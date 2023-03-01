@@ -77,8 +77,8 @@ class MetAnalysisConfig (ConfigBlock):
         alg.significanceTool.IsAFII = config.dataType() == "afii"
         alg.met = config.readName (self.containerName)
 
-        config.addOutputVar (self.containerName, 'mpx', 'mpx')
-        config.addOutputVar (self.containerName, 'mpy', 'mpy')
+        config.addOutputVar (self.containerName, 'met', 'met')
+        config.addOutputVar (self.containerName, 'phi', 'phi')
         config.addOutputVar (self.containerName, 'sumet', 'sumet')
 
 
