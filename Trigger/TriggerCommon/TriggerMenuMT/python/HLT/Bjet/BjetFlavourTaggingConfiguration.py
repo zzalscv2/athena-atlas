@@ -86,7 +86,7 @@ def getFastFlavourTagging( flags, inputJets, inputVertex, inputTracks, isPFlow=F
     # now we associate the tracks to the jet
     ## JetParticleAssociationAlgCfg uses a shrinking cone.
     tracksOnJetDecoratorName = "TracksForMinimalJetTag"
-    pass_flag = 'fastDips_isValid'
+    pass_flag = f'{tracksOnJetDecoratorName}_isValid'
     ca.merge(
         JetParticleAssociationAlgCfg(
             flags,
@@ -132,7 +132,7 @@ def getFastFlavourTagging( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                 'BTagging/20230130/FastGN1/antikt4empflow/fastGN1_20230130.onnx',
                 {
                     'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
-                    **{f'GN120230130_p{x}': f'fastGN1_p{x}' for x in 'cub'},
+                    **{f'GN120230130_p{x}': f'fastGN120230130_p{x}' for x in 'cub'},
                     'btagIp_': trackIpPrefix,
                 }
             ]

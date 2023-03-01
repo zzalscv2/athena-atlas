@@ -71,15 +71,16 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
 
     for ip,p in enumerate(presel_cut_str.split('XX')):
         if not doBJetSel:  # Removing b-jet parts if b-jet presel is not requested
-            p = re.sub(r'b\d+', '', p)
-        hasBjetSel = bool(re.match(r'.*b\d+', p))
+            p = re.sub(r'b\w?\d+', '', p)
+        hasBjetSel = bool(re.match(r'.*b\w?\d+', p))
         assert not (hasBjetSel and not doBJetSel), "Your jet preselection has a b-jet part but a calo-only preselection was requested instead. This should not be possible. Please investigate."
 
-        matched = re.match(r'(?P<mult>\d?\d?)(?P<region>[jacf])(?P<scenario>(HT)?)(?P<cut>\d+)'+(r'b(?P<bwp>\d+)' if hasBjetSel else ''), p)
+        matched = re.match(r'(?P<mult>\d?\d?)(?P<region>[jacf])(?P<scenario>(HT)?)(?P<cut>\d+)'+(r'b(?P<btagger>\D?)(?P<bwp>\d+)' if hasBjetSel else ''), p)
         assert matched is not None, "Impossible to extract preselection cut for \'{0}\' substring. Please investigate.".format(p)
         cut_dict = matched.groupdict()
         if 'bwp' not in cut_dict.keys(): cut_dict['bwp'] = ''
-        mult,region,scenario,cut,bwp=cut_dict['mult'],cut_dict['region'],cut_dict['scenario'],cut_dict['cut'], cut_dict['bwp']
+        if 'btagger' not in cut_dict.keys(): cut_dict['btagger'] = ''
+        mult,region,scenario,cut,btagger,bwp=cut_dict['mult'],cut_dict['region'],cut_dict['scenario'],cut_dict['cut'],cut_dict['btagger'], cut_dict['bwp']
 
         if mult=='': mult='1'
         etarange = etaRangeAbbrev[region]
@@ -92,6 +93,11 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
             threshold=cut
             chainPartName=f'{mult}j{cut}_{etarange}'
 
+        if btagger == 'g':
+            btagger = 'gnone'
+        elif btagger == '':
+            btagger = 'dips'
+
         tmpChainDict = dict(preselCommonJetParts)
         tmpChainDict.update(
             {'L1threshold': 'FSNOSEED',
@@ -100,7 +106,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
             'threshold': threshold,
             'etaRange':etarange,
             'jvt':'',
-            'bdips': '' if bwp == '' else f'{bwp}bdips',
+            'bsel': '' if bwp == '' else f'{bwp}b{btagger}',
             'chainPartIndex': ip,
             'hypoScenario': hyposcenario,
             }
