@@ -19,7 +19,7 @@ def MCTruthClassifierCaloTruthMatchCfg(flags, **kwargs):
     """
     This is the default configuration allowing all options.
     By default, it does calo truth matching using a
-    dedicated instance of the extrapolator.
+    dedicated instance of the ParticleCaloExtensionTool
     """
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.Enums import LHCPeriod
@@ -32,7 +32,8 @@ def MCTruthClassifierCaloTruthMatchCfg(flags, **kwargs):
             MCTruthClassifierExtrapolatorCfg)
         extrapolator = acc.popToolsAndMerge(
             MCTruthClassifierExtrapolatorCfg(flags))
-        from egammaTrackTools.egammaTrackToolsConfig import (
+
+        from TrackToCalo.TrackToCaloConfig import (
             EMParticleCaloExtensionToolCfg)
         extension = EMParticleCaloExtensionToolCfg(
             flags, Extrapolator=extrapolator)
@@ -53,8 +54,6 @@ def MCTruthClassifierCaloTruthMatchCfg(flags, **kwargs):
 # The function below are for the old style and should be
 # condsidered deprecated
 ##########################################################
-
-
 def firstSimCreatedBarcode():
     """DEPRECATED!!! Return the simulation barcode offset for G4
     particles from metadata
