@@ -274,7 +274,7 @@ if DetFlags.haveRIO.SCT_on():
   fixedTools = []
   for tool in InDetTrigSCTConditionsSummaryTool.ConditionsTools:
     if hasattr( tool, "SCT_FlaggedCondData" ):
-      tool.SCT_FlaggedCondData = "SCT_FlaggedCondData_TRIG"
+      continue
     if not globalflags.InputFormat.is_bytestream() and "ByteStream" in tool.getName():
       continue
     fixedTools.append( tool )

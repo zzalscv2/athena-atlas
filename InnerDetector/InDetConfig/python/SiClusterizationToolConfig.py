@@ -93,8 +93,7 @@ def ITkPixelRDOToolCfg(flags, name="ITkPixelRDOTool", **kwargs):
     return acc
 
 
-def TrigPixelRDOToolCfg(flags, name="InDetPixelRDOTool", **kwargs):
-    # Note: see comment in `def TrigMergedPixelsToolCfg' for the name
+def TrigPixelRDOToolCfg(flags, name="InDetTrigPixelRDOTool", **kwargs):
     kwargs.setdefault("PixelDetElStatus", "")
     return InDetPixelRDOToolCfg(flags, name, **kwargs)
 
@@ -110,13 +109,11 @@ def MergedPixelsToolCfg(flags, name="InDetMergedPixelsTool", **kwargs) :
     return acc
 
 
-def TrigMergedPixelsToolCfg(flags, name="InDetMergedPixelsTool", **kwargs) :
-    # @TODO if the configuration is different maybe it should also get a new name ?
-    #       for the time being to not introduce naming changes, the name of this private
-    #       tool is unchanged.
+def TrigMergedPixelsToolCfg(flags, name="InDetTrigMergedPixelsTool", **kwargs) :
     acc = ComponentAccumulator()
+    kwargs.setdefault("globalPosAlg", acc.popToolsAndMerge(ClusterMakerToolCfg(flags)))
     kwargs.setdefault("PixelRDOTool", acc.popToolsAndMerge(TrigPixelRDOToolCfg(flags)))
-    acc.setPrivateTools(acc.popToolsAndMerge(MergedPixelsToolCfg(flags, name, **kwargs)))
+    acc.setPrivateTools(CompFactory.InDet.MergedPixelsTool(name, **kwargs))
     return acc
 
 def ITkMergedPixelsToolCfg(flags, name="ITkMergedPixelsTool", **kwargs) :
@@ -287,21 +284,14 @@ def SCT_ClusteringToolCfg(flags, name="InDetSCT_ClusteringTool", **kwargs):
     return acc
 
 def Trig_SCT_ClusteringToolCfg(flags, name="Trig_SCT_ClusteringTool", **kwargs):
-    from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
-    acc = SCT_ReadoutGeometryCfg(flags) # To produce SCT_DetectorElementCollection
+    acc = ComponentAccumulator()
     from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg
     InDetSCT_ConditionsSummaryToolWithoutFlagged = acc.popToolsAndMerge(SCT_ConditionsSummaryToolCfg(flags, withFlaggedCondTool=False, withTdaqTool = False))
-    InDetClusterMakerTool = acc.popToolsAndMerge(ClusterMakerToolCfg(flags))
-    from SiLorentzAngleTool.SCT_LorentzAngleConfig import SCT_LorentzAngleToolCfg
-    SCTLorentzAngleTool = acc.popToolsAndMerge(SCT_LorentzAngleToolCfg(flags))
 
     kwargs.setdefault("conditionsTool", InDetSCT_ConditionsSummaryToolWithoutFlagged)
-    kwargs.setdefault("globalPosAlg", InDetClusterMakerTool)
-    kwargs.setdefault("LorentzAngleTool", SCTLorentzAngleTool)
+    kwargs.setdefault("SCTDetElStatus","")
 
-    InDetSCT_ClusteringTool = CompFactory.InDet.SCT_ClusteringTool(name, **kwargs)
-    acc.setPrivateTools(InDetSCT_ClusteringTool)
-    return acc
+    return SCT_ClusteringToolCfg(flags, name, **kwargs)
 
 def ITKStrip_SCT_ClusteringToolCfg(flags, name="ITkStripClusteringTool", **kwargs):
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg

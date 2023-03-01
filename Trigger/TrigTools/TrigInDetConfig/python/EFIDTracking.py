@@ -33,7 +33,6 @@ def get_idtrig_view_verifier(name):
                                        ( 'InDet::PixelGangedClusterAmbiguities' , 'StoreGateSvc+TrigPixelClusterAmbiguitiesMap' ),
                                        ( 'InDet::SCT_ClusterContainer',   TrigSCTKeys.Clusters ),
                                        ( 'InDet::PixelClusterContainer',  TrigPixelKeys.Clusters ),
-                                       ( 'IDCInDetBSErrContainer',        'StoreGateSvc+SCT_FlaggedCondData_TRIG' ),
                                       ]
       if globalflags.InputFormat.is_bytestream():
          viewDataVerifier.DataObjects += [
@@ -51,7 +50,6 @@ def get_idtrig_view_verifier(name):
                                      ( 'SpacePointCache' , InDetCacheNames.SpacePointCacheSCT ),
                                      ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.PixBSErrCacheKey ),
                                      ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTBSErrCacheKey ),
-                                     ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTFlaggedCondCacheKey ),
                                      ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
                                      ( 'TagInfo' , 'DetectorStore+ProcessingTags' )]
 

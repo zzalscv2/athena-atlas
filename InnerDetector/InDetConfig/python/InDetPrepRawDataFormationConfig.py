@@ -159,7 +159,7 @@ def TrigSCTClusterizationCfg(flags, name="InDetSCT_Clusterization", roisKey="", 
     kwargs.setdefault("ClustersName", 'SCT_TrigClusters')
     kwargs.setdefault("isRoI_Seeded", True)
     kwargs.setdefault("ClusterContainerCacheKey", "SCT_ClustersCache")
-    kwargs.setdefault("FlaggedCondCacheKey", "SctFlaggedCondCache")
+    kwargs.setdefault("FlaggedCondCacheKey", "")
 
     acc.addEventAlgo(CompFactory.InDet.SCT_Clusterization(name+signature, **kwargs))
     return acc

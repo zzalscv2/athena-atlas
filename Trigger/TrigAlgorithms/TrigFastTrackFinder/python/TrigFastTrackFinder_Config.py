@@ -366,15 +366,16 @@ class TrigFastTrackFinderBase(TrigFastTrackFinder):
 
 
         from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigSiComTrackFinder
-        
-        if conditionsTool is None:
-          from InDetTrigRecExample.InDetTrigConditionsAccess import SCT_ConditionsSetup
-          from SCT_ConditionsTools.SCT_ConditionsSummaryToolSetup import SCT_ConditionsSummaryToolSetup
-          sct_ConditionsSummaryToolSetupWithoutFlagged = SCT_ConditionsSummaryToolSetup(SCT_ConditionsSetup.instanceName('InDetSCT_ConditionsSummaryToolWithoutFlagged'))
-          sct_ConditionsSummaryToolSetupWithoutFlagged.setup()
-          InDetTrigSiComTrackFinder.SctSummaryTool = sct_ConditionsSummaryToolSetupWithoutFlagged.getTool()
-        else:
-          InDetTrigSiComTrackFinder.SctSummaryTool = conditionsTool
+
+        from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg
+        from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
+
+        kwargs = {}
+        kwargs['withFlaggedCondTool'] = False
+        kwargs['withTdaqTool'] = False
+        kwargs['name'] = 'InDetSCT_ConditionsSummaryToolWithoutFlagged_'+remapped_type
+        sctCondSummaryTool = CAtoLegacyPublicToolWrapper(SCT_ConditionsSummaryToolCfg,**kwargs)
+        InDetTrigSiComTrackFinder.SctSummaryTool = sctCondSummaryTool
 
 
         from InDetTrigRecExample.ConfiguredNewTrackingTrigCuts import EFIDTrackingCuts
