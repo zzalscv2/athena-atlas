@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -13,6 +13,7 @@
 #include <cmath>
 #include <algorithm>
 
+
 StatusCode TileDigitsFlxMonitorAlgorithm::initialize() {
 
   ATH_CHECK( AthMonitorAlgorithm::initialize() );
@@ -25,17 +26,19 @@ StatusCode TileDigitsFlxMonitorAlgorithm::initialize() {
 
   std::ostringstream os;
 
-  if ( m_fragIDs.size() != 0) {
-    std::sort(m_fragIDs.begin(), m_fragIDs.end());
-    for (int fragID : m_fragIDs) {
+  if ( m_fragIDsToCompare.size() != 0) {
+    std::sort(m_fragIDsToCompare.begin(), m_fragIDsToCompare.end());
+    for (int fragID : m_fragIDsToCompare) {
       unsigned int ros    = fragID >> 8;
       unsigned int drawer = fragID & 0xFF;
       std::string module = TileCalibUtils::getDrawerString(ros, drawer);
       os << " " << module << "/0x" << std::hex << fragID << std::dec;
     }
   } else {
-    os << "ALL";
+    os << "NONE";
   }
+  m_firstFelix = m_firstSample + m_felixOffset;
+  m_nSamples = (m_lastSample >= m_firstSample) ? 1 + m_lastSample - m_firstSample : 0;
 
   ATH_MSG_INFO("Monitored modules/frag ID:" << os.str());
 
@@ -48,184 +51,183 @@ StatusCode TileDigitsFlxMonitorAlgorithm::fillHistograms( const EventContext& ct
   // In case you want to measure the execution time
   auto timer = Monitored::Timer("TIME_execute");
 
-  std::array<std::string, 2> gainName{"LG", "HG"};
-
   SG::ReadHandle<TileDigitsContainer> digitsContainerLegacy(m_digitsContainerKeyLegacy, ctx);
   ATH_CHECK( digitsContainerLegacy.isValid() );
 
   SG::ReadHandle<TileDigitsContainer> digitsContainerFlx(m_digitsContainerKeyFlx, ctx);
   ATH_CHECK( digitsContainerFlx.isValid() );
 
-  std::vector<float>digitsFlx[TileCalibUtils::MAX_CHAN][TileCalibUtils::MAX_GAIN];
+  std::array<std::string, 2> gainName{"_LG", "_HG"};
+
   std::vector<float>digitsLegacy[TileCalibUtils::MAX_CHAN][TileCalibUtils::MAX_GAIN];
+  std::vector<float>digitsFlx[TileCalibUtils::MAX_CHAN][TileCalibUtils::MAX_GAIN];
+  int found[TileCalibUtils::MAX_CHAN][TileCalibUtils::MAX_GAIN];
 
   const TileFragHash& hashFunc = digitsContainerFlx->hashFunc();
-  for (int fragID : m_fragIDsToCompare) {   
+
+  for (int fragID : m_fragIDsToCompare) {
+
+    memset(found,0,sizeof(found));
+
     IdentifierHash hash = static_cast<IdentifierHash>(hashFunc(fragID));
     unsigned int drawer = (fragID & 0x3F);
     unsigned int ros = fragID >> 8;
-    unsigned int lastSampleLegacy;
-    unsigned int firstSampleLegacy;
-    unsigned int lastSampleFlx;
-    unsigned int firstSampleFlx;
+    std::string module = TileCalibUtils::getDrawerString(ros, drawer);
+    std::array<std::string, 2> moduleName{module+gainName[0], module+gainName[1]};
 
-    //For Legacy Digits 
+    // Legacy digits
     const TileDigitsCollection* digitsCollectionLegacy = digitsContainerLegacy->indexFindPtr(hash);
     for (const TileDigits* tile_digits : *digitsCollectionLegacy) {
-      if (!m_fragIDs.empty() && !std::binary_search(m_fragIDs.begin(), m_fragIDs.end(), fragID)) {
-        continue;
-      }
+
       ATH_MSG_VERBOSE((std::string) *tile_digits);
-      HWIdentifier adcId = tile_digits->adc_HWID();
-      int channel = m_tileHWID->channel(adcId);
-      int gain = m_tileHWID->adc(adcId);
-      std::vector<float> digits = tile_digits->samples();
 
-      std::string nameSample = TileCalibUtils::getDrawerString(ros, drawer)
-        + "_ch_" + std::to_string(channel) + "_" + gainName[gain] +  "_samples";
+      unsigned int nSamples = tile_digits->nsamples();
+      if (m_firstSample < nSamples) {
 
+        HWIdentifier adcId = tile_digits->adc_HWID();
+        int channel = m_tileHWID->channel(adcId);
+        int gain = m_tileHWID->adc(adcId);
 
-      std::string channelName = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_channel";
-      auto monitoredChannel = Monitored::Scalar<float>(channelName, channel);
-      auto channelSample = Monitored::Scalar<float>(nameSample, 0.0F);
+        std::string sampleName = module + "_ch_" + std::to_string(channel) + gainName[gain] +  "_samples";
+        auto channelSample = Monitored::Scalar<float>(sampleName, 0.0F);
 
+        std::vector<float> digits_monitored;
+        auto it = tile_digits->samples().begin() + m_firstSample;
+        auto end = tile_digits->samples().end();
+        for(auto i = m_nSamples; it != end && i-->0; ++it) {
+          float sample = (*it);
+          channelSample = sample;
+          fill("TileLegacyMonSamples", channelSample);
+          digits_monitored.push_back(sample);
+        }
 
-      std::vector<float> digits_monitored;
-      if (digits.size() > 1) {
-         lastSampleLegacy = std::min(static_cast<unsigned int>(m_lastSample),static_cast<unsigned int>(digits.size()));
-         firstSampleLegacy = std::min(static_cast<unsigned int>(m_firstSample), (lastSampleLegacy - 1));
+        nSamples = digits_monitored.size();
+        if (nSamples>0) {
 
-         for(unsigned int i = firstSampleLegacy; i < lastSampleLegacy; ++i) {
-            float  sample = digits[i];
-            channelSample = sample;
-            fill("TileLegacyMonSamples", channelSample);
-            digitsLegacy[channel][gain] = digits;
-            digits_monitored.push_back(sample);
-            std::string Summary_name_Legacy = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_Summary_Legacy";
+          std::string channelName = moduleName[gain] + "_channel";
+          auto monitoredChannel = Monitored::Scalar<float>(channelName, channel);
 
+          std::string monPedestal = moduleName[gain] + "_Pedestal";
+          auto pedestal = Monitored::Scalar<float>(monPedestal, digits_monitored[0]);
+          fill("TileLegacyMonPed", monitoredChannel, pedestal);
 
-         }
-         if (digits_monitored.size()>1){
-            unsigned int nSamples = digits_monitored.size();
-            float sampleMean = std::accumulate( digits_monitored.begin(), digits_monitored.end(), 0.0) / nSamples;
+          if (nSamples>1) {
+
+            double sampleSum = std::accumulate( digits_monitored.begin(), digits_monitored.end(), 0.0);
 
             double sampleRMS = std::accumulate( digits_monitored.begin(), digits_monitored.end(), 0.0, [] (double acc, float sample) {
-                                                                                                     return acc + sample * sample;
-                                                                                                   });
-             sampleRMS = sampleRMS / nSamples - sampleMean * sampleMean;
-             sampleRMS = (sampleRMS > 0.0) ? std::sqrt(sampleRMS * nSamples / (nSamples - 1)) : 0.0;
+                  return acc + sample * sample;
+                });
+            sampleRMS -= sampleSum * sampleSum / nSamples;
+            sampleRMS = (sampleRMS > 0.0) ? std::sqrt(sampleRMS / (nSamples - 1)) : 0.0;
 
-            std::string monHFN = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_HFN";
+            std::string monHFN = moduleName[gain] + "_HFN";
             auto hfn = Monitored::Scalar<float>(monHFN, sampleRMS);
             fill("TileLegacyMonHFN", monitoredChannel, hfn);
+          }
 
-            std::string monPedestal = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_Pedestal";
-            auto pedestal = Monitored::Scalar<float>(monPedestal, digits[0]);
-            fill("TileLegacyMonPed", monitoredChannel, pedestal);
-       }
+          found[channel][gain] |= 1;
+          digitsLegacy[channel][gain].swap(digits_monitored);
+        }
       }
-   }
+    }
 
-  //For FELIX digits
-  const TileDigitsCollection* digitsCollectionFlx = digitsContainerFlx->indexFindPtr(hash);
-
-   for (const TileDigits* tile_digits : *digitsCollectionFlx) {
-
-      if (!m_fragIDs.empty() && !std::binary_search(m_fragIDs.begin(), m_fragIDs.end(), fragID)) {
-        continue;
-      }
+    // FELIX digits
+    const TileDigitsCollection* digitsCollectionFlx = digitsContainerFlx->indexFindPtr(hash);
+    for (const TileDigits* tile_digits : *digitsCollectionFlx) {
 
       ATH_MSG_VERBOSE((std::string) *tile_digits);
 
-      HWIdentifier adcId = tile_digits->adc_HWID();
-      int channel = m_tileHWID->channel(adcId);
-      int gain = m_tileHWID->adc(adcId);
-      std::vector<float> digits = tile_digits->samples();
-      std::string nameSample = TileCalibUtils::getDrawerString(ros, drawer)
-        + "_ch_" + std::to_string(channel) + "_" + gainName[gain] +  "_samples";
-      auto channelSample = Monitored::Scalar<float>(nameSample, 0.0F);
+      unsigned int nSamples = tile_digits->nsamples();
+      if (m_firstFelix < nSamples) {
 
-      std::string channelName = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_channel";
-      auto monitoredChannel = Monitored::Scalar<float>(channelName, channel);
+        HWIdentifier adcId = tile_digits->adc_HWID();
+        int channel = m_tileHWID->channel(adcId);
+        int gain = m_tileHWID->adc(adcId);
 
+        std::string sampleName = module + "_ch_" + std::to_string(channel) + gainName[gain] +  "_samples";
+        auto channelSample = Monitored::Scalar<float>(sampleName, 0.0F);
 
-      std::vector<float> digits_monitored;
-      if (digits.size() > 1) {
-        lastSampleFlx = std::max(static_cast<unsigned int>(m_lastSample),static_cast<unsigned int>(digits.size()));
-        firstSampleFlx = std::min(static_cast<unsigned int>(m_firstSample), (lastSampleFlx - 1));
-        for(unsigned int i = firstSampleFlx; i < lastSampleFlx; ++i) { 
-          float sample = digits[i];
+        std::vector<float> digits_monitored;
+        auto it = tile_digits->samples().begin() + m_firstFelix;
+        auto end = tile_digits->samples().end();
+        
+        for(auto i = m_nSamples; it != end && i-->0; ++it) {
+          float sample = (*it);
           channelSample = sample;
-          digitsFlx[channel][gain] = digits;
-          std::string Summary_name_Flx = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_Summary_Flx";
           fill("TileFlxMonSamples", channelSample);
           digits_monitored.push_back(sample);
-
         }
-        if (digits_monitored.size()>1){
-        unsigned int nSamples = digits_monitored.size();
-        float sampleMean = std::accumulate( digits_monitored.begin(), digits_monitored.end(), 0.0) / nSamples;
 
-        double sampleRMS = std::accumulate( digits_monitored.begin(), digits_monitored.end(), 0.0, [] (double acc, float sample) {
-                                                                                                     return acc + sample * sample;
-                                                                                                   });
-        sampleRMS = sampleRMS / nSamples - sampleMean * sampleMean;
-        sampleRMS = (sampleRMS > 0.0) ? std::sqrt(sampleRMS * nSamples / (nSamples - 1)) : 0.0;
+        nSamples = digits_monitored.size();
+        if (nSamples>0) {
 
-        std::string monHFN = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_HFN";
-        auto hfn = Monitored::Scalar<float>(monHFN, sampleRMS);
-        fill("TileFlxMonHFN", monitoredChannel, hfn);
+          std::string channelName = moduleName[gain] + "_channel";
+          auto monitoredChannel = Monitored::Scalar<float>(channelName, channel);
 
-        std::string monPedestal = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_Pedestal";
-        auto pedestal = Monitored::Scalar<float>(monPedestal, digits[firstSampleFlx]);
-        fill("TileFlxMonPed", monitoredChannel, pedestal);
+          std::string monPedestal = moduleName[gain] + "_Pedestal";
+          auto pedestal = Monitored::Scalar<float>(monPedestal, digits_monitored[0]);
+          fill("TileFlxMonPed", monitoredChannel, pedestal);
+
+          if (nSamples>1) {
+
+            double sampleSum = std::accumulate( digits_monitored.begin(), digits_monitored.end(), 0.0);
+
+            double sampleRMS = std::accumulate( digits_monitored.begin(), digits_monitored.end(), 0.0, [] (double acc, float sample) {
+                  return acc + sample * sample;
+                });
+            sampleRMS -= sampleSum * sampleSum / nSamples;
+            sampleRMS = (sampleRMS > 0.0) ? std::sqrt(sampleRMS / (nSamples - 1)) : 0.0;
+
+            std::string monHFN = moduleName[gain] + "_HFN";
+            auto hfn = Monitored::Scalar<float>(monHFN, sampleRMS);
+            fill("TileFlxMonHFN", monitoredChannel, hfn);
+          }
+
+          found[channel][gain] |= 2;
+          digitsFlx[channel][gain].swap(digits_monitored);
+        }
       }
-     }
-
     }
 
-    //compare digits from Legacy and Felix
+    // Compare digits from Legacy and FELIX
+    for(unsigned int gain = 0; gain<TileCalibUtils::MAX_GAIN; ++gain) {
 
-    for(int gain = 0; gain<2; gain++){
-     float diff_digits;
-      for(int channel = 0; channel<48; channel++){
-        std::vector<float> digits_diff;
-        std::string channelName = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_channel";
-        auto monitoredChannel = Monitored::Scalar<float>(channelName, channel);
+      std::string channelName      = moduleName[gain] + "_channel";
+      std::string moduleSampleName = moduleName[gain] + "_samples";
+      std::string moduleProfName   = moduleName[gain] + "_Profile";
 
-        for (auto it1=digitsLegacy[channel][gain].begin(), it2=digitsFlx[channel][gain].begin();it1!=digitsLegacy[channel][gain].end() && it2!=digitsFlx[channel][gain].end();++it1, ++it2){
-           std::string channelName = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_channel";
-           auto monitoredChannel = Monitored::Scalar<float>(channelName, channel);
+      auto monitoredChannel = Monitored::Scalar<float>(channelName, 0.0F);
+      auto moduleSample = Monitored::Scalar<float>(moduleSampleName, 0.0F);
+      auto profile = Monitored::Scalar<float>(moduleProfName, 0.0F);
 
-           std::string nameSample = TileCalibUtils::getDrawerString(ros, drawer)
-              + "_ch_" + std::to_string(channel) + "_" + gainName[gain] +  "_samples";
-           auto channelSample_diff = Monitored::Scalar<float>(nameSample, 0.0F);
-           diff_digits =(*it2)- ((*it1)*(m_felixScale));
-           channelSample_diff = diff_digits;
+      for(unsigned int channel = 0; channel<TileCalibUtils::MAX_CHAN; ++channel) {
 
-           std::string Legacy_name = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_Legacy";
+        if (found[channel][gain] == 3) {
 
-           digits_diff.push_back(diff_digits);
+          monitoredChannel = channel;
 
-           fill("TileDigitsDiffLegacyFlx", channelSample_diff);
+          std::string sampleName = module + "_ch_" + std::to_string(channel) + gainName[gain] +  "_samples";
+          auto channelSample = Monitored::Scalar<float>(sampleName, 0.0F);
 
+          for (auto it1=digitsLegacy[channel][gain].begin(), it2=digitsFlx[channel][gain].begin();
+               it1!=digitsLegacy[channel][gain].end() && it2!=digitsFlx[channel][gain].end(); ++it1, ++it2) {
 
-           std::string nameSampleModule = TileCalibUtils::getDrawerString(ros,drawer) + "_" + gainName[gain] +  "_samples";
-           auto moduleSample_diff = Monitored::Scalar<float>(nameSampleModule, 0.0F);
+            float diff = (*it2)- (*it1)*m_felixScale;
+            channelSample = diff;
+            moduleSample = diff;
+            profile = diff;
 
-
-           moduleSample_diff = diff_digits;
-           fill("TileDigitsDiffModule",moduleSample_diff );
-           std::string ModuleProf = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_Profile";
-           auto profile = Monitored::Scalar<float>(ModuleProf, moduleSample_diff);
-           fill("TileFlxMonProf", monitoredChannel, profile);
-       }
+            fill("TileDigitsDiffLegacyFlx", channelSample);
+            fill("TileDigitsDiffModule", moduleSample);
+            fill("TileFlxMonProf", monitoredChannel, profile);
+          }
+        }
       }
-     }
-    
-
+    }
   }
+
   fill("TileDigitsFlxMonExecuteTime", timer);
-    
+
   return StatusCode::SUCCESS;
 }

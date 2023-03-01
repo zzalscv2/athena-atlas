@@ -10,7 +10,7 @@
 def TileRawChannelFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
     '''Function to configures TileRawChannelFlxMonAlg algorithms in the monitoring system.'''
 
-    kwargs.setdefault('TileDigitsContainer', 'TileDigitsCnt')
+    #kwargs.setdefault('TileDigitsContainer', 'TileDigitsCnt')
     kwargs.setdefault('TileRawChannelContainerLegacy', 'TileRawChannelFit')
     kwargs.setdefault('TileRawChannelContainerFlx', 'TileRawChannelFlxFit')
     kwargs.setdefault('FirstSample', 0)
