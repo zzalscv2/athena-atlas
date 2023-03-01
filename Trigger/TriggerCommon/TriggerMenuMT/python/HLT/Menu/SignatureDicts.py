@@ -206,6 +206,7 @@ JetChainParts = {
        'preselcHT850',
        #b-jet preselections
        'presel2c20XX2c20b85',
+       'presel2c20XX2c20bg85',
        'presel2c20XX2c20b90',
        'preselj20b95',
        'preselj2b77',
@@ -297,7 +298,7 @@ JetChainParts = {
      # jets by ordering by pt, and selecting those with indices in [X,Y]
      'PTRANGE0r1',
      'PTRANGE2r3'],
-    'bdips': ['95bdips','90bdips','85bdips','80bdips','77bdips'],
+    'bsel': ['95bdips','90bdips','85bdips','80bdips','77bdips','95bgnone','90bgnone','85bgnone','80bgnone','77bgnone' ],
     'smc'           : # "Single mass condition" -- rename?
       ['30smcINF', '35smcINF', '40smcINF', '50smcINF', '60smcINF', 'nosmc'],
     # Setup for alternative data stream readout
@@ -352,7 +353,7 @@ JetChainParts_Default = {
     'momCuts'       : '',
     'timing'       : '',
     'prefilters'    : [],
-    'bdips'         : '',
+    'bsel'         : '',
     'hypoScenario'  : 'simple',
     'exotHypo'      : [],
     'smc'           : 'nosmc',
