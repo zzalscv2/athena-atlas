@@ -153,7 +153,7 @@ def ActsTrkBaseSeedAnalysisAlgCfg(flags,
 
     kwargs.setdefault('InputSeedCollection', 'ITkPixelSeeds')
 
-    if flags.ITk.Tracking.doTruth:
+    if flags.Tracking.doTruth:
         from ActsGeometry.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         geoTool = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
         acc.addPublicTool(geoTool)
@@ -188,7 +188,7 @@ def ActsTrkBaseSeedAnalysisAlgCfg(flags,
                                     xbins=1500, xmin=-3000, xmax=3000,
                                     ybins=400, ymin=perp_min, ymax=perp_max)
 
-    if flags.ITk.Tracking.doTruth:
+    if flags.Tracking.doTruth:
         monitoringGroup.defineHistogram('passed,estimated_eta;EfficiencyEta', title='Efficiency vs eta;eta;Efficiency', type='TEfficiency', path=f'{histoPath}',
                                         xbins=50, xmin=-5, xmax=5)
         monitoringGroup.defineHistogram('passed,estimated_pt;EfficiencyPt', title='Efficiency vs pT;pT [GeV];Efficiency', type='TEfficiency', path=f'{histoPath}',
@@ -198,7 +198,7 @@ def ActsTrkBaseSeedAnalysisAlgCfg(flags,
     list_variables = "x1,y1,z1,r1,x2,y2,z2,r2,x3,y3,z3,r3,pt,theta,eta,d0,dzdr_b,dzdr_t,penalty,event_number,actual_mu"
     tree_def = "x1/vector<double>:y1/vector<double>:z1/vector<double>:r1/vector<double>:x2/vector<double>:y2/vector<double>:z2/vector<double>:r2/vector<double>:x3/vector<double>:y3/vector<double>:z3/vector<double>:r3/vector<double>\
 :pt/vector<float>:theta/vector<float>:eta/vector<float>:d0/vector<float>:dzdr_b/vector<float>:dzdr_t/vector<float>:penalty/vector<float>:event_number/l:actual_mu/F"
-    if flags.ITk.Tracking.doTruth:
+    if flags.Tracking.doTruth:
         list_variables += ",truth_barcode,truth_prob"
         tree_def += ":truth_barcode/vector<int>:truth_prob/vector<double>"
 
@@ -214,7 +214,7 @@ def ActsTrkBaseSeedAnalysisAlgCfg(flags,
 def ActsTrkPixelSeedAnalysisAlgCfg(flags, name = "ActsTrkPixelSeedAnalysisAlg", **kwargs):
     kwargs.setdefault('InputSeedCollection', 'ITkPixelSeeds')
 
-    if flags.ITk.Tracking.doTruth:
+    if flags.Tracking.doTruth:
         kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
         kwargs.setdefault('ITkClustersTruth', 'PRD_MultiTruthITkPixel')
 
@@ -224,7 +224,7 @@ def ActsTrkPixelSeedAnalysisAlgCfg(flags, name = "ActsTrkPixelSeedAnalysisAlg", 
 def ActsTrkStripSeedAnalysisAlgCfg(flags, name = "ActsTrkStripSeedAnalysisAlg", **kwargs):
     kwargs.setdefault('InputSeedCollection', 'ITkStripSeeds')
 
-    if flags.ITk.Tracking.doTruth:
+    if flags.Tracking.doTruth:
         kwargs.setdefault('UsePixel', False)
         kwargs.setdefault('DetectorElements', 'ITkStripDetectorElementCollection')
         kwargs.setdefault('ITkClustersTruth', 'PRD_MultiTruthITkStrip')

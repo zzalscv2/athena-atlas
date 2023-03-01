@@ -103,7 +103,7 @@ def ITkTrackRecoCfg(flags):
                                       TrackContainer+"TruthCollection"]
 
         if current_flags.ITk.Tracking.ActiveConfig.storeSeparateContainer:
-            if flags.ITk.Tracking.doTruth:
+            if flags.Tracking.doTruth:
                 result.merge(ITkTrackTruthCfg(
                     current_flags,
                     Tracks = TrackContainer,
@@ -135,7 +135,7 @@ def ITkTrackRecoCfg(flags):
         AssociationMapName = "PRDtoTrackMapCombinedITkTracks" \
         if not flags.ITk.Tracking.doFastTracking else ""))
 
-    if flags.ITk.Tracking.doTruth:
+    if flags.Tracking.doTruth:
         from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
         result.merge(ITkTrackTruthCfg(
             flags,
@@ -146,13 +146,13 @@ def ITkTrackRecoCfg(flags):
     StatTrackCollections += ["CombinedITkTracks"]
     StatTrackTruthCollections += ["CombinedITkTracksTruthCollection"]
 
-    if flags.ITk.Tracking.doSlimming:
+    if flags.Tracking.doSlimming:
         from TrkConfig.TrkTrackSlimmerConfig import TrackSlimmerCfg
         result.merge(TrackSlimmerCfg(
             flags,
             TrackLocation = ["CombinedITkTracks"]))
 
-    if flags.ITk.Tracking.doTruth:
+    if flags.Tracking.doTruth:
         result.merge(ITkTrackTruthCfg(flags))
 
     result.merge(ITkTrackParticleCnvAlgCfg(
@@ -174,9 +174,9 @@ def ITkTrackRecoCfg(flags):
             flags,
             TrackCollectionKeys = StatTrackCollections,
             TrackTruthCollectionKeys = \
-            StatTrackTruthCollections if flags.ITk.Tracking.doTruth else []))
+            StatTrackTruthCollections if flags.Tracking.doTruth else []))
 
-        if flags.ITk.Tracking.doTruth:
+        if flags.Tracking.doTruth:
             from InDetConfig.InDetTrackClusterAssValidationConfig import (
                 ITkTrackClusterAssValidationCfg)
             result.merge(ITkTrackClusterAssValidationCfg(
@@ -258,7 +258,7 @@ def ITkTrackRecoOutputCfg(flags):
               ITkClusterSplitProbabilityContainerName(flags)]
 
     # Save (Detailed) Track Truth
-    if flags.ITk.Tracking.doTruth:
+    if flags.Tracking.doTruth:
         toESD += ["TrackTruthCollection#TrackTruthCollection"]
         toESD += ["DetailedTrackTruthCollection#DetailedTrackTruth"]
 

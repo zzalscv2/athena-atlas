@@ -75,7 +75,7 @@ def ITkTrackingSiPatternCfg(flags,
                 TracksLocation=SiSPSeededTrackCollectionKey))
 
     from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
-    if flags.ITk.Tracking.doTruth:
+    if flags.Tracking.doTruth:
         acc.merge(ITkTrackTruthCfg(
             flags,
             Tracks = SiSPSeededTrackCollectionKey,
@@ -110,7 +110,7 @@ def ITkTrackingSiPatternCfg(flags,
             flags,
             ResolvedTrackCollectionKey = ResolvedTrackCollectionKey))
 
-    if flags.ITk.Tracking.doTruth:
+    if flags.Tracking.doTruth:
         acc.merge(ITkTrackTruthCfg(
             flags,
             Tracks = ResolvedTrackCollectionKey,

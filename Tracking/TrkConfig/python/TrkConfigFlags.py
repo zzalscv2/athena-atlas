@@ -19,6 +19,9 @@ class KalmanUpdatorType(FlagEnum):
 def createTrackingConfigFlags():
     icf = AthConfigFlags()
 
+    # Turn running of truth matching on and off (by default on for MC off for data)
+    icf.addFlag("Tracking.doTruth", lambda prevFlags: prevFlags.Input.isMC)
+
     # control which fitter to be used
     icf.addFlag("Tracking.trackFitterType",
                 TrackFitterType.GlobalChi2Fitter, enum=TrackFitterType)
@@ -32,6 +35,9 @@ def createTrackingConfigFlags():
     # 0=non-interacting,1=electron,2=muon,3=pion,4=kaon,5=proton. See ParticleHypothesis.h for full definition.
     icf.addFlag("Tracking.materialInteractionsType", lambda prevFlags:
                 2 if prevFlags.Beam.Type is BeamType.Cosmics else 3)
+
+    # control if the shared hits are recorded in TrackPatricles
+    icf.addFlag("Tracking.doSharedHits", True)
 
     def doLargeD0(flags):
         if flags.GeoModel.Run<=LHCPeriod.Run3:
@@ -49,6 +55,13 @@ def createTrackingConfigFlags():
 
     # Turn on to save the Track Seeds in a xAOD track collecting for development studies
     icf.addFlag("Tracking.doStoreTrackSeeds", False)
+
+    # Toggle track slimming
+    icf.addFlag("Tracking.doSlimming", lambda prevFlags:
+                not(prevFlags.Beam.Type in [BeamType.SingleBeam,
+                                            BeamType.Cosmics] \
+                    or prevFlags.Tracking.doHighPileup \
+                    or prevFlags.Tracking.doVtxLumi) )
 
     # The following flags are only used in InDet configurations for now
     # No corresponding ITk config is available yet

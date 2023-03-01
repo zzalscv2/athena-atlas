@@ -75,7 +75,7 @@ def ITkFastTrackFinderStandaloneCfg(flags):
 
     acc.addEventAlgo( ftf, primary=True )
 
-    if newflags.ITk.Tracking.doTruth:
+    if newflags.Tracking.doTruth:
         from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
         acc.merge(ITkTrackTruthCfg(newflags,
                                         Tracks=SiSPSeededTrackCollectionKey,
@@ -111,7 +111,7 @@ def ITkFastTrackFinderStandaloneCfg(flags):
     #
     # ------------------------------------------------------------
 
-    if newflags.ITk.Tracking.doTruth:
+    if newflags.Tracking.doTruth:
         from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
         acc.merge(ITkTrackTruthCfg(newflags,
                                         Tracks=ResolvedTrackCollectionKey,

@@ -22,14 +22,9 @@ def createInDetConfigFlags():
     # Turn running of the truth seeded pseudo tracking only for pileup on and off.
     # Only makes sense to run on RDO file where SplitDigi was used!
     icf.addFlag("InDet.doSplitReco", False)
-    # Turn running of truth matching on and off (by default on for MC off for data)
+    # Turn on running of PRD MultiTruthMaker
     icf.addFlag("InDet.doTruth", lambda prevFlags: prevFlags.Input.isMC)
-    # Toggle track slimming
-    icf.addFlag("InDet.doSlimming", lambda prevFlags:
-                not(prevFlags.Beam.Type in [BeamType.SingleBeam,
-                                            BeamType.Cosmics] \
-                    or prevFlags.Tracking.doHighPileup \
-                    or prevFlags.Tracking.doVtxLumi) )
+
     # defines if the X1X mode is used for the offline or not
     icf.addFlag("InDet.selectSCTIntimeHits", lambda prevFlags: (
         not(prevFlags.Beam.Type is BeamType.Cosmics or \
@@ -56,8 +51,6 @@ def createInDetConfigFlags():
 
     # Tracking parameters
 
-    # control if the shared hits are recorded in TrackPatricles
-    icf.addFlag("InDet.Tracking.doSharedHits", True)
     # Express track parameters wrt. to : 'BeamLine','BeamSpot','Vertex' (first primary vertex)
     icf.addFlag("InDet.Tracking.perigeeExpression",
                 lambda prevFlags: "Vertex" if prevFlags.Reco.EnableHI else "BeamLine")

@@ -16,17 +16,19 @@ def NewTrackingTRTExtensionCfg(flags,
     # Track extension to TRT algorithm
     #
     from InDetConfig.TRT_TrackExtensionAlgConfig import TRT_TrackExtensionAlgCfg
-    acc.merge(TRT_TrackExtensionAlgCfg(flags,
-                                       InputTracksLocation = SiTrackCollection,
-                                       ExtendedTracksLocation = ExtendedTracksMap))
+    acc.merge(TRT_TrackExtensionAlgCfg(
+        flags,
+        InputTracksLocation = SiTrackCollection,
+        ExtendedTracksLocation = ExtendedTracksMap))
 
-    from InDetConfig.InDetExtensionProcessorConfig import InDetExtensionProcessorCfg
+    from InDetConfig.InDetExtensionProcessorConfig import (
+        InDetExtensionProcessorCfg)
     acc.merge(InDetExtensionProcessorCfg(flags,
                                          TrackName = SiTrackCollection,
                                          NewTrackName = ExtendedTrackCollection,
                                          ExtensionMap = ExtendedTracksMap))
 
-    if flags.InDet.doTruth:
+    if flags.Tracking.doTruth:
         from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
         acc.merge(InDetTrackTruthCfg(
             flags,
@@ -46,12 +48,15 @@ def NewTrackingTRTExtensionPhaseCfg(flags,
     #
     # Track extension to TRT algorithm
     #
-    from InDetConfig.TRT_TrackExtensionAlgConfig import TRT_Phase_TrackExtensionAlgCfg
-    acc.merge(TRT_Phase_TrackExtensionAlgCfg(flags,
-                                             InputTracksLocation = SiTrackCollection,
-                                             ExtendedTracksLocation = ExtendedTracksMap))
+    from InDetConfig.TRT_TrackExtensionAlgConfig import (
+        TRT_Phase_TrackExtensionAlgCfg)
+    acc.merge(TRT_Phase_TrackExtensionAlgCfg(
+        flags,
+        InputTracksLocation = SiTrackCollection,
+        ExtendedTracksLocation = ExtendedTracksMap))
 
-    from InDetConfig.InDetExtensionProcessorConfig import InDetExtensionProcessorCfg
+    from InDetConfig.InDetExtensionProcessorConfig import (
+        InDetExtensionProcessorCfg)
     acc.merge(InDetExtensionProcessorCfg(flags,
                                          name = "InDetExtensionProcessorPhase",
                                          TrackName = SiTrackCollection,
@@ -135,16 +140,18 @@ if __name__ == "__main__":
 
     ####################### TrackingSiPattern #############################
     from InDetConfig.TrackingSiPatternConfig import TrackingSiPatternCfg
-    top_acc.merge(TrackingSiPatternCfg(flags,
-                                       InputCollections = InputCollections,
-                                       ResolvedTrackCollectionKey = ResolvedTracks,
-                                       SiSPSeededTrackCollectionKey = InDetSpSeededTracksKey))
+    top_acc.merge(TrackingSiPatternCfg(
+        flags,
+        InputCollections = InputCollections,
+        ResolvedTrackCollectionKey = ResolvedTracks,
+        SiSPSeededTrackCollectionKey = InDetSpSeededTracksKey))
 
     ########################### TRTExtension  #############################
-    top_acc.merge(NewTrackingTRTExtensionCfg(flags,
-                                             SiTrackCollection = ResolvedTracks,
-                                             ExtendedTrackCollection = ExtendedTrackCollection, 
-                                             ExtendedTracksMap = ExtendedTracksMap))
+    top_acc.merge(NewTrackingTRTExtensionCfg(
+        flags,
+        SiTrackCollection = ResolvedTracks,
+        ExtendedTrackCollection = ExtendedTrackCollection,
+        ExtendedTracksMap = ExtendedTracksMap))
     #######################################################################
 
     iovsvc = top_acc.getService('IOVDbSvc')

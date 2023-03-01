@@ -150,7 +150,7 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
     # this truth must only be done if you do PRD and SpacePointformation
     # If you only do the latter (== running on ESD) then the needed input (simdata)
     # is not in ESD but the resulting truth (clustertruth) is already there ...
-    if flags.ITk.Tracking.doTruth:
+    if flags.ITk.doTruth:
         from InDetConfig.InDetTruthAlgsConfig import ITkPRD_MultiTruthMakerSiCfg
         acc.merge(ITkPRD_MultiTruthMakerSiCfg(flags))
 

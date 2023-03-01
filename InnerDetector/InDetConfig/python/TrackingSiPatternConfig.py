@@ -37,7 +37,7 @@ def TrackingSiPatternCfg(flags,
         TracksLocation = SiSPSeededTrackCollectionKey))
 
     from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
-    if flags.InDet.doTruth:
+    if flags.Tracking.doTruth:
         acc.merge(InDetTrackTruthCfg(
             flags,
             Tracks = SiSPSeededTrackCollectionKey,
@@ -62,7 +62,7 @@ def TrackingSiPatternCfg(flags,
         ResolvedTrackCollectionKey = ResolvedTrackCollectionKey,
         ClusterSplitProbContainer = ClusterSplitProbContainer))
 
-    if flags.InDet.doTruth:
+    if flags.Tracking.doTruth:
         acc.merge(InDetTrackTruthCfg(
             flags,
             Tracks = ResolvedTrackCollectionKey,
