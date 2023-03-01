@@ -181,16 +181,14 @@ JetCollections = dict()
 JetCollections['MT'] = {
   'HLT_AntiKt4EMTopoJets_subjesIS'                                : { 'MatchTo' : 'AntiKt4EMPFlowJets'}, # default small-R EM
   'HLT_AntiKt4EMTopoJets_subjesIS_fastftag'                       : { 'MatchTo' : 'NONE'}, # small-R EM jets with RoI tracking & fast flavour tagging
-  'HLT_AntiKt4EMTopoJets_subjesgscIS_ftf'                         : { 'MatchTo' : 'AntiKt4EMPFlowJets'}, # a4 calo jet w/ calo+track GSC
-  'HLT_AntiKt4EMPFlowJets_subjesgscIS_ftf'                        : { 'MatchTo' : 'AntiKt4EMPFlowJets'}, # a4 pflow w/ calo+track GSC
+  'HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf'                      : { 'MatchTo' : 'AntiKt4EMPFlowJets'}, # a4 calo jet w/ FTF
+  'HLT_AntiKt4EMTopoJets_subjesgscIS_ftf'                         : { 'MatchTo' : 'AntiKt4EMPFlowJets'}, # a4 calo jet w/ calo+track GSC, reconstructed by MET
+  'HLT_AntiKt4EMPFlowJets_subjesgscIS_ftf'                        : { 'MatchTo' : 'AntiKt4EMPFlowJets'}, # a4 pflow w/ calo+track GSC, reconstructed by MET
   'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf'                     : { 'MatchTo' : 'AntiKt4EMPFlowJets'}, # a4 pflow w/ residual + calo+track GSC
   'HLT_AntiKt4EMPFlowJets_nojcalib_ftf'                           : { 'MatchTo' : 'NONE'},               # a4 pflow nojcalib
-  'HLT_AntiKt4EMPFlowCSSKJets_nojcalib_ftf'                       : { 'MatchTo' : 'NONE'},               # a4 pflow cssk nojcalib
   'HLT_AntiKt10EMTopoRCJets_subjesIS'                             : { 'MatchTo' : 'NONE'},               # a10r
   'HLT_AntiKt10LCTopoJets_subjes'                                 : { 'MatchTo' : 'NONE'},               # a10
   'HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes'              : { 'MatchTo' : 'NONE'}, # a10t
-  'HLT_AntiKt10LCTopoSoftDropBeta100Zcut10Jets_nojcalib'          : { 'MatchTo' : 'NONE'},               # a10sd lcw nojcalib
-  'HLT_AntiKt10EMPFlowSoftDropBeta100Zcut10Jets_nojcalib_ftf'     : { 'MatchTo' : 'NONE'},               # a10sd pflow nojcalib
   'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_nojcalib_ftf' : { 'MatchTo' : 'NONE'},               # a10sd pflow cssk nojcalib
   'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf'      : { 'MatchTo' : 'NONE'},               # a10sd pflow cssk jes
 }
@@ -208,23 +206,23 @@ Chains2Monitor['MT'] = {
   # Small-R EMTopo chains
   'HLT_j45_L1J15'  : { 'HLTColl' : 'HLT_AntiKt4EMTopoJets_subjesIS',
                        'RefChain' : 'NONE',
-                       'OfflineColl' : 'AntiKt4EMTopoJets' },
+                       'OfflineColl' : 'AntiKt4EMPFlowJets' },
 
-  'HLT_j45_ftf_preselj20_L1J15'  : { 'HLTColl' : 'HLT_AntiKt4EMTopoJets_subjesgscIS_ftf',
+  'HLT_j45_ftf_preselj20_L1J15'  : { 'HLTColl' : 'HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf',
                        'RefChain' : 'NONE',
-                       'OfflineColl' : 'AntiKt4EMTopoJets' },
+                       'OfflineColl' : 'AntiKt4EMPFlowJets' },
 
   'HLT_j420_L1J100': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
                       'RefChain': 'HLT_j85_L1J20',
-                      'OfflineColl': 'AntiKt4EMTopoJets'},
+                      'OfflineColl': 'AntiKt4EMPFlowJets'},
   
   'HLT_3j200_L1J100': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
                        'RefChain': 'HLT_j85_L1J20',
-                       'OfflineColl': 'AntiKt4EMTopoJets'},
+                       'OfflineColl': 'AntiKt4EMPFlowJets'},
   
   'HLT_4j120_L13J50': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
                        'RefChain': 'HLT_j85_L1J20',
-                       'OfflineColl': 'AntiKt4EMTopoJets'},
+                       'OfflineColl': 'AntiKt4EMPFlowJets'},
   
   'HLT_j45_320eta490_L1J15p31ETA49': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
                                       'RefChain': 'NONE',
