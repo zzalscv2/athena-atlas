@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -254,7 +254,7 @@ void InDet::SiCombinatorialTrackFinder_xk::newEvent(const EventContext& ctx, SiC
   // Set track info
   //
   data.trackinfo().setPatternRecognitionInfo(Trk::TrackInfo::SiSPSeededFinder);
-  data.cosmicTrack() = 0;
+  data.setCosmicTrack(0);
 
   // Add conditions object to SiCombinatorialTrackFinderData to be able to access the field cache for each new event
   // Get conditions object for field cache
@@ -291,15 +291,14 @@ void InDet::SiCombinatorialTrackFinder_xk::newEvent
   /// the event data
   getTrackQualityCuts(data, Cuts);
 
-  data.heavyIon() = false;
-  data.cosmicTrack() = 0;
+  data.setHeavyIon(false);
+  data.setCosmicTrack(0);
   /// update pattern recognition flags in the event data based on track info arg
-  if (info.patternRecoInfo(Trk::TrackInfo::SiSpacePointsSeedMaker_Cosmic)) {
-    data.cosmicTrack() = 1;
-  } else if (info.patternRecoInfo(Trk::TrackInfo::SiSpacePointsSeedMaker_HeavyIon)) {
-    data.heavyIon() = true;
-  }
-  data.tools().setHeavyIon(data.heavyIon());
+  if (info.patternRecoInfo(Trk::TrackInfo::SiSpacePointsSeedMaker_Cosmic))
+    data.setCosmicTrack(1);
+  else if (info.patternRecoInfo(Trk::TrackInfo::SiSpacePointsSeedMaker_HeavyIon))
+    data.setHeavyIon(true);
+
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -369,7 +368,12 @@ const std::list<Trk::Track*>&  InDet::SiCombinatorialTrackFinder_xk::getTracks
      if (m_writeHolesFromPattern) data.addPatternHoleSearchOutcome(t,data.trajectory().getHoleSearchResult());
      data.tracks().push_back(t);
   }
-  if (!data.tools().multiTrack() || data.simpleTrack() || Sp.size()<=2 || data.cosmicTrack() || data.trajectory().pTfirst() < data.tools().pTmin()) return data.tracks();
+
+  if (!data.tools().multiTrack() ||
+      data.simpleTrack() ||
+      Sp.size()<=2 ||
+      data.cosmicTrack() ||
+      data.trajectory().pTfirst() < data.tools().pTmin()) return data.tracks();
 
   while ((t=convertToNextTrack(data))) {
     ++data.findtracks();
@@ -432,7 +436,11 @@ const std::list<Trk::Track*>& InDet::SiCombinatorialTrackFinder_xk::getTracks
   ++data.findtracks();
   data.tracks().push_back(t);
 
-  if (!data.tools().multiTrack() || data.simpleTrack() || Sp.size()<=2 || data.cosmicTrack() || data.trajectory().pTfirst() < data.tools().pTmin()) return data.tracks();
+  if (!data.tools().multiTrack() ||
+      data.simpleTrack() ||
+      Sp.size()<=2 ||
+      data.cosmicTrack() ||
+      data.trajectory().pTfirst() < data.tools().pTmin()) return data.tracks();
 
   while ((t=convertToNextTrack(data))) {
     if (m_writeHolesFromPattern) data.addPatternHoleSearchOutcome(t,data.trajectory().getHoleSearchResult());
@@ -674,31 +682,35 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
     if (!data.trajectory().forwardExtension (false,itmax)) return CantFindTrk;
     if (!data.trajectory().backwardSmoother (false)      ) return CantFindTrk;
     if (!data.trajectory().backwardExtension(itmax)      ) return CantFindTrk;
-    if (data.isITkGeometry() && (data.trajectory().nclusters() < data.nclusmin() || data.trajectory().ndf() < data.nwclusmin()) ) return CantFindTrk;
+    if (data.isITkGeometry() &&
+	(data.trajectory().nclusters() < data.nclusmin() ||
+	 data.trajectory().ndf() < data.nwclusmin()) ) return CantFindTrk;
+
     /// refine if needed
-    if(!data.useFastTracking()){
-      if (data.trajectory().difference() > 0) {
-        if (!data.trajectory().forwardFilter()          ) {
-	  if( toReturnFailedTrack ) {
-	    data.setResultCode(SiCombinatorialTrackFinderData_xk::ResultCode::PixSeedDiffKFFwd);
-	  }
-	  else {
-	    return CantFindTrk;
-	  }
-        }
-        if (!data.trajectory().backwardSmoother (false) ) {
-	  if( toReturnFailedTrack ) {
-	    data.setResultCode(SiCombinatorialTrackFinderData_xk::ResultCode::PixSeedDiffKFBwd);
-	  }
-	  else {
-	    return CantFindTrk;
-	  }
-        }
+    if(!data.useFastTracking() && data.trajectory().difference() > 0){
+      if (!data.trajectory().forwardFilter()) {
+	if( toReturnFailedTrack ) {
+	  data.setResultCode(SiCombinatorialTrackFinderData_xk::ResultCode::PixSeedDiffKFFwd);
+	}
+	else {
+	  return CantFindTrk;
+	}
+      }
+
+      if (!data.trajectory().backwardSmoother (false) ) {
+	if( toReturnFailedTrack ) {
+	  data.setResultCode(SiCombinatorialTrackFinderData_xk::ResultCode::PixSeedDiffKFBwd);
+	}
+	else {
+	  return CantFindTrk;
+	}
       }
     }
+
     int na = data.trajectory().nclustersNoAdd();
     /// check if we found enough clusters
-    if (data.trajectory().nclusters()+na < data.nclusmin() || data.trajectory().ndf() < data.nwclusmin()) {
+    if (data.trajectory().nclusters()+na < data.nclusmin() ||
+	data.trajectory().ndf() < data.nwclusmin()) {
        if( toReturnFailedTrack ) {
 	  data.setResultCode(SiCombinatorialTrackFinderData_xk::ResultCode::PixSeedNCluster);
        }
@@ -707,6 +719,7 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
        }
     }
   }
+
   /// case of a strip seed or mixed PPS
   else {      // Strategy for mixed seeds
     if (!data.trajectory().backwardSmoother(isTwoPointSeed)       ) return CantFindTrk;
@@ -715,13 +728,15 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
 
     /// first application of hit cut
     int na = data.trajectory().nclustersNoAdd();
-    if (data.trajectory().nclusters()+na < data.nclusmin() || data.trajectory().ndf() < data.nwclusmin()) return CantFindTrk;
+    if (data.trajectory().nclusters()+na < data.nclusmin() ||
+	data.trajectory().ndf() < data.nwclusmin()) return CantFindTrk;
     /// backward smooting
     if (!data.trajectory().backwardSmoother(false)    ) return CantFindTrk;
 
     /// apply hit cut again following smoothing step
     na     = data.trajectory().nclustersNoAdd();
-    if (data.trajectory().nclusters()+na < data.nclusmin() || data.trajectory().ndf() < data.nwclusmin()) {
+    if (data.trajectory().nclusters()+na < data.nclusmin() ||
+	data.trajectory().ndf() < data.nwclusmin()) {
        if( toReturnFailedTrack ) {
 	  data.setResultCode(SiCombinatorialTrackFinderData_xk::ResultCode::MixSeedNCluster);
        }
@@ -732,7 +747,7 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
 
     /// refine if needed
     if (data.trajectory().difference() > 0) {
-      if (!data.trajectory().forwardFilter()         ) {
+      if (!data.trajectory().forwardFilter()) {
 	 if( toReturnFailedTrack ) {
 	    data.setResultCode(SiCombinatorialTrackFinderData_xk::ResultCode::MixSeedDiffKFFwd);
 	 }
@@ -750,8 +765,9 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
       }
     }
   }
+
   /// quality cut
-  if (data.trajectory().qualityOptimization()     <           (m_qualityCut*data.nclusmin())    ) {
+  if (data.trajectory().qualityOptimization() < (m_qualityCut*data.nclusmin())) {
      if( toReturnFailedTrack ) {
 	data.setResultCode(SiCombinatorialTrackFinderData_xk::ResultCode::Quality);
      }
@@ -760,7 +776,8 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
      }
   }
 
-  if (data.trajectory().pTfirst  () < data.pTmin()     && data.trajectory().nclusters() < data.nclusmin() ) {
+  if (data.trajectory().pTfirst  () < data.pTmin   () &&
+      data.trajectory().nclusters() < data.nclusmin()) {
      if( toReturnFailedTrack ) {
 	data.setResultCode(SiCombinatorialTrackFinderData_xk::ResultCode::Pt);
      }
@@ -769,7 +786,8 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
      }
   }
 
-  if (data.trajectory().nclusters() < data.nclusminb() || data.trajectory().ndf      () < data.nwclusmin()) {
+  if (data.trajectory().nclusters() < data.nclusminb() ||
+      data.trajectory().ndf      () < data.nwclusmin()) {
      if( toReturnFailedTrack ) {
 	data.setResultCode(SiCombinatorialTrackFinderData_xk::ResultCode::NCluster);
      }
@@ -985,56 +1003,66 @@ void  InDet::SiCombinatorialTrackFinder_xk::getTrackQualityCuts
 {
   // Integer cuts
   //
-  if (!Cuts.getIntCut   ("CosmicTrack"         ,data.cosmicTrack())) data.cosmicTrack()   =    0;
+  int intCut = 0;
 
-  if (!Cuts.getIntCut   ("MinNumberOfClusters" ,data.nclusmin()   )) data.nclusmin()      =    7;
-  data.nclusminb() = data.nclusmin()-1;
-  if (data.nclusminb() < 3) data.nclusminb() = 3;
+  if (!Cuts.getIntCut("CosmicTrack"         , intCut)) intCut = 0;
+  data.setCosmicTrack(intCut);
 
-  if (!Cuts.getIntCut   ("MinNumberOfWClusters",data.nwclusmin()  )) data.nwclusmin()     =    7;
+  if (!Cuts.getIntCut("MinNumberOfClusters" , intCut)) intCut = 7;
+  data.setNclusmin(intCut);
 
-  if (!Cuts.getIntCut   ("MaxNumberOfHoles"    ,data.nholesmax()  )) data.nholesmax()     =    2;
-  if (!Cuts.getIntCut   ("MaxHolesGae"         ,data.dholesmax()  )) data.dholesmax()     =    2;
-  if (!data.cosmicTrack()) {
-    if (data.nholesmax() > 2) data.nholesmax() = 2;
-    if (data.dholesmax() > 2) data.dholesmax() = 2;
-  }
-  if (data.dholesmax() > data.nholesmax()) data.dholesmax() = data.nholesmax();
+  data.setNclusminb(std::max(3, data.nclusmin()-1));
 
-  int useasso;
-  if (!Cuts.getIntCut   ("UseAssociationTool"  ,useasso      )) useasso         =    0;
+  if (!Cuts.getIntCut("MinNumberOfWClusters", intCut)) intCut = 7;
+  data.setNwclusmin(intCut);
 
-  int simpletrack;
-  if (!Cuts.getIntCut   ("SimpleTrack"         ,simpletrack  )) simpletrack     =    0;
-  simpletrack ? data.simpleTrack() = true : data.simpleTrack() = false;
+  if (!Cuts.getIntCut("MaxNumberOfHoles"    , intCut)) intCut = 2;
+  if(!data.cosmicTrack() && intCut>2) intCut = 2;
+  data.setNholesmax(intCut);
 
-  int multitrack;
-  if (!Cuts.getIntCut   ("doMultiTracksProd"   ,multitrack   )) multitrack      =    0;
+  if (!Cuts.getIntCut("MaxHolesGap"         , intCut)) intCut = 2;
+  if(!data.cosmicTrack() && intCut>2) intCut = 2;
+  if(intCut > data.nholesmax())       intCut = data.nholesmax();
+  data.setDholesmax(intCut);
+
+  data.tools().setHolesClusters(data.nholesmax(), data.dholesmax(),
+				data.nclusmin());
+
+  if (!Cuts.getIntCut("UseAssociationTool"  , intCut)) intCut = 0;
+  data.tools().setAssociation(intCut);
+
+  if (!Cuts.getIntCut("SimpleTrack"         , intCut)) intCut = 0;
+  data.setSimpleTrack(bool(intCut));
 
   // Double cuts
   //
-  if (!Cuts.getDoubleCut("pTmin"              ,data.pTmin()      )) data.pTmin()         = 500.;
-  if (!Cuts.getDoubleCut("pTminBrem"          ,data.pTminBrem()  )) data.pTminBrem()     =1000.;
+  double doubleCut = 0.;
 
-  if (!Cuts.getDoubleCut("MaxXi2forCluster"   ,data.xi2max()     )) data.xi2max()        =   9.;
-  if (!Cuts.getDoubleCut("MaxXi2forOutlier"   ,data.xi2maxNoAdd())) data.xi2maxNoAdd()   =  25.;
-  if (!data.cosmicTrack()) {
-    if (data.xi2maxNoAdd() > 25.) data.xi2maxNoAdd() = 25.;
-  }
-  if (data.xi2maxNoAdd() <= data.xi2max()) data.xi2maxNoAdd() = data.xi2max()+5.;
+  if (!Cuts.getDoubleCut("pTmin"             , doubleCut)) doubleCut = 500.;
+  data.setPTmin(doubleCut);
 
-  if (!Cuts.getDoubleCut("MaxXi2forSearch"    ,data.xi2maxlink() )) data.xi2maxlink()    = 100.;
+  if (!Cuts.getDoubleCut("pTminBrem"         , doubleCut)) doubleCut = 1000.;
+  data.setPTminBrem(doubleCut);
 
-  double xi2m;
-  if (!Cuts.getDoubleCut("MaxXi2MultiTracks"  ,xi2m         )) xi2m            =   7.;
-  if (!data.cosmicTrack()) {
-    if (xi2m > 7.) xi2m = 7.;
-  }
+  if (!Cuts.getDoubleCut("MaxXi2forCluster"  , doubleCut)) doubleCut = 9.;
+  data.setXi2max(doubleCut);
 
-  data.tools().setXi2pTmin(data.xi2max(), data.xi2maxNoAdd(), data.xi2maxlink(), data.pTmin());
-  data.tools().setHolesClusters(data.nholesmax(), data.dholesmax(), data.nclusmin());
-  data.tools().setAssociation(useasso);
-  data.tools().setMultiTracks(multitrack, xi2m);
+  if (!Cuts.getDoubleCut("MaxXi2forOutlier"  , doubleCut)) doubleCut = 25.;
+  if (!data.cosmicTrack() && doubleCut > 25.) doubleCut = 25.;
+  if (doubleCut <= data.xi2max()) doubleCut = data.xi2max()+5.;
+  data.setXi2maxNoAdd(doubleCut);
+
+  if (!Cuts.getDoubleCut("MaxXi2forSearch"    , doubleCut)) doubleCut = 100.;
+  data.setXi2maxlink(doubleCut);
+
+  data.tools().setXi2pTmin(data.xi2max(), data.xi2maxNoAdd(),
+			   data.xi2maxlink(), data.pTmin());
+
+  if (!Cuts.getIntCut   ("doMultiTracksProd", intCut)) intCut = 0;
+  if (!Cuts.getDoubleCut("MaxXi2MultiTracks", doubleCut)) doubleCut = 7.;
+  if (!data.cosmicTrack() && doubleCut > 7.) doubleCut = 7.;
+  data.tools().setMultiTracks(intCut, doubleCut);
+
   data.trajectory().setParameters();
 }
 
@@ -1068,11 +1096,9 @@ void InDet::SiCombinatorialTrackFinder_xk::initializeCombinatorialData(const Eve
   }
 
   // Set the ITk Geometry setup
-  data.isITkGeometry() = m_ITkGeometry;
-  data.tools().setITkGeometry(m_ITkGeometry);
+  data.setITkGeometry(m_ITkGeometry);
   // Set the ITk Fast Tracking setup
-  data.useFastTracking() = m_doFastTracking;
-  data.tools().setFastTracking(m_doFastTracking);
+  data.setFastTracking(m_doFastTracking);
 }
 
 void InDet::SiCombinatorialTrackFinder_xk::fillStatistic(SiCombinatorialTrackFinderData_xk& data, std::array<bool,6>& information) const

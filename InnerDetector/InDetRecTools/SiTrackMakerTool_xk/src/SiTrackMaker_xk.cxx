@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -977,7 +977,7 @@ InDet::TrackQualityCuts InDet::SiTrackMaker_xk::setTrackQualityCuts(bool simpleT
   trackquality.setIntCut("MinNumberOfClusters" ,m_nclusmin   );
   trackquality.setIntCut("MinNumberOfWClusters",m_nwclusmin  );
   trackquality.setIntCut("MaxNumberOfHoles"    ,m_nholesmax  );
-  trackquality.setIntCut("MaxHolesGae"         ,m_dholesmax  );
+  trackquality.setIntCut("MaxHolesGap"         ,m_dholesmax  );
 
   if (m_useassoTool)                  trackquality.setIntCut("UseAssociationTool",1);
   else                                trackquality.setIntCut("UseAssociationTool",0);

@@ -826,7 +826,7 @@ InDet::TRT_SeededTrackFinder_ATL::setTrackQualityCuts(){
   m_trackquality.setIntCut   ("MinNumberOfClusters",  m_nclusmin   );
   m_trackquality.setIntCut   ("MinNumberOfWClusters", m_nwclusmin  );
   m_trackquality.setIntCut   ("MaxNumberOfHoles"   ,  m_nholesmax  );
-  m_trackquality.setIntCut   ("MaxHolesGae"        ,  m_dholesmax  );
+  m_trackquality.setIntCut   ("MaxHolesGap"        ,  m_dholesmax  );
   if( m_useassoTool ) m_trackquality.setIntCut   ("UseAssociationTool",1);
   else                m_trackquality.setIntCut   ("UseAssociationTool",0);
 
