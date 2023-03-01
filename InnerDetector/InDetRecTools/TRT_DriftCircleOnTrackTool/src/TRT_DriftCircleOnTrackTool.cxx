@@ -84,7 +84,7 @@ const InDet::TRT_DriftCircleOnTrack* InDet::TRT_DriftCircleOnTrackTool::correct
 
   // Global direction of the track parameters
   //
-  const Amg::VectorX& P = TP.parameters();
+  const AmgVector(5)& P = TP.parameters();
   double se = sin(P[3]); 
   Amg::Vector3D dir(cos(P[2])*se,sin(P[2])*se,cos(P[3]));
 
