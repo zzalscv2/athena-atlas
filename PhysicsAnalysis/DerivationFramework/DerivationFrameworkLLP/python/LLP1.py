@@ -219,11 +219,13 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
     LLP1VSITPThinningTool = acc.getPrimaryAndMerge(VSITrackParticleThinningCfg(ConfigFlags,
                                                                                name                    = "LLP1VSITPThinningTool",
                                                                                StreamName              = kwargs['StreamName'],
-                                                                               InDetTrackParticlesKey  = "InDetTrackParticles"))
+                                                                               InDetTrackParticlesKey  = "InDetTrackParticles",
+                                                                               AugVerStrings = LLP1VrtSecInclusiveSuffixes))
     LLP1LRTVSITPThinningTool = acc.getPrimaryAndMerge(VSITrackParticleThinningCfg(ConfigFlags,
                                                                                   name                    = "LLP1LRTVSITPThinningTool",
                                                                                   StreamName              = kwargs['StreamName'],
-                                                                                  InDetTrackParticlesKey  = "InDetLargeD0TrackParticles"))
+                                                                                  InDetTrackParticlesKey  = "InDetLargeD0TrackParticles",
+                                                                                  AugVerStrings = LLP1VrtSecInclusiveSuffixes))
 
 
 
