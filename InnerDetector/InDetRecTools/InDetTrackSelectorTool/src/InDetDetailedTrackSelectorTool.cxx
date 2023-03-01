@@ -906,7 +906,11 @@ namespace InDet
       ATH_MSG_DEBUG("Track rejected because of fit probability "<<proba<<" > "<<m_fitProb);
       return false;
     }
-    if(!ndf || chi2/double(ndf)>m_fitChi2OnNdfMax) {
+    if(!ndf) {
+      ATH_MSG_DEBUG("Track rejected because of ndof = "<<ndf);
+      return false;
+    }
+    if(chi2/double(ndf)>m_fitChi2OnNdfMax) {
       ATH_MSG_DEBUG("Track rejected because of chi2/ndof "<<chi2/double(ndf)<<" > "<<m_fitChi2OnNdfMax);
       return false;
     }
