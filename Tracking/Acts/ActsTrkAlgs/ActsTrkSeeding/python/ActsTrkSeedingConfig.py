@@ -10,9 +10,9 @@ from ActsGeometry.ActsGeometryConfig import ActsATLASConverterToolCfg
 from ActsInterop.ActsConfigFlags import SeedingStrategy
         
 # ACTS algorithm using Athena objects upstream
-def ActsTrkITkPixelSeedingFromAthenaCfg(flags,
-                                        name: str = 'ActsTrkPixelSeedingAlg',
-                                        **kwargs):
+def ActsTrkITkPixelSeedingCfg(flags,
+                              name: str = 'ActsTrkPixelSeedingAlg',
+                              **kwargs):
     acc = ComponentAccumulator()
 
     # Need To add additional tool(s)
@@ -47,13 +47,13 @@ def ActsTrkITkPixelSeedingFromAthenaCfg(flags,
         from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkITkPixelSeedingMonitoringCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkPixelSeedingMonitoringCfg(flags)))
 
-    acc.addEventAlgo(CompFactory.ActsTrk.SeedingFromAthenaAlg(name, **kwargs))
+    acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc
 
 
-def ActsTrkITkStripSeedingFromAthenaCfg(flags,
-                                        name: str = 'ActsTrkStripSeedingAlg',
-                                        **kwargs):
+def ActsTrkITkStripSeedingCfg(flags,
+                              name: str = 'ActsTrkStripSeedingAlg',
+                              **kwargs):
     acc = ComponentAccumulator()
 
     # Need To add additional tool(s)
@@ -88,77 +88,9 @@ def ActsTrkITkStripSeedingFromAthenaCfg(flags,
         from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkITkStripSeedingMonitoringCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkStripSeedingMonitoringCfg(flags)))
 
-    acc.addEventAlgo(CompFactory.ActsTrk.SeedingFromAthenaAlg(name, **kwargs))
-    return acc
-
-
-def ActsTrkSeedingFromAthenaCfg(flags):
-    acc = ComponentAccumulator()
-    if flags.Detector.EnableITkPixel:
-        acc.merge(ActsTrkITkPixelSeedingFromAthenaCfg(flags))
-    if flags.Detector.EnableITkStrip:
-        acc.merge(ActsTrkITkStripSeedingFromAthenaCfg(flags))
-
-    if flags.Acts.doAnalysis:
-        from ActsTrkAnalysis.ActsTrkAnalysisConfig import ActsTrkSeedAnalysisCfg, ActsTrkEstimatedTrackParamsAnalysisCfg
-        acc.merge(ActsTrkSeedAnalysisCfg(flags))
-        acc.merge(ActsTrkEstimatedTrackParamsAnalysisCfg(flags))
-
-    return acc
-
-
-# ACTS only algorithm
-def ActsTrkITkPixelSeedingCfg(flags,
-                              name: str = 'ActsTrkPixelSeedingAlg',
-                              **kwargs):
-    acc = ComponentAccumulator()
-
-    # tools
-    # check if options have already the seed tool defined
-    # and make sure it is not a None
-    seedTool = None
-    if "SeedTool" not in kwargs:
-        if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
-            seedTool = acc.popToolsAndMerge(ActsTrkITkPixelOrthogonalSeedingToolCfg(flags))
-        else:
-            seedTool = acc.popToolsAndMerge(ActsTrkITkPixelSeedingToolCfg(flags))
-        
-    kwargs.setdefault('InputSpacePoints', ['ITkPixelSpacePoints'])
-    kwargs.setdefault('OutputSeeds', 'ITkPixelSeeds')
-    kwargs.setdefault('SeedTool', seedTool)
-
-    if flags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkITkPixelSeedingMonitoringCfg
-        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkPixelSeedingMonitoringCfg(flags)))
-
     acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc
 
-def ActsTrkITkStripSeedingCfg(flags,
-                              name: str = 'ActsTrkStripSeedingAlg',
-                              **kwargs):
-    acc = ComponentAccumulator()
-
-    # tools
-    # check if options have already the seed tool defined
-    # and make sure it is not a None
-    seedTool = None
-    if "SeedTool" not in kwargs:
-        if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
-            seedTool = acc.popToolsAndMerge(ActsTrkITkStripOrthogonalSeedingToolCfg(flags))
-        else:
-            seedTool = acc.popToolsAndMerge(ActsTrkITkStripSeedingToolCfg(flags))
-        
-    kwargs.setdefault('InputSpacePoints', ['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints'])
-    kwargs.setdefault('OutputSeeds', 'ITkStripSeeds')
-    kwargs.setdefault('SeedTool', seedTool)
-
-    if flags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkITkStripSeedingMonitoringCfg
-        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkStripSeedingMonitoringCfg(flags)))
-
-    acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
-    return acc
 
 def ActsTrkSeedingCfg(flags):
     acc = ComponentAccumulator()

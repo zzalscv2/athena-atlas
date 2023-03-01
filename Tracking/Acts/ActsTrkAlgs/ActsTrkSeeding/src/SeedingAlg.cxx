@@ -13,11 +13,17 @@
 #include "Acts/Seeding/SeedFilter.hpp"
 #include "Acts/Seeding/SeedFinder.hpp"
 
+#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "TrkSpacePoint/SpacePointCollection.h"
+#include "SiSPSeededTrackFinderData/SiSpacePointForSeed.h"
 #include "AthenaMonitoringKernel/Monitored.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
+
+#include <boost/container/static_vector.hpp>
+
+#include "SiSPSeededTrackFinderData/ITkSiSpacePointForSeed.h"
 
 namespace ActsTrk {
-  
   SeedingAlg::SeedingAlg( const std::string &name,
 			  ISvcLocator *pSvcLocator )
     : AthReentrantAlgorithm( name,pSvcLocator ) 
@@ -28,18 +34,23 @@ namespace ActsTrk {
     
     // Retrieve seed tool
     ATH_CHECK( m_seedsTool.retrieve() );
-    
+    ATH_CHECK( m_paramEstimationTool.retrieve() );
+    ATH_CHECK( m_trackingGeometryTool.retrieve() );
+    ATH_CHECK( m_ATLASConverterTool.retrieve() );
+
     // Cond
     ATH_CHECK( m_beamSpotKey.initialize() );
     ATH_CHECK( m_fieldCondObjInputKey.initialize() );
-    
-    // Read nd Write handles
+    ATH_CHECK( m_detEleCollKey.initialize() );
+
+    // Read and Write handles
     ATH_CHECK( m_spacePointKey.initialize() );
     ATH_CHECK( m_seedKey.initialize() );
+    ATH_CHECK( m_actsTrackParamsKey.initialize() );
 
     if ( not m_monTool.empty() )
       ATH_CHECK( m_monTool.retrieve() );
-    
+
     return StatusCode::SUCCESS;
   }
   
@@ -62,7 +73,7 @@ namespace ActsTrk {
     }
     auto beamSpotData = beamSpotHandle.cptr();
     // Beam Spot Position
-    Acts::Vector3 beamPos( beamSpotData->beamPos().x() * Acts::UnitConstants::mm,
+   Acts::Vector3 beamPos( beamSpotData->beamPos().x() * Acts::UnitConstants::mm,
                            beamSpotData->beamPos().y() * Acts::UnitConstants::mm,
                            beamSpotData->beamPos().z() * Acts::UnitConstants::mm);
     
@@ -83,7 +94,6 @@ namespace ActsTrk {
     Acts::MagneticFieldProvider::Cache magFieldCache = magneticField.makeCache( magFieldContext );
     Acts::Vector3 bField = *magneticField.getField( Acts::Vector3(beamPos.x(), beamPos.y(), 0),
                                                     magFieldCache );
-
     
     // ================================================== //
     // ===================== INPUTS ===================== // 
@@ -113,8 +123,16 @@ namespace ActsTrk {
 	selectedSpacePoints.push_back( sp );
       }
     }
-
+	
     ATH_MSG_DEBUG( "    \\__ Total input space points: " << selectedSpacePoints.size());
+
+    SG::ReadCondHandle< InDetDD::SiDetectorElementCollection > detEleHandle( m_detEleCollKey, ctx );
+    ATH_CHECK( detEleHandle.isValid() );
+    const InDetDD::SiDetectorElementCollection* detEle = detEleHandle.retrieve();
+    if ( detEle == nullptr ) {
+      ATH_MSG_FATAL( m_detEleCollKey.fullKey() << " is not available." );
+      return StatusCode::FAILURE;
+    }
 
     // ================================================== // 
     // ===================== OUTPUTS ==================== //
@@ -124,6 +142,10 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "    \\__ Seed Container `" << m_seedKey.key() << "` created ..." );
     std::unique_ptr< ActsTrk::SeedContainer > seedPtrs = std::make_unique< ActsTrk::SeedContainer >();
     
+    SG::WriteHandle< ActsTrk::BoundTrackParametersContainer > boundTrackParamsHandle = SG::makeHandle( m_actsTrackParamsKey, ctx );
+    ATH_MSG_DEBUG( "    \\__ Track Params Estimated `"<< m_actsTrackParamsKey.key() << "` created ..." );
+    std::unique_ptr< ActsTrk::BoundTrackParametersContainer > trackParams = std::make_unique< ActsTrk::BoundTrackParametersContainer >();
+
     // ================================================== // 
     // ===================== COMPUTATION ================ //
     // ================================================== // 
@@ -135,14 +157,47 @@ namespace ActsTrk {
 					 bField,
 					 *seedPtrs.get() ) );
     ATH_MSG_DEBUG("    \\__ Created " << seedPtrs->size() << " seeds");
-    
+
+    // ================================================== //   
+    // ================ PARAMS ESTIMATION =============== //  
+    // ================================================== //   
+
+    ATH_MSG_DEBUG( "Estimating Track Parameters from seed ..." );
+
+    // Estimate Track Parameters
+    auto retrieveSurfaceFunction = 
+      [this, &detEle] (const Acts::Seed<xAOD::SpacePoint>& seed) -> const Acts::Surface& 
+      { 
+	const InDetDD::SiDetectorElement* Element = detEle->getDetectorElement(seed.sp().front()->elementIdList()[0]);
+	const Trk::Surface& atlas_surface = Element->surface();
+	return this->m_ATLASConverterTool->ATLASSurfaceToActs(atlas_surface);
+      };
+
+    auto geo_context = m_trackingGeometryTool->getNominalGeometryContext();
+
+    for (const ActsTrk::Seed* seed : *seedPtrs) {
+      std::optional<Acts::BoundTrackParameters> optTrackParams =
+        m_paramEstimationTool->estimateTrackParameters(ctx,
+						       *seed,
+						       geo_context.context(),
+						       magFieldContext,
+						       retrieveSurfaceFunction);
+
+      if ( optTrackParams.has_value() ) {
+	Acts::BoundTrackParameters *toAdd = 
+	  new Acts::BoundTrackParameters( optTrackParams.value() );
+	trackParams->push_back( toAdd );
+      }
+    }
+
     // ================================================== //   
     // ===================== STORE OUTPUT =============== //
     // ================================================== //   
     
-    ATH_MSG_DEBUG("Storing Seed Collection");
+    ATH_MSG_DEBUG("Storing Output Collections");
     ATH_CHECK( seedHandle.record( std::move( seedPtrs ) ) );
-    
+    ATH_CHECK( boundTrackParamsHandle.record( std::move( trackParams ) ) );
+
     return StatusCode::SUCCESS;
   }
   
