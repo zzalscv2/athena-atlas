@@ -34,6 +34,7 @@ run "Reconstruction" \
     --postInclude TrigFastTrackFinder.ITkFastTrackFinderStandaloneConfig.ITkFastTrackFinderStandaloneCfg \
     --preExec "ConfigFlags.ITk.Tracking.doFastTracking=True"
 
+
 run "IDPVM" \
     runIDPVM.py \
     --filesInput AOD.root \
@@ -41,7 +42,7 @@ run "IDPVM" \
     --doHitLevelPlots \
     --doExpertPlots \
     --truthMinPt=1000 \
-    --validateExtraTrackCollections 'TrigFastTrackFinder_FTF_'
+    --validateExtraTrackCollections {'TrigFastTrackFinder_FTF_','TrigFastTrackFinder_IDTrig_'}
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
