@@ -80,10 +80,7 @@ namespace Muon {
         For more details look at the mainpage of this package.
     */
     class MooTrackBuilder : virtual public IMuonSegmentTrackBuilder, public IMuonTrackBuilder, public IMuonTrackRefiner, public AthAlgTool {
-    public:
-        typedef IMuonSegmentTrackBuilder::PrepVec PrepVec;
-        typedef PrepVec::iterator PrepIt;
-        typedef PrepVec::const_iterator PrepCit;
+       
 
     public:
         /** @brief default AlgTool constructor */
@@ -117,7 +114,7 @@ namespace Muon {
             @return a pointer to the resulting track, will return zero if combination failed. Ownership passed to user.
         */
         std::unique_ptr<Trk::Track> combine(const EventContext& ctx, const MuPatCandidateBase& firstEntry, const MuPatCandidateBase& secondEntry,
-                                            const PrepVec* patternPhiHits) const;
+                                            const PrepVec& patternPhiHits) const;
         
         /// Methos is used externally by MuonTrackSteering.cxx:233. Should be revised to put it into an interface
     public:        
@@ -128,7 +125,7 @@ namespace Muon {
             @return a pointer to the resulting track, will return zero if combination failed. Ownership passed to user.
         */
         std::unique_ptr<MuonSegment> combineToSegment(const EventContext& ctx, const MuPatCandidateBase& firstEntry, const MuPatCandidateBase& secondEntry,
-                                      const PrepVec* patternPhiHits) const;
+                                      const PrepVec& patternPhiHits) const;
     
         /** @brief combine two segments to a super segment
             @param seg1 the first segment
@@ -137,7 +134,7 @@ namespace Muon {
             @return a pointer to the combined segment, will return zero if combination failed. Ownership passed to user.
         */
         virtual std::unique_ptr<MuonSegment> combineToSegment(const EventContext& ctx, const MuonSegment& seg1, const MuonSegment& seg2,
-                                              const PrepVec* patternPhiHits) const override;
+                                              const PrepVec& patternPhiHits) const override;
 
         /** @brief combine two segments to a track
             @param seg1 the first segment
@@ -146,7 +143,7 @@ namespace Muon {
             @return a pointer to the resulting track, will return zero if combination failed. Ownership passed to user.
         */
         virtual std::unique_ptr<Trk::Track> combine(const EventContext& ctx, const MuonSegment& seg1, const MuonSegment& seg2,
-                                                    const PrepVec* patternPhiHits) const override;
+                                                    const PrepVec& patternPhiHits) const override;
 
         /** @brief combine a track with a segment
             @param track a track
@@ -155,7 +152,7 @@ namespace Muon {
             @return a pointer to the resulting track, will return zero if combination failed. Ownership passed to user.
         */
         virtual std::unique_ptr<Trk::Track> combine(const EventContext& ctx, const Trk::Track& track, const MuonSegment& seg,
-                                                    const PrepVec* patternPhiHits) const override;
+                                                    const PrepVec& patternPhiHits) const override;
 
         /** @brief find tracks by redoing the segment finding in the chamber of the segment
             @param track a reference to a Track
@@ -164,7 +161,7 @@ namespace Muon {
          */
     private:
         std::vector<std::unique_ptr<Trk::Track> > combineWithSegmentFinding(const EventContext& ctx, const Trk::Track& track, const MuonSegment& seg,
-                                                                            const PrepVec* patternPhiHits) const;
+                                                                            const PrepVec& patternPhiHits) const;
 
         /** @brief find tracks by redoing the segment finding in the chamber of the segment
             @param candidate a reference to a MuPatTrack
@@ -172,7 +169,7 @@ namespace Muon {
             @return a pointer to vector of tracks, the ownership of the vector and the tracks is passed to the client calling the tool.
          */
         std::vector<std::unique_ptr<Trk::Track> > combineWithSegmentFinding(const EventContext& ctx, const MuPatTrack& candidate, 
-                                                                            const MuPatSegment& segInfo, const PrepVec* patternPhiHits) const;
+                                                                            const MuPatSegment& segInfo, const PrepVec& patternPhiHits) const;
 
         /** @brief find tracks by redoing the segment finding in the chamber of the segment
             @param candidate a reference to a MuPatTrack
@@ -181,7 +178,7 @@ namespace Muon {
             @return a pointer to vector of tracks, the ownership of the vector and the tracks is passed to the client calling the tool.
          */
         std::vector<std::unique_ptr<Trk::Track> > combineWithSegmentFinding(const EventContext& ctx, const MuPatTrack& candidate, const Trk::TrackParameters& pars,
-                                                                            const std::set<Identifier>& chIds, const PrepVec* patternPhiHits) const;
+                                                                            const std::set<Identifier>& chIds, const PrepVec& patternPhiHits) const;
         /** @brief find tracks by redoing the segment finding in the chamber of the segment
             @param track a reference to a Track
             @param pars predicted track parameters in first chamber
@@ -190,7 +187,7 @@ namespace Muon {
          */
         std::vector<std::unique_ptr<Trk::Track> > combineWithSegmentFinding(const EventContext& ctx, const Trk::Track& track, const Trk::TrackParameters& pars,
                                                                             const std::set<Identifier>& chIds,
-                                                                            const PrepVec* patternPhiHits) const;
+                                                                            const PrepVec& patternPhiHits) const;
     public:    
         /** @brief find closest TrackParameters to the position. Closest is defined as closest in z in the endcap and
             closest in r in the barrel.

@@ -102,7 +102,7 @@ namespace Muon {
             @return a pointer to the resulting track, will return zero if the fit failed.
         */
         std::unique_ptr<Trk::Track> fit(const EventContext& ctx, const MuPatCandidateBase& firstEntry, const MuPatCandidateBase& secondEntry,
-                                        const PrepVec* externalPhiHits) const;
+                                        const PrepVec& externalPhiHits) const;
 
         /** refit a MuPatTrack */
         std::unique_ptr<Trk::Track> refit(const EventContext& ctx, const MuPatTrack& trkCan) const;
@@ -246,7 +246,7 @@ namespace Muon {
         double thetaSeeding(const MuPatCandidateBase& entry, MeasVec& etaHits) const;
 
         /** clean phi hits, returns true if anything happened during the cleaning */
-        bool cleanPhiHits(const EventContext& ctx, double momentum, FitterData& phiHits, const PrepVec* patternPhiHits) const;
+        bool cleanPhiHits(const EventContext& ctx, double momentum, FitterData& phiHits, const PrepVec& patternPhiHits) const;
 
         /** check whether mometum of start parameter is ok */
         bool validMomentum(const Trk::TrackParameters& pars) const;
@@ -281,8 +281,7 @@ namespace Muon {
         ToolHandle<IMuonTrackToSegmentTool> m_trackToSegmentTool{
             this, "TrackToSegmentTool",
             "Muon::MuonTrackToSegmentTool/MuonTrackToSegmentTool"};  //!< helper tool to convert tracks into segments
-        ToolHandle<IMdtDriftCircleOnTrackCreator> m_mdtRotCreator{
-            this, "MdtRotCreator", "Muon::MdtDriftCircleOnTrackCreator/MdtTubeHitOnTrackCreator"};  //!< mdt tube hit creator
+        
         ToolHandle<IMuonHitSelector> m_phiHitSelector{this, "PhiHitSelector",
                                                       "MuonPhiHitSelector/MuonPhiHitSelector"};  //!< tool to clean phi hits
         ToolHandle<IMuonTrackCleaner> m_cleaner{this, "TrackCleaner", "Muon::MuonTrackCleaner/MuonTrackCleaner"};

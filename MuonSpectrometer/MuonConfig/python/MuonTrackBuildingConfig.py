@@ -14,7 +14,6 @@ def MooTrackFitterCfg(flags, name = 'MooTrackFitter', prefix='', **kwargs):
     Muon__MooTrackFitter=CompFactory.Muon.MooTrackFitter
     MuonSegmentMomentum=CompFactory.MuonSegmentMomentum
     from MuonConfig.MuonRecToolsConfig import MuonPhiHitSelectorCfg, MuonTrackToSegmentToolCfg, MuonTrackSummaryHelperToolCfg, MuPatHitToolCfg
-    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg
     
     result = ComponentAccumulator()
     mctb_fitter = result.getPrimaryAndMerge(MCTBFitterCfg(flags, name = prefix+'MCTBFitter'))
@@ -47,8 +46,6 @@ def MooTrackFitterCfg(flags, name = 'MooTrackFitter', prefix='', **kwargs):
     track_to_segment_tool =  result.popToolsAndMerge(MuonTrackToSegmentToolCfg(flags))
     kwargs.setdefault("TrackToSegmentTool", track_to_segment_tool)    
     
-    mdt_dcot_creator = result.popToolsAndMerge(MdtDriftCircleOnTrackCreatorCfg(flags, name="MdtTubeHitOnTrackCreator", CreateTubeHit=True ))
-    kwargs.setdefault("MdtRotCreator", mdt_dcot_creator)
     
     kwargs.setdefault("PhiHitSelector",  result.popToolsAndMerge(MuonPhiHitSelectorCfg(flags)))
     kwargs.setdefault("TrackCleaner",  result.popToolsAndMerge(MuonTrackCleanerCfg(flags)))

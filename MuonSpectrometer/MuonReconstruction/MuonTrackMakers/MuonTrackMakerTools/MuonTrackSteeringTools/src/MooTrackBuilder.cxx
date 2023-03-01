@@ -25,8 +25,9 @@
 #include "TrkEventPrimitives/ResidualPull.h"
 #include "TrkSegment/SegmentCollection.h"
 ATLAS_CHECK_FILE_THREAD_SAFETY;
-
+    
 namespace Muon {
+    static const MooTrackBuilder::PrepVec emptyPhiHits{};
 
     MooTrackBuilder::MooTrackBuilder(const std::string& t, const std::string& n, const IInterface* p) : AthAlgTool(t, n, p) {
         declareInterface<IMuonSegmentTrackBuilder>(this);
@@ -133,7 +134,7 @@ namespace Muon {
         m_candidateHandler->updateTrack(track, finalTrack);
     }
 
-    std::unique_ptr<MuonSegment> MooTrackBuilder::combineToSegment(const EventContext& ctx, const MuonSegment& seg1, const MuonSegment& seg2, const PrepVec* externalPhiHits) const {
+    std::unique_ptr<MuonSegment> MooTrackBuilder::combineToSegment(const EventContext& ctx, const MuonSegment& seg1, const MuonSegment& seg2, const PrepVec& externalPhiHits) const {
         // try to get track
         std::unique_ptr<Trk::Track> track = combine(ctx, seg1, seg2, externalPhiHits);
 
@@ -147,11 +148,11 @@ namespace Muon {
     }
 
     std::unique_ptr<Trk::Track> MooTrackBuilder::combine(const EventContext& ctx, const MuonSegment& seg1, const MuonSegment& seg2,
-                                                         const PrepVec* externalPhiHits) const {
+                                                         const PrepVec& externalPhiHits) const {
      
         // convert segments
         std::unique_ptr<MuPatSegment> segInfo1{m_candidateHandler->createSegInfo(ctx, seg1)};
-        if (!segInfo1) return nullptr;
+        if (!segInfo1) {return nullptr; }
         std::unique_ptr<MuPatSegment> segInfo2{m_candidateHandler->createSegInfo(ctx, seg2)};
         if (!segInfo2) { return nullptr; }
 
@@ -160,7 +161,7 @@ namespace Muon {
     }
 
     std::unique_ptr<MuonSegment> MooTrackBuilder::combineToSegment(const EventContext& ctx, const MuPatCandidateBase& firstCandidate, const MuPatCandidateBase& secondCandidate,
-                                                   const PrepVec* externalPhiHits) const {
+                                                   const PrepVec& externalPhiHits) const {
         // try to get track
         std::unique_ptr<Trk::Track> track = combine(ctx, firstCandidate, secondCandidate, externalPhiHits);
 
@@ -174,7 +175,7 @@ namespace Muon {
     }
 
     std::unique_ptr<Trk::Track> MooTrackBuilder::combine(const EventContext& ctx, const MuPatCandidateBase& firstCandidate,
-                                                         const MuPatCandidateBase& secondCandidate, const PrepVec* externalPhiHits) const {
+                                                         const MuPatCandidateBase& secondCandidate, const PrepVec& externalPhiHits) const {
         ++m_ncalls;
 
         if (m_doTimeOutChecks && Athena::Timeout::instance(ctx).reached()) {
@@ -183,11 +184,22 @@ namespace Muon {
             return nullptr;
         }
 
-        std::set<MuonStationIndex::StIndex> stations;
-        stations.insert(firstCandidate.stations().begin(), firstCandidate.stations().end());
+        std::set<MuonStationIndex::StIndex> stations = firstCandidate.stations();
         stations.insert(secondCandidate.stations().begin(), secondCandidate.stations().end());
         unsigned int nstations = stations.size();
-        bool slFit = nstations == 1 || (nstations == 2 && (stations.count(MuonStationIndex::EM) &&
+
+        MagField::AtlasFieldCache fieldCache;
+        // Get field cache object
+        SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, ctx};
+        const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
+
+        if (!fieldCondObj) {
+            ATH_MSG_ERROR("combine: Failed to retrieve AtlasFieldCacheCondObj with key " << m_fieldCacheCondObjInputKey.key());
+            return nullptr;
+        }
+        fieldCondObj->getInitializedCache(fieldCache);
+
+        bool slFit = !fieldCache.toroidOn() || nstations == 1 || (nstations == 2 && (stations.count(MuonStationIndex::EM) &&
                                                            (stations.count(MuonStationIndex::BO) || stations.count(MuonStationIndex::EO))));
         if (msgLvl(MSG::DEBUG)) {
             msg(MSG::DEBUG) << MSG::DEBUG << " combining entries: nstations " << nstations << " types:";
@@ -221,12 +233,10 @@ namespace Muon {
         // check whether this combination was already tried, if yes reject the combination
         if (candidate && segment) {
             ATH_MSG_DEBUG(" Track/segment combination");
-            for (std::vector<MuPatSegment*>::const_iterator esit = candidate->excludedSegments().begin();
-                 esit != candidate->excludedSegments().end(); ++esit) {
-                if (*esit == segment) {
-                    ATH_MSG_DEBUG(" Rejected segment based on exclusion list");
-                    return nullptr;
-                }
+            const std::vector<MuPatSegment*>& excl = candidate->excludedSegments();
+            if (std::find(excl.begin(),excl.end(), segment) != excl.end()){
+                ATH_MSG_DEBUG(" Rejected segment based on exclusion list");
+                return nullptr;                
             }
         }
 
@@ -243,22 +253,15 @@ namespace Muon {
                 segments.insert(candidate->segments().begin(), candidate->segments().end());                
             }
             // now loop over the segments and check if any of them is associated with a track that contains all of the segments
-            std::set<const MuPatSegment*>::iterator sit = segments.begin();
-            std::set<const MuPatSegment*>::iterator sit_end = segments.end();
-
-            for (; sit != sit_end; ++sit) {
+           
+            for (const MuPatSegment* used : segments) {
                 // loop over the tracks associated with the current segment
-                std::set<MuPatTrack*>::const_iterator tit = (*sit)->tracks().begin();
-                std::set<MuPatTrack*>::const_iterator tit_end = (*sit)->tracks().end();
-                for (; tit != tit_end; ++tit) {
+                for (const MuPatTrack* assoc_track : used->tracks()) {
                     // loop over the segments associated with the track
-                    std::set<MuPatSegment*> foundSegments;
-                    std::vector<MuPatSegment*>::const_iterator tsit = (*tit)->segments().begin();
-                    std::vector<MuPatSegment*>::const_iterator tsit_end = (*tit)->segments().end();
-                    for (; tsit != tsit_end; ++tsit) {
-                        if (segments.count(*tsit)) foundSegments.insert(*tsit);
-                    }
-
+                    std::set<const MuPatSegment*> foundSegments;
+                    for (const MuPatSegment* segOnTrack : assoc_track->segments()) {
+                        if (segments.count(segOnTrack)) foundSegments.insert(segOnTrack);
+                    }                   
                     // if all segments are already part of an existing track, don't perform the fit
                     if (foundSegments.size() == segments.size()) {
                         ATH_MSG_DEBUG("Combination already part of an existing track");
@@ -307,23 +310,11 @@ namespace Muon {
         // use slFitter for straight line fit, or toroid off, otherwise use normal Fitter
         if (slFit) return std::unique_ptr<Trk::Track>(m_slFitter->fit(ctx, firstCandidate, secondCandidate, externalPhiHits));
 
-        MagField::AtlasFieldCache fieldCache;
-        // Get field cache object
-        SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, ctx};
-        const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
-
-        if (!fieldCondObj) {
-            ATH_MSG_ERROR("combine: Failed to retrieve AtlasFieldCacheCondObj with key " << m_fieldCacheCondObjInputKey.key());
-            return nullptr;
-        }
-        fieldCondObj->getInitializedCache(fieldCache);
-        if (!fieldCache.toroidOn()) return std::unique_ptr<Trk::Track>(m_slFitter->fit(ctx, firstCandidate, secondCandidate, externalPhiHits));
-
         return m_fitter->fit(ctx, firstCandidate, secondCandidate, externalPhiHits);
     }
 
     std::unique_ptr<Trk::Track> MooTrackBuilder::combine(const EventContext& ctx, const Trk::Track& track, const MuonSegment& seg,
-                                                         const PrepVec* externalPhiHits) const {
+                                                         const PrepVec& externalPhiHits) const {
 
         // convert segments
         std::unique_ptr<Trk::Track> inTrack = std::make_unique<Trk::Track>(track);
@@ -337,7 +328,7 @@ namespace Muon {
     }
 
     std::vector<std::unique_ptr<Trk::Track> > MooTrackBuilder::combineWithSegmentFinding(const EventContext& ctx, const Trk::Track& track, const MuonSegment& seg,
-                                                                                         const PrepVec* externalPhiHits) const {
+                                                                                         const PrepVec& externalPhiHits) const {
        
         // convert segments
         std::unique_ptr<Trk::Track> inTrack = std::make_unique<Trk::Track>(track);       
@@ -422,7 +413,7 @@ namespace Muon {
     std::vector<std::unique_ptr<Trk::Track> > MooTrackBuilder::combineWithSegmentFinding(const EventContext& ctx, const Trk::Track& track,
                                                                                          const Trk::TrackParameters& pars,
                                                                                          const std::set<Identifier>& chIds,
-                                                                                         const PrepVec* patternPhiHits) const {
+                                                                                         const PrepVec& patternPhiHits) const {
         // convert track
         std::unique_ptr<Trk::Track> inTrack = std::make_unique<Trk::Track>(track);
         std::unique_ptr<MuPatTrack> can = m_candidateHandler->createCandidate(inTrack);
@@ -432,7 +423,7 @@ namespace Muon {
 
     std::vector<std::unique_ptr<Trk::Track> > MooTrackBuilder::combineWithSegmentFinding(const EventContext& ctx, const MuPatTrack& candidate,
                                                                                          const MuPatSegment& segInfo,
-                                                                                         const PrepVec* externalPhiHits) const {
+                                                                                         const PrepVec& externalPhiHits) const {
         /** second stage segment matching:
             - estimate segment parameters at segment position using fit of track + segment position
             - redo segment finding using the predicted parameters as seed
@@ -546,7 +537,7 @@ namespace Muon {
     std::vector<std::unique_ptr<Trk::Track> > MooTrackBuilder::combineWithSegmentFinding(const EventContext& ctx, const MuPatTrack& candidate,
                                                                                          const Trk::TrackParameters& pars,
                                                                                          const std::set<Identifier>& chIds,
-                                                                                         const PrepVec* externalPhiHits) const {
+                                                                                         const PrepVec& externalPhiHits) const {
         std::vector<std::unique_ptr<Trk::Track> > newTracks;
 
         if (chIds.empty()) return newTracks;
@@ -911,10 +902,9 @@ namespace Muon {
         SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, ctx};
         const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
 
-        if (fieldCondObj == nullptr) {
+        if (!fieldCondObj) {
             ATH_MSG_ERROR("splitTrack: Failed to retrieve AtlasFieldCacheCondObj with key " << m_fieldCacheCondObjInputKey.key());
-            std::pair<std::unique_ptr<Trk::Track>, std::unique_ptr<Trk::Track> > emptyPair;
-            return emptyPair;
+            return {};
         }
         fieldCondObj->getInitializedCache(fieldCache);
 
@@ -961,7 +951,7 @@ namespace Muon {
             ATH_MSG_VERBOSE("combining: " << m_printer->print(*seg->segment));
 
             // try to combine track with segment
-            std::unique_ptr<Trk::Track> track = combine(ctx, candidate, *seg, nullptr);
+            std::unique_ptr<Trk::Track> track = combine(ctx, candidate, *seg, emptyPhiHits);
 
             // additional check in case the candidate is a MuPatTrack
             MuPatTrack* trkCan = dynamic_cast<MuPatTrack*>(&candidate);
@@ -1034,14 +1024,13 @@ namespace Muon {
                     }
        
                     ATH_MSG_VERBOSE("adding SL overlap " << m_printer->print(*seg_1->segment));
-                    std::unique_ptr<Trk::Track> slOverlapTrack = combine(ctx, *track, *seg_1->segment, nullptr);
+                    std::unique_ptr<Trk::Track> slOverlapTrack = combine(ctx, *track, *seg_1->segment, emptyPhiHits);
                     if (!slOverlapTrack) continue;
 
                     // is the new track better
                     SortTracksByHitNumber sortTracks;
                     if (!sortTracks(*slOverlapTrack, *track)) {
-                        ATH_MSG_VERBOSE(" rejecting track as new segment results in worse fit");
-                        slOverlapTrack.reset();
+                        ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" rejecting track as new segment results in worse fit");
                         continue;
                     }
                     ATH_MSG_VERBOSE("adding SL overlap ok, new track" << m_printer->print(*slOverlapTrack) << std::endl
@@ -1054,7 +1043,7 @@ namespace Muon {
                 }
             }
 
-            ATH_MSG_VERBOSE(" Track found " << m_printer->print(*track));
+            ATH_MSG_VERBOSE(" Track found " << m_printer->print(*track)<<std::endl<<m_printer->printMeasurements(*track));
 
             // add new solution
             extensions.push_back(std::make_pair(seg, std::move(track)));
@@ -1343,7 +1332,7 @@ namespace Muon {
                     std::unique_ptr<Trk::Track> track2 = std::make_unique<Trk::Track>(*in_track);
                     std::unique_ptr<MuPatTrack> can1 = m_candidateHandler->createCandidate(track1);
                     std::unique_ptr<MuPatTrack> can2 = m_candidateHandler->createCandidate(track2);
-                    mergedTrack = combine(ctx, *can1, *can2, nullptr);
+                    mergedTrack = combine(ctx, *can1, *can2, emptyPhiHits);
 
                     // we have found a split track and have successfully merged it
                     // replace the track in goodTracks with the new one
