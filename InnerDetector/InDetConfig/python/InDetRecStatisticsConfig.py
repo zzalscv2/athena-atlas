@@ -8,7 +8,7 @@ from AthenaConfiguration.Enums import BeamType
 def InDetRecStatisticsAlgCfg(flags, name='InDetRecStatistics', **kwargs):
     acc = ComponentAccumulator()
 
-    if "TruthToTrackTool" not in kwargs and flags.InDet.doTruth:
+    if "TruthToTrackTool" not in kwargs and flags.Tracking.doTruth:
         from TrkConfig.TrkTruthCreatorToolsConfig import TruthToTrackToolCfg
         TruthToTrackTool = acc.popToolsAndMerge(TruthToTrackToolCfg(flags))
         acc.addPublicTool(TruthToTrackTool)
@@ -22,7 +22,7 @@ def InDetRecStatisticsAlgCfg(flags, name='InDetRecStatistics', **kwargs):
 
     kwargs.setdefault("PrintSecondary", True)
     kwargs.setdefault("UseTrackSummary", True)
-    kwargs.setdefault("DoTruth", flags.InDet.doTruth)
+    kwargs.setdefault("DoTruth", flags.Tracking.doTruth)
     kwargs.setdefault("fakeTrackCut", 0.8)
     kwargs.setdefault("fakeTrackCut2", 0.5)
 
@@ -56,7 +56,7 @@ def InDetRecStatisticsAlgCfg(flags, name='InDetRecStatistics', **kwargs):
 def ITkRecStatisticsAlgCfg(flags, name='ITkRecStatistics', **kwargs):
     acc = ComponentAccumulator()
 
-    if "TruthToTrackTool" not in kwargs and flags.ITk.Tracking.doTruth:
+    if "TruthToTrackTool" not in kwargs and flags.Tracking.doTruth:
         from TrkConfig.TrkTruthCreatorToolsConfig import TruthToTrackToolCfg
         TruthToTrackTool = acc.popToolsAndMerge(TruthToTrackToolCfg(flags))
         acc.addPublicTool(TruthToTrackTool)
@@ -70,7 +70,7 @@ def ITkRecStatisticsAlgCfg(flags, name='ITkRecStatistics', **kwargs):
 
     kwargs.setdefault("PrintSecondary", True)
     kwargs.setdefault("UseTrackSummary", True)
-    kwargs.setdefault("DoTruth", flags.ITk.Tracking.doTruth)
+    kwargs.setdefault("DoTruth", flags.Tracking.doTruth)
     kwargs.setdefault("fakeTrackCut", 0.8)
     kwargs.setdefault("fakeTrackCut2", 0.5)
 

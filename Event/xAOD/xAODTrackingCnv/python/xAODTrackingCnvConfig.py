@@ -129,7 +129,7 @@ def TrackParticleCnvAlgCfg(flags, name="TrackParticleCnvAlg",
                 flags,
                 TrackParticleCreator = kwargs["TrackParticleCreator"])))
 
-    if flags.InDet.doTruth:
+    if flags.Tracking.doTruth:
         kwargs.setdefault("TrackTruthContainerName", "TrackTruthCollection" \
                           if kwargs["TrackContainerName"]=="CombinedInDetTracks" \
                           else kwargs["TrackContainerName"]+"TruthCollection")
@@ -241,7 +241,7 @@ def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg",
                 flags,
                 TrackParticleCreator = kwargs["TrackParticleCreator"])))
 
-    if flags.ITk.Tracking.doTruth:
+    if flags.Tracking.doTruth:
         kwargs.setdefault("TrackTruthContainerName",
                           kwargs["TrackContainerName"]+"TruthCollection")
         kwargs.setdefault("AddTruthLink", True)

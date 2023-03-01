@@ -37,7 +37,7 @@ def TRTStandaloneCfg(flags, InputCollections = None):
         acc.merge(TRT_StandaloneTrackFinderCfg(flags,
                                                InputSegmentsLocation = 'TRTSegments',
                                                PRDtoTrackMap = prd_to_track_map))
-        if flags.InDet.doTruth:
+        if flags.Tracking.doTruth:
             from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
             acc.merge(InDetTrackTruthCfg(
                 flags,

@@ -18,7 +18,8 @@ run.executable = 'runHLT_standalone_newJO.py'
 run.args += ' --filesInput='+Input.get_input(run.input).paths[0]
 run.args += ' Trigger.triggerMenuSetup="Dev_pp_run3_v1"'
 run.args += ' Trigger.doRuntimeNaviVal=True'
-run.args += ' ITk.Tracking.doTruth="False"'
+run.args += ' ITk.doTruth=False'
+run.args += ' Tracking.doTruth=False'
 run.prmon = False
 
 

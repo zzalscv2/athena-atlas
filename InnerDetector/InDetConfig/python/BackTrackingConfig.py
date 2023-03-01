@@ -21,7 +21,7 @@ def BackTrackingCfg(flags, InputCollections = None,
                                        InputCollections = InputCollections))
 
     from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
-    if flags.InDet.doTruth:
+    if flags.Tracking.doTruth:
         acc.merge(InDetTrackTruthCfg(
             flags,
             Tracks = "TRTSeededTracks",
@@ -38,7 +38,7 @@ def BackTrackingCfg(flags, InputCollections = None,
     acc.merge(TrkAmbiguitySolver_TRT_Cfg(flags,
                                          ClusterSplitProbContainer = ClusterSplitProbContainer))
 
-    if flags.InDet.doTruth:
+    if flags.Tracking.doTruth:
         acc.merge(InDetTrackTruthCfg(
             flags,
             Tracks = "ResolvedTRTSeededTracks",

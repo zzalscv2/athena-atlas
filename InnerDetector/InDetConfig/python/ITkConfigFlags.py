@@ -43,6 +43,9 @@ def createITkConfigFlags():
   itkcf.addFlag("ITk.Conditions.PixelOfflineCalibTag", "PixelITkError_v5")
   itkcf.addFlag("ITk.Conditions.PixelOfflineCalibFile", "")
 
+  # Turn on running of PRD MultiTruthMaker
+  itkcf.addFlag("ITk.doTruth", lambda prevFlags: prevFlags.Input.isMC)
+
   itkcf.addFlag("ITk.doStripModuleVeto", False) # Turn on SCT_ModuleVetoSvc, allowing it to be configured later
   itkcf.addFlag("ITk.checkDeadPixelsOnTrack", True) # Enable check for dead modules and FEs
   itkcf.addFlag("ITk.selectStripIntimeHits", lambda prevFlags: not(prevFlags.Beam.Type is BeamType.Cosmics) ) # defines if the X1X mode is used for the offline or not
@@ -54,14 +57,11 @@ def createITkConfigFlags():
   itkcf.addFlag("ITk.Tracking.doCaloSeededBrem", True) # Brem Recover in tracking restricted to Calo ROIs
   itkcf.addFlag("ITk.Tracking.doHadCaloSeededSSS", False) # Use Recover SSS to Calo ROIs
   itkcf.addFlag("ITk.Tracking.doCaloSeededAmbi", lambda prevFlags: prevFlags.Detector.EnableCalo) # Use Calo ROIs to seed specific cuts for the ambi
-  itkcf.addFlag("ITk.Tracking.doTruth", lambda f: f.Input.isMC) # Turn running of truth matching on and off (by default on for MC off for data)
-  itkcf.addFlag("ITk.Tracking.doSlimming", True) # Toggle track slimming
   itkcf.addFlag("ITk.Tracking.doPixelClusterSplitting", True) # Try to split pixel clusters
   itkcf.addFlag("ITk.Tracking.pixelClusterSplittingType", "Truth") # choose splitter type: NeuralNet, AnalogClus or Truth
   itkcf.addFlag("ITk.Tracking.pixelClusterSplitProb1", 0.55) # Cut value for splitting clusters into two parts
   itkcf.addFlag("ITk.Tracking.pixelClusterSplitProb2", 0.45) # Cut value for splitting clusters into three parts
   itkcf.addFlag("ITk.Tracking.perigeeExpression", "BeamLine"   ) # Express track parameters wrt. to : 'BeamLine','BeamSpot','Vertex' (first primary vertex)
-  itkcf.addFlag("ITk.Tracking.doSharedHits", True) # control if the shared hits are recorded in TrackParticles
   itkcf.addFlag("ITk.Tracking.writeSeedValNtuple", False) # Turn writing of seed validation ntuple on and off
   itkcf.addFlag("ITk.Tracking.writeExtendedPRDInfo", False)
   # Special configuration for low-mu runs

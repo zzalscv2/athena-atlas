@@ -231,7 +231,7 @@ def InDetTrackRecoCfg(flags):
         ClusterSplitProbContainer = "InDetAmbiguityProcessorSplitProb" + \
                                     flagsPixel.InDet.Tracking.ActiveConfig.extension
 
-        if flags.InDet.doTruth:
+        if flags.Tracking.doTruth:
             result.merge(InDetTrackTruthCfg(
                 flagsPixel,
                 Tracks = PixelTrackContainer,
@@ -447,7 +447,7 @@ def InDetTrackRecoCfg(flags):
                     OutputCombinedTracks = MergerOutputTracks,
                     AssociationMapName = AssociationMapName))
 
-            if flags.InDet.doTruth:
+            if flags.Tracking.doTruth:
                 result.merge(InDetTrackTruthCfg(
                     current_flags,
                     Tracks = TrackContainer,
@@ -517,7 +517,7 @@ def InDetTrackRecoCfg(flags):
             # --- PseudoTracking
             # ---------------------------------------
 
-            if flags.InDet.doTruth and \
+            if flags.Tracking.doTruth and \
                (flags.InDet.Tracking.doPseudoTracking or \
                 flags.InDet.Tracking.doIdealPseudoTracking):
 
@@ -556,7 +556,7 @@ def InDetTrackRecoCfg(flags):
         OutputCombinedTracks = "CombinedInDetTracks",
         AssociationMapName = "PRDtoTrackMapCombinedInDetTracks"))
 
-    if flags.InDet.doTruth:
+    if flags.Tracking.doTruth:
         from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
         result.merge(InDetTrackTruthCfg(
             flags,
@@ -567,13 +567,13 @@ def InDetTrackRecoCfg(flags):
     StatTrackCollections += ["CombinedInDetTracks"]
     StatTrackTruthCollections += ["CombinedInDetTracksTruthCollection"]
 
-    if flags.InDet.doSlimming:
+    if flags.Tracking.doSlimming:
         from TrkConfig.TrkTrackSlimmerConfig import TrackSlimmerCfg
         result.merge(TrackSlimmerCfg(
             flags,
             TrackLocation = ["CombinedInDetTracks"]))
 
-    if flags.InDet.doTruth:
+    if flags.Tracking.doTruth:
         from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
         result.merge(InDetTrackTruthCfg(flags))
 
@@ -606,7 +606,7 @@ def InDetTrackRecoCfg(flags):
             TrackParticleCnvAlgNoPIDCfg)
         TrackContainer = "SiSPSeedSegments"
 
-        if flags.InDet.doTruth:
+        if flags.Tracking.doTruth:
             result.merge(InDetTrackTruthCfg(
                 flags,
                 Tracks = TrackContainer,
@@ -635,9 +635,9 @@ def InDetTrackRecoCfg(flags):
             flags,
             TrackCollectionKeys = StatTrackCollections,
             TrackTruthCollectionKeys = \
-            StatTrackTruthCollections if flags.InDet.doTruth else []))
+            StatTrackTruthCollections if flags.Tracking.doTruth else []))
 
-        if flags.InDet.doTruth:
+        if flags.Tracking.doTruth:
             from InDetConfig.InDetTrackClusterAssValidationConfig import (
                 InDetTrackClusterAssValidationCfg)
             result.merge(InDetTrackClusterAssValidationCfg(
@@ -805,25 +805,25 @@ def InDetTrackRecoOutputCfg(flags):
 
     if flags.InDet.Tracking.doTrackSegmentsPixel:
         toESD += ["TrackCollection#ResolvedPixelTracks"]
-        if flags.InDet.doTruth:
+        if flags.Tracking.doTruth:
             toESD += ["TrackTruthCollection#ResolvedPixelTracksTruthCollection"]
             toESD += ["DetailedTrackTruthCollection#ResolvedPixelTracksDetailedTruth"]
 
     if flags.InDet.Tracking.doTrackSegmentsSCT:
         toESD += ["TrackCollection#ResolvedSCTTracks"]
-        if flags.InDet.doTruth:
+        if flags.Tracking.doTruth:
             toESD += ["TrackTruthCollection#ResolvedSCTTracksTruthCollection"]
             toESD += ["DetailedTrackTruthCollection#ResolvedSCTTracksDetailedTruth"]
 
     if flags.InDet.Tracking.doTrackSegmentsTRT:
         toESD += ["TrackCollection#StandaloneTRTTracks"]
-        if flags.InDet.doTruth:
+        if flags.Tracking.doTruth:
             toESD += ["TrackTruthCollection#StandaloneTRTTracksTruthCollection"]
             toESD += ["DetailedTrackTruthCollection#StandaloneTRTTracksDetailedTruth"]
 
     if flags.InDet.Tracking.doPseudoTracking:
         toESD += ["TrackCollection#InDetPseudoTracks"]
-        if flags.InDet.doTruth:
+        if flags.Tracking.doTruth:
             toESD += ["TrackTruthCollection#InDetPseudoTracksTruthCollection"]
             toESD += ["DetailedTrackTruthCollection#InDetPseudoTracksDetailedTruth"]
 
@@ -833,7 +833,7 @@ def InDetTrackRecoOutputCfg(flags):
     # add the forward tracks for combined muon reconstruction
     if flags.InDet.Tracking.doForwardTracks:
         toESD += ["TrackCollection#ResolvedForwardTracks"]
-        if flags.InDet.doTruth:
+        if flags.Tracking.doTruth:
             toESD += ["TrackTruthCollection#ResolvedForwardTracksTruthCollection"]
             toESD += ["DetailedTrackTruthCollection#ResolvedForwardTracksDetailedTruth"]
 
@@ -843,7 +843,7 @@ def InDetTrackRecoOutputCfg(flags):
 
     if flags.InDet.Tracking.doTrackSegmentsDisappearing:
         toESD += ["TrackCollection#DisappearingTracks"]
-        if flags.InDet.doTruth:
+        if flags.Tracking.doTruth:
             toESD += ["TrackTruthCollection#DisappearingTracksTruthCollection"]
             toESD += ["DetailedTrackTruthCollection#DisappearingTracksDetailedTruth"]
 
@@ -853,7 +853,7 @@ def InDetTrackRecoOutputCfg(flags):
     #    toESD += ["Trk::SegmentCollection#TRTSegments"]
 
     # Save (Detailed) Track Truth
-    if flags.InDet.doTruth:
+    if flags.Tracking.doTruth:
         toESD += ["TrackTruthCollection#TrackTruthCollection"]
         toESD += ["DetailedTrackTruthCollection#DetailedTrackTruth"]
 
@@ -896,13 +896,13 @@ def InDetTrackRecoOutputCfg(flags):
     if flags.InDet.Tracking.doPseudoTracking:
         toAOD += ["xAOD::TrackParticleContainer#InDetPseudoTrackParticles"]
         toAOD += [f"xAOD::TrackParticleAuxContainer#InDetPseudoTrackParticlesAux.{excludedAuxData}"]
-        if flags.InDet.doTruth:
+        if flags.Tracking.doTruth:
             toAOD += ["TrackTruthCollection#InDetPseudoTrackTruthCollection"]
             toAOD += ["DetailedTrackTruthCollection#InDetPseudoTrackDetailedTruth"]
     if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring:
         toAOD += ["xAOD::TrackParticleContainer#InDetObservedTrackParticles"]
         toAOD += [f"xAOD::TrackParticleAuxContainer#InDetObservedTrackParticlesAux.{excludedAuxData}"]
-        if flags.InDet.doTruth:
+        if flags.Tracking.doTruth:
             toAOD += ["TrackTruthCollection#InDetObservedTrackTruthCollection"]
             toAOD += ["DetailedTrackTruthCollection#ObservedDetailedTracksTruth"]
 
