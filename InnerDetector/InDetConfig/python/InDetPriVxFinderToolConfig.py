@@ -4,7 +4,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrkConfig.VertexFindingFlags import VertexSetup
 
-def AdaptiveMultiFindingBaseCfg(flags, name="InDetAdaptiveMultiPriVxFinderTool",
+def AdaptiveMultiFindingBaseCfg(flags,
+                                name="InDetAdaptiveMultiPriVxFinderTool",
                                 **kwargs):
     acc = ComponentAccumulator()
     
@@ -38,7 +39,9 @@ def AdaptiveMultiFindingBaseCfg(flags, name="InDetAdaptiveMultiPriVxFinderTool",
         CompFactory.InDet.InDetAdaptiveMultiPriVxFinderTool(name, **kwargs))
     return acc
 
-def GaussAdaptiveMultiFindingCfg(flags, name="GaussInDetAdaptiveMultiPriVxFinderTool", **kwargs):
+def GaussAdaptiveMultiFindingCfg(flags,
+                                 name="GaussInDetAdaptiveMultiPriVxFinderTool",
+                                 **kwargs):
     acc = ComponentAccumulator()
     
     if "SeedFinder" not in kwargs:
@@ -51,7 +54,11 @@ def GaussAdaptiveMultiFindingCfg(flags, name="GaussInDetAdaptiveMultiPriVxFinder
         AdaptiveMultiFindingBaseCfg(flags, name, **kwargs)))
     return acc
 
-def TrigGaussAdaptiveMultiFindingCfg(flags, name="InDetTrigAdaptiveMultiPriVxFinderTool", signature="", **kwargs):
+def TrigGaussAdaptiveMultiFindingCfg(
+        flags,
+        name="InDetTrigAdaptiveMultiPriVxFinderTool",
+        signature="",
+        **kwargs):
     acc = ComponentAccumulator()
 
     if "TrackSelector" not in kwargs:
@@ -72,7 +79,9 @@ def TrigGaussAdaptiveMultiFindingCfg(flags, name="InDetTrigAdaptiveMultiPriVxFin
         GaussAdaptiveMultiFindingCfg(flags, name+signature, **kwargs)))
     return acc
 
-def IterativeFindingBaseCfg(flags, name="InDetIterativePriVxFinderTool", **kwargs):
+def IterativeFindingBaseCfg(flags,
+                            name="InDetIterativePriVxFinderTool",
+                            **kwargs):
     acc = ComponentAccumulator()
 
     if "SeedFinder" not in kwargs:
@@ -101,9 +110,11 @@ def IterativeFindingBaseCfg(flags, name="InDetIterativePriVxFinderTool", **kwarg
     if "VertexFitterTool" not in kwargs:
         from TrkConfig.TrkVertexFittersConfig import AdaptiveVertexFitterCfg
         kwargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(
-            AdaptiveVertexFitterCfg(flags, SeedFinder=kwargs["SeedFinder"],
-                                    LinearizedTrackFactory=kwargs["LinearizedTrackFactory"],
-                                    ImpactPoint3dEstimator=kwargs["ImpactPoint3dEstimator"])))
+            AdaptiveVertexFitterCfg(
+                flags,
+                SeedFinder=kwargs["SeedFinder"],
+                LinearizedTrackFactory=kwargs["LinearizedTrackFactory"],
+                ImpactPoint3dEstimator=kwargs["ImpactPoint3dEstimator"])))
 
     kwargs.setdefault("useBeamConstraint",
                       flags.Tracking.PriVertex.useBeamConstraint)
@@ -117,7 +128,9 @@ def IterativeFindingBaseCfg(flags, name="InDetIterativePriVxFinderTool", **kwarg
         CompFactory.InDet.InDetIterativePriVxFinderTool(name, **kwargs))
     return acc
 
-def FastIterativeFindingCfg(flags, name="FastInDetIterativePriVxFinderTool", **kwargs):
+def FastIterativeFindingCfg(flags,
+                            name="FastInDetIterativePriVxFinderTool",
+                            **kwargs):
     acc = ComponentAccumulator()
 
     if "VertexFitterTool" not in kwargs:
@@ -129,7 +142,9 @@ def FastIterativeFindingCfg(flags, name="FastInDetIterativePriVxFinderTool", **k
         IterativeFindingBaseCfg(flags, name, **kwargs)))
     return acc
 
-def GaussIterativeFindingCfg(flags, name="GaussInDetIterativePriVxFinderTool", **kwargs):
+def GaussIterativeFindingCfg(flags,
+                             name="GaussInDetIterativePriVxFinderTool",
+                             **kwargs):
     acc = ComponentAccumulator()
 
     if "SeedFinder" not in kwargs:
@@ -142,7 +157,10 @@ def GaussIterativeFindingCfg(flags, name="GaussInDetIterativePriVxFinderTool", *
         IterativeFindingBaseCfg(flags, name, **kwargs)))
     return acc
 
-def TrigGaussIterativeFindingCfg(flags, name="InDetTrigPriVxFinderTool", signature="", **kwargs):
+def TrigGaussIterativeFindingCfg(flags,
+                                 name="InDetTrigPriVxFinderTool",
+                                 signature="",
+                                 **kwargs):
     acc = ComponentAccumulator()
 
     if "VertexFitterTool" not in kwargs:
@@ -156,7 +174,8 @@ def TrigGaussIterativeFindingCfg(flags, name="InDetTrigPriVxFinderTool", signatu
         kwargs.setdefault("TrackSelector", acc.popToolsAndMerge(
             TrigVtxInDetTrackSelectionCfg(flags, signature = signature)))
 
-    from InDetTrigRecExample.TrigInDetConfiguredVtxCuts import ConfiguredTrigVtxCuts
+    from InDetTrigRecExample.TrigInDetConfiguredVtxCuts import (
+        ConfiguredTrigVtxCuts)
     vtx_cuts = ConfiguredTrigVtxCuts()
     kwargs.setdefault("useBeamConstraint", True)
     kwargs.setdefault("maximumChi2cutForSeeding", 29)
@@ -168,7 +187,9 @@ def TrigGaussIterativeFindingCfg(flags, name="InDetTrigPriVxFinderTool", signatu
         GaussIterativeFindingCfg(flags, name+signature, **kwargs)))
     return acc
 
-def ActsGaussAdaptiveMultiFindingCfg(flags, name="ActsAdaptiveMultiPriVtxFinderTool", **kwargs):
+def ActsGaussAdaptiveMultiFindingCfg(flags,
+                                     name="ActsAdaptiveMultiPriVtxFinderTool",
+                                     **kwargs):
     acc = ComponentAccumulator()
 
     if "TrackSelector" not in kwargs:
@@ -198,7 +219,35 @@ def ActsGaussAdaptiveMultiFindingCfg(flags, name="ActsAdaptiveMultiPriVtxFinderT
         CompFactory.ActsTrk.AdaptiveMultiPriVtxFinderTool(name, **kwargs))
     return acc
 
-def ActsIterativeFindingCfg(flags, name="ActsIterativePriVtxFinderTool", **kwargs):
+def TrigActsGaussAdaptiveMultiFindingCfg(
+        flags,
+        name="ActsAdaptiveMultiPriVtxFinderTool",
+        signature="",
+        **kwargs):
+    acc = ComponentAccumulator()
+
+    if "TrackSelector" not in kwargs:
+        from InDetConfig.InDetTrackSelectionToolConfig import (
+            TrigVtxInDetTrackSelectionCfg)
+        kwargs.setdefault("TrackSelector", acc.popToolsAndMerge(
+            TrigVtxInDetTrackSelectionCfg(flags, signature=signature)))
+
+    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
+    config = getInDetTrigConfig(signature)
+
+    kwargs.setdefault("useBeamConstraint", True)
+    kwargs.setdefault("useSeedConstraint", False)
+    kwargs.setdefault("tracksMaxZinterval", config.TracksMaxZinterval)
+    kwargs.setdefault("do3dSplitting", False)
+    kwargs.setdefault("addSingleTrackVertices", config.addSingleTrackVertices)
+
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        ActsGaussAdaptiveMultiFindingCfg(flags, name+signature, **kwargs)))
+    return acc
+
+def ActsIterativeFindingCfg(flags,
+                            name="ActsIterativePriVtxFinderTool",
+                            **kwargs):
     acc = ComponentAccumulator()
 
     if "TrackSelector" not in kwargs:
@@ -238,3 +287,18 @@ def VertexFinderToolCfg(flags, **kwargs):
         return FastIterativeFindingCfg(flags, **kwargs)
     elif flags.Tracking.PriVertex.setup == VertexSetup.ActsGaussAMVF:
         return ActsGaussAdaptiveMultiFindingCfg(flags, **kwargs)
+
+def TrigVertexFinderToolCfg(flags, signature="", **kwargs):
+
+    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
+    config = getInDetTrigConfig(signature)
+
+    if config.vertexSetup == VertexSetup.ActsGaussAMVF:
+        return TrigActsGaussAdaptiveMultiFindingCfg(
+            flags, signature=signature, **kwargs)
+    elif config.vertexSetup == VertexSetup.GaussAMVF:
+        return TrigGaussAdaptiveMultiFindingCfg(
+            flags, signature=signature, **kwargs)
+    elif config.vertexSetup == VertexSetup.GaussIVF:
+        return TrigGaussIterativeFindingCfg(
+            flags, signature=signature, **kwargs)

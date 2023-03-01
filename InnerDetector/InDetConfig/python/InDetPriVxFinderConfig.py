@@ -22,12 +22,17 @@ def InDetPriVxFinderCfg(flags, name="InDetPriVxFinder", **kwargs):
     kwargs.setdefault("doVertexSorting", True)
 
     if flags.InDet.Tracking.perigeeExpression == "Vertex":
-        from xAODTrackingCnv.xAODTrackingCnvConfig import BeamLineTrackParticleCnvAlgCfg
-        from InDetConfig.TrackRecoConfig import ClusterSplitProbabilityContainerName
-        acc.merge(BeamLineTrackParticleCnvAlgCfg(flags,
-                                         ClusterSplitProbabilityName = ClusterSplitProbabilityContainerName(flags),
-                                         AssociationMapName = "PRDtoTrackMapCombinedInDetTracks",
-                                         xAODTrackParticlesFromTracksContainerName = "InDetTrackParticlesTemporary"))
+        from xAODTrackingCnv.xAODTrackingCnvConfig import (
+            BeamLineTrackParticleCnvAlgCfg)
+        from InDetConfig.TrackRecoConfig import (
+            ClusterSplitProbabilityContainerName)
+        acc.merge(BeamLineTrackParticleCnvAlgCfg(
+            flags,
+            ClusterSplitProbabilityName = \
+            ClusterSplitProbabilityContainerName(flags),
+            AssociationMapName = "PRDtoTrackMapCombinedInDetTracks",
+            xAODTrackParticlesFromTracksContainerName = \
+            "InDetTrackParticlesTemporary"))
         kwargs["TracksName"]="InDetTrackParticlesTemporary"
 
     acc.addEventAlgo(CompFactory.InDet.InDetPriVxFinder(name, **kwargs))
@@ -35,45 +40,15 @@ def InDetPriVxFinderCfg(flags, name="InDetPriVxFinder", **kwargs):
 
 def InDetTrigPriVxFinderCfg(flags, name="InDetTrigPriVxFinder",
                             signature="",
-                            adaptiveVertexing = True,
                             **kwargs):
 
     acc = ComponentAccumulator()
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    config = getInDetTrigConfig(signature)
 
     if "VertexFinderTool" not in kwargs:
-        if adaptiveVertexing:
-            if config.actsVertex:
-                from InDetConfig.InDetPriVxFinderToolConfig import (
-                    ActsGaussAdaptiveMultiFindingCfg)
-                from InDetConfig.InDetTrackSelectionToolConfig import (
-                    TrigVtxInDetTrackSelectionCfg)
-                VertexFinderTool = acc.popToolsAndMerge(
-                    ActsGaussAdaptiveMultiFindingCfg(
-                        flags,
-                        name=f"ActsAdaptiveMultiPriVtxFinderTool{signature}",
-                        TrackSelector=acc.popToolsAndMerge(
-                            TrigVtxInDetTrackSelectionCfg(flags, signature=signature)
-                        ),
-                        useBeamConstraint=True,
-                        useSeedConstraint=False,
-                        tracksMaxZinterval=config.TracksMaxZinterval,
-                        do3dSplitting=False,
-                        addSingleTrackVertices=config.addSingleTrackVertices,
-                    )
-                )
-            else:
-                from InDetConfig.InDetPriVxFinderToolConfig import (
-                    TrigGaussAdaptiveMultiFindingCfg)
-                VertexFinderTool = acc.popToolsAndMerge(
-                    TrigGaussAdaptiveMultiFindingCfg(flags, signature=signature))
-        else:
-            from InDetConfig.InDetPriVxFinderToolConfig import (
-                TrigGaussIterativeFindingCfg)
-            VertexFinderTool = acc.popToolsAndMerge(
-                TrigGaussIterativeFindingCfg(flags, signature=signature))
-        kwargs.setdefault("VertexFinderTool", VertexFinderTool)
+        from InDetConfig.InDetPriVxFinderToolConfig import (
+            TrigVertexFinderToolCfg)
+        kwargs.setdefault("VertexFinderTool", acc.popToolsAndMerge(
+            TrigVertexFinderToolCfg(flags, signature=signature)))
 
     if "VertexCollectionSortingTool" not in kwargs:
         from TrkConfig.TrkVertexToolsConfig import (

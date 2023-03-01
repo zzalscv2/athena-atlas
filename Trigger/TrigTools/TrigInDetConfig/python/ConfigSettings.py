@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __author__ = "Mark Sutton, Matous Vozak"
 __doc__    = "ConfigSettings"
@@ -74,6 +74,7 @@ class ConfigSettings_tau( _ConfigSettingsBase ):
       self._suffix   = "Tau"
       self._roi      = "HLT_Roi_Tau"
       self._vertex   = "HLT_IDVertex_Tau"
+      # Note: This is the only AMVF non-ACTS mode
       self._adaptiveVertex  = True
       self._pTmin           = 0.8*GeV
       self._etaHalfWidth    = 0.4

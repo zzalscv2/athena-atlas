@@ -1,3 +1,4 @@
+
 #
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
@@ -69,7 +70,6 @@ def JetFSTrackingCfg(flags, trkopt, RoIs):
     acc = ComponentAccumulator()
     acc.addSequence(parOR(seqname))
 
-    IDTrigConfig = getInDetTrigConfig( 'jet' )
     assert trkopt == "ftf"
     acc.merge(
         trigInDetFastTrackingCfg(
@@ -86,7 +86,7 @@ def JetFSTrackingCfg(flags, trkopt, RoIs):
 
     acc.merge(
         JetVertexCfg(
-            flags, trkopt, IDTrigConfig.adaptiveVertex, jetContext,
+            flags, trkopt, jetContext,
         ),
         seqname
     )
@@ -140,7 +140,6 @@ def JetRoITrackingCfg(flags, jetsIn, trkopt, RoIs):
             flags,
             name="InDetTrigPriVxFinderjetSuper",
             signature = "jetSuper",
-            adaptiveVertexing = IDTrigConfig.adaptiveVertex,
             TracksName = IDTrigConfig.tracks_FTF(),
             VxCandidatesOutputName = IDTrigConfig.vertex
         )
@@ -203,16 +202,17 @@ def jetTTVA( flags, signature, jetseq, trkopt, config, verticesname=None, adapti
     return outmap
 
 @AccumulatorCache
-def JetVertexCfg(flags, trkopt, adaptiveVertex, jetContext):
+def JetVertexCfg(flags, trkopt, jetContext):
     """ Create the jet vertexing """
 
     acc = InDetTrigPriVxFinderCfg(
         flags,
         name="InDetTrigPriVxFinder_jetFS",
         signature = "jet",
-        adaptiveVertexing = adaptiveVertex,
         TracksName = jetContext["Tracks"],
         VxCandidatesOutputName = jetContext["Vertices"])
+
+    IDTrigConfig = getInDetTrigConfig( 'jet' )
 
     # Create the track selection tool
     # TODO - this is not used anywhere that I can see so I'm skipping it
@@ -235,7 +235,7 @@ def JetVertexCfg(flags, trkopt, adaptiveVertex, jetContext):
                             WorkingPoint = "Custom",
                             d0_cut = 2.0,
                             dzSinTheta_cut = 2.0,
-                            doPVPriority = adaptiveVertex,
+                            doPVPriority = IDTrigConfig.adaptiveVertex,
                             TrackContName = jetContext["Tracks"],
                             VertexContName = jetContext["Vertices"],
                         )

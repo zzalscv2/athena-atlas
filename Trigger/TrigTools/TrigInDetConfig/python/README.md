@@ -168,7 +168,6 @@ Typically it should be used as in the following example
     acc = InDetTrigPriVxFinderCfg(
         flags,
         signature = "jet",
-        adaptiveVertexing = adaptiveVertex,
         TracksName = jetContext["Tracks"],
         VxCandidatesOutputName = jetContext["Vertices"])
 
@@ -177,13 +176,11 @@ The actual function is defined
 ```
 def InDetTrigPriVxFinderCfg(flags, name="InDetTrigPriVxFinder",
                             signature="",
-                            adaptiveVertexing = True,
                             **kwargs):
 ```
 where the arguments are    
 
        signature              - the ID Trigger signature
-       adaptiveVertex         - flag to determine whether the adaptive vertexing should be used
        TracksName             - the input track collection key
        VxCandidatesOutputName - optional output vertex collection key
 
