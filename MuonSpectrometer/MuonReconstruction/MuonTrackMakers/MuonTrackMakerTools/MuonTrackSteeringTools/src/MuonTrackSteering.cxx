@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackSteering.h"
@@ -74,18 +74,17 @@ namespace Muon {
         ATH_CHECK(m_trackSummaryTool.retrieve());
         ATH_CHECK(decodeStrategyVector(m_stringStrategies));
         if (m_outputSingleStationTracks) ATH_MSG_INFO("Single station track enabled ");
-ATH_CHECK(m_segmentFitter.retrieve(DisableTool{!m_outputSingleStationTracks}));
-ATH_CHECK(m_muonHoleRecoverTool.retrieve(DisableTool{!m_outputSingleStationTracks}));
-        if (!m_trackSelector.empty()) {
-            ATH_CHECK(m_trackSelector.retrieve());
-            ATH_MSG_INFO("Track selection enabled: " << m_trackSelector);
-        }
+        ATH_CHECK(m_segmentFitter.retrieve(DisableTool{!m_outputSingleStationTracks}));
+        ATH_CHECK(m_muonHoleRecoverTool.retrieve(DisableTool{!m_outputSingleStationTracks}));
+        ATH_CHECK(m_trackSelector.retrieve(DisableTool{m_trackSelector.empty()}));
+        if (!m_trackSelector.empty()) ATH_MSG_INFO("Track selection enabled: " << m_trackSelector);
+        
         return StatusCode::SUCCESS;
     }
 
     std::unique_ptr<TrackCollection> MuonTrackSteering::find(const EventContext& ctx, const MuonSegmentCollection& coll) const {
         GarbageContainer trash_bin{};
-        trash_bin.reserve(coll.size()*2);
+        trash_bin.reserve(150);
 
         std::unique_ptr<TrackCollection> result = std::make_unique<TrackCollection>();
 
@@ -218,7 +217,8 @@ ATH_CHECK(m_muonHoleRecoverTool.retrieve(DisableTool{!m_outputSingleStationTrack
                 }
 
                 // create MuonSegment
-                std::unique_ptr<MuonSegment> newseg{m_mooBTool->combineToSegment(ctx, *sit1, *sit2, nullptr)};
+                static const Muon::IMuonSegmentTrackBuilder::PrepVec emptyPhiHits{};
+                std::unique_ptr<MuonSegment> newseg{m_mooBTool->combineToSegment(ctx, *sit1, *sit2, emptyPhiHits)};
                 if (!newseg) {
                     ATH_MSG_DEBUG(" Combination of segments failed ");
                     continue;
@@ -550,7 +550,6 @@ ATH_CHECK(m_muonHoleRecoverTool.retrieve(DisableTool{!m_outputSingleStationTrack
             if (segs[ilayer].empty()) continue;
 
             std::vector<MuPatSegment*> matchedSegs;
-            matchedSegs.clear();
             bool tightCuts = false;
             //
             if (m_useTightMatching) {
@@ -570,12 +569,12 @@ ATH_CHECK(m_muonHoleRecoverTool.retrieve(DisableTool{!m_outputSingleStationTrack
                 }
 
                 if (segsInCone > m_segThreshold) {
-                    for (unsigned int j = 0; j < segs[ilayer].size(); j++) {
+                    for (unsigned int j = 0; j < segs[ilayer].size(); ++j) {
                         bool isMatched = m_candidateMatchingTool->match(ctx, seedSeg, *segs[ilayer][j], true);
 
                         if (isMatched) matchedSegs.push_back(segs[ilayer][j]);
                     }
-                    if (matchedSegs.size() == 0) continue;
+                    if (matchedSegs.empty()) continue;
                     tightCuts = true;
                 }
             }

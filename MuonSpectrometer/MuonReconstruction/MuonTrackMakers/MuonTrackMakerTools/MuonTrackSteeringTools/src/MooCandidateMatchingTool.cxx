@@ -183,7 +183,7 @@ namespace Muon {
             isSLOverlap = true;
         if (isSLOverlap) {
             ATH_MSG_DEBUG("Small/large overlap");
-            // don't combined CSC and MDT segments
+            // don't combine CSC and MDT segments
             if (entry1.isMdt != entry2.isMdt) {
                 ATH_MSG_DEBUG(" mdt/csc mix ignored");
                 return false;
@@ -1126,7 +1126,7 @@ namespace Muon {
 
         // if one segment in each endcap, then consider on different side
         bool inOppositeEndcap = false;
-        double etaEndcap = 1.1;
+        constexpr double etaEndcap = 1.1;
         double eta1 = pos1.eta();
         double eta2 = pos2.eta();
         if ((eta1 > +etaEndcap && eta2 < -etaEndcap) || (eta1 < -etaEndcap && eta2 > +etaEndcap)) {
@@ -1337,7 +1337,7 @@ namespace Muon {
     bool MooCandidateMatchingTool::checkSegmentDistance(const MuPatSegment& entry1, const MuPatSegment& entry2) const {
         DistanceToPars distToPars(&entry1.entryPars());
         double distance = distToPars(entry2.entryPars().position());
-        if (fabs(distance) > 5000.) {
+        if (std::abs(distance) > 5000.) {
             ATH_MSG_VERBOSE("  large distance between segments, not using segment " << distance);
             return false;
         }

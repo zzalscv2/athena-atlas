@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MooTrackFitter.h"
@@ -73,7 +73,6 @@ namespace Muon {
         m_magFieldProperties = m_slProp ? Trk::NoField : Trk::FullField;
 
         ATH_CHECK(m_trackToSegmentTool.retrieve());
-        ATH_CHECK(m_mdtRotCreator.retrieve());
         ATH_CHECK(m_phiHitSelector.retrieve());
 
         return StatusCode::SUCCESS;
@@ -177,7 +176,7 @@ namespace Muon {
     }
 
     std::unique_ptr<Trk::Track> MooTrackFitter::fit(const EventContext& ctx, const MuPatCandidateBase& entry1, const MuPatCandidateBase& entry2,
-                                                    const PrepVec* externalPhiHits) const {
+                                                    const PrepVec& externalPhiHits) const {
         ++m_nfits;
         // internal representation of the track in fitter
         FitterData fitterData;
@@ -204,13 +203,15 @@ namespace Muon {
             ATH_MSG_DEBUG(" Creation of start parameters failed ");
             return nullptr;
         }
+        ATH_MSG_VERBOSE("Extracted start parameters: "<<Amg::toString(startPars->momentum().unit())<< " "<<Amg::toString(startPars->position()));
         ++m_nfailedParsInital;
 
         // clean phi hits and reevaluate hits. Do not run for cosmics
-        bool hasCleaned = !m_cleanPhiHits || cleanPhiHits(ctx, startPars->momentum().mag(), fitterData, externalPhiHits);
+        bool hasCleaned = m_cleanPhiHits && cleanPhiHits(ctx, startPars->momentum().mag(), fitterData, externalPhiHits);
         if (hasCleaned) {
             ATH_MSG_DEBUG(" Cleaned phi hits, re-extracting hits");
             bool usePrecise = m_usePreciseHits || (fitterData.firstHasMomentum || fitterData.secondHasMomentum);
+            ATH_MSG_VERBOSE("Call extract data with usePrecise "<<usePrecise);
             if (!extractData(fitterData, usePrecise)) {
                 ATH_MSG_DEBUG(" Failed to extract data after phi hit cleaning");
                 return nullptr;
@@ -231,6 +232,10 @@ namespace Muon {
         if (fitterData.firstHasMomentum || fitterData.secondHasMomentum) doPreFit = false;
         if (!doPreFit) particleType = Trk::muon;
 
+        if (m_cosmics) {
+            Muon::CosmicMuPatHitSorter sorter{*startPars};
+            std::stable_sort(fitterData.measurements.begin(),fitterData.measurements.end(),sorter);
+        }
         std::unique_ptr<Trk::Track> track = fit(ctx, *startPars, fitterData.measurements, particleType, doPreFit);
 
         if (!track) {
@@ -248,7 +253,7 @@ namespace Muon {
         ++m_noPerigee;
 
         if (!m_slFit && !validMomentum(*pp)) {
-            ATH_MSG_DEBUG(" Low momentum, rejected ");
+            ATH_MSG_VERBOSE(" Low momentum, rejected ");
             return nullptr;
         }
         ++m_nlowMomentum;
@@ -347,8 +352,9 @@ namespace Muon {
             DistanceToPars distToPars(&entry1.entryPars());
             double distToSecond = distToPars(entry2.entryPars().position());
             if (distToSecond < 0) entry1IsFirst = false;
-            ATH_MSG_DEBUG(" first entry dir " << entry1.entryPars().momentum() << " pos " << entry1.entryPars().position() << " second "
-                                              << entry2.entryPars().position() << "  dist " << distToSecond);
+            ATH_MSG_DEBUG(" first entry dir " << Amg::toString(entry1.entryPars().momentum()) 
+                                               << " pos " << Amg::toString(entry1.entryPars().position()) << " second "
+                                               <<  Amg::toString(entry2.entryPars().position()) << "  dist " << distToSecond);
         }
         const MuPatCandidateBase& firstEntry = entry1IsFirst ? entry1 : entry2;
         const MuPatCandidateBase& secondEntry = entry1IsFirst ? entry2 : entry1;
@@ -368,7 +374,7 @@ namespace Muon {
         // merge hitLists and add them to the fitterData
         fitterData.hitList = m_hitHandler->merge(entry1.hitList(), entry2.hitList());
 
-        bool usePrecise = m_usePreciseHits ? true : (fitterData.firstHasMomentum || fitterData.secondHasMomentum);
+        bool usePrecise = m_usePreciseHits || (fitterData.firstHasMomentum || fitterData.secondHasMomentum);
         if (msgLvl(MSG::DEBUG)) {
             msg(MSG::DEBUG) << MSG::DEBUG << " entering fitter: etaHits, first entry: ";
             if (fitterData.firstIsTrack)
@@ -519,8 +525,7 @@ namespace Muon {
             if (fitterData.firstEntry->stations().size() == 1 && fitterData.firstEntry->containsStation(MuonStationIndex::EI) &&
                 (fitterData.firstEntry->phiHits().empty() || (fitterData.firstEntry->containsChamber(MuonStationIndex::CSS) ||
                                                               fitterData.firstEntry->containsChamber(MuonStationIndex::CSL)))) {
-                if (msgLvl(MSG::VERBOSE))
-                    msg(MSG::DEBUG) << MSG::DEBUG << " Special treatment of the forward region: adding fake at ip " << endmsg;
+                ATH_MSG_VERBOSE( " Special treatment of the forward region: adding fake at ip ");
             }
             return true;
         }
@@ -1679,7 +1684,7 @@ namespace Muon {
     }
 
     bool MooTrackFitter::cleanPhiHits(const EventContext& ctx, double momentum, MooTrackFitter::FitterData& fitterData,
-                                      const std::vector<const Trk::PrepRawData*>* patternPhiHits) const {
+                                      const std::vector<const Trk::PrepRawData*>& patternPhiHits) const {
         ATH_MSG_VERBOSE(" cleaning phi hits ");
 
         MeasVec& phiHits = fitterData.phiHits;
@@ -1730,13 +1735,12 @@ namespace Muon {
 
         // if available, extract additional phi hits from the road that were not on the entries
         std::vector<const Trk::PrepRawData*> roadPhiHits;
-        if (patternPhiHits) {
-            std::copy_if(patternPhiHits->begin(), patternPhiHits->end(), std::back_inserter(roadPhiHits), [&ids, this](const Trk::PrepRawData* prd){
-                return !(ids.count(prd->identify()) || 
-                        /// do not add CSCs as they really should be on a segment
-                        m_idHelperSvc->isCsc(prd->identify()) || m_idHelperSvc->issTgc(prd->identify()));
-            });
-        }
+        std::copy_if(patternPhiHits.begin(), patternPhiHits.end(), std::back_inserter(roadPhiHits), [&ids, this](const Trk::PrepRawData* prd){
+            return !(ids.count(prd->identify()) || 
+                    /// do not add CSCs as they really should be on a segment
+                    m_idHelperSvc->isCsc(prd->identify()) || m_idHelperSvc->issTgc(prd->identify()));
+        });
+        
 
         if (roadPhiHits.size() + rots.size() > m_phiHitsMax) {
             ATH_MSG_VERBOSE(" too many pattern phi hits, not adding any " << roadPhiHits.size());
