@@ -233,6 +233,7 @@ def initConfigFlags():
     acf.addFlag('Output.doWriteDAOD',  False) # write out at least one DAOD file
 
     acf.addFlag('Output.TreeAutoFlush', {})  # {} = automatic for all streams, otherwise {'STREAM': 123}
+    acf.addFlag('Output.StorageTechnology', 'ROOTTREEINDEX')  # Set the underlying POOL storage technology
 
     # Might move this elsewhere in the future.
     # Some flags from https://gitlab.cern.ch/atlas/athena/blob/master/Tracking/TrkDetDescr/TrkDetDescrSvc/python/TrkDetDescrJobProperties.py
