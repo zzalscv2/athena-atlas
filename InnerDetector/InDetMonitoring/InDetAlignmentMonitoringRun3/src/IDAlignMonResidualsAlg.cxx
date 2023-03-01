@@ -709,7 +709,7 @@ StatusCode  IDAlignMonResidualsAlg::getSiResiduals(const Trk::Track* track, cons
     trackParameterForResiduals = std::move(uTrkPtr);
       }
 
-  if (!m_residualPullCalculator.empty() && !m_residualPullCalculator.retrieve().isFailure()) {
+  if (!m_residualPullCalculator.empty()) {
 
     if (hit && trackParameterForResiduals) {
 
@@ -1084,6 +1084,7 @@ StatusCode IDAlignMonResidualsAlg::setupTools()
     ATH_MSG_DEBUG("No residual/pull calculator for general hit residuals configured.");
     ATH_MSG_DEBUG("It is recommended to give R/P calculators to the det-specific tool handle lists then.");
     m_doPulls = false;
+    ATH_CHECK(m_residualPullCalculator.retrieve( DisableTool{!m_doPulls} ));
   } else if (m_residualPullCalculator.retrieve().isFailure()) {
     ATH_MSG_WARNING("Could not retrieve "<< m_residualPullCalculator << " (to calculate residuals and pulls) ");
     m_doPulls = false;
@@ -1096,6 +1097,7 @@ StatusCode IDAlignMonResidualsAlg::setupTools()
   if (m_hitQualityTool.empty()) {
     ATH_MSG_DEBUG("No hit quality tool configured - not hit quality cuts will be imposed");
     m_doHitQuality = false;
+    ATH_CHECK(m_hitQualityTool.retrieve( DisableTool{!m_doHitQuality} ));
   } else if (m_hitQualityTool.retrieve().isFailure()) {
     ATH_MSG_WARNING("Could not retrieve " << m_hitQualityTool << " to apply hit quality cuts to Si hits");
     m_doHitQuality = false;
