@@ -116,12 +116,19 @@ def MC23NoPileUp(flags):
     flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
 
+def MC23NoPileUpLowMuRun(flags):
+    """MC23a flags for MC to match 2002 Low Mu data"""
+    MC23NoPileUp(flags)
+    flags.Input.ConditionsRunNumber = 420000
+
+
 def BeamspotSplitMC23a():
     """MC23a beamspot splitting configuration"""
     substeps = 4
     event_fractions = [0.14, 0.14, 0.14, 0.58]
 
     return substeps, event_fractions
+
 
 def BeamspotSplitMC23c():
     """MC23a beamspot splitting configuration"""
@@ -150,24 +157,21 @@ def MC23SimulationNoIoV(flags):
     from SimuJobTransforms.G4Optimizations import enableG4Optimizations
     enableG4Optimizations(flags)
 
+
+def MC23SimulationLowMuRun(flags):
+    """MC23 flags for low mu run simulation"""
+    MC23SimulationNoIoV(flags)
+
+    flags.Input.RunNumber = [420000]
+    flags.Input.OverrideRunNumber = True
+    flags.Input.LumiBlockNumber = [1] # dummy value
+
+
 def MC23cSimulationNoIoV(flags):
     """MC23 base flags for simulation without specifying conditions IoVs"""
+    MC23SimulationNoIoV(flags)
     flags.Input.MCCampaign = Campaign.MC23c
 
-    from SimulationConfig.SimEnums import SimulationFlavour, TruthStrategy
-    flags.Sim.PhysicsList = 'FTFP_BERT_ATL'
-    flags.Sim.TruthStrategy = TruthStrategy.MC15aPlus
-
-    flags.Sim.TRTRangeCut = 30.0
-    flags.Sim.TightMuonStepping = True
-
-    from SimuJobTransforms.SimulationHelpers import enableBeamPipeKill, enableFrozenShowersFCalOnly
-    enableBeamPipeKill(flags)
-    if flags.Sim.ISF.Simulator in [SimulationFlavour.FullG4MT, SimulationFlavour.FullG4MT_QS]:
-        enableFrozenShowersFCalOnly(flags)
-
-    from SimuJobTransforms.G4Optimizations import enableG4Optimizations
-    enableG4Optimizations(flags)
 
 def MC23SimulationSingleIoV(flags):
     """MC23 flags for simulation"""
@@ -177,6 +181,7 @@ def MC23SimulationSingleIoV(flags):
     flags.Input.OverrideRunNumber = True
     flags.Input.LumiBlockNumber = [1] # dummy value
 
+
 def MC23cSimulationSingleIoV(flags):
     """MC23 flags for simulation"""
     MC23SimulationNoIoV(flags)
@@ -184,6 +189,7 @@ def MC23cSimulationSingleIoV(flags):
     flags.Input.RunNumber = [450000]
     flags.Input.OverrideRunNumber = True
     flags.Input.LumiBlockNumber = [1] # dummy value
+
 
 def MC23aSimulationMultipleIoV(flags):
     """MC23 flags for simulation"""
@@ -214,12 +220,14 @@ def MC23SimulationSingleIoVCalibrationHits(flags):
     CalHits(flags)
     ParticleID(flags)
 
+
 def MC23aSimulationMultipleIoVCalibrationHits(flags):
     """MC23 flags for simulation with CalibrationHits"""
     MC23aSimulationMultipleIoV(flags)
     from SimuJobTransforms import CalHits, ParticleID
     CalHits(flags)
     ParticleID(flags)
+
 
 def MC23cSimulationMultipleIoVCalibrationHits(flags):
     """MC23 flags for simulation with CalibrationHits"""
