@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TriggerMenuMT )
@@ -102,14 +102,6 @@ atlas_test_hlt_trigger_menu( Dev_pp_run4_v1_HLTReprocessing_prescale )
 # Test other HLT menus not included above
 atlas_test_l1defined_menu( PhysicsP1_pp_run3_v1 )
 atlas_test_l1defined_menu( PhysicsP1_pp_lowMu_run3_v1 )
-
-# New job options test:
-atlas_add_test(generateMenuMT_newJO
-   SCRIPT python -m TriggerMenuMT.HLT.Menu.Dev_pp_run3_v1_newJO 
-   PRIVATE_WORKING_DIRECTORY
-   PROPERTIES TIMEOUT 500
-   POST_EXEC_SCRIPT noerror.sh )
-
 
 function( atlas_test_ca_trigger_menu menu )
    atlas_add_test( "menu_CA_${menu}"
