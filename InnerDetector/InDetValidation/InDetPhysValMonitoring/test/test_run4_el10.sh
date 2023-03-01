@@ -10,7 +10,6 @@
 # art-html: dcube_last
 
 lastref_dir=last_results
-
 dcubeXml=dcube_ART_IDPVMPlots_ITk.xml
 ref_21p9=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/900035_el10_ITk_21p9_v1.IDPVM.root  # Ref release = 21.9.26
 
