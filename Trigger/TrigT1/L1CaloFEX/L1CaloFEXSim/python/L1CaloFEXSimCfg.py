@@ -160,6 +160,10 @@ def L1CaloFEXSimCfg(flags):
             jFEX.jFEXSysSimTool.Key_jFexSumETOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexSumETOutputContainer)
             jFEX.jFEXSysSimTool.Key_jFexMETOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexMETOutputContainer)
             jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer)
+            jFEX.jFEXSysSimTool.Key_xTobOutKey_jJ=getSimHandle(jFEX.jFEXSysSimTool.Key_xTobOutKey_jJ)
+            jFEX.jFEXSysSimTool.Key_xTobOutKey_jLJ=getSimHandle(jFEX.jFEXSysSimTool.Key_xTobOutKey_jLJ)
+            jFEX.jFEXSysSimTool.Key_xTobOutKey_jTau=getSimHandle(jFEX.jFEXSysSimTool.Key_xTobOutKey_jTau)
+            jFEX.jFEXSysSimTool.Key_xTobOutKey_jEM=getSimHandle(jFEX.jFEXSysSimTool.Key_xTobOutKey_jEM)
         if flags.Trigger.L1.dogFex:
             gFEX.gFEXSysSimTool.Key_gFexSRJetOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gFexSRJetOutputContainer)
             gFEX.gFEXSysSimTool.Key_gFexLRJetOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gFexLRJetOutputContainer)
