@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #################
 ### Steering options
@@ -155,6 +155,12 @@ if makeSplitTracks:
                                                                       ComputeAdditionalInfo   = True,
                                                                       KeepParameters          = True)
     ToolSvc += InDetxAODSplitParticleCreatorTool
+
+    from xAODTrackingCnv.xAODTrackingCnvConf import xAODMaker__TrackCollectionCnvTool
+    InDetSplitTrackCollectionCnvTool = xAODMaker__TrackCollectionCnvTool(
+        "InDetSplitTrackCollectionCnvTool",
+        TrackParticleCreator = InDetxAODSplitParticleCreatorTool)
+
     # The following adds truth information, but needs further testing
     #include ("InDetRecExample/ConfiguredInDetTrackTruth.py")
     #if isIdTrkDxAODSimulation:
@@ -165,6 +171,7 @@ if makeSplitTracks:
     xAODSplitTrackParticleCnvAlg.xAODContainerName = 'InDetSplitTrackParticles'
     xAODSplitTrackParticleCnvAlg.xAODTrackParticlesFromTracksContainerName = 'InDetSplitTrackParticles'
     xAODSplitTrackParticleCnvAlg.TrackParticleCreator = InDetxAODSplitParticleCreatorTool
+    xAODSplitTrackParticleCnvAlg.TrackCollectionCnvTool = InDetSplitTrackCollectionCnvTool
     xAODSplitTrackParticleCnvAlg.TrackContainerName = 'Tracks_splitID'
     xAODSplitTrackParticleCnvAlg.ConvertTrackParticles = False
     xAODSplitTrackParticleCnvAlg.ConvertTracks = True
