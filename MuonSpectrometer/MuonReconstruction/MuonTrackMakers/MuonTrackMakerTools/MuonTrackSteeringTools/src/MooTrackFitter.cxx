@@ -4,7 +4,6 @@
 
 #include "MooTrackFitter.h"
 
-#include "CxxUtils/checker_macros.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
@@ -41,7 +40,6 @@
 #include "TrkTrack/TrackInfo.h"
 #include "TrkTrackSummary/MuonTrackSummary.h"
 #include "TrkTrackSummary/TrackSummary.h"
-ATLAS_CHECK_FILE_THREAD_SAFETY;
 
 namespace {
     const double FiftyOverSqrt12 =  50. / std::sqrt(12);

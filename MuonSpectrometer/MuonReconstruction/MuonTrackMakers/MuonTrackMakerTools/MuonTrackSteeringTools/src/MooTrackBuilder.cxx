@@ -8,7 +8,6 @@
 #include <set>
 
 #include "AthenaKernel/Timeout.h"
-#include "CxxUtils/checker_macros.h"
 #include "MuPatPrimitives/MuPatSegment.h"
 #include "MuPatPrimitives/MuPatTrack.h"
 #include "MuPatPrimitives/SortMuPatHits.h"
@@ -24,8 +23,7 @@
 #include "MuonTrackMakerUtils/SortTracksByHitNumber.h"
 #include "TrkEventPrimitives/ResidualPull.h"
 #include "TrkSegment/SegmentCollection.h"
-ATLAS_CHECK_FILE_THREAD_SAFETY;
-    
+
 namespace Muon {
     static const MooTrackBuilder::PrepVec emptyPhiHits{};
 
