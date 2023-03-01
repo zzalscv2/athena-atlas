@@ -19,13 +19,10 @@
 # Existing modifiers can be found in "TriggerJobOpts/python/Modifiers.py"
 #
 class opt:
-    setupForMC       = None           # force MC setup
     setMenu          = None           # option to overwrite flags.Trigger.triggerMenuSetup
     setDetDescr      = None           # force geometry tag
     setGlobalTag     = None           # force global conditions tag
-    useCONDBR2       = True           # if False, use run-1 conditions DB
     condOverride     = {}             # overwrite conditions folder tags e.g. '{"Folder1":"Tag1", "Folder2":"Tag2"}'
-    autoConfigCond   = False          # auto configure conditions based on input file
     doHLT            = True           # run HLT?
     doID             = True           # ConfigFlags.Trigger.doID
     doCalo           = True           # ConfigFlags.Trigger.doCalo
@@ -34,11 +31,9 @@ class opt:
     doWriteBS        = True           # Write out BS?
     doL1Unpacking    = True           # decode L1 data in input file if True, else setup emulation
     doL1Sim          = False          # (re)run L1 simulation
-    isOnline         = True           # isOnline flag
     doEmptyMenu      = False          # Disable all chains, except those re-enabled by specific slices
     createHLTMenuExternally = False   # Set to True if the menu is build manually outside runHLT_standalone.py
     endJobAfterGenerate = False       # Finish job after menu generation
-    strictDependencies = True         # Sets SGInputLoader.FailIfNoProxy=True and AlgScheduler.DataLoaderAlg=""
     forceEnableAllChains = False      # if True, all HLT chains will run even if the L1 item is false
     enableL1MuonPhase1   = None       # option to overwrite flags.Trigger.enableL1MuonPhase1
     enableL1CaloPhase1   = False      # Enable Run-3 LVL1 calo simulation and/or decoding
@@ -133,6 +128,8 @@ from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 from AthenaCommon.BeamFlags import jobproperties
 import TriggerJobOpts.Modifiers
 
+flags.Common.isOnline = True
+
 # Auto-configuration for athena
 if len(athenaCommonFlags.FilesInput())>0:
     flags.Input.Files = athenaCommonFlags.FilesInput()
@@ -141,21 +138,18 @@ if len(athenaCommonFlags.FilesInput())>0:
     globalflags.InputFormat = 'bytestream' if af.fileinfos['file_type']=='bs' else 'pool'
     globalflags.DataSource = 'data' if af.fileinfos['evt_type'][0]=='IS_DATA' else 'geant4'
     flags.Input.isMC = False if globalflags.DataSource=='data' else True
-    # Set isOnline=False for MC inputs unless specified in the options
-    if globalflags.DataSource() != 'data' and 'isOnline' not in globals():
+    if globalflags.DataSource() != 'data':
         log.info("Setting isOnline = False for MC input")
-        opt.isOnline = False
+        flags.Common.isOnline = False
     # Set geometry
     if opt.setDetDescr is None:
         opt.setDetDescr = af.fileinfos.get('geometry',None)
-    if opt.autoConfigCond and opt.setGlobalTag is None:
-        opt.setGlobalTag = af.fileinfos.get('conditions_tag',None)
     TriggerJobOpts.Modifiers._run_number = flags.Input.RunNumber[0]
     TriggerJobOpts.Modifiers._lb_number = flags.Input.LumiBlockNumber[0]
 
 else:   # athenaHLT
     globalflags.InputFormat = 'bytestream'
-    globalflags.DataSource = 'data' if not opt.setupForMC else 'data'
+    globalflags.DataSource = 'data'
     flags.Input.isMC = False
     flags.Input.Files = []
     TriggerJobOpts.Modifiers._run_number = globals().get('_run_number')  # set by athenaHLT
@@ -183,7 +177,7 @@ flags.GeoModel.AtlasVersion = globalflags.DetDescrVersion()
 #set conditions tag
 if opt.setGlobalTag is None:
     if globalflags.DataSource=='data':
-        opt.setGlobalTag = flags.Trigger.OnlineCondTag if opt.isOnline else 'CONDBR2-BLKPA-2022-08'
+        opt.setGlobalTag = flags.Trigger.OnlineCondTag if flags.Common.isOnline else 'CONDBR2-BLKPA-2022-08'
     else:
         if flags.GeoModel.Run == LHCPeriod.Run3:
             opt.setGlobalTag = 'OFLCOND-MC21-SDR-RUN3-07'
@@ -197,10 +191,9 @@ flags.IOVDb.GlobalTag = globalflags.ConditionsTag()
 jobproperties.Beam.beamType = 'collisions'
 flags.Beam.Type = BeamType(jobproperties.Beam.beamType)
 if not flags.Input.isMC:
-    globalflags.DatabaseInstance='CONDBR2' if opt.useCONDBR2 else 'COMP200'
+    globalflags.DatabaseInstance='CONDBR2'
     flags.IOVDb.DatabaseInstance=globalflags.DatabaseInstance()
-athenaCommonFlags.isOnline.set_Value_and_Lock(opt.isOnline)
-flags.Common.isOnline = athenaCommonFlags.isOnline()
+athenaCommonFlags.isOnline.set_Value_and_Lock(flags.Common.isOnline)
 
 log.info('Configured the following global flags:')
 globalflags.print_JobProperties()
@@ -341,8 +334,6 @@ topSequence += hltTop
 from AthenaCommon.DetFlags import DetFlags
 if flags.Input.Format is not Format.BS:
     DetFlags.detdescr.all_setOn()
-    #if not flags.Input.isMC or flags.Common.isOnline:
-    #    DetFlags.detdescr.ALFA_setOff()
 
 if flags.Trigger.doID:
     DetFlags.detdescr.ID_setOn()
@@ -389,8 +380,8 @@ flags.Scheduler.CheckDependencies = True
 flags.Scheduler.ShowControlFlow = True
 flags.Scheduler.ShowDataDeps = True
 flags.Scheduler.EnableVerboseViews = True
-flags.Input.FailOnUnknownCollections = opt.strictDependencies
-flags.Scheduler.AutoLoadUnmetDependencies = not opt.strictDependencies
+flags.Input.FailOnUnknownCollections = True
+flags.Scheduler.AutoLoadUnmetDependencies = False
 
 from AthenaCommon.AlgScheduler import AlgScheduler
 AlgScheduler.CheckDependencies( True )
@@ -398,7 +389,7 @@ AlgScheduler.ShowControlFlow( True )
 AlgScheduler.ShowDataDependencies( True )
 AlgScheduler.EnableVerboseViews( True )
 
-if opt.strictDependencies:
+if flags.Input.FailOnUnknownCollections:
     AlgScheduler.setDataLoaderAlg("")
     if not hasattr(topSequence,"SGInputLoader"):
         log.error('Cannot set FailIfNoProxy property because SGInputLoader not found in topSequence')
@@ -615,7 +606,7 @@ if hasattr(topSequence,"SGInputLoader"):
 from TriggerJobOpts.TriggerHistSvcConfig import TriggerHistSvcConfig
 CAtoGlobalWrapper(TriggerHistSvcConfig, flags)
 
-if athenaCommonFlags.isOnline():
+if flags.Common.isOnline:
     from TrigOnlineMonitor.TrigOnlineMonitorConfig import trigOpMonitorCfg
     CAtoGlobalWrapper(trigOpMonitorCfg, flags)
 
