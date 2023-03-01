@@ -160,6 +160,7 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
 
       IDbDatabase* idb = dbH.info();
       m_rootDb = dynamic_cast<RootDatabase*>(idb);
+      if (not m_rootDb) return Error;
       if( mode & pool::CREATE ) {
          m_ntupleWriter = m_rootDb->getNTupleWriter(ntupleName, true);
          if( m_ntupleWriter ) {
