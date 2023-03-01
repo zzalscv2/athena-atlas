@@ -23,15 +23,15 @@ class MuonPhiHitSelector : public AthAlgTool, virtual public Muon::IMuonHitSelec
     MuonPhiHitSelector(const std::string&, const std::string&, const IInterface*);
     virtual ~MuonPhiHitSelector() = default;
 
-    virtual StatusCode initialize();
+    StatusCode initialize() override;
 
     /** @brief Selects and builds a cleaned vector of RIO
         fits the associatedHits and build new RIOs, if m_competingRios true then for ambiguous hits competing rios are
        built
     */
-    virtual std::vector<const Trk::MeasurementBase*>* select_rio(
+    std::vector<std::unique_ptr<const Trk::MeasurementBase>> select_rio(
         const double pmom, const std::vector<const Trk::RIO_OnTrack*>& associatedHits,
-        const std::vector<const Trk::PrepRawData*>& unassociatedHits) const;
+        const std::vector<const Trk::PrepRawData*>& unassociatedHits) const override;
 
   private:
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{

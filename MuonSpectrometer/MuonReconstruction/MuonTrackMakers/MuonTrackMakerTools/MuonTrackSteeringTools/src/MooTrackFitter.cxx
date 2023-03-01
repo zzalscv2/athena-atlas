@@ -1689,7 +1689,7 @@ namespace Muon {
 
         // copy phi ROTs into vector, split up competing ROTs
         std::vector<const Trk::RIO_OnTrack*> rots;
-        std::vector<const Trk::RIO_OnTrack*> rotsNSW;  // hack as the phi hit cleaning does not work for NSW hits
+        std::vector<std::unique_ptr<const Trk::RIO_OnTrack>> rotsNSW;  // hack as the phi hit cleaning does not work for NSW hits
         std::set<Identifier> ids;
         std::set<MuonStationIndex::StIndex> stations;
         rots.reserve(phiHits.size() + 5);
@@ -1698,7 +1698,7 @@ namespace Muon {
             const Trk::RIO_OnTrack* rot = dynamic_cast<const Trk::RIO_OnTrack*>(hit);
             if (rot) {
                 if (m_idHelperSvc->issTgc(rot->identify())) {
-                    rotsNSW.push_back(rot);
+                    rotsNSW.push_back(rot->uniqueClone());
                     continue;
                 }
                 rots.push_back(rot);
@@ -1759,16 +1759,15 @@ namespace Muon {
             }
         }
 
-        std::unique_ptr<std::vector<const Trk::MeasurementBase*>> newMeasurements{m_phiHitSelector->select_rio(momentum, rots, roadPhiHits)};
-        if (!newMeasurements) {
-            ATH_MSG_WARNING(" no measurements returned by phi hit selector ");
-            return false;
-        }
-        newMeasurements->insert(newMeasurements->end(), rotsNSW.begin(), rotsNSW.end());
+        std::vector<std::unique_ptr<const Trk::MeasurementBase>> newMeasurements{m_phiHitSelector->select_rio(momentum, rots, roadPhiHits)};
+       
+        newMeasurements.insert(newMeasurements.end(), 
+                               std::make_move_iterator(rotsNSW.begin()), 
+                               std::make_move_iterator(rotsNSW.end()));
 
-        ATH_MSG_VERBOSE(" selected phi hits " << newMeasurements->size());
+        ATH_MSG_VERBOSE(" selected phi hits " << newMeasurements.size());
 
-        if (newMeasurements->empty()) {
+        if (newMeasurements.empty()) {
             ATH_MSG_DEBUG(" empty list of phi hits return from phi hit selector: input size " << phiHits.size());
             return false;
         }
@@ -1777,8 +1776,8 @@ namespace Muon {
         DistanceAlongParameters distAlongPars;
         constexpr double maxDistCut = 800.;
         std::vector<const Trk::MeasurementBase*> measurementsToBeAdded{};
-        measurementsToBeAdded.reserve(newMeasurements->size());
-        for (const Trk::MeasurementBase* meas : *newMeasurements) {          
+        measurementsToBeAdded.reserve(newMeasurements.size());
+        for (std::unique_ptr<const Trk::MeasurementBase>& meas : newMeasurements) {          
             const Identifier id = m_edmHelperSvc->getIdentifier(*meas);
             if (!id.is_valid()) {
                 ATH_MSG_WARNING(" Phi measurement without valid Identifier! ");
@@ -1810,7 +1809,8 @@ namespace Muon {
 
             ATH_MSG_VERBOSE("          new phi hit, distance from start pars " << dist << " distance to last pars " << distBack);
 
-            measurementsToBeAdded.push_back(meas);
+            measurementsToBeAdded.push_back(meas.get());
+            fitterData.garbage.push_back(std::move(meas));
         }
 
         // now remove all previous phi hits and replace them with the new ones
