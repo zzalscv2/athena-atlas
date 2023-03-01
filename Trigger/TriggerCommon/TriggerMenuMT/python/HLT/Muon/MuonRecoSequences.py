@@ -480,7 +480,6 @@ def VDVPrecMuTrkCfg(flags, name):
   vdvName = "VDVMuTrkLRT" if "LRT" in name else "VDVMuTrk"
   trkname = "LRT" if "LRT" in name else ''
   dataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks(flags, trkname) ),
-                 ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_FlaggedCondData_TRIG' ),
                  ( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks(flags, trkname) )]
 
   if not flags.Input.isMC:

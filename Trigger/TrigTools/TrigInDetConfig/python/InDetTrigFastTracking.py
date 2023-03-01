@@ -25,6 +25,7 @@ def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF 
   from TrigInDetConfig.TrigInDetConfig import InDetCacheNames
   from AthenaConfiguration.Enums import Format
 
+  from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
   from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
   from InDetTrigRecExample import InDetTrigCA
   
@@ -59,7 +60,6 @@ def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF 
                                     ( 'SpacePointCache' , InDetCacheNames.SpacePointCacheSCT ),
                                     ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.PixBSErrCacheKey ),
                                     ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTBSErrCacheKey ),
-                                    ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTFlaggedCondCacheKey ),
                                     ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
                                     ( 'TagInfo' , 'DetectorStore+ProcessingTags' )]
     if doFTF and flags.InDet.Tracking.ActiveConfig.name == 'fullScanUTT' :
@@ -149,133 +149,19 @@ def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF 
     viewAlgs.append(InDetSCTEventFlagWriter)
 
   #Pixel clusterisation
-  from InDetTrigRecExample.InDetTrigConfigRecLoadTools import TrigPixelLorentzAngleTool, TrigSCTLorentzAngleTool
+  from InDetConfig.InDetPrepRawDataFormationConfig import TrigPixelClusterizationCfg
+  pixClusterizationAlg = algorithmCAToGlobalWrapper(TrigPixelClusterizationCfg, flags, name="InDetPixelClusterization" + signature, RoIs=rois)
+  viewAlgs.extend(pixClusterizationAlg)
 
-  from SiClusterizationTool.SiClusterizationToolConf import InDet__ClusterMakerTool
-  InDetClusterMakerTool = InDet__ClusterMakerTool(name                 = "InDetClusterMakerTool_" + signature,
-                                                  SCTLorentzAngleTool = TrigSCTLorentzAngleTool,
-                                                  PixelLorentzAngleTool = TrigPixelLorentzAngleTool)
+  #SCT clusterization 
+  from InDetConfig.InDetPrepRawDataFormationConfig import TrigSCTClusterizationCfg
+  sctClusterizationAlg = algorithmCAToGlobalWrapper(TrigSCTClusterizationCfg, flags, name="InDetSCTClusterization" + signature, RoIs = rois)
+  viewAlgs.extend(sctClusterizationAlg)
 
-  ToolSvc += InDetClusterMakerTool
-
-  from PixelConditionsTools.PixelConditionsToolsConf import PixelConditionsSummaryTool
-  idPixelSummary = PixelConditionsSummaryTool("PixelConditionsSummaryTool",
-                                              UseByteStreamFEI4=isByteStream,
-                                              UseByteStreamFEI3=isByteStream)
-
-  from SiClusterizationTool.SiClusterizationToolConf import InDet__MergedPixelsTool, InDet__PixelRDOTool
-
-  InDetPixelRDOTool = InDet__PixelRDOTool(name = "InDetPixelRDOTool_" + signature,
-                                          PixelConditionsSummaryTool = idPixelSummary)
-                                          
-  if "data15" in flags.Input.ProjectName:
-     InDetPixelRDOTool.CheckDuplicatedRDO = True   # Disable for data15 because duplication mechanism was used.
-
-  InDetMergedPixelsTool = InDet__MergedPixelsTool(name                       = "InDetMergedPixelsTool_" + signature,
-                                                  globalPosAlg               = InDetClusterMakerTool,
-                                                  PixelRDOTool               = InDetPixelRDOTool)
-
-  ToolSvc += InDetMergedPixelsTool
-
-  from SiClusterizationTool.SiClusterizationToolConf import InDet__PixelGangedAmbiguitiesFinder
-  InDetPixelGangedAmbiguitiesFinder = InDet__PixelGangedAmbiguitiesFinder(name = "InDetPixelGangedAmbiguitiesFinder_" + signature)
-  ToolSvc += InDetPixelGangedAmbiguitiesFinder
-
-  from InDetPrepRawDataFormation.InDetPrepRawDataFormationConf import InDet__PixelClusterization
-  InDetPixelClusterization = InDet__PixelClusterization(name                    = "InDetPixelClusterization_" + signature,
-                                                        clusteringTool          = InDetMergedPixelsTool,
-                                                        gangedAmbiguitiesFinder = InDetPixelGangedAmbiguitiesFinder,
-                                                        DataObjectName          = InDetKeys.PixelRDOs(),
-                                                        AmbiguitiesMap          = TrigPixelKeys.PixelClusterAmbiguitiesMap,
-                                                        ClustersName            = TrigPixelKeys.Clusters)
-
-  InDetPixelClusterization.isRoI_Seeded = True
-  InDetPixelClusterization.RoIs = rois
-  InDetPixelClusterization.ClusterContainerCacheKey = InDetCacheNames.Pixel_ClusterKey
-
-  from RegionSelector.RegSelToolConfig import makeRegSelTool_Pixel
-  InDetPixelClusterization.RegSelTool = makeRegSelTool_Pixel()
-
-  from InDetPrepRawDataFormation.MonitoringTool import PixelClusterization_MonitoringTool
-  InDetPixelClusterization.MonTool = PixelClusterization_MonitoringTool(flags)
-
-  viewAlgs.append(InDetPixelClusterization)
-
-  # Create SCT_ConditionsSummaryTool
-  from SCT_ConditionsTools.SCT_ConditionsSummaryToolSetup import SCT_ConditionsSummaryToolSetup
-  sct_ConditionsSummaryToolSetup = SCT_ConditionsSummaryToolSetup("InDetSCT_ConditionsSummaryTool_" + signature)
-  sct_ConditionsSummaryToolSetup.setup()
-  sct_ConditionsSummaryToolSetupWithoutFlagged = SCT_ConditionsSummaryToolSetup("InDetSCT_ConditionsSummaryToolWithoutFlagged_" + signature)
-  sct_ConditionsSummaryToolSetupWithoutFlagged.setup()
-  InDetSCT_ConditionsSummaryToolWithoutFlagged = sct_ConditionsSummaryToolSetupWithoutFlagged.getTool()
-
-  # Add conditions tools to SCT_ConditionsSummaryTool
-  from SCT_ConditionsTools.SCT_ConfigurationConditionsToolSetup import SCT_ConfigurationConditionsToolSetup
-  sct_ConfigurationConditionsToolSetup = SCT_ConfigurationConditionsToolSetup()
-  sct_ConfigurationConditionsToolSetup.setToolName("InDetSCT_ConfigurationConditionsTool_" + signature)
-
-  if (flags.Input.isMC or flags.IOVDb.DatabaseInstance == "CONDBR2"):
-     sct_ConfigurationConditionsToolSetup.setChannelFolder("/SCT/DAQ/Config/ChipSlim") # For MC (OFLP200) or Run 2, 3 data (CONDBR2)
-  sct_ConfigurationConditionsToolSetup.setup()
-  InDetSCT_ConditionsSummaryToolWithoutFlagged.ConditionsTools.append(sct_ConfigurationConditionsToolSetup.getTool().getFullName())
-
-  from SCT_ConditionsTools.SCT_ReadCalibDataToolSetup import SCT_ReadCalibDataToolSetup
-  sct_ReadCalibDataToolSetup = SCT_ReadCalibDataToolSetup()
-  sct_ReadCalibDataToolSetup.setToolName("InDetSCT_ReadCalibDataTool_" + signature)
-  sct_ReadCalibDataToolSetup.setup()
-  InDetSCT_ConditionsSummaryToolWithoutFlagged.ConditionsTools.append(sct_ReadCalibDataToolSetup.getTool().getFullName())
-
-  if isByteStream:
-     from SCT_ConditionsTools.SCT_ByteStreamErrorsToolSetup import SCT_ByteStreamErrorsToolSetup
-     sct_ByteStreamErrorsToolSetup = SCT_ByteStreamErrorsToolSetup()
-     sct_ByteStreamErrorsToolSetup.setToolName("InDetSCT_BSErrorTool_" + signature)
-     sct_ByteStreamErrorsToolSetup.setConfigTool(sct_ConfigurationConditionsToolSetup.getTool())
-     sct_ByteStreamErrorsToolSetup.setup()
-     InDetSCT_ConditionsSummaryToolWithoutFlagged.ConditionsTools.append(sct_ByteStreamErrorsToolSetup.getTool().getFullName())
-
-  if (InDetTrigFlags.doPrintConfigurables()):
-     print (InDetSCT_ConditionsSummaryToolWithoutFlagged)  # noqa: ATL901
-
-  #
-  # --- SCT_ClusteringTool
-  #
-  from SiClusterizationTool.SiClusterizationToolConf import InDet__SCT_ClusteringTool
-  InDetSCT_ClusteringTool = InDet__SCT_ClusteringTool(name              = "InDetSCT_ClusteringTool_" + signature,
-                                                      globalPosAlg      = InDetClusterMakerTool,
-                                                      conditionsTool    = InDetSCT_ConditionsSummaryToolWithoutFlagged)
-  if InDetTrigFlags.doSCTIntimeHits():
-     if InDetTrigFlags.InDet25nsec():
-        InDetSCT_ClusteringTool.timeBins = "01X"
-     else:
-        InDetSCT_ClusteringTool.timeBins = "X1X"
-
-  #
-  # --- SCT_Clusterization algorithm
-  #
-
-  from InDetPrepRawDataFormation.InDetPrepRawDataFormationConf import InDet__SCT_Clusterization
-  InDetSCT_Clusterization = InDet__SCT_Clusterization(name                    = "InDetSCT_Clusterization_" + signature,
-                                                      clusteringTool          = InDetSCT_ClusteringTool,
-                                                      # ChannelStatus         = InDetSCT_ChannelStatusAlg,
-                                                      DataObjectName          = InDetKeys.SCT_RDOs(),
-                                                      ClustersName            = TrigSCTKeys.Clusters,
-                                                      #Adding the suffix to flagged conditions
-                                                      SCT_FlaggedCondData     = "SCT_FlaggedCondData_TRIG",
-                                                      conditionsTool          = InDetSCT_ConditionsSummaryToolWithoutFlagged)
-  InDetSCT_Clusterization.isRoI_Seeded = True
-  InDetSCT_Clusterization.RoIs = rois
-  InDetSCT_Clusterization.ClusterContainerCacheKey = InDetCacheNames.SCT_ClusterKey
-  InDetSCT_Clusterization.FlaggedCondCacheKey = InDetCacheNames.SCTFlaggedCondCacheKey
-
-  from RegionSelector.RegSelToolConfig import makeRegSelTool_SCT
-  InDetSCT_Clusterization.RegSelTool = makeRegSelTool_SCT()
+  #TBD make Cfg function for MonTools
+  #from InDetPrepRawDataFormation.MonitoringTool import SCT_Clusterization_MonitoringTool
+  #InDetSCT_Clusterization.MonTool = SCT_Clusterization_MonitoringTool(flags)
   
-  from InDetPrepRawDataFormation.MonitoringTool import SCT_Clusterization_MonitoringTool
-  InDetSCT_Clusterization.MonTool = SCT_Clusterization_MonitoringTool(flags)
-  
-
-  viewAlgs.append(InDetSCT_Clusterization)
-
 
   #Space points and FTF
 
@@ -362,8 +248,7 @@ def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF 
 
         from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderBase
         #TODO: eventually adapt IDTrigConfig also in FTF configuration (pass as additional param)
-        theFTF = TrigFastTrackFinderBase(flags, "TrigFastTrackFinder_" + signature, flags.InDet.Tracking.ActiveConfig.input_name,
-                                        conditionsTool = InDetSCT_ConditionsSummaryToolWithoutFlagged )
+        theFTF = TrigFastTrackFinderBase(flags, "TrigFastTrackFinder_" + signature, flags.InDet.Tracking.ActiveConfig.input_name)
         theFTF.RoIs           = rois
 
         if LRTInputCollection is not None:
@@ -389,8 +274,7 @@ def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF 
           inputTracksname = flags.InDet.Tracking.ActiveConfig.trkTracks_FTF   #before ActiveConfig gets replaced -needs restructuring
           flags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+secondStageConfig.name)
 
-          theFTF2 = TrigFastTrackFinderBase(flags, "TrigFastTrackFinder_" + secondStageConfig.input_name, secondStageConfig.input_name,
-                                            conditionsTool = InDetSCT_ConditionsSummaryToolWithoutFlagged )
+          theFTF2 = TrigFastTrackFinderBase(flags, "TrigFastTrackFinder_" + secondStageConfig.input_name, secondStageConfig.input_name)
           theFTF2.RoIs           = rois
           theFTF2.inputTracksName = inputTracksname
         
