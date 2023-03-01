@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIEventUtils/HITowerWeightTool.h"
@@ -18,10 +18,7 @@ HITowerWeightTool::HITowerWeightTool(const std::string& n) : asg::AsgTool(n),
 							     m_h3Phi(nullptr),
 							     m_h3Mag(nullptr),
 							     m_h3EtaPhiResponse(nullptr),
-							     m_h3EtaPhiOffset(nullptr),
-							     m_runNumber(0),
-							     m_runIndex(0)
-
+							     m_h3EtaPhiOffset(nullptr)
 {
   declareProperty("ApplyCorrection",m_applycorrection=true,"If false unit weigts are applied");
   declareProperty("InputFile",m_inputFile="cluster.geo.HIJING_2018.root","File containing cluster geometric moments.");
@@ -48,59 +45,61 @@ float HITowerWeightTool::getWeightMag(float eta, float phi, int sample) const
 
 float HITowerWeightTool::getEtaPhiResponse(float eta, float phi) const
 {
-  if(m_runIndex==0)  return 1;
+  int my_runIndex=getRunIndex();
+  if(my_runIndex<=0)  return 1;
 
   int eb=std::as_const(m_h3EtaPhiResponse)->GetXaxis()->FindFixBin(eta);
   int pb=std::as_const(m_h3EtaPhiResponse)->GetYaxis()->FindFixBin(phi);
-  float rv=m_h3EtaPhiResponse->GetBinContent(eb,pb,m_runIndex);
+  float rv=m_h3EtaPhiResponse->GetBinContent(eb,pb,my_runIndex);
   return rv;
 }
 
 float HITowerWeightTool::getEtaPhiOffset(float eta, float phi) const
 {
-  if(m_runIndex==0) return 0;
+  int my_runIndex=getRunIndex();
+  if(my_runIndex<=0) return 0;
+
   int eb=std::as_const(m_h3EtaPhiOffset)->GetXaxis()->FindFixBin(eta);
   int pb=std::as_const(m_h3EtaPhiOffset)->GetYaxis()->FindFixBin(phi);
-  return m_h3EtaPhiOffset->GetBinContent(eb,pb,m_runIndex)*std::cosh(eta);
+  return m_h3EtaPhiOffset->GetBinContent(eb,pb,my_runIndex)*std::cosh(eta);
 }
 
-StatusCode HITowerWeightTool::configureEvent()
+int HITowerWeightTool::getRunIndex() const
 {
   if (!m_applycorrection){
-    m_runIndex=0;
     ATH_MSG_DEBUG("Using unit weights and doing no eta-phi correction.");
-    return StatusCode::SUCCESS;
+    return 0;
   }
 
   const xAOD::EventInfo* ei=nullptr;
   if(evtStore()->retrieve(ei,"EventInfo").isFailure())
   {
     ATH_MSG_ERROR("Could not retrieve EventInfo");
-    return StatusCode::FAILURE;
+    return -1;
   }
   unsigned int run_number=ei->runNumber();
 
-  if(m_runNumber!=run_number)
+  auto itr=m_runMap.find(run_number);
+  if(itr==m_runMap.end())
   {
-    auto itr=m_runMap.find(run_number);
-    if(itr==m_runMap.end())
+		//trying generic run number <=> no run dependence
+		run_number = 226000;
+		auto itrg=m_runMap.find(run_number);
+		if(itrg==m_runMap.end())
     {
-			//trying generic run number <=> no run dependence
-		        run_number = 226000;
-		        auto itrg=m_runMap.find(run_number);
-		        if(itrg==m_runMap.end()){
-		            m_runIndex=0;
-		            ATH_MSG_WARNING("No generic calibration or calibration for " << run_number << " is avaliable. Doing no eta-phi correction.");
-		        }
-		        else {
-		            m_runIndex=itrg->second;
-		            ATH_MSG_DEBUG("Using generic calibration for eta-phi correction.");
-		        }
-    }
-    else m_runIndex=itr->second;
-    m_runNumber=run_number;
+		  ATH_MSG_WARNING("No generic calibration or calibration for " << run_number << " is avaliable. Doing no eta-phi correction.");
+      return 0;
+	  }
+	  else
+    {
+	    ATH_MSG_DEBUG("Using generic calibration for eta-phi correction.");
+      return itrg->second;
+	  }
   }
-  return StatusCode::SUCCESS;
+  else 
+  {
+    return itr->second;
+  }
 }
 
 StatusCode HITowerWeightTool::initialize()
