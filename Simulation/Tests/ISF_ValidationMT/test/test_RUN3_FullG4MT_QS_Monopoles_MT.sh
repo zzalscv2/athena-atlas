@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-# art-description: MC21-style simulation of monopole samples using FullG4MT_QS
-# art-include: 22.0/Athena
-# art-include: 22.0/AthSimulation
+# art-description: MC23-style RUN3 simulation of monopole samples using FullG4MT_QS
+# art-include: 23.0/Athena
+# art-include: 23.0/AthSimulation
 # art-include: master/Athena
 # art-include: master/AthSimulation
 # art-type: grid
@@ -21,12 +21,11 @@ Sim_tf.py \
     --inputEVNTFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc21_13p6TeV.950542.MGPy8EG_DYSpinHalfMonopoles_1gD_1500GeV_valid.merge.EVNT.e8467_e8455.29631249._000005.pool.root.1" \
     --maxEvents="100" \
     --multithreaded="True" \
-    --preInclude "EVNTtoHITS:Campaigns.MC21SimulationMultiBeamSpot,G4DebuggingTools.DebugMonopole" \
+    --preInclude "EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV,G4DebuggingTools.DebugMonopole" \
     --skipEvents="0" \
     --randomSeed="41" \
-    --DBRelease="all:300.0.4" \
-    --conditionsTag "default:OFLCOND-MC21-SDR-RUN3-05" \
-    --geometryVersion="default:ATLAS-R3S-2021-03-00-00" \
+    --conditionsTag "default:OFLCOND-MC21-SDR-RUN3-07" \
+    --geometryVersion="default:ATLAS-R3S-2021-03-02-00" \
     --runNumber="950542" \
     --AMITag="s3890" \
     --jobNumber="41" \
@@ -48,12 +47,11 @@ Sim_tf.py \
     --maxEvents="100" \
     --multithreaded="True" \
     --postInclude "default:PyJobTransforms/UseFrontier.py" \
-    --preInclude "EVNTtoHITS:Campaigns/MC21SimulationMultiBeamSpot.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py,SimulationJobOptions/preInclude.DebugMonopoles.py" \
+    --preInclude "EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py,SimulationJobOptions/preInclude.DebugMonopoles.py" \
     --skipEvents="0" \
     --randomSeed="41" \
-    --DBRelease="all:300.0.4" \
-    --conditionsTag "default:OFLCOND-MC21-SDR-RUN3-05" \
-    --geometryVersion="default:ATLAS-R3S-2021-03-00-00_VALIDATION" \
+    --conditionsTag "default:OFLCOND-MC21-SDR-RUN3-07" \
+    --geometryVersion="default:ATLAS-R3S-2021-03-02-00" \
     --runNumber="950542" \
     --AMITag="s3890" \
     --jobNumber="41" \
@@ -68,12 +66,11 @@ Sim_tf.py \
     --maxEvents="100" \
     --multithreaded="True" \
     --postInclude "default:PyJobTransforms/UseFrontier.py" \
-    --preInclude "EVNTtoHITS:Campaigns/MC21SimulationMultiBeamSpot.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py,SimulationJobOptions/preInclude.DebugMonopoles.py" \
+    --preInclude "EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py,SimulationJobOptions/preInclude.DebugMonopoles.py" \
     --skipEvents="0" \
     --randomSeed="41" \
-    --DBRelease="all:300.0.4" \
-    --conditionsTag "default:OFLCOND-MC21-SDR-RUN3-05" \
-    --geometryVersion="default:ATLAS-R3S-2021-03-00-00_VALIDATION" \
+    --conditionsTag "default:OFLCOND-MC21-SDR-RUN3-07" \
+    --geometryVersion="default:ATLAS-R3S-2021-03-02-00" \
     --runNumber="950542" \
     --AMITag="s3890" \
     --jobNumber="41" \
