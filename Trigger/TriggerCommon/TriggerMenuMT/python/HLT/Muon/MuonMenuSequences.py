@@ -163,25 +163,6 @@ def muFastCalibSequence(flags, is_probe_leg=False):
                          IsProbe     = is_probe_leg)
 
 
-def muFastOvlpRmSequence(flags, is_probe_leg=False):
-
-    (l2muFastSequence, l2MuViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(muFastAlgSequence, flags)
-
-    ### set up MuFastHypo ###
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoAlg
-    trigMufastHypo = TrigMufastHypoAlg("TrigL2MufastHypoAlg")
-    trigMufastHypo.MuonL2SAInfoFromMuFastAlg = sequenceOut
-
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoToolwORFromDict
-
-    return MenuSequence( flags,
-                         Sequence    = l2muFastSequence,
-                         Maker       = l2MuViewsMaker,
-                         Hypo        = trigMufastHypo,
-                         HypoToolGen = TrigMufastHypoToolwORFromDict,
-                         IsProbe     = is_probe_leg )
-
-
 def mul2mtSAOvlpRmSequence(flags, is_probe_leg=False):
 
     (l2muFastSequence, l2MuViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(muFastAlgSequence, flags)
@@ -191,13 +172,13 @@ def mul2mtSAOvlpRmSequence(flags, is_probe_leg=False):
     trigMufastHypo = TrigMufastHypoAlg("TrigL2mtMufastHypoAlg")
     trigMufastHypo.MuonL2SAInfoFromMuFastAlg = muNames.L2SAName+"l2mtmode"
 
-    from TrigMuonHypo.TrigMuonHypoConfig import Trigl2mtSAHypoToolwORFromDict
+    from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoToolFromDict
 
     return MenuSequence( flags,
                          Sequence    = l2muFastSequence,
                          Maker       = l2MuViewsMaker,
                          Hypo        = trigMufastHypo,
-                         HypoToolGen = Trigl2mtSAHypoToolwORFromDict,
+                         HypoToolGen = TrigMufastHypoToolFromDict,
                          IsProbe     = is_probe_leg )
 
 

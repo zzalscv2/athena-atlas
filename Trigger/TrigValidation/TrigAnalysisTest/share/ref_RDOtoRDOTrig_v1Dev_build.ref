@@ -13242,7 +13242,7 @@ HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:
   stepCounts:
     0: 3
   stepFeatures:
-    0: 12
+    0: 13
     1: 11
 HLT_mu11_mu6_bBmumux_BpmumuKp_L1LFV-MU8VF:
   eventCount: 0
@@ -13455,12 +13455,18 @@ HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1MU8F_TAU20IM:
     4: 2
 HLT_mu14_mu14_idperf_50invmAB130_L12MU8F:
   eventCount: 0
+  stepCounts:
+    0: 2
   stepFeatures:
-    0: 4
+    0: 7
+    1: 4
 HLT_mu14_mu14_idtp_idZmumu_L12MU8F:
   eventCount: 0
+  stepCounts:
+    0: 2
   stepFeatures:
-    0: 4
+    0: 7
+    1: 4
 HLT_mu14_tau25_mediumRNN_tracktwoMVA_xe50_cell_03dRAB_L1MU8F_TAU12IM_XE35:
   eventCount: 0
   stepCounts:
