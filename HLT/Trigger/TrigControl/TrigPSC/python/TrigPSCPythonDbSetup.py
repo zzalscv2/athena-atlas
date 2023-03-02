@@ -17,7 +17,9 @@ from GaudiPython import InterfaceCast, gbl
 from GaudiPython.Bindings import iProperty
 from TrigCommon.TrigPyHelper import trigApp
 from TrigPSC import PscConfig
-from TrigServices.TriggerUnixStandardSetup import _Conf
+from TrigPSC.PscDefaultFlags import defaultOnlineFlags
+
+flags = defaultOnlineFlags()
 
 ## If HLT PSK is set on command line read it from DB instead of COOL (ATR-25974)
 if PscConfig.forcePSK:
@@ -31,7 +33,7 @@ if logLevel!="INFO":
    trigApp.changeJobProperties('.*', 'OutputLevel', str(locals()[logLevel]))
 
 ## For running with offline THistSvc from online DB
-if not _Conf.useOnlineTHistSvc:
+if not flags.Trigger.Online.useOnlineTHistSvc:
    isvcMgr = InterfaceCast(gbl.ISvcManager)(gbl.Gaudi.svcLocator())
    ## Change service type from TrigMonTHistSvc to THistSvc
    isvcMgr.declareSvcType("THistSvc","THistSvc")
