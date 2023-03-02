@@ -42,7 +42,7 @@ namespace Trk {
     m_caloelossstate = nullptr;
   } 
   
-  GXFTrajectory::GXFTrajectory(GXFTrajectory & rhs)
+  GXFTrajectory::GXFTrajectory(const GXFTrajectory & rhs)
     : m_straightline (rhs.m_straightline),
       m_fieldprop (rhs.m_fieldprop),
       m_ndof (rhs.m_ndof),
@@ -79,7 +79,7 @@ namespace Trk {
       m_caloelossstate (nullptr),
       m_upstreammat (rhs.m_upstreammat)
   {
-    for (std::unique_ptr<GXFTrackState> & i : rhs.m_states) {
+    for (const std::unique_ptr<GXFTrackState> & i : rhs.m_states) {
       m_states.push_back(std::make_unique<GXFTrackState>(*i));
     }
    
@@ -90,7 +90,7 @@ namespace Trk {
     }
   }
 
-  GXFTrajectory & GXFTrajectory::operator =(GXFTrajectory & rhs) {
+  GXFTrajectory & GXFTrajectory::operator =(const GXFTrajectory & rhs) {
     if (this != &rhs) {
       m_straightline = rhs.m_straightline;
       m_fieldprop = rhs.m_fieldprop;
@@ -118,7 +118,7 @@ namespace Trk {
       m_refpar.reset(rhs.m_refpar != nullptr ? rhs.m_refpar->clone() : nullptr);
       
       m_states.clear();
-      for (std::unique_ptr<GXFTrackState> & i : rhs.m_states) {
+      for (const std::unique_ptr<GXFTrackState> & i : rhs.m_states) {
         m_states.push_back(std::make_unique<GXFTrackState>(*i));
       }
       

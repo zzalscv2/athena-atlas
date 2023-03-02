@@ -19,7 +19,7 @@
 #include <utility>
 
 namespace Trk {
-  GXFTrackState::GXFTrackState(GXFTrackState & rhs):
+  GXFTrackState::GXFTrackState(const GXFTrackState & rhs):
     m_measurement(rhs.m_measurement != nullptr ? std::unique_ptr<const MeasurementBase>(rhs.m_measurement->clone()) : nullptr), 
     m_tsType(rhs.m_tsType), 
     m_trackpar(std::unique_ptr<const TrackParameters>(rhs.m_trackpar != nullptr ? rhs.m_trackpar->clone() : nullptr)),

@@ -30,7 +30,11 @@ namespace Trk {
   class GXFTrackState {
   public:
     GXFTrackState() = delete;
-    GXFTrackState(GXFTrackState &);
+    GXFTrackState(const GXFTrackState &);
+    GXFTrackState(GXFTrackState &&) = default;
+    GXFTrackState & operator=(const GXFTrackState &) = delete;
+    GXFTrackState & operator=(GXFTrackState &&) = default;
+    ~GXFTrackState() = default;
 
     GXFTrackState(std::unique_ptr<const MeasurementBase>, std::unique_ptr<const TrackParameters>);
     GXFTrackState(std::unique_ptr<const TrackParameters>, TrackStateOnSurface::TrackStateOnSurfaceType);
