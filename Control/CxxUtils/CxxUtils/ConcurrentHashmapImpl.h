@@ -17,6 +17,7 @@
 
 #include "CxxUtils/bitscan.h"
 #include "CxxUtils/atomic_fetch_minmax.h"
+#include "CxxUtils/concepts.h"
 #include <functional>
 #include <cstdint>
 #include <cstdlib>
@@ -38,6 +39,23 @@ namespace detail {
 /// in order to avoid instantiation circularities, as the HASHER_ and MATCHER_
 /// classes will probably want to use it.
 using ConcurrentHashmapVal_t = uintptr_t;
+
+
+#if HAVE_CONCEPTS
+
+
+/**
+ * @brief Concept for a value that can be saved in a concurrent hash map.
+ *
+ * Must be a trivial type that can fit in a uintptr_t
+ */
+template <class T>
+concept IsConcurrentHashmapPayload = std::is_standard_layout_v<T> &&
+  std::is_trivial_v<T> &&
+  sizeof (T) <= sizeof (ConcurrentHashmapVal_t);
+
+
+#endif
 
 
 /**

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/ConcurrentRangeMap.icc
@@ -39,7 +39,10 @@ IRangeMapPayloadDeleter<T, CONTEXT>::delfcn() const
 //*****************************************************************************
 
 
-#define T_CONCURRENTRANGEMAP template <class RANGE, class KEY, class T, class COMPARE, template <class> class UPDATER>
+#define T_CONCURRENTRANGEMAP template <class RANGE, class KEY, class T, class COMPARE, template <class> class UPDATER> \
+  ATH_REQUIRES (detail::IsUpdater<UPDATER> &&                           \
+                detail::IsConcurrentRangeCompare<COMPARE, RANGE, KEY, typename UPDATER<int>::Context_t>)
+
 #define CONCURRENTRANGEMAP ConcurrentRangeMap<RANGE, KEY, T, COMPARE, UPDATER>
 
 

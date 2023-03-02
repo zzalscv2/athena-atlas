@@ -17,6 +17,7 @@
 #include "CxxUtils/ConcurrentHashmapImpl.h"
 #include "CxxUtils/UIntConv.h"
 #include "CxxUtils/concepts.h"
+#include "CxxUtils/IsUpdater.h"
 #include "boost/iterator/iterator_facade.hpp"
 #include "boost/range/iterator_range.hpp"
 #include <type_traits>
@@ -40,9 +41,8 @@ namespace CxxUtils {
  *
  * Besides the mapped value type,
  * this class is templated on an UPDATER class, which is used to manage
- * the underlying memory.  The requirements are the same as for the 
- * UPDATER template argument of ConcurrentRangeMap; see there for
- * further details.  (AthenaKernel/RCUUpdater is a concrete version
+ * the underlying memory.  See IsUpdater.h for details.
+ * (AthenaKernel/RCUUpdater is a concrete version
  * that should work in the context of Athena.)
  *
  * This mostly supports the interface of std::unordered_map, with a few
@@ -74,10 +74,8 @@ namespace CxxUtils {
  *    than in insertion.
  */
 template <class VALUE, template <class> class UPDATER>
-// FIXME: Check UPDATER too.
-ATH_REQUIRES (std::is_standard_layout_v<VALUE> &&
-              std::is_trivial_v<VALUE> &&
-              (sizeof (VALUE) <= sizeof (uintptr_t)))
+ATH_REQUIRES (detail::IsConcurrentHashmapPayload<VALUE> &&
+              detail::IsUpdater<UPDATER>)
 class ConcurrentStrMap
 {
 private:

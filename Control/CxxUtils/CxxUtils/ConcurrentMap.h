@@ -17,6 +17,7 @@
 #include "CxxUtils/ConcurrentHashmapImpl.h"
 #include "CxxUtils/UIntConv.h"
 #include "CxxUtils/concepts.h"
+#include "CxxUtils/IsUpdater.h"
 #include "boost/iterator/iterator_facade.hpp"
 #include "boost/range/iterator_range.hpp"
 #include <type_traits>
@@ -40,9 +41,8 @@ namespace CxxUtils {
  *
  * Besides the mapped key and value types,
  * this class is templated on an UPDATER class, which is used to manage
- * the underlying memory.  The requirements are the same as for the 
- * UPDATER template argument of ConcurrentRangeMap; see there for
- * further details.  (AthenaKernel/RCUUpdater is a concrete version
+ * the underlying memory.  See IsUpdater.h for details.
+ * (AthenaKernel/RCUUpdater is a concrete version
  * that should work in the context of Athena.)
  *
  * One value of the key must be reserved as a null value, which no real keys
@@ -85,15 +85,11 @@ namespace CxxUtils {
  * since the test doesn't do any locking in that case.
  */
 template <class KEY, class VALUE, template <class> class UPDATER,
-          CxxUtils::detail::ConcurrentHashmapVal_t NULLVAL = 0,
-          CxxUtils::detail::ConcurrentHashmapVal_t TOMBSTONE = NULLVAL>
-// FIXME: Check UPDATER too.
-ATH_REQUIRES (std::is_standard_layout_v<VALUE> &&
-              std::is_trivial_v<VALUE> &&
-              (sizeof (VALUE) <= sizeof (uintptr_t)) &&
-              std::is_standard_layout_v<KEY> &&
-              std::is_trivial_v<KEY> &&
-              (sizeof (KEY) <= sizeof (uintptr_t)))
+          detail::ConcurrentHashmapVal_t NULLVAL = 0,
+          detail::ConcurrentHashmapVal_t TOMBSTONE = NULLVAL>
+ATH_REQUIRES (detail::IsConcurrentHashmapPayload<KEY> &&
+              detail::IsConcurrentHashmapPayload<VALUE> &&
+              detail::IsUpdater<UPDATER>)
 class ConcurrentMap
 {
 private:
