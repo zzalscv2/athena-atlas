@@ -20,7 +20,6 @@ def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF 
     raise ValueError('makeInDetTrigFastTracking() No config provided!')
 
   #Global keys/names for Trigger collections
-  from .InDetTrigCollectionKeys import  TrigPixelKeys, TrigSCTKeys
   from InDetRecExample.InDetKeys import InDetKeys
   from TrigInDetConfig.TrigInDetConfig import InDetCacheNames
   from AthenaConfiguration.Enums import Format
@@ -150,51 +149,27 @@ def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF 
 
   #Pixel clusterisation
   from InDetConfig.InDetPrepRawDataFormationConfig import TrigPixelClusterizationCfg
-  pixClusterizationAlg = algorithmCAToGlobalWrapper(TrigPixelClusterizationCfg, flags, name="InDetPixelClusterization" + signature, RoIs=rois)
+  pixClusterizationAlg = algorithmCAToGlobalWrapper(TrigPixelClusterizationCfg, flags, 
+                                                    name="InDetPixelClusterization" + signature, RoIs=rois)
   viewAlgs.extend(pixClusterizationAlg)
 
   #SCT clusterization 
   from InDetConfig.InDetPrepRawDataFormationConfig import TrigSCTClusterizationCfg
-  sctClusterizationAlg = algorithmCAToGlobalWrapper(TrigSCTClusterizationCfg, flags, name="InDetSCTClusterization" + signature, RoIs = rois)
+  sctClusterizationAlg = algorithmCAToGlobalWrapper(TrigSCTClusterizationCfg, flags, 
+                                                    name="InDetSCTClusterization" + signature, RoIs = rois)
   viewAlgs.extend(sctClusterizationAlg)
 
-  #TBD make Cfg function for MonTools
+  #TBD make Cfg function for MonTools Pix/SCT/SPFinder
   #from InDetPrepRawDataFormation.MonitoringTool import SCT_Clusterization_MonitoringTool
   #InDetSCT_Clusterization.MonTool = SCT_Clusterization_MonitoringTool(flags)
   
 
-  #Space points and FTF
-
-  from SiSpacePointTool.SiSpacePointToolConf import InDet__SiSpacePointMakerTool
-  InDetSiSpacePointMakerTool = InDet__SiSpacePointMakerTool(name = "InDetSiSpacePointMakerTool_" + signature)
-
-  from AthenaCommon.DetFlags import DetFlags
-  from SiSpacePointFormation.SiSpacePointFormationConf import InDet__SiTrackerSpacePointFinder
-  from SiSpacePointFormation.InDetOnlineMonitor import InDetMonitoringTool
-  InDetSiTrackerSpacePointFinder = InDet__SiTrackerSpacePointFinder(name                   = "InDetSiTrackerSpacePointFinder_" + signature,
-                                                                    SiSpacePointMakerTool  = InDetSiSpacePointMakerTool,
-                                                                    PixelsClustersName     = TrigPixelKeys.Clusters,
-                                                                    SpacePointsPixelName   = TrigPixelKeys.SpacePoints,
-                                                                    SCT_ClustersName	    = TrigSCTKeys.Clusters,
-                                                                    SpacePointsSCTName     = TrigSCTKeys.SpacePoints,
-                                                                    SpacePointsOverlapName = InDetKeys.OverlapSpacePoints(),
-                                                                    ProcessPixels          = DetFlags.haveRIO.pixel_on(),
-                                                                    ProcessSCTs            = DetFlags.haveRIO.SCT_on(),
-                                                                    ProcessOverlaps        = DetFlags.haveRIO.SCT_on(),
-                                                                    SpacePointCacheSCT     = InDetCacheNames.SpacePointCacheSCT,
-                                                                    SpacePointCachePix     = InDetCacheNames.SpacePointCachePix,
-                                                                    monTool                = InDetMonitoringTool(flags))
-
-  viewAlgs.append(InDetSiTrackerSpacePointFinder)
-
-  # Condition algorithm for SiTrackerSpacePointFinder
-  if InDetSiTrackerSpacePointFinder.ProcessSCTs:
-    from AthenaCommon.AlgSequence import AthSequencer
-    condSeq = AthSequencer("AthCondSeq")
-    if not hasattr(condSeq, "InDetSiElementPropertiesTableCondAlg"):
-      # Setup alignment folders and conditions algorithms
-      from SiSpacePointFormation.SiSpacePointFormationConf import InDet__SiElementPropertiesTableCondAlg
-      condSeq += InDet__SiElementPropertiesTableCondAlg(name = "InDetSiElementPropertiesTableCondAlg")
+  #Space points
+  from InDetConfig.SiSpacePointFormationConfig import TrigSiTrackerSpacePointFinderCfg
+  spacePointFinderAlg = algorithmCAToGlobalWrapper(TrigSiTrackerSpacePointFinderCfg, flags,
+                                                   name="TrigSpacePointFinder"+signature)
+                                                   
+  viewAlgs.extend(spacePointFinderAlg)
 
   #FIXME have a flag for now set for True( as most cases call FTF) but potentially separate
   #do not add if the config is LRT
