@@ -36,16 +36,19 @@ namespace Root {
 class TElectronEfficiencyCorrectionTool : public asg::AsgMessaging
 {
 public:
+  //We want to have unique ownership of the Histos
   using HistArray = std::vector<std::unique_ptr<TH1>>;
 
   // The Result
-  struct Result{
+  struct Result {
     double SF = 0;
     double Total = 0;
     double Stat = 0;
     double UnCorr = 0;
-    double Corr = 0;
+    std::vector<double> Corr{};
     std::vector<double> toys{};
+    int histIndex = -1;
+    int histBinNum = -1;
   };
 
   /** Standard constructor */
@@ -53,10 +56,28 @@ public:
     const char* name = "TElectronEfficiencyCorrectionTool");
 
   /** Standard destructor */
-  ~TElectronEfficiencyCorrectionTool();
+  ~TElectronEfficiencyCorrectionTool() = default;
 
-  // Main methods
-  /** Initialize this class */
+  /// This is more of an utility
+  /// so the initialize is different wrt
+  /// to an athena component
+  ///
+  ///  Add an input file with the auxiliary measurement
+  ///  needed before we call initialize
+  inline void addFileName(const std::string& val) {
+    m_corrFileNameList.push_back(val);
+  }
+  /// Running these before the initialize
+  /// will setup the booking of toys
+  inline void bookToyMCScaleFactors(const int nToyMC) {
+    m_doToyMC = true;
+    m_nToyMC = nToyMC;
+  }
+  inline void bookCombToyMCScaleFactors(const int nToyMC) {
+    m_doCombToyMC = true;
+    m_nToyMC = nToyMC;
+  }
+  /// Initialize this class
   int initialize();
 
   /** The main calculate method: the actual cuts are applied here
@@ -77,29 +98,10 @@ public:
                 const double cluster_eta,
                 const double et, /* in MeV */
                 Result& result,
-                const bool onlyTotal = false,
-                const int corrIndex = -999) const;
-
-  /// Add an input file with the auxiliary measurement
-  inline void addFileName(const std::string& val)
-  {
-    m_corrFileNameList.push_back(val);
-  }
-  /// Running these book toys
-  inline void bookToyMCScaleFactors(const int nToyMC)
-  {
-    m_doToyMC = true;
-    m_nToyMC = nToyMC;
-  }
-
-  inline void bookCombToyMCScaleFactors(const int nToyMC)
-  {
-    m_doCombToyMC = true;
-    m_nToyMC = nToyMC;
-  }
+                const bool onlyTotal = false) const;
 
   /// Helpers to get the binning of the uncertainties
-  // in a std::map (pt, eta)
+  /// in a std::map (pt, eta)
   int getNbins(std::map<float, std::vector<float>>& ptEta) const;
 
   /// get number of systematics

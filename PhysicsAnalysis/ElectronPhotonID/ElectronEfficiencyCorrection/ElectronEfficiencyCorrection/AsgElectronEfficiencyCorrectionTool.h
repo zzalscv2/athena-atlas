@@ -15,9 +15,7 @@
 
 // Fwd Declarations
 class TH2F;
-namespace Root {
-class TElectronEfficiencyCorrectionTool;
-}
+#include "ElectronEfficiencyCorrection/TElectronEfficiencyCorrectionTool.h"
 #include "xAODEgamma/ElectronFwd.h"
 // Interface
 #include "EgammaAnalysisInterfaces/IAsgElectronEfficiencyCorrectionTool.h"
@@ -140,7 +138,7 @@ private:
   bool m_metadata_retrieved = false;
 
   /// Pointer to the underlying ROOT based tool
-  Root::TElectronEfficiencyCorrectionTool* m_rootTool;
+  std::unique_ptr<Root::TElectronEfficiencyCorrectionTool> m_rootTool = nullptr;
 
   /// Systematics filter map
   std::unordered_map<CP::SystematicSet, CP::SystematicSet> m_systFilter;

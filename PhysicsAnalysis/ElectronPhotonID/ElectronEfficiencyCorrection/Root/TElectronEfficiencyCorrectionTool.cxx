@@ -83,18 +83,13 @@ Root::TElectronEfficiencyCorrectionTool::TElectronEfficiencyCorrectionTool(
 {
 }
 
-Root::TElectronEfficiencyCorrectionTool::~TElectronEfficiencyCorrectionTool() =
-  default;
-
 int
 Root::TElectronEfficiencyCorrectionTool::initialize()
 {
   // use an int as a StatusCode
   int sc(1);
-
   ATH_MSG_DEBUG(" (file: " << __FILE__ << ", line: " << __LINE__ << ")\n"
-                           << "Debug flag set. Printing verbose output!");
-
+                           << "Printing verbose output!");
   // Check if files are present
   if (m_corrFileNameList.empty()) {
     ATH_MSG_ERROR(" No file added!");
@@ -162,17 +157,8 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
   const double cluster_eta,
   const double et, /* in MeV */
   Result& result,
-  const bool onlyTotal,
-  const int corrIndex) const
+  const bool onlyTotal) const
 {
-  /*
-   * At this point, we know the size of the vector.
-   * Position::End + m_nSysMax + m_nToyMC
-   * The starting index of the sys is Position::End
-   * The starting point of the toys is Position::End+m_nSysMax
-   */
-  ATH_MSG_DEBUG("Max number of systematics seen : "
-                << m_nSysMax << " number of toys " << m_nToyMC);
   // Set up the non-0 defaults
   result.SF = -999;
   result.Total = 1;
@@ -199,11 +185,6 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
     }
   }
   if (runnumberIndex < 0) {
-    ATH_MSG_DEBUG(
-      "(file: "
-      << __FILE__ << ", line: " << __LINE__ << ")\n"
-      << "No valid run number period  found for the current run number: "
-      << runnumber << " for simulation type: " << dataType);
     return 0;
   }
   /* What we have is a vector<vector<HistArray>> acting as a map:
@@ -222,10 +203,6 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
    * for the run period.
    */
   if (sfVector.empty() || runnumberIndex >= static_cast<int>(sfVector.size())) {
-    ATH_MSG_DEBUG("(file: "
-                  << __FILE__ << ", line: " << __LINE__ << ")\n"
-                  << "No valid  sf ObjArray found for the current run number "
-                  << runnumber << " for simulation type: " << dataType);
     return 0;
   }
   /*
@@ -296,15 +273,9 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
     }
   }
   if (smallEt == entries) {
-    ATH_MSG_DEBUG("(file: " << __FILE__ << ", line: " << __LINE__ << ")\n"
-                            << "No correction factor provided for et "
-                            << xValue);
     return 0;
   }
   if (etaCov == entries) {
-    ATH_MSG_DEBUG("(file: " << __FILE__ << ", line: " << __LINE__ << ")\n"
-                            << "No correction factor provided for eta "
-                            << yValue);
     return 0;
   }
   if (nSF > 1) {
@@ -319,24 +290,13 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
   if (index >= 0) {
     currentHist = static_cast<TH2*>(sfObjectArray[index].get());
   } else {
-    ATH_MSG_DEBUG("(file: "
-                  << __FILE__ << ", line: " << __LINE__ << ")\n"
-                  << "No correction factor provided because of an invalid index"
-                  << yValue);
     return 0;
   }
   /*
    * If SF is only given in Abs(eta) convert eta input to std::abs()
    */
   constexpr double epsilon = 1e-6;
-  if (currentHist->GetYaxis()->GetBinLowEdge(1) >= 0 - epsilon) {
-    if (yValue < -1) {
-      ATH_MSG_DEBUG(
-        " (file: "
-        << __FILE__ << ", line: " << __LINE__ << ")\n"
-        << "Scale factor only measured in Abs(eta) changing eta from " << yValue
-        << " to " << std::abs(yValue));
-    }
+  if (currentHist->GetYaxis()->GetBinLowEdge(1) >= (0-epsilon)) {
     yValue = std::abs(yValue);
   }
   const int globalBinNumber = currentHist->FindFixBin(xValue, yValue);
@@ -347,14 +307,14 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
    */
   result.SF= scaleFactor;
   result.Total = scaleFactorErr;
-
+  result.histIndex = index;
+  result.histBinNum = globalBinNumber;
   /*
    * if we only wanted the Total we can exit here
    */
   if (onlyTotal) {
     return 1;
   }
-
   /*
    * Do the stat error using the available info from the above (SF)
    */
@@ -381,38 +341,33 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
     }
   }
   result.UnCorr = val;
-  if (corrIndex >= 0) {
-    /*
-     * The previous setup is becoming cumbersome
-     * for the N~16 systematic variations.
-     * So we keep them in a vector of vector of HistArray
-     * The first vector index being the runnumber
-     * The second the systematic
-     * And them the HistArray for high low etc.
-     * We invert the order in the output
-     */
-    const std::vector<std::vector<HistArray>>& sysList =
-        (isFastSim) ? m_fastSysList : m_sysList;
-    if (sysList.size() > static_cast<unsigned int>(index)) {
-      if (sysList.at(index).size() >
-          static_cast<unsigned int>(runnumberIndex)) {
-        const int sys_entries = sysList.at(index).at(runnumberIndex).size();
-        size_t sysIndex = sys_entries - 1 - corrIndex;
+  /*
+   * Do the correlated part
+   * The previous setup is becoming cumbersome
+   * for the N~16 systematic variations.
+   * So we keep them in a vector of vector of HistArray
+   * The first vector index being the runnumber
+   * The second the systematic
+   * And them the HistArray for high low etc.
+   * We invert the order in the output
+   */
+  result.Corr.resize(m_nSysMax);
+  const std::vector<std::vector<HistArray>>& sysList =
+      (isFastSim) ? m_fastSysList : m_sysList;
+  if (sysList.size() > static_cast<unsigned int>(index)) {
+    if (sysList.at(index).size() > static_cast<unsigned int>(runnumberIndex)) {
+      const int sys_entries = sysList.at(index).at(runnumberIndex).size();
+      for (int sys = 0; sys < sys_entries; ++sys) {
         double sysVal =
             static_cast<TH2*>(
-                sysList[index][runnumberIndex][sysIndex].get())
+                sysList[index][runnumberIndex][sys_entries - 1 - sys].get())
                 ->GetBinContent(globalBinNumber);
-        result.Corr = sysVal; 
-        if (m_nSysMax > 0 && sys_entries <= 1) {
-          if (result.Corr  == 0) {
-            result.Corr = scaleFactorErr;
-          }
-        }
+        result.Corr[sys_entries - 1 - sys] = sysVal;
       }
     }
   }
   /*
-   * Do the toys if requested 
+   * Do the toys if requested
    */
   if (m_doToyMC || m_doCombToyMC) {
     result.toys.resize(static_cast<size_t>(m_nToyMC));
@@ -444,7 +399,6 @@ Root::TElectronEfficiencyCorrectionTool::buildSingleToyMC(
   const std::vector<TH1*>& corr,
   int& randomCounter)
 {
-
   ATH_MSG_DEBUG(" (file: " << __FILE__ << ", line: " << __LINE__ << ")! "
                            << "Entering function buildSingleToyMC");
   std::vector<TH2*> tmpHists;
@@ -581,11 +535,6 @@ Root::TElectronEfficiencyCorrectionTool::buildToyMCTable(
       tmpVec.emplace_back(std::move(tmpArray));
     }
   }
-  ATH_MSG_DEBUG(" (file: " << __FILE__ << ", line: " << __LINE__ << ")\n"
-                           << "m_Rndm->Uniform(0, 1) after throwing "
-                           << randomCounter
-                           << " random numbers: " << m_Rndm.Uniform(0, 1));
-
   return tmpVec;
 }
 /*
@@ -923,10 +872,6 @@ Root::TElectronEfficiencyCorrectionTool::setupUncorrToySyst(
         uncorrToyMCSyst.push_back(buildToyMCTable(
           objs.at(mapkey::sf), {}, objs.at(mapkey::stat), {}, sysObjs));
         toysBooked = true;
-      } else {
-        ATH_MSG_DEBUG("! Toy MC error propagation booked, but not all needed"
-                      << "Histograms found in the output (For full sim). "
-                         "Skipping toy creation!");
       }
     } else {
       uncorrToyMCSyst.push_back(buildToyMCTable(objs.at(mapkey::sf),
@@ -937,10 +882,8 @@ Root::TElectronEfficiencyCorrectionTool::setupUncorrToySyst(
       toysBooked = true;
     }
   }
-
   return toysBooked;
 }
-
 /*
  * Fill and interpret the setup, depending
  * on which histograms are found in the input file(s)
