@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /* ***********************************************************************************\
@@ -51,7 +51,6 @@ StatusCode GlobalNNCalibration::initialize(){
 
   // This code is copied from the GlobalSequentialCorrection code,
   // so while it is hard-coded, it is consistent with how these filenames are parsed.
-  if ( !m_config ) { ATH_MSG_FATAL("Config file not specified. Aborting."); return StatusCode::FAILURE; }
   if ( m_jetAlgo.EqualTo("") ) { ATH_MSG_FATAL("No jet algorithm specified. Aborting."); return StatusCode::FAILURE; }
 
   //find the ROOT file containing response histograms, path comes from the config file.
@@ -274,7 +273,7 @@ std::map<std::string,double> GlobalNNCalibration::getJetFeatures(const xAOD::Jet
 
 
 // This needs to be fixed, but just getting a placeholder
-int GlobalNNCalibration::getEtaBin(const xAOD::Jet& jet_reco, const std::vector<double> etaBins) const{
+int GlobalNNCalibration::getEtaBin(const xAOD::Jet& jet_reco, const std::vector<double>& etaBins) const{
   double detEta = jet_reco.getAttribute<float>("DetectorEta");
   for(unsigned int i=1; i<etaBins.size()-1; i++){
     if(std::abs(detEta) < etaBins[i]) return i-1;

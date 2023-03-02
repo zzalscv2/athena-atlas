@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -150,7 +150,7 @@ class GlobalNNCalibration : virtual public ::JetCalibrationStep {
    @param jet_reco The jet 
    @param etaBins A list of bin edges
   */
-  int getEtaBin(const xAOD::Jet& jet_reco, const std::vector<double> etaBins) const;
+  int getEtaBin(const xAOD::Jet& jet_reco, const std::vector<double>& etaBins) const;
 
 
   std::vector<std::unique_ptr<lwt::LightweightGraph> > m_lwnns;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETCALIBTOOLS_GLOBALSEQUENTIALCORRECTION_H
@@ -31,7 +31,7 @@ class GlobalSequentialCorrection
   typedef unsigned int uint;
 
   GlobalSequentialCorrection();
-  GlobalSequentialCorrection(const std::string& name, TEnv * config, TString jetAlgo, std::string depth, TString calibAreaTag, bool dev); //Apply the full GS calibration by default
+  GlobalSequentialCorrection(const std::string& name, TEnv * config, TString jetAlgo, const std::string& depth, TString calibAreaTag, bool dev); //Apply the full GS calibration by default
 
   virtual StatusCode initialize() override;
   virtual StatusCode calibrate(xAOD::Jet& jet, JetEventInfo&) const override;
@@ -61,7 +61,7 @@ class GlobalSequentialCorrection
     else return 1;
   }
 
-  void setPunchThroughEtaBins(VecD etabins) { 
+  void setPunchThroughEtaBins(const VecD& etabins) { 
     if (etabins.size()==0) ATH_MSG_ERROR("Please check that the punch through eta binning is properly set in your config file");
     m_punchThroughEtaBins=etabins;
   }

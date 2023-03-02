@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -35,7 +35,7 @@ GlobalSequentialCorrection::GlobalSequentialCorrection()
    
 { }
 
-GlobalSequentialCorrection::GlobalSequentialCorrection(const std::string& name, TEnv* config, TString jetAlgo, std::string depth, TString calibAreaTag, bool dev)
+GlobalSequentialCorrection::GlobalSequentialCorrection(const std::string& name, TEnv* config, TString jetAlgo, const std::string& depth, TString calibAreaTag, bool dev)
   : JetCalibrationStep::JetCalibrationStep(name.c_str()),
     m_config(config), m_jetAlgo(jetAlgo), m_depthString(depth), m_calibAreaTag(calibAreaTag), m_dev(dev),
     m_binSize(0.1), m_depth(0),
@@ -78,7 +78,6 @@ StatusCode GlobalSequentialCorrection::initialize() {
   // For AFII calibrations, EM3 correction should be applied up to |eta|=3.2
   m_EM3MaxEtaBin = m_config->GetValue("EM3MaxEtaBin", 35);
 
-  if ( !m_config ) { ATH_MSG_FATAL("Config file not specified. Aborting."); return StatusCode::FAILURE; }
   if ( m_jetAlgo.EqualTo("") ) { ATH_MSG_FATAL("No jet algorithm specified. Aborting."); return StatusCode::FAILURE; }
 
   //find the ROOT file containing response histograms, path comes from the config file.

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETCALIBTOOLS_INSITUDATACORRECTION_H
@@ -39,8 +39,8 @@ class InsituDataCorrection
   inline double getAbsHistoPtMax(){return m_abshistoPtMax;}
 
  private:
-  double getInsituCorr(double pt, double eta, std::string calibstep) const;
-  double getInsituCorr_JMS(double pt, double mass, double eta, std::string calibstep, bool isTAmass) const;
+  double getInsituCorr(double pt, double eta, const std::string& calibstep) const;
+  double getInsituCorr_JMS(double pt, double mass, double eta, const std::string& calibstep, bool isTAmass) const;
   std::unique_ptr<const TH2> combineCalibration(const TH2* h2d, const TH1* h);
   std::unique_ptr<const TH2> invertHistogram(const TH2* h2d);
  
