@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SiSpacePointFormation )
@@ -7,8 +7,8 @@ atlas_subdir( SiSpacePointFormation )
 atlas_add_library( SiSpacePointFormationLib
                    src/*.cxx
                    PUBLIC_HEADERS SiSpacePointFormation
-                   LINK_LIBRARIES AthContainers AthenaBaseComps AthenaKernel AthenaMonitoringKernelLib BeamSpotConditionsData GaudiKernel GeoPrimitives Identifier InDetPrepRawData ReadoutGeometryBase InDetReadoutGeometry SiSpacePointToolLib StoreGateLib TrkSpacePoint
-                   PRIVATE_LINK_LIBRARIES AtlasDetDescr xAODEventInfo InDetIdentifier )
+                   LINK_LIBRARIES AthContainers AthenaBaseComps AthenaKernel AthenaMonitoringKernelLib BeamSpotConditionsData GaudiKernel GeoPrimitives Identifier InDetPrepRawData ReadoutGeometryBase InDetReadoutGeometry SiSpacePointToolLib StoreGateLib TrkSpacePoint xAODInDetMeasurement
+                   PRIVATE_LINK_LIBRARIES AtlasDetDescr xAODEventInfo InDetIdentifier)
 
 atlas_add_component( SiSpacePointFormation
                      src/components/*.cxx

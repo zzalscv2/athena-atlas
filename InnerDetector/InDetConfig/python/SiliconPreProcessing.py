@@ -146,6 +146,14 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
     #
     # --- Space Point EDM converters
     #
+    if configuration_settings.AthenaToActsSpacePointConverter:
+        if not flags.Detector.EnableITkPixel or not flags.Detector.EnableITkStrip:
+            raise RuntimeError("Space Point EDM converter (Trk -> xAOD) must be activated for both Pixel and Strips")
+
+        #
+        # --- Trk -> xAOD Space Point EDM converter
+        from SiSpacePointFormation.SiSpacePointFormationConfig import TrkToXAODSpacePointConversionCfg            
+        acc.merge(TrkToXAODSpacePointConversionCfg(flags))
 
     # this truth must only be done if you do PRD and SpacePointformation
     # If you only do the latter (== running on ESD) then the needed input (simdata)

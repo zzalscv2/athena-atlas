@@ -70,17 +70,17 @@ Validation Mode - Seeds
 Configuration of tracking components:
  - Athena Algorithms:
     * Clustering: ENABLED
-    * Space Point Formation: DISABLED
+    * Space Point Formation: ENABLED
     * Seeding: DISABLED
     * Track Finding: ENABLED
  - Acts Algorithms:
     * Clustering: DISABLED
-    * Space Point Formation: ENABLED
+    * Space Point Formation: DISABLED
     * Seeding: DISABLED
     * Track Finding: DISABLED
  - Athena -> Acts EDM Convertions:
-    * Cluster: ENABLED
-    * Space Point: DISABLED
+    * Cluster: DISABLED
+    * Space Point: ENABLED
  - Acts -> Athena EDM Convertions:
     * Cluster: DISABLED
     * Space Point: DISABLED
