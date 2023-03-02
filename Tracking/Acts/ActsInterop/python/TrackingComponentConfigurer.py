@@ -152,11 +152,8 @@ class TrackingComponentConfigurer:
 
     def ValidateActsSeeds(self):
         self.AthenaCluster = True
-        # we should go for Athena SP maker and the schedule the Acts -> Athena SP converter
-        # but that is not available yet
-        # so we convert here
-        self.AthenaToActsClusterConverter = True
-        self.ActsSpacePoint = True
+        self.AthenaSpacePoint = True
+        self.AthenaToActsSpacePointConverter = True
         self.ActsToAthenaSeedConverter = True
         self.AthenaTrack = True
 
