@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef jetsubstructureutils_softdropobservables_header
@@ -12,8 +12,9 @@ namespace JetSubStructureUtils {
 
   class SoftDropObservables : public SubstructureCalculator<double>{
     public:
-      SoftDropObservables(std::string observableName) {
-        m_observableName = observableName;
+      SoftDropObservables(const std::string& observableName)
+        : m_observableName (observableName)
+      {
       };
 
       using SubstructureCalculator::result;
