@@ -125,6 +125,7 @@ StatusCode LArOFPhasePicker::pickOFC() {
   sc=detStore()->retrieve(inputOFC,m_keyOFC);
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to get input OFCs with key " << m_keyOFC );
+    ATH_MSG_INFO(detStore()->dump());
     return sc;
   }
   
