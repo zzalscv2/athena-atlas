@@ -23,7 +23,7 @@ all = ['getJetCalibTool']
 pflowcontexts = {
     "T0":("JES_MC15cRecommendation_PFlow_Aug2016_rel21.config","00-04-77","JetArea_Residual_EtaJES"),
     # Omit smearing, to avoid any efficiency loss
-    "AnalysisLatest":("JES_data2017_2016_2015_Consolidated_PFlow_2018_Rel21.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
+    "AnalysisLatest":("PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
     "TrigLS2":("JES_MC16Recommendation_Consolidated_PFlow_Apr2019_Rel21_Trigger.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
     "Trigger":("JES_MC16Recommendation_Consolidated_PFlow_30May2022_Rel22_Trigger.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
 }
@@ -31,7 +31,7 @@ pflowcontexts = {
 topocontexts = {
     "T0":("JES_MC15cRecommendation_May2016_rel21.config","00-04-77","JetArea_Residual_EtaJES"),
     # Omit smearing, to avoid any efficiency loss
-    "AnalysisLatest":("JES_data2017_2016_2015_Consolidated_EMTopo_2018_Rel21.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
+    "AnalysisLatest":("JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
     "TrigRun2":("JES_MC15cRecommendation_May2016_Trigger.config","00-04-77","JetArea_EtaJES_GSC_Insitu"),
     "TrigRun2GSC":("JES_data2016_data2015_Recommendation_Dec2016_rel21.config","00-04-77","JetArea_EtaJES_GSC_Insitu"),
     "TrigLS2":("JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21_Trigger.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
@@ -60,10 +60,10 @@ fatjetcontexts = {
 
 # List AFII config files separately, to avoid needing to specify a different context
 af2configs = {
-    "AntiKt4EMPFlow": "JES_MC16Recommendation_AFII_PFlow_April2018_rel21.config",
-    "AntiKt4GPFlow": "JES_MC16Recommendation_AFII_PFlow_April2018_rel21.config",
-    "AntiKt4EMTopo":  "JES_MC16Recommendation_AFII_EMTopo_April2018_rel21.config",
-    "AntiKt4LCTopo":  "JES_MC16Recommendation_AFII_EMTopo_April2018_rel21.config",
+    "AntiKt4EMPFlow": "JES_MC16Recommendation_AFII_PFlow_Apr2019_Rel21.config",
+    "AntiKt4GPFlow": "JES_MC16Recommendation_AFII_PFlow_Apr2019_Rel21.config",
+    "AntiKt4EMTopo":  "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config",
+    "AntiKt4LCTopo":  "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config",
 }
 
 calibcontexts = {
