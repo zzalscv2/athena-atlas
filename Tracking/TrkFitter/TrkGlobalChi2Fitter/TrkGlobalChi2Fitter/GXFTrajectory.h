@@ -32,8 +32,11 @@ namespace Trk {
 
   public:
     GXFTrajectory();
-    GXFTrajectory(GXFTrajectory & rhs);
-    GXFTrajectory & operator=(GXFTrajectory & rhs);
+    GXFTrajectory(const GXFTrajectory & rhs);
+    GXFTrajectory &operator=(const GXFTrajectory &rhs);
+    GXFTrajectory(GXFTrajectory &&rhs) = default;
+    GXFTrajectory &operator=(GXFTrajectory &&rhs) = default;
+    ~GXFTrajectory() = default;
 
     bool addMeasurementState(std::unique_ptr<GXFTrackState>, int index = -1);
     void addMaterialState(std::unique_ptr<GXFTrackState>, int index = -1);
