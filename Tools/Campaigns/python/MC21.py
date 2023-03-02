@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.Enums import ProductionStep
 from Campaigns.Utils import Campaign
 
@@ -51,6 +51,12 @@ def MC21NoPileUp(flags):
     flags.Digitization.DoPixelPlanarRadiationDamage = True
 
 
+def MC21NoPileUpLowMuRun(flags):
+    """MC21a flags for MC to match 2002 Low Mu data"""
+    MC21NoPileUp(flags)
+    flags.Input.ConditionsRunNumber = 420000
+
+
 def BeamspotSplitMC21a():
     """MC21a beamspot splitting configuration"""
     substeps = 4
@@ -75,6 +81,15 @@ def MC21SimulationNoIoV(flags):
 
     from SimuJobTransforms.G4Optimizations import enableG4Optimizations
     enableG4Optimizations(flags)
+
+
+def MC21SimulationLowMuRun(flags):
+    """MC21 flags for low mu run simulation"""
+    MC21SimulationNoIoV(flags)
+
+    flags.Input.RunNumber = [420000]
+    flags.Input.OverrideRunNumber = True
+    flags.Input.LumiBlockNumber = [1] # dummy value
 
 
 def MC21SimulationSingleIoV(flags):
