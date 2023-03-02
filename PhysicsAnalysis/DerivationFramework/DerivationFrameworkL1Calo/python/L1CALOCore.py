@@ -96,12 +96,9 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         DecoratorAlgo = eFexTOBDecoratorCfg(flags,'eFexTOBDecorator','L1_eEMRoI_OfflineCopy','L1_eTauRoI_OfflineCopy')
         acc.merge(DecoratorAlgo)
 
-    doReSim = True if flags.Trigger.L1.doeFex and not flags.Trigger.L1.dojFex else False
-    if doReSim:
-        log.info('Resimulating eFEX')
-        from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
-        acc.merge(L1CaloFEXSimCfg(flags))
-
+    # Re-simulate from LATOME
+    from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
+    acc.merge(L1CaloFEXSimCfg(flags))
 
     # set up the slimming helper
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
@@ -275,9 +272,10 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     L1CaloSlimmingHelper,AllVariables = addJfexTOBs(L1CaloSlimmingHelper, AllVariables, "_OfflineCopy")
     L1CaloSlimmingHelper,AllVariables = addGfexTOBs(L1CaloSlimmingHelper, AllVariables, "_OfflineCopy")
 
-    #
-    if doReSim:
-        L1CaloSlimmingHelper,AllVariables = addEfexTOBs(L1CaloSlimmingHelper, AllVariables, "Sim")
+    # re-simulated 
+    L1CaloSlimmingHelper,AllVariables = addEfexTOBs(L1CaloSlimmingHelper, AllVariables, "Sim")
+    L1CaloSlimmingHelper,AllVariables = addJfexTOBs(L1CaloSlimmingHelper, AllVariables, "Sim")
+    L1CaloSlimmingHelper,AllVariables = addGfexTOBs(L1CaloSlimmingHelper, AllVariables, "Sim")
 
 
     # FEX input data towers
@@ -348,30 +346,30 @@ def addJfexTOBs(slimminghelper, allVariables, postFix = ""):
     add the list of jFEX containers for given postFix string
     """
     slimminghelper.AppendToDictionary.update (
-        {"L1_jFexMETRoI_OfflineCopy"+postFix : "xAOD::jFexMETRoIContainer",
-         "L1_jFexMETRoI_OfflineCopy"+postFix+"Aux" : "xAOD::jFexMETRoIAuxContainer",
-         "L1_jFexTauRoI_OfflineCopy"+postFix : "xAOD::jFexTauRoIContainer",
-         "L1_jFexTauRoI_OfflineCopy"+postFix+"Aux" : "xAOD::jFexTauRoIAuxContainer",
-         "L1_jFexFwdElRoI_OfflineCopy"+postFix : "xAOD::jFexFwdElRoIContainer",
-         "L1_jFexFwdElRoI_OfflineCopy"+postFix+"Aux" : "xAOD::jFexFwdElRoIAuxContainer",
-         "L1_jFexSRJetRoI_OfflineCopy"+postFix : "xAOD::jFexSRJetRoIContainer",
-         "L1_jFexSRJetRoI_OfflineCopy"+postFix+"Aux" : "xAOD::jFexSRJetRoIAuxContainer",
-         "L1_jFexLRJetRoI_OfflineCopy"+postFix : "xAOD::jFexLRJetRoIContainer",
-         "L1_jFexLRJetRoI_OfflineCopy"+postFix+"Aux" : "xAOD::jFexLRJetRoIAuxContainer",
-         "L1_jFexSumETRoI_OfflineCopy"+postFix : "xAOD::jFexSumETRoIContainer",
-         "L1_jFexSumETRoI_OfflineCopy"+postFix+"Aux" : "xAOD::jFexSumETRoIAuxContainer",
-         "L1_jFexMETxRoI_OfflineCopy"+postFix : "xAOD::jFexMETRoIContainer",
-         "L1_jFexMETxRoI_OfflineCopy"+postFix+"Aux" : "xAOD::jFexMETRoIAuxContainer",
-         "L1_jFexTauxRoI_OfflineCopy"+postFix : "xAOD::jFexTauRoIContainer",
-         "L1_jFexTauxRoI_OfflineCopy"+postFix+"Aux" : "xAOD::jFexTauRoIAuxContainer",
-         "L1_jFexFwdElxRoI_OfflineCopy"+postFix : "xAOD::jFexFwdElRoIContainer",
-         "L1_jFexFwdElxRoI_OfflineCopy"+postFix+"Aux" : "xAOD::jFexFwdElRoIAuxContainer",
-         "L1_jFexSRJetxRoI_OfflineCopy"+postFix : "xAOD::jFexSRJetRoIContainer",
-         "L1_jFexSRJetxRoI_OfflineCopy"+postFix+"Aux" : "xAOD::jFexSRJetRoIAuxContainer",
-         "L1_jFexLRJetxRoI_OfflineCopy"+postFix : "xAOD::jFexLRJetRoIContainer",
-         "L1_jFexLRJetxRoI_OfflineCopy"+postFix+"Aux" : "xAOD::jFexLRJetRoIAuxContainer",
-         "L1_jFexSumETxRoI_OfflineCopy"+postFix : "xAOD::jFexSumETRoIContainer",
-         "L1_jFexSumETxRoI_OfflineCopy"+postFix+"Aux" : "xAOD::jFexSumETRoIAuxContainer"})
+        {"L1_jFexMETRoI"+postFix : "xAOD::jFexMETRoIContainer",
+         "L1_jFexMETRoI"+postFix+"Aux" : "xAOD::jFexMETRoIAuxContainer",
+         "L1_jFexTauRoI"+postFix : "xAOD::jFexTauRoIContainer",
+         "L1_jFexTauRoI"+postFix+"Aux" : "xAOD::jFexTauRoIAuxContainer",
+         "L1_jFexFwdElRoI"+postFix : "xAOD::jFexFwdElRoIContainer",
+         "L1_jFexFwdElRoI"+postFix+"Aux" : "xAOD::jFexFwdElRoIAuxContainer",
+         "L1_jFexSRJetRoI"+postFix : "xAOD::jFexSRJetRoIContainer",
+         "L1_jFexSRJetRoI"+postFix+"Aux" : "xAOD::jFexSRJetRoIAuxContainer",
+         "L1_jFexLRJetRoI"+postFix : "xAOD::jFexLRJetRoIContainer",
+         "L1_jFexLRJetRoI"+postFix+"Aux" : "xAOD::jFexLRJetRoIAuxContainer",
+         "L1_jFexSumETRoI"+postFix : "xAOD::jFexSumETRoIContainer",
+         "L1_jFexSumETRoI"+postFix+"Aux" : "xAOD::jFexSumETRoIAuxContainer",
+         "L1_jFexMETxRoI"+postFix : "xAOD::jFexMETRoIContainer",
+         "L1_jFexMETxRoI"+postFix+"Aux" : "xAOD::jFexMETRoIAuxContainer",
+         "L1_jFexTauxRoI"+postFix : "xAOD::jFexTauRoIContainer",
+         "L1_jFexTauxRoI"+postFix+"Aux" : "xAOD::jFexTauRoIAuxContainer",
+         "L1_jFexFwdElxRoI"+postFix : "xAOD::jFexFwdElRoIContainer",
+         "L1_jFexFwdElxRoI"+postFix+"Aux" : "xAOD::jFexFwdElRoIAuxContainer",
+         "L1_jFexSRJetxRoI"+postFix : "xAOD::jFexSRJetRoIContainer",
+         "L1_jFexSRJetxRoI"+postFix+"Aux" : "xAOD::jFexSRJetRoIAuxContainer",
+         "L1_jFexLRJetxRoI"+postFix : "xAOD::jFexLRJetRoIContainer",
+         "L1_jFexLRJetxRoI"+postFix+"Aux" : "xAOD::jFexLRJetRoIAuxContainer",
+         "L1_jFexSumETxRoI"+postFix : "xAOD::jFexSumETRoIContainer",
+         "L1_jFexSumETxRoI"+postFix+"Aux" : "xAOD::jFexSumETRoIAuxContainer"})
 
     allVariables += ["L1_jFexMETRoI" + postFix,
                      "L1_jFexTauRoI" + postFix,
@@ -394,20 +392,20 @@ def addGfexTOBs(slimminghelper, allVariables, postFix = ""):
     add the list of gFEX containers for given postFix string
     """
     slimminghelper.AppendToDictionary.update (
-        {"L1_gFexRhoRoI_OfflineCopy"+postFix : "xAOD::gFexJetRoIContainer",
-         "L1_gFexRhoRoI_OfflineCopy"+postFix+"Aux" : "xAOD::gFexJetRoIAuxContainer",
-         "L1_gFexSRJetRoI_OfflineCopy"+postFix : "xAOD::gFexJetRoIContainer",
-         "L1_gFexSRJetRoI_OfflineCopy"+postFix+"Aux" : "xAOD::gFexJetRoIAuxContainer",
-         "L1_gScalarEJwoj_OfflineCopy"+postFix : "xAOD::gFexGlobalRoIContainer",
-         "L1_gScalarEJwoj_OfflineCopy"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer",
-         "L1_gFexLRJetRoI_OfflineCopy"+postFix : "xAOD::gFexJetRoIContainer",
-         "L1_gFexLRJetRoI_OfflineCopy"+postFix+"Aux" : "xAOD::gFexJetRoIAuxContainer",
-         "L1_gMETComponentsJwoj_OfflineCopy"+postFix : "xAOD::gFexGlobalRoIContainer",
-         "L1_gMETComponentsJwoj_OfflineCopy"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer",
-         "L1_gMHTComponentsJwoj_OfflineCopy"+postFix : "xAOD::gFexGlobalRoIContainer",
-         "L1_gMHTComponentsJwoj_OfflineCopy"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer",
-         "L1_gMSTComponentsJwoj_OfflineCopy"+postFix : "xAOD::gFexGlobalRoIContainer",
-         "L1_gMSTComponentsJwoj_OfflineCopy"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer"})
+        {"L1_gFexRhoRoI"+postFix : "xAOD::gFexJetRoIContainer",
+         "L1_gFexRhoRoI"+postFix+"Aux" : "xAOD::gFexJetRoIAuxContainer",
+         "L1_gFexSRJetRoI"+postFix : "xAOD::gFexJetRoIContainer",
+         "L1_gFexSRJetRoI"+postFix+"Aux" : "xAOD::gFexJetRoIAuxContainer",
+         "L1_gScalarEJwoj"+postFix : "xAOD::gFexGlobalRoIContainer",
+         "L1_gScalarEJwoj"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer",
+         "L1_gFexLRJetRoI"+postFix : "xAOD::gFexJetRoIContainer",
+         "L1_gFexLRJetRoI"+postFix+"Aux" : "xAOD::gFexJetRoIAuxContainer",
+         "L1_gMETComponentsJwoj"+postFix : "xAOD::gFexGlobalRoIContainer",
+         "L1_gMETComponentsJwoj"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer",
+         "L1_gMHTComponentsJwoj"+postFix : "xAOD::gFexGlobalRoIContainer",
+         "L1_gMHTComponentsJwoj"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer",
+         "L1_gMSTComponentsJwoj"+postFix : "xAOD::gFexGlobalRoIContainer",
+         "L1_gMSTComponentsJwoj"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer"})
 
     allVariables += ["L1_gFexRhoRoI" + postFix,
                      "L1_gFexSRJetRoI" + postFix,
