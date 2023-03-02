@@ -9,8 +9,16 @@
 
 lastref_dir=last_results
 ref_trk=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/ActsTest_AthenaRef.IDPVM.root
-dcubeXml=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_ACTS_R22.xml
+dcubeXml=dcube_IDPVMPlots_ACTS_R22.xml
 rdo_23p0=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/inputs/601237_ttbar_allhad_PU200_ITk_master_v1.RDO.root
+
+# search in $DATAPATH for matching file
+dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -name $dcubeXml -print -quit 2>/dev/null)
+# Don't run if dcube config not found
+if [ -z "$dcubeXmlAbsPath" ]; then
+    echo "art-result: 1 dcube-xml-config"
+    exit 1
+fi
 
 geometry=ATLAS-P2-RUN4-01-00-00
 
@@ -33,6 +41,11 @@ run "Reconstruction" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsInterop.ActsCIFlags.actsArtFlags" \
     --postInclude "ActsInterop.ActsPostIncludes.PersistifyActsEDMCfg"
 
+reco_rc=$?
+if [ $reco_rc != 0 ]; then
+    exit $reco_rc
+fi
+
 run "IDPVM" \
     runIDPVM.py \
     --filesInput AOD.root \
@@ -51,14 +64,14 @@ ls -la "$lastref_dir"
 run "dcube-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_last \
-    -c ${dcubeXml} \
+    -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/idpvm.root \
     idpvm.root
 
 run "dcube-trk" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_trk \
-    -c ${dcubeXml} \
+    -c ${dcubeXmlAbsPath} \
     -r ${ref_trk} \
     idpvm.root
 

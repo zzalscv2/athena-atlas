@@ -65,7 +65,7 @@ namespace ActsTrk {
     std::lock_guard<std::mutex> lock(m_mutex);
 
     const Identifier& id = stripID->wafer_id(cluster->identifierHash());
-    bool isBarrel = stripID->barrel_ec(id) == 0;
+    bool isBarrel = (stripID->barrel_ec(id) == 0);
 
     const auto& local_position = cluster->template localPosition<1>();
     const auto& local_covariance = cluster->template localCovariance<1>();
@@ -119,7 +119,6 @@ namespace ActsTrk {
       m_global_xy_endcap->Fill(globalPos(0, 0), globalPos(1, 0), beamSpotWeight);
       m_global_zr_endcap->Fill(globalPos(2, 0), globalPosition.perp(), beamSpotWeight);
     }
-
   }
 
 }

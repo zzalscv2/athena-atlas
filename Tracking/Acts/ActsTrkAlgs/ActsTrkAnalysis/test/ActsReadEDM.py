@@ -16,6 +16,7 @@ if __name__ == "__main__":
     flags.Exec.MaxEvents = -1
 
     flags.addFlag("readClusters", False)
+    flags.addFlag("readSpacePoints", False)
     flags.fillFromArgs()
     
     flags.lock()
@@ -30,6 +31,10 @@ if __name__ == "__main__":
     if flags.readClusters:
         from ActsTrkAnalysis.ActsTrkAnalysisConfig import ActsTrkClusterAnalysisCfg
         acc.merge(ActsTrkClusterAnalysisCfg(flags))
+
+    if flags.readSpacePoints:
+        from ActsTrkAnalysis.ActsTrkAnalysisConfig import ActsTrkSpacePointAnalysisCfg
+        acc.merge(ActsTrkSpacePointAnalysisCfg(flags))
 
     acc.printConfig()
     status = acc.run()
