@@ -186,19 +186,22 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
     addPrivateTool( alg, 'calibrationTool', 'JetCalibrationTool' )
     alg.calibrationTool.JetCollection = jetCollectionName[:-4]
     # Get the correct string to use in the config file name
-    if dataType == 'afii':
-        configFile = "JES_MC16Recommendation_AFII_{0}_Apr2019_Rel21.config"
-    else:
-        configFile = "JES_MC16Recommendation_Consolidated_{0}_Apr2019_Rel21.config"
     if jetInput == "EMPFlow":
-        configFile = configFile.format("PFlow")
+        configFile = "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"
     else:
+        if dataType == 'afii':
+            configFile = "JES_MC16Recommendation_AFII_{0}_Apr2019_Rel21.config"
+        else:
+            configFile = "JES_MC16Recommendation_Consolidated_{0}_Apr2019_Rel21.config"
         configFile = configFile.format(jetInput)
     alg.calibrationTool.ConfigFile = configFile
     if dataType == 'data':
         alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Insitu'
     else:
-        alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
+        if jetInput == "EMPFlow":
+            alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC'
+        else:
+            alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
     alg.calibrationTool.IsData = (dataType == 'data')
     seq.append( alg, inputPropName = 'jets', outputPropName = 'jetsOut', stageName = 'calibration')
 
