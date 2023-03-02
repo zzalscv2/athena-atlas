@@ -216,24 +216,18 @@ StatusCode McEventSelector::queryInterface(const InterfaceID& riid,
 }
 
 
-
 McEventSelector::McEventSelector( const std::string& name, ISvcLocator* svcloc ) :
     AthService( name, svcloc),
     m_ctx(0)
 {
 
     declareProperty( "RunNumber",           m_runNo = 0 );
-    m_runNo.verifier().setLower( 0 );
     declareProperty( "EventsPerRun",        m_eventsPerRun = 2000000000 );
-    m_eventsPerRun.verifier().setLower( 0 );
     declareProperty( "FirstEvent",          m_firstEventNo = 1 );
     m_firstEventNo.verifier().setLower( 1 );
     declareProperty( "FirstLB",             m_firstLBNo = 0);
-    m_firstLBNo.verifier().setLower(0);
     declareProperty( "EventsPerLB",         m_eventsPerLB = 1000 );
-    m_eventsPerLB.verifier().setLower( 0 );
     declareProperty( "InitialTimeStamp",    m_initTimeStamp = 0);
-    m_initTimeStamp.verifier().setLower( 0 );
     declareProperty( "TimeStampInterval",   m_timeStampInterval = 0 );
 
     /// Flags to indicate override of run/event/time
@@ -255,13 +249,13 @@ StatusCode
 McEventSelector::createContext(Context*& refpCtxt) const
 {
     McContext* ctx =  new McContext(this,
-                                    (unsigned int) m_runNo.value( ),
+                                    m_runNo.value( ),
                                     (uint64_t)     m_firstEventNo.value( ),
                                     (uint64_t)     m_eventsPerRun.value( ),
-                                    (unsigned int) m_firstLBNo.value( ),
-                                    (unsigned int) m_eventsPerLB.value( ),
-                                    (unsigned int) m_initTimeStamp.value( ),
-                                    (unsigned int) m_timeStampInterval.value( )
+                                     m_firstLBNo.value( ),
+                                     m_eventsPerLB.value( ),
+                                     m_initTimeStamp.value( ),
+                                     m_timeStampInterval.value( )
                                    );
     refpCtxt = ctx;
 
