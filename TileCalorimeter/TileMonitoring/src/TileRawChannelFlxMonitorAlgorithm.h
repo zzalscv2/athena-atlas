@@ -35,9 +35,6 @@ class TileRawChannelFlxMonitorAlgorithm : public AthMonitorAlgorithm {
 
     const TileHWID* m_tileHWID{nullptr};
 
-    Gaudi::Property<int> m_firstSample{this, "FirstSample", 0, "First sample to put into histogram"};
-    Gaudi::Property<int> m_lastSample{this, "LastSample", 16, "Last sample to put into histogram"};
-
     Gaudi::Property<std::vector<int>> m_fragIDsToCompare{this, "TileFragIDsToCompare", {0x201, 0x402}, "Tile Frag IDs of modules to compare."};
 
     Gaudi::Property<unsigned int> m_felixScale{this, "FelixScale", 1, "Scale factor between Felix and Legacy ADC counts"}; // 1 for pedestal run or 4 for physics run

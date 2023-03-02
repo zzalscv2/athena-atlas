@@ -13,7 +13,9 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
     kwargs.setdefault('TileDigitsContainerLegacy', 'TileDigitsCnt')
     kwargs.setdefault('TileDigitsContainerFlx', 'TileDigitsFlxCnt')
     kwargs.setdefault('FirstSample', 0)
-    kwargs.setdefault('LastSample', 7)
+    kwargs.setdefault('LastSample', 15)
+    kwargs.setdefault('FelixOffset', 0)
+    kwargs.setdefault('FelixScale', 1)
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
