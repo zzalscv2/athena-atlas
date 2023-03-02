@@ -97,6 +97,38 @@ def BSMonitoringConfig(inputFlags):
                 RunOnESD = False
                 CompareRerun = False
 
+    # ------ DET MASK ---------------------------------------------------
+    from PyUtils.MetaReader import read_metadata
+    if len(inputFlags.Input.Files)==1:
+      print("INFO: exactly one file",inputFlags.Input.Files[0])
+      metadata = {}
+      thisFileMD = read_metadata(inputFlags.Input.Files[0], None, 'lite')
+      metadata.update(thisFileMD[inputFlags.Input.Files[0]])
+      #print("INFO: runNumbers = ",metadata['runNumbers'])
+      #print("INFO: detMask    = ",metadata['detectorMask'])
+    else:
+      print("INFO: more than one file. DetMask check may fail")
+
+    import eformat #eformat includes DetectorMask and is a tdaq package
+    iii=metadata['detectorMask'][0]
+    detmask=f'{iii:032x}' #detmask needs to be 32 hex chars
+    #print("INFO: detmask",detmask)
+    x = eformat.helper.DetectorMask(detmask)
+    #print("INFO: detMask MUCTPI    = ", x.is_set(eformat.helper.SubDetector.TDAQ_MUON_CTP_INTERFACE))
+    #print("INFO: detMask CTP       = ", x.is_set(eformat.helper.SubDetector.TDAQ_CTP))
+
+    if not x.is_set(eformat.helper.SubDetector.TDAQ_MUON_CTP_INTERFACE):
+       ProcessMuctpiData=False
+       print("INFO: MUCTPI is not in det mask; skipping muctpi algos")
+    # ------------------------------------------------------------------
+
+    from AthenaConfiguration.Enums import LHCPeriod
+    isRun3 = inputFlags.GeoModel.Run is LHCPeriod.Run3
+    BSMonAlg.isRun3 = isRun3
+    if not isRun3:
+        BSMonAlg.ProcessMuctpiData = False
+        BSMonAlg.ProcessMuctpiDataRIO = False
+
     BSMonAlg.isSimulation = isSimulation
     BSMonAlg.ProcessRoIBResult = ProcessRoIBResult
     BSMonAlg.InclusiveTriggerThresholds = InclusiveTriggerThresholds
@@ -105,16 +137,9 @@ def BSMonitoringConfig(inputFlags):
     BSMonAlg.RunOnESD = RunOnESD
     BSMonAlg.CompareRerun = CompareRerun
     BSMonAlg.ProcessCTPData = ProcessCTPData
-    from AthenaConfiguration.Enums import LHCPeriod
-    isRun3 = inputFlags.GeoModel.Run is LHCPeriod.Run3
-    BSMonAlg.isRun3 = isRun3
-    if not isRun3: 
-        BSMonAlg.ProcessMuctpiData = False
-        BSMonAlg.ProcessMuctpiDataRIO = False
     DefaultBcIntervalInNs = 24.9507401
     BSMonAlg.DefaultBcIntervalInNs = DefaultBcIntervalInNs
-    BCsPerTurn = 3564
-    BSMonAlg.BCsPerTurn = BCsPerTurn
+    BSMonAlg.BCsPerTurn = 3564
     LumiBlockTimeCoolFolderName = '/TRIGGER/LUMI/LBLB"'
     BSMonAlg.LumiBlockTimeCoolFolderName = LumiBlockTimeCoolFolderName
     FillStateCoolFolderName = '/LHC/DCS/FILLSTATE'
@@ -130,7 +155,7 @@ def BSMonitoringConfig(inputFlags):
     mainDir = 'CT'
     myGroup = helper.addGroup(BSMonAlg, groupName , mainDir)
 
-    if isRun3:
+    if isRun3 and ProcessMuctpiData:
         #add the phase1 algorithm
         from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import MuCTPIPhase1ByteStreamAlgoCfg
         result.merge( MuCTPIPhase1ByteStreamAlgoCfg(inputFlags) )
