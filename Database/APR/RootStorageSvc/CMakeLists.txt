@@ -1,10 +1,11 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RootStorageSvc )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core RIO TreePlayer Tree MathCore Hist pthread ROOTNTuple)
+find_package( VDT )
 
 # Component(s) in the package:
 atlas_add_library( RootStorageSvc
