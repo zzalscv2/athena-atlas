@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -29,7 +29,7 @@ class EnergyCorrelatorTool :
     public:
       
       /// Constructor
-      EnergyCorrelatorTool(std::string name);
+      EnergyCorrelatorTool(const std::string& name);
      
       virtual StatusCode initialize() override;
 
@@ -83,23 +83,21 @@ struct EnergyCorrelatorTool::moments_t {
   std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECF2_ungroomed;
   std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECF3_ungroomed;
 
-  moments_t (float Beta, std::string Prefix) {
+  moments_t (float Beta, const std::string& Prefix)
+    : prefix (Prefix),
+      suffix (GetBetaSuffix(Beta)),
+      beta (Beta),
 
-    prefix = Prefix;
-    beta = Beta;
+      dec_ECF1 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF1"+suffix)),
+      dec_ECF2 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF2"+suffix)),
+      dec_ECF3 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF3"+suffix)),
+      dec_ECF4 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF4"+suffix)),
+      dec_ECF5 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF5"+suffix)),
 
-    suffix = GetBetaSuffix(beta);
-
-    dec_ECF1 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF1"+suffix);
-    dec_ECF2 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF2"+suffix);
-    dec_ECF3 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF3"+suffix);
-    dec_ECF4 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF4"+suffix);
-    dec_ECF5 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF5"+suffix);
-
-    dec_ECF1_ungroomed = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF1_ungroomed"+suffix);
-    dec_ECF2_ungroomed = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF2_ungroomed"+suffix);
-    dec_ECF3_ungroomed = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF3_ungroomed"+suffix);
-
+      dec_ECF1_ungroomed (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF1_ungroomed"+suffix)),
+      dec_ECF2_ungroomed (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF2_ungroomed"+suffix)),
+      dec_ECF3_ungroomed (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF3_ungroomed"+suffix))
+  {
   }
 
 };

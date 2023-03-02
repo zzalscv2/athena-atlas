@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureMomentTools/ShowerDeconstructionTool.h"
 //#include "JetSubStructureUtils/ShowerDeconstruction.h" 
 
-ShowerDeconstructionTool::ShowerDeconstructionTool(std::string name) : 
+ShowerDeconstructionTool::ShowerDeconstructionTool(const std::string& name) : 
   JetSubStructureMomentToolsBase(name)
 {
 }

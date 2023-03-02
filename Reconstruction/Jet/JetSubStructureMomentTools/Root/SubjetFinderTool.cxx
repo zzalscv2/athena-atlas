@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureMomentTools/SubjetFinderTool.h"
 #include "JetEDM/FastJetUtils.h"
 #include "JetSubStructureUtils/SubjetFinder.h"
 
-SubjetFinderTool::SubjetFinderTool(std::string name) : 
+SubjetFinderTool::SubjetFinderTool(const std::string& name) : 
   JetSubStructureMomentToolsBase(name) 
 {
   declareProperty("JetAlgorithm", m_jetalg = "Kt");

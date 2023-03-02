@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureMomentTools/EnergyCorrelatorGeneralizedTool.h"
 #include "JetSubStructureUtils/EnergyCorrelatorGeneralized.h"
 #include "JetSubStructureUtils/EnergyCorrelator.h"
 
-EnergyCorrelatorGeneralizedTool::EnergyCorrelatorGeneralizedTool(std::string name) : 
+EnergyCorrelatorGeneralizedTool::EnergyCorrelatorGeneralizedTool(const std::string& name) : 
   JetSubStructureMomentToolsBase(name)
 {
   declareProperty("Beta",       m_Beta = 1.0);

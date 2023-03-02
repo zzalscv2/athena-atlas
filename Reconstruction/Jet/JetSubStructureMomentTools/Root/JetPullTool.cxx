@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetPullTool.cxx
@@ -7,7 +7,7 @@
 #include "JetSubStructureMomentTools/JetPullTool.h"
 #include "JetSubStructureUtils/Pull.h" 
 
-JetPullTool::JetPullTool(std::string name) : 
+JetPullTool::JetPullTool(const std::string& name) : 
 JetSubStructureMomentToolsBase(name) {
   declareProperty("UseEtaInsteadOfY", m_useEtaInsteadOfY = false);
   declareProperty("IncludeTensorMoments", m_includeTensorMoments = false);

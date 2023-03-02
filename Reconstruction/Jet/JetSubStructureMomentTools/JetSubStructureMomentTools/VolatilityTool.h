@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef jetsubstructuremomenttools_volatilitytool_header
@@ -13,7 +13,7 @@ class VolatilityTool :
     
     public:
       // Constructor and destructor
-      VolatilityTool(std::string name);
+      VolatilityTool(const std::string& name);
 
       int modifyJet(xAOD::Jet &jet) const;
 

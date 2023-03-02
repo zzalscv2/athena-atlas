@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -29,7 +29,7 @@ class EnergyCorrelatorGeneralizedTool :
     public:
 
       /// Constructor
-      EnergyCorrelatorGeneralizedTool(std::string name);
+      EnergyCorrelatorGeneralizedTool(const std::string& name);
 
       virtual StatusCode initialize() override;
 
@@ -96,23 +96,21 @@ struct EnergyCorrelatorGeneralizedTool::moments_t {
   std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECFG_3_1_ungroomed;
   std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECFG_3_2_ungroomed;
   
-  moments_t (float Beta, std::string Prefix) {
+  moments_t (float Beta, const std::string& Prefix)
+    : prefix (Prefix),
+      suffix (GetBetaSuffix(Beta)),
+      beta (Beta),
 
-    prefix = Prefix;
-    beta = Beta;
-
-    suffix = GetBetaSuffix(beta);
-
-    dec_ECFG_2_1 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_2_1"+suffix);
-    dec_ECFG_3_1 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_3_1"+suffix);
-    dec_ECFG_3_2 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_3_2"+suffix);
-    dec_ECFG_4_1 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_4_1"+suffix);
-    dec_ECFG_4_2 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_4_2"+suffix);
+      dec_ECFG_2_1 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_2_1"+suffix)),
+      dec_ECFG_3_1 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_3_1"+suffix)),
+      dec_ECFG_3_2 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_3_2"+suffix)),
+      dec_ECFG_4_1 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_4_1"+suffix)),
+      dec_ECFG_4_2 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_4_2"+suffix)),
     
-    dec_ECFG_2_1_ungroomed = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_2_1_ungroomed"+suffix);
-    dec_ECFG_3_1_ungroomed = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_3_1_ungroomed"+suffix);
-    dec_ECFG_3_2_ungroomed = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_3_2_ungroomed"+suffix);
-
+      dec_ECFG_2_1_ungroomed (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_2_1_ungroomed"+suffix)),
+      dec_ECFG_3_1_ungroomed (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_3_1_ungroomed"+suffix)),
+      dec_ECFG_3_2_ungroomed (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_3_2_ungroomed"+suffix))
+  {
   }
 
 };

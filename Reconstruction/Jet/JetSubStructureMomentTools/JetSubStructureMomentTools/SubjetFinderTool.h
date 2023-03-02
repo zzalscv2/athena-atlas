@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef jetsubstructuremomenttools_subjetfindertool_header
@@ -15,7 +15,7 @@ class SubjetFinderTool :
 
     public:
       // Constructor and destructor
-      SubjetFinderTool(std::string name);
+      SubjetFinderTool(const std::string& name);
 
       int modifyJet(xAOD::Jet &jet) const;
 
