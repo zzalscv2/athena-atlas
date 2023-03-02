@@ -96,7 +96,7 @@ StatusCode VGammaORTool::photonPtsOutsideDrs(std::map<float, std::vector<float> 
 					     const std::vector<TLorentzVector>* photons,
 					     const std::vector<int>* lepton_origins,
 					     const std::vector<int>* photon_origins) const {
-
+  
   std::vector<TLorentzVector> good_leptons;
   std::vector<TLorentzVector> good_photons;
   ANA_CHECK(setInput(good_leptons,good_photons,leptons,photons,lepton_origins,photon_origins));
@@ -134,14 +134,17 @@ StatusCode VGammaORTool::setInput(std::vector<TLorentzVector>& leptons_out,
 				  const std::vector<int>* photon_origins) const {
 
   // truth particles are retrieved from event if not given by user
-  const xAOD::TruthParticleContainer* truthParticles = nullptr;
-  if(lepton_p4s==0 || photon_p4s==0){
-    ANA_CHECK( evtStore()->retrieve(truthParticles, m_truthparticle_collection_name) );
+
+  const xAOD::TruthParticleContainer* truthLeptons(nullptr);
+  const xAOD::TruthParticleContainer* truthPhotons(nullptr);
+  if(lepton_p4s==0 || photon_p4s==0){ 
+    ANA_CHECK(evtStore()->retrieve(truthLeptons, "BornLeptons"));
+    ANA_CHECK(evtStore()->retrieve(truthPhotons, "TruthPhotons"));
   }
 
   // relevant photons and leptons identified
   if(lepton_p4s==0){
-    leptons_out = getLeptonP4s(*truthParticles);
+    leptons_out = getLeptonP4s(*truthLeptons);
   }
   else{
     if(lepton_origins!=0){
@@ -152,7 +155,7 @@ StatusCode VGammaORTool::setInput(std::vector<TLorentzVector>& leptons_out,
     }
   }
   if(photon_p4s==0){
-    photons_out = getPhotonP4s(*truthParticles);
+    photons_out = getPhotonP4s(*truthPhotons);
   }
   else{
     if(photon_origins!=0){
@@ -170,10 +173,9 @@ StatusCode VGammaORTool::setInput(std::vector<TLorentzVector>& leptons_out,
     ATH_MSG_WARNING(
       BOOST_CURRENT_FUNCTION << ": Found " << leptons_out.size() << " leptons but expected " << m_n_leptons << ".");
   }
- 
+
   return StatusCode::SUCCESS;
 }
-
 
 //============================================================================
 // Functions to filter out particles from wrong origins
@@ -196,6 +198,7 @@ std::vector<TLorentzVector> VGammaORTool::filterPhotonOrigins(const std::vector<
       photon_p4s.push_back(p4);
     }
   }
+
   return photon_p4s;
 }
 
@@ -295,8 +298,8 @@ std::vector<TLorentzVector> VGammaORTool::getLeptonP4s(const xAOD::TruthParticle
   std::vector<TLorentzVector> lepton_p4s;
   std::vector<int> lepton_origins;
   for (const auto& p : lepton_candidates) {
-    auto res = m_truthClassifier->particleTruthClassifier(p);
-    lepton_origins.push_back(res.second);
+    const unsigned int origin = p->auxdata<unsigned int>("classifierParticleOrigin");
+    lepton_origins.push_back(origin);
     lepton_p4s.push_back(p->p4());
   }
   // filter out bad origins
@@ -317,8 +320,8 @@ std::vector<TLorentzVector> VGammaORTool::getPhotonP4s(const xAOD::TruthParticle
       continue;
     }
     // determine photon origin
-    auto res = m_truthClassifier->particleTruthClassifier(p);
-    photon_origins.push_back(res.second);
+    const unsigned int origin = p->auxdata<unsigned int>("classifierParticleOrigin");
+    photon_origins.push_back(origin);
     photon_p4s.push_back(p->p4());
   }
   // filter out bad photons
