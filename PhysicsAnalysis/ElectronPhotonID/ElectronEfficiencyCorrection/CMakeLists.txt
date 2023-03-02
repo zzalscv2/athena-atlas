@@ -19,7 +19,7 @@ atlas_add_library( ElectronEfficiencyCorrectionLib
    PUBLIC_HEADERS ElectronEfficiencyCorrection
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AsgTools
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AsgTools AnaAlgorithmLib AsgDataHandlesLib
    xAODEgamma PATInterfaces PATCoreAcceptLib AsgMessagingLib EgammaAnalysisInterfacesLib
    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${extra_private_libs} xAODEventInfo AsgMessagingLib
    xAODMetaData PathResolver )
@@ -78,9 +78,6 @@ if( XAOD_STANDALONE )
       LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess xAODEventInfo AsgMessagingLib
       xAODCore ElectronEfficiencyCorrectionLib )
 
-
-   atlas_install_python_modules(util/*.py)
-
    #Tests
    atlas_add_test(ut_RunOnASGAOD
 	          SCRIPT EgEfficiencyCorr_testEgEfficiencyCorr  $ASG_TEST_FILE_MC 40)
@@ -91,5 +88,4 @@ if( XAOD_STANDALONE )
  
 endif()
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py)
+atlas_install_python_modules( util/*.py python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

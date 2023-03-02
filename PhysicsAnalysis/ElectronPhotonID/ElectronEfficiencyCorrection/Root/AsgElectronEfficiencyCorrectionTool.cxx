@@ -10,8 +10,6 @@
 // Include this class's header
 #include "ElectronEfficiencyCorrection/AsgElectronEfficiencyCorrectionTool.h"
 #include "ElectronEfficiencyCorrection/ElRecomFileHelpers.h"
-// Implementation include
-#include "ElectronEfficiencyCorrection/TElectronEfficiencyCorrectionTool.h"
 // Library includes
 #include <boost/algorithm/string.hpp>
 #include <cfloat>
@@ -57,7 +55,6 @@ enum model
 AsgElectronEfficiencyCorrectionTool::AsgElectronEfficiencyCorrectionTool(
   const std::string& myname)
   : asg::AsgMetadataTool(myname)
-  , m_rootTool(nullptr)
   , m_affectedSys()
   , m_appliedSystematics(nullptr)
   , m_correlation_model(correlationModel::SIMPLIFIED)
@@ -74,8 +71,8 @@ AsgElectronEfficiencyCorrectionTool::AsgElectronEfficiencyCorrectionTool(
   , m_uncorrVarDown{}
 {
   // Create an instance of the underlying ROOT tool
-  m_rootTool =
-    new Root::TElectronEfficiencyCorrectionTool(("T" + (this->name())).c_str());
+  m_rootTool = std::make_unique<Root::TElectronEfficiencyCorrectionTool>(
+      ("T" + (this->name())).c_str());
   // Declare the needed properties
   declareProperty(
     "CorrectionFileNameList",
@@ -147,7 +144,6 @@ AsgElectronEfficiencyCorrectionTool::~AsgElectronEfficiencyCorrectionTool()
   if (m_UncorrRegions) {
     delete m_UncorrRegions;
   }
-  delete m_rootTool;
 }
 
 StatusCode
@@ -457,7 +453,7 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
   Root::TElectronEfficiencyCorrectionTool::Result result;
   const int status =
       m_rootTool->calculate(m_dataType, runNumber, cluster_eta, et, /* in MeV */
-                            result, isTotal, indexCorrelated);
+                            result, isTotal);
 
   // if status 0 something went wrong
   if (!status) {
@@ -492,7 +488,7 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
   }
   // Then the uncorrelated part for the SiMPLIFIED/FULL models
   else if (unCorrSign!=0) {
-   sys = unCorrSign * result.UnCorr;
+    sys = unCorrSign * result.UnCorr;
     return HelperFunc(efficiencyScaleFactor, sys);
   }
 
@@ -501,6 +497,7 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
   // for the FULL/SIMPLIFIED models.
   // First if there are not correlated systematic
   if (m_nCorrSyst == 0) {
+
     if (appliedSystematics().matchSystematic(m_corrVarUp[0])) {
       sys = std::sqrt(result.Total * result.Total -
                       result.UnCorr * result.UnCorr);  // total
@@ -516,7 +513,7 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
   }
  //or if we had
  if (correlatedSign != 0) {
-    sys = correlatedSign * result.Corr;
+    sys = correlatedSign * result.Corr[indexCorrelated];
     return HelperFunc(efficiencyScaleFactor, sys);
   }
   return CP::CorrectionCode::Ok;
