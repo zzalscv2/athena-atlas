@@ -213,6 +213,13 @@ StatusCode TriggerEDMDeserialiserAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
+
+StatusCode TriggerEDMDeserialiserAlg::finalize() {
+  s_streamerInfoList.reset();
+  return StatusCode::SUCCESS;
+}
+
+
 StatusCode TriggerEDMDeserialiserAlg::execute(const EventContext& context) const {
 
   auto resultHandle = SG::makeHandle( m_resultKey, context );
