@@ -70,21 +70,16 @@ std::unique_ptr<MuonHoughPattern> MuonHoughTransformer::associateHitsToMaximum(c
     int sector = maximumbin.first;
 
     if (sector != -1) {
-       coordsmaximum = m_histos.getHisto(sector)->getCoordsMaximum(maximum_number);
-
-       ATH_MSG_VERBOSE("maximum binnumber of histogram: " << maximumbin.second
-                        << " value: " << m_histos.getHisto(sector)->getBinContent(maximumbin.second));
-       ATH_MSG_VERBOSE(" coordinates: " << coordsmaximum.first << " second " << coordsmaximum.second<<" sector: "<<sector);
-
-
-        if (maximumbin.second == -1)  // no maximum, no bin above threshold
-        {
+        coordsmaximum = m_histos.getHisto(sector)->getCoordsMaximum(maximum_number);
+        if (maximumbin.second == -1){  // no maximum, no bin above threshold
             ATH_MSG_VERBOSE("No Maximum Found");
             return nullptr;
-        } else {
-            houghpattern = hookAssociateHitsToMaximum(event, coordsmaximum, maximum_residu_mm, maximum_residu_grad, sector);
-            if (houghpattern) { houghpattern->setMaximumHistogram(m_histos.getHisto(sector)->getBinContent(maximumbin.second)); }
         }
+        ATH_MSG_VERBOSE("maximum binnumber of histogram: " << maximumbin.second
+                        << " value: " << m_histos.getHisto(sector)->getBinContent(maximumbin.second));
+        ATH_MSG_VERBOSE(" coordinates: " << coordsmaximum.first << " second " << coordsmaximum.second<<" sector: "<<sector);
+        houghpattern = hookAssociateHitsToMaximum(event, coordsmaximum, maximum_residu_mm, maximum_residu_grad, sector);
+        if (houghpattern) { houghpattern->setMaximumHistogram(m_histos.getHisto(sector)->getBinContent(maximumbin.second)); }
     } else {
         ATH_MSG_VERBOSE("No Maximum Found sector is -1");
         return nullptr;
