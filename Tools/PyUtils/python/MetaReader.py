@@ -488,6 +488,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         k, v = md.split('=')
                         bs_metadata[k] = v
 
+                bs_metadata['detectorMask'] = getattr(data_reader, 'detectorMask')()
                 bs_metadata['runNumbers'] = getattr(data_reader, 'runNumber')()
                 bs_metadata['lumiBlockNumbers'] = getattr(data_reader, 'lumiblockNumber')()
                 bs_metadata['projectTag'] = getattr(data_reader, 'projectTag')()
@@ -510,6 +511,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                 meta_dict[filename]['project_name'] = bs_metadata.get('projectTag', None)
 
                 # Promote up one level
+                meta_dict[filename]['detectorMask'] = [bs_metadata.get('detectorMask', None)]
                 meta_dict[filename]['runNumbers'] = [bs_metadata.get('runNumbers', None)]
                 meta_dict[filename]['lumiBlockNumbers'] = [bs_metadata.get('lumiBlockNumbers', None)]
                 meta_dict[filename]['beam_type'] = bs_metadata.get('beamType', None)
