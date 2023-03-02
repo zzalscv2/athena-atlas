@@ -67,7 +67,7 @@ def _algoHLTTopoClusterLC(inputEDM="CellsClusters", algSuffix="") :
 #
 # fast calo algorithm (central or forward regions)
 #
-def _algoL2Egamma(inputEDM="", doRinger=False, ClustersName="HLT_FastCaloEMClusters", RingerKey="HLT_FastCaloRinger", doForward=False, doAllEm=False, doAll=False):
+def _algoL2Egamma(inputEDM="", ClustersName="HLT_FastCaloEMClusters", RingerKey="HLT_FastCaloRinger", doForward=False, doAllEm=False, doAll=False):
     
     if not inputEDM:
         from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
@@ -75,11 +75,11 @@ def _algoL2Egamma(inputEDM="", doRinger=False, ClustersName="HLT_FastCaloEMClust
         inputEDM = mapThresholdToL1RoICollection("EM")
 
     from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import T2CaloEgamma_ReFastAlgo
-    algo=T2CaloEgamma_ReFastAlgo("FastCaloL2EgammaAlg", doRinger=doRinger, RingerKey=RingerKey)
+    algo=T2CaloEgamma_ReFastAlgo("FastCaloL2EgammaAlg", doRinger=True, RingerKey=RingerKey)
     algo.RoIs=inputEDM
     if doForward:
         from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import T2CaloEgamma_ReFastFWDAlgo
-        algo=T2CaloEgamma_ReFastFWDAlgo("FastCaloL2EgammaAlg_FWD", doRinger=doRinger, RingerKey=RingerKey)
+        algo=T2CaloEgamma_ReFastFWDAlgo("FastCaloL2EgammaAlg_FWD", doRinger=True, RingerKey=RingerKey)
         algo.RoIs=inputEDM
     else:
         if ( doAllEm or doAll ) :
@@ -101,9 +101,9 @@ def _algoL2Egamma(inputEDM="", doRinger=False, ClustersName="HLT_FastCaloEMClust
 ####################################
 
 
-def fastCaloRecoSequence(InViewRoIs, doRinger=False, ClustersName="HLT_FastCaloEMClusters", RingerKey="HLT_FastCaloRinger",doAllEm=False,doAll=False):
+def fastCaloRecoSequence(InViewRoIs, ClustersName="HLT_FastCaloEMClusters", RingerKey="HLT_FastCaloRinger",doAllEm=False,doAll=False):
     
-    fastCaloAlg = _algoL2Egamma(inputEDM=InViewRoIs, doRinger=doRinger, ClustersName=ClustersName, RingerKey=RingerKey, doAllEm=doAllEm, doAll=doAll)
+    fastCaloAlg = _algoL2Egamma(inputEDM=InViewRoIs, ClustersName=ClustersName, RingerKey=RingerKey, doAllEm=doAllEm, doAll=doAll)
     
     name = 'fastCaloInViewSequence'
     import AthenaCommon.CfgMgr as CfgMgr
@@ -124,9 +124,9 @@ def fastCaloRecoSequence(InViewRoIs, doRinger=False, ClustersName="HLT_FastCaloE
 
 
 
-def fastCaloRecoFWDSequence(InViewRoIs, doRinger=False, ClustersName="HLT_FastCaloEMClusters_FWD", RingerKey="HLT_FastCaloRinger_FWD"):
+def fastCaloRecoFWDSequence(InViewRoIs, ClustersName="HLT_FastCaloEMClusters_FWD", RingerKey="HLT_FastCaloRinger_FWD"):
     # create alg
-    fastCaloAlg = _algoL2Egamma(inputEDM=InViewRoIs, doRinger=doRinger, ClustersName=ClustersName, RingerKey=RingerKey,
+    fastCaloAlg = _algoL2Egamma(inputEDM=InViewRoIs, ClustersName=ClustersName, RingerKey=RingerKey,
                                 doForward=True)
     import AthenaCommon.CfgMgr as CfgMgr
     fastCaloVDV = CfgMgr.AthViews__ViewDataVerifier("fastCaloVDV_FWD")
