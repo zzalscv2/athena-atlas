@@ -21,7 +21,7 @@ def fastCaloSequence_FWD(flags, name="fastCaloFWDSequence"):
     
     (fastCaloViewsMaker, InViewRoIs) = fastCaloEVFWDCreator()
     # reco sequence always build the rings
-    (fastCaloInViewSequence, sequenceOut) = fastCaloRecoFWDSequence(InViewRoIs, doRinger=True)
+    (fastCaloInViewSequence, sequenceOut) = fastCaloRecoFWDSequence(flags, InViewRoIs, doRinger=True)
      # connect EVC and reco
     fastCaloSequence = seqAND(name, [fastCaloViewsMaker, fastCaloInViewSequence ])
     return (fastCaloSequence, fastCaloViewsMaker, sequenceOut)
