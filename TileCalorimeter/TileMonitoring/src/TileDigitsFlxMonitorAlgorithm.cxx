@@ -37,7 +37,7 @@ StatusCode TileDigitsFlxMonitorAlgorithm::initialize() {
   } else {
     os << "NONE";
   }
-  m_firstFelix = m_firstSample + m_felixOffset;
+  m_firstFelix = static_cast<unsigned int>(m_firstSample) + m_felixOffset;
   m_nSamples = (m_lastSample >= m_firstSample) ? 1 + m_lastSample - m_firstSample : 0;
 
   ATH_MSG_INFO("Monitored modules/frag ID:" << os.str());
