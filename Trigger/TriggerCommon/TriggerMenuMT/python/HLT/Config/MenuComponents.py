@@ -931,7 +931,8 @@ class ChainStep(object):
         if self.combo is not None:
             repr_string += "\n + ComboHypo = %s" %(compName(self.combo.Alg))
             if len(self.comboToolConfs)>0:
-                repr_string +=",  ComboHypoTools = %s" %(' '.join(map(str, [tool.__name__ for tool in self.comboToolConfs])))            
+                repr_string +=",  ComboHypoTools = %s" %(' '.join(map(str, [tool.__name__ for tool in self.comboToolConfs]))) 
+        repr_string += "\n"       
         return repr_string
 
 
@@ -950,6 +951,7 @@ class InEventRecoCA( ComponentAccumulator ):
     def __init__(self, name, inputMaker=None, **inputMakerArgs):
         super( InEventRecoCA, self ).__init__()
         self.name = name
+        self.recoSeq = None
 
         if inputMaker:
             assert len(inputMakerArgs) == 0, "No support for explicitly passed input maker and and input maker arguments at the same time" 
@@ -963,17 +965,20 @@ class InEventRecoCA( ComponentAccumulator ):
                     'mergeUsingFeature': False}
             args.update(**inputMakerArgs)
             self.inputMakerAlg = CompFactory.InputMakerForRoI(**args)
-            
-        self.recoSeq = parOR( self.name )
-        self.addSequence( self.recoSeq )
-    pass
+                
+    def addRecoSequence(self):
+        if self.recoSeq is None:
+            self.recoSeq = parOR( self.name )
+            self.addSequence( self.recoSeq )
 
     def mergeReco( self, ca ):
-        """ Merged CA moving reconstruction algorithms into the right sequence """
+        """ Merged CA moving reconstruction algorithms into the right sequence """ 
+        self.addRecoSequence()       
         return self.merge( ca, sequenceName=self.recoSeq.name )
 
     def addRecoAlgo( self, algo ):
         """ Place algorithm in the correct reconstruction sequence """
+        self.addRecoSequence()  
         return self.addEventAlgo( algo, sequenceName=self.recoSeq.name )
 
     def inputMaker( self ):

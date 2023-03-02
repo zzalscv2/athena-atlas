@@ -695,7 +695,7 @@ def build_empty_sequences(doBonusDebug, emptyChainDicts, step_mult, caller, L1de
     if doBonusDebug:
         log.debug("[{}] emptyChainDicts {}".format(caller,
                                                    emptyChainDicts))
-    log.info("[{}] {} has a different number of empty sequences/legs {} than stepDicts {}".format(caller,
+    log.info("[{}] {} has number of empty sequences {} and empty legs in stepDicts {}".format(caller,
                                                                                                    chainName,
                                                                                                    len(emptySequences),
                                                                                                    len(emptyChainDicts)))
