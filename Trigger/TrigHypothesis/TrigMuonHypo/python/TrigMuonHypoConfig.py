@@ -14,11 +14,9 @@ from TrigMuonHypo.TrigMuonHypoConf import (  # noqa: F401 (import all into this 
 
 # import monitoring
 from TrigMuonHypo.TrigMuonHypoMonitoring import (
-    TrigMufastHypoMonitoring,
     TrigmuCombHypoMonitoring,
     TrigMuonEFHypoMonitoring,
     TrigMuonEFIdtpHypoMonitoring,
-    TrigL2MuonOverlapRemoverMonitoringMufast,
     TrigL2MuonOverlapRemoverMonitoringMucomb,
     TrigMuonEFInvMassHypoMonitoring,
     TrigMuonEFIdtpInvMassHypoMonitoring,
@@ -287,155 +285,192 @@ def getThresholdsFromDict( chainDict ):
     return sum( [ [part['threshold']]*int(part['multiplicity']) for part in cparts ], [])
 
 
-def TrigMufastHypoToolFromDict( flags, chainDict ):
-    if 'mucombTag' in chainDict['chainParts'][0]['extra']:
-        thresholds = ['passthrough']
-    else:   
-        thresholds = getThresholdsFromDict( chainDict )
-    config = TrigMufastHypoConfig()
-    tool = config.ConfigurationHypoTool( chainDict['chainName'], thresholds )
+def TrigMufastHypoToolFromDict(flags, chainDict):
 
-    if monitorAll:
-        tool.MonTool = TrigMufastHypoMonitoring(flags, 'TrigMufastHypoTool/'+chainDict['chainName'])
-    else:
-        if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
-            tool.MonTool = TrigMufastHypoMonitoring(flags, 'TrigMufastHypoTool/'+chainDict['chainName'])
-    
-    return tool
+    chainPart = chainDict['chainParts'][0]
 
-def TrigMufastHypoToolwORFromDict( flags, chainDict ):
+    doOverlapRemoval = False
+    if chainPart['signature'] == 'Bphysics' or 'l2io' in chainPart['l2AlgInfo']:
+        doOverlapRemoval = False
+    elif int(chainPart['multiplicity']) > 1:
+        doOverlapRemoval = True
+    elif len(chainDict['signatures']) > 1 and not chainPart['extra']:
+        doOverlapRemoval = True
 
-    thresholds = getThresholdsFromDict( chainDict )
-    config = TrigMufastHypoConfig()
-    tool = config.ConfigurationHypoTool( chainDict['chainName'], thresholds )
+    doMonitoring = monitorAll or any(group in muonHypoMonGroups for group in chainDict['monGroups'])
 
-    if monitorAll:
-        tool.MonTool = TrigL2MuonOverlapRemoverMonitoringMufast(flags, 'TrigMufastHypoTool/'+chainDict['chainName'])
-    else:
-        if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
-            tool.MonTool = TrigL2MuonOverlapRemoverMonitoringMufast(flags, 'TrigMufastHypoTool/'+chainDict['chainName'])
-
-    # Overlap Removal
-    tool.ApplyOR = True
-    # cut defintion
-    tool.RequireDR       = True
-    tool.RequireMass     = True
-    tool.RequireSameSign = True
-    # BB
-    tool.DRThresBB       = 0.05
-    tool.MassThresBB     = 0.20
-    # BE
-    tool.DRThresBE       = 0.05
-    tool.MassThresBE     = 0.20
-    # EE
-    tool.EtaBinsEC       = [0, 1.9, 2.1, 9.9]
-    tool.DRThresEC       = [0.06, 0.05, 0.05]
-    tool.MassThresEC     = [0.20, 0.15, 0.10]
-
-    return tool
-
-# muFast Hypo for L2 multi-track SA mode
-def Trigl2mtSAHypoToolwORFromDict( chainDict ):
-
-    thresholds = getThresholdsFromDict( chainDict )
-    config = TrigMufastHypoConfig()
-    tool=config.ConfigurationHypoTool( chainDict['chainName'], thresholds )
-    #tight = False # can be probably decoded from some of the proprties of the chain, expert work
-    #acceptAll = False
-    
-    # Overlap Removal
-    tool.ApplyOR = True
-    tool.RequireDR       = True
-    tool.RequireMass     = True
-    tool.RequireSameSign = True
-    # BB
-    tool.DRThresBB       = 0.05
-    tool.MassThresBB     = 0.20
-    # BE
-    tool.DRThresBE       = 0.05
-    tool.MassThresBE     = 0.20
-    # EE
-    tool.EtaBinsEC       = [0, 1.9, 2.1, 9.9]
-    tool.DRThresEC       = [0.06, 0.05, 0.05]
-    tool.MassThresEC     = [0.20, 0.15, 0.10]
-    
-    return tool
+    config = TrigMufastHypoToolConfig(chainDict['chainName'], chainPart, doOverlapRemoval, doMonitoring)
+    config.compile(flags)
+    return config.tool()
 
 
-class TrigMufastHypoConfig(object):
+class TrigMufastHypoToolConfig:
+    def __init__(self, name, cpart, doOverlapRemoval = False, doMonitoring = False):
 
-    log = logging.getLogger('TrigMufastHypoConfig')
+        from AthenaCommon.Logging import logging
+        self.__log = logging.getLogger('TrigMufastHypoToolConfig')
+        self.__name = name
 
-    def ConfigurationHypoTool( self, toolName, thresholds ):
+        self.__threshold = int(cpart['threshold'])
+        self.__multiplicity = int(cpart['multiplicity'])
+        self.__isPassThrough = 'mucombTag' in cpart['extra']
+        self.__isCalibration = 'muoncalib' in cpart['extra']
+        self.__isBarrelOnly = '0eta105' in cpart['etaRange']
+        self.__useGeV_v15a = any(x in cpart['addInfo'] for x in ['idperf', 'idtp', '3layersEC'])
+        self.__doL2MT = 'l2mt' in cpart['l2AlgInfo']
+        self.__doOverlapRemoval = doOverlapRemoval
+        self.__doMonitoring = doMonitoring
 
-        tool = CompFactory.TrigMufastHypoTool( toolName )
+        from AthenaConfiguration.ComponentFactory import CompFactory
+        tool = CompFactory.TrigMufastHypoTool(name)
+        self.__tool = tool
 
-        if "muoncalib" in toolName:
-            tool.DoCalib = True
-            nt = len(thresholds)
-            tool.PtBins = [ [ 0, 2.5 ] ] * nt
-            try:
-                tool.AcceptAll = False
+    def multiplicity(self):
+        return self.__multiplicity
 
-            except LookupError:
-                raise Exception('MuFast Hypo for muoncalib chain  Misconfigured')
+    def tool(self):
+        return self.__tool
+
+    def toolName(self):
+        return self.__name
+
+    def log(self):
+        return self.__log
+
+    def isPassThrough(self):
+        return self.__isPassThrough
+
+    def isCalibration(self):
+        return self.__isCalibration
+
+    def isBarrelOnly(self):
+        return self.__isBarrelOnly
+
+    def useGeV_v15a(self):
+        return self.__useGeV_v15a or self.getThresholdValue() < 5
+
+    def doMonitoring(self):
+        return self.__doMonitoring
+
+    def doL2MT(self):
+        return self.__doL2MT
+
+    def doOverlapRemoval(self):
+        return self.__doOverlapRemoval
+
+    def getThresholdValue(self):
+        return self.__threshold
+
+    def getThresholdName(self):
+        threshold = str(self.getThresholdValue())
+        key = '6GeV_v15a'
+        if self.useGeV_v15a():
+            key = threshold + 'GeV_v15a'
+            if self.getThresholdValue() == 3:
+                key = threshold + 'GeV_v22a'
+        elif self.isBarrelOnly():
+            key = threshold + 'GeV_barrelOnly_v15a'
+        elif self.getThresholdValue() >= 20:
+            key = threshold + 'GeV_v15a'
+        return key
+
+    def setOverlapRemoval(self):
+        self.tool().ApplyOR = True
+        # cut defintion
+        self.tool().RequireDR       = True
+        self.tool().RequireMass     = True
+        self.tool().RequireSameSign = True
+        # BB
+        self.tool().DRThresBB       = 0.05
+        self.tool().MassThresBB     = 0.20
+        # BE
+        self.tool().DRThresBE       = 0.05
+        self.tool().MassThresBE     = 0.20
+        # EE
+        self.tool().EtaBinsEC       = [0, 1.9, 2.1, 9.9]
+        self.tool().DRThresEC       = [0.06, 0.05, 0.05]
+        self.tool().MassThresEC     = [0.20, 0.15, 0.10]
+
+    def setL2MT(self):
+        self.tool().ApplyOR = True
+        # cut defintion
+        self.tool().RequireDR       = True
+        self.tool().RequireMass     = True
+        self.tool().RequireSameSign = True
+        # BB
+        self.tool().DRThresBB       = 0.05
+        self.tool().MassThresBB     = 0.20
+        # BE
+        self.tool().DRThresBE       = 0.05
+        self.tool().MassThresBE     = 0.20
+        # EE
+        self.tool().EtaBinsEC       = [0, 1.9, 2.1, 9.9]
+        self.tool().DRThresEC       = [0.06, 0.05, 0.05]
+        self.tool().MassThresEC     = [0.20, 0.15, 0.10]
+
+    def compile(self, flags):
+
+        nt = self.multiplicity()
+        if self.isCalibration():
+            self.tool().AcceptAll = False
+            self.tool().DoCalib = True
+            self.tool().PtBins = [ [ 0, 2.5 ] ] * nt
+
+        elif self.isPassThrough():
+            self.tool().AcceptAll = True
+            self.tool().PtBins = [ [-10000.,10000.] ]
+            self.tool().PtThresholds = [ [ -1. * GeV ] ]
+            self.tool().PtThresholdForECWeakBRegionA = [ 3. * GeV ]
+            self.tool().PtThresholdForECWeakBRegionB = [ 3. * GeV ]
+
         else:
-            nt = len(thresholds)
-            log.debug('Set %d thresholds', nt)
-            tool.PtBins = [ [ 0, 2.5 ] ] * nt
-            tool.PtThresholds = [ [ 5.49 * GeV ] ] * nt
-            tool.PtThresholdForECWeakBRegionA = [ 3. * GeV ] * nt
-            tool.PtThresholdForECWeakBRegionB = [ 3. * GeV ] * nt
+            self.log().debug('Set %d thresholds', nt)
+            self.tool().AcceptAll = False
+            self.tool().PtBins = [ [ 0, 2.5 ] ] * nt
+            self.tool().PtThresholds = [ [ 5.49 * GeV ] ] * nt
+            self.tool().PtThresholdForECWeakBRegionA = [ 3. * GeV ] * nt
+            self.tool().PtThresholdForECWeakBRegionB = [ 3. * GeV ] * nt
 
-            for th, thvalue in enumerate(thresholds):
-                if (thvalue == 'passthrough'):
-                    tool.PtBins[th] = [-10000.,10000.]
-                    tool.PtThresholds[th] = [ -1. * GeV ]
-                    tool.AcceptAll = True
-                else:
-                    if "idperf" in toolName or "idtp" in toolName or int(thvalue) < 5 or "3layersEC" in toolName:
-                        thvaluename =  thvalue + 'GeV_v15a'
-                        if int(thvalue)==3:
-                            thvaluename = thvalue + 'GeV_v22a'
-                    elif "0eta105" in toolName:
-                        thvaluename = thvalue+ "GeV_barrelOnly_v15a"
-                    # 15.03.2022: added to allow to use the new HLT algo thresholds
-                    elif int(thvalue) >= 20:
-                        thvaluename = thvalue + 'GeV_v15a'
+            thvaluename = self.getThresholdName()
+
+            for th in range(nt):
+                try:
+                    values = muFastThresholds[thvaluename]
+                    self.tool().PtBins[th] = values[0]
+                    self.tool().PtThresholds[th] = [ x * GeV for x in values[1] ]
+                    self.log().debug('Configration of threshold[%d] %s', th, self.tool().PtThresholds[th])
+                    self.log().debug('Configration of PtBins[%d] %s', th, self.tool().PtBins[th])
+                    if thvaluename in muFastThresholdsForECWeakBRegion:
+                        spThres = muFastThresholdsForECWeakBRegion[thvaluename]
+                        self.tool().PtThresholdForECWeakBRegionA[th] = spThres[0] * GeV
+                        self.tool().PtThresholdForECWeakBRegionB[th] = spThres[1] * GeV
                     else:
-                        thvaluename = '6GeV_v15a'
-
-
-
-                    log.debug('Number of threshold = %d, Value of threshold = %s', th, thvaluename)
-
-                    try:
-                        tool.AcceptAll = False
-                        values = muFastThresholds[thvaluename]
-                        tool.PtBins[th] = values[0]
-                        tool.PtThresholds[th] = [ x * GeV for x in values[1] ]
-                        log.debug('Configration of threshold[%d] %s', th, tool.PtThresholds[th])
-                        log.debug('Configration of PtBins[%d] %s', th, tool.PtBins[th])
-                        if thvaluename in muFastThresholdsForECWeakBRegion:
-                            spThres = muFastThresholdsForECWeakBRegion[thvaluename]
-                            tool.PtThresholdForECWeakBRegionA[th] = spThres[0] * GeV
-                            tool.PtThresholdForECWeakBRegionB[th] = spThres[1] * GeV
+                        self.log().debug('No special thresholds for EC weak Bfield regions for %s. Copy EC1 for region A, EC2 for region B.', thvaluename)
+                        spThres = values[0][1]
+                        if thvaluename == '2GeV' or thvaluename == '3GeV':
+                            self.tool().PtThresholdForECWeakBRegionA[th] = spThres[0] * GeV
+                            self.tool().PtThresholdForECWeakBRegionB[th] = spThres[0] * GeV
                         else:
-                            log.debug('No special thresholds for EC weak Bfield regions for %s. Copy EC1 for region A, EC2 for region B.', thvaluename)
-                            spThres = values[0][1]
-                            if thvaluename == '2GeV' or thvaluename == '3GeV':
-                                tool.PtThresholdForECWeakBRegionA[th] = spThres[0] * GeV
-                                tool.PtThresholdForECWeakBRegionB[th] = spThres[0] * GeV
-                            else:
-                                tool.PtThresholdForECWeakBRegionA[th] = spThres[1] * GeV
-                                tool.PtThresholdForECWeakBRegionB[th] = spThres[2] * GeV
+                            self.tool().PtThresholdForECWeakBRegionA[th] = spThres[1] * GeV
+                            self.tool().PtThresholdForECWeakBRegionB[th] = spThres[2] * GeV
 
-                            log.debug('Thresholds for A[%d]/B[%d] = %d/%d', th, th, tool.PtThresholdForECWeakBRegionA[th], tool.PtThresholdForECWeakBRegionB[th])
+                        self.log().debug('Thresholds for A[%d]/B[%d] = %d/%d', th, th, self.tool().PtThresholdForECWeakBRegionA[th], self.tool().PtThresholdForECWeakBRegionB[th])
 
-                    except LookupError:
-                        raise Exception('MuFast Hypo Misconfigured: threshold %r not supported' % thvaluename)
+                except LookupError:
+                    raise Exception('MuFast Hypo Misconfigured: threshold %r not supported' % thvaluename)
 
-        return tool
+        if self.doL2MT():
+            self.setL2MT()
+        elif self.doOverlapRemoval():
+            self.setOverlapRemoval()
+
+        if self.doMonitoring():
+            if self.doOverlapRemoval():
+                from TrigMuonHypo.TrigMuonHypoMonitoring import TrigL2MuonOverlapRemoverMonitoringMufast
+                self.tool().MonTool = TrigL2MuonOverlapRemoverMonitoringMufast(flags, 'TrigMufastHypoTool/' + self.toolName())
+            else:
+                from TrigMuonHypo.TrigMuonHypoMonitoring import TrigMufastHypoMonitoring
+                self.tool().MonTool = TrigMufastHypoMonitoring(flags, 'TrigMufastHypoTool/' + self.toolName())
 
 
 def TrigmuCombHypoToolFromDict( flags, chainDict ):

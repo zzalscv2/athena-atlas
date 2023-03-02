@@ -200,10 +200,6 @@ def muFastStep(flags, chainDict):
 
     return ChainStep( name=selAcc.name, Sequences=[l2muFastSequence], chainDicts=[chainDict] )
 
-## FP fake, just to test run
-def muFastOvlpRmSequence (flags, is_probe_leg=False):
-    log.warning("FAKE muFastOvlpRmSequence replaced by single muFast")
-    return muFastSequence(flags, is_probe_leg)
 
 @AccumulatorCache
 def _muCombStepSeq(flags):

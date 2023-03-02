@@ -13,9 +13,9 @@ from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
 if isComponentAccumulatorCfg():
-    from .generateMuon import muFastSequence, muEFSASequence, muCombSequence, muEFCBSequence,  muCombOvlpRmSequence, muFastOvlpRmSequence
+    from .generateMuon import muFastSequence, muEFSASequence, muCombSequence, muEFCBSequence,  muCombOvlpRmSequence
 else: 
-    from .MuonMenuSequences import muFastSequence, muFastCalibSequence, muFastOvlpRmSequence, mul2mtSAOvlpRmSequence, muCombSequence, muCombLRTSequence, muCombOvlpRmSequence, mul2mtCBOvlpRmSequence, mul2IOOvlpRmSequence, muEFSASequence, muEFCBSequence, muEFCBIDperfSequence, muEFCBLRTSequence, muEFCBLRTIDperfSequence, muEFSAFSSequence, muEFCBFSSequence, muEFIsoSequence, muEFMSIsoSequence, efLateMuSequence, muEFIDtpSequence
+    from .MuonMenuSequences import muFastSequence, muFastCalibSequence, mul2mtSAOvlpRmSequence, muCombSequence, muCombLRTSequence, muCombOvlpRmSequence, mul2mtCBOvlpRmSequence, mul2IOOvlpRmSequence, muEFSASequence, muEFCBSequence, muEFCBIDperfSequence, muEFCBLRTSequence, muEFCBLRTIDperfSequence, muEFSAFSSequence, muEFCBFSSequence, muEFIsoSequence, muEFMSIsoSequence, efLateMuSequence, muEFIDtpSequence
 
 from .MuonMenuSequences import efLateMuRoISequence, muRoiClusterSequence
 from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
@@ -31,9 +31,6 @@ def muFastSequenceCfg(flags,is_probe_leg=False):
 
 def muFastCalibSequenceCfg(flags,is_probe_leg=False):
     return muFastCalibSequence(flags, is_probe_leg=is_probe_leg)
-
-def muFastOvlpRmSequenceCfg(flags,is_probe_leg=False):
-    return muFastOvlpRmSequence(flags,is_probe_leg=is_probe_leg)
 
 def mul2mtSAOvlpRmSequenceCfg(flags,is_probe_leg=False):
     return mul2mtSAOvlpRmSequence(flags, is_probe_leg=is_probe_leg)
@@ -168,22 +165,11 @@ class MuonChainConfiguration(ChainConfigurationBase):
 
     # --------------------
     def getmuFast(self, flags, is_probe_leg=False):
-        doOvlpRm = False
-        if self.chainPart['signature'] == 'Bphysics' or 'l2io' in self.chainPart['l2AlgInfo']:
-           doOvlpRm = False
-        elif self.mult>1:
-           doOvlpRm = True
-        elif len( self.dict['signatures'] )>1 and not self.chainPart['extra']:
-           doOvlpRm = True
-        else:
-           doOvlpRm = False
 
         if 'muoncalib' in self.chainPart['extra']:
            return self.getStep(flags,1,"mufastcalib", [muFastCalibSequenceCfg], is_probe_leg=is_probe_leg )
         elif 'l2mt' in self.chainPart['l2AlgInfo']:
             return self.getStep(flags,1,"mufastl2mt", [mul2mtSAOvlpRmSequenceCfg], is_probe_leg=is_probe_leg )
-        elif doOvlpRm:
-           return self.getStep(flags,1,"mufast", [muFastOvlpRmSequenceCfg], is_probe_leg=is_probe_leg )
         else:
            return self.getStep(flags,1,"mufast", [muFastSequenceCfg], is_probe_leg=is_probe_leg )
 
