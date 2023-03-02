@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # @file AthenaCommon.AthOptionsParser
 # @purpose the central module to parse command line options of athena.py
@@ -150,7 +150,7 @@ def getArgumentParser():
     g.add_argument('-c', '--command', metavar='CMD',
                    help='one-liner, runs before any scripts')
 
-    g.add_argument('-l', '--loglevel', metavar='LVL', type=str.upper, dest='msg_lvl', default='INFO',
+    g.add_argument('-l', '--loglevel', metavar='LVL', type=str.upper, default='INFO',
                    choices=['ALL', 'VERBOSE', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'FATAL'],
                    help='logging level: %(choices)s')
 
@@ -211,7 +211,7 @@ def getArgumentParser():
     g.add_argument('--profile-python', metavar='FILE',
                    help='profile python code, dump in %(metavar)s (.pkl or .txt)')
 
-    g.add_argument('-d', '--debug', metavar='STAGE', nargs='?', dest='dbg_stage', const='init',
+    g.add_argument('-d', '--debug', metavar='STAGE', nargs='?', const='init',
                    choices=['conf', 'init', 'exec', 'fini'],
                    help='attach debugger at stage: %(choices)s [%(const)s]')
 

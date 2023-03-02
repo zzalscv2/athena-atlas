@@ -35,12 +35,12 @@ if not opts.run_batch:                               # i.e. interactive
 
 ## create the application manager and start in a non-initialised state
 from AthenaCommon.AppMgr import ToolSvc, ServiceMgr, theAuditorSvc
-theApp.setOutputLevel( globals()[opts.msg_lvl] )
+theApp.setOutputLevel( globals()[opts.loglevel] )
 theApp._opts = opts                                     # FIXME
 
 ## further job messaging configuration
 if not "POOL_OUTMSG_LEVEL" in os.environ:
-   os.environ[ "POOL_OUTMSG_LEVEL" ] = str(globals()[opts.msg_lvl])
+   os.environ[ "POOL_OUTMSG_LEVEL" ] = str(globals()[opts.loglevel])
 
 ## basic job configuration
 include( "AthenaCommon/Atlas.UnixStandardJob.py" )

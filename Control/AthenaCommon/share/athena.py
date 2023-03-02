@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # athena.py is born as shell script to preload some optional libraries
 #
@@ -109,7 +109,7 @@ if opts.profile_python:
 
 ### debugging setup
 from AthenaCommon.Debugging import DbgStage
-DbgStage.value = opts.dbg_stage
+DbgStage.value = opts.debug
 
 ### python interpreter configuration -----------------------------------------
 if not os.getcwd() in sys.path:
@@ -136,7 +136,7 @@ fhistory = os.path.expanduser( '~/.athena.history' )
 
 
 ## interface setup as appropriate
-if opts.run_batch and not opts.dbg_stage:
+if opts.run_batch and not opts.debug:
  # in batch there is no need for stdin
    if sys.stdin and os.isatty( sys.stdin.fileno() ):
       os.close( sys.stdin.fileno() )
@@ -172,7 +172,7 @@ _msg = log
 
 ## test and set log level
 try:
-   _msg.setLevel (getattr(logging, opts.msg_lvl))
+   _msg.setLevel (getattr(logging, opts.loglevel))
 except Exception:
    aop._help_and_exit()
 
