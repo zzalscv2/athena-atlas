@@ -43,21 +43,25 @@ DQTGlobalWZFinderAlg::DQTGlobalWZFinderAlg(const std::string & name,
 }
 
 StatusCode DQTGlobalWZFinderAlg::initialize() {
+  ATH_CHECK(AthMonitorAlgorithm::initialize());
   ATH_CHECK(m_muonSelectionTool.retrieve());
-  ATH_CHECK(m_isolationSelectionTool.retrieve());
   ATH_CHECK(m_r3MatchingTool.retrieve());
-  ATH_CHECK(m_truthClassifier.retrieve());
+  if (dataType() == DataType_t::monteCarlo) {
+    ATH_CHECK(m_truthClassifier.retrieve());
+  } else {
+    m_truthClassifier.disable();
+  }
 
   ATH_CHECK(m_ElectronContainerKey.initialize());
   ATH_CHECK(m_MuonContainerKey.initialize());
   ATH_CHECK(m_PhotonContainerKey.initialize());
   ATH_CHECK(m_VertexContainerKey.initialize());
-  ATH_CHECK(m_TruthParticleContainerKey.initialize());
+  ATH_CHECK(m_TruthParticleContainerKey.initialize(dataType() == DataType_t::monteCarlo));
   ATH_CHECK(m_idTrackParticleContainerKey.initialize());
   ATH_CHECK(m_msTrackParticleContainerKey.initialize());
   ATH_CHECK(m_isoMuonContainerKey.initialize());
   ATH_CHECK(m_isoElectronContainerKey.initialize());
-  return AthMonitorAlgorithm::initialize();
+  return StatusCode::SUCCESS;
 }
 
 //----------------------------------------------------------------------------------
@@ -144,6 +148,7 @@ StatusCode DQTGlobalWZFinderAlg::fillHistograms( const EventContext& ctx ) const
      const xAOD::Electron* subleadingAllEle(0);
      std::vector<const xAOD::Electron*> allElectrons;
      
+     
      // Electron Cut Flow
      ATH_MSG_DEBUG("Start electron selection");
   
@@ -167,7 +172,8 @@ StatusCode DQTGlobalWZFinderAlg::fillHistograms( const EventContext& ctx ) const
      
      auto muongroup = getGroup("muon");
      ATH_MSG_DEBUG("Start muon selection");
-     
+     static const SG::AuxElement::Accessor<float> aptc20("ptcone20");
+
      for (const auto &muon : *muons){
        auto muTrk = (muon)->primaryTrackParticle();
        float d0sig;
@@ -187,16 +193,28 @@ StatusCode DQTGlobalWZFinderAlg::fillHistograms( const EventContext& ctx ) const
 	       }
        }
 
+       float ptcone20 = 0;
+       if (! aptc20.isAvailable(*muon)) {
+        ATH_MSG_WARNING("aptc20 is not available -  muon");
+       } else {
+        ptcone20 = aptc20(*muon);
+       }
+
+       float muonIso = 0.0;
+       if ((muon)->pt() != 0.0){
+         muonIso = ptcone20/((muon)->pt());
+       }
+
        ATH_MSG_DEBUG("Muon accept: " << static_cast<bool>(m_muonSelectionTool->accept(*muon)));
        ATH_MSG_DEBUG("Muon pt: " << (muon)->pt() << " " << m_muonPtCut*GeV);
-       ATH_MSG_DEBUG("Muon iso: " << static_cast<bool>(m_isolationSelectionTool->accept(*muon)));
+       ATH_MSG_DEBUG("Muon iso: " << static_cast<bool>(muonIso < 0.1 ));
        ATH_MSG_DEBUG("Muon d0sig: " << d0sig);
        ATH_MSG_DEBUG("Muon Good vtx: " << pVtx);
        if (pVtx) ATH_MSG_DEBUG("Muon z0sinth: " << std::abs((muTrk->z0()+muTrk->vz()-pVtx->z())*std::sin(muTrk->theta())) << " " << 0.5*mm);
        
        if (m_muonSelectionTool->accept(*muon) &&
            ((muon)->pt() > 0.8*m_muonPtCut*GeV) &&
-           m_isolationSelectionTool->accept(*muon) &&
+           muonIso < 0.1 &&
            std::abs(d0sig) < 3 &&
            pVtx &&
            std::abs((muTrk->z0()+muTrk->vz()-pVtx->z())*std::sin(muTrk->theta())) < 0.5*mm)
@@ -646,6 +664,19 @@ bool DQTGlobalWZFinderAlg::goodElectrons(const xAOD::Electron* electron_itr, con
 
   bool isGood = false;
 
+  static const SG::AuxElement::Accessor<float> aptc20("ptcone20");
+  float ptcone20 = 0;
+  if (! aptc20.isAvailable(*electron_itr)) {
+    ATH_MSG_WARNING("aptc20 is not available -  goodElectron");
+  } else {
+    ptcone20 = aptc20(*electron_itr);
+  }
+
+  float eleIso = 0.0;
+  if ((electron_itr)->pt() != 0.0){
+    eleIso = ptcone20/((electron_itr)->pt());
+  }
+
   bool passSel = electron_itr->passSelection("LHMedium");
   auto elTrk = (electron_itr)->trackParticle();
 
@@ -668,7 +699,7 @@ bool DQTGlobalWZFinderAlg::goodElectrons(const xAOD::Electron* electron_itr, con
   if ( ((electron_itr)->pt() > m_electronEtCut*GeV) &&
        std::abs(electron_itr->caloCluster()->etaBE(2)) < 2.4 &&
        passSel &&
-       m_isolationSelectionTool->accept(*electron_itr) &&
+       (eleIso < 0.1) &&
        std::abs(d0sig) < 5 &&
        pVtx &&
        std::abs((elTrk->z0()+elTrk->vz()-pVtx->z())*std::sin(elTrk->theta())) < 0.5*mm)
@@ -691,10 +722,22 @@ bool DQTGlobalWZFinderAlg::antiGoodElectrons(const xAOD::Electron* electron_itr,
 
   bool antiGood = false;
 
-  
+  static const SG::AuxElement::Accessor<float> aptc20("ptcone20");
+  float ptcone20 = 0;
+  if (! aptc20.isAvailable(*electron_itr)) {
+    ATH_MSG_WARNING("aptc20 is not available -  antiGoodElectron");
+  } else {
+    ptcone20 = aptc20(*electron_itr);
+  }
+
+  float eleIso = 0.0;
+  if ((electron_itr)->pt() != 0.0){
+    eleIso = ptcone20/((electron_itr)->pt());
+  }
+
   bool passID = electron_itr->passSelection("LHLoose");
   bool passIso = false;
-  if(m_isolationSelectionTool->accept(*electron_itr)) passIso = true;
+  if(eleIso < 0.1) passIso = true;
   auto elTrk = (electron_itr)->trackParticle();
 
   if (!elTrk) {

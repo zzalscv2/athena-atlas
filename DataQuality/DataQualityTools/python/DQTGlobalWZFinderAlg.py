@@ -9,21 +9,17 @@ def DQTGlobalWZFinderAlgConfig(flags):
 
 	algConfObj = CompFactory.DQTGlobalWZFinderAlg
 	muonSelectionTool = CompFactory.CP.MuonSelectionTool("DQTMuonSelectionTool")
-	isolationSelectionTool = CompFactory.CP.IsolationSelectionTool("DQTIsoGradientTool")
 	r3MatchingTool = CompFactory.Trig.R3MatchingTool("R3MatchingTool")
 	truthClassifier = CompFactory.MCTruthClassifier("MCTruthClassifier")
 
+	# Configure MuonSelectionTool
 	muonSelectionTool.MuQuality=1
 	muonSelectionTool.MaxEta=2.4
 	muonSelectionTool.IsRun3Geo=(flags.GeoModel.Run == LHCPeriod.Run3)
 	muonSelectionTool.TurnOffMomCorr=True
 
-	isolationSelectionTool.MuonWP="PflowLoose_VarRad"
-	isolationSelectionTool.ElectronWP="Loose_VarRad"
-	
 	monAlg = helper.addAlgorithm(algConfObj, 'DQTGlobalWZFinderAlg',
 					MuonSelectionTool = muonSelectionTool,
-					IsolationSelectionTool = isolationSelectionTool,
 					R3MatchingTool = r3MatchingTool,
 					MCTruthClassifier = truthClassifier)
 
@@ -621,7 +617,5 @@ def DQTGlobalWZFinderAlgConfig(flags):
 	)
 
 	result = helper.result()
-	from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg
-	result.merge(DerivationTrackIsoCfg(flags, object_types=('Muons', 'Electrons'), ptCuts=(500, 1000)))
 	return result
 
