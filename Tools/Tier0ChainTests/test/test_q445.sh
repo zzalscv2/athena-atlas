@@ -9,7 +9,7 @@
 # art-athena-mt: 8
 
 Reco_tf.py \
---CA True \
+--CA 'all:True' 'RDOtoRDOTrigger:False' \
 --AMI=q445 \
 --multithreaded \
 --maxEvents=500 \
