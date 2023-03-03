@@ -189,6 +189,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     # shortcut to check if job is running in a partition (i.e. partition name is not empty)
     flags.addFlag('Trigger.Online.isPartition', lambda prevFlags: len(prevFlags.Trigger.Online.partitionName)>0)
 
+    # use TrigMonTHistSvc
+    flags.addFlag('Trigger.Online.useOnlineTHistSvc', False)
+
     # write BS output file
     flags.addFlag('Trigger.writeBS', False)
 

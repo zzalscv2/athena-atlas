@@ -5,10 +5,6 @@
 ## @author Werner Wiedenmann <Werner.Wiedenmann@cern.ch>
 ###############################################################
 
-class _Conf:
-    """Some configuration flags for this module with defaults"""
-    useOnlineTHistSvc = True    # set in athenaHLT.py
-
 
 def setupCommonServices(flags):
     from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper

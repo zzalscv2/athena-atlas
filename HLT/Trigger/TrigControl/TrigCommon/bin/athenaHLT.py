@@ -468,9 +468,7 @@ def main():
    PscConfig.reloadAfterDump = args.dump_config_reload
 
    flags.PerfMon.doFastMonMT = args.perfmon
-
-   from TrigServices.TriggerUnixStandardSetup import _Conf
-   _Conf.useOnlineTHistSvc = args.oh_monitoring
+   flags.Trigger.Online.useOnlineTHistSvc = args.oh_monitoring
 
    # Run HLTMPPU
    from HLTMPPy.runner import runHLTMPPy

@@ -46,19 +46,6 @@ def getMessageSvc(flags, msgSvcType="TrigMessageSvc"):
    return msgsvc
 
 
-def getTHistSvc():
-   from TrigServices.TriggerUnixStandardSetup import _Conf  # could also use flags for this
-   if _Conf.useOnlineTHistSvc:
-      log.debug("Using online histogramming service (TrigMonTHistSvc)")
-      svc = CompFactory.TrigMonTHistSvc("THistSvc")
-   else:
-      log.debug("Using offline histogramming service (THistSvc)")
-      svc = CompFactory.THistSvc("THistSvc",
-         Output = ["EXPERT DATAFILE='expert-monitoring.root' OPT='RECREATE'"] )
-
-   return svc
-
-
 def getTrigCOOLUpdateHelper(flags, name='TrigCOOLUpdateHelper'):
    '''Enable COOL folder updates'''
 
@@ -175,12 +162,14 @@ def TrigServicesCfg(flags):
    acc = ComponentAccumulator()
 
    acc.addService( getMessageSvc(flags) )
-   acc.addService( getTHistSvc() )
    acc.addService( getHltROBDataProviderSvc(flags) )
    cool_helper = acc.popToolsAndMerge( getTrigCOOLUpdateHelper(flags) )
 
    loop_mgr = getHltEventLoopMgr(flags)
    loop_mgr.CoolUpdateTool = cool_helper
+
+   from TriggerJobOpts.TriggerHistSvcConfig import TriggerHistSvcConfig
+   acc.merge( TriggerHistSvcConfig(flags) )
 
    from TrigOutputHandling.TrigOutputHandlingConfig import HLTResultMTMakerCfg
    loop_mgr.ResultMaker = HLTResultMTMakerCfg(flags)

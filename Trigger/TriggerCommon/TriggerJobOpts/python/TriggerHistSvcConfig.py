@@ -2,6 +2,9 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
+from AthenaCommon.Logging import logging
+log = logging.getLogger('TriggerHistSvcConfig')
+
 def setTHistSvcOutput(outputList):
     """Build the Output list of the THistSvc ensuring minimum set of output files"""
 
@@ -15,16 +18,20 @@ def TriggerHistSvcConfig(flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.ComponentFactory import CompFactory
 
-    output = []
-    if flags.Trigger.L1MuonSim.WriteNSWDebugNtuple:
-        output += [ "NSWL1Simulation DATAFILE='NSWL1Simulation.root' OPT='RECREATE'" ]
-
-    # add default outputs
-    setTHistSvcOutput(output)
-
     acc = ComponentAccumulator()
-    histSvc = CompFactory.THistSvc(
-        Output = output)
+
+    if flags.Trigger.Online.useOnlineTHistSvc:
+        log.info("Configuring online TrigMonTHistSvc")
+        histSvc = CompFactory.TrigMonTHistSvc("THistSvc")  # no outputs in online
+    else:
+        log.info("Configuring offline THistSvc")
+        output = []
+        if flags.Trigger.L1MuonSim.WriteNSWDebugNtuple:
+            output += ["NSWL1Simulation DATAFILE='NSWL1Simulation.root' OPT='RECREATE'"]
+
+        # add default outputs
+        setTHistSvcOutput(output)
+        histSvc = CompFactory.THistSvc("THistSvc", Output = output)
 
     acc.addService( histSvc )
     return acc
