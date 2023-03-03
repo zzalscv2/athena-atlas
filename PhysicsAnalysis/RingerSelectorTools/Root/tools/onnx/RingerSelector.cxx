@@ -28,11 +28,10 @@ namespace Ringer{
     {
 
       std::string configFile = PathResolverFindCalibFile( path );
-
-
-      std::string basepath = configFile.substr(0, configFile.find_last_of("/"));
+      std::string basepath = GetBasePath( path );
 
       ATH_MSG_INFO( "Loading all tunings configs from " << configFile );
+      ATH_MSG_INFO( "Basepath is "<< basepath);
 
       if (configFile.empty()){
          ATH_MSG_ERROR( "Could not locate the config file: " << configFile);
@@ -47,8 +46,7 @@ namespace Ringer{
       {
         // Retrieve the size
         unsigned size = env.GetValue( "Model__size" , 0 );
-
-        unsigned barcode = env.GetValue( "Model__barcode", 0); // select the input preprocessing mode
+        auto barcode = GetValues<int>( "Model__barcode", env); // select the input preprocessing mode
           
         // Retrieve Et bins
         auto etmin = GetValues<float>( "Model__etmin", env );
@@ -60,15 +58,13 @@ namespace Ringer{
         
         // Retreive all ONNX model file paths
         auto model_paths = GetPaths( "Model__path", env );
-        ATH_MSG_INFO( "Basepath is "<< basepath);
 
         // Loop over all models
         for ( unsigned idx = 0; idx < size; ++idx )
         {
           std::string modelPath = PathResolverFindCalibFile( basepath+"/"+model_paths[idx] );
           ATH_MSG_DEBUG( "Reading Onnx model from: " << modelPath );
-          auto model = Ringer::onnx::Model( modelPath, svc, etmin[idx], etmax[idx], etamin[idx], etamax[idx], barcode) ;
-          
+          auto model = Ringer::onnx::Model( modelPath, svc, etmin[idx], etmax[idx], etamin[idx], etamax[idx], barcode[idx]) ;
           // Compile the model
           model.compile();
           m_models.push_back(model);
@@ -79,9 +75,6 @@ namespace Ringer{
       {
         // Retrieve the size
          unsigned size = env.GetValue( "Threshold__size" , 0);
-  
-        
-           
          auto max_avgmu = GetValues<float>( "Threshold__MaxAverageMu", env );
          
          // Retrieve Et bins
@@ -116,12 +109,12 @@ namespace Ringer{
     //==============================================================================
     bool RingerSelector::accept( const xAOD::TrigRingerRings *ringsCluster, float discr, float avgmu ) const 
     {
-      float et = ringsCluster->emCluster()->et()/Gaudi::Units::GeV;
+      float et = ringsCluster->emCluster()->et();
       float eta = std::abs(ringsCluster->emCluster()->eta());
     
       ATH_MSG_DEBUG( "Event et = "<< et << ", eta = " << eta );
       for( auto& cutDef : m_thresholds ){
-        if ( et < cutDef.etMin() || et >= cutDef.etMax() ) continue;
+        if ( et < cutDef.etMin()*Gaudi::Units::GeV || et >= cutDef.etMax()*Gaudi::Units::GeV ) continue;
         if ( eta < cutDef.etaMin() || eta >= cutDef.etaMax() ) continue;
         return cutDef.accept( discr, avgmu );
       }// loop over all thresholds
@@ -131,75 +124,53 @@ namespace Ringer{
 
 
     //==============================================================================
+    float RingerSelector::predict(const xAOD::TrigRingerRings *ringsCluster , const xAOD::TrigElectron *el ) const
+    {
+      float et = ringsCluster->emCluster()->et();
+      float eta = std::abs(ringsCluster->emCluster()->eta());
+
+      // Find the correct model and predict
+      for( auto& model : m_models ){
+        
+        if(et<model.etMin()*Gaudi::Units::GeV   || et  >= model.etMax()*Gaudi::Units::GeV ) continue;
+        if(eta<model.etaMin() || eta >= model.etaMax()) continue;
+        auto inputs = prepare_inputs( model.barcode(), ringsCluster, el );
+        auto output = model.predict( inputs ); // propagate the input throut the model
+        ATH_MSG_DEBUG( "The current model predict with output: " << output );
+        return output;
+      }
+
+      ATH_MSG_DEBUG("There is no model available for this cluster.");
+      return -999;
+    }
+
+
+
+    //==============================================================================
     // barcode = 0: use only rings normalized by total energy as input
-    // barcode = 1: use normalized rings and shower shapes (6 from cluster) as input
-    // barcode = 2: use normalized rings, shower shapes and track variables as input 
-    // barcode = 3: use only a half of total rings and then normalize to use as input
+    // barcode = 1: use only a half of total rings and then normalize to use as input
     std::vector<std::vector<float>> RingerSelector::prepare_inputs(  unsigned barcode,
                                                                      const xAOD::TrigRingerRings *ringsCluster, 
-                                                                     const xAOD::TrigElectron *el ) const
+                                                                     const xAOD::TrigElectron */*el*/ ) const
     {
       std::vector< std::vector< float > > inputs;
-      // check if the barcode = 3 because this is the unique case that we do not use 100 rings
-      if ( barcode != 3 ){ 
+
+      // Barcode 0 for all rings normalized by the total energy
+      if ( barcode == 0 ){ 
         const std::vector<float> rings = ringsCluster->rings();
         std::vector<float> refRings(rings.size());
         refRings.assign(rings.begin(), rings.end());
-        
         float energy=0.0;
         for(auto &ring : refRings ) energy+=ring;
-        for(auto &ring : refRings ) ring/=std::abs(energy);
+
+        if (energy > 0){
+          for(auto &ring : refRings ) ring/=energy;
+        }
         
         inputs.push_back( refRings );
-      }
 
-      if ( barcode == 1 || barcode == 2 ){ // barcode 1
-        std::vector<float> refShowers;
-        const xAOD::TrigEMCluster *pClus = ringsCluster->emCluster();
-        
-        float e0 = pClus->energy( CaloSampling::PreSamplerB ) + pClus->energy( CaloSampling::PreSamplerE );
-        float e1 = pClus->energy( CaloSampling::EMB1 ) + pClus->energy( CaloSampling::EME1 );
-        float e2 = pClus->energy( CaloSampling::EMB2 ) + pClus->energy( CaloSampling::EME2 );
-        float e3 = pClus->energy( CaloSampling::EMB3 ) + pClus->energy( CaloSampling::EME3 );
-        float eallsamples = e0+e1+e2+e3;
-        float f3 = std::abs( eallsamples )>0. ? e3/eallsamples : 0.;
-
-        float eratio = pClus->emaxs1() - pClus->e2tsts1();
-        eratio/= (pClus->emaxs1() + pClus->e2tsts1());
-        float weta2 = pClus->weta2();
-        float wstot = pClus->wstot();
-        float reta = pClus->e237() / pClus->e277();
-
-        // fix eratio and wstot for some cases
-        if(eratio>10) eratio=0;
-        if(eratio>1) eratio=1;
-        if(wstot<-99) wstot=0;
-
-        float etot=0.0;
-        for ( float e : pClus->energySample() )  etot+=e;
-        
-        float f1 = e1/etot;
-
-        refShowers.push_back( reta/1.);
-        refShowers.push_back( eratio/1. );
-        refShowers.push_back( f1/0.6 );
-        refShowers.push_back( f3/0.04 );
-        refShowers.push_back( weta2/0.02 );
-        refShowers.push_back( wstot/1. );
-
-        inputs.push_back( refShowers );
-      }
-
-      if ( barcode == 2 && el){ // barcode 2
-        std::vector<float> refTrack;
-        refTrack.push_back( el->etOverPt() );
-        refTrack.push_back( el->trkClusDeta() );
-        refTrack.push_back( el->trkClusDphi() );
-        inputs.push_back( refTrack );
-      }
-
-
-      if ( barcode == 3){ // barcode 3 (half of rings)
+      // Barcode 1 for half rings normalized by the total energy
+      }else if ( barcode == 1){
 
         std::vector< std::vector< float > > inputs;
         const std::vector<float> rings = ringsCluster->rings();
@@ -225,38 +196,20 @@ namespace Ringer{
         halfRings.insert(halfRings.end(), refRings.begin() + PS + EM1 + EM2 + EM3 + HAD1 + HAD2, refRings.begin() + PS + EM1 + EM2 + EM3 + HAD1 + HAD2 + (HAD3/2));
 
         // concatenate
-        
-        
         float energy=0.0;
         for(auto &ring : halfRings ) energy+=ring;
-        for(auto &ring : halfRings ) ring/=std::abs(energy);
+
+        if (energy > 0){
+          for(auto &ring : halfRings ) ring/=energy;
+        }
 
         inputs.push_back( halfRings );
       }
+
       return inputs;
     }
 
 
-    //==============================================================================
-    float RingerSelector::predict(const xAOD::TrigRingerRings *ringsCluster , const xAOD::TrigElectron *el ) const
-    {
-      float et = ringsCluster->emCluster()->et()/Gaudi::Units::GeV;
-      float eta = std::abs(ringsCluster->emCluster()->eta());
-
-      // Find the correct model and predict
-      for( auto& model : m_models ){
-        
-        if(et<model.etMin() || et >= model.etMax()) continue;
-        if(eta<model.etaMin() || eta >= model.etaMax()) continue;
-
-        auto inputs = prepare_inputs( model.barcode(), ringsCluster, el );
-        auto output = model.predict( inputs ); // propagate the input throut the model
-        ATH_MSG_DEBUG( "The current model predict with output: " << output );
-        return output;
-      }
-
-      return -999;
-    }
 
 
 
@@ -332,7 +285,16 @@ namespace Ringer{
       return CutVector;
     }
 
-
+    std::string RingerSelector::GetBasePath(std::string &path){
+      
+      std::vector<std::string> strs;
+      boost::split(strs,path,boost::is_any_of("/"));
+      std::string basepath;
+      for (unsigned at=0; at<strs.size()-1;++at)
+        basepath += "/"+strs.at(at);
+      basepath.erase(0,1);
+      return basepath;
+    }
 
 
   } // namespace onnx

@@ -80,6 +80,7 @@ namespace Ringer {
 
     Gaudi::Property<std::vector<std::string>> m_configFiles{this, "ConfigFiles", {}, "Ringer Run3 Calib Path"};  
     ServiceHandle< AthONNX::IONNXRuntimeSvc > m_onnxSvc{ this, "ONNXRuntimeSvc", "AthONNX::ONNXRuntimeSvc", "Name of the service to use" };
+    Gaudi::Property<bool> m_useTansigOutput{this, "UseTansigOutput", {}, "Use tansig output."};  
 
 };
 

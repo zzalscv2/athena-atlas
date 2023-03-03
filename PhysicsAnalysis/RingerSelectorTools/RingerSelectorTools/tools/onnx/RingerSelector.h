@@ -73,6 +73,9 @@ namespace Ringer {
         template <typename T>  std::vector<T> GetValues (const std::string& input,  TEnv& env);
         /// @brief Get the list of paths inside of tenv
         std::vector<std::string> GetPaths(const std::string& input, TEnv& env);  
+        /// @brief Get basepath from calib path
+        std::string GetBasePath(std::string &path);
+
     };
  
   } // namespace onnx

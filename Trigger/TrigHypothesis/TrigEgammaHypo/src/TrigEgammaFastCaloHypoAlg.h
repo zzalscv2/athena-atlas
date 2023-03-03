@@ -12,7 +12,6 @@
 #include "xAODTrigRinger/TrigRingerRings.h"
 #include "xAODTrigRinger/TrigRingerRingsContainer.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
-#include "TrigMultiVarHypo/tools/RingerSelectorTool.h"
 #include "RingerSelectorTools/IAsgRingerSelectorTool.h"
 #include "LumiBlockComps/ILumiBlockMuTool.h"
 #include "ITrigEgammaFastCaloHypoTool.h"
@@ -41,12 +40,7 @@ class TrigEgammaFastCaloHypoAlg : public ::HypoBase {
     Gaudi::Property<std::vector<std::string>>         m_pidNames{this, "PidNames", {}, "Ringer pid names"};
 
 
-    // NOTE: This will be uncommissioned.
-    std::vector<Ringer::RingerSelectorTool*>          m_ringerTools;
-    Gaudi::Property<std::vector<std::string>>         m_constantsCalibPaths{this, "ConstantsCalibPaths", {}, "Ringer Run2 Constants Calib Paths"};
-    Gaudi::Property<std::vector<std::string>>         m_thresholdsCalibPaths{this, "ThresholdsCalibPaths", {}, "Ringer Run2 Thresholds Calib Paths"};
-    Gaudi::Property<bool>                             m_useRun3{this, "UseRun3", false, "Use Run 3 NN selection tools."};
- 
+
     
 }; 
 

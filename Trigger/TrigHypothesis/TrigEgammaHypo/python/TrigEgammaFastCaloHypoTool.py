@@ -1,11 +1,11 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import GeV
-from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 def same( val , tool):
   return [val]*( len( tool.EtaBins ) - 1 )
+
 
 #
 # For electrons
@@ -15,19 +15,10 @@ def electronRingerFastCaloHypoConfig(flags, name, sequenceOut):
   from AthenaConfiguration.ComponentFactory import CompFactory
   theFastCaloHypo = CompFactory.TrigEgammaFastCaloHypoAlg(name)
   theFastCaloHypo.CaloClusters = sequenceOut
-
-  # Just for electrons
   theFastCaloHypo.PidNames = ["tight", "medium", "loose", "vloose"]
-  theFastCaloHypo.UseRun3  = False
+  theFastCaloHypo.RingerNNSelectorTools = createTrigEgammaFastCaloElectronSelectors(flags)
 
-  # NOTE: This will be remove next
-  pidnames = ["Tight","Medium","Loose","VeryLoose"]
-  basepath = 'RingerSelectorTools/TrigL2_20180903_v9'
-  theFastCaloHypo.ConstantsCalibPaths = [(basepath+'/TrigL2CaloRingerElectron{WP}Constants.root'.format(WP=pid)) for pid in pidnames  ]
-  theFastCaloHypo.ThresholdsCalibPaths = [(basepath+'/TrigL2CaloRingerElectron{WP}Thresholds.root'.format(WP=pid)) for pid in pidnames  ]
-
-  monTool = GenericMonitoringTool(flags, "MonTool_"+name,
-                                  HistPath = 'FastCaloL2EgammaHypo/'+name)
+  monTool = GenericMonitoringTool(flags, "MonTool_"+name, HistPath = 'FastCaloL2EgammaHypo/'+name)
   monTool.defineHistogram('TIME_exec', type='TH1F', path='EXPERT', title="Fast Calo Hypo Algtime; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=8000.0)
   monTool.defineHistogram('TIME_NN_exec', type='TH1F', path='EXPERT', title="Fast Calo Hypo NN Algtime; time [ us ] ; Nruns", xbins=50, xmin=0.0, xmax=50)
 
@@ -39,24 +30,13 @@ def electronRingerFastCaloHypoConfig(flags, name, sequenceOut):
 #
 def photonRingerFastCaloHypoConfig(flags, name, sequenceOut):
     # make the Hypo
-  #from TriggerMenuMT.HLTMenuConfig.Egamma.TrigEgammaDefs import createTrigEgammaFastCaloSelectors
   from AthenaConfiguration.ComponentFactory import CompFactory
   theFastCaloHypo = CompFactory.TrigEgammaFastCaloHypoAlg(name)
   theFastCaloHypo.CaloClusters = sequenceOut
-
-  # Just for electrons
   theFastCaloHypo.PidNames = ["tight", "medium", "loose"]
-  theFastCaloHypo.UseRun3  = False
-  #theFastCaloHypo.RingerNNSelectorTools = createTrigEgammaFastCaloSelectors()
+  theFastCaloHypo.RingerNNSelectorTools = createTrigEgammaFastCaloPhotonSelectors(flags)
 
-  # NOTE: This will be remove next
-  pidnames = ["Tight","Medium","Loose"]
-  basepath = 'RingerSelectorTools/TrigL2_20211125_r1' #just for test, it will be changed for photons
-  theFastCaloHypo.ConstantsCalibPaths = [(basepath+'/TrigL2CaloRingerPhoton{WP}Constants.root'.format(WP=pid)) for pid in pidnames  ]
-  theFastCaloHypo.ThresholdsCalibPaths = [(basepath+'/TrigL2CaloRingerPhoton{WP}Thresholds.root'.format(WP=pid)) for pid in pidnames  ]
-
-  monTool = GenericMonitoringTool(flags, "MonTool_"+name,
-                                  HistPath = 'FastCaloL2EgammaHypo/'+name)
+  monTool = GenericMonitoringTool(flags, "MonTool_"+name, HistPath = 'FastCaloL2EgammaHypo/'+name)
   monTool.defineHistogram('TIME_exec', type='TH1F', path='EXPERT', title="Fast Calo Hypo Algtime; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=8000.0)
   monTool.defineHistogram('TIME_NN_exec', type='TH1F', path='EXPERT', title="Fast Calo Hypo NN Algtime; time [ us ] ; Nruns", xbins=50, xmin=0.0, xmax=50)
 
@@ -70,6 +50,7 @@ def createTrigEgammaFastCaloHypoAlg(flags, name, sequenceOut):
     return electronRingerFastCaloHypoConfig(flags, name, sequenceOut)
   elif 'Photon' in name:
     return photonRingerFastCaloHypoConfig(flags, name, sequenceOut)
+
 
 def TrigEgammaFastCaloHypoAlgCfg(flags, name, CaloClusters):
   from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -90,11 +71,8 @@ def createTrigEgammaFastCaloHypoAlg_noringer(flags, name, sequenceOut):
 
   # Just for electrons
   theFastCaloHypo.PidNames = []
-  theFastCaloHypo.UseRun3  = False
   theFastCaloHypo.RingerNNSelectorTools = []
-  # Configure the old ringer selector
-  theFastCaloHypo.ConstantsCalibPaths = []
-  theFastCaloHypo.ThresholdsCalibPaths = []
+
 
   monTool = GenericMonitoringTool(flags, "MonTool_"+name,
                                   HistPath = 'FastCaloL2EgammaHypo/'+name)
@@ -141,7 +119,6 @@ class TrigEgammaFastCaloHypoToolConfig:
 
     from AthenaCommon.Logging import logging
     self.__log = logging.getLogger('TrigEgammaFastCaloHypoTool')
-    self.__useRun3 = False
     self.__name = name
     self.__cand = cpart['trigType']
     self.__threshold  = float(cpart['threshold'])
@@ -359,7 +336,7 @@ def TrigEgammaFastCaloHypoToolFromDict(flags, chainDict , tool=None):
 
 
 
-def createTrigEgammaFastCaloSelectors(flags, ConfigFilePath=None):
+def createTrigEgammaFastCaloElectronSelectors(flags, ConfigFilePath=None):
 
     import collections.abc
 
@@ -376,15 +353,50 @@ def createTrigEgammaFastCaloSelectors(flags, ConfigFilePath=None):
         
 
     ToolConfigFile = collections.OrderedDict({
-          'tight'   :['ElectronJpsieeRingerTightTriggerConfig_RingsOnly.conf'     , 'ElectronZeeRingerTightTriggerConfig_RingsOnly.conf'    ],
-          'medium'  :['ElectronJpsieeRingerMediumTriggerConfig_RingsOnly.conf'    , 'ElectronZeeRingerMediumTriggerConfig_RingsOnly.conf'   ],
-          'loose'   :['ElectronJpsieeRingerLooseTriggerConfig_RingsOnly.conf'     , 'ElectronZeeRingerLooseTriggerConfig_RingsOnly.conf'    ],
-          'vloose'  :['ElectronJpsieeRingerVeryLooseTriggerConfig_RingsOnly.conf' , 'ElectronZeeRingerVeryLooseTriggerConfig_RingsOnly.conf'],
+          'tight'   :['ElectronRingerTightTriggerConfig.conf'    ],
+          'medium'  :['ElectronRingerMediumTriggerConfig.conf'   ],
+          'loose'   :['ElectronRingerLooseTriggerConfig.conf'    ],
+          'vloose'  :['ElectronRingerVeryLooseTriggerConfig.conf'],
           })
     
     selectors = []    
+    from RingerSelectorTools.RingerSelectorToolsConf import Ringer__AsgRingerSelectorTool
+
     for pidname , name in SelectorNames.items():
-      SelectorTool=CompFactory.Ringer.AsgRingerSelectorTool(name)
+      SelectorTool=Ringer__AsgRingerSelectorTool(name)
+      SelectorTool.ConfigFiles = [ (ConfigFilePath+'/'+path) for path in ToolConfigFile[pidname] ]
+      selectors.append(SelectorTool)
+    return selectors
+
+
+
+def createTrigEgammaFastCaloPhotonSelectors(flags, ConfigFilePath=None):
+
+    import collections.abc
+
+    if not ConfigFilePath:
+      ConfigFilePath = flags.Trigger.egamma.ringerVersion
+
+  
+    SelectorNames = collections.OrderedDict({
+            'tight'    : 'AsgPhotonFastCaloRingerTightSelectorTool',
+            'medium'   : 'AsgPhotonFastCaloRingerMediumSelectorTool',
+            'loose'    : 'AsgPhotonFastCaloRingerLooseSelectorTool',
+            })
+        
+
+    ToolConfigFile = collections.OrderedDict({
+          'tight'   :['PhotonRingerTightTriggerConfig.conf'    ],
+          'medium'  :['PhotonRingerMediumTriggerConfig.conf'   ],
+          'loose'   :['PhotonRingerLooseTriggerConfig.conf'    ],
+          })
+    
+    selectors = []    
+    from RingerSelectorTools.RingerSelectorToolsConf import Ringer__AsgRingerSelectorTool
+
+    for pidname , name in SelectorNames.items():
+      SelectorTool=Ringer__AsgRingerSelectorTool(name)
+      SelectorTool.UseTansigOutput = True # FIXME: Should be removed in the next round
       SelectorTool.ConfigFiles = [ (ConfigFilePath+'/'+path) for path in ToolConfigFile[pidname] ]
       selectors.append(SelectorTool)
     return selectors
