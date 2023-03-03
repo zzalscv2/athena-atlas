@@ -109,7 +109,7 @@ class ConfigSettings_tauIso( _ConfigSettingsBase ):
       self._vertex         = "HLT_IDVertex_Tau"
       self._electronPID    = False
       self._pTmin          = 0.8*GeV
-      self._Xi2max         = 12
+      #self._Xi2max         = 9     Revert to default value for 2023
       # potential change coming up ...
       # self._minNSiHits_vtx = 6
 
