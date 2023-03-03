@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHoughPatternEvent/MuonHoughMathUtils.h"
@@ -62,17 +62,6 @@ std::string MuonHoughMathUtils::intToString(int i) {
     ss >> s;
 
     return s;
-}
-
-const char* MuonHoughMathUtils::stringToChar(std::string& string) {
-    const char* constcharstar = string.data();
-    return constcharstar;
-}
-
-const char* MuonHoughMathUtils::intToChar(int i) {
-    std::string string = intToString(i);
-    const char* constcharstar = stringToChar(string);
-    return constcharstar;
 }
 
 double MuonHoughMathUtils::distanceToLine2D(double x0, double y0, double r0, double phi)

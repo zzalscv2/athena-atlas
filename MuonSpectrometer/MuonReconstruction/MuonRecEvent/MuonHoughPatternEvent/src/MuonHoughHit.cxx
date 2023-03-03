@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHoughPatternEvent/MuonHoughHit.h"
@@ -30,22 +30,22 @@ MuonHoughHit::MuonHoughHit(const Trk::PrepRawData* prd) {
 
 MuonHoughHit::MuonHoughHit(const Amg::Vector3D& pos_vec, bool measures_phi, MuonHough::DetectorTechnology detector_id, double prob,
                            double weight, const Trk::PrepRawData* prd, int id) :
-    m_orig_weight(weight) {
-    m_detector_id = detector_id;
-    m_measures_phi = measures_phi;
-    m_pos = pos_vec;
-    m_probability = prob;
-    m_weight = weight;
-    m_prd = prd;
-    m_id = id;
-
-    m_radius = m_pos.perp();
-    m_abs = m_pos.mag();
-    m_theta = std::atan2(m_radius, getHitz());
-    m_phi = m_pos.phi();
-    m_barrel = (std::abs(m_radius / getHitz()) < MuonHough::tan_barrel) ? 0 : 1;
-    m_phi_sector = calcPhiSector();
-    m_magnetic_trackratio = calcMagneticTrackRatio();
+    m_prd(prd),
+    m_pos(pos_vec),
+    m_id(id),
+    m_radius(m_pos.perp()),
+    m_abs(m_pos.mag()),
+    m_phi(m_pos.phi()),
+    m_theta(std::atan2(m_radius, getHitz())),
+    m_barrel ((std::abs(m_radius / getHitz()) < MuonHough::tan_barrel) ? 0 : 1),
+    m_phi_sector(calcPhiSector()),
+    m_magnetic_trackratio(calcMagneticTrackRatio()),
+    m_weight(weight),
+    m_orig_weight(weight),
+    m_probability(prob),
+    m_detector_id(detector_id),
+    m_measures_phi(measures_phi)
+{
 }
 
 std::string MuonHoughHit::getWhichDetector() const {
