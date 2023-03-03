@@ -28,12 +28,13 @@
 #include "xAODTruth/TruthParticleContainer.h"
 
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
-#include "IsolationSelection/IIsolationSelectionTool.h"
 #include "TriggerMatchingTool/R3MatchingTool.h"
 
 #include "xAODTruth/TruthEvent.h"
 #include "xAODTruth/TruthParticle.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
+
+#include "StoreGate/ReadDecorHandleKeyArray.h"
 
 class DQTGlobalWZFinderAlg: public AthMonitorAlgorithm
 {
@@ -82,7 +83,6 @@ private:
   bool checkTruthTrack(const xAOD::TrackParticle* trk) const;
 
   ToolHandle<CP::IMuonSelectionTool> m_muonSelectionTool{this,"MuonSelectionTool","CP::MuonSelectionTool/MuonSelectionTool","MuonSelectionTool"};
-  ToolHandle<CP::IIsolationSelectionTool> m_isolationSelectionTool{this,"IsolationSelectionTool","CP::IsolationSelectionTool/IsolationSelectionTool","IsolationSelectionTool"};
   ToolHandle<Trig::R3MatchingTool> m_r3MatchingTool{this, "R3MatchingTool", "Trig::R3MatchingTool", "R3MatchingTool"};
 
   ToolHandle<IMCTruthClassifier> m_truthClassifier{this, "MCTruthClassifier", "MCTruthClassifier/MCTruthClassifier", "MCTruthClassifier"}; 
@@ -101,10 +101,10 @@ private:
    {this, "MuonInDetTrackParticleContainerName", "InDetTrackParticles", ""};
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_msTrackParticleContainerKey
    {this, "MuonExtrapolatedTrackParticleContainerName", "ExtrapolatedMuonTrackParticles", ""};
-  
-  SG::ReadDecorHandleKey<xAOD::MuonContainer> m_isoMuonContainerKey
-   {this, "isoMuonContainerName", "Muons.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500", "Isolation decoration for muon container"};
-  SG::ReadDecorHandleKey<xAOD::ElectronContainer> m_isoElectronContainerKey
-   {this, "isoElectronContainerName", "Electrons.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000", "Isolation decoration for electron container"};
+
+  SG::ReadDecorHandleKeyArray<xAOD::MuonContainer> m_isoMuonContainerKey
+   {this, "IsoMuonVariableNames", {"Muons.ptcone20"}, "Isolation decoration for muon container"};
+  SG::ReadDecorHandleKeyArray<xAOD::ElectronContainer> m_isoElectronContainerKey
+   {this, "IsoElectronVariableNames", {"Electrons.ptcone20"}, "Isolation decoration for electron container"};
 };
 #endif
