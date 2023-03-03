@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARMONITORING_LARDIGITALTRIGGMON_H
@@ -62,7 +62,7 @@ private:
   /** Switch to online/offline mode*/
   Gaudi::Property<bool>        m_IsOnline      {this, "IsOnline", false}; 
   Gaudi::Property<int>         m_NLatomeBins{this, "NLatomeBins", 117};
-  Gaudi::Property<int>         m_NLatomeBins_side{this, "NLatomeBins", 56};
+  Gaudi::Property<int>         m_NLatomeBins_side{this, "NLatomeBins_side", 56};
 
 
   Gaudi::Property<std::string>        m_EtName{this, "EtName", "Dummy"};
