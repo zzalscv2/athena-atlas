@@ -10,7 +10,7 @@
 
 Reco_tf.py  \
 --AMI f1328  \
---preExec="flags.DQ.Steering.doJetMon=False; flags.DQ.Steering.doTauMon=False; flags.DQ.Steering.doMissingEtMon=False" \
+--preExec="flags.DQ.Steering.doTauMon=False;" \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_cos.00421739.express_express.merge.RAW._lb0534._SFO-12._0001.1" \
 --outputAODFile="AOD.pool.root" \
 --outputESDFile="ESD.pool.root" \
