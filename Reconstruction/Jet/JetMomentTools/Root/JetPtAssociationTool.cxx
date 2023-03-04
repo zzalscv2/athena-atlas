@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetPtAssociationTool.cxx
@@ -18,7 +18,7 @@ using xAOD::JetConstituentVector;
 
 //**********************************************************************
 
-JetPtAssociationTool::JetPtAssociationTool(std::string myname)
+JetPtAssociationTool::JetPtAssociationTool(const std::string& myname)
   : asg::AsgTool(myname) {
 
 }
