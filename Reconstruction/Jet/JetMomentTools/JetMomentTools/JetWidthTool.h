@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetWidthTool.h
@@ -27,7 +27,7 @@ class JetWidthTool : public asg::AsgTool,
 public:
 
   // Constructor from tool name.
-  JetWidthTool(std::string myname);
+  JetWidthTool(const std::string& myname);
 
   virtual StatusCode initialize() override;
 

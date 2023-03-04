@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetECPSFractionTool.h
@@ -33,7 +33,7 @@ class JetECPSFractionTool : public asg::AsgTool,
 public:
 
   // Constructor from tool name.
-  JetECPSFractionTool(std::string myname);
+  JetECPSFractionTool(const std::string& myname);
 
   // Inherited method to decorate a jet.
   virtual StatusCode decorate(const xAOD::JetContainer& jets) const override;

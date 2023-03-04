@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetPtAssociationTool.h
@@ -36,7 +36,7 @@ public:
 public:
 
   /// Constructor from tool name.
-  JetPtAssociationTool(std::string myname);
+  JetPtAssociationTool(const std::string& myname);
 
   /// Initialization.
   virtual StatusCode initialize() override;

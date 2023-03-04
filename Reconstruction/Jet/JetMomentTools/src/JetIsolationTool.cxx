@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetIsolationTool.cxx 
@@ -83,7 +83,7 @@ namespace jet {
         return result_map;
       }
       
-      bool scheduleKinematicCalculation(string kname){
+      bool scheduleKinematicCalculation(const std::string& kname){
         for( size_t i=0; i<4 ;i++){  
           if( s_kname[i]==kname) {
             m_kinematics.push_back( (Kinematics) i);
@@ -203,7 +203,7 @@ namespace jet {
     }
 
  
-    IsolationCalculator *createCalulator(string n, double parameter){
+    IsolationCalculator *createCalulator(const std::string& n, double parameter){
 
       if( n == "IsoKR" )        return new  IsolationCalculatorT<IsoKR>( parameter);      
       if( n == "IsoDelta" )     return new  IsolationCalculatorT<IsoDelta>( parameter);      
