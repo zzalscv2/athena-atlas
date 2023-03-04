@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/SimpleUpdater.icc
@@ -73,6 +73,40 @@ void SimpleUpdater<T>::discard (std::unique_ptr<T> p)
 template <class T>
 void SimpleUpdater<T>::quiescent (const Context_t&)
 {
+}
+
+
+/**
+ * @brief Delete all objects we're managing except for the current one.
+ *
+ * This is NOT concurrency-safe.  No other threads may be accessing
+ * the objects managed here.
+ */
+template <class T>
+void SimpleUpdater<T>::clean()
+{
+  const T* obj = m_obj;
+  auto it = std::remove_if (m_objs.begin(), m_objs.end(),
+                            [&] (const std::unique_ptr<T>& p) { return p.get() != obj; });
+  m_objs.erase (it, m_objs.end());
+}
+
+
+/**
+ * @brief Swap this object with another.
+ * @param other The other object with which to swap.
+ *
+ * This operation is NOT concurrency-safe.  No other threads may be accessing
+ * either container during this operation.
+ */
+template <class T>
+void SimpleUpdater<T>::swap (SimpleUpdater& other)
+{
+  const T* tmp = m_obj.load (std::memory_order_relaxed);
+  m_obj.store (other.m_obj.load(std::memory_order_relaxed), std::memory_order_relaxed);
+  other.m_obj.store (tmp, std::memory_order_relaxed);
+
+  m_objs.swap (other.m_objs);
 }
 
 
