@@ -25,12 +25,13 @@ mutex_t guidMapMutex;
 /* Lookup table for translating GUIDs into class names.
    Here for convenience to avoid searching through ROOT dictionary information
    which can be slow and produce side effects.
-   This must mutch the GUIDs in selection.xml files.
+   This must match the GUIDs in selection.xml files.
    GUIDs should never change, so it is safe to hardcode them here.
 */
 const std::pair<Guid, const char*> GuidToClname[] = {
    {Guid("F41DF744-242D-11E6-B472-02163E010CEC"), "xAOD::TrackParticleAuxContainer_v3"}
   ,{Guid("8251F481-EA4C-4852-AE72-BED87E6FD2FB"), "xAOD::MuonAuxContainer_v4"}
+  ,{Guid("89AE2C6B-A862-499C-8BDA-11D24FAC83F1"), "xAOD::JetTrigAuxContainer_v1"}
 };
 
 using namespace pool;
