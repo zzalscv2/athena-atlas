@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuPatPrimitives/MuPatTrack.h"
@@ -11,55 +11,60 @@
 
 namespace Muon {
 
-    // Static members   
-    unsigned int MuPatTrack::s_processingStageStringMaxLen = 0;
-    std::vector<std::string> MuPatTrack::s_processingStageStrings;
-    std::once_flag MuPatTrack::s_stageStringsInitFlag;
-
     // Static functions
 
     unsigned int MuPatTrack::processingStageStringMaxLen() {
-        std::call_once(s_stageStringsInitFlag, MuPatTrack::initProcessingStageStrings);
-        return s_processingStageStringMaxLen;
+        static const unsigned int maxlen = []() -> unsigned int {
+          const std::vector<std::string>& pss = processingStageStrings();
+          auto it = std::max_element(pss.begin(), pss.end(),
+                                     [](const std::string& lhs, const std::string& rhs) { return lhs.size() < rhs.size(); });
+
+          if (it != pss.end())
+            return it->size();
+          return 0u;
+        }();
+
+        return maxlen;
     }
 
-    void MuPatTrack::initProcessingStageStrings() {
-        s_processingStageStrings.resize(NumberOfProcessingStages + 1);
-        s_processingStageStrings[Unknown] = "Unknown";
-        s_processingStageStrings[InitialLoop] = "InitialLoop";
-        s_processingStageStrings[LayerRecovery] = "LayerRecov";
-        s_processingStageStrings[ExtendedWithSegment] = "ExtWSegment";
-        s_processingStageStrings[SegmentRecovery] = "SegmentRecov";
-        s_processingStageStrings[FitRemovedSegment] = "FitRmSegment";
-        s_processingStageStrings[RefitRemovedSegment] = "RefitRmSegment";
-        s_processingStageStrings[AmbiguityCreateCandidateFromSeeds] = "AmbiCreate";
-        s_processingStageStrings[AmbiguitySelectCandidates] = "AmbiSelect";
-        s_processingStageStrings[MatchFail] = "MatchFail";
-        s_processingStageStrings[FitFail] = "FitFail";
-        s_processingStageStrings[FitWorse] = "FitWorse";
-        s_processingStageStrings[UnassociatedEM] = "UnassocEM";
-        s_processingStageStrings[FitRemovedLayer] = "FitRmLayer";
-        s_processingStageStrings[TrackSelector] = "TrackSelect";
-        s_processingStageStrings[KeptUntilEndOfCombi] = "--KEPT--";
-        s_processingStageStrings[NumberOfProcessingStages] = "OutOfBounds";
+    std::vector<std::string> MuPatTrack::initProcessingStageStrings() {
+        std::vector<std::string> pss;
+        pss.resize(NumberOfProcessingStages + 1);
+        pss[Unknown] = "Unknown";
+        pss[InitialLoop] = "InitialLoop";
+        pss[LayerRecovery] = "LayerRecov";
+        pss[ExtendedWithSegment] = "ExtWSegment";
+        pss[SegmentRecovery] = "SegmentRecov";
+        pss[FitRemovedSegment] = "FitRmSegment";
+        pss[RefitRemovedSegment] = "RefitRmSegment";
+        pss[AmbiguityCreateCandidateFromSeeds] = "AmbiCreate";
+        pss[AmbiguitySelectCandidates] = "AmbiSelect";
+        pss[MatchFail] = "MatchFail";
+        pss[FitFail] = "FitFail";
+        pss[FitWorse] = "FitWorse";
+        pss[UnassociatedEM] = "UnassocEM";
+        pss[FitRemovedLayer] = "FitRmLayer";
+        pss[TrackSelector] = "TrackSelect";
+        pss[KeptUntilEndOfCombi] = "--KEPT--";
+        pss[NumberOfProcessingStages] = "OutOfBounds";
 
-        auto it = std::max_element(s_processingStageStrings.begin(), s_processingStageStrings.end(),
-                                   [](const std::string& lhs, const std::string& rhs) { return lhs.size() < rhs.size(); });
+        return pss;
+    }
 
-        if (it != s_processingStageStrings.end()) {
-            s_processingStageStringMaxLen = it->size();
-        } else {
-            s_processingStageStringMaxLen = 0;
-        }
+    const std::vector<std::string>& MuPatTrack::processingStageStrings()
+    {
+      static const std::vector<std::string> processingStrings =
+        initProcessingStageStrings();
+      return processingStrings;
     }
 
     const std::string& MuPatTrack::processingStageString(MuPatTrack::ProcessingStage stage) {
-        std::call_once(s_stageStringsInitFlag, MuPatTrack::initProcessingStageStrings);
+        const std::vector<std::string>& pss = processingStageStrings();
 
-        if (static_cast<size_t>(stage) < s_processingStageStrings.size()) {
-            return s_processingStageStrings[static_cast<size_t>(stage)];
+        if (static_cast<size_t>(stage) < pss.size()) {
+            return pss[static_cast<size_t>(stage)];
         } else {
-            return s_processingStageStrings[NumberOfProcessingStages];
+            return pss[NumberOfProcessingStages];
         }
     }
 
