@@ -109,10 +109,10 @@ class LArPileUpTool : public PileUpToolBase
   SG::WriteHandle<LArHitEMap> m_hitmap_DigiHSTruth; //Set in perpareEvent, used in subsequent methods (mergeEvent, fillMapFromHit)
 
   Gaudi::Property<bool> m_onlyUseContainerName{this, "OnlyUseContainerName", true, "Don't use the ReadHandleKey directly. Just extract the container name from it."};
-  SG::ReadHandleKeyArray<LArHitContainer> m_hitContainerKeys{this, "LArHitContainers", {"LArHitEMB", "LArHitEMEC", "LArHitHEC", "LArHitFCAL"},
-      "Name of input hit vectors (default=[LArHitEMB, LArHitEMEC, LArHitHEC, LArHitFCAL])" };  //!< vector with the names of LArHitContainers to use
-  SG::ReadHandleKeyArray<LArHitFloatContainer> m_hitFloatContainerKeys{this, "LArHitFloatContainers", {"LArHitEMB", "LArHitEMEC", "LArHitHEC", "LArHitFCAL"},
-      "Name of input hit vectors (default=[LArHitEMB, LArHitEMEC, LArHitHEC, LArHitFCAL])" };  //!< vector with the names of LArHitFloatContainers to use
+  StringArrayProperty m_inputKeys{this, "InputHitContainers", {"LArHitEMB", "LArHitEMEC", "LArHitHEC", "LArHitFCAL"},
+      "Name of input hit vectors (default=[LArHitEMB, LArHitEMEC, LArHitHEC, LArHitFCAL])" };
+  SG::ReadHandleKeyArray<LArHitContainer> m_hitContainerKeys;
+  SG::ReadHandleKeyArray<LArHitFloatContainer> m_hitFloatContainerKeys;
   SG::ReadHandleKey<LArDigitContainer> m_inputDigitContainerKey{this, "InputDigitContainer", "",
       "Name of input digit container"}; // input digit container name 
   std::vector <std::string> m_hitContainerNames; // hit container name list
