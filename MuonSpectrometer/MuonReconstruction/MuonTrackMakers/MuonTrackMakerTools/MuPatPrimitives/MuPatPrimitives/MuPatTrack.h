@@ -130,7 +130,10 @@ namespace Muon {
         // private member functions
         //
         /** @brief Initialize s_processingStageStrings & s_processingStageStringMaxLen */
-        static void initProcessingStageStrings();
+        static std::vector<std::string> initProcessingStageStrings();
+        /** @brief Return list of processing stage strings. */
+        static const std::vector<std::string>& processingStageStrings();
+
         /** @brief update segment/track association, if add == true ,will add track to segments else remove it */
         void updateSegments(bool add);
 
@@ -144,9 +147,6 @@ namespace Muon {
     private:       
 
         
-        static std::once_flag s_stageStringsInitFlag;
-        static std::vector<std::string> s_processingStageStrings ATLAS_THREAD_SAFE;
-        static unsigned int s_processingStageStringMaxLen ATLAS_THREAD_SAFE;
         /** @brief increase the segment counters by the passed number */
         void modifySegmentCounters(int change);
 
