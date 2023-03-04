@@ -103,11 +103,6 @@ def getLArPileUpTool(name='LArPileUpTool', **kwargs): ## useLArFloat()=True,isOv
 
     kwargs.setdefault('RndmEvtOverlay', isOverlay() )
 
-    if useLArFloat():
-        kwargs.setdefault("LArHitContainers",[])
-    else:
-        kwargs.setdefault("LArHitFloatContainers",[])
-
     # if doing MC+MC overlay 
     from AthenaCommon.GlobalFlags import globalflags
     if isOverlay() and globalflags.DataSource() == 'geant4':
