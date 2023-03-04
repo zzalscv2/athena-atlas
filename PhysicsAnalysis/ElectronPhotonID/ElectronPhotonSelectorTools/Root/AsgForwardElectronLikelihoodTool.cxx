@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -143,7 +143,7 @@ AsgForwardElectronLikelihoodTool::initialize()
     std::string filename = PathResolverFindCalibFile(PDFfilename);
 
     if (!filename.empty()) {
-      m_rootForwardTool->setPDFFileName(filename.c_str());
+      m_rootForwardTool->setPDFFileName(filename);
     } else {
       ATH_MSG_ERROR("Could not find PDF file");
       return StatusCode::FAILURE;

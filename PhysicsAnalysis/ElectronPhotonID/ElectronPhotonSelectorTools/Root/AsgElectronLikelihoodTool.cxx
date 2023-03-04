@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -125,7 +125,7 @@ AsgElectronLikelihoodTool::initialize()
 
     resolvedPDF = PathResolverFindCalibFile(PDFfilename);
     if (!resolvedPDF.empty()) {
-      m_rootTool->setPDFFileName(resolvedPDF.c_str());
+      m_rootTool->setPDFFileName(resolvedPDF);
     } else {
       ATH_MSG_ERROR("Couldn't resolve PDF filename from "
                     << PDFfilename << ", config file = " << configFile);
