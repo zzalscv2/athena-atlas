@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EXCEPTIONS_HH_TAURECTOOLS
@@ -14,23 +14,23 @@ namespace lwtDev {
   // base exception
   class LightweightNNException: public std::logic_error {
   public:
-    LightweightNNException(std::string problem);
+    LightweightNNException(const std::string& problem);
   };
 
   // thrown by the constructor if something goes wrong
   class NNConfigurationException: public LightweightNNException {
   public:
-    NNConfigurationException(std::string problem);
+    NNConfigurationException(const std::string& problem);
   };
 
   // thrown by `compute`
   class NNEvaluationException: public LightweightNNException {
   public:
-    NNEvaluationException(std::string problem);
+    NNEvaluationException(const std::string& problem);
   };
   class OutputRankException: public NNEvaluationException {
   public:
-    OutputRankException(std::string problem);
+    OutputRankException(const std::string& problem);
   };
 }
 
