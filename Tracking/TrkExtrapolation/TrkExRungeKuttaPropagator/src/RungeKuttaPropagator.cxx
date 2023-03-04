@@ -946,9 +946,10 @@ propagateStraightLine(Cache& cache,
 // where mS - max step allowed if mS > 0 propagate along    momentum
 //                                mS < 0 propogate opposite momentum
 /////////////////////////////////////////////////////////////////////////////////
+template <typename Container>
 void
 globalOneSidePositions(Cache& cache,
-                       std::list<Amg::Vector3D>& GP,
+                       Container& GP,
                        const double* ATH_RESTRICT P,
                        const Trk::MagneticFieldProperties& M,
                        const Trk::CylinderBounds& CB,
@@ -1098,9 +1099,10 @@ globalOneSidePositions(Cache& cache,
 // where mS - max step allowed if mS > 0 propagate along    momentum
 //                                mS < 0 propogate opposite momentum
 /////////////////////////////////////////////////////////////////////////////////
+template <typename Container>
 void
 globalTwoSidePositions(Cache& cache,
-                       std::list<Amg::Vector3D>& GP,
+                       Container& GP,
                        const double* ATH_RESTRICT P,
                        const Trk::MagneticFieldProperties& M,
                        const Trk::CylinderBounds& CB,
@@ -1501,6 +1503,127 @@ propagateRungeKutta(Cache& cache,
     Tb.setParameters(&Su, p);
   }
   return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// GlobalPostions and steps for set surfaces
+/////////////////////////////////////////////////////////////////////////////////
+template <typename Container1, typename Container2>
+void
+globalPositionsImpl(
+  Cache& cache,
+  const Trk::PatternTrackParameters& Tp,
+  Container1& SU,
+  Container2& GP,
+  const Trk::MagneticFieldProperties& M)
+{
+  cache.m_direction = 0.;
+  cache.m_mcondition = false;
+  cache.m_maxPath = 10000.;
+  cache.m_needgradient = false;
+  M.magneticFieldMode() == Trk::FastField ? cache.m_solenoid = true : cache.m_solenoid = false;
+  M.magneticFieldMode() != Trk::NoField ? cache.m_mcondition = true : cache.m_mcondition = false;
+
+  double Step = 0.;
+  double P[64];
+  if (!Trk::RungeKuttaUtils::transformLocalToGlobal(false, Tp, P)){
+    return;
+  }
+
+  auto su = SU.begin();
+  auto sue = SU.end();
+  // Loop trough all input surfaces
+  for (; su != sue; ++su) {
+    const Amg::Transform3D& T = (*su)->transform();
+    Trk::SurfaceType ty = (*su)->type();
+
+    if (ty == Trk::SurfaceType::Plane) {
+
+      double s[4];
+      const double d =
+          T(0, 3) * T(0, 2) + T(1, 3) * T(1, 2) + T(2, 3) * T(2, 2);
+      if (d >= 0.) {
+        s[0] = T(0, 2);
+        s[1] = T(1, 2);
+        s[2] = T(2, 2);
+        s[3] = d;
+      } else {
+        s[0] = -T(0, 2);
+        s[1] = -T(1, 2);
+        s[2] = -T(2, 2);
+        s[3] = -d;
+      }
+      if (!propagateWithJacobian(cache, false, 1, s, P, Step)) {
+        return;
+      }
+    } else if (ty == Trk::SurfaceType::Line) {
+      double s[6] = {T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2)};
+      if (!propagateWithJacobian(cache, false, 0, s, P, Step)) {
+        return;
+      }
+    } else if (ty == Trk::SurfaceType::Disc) {
+      double s[4];
+      const double d =
+          T(0, 3) * T(0, 2) + T(1, 3) * T(1, 2) + T(2, 3) * T(2, 2);
+      if (d >= 0.) {
+        s[0] = T(0, 2);
+        s[1] = T(1, 2);
+        s[2] = T(2, 2);
+        s[3] = d;
+      } else {
+        s[0] = -T(0, 2);
+        s[1] = -T(1, 2);
+        s[2] = -T(2, 2);
+        s[3] = -d;
+      }
+      if (!propagateWithJacobian(cache, false, 1, s, P, Step)) {
+        return;
+      }
+    } else if (ty == Trk::SurfaceType::Cylinder) {
+
+      const Trk::CylinderSurface* cyl =
+          static_cast<const Trk::CylinderSurface*>(*su);
+      const double r0[3] = {P[0], P[1], P[2]};
+      double s[9] = {T(0, 3),           T(1, 3),           T(2, 3),
+                     T(0, 2),           T(1, 2),           T(2, 2),
+                     cyl->bounds().r(), cache.m_direction, 0.};
+
+      if (!propagateWithJacobian(cache, false, 2, s, P, Step)) {
+        return;
+      }
+
+      // For cylinder we do test for next cross point
+      //
+      if (cyl->bounds().halfPhiSector() < 3.1 && newCrossPoint(*cyl, r0, P)) {
+        s[8] = 0.;
+        if (!propagateWithJacobian(cache, false, 2, s, P, Step)) {
+          return;
+        }
+      }
+    } else if (ty == Trk::SurfaceType::Perigee) {
+
+      double s[6] = {T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2)};
+      if (!propagateWithJacobian(cache, false, 0, s, P, Step)) {
+        return;
+      }
+    } else if (ty == Trk::SurfaceType::Cone) {
+      double k = static_cast<const Trk::ConeSurface*>(*su)->bounds().tanAlpha();
+      k = k * k + 1.;
+      double s[9] = {T(0, 3), T(1, 3), T(2, 3),           T(0, 2), T(1, 2),
+                     T(2, 2), k,       cache.m_direction, 0.};
+      if (!propagateWithJacobian(cache, false, 3, s, P, Step)) {
+        return;
+      }
+    } else {
+      return;
+    }
+    if (cache.m_maxPathLimit) {
+      return;
+    }
+
+    Amg::Vector3D gp(P[0], P[1], P[2]);
+    GP.emplace_back(gp, Step);
+  }
 }
 
 /*
@@ -2257,130 +2380,34 @@ Trk::RungeKuttaPropagator::globalPositions(const ::EventContext& ctx,
 void
 Trk::RungeKuttaPropagator::globalPositions(const ::EventContext& ctx,
                                            const PatternTrackParameters& Tp,
+                                           std::vector<const Trk::Surface*>& SU,
+                                           std::list<std::pair<Amg::Vector3D, double>>& GP,
+                                           const Trk::MagneticFieldProperties& M,
+                                           ParticleHypothesis) const
+{
+  Cache cache{};
+  getFieldCacheObject(cache, ctx);
+  cache.m_dlt = m_dlt;
+  cache.m_helixStep = m_helixStep;
+  cache.m_straightStep = m_straightStep;
+  cache.m_usegradient = m_usegradient;
+  globalPositionsImpl(cache, Tp, SU, GP, M);
+}
+void
+Trk::RungeKuttaPropagator::globalPositions(const ::EventContext& ctx,
+                                           const PatternTrackParameters& Tp,
                                            std::list<const Trk::Surface*>& SU,
                                            std::list<std::pair<Amg::Vector3D, double>>& GP,
                                            const Trk::MagneticFieldProperties& M,
                                            ParticleHypothesis) const
 {
   Cache cache{};
-  // Get field cache object
   getFieldCacheObject(cache, ctx);
   cache.m_dlt = m_dlt;
   cache.m_helixStep = m_helixStep;
   cache.m_straightStep = m_straightStep;
   cache.m_usegradient = m_usegradient;
-  cache.m_direction = 0.;
-  cache.m_mcondition = false;
-  cache.m_maxPath = 10000.;
-  cache.m_needgradient = false;
-  M.magneticFieldMode() == Trk::FastField ? cache.m_solenoid = true : cache.m_solenoid = false;
-  M.magneticFieldMode() != Trk::NoField ? cache.m_mcondition = true : cache.m_mcondition = false;
-
-  double Step = 0.;
-  double P[64];
-  if (!Trk::RungeKuttaUtils::transformLocalToGlobal(false, Tp, P))
-    return;
-
-  std::list<const Trk::Surface*>::iterator su = SU.begin();
-  std::list<const Trk::Surface*>::iterator sue = SU.end();
-
-  // Loop trough all input surfaces
-  //
-  for (; su != sue; ++su) {
-
-    const Amg::Transform3D& T = (*su)->transform();
-    Trk::SurfaceType ty = (*su)->type();
-
-    if (ty == Trk::SurfaceType::Plane) {
-
-      double s[4];
-      const double d = T(0, 3) * T(0, 2) + T(1, 3) * T(1, 2) + T(2, 3) * T(2, 2);
-
-      if (d >= 0.) {
-        s[0] = T(0, 2);
-        s[1] = T(1, 2);
-        s[2] = T(2, 2);
-        s[3] = d;
-      } else {
-        s[0] = -T(0, 2);
-        s[1] = -T(1, 2);
-        s[2] = -T(2, 2);
-        s[3] = -d;
-      }
-      if (!propagateWithJacobian(cache, false, 1, s, P, Step)){
-        return;
-      }
-    } else if (ty == Trk::SurfaceType::Line) {
-
-      double s[6] = { T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2) };
-      if (!propagateWithJacobian(cache, false, 0, s, P, Step)){
-        return;
-      }
-    } else if (ty == Trk::SurfaceType::Disc) {
-
-      double s[4];
-      const  double d = T(0, 3) * T(0, 2) + T(1, 3) * T(1, 2) + T(2, 3) * T(2, 2);
-      if (d >= 0.) {
-        s[0] = T(0, 2);
-        s[1] = T(1, 2);
-        s[2] = T(2, 2);
-        s[3] = d;
-      } else {
-        s[0] = -T(0, 2);
-        s[1] = -T(1, 2);
-        s[2] = -T(2, 2);
-        s[3] = -d;
-      }
-      if (!propagateWithJacobian(cache, false, 1, s, P, Step)){
-        return;
-      }
-    } else if (ty == Trk::SurfaceType::Cylinder) {
-
-      const Trk::CylinderSurface* cyl =
-        static_cast<const Trk::CylinderSurface*>(*su);
-      const double r0[3] = { P[0], P[1], P[2] };
-      double s[9] = { T(0, 3),           T(1, 3),           T(2, 3),
-                      T(0, 2),           T(1, 2),           T(2, 2),
-                      cyl->bounds().r(), cache.m_direction, 0. };
-
-      if (!propagateWithJacobian(cache, false, 2, s, P, Step)){
-        return;
-      }
-
-      // For cylinder we do test for next cross point
-      //
-      if (cyl->bounds().halfPhiSector() < 3.1 && newCrossPoint(*cyl, r0, P)) {
-        s[8] = 0.;
-        if (!propagateWithJacobian(cache, false, 2, s, P, Step)){
-          return;
-        }
-      }
-    } else if (ty == Trk::SurfaceType::Perigee) {
-
-      double s[6] = { T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2) };
-      if (!propagateWithJacobian(cache, false, 0, s, P, Step)){
-        return;
-      }
-    } else if (ty == Trk::SurfaceType::Cone) {
-
-      double k = static_cast<const Trk::ConeSurface*>(*su)->bounds().tanAlpha();
-      k = k * k + 1.;
-      double s[9] = { T(0, 3), T(1, 3), T(2, 3),
-                      T(0, 2), T(1, 2), T(2, 2),
-                      k,       cache.m_direction, 0. };
-      if (!propagateWithJacobian(cache, false, 3, s, P, Step)) {
-        return;
-      }
-    } else{
-      return;
-    }
-
-    if (cache.m_maxPathLimit)
-      return;
-
-    Amg::Vector3D gp(P[0], P[1], P[2]);
-    GP.emplace_back(gp, Step);
-  }
+  globalPositionsImpl(cache, Tp, SU, GP, M);
 }
 
 void

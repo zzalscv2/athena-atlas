@@ -313,6 +313,14 @@ public:
     const MagneticFieldProperties&,
     ParticleHypothesis particle = pion) const override final;
 
+  virtual void globalPositions(
+    const EventContext& ctx,
+    const PatternTrackParameters&,
+    std::vector<const Surface*>&,
+    std::list<std::pair<Amg::Vector3D, double>>&,
+    const MagneticFieldProperties&,
+    ParticleHypothesis particle = pion) const override final;
+
   /** unimplemented propagateT*/
   virtual std::unique_ptr<Trk::TrackParameters> propagateT(
     const EventContext&,

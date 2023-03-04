@@ -108,7 +108,17 @@ namespace Trk {
        std::list<const Surface*>                    &,
        std::list< std::pair<Amg::Vector3D,double> > &,
        const MagneticFieldProperties                &,
-       ParticleHypothesis particle=pion              ) const = 0;
+       ParticleHypothesis particle=pion) const = 0;
+
+    virtual void globalPositions
+      (const ::EventContext&          ctx,
+       const PatternTrackParameters                 &,
+       std::vector<const Surface*>                  &,
+       std::list< std::pair<Amg::Vector3D,double> > &,
+       const MagneticFieldProperties                &,
+       ParticleHypothesis particle=pion) const = 0;
+
+
 
   };
 } // end namespace

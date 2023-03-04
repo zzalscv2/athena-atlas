@@ -25,17 +25,16 @@
 namespace{
   constexpr size_t MAX_ROAD_SIZE(399);
 
-  std::list<const Trk::Surface*> 
-  listOfSurfacesFromVectorOfElements(const std::vector<const InDetDD::TRT_BaseElement*> & v){
+  std::vector<const Trk::Surface*> 
+  vectorOfSurfacesFromVectorOfElements(const std::vector<const InDetDD::TRT_BaseElement*> & v){
     size_t roadsize{0};
-    std::list<const Trk::Surface*> surfaces;
+    std::vector<const Trk::Surface*> surfaces;
     for(const auto &pThisElement: v) {
      surfaces.emplace_back(&(pThisElement->surface())); 
      if(++roadsize==MAX_ROAD_SIZE) break;
     }
     return surfaces;
   }
-
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -375,7 +374,7 @@ InDet::TRT_TrackExtensionTool_xk::findSegment(const EventContext& ctx,
 
   // Array pointers to surface preparation
   //
-  auto surfaces = listOfSurfacesFromVectorOfElements(detectorElements);
+  auto surfaces =vectorOfSurfacesFromVectorOfElements(detectorElements);
 
   // Global position on surfaces production
   //
@@ -462,7 +461,7 @@ InDet::TRT_TrackExtensionTool_xk::isGoodExtension(const EventContext& ctx,
   if(int(detectorElements.size()) < m_minNumberDCs) return false;
   // Array pointers to surface preparation
   //
-  auto surfaces = listOfSurfacesFromVectorOfElements(detectorElements);
+  auto surfaces = vectorOfSurfacesFromVectorOfElements(detectorElements);
   
   // Global position on surfaces production
   //
