@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/SimpleUpdater_test.cxx
@@ -49,6 +49,24 @@ void test1()
     assert (su.get().m_x == 3);
     su.quiescent (SU::defaultContext());
     assert (log == (std::vector<int> {1, 2, 3}));
+  }
+  assert (log.empty());
+
+  {
+    using SU = CxxUtils::SimpleUpdater<Payload>;
+    SU su;
+    su.update (std::make_unique<Payload> (log, 1), SU::defaultContext());
+    assert (su.get().m_x == 1);
+    su.discard (std::make_unique<Payload> (log, 2));
+    su.update (std::make_unique<Payload> (log, 3), SU::defaultContext());
+    assert (su.get().m_x == 3);
+    su.discard (std::make_unique<Payload> (log, 4));
+    assert (su.get().m_x == 3);
+    assert (log == (std::vector<int> {1, 2, 3, 4}));
+
+    su.clean();
+    assert (su.get().m_x == 3);
+    assert (log == (std::vector<int> {3}));
   }
   assert (log.empty());
 }
