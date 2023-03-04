@@ -72,5 +72,7 @@
    <typedef name="xAOD::MissingETAuxAssociationMap" />
 
    <typedef name="MissingETBase::Types::jetlink_t" />
+   <typedef name="MissingETBase::Types::objlink_t" />
+   <typedef name="MissingETBase::Types::objlink_vector_t" />
 
 </lcgdict>
