@@ -248,6 +248,17 @@ if ( True ) :
     # none of these will work
     "HLT_tau.*_idperf.*:HLT_IDTrack_Tau_IDTrig",
 
+
+    # only need one instance for the tag of the tag and probe, because we
+    # don't actually use the triggder collections at all, only the Roi and 
+    # offline objects in the roi 
+    # "HLT_mu.*tau.*_idperf.*:HLT_IDTrack_Muon_FTF:HLT_Roi_L2SAMuon:te=0",
+    "HLT_mu.*tau.*_idperf.*:HLT_IDTrack_Muon_IDTrig:HLT_Roi_L2SAMuon:te=0",
+
+    "HLT_mu.*tau.*_idperf.*:HLT_IDTrack_TauCore_FTF:roi=HLT_Roi_TauCore:te=1",
+    "HLT_mu.*tau.*_idperf.*:HLT_IDTrack_TauIso_FTF:roi=HLT_Roi_TauIso:te=1",
+    "HLT_mu.*tau.*_idperf.*:HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso:te=1",
+
     # should work for single stage tau ???
     # "HLT_tau.*_idperf.*:HLT_IDTrack_Tau_FTF",
 

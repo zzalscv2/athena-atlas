@@ -773,13 +773,31 @@ void AnalysisConfigMT_Ntuple::loop() {
 		  leg = std::atoi(m_chainNames[ichain].element().c_str());
 		}
 
+
+		std::string rgex = roi_key;
+
 		std::vector< TrigCompositeUtils::LinkInfo<TrigRoiDescriptorCollection> > rois = 
 		  (*m_tdt)->template features<TrigRoiDescriptorCollection>( Trig::FeatureRequestDescriptor( chainName,  
 													    decisiontype, 
-													    roi_key, 
+													    rgex,
 													    feature_type,
 													    "roi", 
 													    leg ) );
+
+		/// a hack to fetch back the Rois with "_probe" in the name if the standard named 
+		/// RoiDescriptors are not actually present for this chain ...  
+		if ( rois.empty() ) {
+		  if ( !rgex.empty() ) {
+		    rgex += "_probe";
+		    rois = (*m_tdt)->template features<TrigRoiDescriptorCollection>( Trig::FeatureRequestDescriptor( chainName,  
+														     decisiontype, 
+														     rgex,
+														     feature_type,
+														     "roi", 
+														     leg ) );
+		  }
+		}
+
 		int iroi = 0; /// count of how many rois processed so far
 
 		/// if no rois for this chain then move along
@@ -808,7 +826,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 		  const ElementLink<TrigRoiDescriptorCollection> roi_link = roi_info.link;
 
 		  /// check this is not a spurious TDT match
-		  if ( roi_key!="" && roi_link.dataID()!=roi_key ) continue;
+		  if ( roi_key!="" && roi_link.dataID()!=rgex ) continue;
 
 		  const TrigRoiDescriptor* const* roiptr = roi_link.cptr();
 
