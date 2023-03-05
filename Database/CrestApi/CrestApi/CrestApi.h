@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2019-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2019-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 
@@ -861,7 +861,7 @@ namespace Crest {
  *    json tag_info28 = myCrestClientF.findRunLumiInfo(params28);
  * </pre>
  */
-    nlohmann::json findRunLumiInfo(urlParameters params);
+    nlohmann::json findRunLumiInfo(const urlParameters& params);
 
 
 /**
