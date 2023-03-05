@@ -55,6 +55,7 @@ Py:MetaReader        INFO Current filenames: ['mergedBS._0001.data', 'mergedBS._
 |   |-- beam_energy       : 6500
 |   |-- beam_type         : collisions
 |   |-- conditions_tag    : None
+|   |-- detectorMask      : [32353976271262187511]
 |   |-- eventTypes        : ['IS_DATA', 'IS_ATLAS', 'Unknown']
 |   |-- evt_number        : [1]
 |   |-- file_comp_alg     : 1
@@ -74,6 +75,7 @@ Py:MetaReader        INFO Current filenames: ['mergedBS._0001.data', 'mergedBS._
     |-- beam_energy       : 6500
     |-- beam_type         : collisions
     |-- conditions_tag    : None
+    |-- detectorMask      : [32353976271262187511]
     |-- eventTypes        : ['IS_DATA', 'IS_ATLAS', 'Unknown']
     |-- evt_number        : [11]
     |-- file_comp_alg     : 1
