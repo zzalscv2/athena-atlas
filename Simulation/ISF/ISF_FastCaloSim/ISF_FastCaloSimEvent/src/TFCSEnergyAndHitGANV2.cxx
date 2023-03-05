@@ -120,18 +120,12 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(TFCSSimulationState& simulstate, const TF
     return false;
   }
 
-  TFCSGANEtaSlice::NetworkOutputs outputs = m_slice->GetNetworkOutputs(truth, extrapol, simulstate);
+  const TFCSGANEtaSlice::NetworkOutputs& outputs = m_slice->GetNetworkOutputs(truth, extrapol, simulstate);
   ATH_MSG_VERBOSE("network outputs size: "<<outputs.size());
 
-  TFCSGANXMLParameters::Binning binsInLayers = m_param.GetBinning();
-  TFCSGANEtaSlice::FitResultsPerLayer fitResults;
-  
-  std::vector<int> relevantlayers;
-  
-  if (m_param.GetGANVersion() > 1){
-    fitResults = m_slice->GetFitResults();
-    relevantlayers = m_param.GetRelevantLayers();    
-  } 
+  const TFCSGANXMLParameters::Binning& binsInLayers = m_param.GetBinning();
+  const auto ganVersion = m_param.GetGANVersion();
+  const TFCSGANEtaSlice::FitResultsPerLayer& fitResults = m_slice->GetFitResults(); // used only if GAN version > 1
   
   unsigned int energyBins = outputs.size();
   ATH_MSG_VERBOSE("energy voxels size = "<<energyBins);
@@ -141,13 +135,13 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(TFCSSimulationState& simulstate, const TF
   simulstate.set_E(0);
   
   int vox = 0; 
-  for (auto element : binsInLayers){
+  for (const auto& element : binsInLayers){
     int layer = element.first;
-    TH2D* h = &element.second;
+    const TH2D* h = &element.second;
 
     int xBinNum = h->GetNbinsX();
     int yBinNum = h->GetNbinsY();
-    TAxis* x = (TAxis*)h->GetXaxis();
+    const TAxis* x = h->GetXaxis();
 
     //If only one bin in r means layer is empty, no value should be added
     if (xBinNum == 1) {
@@ -163,7 +157,7 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(TFCSSimulationState& simulstate, const TF
     for (int ix = 1; ix <= xBinNum; ++ix){
       double binsInAlphaInRBin = GetAlphaBinsForRBin(x, ix, yBinNum);   
       for (int iy = 1; iy <= binsInAlphaInRBin; ++iy){
-        double energyInVoxel  = outputs["out_" + std::to_string(vox)];
+        double energyInVoxel  = outputs.at("out_" + std::to_string(vox));
         ATH_MSG_VERBOSE(" Vox "<< vox
         << " energy " << energyInVoxel
         << " binx " << ix
@@ -188,13 +182,13 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(TFCSSimulationState& simulstate, const TF
   }
   
   vox = 0;
-  for (auto element : binsInLayers){
+  for (const auto& element : binsInLayers){
     int layer = element.first;
-    TH2D* h = &element.second;
+    const TH2D* h = &element.second;
     int xBinNum = h->GetNbinsX();
     int yBinNum = h->GetNbinsY();
-    TAxis* x = (TAxis*)h->GetXaxis();
-    TAxis* y = (TAxis*)h->GetYaxis();
+    const TAxis* x = h->GetXaxis();
+    const TAxis* y = h->GetYaxis();
 
     simulstate.setAuxInfo<int>("GANlayer"_FCShash,layer);
     TFCSLateralShapeParametrizationHitBase::Hit hit;
@@ -256,7 +250,7 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(TFCSSimulationState& simulstate, const TF
       //Horrible work around for variable # of bins along alpha direction 
       int binsToMerge = yBinNum == 32 ? 32/binsInAlphaInRBin : 1;
       for (int iy = 1; iy <= binsInAlphaInRBin; ++iy){
-        double energyInVoxel  = outputs["out_" + std::to_string(vox)];
+        double energyInVoxel  = outputs.at("out_" + std::to_string(vox));
         int lowEdgeIndex = (iy-1)*binsToMerge+1;
 
         ATH_MSG_VERBOSE(" Vox "<< vox
@@ -286,7 +280,7 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(TFCSSimulationState& simulstate, const TF
           }
           else{
             //d = 2*r*sin (a/2r) this distance at the upper r must be 1mm for layer 1 or 5, 5mm otherwise. 
-            TAxis* y = (TAxis*)h->GetYaxis();
+            const TAxis* y = h->GetYaxis();
             double angle = y->GetBinUpEdge(iy) - y->GetBinLowEdge(iy);
             double r = x->GetBinUpEdge(ix);
             double d = 2 * r * sin(angle/2*r);
@@ -306,18 +300,18 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(TFCSSimulationState& simulstate, const TF
           double r = x->GetBinLowEdge(ix) + x->GetBinWidth(ix)/(nHitsR+1)*ir;
                    
           for (int ialpha = 1; ialpha <= nHitsAlpha; ++ialpha){
-            if (m_param.GetGANVersion() > 1){
-              if (fitResults[layer][ix-1] != 0){
+            if (ganVersion > 1){
+              if (fitResults.at(layer)[ix-1] != 0){
                 int tries = 0;
                 double a = CLHEP::RandFlat::shoot(simulstate.randomEngine(), x->GetBinLowEdge(ix), x->GetBinUpEdge(ix));
-                double rand_r = log((a - x->GetBinLowEdge(ix))/(x->GetBinWidth(ix)))/fitResults[layer][ix-1];
+                double rand_r = log((a - x->GetBinLowEdge(ix))/(x->GetBinWidth(ix)))/fitResults.at(layer)[ix-1];
                 while ((rand_r < x->GetBinLowEdge(ix) || rand_r > x->GetBinUpEdge(ix)) && tries < 100){
                   a = CLHEP::RandFlat::shoot(simulstate.randomEngine(), x->GetBinLowEdge(ix), x->GetBinUpEdge(ix));
-                  rand_r = log((a - x->GetBinLowEdge(ix))/(x->GetBinWidth(ix)))/fitResults[layer][ix-1];     
+                  rand_r = log((a - x->GetBinLowEdge(ix))/(x->GetBinWidth(ix)))/fitResults.at(layer)[ix-1];     
                   tries++;            
                 }
                 if (tries >= 100){
-                  ATH_MSG_VERBOSE(" Too many tries for bin [" << x->GetBinLowEdge(ix) << "-" << x->GetBinUpEdge(ix) << "] having slope " << fitResults[layer][ix-1] << " will use grid (old method)" );
+                  ATH_MSG_VERBOSE(" Too many tries for bin [" << x->GetBinLowEdge(ix) << "-" << x->GetBinUpEdge(ix) << "] having slope " << fitResults.at(layer)[ix-1] << " will use grid (old method)" );
                 }
                 else{
                   r = rand_r;

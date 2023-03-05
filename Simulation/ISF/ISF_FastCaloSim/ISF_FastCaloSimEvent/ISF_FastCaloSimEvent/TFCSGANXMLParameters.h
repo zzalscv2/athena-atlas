@@ -33,7 +33,7 @@ class TFCSGANXMLParameters
   void Print() const;
 
   std::vector<int> GetRelevantLayers() const {return m_relevantlayers;};
-  Binning GetBinning() const {return m_binning;};
+  const Binning& GetBinning() const {return m_binning;};
   int GetLatentSpaceSize() const {return m_latentDim;};
   int GetGANVersion() const {return m_ganVersion;};
   bool IsSymmetrisedAlpha() const {return m_symmetrisedAlpha;};
