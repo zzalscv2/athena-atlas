@@ -211,6 +211,7 @@ class TrigCaloClusterMaker_topo (TrigCaloClusterMakerBase):
 
         TrigTopoMaker.NeighborOption = "super3D"
         TrigTopoMaker.RestrictHECIWandFCalNeighbors  = False
+        TrigTopoMaker.RestrictPSNeighbors = False
         TrigTopoMaker.CellThresholdOnEorAbsEinSigma     =    0.0
         TrigTopoMaker.NeighborThresholdOnEorAbsEinSigma =    2.0  #instead of 2
         TrigTopoMaker.SeedThresholdOnEorAbsEinSigma     =    4.0  #instead of 4
@@ -321,7 +322,6 @@ def HLTCaloCellMaker(flags, name, roisKey='UNSPECIFIED', CellsName=None, monitor
     cellmaker = algorithmCAToGlobalWrapper(hltCaloCellMakerCfg, flags, name, roisKey, CellsName, monitorCells)[0]
     return cellmaker
 
-
 def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None, monitorCells=True):
     acc = ComponentAccumulator()
     from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg, CaloDataAccessSvcDependencies
@@ -371,14 +371,69 @@ def hltCaloCellSeedlessMakerCfg(flags, roisKey='UNSPECIFIED'):
     return acc
 
 
-def hltTopoClusterMakerCfg(flags, name, clustersKey, cellsKey="CaloCells"):
+def hltCaloLocalCalib(flags, name = "hltCaloLocalCalib"):
+    det_version_is_rome = flags.GeoModel.AtlasVersion.startswith("Rome")
+    localCalibTool = CompFactory.CaloLCWeightTool("TrigLCWeight",
+           CorrectionKey="H1ClusterCellWeights",
+           SignalOverNoiseCut=2.0, UseHadProbability=True)
+    trigLCClassify = CompFactory.CaloLCClassificationTool("TrigLCClassify",
+           ClassificationKey="EMFracClassify",
+           UseSpread=False, MaxProbability=0.85 if det_version_is_rome else 0.5,
+           UseNormalizedEnergyDensity=not det_version_is_rome,
+           StoreClassificationProbabilityInAOD=True)
+    tool = CompFactory.CaloClusterLocalCalib( name,
+           ClusterRecoStatus=[1, 2], ClusterClassificationTool=[ trigLCClassify ],
+           LocalCalibTools=[ localCalibTool ])
+    return tool
+
+
+def hltCaloOOCalib(flags, name = "hltCaloOOCCalib"):
+    localCalibTool = CompFactory.CaloLCOutOfClusterTool("TrigLCOut",
+           CorrectionKey="OOCCorrection",UseEmProbability=False,
+           UseHadProbability=True)
+    tool = CompFactory.CaloClusterLocalCalib( name,
+           ClusterRecoStatus=[1, 2],
+           LocalCalibTools=[ localCalibTool ] )
+    return tool
+
+def hltCaloOOCPi0Calib(flags, name = "hltCaloOOCPi0Calib" ):
+    localCalibTool = CompFactory.CaloLCOutOfClusterTool("TrigLCOutPi0",
+           CorrectionKey="OOCPi0Correction", UseEmProbability=True,
+           UseHadProbability=False)
+    tool = CompFactory.CaloClusterLocalCalib( name,
+           ClusterRecoStatus=[1, 2],
+           LocalCalibTools=[ localCalibTool ] )
+    return tool
+
+def hltCaloDMCalib(flags, name = "hltCaloDMCalib" ):
+    localCalibTool = CompFactory.CaloLCDeadMaterialTool("TrigLCDeadMaterial",
+           HadDMCoeffKey="HadDMCoeff2", ClusterRecoStatus=0,
+           WeightModeDM=2,UseHadProbability=True)
+    tool = CompFactory.CaloClusterLocalCalib( name,
+            ClusterRecoStatus=[1, 2],
+            LocalCalibTools=[ localCalibTool ] )
+    return tool
+
+
+
+def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
+                    cellsKey="CaloCells", doLC=True):
     acc = ComponentAccumulator()
+
     from CaloRec.CaloTopoClusterConfig import (
         CaloTopoClusterToolCfg,
         CaloTopoClusterSplitterToolCfg,
     )
 
     topoMaker = acc.popToolsAndMerge(CaloTopoClusterToolCfg(flags, cellsname=cellsKey))
+    topoMaker.RestrictPSNeighbors=False
+    listClusterCorrectionTools = []
+    if doLC :
+       from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
+       # We need the electronic noise for the LC weights
+       acc.merge(CaloNoiseCondAlgCfg(flags, noisetype="electronicNoise"))
+       listClusterCorrectionTools = [ hltCaloLocalCalib(flags), hltCaloOOCalib(flags),
+             hltCaloOOCPi0Calib(flags), hltCaloDMCalib(flags) ]
 
     #timing
     topoMaker.SeedCutsInT = flags.Trigger.Calo.TopoCluster.doTimeCut
@@ -432,6 +487,7 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey, cellsKey="CaloCells"):
         Cells=cellsKey,
         CaloClusters=recordable(clustersKey),
         ClusterMakerTools = [ topoMaker, topoSplitter, topoMoments], # moments are missing yet
+        ClusterCorrectionTools = listClusterCorrectionTools,
         MonCells = doMonCells,
         MonTool = trigCaloClusterMakerMonTool(flags, doMonCells) )
 
@@ -467,74 +523,14 @@ def hltCaloTopoClusterCalibratorCfg(flags, name, clustersin, clustersout, **kwar
     from CaloRec.CaloTopoClusterConfig import caloTopoCoolFolderCfg
     acc.merge(caloTopoCoolFolderCfg(flags))
 
-    # Figure out the detector version
-    det_version_is_rome = flags.GeoModel.AtlasVersion.startswith("Rome")
-
     calibrator = CompFactory.TrigCaloClusterCalibrator(
-        name, InputClusters=clustersin, OutputClusters=clustersout, **kwargs
+        name, InputClusters=clustersin, OutputClusters=clustersout, 
+        **kwargs
+        #OutputCellLinks = clustersout+"_cellLinks", **kwargs
     )
 
-    calibrator.ClusterCorrectionTools = [
-        CompFactory.CaloClusterLocalCalib(
-            "TrigLocalCalib",
-            ClusterRecoStatus=[1, 2],
-            ClusterClassificationTool=[
-                CompFactory.CaloLCClassificationTool(
-                    "TrigLCClassify",
-                    ClassificationKey="EMFracClassify",
-                    UseSpread=False,
-                    MaxProbability=0.85 if det_version_is_rome else 0.5,
-                    UseNormalizedEnergyDensity=not det_version_is_rome,
-                    StoreClassificationProbabilityInAOD=True,
-                ),
-            ],
-            LocalCalibTools=[
-                CompFactory.CaloLCWeightTool(
-                    "TrigLCWeight",
-                    CorrectionKey="H1ClusterCellWeights",
-                    SignalOverNoiseCut=2.0,
-                    UseHadProbability=True,
-                )
-            ],
-        ),
-        CompFactory.CaloClusterLocalCalib(
-            "TrigOOCCalib",
-            ClusterRecoStatus=[1, 2],
-            LocalCalibTools=[
-                CompFactory.CaloLCOutOfClusterTool(
-                    "TrigLCOut",
-                    CorrectionKey="OOCCorrection",
-                    UseEmProbability=False,
-                    UseHadProbability=True,
-                ),
-            ],
-        ),
-        CompFactory.CaloClusterLocalCalib(
-            "TrigOOCPi0Calib",
-            ClusterRecoStatus=[1, 2],
-            LocalCalibTools=[
-                CompFactory.CaloLCOutOfClusterTool(
-                    "TrigLCOutPi0",
-                    CorrectionKey="OOCPi0Correction",
-                    UseEmProbability=True,
-                    UseHadProbability=False,
-                ),
-            ],
-        ),
-        CompFactory.CaloClusterLocalCalib(
-            "TrigDMCalib",
-            ClusterRecoStatus=[1, 2],
-            LocalCalibTools=[
-                CompFactory.CaloLCDeadMaterialTool(
-                    "TrigLCDeadMaterial",
-                    HadDMCoeffKey="HadDMCoeff2",
-                    ClusterRecoStatus=0,
-                    WeightModeDM=2,
-                    UseHadProbability=True,
-                )
-            ],
-        ),
-    ]  # End ClusterCorrectionTools
+    calibrator.ClusterCorrectionTools = [ hltCaloLocalCalib(flags), hltCaloOOCalib(flags),
+             hltCaloOOCPi0Calib(flags), hltCaloDMCalib(flags) ]
     #NB: Could we take these from CaloRec.CaloTopoClusterConfig.getTopoClusterLocalCalibTools?
 
     # Monitoring
@@ -611,10 +607,15 @@ def hltHICaloTowerMakerCfg(flags, name, clustersKey, cellsKey="CaloCells"):
 if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.Enums import LHCPeriod
 
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.RAW
+    flags.Input.Files = defaultTestFiles.RAW_RUN3
     flags.Input.isMC=False
+    flags.GeoModel.Run=LHCPeriod.Run3
     flags.lock()    
     hltCaloCellSeedlessMakerCfg(flags).printConfig(withDetails=True)
     hltCaloCellMakerCfg(flags, "SthFS").printConfig(withDetails=True)
+    hltTopoClusterMakerCfg(flags, "TrigCaloClusterMaker_topo").printConfig(withDetails=True,summariseProps=True)
+    hltCaloTopoClusterCalibratorCfg(flags,"Calibrator",
+       clustersin="clustersIn",clustersout="clustersOut").printConfig(withDetails=True, summariseProps=True)
