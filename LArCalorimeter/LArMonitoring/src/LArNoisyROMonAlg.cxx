@@ -45,7 +45,7 @@ void LArNoisyROMonAlg::fillHistogramsOnce(const EventContext& ctx, const bool is
   const LArBadFebCont *badCont{*badHdl};
   if(badCont) {
     if( !isMC && badCont->size()==0) {
-      ATH_MSG_WARNING("List of known Bad FEBs empty !? ");
+      ATH_MSG_DEBUG("List of known Bad FEBs empty !? ");
     } else {
       auto sl=Monitored::Scalar<unsigned>("slotBad",0);
       auto FT=Monitored::Scalar<unsigned>("FTBad",0);
