@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetConstituentsRetriever.cxx
@@ -23,7 +23,7 @@ typedef IJetConstituentsRetriever::NameList NameList;
 
 //**********************************************************************
 
-JetConstituentsRetriever::JetConstituentsRetriever(std::string name)
+JetConstituentsRetriever::JetConstituentsRetriever(const std::string& name)
   : AsgTool(name), m_hpjr("",this) {
   declareProperty("UsePseudojet", m_usepj =true);
   declareProperty("UseJetConstituents", m_usejetcons =true);

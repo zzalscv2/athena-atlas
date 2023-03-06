@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetFinder.cxx
@@ -34,7 +34,7 @@ using xAOD::JetContainer;
 
 //**********************************************************************
 
-JetFinder::JetFinder(string name)
+JetFinder::JetFinder(const std::string& name)
 : AsgTool(name),
   m_bld("JetFromPseudojet",this),
   m_fjalg(fastjet::undefined_jet_algorithm),

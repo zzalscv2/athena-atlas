@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetFromPseudojet.cxx
@@ -28,7 +28,7 @@ typedef std::vector<PseudoJet> PseudoJetVector;
 
 //**********************************************************************
 
-JetFromPseudojet::JetFromPseudojet(std::string name)
+JetFromPseudojet::JetFromPseudojet(const std::string& name)
   :   AsgTool(name), m_doArea(false), m_doFourVecArea(false) {
   declareProperty("Attributes", m_atts);
 

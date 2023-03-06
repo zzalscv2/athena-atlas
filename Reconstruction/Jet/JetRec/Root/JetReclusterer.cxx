@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetReclusterer.cxx
@@ -14,7 +14,7 @@ typedef IJetFinder::NameList NameList;
 
 //**********************************************************************
 
-JetReclusterer::JetReclusterer(std::string name)
+JetReclusterer::JetReclusterer(const std::string& name)
   : AsgTool(name), m_hcr("",this), m_finder("",this) {
   declareProperty("JetConstituentsRetriever", m_hcr);
   declareProperty("JetFinder", m_finder);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetDumper.cxx
@@ -21,7 +21,7 @@ typedef JetDumper::NameList NameList;
 
 //**********************************************************************
 
-JetDumper::JetDumper(std::string myname)
+JetDumper::JetDumper(const std::string& myname)
 : AsgTool(myname) {
   ATH_MSG_INFO("JetDumper::ctor: Declaring properties.");
   declareProperty("ContainerName", m_cname ="");

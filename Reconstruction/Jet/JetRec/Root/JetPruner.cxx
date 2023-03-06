@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetPruner.cxx
@@ -19,7 +19,7 @@ using xAOD::JetContainer;
 
 //**********************************************************************
 
-JetPruner::JetPruner(std::string name)
+JetPruner::JetPruner(const std::string& name)
   : AsgTool(name), m_bld("",this) {
   declareProperty("JetAlgorithm", m_jetalg ="CamKt");
   declareProperty("RCut", m_rcut =0.3);

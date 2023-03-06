@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetModifiedMassDrop.cxx
@@ -24,7 +24,7 @@ using xAOD::JetContainer;
 
 //**********************************************************************
 
-JetModifiedMassDrop::JetModifiedMassDrop(std::string name)
+JetModifiedMassDrop::JetModifiedMassDrop(const std::string& name)
   : AsgTool(name), m_bld("",this) {
   declareProperty("ZCut",            m_zcut = 0.1);
   declareProperty("SymmetryMeasure", m_sym = scalar_z);

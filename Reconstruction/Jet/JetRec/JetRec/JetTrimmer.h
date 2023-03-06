@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetTrimmer.h
@@ -25,7 +25,7 @@ ASG_TOOL_CLASS(JetTrimmer, IJetGroomer)
 public:
 
   // Ctor.
-  JetTrimmer(std::string name);
+  JetTrimmer(const std::string& name);
 
   // Dtor.
   ~JetTrimmer();

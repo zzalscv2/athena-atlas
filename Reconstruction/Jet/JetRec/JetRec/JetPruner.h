@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetPruner.h
@@ -26,7 +26,7 @@ ASG_TOOL_CLASS(JetPruner, IJetGroomer)
 public:
 
   // Ctor.
-  JetPruner(std::string name);
+  JetPruner(const std::string& name);
 
   // Dtor.
   ~JetPruner();

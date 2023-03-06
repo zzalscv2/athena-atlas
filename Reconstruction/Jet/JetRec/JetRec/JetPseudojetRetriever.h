@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetPseudojetRetriever.h
@@ -26,7 +26,7 @@ ASG_TOOL_CLASS(JetPseudojetRetriever, IJetPseudojetRetriever)
 public:
 
   // Ctor.
-  JetPseudojetRetriever(std::string name);
+  JetPseudojetRetriever(const std::string& name);
 
   // Initialization.
   StatusCode initialize();

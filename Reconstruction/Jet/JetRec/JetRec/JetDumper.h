@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetDumper.h
@@ -70,7 +70,7 @@ public:  // typedefs
 public:  // methods
 
   // Ctor.
-  JetDumper(std::string myname);
+  JetDumper(const std::string& myname);
 
   // Process a jet.
   // Returns 0 for success.

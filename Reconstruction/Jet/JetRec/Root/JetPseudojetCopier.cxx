@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetPseudojetCopier.cxx
@@ -149,7 +149,7 @@ copy(const JetContainer& srcjets, const JetContainer& dstjets, string pjmapname)
 //**********************************************************************
 
 int JetPseudojetCopier::
-copy(const JetContainer& srcjets, string dstname, string pjmapname) const {
+copy(const JetContainer& srcjets, const std::string& dstname, const std::string& pjmapname) const {
   const xAOD::JetContainer* pdstjets;
   if ( ! evtStore()->retrieve(pdstjets, dstname).isSuccess() ) {
     ATH_MSG_WARNING("Unable to retrieve destination jet container.");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetFinder.h
@@ -50,7 +50,7 @@ ASG_TOOL_CLASS(JetFinder, IJetFinder)
 
 public:
 
-  JetFinder(std::string name);
+  JetFinder(const std::string& name);
 
   virtual StatusCode initialize() override;
 
