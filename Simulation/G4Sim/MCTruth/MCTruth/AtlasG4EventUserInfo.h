@@ -7,14 +7,15 @@
 
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
+#include "AtlasHepMC/MagicNumbers.h"
 #include "G4ThreeVector.hh"
 #include "G4VUserEventInformation.hh"
 
 class AtlasG4EventUserInfo: public G4VUserEventInformation {
 public:
         AtlasG4EventUserInfo(): G4VUserEventInformation(),m_nrOfPrimaryParticles(0),
-                        m_nrOfPrimaryVertices(0),m_secondaryParticleBarCode(200000),
-                        m_secondaryVertexBarCode(-200000),m_theEvent(0),
+                        m_nrOfPrimaryVertices(0),m_secondaryParticleBarCode(HepMC::SIM_BARCODE_THRESHOLD),
+                        m_secondaryVertexBarCode(-HepMC::SIM_BARCODE_THRESHOLD),m_theEvent(0),
                         m_currentPrimary(0),m_currentlyTraced(0),
                         m_last_processed_barcode(0),m_last_processed_step(0) {}
         HepMC::GenEvent* GetHepMCEvent() ;

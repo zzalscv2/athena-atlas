@@ -6,6 +6,7 @@
 #include "MCTruthClassifier/MCTruthClassifier.h"
 #include "xAODTruth/TruthVertex.h"
 #include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
@@ -33,7 +34,7 @@ using namespace MCTruthPartClassifier;
 CopyTruthJetParticles::CopyTruthJetParticles(const std::string& name)
   : CopyTruthParticles(name) ,
     m_maxAbsEta(5)
-  , m_barcodeOffset(200000)
+  , m_barcodeOffset(HepMC::SIM_BARCODE_THRESHOLD)
   , m_barcodeFromMetadata(2)
   , m_photonCone(0.1)
   , m_classif("",this)

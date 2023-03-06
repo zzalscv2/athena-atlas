@@ -789,7 +789,7 @@ TIDA::Track* TrigTrackSelector::makeTrack( const TruthParticle* track, unsigned 
     //// if ( gp->production_vertex() ){
     ////   cout<<"BP BP gp->production_vertex() "<<endl;
     ////   generatedTrackPerigee = truthToTrack->makePerigeeParameters( gp );
-    ////   if (generatedTrackPerigee == NULL && gp->barcode() > 1000000 ) {
+    ////   if (generatedTrackPerigee == NULL && gp->barcode() > HepMC::SIM_REGENERATION_INCREMENT ) {
     ////      std::cout<<"BP No perigee available for interacting truth particle."<<std::endl;
     ////   }
     //// }

@@ -28,7 +28,7 @@ atlas_add_component( BarcodeServices
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps GaudiKernel BarcodeEventLib BarcodeInterfacesLib BarcodeServicesLib )
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps TruthUtils GaudiKernel BarcodeEventLib BarcodeInterfacesLib BarcodeServicesLib )
 
 
 atlas_add_test(BitCalculator_test

@@ -8,6 +8,7 @@
 #include "xAODEgamma/EgammaTruthxAODHelpers.h"
 #include "xAODEgamma/Electron.h"
 #include "xAODTruth/TruthParticle.h"
+#include "TruthUtils/MagicNumbers.h"
 
 namespace DerivationFramework {
 
@@ -19,7 +20,7 @@ BkgElectronClassification::BkgElectronClassification(const std::string& t,
 
   declareInterface<DerivationFramework::IAugmentationTool>(this);
   declareProperty("barcodeCut",
-                  m_barcodecut = 200e3,
+                  m_barcodecut = HepMC::SIM_BARCODE_THRESHOLD,
                   "Cut on the barcode for the xAODEgammaTruthHelpers");
 }
 

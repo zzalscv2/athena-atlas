@@ -296,7 +296,7 @@ StatusCode TruthTestTool::processEvent()
         }
         else {
           ++npart_sec;
-          const int gen = barcode/ 1000000 +2;
+          const int gen = barcode/ HepMC::SIM_REGENERATION_INCREMENT +2;
           m_n_generations ->Fill(gen);
         }
       }

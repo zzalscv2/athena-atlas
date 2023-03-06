@@ -7,6 +7,7 @@
 
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthEventContainer.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #include <math.h>
 
@@ -20,7 +21,7 @@ namespace InDet {
     declareInterface<IInDetTrackTruthOriginTool>(this);
 #endif
 
-    declareProperty("barcodeG4", m_barcodeG4 = 2e5);
+    declareProperty("barcodeG4", m_barcodeG4 = HepMC::SIM_BARCODE_THRESHOLD);
     declareProperty("matchingProbabilityCut", m_matchingProbabilityCut = 0.5);
 
     declareProperty("truthParticleLinkName", m_truthParticleLinkName = "truthParticleLink");
