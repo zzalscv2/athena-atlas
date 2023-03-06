@@ -20,3 +20,23 @@ def MbtsSGInputCfg(flags):
     """Configures SG Input needed for MBTS Fex"""
     from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
     return SGInputLoaderCfg(flags, [('TileTBID','DetectorStore+TileTBID' )])
+
+
+if __name__ == '__main__':
+    from AthenaCommon.Configurable import Configurable
+    Configurable.configurableRun3Behavior=1
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+
+    flags = initConfigFlags()
+    flags.Input.Files=defaultTestFiles.RAW # or ESD or AOD or ...
+    flags.lock()
+
+    acc=ComponentAccumulator()
+
+    acc.merge(MbtsFexCfg(flags, MbtsBitsKey="some"))
+    acc.merge(MbtsSGInputCfg(flags))
+
+    acc.printConfig(withDetails=True, summariseProps=True)
+
+    acc.wasMerged()

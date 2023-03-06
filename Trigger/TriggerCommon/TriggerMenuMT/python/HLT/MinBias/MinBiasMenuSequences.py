@@ -13,7 +13,6 @@ from TrigMinBias.TrigMinBiasMonitoring import MbtsHypoToolMonitoring
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from ..Config.MenuComponents import InViewRecoCA, InEventRecoCA, SelectionCA, MenuSequenceCA
 
 
@@ -87,15 +86,6 @@ def TrigZVertexHypoToolGen(chainDict):
         hypo.minWeight = -1 # pass always
 
     return hypo
-
-@AccumulatorCache
-def SPCounterRecoAlgCfg(flags):
-    acc = ComponentAccumulator()
-    from TrigMinBias.TrigMinBiasMonitoring import SpCountMonitoring
-    alg = CompFactory.TrigCountSpacePoints( SpacePointsKey = recordable("HLT_SpacePointCounts"), 
-                                            MonTool = SpCountMonitoring(flags) )
-    acc.addEventAlgo(alg)
-    return acc
     
 
 
@@ -110,7 +100,6 @@ def MinBiasSPSequence(flags):
     spInputMakerAlg.RoITool = ViewCreatorInitialROITool()
     spInputMakerAlg.InViewRoIs = "InputRoI"
     spInputMakerAlg.Views = "SPView"
-
     idTrigConfig = getInDetTrigConfig('minBias')
 
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
@@ -134,6 +123,7 @@ def MinBiasSPSequence(flags):
     spAlgsList = idAlgs
 
     from ..Config.MenuComponents import algorithmCAToGlobalWrapper # this will disappear once whole sequence would be configured at once
+    from TrigMinBias.MinBiasCountersConfig import SPCounterRecoAlgCfg
     spCount = algorithmCAToGlobalWrapper(SPCounterRecoAlgCfg, flags)[0]
 
     spRecoSeq = parOR("spRecoSeq", spAlgsList + [spCount])
@@ -167,7 +157,6 @@ def MinBiasZVertexFinderSequenceCfg(flags):
 
 
 def MinBiasTrkSequence(flags):
-        from TrigMinBias.TrigMinBiasConf import TrackCountHypoAlg
 
         trkInputMakerAlg = EventViewCreatorAlgorithm("IM_TrkEventViewCreator")
         trkInputMakerAlg.ViewFallThrough = True
@@ -185,14 +174,11 @@ def MinBiasTrkSequence(flags):
         vdv = algs[0]
         assert vdv.DataObjects, "Likely not ViewDataVerifier, does not have DataObjects property"
         vdv.DataObjects += [("xAOD::TrigCompositeContainer", "HLT_vtx_z")]
-        trackCountHypo = TrackCountHypoAlg()
-        trackCountHypo.trackCountKey = recordable("HLT_TrackCount")
-        trackCountHypo.tracksKey = recordable(idTrigConfig.tracks_IDTrig())
 
 
-        #TODO move a complete configuration of the algs to TrigMinBias package
-        from TrigMinBias.TrigMinBiasMonitoring import TrackCountMonitoring
-        trackCountHypo.MonTool = TrackCountMonitoring(flags, trackCountHypo) # monitoring tool configures itself using config of the hypo alg
+        from ..Config.MenuComponents import algorithmCAToGlobalWrapper # this will disappear once whole sequence would be configured at once
+        from TrigMinBias.MinBiasCountersConfig import TrackCounterHypoAlgCfg
+        trackCountHypo = algorithmCAToGlobalWrapper(TrackCounterHypoAlgCfg, flags)[0]
 
         trkRecoSeq = parOR("TrkRecoSeq", algs)
         trkSequence = seqAND("TrkSequence", [trkInputMakerAlg, trkRecoSeq])
@@ -234,10 +220,5 @@ if __name__ == "__main__":
     mb = MinBiasMbtsSequenceCfg(flags)
     mb.ca.printConfig()
     mbms = menuSequenceCAToGlobalWrapper(MinBiasMbtsSequenceCfg, flags)
-    
-    spca = SPCounterRecoAlgCfg(flags)
-    spca.printConfig(withDetails=True)
-
-    spca.wasMerged()
 
 
