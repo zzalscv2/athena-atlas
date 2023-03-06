@@ -59,8 +59,6 @@ namespace CxxUtils {
  *  - Dereferencing the iterator returns a structure by value, not a reference.
  *  - No try_emplace.
  *  - No insert methods with hints.
- *  - No swap().  Could probably be implemented if really needed, but would
- *    require support in ConcurrentHashmapImpl and in the Updater classes.
  *  - No operator==.
  *  - Nothing dealing with the bucket/node interface or merge().
  *
@@ -486,6 +484,20 @@ public:
    * @param ctx Execution context.
    */
   void quiescent (const Context_t& ctx);
+
+
+  /**
+   * @brief Swap this container with another.
+   * @param other The container with which to swap.
+   *
+   * This will also call swap on the Updater object; hence, the Updater
+   * object must also support swap.  The Hasher and Matcher instances
+   * are NOT swapped.
+   *
+   * This operation is NOT thread-safe.  No other threads may be accessing
+   * either container during this operation.
+   */
+  void swap (ConcurrentMap& other);
 
 
 private:

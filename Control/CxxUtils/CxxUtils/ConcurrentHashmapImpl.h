@@ -594,6 +594,20 @@ public:
   void quiescent (const typename Updater_t::Context_t& ctx);
 
 
+  /**
+   * @brief Swap this container with another.
+   * @param other The container with which to swap.
+   *
+   * This will also call swap on the Updater object; hence, the Updater
+   * object must also support swap.  The Hasher and Matcher instances
+   * are NOT swapped.
+   *
+   * This operation is NOT thread-safe.  No other threads may be accessing
+   * either container during this operation.
+   */
+  void swap (ConcurrentHashmapImpl& other);
+
+
 private:
   using mutex_t = std::mutex;
   using lock_t  = std::lock_guard<mutex_t>;

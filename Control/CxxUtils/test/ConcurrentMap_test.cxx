@@ -99,6 +99,22 @@ public:
   static Context_t defaultContext() { return 0; }
 
 
+  void swap (TestUpdater& other)
+  {
+    auto swap_atomic = [] (std::atomic<T*>& a, std::atomic<T*>& b)
+    {
+      T* tmp = a.load (std::memory_order_relaxed);
+      a.store (b.load (std::memory_order_relaxed),
+               std::memory_order_relaxed);
+      b.store (tmp, std::memory_order_relaxed);
+    };
+
+    swap_atomic (m_p, other.m_p);
+    m_garbage.swap (other.m_garbage);
+    std::swap (m_inGrace, other.m_inGrace);
+  }
+
+
 private:
   std::mutex m_mutex;
   std::atomic<T*> m_p;
@@ -488,6 +504,79 @@ void test3()
   test3a<TestMapul>();
   test3a<TestMapip>();
   test3a<TestMappu>();
+}
+
+
+// Swap
+template <class MAP>
+void test_swap1()
+{
+  MAP map1 {typename MAP::Updater_t()};
+  MAP map2 {typename MAP::Updater_t()};
+
+  const size_t MAXKEYS = 1000;
+  using key_type = typename MAP::key_type;
+  using mapped_type = typename MAP::mapped_type;
+  using const_iterator = typename MAP::const_iterator;
+  Values<key_type> keys1 (MAXKEYS);
+  Values<mapped_type> vals1 (MAXKEYS);
+  Values<key_type> keys2 (MAXKEYS, MAXKEYS);
+  Values<mapped_type> vals2 (MAXKEYS, MAXKEYS);
+
+  for (size_t i = 0; i < MAXKEYS; i++) {
+    auto [it, flag] = map1.emplace (keys1[i], vals1[i]);
+    assert (flag);
+  }
+  for (size_t i = 0; i < MAXKEYS; i++) {
+    auto [it, flag] = map2.emplace (keys2[i], vals2[i]);
+    assert (flag);
+  }
+  for (size_t i = 0; i < MAXKEYS; i+=2) {
+    assert (map2.erase (keys2[i]));
+  }
+
+  assert (map1.size() == MAXKEYS);
+  assert (map1.capacity() == 1024);
+  assert (map1.erased() == 0);
+  assert (map2.size() == MAXKEYS/2);
+  assert (map2.capacity() == 1024);
+  assert (map2.erased() == MAXKEYS/2);
+
+  map1.swap (map2);
+
+  assert (map1.size() == MAXKEYS/2);
+  assert (map1.capacity() == 1024);
+  assert (map1.erased() == MAXKEYS/2);
+  assert (map2.size() == MAXKEYS);
+  assert (map2.capacity() == 1024);
+  assert (map2.erased() == 0);
+
+  for (size_t i = 0; i < MAXKEYS; i++) {
+    const_iterator it = map2.find (keys1[i]);
+    assert (it.valid());
+    assert (it->first == keys1[i]);
+    assert (it->second == vals1[i]);
+  }
+
+  for (size_t i = 0; i < MAXKEYS; i++) {
+    const_iterator it = map1.find (keys2[i]);
+    if ((i%2) == 0) {
+      assert (!it.valid());
+    }
+    else {
+      assert (it.valid());
+      assert (it->first == keys2[i]);
+      assert (it->second == vals2[i]);
+    }
+  }
+}
+void test_swap()
+{
+  std::cout << "test_swap\n";
+  test_swap1<TestMapul>();
+  test_swap1<TestMapip>();
+  test_swap1<TestMappu>();
+  test_swap1<TestMapuf>();
 }
 
 
@@ -1135,6 +1224,7 @@ int main (int argc, char** argv)
   test1();
   test2();
   test3();
+  test_swap();
   test_threaded();
   return 0;
 }
