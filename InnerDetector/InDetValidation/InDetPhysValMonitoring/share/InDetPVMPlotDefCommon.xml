@@ -718,6 +718,10 @@
   <x title="Num. matching truth" n="10" lo="0" hi="10"/>
   <y title="Entries"/>
 </h>
+<h id="nparticlesel" type="TH1F" title="Number of Selected Truth Particles">
+  <x title="Num. truth particles" n="500" lo="0" hi="5000"/>
+  <y title="Entries"/>
+</h>
 <h id="nparticle" type="TH1F" title="Number of Truth Particles">
   <x title="Num. truth particles" n="500" lo="0" hi="5000"/>
   <y title="Entries"/>

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -20,12 +20,13 @@ void
 InDetPerfPlot_nTracks::initializePlots() {
   const bool prependDirectory(false);
   SingleHistogramDefinition hd = retrieveDefinition("ntrack");
-
   m_counters[ALLRECO] = Book1D(hd.name, hd.allTitles, hd.nBinsX, hd.xAxis.first, hd.xAxis.second, prependDirectory);
   hd = retrieveDefinition("ntracksel");
   m_counters[SELECTEDRECO] = Book1D(hd.name, hd.allTitles, hd.nBinsX, hd.xAxis.first, hd.xAxis.second, prependDirectory);
   hd = retrieveDefinition("nparticle");
   m_counters[ALLTRUTH] = Book1D(hd.name, hd.allTitles, hd.nBinsX, hd.xAxis.first, hd.xAxis.second, prependDirectory);
+  hd = retrieveDefinition("nparticlesel");
+  m_counters[SELECTEDTRUTH] = Book1D(hd.name, hd.allTitles, hd.nBinsX, hd.xAxis.first, hd.xAxis.second, prependDirectory);
   hd = retrieveDefinition("num_truthmatch_match");
   m_counters[MATCHEDRECO] =
     Book1D(hd.name, hd.allTitles, hd.nBinsX, hd.xAxis.first, hd.xAxis.second, prependDirectory);
