@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.Enums import LHCPeriod
 
@@ -27,6 +27,7 @@ def createIDPVMConfigFlags():
     icf.addFlag("jetsNameForHardScatter", 'AntiKt4EMTopoJets' ) # when building jets, what types of jets are built (used for hardScatterStrategy == 2)
     icf.addFlag("validateExtraTrackCollections", [] ) # List of extra track collection names to be validated in addition to Tracks.
     icf.addFlag("ancestorIDs", [] )
+    icf.addFlag("selectedCharge", 0)
     icf.addFlag("requiredSiHits", 0)
     icf.addFlag("maxProdVertRadius", 300)
     icf.addFlag("hardScatterStrategy", 0 ) # The hard-scatter vertex selection strategy to use when running hard-scatter efficiency / performance plots in IDPVM. 0 corresponds to sumPt^2, 1 corresponds to sumPt
