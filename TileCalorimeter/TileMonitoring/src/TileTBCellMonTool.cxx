@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// ********************************************************************
@@ -75,7 +75,7 @@ TileTBCellMonTool::TileTBCellMonTool(const std::string & type, const std::string
   declareProperty("FillTimeHistograms"     , m_fillTimeHistograms = false);
   declareProperty("MaxEnergy"              , m_maxEnergy = 150.0);
   declareProperty("MaxTotalEnergy"         , m_maxTotalEnergy = 150.0);
-
+  declareProperty("TimeRange", m_timeRange = {-80., 80.});
   //declareProperty("FillTimeHistograms"     , m_fillTimeHistograms = false);
 
 
@@ -96,6 +96,12 @@ StatusCode TileTBCellMonTool:: initialize() {
 /*---------------------------------------------------------*/
 
   ATH_MSG_INFO( "in initialize()" );
+
+  if (m_timeRange.size() != 2) {
+    ATH_MSG_FATAL( "Size of TimeRange should be 2 (from,to), but is " << m_timeRange.size() );
+    return StatusCode::FAILURE;
+  }
+
   //=== get TileBadChanTool
 	//E3
 	m_cellHitMapEB[0][0]=-1;
@@ -819,12 +825,14 @@ StatusCode TileTBCellMonTool::bookHistograms() {
   ATH_MSG_INFO( "in bookHistograms()" );
   ATH_MSG_INFO( "Using base path " << m_path );
 
+  int nTimeBins = m_timeRange[1] - m_timeRange[0];
+
   if (m_fillTimeHistograms) {
 
     std::string module_name;
     std::string cell_name;
     std::string channel_name;
-    for (int mod=0; mod<64; mod++) {
+    for (int mod=0; mod<MAX_MODULE; ++mod) {
       for (unsigned int channel = 0; channel < TileCalibUtils::MAX_CHAN; ++channel) {
         module_name = TileCalibUtils::getDrawerString(1, mod);
         cell_name = getCellName(1, channel);
@@ -832,11 +840,11 @@ StatusCode TileTBCellMonTool::bookHistograms() {
         m_tileChannelEnergyLBA[mod][channel] = book1F("ChannelEnergy/LBA/" + module_name, "ChannelEnergy_" + module_name + "_" + cell_name + "_ch" + std::to_string(channel)
                                                       , "Tile channel energy " + module_name + " " + cell_name + " ch" + std::to_string(channel), 300,0,m_maxEnergy);
         m_tileChannelTimeLBA[mod][channel] = book1F("ChannelTime/LBA/" + module_name, "ChannelTime_" + module_name + "_" + cell_name + "_ch" + std::to_string(channel)
-                                                    , "Tile channel time " + module_name + " " + cell_name + " ch" + std::to_string(channel), 160, -80, 80);
+                                                    , "Tile channel time " + module_name + " " + cell_name + " ch" + std::to_string(channel), nTimeBins, m_timeRange[0], m_timeRange[1]);
 
       }
     }
-    for (int mod=0; mod<64; mod++) {
+    for (int mod=0; mod<MAX_MODULE; ++mod) {
       for (unsigned int channel = 0; channel < TileCalibUtils::MAX_CHAN; ++channel) {
         module_name = TileCalibUtils::getDrawerString(2, mod);
         cell_name = getCellName(2, channel);
@@ -844,11 +852,11 @@ StatusCode TileTBCellMonTool::bookHistograms() {
         m_tileChannelEnergyLBC[mod][channel] = book1F("ChannelEnergy/LBC/" + module_name, "ChannelEnergy_" + module_name + "_" + cell_name + "_ch" + std::to_string(channel)
                                                       , "Tile channel energy " + module_name + " " + cell_name + " ch" + std::to_string(channel), 300,0,m_maxEnergy);
         m_tileChannelTimeLBC[mod][channel] = book1F("ChannelTime/LBC/" + module_name, "ChannelTime_" + module_name + "_" + cell_name + "_ch" + std::to_string(channel)
-                                                    , "Tile channel time " + module_name + " " + cell_name + " ch" + std::to_string(channel), 160, -80, 80);
+                                                    , "Tile channel time " + module_name + " " + cell_name + " ch" + std::to_string(channel), nTimeBins, m_timeRange[0], m_timeRange[1]);
 
       }
     }
-    for (int mod=0; mod<64; mod++) {
+    for (int mod=0; mod<MAX_MODULE; ++mod) {
       for (unsigned int channel = 0; channel < TileCalibUtils::MAX_CHAN; ++channel) {
         module_name = TileCalibUtils::getDrawerString(3, mod);
         cell_name = getCellName(3, channel);
@@ -856,11 +864,11 @@ StatusCode TileTBCellMonTool::bookHistograms() {
         m_tileChannelEnergyEBA[mod][channel] = book1F("ChannelEnergy/EBA/" + module_name, "ChannelEnergy_" + module_name + "_" + cell_name + "_ch" + std::to_string(channel)
                                                       , "Tile channel energy " + module_name + " " + cell_name + " ch" + std::to_string(channel), 300,0,m_maxEnergy);
         m_tileChannelTimeEBA[mod][channel] = book1F("ChannelTime/EBA/" + module_name, "ChannelTime_" + module_name + "_" + cell_name + "_ch" + std::to_string(channel)
-                                                    , "Tile channel time " + module_name + " " + cell_name + " ch" + std::to_string(channel), 160, -80, 80);
+                                                    , "Tile channel time " + module_name + " " + cell_name + " ch" + std::to_string(channel), nTimeBins, m_timeRange[0], m_timeRange[1]);
 
       }
     }
-    for (int mod=0; mod<64; mod++) {
+    for (int mod=0; mod<MAX_MODULE; ++mod) {
       for (unsigned int channel = 0; channel < TileCalibUtils::MAX_CHAN; ++channel) {
         module_name = TileCalibUtils::getDrawerString(4, mod);
         cell_name = getCellName(4, channel);
@@ -868,7 +876,7 @@ StatusCode TileTBCellMonTool::bookHistograms() {
         m_tileChannelEnergyEBC[mod][channel] = book1F("ChannelEnergy/EBC/" + module_name, "ChannelEnergy_" + module_name + "_" + cell_name + "_ch" + std::to_string(channel)
                                                       , "Tile channel energy " + module_name + " " + cell_name + " ch" + std::to_string(channel), 300,0,m_maxEnergy);
         m_tileChannelTimeEBC[mod][channel] = book1F("ChannelTime/EBC/" + module_name, "ChannelTime_" + module_name + "_" + cell_name + "_ch" + std::to_string(channel)
-                                                    , "Tile channel time " + module_name + " " + cell_name + " ch" + std::to_string(channel), 160, -80, 80);
+                                                    , "Tile channel time " + module_name + " " + cell_name + " ch" + std::to_string(channel), nTimeBins, m_timeRange[0], m_timeRange[1]);
 
       }
     }
@@ -876,21 +884,21 @@ StatusCode TileTBCellMonTool::bookHistograms() {
   }
 
 
-  for (int mod=0; mod<64; mod++) {
+  for (int mod=0; mod<MAX_MODULE; ++mod) {
     m_TileTBHitMapEBA[mod]= book2F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"CellMap","CellMap",18,1,19,5,1,6) ;
     m_TileTBHitMapEBA[mod]->SetOption("COLZ");
     m_TileTBHitMapEBA[mod]->SetStats(0);
     m_TileTBHitMapEBA[mod]->SetZTitle("Charge[pC]");
 
-    m_TileTBTotalEnergyEBA[mod]=book1F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"EnergyTotalEBA","EnergyTotalEBA",300,0,m_maxTotalEnergy);
+    m_TileTBTotalEnergyEBA[mod]=book1F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"EnergyTotalEBA","EnergyTotalEBA",m_maxTotalEnergy*2,0,m_maxTotalEnergy);
     m_TileTBTotalEnergyEBA[mod]->SetXTitle("Charge[pC]");
     m_TileTBTotalEnergyEBA[mod]->SetYTitle("Entries");
 
-    m_TileTBSampleBCvsAEneEBA[mod]=book2F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"EnergyTotalSampleBCVsA","EnergyTotalSampleBCVsA",300,0,m_maxTotalEnergy,300,0,m_maxTotalEnergy);
+    m_TileTBSampleBCvsAEneEBA[mod]=book2F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"EnergyTotalSampleBCVsA","EnergyTotalSampleBCVsA",m_maxTotalEnergy*2,0,m_maxTotalEnergy,m_maxTotalEnergy*2,0,m_maxTotalEnergy);
     m_TileTBSampleBCvsAEneEBA[mod]->SetXTitle("Sample A Charge[pC]");
     m_TileTBSampleBCvsAEneEBA[mod]->SetYTitle("Sample B Charge[pC]");
     m_TileTBSampleBCvsAEneEBA[mod]->SetOption("COLZ");
-    m_TileTBSampleDEneEBA[mod]=book1F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"EnergyTotalSampleD","EnergyTotalSampleD",300,0,m_maxTotalEnergy);
+    m_TileTBSampleDEneEBA[mod]=book1F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"EnergyTotalSampleD","EnergyTotalSampleD",m_maxTotalEnergy*2,0,m_maxTotalEnergy);
     m_TileTBSampleDEneEBA[mod]->SetXTitle("Sample D Charge[pC]");
 
     m_TileTBHitMapEBC[mod]= book2F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"CellMap","CellMap",18,1,19,5,1,6) ;
@@ -898,15 +906,15 @@ StatusCode TileTBCellMonTool::bookHistograms() {
     m_TileTBHitMapEBC[mod]->SetStats(0);
     m_TileTBHitMapEBC[mod]->SetZTitle("Charge[pC]");
 
-    m_TileTBTotalEnergyEBC[mod]=book1F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"EnergyTotalEBC","EnergyTotalEBC",300,0,m_maxTotalEnergy);
+    m_TileTBTotalEnergyEBC[mod]=book1F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"EnergyTotalEBC","EnergyTotalEBC",m_maxTotalEnergy*2,0,m_maxTotalEnergy);
     m_TileTBTotalEnergyEBC[mod]->SetXTitle("Charge[pC]");
     m_TileTBTotalEnergyEBC[mod]->SetYTitle("Entries");
 
-    m_TileTBSampleBCvsAEneEBC[mod]=book2F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"EnergyTotalSampleBCVsA","EnergyTotalSampleBCVsA",300,0,m_maxTotalEnergy,300,0,m_maxTotalEnergy);
+    m_TileTBSampleBCvsAEneEBC[mod]=book2F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"EnergyTotalSampleBCVsA","EnergyTotalSampleBCVsA",m_maxTotalEnergy*2,0,m_maxTotalEnergy,m_maxTotalEnergy*2,0,m_maxTotalEnergy);
     m_TileTBSampleBCvsAEneEBC[mod]->SetXTitle("Sample A Charge[pC]");
     m_TileTBSampleBCvsAEneEBC[mod]->SetYTitle("Sample B Charge[pC]");
     m_TileTBSampleBCvsAEneEBC[mod]->SetOption("COLZ");
-    m_TileTBSampleDEneEBC[mod]=book1F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"EnergyTotalSampleD","EnergyTotalSampleD",300,0,m_maxTotalEnergy);
+    m_TileTBSampleDEneEBC[mod]=book1F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"EnergyTotalSampleD","EnergyTotalSampleD",m_maxTotalEnergy*2,0,m_maxTotalEnergy);
     m_TileTBSampleDEneEBC[mod]->SetXTitle("Sample D Charge[pC]");
 
     m_TileTBHitMapLBA[mod]= book2F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"CellMap","CellMap",76,1,77,44,1,45) ;
@@ -914,15 +922,15 @@ StatusCode TileTBCellMonTool::bookHistograms() {
     m_TileTBHitMapLBA[mod]->SetStats(0);
     m_TileTBHitMapLBA[mod]->SetZTitle("Charge[pC]");
 
-    m_TileTBTotalEnergyLBA[mod]=book1F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"EnergyTotalLBA","EnergyTotalLBA",300,0,m_maxTotalEnergy);
+    m_TileTBTotalEnergyLBA[mod]=book1F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"EnergyTotalLBA","EnergyTotalLBA",m_maxTotalEnergy*2,0,m_maxTotalEnergy);
     m_TileTBTotalEnergyLBA[mod]->SetXTitle("Charge[pC]");
     m_TileTBTotalEnergyLBA[mod]->SetYTitle("Entries");
 
-    m_TileTBSampleBCvsAEneLBA[mod]=book2F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"EnergyTotalSampleBCVsA","EnergyTotalSampleBCVsA",300,0,m_maxTotalEnergy,300,0,m_maxTotalEnergy);
+    m_TileTBSampleBCvsAEneLBA[mod]=book2F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"EnergyTotalSampleBCVsA","EnergyTotalSampleBCVsA",m_maxTotalEnergy*2,0,m_maxTotalEnergy,m_maxTotalEnergy*2,0,m_maxTotalEnergy);
     m_TileTBSampleBCvsAEneLBA[mod]->SetXTitle("Sample A Charge[pC]");
     m_TileTBSampleBCvsAEneLBA[mod]->SetYTitle("Sample BC Charge[pC]");
     m_TileTBSampleBCvsAEneLBA[mod]->SetOption("COLZ");
-    m_TileTBSampleDEneLBA[mod]=book1F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"EnergyTotalSampleD","EnergyTotalSampleD",300,0,m_maxTotalEnergy);
+    m_TileTBSampleDEneLBA[mod]=book1F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"EnergyTotalSampleD","EnergyTotalSampleD",m_maxTotalEnergy*2,0,m_maxTotalEnergy);
     m_TileTBSampleDEneLBA[mod]->SetXTitle("Sample D Charge[pC]");
 
     m_TileTBHitMapLBC[mod]= book2F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"CellMap","CellMap",76,1,77,44,1,45) ;
@@ -930,54 +938,54 @@ StatusCode TileTBCellMonTool::bookHistograms() {
     m_TileTBHitMapLBC[mod]->SetStats(0);
     m_TileTBHitMapLBC[mod]->SetZTitle("Charge[pC]");
 
-    m_TileTBTotalEnergyLBC[mod]=book1F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"EnergyTotalLBC","EnergyTotalLBC",300,0,m_maxTotalEnergy);
+    m_TileTBTotalEnergyLBC[mod]=book1F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"EnergyTotalLBC","EnergyTotalLBC",m_maxTotalEnergy*2,0,m_maxTotalEnergy);
     m_TileTBTotalEnergyLBC[mod]->SetXTitle("Charge[pC]");
     m_TileTBTotalEnergyLBC[mod]->SetYTitle("Entries");
 
-    m_TileTBSampleBCvsAEneLBC[mod]=book2F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"EnergyTotalSampleBCVsA","EnergyTotalSampleBCVsA",300,0,m_maxTotalEnergy,300,0,m_maxTotalEnergy);
+    m_TileTBSampleBCvsAEneLBC[mod]=book2F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"EnergyTotalSampleBCVsA","EnergyTotalSampleBCVsA",m_maxTotalEnergy*2,0,m_maxTotalEnergy,m_maxTotalEnergy*2,0,m_maxTotalEnergy);
     m_TileTBSampleBCvsAEneLBC[mod]->SetXTitle("Sample A Charge[pC]");
     m_TileTBSampleBCvsAEneLBC[mod]->SetYTitle("Sample BC Charge[pC]");
     m_TileTBSampleBCvsAEneLBC[mod]->SetOption("COLZ");
-    m_TileTBSampleDEneLBC[mod]=book1F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"EnergyTotalSampleD","EnergyTotalSampleD",300,0,m_maxTotalEnergy);
+    m_TileTBSampleDEneLBC[mod]=book1F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"EnergyTotalSampleD","EnergyTotalSampleD",m_maxTotalEnergy*2,0,m_maxTotalEnergy);
     m_TileTBSampleDEneLBC[mod]->SetXTitle("Sample D Charge[pC]");
 
     for (int x=0;x<14;x++) {
-      m_TileTBCellEneSumEBA[mod][x]=book1F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"CellEnergy"+m_cellHitMapNameEB[x],"CellEnergy"+m_cellHitMapNameEB[x],300,0,m_maxEnergy);
+      m_TileTBCellEneSumEBA[mod][x]=book1F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"CellEnergy"+m_cellHitMapNameEB[x],"CellEnergy"+m_cellHitMapNameEB[x],m_maxTotalEnergy*2,0,m_maxEnergy);
       m_TileTBCellEneSumEBA[mod][x]->SetXTitle("Charge[pC]");
       m_TileTBCellEneDiffEBA[mod][x]=book1F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"CellEnergyDiff"+m_cellHitMapNameEB[x],"CellEnergyDiff"+m_cellHitMapNameEB[x],50,-20,20);
       m_TileTBCellEneDiffEBA[mod][x]->SetXTitle("Charge[pC]");
 
-      m_TileTBCellTimeSumEBA[mod][x]=book1F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"CellTime"+m_cellHitMapNameEB[x],"CellTime"+m_cellHitMapNameEB[x],100,-75,75);
+      m_TileTBCellTimeSumEBA[mod][x]=book1F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"CellTime"+m_cellHitMapNameEB[x],"CellTime"+m_cellHitMapNameEB[x],nTimeBins,m_timeRange[0],m_timeRange[1]);
       m_TileTBCellTimeSumEBA[mod][x]->SetXTitle("Time");
-      m_TileTBCellTimeDiffEBA[mod][x]=book1F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"CellTimeDiff"+m_cellHitMapNameEB[x],"CellTimeDiff"+m_cellHitMapNameEB[x],100,-75,75);
+      m_TileTBCellTimeDiffEBA[mod][x]=book1F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"CellTimeDiff"+m_cellHitMapNameEB[x],"CellTimeDiff"+m_cellHitMapNameEB[x],nTimeBins,m_timeRange[0],m_timeRange[1]);
       m_TileTBCellTimeDiffEBA[mod][x]->SetXTitle("Time");
 
-      m_TileTBCellEneLeftVsRightPMTEBA[mod][x]=book2F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"CellEnergyLeftVsRightPMT"+m_cellHitMapNameEB[x],"CellEnergyLeftVsRightPMT"+m_cellHitMapNameEB[x],100,0,m_maxEnergy,100,0,m_maxEnergy);
+      m_TileTBCellEneLeftVsRightPMTEBA[mod][x]=book2F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"CellEnergyLeftVsRightPMT"+m_cellHitMapNameEB[x],"CellEnergyLeftVsRightPMT"+m_cellHitMapNameEB[x],nTimeBins,0,m_maxEnergy,nTimeBins,0,m_maxEnergy);
       m_TileTBCellEneLeftVsRightPMTEBA[mod][x]->SetOption("COLZ");
       m_TileTBCellEneLeftVsRightPMTEBA[mod][x]->SetXTitle("Charge[pC]");
       m_TileTBCellEneLeftVsRightPMTEBA[mod][x]->SetYTitle("Charge[pC]");
 
-      m_TileTBCellTimeLeftVsRightPMTEBA[mod][x]=book2F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"CellTimeLeftVsRightPMT"+m_cellHitMapNameEB[x],"CellTimeLeftVsRightPMT"+m_cellHitMapNameEB[x],160, -80, 80,160, -80, 80);
+      m_TileTBCellTimeLeftVsRightPMTEBA[mod][x]=book2F("EBA/" + TileCalibUtils::getDrawerString(3, mod),"CellTimeLeftVsRightPMT"+m_cellHitMapNameEB[x],"CellTimeLeftVsRightPMT"+m_cellHitMapNameEB[x],nTimeBins, m_timeRange[0], m_timeRange[1],nTimeBins, m_timeRange[0], m_timeRange[1]);
       m_TileTBCellTimeLeftVsRightPMTEBA[mod][x]->SetOption("COLZ");
       m_TileTBCellTimeLeftVsRightPMTEBA[mod][x]->SetXTitle("Time[ns]");
       m_TileTBCellTimeLeftVsRightPMTEBA[mod][x]->SetYTitle("Time[ns]");
 
-      m_TileTBCellEneSumEBC[mod][x]=book1F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"CellEnergy"+m_cellHitMapNameEB[x],"CellEnergy"+m_cellHitMapNameEB[x],300,0,m_maxEnergy);
+      m_TileTBCellEneSumEBC[mod][x]=book1F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"CellEnergy"+m_cellHitMapNameEB[x],"CellEnergy"+m_cellHitMapNameEB[x],m_maxTotalEnergy*2,0,m_maxEnergy);
       m_TileTBCellEneSumEBC[mod][x]->SetXTitle("Charge[pC]");
       m_TileTBCellEneDiffEBC[mod][x]=book1F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"CellEnergyDiff"+m_cellHitMapNameEB[x],"CellEnergyDiff"+m_cellHitMapNameEB[x],50,-20,20);
       m_TileTBCellEneDiffEBC[mod][x]->SetXTitle("Charge[pC]");
 
-      m_TileTBCellTimeSumEBC[mod][x]=book1F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"CellTime"+m_cellHitMapNameEB[x],"CellTime"+m_cellHitMapNameEB[x],100,-75,75);
+      m_TileTBCellTimeSumEBC[mod][x]=book1F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"CellTime"+m_cellHitMapNameEB[x],"CellTime"+m_cellHitMapNameEB[x],nTimeBins,m_timeRange[0],m_timeRange[1]);
       m_TileTBCellTimeSumEBC[mod][x]->SetXTitle("Time");
-      m_TileTBCellTimeDiffEBC[mod][x]=book1F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"CellTimeDiff"+m_cellHitMapNameEB[x],"CellTimeDiff"+m_cellHitMapNameEB[x],100,-75,75);
+      m_TileTBCellTimeDiffEBC[mod][x]=book1F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"CellTimeDiff"+m_cellHitMapNameEB[x],"CellTimeDiff"+m_cellHitMapNameEB[x],nTimeBins,m_timeRange[0],m_timeRange[1]);
       m_TileTBCellTimeDiffEBC[mod][x]->SetXTitle("Time");
 
-      m_TileTBCellEneLeftVsRightPMTEBC[mod][x]=book2F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"CellEnergyLeftVsRightPMT"+m_cellHitMapNameEB[x],"CellEnergyLeftVsRightPMT"+m_cellHitMapNameEB[x],100,0,m_maxEnergy,100,0,m_maxEnergy);
+      m_TileTBCellEneLeftVsRightPMTEBC[mod][x]=book2F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"CellEnergyLeftVsRightPMT"+m_cellHitMapNameEB[x],"CellEnergyLeftVsRightPMT"+m_cellHitMapNameEB[x],nTimeBins,0,m_maxEnergy,nTimeBins,0,m_maxEnergy);
       m_TileTBCellEneLeftVsRightPMTEBC[mod][x]->SetOption("COLZ");
       m_TileTBCellEneLeftVsRightPMTEBC[mod][x]->SetXTitle("Charge[pC]");
       m_TileTBCellEneLeftVsRightPMTEBC[mod][x]->SetYTitle("Charge[pC]");
 
-      m_TileTBCellTimeLeftVsRightPMTEBC[mod][x]=book2F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"CellTimeLeftVsRightPMT"+m_cellHitMapNameEB[x],"CellTimeLeftVsRightPMT"+m_cellHitMapNameEB[x],160, -80, 80,160, -80, 80);
+      m_TileTBCellTimeLeftVsRightPMTEBC[mod][x]=book2F("EBC/" + TileCalibUtils::getDrawerString(4, mod),"CellTimeLeftVsRightPMT"+m_cellHitMapNameEB[x],"CellTimeLeftVsRightPMT"+m_cellHitMapNameEB[x],nTimeBins, m_timeRange[0], m_timeRange[1],nTimeBins, m_timeRange[0], m_timeRange[1]);
       m_TileTBCellTimeLeftVsRightPMTEBC[mod][x]->SetOption("COLZ");
       m_TileTBCellTimeLeftVsRightPMTEBC[mod][x]->SetXTitle("Time[ns]");
       m_TileTBCellTimeLeftVsRightPMTEBC[mod][x]->SetYTitle("Time[ns]");
@@ -985,51 +993,51 @@ StatusCode TileTBCellMonTool::bookHistograms() {
     }
 
     for (int x=0;x<23;x++) {
-      m_TileTBCellEneSumLBA[mod][x]=book1F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"CellEnergy"+m_cellHitMapNameLB[x],"CellEnergy"+m_cellHitMapNameLB[x],300,0,m_maxEnergy);
+      m_TileTBCellEneSumLBA[mod][x]=book1F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"CellEnergy"+m_cellHitMapNameLB[x],"CellEnergy"+m_cellHitMapNameLB[x],m_maxTotalEnergy*2,0,m_maxEnergy);
       m_TileTBCellEneSumLBA[mod][x]->SetXTitle("Charge[pC]");
       m_TileTBCellEneDiffLBA[mod][x]=book1F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"CellEnergyDiff"+m_cellHitMapNameLB[x],"CellEnergyDiff"+m_cellHitMapNameLB[x],50,-20,20);
       m_TileTBCellEneDiffLBA[mod][x]->SetXTitle("Charge[pC]");
 
-      m_TileTBCellTimeSumLBA[mod][x]=book1F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"CellTime"+m_cellHitMapNameLB[x],"CellTime"+m_cellHitMapNameLB[x],100,-75,75);
+      m_TileTBCellTimeSumLBA[mod][x]=book1F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"CellTime"+m_cellHitMapNameLB[x],"CellTime"+m_cellHitMapNameLB[x],nTimeBins,m_timeRange[0],m_timeRange[1]);
       m_TileTBCellTimeSumLBA[mod][x]->SetXTitle("Time");
-      m_TileTBCellTimeDiffLBA[mod][x]=book1F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"CellTimeDiff"+m_cellHitMapNameLB[x],"CellTimeDiff"+m_cellHitMapNameLB[x],100,-75,75);
+      m_TileTBCellTimeDiffLBA[mod][x]=book1F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"CellTimeDiff"+m_cellHitMapNameLB[x],"CellTimeDiff"+m_cellHitMapNameLB[x],nTimeBins,m_timeRange[0],m_timeRange[1]);
       m_TileTBCellTimeDiffLBA[mod][x]->SetXTitle("Time");
 
-      m_TileTBCellEneLeftVsRightPMTLBA[mod][x]=book2F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"CellEnergyLeftVsRightPMT"+m_cellHitMapNameLB[x],"CellEnergyLeftVsRightPMT"+m_cellHitMapNameLB[x],100,0,m_maxEnergy,100,0,m_maxEnergy);
+      m_TileTBCellEneLeftVsRightPMTLBA[mod][x]=book2F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"CellEnergyLeftVsRightPMT"+m_cellHitMapNameLB[x],"CellEnergyLeftVsRightPMT"+m_cellHitMapNameLB[x],nTimeBins,0,m_maxEnergy,nTimeBins,0,m_maxEnergy);
       m_TileTBCellEneLeftVsRightPMTLBA[mod][x]->SetOption("COLZ");
       m_TileTBCellEneLeftVsRightPMTLBA[mod][x]->SetXTitle("Charge[pC]");
       m_TileTBCellEneLeftVsRightPMTLBA[mod][x]->SetYTitle("Charge[pC]");
 
-      m_TileTBCellTimeLeftVsRightPMTLBA[mod][x]=book2F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"CellTimeLeftVsRightPMT"+m_cellHitMapNameLB[x],"CellTimeLeftVsRightPMT"+m_cellHitMapNameLB[x],160, -80, 80,160, -80, 80);
+      m_TileTBCellTimeLeftVsRightPMTLBA[mod][x]=book2F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"CellTimeLeftVsRightPMT"+m_cellHitMapNameLB[x],"CellTimeLeftVsRightPMT"+m_cellHitMapNameLB[x],nTimeBins, m_timeRange[0], m_timeRange[1],nTimeBins, m_timeRange[0], m_timeRange[1]);
       m_TileTBCellTimeLeftVsRightPMTLBA[mod][x]->SetOption("COLZ");
       m_TileTBCellTimeLeftVsRightPMTLBA[mod][x]->SetXTitle("Time[ns]");
       m_TileTBCellTimeLeftVsRightPMTLBA[mod][x]->SetYTitle("Time[ns]");
 
-      m_TileTBCellEneSumLBC[mod][x]=book1F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"CellEnergy"+m_cellHitMapNameLB[x],"CellEnergy"+m_cellHitMapNameLB[x],300,0,m_maxEnergy);
+      m_TileTBCellEneSumLBC[mod][x]=book1F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"CellEnergy"+m_cellHitMapNameLB[x],"CellEnergy"+m_cellHitMapNameLB[x],m_maxTotalEnergy*2,0,m_maxEnergy);
       m_TileTBCellEneSumLBC[mod][x]->SetXTitle("Charge[pC]");
       m_TileTBCellEneDiffLBC[mod][x]=book1F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"CellEnergyDiff"+m_cellHitMapNameLB[x],"CellEnergyDiff"+m_cellHitMapNameLB[x],50,-20,20);
       m_TileTBCellEneDiffLBC[mod][x]->SetXTitle("Charge[pC]");
 
-      m_TileTBCellTimeSumLBC[mod][x]=book1F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"CellTime"+m_cellHitMapNameLB[x],"CellTime"+m_cellHitMapNameLB[x],100,-75,75);
+      m_TileTBCellTimeSumLBC[mod][x]=book1F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"CellTime"+m_cellHitMapNameLB[x],"CellTime"+m_cellHitMapNameLB[x],nTimeBins,m_timeRange[0],m_timeRange[1]);
       m_TileTBCellTimeSumLBC[mod][x]->SetXTitle("Time");
-      m_TileTBCellTimeDiffLBC[mod][x]=book1F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"CellTimeDiff"+m_cellHitMapNameLB[x],"CellTimeDiff"+m_cellHitMapNameLB[x],100,-75,75);
+      m_TileTBCellTimeDiffLBC[mod][x]=book1F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"CellTimeDiff"+m_cellHitMapNameLB[x],"CellTimeDiff"+m_cellHitMapNameLB[x],nTimeBins,m_timeRange[0],m_timeRange[1]);
       m_TileTBCellTimeDiffLBC[mod][x]->SetXTitle("Time");
 
-      m_TileTBCellEneLeftVsRightPMTLBC[mod][x]=book2F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"CellEnergyLeftVsRightPMT"+m_cellHitMapNameLB[x],"CellEnergyLeftVsRightPMT"+m_cellHitMapNameLB[x],100,0,m_maxEnergy,100,0,m_maxEnergy);
+      m_TileTBCellEneLeftVsRightPMTLBC[mod][x]=book2F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"CellEnergyLeftVsRightPMT"+m_cellHitMapNameLB[x],"CellEnergyLeftVsRightPMT"+m_cellHitMapNameLB[x],nTimeBins,0,m_maxEnergy,nTimeBins,0,m_maxEnergy);
       m_TileTBCellEneLeftVsRightPMTLBC[mod][x]->SetOption("COLZ");
       m_TileTBCellEneLeftVsRightPMTLBC[mod][x]->SetXTitle("Charge[pC]");
       m_TileTBCellEneLeftVsRightPMTLBC[mod][x]->SetYTitle("Charge[pC]");
 
-      m_TileTBCellTimeLeftVsRightPMTLBC[mod][x]=book2F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"CellTimeLeftVsRightPMT"+m_cellHitMapNameLB[x],"CellTimeLeftVsRightPMT"+m_cellHitMapNameLB[x],160, -80, 80,160, -80, 80);
+      m_TileTBCellTimeLeftVsRightPMTLBC[mod][x]=book2F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"CellTimeLeftVsRightPMT"+m_cellHitMapNameLB[x],"CellTimeLeftVsRightPMT"+m_cellHitMapNameLB[x],nTimeBins, m_timeRange[0], m_timeRange[1],nTimeBins, m_timeRange[0], m_timeRange[1]);
       m_TileTBCellTimeLeftVsRightPMTLBC[mod][x]->SetOption("COLZ");
       m_TileTBCellTimeLeftVsRightPMTLBC[mod][x]->SetXTitle("Time[ns]");
       m_TileTBCellTimeLeftVsRightPMTLBC[mod][x]->SetYTitle("Time[ns]");
     }
     //cell D0 for long barrel.
-    m_TileTBCellEneSumLBAD0[mod]=book1F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"CellEnergyD01","CellEnergyD0",300,0,m_maxTotalEnergy);
-    m_TileTBCellEneSumLBCD0[mod]=book1F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"CellEnergyD01","CellEnergyD0",300,0,m_maxTotalEnergy);
-    m_TileTBCellTimeSumLBAD0[mod]=book1F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"CellTimeD01","CellTimeD0",100,-75,75);
-    m_TileTBCellTimeSumLBCD0[mod]=book1F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"CellTimeD01","CellTimeD0",100,-75,75);
+    m_TileTBCellEneSumLBAD0[mod]=book1F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"CellEnergyD01","CellEnergyD0",m_maxTotalEnergy*2,0,m_maxTotalEnergy);
+    m_TileTBCellEneSumLBCD0[mod]=book1F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"CellEnergyD01","CellEnergyD0",m_maxTotalEnergy*2,0,m_maxTotalEnergy);
+    m_TileTBCellTimeSumLBAD0[mod]=book1F("LBA/" + TileCalibUtils::getDrawerString(1, mod),"CellTimeD01","CellTimeD0",nTimeBins,m_timeRange[0],m_timeRange[1]);
+    m_TileTBCellTimeSumLBCD0[mod]=book1F("LBC/" + TileCalibUtils::getDrawerString(2, mod),"CellTimeD01","CellTimeD0",nTimeBins,m_timeRange[0],m_timeRange[1]);
   }
   return StatusCode::SUCCESS;
 }
@@ -1046,30 +1054,31 @@ StatusCode TileTBCellMonTool::fillHistograms() {
 
   //Retrieve Cell collection from SG
   CHECK( evtStore()->retrieve(cell_container, m_cellsContName) );
+  if (cell_container->empty()) return StatusCode::SUCCESS;
 
   std::string letterA="A";
   std::string letterB="B";
   std::string letterD="D";
-  double totalEnergyEBA[64];
-  double totalEnergyEBC[64];
-  double totalEnergyLBA[64];
-  double totalEnergyLBC[64];
+  double totalEnergyEBA[MAX_MODULE];
+  double totalEnergyEBC[MAX_MODULE];
+  double totalEnergyLBA[MAX_MODULE];
+  double totalEnergyLBC[MAX_MODULE];
 
-  double totalEnergyEBASampleA[64];
-  double totalEnergyEBCSampleA[64];
-  double totalEnergyLBASampleA[64];
-  double totalEnergyLBCSampleA[64];
+  double totalEnergyEBASampleA[MAX_MODULE];
+  double totalEnergyEBCSampleA[MAX_MODULE];
+  double totalEnergyLBASampleA[MAX_MODULE];
+  double totalEnergyLBCSampleA[MAX_MODULE];
 
-  double totalEnergyEBASampleBC[64];
-  double totalEnergyEBCSampleBC[64];
-  double totalEnergyLBASampleBC[64];
-  double totalEnergyLBCSampleBC[64];
+  double totalEnergyEBASampleBC[MAX_MODULE];
+  double totalEnergyEBCSampleBC[MAX_MODULE];
+  double totalEnergyLBASampleBC[MAX_MODULE];
+  double totalEnergyLBCSampleBC[MAX_MODULE];
 
-  double totalEnergyEBASampleD[64];
-  double totalEnergyEBCSampleD[64];
-  double totalEnergyLBASampleD[64];
-  double totalEnergyLBCSampleD[64];
-  for (int mod=0;mod<64;mod++) {
+  double totalEnergyEBASampleD[MAX_MODULE];
+  double totalEnergyEBCSampleD[MAX_MODULE];
+  double totalEnergyLBASampleD[MAX_MODULE];
+  double totalEnergyLBCSampleD[MAX_MODULE];
+  for (int mod=0;mod<MAX_MODULE;++mod) {
     totalEnergyEBA[mod]=0.0;
     totalEnergyEBC[mod]=0.0;
     totalEnergyLBA[mod]=0.0;
@@ -1433,7 +1442,7 @@ StatusCode TileTBCellMonTool::fillHistograms() {
 
     } // end if tile_cell
   } // end of loop over the Cells
-  	for (int mod=0;mod<64;mod++) {
+  for (int mod=0;mod<MAX_MODULE;++mod) {
 		m_TileTBTotalEnergyEBA[mod]->Fill(totalEnergyEBA[mod]);
 		m_TileTBTotalEnergyEBC[mod]->Fill(totalEnergyEBC[mod]);
 		m_TileTBTotalEnergyLBA[mod]->Fill(totalEnergyLBA[mod]);
