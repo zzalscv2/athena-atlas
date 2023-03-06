@@ -892,6 +892,8 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping *map,
       StatusCode sc1 = calibParams1->initialize();
       if(sc1 != StatusCode::SUCCESS){ 
 	ATH_MSG_WARNING( "could not initialize LArCalibParams, acc calib will not be filled " );
+	delete calibParams1;
+  delete calibParams2;
 	return;
       } 
       calibParams1->set(1,m_latomeCalibPatternsInEvent[0].patterns,
