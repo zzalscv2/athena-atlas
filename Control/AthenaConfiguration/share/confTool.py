@@ -134,7 +134,7 @@ knownDifferences={}
 
 def main(args):
     if not args.quiet and args.ignoreIrrelevant:
-        print(f"Components to ignore: {args.ignore}")
+        print(f"Properties to ignore: {args.ignore}")
     color = fullColor()
     if not sys.stdout.isatty() and not args.color: #Remove colors when writing to a file unless forced
         color = noColor()
