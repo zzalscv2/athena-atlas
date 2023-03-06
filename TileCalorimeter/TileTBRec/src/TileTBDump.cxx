@@ -411,7 +411,9 @@ StatusCode TileTBDump::execute() {
             subdet_id == 0x70) { // COMMON BEAM ROD in CTB2004
           dump_digi(subdet_id,data, size, version, verbosity, source_id, ctx);
         } else if ( m_dumpUnknown ) {
-          dump_data(data, size, version, verbosity);
+          if (subdet_id != 0 || size<13 || data[5] != 0x12345678 || data[size-1] != 0x87654321) {
+            dump_data(data, size, version, verbosity);
+          }
           if (subdet_id == 0) { // try also to find normal fragments  
             dump_digi(subdet_id,data, size, version, verbosity, source_id, ctx);
           }
@@ -1782,6 +1784,72 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
             break;
           }
 
+          case 6:
+          {
+            std::cout << "\nFELIX fragment 0x" << std::hex  << id << std::dec << ", " << size << " words found" << std::endl;
+
+            // dump first few words of the first MD fragment
+            int head = 9;
+            std::cout << std::hex << std::endl;
+            bool phase2format = (size>head && data[2] == 0x12345678 && data[size-1] == 0x87654321);
+            if (phase2format) {
+              const char * names[] = { "size_packet", "elink", "SOP", "runParam1", "runParam2", "runParam3", "runParam4", "BC_MD_ID", "L1ID" };
+              for (int i=0; i<head; ++i) {
+                std::cout << std::setw(13) << names[i] << std::setw(10) << data[i] << std::endl;
+              }
+            } else {
+              if (head>size) head=size;
+              for (int i=0; i<head; ++i) {
+                std::cout << "     Word" << std::setw(3) << i << std::setw(10) << data[i] << std::endl;
+              }
+            }
+            std::cout << std::dec << std::endl;
+
+            FelixData_t digitsHighGain, digitsLowGain, digitsMetaData;
+            unpack_frag6(data, size, digitsHighGain, digitsLowGain, digitsMetaData);
+
+            std::cout << "                    MD1       MD2       MD3       MD4" << std::endl;
+            std::cout << "-----------------------------------------------------";
+            const char * metaNames[] = { "BCID", "L1ID", "ModuleID", "RunType", "RunNumber", "PedHi", "PedLo", "ChargeInj", "TimeInj", "Capacitor" };
+            for (size_t i = 0; i < digitsMetaData.size(); ++i) {
+              std::cout << std::endl << std::setw(13) << metaNames[i];
+              for (size_t j = 0; j<digitsMetaData[i].size(); ++j) {
+                std::cout << std::setw(10) << digitsMetaData[i][j];
+              }
+            }
+            std::cout << std::endl << std::endl;
+
+            size_t nsamp = 7;
+            if (digitsLowGain[0].size()>0)
+              nsamp = std::max(nsamp,digitsLowGain[0].size());
+            if (digitsHighGain[0].size()>0)
+              nsamp =std::max(nsamp,digitsHighGain[0].size());
+
+            std::cout << " ch  G  ";
+            for (size_t s = 0; s < nsamp; ++s) {
+              std::cout << std::setw(5) << s;
+            }
+            std::string a(8+nsamp*5,'-');
+            std::cout << std::endl << a;
+
+            for (size_t ch = 0; ch < digitsHighGain.size() ; ++ch) {
+              std::cout << std::endl << std::setw(3) << ch << " HG  ";
+              for (size_t s = 0; s < digitsHighGain[ch].size(); ++s) {
+                std::cout << std::setw(5) << (digitsHighGain[ch][s]);
+              }
+            }
+
+            for (size_t ch = 0; ch < digitsLowGain.size() ; ++ch) {
+              std::cout <<  std::endl << std::setw(3) << ch << " LG  ";
+              for (size_t s = 0; s < digitsLowGain[ch].size(); ++s) {
+                std::cout << std::setw(5) << (digitsLowGain[ch][s]);
+              }
+            }
+            std::cout << std::endl << std::endl;
+
+            break;
+          }
+
           case 0xA: // fragment with data quality words
             DQstat = tile_unpack_quality(frag[f], DQword);
 
@@ -1925,6 +1993,123 @@ void TileTBDump::find_frag(const uint32_t* data, unsigned int size, unsigned int
   }
 }
 
+/* ------------------------------------------------------------------------ */
+void TileTBDump::unpack_frag6(const uint32_t* data, unsigned int size,
+                              FelixData_t & digitsHighGain,
+                              FelixData_t & digitsLowGain,
+                              FelixData_t & digitsMetaData) const
+{
+
+  std::vector<unsigned short> bcid(4);
+  std::vector<unsigned short> l1id(4);
+  std::vector<unsigned short> moduleID(4);
+  std::vector<unsigned short> runType (4);
+  std::vector<unsigned short> runNumber(4);
+  std::vector<unsigned short> pedestalHi(4);
+  std::vector<unsigned short> pedestalLo(4);
+  std::vector<unsigned short> chargeInjected(4);
+  std::vector<unsigned short> timeInjected(4);
+  std::vector<unsigned short> capacitor(4);
+
+  digitsHighGain.clear();
+  digitsLowGain.clear();
+  digitsMetaData.clear();
+
+  int sampleNumber = ((int)(size/4)-10)/12;
+  int delta = size - (sampleNumber*48+40);
+  if (delta!=0) {
+     std::cout << "Unexpected fragment size " << size << " => "
+               << sampleNumber << " samples will be unpacked and last "
+               << delta << " words will be ignored "<< std::endl;
+  }
+
+  const uint32_t* const end_data = data + size;
+  while (data < end_data) {
+    if (*data == 0x12345678 ) {
+      unsigned int miniDrawer = *(data+5) & 0xFF;
+      if ((++data < end_data)) {
+        int fragSize = *data & 0xFF;
+        unsigned int paramsSize = (*data >> 8 ) & 0xFF;
+        moduleID[miniDrawer ]   = (*data >> 16) & 0xFF;
+        runType[miniDrawer]     = (*data >> 24) & 0xFF;
+
+        if (fragSize != sampleNumber*6) {
+            std::cout << "Minidrawer [" << miniDrawer
+                      << "] has unexpected fragment size: " << fragSize
+                      << " correct value for " << sampleNumber
+                      << " samples is " << sampleNumber*6 << std::endl;
+        }
+
+        // find MD trailer
+        const uint32_t* trailer = data + size/4 - 4;
+
+        if (trailer < end_data && *trailer == 0x87654321 ) {
+
+          if (paramsSize == 3){
+            runNumber[miniDrawer]  = *(++data);
+
+            pedestalHi[miniDrawer] = *(++data)      & 0xFFF;
+            pedestalLo[miniDrawer] = (*data >> 12 ) & 0xFFF;
+
+            chargeInjected[miniDrawer] = *(++data)     & 0xFFF;
+            timeInjected[miniDrawer]   = (*data >> 12) & 0xFF;
+            capacitor[miniDrawer]      = (*data >> 20) & 0x1;
+          } else {
+
+            std::cout << "Minidrawer [" << miniDrawer
+                      << "] has unexpected number of parameter words: " << paramsSize
+                      << " => ignore them !!!" << std::endl;
+            data += paramsSize;
+          }
+
+          bcid[miniDrawer] = (*(++data) >> 16) & 0xFFFF;
+          l1id[miniDrawer] = *(++data);
+
+          const uint16_t* sample = (const uint16_t *) (++data);
+
+          size_t start_channel(miniDrawer * 12);
+          size_t end_channel(start_channel + 12);
+
+          if (end_channel > digitsHighGain.size()) digitsHighGain.resize(end_channel);
+          for (size_t channel = start_channel; channel < end_channel; ++channel) {
+            digitsHighGain[channel].resize(sampleNumber);
+            for (int samplesIdx = 0; samplesIdx<sampleNumber; ++samplesIdx) {
+              digitsHighGain[channel][samplesIdx] = (*sample & 0x0FFF);
+              ++sample;
+            }
+          }
+
+          if (end_channel > digitsLowGain.size()) digitsLowGain.resize(end_channel);
+          for (size_t channel = start_channel; channel < end_channel; ++channel) {
+            digitsLowGain[channel].resize(sampleNumber);
+            for (int samplesIdx = 0; samplesIdx<sampleNumber; ++samplesIdx) {
+              digitsLowGain[channel][samplesIdx] = (*sample & 0x0FFF);
+              ++sample;
+            }
+          }
+
+          data = ++trailer;
+
+        } else {
+          std::cout << "Wrong trailer for MD[" << miniDrawer << "] => skip MD fragment !!!" << std::endl;
+        }
+      }
+    } else {
+      ++data;
+    }
+  }
+
+  digitsMetaData.push_back(bcid);
+  digitsMetaData.push_back(l1id);
+  digitsMetaData.push_back(moduleID);
+  digitsMetaData.push_back(runType);
+  digitsMetaData.push_back(runNumber);
+  digitsMetaData.push_back(pedestalHi);
+  digitsMetaData.push_back(pedestalLo);
+  digitsMetaData.push_back(chargeInjected);
+  digitsMetaData.push_back(timeInjected);
+  digitsMetaData.push_back(capacitor);
+}
 
 
 /*--------------------------------------------------------------------------*/

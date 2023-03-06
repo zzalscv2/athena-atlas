@@ -48,7 +48,6 @@
 
 
 class IROBDataProviderSvc;
-class TileDigits;
 class TileCablingService;
 class TileCondToolOfcCool;
 class TileCondToolTiming;
@@ -81,6 +80,7 @@ class TileTBDump: public AthAlgorithm {
     std::vector<int> m_drawerType; // type of every drawer 1-4: B+, B-, EB+, EB-
     std::map<unsigned int, unsigned int, std::less<unsigned int> > m_drawerMap; // map for frag IDs -> index
     typedef std::map<unsigned int, unsigned int, std::less<unsigned int> >::iterator drawerMap_iterator;
+    typedef std::vector<std::vector<unsigned short> > FelixData_t;
 
     ToolHandle<TileCondToolTiming> m_tileToolTiming;
     ToolHandle<TileCondToolOfcCool> m_tileCondToolOfcCool;
@@ -209,6 +209,8 @@ class TileTBDump: public AthAlgorithm {
                                , int verbosity, int* ngain, int* nchannel); // Baxo
 
     int tile_unpack_quality(const T_RodDataFrag* frag, T_TileRecoQuality & DQword);
+
+    void unpack_frag6(const uint32_t* data, unsigned int size, FelixData_t & digitsHighGain, FelixData_t & digitsLowGain,  FelixData_t & digitsMetaData) const;
 
     unsigned int tile_check_parity(const unsigned int* frame, int length);
 
