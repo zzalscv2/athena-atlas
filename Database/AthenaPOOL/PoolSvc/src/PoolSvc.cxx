@@ -837,20 +837,6 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
    bool hasTTreeName = (contName.length() > 6 && contName.compare(0, 6, "TTree=") == 0);
    if (contName.empty() || hasTTreeName || m_persistencySvcVec[contextId]->session().defaultConnectionPolicy().writeModeForNonExisting() == pool::DatabaseConnectionPolicy::RAISE_ERROR) {
       objName = hasTTreeName ? contName.substr(6) : contName;
-      if (!objName.empty()) {
-         bool found = false;
-         const std::vector<std::string>& containers = dbH->containers();
-         for (const auto& containerName : containers) {
-            if (containerName == objName || boost::starts_with(containerName, objName + "(") || boost::starts_with(containerName, objName + "_")) {
-               found = true;
-               break;
-            }
-         }
-         if (!found) {
-            ATH_MSG_DEBUG("Failed to find TTree: " << objName << " to set POOL property.");
-            return(StatusCode::FAILURE);
-         }
-      }
       if( !isNumber(data) ) {
          retError = dbH->technologySpecificAttributes().setAttribute(optName, data.c_str(), objName);
       } else if( data[data.size() - 1] == 'L' ) {
