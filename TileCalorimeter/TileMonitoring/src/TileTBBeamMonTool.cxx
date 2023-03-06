@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //TileTBBeamMonTool
@@ -316,15 +316,33 @@ StatusCode TileTBBeamMonTool::storeBeamElements() {
 
 	  break;
 	    
+	case COMMON_TOF_FRAG:
+	  if (m_TBperiod >= 2022) {
+	    if (cha > 11) { // The first channels are connected to BC1 and BC2, the last 4 channels are supposed to be TOF
+	      if(cha < 16) {
+          m_tof[cha] = amplitude;
+          ATH_MSG_VERBOSE( "TOF: " << cha << " amp: " << amplitude);
+	      } else {
+          WRONG_CHANNEL(frag, cha);
+	      }
+	      break;
+	    }
+	    // Fall through to case COMMON_TDC1_FRAG to unpack the first channels of BC1 and BC2
+	    [[fallthrough]]; // silent the warning on fall through
+	  } else {
+	    break;
+	  }
 	case COMMON_TDC1_FRAG:
           
-          FRAG_FOUND(frag, cha, dsize);
-          
-          if (cha < 16) {
-	    if (m_TBperiod == 2021) {
+    FRAG_FOUND(frag, cha, dsize);
+	  if ((cha > 11) && (cha < 16) && (m_lastRun > 2211136)) {
+	    m_tof[cha] = amplitude;
+	    ATH_MSG_VERBOSE( "TOF: " << cha << " amp: " << amplitude);
+    } if (cha < 16) {
+	    if (m_TBperiod >= 2021) {
 	      if (m_btdcFirstHit[cha]) {
-		m_btdc[cha] = amplitude;
-		m_btdcFirstHit[cha] = false;
+          m_btdc[cha] = amplitude;
+          m_btdcFirstHit[cha] = false;
 	      }
 	    } else {
 	      m_btdc[cha] = amplitude;
@@ -349,7 +367,90 @@ StatusCode TileTBBeamMonTool::storeBeamElements() {
 	    
           }
           break;
-        }
+
+        case COMMON_ADC1_FRAG:
+
+	  if (m_lastRun > 2211444) {
+	    switch(cha) {
+	      // set counter values for 1D beam elements
+	    case 0:  m_s1cou = amplitude; break;
+	    case 1:  m_s2cou = amplitude; break;
+	    case 2:  m_pmt11cou = amplitude; break;
+	    case 3:  m_cher1 = amplitude; break;
+	    case 4:  m_cher2 = amplitude; break;
+	    case 5:  m_cher3 = amplitude; break;
+
+	    case 6:  m_pmt1cou = amplitude; break;
+	    case 7:  m_pmt2cou = amplitude; break;
+	    case 8:  m_pmt3cou = amplitude; break;
+	    case 9:  m_pmt4cou = amplitude; break;
+	    case 10: m_pmt5cou = amplitude; break;
+	    case 11: m_pmt6cou = amplitude; break;
+	    case 12: m_pmt7cou = amplitude; break;
+	    case 13: m_pmt8cou = amplitude; break;
+	    case 14: m_pmt9cou = amplitude; break;
+	    case 15: m_pmt10cou = amplitude; break;
+
+	    default: if (cha > 15) WRONG_CHANNEL(frag, cha);
+	    }
+
+	    if((cha > 5) && (cha < 16)) {
+	      m_muBack[cha - 5] = amplitude;
+	      m_total_muon_energy += amplitude;
+	    } else if (cha == 2) {
+	      m_muBack[11] = amplitude;
+	      m_total_muon_energy += amplitude;
+	    }
+
+	    break;
+
+	  } else {
+
+	    switch(cha) {
+
+	      // set counter values for 1D beam elements
+	    case 0: m_s1cou = amplitude; break;
+	    case 1: m_s2cou = amplitude; break;
+	    case 2: m_s3cou = amplitude; break;
+	    case 3: m_cher1 = amplitude; break;
+	    case 4: m_cher2 = amplitude; break;
+	    case 5: m_cher3 = amplitude; break;
+
+	    default: if (cha > 15) WRONG_CHANNEL(frag, cha);
+	    }
+	    break;
+	  }
+
+
+        case COMMON_ADC2_FRAG:
+
+	  if (m_lastRun < 2211445) {
+
+	    switch(cha) {
+
+	    case 0: m_pmt1cou = amplitude; break;
+	    case 1: m_pmt2cou = amplitude; break;
+	    case 2: m_pmt3cou = amplitude; break;
+	    case 3: m_pmt4cou = amplitude; break;
+	    case 4: m_pmt5cou = amplitude; break;
+	    case 5: m_pmt6cou = amplitude; break;
+	    case 6: m_pmt7cou = amplitude; break;
+	    case 7: m_pmt8cou = amplitude; break;
+	    case 8: m_pmt9cou = amplitude; break;
+	    case 9: m_pmt10cou = amplitude; break;
+	    case 10: m_pmt11cou = amplitude; break;
+	    case 11: m_pmt12cou = amplitude; break;
+
+	    default: if (cha > 31) WRONG_CHANNEL(frag, cha);
+	    }
+
+	    if(cha < 16) {
+	      m_muBack[cha] = amplitude;
+	      m_total_muon_energy += amplitude;
+	    }
+	  }
+	  break;
+	}
       }
     }
   }
@@ -386,8 +487,14 @@ StatusCode TileTBBeamMonTool::storeBeamElements() {
   // Beam Chamber Coordinates
 
   // For BC1
-  m_xCha1 = (m_btdc[1] - m_btdc[0]) * m_horizontal_slope1 + m_horizontal_offset1;
-  m_yCha1 = (m_btdc[2] - m_btdc[3]) * m_vertical_slope1 + m_vertical_offset1; //(up - down)
+  if (m_lastRun > 2211444) {
+    m_xCha1 = (m_btdc[8] - m_btdc[0]) * m_horizontal_slope1 + m_horizontal_offset1;
+    m_yCha1 = (m_btdc[9] - m_btdc[3]) * m_vertical_slope1 + m_vertical_offset1; //(up - down)
+  } else {
+    m_xCha1 = (m_btdc[1] - m_btdc[0]) * m_horizontal_slope1 + m_horizontal_offset1;
+    m_yCha1 = (m_btdc[2] - m_btdc[3]) * m_vertical_slope1 + m_vertical_offset1; //(up - down)
+  }
+
 
   // For BC2:
   m_xCha2 = (m_btdc[5] - m_btdc[4]) * m_horizontal_slope2 + m_horizontal_offset2;
@@ -396,8 +503,14 @@ StatusCode TileTBBeamMonTool::storeBeamElements() {
   //Sum Plots
 
   // For BC1
-  m_xCha1_sum = (m_btdc[1] + m_btdc[0]) * m_horizontal_slope1 + m_horizontal_offset1;
-  m_yCha1_sum = (m_btdc[2] + m_btdc[3]) * m_vertical_slope1 + m_vertical_offset1;
+  if (m_lastRun > 2211444) {
+    m_xCha1_sum = (m_btdc[8] + m_btdc[0]) * m_horizontal_slope1 + m_horizontal_offset1;
+    m_yCha1_sum = (m_btdc[9] + m_btdc[3]) * m_vertical_slope1 + m_vertical_offset1;
+  } else {
+    m_xCha1_sum = (m_btdc[1] + m_btdc[0]) * m_horizontal_slope1 + m_horizontal_offset1;
+    m_yCha1_sum = (m_btdc[2] + m_btdc[3]) * m_vertical_slope1 + m_vertical_offset1;
+  }
+
 
   //For BC2
   m_xCha2_sum = (m_btdc[5] + m_btdc[4]) * m_horizontal_slope2 + m_horizontal_offset2;
@@ -442,9 +555,11 @@ StatusCode TileTBBeamMonTool::fillHistograms() {
     m_btdcFirstHit[i] = true;
   }
 
-  CHECK( storeBeamElements() );
+  for (int i=0; i<16; ++i) {
+    m_tof[i] = 0;
+  }
 
-  m_cher3 = m_s3cou; // Test beam September 2016
+  CHECK( storeBeamElements() );
 
   //Filling histograms
   m_BC1Profile->Fill(m_xCha1, m_yCha1);
@@ -495,6 +610,39 @@ StatusCode TileTBBeamMonTool::fillHistograms() {
   m_PMTHitMap->SetBinContent(2, 2, m_pmt3cou);
   m_PMTHitMap->SetBinContent(3, 2, m_pmt2cou);
   m_PMTHitMap->SetBinContent(4, 2, m_pmt1cou);
+
+  // TOF
+  int tof1 = m_tof[14];
+  int tof2 = m_tof[15];
+  int tof3 = m_tof[13]; // S2 counter in TDC
+
+  m_TOF1->Fill(tof1);
+  m_TOF2->Fill(tof2);
+  m_TOF3->Fill(tof3);
+
+  if ((tof2 != 0) && (tof1 != 0)) {
+    m_TOF21->Fill(tof2 - tof1);
+  }
+
+  if ((tof2 != 0) && (tof3 != 0)) {
+    m_TOF23->Fill(tof2 - tof3);
+  }
+
+  if ((tof3 != 0) && (tof1 != 0)) {
+    m_TOF31->Fill(tof3 - tof1);
+  }
+
+  m_Cher1TOF1->Fill(tof1, m_cher1);
+  m_Cher1TOF2->Fill(tof2, m_cher1);
+  m_Cher1TOF3->Fill(tof3, m_cher1);
+
+  m_Cher2TOF1->Fill(tof1, m_cher2);
+  m_Cher2TOF2->Fill(tof2, m_cher2);
+  m_Cher2TOF3->Fill(tof3, m_cher2);
+
+  m_Cher3TOF1->Fill(tof1, m_cher3);
+  m_Cher3TOF2->Fill(tof2, m_cher3);
+  m_Cher3TOF3->Fill(tof3, m_cher3);
 
   //...
 
@@ -616,62 +764,62 @@ void TileTBBeamMonTool::initFirstEvent() {
 
   //1D elements histograms
 
-  m_S1hist = book1F("", "S1hist", "Run " + runNumber + ": S1 Hist", 200, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_S1hist = book1F("", "S1hist", "Run " + runNumber + ": S1 Hist", 200, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_S1hist->GetYaxis()->SetTitle("Counts");
 
-  m_S2hist = book1F("", "S2hist", "Run " + runNumber + ": S2 Hist", 200, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_S2hist = book1F("", "S2hist", "Run " + runNumber + ": S2 Hist", 200, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_S2hist->GetYaxis()->SetTitle("Counts");
 
-  m_S3hist = book1F("", "S3hist", "Run " + runNumber + ": S3 Hist", 200, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_S3hist = book1F("", "S3hist", "Run " + runNumber + ": S3 Hist", 200, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_S3hist->GetYaxis()->SetTitle("Counts");
 
-  m_Cher1hist = book1F("", "Cher1hist", "Run " + runNumber + ": Cher1 Hist", 200, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_Cher1hist = book1F("", "Cher1hist", "Run " + runNumber + ": Cher1 Hist", 200, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_Cher1hist->GetYaxis()->SetTitle("Counts");
 
-  m_Cher2hist = book1F("", "Cher2hist", "Run " + runNumber + ": Cher2 Hist", 200, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_Cher2hist = book1F("", "Cher2hist", "Run " + runNumber + ": Cher2 Hist", 200, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_Cher2hist->GetYaxis()->SetTitle("Counts");
 
-  m_Cher3hist = book1F("", "Cher3hist", "Run " + runNumber + ": Cher3 Hist", 200, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_Cher3hist = book1F("", "Cher3hist", "Run " + runNumber + ": Cher3 Hist", 200, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_Cher3hist->GetYaxis()->SetTitle("Counts");
 
 
-  m_MuonEnergy = book1F("", "TotalMuonEnergy", "Run " + runNumber + ": Muon Wall Total Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_MuonEnergy = book1F("", "TotalMuonEnergy", "Run " + runNumber + ": Muon Wall Total Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_MuonEnergy->GetYaxis()->SetTitle("Counts");
 
-  m_PMT1 = book1F("", "MuonWallPMT1", "Run " + runNumber + ": Muon Wall PMT1 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_PMT1 = book1F("", "MuonWallPMT1", "Run " + runNumber + ": Muon Wall PMT1 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_PMT1->GetYaxis()->SetTitle("Counts");
 
-  m_PMT2 = book1F("", "MuonWallPMT2", "Run " + runNumber + ": Muon Wall PMT2 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_PMT2 = book1F("", "MuonWallPMT2", "Run " + runNumber + ": Muon Wall PMT2 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_PMT2->GetYaxis()->SetTitle("Counts");
 
-  m_PMT3 = book1F("", "MuonWallPMT3", "Run " + runNumber + ": Muon Wall PMT3 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_PMT3 = book1F("", "MuonWallPMT3", "Run " + runNumber + ": Muon Wall PMT3 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_PMT3->GetYaxis()->SetTitle("Counts");
 
-  m_PMT4 = book1F("", "MuonWallPMT4", "Run " + runNumber + ": Muon Wall PMT4 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_PMT4 = book1F("", "MuonWallPMT4", "Run " + runNumber + ": Muon Wall PMT4 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_PMT4->GetYaxis()->SetTitle("Counts");
 
-  m_PMT5 = book1F("", "MuonWallPMT5", "Run " + runNumber + ": Muon Wall PMT5 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_PMT5 = book1F("", "MuonWallPMT5", "Run " + runNumber + ": Muon Wall PMT5 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_PMT5->GetYaxis()->SetTitle("Counts");
 
-  m_PMT6 = book1F("", "MuonWallPMT6", "Run " + runNumber + ": Muon Wall PMT6 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_PMT6 = book1F("", "MuonWallPMT6", "Run " + runNumber + ": Muon Wall PMT6 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_PMT6->GetYaxis()->SetTitle("Counts");
 
-  m_PMT7 = book1F("", "MuonWallPMT7", "Run " + runNumber + ": Muon Wall PMT7 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_PMT7 = book1F("", "MuonWallPMT7", "Run " + runNumber + ": Muon Wall PMT7 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_PMT7->GetYaxis()->SetTitle("Counts");
 
-  m_PMT8 = book1F("", "MuonWallPMT8", "Run " + runNumber + ": Muon Wall PMT8 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_PMT8 = book1F("", "MuonWallPMT8", "Run " + runNumber + ": Muon Wall PMT8 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_PMT8->GetYaxis()->SetTitle("Counts");
 
-  m_PMT9 = book1F("", "MuonWallPMT9", "Run " + runNumber + ": Muon Wall PMT9 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_PMT9 = book1F("", "MuonWallPMT9", "Run " + runNumber + ": Muon Wall PMT9 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_PMT9->GetYaxis()->SetTitle("Counts");
 
-  m_PMT10 = book1F("", "MuonWallPMT10", "Run " + runNumber + ": Muon Wall PMT10 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_PMT10 = book1F("", "MuonWallPMT10", "Run " + runNumber + ": Muon Wall PMT10 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_PMT10->GetYaxis()->SetTitle("Counts");
 
-  m_PMT11 = book1F("", "MuonWallPMT11", "Run " + runNumber + ": Muon Wall PMT11 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_PMT11 = book1F("", "MuonWallPMT11", "Run " + runNumber + ": Muon Wall PMT11 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_PMT11->GetYaxis()->SetTitle("Counts");
 
-  m_PMT12 = book1F("", "MuonWallPMT12", "Run " + runNumber + ": Muon Wall PMT12 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned"),
+  m_PMT12 = book1F("", "MuonWallPMT12", "Run " + runNumber + ": Muon Wall PMT12 Hist", 500, 0., 5000., run, ATTRIB_MANAGED, "", "mergeRebinned");
   m_PMT12->GetYaxis()->SetTitle("Counts");
 
   //PMT hit map
@@ -679,7 +827,58 @@ void TileTBBeamMonTool::initFirstEvent() {
   m_PMTHitMap->SetOption("COLZ");
   m_PMTHitMap->SetStats(0);
 
+  m_TOF1 = book1F("", "TOF1", "Run " + runNumber + ": TOF1 Hist", 4096.0, -0.5, 4095.5, run, ATTRIB_MANAGED);
+  m_TOF2 = book1F("", "TOF2", "Run " + runNumber + ": TOF2 Hist", 4096.0, -0.5, 4095.5, run, ATTRIB_MANAGED);
+  m_TOF3 = book1F("", "TOF3", "Run " + runNumber + ": TOF2 Hist (signal from S2 counter)", 4096.0, -0.5, 4095.5, run, ATTRIB_MANAGED);
 
+  m_TOF21 = book1F("", "TOFDiff21", "Run " + runNumber + ": TOF2 - TOF1 Hist", 4096.0, -0.5, 4095.5, run, ATTRIB_MANAGED);
+  m_TOF23 = book1F("", "TOFDiff23", "Run " + runNumber + ": TOF2 - TOF3 Hist", 4096.0, -0.5, 4095.5, run, ATTRIB_MANAGED);
+  m_TOF31 = book1F("", "TOFDiff31", "Run " + runNumber + ": TOF3 - TOF1 Hist", 4096.0, -0.5, 4095.5, run, ATTRIB_MANAGED);
+
+  m_Cher1TOF1 = book2F("", "Cher1TOF1", "Run " + runNumber + ": Cher1 counts v. TOF1", 4096, -0.5, 4095.5, 4096, -0.5, 4095.5, run, ATTRIB_MANAGED);
+  m_Cher1TOF1->GetXaxis()->SetTitle("TOF1");
+  m_Cher1TOF1->GetYaxis()->SetTitle("Cher1");
+  m_Cher1TOF1->SetOption("COLZ");
+
+  m_Cher1TOF2 = book2F("", "Cher1TOF2", "Run " + runNumber + ": Cher1 counts v. TOF2", 4096, -0.5, 4095.5, 4096, -0.5, 4095.5, run, ATTRIB_MANAGED);
+  m_Cher1TOF2->GetXaxis()->SetTitle("TOF2");
+  m_Cher1TOF2->GetYaxis()->SetTitle("Cher1");
+  m_Cher1TOF2->SetOption("COLZ");
+
+  m_Cher1TOF3 = book2F("", "Cher1TOF3", "Run " + runNumber + ": Cher1 counts v. TOF3 (signal from S2)", 4096, -0.5, 4095.5, 4096, -0.5, 4095.5, run, ATTRIB_MANAGED);
+  m_Cher1TOF3->GetXaxis()->SetTitle("TOF3");
+  m_Cher1TOF3->GetYaxis()->SetTitle("Cher1");
+  m_Cher1TOF3->SetOption("COLZ");
+
+  m_Cher2TOF1 = book2F("", "Cher2TOF1", "Run " + runNumber + ": Cher2 counts v. TOF1", 4096, -0.5, 4095.5, 4096, -0.5, 4095.5, run, ATTRIB_MANAGED);
+  m_Cher2TOF1->GetXaxis()->SetTitle("TOF1");
+  m_Cher2TOF1->GetYaxis()->SetTitle("Cher2");
+  m_Cher2TOF1->SetOption("COLZ");
+
+  m_Cher2TOF2 = book2F("", "Cher2TOF2", "Run " + runNumber + ": Cher2 counts v. TOF2", 4096, -0.5, 4095.5, 4096, -0.5, 4095.5, run, ATTRIB_MANAGED);
+  m_Cher2TOF2->GetXaxis()->SetTitle("TOF2");
+  m_Cher2TOF2->GetYaxis()->SetTitle("Cher2");
+  m_Cher2TOF2->SetOption("COLZ");
+
+  m_Cher2TOF3 = book2F("", "Cher2TOF3", "Run " + runNumber + ": Cher2 counts v. TOF3 (signal from S2)", 4096, -0.5, 4095.5, 4096, -0.5, 4095.5, run, ATTRIB_MANAGED);
+  m_Cher2TOF3->GetXaxis()->SetTitle("TOF3");
+  m_Cher2TOF3->GetYaxis()->SetTitle("Cher2");
+  m_Cher2TOF3->SetOption("COLZ");
+
+  m_Cher3TOF1 = book2F("", "Cher3TOF1", "Run " + runNumber + ": Cher3 counts v. TOF1", 4096, -0.5, 4095.5, 4096, -0.5, 4095.5, run, ATTRIB_MANAGED);
+  m_Cher3TOF1->GetXaxis()->SetTitle("TOF1");
+  m_Cher3TOF1->GetYaxis()->SetTitle("Cher3");
+  m_Cher3TOF1->SetOption("COLZ");
+
+  m_Cher3TOF2 = book2F("", "Cher3TOF2", "Run " + runNumber + ": Cher3 counts v. TOF2", 4096, -0.5, 4095.5, 4096, -0.5, 4095.5, run, ATTRIB_MANAGED);
+  m_Cher3TOF2->GetXaxis()->SetTitle("TOF2");
+  m_Cher3TOF2->GetYaxis()->SetTitle("Cher3");
+  m_Cher3TOF2->SetOption("COLZ");
+
+  m_Cher3TOF3 = book2F("", "Cher3TOF3", "Run " + runNumber + ": Cher3 counts v. TOF3 (signal from S2)", 4096, -0.5, 4095.5, 4096, -0.5, 4095.5, run, ATTRIB_MANAGED);
+  m_Cher3TOF3->GetXaxis()->SetTitle("TOF3");
+  m_Cher3TOF3->GetYaxis()->SetTitle("Cher3");
+  m_Cher3TOF3->SetOption("COLZ");
 
 }
  
