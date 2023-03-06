@@ -3,18 +3,6 @@
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, LHCPeriod
 
-def cutLevel(flags):
-    if flags.Reco.EnableHI:
-        return 2
-    elif flags.InDet.Tracking.doLowMu:
-        return 3
-    elif flags.Beam.Type is BeamType.Cosmics:
-        return 8
-    elif flags.InDet.Tracking.doMinBias:
-        return 12
-    else:
-        return 19
-
 def createInDetConfigFlags():
     icf = AthConfigFlags()
 
@@ -51,11 +39,6 @@ def createInDetConfigFlags():
 
     # Tracking parameters
 
-    # Express track parameters wrt. to : 'BeamLine','BeamSpot','Vertex' (first primary vertex)
-    icf.addFlag("InDet.Tracking.perigeeExpression",
-                lambda prevFlags: "Vertex" if prevFlags.Reco.EnableHI else "BeamLine")
-    # Control cuts and settings for different lumi to limit CPU and disk space
-    icf.addFlag("InDet.Tracking.cutLevel", cutLevel)
     # Switch for running TIDE Ambi
     icf.addFlag("InDet.Tracking.doTIDE_Ambi", lambda prevFlags:
                 not(prevFlags.Beam.Type is BeamType.Cosmics))
@@ -63,7 +46,7 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.Tracking.doBremRecovery", lambda prevFlags: (
         not (prevFlags.Tracking.doVtxLumi or
              prevFlags.Tracking.doVtxBeamSpot or
-             prevFlags.InDet.Tracking.doLowMu or
+             prevFlags.Tracking.doLowMu or
              prevFlags.Beam.Type is not BeamType.Collisions or
              not prevFlags.BField.solenoidOn)))
     # Brem Recover in tracking restricted to Calo ROIs
@@ -98,16 +81,16 @@ def createInDetConfigFlags():
     # Turn running of track segment creation in pixel on and off
     icf.addFlag("InDet.Tracking.doTrackSegmentsPixel",
                 lambda prevFlags: (
-                    prevFlags.InDet.Tracking.doMinBias or
-                    prevFlags.InDet.Tracking.doLowMu or
+                    prevFlags.Tracking.doMinBias or
+                    prevFlags.Tracking.doLowMu or
                     prevFlags.Beam.Type is BeamType.Cosmics))
     # Turn running of track segment creation in SCT on and off
     icf.addFlag("InDet.Tracking.doTrackSegmentsSCT",
-                lambda prevFlags: (prevFlags.InDet.Tracking.doLowMu or
+                lambda prevFlags: (prevFlags.Tracking.doLowMu or
                                    prevFlags.Beam.Type is BeamType.Cosmics))
     # Turn running of track segment creation in TRT on and off
     icf.addFlag("InDet.Tracking.doTrackSegmentsTRT",
-                lambda prevFlags: (prevFlags.InDet.Tracking.doLowMu or
+                lambda prevFlags: (prevFlags.Tracking.doLowMu or
                                    prevFlags.Beam.Type is BeamType.Cosmics))
     # turn on / off TRT extensions
     icf.addFlag("InDet.Tracking.doTRTExtension", True)
@@ -124,7 +107,7 @@ def createInDetConfigFlags():
             prevFlags.Tracking.doVtxBeamSpot)))
     # Turn running of doLowPt second pass on and off
     icf.addFlag("InDet.Tracking.doLowPt",
-                lambda prevFlags: prevFlags.InDet.Tracking.doLowMu)
+                lambda prevFlags: prevFlags.Tracking.doLowMu)
     # Turn running of doVeryLowPt thrid pass on and off
     icf.addFlag("InDet.Tracking.doVeryLowPt", False)
     # control TRT Standalone
@@ -140,16 +123,14 @@ def createInDetConfigFlags():
             prevFlags.Tracking.doHighPileup or
             prevFlags.Tracking.doVtxLumi or
             prevFlags.Tracking.doVtxBeamSpot or
-            prevFlags.InDet.Tracking.doMinBias or
-            prevFlags.InDet.Tracking.doLowMu)))
+            prevFlags.Tracking.doMinBias or
+            prevFlags.Tracking.doLowMu)))
     icf.addFlag("InDet.Tracking.doTrackSegmentsDisappearing", lambda prevFlags: (
         not(prevFlags.Reco.EnableHI or
             prevFlags.Beam.Type is BeamType.Cosmics)))
     # Turn running of BeamGas second pass on and off
     icf.addFlag("InDet.Tracking.doBeamGas",
                 lambda prevFlags: prevFlags.Beam.Type is BeamType.SingleBeam)
-    # Switch for running MinBias settings
-    icf.addFlag("InDet.Tracking.doMinBias", False)
     # Switch for running MinBias settings with a 300 MeV pT cut (for Heavy Ion Proton)
     icf.addFlag("InDet.Tracking.doHIP300", False)
     # Switch for running Robust settings
@@ -157,8 +138,6 @@ def createInDetConfigFlags():
     # Switch for running looser settings in ID for commissioning
     # Special reconstruction for BLS physics
     icf.addFlag("InDet.Tracking.doBLS", False)
-    # Special configuration for low-mu runs
-    icf.addFlag("InDet.Tracking.doLowMu", False)
     icf.addFlag("InDet.Tracking.writeSeedValNtuple", False) # Turn writing of seed validation ntuple on and off
     icf.addFlag("InDet.Tracking.writeExtendedPRDInfo", False)
     # Special pass using truth information for pattern recognition, runs in parallel to/instead of the first pass

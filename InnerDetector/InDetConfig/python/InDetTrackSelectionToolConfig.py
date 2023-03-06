@@ -102,8 +102,8 @@ def VtxInDetTrackSelectionCfg(flags, name="VertexInDetTrackSelectionTool", **kwa
 
     # Cut level = NoCut for a few modes
     if flags.Reco.EnableHI or \
-       flags.InDet.Tracking.doMinBias or \
-       flags.InDet.Tracking.doLowMu:
+       flags.Tracking.doMinBias or \
+       flags.Tracking.doLowMu:
         acc = ComponentAccumulator()
         acc.setPrivateTools(CompFactory.InDet.InDetTrackSelectionTool(name, **kwargs))
         return acc

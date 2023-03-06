@@ -141,7 +141,7 @@ def TrackParticleCnvAlgCfg(flags, name="TrackParticleCnvAlg",
     else:
         kwargs.setdefault("AddTruthLink", False)
 
-    if flags.InDet.Tracking.perigeeExpression == "Vertex":
+    if flags.Tracking.perigeeExpression == "Vertex":
         kwargs.setdefault("PrimaryVerticesName", "PrimaryVertices")
 
     result.addEventAlgo(CompFactory.xAODMaker.TrackParticleCnvAlg(name, **kwargs))
@@ -163,7 +163,7 @@ def BeamLineTrackParticleCnvAlgCfg(flags, name="BeamLineTrackParticleCnvAlg",
                   AssociationMapName = AssociationMapName,
                   PerigeeExpression = "BeamLine")))
     
-    if flags.InDet.Tracking.perigeeExpression == "Vertex":
+    if flags.Tracking.perigeeExpression == "Vertex":
         kwargs.setdefault("PrimaryVerticesName", "")
 
     result.merge(TrackParticleCnvAlgCfg(flags, name, **kwargs))
