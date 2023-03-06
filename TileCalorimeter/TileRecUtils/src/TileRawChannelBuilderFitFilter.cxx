@@ -91,6 +91,15 @@ StatusCode TileRawChannelBuilderFitFilter::initialize() {
   ATH_CHECK( TileRawChannelBuilder::initialize() );
   ATH_CHECK( m_tileToolNoiseSample.retrieve() );
 
+  if (m_bestPhase) {
+    //=== get TileToolTiming
+    // TileToolTiming can be disabled in the TileRawChannelBuilder
+    if (!m_tileToolTiming.isEnabled()) {
+      m_tileToolTiming.enable();
+    }
+    ATH_CHECK( m_tileToolTiming.retrieve() );
+  }
+
   // Get number of samples from TileInfo - ignore jobOptions settings
   m_frameLength = m_tileInfo->NdigitSamples();
   ATH_MSG_DEBUG( "NSamples = " << m_frameLength );
@@ -184,6 +193,7 @@ StatusCode TileRawChannelBuilderFitFilter::finalize() {
 
 TileRawChannel* TileRawChannelBuilderFitFilter::rawChannel(const TileDigits* digits, const EventContext& ctx) {
 
+
   ++m_chCounter;
 
   const HWIdentifier adcId = digits->adc_HWID();
@@ -228,7 +238,7 @@ TileRawChannel* TileRawChannelBuilderFitFilter::rawChannel(const TileDigits* dig
                  chi2,
                  pedestal);
 
-  if (m_correctTime && chi2 > 0) {
+  if (m_correctTime && ((chi2 > 0) || m_bestPhase)) {
     time -= m_tileToolTiming->getSignalPhase(drawerIdx, channel, adc);
     rawCh->insertTime(time);
     ATH_MSG_VERBOSE( "Correcting time, new time=" << rawCh->time() );
@@ -427,6 +437,13 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
         m_t0Fit = 0.0;    // fit with fixed time
       }
     }
+  }
+
+  double expectedTime = 0.;
+  if (fixedTime && m_bestPhase) {
+    expectedTime = m_tileToolTiming->getSignalPhase(drawerIdx, channel, igain);
+    delta_peak = std::round(expectedTime / DTIME);  // Adjust initial phase guess
+    m_t0Fit = expectedTime;
   }
   
   ATH_MSG_VERBOSE ( " initial value of"
@@ -784,7 +801,7 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
         /* For first iteration, also calculate 2-Parameter Fit for pedestal and amplitude
         */
         double t0fit_old = m_t0Fit;
-        m_t0Fit = 0.0;
+        m_t0Fit = expectedTime;
 
         sy = 0.0;
         sg = 0.0;
@@ -856,7 +873,7 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
       }                        /* end of 2-par fit in first iteration */
 
       if (fixedTime) {
-        m_t0Fit = 0.0;
+        m_t0Fit = expectedTime;
         tau = fixtau;
         ped = fixped;
         ampl = fixampl;

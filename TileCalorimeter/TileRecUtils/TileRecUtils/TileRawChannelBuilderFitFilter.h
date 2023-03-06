@@ -52,6 +52,8 @@ class TileRawChannelBuilderFitFilter: public TileRawChannelBuilder {
 
   private:
 
+    Gaudi::Property<bool> m_bestPhase{this, "BestPhase", false, "Use best phase from DB"};
+
     void pulseFit(const TileDigits *digit, double &amplitude, double &time, double &pedestal, double &chi2, const EventContext &ctx);
 
     // generic functions for pulse interpolation
