@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #define APWeightEntry_cxx
@@ -177,7 +177,8 @@ void APWeightEntry::ReadEfficiency(double efficiency, double err_low, double err
   m_variance *= m_variance;
 }
 
-void APWeightEntry::SetCoordinates(std::vector<int> coords, std::vector<int> n_dim_origin) {
+void APWeightEntry::SetCoordinates(const std::vector<int>& coords,
+                                   const std::vector<int>& n_dim_origin) {
   m_coords.clear();
   m_n_dim_origin.clear();
   m_coords = coords;

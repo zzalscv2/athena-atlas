@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #define APEvtWeight_cxx
@@ -11,15 +11,14 @@
 using namespace std;
 
 APEvtWeight::APEvtWeight(ObjType type)
-  : m_k_evt_weight(0),
+  : m_current_evt_weights(vector< vector< APWeightEntry* > >(12)),
+    m_n_entries(0),
+    m_k_evt_weight(0),
     m_variance(0),
-    m_variance_sys(0)
+    m_variance_sys(0),
+    m_isComputed (type > APEvtWeight::kDiJet),
+    m_type(type)
 {
-  m_n_entries = 0;
-  m_current_evt_weights = vector< vector< APWeightEntry* > >(12);
-  if (type > APEvtWeight::kDiJet) m_isComputed = true;
-  else m_isComputed = false;
-  m_type = type;
 }
 
 APEvtWeight::~APEvtWeight() {

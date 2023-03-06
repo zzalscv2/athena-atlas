@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ReweightUtils includes
 #include "SumOfWeightsAlg.h"
 #include "ReweightUtils/WeightToolBase.h"
+#include "boost/algorithm/string/predicate.hpp"
 
 #include "TString.h"
 #include <string>
@@ -48,7 +49,7 @@ StatusCode SumOfWeightsAlg::initialize ATLAS_NOT_THREAD_SAFE () {
     }
     //strip the 'ToolSvc.' off the weight name
     std::string toolName = m_weightTools[itool]->name();
-    if(toolName.find("ToolSvc.")==0) toolName.replace(0,8,"");
+    if(boost::starts_with (toolName, "ToolSvc.")) toolName.replace(0,8,"");
     CutIdentifier cID = cutFlowSvc()->registerTopFilter( toolName,
                                                          toolName, // description (can be improved FIXME)
                                                          xAOD::CutBookkeeper::CutLogic::ALLEVENTSPROCESSED,

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ReweightUtils )
@@ -12,6 +12,7 @@ endif()
 # External dependencies:
 find_package( Lhapdf )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
+find_package( Boost )
 
 # Libraries in the package:
 atlas_add_root_dictionary( ReweightUtilsLib ReweightUtilsDictSource
@@ -26,10 +27,10 @@ atlas_add_root_dictionary( ReweightUtilsLib ReweightUtilsDictSource
 atlas_add_library( ReweightUtilsLib
    ReweightUtils/*.h Root/*.cxx ${ReweightUtilsDictSource}
    PUBLIC_HEADERS ReweightUtils
-   INCLUDE_DIRS ${LHAPDF_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+   INCLUDE_DIRS ${LHAPDF_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES ${LHAPDF_LIBRARIES} ${ROOT_LIBRARIES} AsgTools xAODEventInfo
    xAODBase PATInterfaces AsgAnalysisInterfaces
-   PRIVATE_LINK_LIBRARIES CxxUtils RootUtils xAODParticleEvent xAODTruth PathResolver xAODCutFlow )
+   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils RootUtils xAODParticleEvent xAODTruth PathResolver xAODCutFlow )
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( ReweightUtils
