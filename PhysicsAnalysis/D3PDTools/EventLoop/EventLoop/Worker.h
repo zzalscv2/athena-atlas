@@ -408,6 +408,11 @@ namespace EL
     // private interface
     //
 
+    /// \brief Error handler for file opening
+  private:
+    static bool fileOpenErrorFilter(int level, bool, const char*, const char *);
+
+
     /// \brief the output map
   private:
     typedef std::map<std::string,TH1*>::const_iterator OutputHistMapIter;
