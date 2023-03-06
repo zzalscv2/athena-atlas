@@ -2320,7 +2320,12 @@ namespace AtlasRoot {
       value -= get_ZeeSyst(eta) * varSF;
     } else if( var==egEnergyCorr::Scale::OFCUp && m_zeeSystOFC ) {
       value += get_OFCSyst(eta) * varSF;
-
+    } else if( var == egEnergyCorr::Scale::EXTRARUN3PREUp)
+    {
+      value+=0.4E-2*varSF;  // flat 0.4% syst (details: https://indico.cern.ch/event/1250560/contributions/5253619/attachments/2586538/4462853/mc21-change.pdf)
+    } else if(var == egEnergyCorr::Scale::EXTRARUN3PREDown)
+    {
+      value-=0.4E-2*varSF;
     } else if( var==egEnergyCorr::Scale::OFCDown && m_zeeSystOFC ) {
       value -= get_OFCSyst(eta) * varSF;
     } else if( var==egEnergyCorr::Scale::ZeePhysUp && m_zeePhys ) {
@@ -3569,6 +3574,10 @@ double egammaEnergyCorrectionTool::getMaterialEffect(egEnergyCorr::Geometry geo,
     case egEnergyCorr::Scale::Wtots1Up: return "Wtots1Up";
     case egEnergyCorr::Scale::Wtots1Down: return "Wtots1Down";
     case egEnergyCorr::Scale::LastScaleVariation: return "LastScaleVariation";
+    case egEnergyCorr::Scale::OFCUp: return "OFCUp";
+    case egEnergyCorr::Scale::OFCDown: return "OFCDown";
+    case egEnergyCorr::Scale::EXTRARUN3PREUp: return "EXTRARUN3PREUp";
+    case egEnergyCorr::Scale::EXTRARUN3PREDown: return "EXTRARUN3PREDown";
     default: return "Unknown";
     }
   }
