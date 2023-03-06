@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef particlejettools_jetpartontruthlabel_header
@@ -15,7 +15,7 @@ namespace Analysis {
 
 			public:
 				// Constructor and destructor
-				JetPartonTruthLabel(std::string name) : 
+				JetPartonTruthLabel(const std::string& name) : 
 					JetModifierBase(name) { };
 
 				int modifyJet(xAOD::Jet &jet) const;
