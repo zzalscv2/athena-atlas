@@ -10,3 +10,11 @@ atlas_add_component( TrigMinBias
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-select=ATL900,ATL901 )
+
+atlas_add_test( MinBiasCountersConfig
+                SCRIPT python -m TrigMinBias.MinBiasCountersConfig
+                POST_EXEC_SCRIPT noerror.sh)
+
+atlas_add_test( MinBiasMbtsConfig
+                SCRIPT python -m TrigMinBias.MbtsConfig
+                POST_EXEC_SCRIPT noerror.sh)                 
