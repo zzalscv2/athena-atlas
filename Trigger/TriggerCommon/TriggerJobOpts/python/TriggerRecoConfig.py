@@ -136,8 +136,9 @@ def TriggerEDMCfg(flags):
         acc.merge(addToESD(flags, edmDictToList(getLvl1ESDList())))
         acc.merge(addToAOD(flags, edmDictToList(getLvl1AODList())))
 
-    _TriggerESDList = getTriggerEDMList(flags.Trigger.ESDEDMSet,  flags.Trigger.EDMVersion)
-    _TriggerAODList = getTriggerEDMList(flags.Trigger.AODEDMSet,  flags.Trigger.EDMVersion)
+    edmVersion = max(2, flags.Trigger.EDMVersion)
+    _TriggerESDList = getTriggerEDMList(flags.Trigger.ESDEDMSet,  edmVersion)
+    _TriggerAODList = getTriggerEDMList(flags.Trigger.AODEDMSet,  edmVersion)
     log.debug("ESD EDM list: %s", _TriggerESDList)
     log.debug("AOD EDM list: %s", _TriggerAODList)
     
