@@ -48,7 +48,7 @@ StatusCode RPC_HitsTruthRelink::execute(const EventContext &ctx) const
   ATH_CHECK(getReferenceBarcode(ctx, &referenceBarcode));
 
   for (const RPCSimHit & hit : *inputCollection) {
-    const HepMcParticleLink oldLink = hit.particleLink();
+    const HepMcParticleLink& oldLink = hit.particleLink();
 
     int currentBarcode{};
     if (oldLink.barcode() != 0) {

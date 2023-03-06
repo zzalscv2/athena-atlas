@@ -305,15 +305,16 @@ StatusCode SiHitAnalysis::execute()
       m_hits_step->push_back(step_length);
       m_hits_barcode->push_back(hit.particleLink().barcode());
       if (m_extraTruthBranches) {
-        auto tpl = hit.particleLink();
-        if (tpl.isValid()) {
-          m_hits_pdgId->push_back(tpl->pdg_id());
-          m_hits_pT->push_back(tpl->momentum().perp());
-          m_hits_eta->push_back(tpl->momentum().eta());
-          m_hits_phi->push_back(tpl->momentum().phi());
-          m_hits_prodVtx_x->push_back(tpl->production_vertex()->position().x());
-          m_hits_prodVtx_y->push_back(tpl->production_vertex()->position().y());
-          m_hits_prodVtx_z->push_back(tpl->production_vertex()->position().z());
+        const auto& HMPL = hit.particleLink();
+        if (HMPL.isValid()) {
+          auto part = HMPL.cptr();
+          m_hits_pdgId->push_back(part->pdg_id());
+          m_hits_pT->push_back(part->momentum().perp());
+          m_hits_eta->push_back(part->momentum().eta());
+          m_hits_phi->push_back(part->momentum().phi());
+          m_hits_prodVtx_x->push_back(part->production_vertex()->position().x());
+          m_hits_prodVtx_y->push_back(part->production_vertex()->position().y());
+          m_hits_prodVtx_z->push_back(part->production_vertex()->position().z());
         }
         else {
           m_hits_pdgId->push_back(-9999);

@@ -48,7 +48,7 @@ StatusCode TRT_HitsTruthRelink::execute(const EventContext &ctx) const
   ATH_CHECK(getReferenceBarcode(ctx, &referenceBarcode));
 
   for (const TRTUncompressedHit &hit : *inputCollection) {
-    const HepMcParticleLink oldLink = hit.particleLink();
+    const HepMcParticleLink& oldLink = hit.particleLink();
 
     int pdgID = hit.GetParticleEncoding();
     int currentBarcode = oldLink.barcode();

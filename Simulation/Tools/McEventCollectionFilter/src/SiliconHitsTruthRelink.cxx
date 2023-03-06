@@ -48,7 +48,7 @@ StatusCode SiliconHitsTruthRelink::execute(const EventContext &ctx) const
   ATH_CHECK(getReferenceBarcode(ctx, &referenceBarcode));
 
   for (const SiHit &hit : *inputCollection) {
-    const HepMcParticleLink oldLink = hit.particleLink();
+    const HepMcParticleLink& oldLink = hit.particleLink();
 
     HepGeom::Point3D<double> lP1 = hit.localStartPosition();
     HepGeom::Point3D<double> lP2 = hit.localEndPosition();
