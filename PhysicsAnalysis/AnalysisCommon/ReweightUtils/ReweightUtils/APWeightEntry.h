@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -30,7 +30,7 @@ public:
   virtual ~APWeightEntry();                                                      /*!< Default destructor. */
 
   void ReadEfficiency(double efficiency, double err_low, double err_high);       /*!< Read efficiencies and upper/lower uncertainty (if numerator/denominator not applicable (e.g. Bootstrap)). */
-  void SetCoordinates(std::vector<int> coords, std::vector<int> n_dim_origin);
+  void SetCoordinates(const std::vector<int>& coords, const std::vector<int>& n_dim_origin);
   
   unsigned int GetValDenominator() const;                                        /*!< Get value of original denominator. */
   unsigned int GetValNumerator() const;                                          /*!< Get value of original numerator. */

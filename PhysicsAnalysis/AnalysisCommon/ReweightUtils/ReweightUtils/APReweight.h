@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@ class APReweight : public APReweightBase {
 
 public:
   APReweight();                                                                  /*!< Default constructor. */
-  APReweight(TTree* denominator, std::string denominator_branch, TTree* numerator, std::string numerator_branch, unsigned int n_bins, double x_min, double x_max, bool isTrig = false); /*!< Constructor for whole branches (numerator/denominator) to read in. */
+  APReweight(TTree* denominator, const std::string& denominator_branch, TTree* numerator, const std::string& numerator_branch, unsigned int n_bins, double x_min, double x_max, bool isTrig = false); /*!< Constructor for whole branches (numerator/denominator) to read in. */
   APReweight(std::vector< double > denominator, std::vector< double > numerator, unsigned int n_bins, double x_min, double x_max, bool isTrig = false); /*!< Constructor for vectors (numerator/denominator) to read in. */
   APReweight(TH1* denominator_in, TH1* numerator_in, bool isTrig = false);       /*!< Constructor for histograms (numerator/denominator) to read in. */
   virtual ~APReweight();							 /*!< Default destructor. */

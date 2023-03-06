@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #define APReweight_cxx
@@ -22,7 +22,7 @@ APReweight::APReweight() :
   m_isQuiet = false;
 }
 
-APReweight::APReweight(TTree* denominator, string denominator_branch, TTree* numerator, string numerator_branch, unsigned int n_bins, double x_min, double x_max, bool isTrig) : APReweightBase() {
+APReweight::APReweight(TTree* denominator, const std::string& denominator_branch, TTree* numerator, const std::string& numerator_branch, unsigned int n_bins, double x_min, double x_max, bool isTrig) : APReweightBase() {
   m_empty_weight = new APWeightEntry(0, 0, 1.);
   m_denominator_hist = new TH1D("", "denominator_hist", n_bins, x_min, x_max);
   m_numerator_hist = new TH1D("", "numerator_hist", n_bins, x_min, x_max);
