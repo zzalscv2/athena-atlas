@@ -142,8 +142,9 @@ def BSMonitoringConfig(inputFlags):
     BSMonAlg.BCsPerTurn = 3564
     LumiBlockTimeCoolFolderName = '/TRIGGER/LUMI/LBLB"'
     BSMonAlg.LumiBlockTimeCoolFolderName = LumiBlockTimeCoolFolderName
-    FillStateCoolFolderName = '/LHC/DCS/FILLSTATE'
-    BSMonAlg.FillStateCoolFolderName = FillStateCoolFolderName
+    #should not use online
+    #FillStateCoolFolderName = '/LHC/DCS/FILLSTATE'
+    #BSMonAlg.FillStateCoolFolderName = FillStateCoolFolderName
     DataTakingModeCoolFolderName = '/TDAQ/RunCtrl/DataTakingMode'
     BSMonAlg.DataTakingModeCoolFolderName = DataTakingModeCoolFolderName
     IgnorePatterns = ["L1_TRT", "L1_ZB", "_AFP", "L1_BPTX", "L1_BCM", "L1_LUCID"]
