@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetTagTools/GradedTrack.h"
@@ -14,7 +14,7 @@
 namespace Analysis {
 
   // GradedTrack::GradedTrack(const xAOD::TrackParticle* trk, TrackGrade grd) {
-  GradedTrack::GradedTrack(const tracklink_t& trk, TrackGrade grd) :
+  GradedTrack::GradedTrack(const tracklink_t& trk, const TrackGrade& grd) :
     track(trk), grade(grd) {
     // this->track = trk;
     // this->grade = grd;

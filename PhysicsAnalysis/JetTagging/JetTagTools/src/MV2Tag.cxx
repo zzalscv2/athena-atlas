@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/IToolSvc.h"
@@ -204,7 +204,7 @@ namespace Analysis {
 
   std::vector<float>
   MV2Tag::CreateVariables (const std::map<std::string, double> &inputs,
-                           const std::vector<std::string> inputVars) const
+                           const std::vector<std::string>& inputVars) const
   {
     std::vector<float> vals;
     vals.reserve (inputVars.size());
