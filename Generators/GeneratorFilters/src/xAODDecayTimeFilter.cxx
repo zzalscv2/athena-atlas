@@ -3,6 +3,8 @@
 */
 
 #include "GeneratorFilters/xAODDecayTimeFilter.h"
+#include "CLHEP/Random/RandomEngine.h"
+#include "AthenaKernel/RNGWrapper.h"
 #include <limits>       // std::numeric_limits
 
 
@@ -11,13 +13,18 @@ xAODDecayTimeFilter::xAODDecayTimeFilter(const std::string& name, ISvcLocator* p
 {
   declareProperty("LifetimeLow",m_lifetimeLow = std::numeric_limits<float>::lowest(), "proper decay time value in ps");
   declareProperty("LifetimeHigh",m_lifetimeHigh = std::numeric_limits<float>::max(), "proper decay time value in ps");
+  declareProperty("Seedlifetime",m_seedlifetime = std::numeric_limits<float>::lowest(), "proper decay time value in ps");
+  declareProperty("Flatlifetime",m_flatlifetime = false, "proper decay time value in ps");
   declareProperty("PDGs",m_particleID);
 }
 
 
 StatusCode xAODDecayTimeFilter::filterInitialize() {
+  CHECK(m_rndmSvc.retrieve());
   ATH_MSG_INFO("lifetimeLow=" << m_lifetimeLow);
   ATH_MSG_INFO("lifetimeHigh=" << m_lifetimeHigh);
+  ATH_MSG_INFO("Seedlifetime=" << m_seedlifetime);
+  ATH_MSG_INFO("flatlifetime=" << m_flatlifetime);
   for(int pdg : m_particleID){
       ATH_MSG_INFO("PDG codes=" << pdg);
   }
@@ -50,6 +57,14 @@ StatusCode xAODDecayTimeFilter::filterEvent() {
 
   int nPassPDG = 0;
   bool passed = true;
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  CLHEP::HepRandomEngine* rndm = this->getRandomEngine(name(), ctx);
+  if (!rndm) {
+    ATH_MSG_WARNING("Failed to retrieve random number engine xAODDecayTimeFilter.");
+    setFilterPassed(false);
+    return StatusCode::SUCCESS;
+  }
+
   for ( xAOD::TruthEventContainer::const_iterator itr = xTruthEventContainer->begin(); itr != xTruthEventContainer->end(); ++itr) {
        unsigned int nPart = (*itr)->nTruthParticles();
         for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
@@ -59,6 +74,12 @@ StatusCode xAODDecayTimeFilter::filterEvent() {
                     nPassPDG++;
                     double calctau = tau(part);
                     passed &= calctau < m_lifetimeHigh && calctau > m_lifetimeLow;
+                    if (m_flatlifetime) {
+                       double rnd = rndm->flat();
+                       //particle with calctau = m_lifetimeHigh is accepted 100%, the probability decreases exponentially as moving towards m_lifetimeLow
+                       double threshold = std::pow(M_E,-1*m_lifetimeHigh/m_seedlifetime)/std::pow(M_E,-1*calctau/m_seedlifetime);
+                       passed &= rnd < threshold;
+                   }
                 }
             }
         }
@@ -66,5 +87,15 @@ StatusCode xAODDecayTimeFilter::filterEvent() {
   
   setFilterPassed((nPassPDG > 0) & passed);
   return StatusCode::SUCCESS;
+}
+
+
+CLHEP::HepRandomEngine* xAODDecayTimeFilter::getRandomEngine(const std::string& streamName,
+                                                           const EventContext& ctx) const
+{
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, streamName);
+  std::string rngName = name()+streamName;
+  rngWrapper->setSeed( rngName, ctx );
+  return rngWrapper->getEngine(ctx);
 }
 
