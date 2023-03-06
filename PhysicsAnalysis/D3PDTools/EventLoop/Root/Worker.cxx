@@ -41,6 +41,7 @@
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/RootUtils.h>
 #include <RootCoreUtils/ThrowMsg.h>
+#include <RootUtils/WithRootErrorHandler.h>
 #include <SampleHandler/DiskOutput.h>
 #include <SampleHandler/DiskWriter.h>
 #include <SampleHandler/MetaFields.h>
@@ -543,10 +544,29 @@ namespace EL
 
 
 
+  bool Worker ::
+  fileOpenErrorFilter(int level, bool, const char*, const char *)
+  {
+    // For messages above warning level (SysError, Error, Fatal)
+    if( level > kWarning ) {
+      // We won't output further; ROOT should have already put something in the log file
+      throw std::runtime_error("ROOT error detected");
+
+      // No need for further error handling
+      return false;
+    }
+
+    // Pass to the default error handlers
+    return true;
+  }
+
   ::StatusCode Worker ::
   openInputFile (std::string inputFileUrl)
   {
     using namespace msgEventLoop;
+
+    // Enable custom error handling in a nice way
+    RootUtils::WithRootErrorHandler my_handler( fileOpenErrorFilter );
 
     RCU_CHANGE_INVARIANT (this);
 
