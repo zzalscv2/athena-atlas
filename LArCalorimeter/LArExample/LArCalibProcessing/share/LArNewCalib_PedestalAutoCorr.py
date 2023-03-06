@@ -54,10 +54,6 @@ if __name__=='__main__':
       else:   
          InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Pedestal-32s-"+gain+"-"+args.partition+"-DT-RawData/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Pedestal-32s-"+gain+"-"+args.partition+"-DT-RawData.daq.RAW/"
 
-   # move start IOVC slightly back
-   #IOVBegin = int(args.run)-200
-   IOVBegin = int(args.run)
-   
    #Import the configution-method we want to use (here: Pedestal and AutoCorr)
    from LArCalibProcessing.LArCalib_PedestalAutoCorrConfig import LArPedestalAutoCorrCfg
    
@@ -166,11 +162,6 @@ if __name__=='__main__':
    cfg=MainServicesCfg(flags)
    
    cfg.merge(LArPedestalAutoCorrCfg(flags))
-
-   cfg.getEventAlgo("OutputConditionsAlg").Run1= IOVBegin
-   if 'IOVEnd' in dir() and IOVEnd>0:
-      cfg.getEventAlgo("OutputConditionsAlg").Run2=IOVEnd
-
 
    #run the application
    cfg.run() 

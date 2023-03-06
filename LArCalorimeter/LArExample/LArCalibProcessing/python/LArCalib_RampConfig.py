@@ -130,7 +130,9 @@ def LArRampCfg(flags):
     result.merge(OutputConditionsAlgCfg(flags,
                                         outputFile=flags.LArCalib.Output.POOLFile,
                                         ObjectList=["LArRampComplete#LArRamp#"+flags.LArCalib.Ramp.Folder,],
-                                        IOVTagList=[rampTag,]
+                                        IOVTagList=[rampTag,],
+                                        Run1=flags.LArCalib.IOVStart,
+                                        Run2=flags.LArCalib.IOVEnd
                                     ))
 
     #RegistrationSvc    

@@ -102,7 +102,10 @@ def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
     result.merge(OutputConditionsAlgCfg(flags,name="OutCondAlg",
                                         outputFile=flags.LArCalib.Output.POOLFile,
                                         ObjectList=objList,
-                                        IOVTagList=tagList))
+                                        IOVTagList=tagList,
+                                        Run1=flags.LArCalib.IOVStart,
+                                        Run2=flags.LArCalib.IOVEnd
+                                    ))
 
     return result
 

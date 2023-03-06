@@ -64,7 +64,10 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
                                         outputFile=flags.LArCalib.Output.POOLFile,
                                         ObjectList=["LArOFCComplete#LArOFC"+keySuffix+"#"+flags.LArCalib.OFCPhys.Folder+outputSuffix,
                                                     "LArShapeComplete#LArShape"+keySuffix+"#"+flags.LArCalib.Shape.Folder+outputSuffix],
-                                        IOVTagList=[outputOFCTag,outputShapeTag]))
+                                        IOVTagList=[outputOFCTag,outputShapeTag],
+                                        Run1=flags.LArCalib.IOVStart,
+                                        Run2=flags.LArCalib.IOVEnd
+                                    ))
 
 
     rootfile=flags.LArCalib.Output.ROOTFile

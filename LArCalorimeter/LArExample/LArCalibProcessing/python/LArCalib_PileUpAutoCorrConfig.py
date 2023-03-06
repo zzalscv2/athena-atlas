@@ -115,7 +115,9 @@ def LArPileUpAutoCorrCfg(flags):
     result.merge(OutputConditionsAlgCfg(flags,
                                         outputFile=flags.LArCalib.Output.POOLFile,
                                         ObjectList=["LArAutoCorrComplete#LArPhysAutoCorr#"+flags.LArCalib.PhysAutoCorr.Folder,],
-                                        IOVTagList=[PhysAutoCorrTag,]
+                                        IOVTagList=[PhysAutoCorrTag,],
+                                        Run1=flags.LArCalib.IOVStart,
+                                        Run2=flags.LArCalib.IOVEnd
                                     ))
 
 
