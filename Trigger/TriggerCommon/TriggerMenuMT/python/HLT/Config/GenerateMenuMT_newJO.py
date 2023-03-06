@@ -12,6 +12,10 @@ from TriggerMenuMT.HLT.Config.Utility.MenuAlignmentTools import MenuAlignment
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
+_isCAMenu = False
+def isCAMenu():
+  return _isCAMenu
+
 
 def doMenuAlignment(chains):
     """
@@ -72,8 +76,10 @@ class FilterChainsToGenerate(object):
 def generateMenuMT(flags): 
     """
     Interface between CA and MenuMT using ChainConfigurationBase
-    """     
-
+    """         
+    global _isCAMenu
+    _isCAMenu = True
+    
     # Generate the menu, stolen from HLT_standalone
     from TriggerMenuMT.HLT.Config.GenerateMenuMT import GenerateMenuMT
     menu = GenerateMenuMT() 

@@ -286,8 +286,8 @@ class ElectronChainConfiguration(ChainConfigurationBase):
 
     def getFastCalo(self, flags, is_probe_leg=False):
         stepName       = "FastCalo_electron"
-        fastCaloCfg    = electronFastCaloCfg
-        return self.getStep(flags,1,stepName,[ fastCaloCfg], is_probe_leg=is_probe_leg)
+        #fastCaloCfg    = electronFastCaloCfg
+        return self.getStep(flags,1,stepName,[ electronFastCaloCfg], is_probe_leg=is_probe_leg)
 
     def getFastTracking(self, flags, is_probe_leg=False):
         stepName = "fast_tracking"

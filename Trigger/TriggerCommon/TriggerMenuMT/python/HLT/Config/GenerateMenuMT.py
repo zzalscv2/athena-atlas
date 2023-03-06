@@ -3,8 +3,8 @@
 import importlib
 import string
 
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
+ 
 
 
 from AthenaCommon.Logging import logging
@@ -150,7 +150,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         return
 
     def generateChains(self, flags):
-
+        from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu
         all_chains = []
         combinations_in_menu = []
         alignmentGroups_to_align = set()
@@ -159,7 +159,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         for chainDict in self.chainDicts:
             log.debug("Next: getting chain configuration for chain %s ", chainDict['chainName'])
             chainConfig,lengthOfChainConfigs = self.__generateChainConfig(flags, chainDict)
-            if isComponentAccumulatorCfg():
+            if isCAMenu():
                 # skip chain generation if no ChainConfig was found
                 if chainConfig is None:
                     continue
@@ -340,6 +340,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         from TriggerMenuMT.HLT.Config.Utility.ComboHypoHandling import addTopoInfo, comboConfigurator, topoLegIndices
         from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
         from TriggerMenuMT.HLT.CommonSequences import EventBuildingSequences, TLABuildingSequences
+        from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu
 
         # split the the chainDictionaries for each chain and print them in a pretty way
         chainDicts = splitInterSignatureChainDict(mainChainDict)
@@ -390,7 +391,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
             # if built-up steps are not consecutive, do not build the chain because it's incomplete  
             not_migrated |= (chainPartConfig is None or  \
                 len([k for k, g in itertools.groupby(["_MissingCA" in step.name for step in chainPartConfig.steps]) if k==0])!=1)                    
-            if isComponentAccumulatorCfg() and not_migrated:                              
+            if isCAMenu() and not_migrated:                      
                 log.debug(str(NoCAmigration("[__generateChainConfigs] Chain {0} removed leg because is incomplete".format(chainPartDict['chainName'])) ))       
             else:
                 listOfChainConfigs.append(chainPartConfig)
@@ -400,8 +401,8 @@ class GenerateMenuMT(object, metaclass=Singleton):
         # multi-element list for intra-sig combined chains
         # here, we flatten it accordingly (works for both cases!)
         lengthOfChainConfigs = []
-        if isComponentAccumulatorCfg() and not_migrated:                                  
-            log.debug(str(NoCAmigration("[__generateChainConfigs] Chain {0} removed because is incomplete".format(chainPartDict['chainName'])) ))       
+        if isCAMenu() and not_migrated: 
+             log.debug(str(NoCAmigration("[__generateChainConfigs] Chain {0} removed because is incomplete".format(chainPartDict['chainName'])) ))       
         else:        
             for nSteps, aGrps in perSig_lengthOfChainConfigs:
                 if len(nSteps) != len(aGrps):
@@ -413,7 +414,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
        
         # This part is to deal with combined chains between different signatures
         try:
-            if isComponentAccumulatorCfg() and not_migrated:
+            if isCAMenu() and not_migrated:
                 raise NoCAmigration("[__generateChainConfigs] chain {0} generation missed configuration".format(mainChainDict['chainName']))                               
 
             if len(listOfChainConfigs) == 0:
@@ -446,7 +447,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
             log.exception('[__generateChainConfigs] Full chain dictionary is\n %s ', mainChainDict)
             raise Exception('[__generateChainConfigs] Stopping menu generation. Please investigate the exception shown above.')
         except AttributeError:                    
-            if isComponentAccumulatorCfg():
+            if isCAMenu():
                 log.warning(str(NoCAmigration("[__generateChainConfigs] addTopoInfo failed with CA configurables") )  )  
                 return None,[]                       
             raise Exception('[__generateChainConfigs] Stopping menu generation. Please investigate the exception shown above.')
@@ -465,7 +466,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
                 log.debug('Configuring event building sequence %s for chain %s', eventBuildType, mainChainDict['chainName'])
                 EventBuildingSequences.addEventBuildingSequence(flags, theChainConfig, eventBuildType, mainChainDict)
             except TypeError as ex:
-                if isComponentAccumulatorCfg():
+                if isCAMenu():
                     log.warning(str(NoCAmigration("[__generateChainConfigs] EventBuilding/TLA sequences failed with CA configurables")) )                                  
                 else:
                     log.error(ex)
