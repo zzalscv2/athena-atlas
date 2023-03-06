@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -822,7 +822,9 @@ InDetPhysValMonitoringTool::getTruthParticles() const {
           ATH_MSG_VERBOSE("Adding " << ntruth << " truth particles from TruthPileupEvents container");
           const auto& links = eventPileup->truthParticleLinks();
           for (const auto& link : links) {
-            tempVec.push_back(*link);
+            if (link.isValid()){
+              tempVec.push_back(*link);
+            }
           }
         }
       } else {
