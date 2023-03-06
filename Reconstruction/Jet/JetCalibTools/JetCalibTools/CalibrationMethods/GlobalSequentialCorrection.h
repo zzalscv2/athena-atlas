@@ -90,12 +90,12 @@ class GlobalSequentialCorrection
   uint m_depth, m_trackWIDTHMaxEtaBin, m_nTrkMaxEtaBin, m_Tile0MaxEtaBin, m_EM3MaxEtaBin, m_chargedFractionMaxEtaBin, m_caloWIDTHMaxEtaBin, m_N90ConstituentsMaxEtaBin, m_TileGap3MaxEtaBin;
   VecD m_punchThroughEtaBins;
   double m_punchThroughMinPt;
-  bool m_turnOffTrackCorrections;
-  bool m_PFlow;
-  bool m_caloBased;
-  bool m_pTResponseRequirementOff;
-  bool m_nTrkwTrk_4PFlow;
-  double m_turnOffStartingpT, m_turnOffEndpT;
+  bool m_turnOffTrackCorrections{false};
+  bool m_PFlow{false};
+  bool m_caloBased{false};
+  bool m_pTResponseRequirementOff{false};
+  bool m_nTrkwTrk_4PFlow{false};
+  double m_turnOffStartingpT{1200.}, m_turnOffEndpT{2000};
 
 };
 

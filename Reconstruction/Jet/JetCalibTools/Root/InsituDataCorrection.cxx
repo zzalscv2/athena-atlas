@@ -342,7 +342,7 @@ double InsituDataCorrection::getInsituCorr(double pt, double eta, const std::str
   else if ( myPt >= ptMax ) myPt = ptMax - 1e-6;
   if (calibstep == "ResidualMCbased" && m_applyEtaRestrictionResidualMCbased) {
     if(myEta>=etaMax) return 1.0;
-    return m_insituCorr_ResidualMCbased->Interpolate(myPt,myEta);
+    return m_insituCorr_ResidualMCbased? (m_insituCorr_ResidualMCbased->Interpolate(myPt,myEta)) : 1.0;
   }
   if (calibstep == "RelativeAbs" && m_applyEtaRestrictionRelativeandAbsolute) {
     if(myEta>=etaMax) return 1.0;
@@ -351,9 +351,9 @@ double InsituDataCorrection::getInsituCorr(double pt, double eta, const std::str
   if (myEta <= -etaMax) myEta = 1e-6 - etaMax;
   else if (myEta >= etaMax) myEta = etaMax - 1e-6;
   if (calibstep == "ResidualMCbased" && !m_applyEtaRestrictionResidualMCbased){
-    return m_insituCorr_ResidualMCbased->Interpolate(myPt,myEta);
+    return m_insituCorr_ResidualMCbased? (m_insituCorr_ResidualMCbased->Interpolate(myPt,myEta)) : 1.0;
   }
-  return m_insituCorr->Interpolate(myPt,myEta);
+  return m_insituCorr? (m_insituCorr->Interpolate(myPt,myEta)):1.0;
 }
 
 double InsituDataCorrection::getInsituCorr_JMS(double pt, double mass, double eta, const std::string& calibstep, bool isTAmass) const {
