@@ -27,7 +27,7 @@ def precisionPhotonCaloIsoSequence(flags, ion=False):
 
     # Configure the reconstruction algorithm sequence
     from TriggerMenuMT.HLT.Photon.PrecisionPhotonCaloIsoRecoSequences import precisionPhotonCaloIsoRecoSequence
-    (precisionPhotonCaloIsoInViewSequence, sequenceOut) = precisionPhotonCaloIsoRecoSequence(InViewRoIs, ion)
+    (precisionPhotonCaloIsoInViewSequence, sequenceOut) = precisionPhotonCaloIsoRecoSequence(flags, RoIs=InViewRoIs, ion=ion)
 
     precisionPhotonCaloIsoViewsMaker.ViewNodeName = precisionPhotonCaloIsoInViewSequence.name()
 
