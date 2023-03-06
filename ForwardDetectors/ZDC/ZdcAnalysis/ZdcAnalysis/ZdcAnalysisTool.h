@@ -170,7 +170,7 @@ private:
   std::shared_ptr<ZDCDataAnalyzer> m_zdcDataAnalyzer;
   std::shared_ptr<ZDCDataAnalyzer> m_zdcDataAnalyzer_40MHz;
   std::shared_ptr<ZDCDataAnalyzer> m_zdcDataAnalyzer_80MHz;
-  ZDCDataAnalyzer::ZDCModuleFloatArray m_peak2ndDerivMinSamples;
+  ZDCDataAnalyzer::ZDCModuleIntArray m_peak2ndDerivMinSamples;
   ZDCDataAnalyzer::ZDCModuleFloatArray m_peak2ndDerivMinThresholdsHG;
   ZDCDataAnalyzer::ZDCModuleFloatArray m_peak2ndDerivMinThresholdsLG;
 
