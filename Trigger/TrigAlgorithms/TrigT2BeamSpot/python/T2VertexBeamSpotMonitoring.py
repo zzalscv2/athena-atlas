@@ -13,21 +13,25 @@ class BaseMonitoringTool:
     def __init__(self, flags, name):
         self.monTool = GenericMonitoringTool(flags, name)
 
-    def makeHisto1D(self, name, type, xbins, xmin, xmax, title, path='EXPERT', opt=None, **kw):
+    def makeHisto1D(self, name, type, xbins, xmin, xmax, title, path='EXPERT', opt=None, alias=None, **kw):
+        if alias is not None:
+            name = f"{name};{alias}"
         self.monTool.defineHistogram(
             name, path=path, type=type, title=title, opt=opt,
             xbins=xbins, xmin=xmin, xmax=xmax, **kw
         )
 
-    def makeLBNHisto1D(self, name, type, xbins, xmin, xmax, title, path='EXPERT', opt="", **kw):
+    def makeLBNHisto1D(self, name, type, xbins, xmin, xmax, title, path='EXPERT', opt="", alias=None, **kw):
         opt = _LBN_OPTIONS + " " + opt if opt else _LBN_OPTIONS
         self.makeHisto1D(
             name, type, xbins, xmin, xmax, title, path=path, opt=opt, **kw,
         )
 
     def makeHisto2D(self, nameX, nameY, type, xbins, xmin, xmax,
-                    ybins, ymin, ymax, title, path='EXPERT', opt=None, **kw):
+                    ybins, ymin, ymax, title, path='EXPERT', opt=None, alias=None, **kw):
         name = ", ".join([nameX, nameY])
+        if alias is not None:
+            name = f"{name};{alias}"
         self.monTool.defineHistogram(
             name, path=path, type=type, title=title, opt=opt,
             xbins=xbins, xmin=xmin, xmax=xmax,
@@ -43,8 +47,10 @@ class BaseMonitoringTool:
             path=path, opt=opt, **kw,
         )
 
-    def makeProfile(self, nameX, nameY, xbins, xmin, xmax, title, path='EXPERT', opt=None, **kw):
+    def makeProfile(self, nameX, nameY, xbins, xmin, xmax, title, path='EXPERT', opt=None, alias=None, **kw):
         name = ", ".join([nameX, nameY])
+        if alias is not None:
+            name = f"{name};{alias}"
         self.monTool.defineHistogram(
             name, path=path, type="TProfile", title=title, opt=opt,
             xbins=xbins, xmin=xmin, xmax=xmax, **kw,
@@ -429,6 +435,16 @@ class T2VertexBeamSpotToolMonitoring(BaseMonitoringTool):
                                 title="Split Vertex DY vs. NTrks; N trk per split vertex; #Deltay between split vertices [mm]")
             self.makeLBNHisto2D('SplitVertexDNTrksPass', 'SplitVertexDZPass', 'TH2F', 100, 0.0, 50.0, 250, -2.5, 2.5,
                                 title="Split Vertex DZ vs. NTrks; N trk per split vertex; #Deltaz between split vertices [mm]")
+            # same histograms, per run
+            self.makeHisto2D('SplitVertexDNTrksPass', 'SplitVertexDXPass', 'TH2F', 100, 0.0, 50.0, 250, -1.25, 1.25,
+                             title="Split Vertex DX vs. NTrks (runsummary); N trk per split vertex; #Deltax between split vertices [mm]",
+                             alias="SplitVertexDXPass_vs_SplitVertexDNTrksPass_runsummary")
+            self.makeHisto2D('SplitVertexDNTrksPass', 'SplitVertexDYPass', 'TH2F', 100, 0.0, 50.0, 250, -1.25, 1.25,
+                             title="Split Vertex DY vs. NTrks (runsummary); N trk per split vertex; #Deltay between split vertices [mm]",
+                             alias="SplitVertexDYPass_vs_SplitVertexDNTrksPass_runsummary")
+            self.makeHisto2D('SplitVertexDNTrksPass', 'SplitVertexDZPass', 'TH2F', 100, 0.0, 50.0, 250, -2.5, 2.5,
+                             title="Split Vertex DZ vs. NTrks (runsummary); N trk per split vertex; #Deltaz between split vertices [mm]",
+                             alias="SplitVertexDZPass_vs_SplitVertexDNTrksPass_runsummary")
 
             # Pull in X, Y, Z vs. Ntrk in split vertices: Monitors quality of tracking information
             # Total number of bins: 30,000
