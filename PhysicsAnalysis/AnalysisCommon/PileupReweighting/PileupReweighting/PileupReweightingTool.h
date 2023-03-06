@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -146,7 +146,7 @@ namespace CP {
       CP::TPileupReweighting* m_activeTool; //defaults to this
 
       std::vector<std::string> m_prwFiles;
-      std::vector<std::string> m_lumicalcFiles;
+      std::vector<std::string> m_toolLumicalcFiles;
 
       std::string m_prefix;
 

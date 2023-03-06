@@ -905,10 +905,11 @@ Int_t CP::TPileupReweighting::AddLumiCalcFile(const TString& fileName, const TSt
                //fill into input data histograms
                //check if we need to create an empty histogram
 
-               if(r.inputHists.find(trigger) == r.inputHists.end()) {
-                  r.inputHists[trigger] = CloneEmptyHistogram(runNbr,-1);
+               std::unique_ptr<TH1>& histptr = r.inputHists[trigger];
+               if (!histptr) {
+                  histptr = CloneEmptyHistogram(runNbr,-1);
                }
-               r.inputHists[trigger]->Fill(mu,intLumi);
+               histptr->Fill(mu,intLumi);
             }
             m_countingMode=false;
             m_lumiVectorIsLoaded=true;
@@ -1859,11 +1860,12 @@ Int_t CP::TPileupReweighting::Fill(Int_t runNumber,Int_t channelNumber,Float_t w
          Error("Fill","Unrecognised runNumber: %d.  Check your period configuration (AddPeriod or UsePeriodConfig) ... but should never have got here so please report this!",runNumber);
          throw std::runtime_error("Throwing 1: Unrecognised periodNumber");
       }
-      if(p->inputHists.find(channelNumber)==p->inputHists.end()) {
+      std::unique_ptr<TH1>& histptr = p->inputHists[channelNumber];
+      if(!histptr) {
          //need to create my period histogram
-         p->inputHists[channelNumber] = CloneEmptyHistogram(runNumber,channelNumber);
+         histptr = CloneEmptyHistogram(runNumber,channelNumber);
       }
-      hist = p->inputHists[channelNumber].get();
+      hist = histptr.get();
    } else {
       Run& r = m_runs[runNumber];
       if( ! r.inputHists["None"]) r.inputHists["None"]=CloneEmptyHistogram(runNumber,channelNumber);
@@ -2229,13 +2231,14 @@ void CP::TPileupReweighting::calculateHistograms(CompositeTrigger* t, int runDep
 
 
                 auto& triggerHists = t->triggerHists[idx];
-                if(triggerHists.find(tbits) == triggerHists.end()) {
-                    triggerHists[tbits] = CloneEmptyHistogram(p.first,-1);
+                std::unique_ptr<TH1>& histptr = triggerHists[tbits];
+                if(!histptr) {
+                    histptr = CloneEmptyHistogram(p.first,-1);
                     if(m_debugging && m_printInfo) Info("CalculatePrescaledLuminosityHistograms","Created Data Weight Histogram for [%s,%d,%d,%ld]",t->val.Data(),p.first,idx,tbits);
                 }
                   //check if we were about to fill a bad bin ... if we are, we either skipp the fill (unrep action=1) or redirect (unrep action=3)
                 if( (m_unrepresentedDataAction==1) && p.second->inputBinRedirect[bin]!=bin) { } //do nothing
-                else if( m_unrepresentedDataAction==3 ) {triggerHists[tbits]->Fill(triggerHists[tbits]->GetBinCenter(p.second->inputBinRedirect[bin]), intLumi*pFactor);}
+                else if( m_unrepresentedDataAction==3 ) {histptr->Fill(triggerHists[tbits]->GetBinCenter(p.second->inputBinRedirect[bin]), intLumi*pFactor);}
                 else triggerHists[tbits]->Fill(mu*m_dataScaleFactorX,intLumi*pFactor);
 
 
