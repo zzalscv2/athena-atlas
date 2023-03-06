@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILETBPULSEMONTOOL_H
@@ -11,6 +11,8 @@ class ITileBadChanTool;
 
 #include <vector>
 #include <string>
+
+class TileInfo;
 
 /** @class
  *  @brief Class for TileCal pulse shape monitoring
@@ -24,12 +26,12 @@ class ATLAS_NOT_THREAD_SAFE TileTBPulseMonTool : public TileFatherMonTool {  // 
 
     ~TileTBPulseMonTool();
 
-    virtual StatusCode initialize();
+    virtual StatusCode initialize() override;
 
     //pure virtual methods
-    virtual StatusCode bookHistograms();
-    virtual StatusCode fillHistograms();
-    virtual StatusCode procHistograms();
+    virtual StatusCode bookHistograms() override;
+    virtual StatusCode fillHistograms() override;
+    virtual StatusCode procHistograms() override;
 
   private:
 
@@ -48,6 +50,11 @@ class ATLAS_NOT_THREAD_SAFE TileTBPulseMonTool : public TileFatherMonTool {  // 
     bool m_isFirstEvent;
 
     int m_useDemoCabling;
+    std::vector<float> m_timeRange;
+    // TileInfo
+    std::string m_infoName;
+    const TileInfo* m_tileInfo;
+    int m_t0SamplePosition;
 };
 
 #endif
