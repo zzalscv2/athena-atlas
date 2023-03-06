@@ -187,6 +187,9 @@ namespace egEnergyCorr {
       // Rel22 OFC changes
       OFCUp, OFCDown,
 
+      // Rel22 MC20 pre and bulk
+      EXTRARUN3PREUp, EXTRARUN3PREDown, 
+
       AllUp, AllDown,
       AllCorrelatedUp, AllCorrelatedDown,
 

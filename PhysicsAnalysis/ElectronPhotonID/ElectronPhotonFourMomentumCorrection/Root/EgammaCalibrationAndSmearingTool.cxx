@@ -1008,10 +1008,13 @@ void EgammaCalibrationAndSmearingTool::setupSystematics() {
     m_syst_description[CP::SystematicVariation("EG_SCALE_ZEESTAT", +1)] = SysInfo{always, egEnergyCorr::Scale::ZeeStatUp};
     m_syst_description[CP::SystematicVariation("EG_SCALE_ZEESTAT", -1)] = SysInfo{always, egEnergyCorr::Scale::ZeeStatDown};
 
-    // additional systematics for R22 OFC
+    // additional systematics for R22 OFC and MC21 pre and bulk
     if (m_TESModel == egEnergyCorr::es2022_R22_PRE) {
       m_syst_description[CP::SystematicVariation("EG_SCALE_OFC", +1)] = SysInfo{always, egEnergyCorr::Scale::OFCUp};
       m_syst_description[CP::SystematicVariation("EG_SCALE_OFC", -1)] = SysInfo{always, egEnergyCorr::Scale::OFCDown};
+
+      m_syst_description[CP::SystematicVariation("EG_SCALE_EXTRARUN3PRE", +1)] = SysInfo{always, egEnergyCorr::Scale::EXTRARUN3PREUp};
+      m_syst_description[CP::SystematicVariation("EG_SCALE_EXTRARUN3PRE", -1)] = SysInfo{always, egEnergyCorr::Scale::EXTRARUN3PREDown};
     }
 
     // additional systematics for S12 run2
@@ -1178,6 +1181,8 @@ void EgammaCalibrationAndSmearingTool::setupSystematics() {
     if (m_TESModel == egEnergyCorr::es2022_R22_PRE) {
       m_syst_description[CP::SystematicVariation("EG_SCALE_OFC", +1)] = SysInfo{always, egEnergyCorr::Scale::OFCUp};
       m_syst_description[CP::SystematicVariation("EG_SCALE_OFC", -1)] = SysInfo{always, egEnergyCorr::Scale::OFCDown};
+      m_syst_description[CP::SystematicVariation("EG_SCALE_EXTRARUN3PRE", +1)] = SysInfo{always, egEnergyCorr::Scale::EXTRARUN3PREUp};
+      m_syst_description[CP::SystematicVariation("EG_SCALE_EXTRARUN3PRE", -1)] = SysInfo{always, egEnergyCorr::Scale::EXTRARUN3PREDown};
     }
 
     // additional systematics for S12 run2
