@@ -189,7 +189,7 @@ namespace FCS_Param
   StatusCode FCS_StepInfoSDTool::Gather()
   {
     ATH_MSG_DEBUG("Gathering hits to write out in " << name());
-    auto sdWrapper = dynamic_cast<FCS_StepInfoSDWrapper*>( getSD() );
+    auto *sdWrapper = dynamic_cast<FCS_StepInfoSDWrapper*>( getSD() );
     if(!sdWrapper) {
       ATH_MSG_ERROR("Failed to cast SD to FCS_StepInfoSDWrapper");
       return StatusCode::FAILURE;
@@ -204,7 +204,7 @@ namespace FCS_Param
   G4VSensitiveDetector* FCS_StepInfoSDTool::makeSD() const
   {
     // Create the wrapper
-    auto sdWrapper = new FCS_StepInfoSDWrapper("FCS_StepInfoSDWrapper", m_hitCollName);
+    auto *sdWrapper = new FCS_StepInfoSDWrapper("FCS_StepInfoSDWrapper", m_hitCollName);
 
     // Create the SDs.
     sdWrapper->addSD( makeOneLArSD( "Barrel::Presampler::Module::StepInfo", &*m_bpsmodcalc, m_presBarVolumes ) );

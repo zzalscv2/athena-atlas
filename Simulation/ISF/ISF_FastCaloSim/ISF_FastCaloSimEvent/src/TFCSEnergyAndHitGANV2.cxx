@@ -67,7 +67,7 @@ void TFCSEnergyAndHitGANV2::set_nr_of_init(unsigned int bin,unsigned int ninit)
 }
 
 // initialize lwtnn network 
-bool TFCSEnergyAndHitGANV2::initializeNetwork(int pid,int etaMin,std::string FastCaloGANInputFolderName)
+bool TFCSEnergyAndHitGANV2::initializeNetwork(int pid,int etaMin,const std::string& FastCaloGANInputFolderName)
 {
 
   // initialize all necessary constants
@@ -545,7 +545,7 @@ void TFCSEnergyAndHitGANV2::unit_test(TFCSSimulationState* simulstate,const TFCS
   simulstate->Print();
 }
 
-int TFCSEnergyAndHitGANV2::GetBinsInFours(double bins) const{
+int TFCSEnergyAndHitGANV2::GetBinsInFours(double bins) {
     if (bins < 4)
     return 4;
   else if (bins < 8)

@@ -38,7 +38,7 @@ TFCSHistoLateralShapeParametrization::~TFCSHistoLateralShapeParametrization()
 void TFCSHistoLateralShapeParametrization::set_geometry(ICaloGeometry* geo)
 {
   TFCSLateralShapeParametrizationHitBase::set_geometry(geo);
-  if(m_hist.get_HistoContents().size()>0) {
+  if(!m_hist.get_HistoContents().empty()) {
     int first_fix_bin=-1;
     for(int i=(int)(m_hist.get_HistoContents().size()-1);i>=0;--i) {
       if(isnan(m_hist.get_HistoContents()[i])) {
@@ -162,7 +162,7 @@ bool TFCSHistoLateralShapeParametrization::Initialize(TH2* hist)
 {
   if(!hist) return false;
 	m_hist.Initialize(hist);
-	if(m_hist.get_HistoContents().size()==0) return false;
+	if(m_hist.get_HistoContents().empty()) return false;
 	
 	set_number_of_hits(hist->Integral());
 
@@ -173,11 +173,11 @@ bool TFCSHistoLateralShapeParametrization::Initialize(const char* filepath, cons
 {
   // input file with histogram to fit
   std::unique_ptr<TFile> inputfile(TFile::Open( filepath, "READ" ));
-  if (inputfile == NULL) return false;
+  if (inputfile == nullptr) return false;
 
   // histogram with hit pattern
   TH2 *inputShape = (TH2*)inputfile->Get(histname);
-  if (inputShape == NULL) return false;
+  if (inputShape == nullptr) return false;
 
   bool OK=Initialize(inputShape);
 

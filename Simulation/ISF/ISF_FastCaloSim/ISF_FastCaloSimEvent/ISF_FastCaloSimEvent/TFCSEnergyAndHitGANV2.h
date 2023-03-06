@@ -56,7 +56,7 @@ public:
   const TFCSGANXMLParameters::Binning get_Binning() const {return m_param.GetBinning();};
   const TFCSGANEtaSlice::ExtrapolatorWeights get_ExtrapolationWeights() const {return m_slice->GetExtrapolatorWeights();};
   
-  bool initializeNetwork(int pid,int etaMin,std::string FastCaloGANInputFolderName);
+  bool initializeNetwork(int pid,int etaMin,const std::string& FastCaloGANInputFolderName);
   
   bool fillEnergy(TFCSSimulationState& simulstate, const TFCSTruthState* truth, const TFCSExtrapolationState* extrapol) const;
   virtual FCSReturnCode simulate(TFCSSimulationState& simulstate,const TFCSTruthState* truth, const TFCSExtrapolationState* extrapol) const override;
@@ -70,7 +70,7 @@ protected:
   
 private:
 
-  int GetBinsInFours(double bins) const;
+  static int GetBinsInFours(double bins) ;
   int GetAlphaBinsForRBin(const TAxis* x, int ix, int yBinNum) const;
 
   std::vector< int > m_bin_ninit;

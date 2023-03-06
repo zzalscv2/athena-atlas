@@ -122,7 +122,7 @@ bool TFCSPredictExtrapWeights::getNormInputs(const std::string& etaBin, const st
         getline(ss, substr, ' ');
 	if(counter == 0){ // Get index (#layer or -1 if var == etrue)
           if(substr != "etrue"){
-            int index = std::stoi(substr.substr(substr.find("_")+1));
+            int index = std::stoi(substr.substr(substr.find('_')+1));
 	    m_normLayers->push_back(index);
 	  } else { // etrue
 	    m_normLayers->push_back(-1);

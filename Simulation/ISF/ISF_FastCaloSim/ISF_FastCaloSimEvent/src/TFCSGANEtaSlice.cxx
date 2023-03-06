@@ -26,7 +26,7 @@ TFCSGANEtaSlice::TFCSGANEtaSlice() {
 
 }
 
-TFCSGANEtaSlice::TFCSGANEtaSlice(int pid, int etaMin, int etaMax, const TFCSGANXMLParameters param) {
+TFCSGANEtaSlice::TFCSGANEtaSlice(int pid, int etaMin, int etaMax, const TFCSGANXMLParameters& param) {
   m_pid = pid;
   m_etaMin = etaMin;
   m_etaMax = etaMax;

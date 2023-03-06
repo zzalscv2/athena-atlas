@@ -208,7 +208,7 @@ FCSReturnCode TFCSVoxelHistoLateralCovarianceFluctuations::simulate(TFCSSimulati
     simulstate.Print();
   }
   //if(m_parMeans[Ebin-1].GetNrows()<1) {
-  if(m_parMeans.size() < 1 || Ebin <= 0){
+  if(m_parMeans.empty() || Ebin <= 0){
     //not initialized, do nothing in case this instance is just used to clean up memory
     return FCSSuccess;
   }

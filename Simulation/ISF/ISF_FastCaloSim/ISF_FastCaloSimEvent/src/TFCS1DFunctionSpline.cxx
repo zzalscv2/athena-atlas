@@ -279,7 +279,7 @@ double TFCS1DFunctionSpline::get_maxdev(const TH1* hist,const TSpline3& sp,doubl
   maxeffsig=0;
 
   TH1* hist_clone=(TH1*)hist->Clone("hist_clone");
-  hist_clone->SetDirectory(0);
+  hist_clone->SetDirectory(nullptr);
   hist_clone->Reset();
   double interr=0;
   double integral=hist->IntegralAndError(1,hist->GetNbinsX(),interr);
@@ -329,7 +329,7 @@ double TFCS1DFunctionSpline::rnd_to_fct(double rnd) const
 void TFCS1DFunctionSpline::unit_test ATLAS_NOT_THREAD_SAFE (TH1* hist)
 {
   int nbinsx;
-  TH1* histfine=0;
+  TH1* histfine=nullptr;
   if(hist==nullptr) {
     nbinsx=50;
     double xmin=1;

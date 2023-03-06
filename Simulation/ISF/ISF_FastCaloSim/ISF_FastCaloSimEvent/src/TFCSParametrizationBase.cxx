@@ -98,7 +98,7 @@ void TFCSParametrizationBase::DoCleanup()
 {
   std::scoped_lock lock(s_cleanup_mutex);
   //Do cleanup only at the end of read/write operations
-  for(auto ptr:s_cleanup_list) if(ptr) {
+  for(auto *ptr:s_cleanup_list) if(ptr) {
     delete ptr;
   }  
   s_cleanup_list.resize(0);
@@ -160,7 +160,7 @@ void TFCSParametrizationBase::RemoveDuplicates()
   for(auto& dupiter : dupclasses) {
     FindDuplicates_t& dup=dupiter.second;
     for(auto onedup : dup) {
-      if(onedup.second.mother.size()==0) continue;
+      if(onedup.second.mother.empty()) continue;
       TFCSParametrizationBase* ref=onedup.first;
       ATH_MSG_DEBUG("Main object "<<ref<<"="<<ref->GetName());
       for(unsigned int i=0;i<onedup.second.mother.size();++i) {
@@ -184,7 +184,7 @@ void TFCSParametrizationBase::RemoveDuplicates()
   FindDuplicates(dupclasses2);
 
   std::map<std::string,int> ndel;
-  for(auto delparam : dellist) {
+  for(auto *delparam : dellist) {
     FindDuplicates_t& dup2=dupclasses2[delparam->GetName()];
     bool present=dup2.find(delparam) != dup2.end();
     if(present) {

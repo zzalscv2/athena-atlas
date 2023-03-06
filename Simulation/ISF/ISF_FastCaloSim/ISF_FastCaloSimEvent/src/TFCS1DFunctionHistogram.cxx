@@ -95,7 +95,7 @@ void TFCS1DFunctionHistogram::smart_rebin_loop(TH1* hist, double cut_maxdev)
   double maxdev=-1;
   
   TH1D* h_input=(TH1D*)hist->Clone("h_input");
-  TH1D* h_output=0;
+  TH1D* h_output=nullptr;
   
   int i=0;
   while(1)
@@ -250,7 +250,7 @@ double TFCS1DFunctionHistogram::rnd_to_fct(double rnd) const
 }
 
 
-double TFCS1DFunctionHistogram::linear(double y1,double y2,double x1,double x2,double y) const
+double TFCS1DFunctionHistogram::linear(double y1,double y2,double x1,double x2,double y) 
 {
   double x=-1;
 
@@ -266,7 +266,7 @@ double TFCS1DFunctionHistogram::linear(double y1,double y2,double x1,double x2,d
   return x;
 }
 
-double TFCS1DFunctionHistogram::non_linear(double y1,double y2,double x1,double x2,double y) const
+double TFCS1DFunctionHistogram::non_linear(double y1,double y2,double x1,double x2,double y) 
 {
   double x=-1;
   double eps=0.0000000001;

@@ -112,7 +112,7 @@ void TFCSParametrizationChain::recalc_Ekin_eta_union()
 void TFCSParametrizationChain::recalc()
 {
   clear();
-  if(m_chain.size()==0) return;
+  if(m_chain.empty()) return;
   
   recalc_pdgid_intersect();
   recalc_Ekin_eta_intersect();
@@ -202,7 +202,7 @@ void TFCSParametrizationChain::Streamer(TBuffer &R__b)
         TFCSParametrizationChain::Chain_t &R__stl =  m_chain;
         R__stl.clear();
         TClass *R__tcl1 = TFCSParametrizationBase::Class();
-        if (R__tcl1==0) {
+        if (R__tcl1==nullptr) {
           Error("m_chain streamer","Missing the TClass object for class TFCSParametrizationBase *!");
           return;
         }

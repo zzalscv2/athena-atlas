@@ -24,7 +24,7 @@ class TFCSGANLWTNNHandler {
 
   const lwt::LightweightGraph* GetGraph() const { return m_graph;}
 
-  bool LoadGAN(std::string inputFile);   
+  bool LoadGAN(const std::string& inputFile);   
   
   private:
   

@@ -130,7 +130,7 @@ StatusCode ISF::FastCaloTool::setupEventST()
         return StatusCode::FAILURE;
       }
     // this is only used if m_caloCellHack and there is a warning during initialize
-    auto cc_nc ATLAS_THREAD_SAFE = const_cast<CaloCellContainer *> (theConstContainer);
+    auto *cc_nc ATLAS_THREAD_SAFE = const_cast<CaloCellContainer *> (theConstContainer);
     m_theContainer = cc_nc;
   }
 
@@ -153,7 +153,7 @@ StatusCode ISF::FastCaloTool::setupEvent(const EventContext&)
       return StatusCode::FAILURE;
     }
     // this is only used if m_caloCellHack and there is a warning during initialize
-    auto cc_nc ATLAS_THREAD_SAFE = const_cast<CaloCellContainer *> (theConstContainer);
+    auto *cc_nc ATLAS_THREAD_SAFE = const_cast<CaloCellContainer *> (theConstContainer);
     m_theContainer = cc_nc;
   }
 

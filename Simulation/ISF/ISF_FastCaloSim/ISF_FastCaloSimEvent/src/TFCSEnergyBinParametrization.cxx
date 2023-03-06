@@ -86,7 +86,7 @@ bool TFCSEnergyBinParametrization::load_pdgid_Ekin_bin_probability_from_file(int
   add_pdgid(id);
 
   file->cd();
-  auto probFromFile = dynamic_cast<TVectorF *>(gDirectory->Get(prob_object_name.c_str()));
+  auto *probFromFile = dynamic_cast<TVectorF *>(gDirectory->Get(prob_object_name.c_str()));
 
   std::vector<float> prob;
   prob.reserve(m_pdgid_Ebin_probability[id].size());

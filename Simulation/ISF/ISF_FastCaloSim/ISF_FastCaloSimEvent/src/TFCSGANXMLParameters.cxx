@@ -21,17 +21,17 @@ TFCSGANXMLParameters::~TFCSGANXMLParameters(){
 }
 
 
-void TFCSGANXMLParameters::InitialiseFromXML(int pid,int etaMid,std::string FastCaloGANInputFolderName){ 
+void TFCSGANXMLParameters::InitialiseFromXML(int pid,int etaMid,const std::string& FastCaloGANInputFolderName){ 
    m_fastCaloGANInputFolderName = FastCaloGANInputFolderName;
    std::string xmlFullFileName = FastCaloGANInputFolderName + "/binning.xml";
    
    xmlDocPtr doc = xmlParseFile( xmlFullFileName.c_str() );
-   for( xmlNodePtr nodeRoot = doc->children; nodeRoot != NULL; nodeRoot = nodeRoot->next) {
+   for( xmlNodePtr nodeRoot = doc->children; nodeRoot != nullptr; nodeRoot = nodeRoot->next) {
       if (xmlStrEqual( nodeRoot->name, BAD_CAST "Bins" )) {
-         for( xmlNodePtr nodeParticle = nodeRoot->children; nodeParticle != NULL; nodeParticle = nodeParticle->next ) {
+         for( xmlNodePtr nodeParticle = nodeRoot->children; nodeParticle != nullptr; nodeParticle = nodeParticle->next ) {
             if (xmlStrEqual( nodeParticle->name, BAD_CAST "Particle" )) {
                int nodePid = atof( (const char*) xmlGetProp( nodeParticle, BAD_CAST "pid" ) );
-               for( xmlNodePtr nodeBin = nodeParticle->children; nodeBin != NULL; nodeBin = nodeBin->next ) {
+               for( xmlNodePtr nodeBin = nodeParticle->children; nodeBin != nullptr; nodeBin = nodeBin->next ) {
                   if(nodePid == pid){ 
                      if (xmlStrEqual( nodeBin->name, BAD_CAST "Bin" )) {
                         int nodeEtaMin = atof( (const char*) xmlGetProp( nodeBin, BAD_CAST "etaMin" ) );
@@ -44,7 +44,7 @@ void TFCSGANXMLParameters::InitialiseFromXML(int pid,int etaMid,std::string Fast
                           m_ganVersion = atof( (const char*) xmlGetProp( nodeBin, BAD_CAST "ganVersion" ) );
                           m_latentDim = atof( (const char*) xmlGetProp( nodeParticle, BAD_CAST "latentDim" ) );
                           
-                          for( xmlNodePtr nodeLayer = nodeBin->children; nodeLayer != NULL; nodeLayer = nodeLayer->next ) {
+                          for( xmlNodePtr nodeLayer = nodeBin->children; nodeLayer != nullptr; nodeLayer = nodeLayer->next ) {
                               if( xmlStrEqual( nodeLayer->name, BAD_CAST "Layer" ) ) {
                                 std::vector<double> edges; 
                                 std::string s( (const char*)xmlGetProp( nodeLayer, BAD_CAST "r_edges" ) );
@@ -80,7 +80,7 @@ void TFCSGANXMLParameters::InitialiseFromXML(int pid,int etaMid,std::string Fast
    }   
 }   
 
-bool TFCSGANXMLParameters::ReadBooleanAttribute(std::string name, xmlNodePtr node){
+bool TFCSGANXMLParameters::ReadBooleanAttribute(const std::string& name, xmlNodePtr node){
    std::string attribute = (const char*) xmlGetProp( node, BAD_CAST name.c_str() );
    bool value = attribute == "true" ? true : false; 
    return value;

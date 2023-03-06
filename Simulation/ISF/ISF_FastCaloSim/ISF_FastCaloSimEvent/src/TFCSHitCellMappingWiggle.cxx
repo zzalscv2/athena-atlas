@@ -25,7 +25,7 @@ TFCSHitCellMappingWiggle::TFCSHitCellMappingWiggle(const char* name, const char*
 
 TFCSHitCellMappingWiggle::~TFCSHitCellMappingWiggle()
 {
-  for(auto function : m_functions) delete function;
+  for(const auto *function : m_functions) delete function;
 #ifdef USE_GPU
 delete m_LdFH;
 #endif
@@ -34,7 +34,7 @@ delete m_LdFH;
 void TFCSHitCellMappingWiggle::initialize(TFCS1DFunction* func)
 {
   if(!func) return;
-  for(auto function : m_functions) if(function) delete function;
+  for(const auto *function : m_functions) if(function) delete function;
 
   m_functions.resize(1);
   m_functions[0]=func;
@@ -50,7 +50,7 @@ void TFCSHitCellMappingWiggle::initialize(const std::vector< const TFCS1DFunctio
     ATH_MSG_ERROR("Using "<<functions.size()<<" functions needs "<<functions.size()+1<<" bin low edges, but got "<<bin_low_edges.size()<<"bins");
     return;
   }
-  for(auto function : m_functions) if(function) delete function;
+  for(const auto *function : m_functions) if(function) delete function;
   m_functions=functions;
   m_bin_low_edge=bin_low_edges;
 }
