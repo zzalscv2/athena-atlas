@@ -2381,23 +2381,7 @@ void
 Trk::RungeKuttaPropagator::globalPositions(const ::EventContext& ctx,
                                            const PatternTrackParameters& Tp,
                                            std::vector<const Trk::Surface*>& SU,
-                                           std::list<std::pair<Amg::Vector3D, double>>& GP,
-                                           const Trk::MagneticFieldProperties& M,
-                                           ParticleHypothesis) const
-{
-  Cache cache{};
-  getFieldCacheObject(cache, ctx);
-  cache.m_dlt = m_dlt;
-  cache.m_helixStep = m_helixStep;
-  cache.m_straightStep = m_straightStep;
-  cache.m_usegradient = m_usegradient;
-  globalPositionsImpl(cache, Tp, SU, GP, M);
-}
-void
-Trk::RungeKuttaPropagator::globalPositions(const ::EventContext& ctx,
-                                           const PatternTrackParameters& Tp,
-                                           std::list<const Trk::Surface*>& SU,
-                                           std::list<std::pair<Amg::Vector3D, double>>& GP,
+                                           std::vector<std::pair<Amg::Vector3D, double>>& GP,
                                            const Trk::MagneticFieldProperties& M,
                                            ParticleHypothesis) const
 {

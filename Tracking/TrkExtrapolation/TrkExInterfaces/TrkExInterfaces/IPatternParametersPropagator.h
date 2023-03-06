@@ -101,20 +101,11 @@ namespace Trk {
        double                          ,
        ParticleHypothesis particle=pion) const = 0;
 
-      /** GlobalPostions and steps for set surfaces */
-    virtual void globalPositions
-      (const ::EventContext&          ctx,
-       const PatternTrackParameters                 &,
-       std::list<const Surface*>                    &,
-       std::list< std::pair<Amg::Vector3D,double> > &,
-       const MagneticFieldProperties                &,
-       ParticleHypothesis particle=pion) const = 0;
-
     virtual void globalPositions
       (const ::EventContext&          ctx,
        const PatternTrackParameters                 &,
        std::vector<const Surface*>                  &,
-       std::list< std::pair<Amg::Vector3D,double> > &,
+       std::vector< std::pair<Amg::Vector3D,double> > &,
        const MagneticFieldProperties                &,
        ParticleHypothesis particle=pion) const = 0;
 
