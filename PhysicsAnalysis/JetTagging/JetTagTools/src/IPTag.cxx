@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetTagTools/IPTag.h"
@@ -812,7 +812,7 @@ namespace Analysis {
   }
 
   /** compute individual track contribution to the likelihoods: */
-  void IPTag::trackWeight(std::string author, TrackGrade grade, double sa0, double sz0, 
+  void IPTag::trackWeight(const std::string& author, const TrackGrade& grade, double sa0, double sz0, 
      double & twb, double & twu, double & twc) const { // output parameters
     /** define and compute likelihood: */
     std::vector<Slice> slices;

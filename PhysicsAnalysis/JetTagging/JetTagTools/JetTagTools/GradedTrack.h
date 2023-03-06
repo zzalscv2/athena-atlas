@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGTOOLS_GRADEDTRACK
@@ -31,7 +31,7 @@ class GradedTrack {
  public:
 
   // GradedTrack(const xAOD::TrackParticle*, TrackGrade);
-  GradedTrack(const tracklink_t&, TrackGrade);
+  GradedTrack(const tracklink_t&, const TrackGrade&);
   // const xAOD::TrackParticle* track;
   const tracklink_t& track;
   TrackGrade grade;
