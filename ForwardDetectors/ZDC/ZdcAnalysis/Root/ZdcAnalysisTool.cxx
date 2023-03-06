@@ -196,32 +196,32 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
   m_deltaTSample = 3.125;
   m_numSample = 24;
 
-  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinSamples;
+  ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples = {{{0, 9, 9, 9}, {0, 9, 10, 8}}};
+
   ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG;
   ZDCDataAnalyzer::ZDCModuleFloatArray deltaT0CutLow, deltaT0CutHigh, chisqDivAmpCut;
   ZDCDataAnalyzer::ZDCModuleBoolArray fixTau1Arr, fixTau2Arr;
   
-  ZDCDataAnalyzer::ZDCModuleFloatArray tau1 = {{{0, 1.3, 0.9, 1.0},
-                                                {0, 1.2, 1.3, 1.35}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray tau1 = {{{0, 1.1, 1.1, 1.1},
+                                                {0, 1.1, 1.1, 1.1}}};
 
-  ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{4.5, 4.5, 4.5, 4.5}, {4.5, 4.5, 4.5, 4.5}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{6, 5, 5, 5}, {5.5, 5.5, 5.5, 5.5}}};
 
   ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{0, 26.3, 26.5, 26.8}, {32, 32, 32, 32}}};
 					       
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{0, 26.3, 26.5, 26.8}, {0, 26.6, 26.3, 25.3}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{0, 31.1, 28.1, 27.0}, {0, 26.6, 26.3, 25.3}}};
 
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
       fixTau1Arr[side][module] = true;
       fixTau2Arr[side][module] = false;
       
-      peak2ndDerivMinSamples[side][module] = 10;
       peak2ndDerivMinThresholdsHG[side][module] = -35;
-      peak2ndDerivMinThresholdsLG[side][module] = -20;
+      peak2ndDerivMinThresholdsLG[side][module] = -16;
       
       deltaT0CutLow[side][module] = -10;
       deltaT0CutHigh[side][module] = 10;
-      chisqDivAmpCut[side][module] = 50;
+      chisqDivAmpCut[side][module] = 20;
     }
   }
   
@@ -239,13 +239,13 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
   //
   std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer (new ZDCDataAnalyzer(MakeMessageFunction(),
 									m_numSample, m_deltaTSample, 
-									m_presample, "FermiExpRun3", 
+									m_presample, "FermiExpLHCf", 
 									peak2ndDerivMinSamples,
 									peak2ndDerivMinThresholdsHG, 
 									peak2ndDerivMinThresholdsLG, 
 									m_lowGainOnly)); 
 
-  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(4);
+  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(2);
   zdcDataAnalyzer->SetADCOverUnderflowValues(HGOverFlowADC, HGUnderFlowADC, LGOverFlowADC);
   zdcDataAnalyzer->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0HG, t0LG);
   zdcDataAnalyzer->SetCutValues(chisqDivAmpCut, chisqDivAmpCut, deltaT0CutLow, deltaT0CutHigh, deltaT0CutLow, deltaT0CutHigh);
@@ -259,11 +259,11 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
 
   // Enable two-pass analysis
   // 
-  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {{{-10, -10, -10, -10},
-								   {-10, -10, -10, -10}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {{{-12, -12, -12, -12},
+								   {-12, -12, -12, -12}}};
 
-  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassLG = {{{-6, -6, -6, -6},
-								   {-6, -6, -6, -6}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassLG = {{{-8, -8, -8, -8},
+								   {-8, -8, -8, -8}}};
 
   zdcDataAnalyzer->enableRepass(peak2ndDerivMinRepassHG, peak2ndDerivMinRepassLG);
 
@@ -294,8 +294,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeDefault()
     //
     //   For now, we continue to use hard-coded values for the maximum and minimum ADC values
     //   For now we also use the FermiExp pulse model.
-
-    ZDCDataAnalyzer::ZDCModuleFloatArray tau1, tau2, peak2ndDerivMinSamples, t0;
+  ZDCDataAnalyzer::ZDCModuleIntArray  peak2ndDerivMinSamples;
+    ZDCDataAnalyzer::ZDCModuleFloatArray tau1, tau2, t0;
     ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG;
     ZDCDataAnalyzer::ZDCModuleFloatArray deltaT0CutLow, deltaT0CutHigh, chisqDivAmpCut;
     ZDCDataAnalyzer::ZDCModuleBoolArray fixTau1Arr, fixTau2Arr;
@@ -345,7 +345,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeDefault()
 std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2015G4()
 {
     // ref. https://indico.cern.ch/event/849143/contributions/3568263/attachments/1909759/3155352/ZDCWeekly_20190917_PengqiYin.pdf
-    ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinSamples;
+    ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples;
     ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG;
     ZDCDataAnalyzer::ZDCModuleFloatArray chisqDivAmpCut;
     ZDCDataAnalyzer::ZDCModuleBoolArray  fixTau1Arr, fixTau2Arr;
@@ -411,7 +411,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepPb2016()
     //   For now, we continue to use hard-coded values for the maximum and minimum ADC values
     //   For now we also use the FermiExp pulse model.
 
-    ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinSamples;
+    ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples;
     ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG;
     ZDCDataAnalyzer::ZDCModuleFloatArray chisqDivAmpCut;
     ZDCDataAnalyzer::ZDCModuleBoolArray  fixTau1Arr, fixTau2Arr;
@@ -518,7 +518,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepPb2016()
 
 std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2018()
 {
-    ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinSamples;
+    ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples;
     ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG, peak2ndDerivMinRepassHG, peak2ndDerivMinRepassLG;
     ZDCDataAnalyzer::ZDCModuleFloatArray chisqDivAmpCut;
     ZDCDataAnalyzer::ZDCModuleBoolArray fixTau1Arr, fixTau2Arr;
@@ -652,7 +652,7 @@ void ZdcAnalysisTool::initialize40MHz()
         }
     };
 
-    ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinSamples = {{{{1, 1, 2, 1}},
+    ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples = {{{{1, 1, 2, 1}},
             {{1, 1, 1, 1}}
         }
     };

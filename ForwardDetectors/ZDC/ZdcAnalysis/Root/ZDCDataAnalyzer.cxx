@@ -12,7 +12,7 @@
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSample, float deltaTSample, size_t preSampleIdx, std::string fitFunction,
-                                 const ZDCModuleFloatArray& peak2ndDerivMinSamples,
+                                 const ZDCModuleIntArray& peak2ndDerivMinSamples,
                                  const ZDCModuleFloatArray& peak2ndDerivMinThresholdsHG,
                                  const ZDCModuleFloatArray& peak2ndDerivMinThresholdsLG,
                                  bool forceLG) :
@@ -463,6 +463,7 @@ bool ZDCDataAnalyzer::FinishEvent()
         if (!pulseAna_p->HavePulse()) {
           (*m_msgFunc_p)(ZDCMsg::Debug, ("ZDCPulseAnalyzer:: performing a repass on data for side, module = " + std::to_string(side) + ", " + std::to_string(module)));
           pulseAna_p->ReanalyzeData();
+	  m_moduleStatus[side][module] = pulseAna_p->GetStatusMask();
         }
       }
     }
