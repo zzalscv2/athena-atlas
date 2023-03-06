@@ -3,9 +3,10 @@
 
 #include "TrackInfo.h"
 namespace MMCTest {
-    TrackInfo::TrackInfo(std::string type, std::vector<std::string> systs) {
-        m_Type = std::move(type);
-        m_Systs = std::move(systs);
+    TrackInfo::TrackInfo(std::string type, std::vector<std::string> systs)
+      : m_Type (std::move (type)),
+        m_Systs (std::move (systs))
+    {
         Reset();
     }
 

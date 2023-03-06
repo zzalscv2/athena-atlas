@@ -118,7 +118,7 @@ namespace MCP {
 
     struct MuonObj 
     {
-        MuonObj(TrackCalibObj CB, TrackCalibObj ID, TrackCalibObj ME): ID{ID}, ME{ME}, CB{CB}{}
+        MuonObj(const TrackCalibObj& CB, const TrackCalibObj& ID, const TrackCalibObj& ME): ID{ID}, ME{ME}, CB{CB}{}
         
         TrackCalibObj ID{};
         TrackCalibObj ME{};
@@ -147,7 +147,7 @@ namespace MCP {
         {
             if(type == MCP::TrackType::CB)      return CB.calib_pt;
             else if(type == MCP::TrackType::ID) return ID.calib_pt;
-            else if(type == MCP::TrackType::ID) return ME.calib_pt;
+            else if(type == MCP::TrackType::ME) return ME.calib_pt;
             return 0;
         }  
     };
