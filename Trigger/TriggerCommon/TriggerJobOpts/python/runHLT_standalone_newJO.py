@@ -91,13 +91,6 @@ log.info("Command line arguments:")
 import sys
 log.info(" ".join(sys.argv))
 
-#Since isOnline is set by determining if input file is MC
-#can only set these once we've read in the input file (usually from command line)
-if flags.Common.isOnline:
-  flags.GeoModel.AtlasVersion = flags.Trigger.OnlineGeoTag
-  flags.IOVDb.GlobalTag = flags.Trigger.OnlineCondTag
-#otherwise, read these from file metadata (e.g. for MC)
-
 from TriggerJobOpts import runHLT
 _allflags = flags.clone()   # copy including Concurrency flags
 _allflags.lock()

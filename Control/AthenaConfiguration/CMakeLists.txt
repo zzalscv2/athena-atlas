@@ -62,8 +62,7 @@ endif()
 if( NOT XAOD_ANALYSIS )
     atlas_add_test( AllConfigFlagsTest_EVNT
                     SCRIPT test/testAllConfigFlags_EVNT.py
-                    POST_EXEC_SCRIPT nopost.sh
-                    PROPERTIES TIMEOUT 300 )
+                    POST_EXEC_SCRIPT nopost.sh )
 endif()
 
 # tests that should not run in analysis releases and in AthGeneration
@@ -73,26 +72,26 @@ if( NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
 
     atlas_add_test( DetectorConfigFlags
                     SCRIPT test/testDetectorFlags.py
-                    POST_EXEC_SCRIPT nopost.sh
-                    PROPERTIES TIMEOUT 300 )
+                    POST_EXEC_SCRIPT nopost.sh )
 
     atlas_add_test( AllConfigFlagsTest_HITS
                     SCRIPT test/testAllConfigFlags_HITS.py
-                    POST_EXEC_SCRIPT nopost.sh
-                    PROPERTIES TIMEOUT 300  )
+                    POST_EXEC_SCRIPT nopost.sh )
 endif()
 
 # tests that should run only in Athena
 if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
     atlas_add_test( AllConfigFlagsTest_RDO
                     SCRIPT test/testAllConfigFlags_RDO.py
-                    POST_EXEC_SCRIPT nopost.sh
-                    PROPERTIES TIMEOUT 300  )
+                    POST_EXEC_SCRIPT nopost.sh )
 
     atlas_add_test( AllConfigFlagsTest_AOD_Full
                     SCRIPT python -m AthenaConfiguration.AllConfigFlags
-                    POST_EXEC_SCRIPT nopost.sh
-                    PROPERTIES TIMEOUT 300  )
+                    POST_EXEC_SCRIPT nopost.sh )
+
+    atlas_add_test( AllConfigFlagsTest_TRIG
+                    SCRIPT test/testAllConfigFlags_TRIG.py
+                    POST_EXEC_SCRIPT noerror.sh )
 
     atlas_add_test( ComponentAccumulatorTestReco
                     SCRIPT test/testComponentAccumulatorReco.py

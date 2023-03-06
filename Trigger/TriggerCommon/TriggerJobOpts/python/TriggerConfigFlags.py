@@ -17,6 +17,21 @@ class ROBPrefetching(FlagEnum):
     # Enable using larger RoI in TauCore step to speculatively prefetch ROBs for the subsequent TauIso step (ATR-26419)
     TauCoreLargeRoI = 'TauCoreLargeRoI'
 
+
+def trigGlobalTag(flags):
+    """Return global conditions data to be used in the HLT. Return None to indicate that
+    no trigger-specific tag is required. Used for IOVDb.GlobalTag in AllConfigFlags.py.
+    """
+    return None if flags.Input.isMC else 'CONDBR2-HLTP-2022-02'
+
+
+def trigGeoTag(flags):
+    """Return geometry tag to be used in the HLT. Returns None to indicate that
+    no trigger-specific tag is required. Used for GeoModel.AtlasVersion in GeoModelConfigFlags.py.
+    """
+    return None if flags.Input.isMC else 'ATLAS-R3S-2021-03-00-00'
+
+
 def createTriggerFlags(doTriggerRecoFlags):
     flags = AthConfigFlags()
 
@@ -206,12 +221,6 @@ def createTriggerFlags(doTriggerRecoFlags):
 
     # to allow stroing extra EDM items via preExec
     flags.addFlag('Trigger.ExtraEDMList', [])
-
-    # tag to be used for condutions used by HLT code
-    flags.addFlag('Trigger.OnlineCondTag', 'CONDBR2-HLTP-2022-02')
-
-    # geometry version used by HLT online
-    flags.addFlag('Trigger.OnlineGeoTag', 'ATLAS-R3S-2021-03-00-00')
 
     def __availableRecoMetadata(flags):
         systems = ['L1','HLT']
