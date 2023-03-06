@@ -220,13 +220,10 @@ if __name__ == '__main__':
     flags.Trigger.doLVL1 = True
     flags.Trigger.enableL1CaloPhase1 = True
     flags.Trigger.triggerConfig = 'FILE'
-    if flags.Common.isOnline:
-        flags.IOVDb.GlobalTag = flags.Trigger.OnlineCondTag
 
-    # TODO 1: Reverse this into a special setting for Run-2 data input when the default geo tag is changed to Run-3
-    # TODO 2: Any better way of figuring this out than run number?
-    if not flags.Input.isMC and flags.Input.RunNumber[0] > 400000:
-        flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-01-00'
+    from AthenaConfiguration.Enums import LHCPeriod
+    if not flags.Input.isMC and flags.GeoModel.Run is LHCPeriod.Run2:
+        flags.GeoModel.AtlasVersion = 'ATLAS-R2-2016-01-00-01'
 
     # Enable only calo for this test
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags

@@ -73,11 +73,10 @@ if __name__ == '__main__':
     flags.Trigger.EDMVersion = 3
     flags.Trigger.doLVL1 = True
     flags.Trigger.enableL1CaloPhase1 = True
-    if flags.Common.isOnline:
-        flags.IOVDb.GlobalTag = flags.Trigger.OnlineCondTag
 
-    if not flags.Input.isMC and flags.Input.RunNumber[0] > 400000:
-        flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-02-00-00'
+    from AthenaConfiguration.Enums import LHCPeriod
+    if not flags.Input.isMC and flags.GeoModel.Run is LHCPeriod.Run2:
+        flags.GeoModel.AtlasVersion = 'ATLAS-R2-2016-01-00-01'
 
     # Enable only calo for this test
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
