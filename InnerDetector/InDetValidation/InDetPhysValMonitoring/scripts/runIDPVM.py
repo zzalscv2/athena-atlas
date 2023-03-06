@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from glob import glob
 
@@ -31,6 +31,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--jetsNameForHardScatter", help='Name of jet collection',default="AntiKt4EMTopoJets")
     IDPVMparser.add_argument("--ancestorIDList", help='List of ancestor truth IDs to match.', default = [], nargs='+', type=int)
     IDPVMparser.add_argument("--requiredSiHits", help='Number of truth silicon hits', type=int, default=0)
+    IDPVMparser.add_argument("--selectedCharge", help='Charge of selected truth particles (0=inclusive)', type=int, default=0)
     IDPVMparser.add_argument("--maxProdVertRadius", help='Maximum production radius for truth particles', type=float, default=300)
     IDPVMparser.add_argument("--GRL", help='Which GRL(s) to use, if any, when running on data', choices=['2015', '2016', '2017', '2018', '2022'], nargs='+', default=[])
     IDPVMparser.add_argument("--validateExtraTrackCollections", help='List of extra track collection names to be validated in addition to Tracks.', nargs='+', default=[])
@@ -73,6 +74,7 @@ flags.PhysVal.IDPVM.doPerAuthorPlots = MyArgs.doPerAuthor
 flags.PhysVal.IDPVM.doHitLevelPlots = MyArgs.doHitLevelPlots
 flags.PhysVal.IDPVM.runDecoration = not MyArgs.disableDecoration
 flags.PhysVal.IDPVM.requiredSiHits = MyArgs.requiredSiHits
+flags.PhysVal.IDPVM.selectedCharge = MyArgs.selectedCharge
 flags.PhysVal.IDPVM.maxProdVertRadius = MyArgs.maxProdVertRadius
 flags.PhysVal.IDPVM.ancestorIDs = MyArgs.ancestorIDList
 flags.PhysVal.IDPVM.hardScatterStrategy = int(MyArgs.hardScatterStrategy)

@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file InDetPhysValMonitoringConfig.py
@@ -27,6 +27,7 @@ def InDetRttTruthSelectionToolCfg(flags, name="InDetRttTruthSelectionTool", **kw
 
     kwargs.setdefault("requireStatus1", True)
     kwargs.setdefault("requireCharged", True)
+    kwargs.setdefault("selectedCharge", flags.PhysVal.IDPVM.selectedCharge)
     kwargs.setdefault("maxBarcode", (200*1000 if kwargs.pop("OnlyDressPrimaryTracks", True) else 2**31-1))
     kwargs.setdefault("maxProdVertRadius", 300.)
     if flags.Detector.GeometryITk:
