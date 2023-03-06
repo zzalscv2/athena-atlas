@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetTrimmer.cxx
@@ -18,7 +18,7 @@ using xAOD::JetContainer;
 
 //**********************************************************************
 
-JetTrimmer::JetTrimmer(std::string name)
+JetTrimmer::JetTrimmer(const std::string& name)
   : AsgTool(name), m_bld("",this) {
   declareProperty("RClus", m_rclus =0.3);
   declareProperty("PtFrac", m_ptfrac =0.03);

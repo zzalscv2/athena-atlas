@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetSoftDrop.cxx
@@ -19,7 +19,7 @@ using xAOD::JetContainer;
 
 //**********************************************************************
 
-JetSoftDrop::JetSoftDrop(std::string name)
+JetSoftDrop::JetSoftDrop(const std::string& name)
   : AsgTool(name), m_bld("",this) {
   //ZCut = 0.1, Beta = 0 are "CMS-like" parameters for SoftDrop: 
   //https://indico.cern.ch/event/439039/contributions/2223279/attachments/1311773/1963161/BOOST16_toptagging_CMS.pdf
