@@ -14,6 +14,7 @@
 #include "HTTMatrixAccumulator.h"
 #include "TrigHTTConfTools/HTTRegionSlices.h"
 #include "TrigHTTObjects/HTTConstants.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #include "TH1.h"
 #include "TH2.h"
@@ -331,7 +332,7 @@ std::vector<HTTTruthTrack> HTTMatrixGenAlgo::filterTrainingTracks(std::vector<HT
   std::vector<HTTTruthTrack> training_tracks;
 
   for (HTTTruthTrack const & track : truth_tracks) {
-    if (track.getBarcode() >= 1000000 || std::abs(track.getPDGCode()) != m_TRAIN_PDG) continue;
+    if (track.getBarcode() >= HepMC::SIM_REGENERATION_INCREMENT || std::abs(track.getPDGCode()) != m_TRAIN_PDG) continue;
     if (std::abs(track.getD0()) > m_D0_THRESHOLD) continue;
     
     double pt = TMath::Sqrt(track.getPX()*track.getPX() + track.getPY()*track.getPY());

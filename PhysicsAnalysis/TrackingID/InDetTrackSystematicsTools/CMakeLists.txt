@@ -11,7 +11,7 @@ atlas_add_library( InDetTrackSystematicsToolsLib
    InDetTrackSystematicsTools/*.h Root/*.cxx
    PUBLIC_HEADERS InDetTrackSystematicsTools
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools PATInterfaces xAODTracking
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools PATInterfaces xAODTracking TruthUtils
    xAODTruth xAODJet
    PRIVATE_LINK_LIBRARIES FourMomUtils xAODEventInfo PathResolver )
 

@@ -21,6 +21,7 @@ Updated:
 
 //
 #include "MCTruthClassifier/MCTruthClassifier.h"
+#include "TruthUtils/MagicNumbers.h"
 using namespace MCTruthPartClassifier;
 using std::abs;
 
@@ -80,8 +81,8 @@ MCTruthClassifier::initialize()
 
   ATH_MSG_INFO(" Initializing MCTruthClassifier");
   // define barcode scheme
-  m_barcodeShift = 1000000;
-  if (m_barcodeG4Shift == 1000001) {
+  m_barcodeShift = HepMC::SIM_REGENERATION_INCREMENT;
+  if (m_barcodeG4Shift == HepMC::SIM_REGENERATION_INCREMENT+1) {
     m_barcodeShift = 10000000;
   }
 

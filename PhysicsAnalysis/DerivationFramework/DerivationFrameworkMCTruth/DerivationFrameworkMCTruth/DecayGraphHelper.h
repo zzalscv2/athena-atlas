@@ -19,6 +19,7 @@
 #include "xAODTruth/TruthVertexContainer.h"
 #include "MCTruthClassifier/MCTruthClassifier.h"
 #include "HepPID/ParticleIDMethods.hh"
+#include "AtlasHepMC/MagicNumbers.h"
 #include<unordered_set>
 
 namespace DerivationFramework {
@@ -29,7 +30,7 @@ namespace DerivationFramework {
             g4BarcodeOffset = init_g4BarcodeOffset;
         }
         DecayGraphHelper(void) {
-            g4BarcodeOffset = 200000;
+            g4BarcodeOffset = HepMC::SIM_BARCODE_THRESHOLD;
         }
         
         // Immediate relatives (parents, siblings, children)
