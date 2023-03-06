@@ -107,7 +107,9 @@ def LArPedestalAutoCorrCfg(flags):
                                         outputFile=flags.LArCalib.Output.POOLFile,
                                         ObjectList=["LArPedestalComplete#Pedestal#"+flags.LArCalib.Pedestal.Folder,
                                                     "LArAutoCorrComplete#LArAutoCorr#"+flags.LArCalib.AutoCorr.Folder],
-                                        IOVTagList=[pedestalTag,autocorrTag]
+                                        IOVTagList=[pedestalTag,autocorrTag],
+                                        Run1=flags.LArCalib.IOVStart,
+                                        Run2=flags.LArCalib.IOVEnd
                                     ))
 
     #RegistrationSvc    

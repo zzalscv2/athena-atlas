@@ -123,7 +123,9 @@ def LArPhysWavePredictionCfg(flags):
                                         outputFile=flags.LArCalib.Output.POOLFile,
                                         ObjectList=["LArPhysWaveContainer#LArPhysWave#"+flags.LArCalib.PhysWave.Folder,
                                                     "LArMphysOverMcalComplete#LArMphysOverMcal#"+flags.LArCalib.MPhysOverMCal.Folder,],
-                                        IOVTagList=[PhysWaveTag,MphysOverMcalTag]
+                                        IOVTagList=[PhysWaveTag,MphysOverMcalTag],
+                                        Run1=flags.LArCalib.IOVStart,
+                                        Run2=flags.LArCalib.IOVEnd
                                     ))
 
     #RegistrationSvc    

@@ -110,7 +110,9 @@ def LArRTMParamsCfg(flags):
                                         outputFile=flags.LArCalib.Output.POOLFile,
                                         ObjectList=["LArCaliPulseParamsComplete#"+"LArCaliPulseParams_RTM#"+flags.LArCalib.CaliPulseParams.Folder,
                                                     "LArDetCellParamsComplete#"+"LArDetCellParams_RTM#"+flags.LArCalib.DetCellParams.Folder,],
-                                        IOVTagList=[CaliPulseParamsTag,DetCellParamsTag]
+                                        IOVTagList=[CaliPulseParamsTag,DetCellParamsTag],
+                                        Run1=flags.LArCalib.IOVStart,
+                                        Run2=flags.LArCalib.IOVEnd
                                     ))
 
     #RegistrationSvc    

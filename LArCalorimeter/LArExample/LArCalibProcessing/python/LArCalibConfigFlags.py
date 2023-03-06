@@ -54,6 +54,11 @@ def addLArCalibFlags(flags, isSC=False):
 
     flags.addFlag("LArCalib.Input.ChannelSelection","") #Read only a subset of COOL channels. Format like '3,4,5:10' 
 
+    flags.addFlag("LArCalib.IOVStart", lambda pF: min(pF.LArCalib.Input.RunNumbers) if len(pF.LArCalib.Input.RunNumbers)>0 else 0) #Output IOV start (runnumber)
+    flags.addFlag("LArCalib.IOVEnd", 0x7FFFFFFF) #Output IOV end (runnumber)
+    
+    
+
     flags.addFlag("LArCalib.Preselection.Side",[])
     flags.addFlag("LArCalib.Preselection.BEC",[])
     flags.addFlag("LArCalib.Preselection.FT",[])

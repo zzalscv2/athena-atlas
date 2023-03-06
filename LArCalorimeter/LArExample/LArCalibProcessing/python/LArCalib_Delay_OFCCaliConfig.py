@@ -195,7 +195,9 @@ def LArDelay_OFCCaliCfg(flags):
                                         outputFile=flags.LArCalib.Output.POOLFile,
                                         ObjectList=["LArCaliWaveContainer#LArCaliWave#"+flags.LArCalib.CaliWave.Folder,
                                                     "LArOFCComplete#LArOFC#"+flags.LArCalib.OFCCali.Folder],
-                                        IOVTagList=[caliWaveTag,caliOFCTag]
+                                        IOVTagList=[caliWaveTag,caliOFCTag],
+                                        Run1=flags.LArCalib.IOVStart,
+                                        Run2=flags.LArCalib.IOVEnd
                                     ))
 
     #RegistrationSvc    
