@@ -127,7 +127,8 @@ namespace TrigT1CTMonitoring {
     Gaudi::Property<double> m_defaultBcIntervalInNs{ this, "DefaultBcIntervalInNs", 24.9507401, "Default bunch-crossing duration to use if not accessible in COOL" };
     Gaudi::Property<int64_t> m_bcsPerTurn{ this, "BCsPerTurn", 3564, "Number of bunch crossings per turn" };
     Gaudi::Property<std::string > m_lbTimeCoolFolderName{ this, "LumiBlockTimeCoolFolderName", "/TRIGGER/LUMI/LBLB", "COOL folder in COOLONL_TRIGGER holding info about start and stop times for luminosity blocks" };
-    Gaudi::Property<std::string > m_fillStateCoolFolderName{ this, "FillStateCoolFolderName", "/LHC/DCS/FILLSTATE", "COOL folder in COOLOFL_DCS holding the LHC fill state info" };
+    //do not use online
+    //Gaudi::Property<std::string > m_fillStateCoolFolderName{ this, "FillStateCoolFolderName", "/LHC/DCS/FILLSTATE", "COOL folder in COOLOFL_DCS holding the LHC fill state info" };
     Gaudi::Property<std::string> m_dataTakingModeCoolFolderName{ this, "DataTakingModeCoolFolderName", "/TDAQ/RunCtrl/DataTakingMode", "COOL folder in COOLONL_TDAQ holding the ATLAS data taking mode info" };
     Gaudi::Property<std::vector<std::string>> m_ignorePatterns{ this, "IgnorePatterns", {"L1_TRT", "L1_ZB", "_AFP", "L1_BPTX", "L1_BCM", "L1_LUCID"}, "patters that are excluded from check (no regex)"};
 

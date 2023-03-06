@@ -15,10 +15,10 @@ def CTPMonitoringConfig(flags):
     #get these for Data only
     if not flags.Input.isMC:
         info('CTPMonitoringConfig: attempting to add DATA COOL folders')
-        #if flags.Common.isOnline:
-        from IOVDbSvc.IOVDbSvcConfig import addFolders
-        result.merge(addFolders(flags,'/LHC/DCS/FILLSTATE','DCS_OFL',className='CondAttrListCollection'))
-        ## see https://gitlab.cern.ch/czodrows/athena/-/blob/master/Database/IOVDbSvc/python/IOVDbSvcConfig.py#L171 for db shorthand list
+        if not flags.Common.isOnline:
+          from IOVDbSvc.IOVDbSvcConfig import addFolders
+          result.merge(addFolders(flags,'/LHC/DCS/FILLSTATE','DCS_OFL',className='CondAttrListCollection'))
+          ## see https://gitlab.cern.ch/czodrows/athena/-/blob/master/Database/IOVDbSvc/python/IOVDbSvcConfig.py#L171 for db shorthand list
         result.merge(addFolders(flags,'/TDAQ/RunCtrl/DataTakingMode','TDAQ',className='AthenaAttributeList'))
         info('CTPMonitoringConfig: added DATA COOL folders')
 
