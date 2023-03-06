@@ -19,7 +19,7 @@
 #include "TrkTrack/Track.h"
 #include "TrkTrack/TrackStateOnSurface.h"
 #include <array>
-#include <list>
+#include <vector>
 #include <iostream>
 
 namespace{
@@ -380,7 +380,7 @@ InDet::TRT_TrackExtensionTool_xk::findSegment(const EventContext& ctx,
   //
   Trk::PatternTrackParameters Tp; 
   if(!Tp.production(par)) return nullptr;
-  std::list< std::pair<Amg::Vector3D,double> > gpos;
+  std::vector< std::pair<Amg::Vector3D,double> > gpos;
   m_proptool->globalPositions(ctx, Tp, surfaces, gpos, m_fieldprop);
 
   // Initiate trajectory
@@ -467,7 +467,7 @@ InDet::TRT_TrackExtensionTool_xk::isGoodExtension(const EventContext& ctx,
   //
   Trk::PatternTrackParameters Tp; 
   if(!Tp.production(par)) return false;
-  std::list< std::pair<Amg::Vector3D,double> > gpos;
+  std::vector< std::pair<Amg::Vector3D,double> > gpos;
   m_proptool->globalPositions(ctx, Tp,surfaces,gpos,m_fieldprop);
 
   // Initiate trajectory
