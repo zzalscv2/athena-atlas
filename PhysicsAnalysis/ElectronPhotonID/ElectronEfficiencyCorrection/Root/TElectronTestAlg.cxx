@@ -54,7 +54,7 @@ StatusCode CP::TElectronTestAlg::initialize() {
   std::map<float, std::vector<float>> tmp;
   m_pimpl->getNbins(tmp);
   m_lowestEt = tmp.begin()->first;
-  m_doDetail = (m_mode != Toys || m_mode != Total);
+  m_doDetail = (m_mode != Toys && m_mode != Total);
   m_doToys = (m_mode == Toys || m_mode == All);
 
   // decorations if requested
@@ -141,17 +141,17 @@ StatusCode CP::TElectronTestAlg::execute(const EventContext& ctx) const {
         SF.value()(*el) = result.SF;
         TotalUp.value()(*el) = result.SF + result.Total;
         TotalDown.value()(*el) = result.SF - result.Total;
-      }
-      if (m_doDetail) {
-        uncorrUp.value()(*el) = result.SF + result.UnCorr;
-        uncorrDown.value()(*el) = result.SF - result.UnCorr;
-        HistIndex.value()(*el) = result.histIndex;
-        HistBin.value()(*el) = result.histBinNum;
-        corrUp.value()(*el) = result.Corr;
-        corrDown.value()(*el) = result.Corr;
-      }
-      if (m_doToys) {
-        toys.value()(*el) = result.toys;
+        if (m_doDetail) {
+          uncorrUp.value()(*el) = result.SF + result.UnCorr;
+          uncorrDown.value()(*el) = result.SF - result.UnCorr;
+          HistIndex.value()(*el) = result.histIndex;
+          HistBin.value()(*el) = result.histBinNum;
+          corrUp.value()(*el) = result.Corr;
+          corrDown.value()(*el) = result.Corr;
+        }
+        if (m_doToys) {
+          toys.value()(*el) = result.toys;
+        }
       }
       continue;
     }

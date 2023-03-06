@@ -10,10 +10,9 @@
   @class TElectronEfficiencyCorrectionTool
   @brief Calculate the egamma scale factors
   Implementation class for the e/gamma Efficiency Scale Factors. This code
-  implements the underlying logic of accessign the ROOT files containing the
+  implements the underlying logic of accessing the ROOT files containing the
   recommendations.
   @authors Kristin Lohwasser, Karsten Koeneke, Felix Buehrer
-  @date   January 2013
   @updated by Christos Anastopoulos 2017-2018
   */
 
@@ -155,38 +154,52 @@ private:
             const int runNumBegin,
             const int runNumEnd) const;
 
-private:
-  /// Flag to control Toys
-  bool m_doToyMC;
-  bool m_doCombToyMC;
-  /// The number of toys
-  int m_nToyMC;
-  /// The Random seed
-  unsigned long int m_seed;
-  /// Maximum number of systematics
-  int m_nSysMax;
-  // The representation of the prepared toy SF tables
-  std::vector<std::vector<HistArray>> m_uncorrToyMCSystFull;
-  std::vector<std::vector<HistArray>> m_uncorrToyMCSystFast;
-  /// The list of file name(s)
-  std::vector<std::string> m_corrFileNameList;
-  /// List of run numbers where histograms become valid for full simulation
-  std::vector<unsigned int> m_begRunNumberList;
-  /// List of run numbers where histograms stop being valid for full simulation
-  std::vector<unsigned int> m_endRunNumberList;
-  /// List of run numbers where histograms become valid for fast simulation
-  std::vector<unsigned int> m_begRunNumberListFastSim;
-  /// List of run numbers where histograms stop being valid for fast simulation
-  std::vector<unsigned int> m_endRunNumberListFastSim;
-  /// List of histograms for full Geant4 simulation
-  std::vector<std::vector<HistArray>> m_histList;
-  std::vector<std::vector<HistArray>> m_sysList;
-  /// List of histograms for fast simulation
-  std::vector<std::vector<HistArray>> m_fastHistList;
-  std::vector<std::vector<HistArray>> m_fastSysList;
-  // The Random generator class
-  TRandom3 m_Rndm;
-}; // End: class definition
+  struct HistEdge {
+    double etaMax = 0;
+    double etaMin = 0;
+    double etMax = 0;
+    double etMin = 0;
+    bool isLowPt = false;
+  };
+
+  void fillHistEdges(const std::vector<HistArray>& sfPerPeriodHist,
+                     std::vector<std::vector<HistEdge>>& sfPerPeriodEdges) const;
+
+    /// Flag to control Toys
+    bool m_doToyMC;
+    bool m_doCombToyMC;
+    /// The number of toys
+    int m_nToyMC;
+    /// The Random seed
+    unsigned long int m_seed;
+    /// Maximum number of systematics
+    int m_nSysMax;
+    // The representation of the prepared toy SF tables
+    std::vector<std::vector<HistArray>> m_uncorrToyMCSystFull;
+    std::vector<std::vector<HistArray>> m_uncorrToyMCSystFast;
+    /// The list of file name(s)
+    std::vector<std::string> m_corrFileNameList;
+    /// List of run numbers where histograms become valid for full simulation
+    std::vector<unsigned int> m_begRunNumberList;
+    /// List of run numbers where histograms stop being valid for full
+    /// simulation
+    std::vector<unsigned int> m_endRunNumberList;
+    /// List of run numbers where histograms become valid for fast simulation
+    std::vector<unsigned int> m_begRunNumberListFastSim;
+    /// List of run numbers where histograms stop being valid for fast
+    /// simulation
+    std::vector<unsigned int> m_endRunNumberListFastSim;
+    /// List of histograms for full Geant4 simulation
+    std::vector<std::vector<HistArray>> m_histList;
+    std::vector<std::vector<HistEdge>> m_histEdges;
+    std::vector<std::vector<HistArray>> m_sysList;
+    /// List of histograms for fast simulation
+    std::vector<std::vector<HistArray>> m_fastHistList;
+    std::vector<std::vector<HistEdge>> m_fastHistEdges;
+    std::vector<std::vector<HistArray>> m_fastSysList;
+    // The Random generator class
+    TRandom3 m_Rndm;
+  };  // End: class definition
 } // End: namespace Root
 
 #endif
