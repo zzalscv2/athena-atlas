@@ -40,8 +40,8 @@ from TriggerJobOpts.TriggerConfig import collectHypos, collectFilters, collectVi
      triggerMonitoringCfg, triggerSummaryCfg, triggerMergeViewsAndAddMissingEDMCfg, collectHypoDecisionObjects
 from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import getTrigNavSlimmingMTOnlineConfig
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+
 
 from builtins import map, range, str, zip
 from collections import OrderedDict, defaultdict
@@ -365,13 +365,13 @@ def sequenceScanner( HLTNode ):
 
 def decisionTreeFromChains(flags, HLTNode, chains, allDicts, newJO):
     """ Creates the decision tree, given the starting node and the chains containing the sequences  """
-
+    from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
     log.info("[decisionTreeFromChains] Run decisionTreeFromChains on %s", HLTNode.getName())
     HLTNodeName = HLTNode.getName()
     if len(chains) == 0:
         log.info("[decisionTreeFromChains] Configuring empty decisionTree")
         acc = ComponentAccumulator()
-        if isComponentAccumulatorCfg():
+        if isCAMenu():
             acc.addSequence(HLTNode)
         return ([], acc)
     
@@ -386,7 +386,7 @@ def decisionTreeFromChains(flags, HLTNode, chains, allDicts, newJO):
     if flags.Trigger.generateMenuDiagnostics:
         all_DataFlow_to_dot(HLTNodeName, CFseq_list)
     
-    if isComponentAccumulatorCfg():
+    if isCAMenu():
         acc.printConfig(withDetails = True, summariseProps = True) 
 
     # matrix display
@@ -398,7 +398,7 @@ def decisionTreeFromChains(flags, HLTNode, chains, allDicts, newJO):
 
 def createDataFlow(flags, chains, allDicts):
     """ Creates the filters and connect them to the menu sequences"""
-
+    from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
     # find tot nsteps
     chainWithMaxSteps = max(chains, key = lambda chain: len(chain.steps))
     NSTEPS = len(chainWithMaxSteps.steps)
@@ -442,7 +442,7 @@ def createDataFlow(flags, chains, allDicts):
             log.debug("Found %d CF sequences with filter name %s", len(foundCFSeq), filterName)
             if not foundCFSeq:
                 sequenceFilter = buildFilter(filterName, filterInput, chainStep.isEmpty)
-                if isComponentAccumulatorCfg():
+                if isCAMenu():
                     CFseq = CFSequenceCA( ChainStep = chainStep, FilterAlg = sequenceFilter)
                 else:
                     CFseq = CFSequence( ChainStep = chainStep, FilterAlg = sequenceFilter)
@@ -500,11 +500,11 @@ def createDataFlow(flags, chains, allDicts):
 
 def createControlFlow(flags, HLTNode, CFseqList):
     """ Creates Control Flow Tree starting from the CFSequences"""
-
+    from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
     HLTNodeName = HLTNode.getName()    
     log.debug("[createControlFlow] on node %s",HLTNodeName)
     acc = ComponentAccumulator()
-    if isComponentAccumulatorCfg():
+    if isCAMenu():
         acc.addSequence(HLTNode)
     
     for nstep, sequences in enumerate(CFseqList):    
@@ -515,7 +515,7 @@ def createControlFlow(flags, HLTNode, CFseqList):
         # create filter node
         log.debug("[createControlFlow] Create filter step %s with %d filters", stepSequenceName, len(CFseqList[nstep])) 
         stepCFFilter = parOR(stepSequenceName + CFNaming.FILTER_POSTFIX)
-        if isComponentAccumulatorCfg():
+        if isCAMenu():
             acc.addSequence(stepCFFilter, parentName=HLTNodeName)
         else:
             HLTNode += stepCFFilter
@@ -526,8 +526,8 @@ def createControlFlow(flags, HLTNode, CFseqList):
             filterAlg = cseq.filter.Alg 
             if filterAlg.getName() not in filter_list:
                 log.debug("[createControlFlow] Add  %s to filter node %s", filterAlg.getName(), stepSequenceName)
-                filter_list.append(filterAlg.getName())                
-                if isComponentAccumulatorCfg():                    
+                filter_list.append(filterAlg.getName())   
+                if isCAMenu():             
                     stepCFFilter.Members += [filterAlg]
                 else:
                     stepCFFilter += filterAlg
@@ -535,8 +535,8 @@ def createControlFlow(flags, HLTNode, CFseqList):
 
         # create reco step node
         log.debug("[createControlFlow] Create reco step %s with %d sequences", stepSequenceName, len(CFseqList))
-        stepCFReco = parOR(stepSequenceName + CFNaming.RECO_POSTFIX)              
-        if isComponentAccumulatorCfg():
+        stepCFReco = parOR(stepSequenceName + CFNaming.RECO_POSTFIX)  
+        if isCAMenu():            
             acc.addSequence(stepCFReco, parentName = HLTNodeName)
         else:
             HLTNode += stepCFReco
@@ -544,7 +544,7 @@ def createControlFlow(flags, HLTNode, CFseqList):
         # add the sequences to the reco node
         for cseq in sequences:             
             log.debug(" *** Create CF Tree for CFSequence %s", cseq.step.name)
-            if isComponentAccumulatorCfg():
+            if isCAMenu():
                 acc.merge( cseq.ca, sequenceName = stepCFReco.getName())
             else:
                 filterAlg = cseq.filter.Alg  
@@ -573,7 +573,7 @@ def createControlFlow(flags, HLTNode, CFseqList):
             stepDecisions.extend(CFseq.decisions)
 
         summary = makeSummary( flags, stepSequenceName, stepDecisions )
-        if isComponentAccumulatorCfg():
+        if isCAMenu():
             acc.addEventAlgo([summary],sequenceName = HLTNode.getName())            
         else:
             HLTNode += summary

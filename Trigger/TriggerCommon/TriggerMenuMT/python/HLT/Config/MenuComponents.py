@@ -22,7 +22,7 @@ from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from TrigCompositeUtils.TrigCompositeUtils import legName
 from AthenaConfiguration.ComponentAccumulator import appendCAtoAthena, conf2toConfigurable
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+
 
 from collections.abc import MutableSequence
 import collections.abc
@@ -177,10 +177,11 @@ class HypoAlgNode(AlgNode):
 
 
     def addHypoTool (self, flags, hypoToolConf):
+        from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
         log.debug("Adding HypoTool %s for chain %s to %s", hypoToolConf.name, hypoToolConf.chainDict['chainName'], self.Alg.getName())        
         try:
             self.Alg.HypoTools = self.Alg.HypoTools + [hypoToolConf.create(flags)]  # see ATEAM-773
-            if isComponentAccumulatorCfg():
+            if isCAMenu():
                 assert isinstance(self.Alg.HypoTools[-1], GaudiConfig2._configurables.Configurable), "The Hypo Tool for {} is not Configurable2".format(hypoToolConf.chainDict['chainName'])
 
         except NoHypoToolCreated as e:
@@ -367,12 +368,11 @@ class MenuSequence(object):
 
     def __init__(self, flags, Sequence, Maker,  Hypo, HypoToolGen, IsProbe=False):
         assert compName(Maker).startswith("IM"), "The input maker {} name needs to start with letter: IM".format(compName(Maker))        
-
+        from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
         # For probe legs we need to substitute the inputmaker and hypo alg
         # so we will use temp variables for both
         if IsProbe: 
-            from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg           
-            if isComponentAccumulatorCfg(): 
+            if isCAMenu():    
                 #_Hypo = Hypo
                 #_Maker = Maker
                 #_Sequence = Sequence 
@@ -413,7 +413,7 @@ class MenuSequence(object):
 
         if IsProbe:
             def getProbeSequence(baseSeq,probeIM):
-                if isComponentAccumulatorCfg():
+                if isCAMenu():
                     probeSeq = None #baseSeq
                     #probeSeq.name= baseSeq.getName()+"_probe"
                     log.warning(str(NoCAmigration('[MenuSequence] found a probe leg, dont know how to clone, no sequence {0}_probe created for CA components'.format(compName(Hypo))) ))                                

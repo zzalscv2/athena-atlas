@@ -9,7 +9,6 @@ import inspect
 import functools
 from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, RecoFragmentsPool
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 
 
@@ -47,15 +46,16 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
     def getStep(self, flags, stepID, stepPartName, sequenceCfgArray, comboHypoCfg=ComboHypoCfg, comboTools=[], **stepArgs):
         stepName = 'Step%d'%stepID + '_' + stepPartName
         log.debug("Configuring step %s", stepName)
-        seqArray = []                
+        seqArray = []   
+        from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu             
         for sequenceCfg in sequenceCfgArray:            
             try:
-                if isComponentAccumulatorCfg():
+                if isCAMenu():                
                     seqArray.append (sequenceCfg(flags, **stepArgs) )                                                         
                 else:
                     seqArray.append( RecoFragmentsPool.retrieve( sequenceCfg, flags, **stepArgs ))                                                       
             except NameError:
-                if isComponentAccumulatorCfg():
+                if isCAMenu():
                     log.warning(str(NoCAmigration('[getStep] Menu sequence {0} does not exist for CA components'.format(sequenceCfg.__name__)) ))                    
                 else: 
                     raise
@@ -70,7 +70,7 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
         
         # if not returned any step
         try:
-            if isComponentAccumulatorCfg():
+            if isCAMenu():
                 raise NoCAmigration                            
             raise RuntimeError("[getStep] No sequences generated for step %s!", stepPartName)        
         except NoCAmigration:

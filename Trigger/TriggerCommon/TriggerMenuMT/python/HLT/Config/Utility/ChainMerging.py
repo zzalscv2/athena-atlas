@@ -4,10 +4,10 @@ from TriggerMenuMT.HLT.Config.Utility.MenuAlignmentTools import get_alignment_gr
 from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuSequence, EmptyMenuSequenceCA
 
 from AthenaCommon.Logging import logging
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 from TrigCompositeUtils.TrigCompositeUtils import legName
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
+from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
 
 from collections import OrderedDict
 from copy import deepcopy
@@ -21,7 +21,7 @@ def mergeChainDefs(listOfChainDefs, chainDict, perSig_lengthOfChainConfigs = Non
     #one for each part in the chain
     
     # protect against serial merging in the signature code
-    if isComponentAccumulatorCfg():
+    if isCAMenu():
         try:           
             for chainPartConfig in listOfChainDefs:
                 if any ([ "_MissingCA" in step.name for step in chainPartConfig.steps]):
@@ -264,7 +264,7 @@ def getEmptySeqName(stepName, step_number, alignGroup):
 
 def EmptyMenuSequenceCfg(name):
     # to clean up
-    if isComponentAccumulatorCfg():
+    if isCAMenu():
         return EmptyMenuSequenceCA(name)
     else:
         return EmptyMenuSequence(name)
