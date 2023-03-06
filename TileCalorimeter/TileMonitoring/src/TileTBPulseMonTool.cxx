@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODEventInfo/EventInfo.h"
@@ -13,6 +13,7 @@
 #include "TileCalibBlobObjs/TileCalibUtils.h"
 #include "TileEvent/TileCell.h"
 #include "TileConditions/TileBadChanTool.h"
+#include "TileConditions/TileInfo.h"
 
 #include "TH1F.h"
 #include "TH2F.h"
@@ -32,6 +33,8 @@ TileTBPulseMonTool::TileTBPulseMonTool(const std::string & type, const std::stri
   , m_pulseHist2{ {{{}}} }
   , m_pulseProfile{ {{{}}} }
   , m_isFirstEvent(true)
+  , m_tileInfo(nullptr)
+  , m_t0SamplePosition(3)
 
 /*---------------------------------------------------------*/
 {
@@ -42,6 +45,8 @@ TileTBPulseMonTool::TileTBPulseMonTool(const std::string & type, const std::stri
   declareProperty("TileRawChannelContainer", m_rawChannelContainerName = "TileRawChannelOpt2");
 
   declareProperty("UseDemoCabling", m_useDemoCabling = 0); // if set to 2015 - assume TB 2015 cabling
+  declareProperty("TimeRange", m_timeRange = {-100., 100.});
+  declareProperty("TileInfoName", m_infoName = "TileInfo");
 
   m_path = "/Tile/TestBeam/PulseShape"; //ROOT File relative directory
 }
@@ -58,6 +63,13 @@ StatusCode TileTBPulseMonTool:: initialize() {
 
   ATH_MSG_INFO( "in initialize()" );
 
+  if (m_timeRange.size() != 2) {
+    ATH_MSG_FATAL( "Size of TimeRange should be 2 (from,to), but is " << m_timeRange.size() );
+    return StatusCode::FAILURE;
+  }
+
+  ATH_CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
+  m_t0SamplePosition = (int) m_tileInfo->ItrigSample();
 
   return TileFatherMonTool::initialize();
 }
@@ -132,9 +144,9 @@ StatusCode TileTBPulseMonTool::bookHistogramsPerModule(int ros, int drawer) {
 
       subDir = part[ros] + "/" + moduleName;
 
-
-      m_pulseHist2[ros][drawer][channel][adc] = book2F(subDir, histName, histTitle, 100, -100, 100, 100, -0.2, 1.5);
-      m_pulseProfile[ros][drawer][channel][adc] = bookProfile(subDir, profName, histTitle, 100, -100, 100);
+      int nBins = std::abs(m_timeRange[1]);
+      m_pulseHist2[ros][drawer][channel][adc] = book2F(subDir, histName, histTitle, nBins, m_timeRange[0], m_timeRange[1], 100, -0.2, 1.5);
+      m_pulseProfile[ros][drawer][channel][adc] = bookProfile(subDir, profName, histTitle, nBins, m_timeRange[0], m_timeRange[1]);
 
       m_pulseHist2[ros][drawer][channel][adc]->GetXaxis()->SetTitle("time [ns]");
       m_pulseHist2[ros][drawer][channel][adc]->GetYaxis()->SetTitle("Normalized Units");
@@ -230,7 +242,7 @@ StatusCode TileTBPulseMonTool::fillHistograms() {
         if ( time[ros][drawer][channel][adc] != 0 && amplitude[ros][drawer][channel][adc] > 0.) {
           for (double digit : digits) {
 
-            float sampleT = (sampleI - 3)* 25. - time[ros][drawer][channel][adc];
+            float sampleT = (sampleI - m_t0SamplePosition) * 25. - time[ros][drawer][channel][adc];
             float sampleE = (digit - ped[ros][drawer][channel][adc] ) / amplitude[ros][drawer][channel][adc];
             m_pulseHist2[ros][drawer][channel][adc]->Fill( sampleT, sampleE);
             m_pulseProfile[ros][drawer][channel][adc]->Fill( sampleT, sampleE);
