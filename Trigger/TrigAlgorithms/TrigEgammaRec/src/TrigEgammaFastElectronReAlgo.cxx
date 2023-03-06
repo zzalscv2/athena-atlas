@@ -62,6 +62,7 @@ StatusCode TrigEgammaFastElectronReAlgo::initialize()
   ATH_CHECK( m_roiCollectionKey.initialize() );
   ATH_CHECK( m_TrigEMClusterContainerKey.initialize() );
   ATH_CHECK( m_TrackParticleContainerKey.initialize() );
+  ATH_CHECK( m_caloDetDescrMgrKey.initialize() );
   ATH_CHECK( m_outputElectronsKey.initialize() );
   ATH_CHECK( m_outputDummyElectronsKey.initialize() );
 
@@ -152,8 +153,12 @@ StatusCode TrigEgammaFastElectronReAlgo::execute(const EventContext& ctx) const
      
   trigDummyElecColl->push_back(trigDummyElec);
   trigDummyElec->init( 0, 0, 0,  0, clusEL, trackDummyEL);
- 
-
+  
+  //Pick the Calo Det Descr 
+  SG::ReadCondHandle<CaloDetDescrManager> caloDetDescrMgrHandle{
+      m_caloDetDescrMgrKey, ctx};
+  ATH_CHECK(caloDetDescrMgrHandle.isValid());
+  const CaloDetDescrManager* caloDD = *caloDetDescrMgrHandle;
 
   // loop over tracks
   for(unsigned int track_index = 0; track_index < tracks->size(); track_index++)
@@ -176,7 +181,7 @@ StatusCode TrigEgammaFastElectronReAlgo::execute(const EventContext& ctx) const
     double etaAtCalo=999.;
     double phiAtCalo=999.;
     if(m_acceptAll){
-      if(!extrapolate(emCluster,trkIter,etaAtCalo,phiAtCalo)){
+      if(!extrapolate(ctx,*caloDD,emCluster,trkIter,etaAtCalo,phiAtCalo)){
         ATH_MSG_VERBOSE("extrapolator failed");
         continue; 
       }
@@ -222,7 +227,7 @@ StatusCode TrigEgammaFastElectronReAlgo::execute(const EventContext& ctx) const
         ATH_MSG_DEBUG("failed high cut on ET/PT");
         continue;
       }
-      if(!extrapolate(emCluster,trkIter,etaAtCalo,phiAtCalo)){
+      if(!extrapolate(ctx,*caloDD,emCluster,trkIter,etaAtCalo,phiAtCalo)){
         ATH_MSG_DEBUG("extrapolator failed 1");
         continue; 
       }
@@ -280,33 +285,79 @@ StatusCode TrigEgammaFastElectronReAlgo::execute(const EventContext& ctx) const
   return StatusCode::SUCCESS;
 }
 
-bool TrigEgammaFastElectronReAlgo::extrapolate(const xAOD::TrigEMCluster *clus, const xAOD::TrackParticle *trk, 
-                                              double &etaAtCalo, double &phiAtCalo) const
-{
-    CaloExtensionHelpers::LayersToSelect layersToSelect; 
-    layersToSelect.insert(CaloSampling::CaloSample::EMB2); 
-    layersToSelect.insert(CaloSampling::CaloSample::EME2); 
+bool TrigEgammaFastElectronReAlgo::extrapolate(
+    const EventContext& ctx, const CaloDetDescrManager& caloDD,
+    const xAOD::TrigEMCluster* clus, const xAOD::TrackParticle* trk,
+    double& etaAtCalo, double& phiAtCalo) const {
+
+  if (m_useCaloInfoInExtrap) {
+    // use the provided EM cluster to "guide" the extrapolation
+
+    // 1st figure which layer we  want to shoot at
+    // in this case we chose between EMB2 or EME2
+    // given the cluster.
+    std::vector<CaloSampling::CaloSample> samples;
+    if (clus->energy(CaloSampling::CaloSample::EME2) >
+        clus->energy(CaloSampling::CaloSample::EMB2)) {
+      samples.push_back(CaloSampling::CaloSample::EME2);
+    } else {
+      samples.push_back(CaloSampling::CaloSample::EMB2);
+    }
+
+    // create the surfaces we want to reach.
+    // Aka either a cylinder for EME2 or a disc for EMB2
+    std::vector<std::unique_ptr<Trk::Surface>> caloSurfaces =
+        m_caloExtensionTool->caloSurfacesFromLayers(samples, clus->eta(),
+                                                    caloDD);
+
+    // And then try to reach them
+    const auto extension = m_caloExtensionTool->surfaceCaloExtension(
+        ctx, trk->perigeeParameters(), samples, caloSurfaces,
+        Trk::nonInteracting);
+
+    if (extension.empty()) {
+      ATH_MSG_VERBOSE("extrapolator failed 1");
+      return false;
+    }
+    // We target exactly one EMB2 or EME2  (the vector has 1 entry if not empty)
+    etaAtCalo = extension[0].second->position().eta();
+    phiAtCalo = extension[0].second->position().phi();
+
+    ATH_MSG_VERBOSE("Hit sampling :" << extension.at(0).first << " at eta : "
+                                     << etaAtCalo << " at phi : " << phiAtCalo);
+  } else {
+    // Do the extrapolation to the full calo volume with
+    // navigation and possible material effects. Then just pick
+    // the intersection with the EMB2/EME2 sample
+    CaloExtensionHelpers::LayersToSelect layersToSelect;
+    layersToSelect.insert(CaloSampling::CaloSample::EMB2);
+    layersToSelect.insert(CaloSampling::CaloSample::EME2);
     // extrapolate track using tool
     // get calo extension
     std::unique_ptr<Trk::CaloExtension> caloExtension =
-      m_caloExtensionTool->caloExtension(Gaudi::Hive::currentContext(), *trk);
+        m_caloExtensionTool->caloExtension(ctx, *trk);
     if (!caloExtension || caloExtension->caloLayerIntersections().empty()) {
       ATH_MSG_VERBOSE("extrapolator failed 1");
       return false;
     }
-    // extract eta/phi in EM2 
-    CaloExtensionHelpers::EtaPhiPerLayerVector intersections; 
-    CaloExtensionHelpers::midPointEtaPhiPerLayerVector( *caloExtension, intersections, &layersToSelect ); 
-    if( intersections.empty() ) { 
-        ATH_MSG_VERBOSE("extrapolator failed 2");
-        return false;
-    }  
-    // pick the correct sample in case of ambiguity 
-    std::tuple<CaloSampling::CaloSample, double, double> etaPhiTuple = intersections.front(); 
-    if( intersections.size() == 2 )  
-        if ( clus->energy(CaloSampling::CaloSample::EME2) > clus->energy(CaloSampling::CaloSample::EMB2) ) 
-            etaPhiTuple=intersections.back(); 
-    etaAtCalo = std::get<1>(etaPhiTuple); 
-    phiAtCalo = std::get<2>(etaPhiTuple); 
-    return true;
+    // extract eta/phi in EM2
+    CaloExtensionHelpers::EtaPhiPerLayerVector intersections;
+    CaloExtensionHelpers::midPointEtaPhiPerLayerVector(
+        *caloExtension, intersections, &layersToSelect);
+    if (intersections.empty()) {
+      ATH_MSG_VERBOSE("extrapolator failed 2");
+      return false;
+    }
+    // pick the correct sample in case of ambiguity
+    std::tuple<CaloSampling::CaloSample, double, double> etaPhiTuple =
+        intersections.front();
+    if (intersections.size() == 2)
+      if (clus->energy(CaloSampling::CaloSample::EME2) >
+          clus->energy(CaloSampling::CaloSample::EMB2))
+        etaPhiTuple = intersections.back();
+    etaAtCalo = std::get<1>(etaPhiTuple);
+    phiAtCalo = std::get<2>(etaPhiTuple);
+  }
+
+  return true;
 }
