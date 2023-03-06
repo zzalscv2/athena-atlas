@@ -72,6 +72,7 @@ merge_log.merged_name = 'athena.merged.log'
 merge_log.log_files = [ step.get_log_file_name() for step in test.exec_steps ]
 
 check_log = CheckSteps.CheckLogStep('CheckLog')
+check_log.timeout = 60*10
 check_log.log_file = merge_log.merged_name
 
 chain_comp_steps = [generate_chaincomp_step(name) for name in slice_names]
