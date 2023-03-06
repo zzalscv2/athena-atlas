@@ -329,13 +329,13 @@ StatusCode BTaggingEfficiencyTool::initialize() {
 						     m_useRecommendedEVExclusions,              // if true, add pre-set lists of uncertainties to be excluded from EV decomposition
                                                      msgLvl(MSG::INFO)));                         // if false, suppress any non-error/warning messages
 
-  std::cout << "BTEffTool->initialize : setMapIndex(Light)" << std::endl;
+  ATH_MSG_INFO("BTEffTool->initialize : setMapIndex(Light)");
   setMapIndex("Light",0);
-  std::cout << "BTEffTool->initialize : setMapIndex(C)" << std::endl;
+  ATH_MSG_INFO("BTEffTool->initialize : setMapIndex(C)");
   setMapIndex("C",0);
-  std::cout << "BTEffTool->initialize : setMapIndex(B)" << std::endl;
+  ATH_MSG_INFO("BTEffTool->initialize : setMapIndex(B)");
   setMapIndex("B",0);
-  std::cout << "BTEffTool->initialize : setMapIndex(T)" << std::endl;
+  ATH_MSG_INFO("BTEffTool->initialize : setMapIndex(T)");
   setMapIndex("T",0);
 
   ATH_MSG_INFO( "Using systematics model " << m_systStrategy);
