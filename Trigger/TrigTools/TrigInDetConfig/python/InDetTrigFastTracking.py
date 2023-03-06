@@ -72,80 +72,24 @@ def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF 
 
 
   from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
-  from AthenaCommon.AppMgr import ToolSvc
 
   #Only add raw data decoders if we're running over raw data
   if isByteStream:
 
     #Pixel
-    from PixelRawDataByteStreamCnv.PixelRawDataByteStreamCnvConf import PixelRodDecoder
-    InDetPixelRodDecoder = PixelRodDecoder(name = "InDetPixelRodDecoder_" + signature)
-    if "data15" in flags.Input.ProjectName:         # Disable for data15 because duplication mechanism was used.
-       InDetPixelRodDecoder.CheckDuplicatedPixel=False
-    ToolSvc += InDetPixelRodDecoder
-
-    from PixelRawDataByteStreamCnv.PixelRawDataByteStreamCnvConf import PixelRawDataProviderTool
-    InDetPixelRawDataProviderTool = PixelRawDataProviderTool(name    = "InDetPixelRawDataProviderTool_" + signature,
-                                                             Decoder = InDetPixelRodDecoder)
-    ToolSvc += InDetPixelRawDataProviderTool
-
-    if (InDetTrigFlags.doPrintConfigurables()):
-      print(InDetPixelRawDataProviderTool) # noqa: ATL901
-
-    # load the PixelRawDataProvider
-    from PixelRawDataByteStreamCnv.PixelRawDataByteStreamCnvConf import PixelRawDataProvider
-    InDetPixelRawDataProvider = PixelRawDataProvider(name         = "InDetPixelRawDataProvider_"+ signature,
-                                                     RDOKey       = InDetKeys.PixelRDOs(),
-                                                     ProviderTool = InDetPixelRawDataProviderTool,)
-    InDetPixelRawDataProvider.isRoI_Seeded = True
-    InDetPixelRawDataProvider.RoIs = rois
-    InDetPixelRawDataProvider.RDOCacheKey = InDetCacheNames.PixRDOCacheKey
-    InDetPixelRawDataProvider.BSErrorsCacheKey = InDetCacheNames.PixBSErrCacheKey
-
-    from RegionSelector.RegSelToolConfig import makeRegSelTool_Pixel
-
-    InDetPixelRawDataProvider.RegSelTool = makeRegSelTool_Pixel()
-
-    viewAlgs.append(InDetPixelRawDataProvider)
-
-
-    if (InDetTrigFlags.doPrintConfigurables()):
-      print(InDetPixelRawDataProvider) # noqa: ATL901
-
+    from PixelRawDataByteStreamCnv.PixelRawDataByteStreamCnvConfig import TrigPixelRawDataProviderAlgCfg
+    pixelRawDataProviderAlg = algorithmCAToGlobalWrapper(TrigPixelRawDataProviderAlgCfg, flags,
+                                                         suffix=signature,
+                                                         RoIs=rois)
+    viewAlgs.extend(pixelRawDataProviderAlg)
 
     #SCT
-    from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConf import SCT_RodDecoder
-    InDetSCTRodDecoder = SCT_RodDecoder(name          = "InDetSCTRodDecoder_" + signature)
-    ToolSvc += InDetSCTRodDecoder
+    from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import TrigSCTRawDataProviderCfg
+    sctRawDataProviderAlg = algorithmCAToGlobalWrapper(TrigSCTRawDataProviderCfg, flags,
+                                                       suffix=signature,
+                                                       RoIs=rois)
+    viewAlgs.extend(sctRawDataProviderAlg)
 
-    from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConf import SCTRawDataProviderTool
-    InDetSCTRawDataProviderTool = SCTRawDataProviderTool(name    = "InDetSCTRawDataProviderTool_" + signature,
-                                                         Decoder = InDetSCTRodDecoder)
-    ToolSvc += InDetSCTRawDataProviderTool
-    if (InDetTrigFlags.doPrintConfigurables()):
-      print(InDetSCTRawDataProviderTool) # noqa: ATL901
-
-
-    # load the SCTRawDataProvider
-    from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConf import SCTRawDataProvider
-    InDetSCTRawDataProvider = SCTRawDataProvider(name         = "InDetSCTRawDataProvider_" + signature,
-                                                 RDOKey       = InDetKeys.SCT_RDOs(),
-                                                 ProviderTool = InDetSCTRawDataProviderTool)
-    InDetSCTRawDataProvider.isRoI_Seeded = True
-    InDetSCTRawDataProvider.RoIs = rois
-    InDetSCTRawDataProvider.RDOCacheKey = InDetCacheNames.SCTRDOCacheKey
-    InDetSCTRawDataProvider.BSErrCacheKey = InDetCacheNames.SCTBSErrCacheKey
-
-    from RegionSelector.RegSelToolConfig import makeRegSelTool_SCT
-    InDetSCTRawDataProvider.RegSelTool = makeRegSelTool_SCT()
-
-    viewAlgs.append(InDetSCTRawDataProvider)
-
-    # load the SCTEventFlagWriter
-    from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConf import SCTEventFlagWriter
-    InDetSCTEventFlagWriter = SCTEventFlagWriter(name = "InDetSCTEventFlagWriter_"+ signature)
-
-    viewAlgs.append(InDetSCTEventFlagWriter)
 
   #Pixel clusterisation
   from InDetConfig.InDetPrepRawDataFormationConfig import TrigPixelClusterizationCfg
