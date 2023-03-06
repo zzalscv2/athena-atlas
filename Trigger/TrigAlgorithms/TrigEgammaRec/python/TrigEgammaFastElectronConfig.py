@@ -11,8 +11,8 @@ def fastElectronFexAlgCfg(flags, name="EgammaFastElectronFex_1", rois="EMRoIs"):
 
     acc = ComponentAccumulator()
 
-    from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
-    extAcc = ParticleCaloExtensionToolCfg(flags)
+    from TrackToCalo.TrackToCaloConfig import EMParticleCaloExtensionToolCfg
+    extAcc = EMParticleCaloExtensionToolCfg(flags)
     extTool = acc.popToolsAndMerge(extAcc)
 
     efex = CompFactory.TrigEgammaFastElectronReAlgo( name,
