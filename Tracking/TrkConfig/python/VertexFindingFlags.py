@@ -189,8 +189,8 @@ def createPriVertexingFlags():
         if pcf.Reco.EnableHI:
             return VertexSetup.FastIVF
         elif pcf.Tracking.doHighPileup or \
-             pcf.InDet.Tracking.doMinBias or \
-             pcf.InDet.Tracking.doLowMu or \
+             pcf.Tracking.doMinBias or \
+             pcf.Tracking.doLowMu or \
              pcf.InDet.Tracking.doRobustReco or \
              pcf.Tracking.doVtxLumi or \
              pcf.Tracking.doVtxBeamSpot:
@@ -233,9 +233,9 @@ def createPriVertexingFlags():
         if pcf.Detector.GeometryITk:
             return 900.0 * Units.MeV
         else:
-            if pcf.InDet.Tracking.doMinBias or pcf.InDet.Tracking.doLowPt:
+            if pcf.Tracking.doMinBias or pcf.InDet.Tracking.doLowPt:
                 return 100.0 * Units.MeV
-            elif pcf.Reco.EnableHI or pcf.InDet.Tracking.doLowMu:
+            elif pcf.Reco.EnableHI or pcf.Tracking.doLowMu:
                 return 400.0 * Units.MeV
             else: # Default ID
                 return 500.0 * Units.MeV

@@ -21,7 +21,7 @@ def InDetPriVxFinderCfg(flags, name="InDetPriVxFinder", **kwargs):
 
     kwargs.setdefault("doVertexSorting", True)
 
-    if flags.InDet.Tracking.perigeeExpression == "Vertex":
+    if flags.Tracking.perigeeExpression == "Vertex":
         from xAODTrackingCnv.xAODTrackingCnvConfig import (
             BeamLineTrackParticleCnvAlgCfg)
         from InDetConfig.TrackRecoConfig import (

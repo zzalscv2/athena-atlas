@@ -39,6 +39,10 @@ def createTrackingConfigFlags():
     # control if the shared hits are recorded in TrackPatricles
     icf.addFlag("Tracking.doSharedHits", True)
 
+    # Express track parameters wrt. to : 'BeamLine','BeamSpot','Vertex' (first primary vertex)
+    icf.addFlag("Tracking.perigeeExpression", lambda prevFlags:
+                "Vertex" if prevFlags.Reco.EnableHI else "BeamLine")
+
     def doLargeD0(flags):
         if flags.GeoModel.Run<=LHCPeriod.Run3:
            return not(flags.Beam.Type in [BeamType.SingleBeam, \
@@ -53,6 +57,9 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doLargeD0", doLargeD0)
     icf.addFlag("Tracking.storeSeparateLargeD0Container", True)
 
+    # Special configuration for low-mu runs
+    icf.addFlag("Tracking.doLowMu", False)
+
     # Turn on to save the Track Seeds in a xAOD track collecting for development studies
     icf.addFlag("Tracking.doStoreTrackSeeds", False)
 
@@ -63,8 +70,25 @@ def createTrackingConfigFlags():
                     or prevFlags.Tracking.doHighPileup \
                     or prevFlags.Tracking.doVtxLumi) )
 
+    ####################################################################
+
     # The following flags are only used in InDet configurations for now
     # No corresponding ITk config is available yet
+
+    def cutLevel(flags):
+        if flags.Reco.EnableHI:
+            return 2
+        elif flags.Tracking.doLowMu:
+            return 3
+        elif flags.Beam.Type is BeamType.Cosmics:
+            return 8
+        elif flags.Tracking.doMinBias:
+            return 12
+        else:
+            return 19
+
+    # Control cuts and settings for different lumi to limit CPU and disk space
+    icf.addFlag("Tracking.cutLevel", cutLevel)
 
     # Turn running of doLargeD0 second pass down to 100 MeV on and off
     icf.addFlag("Tracking.doLowPtLargeD0", False)
@@ -74,6 +98,8 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doVtxLumi", False)
     # Special reconstruction for vertex beamspot measurement
     icf.addFlag("Tracking.doVtxBeamSpot", False)
+    # Switch for running MinBias settings
+    icf.addFlag("Tracking.doMinBias", False)
     # Turn on InDetRecStatistics
     icf.addFlag("Tracking.doStats", False)
 

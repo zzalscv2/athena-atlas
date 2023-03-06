@@ -66,8 +66,7 @@ def TrackParticleCreatorToolCfg(flags,
 
     kwargs.setdefault("KeepParameters", True)
     kwargs.setdefault("KeepFirstParameters", False)
-    kwargs.setdefault("PerigeeExpression",
-                      flags.InDet.Tracking.perigeeExpression)
+    kwargs.setdefault("PerigeeExpression", flags.Tracking.perigeeExpression)
 
     result.setPrivateTools(
         CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
@@ -168,11 +167,7 @@ def ITkTrackParticleCreatorToolCfg(flags,
 
     kwargs.setdefault("KeepParameters", True)
     kwargs.setdefault("KeepFirstParameters", False)
-
-    # Vertex as PerigeeExpression is not supported in default reco config because at the time of
-    # the track particle creation the primary vertex does not yet exist.
-    # The problem can be solved by first creating track particles wrt. the beam line
-    kwargs.setdefault("PerigeeExpression", flags.ITk.Tracking.perigeeExpression)
+    kwargs.setdefault("PerigeeExpression", flags.Tracking.perigeeExpression)
 
     kwargs.setdefault("IBLParameterSvc", "")
     kwargs.setdefault("DoITk", True)

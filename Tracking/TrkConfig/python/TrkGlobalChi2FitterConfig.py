@@ -70,7 +70,7 @@ def InDetGlobalChi2FitterBaseCfg(flags,
     kwargs.setdefault("MaxIterations", 40)
     kwargs.setdefault("Acceleration", True)
     kwargs.setdefault("RecalculateDerivatives",
-                      flags.InDet.Tracking.doMinBias or
+                      flags.Tracking.doMinBias or
                       flags.Beam.Type is BeamType.Cosmics or
                       flags.InDet.Tracking.doBeamGas)
     kwargs.setdefault("TRTExtensionCuts", True)

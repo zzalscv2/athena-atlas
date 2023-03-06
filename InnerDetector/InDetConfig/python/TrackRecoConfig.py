@@ -30,7 +30,7 @@ def CombinedTrackingPassFlagSets(flags):
     elif flags.Tracking.doHighPileup:
         flags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig",
                                       "InDet.Tracking.HighPileupPass")
-    elif flags.InDet.Tracking.doMinBias:
+    elif flags.Tracking.doMinBias:
         flags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig",
                                       "InDet.Tracking.MinBiasPass")
     elif flags.InDet.Tracking.doRobustReco:

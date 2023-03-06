@@ -93,7 +93,7 @@ def SiTrackMaker_xkCfg(flags, name="InDetSiTrackMaker", **kwargs):
 
     elif flags.InDet.Tracking.ActiveConfig.extension == "VeryLowPt" \
          or (flags.InDet.Tracking.ActiveConfig.extension == "Pixel" \
-             and flags.InDet.Tracking.doMinBias):
+             and flags.Tracking.doMinBias):
         kwargs.setdefault("TrackPatternRecoInfo",
                           'SiSpacePointsSeedMaker_VeryLowMomentum')
 
