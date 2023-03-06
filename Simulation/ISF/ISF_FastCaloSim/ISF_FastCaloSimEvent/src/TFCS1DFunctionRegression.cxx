@@ -36,7 +36,8 @@ double TFCS1DFunctionRegression::regression_value(double uniform) const
   for(int l=0;l<fLayers;l++)
   {
    vector<double> thisvector;
-   for(int i=0;i<fLayerSize[l];i++)
+   thisvector.reserve(fLayerSize[l]);
+for(int i=0;i<fLayerSize[l];i++)
     thisvector.push_back(0); //placeholder
    fWeights.push_back(thisvector);
   }
@@ -109,7 +110,7 @@ void TFCS1DFunctionRegression::set_weights(const vector<vector<double> >& fWeigh
 ///
 /// From the mlpfit package (J.Schwindling   20-Jul-1999)
 
-double TFCS1DFunctionRegression::sigmoid(double x) const
+double TFCS1DFunctionRegression::sigmoid(double x) 
 {
    static const Double_t sigval[7000] = {
    -3.500000e+01, 6.30511676014698530e-16, 6.30511676014698130e-16, 3.15255838007348670e-16, 1.05085279335782620e-16, 2.62713198339455210e-17, 5.25426396678905190e-18, 8.75710661131491060e-19, 1.25101523018779380e-19, 1.56376903773461590e-20,

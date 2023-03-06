@@ -35,7 +35,7 @@ class TFCSLateralShapeTuning: public TFCSLateralShapeParametrizationHitBase {
     // Initialization from interpolation map
     FCSReturnCode initFromMap(const interpolationMap&);
     // Helper function for strip layer model
-    double getSeriesScalingFactor(double a0, double a1, double a2, double a3, double distToShowerCenter);
+    static double getSeriesScalingFactor(double a0, double a1, double a2, double a3, double distToShowerCenter);
 
   private:
 

@@ -48,9 +48,9 @@ void TFCSSimulationState::Print(Option_t *) const
   {
     std::cout<<"  E"<<i<<"("<<CaloSampling::getSamplingName(i)<<")="<<E(i)<<" E"<<i<<"/E="<<Efrac(i)<<std::endl;
   }
-  if(m_AuxInfo.size()>0) {
+  if(!m_AuxInfo.empty()) {
     std::cout<<"  AuxInfo has "<<m_AuxInfo.size()<<" elements"<<std::endl;
-    for(auto& a : m_AuxInfo) {
+    for(const auto& a : m_AuxInfo) {
       std::cout<<"    "<<a.first<<" : bool="<<a.second.b<<" char="<<a.second.c<<" int="<<a.second.i<<" float="<<a.second.f<<" double="<<a.second.d<<" void*="<<a.second.p<<std::endl;
     }
   }  
@@ -73,7 +73,7 @@ void TFCSSimulationState::AddAuxInfoCleanup(const TFCSParametrizationBase* para)
 
 void TFCSSimulationState::DoAuxInfoCleanup()
 {
-  for(auto para : m_AuxInfoCleanup) {
+  for(const auto *para : m_AuxInfoCleanup) {
     para->CleanAuxInfo(*this);
   }
 }

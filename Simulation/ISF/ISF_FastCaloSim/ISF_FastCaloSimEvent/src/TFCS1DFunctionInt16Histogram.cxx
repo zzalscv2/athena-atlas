@@ -59,7 +59,7 @@ void TFCS1DFunctionInt16Histogram::Initialize(const TH1* hist)
 
 double TFCS1DFunctionInt16Histogram::rnd_to_fct(double rnd) const
 {
-  if(m_HistoContents.size()==0) {
+  if(m_HistoContents.empty()) {
     return 0;
   }
   HistoContent_t int_rnd=s_MaxValue*rnd;

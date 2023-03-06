@@ -22,7 +22,7 @@ class TFCS1DFunctionRegression:public TFCS1DFunction
     virtual double rnd_to_fct(double rnd) const;
     double  regression_value(double uniform) const;
     void    set_weights(const std::vector<std::vector<double> >& fWeightMatrix0to1, const std::vector<std::vector<double> >& fWeightMatrix1to2);
-    double  sigmoid(double) const;
+    static double  sigmoid(double) ;
 
   private:
 

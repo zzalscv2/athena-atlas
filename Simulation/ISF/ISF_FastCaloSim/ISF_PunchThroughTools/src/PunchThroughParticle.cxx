@@ -28,9 +28,9 @@ ISF::PunchThroughParticle::PunchThroughParticle(int pdg, bool doAnti):
   m_corrPdg(0),
   m_corrMinEnergy(0),
   m_corrFullEnergy(0),
-  m_histCorrLowE(0),
-  m_histCorrHighE(0),
-  m_corrHistDomains(0),
+  m_histCorrLowE(nullptr),
+  m_histCorrHighE(nullptr),
+  m_corrHistDomains(nullptr),
   m_pdfNumParticles(nullptr),	//does this number ever change?
   m_pdf_pca0(nullptr),
   m_pdf_pca1(nullptr),

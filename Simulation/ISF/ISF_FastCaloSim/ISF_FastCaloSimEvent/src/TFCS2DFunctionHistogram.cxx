@@ -61,7 +61,7 @@ void TFCS2DFunctionHistogram::Initialize(TH2* hist)
 
 void TFCS2DFunctionHistogram::rnd_to_fct(float& valuex,float& valuey,float rnd0,float rnd1) const
 {
-  if(m_HistoContents.size()==0) {
+  if(m_HistoContents.empty()) {
     valuex=0;
     valuey=0;
     return;
@@ -142,7 +142,7 @@ void TFCS2DFunctionHistogram::unit_test ATLAS_NOT_THREAD_SAFE (TH2* hist)
   }
   
   std::unique_ptr<TFile> outputfile(TFile::Open( "TFCS2DFunctionHistogram_unit_test.root", "RECREATE" ));
-  if (outputfile != NULL) {
+  if (outputfile != nullptr) {
     hist->Write();
     hist_val->Write();
     hist_pull->Write();

@@ -39,7 +39,7 @@ class TFCSPCAEnergyParametrization:public TFCSEnergyParametrization
   virtual bool is_match_all_Ekin_bin() const override {return true;};
   virtual bool is_match_all_calosample() const override {return false;};
   
-  void P2X(TVectorD*, TVectorD* , TMatrixD* , int, double* , double* , int) const;
+  static void P2X(TVectorD*, TVectorD* , TMatrixD* , int, const double* , double* , int) ;
   bool loadInputs(TFile* file);
   bool loadInputs(TFile* file,const std::string&);
   

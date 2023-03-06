@@ -9,6 +9,7 @@
 #include "PunchThroughClassifier.h"
 
 #include <fstream>
+#include <memory>
 
 // PathResolver
 #include "PathResolver/PathResolver.h"
@@ -122,7 +123,7 @@ StatusCode ISF::PunchThroughClassifier::initializeNetwork(const std::string & ne
         return StatusCode::FAILURE;
     }
 
-    m_graph  = std::unique_ptr<lwt::LightweightGraph>(new lwt::LightweightGraph(lwt::parse_json_graph(input)));
+    m_graph  = std::make_unique<lwt::LightweightGraph>(lwt::parse_json_graph(input));
     if(!m_graph){
         ATH_MSG_ERROR("Could not parse graph json file " << networkConfigFile );
         return StatusCode::FAILURE;
@@ -164,7 +165,7 @@ StatusCode ISF::PunchThroughClassifier::initializeCalibrator(const std::string &
     return StatusCode::SUCCESS;
 }
 
-std::map<std::string, std::map<std::string, double> > ISF::PunchThroughClassifier::computeInputs(const ISF::ISFParticle &isfp, const TFCSSimulationState& simulstate) const{
+std::map<std::string, std::map<std::string, double> > ISF::PunchThroughClassifier::computeInputs(const ISF::ISFParticle &isfp, const TFCSSimulationState& simulstate) {
 
     //calculate inputs for NN
 
