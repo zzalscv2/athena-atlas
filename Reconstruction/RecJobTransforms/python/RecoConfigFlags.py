@@ -63,8 +63,9 @@ def createRecoConfigFlags():
         and prevFlags.Tracking.doVertexFinding))
     # Enable Isolation Reconstruction
     flags.addFlag("Reco.EnableIsolation", lambda prevFlags: (
-        prevFlags.Reco.EnableCombinedMuon
-        or prevFlags.Reco.EnableEgamma))
+        prevFlags.Tracking.doVertexFinding
+        and (prevFlags.Reco.EnableCombinedMuon
+             or prevFlags.Reco.EnableEgamma)))
     # Enable Jet Reconstruction
     flags.addFlag("Reco.EnableJet", lambda prevFlags: (
         prevFlags.Detector.EnableCalo
