@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetEventAthenaPool )
@@ -9,7 +9,7 @@ atlas_add_library( InDetEventAthenaPool
    PUBLIC_HEADERS InDetEventAthenaPool
    LINK_LIBRARIES Identifier GeneratorObjectsTPCnv AthAllocators AthContainers
    AthenaBaseComps AthenaKernel SGTools StoreGateLib AthenaPoolCnvSvcLib
-   AthenaPoolUtilities AtlasSealCLHEP GaudiKernel InDetIdentifier
+   AthenaPoolUtilities GaudiKernel InDetIdentifier
    InDetReadoutGeometry TRT_ReadoutGeometry InDetEventTPCnv InDetRawData InDetSimData
    InDetLowBetaInfo InDetPrepRawData SCT_ConditionsData TrkTrack )   
 
@@ -26,7 +26,7 @@ atlas_add_poolcnv_library( InDetEventAthenaPoolPoolCnv
    TYPES_WITH_NAMESPACE InDet::InDetLowBetaCandidate
    LINK_LIBRARIES Identifier GeneratorObjectsTPCnv AthAllocators AthContainers
    AthenaBaseComps AthenaKernel SGTools StoreGateLib AthenaPoolCnvSvcLib
-   AthenaPoolUtilities AtlasSealCLHEP GaudiKernel InDetIdentifier
+   AthenaPoolUtilities GaudiKernel InDetIdentifier
    InDetReadoutGeometry TRT_ReadoutGeometry InDetEventTPCnv InDetRawData InDetSimData
    InDetLowBetaInfo InDetPrepRawData SCT_ConditionsData TrkTrack InDetEventAthenaPool )
 

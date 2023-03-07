@@ -23,7 +23,7 @@
   <class name="CLHEP::HepEulerAngles"/>
   <class name="CLHEP::HepRotation"/>
 
-  <!-- Random` -->
+  <!-- Random -->
   <class name="CLHEP::RandStudentT"/>
   <class name="CLHEP::RandPoissonT"/>
   <class name="CLHEP::RandPoissonQ"/>
@@ -54,7 +54,6 @@
   <class name="HepGeom::Point3D<double>"/>
   <class name="HepGeom::Point3D<float>"/>
   <class name="HepGeom::Transform3D"/>
-<!--  <class name="HepTransform3D"/> -->
   <class name="HepGeom::Rotate3D"/>
   <class name="HepGeom::RotateX3D"/>
   <class name="HepGeom::RotateY3D"/>
@@ -80,31 +79,5 @@
   <class name="CLHEP::HepMatrix"/>
   <class name="CLHEP::HepSymMatrix"/>
   <class name="CLHEP::HepVector"/>
-
-  <!-- GenericFunctions -->
-
-
-  <!-- OLD CLHEP -->
-
-  <class name="OldHepPoint3D" />
-  <class name="OldHepVector3D" />
-  <class name="OldBasicVector3D" />
-  <class name="OldHep3Vector" />
-  <class name="OldHepMatrix" />
-  <class name="OldHepGenMatrix" />
-  <class name="OldHepLorentzVector" />
-  <class name="OldHepTransform3D" />
-
-  <!-- OLD CLHEP Streamers -->
-
-  <class name="CLHEPVec3dStreamer" />
-  <class name="CLHEPPoint3dStreamer" />
-  <class name="CLHEPGenMatrixStreamer" />
-  <class name="CLHEPMatrixStreamer" />
-  <class name="CLHEPRotationStreamer" />
-  <class name="CLHEPLorVecStreamer" />
-  <class name="CLHEP3VectorStreamer" />
-  <class name="CLHEPBasicVectorStreamer" />
-  <class name="CLHEPTransform3DStreamer" />
 
 </lcgdict>
