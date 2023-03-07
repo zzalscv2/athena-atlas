@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( eflowAthenaPool )
@@ -7,8 +7,7 @@ atlas_subdir( eflowAthenaPool )
 atlas_add_poolcnv_library( eflowAthenaPoolPoolCnv
    src/*.h src/*.cxx
    FILES eflowEvent/eflowObjectContainer.h
-   LINK_LIBRARIES AthenaPoolUtilities AthenaPoolCnvSvcLib AtlasSealCLHEP
-                  eflowEvent eflowEventTPCnv )
+   LINK_LIBRARIES AthenaPoolUtilities AthenaPoolCnvSvcLib eflowEvent eflowEventTPCnv )
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )

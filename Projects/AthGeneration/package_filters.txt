@@ -61,7 +61,6 @@
 + Database/APR/ImplicitCollection
 + Database/APR/POOLCore 
 + Database/APR/PersistencySvc
-#+ Database/APR/RelationalCollection
 + Database/APR/RootCollection
 + Database/APR/RootStorageSvc
 + Database/APR/StorageSvc
@@ -73,12 +72,11 @@
 + Database/AthenaPOOL/PoolSvc
 + Database/AthenaPOOL/RootConversions
 #+ Database/AthenaPOOL/RootFileTools
-#+ Database/AthenaPOOL/StlAthenaPoolCnv
 + Database/AthenaRoot/AthenaRootComps
 + Database/AthenaRoot/AthenaRootKernel
 + Database/AthenaRoot/RootAuxDynIO
 + Database/AtlasSTLAddReflex
-+ Database/AtlasSealCLHEP
++ Database/AtlasCLHEPDict
 #+ Database/CondDBObjects
 + Database/ConnectionManagement/AtlasAuthentication
 + Database/ConnectionManagement/DBReplicaSvc

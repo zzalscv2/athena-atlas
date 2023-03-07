@@ -9,5 +9,5 @@ atlas_subdir( G4AncillaryEventAthenaPool )
 atlas_add_poolcnv_library( G4AncillaryEventAthenaPoolPoolCnv
                            src/*.cxx
                            FILES G4AncillarySimEvent/ScintillatorHitCollection.h G4AncillarySimEvent/SimpleScintillatorHitCollection.h
-                           LINK_LIBRARIES AthenaPoolUtilities AtlasSealCLHEP AthenaPoolCnvSvcLib G4AncillarySimEvent )
+                           LINK_LIBRARIES AthenaPoolUtilities AthenaPoolCnvSvcLib G4AncillarySimEvent )
 

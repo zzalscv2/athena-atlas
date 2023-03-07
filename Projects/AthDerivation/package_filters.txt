@@ -57,7 +57,7 @@
 + Database/APR/.*
 - Database/AthenaPOOL/AthenaPoolExample/.*
 + Database/AthenaPOOL/.*
-+ Database/AtlasSealCLHEP
++ Database/AtlasCLHEPDict
 + Database/ConnectionManagement/.*
 + Database/CoolConvUtilities
 + Database/CoolLumiUtilities

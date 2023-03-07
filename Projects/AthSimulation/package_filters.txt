@@ -85,7 +85,7 @@
 + Database/AthenaRoot/AthenaRootKernel
 + Database/AthenaRoot/RootAuxDynIO
 + Database/AtlasSTLAddReflex
-+ Database/AtlasSealCLHEP
++ Database/AtlasCLHEPDict
 + Database/CondDBObjects
 + Database/ConnectionManagement/AtlasAuthentication
 + Database/ConnectionManagement/DBReplicaSvc
