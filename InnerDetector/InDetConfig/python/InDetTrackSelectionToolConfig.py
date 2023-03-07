@@ -157,3 +157,30 @@ def InDetGlobalLRTMonAlg_TrackSelectionToolCfg(flags, name="InDetGlobalLRTMonAlg
     kwargs.setdefault("minPt", 1000.)
     kwargs.setdefault("maxNPixelHoles", 1)
     return InDetTrackSelectionTool_TrackTools_Cfg(flags, name, **kwargs)
+
+
+
+###############################################
+#####  Configs for Sec Vtx  #####
+###############################################
+
+
+def InDetTrackSelectionTool_AMSVF_Cfg(flags, name='InDetTrackSelectionTool_AMSVF', **kwargs):
+
+    kwargs.setdefault("CutLevel", "NoCut")
+    kwargs.setdefault("minPt", 1000.)
+    kwargs.setdefault("maxD0", 500.0)
+    kwargs.setdefault("maxZ0", 1500.)
+    kwargs.setdefault("maxSigmaD0", -1.0)
+    kwargs.setdefault("maxSigmaZ0SinTheta", -1.0)
+    kwargs.setdefault("maxChiSqperNdf", 5.0)
+    kwargs.setdefault("maxAbsEta", 2.5)
+    kwargs.setdefault("minNInnermostLayerHits", 0)
+    kwargs.setdefault("minNPixelHits", 0)
+    kwargs.setdefault("maxNPixelHoles", 1)
+    kwargs.setdefault("minNSctHits", 2)
+    kwargs.setdefault("minNTrtHits", 0)
+    kwargs.setdefault("minNSiHits", 0)
+    kwargs.setdefault("maxNSiSharedHits", 6)
+
+    return InDetTrackSelectionTool_TrackTools_Cfg(flags, name, **kwargs)

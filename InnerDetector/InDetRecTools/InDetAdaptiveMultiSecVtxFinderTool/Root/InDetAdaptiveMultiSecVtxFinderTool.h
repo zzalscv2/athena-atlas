@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2019-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2019-2023 CERN for the benefit of the ATLAS collaboration
 */
 // Author: Neza Ribaric <neza.ribaric@cern.ch>
 
@@ -88,19 +88,21 @@ namespace InDet {
         bool V0check(const std::vector<Amg::Vector3D>& momenta, const Amg::Vector3D& posi) const;
         const std::vector<Amg::Vector3D> getVertexMomenta(xAOD::Vertex* myxAODVertex) const;
 
-        ToolHandle<Trk::AdaptiveMultiVertexFitter> m_VertexFitter{this, "VertexFitterTool", "Trk::AdaptiveMultiVertexFitter",
-                                                                  "Multi Vertex Fitter"};
 
-        ToolHandle<InDet::IInDetTrackSelectionTool> m_trkFilter;
-        ToolHandle<Trk::IVertexSeedFinder> m_SeedFinder;
-        ToolHandle<Trk::IImpactPoint3dEstimator> m_ImpactPoint3dEstimator;
-        ToolHandle<Trk::IVertexLinearizedTrackFactory> m_LinearizedTrackFactory;
+        ToolHandle<Trk::AdaptiveMultiVertexFitter> m_VertexFitter{this, "VertexFitterTool", "Trk::AdaptiveMultiVertexFitter", "Multi Vertex Fitter"};
+        ToolHandle<InDet::IInDetTrackSelectionTool> m_trkFilter{this, "BaseTrackSelector", "InDet::DetailedTrackSelectToolRelax", "Base track selection tool"};
+        ToolHandle<InDet::IInDetTrackSelectionTool> m_SVtrkFilter{this, "SecVtxTrackSelector", "InDet::SecVtxTrackSelector", "SV track selection tool"};
+        
+        ToolHandle<Trk::IVertexSeedFinder> m_SeedFinder{this, "SeedFinder", "Trk::IndexedCrossDistancesSeedFinder", "Seed finder"};
+        ToolHandle<Trk::IImpactPoint3dEstimator> m_ImpactPoint3dEstimator{this, "ImpactPoint3dEstimator", "Trk::ImpactPoint3dEstimator", "Impact point estimator"};
+        ToolHandle<Trk::IVertexLinearizedTrackFactory> m_LinearizedTrackFactory{this, "LinearizedTrackFactory", "InDet::LinearizedTrackFactory", "Linearized track factory"};
+
 
         // declareInterface<IAdaptiveMultiSecVertexFinder>(this);
-        FloatProperty m_privtxRef{this, "privtxRef", -999999.9, "MomentumProjectionOnDirection"};
+        FloatProperty m_privtxRef{this, "MomentumProjectionOnDirection", -999999.9, "pri vtx ref"};
         DoubleProperty m_significanceCutSeeding{this, "significanceCutSeeding", 10, "significanceCutSeeding"};
         DoubleProperty m_minWghtAtVtx{this, "minTrackWeightAtVtx", 0., "minTrackWeightAtVtx"};
-        DoubleProperty m_maxIterations{this, "maxIterations", 25, "max iterations"};
+        DoubleProperty m_maxIterations{this, "maxVertices", 25, "max iterations"};
         LongProperty m_evtNum{this, "eventNum", 0, "event number"};
 
         std::vector<Trk::TrackParameters*>* m_seedperigees{};

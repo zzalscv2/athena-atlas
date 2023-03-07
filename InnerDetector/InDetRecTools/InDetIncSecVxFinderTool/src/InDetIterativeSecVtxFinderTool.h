@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  *
@@ -22,6 +22,11 @@
 #define INDETPRIVXFINDERTOOL_INDETITERATIVESECVXFINDERTOOL_H
 
 #include "InDetRecToolInterfaces/IInDetIterativeSecVtxFinderTool.h"
+#include "InDetRecToolInterfaces/IVertexFinder.h"
+#include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
+#include "TrkVertexFitterInterfaces/IImpactPoint3dEstimator.h"
+#include "TrkVertexFitterInterfaces/IVertexSeedFinder.h"
+#include "TrkVertexFitters/AdaptiveVertexFitter.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -34,7 +39,6 @@
 #include "xAODTracking/TrackParticleFwd.h"
 #include "xAODTracking/VertexContainerFwd.h"
 #include "xAODTracking/TrackParticleContainerFwd.h"
-#include "BeamSpotConditionsData/BeamSpotData.h"
 #include <vector>
 
 
@@ -42,7 +46,7 @@ class TTree;
 
 namespace Trk
 {
- class IVertexFitter;
+
  class Track;
  class TrackParticleBase;
  class ITrackLink;
@@ -60,47 +64,48 @@ namespace InDet
 //  InnerDetector/InDetValidation/InDetVertexSplitter/InDetVertexSplitterHist
 //  InnerDetector/InDetDigitization/FastSiDigitization/SiSmearedDigitizationTool
 //  Tracking/TrkVertexFitter/TrkVertexSeedFinderUtils/share/ImagingSeedTuningAlg_jobOptions.py
- class ATLAS_NOT_THREAD_SAFE InDetIterativeSecVtxFinderTool : public AthAlgTool, virtual public ISecVertexFinder // mutable variables are used without protection.
+ class ATLAS_NOT_THREAD_SAFE InDetIterativeSecVtxFinderTool : public extends<AthAlgTool, ISecVertexFinder>
  {
 
 public:
 
    /**
-    * Constructor
-    */
-   
+   * Constructor
+   */
+   using extends::extends;
    InDetIterativeSecVtxFinderTool(const std::string& t, const std::string& n, const IInterface*  p);
    
    /**
-    * Destructor
-    */
+   * Destructor
+   */
    
-   virtual ~InDetIterativeSecVtxFinderTool();
+   virtual ~InDetIterativeSecVtxFinderTool() = default;
     
-   StatusCode initialize();
-   StatusCode finalize();
+   StatusCode initialize() override;
+   StatusCode finalize() override;
 
    std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> 
-         findVertex(const TrackCollection* trackTES);
+         findVertex(const TrackCollection* trackTES) override;
    std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> 
-         findVertex(const Trk::TrackParticleBaseCollection* trackTES);
+         findVertex(const Trk::TrackParticleBaseCollection* trackTES) override;
 
    /** 
-    * Finding method.
-    * Has as input a track collection and as output 
-    * a VxContainer.
-    */
+   * Finding method.
+   * Has as input a track collection and as output 
+   * a VxContainer.
+   */
 
    std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> 
-         findVertex(const xAOD::TrackParticleContainer* trackParticles);  // overwritten 
+         findVertex(const xAOD::TrackParticleContainer* trackParticles) override;
    std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
-         findVertex( const std::vector<const xAOD::IParticle*> & inputTracks)  ;
+         findVertex( const std::vector<const xAOD::IParticle*> & inputTracks) override;
 
-   void setPriVtxPosition( double , double , double ) ;
+   void setPriVtxPosition( double , double , double ) override;
 
    int getModes1d( std::vector<int> *, std::vector<int> *, std::vector<int> * ) const ;
 
  private:
+
 
    std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> 
      findVertex( const std::vector<Trk::ITrackLink*> & trackVector) ;
@@ -120,9 +125,6 @@ public:
 
    void FillXcheckdefauls() ;
 
-   int m_filterLevel ;   // from 1 up to 5 options
-
-   float m_privtxRef, m_minVtxDist ;
 
    Amg::Vector3D m_privtx ;
    mutable std::vector< Amg::Vector3D > m_TrkAtVtxMomenta ;
@@ -145,29 +147,29 @@ public:
 
 
 
-   ToolHandle< Trk::IVertexFitter > m_iVertexFitter;
-   ToolHandle< InDet::IInDetTrackSelectionTool > m_trkFilter;
-   ToolHandle< InDet::IInDetTrackSelectionTool > m_SVtrkFilter;
-   ToolHandle< Trk::IVertexSeedFinder > m_SeedFinder;
-   ToolHandle< Trk::IImpactPoint3dEstimator > m_ImpactPoint3dEstimator;
-   ToolHandle< Trk::IVertexLinearizedTrackFactory > m_LinearizedTrackFactory;
+   ToolHandle< Trk::AdaptiveVertexFitter > m_iVertexFitter{this, "VertexFitterTool", "Trk::AdaptiveVertexFitter","Vertex Fitter"};
+   ToolHandle< InDet::IInDetTrackSelectionTool > m_trkFilter{this, "BaseTrackSelector", "InDet::InDetTrackSelection", "base track selector"};
+   ToolHandle< InDet::IInDetTrackSelectionTool > m_SVtrkFilter{this, "SecVtxTrackSelector", "InDet::InDetSecVtxTrackSelection", "SV track selector"};
+   ToolHandle< Trk::IVertexSeedFinder > m_SeedFinder{this, "SeedFinder", "Trk::IndexedCrossDistancesSeedFinder", "seed finder"};
+   ToolHandle< Trk::IImpactPoint3dEstimator > m_ImpactPoint3dEstimator{this, "ImpactPoint3dEstimator", "Trk::ImpactPoint3dEstimator", "impact point estimator"};
+   ToolHandle< Trk::IVertexLinearizedTrackFactory > m_LinearizedTrackFactory{this, "LinearizedTrackFactory", "Trk::FullLinearizedTrackFactory", "linearized track factory"};
    
-  SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
 
-   bool m_useBeamConstraint;
-   double m_significanceCutSeeding;
-   double m_maximumChi2cutForSeeding;
-   double m_minWghtAtVtx ;
-   double m_maxVertices;
-   double m_CutHitsFilter ;
+   Gaudi::Property<int> m_filterLevel{this,"VertexFilterLevel",0,""} ;
+   Gaudi::Property<double> m_significanceCutSeeding{this, "significanceCutSeeding", 9., ""};
+   Gaudi::Property<double> m_maximumChi2cutForSeeding{this, "maxCompatibilityCutSeeding",18., ""};
+   Gaudi::Property<double> m_minWghtAtVtx{this, "minTrackWeightAtVtx",0.02, ""};
+   Gaudi::Property<double> m_maxVertices{this, "maxVertices",20, ""};
+   Gaudi::Property<double> m_CutHitsFilter{this, "TrackInnerOuterFraction",0.95, ""};
+   Gaudi::Property<float> m_privtxRef{this, "MomentumProjectionOnDirection",-999.9,""};
+   Gaudi::Property<float> m_minVtxDist{this, "SeedsMinimumDistance",0.1,""};
+   Gaudi::Property<bool> m_createSplitVertices{this, "createSplitVertices", false, ""};
+   Gaudi::Property<int> m_splitVerticesTrkInvFraction{this, "splitVerticesTrkInvFraction",2,""}; ///< Integer: 1./fraction of tracks to be assigned to the tag split vertex 
 
-   bool m_createSplitVertices;
-   int m_splitVerticesTrkInvFraction; ///< Integer: 1./fraction of tracks to be assigned to the tag split vertex 
+   Gaudi::Property<bool> m_reassignTracksAfterFirstFit{this, "reassignTracksAfterFirstFit", true, ""};
 
-   bool m_reassignTracksAfterFirstFit;
-
-   bool m_doMaxTracksCut; 
-   unsigned int m_maxTracks;
+   Gaudi::Property<bool> m_doMaxTracksCut{this, "doMaxTracksCut", false, ""}; 
+   Gaudi::Property<unsigned int> m_maxTracks{this, "MaxTracks", 5000,""};
 
    std::vector<const Trk::TrackParameters*> * m_seedperigees{};
 

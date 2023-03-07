@@ -97,3 +97,11 @@ def TauAdaptiveVertexFitterCfg(flags, name="TauAdaptiveVertexFitter", **kwargs):
 
     acc.setPrivateTools(CompFactory.Trk.AdaptiveVertexFitter(name, **kwargs))
     return acc
+
+def AdaptiveVxFitterToolIncSecVtxCfg(flags, name='AdaptiveVxFitterToolIncSecVtx', **kwargs):
+
+    kwargs.setdefault("MaxIterations", 8000)
+    kwargs.setdefault("MaxDistToLinPoint", 0.2)
+    kwargs.setdefault("InitialError", 0.2)
+    
+    return AdaptiveVertexFitterCfg(flags, name, **kwargs)
