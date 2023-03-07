@@ -3,7 +3,7 @@
 # Declare the package name:
 atlas_subdir( RootAuxDynIO )
 
-find_package( ROOT COMPONENTS Core RIO Tree ROOTNTuple )
+find_package( ROOT COMPONENTS Core RIO Tree ROOTNTuple ROOTVecOps )
 find_package( VDT )
 
 # Component(s) in the package:
