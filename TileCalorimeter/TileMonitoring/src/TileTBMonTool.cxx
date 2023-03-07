@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -43,10 +43,13 @@ TileTBMonTool::TileTBMonTool(const std::string & type, const std::string & name,
   , m_tileTBHitMapLBC01(nullptr)
   , m_tileTBHitMapEBC02(nullptr)
   , m_tileEventEnergyVsCellsNumber(nullptr)
+  , m_CtotVsClong(nullptr)
+  , m_Ctot(nullptr)
+  , m_Clong(nullptr)
+  , m_tileTBChannelTime{{0}}
   , m_isFirstEvent(true)
   , m_maskedChannels{{0}}
-  , m_cellEnergyThreshold(0.0)
-
+  , m_cellsNearTower(9)
 /*---------------------------------------------------------*/
 {
   declareInterface<IMonitorToolBase>(this);
@@ -54,7 +57,8 @@ TileTBMonTool::TileTBMonTool(const std::string & type, const std::string & name,
   declareProperty("Masked", m_masked); // Masked channels in the following format: "LBA01 1,2,3,4,5"
   declareProperty("MaxTotalEnergy", m_maxTotalEnergy = 150.0); // Maximum energy on the histogram
   declareProperty("CellEnergyThreshold", m_cellEnergyThreshold = 0.1); // Cell energy threshold
-
+  declareProperty("EnergyThresholdForTime", m_energyThresholdForTime = 500.); // Channel energy threshold in MeV
+  declareProperty("BeamEnergy", m_beamEnergy = 10000.); // Channel energy threshold in MeV
   m_path = "/Tile/TestBeam"; //ROOT File relative directory
 }
 
@@ -69,6 +73,8 @@ StatusCode TileTBMonTool:: initialize() {
 /*---------------------------------------------------------*/
 
   ATH_MSG_INFO( "in initialize()" );
+
+  ATH_CHECK( TileFatherMonTool::initialize() );
 
   std::map<std::string, unsigned int> roses = { {"AUX", 0}, {"LBA", 1}, {"LBC", 2}, {"EBA", 3}, {"EBC", 4} };
   
@@ -104,20 +110,76 @@ StatusCode TileTBMonTool:: initialize() {
     std::string channel;
     while (std::getline(channels, channel, ',')) {
       if (!channel.empty()) {
-	int chan = std::stoi(channel);
-	if (chan < 0 || chan >= 48) {
-	  ATH_MSG_WARNING("There no such channel: " << chan << " in channels: " << channels.str() 
-			  << " => skip because of bad format: " << maskedModuleChannels);
-	  continue;
-	}
-	m_maskedChannels[drawerIdx][chan] |= (1U << adc);
-	ATH_MSG_INFO(TileCalibUtils::getDrawerString(ros, drawer) << " ch" << chan << (adc ? " HG" : " LG") << ": masked!");
+        int chan = std::stoi(channel);
+        if (chan < 0 || chan >= 48) {
+          ATH_MSG_WARNING("There no such channel: " << chan << " in channels: " << channels.str()
+                          << " => skip because of bad format: " << maskedModuleChannels);
+          continue;
+        }
+        m_maskedChannels[drawerIdx][chan] |= (1U << adc);
+        ATH_MSG_INFO(TileCalibUtils::getDrawerString(ros, drawer) << " ch" << chan << (adc ? " HG" : " LG") << ": masked!");
       }
     }
 
   }
 
-  return TileFatherMonTool::initialize();
+  const CaloCell_ID* caloID;
+  ATH_CHECK( detStore()->retrieve(caloID) );
+
+  unsigned int minCellTower = 1;
+  unsigned int maxCellTower = 9;
+
+  std::vector<std::vector<int>> lbCellsD{{}, {0, 2}, {2, 4}, {2, 4}, {1 , 4, 6}, {4, 6}, {4, 6}, {6}, {6}};
+  for (unsigned int cellTower = minCellTower; cellTower < maxCellTower; ++cellTower) {
+    std::vector<IdentifierHash>& cells = m_cellsNearTower[cellTower];
+    for (unsigned int cellModule = 0; cellModule < 2; ++cellModule) {
+      for (unsigned int cellSample = 0; cellSample < 2; ++cellSample) {
+        for (unsigned int tower = cellTower - 1; tower < cellTower + 2; ++tower) {
+          Identifier cell_id = m_tileID->cell_id(TileID::BARREL, TileID::NEGATIVE, cellModule, tower, cellSample);
+          cells.push_back(caloID->calo_cell_hash(cell_id));
+        }
+      }
+
+      const std::vector<int>& towersD = lbCellsD[cellTower];
+      for (int towerD : towersD) {
+        unsigned int side = (towerD == 0) ?  TileID::POSITIVE : TileID::NEGATIVE;
+        Identifier cell_id = m_tileID->cell_id(TileID::BARREL, side, cellModule, towerD, TileID::SAMP_D);
+        cells.push_back(caloID->calo_cell_hash(cell_id));
+      }
+    }
+  }
+
+  std::vector<std::vector<std::vector<int>>> ebCellsNearTower{{{}},
+                                                             {{11, 12}, {9, 10, 11, 12}, {8, 10}},
+                                                             {{11, 12}, {9, 10, 11, 12}, {8, 10}},
+                                                             {{12, 13}, {11, 12}, {10, 12}},
+                                                             {{12, 13, 14}, {11, 12, 13}, {10, 12}},
+                                                             {{13, 14}, {12, 13}, {12}},
+                                                             {{14, 15}, {13, 14}, {12}},
+                                                             {{14, 15}, {13, 14}, {12}},
+                                                             {{15}, {14}, {12}}};
+  for (unsigned int cellTower = minCellTower; cellTower < maxCellTower; ++cellTower) {
+    std::vector<IdentifierHash>& cells = m_cellsNearTower[cellTower];
+    const std::vector<std::vector<int>> ebCells = ebCellsNearTower[cellTower];
+    for (unsigned int cellSample = 0; cellSample < 3; ++cellSample) {
+      const std::vector<int>& ebCellsInSample = ebCells[cellSample];
+      for (int tower : ebCellsInSample) {
+        int section = (tower < 10) ? TileID::GAPDET : TileID::EXTBAR;
+        Identifier cell_id = m_tileID->cell_id(section, TileID::NEGATIVE, 2, tower, cellSample);
+        cells.push_back(caloID->calo_cell_hash(cell_id));
+      }
+    }
+  }
+
+  for (unsigned int cellTower = minCellTower; cellTower < maxCellTower; ++cellTower) {
+    std::vector<IdentifierHash>& cells = m_cellsNearTower[cellTower];
+    ATH_MSG_INFO("The are " << cells.size() << " Tile cells near the tower " << cellTower << " in LBC02: ");
+    for (IdentifierHash hash : cells) {
+      ATH_MSG_INFO("  " << m_tileID->to_string(caloID->cell_id(hash)));
+    }
+  }
+
+  return StatusCode::SUCCESS;
 }
 
 /*---------------------------------------------------------*/
@@ -151,14 +213,21 @@ StatusCode TileTBMonTool::fillHistograms() {
 
   if (cell_container->empty()) return StatusCode::SUCCESS;
 
+  const TileCell* cellWithMaxEnergy = nullptr;
+
   double energy_pC(0.0);
   double total_energy(0.0);
   bool onlyLBC04(true);
   int nCellsOverThreshold(0);
   double totalEnergySideC(0.0);
 
+  double totalEnergyLBA01 = 0.;
+  double totalEnergyLBA02 = 0.;
+  double totalEnergyLBC01 = 0.;
+  double totalEnergyLBC02 = 0.;
+  double totalEnergyEBC03 = 0.;
+
   for (const CaloCell* cell : *cell_container) {
-    //    Identifier id = cell->ID();
     const TileCell* tile_cell = dynamic_cast<const TileCell*>(cell);
     if (tile_cell == 0) continue;
 
@@ -167,6 +236,11 @@ StatusCode TileTBMonTool::fillHistograms() {
     int module = m_tileID->module(cell->ID());
     int tower = m_tileID->tower(cell->ID());
     int sample = m_tileID->sample(cell->ID());
+
+    if ((section == TileID::BARREL) && (side == TileID::NEGATIVE) && (module == 1) && (sample == TileID::SAMP_A)
+        && (!cellWithMaxEnergy || cellWithMaxEnergy->energy() < tile_cell->energy())) {
+      cellWithMaxEnergy = tile_cell;
+    }
 
     double energy = 0.0;
 
@@ -184,11 +258,20 @@ StatusCode TileTBMonTool::fillHistograms() {
     int chan1 = m_tileHWID->channel(ch_id1);
     int drawerIdx1 = TileCalibUtils::getDrawerIdx(ros1, drawer1);
 
+    int partition1 = ros1 - 1;
+    if (!m_tileTBChannelTime[partition1][drawer1]) {
+      bookTimeHistograms(ros1, drawer1);
+    }
+
+    if (tile_cell->ene1() > m_energyThresholdForTime) {
+      m_tileTBChannelTime[partition1][drawer1]->Fill(chan1, tile_cell->time1());
+    }
+
     if (onlyLBC04 && chan1 > 0 && drawerIdx1 != 87) onlyLBC04 = false;
     
     if (hash2 == TileHWID::NOT_VALID_HASH) {
       if (!((m_maskedChannels[drawerIdx1][chan1] >> gain1) & 1U)) {
-	energy = cell->energy(); 
+        energy = cell->energy();
       }
     } else { 
 
@@ -200,22 +283,44 @@ StatusCode TileTBMonTool::fillHistograms() {
       int chan2 = m_tileHWID->channel(ch_id2);
       int drawerIdx2 = TileCalibUtils::getDrawerIdx(ros2, drawer2);
 
+      int partition2 = ros2 - 1;
+      if (!m_tileTBChannelTime[partition2][drawer2]) {
+        bookTimeHistograms(ros2, drawer2);
+      }
+
+      if (tile_cell->ene2() > m_energyThresholdForTime) {
+        m_tileTBChannelTime[partition2][drawer2]->Fill(chan2, tile_cell->time2());
+      }
+
       if ((m_maskedChannels[drawerIdx1][chan1] >> gain1) & 1U) {
-	if (!((m_maskedChannels[drawerIdx2][chan2] >> gain2) & 1U)) {
-	  energy = tile_cell->ene2() * 2; 
-	}
+        if (!((m_maskedChannels[drawerIdx2][chan2] >> gain2) & 1U)) {
+          energy = tile_cell->ene2() * 2;
+        }
       } else if ((m_maskedChannels[drawerIdx2][chan2] >> gain2) & 1U) {
-	if (!((m_maskedChannels[drawerIdx1][chan1] >> gain1) & 1U)) {
-	  energy =tile_cell->ene1() * 2; 
-	}
+        if (!((m_maskedChannels[drawerIdx1][chan1] >> gain1) & 1U)) {
+          energy =tile_cell->ene1() * 2;
+        }
       } else {
-	energy = cell->energy(); 
+        energy = cell->energy();
       }
     }
-    
 
     energy_pC = energy * 0.001; // keep energy in pC
     total_energy += energy_pC;
+
+    if (section == TileID::BARREL) {
+      if (side == TileID::POSITIVE) {
+        if      (module == 0) totalEnergyLBA01 += energy_pC;
+        else if (module == 1) totalEnergyLBA02 += energy_pC;
+      } else if (side == TileID::NEGATIVE) {
+        if      (module == 0) totalEnergyLBC01 += energy_pC;
+        else if (module == 1) totalEnergyLBC02 += energy_pC;
+      }
+    } else {
+      if (module == 2 && side == TileID::NEGATIVE && sample < TileID::SAMP_E) {
+        totalEnergyEBC03 += energy_pC;
+      }
+    }
 
     if (side < 0) {
       totalEnergySideC += energy_pC;
@@ -225,12 +330,68 @@ StatusCode TileTBMonTool::fillHistograms() {
     }
 
     fillHitMap(side, section, module, tower, sample, energy);
+  }
 
+  if (cellWithMaxEnergy) {
+
+    int tower = m_tileID->tower(cellWithMaxEnergy->ID());
+    m_hotCell_LBC02_A->Fill(tower);
+
+    if ((tower > 0) && (tower < 9)) {
+
+      double sumClong = 0.0;
+      double sumCtot = 0.0;
+
+      std::vector<IdentifierHash>& cellsHashes = m_cellsNearTower[tower];
+      CaloCellContainer::CellVector cells;
+      cell_container->findCellVector(cellsHashes, cells);
+
+      float alpha = (m_beamEnergy < 100000) ? 0.6 : 0.38;
+      unsigned int nCells = cells.size();
+
+      if (nCells) {
+        double sumCellEnergyAlpha = 0.;
+        for (const CaloCell* cell : cells) {
+          double energy = cell->energy();
+          if(energy >= 0) {
+            sumCellEnergyAlpha += std::pow(energy, alpha);
+          }
+        }
+
+        double avgCellEnergyAlpha = sumCellEnergyAlpha / nCells;
+
+        for (const CaloCell* cell : cells) {
+          double energy = cell->energy();
+          if (energy >= 0) {
+            sumCtot += std::pow( std::pow(energy, alpha) - avgCellEnergyAlpha, 2 );
+            int sample = m_tileID->sample(cell->ID());
+            if (sample != TileID::SAMP_D) {
+              sumClong += energy;
+            }
+          }
+        }
+
+        double Ctot = std::sqrt(sumCtot / nCells) / sumCellEnergyAlpha;
+        double Clong = sumClong / m_beamEnergy;
+
+        if (!onlyLBC04) {
+          m_CtotVsClong->Fill(Clong, Ctot);
+          m_Ctot->Fill(Ctot);
+          m_Clong->Fill(Clong);
+        }
+      }
+    }
   }
 
   if (!onlyLBC04) {
     m_tileTotalEventEnergy->Fill(total_energy);
     m_tileEventEnergyVsCellsNumber->Fill(nCellsOverThreshold, totalEnergySideC);
+
+    m_tileTBHitMap->Fill(0., 0., totalEnergyLBA01);
+    m_tileTBHitMap->Fill(0., 1., totalEnergyLBA02);
+    m_tileTBHitMap->Fill(1., 0., totalEnergyLBC01);
+    m_tileTBHitMap->Fill(1., 1., totalEnergyLBC02);
+    m_tileTBHitMap->Fill(1., 2., totalEnergyEBC03);
   }
 
   return StatusCode::SUCCESS;
@@ -249,7 +410,6 @@ StatusCode TileTBMonTool::procHistograms() {
 
   return StatusCode::SUCCESS;
 }
-
 
 void TileTBMonTool::fillHitMap(int side, int section, int module, int tower, int sample, double energy) {
 
@@ -296,7 +456,7 @@ void TileTBMonTool::fillHitMap(int side, int section, int module, int tower, int
         m_tileTBHitMapEBC02->Fill(x, y, energy);
       }
 
-      if (sample != TileID::SAMP_A && tower > 8 && tower < 16) { // A & D4
+      if (sample != TileID::SAMP_A && tower > 8) { // A & D4
         
         if (tower != 9) y = yEB[index * 2 - 1]; // C10
         else y = yEB[index * 2 + 1]; // D & B
@@ -312,7 +472,6 @@ void TileTBMonTool::fillHitMap(int side, int section, int module, int tower, int
   
 }
 
-
 // Operations to be done only once at the first event
 /*---------------------------------------------------------*/
 void TileTBMonTool::initFirstEvent() {
@@ -322,7 +481,7 @@ void TileTBMonTool::initFirstEvent() {
   std::string runNumber = getRunNumStr();
 
   m_tileTotalEventEnergy = book1F("", "TileTBTotalEventEnergy", "Run " + runNumber + ": Total TileCal Event Energy"
-                                  ,500, -2., m_maxTotalEnergy, run, ATTRIB_MANAGED, "", "mergeRebinned");
+                                  ,m_maxTotalEnergy*4, -2., m_maxTotalEnergy, run, ATTRIB_MANAGED, "", "mergeRebinned");
 
   m_tileTotalEventEnergy->GetXaxis()->SetTitle("Event Energy [pC]");
 
@@ -333,6 +492,37 @@ void TileTBMonTool::initFirstEvent() {
 
   m_tileEventEnergyVsCellsNumber->GetXaxis()->SetTitle("# Cells");
   m_tileEventEnergyVsCellsNumber->GetYaxis()->SetTitle("Event Energy [pC]");
+
+  m_tileTBHitMap = bookProfile2D("", "TileTBHitMap",
+				 "Run " + runNumber + ": Tile TB setup map with average energy",
+				 2.0, -0.5, 1.5, 3.0, -0.5, 2.5, -2.e6, 2.e6);
+
+  TAxis* hitMapXaxis = m_tileTBHitMap->GetXaxis();
+  hitMapXaxis->SetBinLabel(1, "A side");
+  hitMapXaxis->SetBinLabel(2, "C side");
+
+  TAxis* hitMapYaxis = m_tileTBHitMap->GetYaxis();
+  hitMapYaxis->SetBinLabel(1, "LB01");
+  hitMapYaxis->SetBinLabel(2, "LB02");
+  hitMapYaxis->SetBinLabel(3, "EB03");
+
+  int nbins = 100;
+  float Clong_upper = 1.8;
+  float Ctot_lower  = 0.03;
+  float Ctot_upper  = 0.22;
+  m_CtotVsClong = book2F("", "TileTBCtotVsClong",
+			 "Run " + runNumber + ": Ctot vs Clong", nbins, 0., Clong_upper, nbins, Ctot_lower, Ctot_upper);
+  m_CtotVsClong->GetXaxis()->SetTitle("Clong");
+  m_CtotVsClong->GetYaxis()->SetTitle("Ctot");
+
+  m_Ctot = book1F("", "TileTBCtot",
+		  "Run " + runNumber + ": Ctot", nbins, Ctot_lower, Ctot_upper);
+  m_Ctot->GetXaxis()->SetTitle("Ctot");
+
+  m_Clong = book1F("", "TileTBClong",  "Run " + runNumber + ": Clong", nbins, 0., Clong_upper);
+  m_Clong->GetXaxis()->SetTitle("Clong");
+
+  m_hotCell_LBC02_A = book1F("", "TileTBHotCellLBC02A",  "Run " + runNumber + " LBC02 : Hot Cell A", 10, -0.5, 9.5);
 
   double* xBinsEB = new double [19] {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
   double* yBinsEB = new double [6] {0,1,2,3,4,5};
@@ -360,5 +550,15 @@ void TileTBMonTool::initFirstEvent() {
   m_tileTBHitMapLBC01->SetOption("COLZ");
   m_tileTBHitMapLBC01->SetStats(0);
   m_tileTBHitMapLBC01->SetZTitle("Energy[pC]");
+
+}
+
+
+void TileTBMonTool::bookTimeHistograms(int ros, int drawer) {
+  std::string runNumber = getRunNumStr();
+  std::string module = TileCalibUtils::getDrawerString(ros, drawer);
+  m_tileTBChannelTime[ros - 1][drawer] = bookProfile("", "TileTBChannelTime" + module,
+						     "Run " + runNumber + ": Test beam channel time: " + module + ";;Time[ns]",
+						     TileCalibUtils::MAX_CHAN, -0.5, TileCalibUtils::MAX_CHAN - 0.5);
 
 }
