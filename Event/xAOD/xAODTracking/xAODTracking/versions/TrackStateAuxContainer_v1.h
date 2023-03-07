@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRACKING_VERSIONS_TRACKSTATEAUXCONTAINER_V1_H
@@ -8,6 +8,9 @@
 
 
 #include "xAODCore/AuxContainerBase.h"
+#include "AthLinks/ElementLink.h"
+#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
+
 namespace xAOD {
  using TrackStateIndexType=uint32_t;    
  class TrackStateAuxContainer_v1 : public AuxContainerBase {
@@ -21,9 +24,10 @@ namespace xAOD {
         std::vector<TrackStateIndexType> smoothed;
         std::vector<TrackStateIndexType> jacobian;
         std::vector<TrackStateIndexType> projector;
-        std::vector<TrackStateIndexType> uncalibrated;
         std::vector<TrackStateIndexType> calibrated;
         std::vector<TrackStateIndexType> measDim;
+        std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > uncalibratedMeasurementLink;
+        std::vector< uint64_t > geometryId;
     };
 }
 

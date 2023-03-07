@@ -282,8 +282,21 @@ class MultiTrajectory final
     return trackMeasurements().at(trackStates[istate]->calibrated())->size();
   }
 
+  /**
+   * Implementation of calibrated link insertion
+   */ 
+  ATH_MEMBER_REQUIRES(RWState == IsReadWrite, void)
+  setUncalibratedSourceLink_impl(const Acts::SourceLink& sourceLink,
+                                 IndexType istate);
 
+  /**
+   * Implementation of calibrated link fetch
+   */ 
+  ATH_MEMBER_REQUIRES(RWState == IsReadWrite, Acts::SourceLink)
+  getUncalibratedSourceLink_impl(IndexType istate);
 
+  ATH_MEMBER_REQUIRES(RWState == IsReadOnly, Acts::SourceLink)
+  getUncalibratedSourceLink_impl(IndexType istate) const;
 
  private:
   // bare pointers to the backend (need to be fast and we do not claim ownership
@@ -332,9 +345,6 @@ class MultiTrajectory final
   template <typename T>
   const std::any decorationGetter(IndexType, const std::string&) const;
 
-  ///!< cache of source links for uncalibrated measurements
-  using SourceLinkType = Acts::SourceLink;
-  std::vector<SourceLinkType*> m_sourceLinks;
 };
 
 typedef ActsTrk::MultiTrajectory<ActsTrk::IsReadOnly> ConstMultiTrajectory;
