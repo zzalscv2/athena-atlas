@@ -680,8 +680,11 @@ InDetIterativePriVxFinderTool::findVertex(
     ++iterations;
   } while (seedTracks.size() > 1 && iterations < m_maxVertices);
 
-  if (iterations >= m_maxVertices) {
-    ATH_MSG_WARNING("Reached maximum iterations ");
+  if (iterations == m_maxVertices) {
+    ATH_MSG_DEBUG("Reached maximum iterations, have "<<iterations<<" vertices");
+  }
+  else if (iterations > m_maxVertices) {
+    ATH_MSG_WARNING("Exceeded maximum iterations, have "<<iterations<<" vertices, m_maxVertices = "<<m_maxVertices);
   }
 
   // unfortunately you have still a problem with the track to links!!!
