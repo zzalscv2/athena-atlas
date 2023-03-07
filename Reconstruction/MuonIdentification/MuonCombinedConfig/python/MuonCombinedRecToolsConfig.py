@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Defines the shared tools used in muon identification
 # Based on :
@@ -718,8 +718,11 @@ def CombinedMuonTrackBuilderCfg(flags, name='CombinedMuonTrackBuilder', **kwargs
     else:
         kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(MuonCombinedTrackSummaryToolCfg(flags)))
 
-    from TrkConfig.TrkExRungeKuttaPropagatorConfig import MuonCombinedPropagatorCfg
-    acc = MuonCombinedPropagatorCfg(flags)
+    from TrkConfig.TrkExRungeKuttaPropagatorConfig import MuonCombinedPropagatorCfg, RungeKuttaPropagatorCfg
+    if flags.Muon.MuonTrigger:
+        acc = RungeKuttaPropagatorCfg(flags)
+    else:
+        acc = MuonCombinedPropagatorCfg(flags)
     propagator = acc.popPrivateTools()
     kwargs.setdefault("Propagator",   propagator)
     kwargs.setdefault("SLPropagator", propagator)
@@ -767,7 +770,10 @@ def CombinedMuonTrackBuilderFitCfg(flags, name='CombinedMuonTrackBuilderFit', **
     result = ComponentAccumulator()
     kwargs.setdefault("PerigeeAtSpectrometerEntrance", True)
     kwargs.setdefault("UseCaloTG", False)
-    kwargs.setdefault("MuonErrorOptimizer", result.popToolsAndMerge(MuidErrorOptimisationToolCfg(flags, PrepareForFit=False, RecreateStartingParameters=False)))
+    if flags.Muon.MuonTrigger:
+        kwargs.setdefault("MuonErrorOptimizer", "")
+    else:
+        kwargs.setdefault("MuonErrorOptimizer", result.popToolsAndMerge(MuidErrorOptimisationToolCfg(flags, PrepareForFit=False, RecreateStartingParameters=False)))
     kwargs.setdefault("MuonHoleRecovery", result.popToolsAndMerge(MuonChamberHoleRecoveryToolCfg(flags)) ) 
 
     tool = result.popToolsAndMerge(CombinedMuonTrackBuilderCfg(flags, name, **kwargs))  # Need to reset this to be the primary tool
