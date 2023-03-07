@@ -31,3 +31,22 @@ def CrossDistancesSeedFinderCfg(flags, name="CrossDistancesSeedFinder", **kwargs
 
     acc.setPrivateTools(CompFactory.Trk.CrossDistancesSeedFinder(name, **kwargs))
     return acc
+
+
+def IndexedCrossDistancesSeedFinderCfg(flags, name='IndexedCrossDistancesSeedFinder', **kwargs):
+
+  acc = ComponentAccumulator()
+  if "Mode3dFinder" not in kwargs:
+    from TrkConfig.TrkVertexSeedFinderUtilsConfig import Mode3dFromFsmw1dFinderCfg
+    kwargs.setdefault("Mode3dFinder", acc.popToolsAndMerge(Mode3dFromFsmw1dFinderCfg(flags)))
+
+  if "TrkDistanceFinder" not in kwargs:
+    from TrkConfig.TrkVertexSeedFinderUtilsConfig import SeedNewtonTrkDistanceFinderCfg
+    kwargs.setdefault("TrkDistanceFinder", acc.popToolsAndMerge(SeedNewtonTrkDistanceFinderCfg(flags)))
+
+  kwargs.setdefault("trackdistcutoff", 0.01)
+  kwargs.setdefault("maximumTracksNoCut", 30)
+  kwargs.setdefault("maximumDistanceCut", 7.5)
+
+  acc.setPrivateTools(CompFactory.Trk.IndexedCrossDistancesSeedFinder(name, **kwargs))
+  return acc

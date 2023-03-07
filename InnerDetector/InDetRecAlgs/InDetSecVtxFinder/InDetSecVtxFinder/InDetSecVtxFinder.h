@@ -47,19 +47,19 @@ namespace InDet
     StatusCode execute();
     StatusCode finalize();
   private: 
+
     SG::ReadHandleKey<TrackCollection> m_inputTrackCollection{this,"inputTrackCollection","Tracks","Trk::Track Collection used in Vertexing"}; 
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_inputTrackParticles{this,"inputTrackParticles","InDetTrackParticles","xAOD::TrackParticle Container used in Vertexing"};
     SG::WriteHandleKey<xAOD::VertexContainer> m_outputSecondaryVertices{this,"outputSecondaryVertices","AdaptiveMultiSecVtx","Output Secondary Vertex Container"};
     SG::ReadHandleKey<xAOD::VertexContainer> m_inputPrimaryVertices{this,"inputPrimaryVertices","PrimaryVertices","Input Primary Vertex Container"};
     
-    ToolHandle< ISecVertexFinder > m_InclusiveVertexFinderTool{this, "InclusiveVertexFinderTool", "", "inclusive secondary vertex finder tool"};
-    ToolHandle<InDet::IAdaptiveMultiSecVertexFinder> m_AdaptiveMultiVertexFinderTool{this, "AdaptiveVertexFinderTool", "", "adaptive multi secondary vertex finder tool"};
-    ToolHandle<Trk::IVertexMergingTool > m_VertexMergingTool{this, "VertexMergingTool", "", "vertex merging tool"};
+    ToolHandle< ISecVertexFinder > m_InclusiveVertexFinderTool{this, "InclusiveVertexFinderTool", "InDet::InDetIterativeSecVtxFinderTool", "inclusive secondary vertex finder tool"};
+    ToolHandle<InDet::IAdaptiveMultiSecVertexFinder> m_AdaptiveMultiVertexFinderTool{this, "AdaptiveMultiVertexFinderTool", "InDet::InDetAdaptiveMultiSecVtxFinderTool", "adaptive multi secondary vertex finder tool"};
+    ToolHandle<Trk::IVertexMergingTool > m_VertexMergingTool{this, "VertexMergingTool", "Trk::SecVertexMergingTool", "vertex merging tool"};
     
     BooleanProperty m_doVertexMerging{this, "doVertexMerging", false, "Do vertex merging"};
     BooleanProperty m_useTrackParticles{this, "useTrackParticles", false, "use TrackParticles"};
-
-    StringProperty m_FinderTool{ this, "AMVF", "vertexing tool to use: AMVF, ISV" };
+    StringProperty m_FinderTool{ this, "FinderTool", "AMVF","vertexing tool to use: AMVF, ISV" };
 
     
     // for summary output at the end

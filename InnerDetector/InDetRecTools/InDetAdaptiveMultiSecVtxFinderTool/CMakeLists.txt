@@ -14,5 +14,6 @@ atlas_add_component( InDetAdaptiveMultiSecVtxFinderTool
                      src/*.cxx
                      Root/InDetAdaptiveMultiSecVtxFinderTool.h
                      src/components/*.cxx
-		             INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+		     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                      LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} AthenaBaseComps AthContainers CxxUtils xAODTracking GaudiKernel InDetRecToolInterfaces GeoPrimitives TrkTrack TrkParticleBase TrkParameters TrkEventPrimitives VxVertex VxMultiVertex TrkLinks TrkTrack TrkSurfaces TrkVertexFitterInterfaces TrkVxEdmCnvLib TrkVertexAnalysisUtilsLib EventPrimitives TrkVertexFittersLib InDetTrackSelectionToolLib TrkVertexSeedFinderUtilsLib )
+

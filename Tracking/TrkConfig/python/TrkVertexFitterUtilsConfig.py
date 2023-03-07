@@ -97,3 +97,9 @@ def AtlasImpactPoint3dEstimatorCfg(flags, name='AtlasImpactPoint3dEstimator', **
     acc.setPrivateTools(acc.popToolsAndMerge(
         ImpactPoint3dEstimatorCfg(flags, name, **kwargs)))
     return acc
+
+def KalmanVertexUpdatorCfg(flags, name='KalmanVertexUpdator', **kwargs):
+
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(CompFactory.Trk.KalmanVertexUpdator(name, **kwargs))
+    return acc
