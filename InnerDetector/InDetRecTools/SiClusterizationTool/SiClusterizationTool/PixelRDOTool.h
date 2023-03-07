@@ -75,7 +75,8 @@ public:
      // the detector element status or the module-map-based summary tool
      bool isGoodRDO(const InDet::SiDetectorElementStatus *pixelDetElStatus,
 		    const IdentifierHash& moduleHash,
-		    const Identifier& rdoID) const;
+		    const Identifier& rdoID,
+        const EventContext& ctx) const;
 
     // Method to check if an RDO is duplicated.
     // If it is, update lvl1 value.

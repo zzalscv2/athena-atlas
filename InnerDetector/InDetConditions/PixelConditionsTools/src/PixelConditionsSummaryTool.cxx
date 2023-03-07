@@ -576,7 +576,7 @@ bool PixelConditionsSummaryTool::isGood(const IdentifierHash & moduleHash, const
 
   if (SG::ReadCondHandle<PixelDeadMapCondData>(m_condDeadMapKey, ctx)->getModuleStatus(moduleHash)) { return false; }
 
-  if (!checkChipStatus(moduleHash, elementId)) { return false; }
+  if (!checkChipStatus(moduleHash, elementId, ctx)) { return false; }
 
   if (hasBSError(moduleHash, ctx, elementId)) { return false; }
 

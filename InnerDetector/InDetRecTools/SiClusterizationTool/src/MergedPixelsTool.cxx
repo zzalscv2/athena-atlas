@@ -39,21 +39,8 @@ namespace InDet {
   
   StatusCode  MergedPixelsTool::initialize()
   {
-    if ( m_clusterMaker.retrieve().isFailure() )
-    {
-      ATH_MSG_FATAL(m_clusterMaker.propertyName() << ": Failed to retrieve tool " << m_clusterMaker.type());
-      return StatusCode::FAILURE;
-    }
-    else
-    {
-      ATH_MSG_INFO(m_clusterMaker.propertyName() << ": Retrieved tool " << m_clusterMaker.type());
-    }
-
-    if (m_pixelRDOTool.retrieve().isFailure()) {
-      ATH_MSG_FATAL(m_pixelRDOTool.propertyName() << ": Failed to retrieve tool " << m_pixelRDOTool.type());
-      return StatusCode::FAILURE;
-    }
-
+    ATH_CHECK(m_clusterMaker.retrieve());
+    ATH_CHECK(m_pixelRDOTool.retrieve());
     return StatusCode::SUCCESS;
   }
 
