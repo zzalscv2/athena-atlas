@@ -362,6 +362,7 @@ def createTriggerRecoFlags():
         muonflags.MuonCombined.doSiAssocForwardMuons = False
         muonflags.MuonCombined.doStatisticalCombination = False
         muonflags.MuonCombined.doMuGirl = False
+        muonflags.MuonCombined.doCombinedFit = True
         return muonflags
 
     flags.addFlagsCategory('Trigger.Offline.SA', __muonSA, prefix=True)

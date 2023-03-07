@@ -497,10 +497,9 @@ def muEFCBRecoSequence( flags, RoIs, name ):
 
 
   from AthenaCommon.CFElements import parOR
-  from MuonCombinedRecExample.MuonCombinedAlgs import MuonCombinedAlg
   from MuonCombinedRecExample.MuonCombinedAlgs import MuonCombinedInDetCandidateAlg
   from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
-  from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCreatorAlgCfg
+  from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCreatorAlgCfg, MuonCombinedAlgCfg
 
   muEFCBRecoSequence = parOR("efcbViewNode_"+name)
 
@@ -583,7 +582,7 @@ def muEFCBRecoSequence( flags, RoIs, name ):
   if 'FS' in name:
     candidatesName = "MuonCandidates_FS"
 
-  theMuonCombinedAlg = MuonCombinedAlg("TrigMuonCombinedAlg_"+name, MuonCandidateLocation=candidatesName, InDetCandidateLocation="InDetCandidates_"+name)
+  theMuonCombinedAlg = algorithmCAToGlobalWrapper(MuonCombinedAlgCfg, flags,name="TrigMuonCombinedAlg_"+name, MuonCandidateLocation=candidatesName, InDetCandidateLocation="InDetCandidates_"+name)
 
   cbMuonName = muNames.EFCBOutInName
   if 'FS' in name:
