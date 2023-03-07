@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -15,7 +15,7 @@ namespace Ringer {
 //==============================================================================
 // Standard constructor
 //==============================================================================
-AsgRingerSelectorTool::AsgRingerSelectorTool(std::string name) :
+AsgRingerSelectorTool::AsgRingerSelectorTool(const std::string& name) :
   AsgTool( name ),
   m_selector( name )
 {}

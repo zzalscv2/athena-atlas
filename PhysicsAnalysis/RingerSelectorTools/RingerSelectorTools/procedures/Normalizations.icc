@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: Normalizations.icc 667905 2015-05-18 19:07:55Z wsfreund $
@@ -123,7 +123,7 @@ void applyDeslocation( std::vector<float> &inputSpace, const float deslocation )
 // =============================================================================
 inline
 void applyDeslocation( std::vector<float> &inputSpace,
-    const std::vector<float> deslocation )
+    const std::vector<float>& deslocation )
 {
   std::vector<float>::const_iterator itr2 = deslocation.begin();
   for ( std::vector<float>::iterator itr = inputSpace.begin();

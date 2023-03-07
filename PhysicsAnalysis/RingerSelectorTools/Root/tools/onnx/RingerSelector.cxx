@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes:
@@ -18,13 +18,13 @@ namespace Ringer{
 
 
     //==============================================================================
-    RingerSelector::RingerSelector(std::string name):
+    RingerSelector::RingerSelector(const std::string& name):
       asg::AsgMessaging(name)
     {;}
     
 
     //==============================================================================
-    StatusCode RingerSelector::read_from( std::string path , AthONNX::IONNXRuntimeSvc *svc )
+    StatusCode RingerSelector::read_from( const std::string& path , AthONNX::IONNXRuntimeSvc *svc )
     {
 
       std::string configFile = PathResolverFindCalibFile( path );
@@ -285,7 +285,7 @@ namespace Ringer{
       return CutVector;
     }
 
-    std::string RingerSelector::GetBasePath(std::string &path){
+    std::string RingerSelector::GetBasePath(const std::string &path){
       
       std::vector<std::string> strs;
       boost::split(strs,path,boost::is_any_of("/"));
