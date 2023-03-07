@@ -6,6 +6,7 @@
 #define MUONCABLINGDATA_MDTMEZZANINECARD_H
 
 #include <GaudiKernel/MsgStream.h>
+#include <MuonReadoutGeometry/ArrayHelper.h>
 #include <array>
 #include <iostream>
 
@@ -30,6 +31,9 @@
 ///     to online.
 class MdtMezzanineCard {
     public:
+        static constexpr uint8_t NOTSET = 250;
+
+        using MezzCardPtr = std::shared_ptr<const MdtMezzanineCard>; 
         using Mapping = std::array<uint8_t, 24>;
         /// @brief Standard constructor of the mezzanine card
         /// @param tdcToTubeMap: array mapping the tdc channels to the tube numbers covered by the card 
@@ -67,13 +71,16 @@ class MdtMezzanineCard {
         };
         OfflineCh offlineTube(uint8_t tdc, MsgStream& msg) const;
 
+        /// @brief Returns the underlying TDC -> Tube conversion map 
         const Mapping& tdcToTubeMap() const { return m_tdcToTubes; }
+        /// @brief Returns the underlying Tube -> Tdc conversion map
+        const Mapping& tubeToTdcMap() const { return m_tubesToTdc; }
         
     private:
         /// Mapping of the tdc channels to the mezzanine tube number
-        Mapping m_tdcToTubes{};
+        Mapping m_tdcToTubes{make_array<uint8_t,24>(NOTSET)};
         /// Mapping of the mezzanine tube number to the tdc channel
-        Mapping m_tubesToTdc{};
+        Mapping m_tubesToTdc{make_array<uint8_t,24>(NOTSET)};
         /// Number of tube layers
         uint8_t m_nlay{0};
         /// Number of tubes per layer

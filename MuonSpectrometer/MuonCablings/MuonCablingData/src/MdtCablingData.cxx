@@ -3,10 +3,10 @@
 */
 
 #include "MuonCablingData/MdtCablingData.h"
-
+#include <iomanip>
 std::ostream& operator<<(std::ostream& ostr, const MdtCablingOffData& obj) {
-    ostr << "stationIndex: " << static_cast<int>(obj.stationIndex)<<", ";
-    ostr << "eta: " << static_cast<int>(obj.eta)<<", ";
+    ostr << "stationIndex: " <<std::setw(2) << static_cast<int>(obj.stationIndex)<<", ";
+    ostr << "eta: " <<std::setw(2) << static_cast<int>(obj.eta)<<", ";
     ostr << "phi: " << static_cast<int>(obj.phi)<<", ";
     ostr << "multilayer: " << static_cast<int>(obj.multilayer);
     return ostr;
