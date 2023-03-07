@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -15,16 +15,13 @@
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 
-//#include "IsolationTool/CaloIsolationTool.h"
-//#include "IsolationTool/TrackIsolationTool.h"
+//added to convert GSF trackparticles to ID trackparticles
+#include "xAODEgamma/ElectronxAODHelpers.h"
 #include "RecoToolInterfaces/ITrackIsolationTool.h"
 #include "xAODPrimitives/IsolationHelpers.h"  //For the definition of Iso::conesize
-
-//#include "IsolationTool/IsolationHelper.h"
-//#include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
+#include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
 
 
-//#include "Identifier/Identifier32.h"
 using namespace std;
 namespace DerivationFramework {
 
@@ -39,14 +36,15 @@ namespace DerivationFramework {
     m_vertexType(7),
     
     m_doIsoPerTrk(false),
-    m_removeDuplicate(2)
+    m_removeDuplicate(2),
+    m_fixElecExclusion(false), 
+    m_includeV0(false)
   {
         ATH_MSG_DEBUG("in constructor");
     declareInterface<DerivationFramework::IAugmentationTool>(this);
     
     // Declare tools                      
     declareProperty("TrackIsoTool" , m_trackIsoTool);
-
     declareProperty("TrackContainer" , m_trackContainerName);
     declareProperty("InputVertexContainer" , m_vertexContainerName);
     declareProperty("PassFlags"                 , m_passFlags);
@@ -55,6 +53,8 @@ namespace DerivationFramework {
 
     declareProperty("DoIsoPerTrk"                , m_doIsoPerTrk, "New property to deal with track isolation per track, the default option (m_doIsoPerTrk=false) preserves the old behavior");
     declareProperty("RemoveDuplicate"            , m_removeDuplicate, "Used with DoIsoPerTrk");
+    declareProperty("FixElecExclusion" , m_fixElecExclusion);
+    declareProperty("IncludeV0" , m_includeV0);
   }
 
   // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
@@ -66,11 +66,9 @@ namespace DerivationFramework {
  
     // retrieve TrackIsolationTool
     CHECK( m_trackIsoTool.retrieve() );
-    
     //Check that flags were given to tag the correct vertices
-    if(m_passFlags.empty()){
-        ATH_MSG_WARNING("As no pass-flags are given, no vertices will be decorated");
-    }
+
+
 
     // Control the IsolationType sequence
     if(m_cones.empty()){
@@ -161,7 +159,7 @@ namespace DerivationFramework {
 
     //	loop over vertices
     for(auto vertex : *vertexContainer){
-
+      
       bool passed = false;
       for(std::vector<std::string>::const_iterator flagItr = m_passFlags.begin(); flagItr!=m_passFlags.end(); ++flagItr) {
         SG::AuxElement::Accessor<Char_t> flagAcc(*flagItr);
@@ -170,26 +168,47 @@ namespace DerivationFramework {
           break;
         }
       } // end of loop over flags
-      if(passed){
+      //if no passFlags given, decorate everything
+      if(passed || m_passFlags.empty()){
 	        if(!m_doIsoPerTrk) { // for legacy
-		  if(vertex->trackParticleLinks().size() != 3)ATH_MSG_WARNING("Vertex without 3 tracks, it has "<< vertex->trackParticleLinks().size() <<" instead");
-		}
-		else {
-		  if(m_removeDuplicate) {
-		    if( isContainedIn(vertex, outVtxContainer) ) continue;
-		    outVtxContainer.push_back(vertex);
+		        if(vertex->trackParticleLinks().size() != 3)ATH_MSG_WARNING("Vertex without 3 tracks, it has "<< vertex->trackParticleLinks().size() <<" instead");
+		      }
+		  else {
+		    if(m_removeDuplicate) {
+		      if( isContainedIn(vertex, outVtxContainer) ) continue;
+		      outVtxContainer.push_back(vertex);
+		    }
 		  }
-		}
 
-		TLorentzVector candidate;
+		  TLorentzVector candidate;
 
-		std::set<const xAOD::TrackParticle*> exclusionset;
+		  std::set<const xAOD::TrackParticle*> exclusionset;
 
-		for(auto part : vertex->trackParticleLinks()){ //Loop over tracks linked to vertex
-			candidate += (*part)->p4();
-			exclusionset.insert( *part ); //If it crashes use the direct TP from the vertex
-		}
+		  for(auto part : vertex->trackParticleLinks()){ //Loop over tracks linked to vertex
+
+
+        candidate += (*part)->p4();
+
+        // if you have electron tracks that are GSF, need to get original ID 
+        //trackparticle for excluding this particle
+        if (m_fixElecExclusion) {  
+          const xAOD::TrackParticle* partID = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(*part);
+          exclusionset.insert(partID);
+        }
+        else exclusionset.insert( *part ); //If it crashes use the direct TP from the vertex
+		  } 
 		//No! the above candidate will fail acceptance of isolation() because it's neither a muon nor a TrackParticle
+
+    // Add in V0->XX particles
+    if (m_includeV0){
+      auto V0VertLink = vertex->auxdata<std::vector<ElementLink<DataVector<xAOD::Vertex_v1> > > >("V0VertexLinks");
+      const xAOD::Vertex* V0Vert = V0VertLink.at(0).getDataPtr()->at(0);
+      for (auto part: V0Vert->trackParticleLinks()){
+        candidate += (*part)->p4();
+        exclusionset.insert(*part);
+      }
+    }
+
 
 		//Make a dummy TrackParticle, otherwise TrackIsolationTool cannot deal with it
 		xAOD::TrackParticle candidate_slyTrack;
