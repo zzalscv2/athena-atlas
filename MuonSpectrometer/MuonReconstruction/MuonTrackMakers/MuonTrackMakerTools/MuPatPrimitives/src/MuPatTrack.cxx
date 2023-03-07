@@ -142,9 +142,8 @@ namespace Muon {
         lastSegmentChange(can.lastSegmentChange),
         m_segments(can.m_segments),
         m_excludedSegments(can.m_excludedSegments),
+        m_track (std::make_unique<Trk::Track>(can.track())),
         m_seedSeg(can.m_seedSeg) {
-
-        m_track = std::make_unique<Trk::Track>(can.track());
         m_hasMomentum = can.m_hasMomentum;
         // increase segment counters
         modifySegmentCounters(+1);
