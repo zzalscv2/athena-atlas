@@ -3,6 +3,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
+import copy
 import unittest
 import json
 import pickle
@@ -43,20 +44,15 @@ class TestGMT(unittest.TestCase):
         self.assertCheckName(gmt, 'gmt')
         self.assertIsInstance(gmt, CompFactory.GenericMonitoringTool)
 
-    def test_createGMT_legacy(self):
-        gmt = GenericMonitoringTool()
-        self.assertCheckName(gmt, 'GenericMonitoringTool')
-        self.assertIsInstance(gmt, CompFactory.GenericMonitoringTool)
-
-    def test_createGMT_legacyName(self):
-        gmt = GenericMonitoringTool('gmt')
-        self.assertCheckName(gmt, 'gmt')
-        self.assertIsInstance(gmt, CompFactory.GenericMonitoringTool)
-
     def test_pickle(self):
         flags = initConfigFlags()
         gmt = GenericMonitoringTool(flags)
         pickle.dumps(gmt)
+
+    def test_copy(self):
+        flags = initConfigFlags()
+        gmt = GenericMonitoringTool(flags)
+        copy.deepcopy(gmt)  # required by PrivateToolHandle(Array)
 
     def test_defineHistogram(self):
         flags = initConfigFlags()
@@ -173,6 +169,10 @@ class TestGMT(unittest.TestCase):
         self.assertEqual(d['y_vs_x_0']['weight'], 'z')
         self.assertEqual(d['y_vs_x_1']['weight'], 'z')
 
+    def test_configurableTypeWithoutFlags(self):
+        with self.assertRaises(RuntimeError):
+            _ = GenericMonitoringTool('gmt')
+
 
 class TestLegacy(TestGMT):
     """All the same tests as above but now with legacy Configurables"""
@@ -198,11 +198,6 @@ class TestLegacy(TestGMT):
 
     def test_configurableTypeWithNoneFlags(self):
         gmt = GenericMonitoringTool(None, 'gmt')
-        self.assertCheckName(gmt, 'gmt')
-        self.assertFalse(hasattr(gmt,'__cpp_type__'))
-
-    def test_configurableTypeWithoutFlags(self):
-        gmt = GenericMonitoringTool('gmt')
         self.assertCheckName(gmt, 'gmt')
         self.assertFalse(hasattr(gmt,'__cpp_type__'))
 
