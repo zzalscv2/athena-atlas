@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PANTAUALGS_PANTAUSEED_H
@@ -114,18 +114,18 @@ namespace PanTau {
 
 
     /** Main constructor to be used */
-    PanTauSeed( std::string                          nameInputAlgorithm,
+    PanTauSeed( const std::string&                   nameInputAlgorithm,
 		xAOD::TauJet*                        tauJet,
-		std::vector<PanTau::TauConstituent*> tauConstituents,
-		std::vector<PanTau::TauConstituent*> tauConstituentsWithUnselected,
-		std::vector<int>                     pantauSeed_TechnicalQuality
+		const std::vector<PanTau::TauConstituent*>& tauConstituents,
+		const std::vector<PanTau::TauConstituent*>& tauConstituentsWithUnselected,
+		const std::vector<int>&              pantauSeed_TechnicalQuality
 		);
 
 
     /** Constructor for invalid seeds */
-    PanTauSeed( std::string                          nameInputAlgorithm,
+    PanTauSeed( const std::string&                    nameInputAlgorithm,
 		 xAOD::TauJet*                        tauJet,
-		 std::vector<int>                     pantauSeed_TechnicalQuality
+		 const std::vector<int>&              pantauSeed_TechnicalQuality
 		 );
 
     std::string                                         getNameInputAlgorithm() const;

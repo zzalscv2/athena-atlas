@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/TauConstituent.h"
@@ -19,7 +19,7 @@ PanTau::TauConstituent::TauConstituent() :
 
 PanTau::TauConstituent::TauConstituent(TLorentzVector   itsMomentum,
 				       int              itsCharge,
-				       std::vector<int> itsType,
+				       const std::vector<int>& itsType,
 				       double           itsBDTValue,
 				       const xAOD::PFO* itsPFO) :
   IParticle(),
