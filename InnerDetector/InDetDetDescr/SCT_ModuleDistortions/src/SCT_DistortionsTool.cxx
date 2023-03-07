@@ -520,8 +520,6 @@ int SCT_DistortionsTool::identifyRegion(IdentifierHash id) const
 }
 
 StatusCode SCT_DistortionsTool::finalize() {
-  ATH_MSG_INFO("finalize()");
-  
   return StatusCode::SUCCESS;
 }
 
