@@ -314,7 +314,7 @@ public:
   /** Return a list of positions along the track */
   virtual void globalPositions(
     const EventContext& ctx,
-    std::list<Amg::Vector3D>& positionsList,
+    std::deque<Amg::Vector3D>& positionsList,
     const TrackParameters& trackParameters,
     const MagneticFieldProperties& magneticFieldProperties,
     const CylinderBounds& cylinderBounds,

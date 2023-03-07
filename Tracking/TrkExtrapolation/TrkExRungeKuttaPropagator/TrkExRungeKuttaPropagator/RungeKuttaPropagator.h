@@ -239,7 +239,7 @@ public:
   /** GlobalPositions list interface:*/
   virtual void globalPositions(
     const EventContext& ctx,
-    std::list<Amg::Vector3D>&,
+    std::deque<Amg::Vector3D>&,
     const TrackParameters&,
     const MagneticFieldProperties&,
     const CylinderBounds&,
@@ -292,16 +292,6 @@ public:
     PropDirection,
     const MagneticFieldProperties&,
     double&,
-    ParticleHypothesis particle = pion) const override final;
-
-  /** GlobalPositions list interface:*/
-  virtual void globalPositions(
-    const EventContext& ctx,
-    std::list<Amg::Vector3D>&,
-    const PatternTrackParameters&,
-    const MagneticFieldProperties&,
-    const CylinderBounds&,
-    double,
     ParticleHypothesis particle = pion) const override final;
 
   virtual void globalPositions(

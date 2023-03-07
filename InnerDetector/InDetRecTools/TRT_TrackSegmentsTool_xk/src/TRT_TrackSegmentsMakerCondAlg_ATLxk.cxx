@@ -259,7 +259,7 @@ StatusCode InDet::TRT_TrackSegmentsMakerCondAlg_ATLxk::execute(const EventContex
     {-2.05,-1.95,-1.84,-1.72,-1.62,-1.53,-1.43,-1.33,-1.21,-1.00,-.94, -.85,-.32,
        .32,  .85,  .94, 1.00, 1.21, 1.33, 1.43, 1.53, 1.62, 1.72,1.84, 1.95,2.05}; 
 
-  std::list<Amg::Vector3D> G [26]; 
+  std::deque<Amg::Vector3D> G [26]; 
   Amg::Vector3D psv(0.,0.,0.); 
   Trk::PerigeeSurface ps(psv);
 
@@ -295,78 +295,94 @@ StatusCode InDet::TRT_TrackSegmentsMakerCondAlg_ATLxk::execute(const EventContex
   writeCdo->m_cirsize  = writeCdo->m_nstraws[0]+writeCdo->m_nstraws[1];
 
   n          = 0;
-  for(int b=0; b!=4; ++b) {
+  for (int b = 0; b != 4; ++b) {
 
-    for(unsigned int i=0; i!=writeCdo->m_nlayers[b]; ++i) {
+    for (unsigned int i = 0; i != writeCdo->m_nlayers[b]; ++i) {
 
-      for(int r=0; r!=26; ++r) {
-	if( writeCdo->m_dzdr[r] >= Tmin[b][i] && writeCdo->m_dzdr[r] <= Tmax[b][i] ) {
-	  writeCdo->m_ndzdr[n] = r;
-	  std::list<Amg::Vector3D>::iterator gp0,gp1, gp=G[r].begin(),gpe=G[r].end();
-	  if   (b==0 || b==3) {
+      for (int r = 0; r != 26; ++r) {
+        if (writeCdo->m_dzdr[r] >= Tmin[b][i] &&
+            writeCdo->m_dzdr[r] <= Tmax[b][i]) {
+          writeCdo->m_ndzdr[n] = r;
+          std::deque<Amg::Vector3D>::iterator gp0, gp1, gp = G[r].begin(),gpe = G[r].end();
+          if (b == 0 || b == 3) {
 
-	    gp0 = gp;
-	    for(++gp; gp!=gpe; ++gp) {
-	      if(b==3 && (*gp).z() >= RZ[b][i]) break; 
-	      if(b==0 && (*gp).z() <= RZ[b][i]) break;
-	      gp1 = gp0;
-	      gp0 = gp; 
-	    }
-	  }
-	  else {
-	    gp0 = gp;
-	    for(++gp; gp!=gpe; ++gp) {
-	      if(std::sqrt((*gp).x()*(*gp).x()+(*gp).y()*(*gp).y()) > RZ[b][i]) break;
-	      gp1 = gp0;
-	      gp0 = gp; 
-	    }
-	  }
-	  double x,y,z,ax,ay,az;
-	  if(gp!=gpe) {
-	    x = (*gp0).x(); ax = (*gp ).x()-x;
-	    y = (*gp0).y(); ay = (*gp ).y()-y;
-	    z = (*gp0).z(); az = (*gp ).z()-z;
-	    double as = 1./std::sqrt(ax*ax+ay*ay+az*az); ax*=as; ay*=as; az*=as;
-	  }
-	  else       {
-	    x = (*gp1).x(); ax = (*gp0).x()-x;
-	    y = (*gp1).y(); ay = (*gp0).y()-y;
-	    z = (*gp1).z(); az = (*gp0).z()-z;
-	    double as = 1./std::sqrt(ax*ax+ay*ay+az*az); ax*=as; ay*=as; az*=as;
-	  }
-	  double S  = 0;
+            gp0 = gp;
+            for (++gp; gp != gpe; ++gp) {
+              if (b == 3 && (*gp).z() >= RZ[b][i])
+                break;
+              if (b == 0 && (*gp).z() <= RZ[b][i])
+                break;
+              gp1 = gp0;
+              gp0 = gp;
+            }
+          } else {
+            gp0 = gp;
+            for (++gp; gp != gpe; ++gp) {
+              if (std::sqrt((*gp).x() * (*gp).x() + (*gp).y() * (*gp).y()) >
+                  RZ[b][i])
+                break;
+              gp1 = gp0;
+              gp0 = gp;
+            }
+          }
+          double x, y, z, ax, ay, az;
+          if (gp != gpe) {
+            x = (*gp0).x();
+            ax = (*gp).x() - x;
+            y = (*gp0).y();
+            ay = (*gp).y() - y;
+            z = (*gp0).z();
+            az = (*gp).z() - z;
+            double as = 1. / std::sqrt(ax * ax + ay * ay + az * az);
+            ax *= as;
+            ay *= as;
+            az *= as;
+          } else {
+            x = (*gp1).x();
+            ax = (*gp0).x() - x;
+            y = (*gp1).y();
+            ay = (*gp0).y() - y;
+            z = (*gp1).z();
+            az = (*gp0).z() - z;
+            double as = 1. / std::sqrt(ax * ax + ay * ay + az * az);
+            ax *= as;
+            ay *= as;
+            az *= as;
+          }
+          double S = 0;
 
-	  if (b==0 || b==3) {
-	    S = (RZ[b][i]-z)/az;
-	  }
-	  else              {
-	    double A  = (ax*x+ay*y)*2.;
-	    double D  = (RZ[b][i]-x-y)*(RZ[b][i]+x+y)+2.*x*y;
-	    S         = D/A;
-	    double B  = 2.*(ax*ax+ay*ay);
-	    double Sq = A*A+2.*D*B;  Sq>0. ? Sq=std::sqrt(Sq) : Sq=0.;
-	    double S1 =-(A+Sq)/B;
-	    double S2 =-(A-Sq)/B;
+          if (b == 0 || b == 3) {
+            S = (RZ[b][i] - z) / az;
+          } else {
+            double A = (ax * x + ay * y) * 2.;
+            double D = (RZ[b][i] - x - y) * (RZ[b][i] + x + y) + 2. * x * y;
+            S = D / A;
+            double B = 2. * (ax * ax + ay * ay);
+            double Sq = A * A + 2. * D * B;
+            Sq > 0. ? Sq = std::sqrt(Sq) : Sq = 0.;
+            double S1 = -(A + Sq) / B;
+            double S2 = -(A - Sq) / B;
             if (S > S2)
               S = S2;
             else if (S < S1)
               S = S1;
-	  }
-	  writeCdo->m_slope [n] = std::atan2(y+S*ay,x+S*ax)*m_A; 
-	  writeCdo->m_islope[n] = int(writeCdo->m_slope[n]*m_Psi128);
-	  ++n;
-	}
+          }
+          writeCdo->m_slope[n] = std::atan2(y + S * ay, x + S * ax) * m_A;
+          writeCdo->m_islope[n] = int(writeCdo->m_slope[n] * m_Psi128);
+          ++n;
+        }
       }
     }
   }
 
   if (writeHandle.record(rangeTrt, writeCdo).isFailure()) {
     ATH_MSG_FATAL("Could not record " << writeHandle.key()
-                  << " with EventRange " << rangeTrt
-                  << " into Conditions Store");
+                                      << " with EventRange " << rangeTrt
+                                      << " into Conditions Store");
     return StatusCode::FAILURE;
   }
-  ATH_MSG_DEBUG("recorded new CDO " << writeHandle.key() << " with range " << rangeTrt << " into Conditions Store");
+  ATH_MSG_DEBUG("recorded new CDO " << writeHandle.key() << " with range "
+                                    << rangeTrt << " into Conditions Store");
 
   return StatusCode::SUCCESS;
   

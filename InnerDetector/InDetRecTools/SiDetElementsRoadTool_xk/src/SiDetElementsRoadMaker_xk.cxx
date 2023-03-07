@@ -303,7 +303,7 @@ std::ostream& InDet::operator <<
 ///////////////////////////////////////////////////////////////////
 
 void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
-(std::list<Amg::Vector3D>& globalPositions,
+(std::deque<Amg::Vector3D>& globalPositions,
  std::list<const InDetDD::SiDetectorElement*>& Road,
  bool testDirection,
  SiDetElementRoadMakerData_xk & roadMakerData,
@@ -325,7 +325,7 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
   const SiDetElementsLayerVectors_xk &layer = *getLayers(ctx);
 
   /// iterators over the positions to consider
-  std::list<Amg::Vector3D>::iterator currentPosition=globalPositions.begin(), endPositions=globalPositions.end();
+  std::deque<Amg::Vector3D>::iterator currentPosition=globalPositions.begin(), endPositions=globalPositions.end();
 
   /// fill an array with the reference point (start with the first one), the road width and a placeholder
   /// for the step length
@@ -564,7 +564,7 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
 
   // Note: could also give fieldCache directly to propagator if it would be more efficient - would
   // need to add interface RDS 2020/03
-  std::list<Amg::Vector3D> G;
+  std::deque<Amg::Vector3D> G;
 
   /// get a list of global positions for the road search by starting from the first surface 
   /// and walking along the trajectory using the RK propagator 
@@ -575,7 +575,7 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
   /// if we are extrapolating along them momentum direction, 
   /// we pick out the part ascending in R 
   if (direction > 0) {
-    std::list<Amg::Vector3D>::iterator currentPosition=G.begin(), nextPosition, endPositions=G.end();
+    std::deque<Amg::Vector3D>::iterator currentPosition=G.begin(), nextPosition, endPositions=G.end();
     float r0 = (*currentPosition).x()*(*currentPosition).x()+(*currentPosition).y()*(*currentPosition).y();
 
     while (currentPosition!=endPositions) {
@@ -586,7 +586,7 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
       /// if the next point is at lower r than the previous point, remove the previous one  
       if (r < r0) {
         r0 = r;
-        G.erase(currentPosition++);
+        currentPosition = G.erase(currentPosition);
       } else {
         break;
       }

@@ -1920,7 +1920,7 @@ propagateRungeKuttaImpl(Cache& cache,
       // if max step allowed > 0 -> propagate along momentum else propagate opposite momentum
       /////////////////////////////////////////////////////////////////////////////////
       void Trk::STEP_Propagator::globalPositions(const EventContext& ctx,
-                                                 std::list<Amg::Vector3D>& positionsList,
+                                                 std::deque<Amg::Vector3D>& positionsList,
                                                  const Trk::TrackParameters& trackParameters,
                                                  const Trk::MagneticFieldProperties& mft,
                                                  const Trk::CylinderBounds& cylinderBounds,

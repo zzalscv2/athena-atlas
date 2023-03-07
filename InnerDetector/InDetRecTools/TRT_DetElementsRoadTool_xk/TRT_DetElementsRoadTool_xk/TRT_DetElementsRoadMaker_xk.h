@@ -63,8 +63,7 @@ namespace InDet {
   */
 
 
-  class TRT_DetElementsRoadMaker_xk :
-
+  class TRT_DetElementsRoadMaker_xk final:
     virtual public ITRT_DetElementsRoadMaker, public AthAlgTool
     {
       ///////////////////////////////////////////////////////////////////
@@ -122,12 +121,14 @@ namespace InDet {
       // Methods
       ///////////////////////////////////////////////////////////////////
 
-      void detElementsRoadATL(std::list<Amg::Vector3D>&,
-			      std::vector<const InDetDD::TRT_BaseElement*>&) const;
-      void detElementsRoadCTB(std::list<Amg::Vector3D>&,
-			      std::vector<const InDetDD::TRT_BaseElement*>&) const;
-      static double stepToDetElement
-	(const InDetDD::TRT_BaseElement*&,Amg::Vector3D&,Amg::Vector3D&) ;
+      void detElementsRoadATL(
+          std::deque<Amg::Vector3D>&,
+          std::vector<const InDetDD::TRT_BaseElement*>&) const;
+      void detElementsRoadCTB(
+          std::deque<Amg::Vector3D>&,
+          std::vector<const InDetDD::TRT_BaseElement*>&) const;
+      static double stepToDetElement(const InDetDD::TRT_BaseElement*&,
+                                     Amg::Vector3D&, Amg::Vector3D&);
 
       Trk::CylinderBounds getBound(MagField::AtlasFieldCache& fieldCache, const Trk::TrackParameters&) const;
 
