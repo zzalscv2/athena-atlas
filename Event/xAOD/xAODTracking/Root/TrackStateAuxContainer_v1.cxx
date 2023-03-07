@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODTracking/versions/TrackStateAuxContainer_v1.h"
 
@@ -14,9 +14,10 @@ namespace xAOD {
     AUX_VARIABLE(smoothed);
     AUX_VARIABLE(jacobian);
     AUX_VARIABLE(projector);
-    AUX_VARIABLE(uncalibrated);
     AUX_VARIABLE(calibrated);
     AUX_VARIABLE(measDim);
+    AUX_VARIABLE(uncalibratedMeasurementLink);
+    AUX_VARIABLE(geometryId);
   }
 }
 

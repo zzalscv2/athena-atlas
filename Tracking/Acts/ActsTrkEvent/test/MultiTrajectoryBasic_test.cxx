@@ -9,6 +9,7 @@
 #include "Acts/EventData/MeasurementHelpers.hpp"
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/SourceLink.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 
 #include "ActsTrkEvent/MultiTrajectory.h"
@@ -19,8 +20,6 @@
 
 #include "CommonHelpers/GenerateParameters.hpp"
 #include "CommonHelpers/TestSourceLink.hpp"
-
-#include "ActsTrkEvent/SourceLink.h"
 
 namespace {
 
@@ -276,26 +275,27 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
   BOOST_CHECK_THROW((ts2.component<float, "sth"_hash>()), std::runtime_error);
 }
 
-// FIX-ME
-// Temporary disabling this, to be addressed in follow-up MR
-/*
+// FIXME - test below should use ACTS::MTJ api once available in needed shape
 BOOST_FIXTURE_TEST_CASE(UncalibratedSourceLink, EmptyMTJ) {
-  auto i0 = mtj->addTrackState();
-  auto ts0 = mtj->getTrackState(i0);
+  mtj->addTrackState();
   using namespace Acts::HashedStringLiteral;
 
-  BOOST_CHECK_EQUAL((ts0.component<Acts::SourceLink *, "uncalibrated"_hash>()),
-                    nullptr);
+  // BOOST_CHECK_EQUAL((ts0.component<Acts::SourceLink *, "uncalibratedSourceLink"_hash>()),
+  //                   nullptr);
+  auto el1 = ElementLink<xAOD::UncalibratedMeasurementContainer>("hello", 7); // EL to a fictional container & a fictional index
 
-  auto link1 = std::shared_ptr<ActsTrk::SourceLink>(nullptr);
-  ts0.component<Acts::SourceLink *, "uncalibrated"_hash>() = reinterpret_cast<Acts::SourceLink*>(link1.get());
-  // BOOST_CHECK_EQUAL((ts0.component<ActsTrk::SourceLink *, "uncalibrated"_hash>()),
-  //  		    link1.get());
+  auto link1 = Acts::SourceLink(99, el1); // a fictional geometry ID
+  mtj->setUncalibratedSourceLink_impl(link1, 0); // set link at position 0
 
-  // TODO
-  // add test for an instantiation of MTJ with eager SourceLinks creation
+  // get it back
+  auto link1Back = mtj->getUncalibratedSourceLink_impl(0);
+  BOOST_CHECK_EQUAL( link1.geometryId(), link1Back.geometryId());
+  auto el1Back = link1Back.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>();
+  // compare them by key & index because equality, requires proper has key generation and is bound to SG
+  BOOST_CHECK_EQUAL( el1.key(), el1Back.key());
+  BOOST_CHECK_EQUAL( el1.index(), el1Back.index());
 }
-*/
+
 
 BOOST_FIXTURE_TEST_CASE(Clear, EmptyMTJ) {
   constexpr auto kMask = Acts::TrackStatePropMask::Predicted;
@@ -638,8 +638,6 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyAllocations, EmptyMTJ) {
   BOOST_CHECK(!tsnone.has<"calibrated"_hash>());
   BOOST_CHECK(!tsnone.has<"projector"_hash>());
   // TODO We always set the uncalibrated, see MultiTrajectory.icc l84
-  BOOST_CHECK(
-      tsnone.has<"uncalibrated"_hash>());  // separate optional mechanism
   BOOST_CHECK(tsnone.has<"calibratedSourceLink"_hash>());
   // TODO referenceSurface not implemented
   // should be here BOOST_CHECK(tsnone.has<"referenceSurface"_hash>());
@@ -657,10 +655,6 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyAllocations, EmptyMTJ) {
 
   BOOST_CHECK(tsall.has<"calibrated"_hash>());
   BOOST_CHECK(tsall.has<"projector"_hash>());
-  // TODO We always set the uncalibrated, see MultiTrajectory.icc l84
-  BOOST_CHECK(tsall.has<"uncalibrated"_hash>());  // separate optional
-                                                  // mechanism: nullptr
-  BOOST_CHECK(tsall.has<"calibratedSourceLink"_hash>());
   // TODO referenceSurface not implemented
 
   BOOST_CHECK(tsall.has<"measdim"_hash>());
