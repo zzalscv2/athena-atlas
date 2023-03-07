@@ -21,7 +21,7 @@ class BaseMonitoringTool:
             xbins=xbins, xmin=xmin, xmax=xmax, **kw
         )
 
-    def makeLBNHisto1D(self, name, type, xbins, xmin, xmax, title, path='EXPERT', opt="", alias=None, **kw):
+    def makeLBNHisto1D(self, name, type, xbins, xmin, xmax, title, path='EXPERT', opt="", **kw):
         opt = _LBN_OPTIONS + " " + opt if opt else _LBN_OPTIONS
         self.makeHisto1D(
             name, type, xbins, xmin, xmax, title, path=path, opt=opt, **kw,
