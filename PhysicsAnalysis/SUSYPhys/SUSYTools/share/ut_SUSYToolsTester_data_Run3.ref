@@ -22,22 +22,18 @@ ToolSvc.TauEffTool_MediumWARNING 2022-prerec tag are pre-recommendations and sti
  CDI file build number: Custom
 
 ======= end of CalibrationDataInterfaceROOT instantiation ========
-BTEffTool->initialize : setMapIndex(Light)
 CalibrationDataInterfaceROOT->retrieveCalibrationIndex :  container name is 410470_Eff
 CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/Light/410470_Eff (with comment: 'efficiencies from sample PowhegPythia8' and hadronisation setting 'Pythia8EvtGen')
 CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/Light/default_SF (with comment: 'negative_tag_Zjet+extrap[Run2MCcalib]' and hadronisation setting 'Pythia8EvtGen')
 CalibrationDataInterfaceROOT->retrieveCalibrationIndex : container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/Light/default_SF already cached! 
-BTEffTool->initialize : setMapIndex(C)
 CalibrationDataInterfaceROOT->retrieveCalibrationIndex :  container name is 410470_Eff
 CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/C/410470_Eff (with comment: 'efficiencies from sample PowhegPythia8' and hadronisation setting 'Pythia8EvtGen')
 CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/C/default_SF (with comment: 'ttbarC+extrap[Run2MCcalib_ttC]' and hadronisation setting 'Pythia8EvtGen')
 CalibrationDataInterfaceROOT->retrieveCalibrationIndex : container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/C/default_SF already cached! 
-BTEffTool->initialize : setMapIndex(B)
 CalibrationDataInterfaceROOT->retrieveCalibrationIndex :  container name is 410470_Eff
 CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/B/410470_Eff (with comment: 'efficiencies from sample PowhegPythia8' and hadronisation setting 'Pythia8EvtGen')
 CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/B/default_SF (with comment: 'ttbar_PDF+extrap[Run2MCcalib]' and hadronisation setting 'Pythia8EvtGen')
 CalibrationDataInterfaceROOT->retrieveCalibrationIndex : container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/B/default_SF already cached! 
-BTEffTool->initialize : setMapIndex(T)
 CalibrationDataInterfaceROOT->retrieveCalibrationIndex :  container name is 410470_Eff
 CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/T/410470_Eff (with comment: 'efficiencies from sample PowhegPythia8' and hadronisation setting 'Pythia8EvtGen')
 CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/T/default_SF (with comment: 'ttbarC+addSys[newsys]+extrap[Run2MCcalib_ttC]' and hadronisation setting 'Pythia8EvtGen')
