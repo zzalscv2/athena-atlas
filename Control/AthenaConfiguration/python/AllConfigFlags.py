@@ -286,8 +286,17 @@ def initConfigFlags():
 #IOVDbSvc Flags:
     if isGaudiEnv():
         from IOVDbSvc.IOVDbAutoCfgFlags import getLastGlobalTag, getDatabaseInstanceDefault
-        acf.addFlag("IOVDb.GlobalTag", getLastGlobalTag) # Retrieve last global tag used from metadata
+
+        def __getTrigTag(flags):
+            from TriggerJobOpts.TriggerConfigFlags import trigGlobalTag
+            return trigGlobalTag(flags)
+
+        acf.addFlag("IOVDb.GlobalTag", lambda flags :
+                    (__getTrigTag(flags) if flags.Trigger.doLVL1 or flags.Trigger.doHLT else None) or
+                    getLastGlobalTag(flags))
+
         acf.addFlag("IOVDb.DatabaseInstance",getDatabaseInstanceDefault)
+
         # Run dependent simulation
         # map from runNumber to timestamp; migrated from RunDMCFlags.py
         acf.addFlag("IOVDb.RunToTimestampDict", lambda prevFlags: getRunToTimestampDict())
@@ -326,13 +335,13 @@ def initConfigFlags():
     def __trigger():
         from TriggerJobOpts.TriggerConfigFlags import createTriggerFlags
         return createTriggerFlags(acf.Common.Project is not Project.AthAnalysis)
-    if isGaudiEnv():
-        added = _addFlagsCategory(acf, "Trigger", __trigger, 'TriggerJobOpts' )
-        if not added:
-            # If TriggerJobOpts is not available, we add at least these basic flags
-            # to indicate Trigger is not available:
-            acf.addFlag('Trigger.doLVL1', False)
-            acf.addFlag('Trigger.doHLT', False)
+
+    added = _addFlagsCategory(acf, "Trigger", __trigger, 'TriggerJobOpts' )
+    if not added:
+        # If TriggerJobOpts is not available, we add at least these basic flags
+        # to indicate Trigger is not available:
+        acf.addFlag('Trigger.doLVL1', False)
+        acf.addFlag('Trigger.doHLT', False)
 
     def __indet():
         from InDetConfig.InDetConfigFlags import createInDetConfigFlags

@@ -7,9 +7,14 @@ from AthenaConfiguration.Enums import LHCPeriod, ProductionStep, Project
 def createGeoModelConfigFlags(analysis=False):
     gcf=AthConfigFlags()
 
-    gcf.addFlag("GeoModel.AtlasVersion",
-                lambda prevFlags : (GetFileMD(prevFlags.Input.Files).get("GeoAtlas", None)
-                                    or "ATLAS-R2-2016-01-00-01"))
+    def __getTrigTag(flags):
+        from TriggerJobOpts.TriggerConfigFlags import trigGeoTag
+        return trigGeoTag(flags)
+
+    gcf.addFlag("GeoModel.AtlasVersion", lambda flags :
+                (__getTrigTag(flags) if flags.Trigger.doLVL1 or flags.Trigger.doHLT else None) or
+                GetFileMD(flags.Input.Files).get("GeoAtlas", None) or
+                "ATLAS-R2-2016-01-00-01")
 
     # Special handling of analysis releases where we only want AtlasVersion and Run
     if analysis:

@@ -19,7 +19,7 @@ hlt.forks = 1
 hlt.threads = 4
 hlt.concurrent_events = 4
 hlt.max_events = 50
-hlt.args = f'--precommand=\\\"setMenu=\\\'{triggermenu}\\\'\\;doL1Sim=True\\;rewriteLVL1=True\\;setDetDescr=\\\'ATLAS-R2-2016-01-00-01\\\'\\;setGlobalTag=\\\'CONDBR2-HLTP-2018-03\\\'\\;\\\"'
+hlt.args = f'--precommand=\\\"setMenu=\\\'{triggermenu}\\\'\\;doL1Sim=True\\;rewriteLVL1=True\\;flags.GeoModel.AtlasVersion=\\\'ATLAS-R2-2016-01-00-01\\\'\\;flags.IOVDb.GlobalTag=\\\'CONDBR2-HLTP-2018-03\\\'\\;\\\"'
 hlt.args += ' --prodSysBSRDO True'
 hlt.args += ' --outputBSFile=RAW.pool.root'
 hlt.args += ' --outputHIST_HLTMONFile=hltmon.root'

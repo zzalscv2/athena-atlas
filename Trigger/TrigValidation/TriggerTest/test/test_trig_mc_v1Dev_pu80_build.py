@@ -16,10 +16,10 @@ ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
 ex.input = 'ttbar_pu80'
 ex.threads = 1
 precommand = ''.join([
-  "setMenu='Dev_pp_run3_v1_TriggerValidation_prescale';",  
-  "doWriteBS=False;",
-  "doWriteRDOTrigger=True;",
-    "setGlobalTag='OFLCOND-RUN12-SDR-31';from IOVDbSvc.CondDB import conddb;conddb.addOverride('/PIXEL/PixelModuleFeMask','PixelModuleFeMask-SIM-MC16-000-03');conddb.addOverride('/TRT/Calib/PID_NN', 'TRTCalibPID_NN_v1')"
+   "setMenu='Dev_pp_run3_v1_TriggerValidation_prescale';",
+   "doWriteBS=False;",
+   "doWriteRDOTrigger=True;",
+   "from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.IOVDb.GlobalTag='OFLCOND-RUN12-SDR-31';from IOVDbSvc.CondDB import conddb;conddb.addOverride('/PIXEL/PixelModuleFeMask','PixelModuleFeMask-SIM-MC16-000-03');conddb.addOverride('/TRT/Calib/PID_NN', 'TRTCalibPID_NN_v1')"
 ])
 ex.args = '-c "{:s}"'.format(precommand)
 

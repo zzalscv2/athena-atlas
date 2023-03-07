@@ -20,8 +20,8 @@
 #
 class opt:
     setMenu          = None           # option to overwrite flags.Trigger.triggerMenuSetup
-    setDetDescr      = None           # force geometry tag
-    setGlobalTag     = None           # force global conditions tag
+    setDetDescr      = None           # OBSOLETE: force geometry tag, use flags instead
+    setGlobalTag     = None           # OBSOLETE: force global conditions tag, use flags instead
     condOverride     = {}             # overwrite conditions folder tags e.g. '{"Folder1":"Tag1", "Folder2":"Tag2"}'
     doHLT            = True           # run HLT?
     doID             = True           # ConfigFlags.Trigger.doID
@@ -93,6 +93,11 @@ for option in defaultOptions:
     else:
         print(' %20s = (Default) %s' % (option, getattr(opt, option)))
 
+if opt.setGlobalTag is not None:
+    log.error("setGlobalTag is not supported anymore: set flags.IOVDb.GlobalTag instead")
+
+if opt.setDetDescr is not None:
+    log.error("setDetDescr is not supported anymore: set flags.GeoModel.AtlasVersion instead")
 
 import re
 
@@ -141,9 +146,6 @@ if len(athenaCommonFlags.FilesInput())>0:
     if globalflags.DataSource() != 'data':
         log.info("Setting isOnline = False for MC input")
         flags.Common.isOnline = False
-    # Set geometry
-    if opt.setDetDescr is None:
-        opt.setDetDescr = af.fileinfos.get('geometry',None)
     TriggerJobOpts.Modifiers._run_number = flags.Input.RunNumber[0]
     TriggerJobOpts.Modifiers._lb_number = flags.Input.LumiBlockNumber[0]
 
@@ -159,7 +161,7 @@ else:   # athenaHLT
     if '_lb_number' in globals():
         del _lb_number  # noqa, set by athenaHLT
 
-from AthenaConfiguration.Enums import BeamType, Format, LHCPeriod
+from AthenaConfiguration.Enums import BeamType, Format
 flags.Input.Format = Format.BS if globalflags.InputFormat == 'bytestream' else Format.POOL
 
 # Load input collection list from POOL metadata
@@ -170,22 +172,6 @@ if flags.Input.Format is Format.POOL:
 
 # Run-3 Trigger produces Run-3 EDM
 flags.Trigger.EDMVersion = 3
-
-# Set final Cond/Geo tag based on input file, command line or default
-globalflags.DetDescrVersion = opt.setDetDescr or flags.Trigger.OnlineGeoTag
-flags.GeoModel.AtlasVersion = globalflags.DetDescrVersion()
-#set conditions tag
-if opt.setGlobalTag is None:
-    if globalflags.DataSource=='data':
-        opt.setGlobalTag = flags.Trigger.OnlineCondTag if flags.Common.isOnline else 'CONDBR2-BLKPA-2022-08'
-    else:
-        if flags.GeoModel.Run == LHCPeriod.Run3:
-            opt.setGlobalTag = 'OFLCOND-MC21-SDR-RUN3-07'
-        else:
-            opt.setGlobalTag = 'OFLCOND-MC16-SDR-RUN2-08-02a'
-
-globalflags.ConditionsTag = opt.setGlobalTag or flags.Trigger.OnlineCondTag
-flags.IOVDb.GlobalTag = globalflags.ConditionsTag()
 
 # Other defaults
 jobproperties.Beam.beamType = 'collisions'
@@ -239,6 +225,10 @@ flags.Trigger.doHLT = bool(opt.doHLT)
 flags.Trigger.doID = opt.doID
 flags.Trigger.doMuon = opt.doMuon
 flags.Trigger.doCalo = opt.doCalo
+
+# Set legacy Cond/Geo tags:
+globalflags.DetDescrVersion = flags.GeoModel.AtlasVersion
+globalflags.ConditionsTag = flags.IOVDb.GlobalTag
 
 if opt.setMenu:
     flags.Trigger.triggerMenuSetup = opt.setMenu
