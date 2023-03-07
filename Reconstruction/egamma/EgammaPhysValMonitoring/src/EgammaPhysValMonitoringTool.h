@@ -40,12 +40,13 @@
 #include "StoreGate/ReadHandleKey.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
+#include "CxxUtils/checker_macros.h"
 
 class IMCTruthClassifier;
 namespace EgammaPhysValMonitoring {
 
 
-class EgammaPhysValMonitoringTool
+class ATLAS_NOT_THREAD_SAFE EgammaPhysValMonitoringTool
   : public ManagedMonitorToolBase
 { 
   /////////////////////////////////////////////////////////////////// 
