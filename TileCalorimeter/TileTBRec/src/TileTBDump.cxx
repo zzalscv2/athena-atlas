@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -651,32 +651,59 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
       switch (id) {
 
         case COMMON_TOF_FRAG:
-          std::cout << "\nBeam ToF TDC, " << size << " hits found"; 
-          prev = 0xFF;
-          for (c = 0; c < size; ++c) {
-            time = data[c] & 0x1FFF;
-            unsigned short res1 = (data[c] >> 13) & 0x1;
-            chan = (data[c] >> 16) & 0x07FF;
-            if (prev != chan) {
-              std::cout << "\n ch" << std::setw(3) << chan << ":"; 
-              nhits = 0;
-              prev = chan;
-            } else if (nhits % 8 == 0) {
-              std::cout << "\n       ";
-            }
-            ++nhits;
-            if (res1) {
-              std::cout << " U" << std::setw(4) << time; 
+        case COMMON_TDC1_FRAG:
+        case COMMON_TDC2_FRAG: {
+          if ((type == 0x1) || (type == 0x2)) {
+            bool isLastChannelEOB = ((data[size - 1] >> 24) & 0x7) == 0x4;
+            if (id == COMMON_TOF_FRAG) {
+              std::cout << "\nBeam ToF TDC, ";
             } else {
-              std::cout << "  " << std::setw(4) << time;
+              std::cout << "\nBeam TDC 0x" << std::setfill('0') << std::hex << std::setw(2) << id << setupDec << ", ";
             }
+            std::cout << (isLastChannelEOB ? size - 1 : size) << " hits found";
+            prev = 0xFF;
+            for (c = 0; c < size; ++c) {
+              time = data[c] & 0x1FFF;
+              unsigned short res1 = (data[c] >> 13) & 0x1;
+
+              chan = (type == 0x1) ? (data[c] >> 17) & 0x3FF  // take 10 bits, but 6 upper bits should be 0
+                : (data[c] >> 16) & 0x7FF; // take 11 bits, but 6 upper bits should be 0
+
+              if (chan > 31) {
+                int wordType = (data[c] >> 24) & 0x7;
+                if (wordType == 0x2) {
+                  std::cout << "\n header, " << ((data[c] >> 8) & 0x3F) << " channels";
+                } else if (wordType == 0x4) {
+                  std::cout << "\n end of block, event counter: " << (data[c] & 0xFFFFFF) << std::endl;
+                } else {
+                  std::cout << "\n unknown word: 0x" << std::hex << data[c] << std::dec << std::endl;
+                }
+                continue;
+              }
+              if (prev != chan) {
+                std::cout << "\n ch" << std::setw(3) << chan << ":";
+                nhits = 0;
+                prev = chan;
+              } else if (nhits % 8 == 0) {
+                std::cout << "\n       ";
+              }
+              ++nhits;
+              if (res1) {
+                std::cout << " U" << std::setw(4) << time;
+              } else {
+                std::cout << "  " << std::setw(4) << time;
+              }
+            }
+            std::cout << std::endl;
+
+            break;
+          } else {
+            // Fall through to BEAM_TDC_FRAG
+            [[fallthrough]]; // silent the warning on fall through
           }
-          std::cout << std::endl;
-          break;
+        }
 
         case BEAM_TDC_FRAG:
-        case COMMON_TDC1_FRAG:
-        case COMMON_TDC2_FRAG:
           std::cout << "\nBeam TDC 0x" << std::setfill('0') << std::hex << std::setw(2) << id << setupDec << ", " << size << " hits found";
           prev = 0xFF;
           for (c = 0; c < size; ++c) {
@@ -705,9 +732,52 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
           std::cout << std::endl;
           break;
 
-        case BEAM_ADC_FRAG:
         case COMMON_ADC1_FRAG:
-        case COMMON_ADC2_FRAG:
+        case COMMON_ADC2_FRAG: {
+          if ((type == 0x1) || (type == 0x2)) { // CAEN V792N or V792
+            bool isLastChannelEOB = ((data[size - 1] >> 24) & 0x7) == 0x4;
+            std::cout << "\nBeam ADC, " << (isLastChannelEOB ? size - 1 : size) << " hits found";
+            prev = 0xFF;
+            for (c = 0; c < size; ++c) {
+              time = data[c] & 0x1FFF;
+              unsigned short res1 = (data[c] >> 13) & 0x1;
+              chan = (type == 0x1) ? (data[c] >> 17) & 0x3FF  // take 10 bits, but 6 upper bits should be 0
+                : (data[c] >> 16) & 0x7FF; // take 11 bits, but 6 upper bits should be 0
+
+              if (chan > 31) {
+                int wordType = (data[c] >> 24) & 0x7;
+                if (wordType == 0x2) {
+                  std::cout << "\n header, " << ((data[c] >> 8) & 0x3F) << " channels";
+                } else if (wordType == 0x4) {
+                  std::cout << "\n end of block, event counter: " << (data[c] & 0xFFFFFF) << std::endl;
+                } else {
+                  std::cout << "\n unknown word: 0x" << std::hex << data[c] << std::dec << std::endl;
+                }
+                continue;
+              }
+              if (prev != chan) {
+                std::cout << "\n ch" << std::setw(3) << chan << ":";
+                nhits = 0;
+                prev = chan;
+              } else if (nhits % 8 == 0) {
+                std::cout << "\n       ";
+              }
+              ++nhits;
+              if (res1) {
+                std::cout << " U" << std::setw(4) << time;
+              } else {
+                std::cout << "  " << std::setw(4) << time;
+              }
+            }
+            std::cout << std::endl;
+            break;
+          } else {
+            // Fall through to BEAM_ADC_FRAG
+            [[fallthrough]]; // silent the warning on fall through
+          }
+        }
+
+        case BEAM_ADC_FRAG:
           if (BEAM_ADC_FRAG == id) {
             std::cout << "\nTile Beam ADC, " << size << " channels found";
           } else {
