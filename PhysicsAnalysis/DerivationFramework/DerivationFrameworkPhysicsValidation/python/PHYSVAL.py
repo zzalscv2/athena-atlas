@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_PHYSVAL.py
@@ -26,6 +26,14 @@ def PHYSVALKernelCfg(ConfigFlags, name='PHYSVALKernel', **kwargs):
     if ConfigFlags.Tracking.doLargeD0:
         from DerivationFrameworkLLP.PhysValLLPConfig import PhysValLLPCfg
         acc.merge(PhysValLLPCfg(ConfigFlags))
+
+    # R = 0.4 LCTopo jets (for tau validation)
+    from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
+    from JetRecConfig.JetRecConfig import JetRecCfg
+    from JetRecConfig.JetConfigFlags import jetInternalFlags
+
+    jetInternalFlags.isRecoJob = True
+    acc.merge(JetRecCfg(ConfigFlags,AntiKt4LCTopo))
 
     # Kernel algorithm
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
@@ -63,6 +71,7 @@ def PHYSVALCfg(ConfigFlags):
                                               "InDetLargeD0TrackParticles",
                                               "AntiKt4EMTopoJets",
                                               "AntiKt4EMPFlowJets",
+                                              "AntiKt4LCTopoJets",
                                               "BTagging_AntiKt4EMPFlow",
                                               "BTagging_AntiKtVR30Rmax4Rmin02Track",
                                               "MET_Baseline_AntiKt4EMTopo",
@@ -84,6 +93,7 @@ def PHYSVALCfg(ConfigFlags):
                                            "InDetLargeD0TrackParticles",
                                            "AntiKt4EMTopoJets",
                                            "AntiKt4EMPFlowJets",
+                                           "AntiKt4LCTopoJets",
                                            "BTagging_AntiKt4EMPFlow",
                                            "BTagging_AntiKt4EMTopo",
                                            "BTagging_AntiKtVR30Rmax4Rmin02Track",
