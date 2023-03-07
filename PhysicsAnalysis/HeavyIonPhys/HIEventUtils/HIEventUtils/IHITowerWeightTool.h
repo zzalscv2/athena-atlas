@@ -5,26 +5,18 @@
 #ifndef HIEVENTUTILS_IHITOWERWEIGHTTOOL_H
 #define HIEVENTUTILS_IHITOWERWEIGHTTOOL_H
 
-#include "AsgTools/IAsgTool.h"
-#include "AsgTools/AsgTool.h"
-#include <map>
+#include "GaudiKernel/IAlgTool.h"
+#include "GaudiKernel/EventContext.h"
 
-class TH3F;
-
-class IHITowerWeightTool : virtual public asg::IAsgTool {
-  ASG_TOOL_INTERFACE(IHITowerWeightTool)
-
+class IHITowerWeightTool : virtual public IAlgTool {
   public:
+    DeclareInterfaceID(IHITowerWeightTool, 1, 0);
 
-  virtual ~IHITowerWeightTool() {};
-  virtual StatusCode initialize() = 0;
-  virtual int getRunIndex() const = 0;
-  virtual float getEtaPhiResponse(float eta, float phi) const = 0;
-  virtual float getEtaPhiOffset(float eta, float phi) const = 0;
-  virtual float getWeight(float eta, float phi, int sampling) const = 0;
-  virtual float getWeightEta(float eta, float phi, int sampling) const = 0;
-  virtual float getWeightPhi(float eta, float phi, int sampling) const = 0;
-  virtual float getWeightMag(float eta, float phi, int sampling) const = 0;
-
+    virtual float getEtaPhiResponse(float eta, float phi, const EventContext& ctx) const = 0;
+    virtual float getEtaPhiOffset(float eta, float phi, const EventContext& ctx) const = 0;
+    virtual float getWeight(float eta, float phi, int sampling) const = 0;
+    virtual float getWeightEta(float eta, float phi, int sampling) const = 0;
+    virtual float getWeightPhi(float eta, float phi, int sampling) const = 0;
+    virtual float getWeightMag(float eta, float phi, int sampling) const = 0;
 };
 #endif

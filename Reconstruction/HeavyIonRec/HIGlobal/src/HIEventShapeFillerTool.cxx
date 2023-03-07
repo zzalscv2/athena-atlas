@@ -41,7 +41,7 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromTowers(std::unique_ptr<xAOD
   {
     SG::ReadHandle<xAOD::CaloClusterContainer>  readHandleCaloClus(tower_container_key, ctx);
     ATH_CHECK(readHandleCaloClus.isValid());
-    return fillCollectionFromClusterContainer(evtShape, readHandleCaloClus.cptr());
+    return fillCollectionFromClusterContainer(evtShape, readHandleCaloClus.cptr(),ctx);
   }
   SG::ReadHandle<INavigable4MomentumCollection>  readHandleINav(navi_container_key, ctx);
   ATH_CHECK(readHandleINav.isValid());
@@ -73,7 +73,7 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromTowerContainer(std::unique_
 }
 
 
-StatusCode HIEventShapeFillerTool::fillCollectionFromClusterContainer(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const xAOD::CaloClusterContainer* theClusters) const
+StatusCode HIEventShapeFillerTool::fillCollectionFromClusterContainer(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const xAOD::CaloClusterContainer* theClusters, const EventContext& ctx) const
 {
   constexpr float area_slice = HI::TowerBins::getBinArea() * HI::TowerBins::numPhiBins();
   evtShape->reserve(HI::TowerBins::numEtaBins());
@@ -111,7 +111,7 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromClusterContainer(std::uniqu
     float weight = 1;
     if (m_towerWeightTool)
     {
-      float recip = m_towerWeightTool->getEtaPhiResponse(eta, phi);
+      float recip = m_towerWeightTool->getEtaPhiResponse(eta, phi, ctx);
       if (recip != 0.) weight = 1. / recip;
     }
     weight_vector->push_back(weight);

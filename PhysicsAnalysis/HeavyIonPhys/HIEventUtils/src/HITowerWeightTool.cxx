@@ -4,25 +4,16 @@
 
 #include "HIEventUtils/HITowerWeightTool.h"
 #include "PathResolver/PathResolver.h"
-#include "xAODEventInfo/EventInfo.h"
-#include <TH3F.h>
-#include <TFile.h>
-#include <sstream>
-#include <iostream>
-#include <iomanip>
 
-HITowerWeightTool::HITowerWeightTool(const std::string& n) : asg::AsgTool(n),
-							     m_init(false),
-							     m_h3W(nullptr),
-							     m_h3Eta(nullptr),
-							     m_h3Phi(nullptr),
-							     m_h3Mag(nullptr),
-							     m_h3EtaPhiResponse(nullptr),
-							     m_h3EtaPhiOffset(nullptr)
+HITowerWeightTool::HITowerWeightTool(const std::string& type, const std::string& name, const IInterface* parent) :
+    base_class(type, name, parent),
+    m_h3W(nullptr),
+    m_h3Eta(nullptr),
+    m_h3Phi(nullptr),
+    m_h3Mag(nullptr),
+    m_h3EtaPhiResponse(nullptr),
+    m_h3EtaPhiOffset(nullptr)
 {
-  declareProperty("ApplyCorrection",m_applycorrection=true,"If false unit weigts are applied");
-  declareProperty("InputFile",m_inputFile="cluster.geo.HIJING_2018.root","File containing cluster geometric moments.");
-  declareProperty("ConfigDir",m_configDir="HIJetCorrection/","Directory containing configuration file.");
 }
 
 
@@ -43,9 +34,10 @@ float HITowerWeightTool::getWeightMag(float eta, float phi, int sample) const
   return m_h3Mag->GetBinContent(m_h3Mag->FindFixBin(eta,phi,sample));
 }
 
-float HITowerWeightTool::getEtaPhiResponse(float eta, float phi) const
+
+float HITowerWeightTool::getEtaPhiResponse(float eta, float phi, const EventContext& ctx) const
 {
-  int my_runIndex=getRunIndex();
+  int my_runIndex=getRunIndex(ctx);
   if(my_runIndex<=0)  return 1;
 
   int eb=std::as_const(m_h3EtaPhiResponse)->GetXaxis()->FindFixBin(eta);
@@ -54,9 +46,10 @@ float HITowerWeightTool::getEtaPhiResponse(float eta, float phi) const
   return rv;
 }
 
-float HITowerWeightTool::getEtaPhiOffset(float eta, float phi) const
+
+float HITowerWeightTool::getEtaPhiOffset(float eta, float phi, const EventContext& ctx) const
 {
-  int my_runIndex=getRunIndex();
+  int my_runIndex=getRunIndex(ctx);
   if(my_runIndex<=0) return 0;
 
   int eb=std::as_const(m_h3EtaPhiOffset)->GetXaxis()->FindFixBin(eta);
@@ -64,37 +57,32 @@ float HITowerWeightTool::getEtaPhiOffset(float eta, float phi) const
   return m_h3EtaPhiOffset->GetBinContent(eb,pb,my_runIndex)*std::cosh(eta);
 }
 
-int HITowerWeightTool::getRunIndex() const
+
+int HITowerWeightTool::getRunIndex(const EventContext& ctx) const
 {
   if (!m_applycorrection){
     ATH_MSG_DEBUG("Using unit weights and doing no eta-phi correction.");
     return 0;
   }
 
-  const xAOD::EventInfo* ei=nullptr;
-  if(evtStore()->retrieve(ei,"EventInfo").isFailure())
-  {
-    ATH_MSG_ERROR("Could not retrieve EventInfo");
-    return -1;
-  }
-  unsigned int run_number=ei->runNumber();
+  unsigned int run_number=ctx.eventID().run_number();
 
   auto itr=m_runMap.find(run_number);
   if(itr==m_runMap.end())
   {
-		//trying generic run number <=> no run dependence
-		run_number = 226000;
-		auto itrg=m_runMap.find(run_number);
-		if(itrg==m_runMap.end())
+    //trying generic run number <=> no run dependence
+    run_number = 226000;
+    auto itrg=m_runMap.find(run_number);
+    if(itrg==m_runMap.end())
     {
-		  ATH_MSG_WARNING("No generic calibration or calibration for " << run_number << " is avaliable. Doing no eta-phi correction.");
+      ATH_MSG_WARNING("No generic calibration or calibration for " << run_number << " is avaliable. Doing no eta-phi correction.");
       return 0;
-	  }
-	  else
+    }
+    else
     {
-	    ATH_MSG_DEBUG("Using generic calibration for eta-phi correction.");
+      ATH_MSG_DEBUG("Using generic calibration for eta-phi correction.");
       return itrg->second;
-	  }
+    }
   }
   else 
   {
@@ -102,9 +90,9 @@ int HITowerWeightTool::getRunIndex() const
   }
 }
 
+
 StatusCode HITowerWeightTool::initialize()
 {
-  if(m_init) return StatusCode::SUCCESS;
   std::string local_path=m_configDir+m_inputFile;
   std::string full_path=PathResolverFindCalibFile(local_path);
   ATH_MSG_INFO("Reading input file "<< m_inputFile << " from " << full_path);
@@ -170,10 +158,8 @@ StatusCode HITowerWeightTool::initialize()
     return StatusCode::FAILURE;
   }
   for(int xbin=1; xbin<=h1_run_index->GetNbinsX(); xbin++) {
-		m_runMap.emplace_hint(m_runMap.end(),std::make_pair(h1_run_index->GetBinContent(xbin),xbin));
-	}
+    m_runMap.emplace_hint(m_runMap.end(),std::make_pair(h1_run_index->GetBinContent(xbin),xbin));
+  }
   f->Close();
-  m_init=true;
   return StatusCode::SUCCESS;
-
 }

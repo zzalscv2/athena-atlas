@@ -11,13 +11,14 @@ atlas_add_library( HIEventUtilsLib
                    Root/*.cxx
                    PUBLIC_HEADERS HIEventUtils
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-		           LINK_LIBRARIES ${ROOT_LIBRARIES} CaloGeoHelpers AsgTools xAODForward xAODHIEvent xAODTracking xAODTrigL1Calo PATCoreAcceptLib InDetTrackSelectionToolLib
-                   PRIVATE_LINK_LIBRARIES AsgMessagingLib CxxUtils PathResolver xAODEventInfo )
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgDataHandlesLib AsgTools CaloGeoHelpers InDetTrackSelectionToolLib PATCoreAcceptLib xAODForward xAODHIEvent xAODTracking xAODTrigL1Calo  
+                   PRIVATE_LINK_LIBRARIES AsgMessagingLib CxxUtils xAODEventInfo )
 
 if (NOT XAOD_STANDALONE)
   atlas_add_component( HIEventUtils
-                       src/components/*.cxx
-                       LINK_LIBRARIES HIEventUtilsLib )
+                       src/*.cxx src/components/*.cxx
+                       LINK_LIBRARIES AthenaBaseComps GaudiKernel HIEventUtilsLib
+                       PRIVATE_LINK_LIBRARIES PathResolver)
 endif ()
 
 # Install files from the package:
