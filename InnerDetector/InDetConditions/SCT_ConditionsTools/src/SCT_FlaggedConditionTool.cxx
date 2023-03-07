@@ -33,7 +33,6 @@ StatusCode SCT_FlaggedConditionTool::initialize() {
 
 // Finalize
 StatusCode SCT_FlaggedConditionTool::finalize() {
-  ATH_MSG_INFO("SCT_FlaggedConditionTool::finalize()");
   return StatusCode::SUCCESS;
 }
 
