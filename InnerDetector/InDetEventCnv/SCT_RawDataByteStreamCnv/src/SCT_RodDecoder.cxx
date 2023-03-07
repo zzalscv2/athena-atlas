@@ -279,17 +279,17 @@ StatusCode SCT_RodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROB
         }
         m_nHits++;
         if (superCondensedMode) { // Super-condensed mode:
-          ATH_CHECK(processSuperCondensedHit(data16[n], robID, data, rdoIDCont, cache, errs, hasError));
+          ATH_CHECK(processSuperCondensedHit(data16[n], robID, data, rdoIDCont, cache, errs, hasError, ctx));
           if (hasError) sc = StatusCode::RECOVERABLE;
           continue;
         }
         else if (data.condensedMode) { // Condensed mode
-          ATH_CHECK(processCondensedHit(data16[n], robID, data, rdoIDCont, cache, errs, hasError));
+          ATH_CHECK(processCondensedHit(data16[n], robID, data, rdoIDCont, cache, errs, hasError,ctx));
           if (hasError) sc = StatusCode::RECOVERABLE;
           continue;
         }
         else { // Expanded mode
-          ATH_CHECK(processExpandedHit(data16[n], robID, data, rdoIDCont, cache, errs, hasError));
+          ATH_CHECK(processExpandedHit(data16[n], robID, data, rdoIDCont, cache, errs, hasError,ctx));
           if (hasError) sc = StatusCode::RECOVERABLE;
           continue;
         }
@@ -751,7 +751,8 @@ StatusCode SCT_RodDecoder::processSuperCondensedHit(const uint16_t inData,
                                                     SCT_RDO_Container& rdoIDCont,
                                                     CacheHelper& cache,
                                                     SCT_RodDecoderErrorsHelper& errs,
-                                                    bool& hasError) const
+                                                    bool& hasError,
+                                                    const EventContext& ctx) const
 {
   StatusCode sc{StatusCode::SUCCESS};
 
@@ -810,7 +811,7 @@ StatusCode SCT_RodDecoder::processSuperCondensedHit(const uint16_t inData,
   }
   if (secondSide) {
     const uint32_t onlineID{(robID & 0xFFFFFF) | (data.linkNumber << 24)};
-    IdentifierHash id_hash(m_cabling->getHashFromOnlineId(onlineID));
+    IdentifierHash id_hash(m_cabling->getHashFromOnlineId(onlineID,ctx));
     if (!id_hash.is_valid()) {
        hasError = true;
        return sc;
@@ -845,7 +846,8 @@ StatusCode SCT_RodDecoder::processCondensedHit(const uint16_t inData,
                                                SCT_RDO_Container& rdoIDCont,
                                                CacheHelper& cache,
                                                SCT_RodDecoderErrorsHelper& errs,
-                                               bool& hasError) const
+                                               bool& hasError,
+                                               const EventContext& ctx) const
 {
   StatusCode sc{StatusCode::SUCCESS};
   
@@ -898,7 +900,7 @@ StatusCode SCT_RodDecoder::processCondensedHit(const uint16_t inData,
   }
   if (secondSide) {
     const uint32_t onlineID{(robID & 0xFFFFFF) | (data.linkNumber << 24)};
-    data.setCollection(m_sctID, m_cabling->getHashFromOnlineId(onlineID), rdoIDCont, errs);
+    data.setCollection(m_sctID, m_cabling->getHashFromOnlineId(onlineID, ctx), rdoIDCont, errs);
   }
 
   if (data.groupSize == 0)  {
@@ -977,7 +979,8 @@ StatusCode SCT_RodDecoder::processExpandedHit(const uint16_t inData,
                                               SCT_RDO_Container& rdoIDCont,
                                               CacheHelper& cache,
                                               SCT_RodDecoderErrorsHelper& errs,
-                                              bool& hasError) const
+                                              bool& hasError,
+                                              const EventContext& ctx) const
 {
   StatusCode sc{StatusCode::SUCCESS};
 
@@ -1008,7 +1011,7 @@ StatusCode SCT_RodDecoder::processExpandedHit(const uint16_t inData,
     }
     if (secondSide) {
       const uint32_t onlineID{(robID & 0xFFFFFF) | (data.linkNumber << 24)};
-      data.setCollection(m_sctID, m_cabling->getHashFromOnlineId(onlineID), rdoIDCont, errs);
+      data.setCollection(m_sctID, m_cabling->getHashFromOnlineId(onlineID, ctx), rdoIDCont, errs);
     }
     data.groupSize = 1;
     const int rdoMade{makeRDO(false, data, cache)};

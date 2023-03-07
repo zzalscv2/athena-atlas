@@ -316,7 +316,8 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
                                       SCT_RDO_Container& rdoIDCont,
                                       CacheHelper& cache,
                                       SCT_RodDecoderErrorsHelper& errs,
-                                      bool& hasError) const;
+                                      bool& hasError,
+                                      const EventContext& ctx) const;
 
   /**
    * @brief Process hit word in Condensed mode
@@ -335,7 +336,8 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
                                  SCT_RDO_Container& rdoIDCont,
                                  CacheHelper& cache,
                                  SCT_RodDecoderErrorsHelper& errs,
-                                 bool& hasError) const;
+                                 bool& hasError,
+                                 const EventContext& ctx) const;
 
   /**
    * @brief Process hit word in Expanded mode
@@ -354,7 +356,8 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
                                 SCT_RDO_Container& rdoIDCont,
                                 CacheHelper& cache,
                                 SCT_RodDecoderErrorsHelper& errs,
-                                bool& hasError) const;
+                                bool& hasError,
+                                const EventContext& ctx) const;
 
   /**
    * @brief Process ABCD error

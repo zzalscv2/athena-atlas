@@ -41,7 +41,7 @@ StatusCode PixelRawDataProviderTool::finalize() {
 }
 
 StatusCode PixelRawDataProviderTool::convert(std::vector<const ROBFragment*>& vecRobs, IPixelRDO_Container* rdoIdc,
-					     IDCInDetBSErrContainer& decodingErrors ) const {
+					     IDCInDetBSErrContainer& decodingErrors, const EventContext& ctx ) const {
   if (vecRobs.size()==0) { return StatusCode::SUCCESS; }
 
   std::vector<const ROBFragment*>::const_iterator rob_it = vecRobs.begin();
@@ -56,7 +56,6 @@ StatusCode PixelRawDataProviderTool::convert(std::vector<const ROBFragment*>& ve
   SG::WriteHandle<InDetTimeCollection> LVL1Collection;
   SG::WriteHandle<InDetTimeCollection> BCIDCollection;
 
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   //    are we working on a new event ?
   LVL1Collection = SG::makeHandle(m_LVL1CollectionKey,ctx);
   ATH_CHECK(LVL1Collection.record(std::make_unique<InDetTimeCollection>()));
