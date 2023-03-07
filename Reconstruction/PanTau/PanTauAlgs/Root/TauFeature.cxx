@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/TauFeature.h"
@@ -75,24 +75,18 @@ int PanTau::TauFeature::nVecValues() const {
 void PanTau::TauFeature::add(PanTau::TauFeature* otherFeatures) {
     
   //add the scalar features
-  FeatureMapIter itScalar = otherFeatures->m_featureMap.begin();
-  for (; itScalar != otherFeatures->m_featureMap.end(); itScalar++) {
-    std::string key = itScalar->first;
-    double      val = itScalar->second;
-    bool        isOK = this->addFeature(key, val);
+  for (const auto& p : otherFeatures->m_featureMap) {
+    bool        isOK = this->addFeature(p.first, p.second);
     if (!isOK) {
-      throw std::runtime_error("PanTau::TauFeature::add( PanTau::TauFeature* ): Error when adding scalar feature " + key);
+      throw std::runtime_error("PanTau::TauFeature::add( PanTau::TauFeature* ): Error when adding scalar feature " + p.first);
     }
   }
     
   //add the vector features
-  VectorFeatureMapIter itVector = otherFeatures->m_vecFeatureMap.begin();
-  for (; itVector != otherFeatures->m_vecFeatureMap.end(); itVector++) {
-    std::string         key = itVector->first;
-    std::vector<double> val = itVector->second;
-    bool        isOK = this->addVecFeature(key, val);
+  for (const auto& p : otherFeatures->m_vecFeatureMap) {
+    bool        isOK = this->addVecFeature(p.first, p.second);
     if (!isOK) {
-      throw std::runtime_error("PanTau::TauFeature::add( PanTau::TauFeature* ): Error when adding vector feature " + key);
+      throw std::runtime_error("PanTau::TauFeature::add( PanTau::TauFeature* ): Error when adding vector feature " + p.first);
     }
   }    
 }

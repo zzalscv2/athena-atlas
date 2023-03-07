@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/PanTauSeed.h"
@@ -191,11 +191,11 @@ xAOD::Type::ObjectType PanTau::PanTauSeed::type() const {
 
 
 /** Main constructor to be used */
-PanTau::PanTauSeed::PanTauSeed( std::string                             nameInputAlgorithm,
+PanTau::PanTauSeed::PanTauSeed( const std::string&                      nameInputAlgorithm,
 				xAOD::TauJet*                           tauJet,
-				std::vector<PanTau::TauConstituent*>    tauConstituents,
-				std::vector<PanTau::TauConstituent*>    tauConstituentsAll,
-				std::vector<int>                        pantauSeed_TechnicalQuality
+				const std::vector<PanTau::TauConstituent*>&    tauConstituents,
+				const std::vector<PanTau::TauConstituent*>&    tauConstituentsAll,
+				const std::vector<int>&                 pantauSeed_TechnicalQuality
 				)
   :
   IParticle()
@@ -283,9 +283,9 @@ PanTau::PanTauSeed::PanTauSeed( std::string                             nameInpu
 
 
 /** Constructor for invalid seeds */
-PanTau::PanTauSeed::PanTauSeed(std::string nameInputAlgorithm,
+PanTau::PanTauSeed::PanTauSeed(const std::string& nameInputAlgorithm,
 			       xAOD::TauJet* tauJet,
-			       std::vector<int> pantauSeed_TechnicalQuality)				  
+			       const std::vector<int>& pantauSeed_TechnicalQuality)				  
   :
   IParticle(),
   m_Constituents(),
