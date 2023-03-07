@@ -4,7 +4,6 @@
 
 from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool, MenuSequence, algorithmCAToGlobalWrapper
 from AthenaCommon.CFElements import seqAND, parOR
-from TrigEDMConfig.TriggerEDMRun3 import recordable
 from .FullScanDefs import caloFSRoI
 
 class CaloMenuDefs(object):
@@ -74,13 +73,11 @@ def caloClusterRecoSequence(
         outputName="HLT_TopoCaloClustersFS"):
     """ Create the EM-level fullscan clusters """
     cell_sequence, cells_name = RecoFragmentsPool.retrieve(cellRecoSequence, flags=flags, RoIs=RoIs)
-    from TrigCaloRec.TrigCaloRecConfig import TrigCaloClusterMaker_topo
-    alg = TrigCaloClusterMaker_topo(
-            name,
-            doMoments=True,
-            doLC=False,
-            cells=cells_name)
-    alg.CaloClusters = recordable(outputName)
+    from TrigCaloRec.TrigCaloRecConfig import hltTopoClusterMakerCfg
+    alg = algorithmCAToGlobalWrapper(hltTopoClusterMakerCfg, flags, name,
+                                     doLC=False,
+                                     clustersKey=outputName,
+                                     cellsKey=cells_name)[0]
     return parOR(name+"RecoSequence", [cell_sequence, alg]), str(alg.CaloClusters)
 
 def LCCaloClusterRecoSequence(
