@@ -35,6 +35,10 @@ private:
                                                                                 "Key of input MuonDetectorManager condition data"};
 
     SG::ReadCondHandleKey<MuonMDT_CablingMap> m_cablingKey{this, "ReadKey", "MuonMDT_CablingMap", "Key of input MDT cabling map"};
+
+    Gaudi::Property<std::string> m_summaryTxt{this, "SummaryFile", "SummaryFile.txt", "Summary of the extracted mapping"};
+    Gaudi::Property<std::string> m_mezzJSON{this, "OutMezzanineJSON", "MezzMapping.json", "Mezzanine JSON"};
+    Gaudi::Property<std::string> m_cablingJSON{this, "OutCablingJSON", "MdtCabling.json", "Cabling JSON"};
     
 };
 
