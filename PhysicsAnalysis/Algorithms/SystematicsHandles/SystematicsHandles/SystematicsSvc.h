@@ -13,6 +13,7 @@
 #include <PATInterfaces/SystematicSet.h>
 #include <SystematicsHandles/ISystematicsSvc.h>
 #include <mutex>
+#include <unordered_map>
 
 namespace CP
 {

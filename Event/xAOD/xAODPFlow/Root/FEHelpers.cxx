@@ -6,6 +6,7 @@
 
 #include "xAODPFlow/FEHelpers.h"
 #include "xAODPFlow/PFODefs.h"
+#include <array>
 
 namespace FEHelpers {
 

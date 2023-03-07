@@ -10,6 +10,7 @@
 
 
 #include "CxxUtils/FPControl.h"
+#include "CxxUtils/features.h"
 
 
 namespace CxxUtils {
@@ -58,11 +59,13 @@ void FPControl::holdExceptions()
  * @brief Enable a set of exceptions.
  * @param exc The set of exceptions to enable.
  */
-void FPControl::enable (Exc exc)
+void FPControl::enable ([[maybe_unused]] Exc exc)
 {
+#if HAVE_FEENABLEEXCEPT
   int mask = excToMask (exc);
   feenableexcept (mask);
   m_masked &= ~mask;
+#endif
 }
 
 
@@ -70,11 +73,13 @@ void FPControl::enable (Exc exc)
  * @brief Disable a set of exceptions.
  * @param exc The set of exceptions to enable.
  */
-void FPControl::disable (Exc exc)
+void FPControl::disable ([[maybe_unused]] Exc exc)
 {
+#if HAVE_FEENABLEEXCEPT
   int mask = excToMask (exc);
   fedisableexcept (mask);
   m_masked |= mask;
+#endif
 }
 
 
