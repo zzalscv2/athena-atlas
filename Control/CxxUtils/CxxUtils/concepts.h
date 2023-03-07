@@ -60,6 +60,34 @@
   requires (CONDITION)   \
   RETTYPE
 
+
+// Some library concepts.
+
+namespace CxxUtils {
+namespace detail {
+
+
+// Standard library Hash requirement.
+template <class HASHER, class T>
+concept IsHash =
+  std::destructible<HASHER> &&
+  std::copy_constructible<HASHER> &&
+  requires (const HASHER& h, T x)
+{
+  { h(x) } -> std::same_as<size_t>;
+};
+
+
+// Standard library BinaryPredicate requirement.
+template <class PRED, class ARG1, class ARG2=ARG1>
+concept IsBinaryPredicate =
+  std::copy_constructible<PRED> &&
+  std::predicate<PRED, ARG1, ARG2>;
+
+
+} // namespace detail
+} // namespace CxxUtils
+
 #else
 
 #define HAVE_CONCEPTS 0

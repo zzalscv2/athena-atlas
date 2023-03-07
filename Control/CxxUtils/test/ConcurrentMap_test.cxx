@@ -193,15 +193,23 @@ struct Values<T*>
 
 
 using TestMapul = CxxUtils::ConcurrentMap<unsigned long, int, TestUpdater,
+                                          std::hash<unsigned long>,
+                                          std::equal_to<unsigned long>,
                                           static_cast<unsigned long>(-1),
                                           static_cast<unsigned long>(-2)>;
 using TestMapip = CxxUtils::ConcurrentMap<int, int*, TestUpdater,
+                                          std::hash<int>,
+                                          std::equal_to<int>,
                                           static_cast<unsigned long>(-1),
                                           static_cast<unsigned long>(-2)>;
 using TestMappu = CxxUtils::ConcurrentMap<int*, unsigned, TestUpdater,
+                                          std::hash<int*>,
+                                          std::equal_to<int*>,
                                           static_cast<unsigned long>(0),
                                           static_cast<unsigned long>(-1)>;
 using TestMapuf = CxxUtils::ConcurrentMap<unsigned long, float, TestUpdater,
+                                          std::hash<unsigned long>,
+                                          std::equal_to<unsigned long>,
                                           static_cast<unsigned long>(-1),
                                           static_cast<unsigned long>(-2)>;
 

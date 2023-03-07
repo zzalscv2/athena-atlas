@@ -14,14 +14,20 @@ namespace CxxUtils {
 
 #define T_CONCURRENTMAP template <class KEY, class VALUE,               \
                                   template <class> class UPDATER,       \
+                                  class HASHER,                         \
+                                  class MATCHER,                        \
                                   detail::ConcurrentHashmapVal_t NULLVAL, \
                                   detail::ConcurrentHashmapVal_t TOMBSTONE> \
-  ATH_REQUIRES (detail::IsConcurrentHashmapPayload<KEY> &&    \
-                detail::IsConcurrentHashmapPayload<VALUE> &&  \
-                detail::IsUpdater<UPDATER>)
+  ATH_REQUIRES (detail::IsConcurrentHashmapPayload<KEY> &&              \
+                detail::IsConcurrentHashmapPayload<VALUE> &&            \
+                detail::IsUpdater<UPDATER> &&                           \
+                detail::IsHash<HASHER, KEY> &&                        \
+                detail::IsBinaryPredicate<MATCHER, KEY>)
 
 
-#define CONCURRENTMAP ConcurrentMap<KEY, VALUE, UPDATER, NULLVAL, TOMBSTONE>
+#define CONCURRENTMAP ConcurrentMap<KEY, VALUE, UPDATER,        \
+                                    HASHER, MATCHER,            \
+                                    NULLVAL, TOMBSTONE>
 
 
 /**
@@ -628,8 +634,9 @@ T_CONCURRENTMAP
 auto CONCURRENTMAP::get (key_type key) const
   -> typename Impl_t::const_iterator
 {
-  size_t hash = m_impl.hasher() (keyAsVal (key));
-  return m_impl.get (keyAsVal(key), hash);
+  val_t kval = keyAsVal (key);
+  size_t hash = m_impl.hasher() (kval);
+  return m_impl.get (kval, hash);
 }
 
 
@@ -651,8 +658,9 @@ auto CONCURRENTMAP::put (key_type key,
                          const Context_t& ctx /*= Updater_t::defaultContext()*/)
   -> std::pair<const_iterator, bool>
 {
-  size_t hash = m_impl.hasher() (keyAsVal (key));
-  auto [it, flag] = m_impl.put (keyAsVal(key), hash,
+  val_t kval = keyAsVal (key);
+  size_t hash = m_impl.hasher() (kval);
+  auto [it, flag] = m_impl.put (kval, hash,
                                 mappedAsVal (val),
                                 overwrite, ctx);
   return std::make_pair (const_iterator (it), flag);

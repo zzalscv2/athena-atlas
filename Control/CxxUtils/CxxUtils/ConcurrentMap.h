@@ -45,6 +45,10 @@ namespace CxxUtils {
  * (AthenaKernel/RCUUpdater is a concrete version
  * that should work in the context of Athena.)
  *
+ * The operations used for calculating the hash of the keys and comparing
+ * keys can be customized with the HASHER and MATCHER template arguments
+ * (though the defaults should usually be fine).
+ *
  * One value of the key must be reserved as a null value, which no real keys
  * may take.  By default this is `0', but it may be customized with
  * the NULLVAL template argument.  The map may optionally support erasures
@@ -83,20 +87,40 @@ namespace CxxUtils {
  * since the test doesn't do any locking in that case.
  */
 template <class KEY, class VALUE, template <class> class UPDATER,
+          class HASHER = std::hash<KEY>,
+          class MATCHER = std::equal_to<KEY>,
           detail::ConcurrentHashmapVal_t NULLVAL = 0,
           detail::ConcurrentHashmapVal_t TOMBSTONE = NULLVAL>
 ATH_REQUIRES (detail::IsConcurrentHashmapPayload<KEY> &&
               detail::IsConcurrentHashmapPayload<VALUE> &&
-              detail::IsUpdater<UPDATER>)
+              detail::IsUpdater<UPDATER> &&
+              detail::IsHash<HASHER, KEY> &&
+              detail::IsBinaryPredicate<MATCHER, KEY>)
 class ConcurrentMap
 {
 private:
   /// Representation type in the underlying map.
   using val_t = CxxUtils::detail::ConcurrentHashmapVal_t;
 
+  // Translate between the Hasher/Matcher provided (which take KEY arguments)
+  // and what we need to give to the underlying implementation
+  // (which takes a uintptr_t).
+  struct Hasher
+  {
+    size_t operator() (val_t k) const {
+      return m_h (keyAsKey (k));
+    }
+    HASHER m_h;
+  };
+  struct Matcher
+  {
+    bool operator() (val_t a, val_t b) const {
+      return m_m (keyAsKey (a), keyAsKey (b));
+    }
+    MATCHER m_m;
+  };
+
   /// The underlying uint->uint hash table.
-  using Hasher = std::hash<uintptr_t>;
-  using Matcher = std::equal_to<uintptr_t>;
   using Impl_t = typename detail::ConcurrentHashmapImpl<UPDATER,
                                                         Hasher,
                                                         Matcher,
