@@ -238,7 +238,7 @@ namespace top {
             m_electronToolsFactory.end(), "AsgElectronEfficiencyCorrectionTool/ElTrigEff_" + std::to_string(
               j) + "_" + std::to_string(nTools));
           top::check(t->setProperty("MapFilePath",
-                                    "ElectronEfficiencyCorrection/2015_2017/rel21.2/Consolidation_September2018_v1/map3.txt"),
+                                    "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt.txt"),
                      "Fail");
           top::check(t->setProperty("TriggerKey",
                                     (j ? year + "_" + trigKey : "Eff_" + year + "_" + trigKey)),
@@ -280,7 +280,7 @@ namespace top {
             m_electronToolsFactoryLoose.end(), "AsgElectronEfficiencyCorrectionTool/ElTrigEffLoose_" + std::to_string(
               j) + "_" + std::to_string(nTools));
           top::check(tLoose->setProperty("MapFilePath",
-                                         "ElectronEfficiencyCorrection/2015_2017/rel21.2/Consolidation_September2018_v1/map3.txt"),
+                                         "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"),
                      "Fail");
           top::check(tLoose->setProperty("TriggerKey",
                                          (j ? year + "_" + trigKey : "Eff_" + year + "_" + trigKey)),
