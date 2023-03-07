@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArWheelSolid.h"
@@ -49,11 +49,11 @@ G4bool LArWheelSolid::check_D(
 	LWSDBG(8, std::cout << "check D=" << D << " out=" << out << std::endl);
 	if(D < 0.) return false;
 	G4double t2 = 0.;
-	if(A == 0 && B == 0){
-		LWSDBG(8, std::cout << "Case A=B=0" << std::endl);
-		return false;
-	}
-	if(A == 0){
+	if(A == 0) {
+		if(B == 0) {
+			LWSDBG(8, std::cout << "Case A=B=0" << std::endl);
+			return false;
+		}
 		t1= -C / (2 * B);
 		LWSDBG(8, std::cout << "t1=" << t1 << " - only one solution" << std::endl);
 		t2 = t1;
