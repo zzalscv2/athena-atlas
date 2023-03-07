@@ -40,6 +40,10 @@ namespace CaloRecGPU{
 
 struct EventData
 {
+  // for initialisers
+  static constexpr double maxDbl=std::numeric_limits<double>::max();
+  static constexpr double lowestDbl = std::numeric_limits<double>::lowest();
+  //
   std::vector<ClusterData> ref_clusters, test_clusters;
   std::vector<float> SNR_array;
   std::vector<float> energy_array;
@@ -60,15 +64,20 @@ struct EventData
   float min_type_energy[4], max_type_energy[4], min_type_SNR[4], max_type_SNR[4];
   //By type (all, seed, grow, terminal)
 
-  double min_delta_R[4], max_delta_R[4];
+  double min_delta_R[4] = {maxDbl, maxDbl,maxDbl, maxDbl};
+  double max_delta_R[4] = {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
-  double min_delta_E[4], max_delta_E[4];
+  double min_delta_E[4]={maxDbl, maxDbl,maxDbl, maxDbl};
+  double max_delta_E[4]= {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
-  double min_delta_Et[4], max_delta_Et[4];
+  double min_delta_Et[4] = {maxDbl, maxDbl,maxDbl, maxDbl};
+  double max_delta_Et[4] = {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
-  double min_delta_E_rel[4], max_delta_E_rel[4];
+  double min_delta_E_rel[4] = {maxDbl, maxDbl,maxDbl, maxDbl};
+  double max_delta_E_rel[4] = {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
-  double min_delta_Et_rel[4], max_delta_Et_rel[4];
+  double min_delta_Et_rel[4] = {maxDbl, maxDbl,maxDbl, maxDbl};
+  double max_delta_Et_rel[4] = {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
   double min_delta_eta[4], max_delta_eta[4];
 
@@ -800,6 +809,10 @@ struct EventData
 
 struct ClusterPlotter : public BasePlotter
 {
+  //
+  static constexpr double maxDbl=std::numeric_limits<double>::max();
+  static constexpr double lowestDbl = std::numeric_limits<double>::lowest();
+  //
   std::vector<EventData> events;
   CaloRecGPU::Helpers::CPU_object<CaloRecGPU::GeometryArr> geometry;
   CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellNoiseArr> noise;
@@ -815,13 +828,17 @@ struct ClusterPlotter : public BasePlotter
   double min_delta_R[4], max_delta_R[4];
 
 
-  double min_delta_E[4], max_delta_E[4];
+  double min_delta_E[4] = {maxDbl, maxDbl, maxDbl, maxDbl};
+  double max_delta_E[4] = {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
-  double min_delta_Et[4], max_delta_Et[4];
+  double min_delta_Et[4] = {maxDbl, maxDbl, maxDbl, maxDbl};
+  double max_delta_Et[4] = {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
-  double min_delta_E_rel[4], max_delta_E_rel[4];
+  double min_delta_E_rel[4] = {maxDbl, maxDbl, maxDbl, maxDbl};
+  double max_delta_E_rel[4] = {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
-  double min_delta_Et_rel[4], max_delta_Et_rel[4];
+  double min_delta_Et_rel[4] = {maxDbl, maxDbl, maxDbl, maxDbl};
+  double max_delta_Et_rel[4] = {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
   double min_delta_eta[4], max_delta_eta[4];
 
