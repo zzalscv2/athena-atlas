@@ -64,6 +64,27 @@ union UIntConv
 };
 
 
+// Specialization for the case where no conversion is required.
+template <>
+union UIntConv<uintptr_t>
+{
+  /**
+   * @brief Convert a T to a uintptr_t.
+   */
+  static uintptr_t valToUInt (uintptr_t x) {
+    return x;
+  };
+
+
+  /**
+   * @brief Convert a uintptr_t to a T.
+   */
+  static uintptr_t uintToVal (uintptr_t ui) {
+    return ui;
+  };
+};
+
+
 } // namespace detail
 } // namespace CxxUtils
 

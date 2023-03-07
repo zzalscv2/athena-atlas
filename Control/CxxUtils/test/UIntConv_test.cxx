@@ -28,6 +28,7 @@ void test1()
 {
   std::cout << "test1\n";
 
+  test1a<uintptr_t> (123456789);
   test1a<unsigned long> (123456789);
   test1a<int> (-23456789);
   test1a<char> ('y');
