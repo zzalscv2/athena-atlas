@@ -12,7 +12,9 @@
 #ifndef CXXUTILS_FEATURES_H
 #define CXXUTILS_FEATURES_H
 
+#if defined(__GLIBC__)
 #include <features.h>
+#endif
 
 /// Do we support the compatible set of GCC and clang extensions
 /// These are our main compilers.
@@ -88,19 +90,34 @@
 
 // Do we have mallinfo2?  Present in glibc 2.33,
 // in which mallinfo is deprecated.
-#if defined(__GLIBC__) && __GLIBC_PREREQ(2, 33)
-# define HAVE_MALLINFO2 1
+#if defined(__GLIBC__)
+# if __GLIBC_PREREQ(2, 33)
+#  define HAVE_MALLINFO2 1
+# else
+#  define HAVE_MALLINFO2 0
+# endif
 #else
 # define HAVE_MALLINFO2 0
 #endif
 
 
 // Do we have malloc hooks?  They were removed in glibc 2.34.
-#if defined(__GLIBC__) && !__GLIBC_PREREQ(2, 34)
-# define HAVE_MALLOC_HOOKS 1
+#if defined(__GLIBC__)
+# if !__GLIBC_PREREQ(2, 34)
+#  define HAVE_MALLOC_HOOKS 1
+# else
+#  define HAVE_MALLOC_HOOKS 0
+# endif
 #else
 # define HAVE_MALLOC_HOOKS 0
 #endif
 
+
+// Do we have feenableexcept/fedisableexcept
+#if defined(__GLIBC__)
+# define HAVE_FEENABLEEXCEPT 1
+#else
+# define HAVE_FEENABLEEXCEPT 0
+#endif
 
 #endif // not CXXUTILS_FEATURES_H

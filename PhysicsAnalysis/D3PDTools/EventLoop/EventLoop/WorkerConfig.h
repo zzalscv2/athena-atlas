@@ -17,7 +17,7 @@ namespace EL
 {
   namespace Detail
   {
-    class ModuleData;
+    struct ModuleData;
   }
 
   class PythonConfigBase;

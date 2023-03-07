@@ -5,6 +5,7 @@
 #ifndef ENUMDEF_H
 #define ENUMDEF_H
 
+#include <array>
 
 namespace MCP {
 

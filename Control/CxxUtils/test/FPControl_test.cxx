@@ -11,6 +11,7 @@
 #undef NDEBUG
 #include "CxxUtils/FPControl.h"
 #include "CxxUtils/checker_macros.h"
+#include "CxxUtils/features.h"
 #include <cassert>
 #include <iostream>
 #include <signal.h>
@@ -55,6 +56,7 @@ void test1()
 {
   std::cout << "test1\n";
 
+#if HAVE_FEENABLEEXCEPT
   fedisableexcept (FE_DIVBYZERO);
   feclearexcept (FE_DIVBYZERO);
   testit (false, false);
@@ -79,6 +81,7 @@ void test1()
     testit (true, false);
     assert (!fetestexcept (FE_DIVBYZERO));
   }
+#endif
 }
 
 
