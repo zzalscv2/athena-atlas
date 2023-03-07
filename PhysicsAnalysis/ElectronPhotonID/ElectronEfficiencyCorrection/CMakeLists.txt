@@ -84,8 +84,13 @@ if( XAOD_STANDALONE )
    
    atlas_add_test(ut_TestFunctionality
 	          SCRIPT test/testEgEfficiencyDetailed.py
-	      	 PROPERTIES TIMEOUT 300)
- 
+	      	  PROPERTIES TIMEOUT 300)
+else()  
+   atlas_add_test(ut_testTtool
+	          SCRIPT python -m  ElectronEfficiencyCorrection.TElectronTestAlgConfig --filesInput $ASG_TEST_FILE_MC --evtMax=5
+              POST_EXEC_SCRIPT nopost.sh 
+              PROPERTIES TIMEOUT 300)
+
 endif()
 
 atlas_install_python_modules( util/*.py python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

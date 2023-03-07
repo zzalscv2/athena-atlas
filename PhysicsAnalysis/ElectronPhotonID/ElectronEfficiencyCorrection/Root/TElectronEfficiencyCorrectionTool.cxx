@@ -279,22 +279,23 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
                     << yValue << " , et = " << et << " , run number = "
                     << runnumber << ". Please check your input files!");
   }
+  if (index < 0) {
+    return 0;
+  }
+
   /*
    * Now we have the index of the histogram
    */
-  TH2* currentHist(nullptr);
-  if (index >= 0) {
-    currentHist = static_cast<TH2*>(sfObjectArray[index].get());
-  } else {
-    return 0;
-  }
+  const HistEdge& currentEdge = edges[index];
   /*
    * If SF is only given in Abs(eta) convert eta input to std::abs()
    */
   constexpr double epsilon = 1e-6;
-  if (currentHist->GetYaxis()->GetBinLowEdge(1) >= (0-epsilon)) {
+  if (currentEdge.etaMin >= (0 - epsilon)) {
     yValue = std::abs(yValue);
   }
+
+  const TH2* currentHist = static_cast<TH2*>(sfObjectArray[index].get()) ;
   const int globalBinNumber = currentHist->FindFixBin(xValue, yValue);
   const double scaleFactor = currentHist->GetBinContent(globalBinNumber);
   const double scaleFactorErr = currentHist->GetBinError(globalBinNumber);
@@ -324,25 +325,6 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
     }
   }
   /*
-   * Do the toys if requested  and exit early
-   */
-  if (m_doToyMC || m_doCombToyMC) {
-    result.toys.resize(static_cast<size_t>(m_nToyMC));
-    const std::vector<std::vector<HistArray>>& toyMCList =
-        ((isFastSim) ? m_uncorrToyMCSystFast : m_uncorrToyMCSystFull);
-    if (toyMCList.size() > (unsigned int)runnumberIndex) {
-      for (int toy = 0; toy < m_nToyMC; ++toy) {
-        if (toyMCList[runnumberIndex][toy].size() >
-            static_cast<unsigned int>(index)) {
-          result.toys[toy] =
-              static_cast<TH2*>(toyMCList[runnumberIndex][toy][index].get())
-                  ->GetBinContent(globalBinNumber);
-        }
-      }
-    }
-    return 1;
-  }
-  /*
    * Do the Uncorr  uncertainty
    */
   double val = statErr;
@@ -364,7 +346,6 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
    * The first vector index being the runnumber
    * The second the systematic
    * And them the HistArray for high low etc.
-   * We invert the order in the output
    */
   result.Corr.resize(m_nSysMax);
   const std::vector<std::vector<HistArray>>& sysList =
@@ -374,10 +355,27 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
       const int sys_entries = sysList.at(index).at(runnumberIndex).size();
       for (int sys = 0; sys < sys_entries; ++sys) {
         double sysVal =
-            static_cast<TH2*>(
-                sysList[index][runnumberIndex][sys_entries - 1 - sys].get())
+            static_cast<TH2*>(sysList[index][runnumberIndex][sys].get())
                 ->GetBinContent(globalBinNumber);
-        result.Corr[sys_entries - 1 - sys] = sysVal;
+        result.Corr[sys] = sysVal;
+      }
+    }
+  }
+  /*
+   * Do the toys if requested  and exit early
+   */
+  if (m_doToyMC || m_doCombToyMC) {
+    result.toys.resize(static_cast<size_t>(m_nToyMC));
+    const std::vector<std::vector<HistArray>>& toyMCList =
+        ((isFastSim) ? m_uncorrToyMCSystFast : m_uncorrToyMCSystFull);
+    if (toyMCList.size() > (unsigned int)runnumberIndex) {
+      for (int toy = 0; toy < m_nToyMC; ++toy) {
+        if (toyMCList[runnumberIndex][toy].size() >
+            static_cast<unsigned int>(index)) {
+          result.toys[toy] =
+              static_cast<TH2*>(toyMCList[runnumberIndex][toy][index].get())
+                  ->GetBinContent(globalBinNumber);
+        }
       }
     }
   }

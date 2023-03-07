@@ -19,22 +19,10 @@ def TElectronTestAlgCfg():
 
 
 if __name__ == "__main__":
-    from argparse import ArgumentParser
-    parser = ArgumentParser("TElectronTestAlg")
-    parser.add_argument("-n", "--maxEvents",
-                        default=10,
-                        type=int,
-                        help="The number of events to run. -1 (all).")
-    parser.add_argument("-f", "--inputFile",
-                        default=None,
-                        type=str,
-                        help="The input (D)AOD file")
-    args = parser.parse_args()
-    print(args)
-
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.Input.Files = [args.inputFile]
+    flags.fillFromArgs()
+    flags.lock()
     flags.dump()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -47,7 +35,7 @@ if __name__ == "__main__":
 
     print("Start running...")
     statusCode = None
-    statusCode = cfg.run(args.maxEvents)
+    statusCode = cfg.run()
 
     assert statusCode is not None, "Issue while running"
     sys.exit(not statusCode.isSuccess())
