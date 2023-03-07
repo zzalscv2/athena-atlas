@@ -11,6 +11,8 @@
 Reco_tf.py \
 --CA 'all:True' 'RDOtoRDOTrigger:False' \
 --AMI=q445 \
+--preExec "r2a:flags.DQ.Steering.HLT.doInDet=False; flags.Exec.FPE=500;" \
+--postExec "" \
 --multithreaded \
 --maxEvents=500 \
 --outputRDOFile=myRDO.pool.root --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root --outputHISTFile=myHIST.root \
