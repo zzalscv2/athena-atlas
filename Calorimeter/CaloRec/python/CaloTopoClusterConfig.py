@@ -423,6 +423,7 @@ if __name__=="__main__":
     flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc20e_13TeV/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.ESD.e4993_s3227_r12689/myESD.pool.root"]  
     flags.Output.ESDFileName="esdOut.pool.root"
 
+    flags.fillFromArgs()
     flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
