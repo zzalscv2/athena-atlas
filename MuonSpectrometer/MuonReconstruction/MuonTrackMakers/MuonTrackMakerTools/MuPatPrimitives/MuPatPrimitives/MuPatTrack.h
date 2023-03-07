@@ -191,8 +191,8 @@ namespace Muon {
             // prefer tracks with fit quality (always expected)
             const Trk::FitQuality* fq1 = c1->track().fitQuality();
             const Trk::FitQuality* fq2 = c2->track().fitQuality();
-            if (!fq1 && fq2) return false;
-            if (fq1 && !fq2) return true;
+            if (!fq1) return false;
+            if (!fq2) return true;
 
             if (fq1->numberDoF() > fq2->numberDoF()) return true;
             if (fq1->numberDoF() < fq2->numberDoF()) return false;
