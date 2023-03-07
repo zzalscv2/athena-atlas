@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-from TrigCaloRec.TrigCaloRecConf import TrigCaloClusterMaker, TrigCaloTowerMaker
+from TrigCaloRec.TrigCaloRecConf import TrigCaloTowerMaker
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
 mlog = logging.getLogger ('TrigCaloRecConfig')
@@ -45,282 +45,12 @@ def trigCaloClusterMakerMonTool(flags, doMonCells = False):
     return monTool
 
 
-class TrigCaloTowerMakerBase (TrigCaloTowerMaker):
-    __slots__ = []
-    def __init__(self, name):
-        super( TrigCaloTowerMakerBase, self ).__init__(name)
-
-class TrigCaloClusterMakerBase (TrigCaloClusterMaker):
-    __slots__ = []
-    def __init__(self, name):
-        super( TrigCaloClusterMakerBase, self ).__init__(name)
-
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
-        self.MonCells = "FS" in name
-        self.MonTool = trigCaloClusterMakerMonTool(flags, self.MonCells)
-
-class TrigCaloClusterMaker_topo (TrigCaloClusterMakerBase):
-    __slots__ = []
-    def __init__ (self, name='TrigCaloClusterMaker_topo', cells="cells",doMoments=True, doLC=True ):
-        super(TrigCaloClusterMaker_topo, self).__init__(name)
-        
-        self.Cells=cells
-
-        from CaloClusterCorrection.CaloClusterCorrectionConf import CaloLCWeightTool, CaloLCClassificationTool, CaloLCOutOfClusterTool, CaloLCDeadMaterialTool
-        from CaloClusterCorrection.CaloClusterCorrectionConf import CaloClusterLocalCalib
-        from CaloRec.CaloRecConf import CaloTopoClusterMaker, CaloTopoClusterSplitter, CaloClusterMomentsMaker
-        from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
-        from CaloRec.CaloTopoClusterFlags import jobproperties
-        from AthenaCommon.SystemOfUnits import deg
-        from AthenaCommon.GlobalFlags import globalflags
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
-        
-        # tools used by tools
-
-        if doLC:
-          #For LCWeightsTool needs electronic noise
-          CaloNoiseCondAlg(noisetype="electronicNoise") 
-          TrigLCClassify   = CaloLCClassificationTool("TrigLCClassify")
-          TrigLCClassify.ClassificationKey   = "EMFracClassify"
-          TrigLCClassify.UseSpread = False
-          TrigLCClassify.MaxProbability = 0.5
-          TrigLCClassify.StoreClassificationProbabilityInAOD = True
-
-          TrigLCWeight = CaloLCWeightTool("TrigLCWeight")
-          TrigLCWeight.CorrectionKey       = "H1ClusterCellWeights"
-          TrigLCWeight.SignalOverNoiseCut  = 2.0
-          TrigLCWeight.UseHadProbability   = True
-
-          TrigLCOut     = CaloLCOutOfClusterTool("TrigLCOut")
-          TrigLCOut.CorrectionKey       = "OOCCorrection"
-          TrigLCOut.UseEmProbability    = False
-          TrigLCOut.UseHadProbability   = True
-
-          TrigLCOutPi0  = CaloLCOutOfClusterTool("TrigLCOutPi0")
-          TrigLCOutPi0.CorrectionKey    = "OOCPi0Correction"
-          TrigLCOutPi0.UseEmProbability  = True
-          TrigLCOutPi0.UseHadProbability = False
-
-          TrigLCDeadMaterial   = CaloLCDeadMaterialTool("TrigLCDeadMaterial")
-          TrigLCDeadMaterial.HadDMCoeffKey       = "HadDMCoeff2"
-          #TrigLCDeadMaterial.SignalOverNoiseCut  = 1.0
-          TrigLCDeadMaterial.ClusterRecoStatus   = 0
-          TrigLCDeadMaterial.WeightModeDM        = 2
-          TrigLCDeadMaterial.UseHadProbability   = True
-
-          # correction tools using tools
-          TrigLocalCalib = CaloClusterLocalCalib ("TrigLocalCalib")
-          TrigLocalCalib.ClusterClassificationTool     = [TrigLCClassify]
-          #TrigLocalCalib.ClusterRecoStatus             = [2]
-          TrigLocalCalib.ClusterRecoStatus             = [1,2]
-          TrigLocalCalib.LocalCalibTools               = [TrigLCWeight]
-
-          TrigLocalCalib += TrigLCClassify
-          TrigLocalCalib += TrigLCWeight
-
-          TrigOOCCalib   = CaloClusterLocalCalib ("TrigOOCCalib")
-          #TrigOOCCalib.ClusterRecoStatus   = [2]
-          TrigOOCCalib.ClusterRecoStatus   = [1,2]
-          TrigOOCCalib.LocalCalibTools     = [TrigLCOut]
-
-          TrigOOCCalib += TrigLCOut
-
-          TrigOOCPi0Calib   = CaloClusterLocalCalib ("TrigOOCPi0Calib")
-          #OOCPi0Calib.ClusterRecoStatus   = [1]
-          TrigOOCPi0Calib.ClusterRecoStatus   = [1,2]
-          TrigOOCPi0Calib.LocalCalibTools     = [TrigLCOutPi0]
-
-          TrigOOCPi0Calib += TrigLCOutPi0
-
-
-          TrigDMCalib    = CaloClusterLocalCalib ("TrigDMCalib")
-          TrigDMCalib.ClusterRecoStatus   = [1,2]
-          TrigDMCalib.LocalCalibTools     = [TrigLCDeadMaterial]
-
-          TrigDMCalib += TrigLCDeadMaterial
-
-       
-        if doMoments:
- 
-          # correction tools not using tools
-          TrigTopoMoments = CaloClusterMomentsMaker ("TrigTopoMoments")
-          TrigTopoMoments.MaxAxisAngle = 20*deg
-          TrigTopoMoments.TwoGaussianNoise = jobproperties.CaloTopoClusterFlags.doTwoGaussianNoise()
-          TrigTopoMoments.MinBadLArQuality = 4000
-          TrigTopoMoments.MomentsNames = ["FIRST_PHI" 
-                                          ,"FIRST_ETA"
-                                          ,"SECOND_R" 
-                                          ,"SECOND_LAMBDA"
-                                          ,"DELTA_PHI"
-                                          ,"DELTA_THETA"
-                                          ,"DELTA_ALPHA" 
-                                          ,"CENTER_X"
-                                          ,"CENTER_Y"
-                                          ,"CENTER_Z"
-                                          ,"CENTER_MAG"
-                                          ,"CENTER_LAMBDA"
-                                          ,"LATERAL"
-                                          ,"LONGITUDINAL"
-                                          ,"FIRST_ENG_DENS" 
-                                          ,"ENG_FRAC_EM" 
-                                          ,"ENG_FRAC_MAX" 
-                                          ,"ENG_FRAC_CORE" 
-                                          ,"FIRST_ENG_DENS" 
-                                          ,"SECOND_ENG_DENS" 
-                                          ,"ISOLATION"
-                                          ,"ENG_BAD_CELLS"
-                                          ,"N_BAD_CELLS"
-                                          ,"N_BAD_CELLS_CORR"
-                                          ,"BAD_CELLS_CORR_E"
-                                          ,"BADLARQ_FRAC"
-                                          ,"ENG_POS"
-                                          ,"SIGNIFICANCE"
-                                          ,"CELL_SIGNIFICANCE"
-                                          ,"CELL_SIG_SAMPLING"
-                                          ,"AVG_LAR_Q"
-                                          ,"AVG_TILE_Q"
-                                          ]          
-        #TrigLockVariables = CaloClusterLockVars("TrigLockVariables")
-        #TrigLockVariables.FixBasicEnergy = True
-        #TrigLockVariables.LockedSamplingVariables = []
-        #TrigLockVariables.LockedSamplingVariables += [
-        #    "Energy", "Max_Energy"]
-        #TrigLockVariables.LockedSamplingVariables += [
-        #    "Eta", "Phi", "Delta_Eta",
-        #    "Delta_Phi", "Max_Eta", "Max_Phi"
-        #    ]
-        
-        # maker tools
-        CaloNoiseCondAlg()
-        TrigTopoMaker = CaloTopoClusterMaker("TopoMaker")
-
-        TrigTopoMaker.CellsName = cells
-        TrigTopoMaker.CalorimeterNames=["LAREM",
-                                        "LARHEC",
-                                        "LARFCAL",
-                                        "TILE"]
-        # cells from the following samplings will be able to form
-        # seeds. By default no sampling is excluded
-        TrigTopoMaker.SeedSamplingNames = ["PreSamplerB", "EMB1", "EMB2", "EMB3",
-                                           "PreSamplerE", "EME1", "EME2", "EME3",
-                                           "HEC0", "HEC1","HEC2", "HEC3",
-                                           "TileBar0", "TileBar1", "TileBar2",
-                                           "TileExt0", "TileExt1", "TileExt2",
-                                           "TileGap1", "TileGap2", "TileGap3",
-                                           "FCAL0", "FCAL1", "FCAL2"]
-
-        TrigTopoMaker.NeighborOption = "super3D"
-        TrigTopoMaker.RestrictHECIWandFCalNeighbors  = False
-        TrigTopoMaker.RestrictPSNeighbors = False
-        TrigTopoMaker.CellThresholdOnEorAbsEinSigma     =    0.0
-        TrigTopoMaker.NeighborThresholdOnEorAbsEinSigma =    2.0  #instead of 2
-        TrigTopoMaker.SeedThresholdOnEorAbsEinSigma     =    4.0  #instead of 4
-        # note Et or AbsEt
-        #TrigTopoMaker.NeighborCutsInAbsE              = False
-        #TrigTopoMaker.CellCutsInAbsE                 = False
-        #
-        # the following cut must be set to TRUE in order to make double
-        # sided cuts on the seed and the cluster level ( neighbor and cell
-        # cuts are always double sided)
-        #
-        TrigTopoMaker.SeedCutsInAbsE                 = True
-        TrigTopoMaker.ClusterEtorAbsEtCut            = 0.0*MeV
-        # the following Et thresholds are ignored in case UsePileUpNoise
-        # is TRUE
-        #
-        #
-        #CellThresholdOnEtorAbsEt = 0.0*MeV
-        #NeighborThresholdOnEtorAbsEt = 100.0*MeV
-        #SeedThresholdOnEtorAbsEt = 200.0*MeV
-
-        # use 2-gaussian or single gaussian noise for TileCal
-        TrigTopoMaker.TwoGaussianNoise = jobproperties.CaloTopoClusterFlags.doTwoGaussianNoise()
-
-        #timing
-        TrigTopoMaker.SeedCutsInT = flags.Trigger.Calo.TopoCluster.doTimeCut
-        TrigTopoMaker.CutOOTseed = flags.Trigger.Calo.TopoCluster.extendTimeCut and flags.Trigger.Calo.TopoCluster.doTimeCut
-        TrigTopoMaker.UseTimeCutUpperLimit = flags.Trigger.Calo.TopoCluster.useUpperLimitForTimeCut
-        TrigTopoMaker.TimeCutUpperLimit = flags.Trigger.Calo.TopoCluster.timeCutUpperLimit
-
-        TrigTopoSplitter = CaloTopoClusterSplitter("TopoSplitter")        
-        # cells from the following samplings will be able to form local
-        # maxima. The excluded samplings are PreSamplerB, EMB1,
-        # PreSamplerE, EME1, all Tile samplings, all HEC samplings and the
-        # two rear FCal samplings.
-        #
-        TrigTopoSplitter.SamplingNames = ["EMB2", "EMB3",
-                                          "EME2", "EME3",
-                                          "FCAL0"]
-        # cells from the following samplings will also be able to form
-        # local maxima but only if they are not overlapping in eta and phi
-        # with local maxima in previous samplings from the primary list.
-        #
-        TrigTopoSplitter.SecondarySamplingNames = ["EMB1","EME1",
-                                                   "TileBar0","TileBar1","TileBar2",
-                                                   "TileExt0","TileExt1","TileExt2",
-                                                   "HEC0","HEC1","HEC2","HEC3",
-                                                   "FCAL1","FCAL2"]
-        TrigTopoSplitter.ShareBorderCells = True
-        TrigTopoSplitter.RestrictHECIWandFCalNeighbors  = False
-        #
-        # the following options are not set, since these are the default
-        # values
-        #
-        # NeighborOption                = "super3D",
-        # NumberOfCellsCut              = 4,
-        # EnergyCut                     = 500*MeV,
-
-
-        # cluster maker
-
-        if not doMoments:
-          self.ClusterMakerTools = [ TrigTopoMaker, TrigTopoSplitter]
-        else:
-          self.ClusterMakerTools = [ TrigTopoMaker, TrigTopoSplitter,  TrigTopoMoments]
-
-        # do not use BadChannelListCorr since this is not used for jet and tau in offline
-        #TrigBadChannelListCorr = CaloClusterBadChannelListCorr()
-        #self.ClusterCorrectionTools += [TrigBadChannelListCorr.getFullName()]
-        
-        self += TrigTopoMaker
-        self += TrigTopoSplitter
-        #self += TrigBadChannelListCorr
-        if doMoments:
-          self += TrigTopoMoments
-
-        self.ClusterCorrectionTools = [  ]
-        #self.ClusterCorrectionTools = [ TrigLockVariables.getFullName() ]
-        #self += TrigLockVariables
-
-        if doLC:
-          self.ClusterCorrectionTools += [ TrigLocalCalib,
-                                           TrigOOCCalib,
-                                           TrigOOCPi0Calib,
-                                           TrigDMCalib]
-          self += TrigLocalCalib
-          self += TrigOOCCalib
-          self += TrigOOCPi0Calib
-          self += TrigDMCalib
-
-        #
-        # pool/cool part
-        #
-        if doLC:  
-          if globalflags.DetDescrVersion().startswith("Rome"):
-             self.TrigLocalCalib.TrigLCClassify.MaxProbability = 0.85
-             self.TrigLocalCalib.TrigLCClassify.UseNormalizedEnergyDensity = False
-          else:
-             self.TrigLocalCalib.TrigLCClassify.MaxProbability = 0.50
-             self.TrigLocalCalib.TrigLCClassify.UseNormalizedEnergyDensity = True
-
-        from CaloRec import CaloClusterTopoCoolFolder  # noqa: F401
-
-
 def HLTCaloCellMaker(flags, name, roisKey='UNSPECIFIED', CellsName=None, monitorCells=True):
     """Wrapper for legacy job options"""
     from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
     cellmaker = algorithmCAToGlobalWrapper(hltCaloCellMakerCfg, flags, name, roisKey, CellsName, monitorCells)[0]
     return cellmaker
+
 
 def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None, monitorCells=True):
     acc = ComponentAccumulator()
@@ -371,7 +101,7 @@ def hltCaloCellSeedlessMakerCfg(flags, roisKey='UNSPECIFIED'):
     return acc
 
 
-def hltCaloLocalCalib(flags, name = "hltCaloLocalCalib"):
+def hltCaloLocalCalib(flags, name = "TrigLocalCalib"):
     det_version_is_rome = flags.GeoModel.AtlasVersion.startswith("Rome")
     localCalibTool = CompFactory.CaloLCWeightTool("TrigLCWeight",
            CorrectionKey="H1ClusterCellWeights",
@@ -387,7 +117,7 @@ def hltCaloLocalCalib(flags, name = "hltCaloLocalCalib"):
     return tool
 
 
-def hltCaloOOCalib(flags, name = "hltCaloOOCCalib"):
+def hltCaloOOCalib(flags, name = "TrigOOCCalib"):
     localCalibTool = CompFactory.CaloLCOutOfClusterTool("TrigLCOut",
            CorrectionKey="OOCCorrection",UseEmProbability=False,
            UseHadProbability=True)
@@ -396,7 +126,7 @@ def hltCaloOOCalib(flags, name = "hltCaloOOCCalib"):
            LocalCalibTools=[ localCalibTool ] )
     return tool
 
-def hltCaloOOCPi0Calib(flags, name = "hltCaloOOCPi0Calib" ):
+def hltCaloOOCPi0Calib(flags, name = "TrigOOCPi0Calib" ):
     localCalibTool = CompFactory.CaloLCOutOfClusterTool("TrigLCOutPi0",
            CorrectionKey="OOCPi0Correction", UseEmProbability=True,
            UseHadProbability=False)
@@ -405,7 +135,7 @@ def hltCaloOOCPi0Calib(flags, name = "hltCaloOOCPi0Calib" ):
            LocalCalibTools=[ localCalibTool ] )
     return tool
 
-def hltCaloDMCalib(flags, name = "hltCaloDMCalib" ):
+def hltCaloDMCalib(flags, name = "TrigDMCalib" ):
     localCalibTool = CompFactory.CaloLCDeadMaterialTool("TrigLCDeadMaterial",
            HadDMCoeffKey="HadDMCoeff2", ClusterRecoStatus=0,
            WeightModeDM=2,UseHadProbability=True)
@@ -417,7 +147,7 @@ def hltCaloDMCalib(flags, name = "hltCaloDMCalib" ):
 
 
 def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
-                    cellsKey="CaloCells", doLC=True):
+                           cellsKey="CaloCells", doLC=True):
     acc = ComponentAccumulator()
 
     from CaloRec.CaloTopoClusterConfig import (
@@ -426,7 +156,7 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
     )
 
     topoMaker = acc.popToolsAndMerge(CaloTopoClusterToolCfg(flags, cellsname=cellsKey))
-    topoMaker.RestrictPSNeighbors=False
+    topoMaker.RestrictPSNeighbors = False
     listClusterCorrectionTools = []
     if doLC :
        from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
@@ -552,8 +282,9 @@ def hltCaloTopoClusterCalibratorCfg(flags, name, clustersin, clustersout, **kwar
     acc.addEventAlgo(calibrator, primary=True)
     return acc
 
+
 ## Heavy Ion 
-class TrigCaloTowerMaker_hijet (TrigCaloTowerMakerBase):
+class TrigCaloTowerMaker_hijet (TrigCaloTowerMaker):
     __slots__ = []
     def __init__ (self, name='TrigCaloTowerMaker_hijet'):
         super(TrigCaloTowerMaker_hijet, self).__init__(name)

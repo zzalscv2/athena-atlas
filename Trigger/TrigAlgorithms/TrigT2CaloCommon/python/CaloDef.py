@@ -2,8 +2,9 @@
 
 from AthenaCommon.CFElements import seqAND, parOR
 from AthenaConfiguration.ComponentFactory import CompFactory
+from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
 from TriggerMenuMT.HLT.CommonSequences.FullScanDefs import caloFSRoI
-
 
 ########################
 ## ALGORITHMS
@@ -48,20 +49,23 @@ def _algoHLTCaloCellCorrector(name='HLTCaloCellCorrector', inputEDM='CellsCluste
 
   return algo
 
-def _algoHLTTopoCluster(inputEDM="CellsClusters", algSuffix="") :
-   from TrigCaloRec.TrigCaloRecConfig import TrigCaloClusterMaker_topo
-   algo = TrigCaloClusterMaker_topo(name="TrigCaloClusterMaker_topo"+algSuffix, doMoments=True, doLC=False, cells=inputEDM)
-   from TrigEDMConfig.TriggerEDMRun3 import recordable
-   algo.CaloClusters=recordable("HLT_TopoCaloClusters"+algSuffix)
+def _algoHLTTopoCluster(flags, inputEDM="CellsClusters", algSuffix="") :
+   from TrigCaloRec.TrigCaloRecConfig import hltTopoClusterMakerCfg
+   algo = algorithmCAToGlobalWrapper(hltTopoClusterMakerCfg, flags,
+                                     name="TrigCaloClusterMaker_topo"+algSuffix,
+                                     doLC=False,
+                                     clustersKey="HLT_TopoCaloClusters"+algSuffix,
+                                     cellsKey=inputEDM)[0]
    return algo
 
-def _algoHLTTopoClusterLC(inputEDM="CellsClusters", algSuffix="") :
-   from TrigCaloRec.TrigCaloRecConfig import TrigCaloClusterMaker_topo
-   algo = TrigCaloClusterMaker_topo(name="TrigCaloClusterMaker_topo"+algSuffix, doMoments=True, doLC=True, cells=inputEDM)
-   from TrigEDMConfig.TriggerEDMRun3 import recordable
-   algo.CaloClusters=recordable("HLT_TopoCaloClusters"+algSuffix)
+def _algoHLTTopoClusterLC(flags, inputEDM="CellsClusters", algSuffix="") :
+   from TrigCaloRec.TrigCaloRecConfig import hltTopoClusterMakerCfg
+   algo = algorithmCAToGlobalWrapper(hltTopoClusterMakerCfg, flags,
+                                     name="TrigCaloClusterMaker_topo"+algSuffix,
+                                     doLC=True,
+                                     clustersKey="HLT_TopoCaloClusters"+algSuffix,
+                                     cellsKey=inputEDM)[0]
    return algo
-
 
 
 #
@@ -92,7 +96,6 @@ def _algoL2Egamma(flags, inputEDM="", ClustersName="HLT_FastCaloEMClusters", Rin
             algo=T2CaloEgamma_All(flags, "L2CaloLayersFex")
             algo.RoIs=inputEDM
     algo.ExtraInputs+=[ ( 'LArBadChannelCont', 'ConditionStore+LArBadChannel'), ( 'LArMCSym', 'ConditionStore+LArMCSym'), ('LArOnOffIdMapping' , 'ConditionStore+LArOnOffIdMap' ), ('LArFebRodMapping'  , 'ConditionStore+LArFebRodMap' ), ('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager') ]
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
     algo.ClustersName=recordable(ClustersName)
     return algo
 
@@ -215,7 +218,7 @@ def HLTFSCellMakerRecoSequence(flags,RoIs=caloFSRoI):
 
 def HLTFSTopoRecoSequence(flags,RoIs):
     cellMaker = HLTCellMaker(flags, RoIs, outputName="CaloCellsFS", algSuffix="FS")
-    topoClusterMaker = _algoHLTTopoCluster(inputEDM = cellMaker.CellsName, algSuffix="FS")
+    topoClusterMaker = _algoHLTTopoCluster(flags, inputEDM = cellMaker.CellsName, algSuffix="FS")
     RecoSequence = parOR("TopoClusterRecoSequenceFS", [cellMaker, topoClusterMaker])
     return (RecoSequence, topoClusterMaker.CaloClusters)
 
@@ -228,7 +231,7 @@ def HLTRoITopoRecoSequence(flags, RoIs, algSuffix=''):
                                              ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' )]
 
     cellMaker = HLTCellMaker(flags, RoIs, algSuffix="RoI%s"%algSuffix)
-    topoClusterMaker = _algoHLTTopoCluster(inputEDM = cellMaker.CellsName, algSuffix="RoI%s"%algSuffix)
+    topoClusterMaker = _algoHLTTopoCluster(flags, inputEDM = cellMaker.CellsName, algSuffix="RoI%s"%algSuffix)
     RecoSequence = parOR("RoITopoClusterRecoSequence%s"%algSuffix, [HLTRoITopoRecoSequenceVDV, cellMaker, topoClusterMaker])
     return (RecoSequence, topoClusterMaker.CaloClusters)
 
@@ -253,7 +256,7 @@ def HLTHIRoITopoRecoSequence(flags, RoIs, algSuffix=''):
         outputEDM='CorrectedRoICaloCells',
         eventShape=eventShape)
 
-    topoClusterMaker = _algoHLTTopoCluster(inputEDM = cellCorrector.OutputCellKey, algSuffix="HIRoI")
+    topoClusterMaker = _algoHLTTopoCluster(flags, inputEDM = cellCorrector.OutputCellKey, algSuffix="HIRoI")
     RecoSequence = parOR("HIRoITopoClusterRecoSequence", [HLTRoITopoRecoSequenceVDV, cellMaker, cellCorrector, topoClusterMaker])
     return (RecoSequence, topoClusterMaker.CaloClusters)
 
@@ -261,7 +264,7 @@ def HLTHIRoITopoRecoSequence(flags, RoIs, algSuffix=''):
 def HLTLCTopoRecoSequence(flags, RoIs='InViewRoIs'):
     cellMaker = HLTCellMaker(flags, RoIs, outputName="CaloCellsLC", algSuffix="LC")
     cellMaker.TileCellsInROI = True
-    topoClusterMaker = _algoHLTTopoClusterLC(inputEDM = cellMaker.CellsName, algSuffix="LC")
+    topoClusterMaker = _algoHLTTopoClusterLC(flags, inputEDM = cellMaker.CellsName, algSuffix="LC")
     RecoSequence = parOR("TopoClusterRecoSequenceLC",[cellMaker,topoClusterMaker])
     return (RecoSequence, topoClusterMaker.CaloClusters)
 
