@@ -158,7 +158,7 @@ public:
 
   // unimplemented globalPositions
   virtual void globalPositions(const EventContext&,
-                               std::list<Amg::Vector3D>&,
+                               std::deque<Amg::Vector3D>&,
                                const TrackParameters&,
                                const MagneticFieldProperties&,
                                const CylinderBounds&,

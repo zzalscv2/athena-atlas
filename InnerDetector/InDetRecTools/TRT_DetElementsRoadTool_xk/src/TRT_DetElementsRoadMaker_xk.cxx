@@ -293,7 +293,7 @@ InDet::TRT_DetElementsRoadMaker_xk::detElementsRoad
     Trk::MagneticFieldMode fieldModeEnum(m_fieldModeEnum);
     if(!fieldCache.solenoidOn()) fieldModeEnum = Trk::NoField;
     Trk::MagneticFieldProperties fieldprop(fieldModeEnum);
-    std::list<Amg::Vector3D> G;
+    std::deque<Amg::Vector3D> G;
     m_proptool->globalPositions(ctx, G,Tp,fieldprop,CB,S,Trk::pion);
     if(G.size() > 1 ) {
       detElementsRoadATL(G,result);
@@ -309,13 +309,13 @@ InDet::TRT_DetElementsRoadMaker_xk::detElementsRoad
 ///////////////////////////////////////////////////////////////////
 
 void InDet::TRT_DetElementsRoadMaker_xk::detElementsRoadATL
-(std::list<Amg::Vector3D>& GP,
+(std::deque<Amg::Vector3D>& GP,
  std::vector<const InDetDD::TRT_BaseElement*>& Road) const
 {
   int n0     = 0;
   int n1     = 0;
   int n2     = 0;
-  std::list<Amg::Vector3D>::iterator g=GP.begin(),ge=GP.end();
+  std::deque<Amg::Vector3D>::iterator g=GP.begin(),ge=GP.end();
 
   const TRT_DetElementsLayerVectors_xk &layer = *getLayers();
 
@@ -350,39 +350,40 @@ void InDet::TRT_DetElementsRoadMaker_xk::detElementsRoadATL
 
     // Barrel
     //
-    if(Pn[3]>Po[3]) {
-      for(; n1<(int)layer[1].size(); ++n1) {
+    if (Pn[3] > Po[3]) {
+        for (; n1 < (int)layer[1].size(); ++n1) {
 
-	if(Pn[3] < layer[1][n1].r()) break;
-        assert( used.at(1).size() > static_cast<unsigned int>(n1) );
-	layer[1][n1].getBarrelDetElementsATL(Po,A,lDE,used[1][n1]);
-
-      }
-    }
-    else     {
-      for(--n1; n1>=0; --n1) {
-	if(Pn[3] > layer[1][n1].r()) break;
-        assert( used.at(1).size() > static_cast<unsigned int>(n1) );
-	layer[1][n1].getBarrelDetElementsATL(Po,A,lDE,used[1][n1]);
-     }
-      ++n1;
+          if (Pn[3] < layer[1][n1].r())
+            break;
+          assert(used.at(1).size() > static_cast<unsigned int>(n1));
+          layer[1][n1].getBarrelDetElementsATL(Po, A, lDE, used[1][n1]);
+        }
+    } else {
+        for (--n1; n1 >= 0; --n1) {
+          if (Pn[3] > layer[1][n1].r())
+            break;
+          assert(used.at(1).size() > static_cast<unsigned int>(n1));
+          layer[1][n1].getBarrelDetElementsATL(Po, A, lDE, used[1][n1]);
+        }
+        ++n1;
     }
 
     // Positive endcap
     //
     if(Pn[2]>Po[2]) {
 
-      for(; n2<(int)layer[2].size(); ++n2) {
-	if(Pn[2] < layer[2][n2].z()) break;
-        assert( used.at(2).size()> static_cast<unsigned int>(n2));
-	layer[2][n2].getEndcapDetElements(Po,A,lDE,used[2][n2]);
+      for (; n2 < (int)layer[2].size(); ++n2) {
+        if (Pn[2] < layer[2][n2].z())
+          break;
+        assert(used.at(2).size() > static_cast<unsigned int>(n2));
+        layer[2][n2].getEndcapDetElements(Po, A, lDE, used[2][n2]);
       }
-    }
-    else     {
-      for(--n2; n2>=0; --n2) {
-	if(Pn[2] > layer[2][n2].z()) break;
-        assert( used.at(2).size() > static_cast<unsigned int>(n2));
-	layer[2][n2].getEndcapDetElements(Po,A,lDE,used[2][n2]);
+    } else {
+      for (--n2; n2 >= 0; --n2) {
+        if (Pn[2] > layer[2][n2].z())
+          break;
+        assert(used.at(2).size() > static_cast<unsigned int>(n2));
+        layer[2][n2].getEndcapDetElements(Po, A, lDE, used[2][n2]);
       }
       ++n2;
     }
@@ -391,17 +392,18 @@ void InDet::TRT_DetElementsRoadMaker_xk::detElementsRoadATL
     //
     if(Pn[2]<Po[2]) {
 
-      for(; n0<(int)layer[0].size(); ++n0) {
-	if(Pn[2] > layer[0][n0].z()) break;
-        assert( used.at(0).size() > static_cast<unsigned int>(n0));
-	layer[0][n0].getEndcapDetElements(Po,A,lDE,used[0][n0]);
+      for (; n0 < (int)layer[0].size(); ++n0) {
+        if (Pn[2] > layer[0][n0].z())
+          break;
+        assert(used.at(0).size() > static_cast<unsigned int>(n0));
+        layer[0][n0].getEndcapDetElements(Po, A, lDE, used[0][n0]);
       }
-    }
-     else   {
-      for(--n0; n0>=0; --n0) {
-	if(Pn[2] < layer[0][n0].z()) break;
-        assert( used.at(0).size() > static_cast<unsigned int>(n0));
-	layer[0][n0].getEndcapDetElements(Po,A,lDE,used[0][n0]);
+    } else {
+      for (--n0; n0 >= 0; --n0) {
+        if (Pn[2] < layer[0][n0].z())
+          break;
+        assert(used.at(0).size() > static_cast<unsigned int>(n0));
+        layer[0][n0].getEndcapDetElements(Po, A, lDE, used[0][n0]);
       }
       ++n0;
     }
@@ -443,11 +445,11 @@ void InDet::TRT_DetElementsRoadMaker_xk::detElementsRoadATL
 ///////////////////////////////////////////////////////////////////
 
 void InDet::TRT_DetElementsRoadMaker_xk::detElementsRoadCTB
-(std::list<Amg::Vector3D>& GP,
+(std::deque<Amg::Vector3D>& GP,
  std::vector<const InDetDD::TRT_BaseElement*>& Road) const
 {
   int n1     = 0;
-  std::list<Amg::Vector3D>::iterator g=GP.begin(),ge=GP.end();
+  std::deque<Amg::Vector3D>::iterator g=GP.begin(),ge=GP.end();
 
   const TRT_DetElementsLayerVectors_xk &layer = *getLayers();
 

@@ -946,10 +946,9 @@ propagateStraightLine(Cache& cache,
 // where mS - max step allowed if mS > 0 propagate along    momentum
 //                                mS < 0 propogate opposite momentum
 /////////////////////////////////////////////////////////////////////////////////
-template <typename Container>
 void
 globalOneSidePositions(Cache& cache,
-                       Container& GP,
+                       std::deque<Amg::Vector3D>& GP,
                        const double* ATH_RESTRICT P,
                        const Trk::MagneticFieldProperties& M,
                        const Trk::CylinderBounds& CB,
@@ -1099,10 +1098,9 @@ globalOneSidePositions(Cache& cache,
 // where mS - max step allowed if mS > 0 propagate along    momentum
 //                                mS < 0 propogate opposite momentum
 /////////////////////////////////////////////////////////////////////////////////
-template <typename Container>
 void
 globalTwoSidePositions(Cache& cache,
-                       Container& GP,
+                       std::deque<Amg::Vector3D>& GP,
                        const double* ATH_RESTRICT P,
                        const Trk::MagneticFieldProperties& M,
                        const Trk::CylinderBounds& CB,
@@ -1508,13 +1506,12 @@ propagateRungeKutta(Cache& cache,
 /////////////////////////////////////////////////////////////////////////////////
 // GlobalPostions and steps for set surfaces
 /////////////////////////////////////////////////////////////////////////////////
-template <typename Container1, typename Container2>
 void
 globalPositionsImpl(
   Cache& cache,
   const Trk::PatternTrackParameters& Tp,
-  Container1& SU,
-  Container2& GP,
+  std::vector<const Trk::Surface*>& SU,
+  std::vector<std::pair<Amg::Vector3D, double>>& GP,
   const Trk::MagneticFieldProperties& M)
 {
   cache.m_direction = 0.;
@@ -2069,7 +2066,7 @@ Trk::RungeKuttaPropagator::propagateParameters(const ::EventContext& ctx,
 /////////////////////////////////////////////////////////////////////////////////
 void
 Trk::RungeKuttaPropagator::globalPositions(const ::EventContext& ctx,
-                                           std::list<Amg::Vector3D>& GP,
+                                           std::deque<Amg::Vector3D>& GP,
                                            const TrackParameters& Tp,
                                            const MagneticFieldProperties& M,
                                            const CylinderBounds& CB,
@@ -2337,41 +2334,6 @@ Trk::RungeKuttaPropagator::propagateParameters(const ::EventContext& ctx,
 
   cache.m_maxPath = 10000.;
   return propagateRungeKutta(cache, false, Ta, Su, Tb, D, M, S);
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-// Global positions calculation inside CylinderBounds
-// where mS - max step allowed if mS > 0 propagate along    momentum
-//                                mS < 0 propogate opposite momentum
-/////////////////////////////////////////////////////////////////////////////////
-void
-Trk::RungeKuttaPropagator::globalPositions(const ::EventContext& ctx,
-                                           std::list<Amg::Vector3D>& GP,
-                                           const Trk::PatternTrackParameters& Tp,
-                                           const MagneticFieldProperties& M,
-                                           const CylinderBounds& CB,
-                                           double mS,
-                                           ParticleHypothesis) const
-{
-  double P[45];
-  if (!Trk::RungeKuttaUtils::transformLocalToGlobal(false, Tp, P))
-    return;
-
-  Cache cache{};
-  cache.m_dlt = m_dlt;
-  cache.m_helixStep = m_helixStep;
-  cache.m_straightStep = m_straightStep;
-  cache.m_usegradient = m_usegradient;
-
-
-  // Get field cache object
-  getFieldCacheObject(cache, ctx);
-
-  cache.m_direction = std::abs(mS);
-  if (mS > 0.)
-    globalOneSidePositions(cache, GP, P, M, CB, mS);
-  else
-    globalTwoSidePositions(cache, GP, P, M, CB, -mS);
 }
 
 /////////////////////////////////////////////////////////////////////////////////

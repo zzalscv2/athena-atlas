@@ -35,7 +35,7 @@
 #include <atomic>
 #include <iosfwd>
 #include <list>
-#include <mutex>
+#include <deque>
 #include <vector>
 #include <array>
 
@@ -56,7 +56,7 @@ namespace InDet{
   */
   class SiDetElementRoadMakerData_xk; 
 
-  class SiDetElementsRoadMaker_xk : 
+  class SiDetElementsRoadMaker_xk final: 
     public extends<AthAlgTool, ISiDetElementsRoadMaker>
   {
     ///////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ namespace InDet{
     /// @param[in] testDirection: If set, avoid adding detector elements encountered only when travelling in the negative direction. Set true for inside-out tracking, false for cosmic tracking. 
     /// @param[in,out] roadMakerData: event data object used to cache information during an event in a thread-safe way 
     virtual void detElementsRoad
-      (std::list<Amg::Vector3D>& globalPositions, 
+      (std::deque<Amg::Vector3D>& globalPositions, 
        std::list<const InDetDD::SiDetectorElement*>& Road,
        bool testDirection,
        SiDetElementRoadMakerData_xk & roadMakerData,

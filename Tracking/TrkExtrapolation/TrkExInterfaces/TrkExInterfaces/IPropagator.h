@@ -28,6 +28,7 @@
 #include "TrkSurfaces/BoundaryCheck.h"
 // STL
 #include <utility>
+#include <deque>
 
 namespace Trk {
 
@@ -213,7 +214,7 @@ public:
      signature and a void method has been chosen.
      */
   virtual void globalPositions(const EventContext& ctx,
-                               std::list<Amg::Vector3D>& positionslist,
+                               std::deque<Amg::Vector3D>& positionslist,
                                const TrackParameters& parm,
                                const MagneticFieldProperties& mprop,
                                const CylinderBounds& cylbo,

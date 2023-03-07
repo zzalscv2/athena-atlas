@@ -91,16 +91,6 @@ namespace Trk {
        double                         &,
        ParticleHypothesis particle=pion) const = 0;
 
-      /** GlobalPositions list interface */
-    virtual void globalPositions
-      (const ::EventContext&          ctx,
-       std::list<Amg::Vector3D>       &,
-       const PatternTrackParameters   &,
-       const MagneticFieldProperties  &,
-       const CylinderBounds           &,
-       double                          ,
-       ParticleHypothesis particle=pion) const = 0;
-
     virtual void globalPositions
       (const ::EventContext&          ctx,
        const PatternTrackParameters                 &,
