@@ -365,7 +365,11 @@ def JETM6Cfg(ConfigFlags):
                                            'GlobalChargedParticleFlowObjects.chargedObjectLinks'
                                            'GlobalNeutralParticleFlowObjects.chargedObjectLinks'
                                            'CSSKGChargedParticleFlowObjects.pt.eta.phi.m.matchedToPV.originalObjectLink'
-                                           'CSSKGNeutralParticleFlowObjects.pt.eta.phi.m.originalObjectLink']
+                                           'CSSKGNeutralParticleFlowObjects.pt.eta.phi.m.originalObjectLink',
+                                           'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.SizeParameter',
+                                           'AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets.SizeParameter',
+                                           'AntiKt10TruthTrimmedPtFrac5SmallR20Jets.SizeParameter',
+                                           'AntiKt10TruthSoftDropBeta100Zcut10Jets.SizeParameter']
 
     # Truth containers
     if ConfigFlags.Input.isMC:
