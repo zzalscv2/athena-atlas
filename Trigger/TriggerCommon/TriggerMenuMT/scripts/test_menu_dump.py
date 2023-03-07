@@ -58,8 +58,10 @@ def run():
     # The Physics menu (at least) depends on a check of the menu name
     # in order to decide if PS:Online chains should be retained.
     # Should do this in a more explicit way
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Trigger.triggerMenuSetup=menu_name
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Trigger.triggerMenuSetup=menu_name
+    flags.lock()
 
     # Import menu by name
     menumodule = importlib.import_module(f'TriggerMenuMT.HLT.Menu.{menu_name}')
@@ -81,7 +83,7 @@ def run():
     if args.names:
         dump_chains(chains)
     elif args.parse_names:
-        chain_to_dict, failed = get_chain_dicts(ConfigFlags, chains)
+        chain_to_dict, failed = get_chain_dicts(flags, chains)
         if failed:
             sys.exit(1)
         if args.check_l1:

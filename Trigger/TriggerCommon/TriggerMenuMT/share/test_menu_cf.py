@@ -27,12 +27,12 @@ for option in defaultOptions:
         log.info(' %20s = (Default) %s' , option, getattr(testopt, option))
 
 
-
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+# runHLT_standalone still requires global ConfigFlags usage:
+from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
-ConfigFlags.Trigger.generateMenuDiagnostics = True
-ConfigFlags.Trigger.triggerMenuSetup = "Dev_pp_run3_v1"
-ConfigFlags.Trigger.ROBPrefetchingOptions = [ROBPrefetching.StepRoI]
+flags.Trigger.generateMenuDiagnostics = True
+flags.Trigger.triggerMenuSetup = "Dev_pp_run3_v1"
+flags.Trigger.ROBPrefetchingOptions = [ROBPrefetching.StepRoI]
 
 createHLTMenuExternally=True # menu will be build up explicitly here 
 doWriteRDOTrigger = False
@@ -52,14 +52,14 @@ from TriggerMenuMT.CFtest.EmuStepProcessingConfig import generateHLTSeedingAndCh
 topSequence = AlgSequence()
 
 if testopt.menuType == 'menuManual':
-    generateCFChains(opt)
+    generateCFChains(flags, opt)
     from TriggerMenuMT.HLT.Config.Validation.CheckL1HLTConsistency import checkL1HLTConsistency
-    checkL1HLTConsistency(ConfigFlags)
+    checkL1HLTConsistency(flags)
 elif testopt.menuType == 'emuMenuTest':
     # HLT_TestChain
-    generateHLTSeedingAndChainsByMenu(ConfigFlags, topSequence)
+    generateHLTSeedingAndChainsByMenu(flags, topSequence)
 elif testopt.menuType == 'emuManual':
-    generateHLTSeedingAndChainsManually(ConfigFlags, topSequence)
+    generateHLTSeedingAndChainsManually(flags, topSequence)
 else:
     log.error("Input parameter %s not accepted",testopt.menuType)
 
@@ -71,17 +71,17 @@ TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig.log.setLevel(DEBUG)
 
 # from here generate the ControlFlow and the Dataflow
 # doing the same as menu.generateMT()
-makeHLTTree(ConfigFlags, hltMenuConfig=HLTMenuConfig )
+makeHLTTree(flags, hltMenuConfig=HLTMenuConfig )
 
        
 from TriggerMenuMT.HLT.Config.JSON.HLTMenuJSON import generateJSON
-generateJSON(ConfigFlags)
+generateJSON(flags)
 
 from TriggerMenuMT.HLT.Config.JSON.HLTPrescaleJSON import generateJSON as generatePrescaleJSON
-generatePrescaleJSON(ConfigFlags)
+generatePrescaleJSON(flags)
    
 from TriggerMenuMT.HLT.Config.JSON.HLTMonitoringJSON import generateDefaultMonitoringJSON
-generateDefaultMonitoringJSON(ConfigFlags)
+generateDefaultMonitoringJSON(flags)
 
 # now some debug
 print ("EmuStepProcessing: dump top Sequence after CF/DF Tree build")

@@ -10,15 +10,12 @@
 
 import functools
 
-def generateCFChains(opt):
+def generateCFChains(flags, opt):
     from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool
     from TriggerMenuMT.HLT.Menu.SignatureDicts import ChainStore
     from TriggerMenuMT.HLT.Config.GenerateMenuMT import GenerateMenuMT
     from DecisionHandling.TestUtils import makeChain, makeChainStep
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
-    ConfigFlags.lock()
-    flags = ConfigFlags  # temporary alias until we can remove ConfigFlags
     menu = GenerateMenuMT()
     menu.chainsInMenu = ChainStore()
     ##################################################################
