@@ -36,7 +36,7 @@ At least one should provide the following arguments or Athena configuration flag
 """
 
 
-def getArgumentParser():
+def getArgumentParser(flags):
     """ Function to return command line arguments parser for reconstuction of Tile calibration runs """
 
     parserParents = [flags.getArgumentParser(), TileInputFiles.getArgumentParser(add_help=False)]
@@ -125,17 +125,17 @@ if __name__=='__main__':
     import sys,os
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
     # Setup logs
     from AthenaCommon.Logging import log
     from AthenaCommon import Constants
     log.setLevel(Constants.INFO)
 
-    parser = getArgumentParser()
+    parser = getArgumentParser(flags)
     args, _ = parser.parse_known_args()
 
     # Initially the following flags are not set up (they must be provided)
-    flags = initConfigFlags()
     flags.Input.Files = []
     flags.Tile.RunType = 'UNDEFINED'
 
@@ -203,7 +203,7 @@ if __name__=='__main__':
             condDbTag = 'CONDBR2-BLKPA-RUN2-09' if args.upd4 else 'CONDBR2-ES1PA-2022-01'
             detDescrVersion = 'ATLAS-R3S-2021-03-01-00'
         elif args.run2:
-            condDbTag = 'CONDBR2-BLKPA-2018-13' if args.upd4 else 'CONDBR2-ES1PA-2018-05'
+            condDbTag = 'CONDBR2-BLKPA-2018-16' if args.upd4 else 'CONDBR2-ES1PA-2018-05'
             detDescrVersion = 'ATLAS-R2-2016-01-00-01'
         else:
             condDbTag = 'COMCOND-BLKPA-RUN1-06' if (args.upd4 and runNumber > 141066) else 'COMCOND-ES1PA-006-05'

@@ -89,17 +89,17 @@ if not 'D3PDOutput' in dir():
     D3PDOutput = 'tile%s.d3pd.root' % FileSuffix
 
 if not 'ConddbTag' in dir():
-    ConddbTag = 'OFLCOND-MC16-SDR-25'
+    ConddbTag = 'OFLCOND-MC23-SDR-RUN3-01'
 
 if not 'DetGeo' in dir():
     DetGeo = 'atlas'
 
 if not 'DetDescrVersion' in dir():
-    DetDescrVersion = 'ATLAS-R2-2015-03-01-00'
+    DetDescrVersion = 'ATLAS-R3S-2021-03-00-00'
 
 # commented out - do not set any override by default
 #if not 'TileVersionOverride' in dir():
-#    TileVersionOverride = 'TileCal-GEO-08'
+#    TileVersionOverride = 'TileCal-GEO-13'
 
 if not 'doD3PD' in dir():
     doD3PD = False
@@ -275,6 +275,9 @@ if doD3PDHit or doD3PDDigit or doD3PDRawChannel or doD3PDCell or doD3PDCellInfo 
         topSequence.StandardPileUpToolsAlg.PileUpTools['TileHitVecToCntTool'].TileHitVectors=['TileHitVec']
         # change threshold in fit method
         topSequence.TileRChMaker.TileRawChannelBuilder['TileRawChannelBuilderFitFilter'].NoiseThresholdRMS = 3.
+    else:
+        if not doD3PDMBTS:
+            topSequence.StandardPileUpToolsAlg.PileUpTools['TileHitVecToCntTool'].TileHitVectors=['TileHitVec']
 
 else:
     include( "TileConditions/TileConditions_jobOptions.py" )
