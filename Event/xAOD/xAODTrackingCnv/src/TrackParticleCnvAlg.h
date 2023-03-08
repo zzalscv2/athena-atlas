@@ -113,7 +113,7 @@ namespace xAODMaker {
 
     // Augment observed tracks with information from track observer tool map
     Gaudi::Property<bool> m_augmentObservedTracks{this, "AugmentObservedTracks", false, "augment observed tracks"};
-    SG::ReadHandleKey<ObservedTracksMap> m_tracksMap{this, "TracksMapName", "" , "name of observed tracks map saved in store"};
+    SG::ReadHandleKey<ObservedTrackMap> m_tracksMap{this, "TracksMapName", "" , "name of observed tracks map saved in store"};
 
 
     /// toggle on converting AOD track particles to xAOD
@@ -128,7 +128,7 @@ namespace xAODMaker {
                 CONVTOOL& tool,
                 SG::WriteHandle<xAOD::TrackParticleContainer>&,
                 const xAODTruthParticleLinkVector*,
-                const ObservedTracksMap* obs_track_map = 0) const;
+                const ObservedTrackMap* obs_track_map = 0) const;
 
     inline xAOD::TrackParticle* createParticle(
       xAOD::TrackParticleContainer& xaod,

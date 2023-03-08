@@ -9,7 +9,6 @@ def TrkObserverToolCfg(flags,
                        name="TrackObserverTool",
                        **kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("HadROIPhiRZEtContainer", "InDetHadCaloClusterROIPhiRZEt")
     acc.setPrivateTools(CompFactory.Trk.TrkObserverTool(name, **kwargs))
     return acc
 

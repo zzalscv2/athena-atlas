@@ -61,14 +61,14 @@ namespace xAODMaker {
   }
 
   StatusCode TrackCollectionCnvTool::convertAndAugment( const TrackCollection* aod,
-					      xAOD::TrackParticleContainer* xaod, const ObservedTracksMap* trk_map ) const {
+					      xAOD::TrackParticleContainer* xaod, const ObservedTrackMap* trk_map ) const {
         
     ATH_MSG_DEBUG( "convertAndAugment: Sizes of containers before conversion: aod, xaod: " << aod->size() << ", " << xaod->size() );
     ATH_MSG_DEBUG( "convertAndAugment: Size of track map: " << trk_map->size() );
     
     TrackCollection::const_iterator itr = aod->begin();
     TrackCollection::const_iterator end = aod->end();
-    ObservedTracksMap::const_iterator itrMap = trk_map->begin();
+    ObservedTrackMap::const_iterator itrMap = trk_map->begin();
 
     // Check size of track collection matches size of observed tracks map
     if(aod->size() != trk_map->size()){
@@ -119,8 +119,6 @@ namespace xAODMaker {
 			particle->auxdecor<float>("averageSplit1")        = std::get<xAOD::ObserverToolIndex::averageSplit1>((*itrMap).second);
 			particle->auxdecor<float>("averageSplit2")        = std::get<xAOD::ObserverToolIndex::averageSplit2>((*itrMap).second);
 			particle->auxdecor<int>("numWeightedShared")      = std::get<xAOD::ObserverToolIndex::numWeightedShared>((*itrMap).second);
-      particle->auxdecor<float>("closestHadROIdR")      = std::get<xAOD::ObserverToolIndex::closestHadROIdR>((*itrMap).second);
-      particle->auxdecor<float>("closestHadROIEt")      = std::get<xAOD::ObserverToolIndex::closestHadROIEt>((*itrMap).second);
       std::vector<int> v_rejectStep(std::get<xAOD::ObserverToolIndex::rejectStep_full>((*itrMap).second).begin(),std::get<xAOD::ObserverToolIndex::rejectStep_full>((*itrMap).second).end());
       std::vector<int> v_rejectReason(std::get<xAOD::ObserverToolIndex::rejectReason_full>((*itrMap).second).begin(),std::get<xAOD::ObserverToolIndex::rejectReason_full>((*itrMap).second).end());
       particle->auxdecor<std::vector<int>>("rejectStep_full") = v_rejectStep;

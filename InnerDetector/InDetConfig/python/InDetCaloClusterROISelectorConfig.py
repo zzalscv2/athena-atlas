@@ -156,11 +156,6 @@ def HadCaloClusterROIPhiRZContainerMakerCfg(ConfigFlags, name="HadCaloClusterROI
     result.addEventAlgo(CompFactory.InDet.CaloClusterROIPhiRZContainerMaker(name, **kwargs), primary=True)
     return result
 
-def HadCaloClusterROIPhiRZEtContainerMakerCfg(ConfigFlags, name="HadCaloClusterROIPhiRZEtContainerMaker", **kwargs):
-    kwargs["keepEt"] = True
-    kwargs["OutputROIContainerNameEt"] = "InDetHadCaloClusterROIPhiRZEt"
-    return HadCaloClusterROIPhiRZContainerMakerCfg(ConfigFlags, name, **kwargs)
-
 def ITkHadCaloClusterROIPhiRZContainerMakerCfg(ConfigFlags, name="HadCaloClusterROIPhiRZContainerMaker", **kwargs):
     from egammaAlgs.egammaTopoClusterCopierConfig import (
         egammaTopoClusterCopierCfg)

@@ -67,11 +67,7 @@ StatusCode InDet::InDetDenseEnvAmbiTrackSelectionTool::initialize()
 
   ATH_CHECK(m_inputHadClusterContainerName.initialize(m_useHClusSeed));
   ATH_CHECK(m_inputEmClusterContainerName.initialize(m_useEmClusSeed));
-  ATH_CHECK(m_inputHadClusterEtContainerKey.initialize(!m_inputHadClusterEtContainerKey.key().empty()));  
-  if (m_skipAmbiInROI && m_skipAmbiInROI_optimized){
-    ATH_MSG_ERROR("only use doLoosenedAmbiInROI OR doLoosenedAmbiInROI_optimized, not both");
-    return StatusCode::FAILURE;
-  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -98,20 +94,9 @@ std::tuple<Trk::Track*,bool> InDet::InDetDenseEnvAmbiTrackSelectionTool::getClea
   CacheEntry  cache;
   
   // nominal or optimized ROI definition
-  if (m_skipAmbi){
-    ATH_MSG_DEBUG("skipping ambiguity resolution");
-    return std::make_tuple(static_cast<Trk::Track *>(nullptr),true); // keep input track
-  }
   if ((m_skipAmbiInROI && inHadronicROI(ptrTrack))){
     ATH_MSG_DEBUG("skipping ambiguity resolution for track in hadronic ROI with m_minPtBjetROI = "<<m_minPtBjetROI<<", m_phiWidth = "<<m_phiWidth<<", m_etaWidth = "<<m_etaWidth);
     return std::make_tuple(static_cast<Trk::Track *>(nullptr),true); // keep input track
-  }
-  if ((m_skipAmbiInROI_optimized && inHadronicROI_optimized(ptrTrack))){
-    ATH_MSG_DEBUG("skipping ambiguity resolution for track in optimized hadronic ROI with m_minTrackPtROI "<<m_minTrackPtROI<<", m_hadEtMin = "<<m_hadEtMin<<", m_rWidth = "<<m_rWidth);
-    return std::make_tuple(static_cast<Trk::Track *>(nullptr),true); // keep input track
-  }
-  if (!m_skipAmbiInROI && !m_skipAmbiInROI_optimized) {
-    ATH_MSG_DEBUG("using regular ambiguity resolution");
   }
   // compute the number of shared hits from the number of max shared modules
   // reset every track as could be changed for tracks within an ROI
@@ -1516,16 +1501,6 @@ bool InDet::InDetDenseEnvAmbiTrackSelectionTool::inHadronicROI(const Trk::Track*
   return isHadCaloCompatible(*ptrTrack->trackParameters()->front());
 }
 
-bool InDet::InDetDenseEnvAmbiTrackSelectionTool::inHadronicROI_optimized(const Trk::Track* ptrTrack) const 
-{
-
-  if (  !ptrTrack->trackParameters()->front() ){ return false; }
-  // above pT for ROI?
-  if (  ptrTrack->trackParameters()->front()->pT() < m_minTrackPtROI ) { return false; }
-
-  return isHadCaloCompatible_optimized(*ptrTrack->trackParameters()->front());
-}
-
 bool InDet::InDetDenseEnvAmbiTrackSelectionTool::isHadCaloCompatible(const Trk::TrackParameters& Tp) const
 {
   SG::ReadHandle<ROIPhiRZContainer> calo(m_inputHadClusterContainerName);
@@ -1535,17 +1510,6 @@ bool InDet::InDetDenseEnvAmbiTrackSelectionTool::isHadCaloCompatible(const Trk::
   }
 
   return calo->hasMatchingROI(Tp.momentum().phi(), Tp.eta(), 0. /* ignore r of Tp*/, Tp.position().z(), m_phiWidth, m_etaWidth);
-}
-
-bool InDet::InDetDenseEnvAmbiTrackSelectionTool::isHadCaloCompatible_optimized(const Trk::TrackParameters& Tp) const
-{
-  SG::ReadHandle<ROIPhiRZEtContainer> calo(m_inputHadClusterEtContainerKey);
-  if (!calo.isValid()) {
-     ATH_MSG_ERROR("Failed to get Had Calo cluster collection " << m_inputHadClusterEtContainerKey );
-     return false;
-  }
-
-  return calo->hasMatchingROI_optimized(Tp.momentum().phi(), Tp.eta(), 0. /* ignore r of Tp*/, Tp.position().z(), m_hadEtMin, m_rWidth);
 }
 
 //==========================================================================================
