@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -29,7 +29,7 @@ bool get32BitDecision( unsigned int index,
 
 
 namespace Trig {
-  DecisionUnpackerEventInfo::DecisionUnpackerEventInfo(SG::ReadHandleKey<EventInfo>* oldEventInfoKey) :
+  DecisionUnpackerEventInfo::DecisionUnpackerEventInfo(const SG::ReadHandleKey<EventInfo>* oldEventInfoKey) :
     m_eventInfoKey(oldEventInfoKey){
   }
 

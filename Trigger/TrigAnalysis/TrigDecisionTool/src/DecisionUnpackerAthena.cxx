@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS // Full Athena only
@@ -13,7 +13,7 @@
 
 
 namespace Trig {
-  DecisionUnpackerAthena::DecisionUnpackerAthena(SG::ReadHandleKey<TrigDec::TrigDecision>* olddeckey) : 
+  DecisionUnpackerAthena::DecisionUnpackerAthena(const SG::ReadHandleKey<TrigDec::TrigDecision>* olddeckey) : 
     m_deckey(olddeckey) {
   }
 
