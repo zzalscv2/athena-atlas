@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/AuxTypeVector.icc
@@ -169,11 +169,8 @@ template <class T, class CONT>
 inline
 std::unique_ptr<IAuxTypeVector> AuxTypeVectorHolder<T, CONT>::clone() const
 {
-  if (m_ownFlag) {
-    vector_type* vecPtr = new vector_type (*m_vecPtr);
-    return std::make_unique<AuxTypeVectorHolder<T, CONT> > (vecPtr, true);
-  }
-  return std::make_unique<AuxTypeVectorHolder<T, CONT> > (m_vecPtr, false);
+  vector_type* vecPtr = new vector_type (*m_vecPtr);
+  return std::make_unique<AuxTypeVectorHolder<T, CONT> > (vecPtr, true);
 }
 
 
