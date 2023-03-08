@@ -1327,7 +1327,7 @@ Trk::RungeKuttaUtils::stepEstimator(
 
   double Smin = 2. * Smax;
 
-  std::list<std::pair<double, int>> LD;
+  std::vector<std::pair<double, int>> LD;
   std::multimap<double, int>::iterator i = DN.begin(), ie = DN.end();
 
   for (; i != ie; ++i) {
@@ -1340,7 +1340,7 @@ Trk::RungeKuttaUtils::stepEstimator(
       SU[j].first->straightLineDistanceEstimate(pos, dir, SU[j].second);
     LD.emplace_back(ds.currentDistance(false) + W, j);
 
-    int n = ds.numberOfSolutions();
+    const int n = ds.numberOfSolutions();
     if (!n)
       continue;
 
@@ -1357,7 +1357,7 @@ Trk::RungeKuttaUtils::stepEstimator(
   if (!LD.empty()) {
 
     DN.erase(DN.begin(), i);
-    std::list<std::pair<double, int>>::iterator l = LD.begin(), le = LD.end();
+    std::vector<std::pair<double, int>>::iterator l = LD.begin(), le = LD.end();
     for (; l != le; ++l)
       DN.insert((*l));
   }
@@ -1379,7 +1379,7 @@ Trk::RungeKuttaUtils::stepEstimator(
 
   Trk::DistanceSolution ds =
     SU[N].first->straightLineDistanceEstimate(posn, dirn, SU[N].second);
-  int n = ds.numberOfSolutions();
+  const int n = ds.numberOfSolutions();
   if (!n)
     return std::make_pair(Sm, N);
   Sm = 10000.;
