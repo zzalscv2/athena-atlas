@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -36,7 +36,7 @@ namespace InDet {
     by job Option. Also the handle to the general hit-error scaling
     is implemented.
 */
-  class SCT_ClusterOnTrackTool: 
+  class SCT_ClusterOnTrackTool final: 
     public AthAlgTool,virtual public Trk::IRIO_OnTrackCreator
 {
   ///////////////////////////////////////////////////////////////////
@@ -49,9 +49,9 @@ public:
   SCT_ClusterOnTrackTool(const std::string&,const std::string&,const IInterface*);
   virtual ~SCT_ClusterOnTrackTool () = default;
   //! AlgTool initialisation
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
   //! AlgTool termination
-  virtual StatusCode finalize  ();
+  virtual StatusCode finalize  () override;
 
   
 /** @brief produces an SCT_ClusterOnTrack using the measured
@@ -61,7 +61,7 @@ public:
      of management/deletion of the  SCT_ClusterOnTrack.
  */
   virtual const InDet::SCT_ClusterOnTrack* correct
-    (const Trk::PrepRawData&, const Trk::TrackParameters&) const; 
+    (const Trk::PrepRawData&, const Trk::TrackParameters&) const override; 
 
   
 /** @brief Returns a correction to be applied to the SCT cluster local x position

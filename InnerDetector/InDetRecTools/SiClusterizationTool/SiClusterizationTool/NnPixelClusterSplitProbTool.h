@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@ namespace InDet {
 
   class NnClusterizationFactory;
 
-  class NnPixelClusterSplitProbTool : public extends<AthAlgTool, IPixelClusterSplitProbTool>
+  class NnPixelClusterSplitProbTool final : public extends<AthAlgTool, IPixelClusterSplitProbTool>
   {
   public:
     
@@ -39,14 +39,16 @@ namespace InDet {
 
     virtual ~NnPixelClusterSplitProbTool() = default;
     
-    StatusCode initialize();
+    StatusCode initialize() override;
 
-    virtual InDet::PixelClusterSplitProb splitProbability(const InDet::PixelCluster& origCluster ) const;
+    virtual InDet::PixelClusterSplitProb splitProbability(
+        const InDet::PixelCluster& origCluster) const override;
 
-    virtual InDet::PixelClusterSplitProb splitProbability(const InDet::PixelCluster& origCluster, const Trk::TrackParameters& trackParameters ) const;
+    virtual InDet::PixelClusterSplitProb splitProbability(
+        const InDet::PixelCluster& origCluster,
+        const Trk::TrackParameters& trackParameters) const override;
 
-
-  private:
+   private:
     
     InDet::PixelClusterSplitProb compileSplitProbability(std::vector<double>& vectorOfProbs ) const;
     

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -20,7 +20,7 @@
 
 namespace InDet {
 
-  class SCTinformation {
+  class SCTinformation final {
    
     /////////////////////////////////////////////////////////////////////////////////
     // Public methods:
@@ -35,7 +35,7 @@ namespace InDet {
                    const double& locx);
 
     SCTinformation(const SCTinformation&) = default;
-    virtual ~SCTinformation() = default;
+    ~SCTinformation() = default;
     SCTinformation& operator = (const SCTinformation&) = default;
 
     const InDet::SiCluster* cluster() const {return m_cluster;}

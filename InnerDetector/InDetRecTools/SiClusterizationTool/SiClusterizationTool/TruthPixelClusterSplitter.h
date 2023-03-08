@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ namespace InDet
     /** @class TruthPixelClusterSplitter
         @author Roland.Jansky@cern.ch
     */
-    class TruthPixelClusterSplitter : public AthAlgTool, virtual public IPixelClusterSplitter {
+    class TruthPixelClusterSplitter final : public AthAlgTool, virtual public IPixelClusterSplitter {
     public :
       /** Constructor*/
       TruthPixelClusterSplitter(const std::string &type,
@@ -37,17 +37,19 @@ namespace InDet
       ~TruthPixelClusterSplitter() = default;
       
       /** AthAlgTool interface methods */
-      StatusCode initialize();            
-      StatusCode finalize();            
-      
+      virtual StatusCode initialize() override;            
+      virtual StatusCode finalize() override;
+
       /** take one, give zero or many */
-      std::vector<InDet::PixelClusterParts> splitCluster(const InDet::PixelCluster& origCluster ) const;
-      
+      virtual std::vector<InDet::PixelClusterParts> splitCluster(
+          const InDet::PixelCluster& origCluster) const override;
+
       /** take one, give zero or many - with split probability object */
-      std::vector<InDet::PixelClusterParts> splitCluster(const InDet::PixelCluster& origCluster, 
-                                                         const InDet::PixelClusterSplitProb& spo) const;
-      
-    private:
+      virtual std::vector<InDet::PixelClusterParts> splitCluster(
+          const InDet::PixelCluster& origCluster,
+          const InDet::PixelClusterSplitProb& spo) const override;
+
+     private:
 
       ToolHandle<TruthClusterizationFactory> m_truthClusterizationFactory{this, "NnClusterizationFactory", "InDet::NnClusterizationFactory/TruthClusterizationFactory"};
 

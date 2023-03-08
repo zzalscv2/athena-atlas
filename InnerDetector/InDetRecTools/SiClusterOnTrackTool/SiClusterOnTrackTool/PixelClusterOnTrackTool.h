@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PixelClusterOnTrackTool_H
@@ -57,7 +57,7 @@ namespace InDet {
     PIXELCLUSTER_SPLIT  =3
   };
 
-  class PixelClusterOnTrackTool: 
+  class PixelClusterOnTrackTool final: 
         public AthAlgTool, virtual public Trk::IRIO_OnTrackCreator
 {
   ///////////////////////////////////////////////////////////////////

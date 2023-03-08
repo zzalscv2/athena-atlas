@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SiSpacePointMakerTool_H
@@ -38,7 +38,7 @@ namespace InDet {
    * Make OverlapSpacePoints from SCT_Clusters.
    */
 
-  class SiSpacePointMakerTool : public AthAlgTool {
+  class SiSpacePointMakerTool final: public AthAlgTool {
 
   public:
     /// Constructor 

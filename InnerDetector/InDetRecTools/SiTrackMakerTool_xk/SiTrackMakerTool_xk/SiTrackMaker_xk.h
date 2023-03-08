@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -59,7 +59,7 @@ namespace InDet{
   @author Igor.Gavrilenko@cern.ch
   */
 
-  class SiTrackMaker_xk :
+  class SiTrackMaker_xk final:
     public extends<AthAlgTool, ISiTrackMaker>
     {
 
