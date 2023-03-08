@@ -103,7 +103,7 @@ std::string cern_local_time(time_t unix_time)
  *  @brief Class to do a formatted dump of the TileCal ByteStream fragments
  */
 
-TileTBDump::TileTBDump(std::string name, ISvcLocator* pSvcLocator)
+TileTBDump::TileTBDump(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
   , m_RobSvc("ROBDataProviderSvc", name)
   , m_cabling(0)

@@ -79,7 +79,7 @@ class TileHit;
 class TileTBAANtuple: public AthAlgorithm {
   public:
     //Constructor
-    TileTBAANtuple(std::string name, ISvcLocator* pSvcLocator);
+    TileTBAANtuple(const std::string& name, ISvcLocator* pSvcLocator);
 
     //Destructor 
     virtual ~TileTBAANtuple() = default;
