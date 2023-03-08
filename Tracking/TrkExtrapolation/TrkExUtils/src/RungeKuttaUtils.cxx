@@ -1322,7 +1322,7 @@ Trk::RungeKuttaUtils::stepEstimator(
     next = true;
     return std::make_pair(0., -1);
   }
-  const Amg::Vector3D pos(Pinp[0], Pinp[1], Pinp[2]);
+  Eigen::Map<const Amg::Vector3D> pos(&Pinp[0],3,1);
   const Amg::Vector3D dir(D[0] / Smax, D[1] / Smax, D[2] / Smax);
 
   double Smin = 2. * Smax;
@@ -1374,8 +1374,8 @@ Trk::RungeKuttaUtils::stepEstimator(
   if (Smin < So || (Smax - Smin) > 2. * So)
     return std::make_pair(Sm, N);
 
-  const Amg::Vector3D posn(Pout[0], Pout[1], Pout[2]);
-  const Amg::Vector3D dirn(Pout[3], Pout[4], Pout[5]);
+  Eigen::Map<const Amg::Vector3D> posn(&Pout[0], 3, 1);
+  Eigen::Map<const Amg::Vector3D> dirn(&Pout[3], 3, 1);
 
   Trk::DistanceSolution ds =
     SU[N].first->straightLineDistanceEstimate(posn, dirn, SU[N].second);
@@ -1823,8 +1823,8 @@ Trk::RungeKuttaUtils::fillDistancesMap(
   int Ns = -1;
   DN.erase(DN.begin(), DN.end());
 
-  const Amg::Vector3D pos(Pinp[0], Pinp[1], Pinp[2]);
-  const Amg::Vector3D dir(Pinp[3], Pinp[4], Pinp[5]);
+  Eigen::Map<const Amg::Vector3D> pos(&Pinp[0], 3, 1);
+  Eigen::Map<const Amg::Vector3D> dir(&Pinp[3], 3, 1);
 
   Step[0] = -1.e+20;
   Step[1] = 1.e+20;
