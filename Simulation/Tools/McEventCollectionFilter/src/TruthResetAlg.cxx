@@ -81,18 +81,18 @@ StatusCode TruthResetAlg::execute() {
    for (;;) {
      std::vector<HepMC::GenParticlePtr> p_to_remove;
      std::vector<HepMC::GenVertexPtr> v_to_remove;
-     for (auto particle: outputEvent->particles()) {
+     for (auto& particle: outputEvent->particles()) {
        if (HepMC::is_simulation_particle(particle)) { // TODO Consider making the threshold for this check configurable.
          p_to_remove.push_back(particle);
        }
      }
-     for (auto particle: p_to_remove) outputEvent->remove_particle(particle);
-     for (auto vertex: outputEvent->vertices()) {
+     for (auto& particle: p_to_remove) outputEvent->remove_particle(particle);
+     for (auto& vertex: outputEvent->vertices()) {
        if (HepMC::is_simulation_vertex(vertex) || vertex->particles_out().empty() ) {  // TODO Consider making the threshold for this check configurable.
          v_to_remove.push_back(vertex);
        }
      }
-     for (auto vertex: v_to_remove) outputEvent->remove_vertex(vertex);
+     for (auto& vertex: v_to_remove) outputEvent->remove_vertex(vertex);
      if (p_to_remove.empty() && v_to_remove.empty()) break;
    }
 #else

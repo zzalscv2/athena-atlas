@@ -66,7 +66,7 @@ StatusCode Simulation::ZeroLifetimePositioner::manipulate(HepMC::GenEvent& ge, b
 
   const auto pdgCodesBegin = m_pdgCodesToCheck.begin();
   const auto pdgCodesEnd = m_pdgCodesToCheck.end();
-  for (auto curVtx: ge.vertices()) {
+  for (auto& curVtx: ge.vertices()) {
     if (curVtx->particles_in().size()!=1 || curVtx->particles_out().size()!=1) { continue; }
     const int pdgIn=curVtx->particles_in().front()->pdg_id();
     const int pdgOut=curVtx->particles_out().front()->pdg_id();
