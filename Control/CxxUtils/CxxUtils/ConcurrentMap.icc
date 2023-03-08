@@ -474,7 +474,7 @@ bool CONCURRENTMAP::erase (key_type key)
  * @param capacity The new table capacity.
  * @param ctx Execution context.
  *
- * No action will be taken in @c capacity is smaller
+ * No action will be taken if @c capacity is smaller
  * than the current capacity.
  */
 T_CONCURRENTMAP
@@ -491,7 +491,7 @@ void CONCURRENTMAP::reserve (size_type capacity,
  * @brief Increase the table capacity.
  * @param capacity The new table capacity.
  *
- * No action will be taken in @c capacity is smaller
+ * No action will be taken if @c capacity is smaller
  * than the current capacity.
  */
 T_CONCURRENTMAP
@@ -572,6 +572,17 @@ T_CONCURRENTMAP
 void CONCURRENTMAP::swap (ConcurrentMap& other)
 {
   return m_impl.swap (other.m_impl);
+}
+
+
+/**
+ * @brief Access the Updater instance.
+ */
+T_CONCURRENTMAP
+inline
+auto CONCURRENTMAP::updater() -> Updater_t&
+{
+  return m_impl.updater();
 }
 
 

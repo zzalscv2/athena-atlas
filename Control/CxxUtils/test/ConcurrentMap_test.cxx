@@ -115,6 +115,9 @@ public:
   }
 
 
+  unsigned int inGrace() const { return m_inGrace; }
+
+
 private:
   std::mutex m_mutex;
   std::atomic<T*> m_p;
@@ -254,6 +257,8 @@ void test1a()
   assert (!map.contains (keys.nonex()));
   assert (map.find (keys.nonex()) == map.end());
   assert (!map.find (keys.nonex()).valid());
+
+  assert (map.updater().inGrace() == 0x0e);
 
   {
     auto [i1, i2] = map.equal_range (keys[10]);
