@@ -28,52 +28,42 @@ def getInputDirectory(run, stream=None, project=None, suffix=None, year=None):
 
     if run < 10:
         directory = '.'
-    elif not year:
-        if run < 142682:
-            year = 2009
-        elif run < 171194:
-            year = 2010
-        elif run < 194688:
-            year = 2011
-        elif run < 216816:
-            year = 2012
-        elif run < 224305:
-            year = 2013
-        elif run < 248584:
-            year = 2014
-        elif run < 287952:
-            year = 2015
-        elif run < 314450:
-            year = 2016
-        elif run < 342540:
-            year = 2017
-        elif run < 367980:
-            year = 2018
-        elif run < 374260:
-            year = 2019
-        elif run < 386367:
-            year = 2020
-        elif run < 408800:
-            year = 2021
-        else:
-            year = 2022
-
-    if stream:
-        if not project:
-            if stream.startswith('calibration_L1Calo'):
-                project = 'data21_calib'
-                log.warning('Data project is not set up and will be used: %s', project)
-            else:
-                project = 'data21_cos'
-                log.warning('Data project is not set up and will be used: %s', project)
-        if not suffix:
-            suffix = 'daq.RAW' if stream.startswith('calibration') else 'merge.RAW'
-            log.warning('Directory suffix is not set up and will be used: %s', suffix)
-
-        directory = f'/eos/atlas/atlastier0/rucio/{project}/{stream}/00{run}/{project}.00{run}.{stream}.{suffix}'
-
     else:
-        directory = f'/eos/atlas/atlascerngroupdisk/det-tile/online/{year}/daq'
+        if not year:
+            yr={             2023:441536, 2022:408681, 2021:387034, 2020:374260,
+                2019:367983, 2018:342531, 2017:314451, 2016:288032, 2015:248505,
+                2014:224307, 2013:216705, 2012:194688, 2011:171194, 2010:142682,
+                2009:99717,  2008:35430,  2007:0}
+            for year,beg in yr.items():
+                if run>=beg:
+                    break
+
+        if stream or project or suffix:
+            if not stream:
+                stream = 'physics_Main'
+                log.warning('%s is not set up and will be used: %s' , 'Run stream', stream)
+            elif stream == 'Tile':
+                stream = 'calibration_Tile'
+            if not project:
+                if 'calibration' in stream and 'Tile' not in stream:
+                    project = f'data{year%100}_calib'
+                else:
+                    project = f'data{year%100}_13p6TeV'
+                log.warning('%s is not set up and will be used: %s' , 'Data project', project)
+            elif 'data' not in project:
+                project = f'data{year%100}_{project}'
+            if not suffix:
+                if stream == 'physics_Main' or stream == 'physics_MinBias' or stream.startswith('calibration'):
+                    suffix = 'daq.RAW'
+                else:
+                    suffix = 'merge.RAW'
+                log.warning('%s is not set up and will be used: %s' , 'Directory suffix', suffix)
+
+            run=str(run).zfill(8)
+            directory = f'/eos/atlas/atlastier0/rucio/{project}/{stream}/{run}/{project}.{run}.{stream}.{suffix}'
+
+        else:
+            directory = f'/eos/atlas/atlascerngroupdisk/det-tile/online/{year}/daq'
 
     return directory
 
@@ -103,12 +93,13 @@ def findFiles(run, path=None, filter='.', stream=None, project=None, suffix=None
 
     log.info('Input directory: %s', path)
 
+    run=str(run).zfill(7) if int(run) > 0 else str(run)
     if (path.startswith('/eos/')):
-        listRunFiles = f'xrdfs eosatlas ls -l {path} | grep {run} | grep -v "#" '
+        listRunFiles = f'xrdfs eosatlas ls -l {path} | grep -e {run} | grep -v "#" '
         listRunFiles += f'| grep -v -e "         [ 0-9][ 0-9][0-9] " | grep {filter} | sed "s|^.*/||" '
 
     else:
-        listRunFiles = f'ls {path} | grep {run} | grep {filter}'
+        listRunFiles = f'ls {path} | grep -e {run} | grep {filter}'
 
     files = []
     try:
