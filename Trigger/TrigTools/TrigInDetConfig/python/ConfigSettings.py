@@ -291,9 +291,9 @@ class ConfigSettings_bmumux( _ConfigSettingsBase ):
       self._DoPhiFiltering      = False
       self._etaHalfWidth        = 0.75
       self._phiHalfWidth        = 0.75
-      self._zedHalfWidth        = 225
+      self._zedHalfWidth        = 50.
       self._doSeedRedundancyCheck = True
-      self._SuperRoI = False
+      self._SuperRoI = True
 
    @property
    def SuperRoI(self):
