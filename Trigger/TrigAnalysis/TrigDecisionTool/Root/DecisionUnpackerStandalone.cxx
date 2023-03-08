@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AsgDataHandles/ReadHandle.h"
@@ -36,8 +36,8 @@ namespace {
 
 namespace Trig {
 
-  DecisionUnpackerStandalone::DecisionUnpackerStandalone( SG::ReadHandleKey<xAOD::TrigDecision>* deckey,
-                                                          SG::ReadHandleKey<xAOD::TrigNavigation>* navikey)
+  DecisionUnpackerStandalone::DecisionUnpackerStandalone( const SG::ReadHandleKey<xAOD::TrigDecision>* deckey,
+                                                          const SG::ReadHandleKey<xAOD::TrigNavigation>* navikey)
     : m_deckey(deckey), m_navikey(navikey)
   {
   }
