@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTHRECORDTOTRACK_H
@@ -35,7 +35,7 @@ namespace Trk {
      @author Wolfgang.Liebig -at- cern.ch
    */
 
-  class TruthTrackRecordToTrack : virtual public ITruthToTrack, public AthAlgTool {
+  class TruthTrackRecordToTrack final: virtual public ITruthToTrack, public AthAlgTool {
   public:
 
     TruthTrackRecordToTrack(const std::string& type, const std::string& name, const IInterface* parent);

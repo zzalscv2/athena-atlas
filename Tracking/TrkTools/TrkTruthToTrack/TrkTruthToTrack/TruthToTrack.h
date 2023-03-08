@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -11,11 +11,6 @@
  *
  * @author Andrei Gaponenko, 2005, 2009
  */
-
-// FIXME: don't export this header (move to src/)
-#ifndef TRUTHTOTRACK_IMP
-#warning  "Header TruthToTrack/TruthToTrack.h is deprecated and will be removed in the future.  Please use the tool via this interface: TrkToolInterfaces/ITruthToTrack.h"
-#endif/*TRUTHTOTRACK_IMP*/
 
 #ifndef TRUTHTOTRACK_H
 #define TRUTHTOTRACK_H

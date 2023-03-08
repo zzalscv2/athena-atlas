@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -16,7 +16,7 @@
 
 namespace Trk {
   
-  class TruthMatchTanimoto: virtual public IDetailedTrackTruthSimilarity,
+  class TruthMatchTanimoto final: virtual public IDetailedTrackTruthSimilarity,
 			    public CommonTruthMatchWeights
   {
   public:
@@ -38,7 +38,7 @@ namespace Trk {
      * 
      * See also IDetailedTrackTruthSimilarity::trackTruthSimilarity() 
      */
-    virtual double trackTruthSimilarity(const DetailedTrackTruth& dtt) const;
+    virtual double trackTruthSimilarity(const DetailedTrackTruth& dtt) const override final;
   };
   
 } // end namespace Trk

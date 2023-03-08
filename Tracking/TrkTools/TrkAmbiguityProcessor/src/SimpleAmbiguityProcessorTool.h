@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SIMPLEAMBIGUITYPROCESSORTOOL_H
@@ -36,7 +36,7 @@ namespace Trk {
   class IPRD_AssociationTool;
   class ITruthToTrack;
 
-  class SimpleAmbiguityProcessorTool : public AmbiguityProcessorBase {
+  class SimpleAmbiguityProcessorTool final: public AmbiguityProcessorBase {
     public:
       // public types
       typedef std::multimap< TrackScore, TrackPtr > TrackScoreMap;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef AmbiguityProcessorUtility_h
 #define AmbiguityProcessorUtility_h
@@ -27,12 +27,17 @@ namespace AmbiguityProcessor{
   using DuplicationCheckSet = std::set<std::vector<const Trk::PrepRawData*>> ;
   //
   //categorise the track as zero-score, duplicate or 'accepted'
-  TrackFilterCategory
-  categoriseTrack(const Trk::Track & track, const Trk::TrackScore & score, const bool dropDuplicates, const AssociationTool &, AssociationMap &, DuplicationCheckSet &);
+  TrackFilterCategory categoriseTrack(const Trk::Track &track,
+                                      const Trk::TrackScore &score,
+                                      const bool dropDuplicates,
+                                      const AssociationTool &, AssociationMap &,
+                                      DuplicationCheckSet &);
   //
-  //give appropriate text for each category
-  const static std::array<std::string , nCategories> debugMessage {"Score is zero, reject.", "Track is duplicate, reject.", "Track is accepted."};
-  //calculate a simple chi^2/ndof
+  // give appropriate text for each category
+  const static std::array<std::string, nCategories> debugMessage{
+      "Score is zero, reject.", "Track is duplicate, reject.",
+      "Track is accepted."};
+  // calculate a simple chi^2/ndof
   float calculateFitQuality(const Trk::Track & track);
   //create a track from a new FitQuality object looping over track-state-on-surfaces to calculate
   std::unique_ptr<Trk::Track> createNewFitQualityTrack(const Trk::Track & track);
