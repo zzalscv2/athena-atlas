@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak <tadej@cern.ch>
@@ -120,6 +120,19 @@ StatusCode EventInfoOverlay::execute(const EventContext& ctx) const
   outputEvent->setErrorState(xAOD::EventInfo::Core,
                              std::max(signalEvent->errorState(xAOD::EventInfo::Core),
                                       bkgEvent->errorState(xAOD::EventInfo::Core)));
+
+  // But clear other detector flags.
+  // They'll get set again during reconstruction, if appropriate.
+  // (For now, do this only for simulation.)
+  if (!m_dataOverlay.value()) {
+    for (unsigned idet = 0; idet < xAOD::EventInfo::nDets; ++idet) {
+      auto det = static_cast<xAOD::EventInfo::EventFlagSubDet> (idet);
+      if (det != xAOD::EventInfo::Core) {
+        outputEvent->setEventFlags (det, 0);
+        outputEvent->setErrorState (det, xAOD::EventInfo::NotSet);
+      }
+    }
+  }
 
   // Ensure correct beam spot info
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
