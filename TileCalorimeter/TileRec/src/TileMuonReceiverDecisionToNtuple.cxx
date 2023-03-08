@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -39,14 +39,13 @@
                           // current configuration of tile-d trigger i.e. 1 input per EB module (2x64)
 
 // Constructor 
-TileMuonReceiverDecisionToNtuple::TileMuonReceiverDecisionToNtuple(std::string name, ISvcLocator* pSvcLocator)
+TileMuonReceiverDecisionToNtuple::TileMuonReceiverDecisionToNtuple(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
   , m_ntuplePtr(0)
+  , m_ntupleID("TileMuRcvNt") // usualy it is a number hxxx, but here we use a name
+  , m_ntupleLoc("/FILE1")
   , m_TileMuRcvContainer("TileMuRcvCnt")
 {
-    m_ntupleLoc= "/FILE1";
-    m_ntupleID = "TileMuRcvNt"; // usualy it is a number hxxx, but here we use a name
-
     declareProperty("TileMuonReceiverContainer" , m_TileMuRcvContainer); 
     declareProperty("NTupleLoc"                 , m_ntupleLoc);
     declareProperty("NTupleID"                  , m_ntupleID);

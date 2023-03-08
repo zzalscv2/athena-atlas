@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -36,16 +36,15 @@
 const int max_chan=12288;
 
 // Constructor & deconstructor
-TileRawChannelToNtuple::TileRawChannelToNtuple(std::string name, ISvcLocator* pSvcLocator)
+TileRawChannelToNtuple::TileRawChannelToNtuple(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
   , m_ntuplePtr(0)
+  , m_ntupleID("h70")
+  , m_ntupleLoc("/FILE1/TileRec")
+  , m_rawChannelContainer("TileRawChannelCnt")
   , m_tileID(0)
   , m_tileHWID(0)
 {
-  m_rawChannelContainer="TileRawChannelCnt";
-  m_ntupleLoc="/FILE1/TileRec";
-  m_ntupleID="h70";
-
   declareProperty("TileRawChannelContainer", m_rawChannelContainer);    
   declareProperty("NTupleLoc", m_ntupleLoc);
   declareProperty("NTupleID", m_ntupleID);

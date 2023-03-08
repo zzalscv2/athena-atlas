@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -37,7 +37,7 @@ class TileTBID;
 class TileCellToNtuple : public AthAlgorithm {
 public:
     //Constructor
-    TileCellToNtuple(std::string name, ISvcLocator* pSvcLocator);
+    TileCellToNtuple(const std::string& name, ISvcLocator* pSvcLocator);
 
     //Destructor 
     virtual ~TileCellToNtuple();                         

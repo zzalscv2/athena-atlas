@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -109,7 +109,7 @@ s1.c_str()
  */
 
 
-TileAANtuple::TileAANtuple(std::string name, ISvcLocator* pSvcLocator)
+TileAANtuple::TileAANtuple(const std::string& name, ISvcLocator* pSvcLocator)
 : AthAlgorithm(name, pSvcLocator)
 , m_evTime(0)
 , m_run(0)
