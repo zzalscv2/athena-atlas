@@ -258,7 +258,7 @@ else:           # More data modifiers
                      'enableSchedulerMon',
     ]
     if opt.doL1Sim:
-        setModifiers += ['superCellWithBCID']
+        flags.LAr.LATOME.DTInfoForL1="SC_ET_ID"
 
 
 #-------------------------------------------------------------

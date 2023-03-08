@@ -65,6 +65,7 @@ def createLArConfigFlags():
     lcf.addFlag("LAr.ROD.nnJson", "")
     lcf.addFlag("LAr.ROD.nnOutputNode", "")
     lcf.addFlag("LAr.ROD.nnInputNode", "")
+    lcf.addFlag("LAr.LATOME.DTInfoForL1","SC_ET_ID")
 
     ##NoisyRO flags
     # cell quality cut
