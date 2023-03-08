@@ -1,6 +1,6 @@
-#include <MyAnalysis/ONNXWrapper.h>
+#include <MyAnalysis/ONNXUtils.h>
 
-void ONNXWrapper::LoadModel(std::string model_path) {
+ONNXWrapper::ONNXWrapper(std::string model_path) {
     
     // Use the path resolver to find the location of the network .onnx file
     m_modelPath = PathResolverFindCalibFile(model_path);
@@ -50,11 +50,51 @@ void ONNXWrapper::LoadModel(std::string model_path) {
       std::vector<float> output(m_output_dims[i][1], 0.0);
       m_outputs.push_back(output);
     }
-
     }
 
-// void ONNXWrapper::Run(std::vector<std::vector<float>> inputs) { // ADDD custom input size
-void ONNXWrapper::Run(std::map<std::string, std::vector<float>> inputs) const { // ADDD custom input size
+void ONNXWrapper::ModelINFO() {
+  std::cout << "MODEL INFO"<< "\n\n";
+
+  std::cout << "MODEL INPUT"<< "\n";
+  for(std::size_t i = 0; i < m_nr_inputs; i++ ) {
+    std::cout << "Name: " << m_input_names.at(i) << "\n";
+    std::cout << "Size: {";
+    for(int j: m_input_dims.at(i) ) 
+      std::cout << j << ", ";
+    std::cout << "}";
+    std::cout << "\n\n";
+  }
+
+  std::cout << "MODEL OUTPUT"<< "\n";
+  for(std::size_t i = 0; i < m_nr_output; i++ ) {
+    std::cout << "Name:" << m_output_names.at(i) << "\n";
+    std::cout << "Size: {";
+    for(int j: m_output_dims.at(i) ) 
+      std::cout << j << ", ";
+    std::cout << "}";
+    std::cout << "\n\n";
+  }
+}
+void ONNXWrapper::GetMETAData() {
+  std::cout << "Get META data"<< "\n\n";
+
+  Ort::ModelMetadata metadata = m_onnxSession->GetModelMetadata();
+
+  std::cout << "keys: ";
+  int64_t nkeys = 0;
+  char** keys = metadata.GetCustomMetadataMapKeys(m_allocator, nkeys);
+  for (int64_t i = 0; i < nkeys; i++) {
+    std::cout << keys[i];
+    if (i+1 < nkeys) std::cout << ", ";
+  }
+  std::cout << std::endl;
+
+  // std::string val = metadata.LookupCustomMetadataMap(argv[2], allocator);
+  // std::cout << val << std::endl;
+
+}
+
+void ONNXWrapper::Run(std::map<std::string, std::vector<float>> inputs) { // ADDD custom input size
     // Create a CPU tensor to be used as input
     // std::cout << "------- Creating ONNX tensors: \n";
     Ort::MemoryInfo memory_info("Cpu", OrtDeviceAllocator, 0, OrtMemTypeDefault);
@@ -65,6 +105,7 @@ void ONNXWrapper::Run(std::map<std::string, std::vector<float>> inputs) const { 
 
 
     // add the inputs to vector
+    // std::cout << "init input"<< "\n";
     for(std::size_t i = 0; i < m_nr_inputs; i++ ){          
       input_tensor.push_back(Ort::Value::CreateTensor<float>(memory_info,
                                                             inputs[m_input_names[i]].data(),
@@ -74,6 +115,7 @@ void ONNXWrapper::Run(std::map<std::string, std::vector<float>> inputs) const { 
     }
 
     // init output tensor and fill with zeros
+    // std::cout << "init output"<< "\n";
     for(std::size_t i = 0; i < m_nr_output; i++ ){                           
       output_tensor.push_back(Ort::Value::CreateTensor<float>(memory_info,
                                                       m_outputs[i].data(),
@@ -83,7 +125,7 @@ void ONNXWrapper::Run(std::map<std::string, std::vector<float>> inputs) const { 
     }
 
     Ort::Session& session ATLAS_THREAD_SAFE = *m_onnxSession;
-
+    // std::cout << "RUNNING MODEL"<< "\n";
     // run the model
     session.Run(Ort::RunOptions{nullptr},
                 m_input_names.data(),

@@ -1,5 +1,5 @@
-#ifndef ONNXWrapper_h
-#define ONNXWrapper_h
+#ifndef ONNXUtils_h
+#define ONNXUtils_h
 
 // STL includes
 #include <string>
@@ -63,10 +63,13 @@ class ONNXWrapper {
     std::vector<std::vector<float>> m_outputs;
     // Constructor with parameters
     ONNXWrapper(){};
-    void LoadModel(std::string model_path);
-    void Run(std::map<std::string, std::vector<float>> inputs);
-    // void Run(std::vector<std::vector<float>> inputs);
-    
+    // ~ONNXWrapper(){};
 
+    ONNXWrapper(std::string model_path);
+    // void LoadModel(std::string model_path);
+    void Run(std::map<std::string, std::vector<float>> inputs);
+    void ModelINFO();
+    void GetMETAData();
+    // void Run(std::vector<std::vector<float>> inputs);
 };
 #endif
