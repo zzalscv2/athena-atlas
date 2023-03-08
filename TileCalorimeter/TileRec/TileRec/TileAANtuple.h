@@ -325,6 +325,7 @@ class TileAANtuple : public AthAlgorithm {
       float m_eTMDB[N_ROS][N_MODULES][N_TMDBCHANS] = {{{0}}}; // TMDB
       unsigned char *m_sampleTMDB = 0;
       unsigned char m_decisionTMDB[N_ROS][N_MODULES][N_TMDBDECISIONS] = {{{0}}}; // TMDB
+      unsigned char m_bcidTMDB[N_ROS][N_MODULES][3] = {{{0}}};
  
       float m_TEMP[4][64][7] = {{{0}}};
       float m_HV[4][64][48] = {{{0}}};

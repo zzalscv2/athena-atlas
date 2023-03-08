@@ -4614,8 +4614,8 @@ void TileROD_Decoder::unpack_frag42( uint32_t sourceid, uint32_t version, const 
   //               32nd bit -> |         results2 [16:31]            ||           results1 [0:15]           | <- 1st bit
   //               32nd bit -> |            0x0   [16:31]            ||           results3 [0:15]           | <- 1st bit
   //
-  //               32nd bit -> | 0x0 [12:15] | m-5 | m-4 | m-3 | m-2 || 0x0 [12:15] | m-3 | m-2 | m-1 | m-0 | <- 1st bit
-  //                           |          0x0 [16:31]                || 0x0 [12:15] | m-7 | m-6 | m-5 | m-4 |
+  //               32nd bit -> | bcid1 [12:15] | m-5 | m-4 | m-3 | m-2 || bcid0 [12:15] | m-3 | m-2 | m-1 | m-0 | <- 1st bit
+  //                           |          0x0 [16:31]                  || bcid2 [12:15] | m-7 | m-6 | m-5 | m-4 |
   //
   // For each module m-X there is a 3-bit word with the results for a threshold
   //
@@ -4626,6 +4626,7 @@ void TileROD_Decoder::unpack_frag42( uint32_t sourceid, uint32_t version, const 
   int nbit=0;
   int nmod=0;
   uint32_t word=0x0;
+  uint32_t bcid=0x0;
 
   int drawer = (sourceid & 0xf0000) >> 8; // get ROS number from source ID
   if (drawer<0x300) { // barrel
@@ -4637,12 +4638,18 @@ void TileROD_Decoder::unpack_frag42( uint32_t sourceid, uint32_t version, const 
     nbit = 4;
     nmod = 8;
     drawer |= ((sourceid & 0x0000f) << 3);
-    if (m_runPeriod<=2) {
-       word = (datasize > 1) ? (p[1] << 20) | ((p[0] >> 8) & 0xff000) | ((p[0] >> 4) & 0xfff) : 0;
-    } else {
-       word = (datasize > 1) ? (p[1] << 12) | (p[0] & 0xfff) : 0;
+    if (datasize > 1) {
+      if (m_runPeriod<=2) {
+        word = (p[1] << 20) | ((p[0] >> 8) & 0xff000) | ((p[0] >> 4) & 0xfff);
+      } else {
+        word = ((p[1] & 0xfff) << 12) | (p[0] & 0xfff);
+        // keeping all 12 bits of information (just for cross check) |bcid2|bcid1|bcid0|
+        bcid = ((p[1] >> 4) & 0xf00) | ((p[0] >> 24) & 0xf0) | ((p[0] >> 12) & 0xf);
+      }
     }
   }
+
+  drawer |= (bcid<<16) ;
 
   std::vector<bool> result(nbit);
   for (int j = 0; j < nmod; ++j) { // loop over modules
@@ -4669,7 +4676,7 @@ void TileROD_Decoder::unpack_frag42( uint32_t sourceid, uint32_t version, const 
     else msg(MSG::DEBUG) << "TMDB version for RUN3 simulation (2020)" <<endmsg;
 
     msg(MSG::DEBUG) << " TileROD_Decoder::unpack_frag42  source ID: 0x" << MSG::hex << sourceid << MSG::dec
-                    << " version: " << version << endmsg;
+                    << " version: " << version << " bcid | drawer " << MSG::hex << drawer << endmsg;
 
     for (size_t j = v.size() - nmod; j < v.size(); ++j) {
       const std::vector<bool> & r = v[j]->GetDecision();

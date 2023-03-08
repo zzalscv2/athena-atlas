@@ -91,8 +91,8 @@ StatusCode TileMuonReceiverReadCnt::execute() {
 
     for (const TileMuonReceiverObj* muonReceiverObj : *muonReceiverContainer) {
 
-      int id = muonReceiverObj->GetID();
-      ATH_MSG_INFO( "+-- Identifier of module: 0x" <<MSG::hex<< id <<MSG::dec<< " ros:" << (id>>8) << " module:"<< (id&0xff));
+      int id = muonReceiverObj->GetID() & 0xFFF;
+      ATH_MSG_INFO( "+-- Identifier of module: 0x" <<MSG::hex<< id <<MSG::dec<< " ros:" << (id>>8) << " module:"<< (id&0xFF));
 
       // -- read thresholds
       const std::vector<float> & thresh = muonReceiverObj->GetThresholds();
