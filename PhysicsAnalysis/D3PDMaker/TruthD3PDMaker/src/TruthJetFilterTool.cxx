@@ -416,7 +416,7 @@ TruthJetFilterTool::acceptParticle (HepMC::ConstGenParticlePtr p)
 			// Ascend decay chain looking for when actual decay occurs (not jsut evolution of particle)
 			while (pdg_id == mom_pdg_id) {
 #ifdef HEPMC3
-				HepMC::ConstGenParticlePtr mother = vprod->particles_in().at(0);
+				const HepMC::ConstGenParticlePtr& mother = vprod->particles_in().front();
 #else
 				HepMC::ConstGenParticlePtr mother = *(vprod->particles_in_const_begin());
 #endif
@@ -501,7 +501,7 @@ TruthJetFilterTool::acceptParticle (HepMC::ConstGenParticlePtr p)
     HepMC::ConstGenVertexPtr vprod = p->production_vertex();
     if ( HepMC::particles_in_size(vprod) > 0) {
 #ifdef HEPMC3
-      HepMC::ConstGenParticlePtr mother = vprod->particles_in().at(0);
+      const HepMC::ConstGenParticlePtr& mother = vprod->particles_in().front();
 #else
       const HepMC::GenParticle* mother = *vprod->particles_in_const_begin();
 #endif
