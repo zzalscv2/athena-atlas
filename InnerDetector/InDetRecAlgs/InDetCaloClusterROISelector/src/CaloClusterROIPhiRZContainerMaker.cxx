@@ -147,7 +147,7 @@ StatusCode CaloClusterROIPhiRZContainerMaker::execute(const EventContext& ctx) c
        output_rois.emplace_back( m_outputClusterContainerName[output_idx], ctx);
        ATH_CHECK( output_rois.back().record( std::make_unique<ROIPhiRZContainer>() ) );
        output_rois.back()->reserve( the_size);
-    } 
+    }
 
     if (!m_outputSorted.empty()) {
        // sort ROIs by phi
@@ -259,6 +259,7 @@ void CaloClusterROIPhiRZContainerMaker::addROI( const xAOD::CaloCluster &cluster
   if ( et >= m_sortedMinPtEm[0]){
      unsigned int roi_idx=output_rois.size();
      output_rois.addROI(global_position, m_maxPhiWidth);
+
      unsigned int n_duplicates = output_rois.size()-roi_idx-1;
      if (n_duplicates>0) {
         m_duplicateROI += n_duplicates;

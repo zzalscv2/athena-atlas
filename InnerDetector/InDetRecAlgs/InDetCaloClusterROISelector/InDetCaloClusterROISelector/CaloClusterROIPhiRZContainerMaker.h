@@ -64,6 +64,7 @@ class CaloClusterROIPhiRZContainerMaker : public AthReentrantAlgorithm
                 ROIPhiRZContainer &output_rois,
                 std::vector<uint_fast8_t> &max_output,
                 std::vector<unsigned int> &n_rois) const;
+
    /** @brief Name of the cluster intput collection*/
    SG::ReadHandleKey<xAOD::CaloClusterContainer>   m_inputClusterContainerName
       {this, "InputClusterContainerName", "egammaTopoCluster", "Input cluster for egamma objects"};
